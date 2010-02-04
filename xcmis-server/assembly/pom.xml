@@ -1,0 +1,203 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+      <groupId>org.xcmis</groupId>
+      <artifactId>xcmis-parent</artifactId>
+      <version>1.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>xcmis-assembly</artifactId>
+  <name>xCMIS :: Assembly</name>
+  <description>xCMIS Assembly</description>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>org.xcmis</groupId>
+      <artifactId>xcmis-application</artifactId>
+      <type>war</type>
+      <version>${project.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.xcmis</groupId>
+      <artifactId>xcmis-core</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.xcmis</groupId>
+      <artifactId>xcmis-sp-jcr-exo</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.xcmis</groupId>
+      <artifactId>xcmis-restatom</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.xcmis</groupId>
+      <artifactId>xcmis-wssoap</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.exoplatform.ws</groupId>
+      <artifactId>exo.ws.rest.core</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.exoplatform.ws</groupId>
+      <artifactId>exo.ws.rest.ext</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.exoplatform.ws</groupId>
+      <artifactId>exo.ws.commons</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.exoplatform.ws</groupId>
+      <artifactId>exo.ws.frameworks.servlet</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.exoplatform.jcr</groupId>
+      <artifactId>exo.jcr.framework.web</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.exoplatform.jcr</groupId>
+      <artifactId>exo.jcr.component.webdav</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.exoplatform.cmis</groupId>
+      <artifactId>exo.cmis.applications.rest</artifactId>
+      <type>war</type>
+      <version>${project.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.exoplatform.cmis</groupId>
+      <artifactId>exo.cmis.applications.soap</artifactId>
+      <type>war</type>
+      <version>${project.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.exoplatform.cmis</groupId>
+      <artifactId>exo.cmis.atom.client.gwt</artifactId>
+      <type>war</type>
+      <version>${project.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.mail</groupId>
+      <artifactId>mail</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>javax.xml.stream</groupId>
+          <artifactId>stax-api</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <plugins>
+
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>install</phase>
+            <goals>
+              <goal>assembly</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <descriptors>
+            <descriptor>assembly-descriptor.xml</descriptor>
+          </descriptors>
+          <finalName>lib</finalName>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>install</phase>
+          </execution>
+        </executions>
+        <configuration>
+          <tasks>
+            <delete dir="${project.build.directory}/xcmis-tomcat" includeEmptyDirs="true" quiet="yes" />
+            <copy todir="${project.build.directory}/xcmis-tomcat" verbose="false" overwrite="true">
+              <fileset dir="${basedir}/../../${xcmis.deploy.tomcat.dependency}" />
+            </copy>
+            <copy todir="${project.build.directory}/xcmis-tomcat/" verbose="true" overwrite="true">
+              <fileset dir="${basedir}/tomcat">
+                <exclude name="**/*.war" />
+              </fileset>
+            </copy>
+            <move todir="${project.build.directory}/lib-${project.version}.dir/">
+              <fileset dir="${project.build.directory}/lib-${project.version}.dir/">
+                <include name="**/*.war" />
+              </fileset>
+              <mapper>
+                <chainedmapper>
+                  <flattenmapper />
+                  <globmapper from="xcmis-application-${project.version}.war" to="xcmis.war" casesensitive="no" />
+                </chainedmapper>
+              </mapper>
+            </move>
+            <move todir="${project.build.directory}/lib-${project.version}.dir/">
+              <fileset dir="${project.build.directory}/lib-${project.version}.dir/">
+                <include name="**/*.war" />
+              </fileset>
+              <mapper>
+                <chainedmapper>
+                  <flattenmapper />
+                  <globmapper from="exo.cmis.atom.client.gwt-${project.version}.war" to="CmisClient.war" casesensitive="no" />
+                </chainedmapper>
+              </mapper>
+            </move>
+            <copy todir="${project.build.directory}/xcmis-tomcat/webapps/" verbose="true" flatten="true" overwrite="true">
+              <fileset dir="${project.build.directory}/lib-${project.version}.dir/" casesensitive="yes">
+                <include name="**/*.war" />
+              </fileset>
+            </copy>
+          </tasks>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

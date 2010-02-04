@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.exoplaform.org/xml/ns/kernel_1_0.xsd http://www.exoplaform.org/xml/ns/kernel_1_0.xsd" xmlns="http://www.exoplaform.org/xml/ns/kernel_1_0.xsd">
+   <component>
+      <type>org.xcmis.core.impl.RepositoryServiceImpl</type>
+   </component>
+   <component>
+      <type>org.xcmis.core.impl.VersioningServiceImpl</type>
+   </component>
+   <component>
+      <type>org.xcmis.core.impl.NavigationServiceImpl</type>
+   </component>
+   <component>
+      <type>org.xcmis.core.impl.ObjectServiceImpl</type>
+   </component>
+   <component>
+      <type>org.xcmis.core.impl.MultifilingServiceImpl</type>
+   </component>
+   <component>
+      <type>org.xcmis.core.impl.RelationshipServiceImpl</type>
+   </component>
+   <component>
+      <type>org.xcmis.core.impl.PolicyServiceImpl</type>
+   </component>
+   <component>
+      <type>org.xcmis.core.impl.AccessControlServiceImpl</type>
+   </component>
+   <component>
+      <type>org.xcmis.core.impl.property.PropertyServiceImpl</type>
+   </component>
+   <component>
+      <type>org.xcmis.core.impl.DiscoveryServiceImpl</type>
+   </component>
+</configuration>
