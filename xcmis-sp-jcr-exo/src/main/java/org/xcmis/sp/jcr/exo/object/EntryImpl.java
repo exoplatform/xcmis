@@ -112,7 +112,6 @@ public class EntryImpl extends TypeManagerImpl implements Entry
       cmis2jcr.put(CMIS.CREATED_BY, "exo:owner");
       cmis2jcr.put(CMIS.CONTENT_STREAM_MIME_TYPE, "jcr:content/jcr:mimeType");
       cmis2jcr.put(CMIS.CONTENT_STREAM_ID, "jcr:content/jcr:uuid");
-      cmis2jcr.put(CMIS.CONTENT_STREAM_ID, "jcr:content/jcr:lastModified");
    }
 
    static String latestLabel = "latest";
