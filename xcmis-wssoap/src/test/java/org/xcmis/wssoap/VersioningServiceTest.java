@@ -166,6 +166,8 @@ public class VersioningServiceTest extends BaseTest
    public void testGetLatestVersionProperties() throws Exception
    {
       String id = createDocument(testFolderId, "doc1");
+      // XXX : Be sure creation document and PWC have different Last Modification dates.
+      Thread.sleep(500);
       CmisObjectType pwc = versioningService.checkout(repositoryId, id);
       String pwcId = getObjectId(pwc);
       String lv = getObjectId(versioningService.checkin(//
