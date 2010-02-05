@@ -1,163 +1,167 @@
 <project>
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
+   <modelVersion>4.0.0</modelVersion>
+   <parent>
       <groupId>org.xcmis</groupId>
       <artifactId>xcmis-parent</artifactId>
       <version>1.0-SNAPSHOT</version>
-  </parent>
+   </parent>
 
-  <artifactId>xcmis-server-tomcat</artifactId>
-  <name>xCMIS :: Server Tomcat</name>
-  <description>xCMIS Server Tomcat</description>
+   <artifactId>xcmis-server-tomcat</artifactId>
+   <name>xCMIS :: Server Tomcat</name>
+   <description>xCMIS Server Tomcat</description>
 
-  <dependencies>
+   <dependencies>
 
-    <dependency>
-      <groupId>org.xcmis</groupId>
-      <artifactId>xcmis-server-war</artifactId>
-      <type>war</type>
-      <version>${project.version}</version>
-      <scope>runtime</scope>
-    </dependency>
+      <dependency>
+         <groupId>org.xcmis</groupId>
+         <artifactId>xcmis-server-war</artifactId>
+         <type>war</type>
+         <version>${project.version}</version>
+         <scope>runtime</scope>
+      </dependency>
 
-    <dependency>
-      <groupId>org.xcmis</groupId>
-      <artifactId>xcmis-core</artifactId>
-      <scope>runtime</scope>
-    </dependency>
+      <dependency>
+         <groupId>org.xcmis</groupId>
+         <artifactId>xcmis-core</artifactId>
+         <scope>runtime</scope>
+      </dependency>
 
-    <dependency>
-      <groupId>org.xcmis</groupId>
-      <artifactId>xcmis-sp-jcr-exo</artifactId>
-      <scope>runtime</scope>
-    </dependency>
+      <dependency>
+         <groupId>org.xcmis</groupId>
+         <artifactId>xcmis-sp-jcr-exo</artifactId>
+         <scope>runtime</scope>
+      </dependency>
 
-    <dependency>
-      <groupId>org.xcmis</groupId>
-      <artifactId>xcmis-restatom</artifactId>
-      <scope>runtime</scope>
-    </dependency>
+      <dependency>
+         <groupId>org.xcmis</groupId>
+         <artifactId>xcmis-restatom</artifactId>
+         <scope>runtime</scope>
+      </dependency>
 
-    <dependency>
-      <groupId>org.xcmis</groupId>
-      <artifactId>xcmis-wssoap</artifactId>
-      <scope>runtime</scope>
-    </dependency>
+      <dependency>
+         <groupId>org.xcmis</groupId>
+         <artifactId>xcmis-wssoap</artifactId>
+         <scope>runtime</scope>
+      </dependency>
 
-    <dependency>
-      <groupId>org.exoplatform.ws</groupId>
-      <artifactId>exo.ws.rest.core</artifactId>
-      <scope>runtime</scope>
-    </dependency>
+      <dependency>
+         <groupId>org.exoplatform.ws</groupId>
+         <artifactId>exo.ws.rest.core</artifactId>
+         <scope>runtime</scope>
+      </dependency>
 
-    <dependency>
-      <groupId>org.exoplatform.ws</groupId>
-      <artifactId>exo.ws.rest.ext</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-    
-    <dependency>
-      <groupId>org.exoplatform.ws</groupId>
-      <artifactId>exo.ws.commons</artifactId>
-      <scope>runtime</scope>
-    </dependency>
+      <dependency>
+         <groupId>org.exoplatform.ws</groupId>
+         <artifactId>exo.ws.rest.ext</artifactId>
+         <scope>runtime</scope>
+      </dependency>
 
-    <dependency>
-      <groupId>org.exoplatform.ws</groupId>
-      <artifactId>exo.ws.frameworks.servlet</artifactId>
-      <scope>runtime</scope>
-    </dependency>
+      <dependency>
+         <groupId>org.exoplatform.ws</groupId>
+         <artifactId>exo.ws.commons</artifactId>
+         <scope>runtime</scope>
+      </dependency>
 
-    <dependency>
-      <groupId>org.exoplatform.jcr</groupId>
-      <artifactId>exo.jcr.framework.web</artifactId>
-      <scope>runtime</scope>
-    </dependency>
+      <dependency>
+         <groupId>org.exoplatform.ws</groupId>
+         <artifactId>exo.ws.frameworks.servlet</artifactId>
+         <scope>runtime</scope>
+      </dependency>
 
-    <dependency>
-      <groupId>org.exoplatform.jcr</groupId>
-      <artifactId>exo.jcr.component.webdav</artifactId>
-      <scope>runtime</scope>
-    </dependency>
+      <dependency>
+         <groupId>org.exoplatform.jcr</groupId>
+         <artifactId>exo.jcr.framework.web</artifactId>
+         <scope>runtime</scope>
+      </dependency>
 
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <scope>runtime</scope>
-    </dependency>
+      <dependency>
+         <groupId>org.exoplatform.jcr</groupId>
+         <artifactId>exo.jcr.component.webdav</artifactId>
+         <scope>runtime</scope>
+      </dependency>
 
-    <dependency>
-      <groupId>javax.mail</groupId>
-      <artifactId>mail</artifactId>
-      <scope>runtime</scope>
-    </dependency>
+      <dependency>
+         <groupId>org.slf4j</groupId>
+         <artifactId>slf4j-log4j12</artifactId>
+         <scope>runtime</scope>
+      </dependency>
 
-    <dependency>
-      <groupId>javax.xml.bind</groupId>
-      <artifactId>jaxb-api</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>javax.xml.stream</groupId>
-          <artifactId>stax-api</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
+      <dependency>
+         <groupId>javax.mail</groupId>
+         <artifactId>mail</artifactId>
+         <scope>runtime</scope>
+      </dependency>
 
-  </dependencies>
+      <dependency>
+         <groupId>javax.xml.bind</groupId>
+         <artifactId>jaxb-api</artifactId>
+         <exclusions>
+            <exclusion>
+               <groupId>javax.xml.stream</groupId>
+               <artifactId>stax-api</artifactId>
+            </exclusion>
+         </exclusions>
+      </dependency>
 
-  <build>
-    <plugins>
+   </dependencies>
 
-      <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>install</phase>
-            <goals>
-              <goal>assembly</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <descriptors>
-            <descriptor>assembly-descriptor.xml</descriptor>
-          </descriptors>
-          <finalName>lib</finalName>
-        </configuration>
-      </plugin>
+   <build>
+      <plugins>
 
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>install</phase>
-          </execution>
-        </executions>
-        <configuration>
-          <tasks>
-            <delete dir="${project.build.directory}/xcmis-tomcat" includeEmptyDirs="true" quiet="yes" />
-            <copy todir="${project.build.directory}/xcmis-tomcat" verbose="false" overwrite="true">
-              <fileset dir="${basedir}/../../${xcmis.deploy.tomcat.dependency}" />
-            </copy>
-            <copy todir="${project.build.directory}/xcmis-tomcat/" verbose="true" overwrite="true">
-              <fileset dir="${basedir}/tomcat">
-                <exclude name="**/*.war" />
-              </fileset>
-            </copy>
-            <copy todir="${project.build.directory}/xcmis-tomcat/webapps/" verbose="true" flatten="true" overwrite="true">
-              <fileset dir="${project.build.directory}/lib-${project.version}.dir/" casesensitive="yes">
-                <include name="**/*.war" />
-              </fileset>
-              <mapper>
-                <chainedmapper>
-                  <flattenmapper />
-                  <globmapper from="xcmis-server-war-${project.version}.war" to="xcmis.war" casesensitive="no" />
-                </chainedmapper>
-              </mapper>
-            </copy>
-          </tasks>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+         <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <executions>
+               <execution>
+                  <phase>install</phase>
+                  <goals>
+                     <goal>assembly</goal>
+                  </goals>
+               </execution>
+            </executions>
+            <configuration>
+               <descriptors>
+                  <descriptor>assembly-descriptor.xml</descriptor>
+               </descriptors>
+               <finalName>lib</finalName>
+            </configuration>
+         </plugin>
+
+         <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+               <execution>
+                  <phase>install</phase>
+                  <goals>
+                     <goal>run</goal>
+                  </goals>
+               </execution>
+            </executions>
+            <configuration>
+               <tasks>
+                  <delete dir="${project.build.directory}/xcmis-tomcat" includeEmptyDirs="true" quiet="yes" />
+                  <copy todir="${project.build.directory}/xcmis-tomcat" verbose="false" overwrite="true">
+                     <fileset dir="${basedir}/../${xcmis.deploy.tomcat.dependency}" />
+                  </copy>
+                  <copy todir="${project.build.directory}/xcmis-tomcat/" verbose="true" overwrite="true">
+                     <fileset dir="${basedir}/tomcat">
+                        <exclude name="**/*.war" />
+                     </fileset>
+                  </copy>
+                  <copy todir="${project.build.directory}/xcmis-tomcat/webapps/" verbose="true" flatten="true" overwrite="true">
+                     <fileset dir="${project.build.directory}/lib-${project.version}.dir/" casesensitive="yes">
+                        <include name="**/*.war" />
+                     </fileset>
+                     <mapper>
+                        <chainedmapper>
+                           <flattenmapper />
+                           <globmapper from="xcmis-server-war-${project.version}.war" to="xcmis.war" casesensitive="no" />
+                        </chainedmapper>
+                     </mapper>
+                  </copy>
+               </tasks>
+            </configuration>
+         </plugin>
+         
+      </plugins>
+   </build>
 </project>
