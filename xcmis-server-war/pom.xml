@@ -112,6 +112,28 @@
          <artifactId>slf4j-log4j12</artifactId>
          <scope>runtime</scope>
       </dependency>
+      
+      <dependency>
+         <groupId>org.apache.shindig</groupId>
+         <artifactId>shindig-common</artifactId>
+         <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.shindig</groupId>
+        <artifactId>shindig-features</artifactId>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+       <groupId>org.apache.shindig</groupId>
+       <artifactId>shindig-gadgets</artifactId>
+       <scope>runtime</scope>
+      </dependency>
+      <dependency>
+      <groupId>org.apache.shindig</groupId>
+        <artifactId>shindig-social-api</artifactId>
+        <scope>runtime</scope>
+      </dependency>
+
 
    </dependencies>
 
@@ -137,7 +159,6 @@
                   **/xbean-*.jar,
                   **/xml-apis-*.jar,
                   **/xmlParserAPIs-*.jar,
-                  **/xercesImpl-*.jar,
                   **/portlet-api-*.jar,
                   **/slf4j-simple-*.jar,
                   **/exo.tool.framework.junit-*.jar,
@@ -151,7 +172,6 @@
                   **/cxf-tools-java2ws-*.jar,
                   **/cxf-tools-validator-*.jar,
                   **/cxf-tools-wsdlto-frontend-jaxws-*.jar,
-                  **/aopalliance-*.jar,
                   **/bcel-*.jar,
                   **/bcmail-jdk14-*.jar,
                   **/fontbox-*.jar,
