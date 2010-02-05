@@ -133,6 +133,15 @@
         <artifactId>shindig-social-api</artifactId>
         <scope>runtime</scope>
       </dependency>
+       <dependency> 
+        <groupId>com.google.code.guice</groupId>
+        <artifactId>guice</artifactId>
+      </dependency>
+
+      <dependency>
+         <groupId>com.google.code.guice</groupId>
+         <artifactId>guice-jmx</artifactId>
+      </dependency>
 
 
    </dependencies>
@@ -152,9 +161,7 @@
                   **/ejb-*.jar,
                   **/ant-*.jar,
                   **/ant-launcher-*.jar,
-                  **/ant-launcher-*.jar,
                   **/carol-*.jar,
-                  **/xbean-*.jar,
                   **/xbean-spring-*.jar,
                   **/xbean-*.jar,
                   **/xml-apis-*.jar,
@@ -163,7 +170,10 @@
                   **/slf4j-simple-*.jar,
                   **/exo.tool.framework.junit-*.jar,
                   **/geronimo-activation_1.0.2_spec-*.jar,
+                  **/geronimo-activation_1.1_spec-*.jar,
                   **/geronimo-stax-api_1.0_spec-*.jar,
+                  **/geronimo-annotation_1.0_spec-*.jar,
+                  **/geronimo-servlet_2.5_spec-*.jar,
                   **/junit-*.jar,
                   **/xerces-*.jar,
                   **/cxf-rt-databinding-aegis-*.jar,
