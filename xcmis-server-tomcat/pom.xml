@@ -6,15 +6,15 @@
       <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>xcmis-assembly</artifactId>
-  <name>xCMIS :: Assembly</name>
-  <description>xCMIS Assembly</description>
+  <artifactId>xcmis-server-tomcat</artifactId>
+  <name>xCMIS :: Server Tomcat</name>
+  <description>xCMIS Server Tomcat</description>
 
   <dependencies>
 
     <dependency>
       <groupId>org.xcmis</groupId>
-      <artifactId>xcmis-application</artifactId>
+      <artifactId>xcmis-server-war</artifactId>
       <type>war</type>
       <version>${project.version}</version>
       <scope>runtime</scope>
@@ -151,7 +151,7 @@
               <mapper>
                 <chainedmapper>
                   <flattenmapper />
-                  <globmapper from="xcmis-application-${project.version}.war" to="xcmis.war" casesensitive="no" />
+                  <globmapper from="xcmis-server-war-${project.version}.war" to="xcmis.war" casesensitive="no" />
                 </chainedmapper>
               </mapper>
             </copy>

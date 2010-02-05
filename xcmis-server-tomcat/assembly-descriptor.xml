@@ -19,7 +19,7 @@
       <outputDirectory>/</outputDirectory>
 
       <includes>
-        <include>org.xcmis:xcmis-application</include>
+        <include>org.xcmis:xcmis-server-war</include>
       </includes>
 
     </dependencySet>

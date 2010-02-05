@@ -7,10 +7,11 @@
       <version>1.0-SNAPSHOT</version>
    </parent>
 
-   <artifactId>xcmis-application</artifactId>
-   <name>xCMIS :: Web Application</name>
-   <packaging>war</packaging>
+   <artifactId>xcmis-server-war</artifactId>
+   <name>xCMIS :: Server WAR</name>
+   <description>xCMIS Server WAR</description>
 
+   <packaging>war</packaging>
 
    <dependencies>
 
@@ -18,17 +19,17 @@
          <groupId>javax.servlet</groupId>
          <artifactId>servlet-api</artifactId>
       </dependency>
-      
+
       <dependency>
          <groupId>org.exoplatform.kernel</groupId>
          <artifactId>exo.kernel.component.common</artifactId>
       </dependency>
-      
+
       <dependency>
          <groupId>org.exoplatform.kernel</groupId>
          <artifactId>exo.kernel.container</artifactId>
       </dependency>
-      
+
       <dependency>
          <groupId>org.xcmis</groupId>
          <artifactId>xcmis-core</artifactId>
