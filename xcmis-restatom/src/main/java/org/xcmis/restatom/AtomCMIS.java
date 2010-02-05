@@ -32,6 +32,11 @@ import javax.xml.namespace.QName;
  */
 public interface AtomCMIS extends CMIS
 {
+   /**
+    * Value for &#64;javax.ws.rs.Path on JAX-RS service.
+    */
+   String CMIS_REST_RESOURCE_PATH = "cmisatom";
+   
    String CMISRA_NS_URI = "http://docs.oasis-open.org/ns/cmis/restatom/200908/";
 
    String CMISRA_PREFIX = "cmisra";

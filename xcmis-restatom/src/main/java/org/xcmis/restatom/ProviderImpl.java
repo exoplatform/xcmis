@@ -98,13 +98,18 @@ public class ProviderImpl extends AbstractProvider
 
       resolver = new RegexTargetResolver();
 
-      resolver.setPattern("/cmisatom/([^/]+)/types(/)?([^/?]+)?(\\??.*)?", //
+      resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+)/typebyid(/)?([^/?]+)?(\\??.*)?", //
+         TargetType.TYPE_ENTRY, //
+         "repoid", //
+         "typeid");
+
+      resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+)/types(/)?([^/?]+)?(\\??.*)?", //
          TargetType.TYPE_COLLECTION, //
          "repoid", //
          "slash", // No slash if 'typeid' is absent. 
          "typeid");
 
-      resolver.setPattern("/cmisatom/([^/]+?)/typedescendants(/)?([^/?]+)?(\\??.*)?", //
+      resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+?)/typedescendants(/)?([^/?]+)?(\\??.*)?", //
          TargetType.TYPE_COLLECTION, //
          "repoid", //
          "slash", // No slash if 'typeid' is absent. 
@@ -116,41 +121,64 @@ public class ProviderImpl extends AbstractProvider
          "slash", // No slash if 'objectid' is absent. 
          "objectid");
 
-      resolver.setPattern("/cmisatom/([^/]+)/children/([^/?]+)(\\??.*)?", //
-         TargetType.TYPE_COLLECTION, "repoid", "objectid");
+      resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+)/children/([^/?]+)(\\??.*)?", //
+         TargetType.TYPE_COLLECTION, //
+         "repoid", //
+         "objectid");
 
-      resolver.setPattern("/cmisatom/([^/]+?)/object/([^/?]+)(\\??.*)?", //
-         TargetType.TYPE_COLLECTION, "repoid", "objectid");
+      resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+?)/object/([^/?]+)(\\??.*)?", //
+         TargetType.TYPE_ENTRY, //
+         "repoid", //
+         "objectid");
 
       resolver.setPattern("/cmisatom/([^/]+?)/objectbypath/([^\\??]+)(\\??.*)?", //
-         TargetType.TYPE_COLLECTION, "repoid", "objectpath");
+         TargetType.TYPE_ENTRY, //
+         "repoid", //
+         "objectpath");
 
       resolver.setPattern("/cmisatom/([^/]+)/parents/([^/?]+)(\\??.*)?", //
-         TargetType.TYPE_COLLECTION, "repoid", "objectid");
+         TargetType.TYPE_COLLECTION, //
+         "repoid", //
+         "objectid");
 
-      resolver.setPattern("/cmisatom/([^/]+)/relationships/([^/?]+)(\\??.*)?", //
-         TargetType.TYPE_COLLECTION, "repoid", "objectid");
+      resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+)/relationships/([^/?]+)(\\??.*)?", //
+         TargetType.TYPE_COLLECTION, //
+         "repoid", //
+         "objectid");
 
-      resolver.setPattern("/cmisatom/([^/]+)/descendants/([^/?]+)(\\??.*)?", // 
-         TargetType.TYPE_COLLECTION, "repoid", "objectid");
+      resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+)/descendants/([^/?]+)(\\??.*)?", // 
+         TargetType.TYPE_COLLECTION, //
+         "repoid", //
+         "objectid");
 
       resolver.setPattern("/cmisatom/([^/]+)/versions/([^/?]+)(\\??.*)?", //
-         TargetType.TYPE_COLLECTION, "repoid", "versionSeriesId");
+         TargetType.TYPE_COLLECTION, //
+         "repoid", //
+         "versionSeriesId");
 
-      resolver.setPattern("/cmisatom/([^/]+)/foldertree/([^/?]+)(\\??.*)?", //
-         TargetType.TYPE_COLLECTION, "repoid", "objectid");
+      resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+)/foldertree/([^/?]+)(\\??.*)?", //
+         TargetType.TYPE_COLLECTION, //
+         "repoid", //
+         "objectid");
 
       resolver.setPattern("/cmisatom/([^/]+)/query(\\??.*)?", //
-         TargetType.TYPE_COLLECTION, "repoid");
-      
-      resolver.setPattern("/cmisatom/([^/]+)/file/([^/?]+)(\\??.*)?", //
-         TargetType.TYPE_COLLECTION, "repoid", "objectid");
+         TargetType.TYPE_COLLECTION, //
+         "repoid"); //
 
-      resolver.setPattern("/cmisatom/([^/]+)/policies/([^/?]+)(\\??.*)?", //
-         TargetType.TYPE_COLLECTION, "repoid", "objectid");
+      resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+)/file/([^/?]+)(\\??.*)?", //
+         TargetType.TYPE_MEDIA, //
+         "repoid", //
+         "objectid");
 
-      resolver.setPattern("/cmisatom/([^/]+)/alternate/([^/?]+)/([^/?]+)(\\??.*)?", //
-         TargetType.TYPE_COLLECTION, "repoid", "objectid", "streamid");
+      resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+)/policies/([^/?]+)(\\??.*)?", //
+         TargetType.TYPE_COLLECTION, //
+         "repoid", "objectid"); //
+
+      resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+)/alternate/([^/?]+)/([^/?]+)(\\??.*)?", //
+         TargetType.TYPE_COLLECTION, //
+         "repoid", //
+         "objectid", //
+         "streamid");
 
       SimpleWorkspaceInfo wInfo = new SimpleWorkspaceInfo();
       wInfo.addCollection(new FolderChildrenCollection(repositoryService, objectService, versioningService,

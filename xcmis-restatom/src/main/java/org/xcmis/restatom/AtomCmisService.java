@@ -92,7 +92,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id$
  */
-@Path("cmisatom")
+@Path(AtomCMIS.CMIS_REST_RESOURCE_PATH)
 public class AtomCmisService implements ResourceContainer
 {
 

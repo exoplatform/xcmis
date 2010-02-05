@@ -242,7 +242,7 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
    {
       Map<String, String> params = new HashMap<String, String>();
       params.put("repoid", getRepositoryId(request));
-      params.put("atomdoctype", "types");
+      params.put("atomdoctype", "typebyid");
       params.put("id", id);
       String type = request.absoluteUrlFor(TargetType.ENTRY, params);
       return type;
