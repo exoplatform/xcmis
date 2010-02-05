@@ -86,7 +86,7 @@
          </build>
       </profile>
       <profile>
-         <id>backend-simple</id>
+         <id>backend-inmemory</id>
          <activation>
             <activeByDefault>true</activeByDefault>
          </activation>
