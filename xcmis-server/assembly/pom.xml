@@ -81,30 +81,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.exoplatform.cmis</groupId>
-      <artifactId>exo.cmis.applications.rest</artifactId>
-      <type>war</type>
-      <version>${project.version}</version>
-      <scope>runtime</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.exoplatform.cmis</groupId>
-      <artifactId>exo.cmis.applications.soap</artifactId>
-      <type>war</type>
-      <version>${project.version}</version>
-      <scope>runtime</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.exoplatform.cmis</groupId>
-      <artifactId>exo.cmis.atom.client.gwt</artifactId>
-      <type>war</type>
-      <version>${project.version}</version>
-      <scope>runtime</scope>
-    </dependency>
-
-    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
       <scope>runtime</scope>
@@ -168,8 +144,8 @@
                 <exclude name="**/*.war" />
               </fileset>
             </copy>
-            <move todir="${project.build.directory}/lib-${project.version}.dir/">
-              <fileset dir="${project.build.directory}/lib-${project.version}.dir/">
+            <copy todir="${project.build.directory}/xcmis-tomcat/webapps/" verbose="true" flatten="true" overwrite="true">
+              <fileset dir="${project.build.directory}/lib-${project.version}.dir/" casesensitive="yes">
                 <include name="**/*.war" />
               </fileset>
               <mapper>
@@ -178,22 +154,6 @@
                   <globmapper from="xcmis-application-${project.version}.war" to="xcmis.war" casesensitive="no" />
                 </chainedmapper>
               </mapper>
-            </move>
-            <move todir="${project.build.directory}/lib-${project.version}.dir/">
-              <fileset dir="${project.build.directory}/lib-${project.version}.dir/">
-                <include name="**/*.war" />
-              </fileset>
-              <mapper>
-                <chainedmapper>
-                  <flattenmapper />
-                  <globmapper from="exo.cmis.atom.client.gwt-${project.version}.war" to="CmisClient.war" casesensitive="no" />
-                </chainedmapper>
-              </mapper>
-            </move>
-            <copy todir="${project.build.directory}/xcmis-tomcat/webapps/" verbose="true" flatten="true" overwrite="true">
-              <fileset dir="${project.build.directory}/lib-${project.version}.dir/" casesensitive="yes">
-                <include name="**/*.war" />
-              </fileset>
             </copy>
           </tasks>
         </configuration>
