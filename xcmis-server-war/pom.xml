@@ -131,9 +131,7 @@
                   <configuration>
                      <webXml>${project.basedir}/src/main/webapp/WEB-INF/web-all.xml</webXml>
                      <warSourceExcludes>
-                        **/web-rest.xml,
-                        **/web-soap.xml,
-                        **/web-all.xml,
+                        **/web-*.xml,
                         **/ant-*.jar,
                         **/ant-launcher-*.jar,
                         **/bcel-*.jar,
@@ -200,7 +198,7 @@
       </profile>
 
       <profile>
-         <id>rest</id>
+         <id>restatom</id>
          <dependencies>
             <dependency>
                <groupId>org.xcmis</groupId>
@@ -216,12 +214,10 @@
                   <artifactId>maven-war-plugin</artifactId>
                   <version>2.0.2</version>
                   <configuration>
-                     <webXml>${project.basedir}/src/main/webapp/WEB-INF/web-rest.xml</webXml>
+                     <webXml>${project.basedir}/src/main/webapp/WEB-INF/web-restatom.xml</webXml>
                      <warSourceExcludes>
                         **/index.html,
-                        **/web-rest.xml,
-                        **/web-soap.xml,
-                        **/web-all.xml,
+                        **/web-*.xml,
                         **/ant-*.jar,
                         **/ant-launcher-*.jar,
                         **/bcel-*.jar,
@@ -288,7 +284,7 @@
       </profile>
 
       <profile>
-         <id>soap</id>
+         <id>wssoap</id>
          <dependencies>
             <dependency>
                <groupId>org.xcmis</groupId>
@@ -304,12 +300,10 @@
                   <artifactId>maven-war-plugin</artifactId>
                   <version>2.0.2</version>
                   <configuration>
-                     <webXml>${project.basedir}/src/main/webapp/WEB-INF/web-soap.xml</webXml>
+                     <webXml>${project.basedir}/src/main/webapp/WEB-INF/web-wssoap.xml</webXml>
                      <warSourceExcludes>
                         **/index.html,
-                        **/web-rest.xml,
-                        **/web-soap.xml,
-                        **/web-all.xml,
+                        **/web-*.xml,
                         **/ant-*.jar,
                         **/ant-launcher-*.jar,
                         **/bcel-*.jar,

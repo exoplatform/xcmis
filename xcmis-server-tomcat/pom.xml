@@ -58,7 +58,7 @@
                      <fileset dir="${tomcat.distrib.location}" />
                   </copy>
                   <copy todir="${project.build.directory}/xcmis-tomcat/" verbose="true" overwrite="true">
-                     <fileset dir="${basedir}/tomcat">
+                     <fileset dir="${basedir}/src/main/resources">
                         <exclude name="**/*.war" />
                      </fileset>
                   </copy>
