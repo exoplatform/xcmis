@@ -24,6 +24,7 @@ import org.apache.abdera.i18n.iri.IRI;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
+import org.apache.abdera.model.Link;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.core.CmisTypeDefinitionType;
@@ -152,10 +153,32 @@ public class TypesDescendantsCollection extends CmisTypeCollection
     * 
     * @throws ResponseContextException the response context exception
     */
-   private void addChildren(Entry entry, List<CmisTypeContainer> children, IRI feedIri, RequestContext request)
+   protected void addChildren(Entry entry, List<CmisTypeContainer> children, IRI feedIri, RequestContext request)
       throws ResponseContextException
    {
       Element childrenElement = entry.addExtension(AtomCMIS.CHILDREN);
+      // In this case entry is parent for feed, so use info from entry for new feed.
+      String entryId = entry.getId().toString();
+      Feed childFeed = request.getAbdera().getFactory().newFeed(childrenElement);
+      childFeed.setId("ch:" + entryId); // TODO : entry use typeId and may not have two items with the same id.
+      childFeed.setTitle("Type Children");
+      childFeed.addAuthor(entry.getAuthor());
+      childFeed.setUpdated(entry.getUpdated());
+
+      // Copy some links from entry.
+      List<Link> links =
+         entry.getLinks(AtomCMIS.LINK_SERVICE, AtomCMIS.LINK_SELF, AtomCMIS.LINK_DOWN,
+            AtomCMIS.LINK_CMIS_TYPEDESCENDANTS, AtomCMIS.LINK_UP);
+      for (Link l : links)
+         childFeed.addLink((Link)l.clone());
+
+      childFeed.addLink(getObjectTypeLink(entryId, request), AtomCMIS.LINK_VIA, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null,
+         null, -1);
+
+      // add cmisra:numItems
+      Element numItems = request.getAbdera().getFactory().newElement(AtomCMIS.NUM_ITEMS, childrenElement);
+      numItems.setText(Integer.toString(children.size()));
+
       for (CmisTypeContainer typeContainer : children)
       {
          Entry ch = entry.getFactory().newEntry(childrenElement);

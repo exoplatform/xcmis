@@ -46,7 +46,7 @@ public class TypeDescendantsCollectionTest extends BaseTest
       org.w3c.dom.Node xmlFeed = getNode("atom:feed", xmlDoc);
       validateFeedCommons(xmlFeed);
 
-      NodeList types = getNodeSet("atom:entry", xmlFeed);
+      NodeList types = getNodeSet("atom:feed/atom:entry", xmlFeed);
 
       int length = types.getLength();
       for (int i = 0; i < length; i++)

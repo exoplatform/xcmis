@@ -224,9 +224,13 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<CmisType
          entry.addLink(parent, AtomCMIS.LINK_UP, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null, null, -1);
       }
 
+      // Down link is link to children types.
+      String childrenLink = getTypeChildrenLink(type.getId(), request);
+      entry.addLink(childrenLink, AtomCMIS.LINK_DOWN, AtomCMIS.MEDIATYPE_ATOM_FEED, null, null, -1);
+
       // Down link is link to descendant types.
-      String down = getTypeDescendantsLink(type.getId(), request);
-      entry.addLink(down, AtomCMIS.LINK_DOWN, AtomCMIS.MEDIATYPE_CMISTREE, null, null, -1);
+      String descendatsLink = getTypeDescendantsLink(type.getId(), request);
+      entry.addLink(descendatsLink, AtomCMIS.LINK_DOWN, AtomCMIS.MEDIATYPE_CMISTREE, null, null, -1);
 
       TypeDefinitionTypeElement objectElement =
          new TypeDefinitionTypeElement(request.getAbdera().getFactory(), CMISExtensionFactory
@@ -252,6 +256,7 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<CmisType
       Map<String, String> params = new HashMap<String, String>();
       params.put("repoid", getRepositoryId(request));
       params.put("atomdoctype", "types");
+      params.put("id", typeId);
       String type = request.absoluteUrlFor(TargetType.ENTRY, params);
       return type;
    }
