@@ -215,7 +215,6 @@
                   <configuration>
                      <webXml>${project.basedir}/src/main/webapp/WEB-INF/web-restatom.xml</webXml>
                      <warSourceExcludes>
-                        **/index.html,
                         **/web-*.xml,
                         **/ant-*.jar,
                         **/ant-launcher-*.jar,
@@ -300,7 +299,6 @@
                   <configuration>
                      <webXml>${project.basedir}/src/main/webapp/WEB-INF/web-wssoap.xml</webXml>
                      <warSourceExcludes>
-                        **/index.html,
                         **/web-*.xml,
                         **/ant-*.jar,
                         **/ant-launcher-*.jar,
