@@ -125,7 +125,7 @@ public class CmisLuceneNativeQueryBuilder extends LuceneNativeQueryBuilder
       final CmisQueryObjectModel queryObjectModel = (CmisQueryObjectModel)context;
 
       if ((!queryObjectModel.getSearchAllVersions().booleanValue())
-         && tableResolver.isNodeType(node.getNodeTypeQName(), locationFactory.parseJCRName(JcrCMIS.NT_CMIS_DOCUMENT)
+         && tableResolver.isNodeType(node.getNodeTypeQName(), locationFactory.parseJCRName(JcrCMIS.NT_FILE)
             .getInternalName()))
       {
          // create boolean query - node must have property latestVersion=true

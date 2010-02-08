@@ -229,7 +229,7 @@ public class EntryFolderTest extends EntryTest
       assertTrue(folder.getNode().hasNodes());
       assertTrue(folder.getNode().hasNode("folder1"));
       Node child = folder.getNode().getNode("folder1");
-      assertEquals(JcrCMIS.NT_CMIS_FOLDER, child.getPrimaryNodeType().getName());
+      assertEquals(JcrCMIS.NT_FOLDER, child.getPrimaryNodeType().getName());
    }
 
    public void testCreateDocumentChild() throws Exception
@@ -243,7 +243,7 @@ public class EntryFolderTest extends EntryTest
       assertTrue(folder.getNode().hasNodes());
       assertTrue(folder.getNode().hasNode("doc1"));
       Node child = folder.getNode().getNode("doc1");
-      assertEquals(JcrCMIS.NT_CMIS_DOCUMENT, child.getPrimaryNodeType().getName());
+      assertEquals(JcrCMIS.NT_FILE, child.getPrimaryNodeType().getName());
    }
 
    public void testCreatePolicyChild() throws Exception
@@ -258,7 +258,7 @@ public class EntryFolderTest extends EntryTest
       assertTrue(folder.getNode().hasNodes());
       assertTrue(folder.getNode().hasNode("policy1"));
       Node child = folder.getNode().getNode("policy1");
-      assertEquals(JcrCMIS.CMIS_POLICY, child.getPrimaryNodeType().getName());
+      assertEquals(JcrCMIS.CMIS_NT_POLICY, child.getPrimaryNodeType().getName());
    }
 
    public void testCreateRelationshipChild() throws Exception
@@ -367,7 +367,7 @@ public class EntryFolderTest extends EntryTest
       Entry doc3 = createDocument(folder2.getObjectId(), "doc3", new byte[0], "");
       doc3.addRelationship("relationship3", doc3, relType);
       doc3.addRelationship("relationship4", doc1, relType);
-      assertTrue(root.getNode(JcrCMIS.CMIS_RELATIONSHIPS).hasNodes());
+      assertTrue(root.getNode("cmis:system/cmis:relationships").hasNodes());
       try
       {
          folder.delete();
@@ -376,7 +376,7 @@ public class EntryFolderTest extends EntryTest
       {
          fail("Unable delete folder");
       }
-      assertFalse(root.getNode(JcrCMIS.CMIS_RELATIONSHIPS).hasNodes());
+      assertFalse(root.getNode("cmis:system/cmis:relationships").hasNodes());
    }
 
    public void testSetContentStream() throws Exception
@@ -396,8 +396,8 @@ public class EntryFolderTest extends EntryTest
 
    protected Node createNode() throws Exception
    {
-      Node folder = testRootFolder.getNode().addNode("node", JcrCMIS.NT_CMIS_FOLDER);
-      folder.addMixin(JcrCMIS.CMIS_FOLDER);
+      Node folder = testRootFolder.getNode().addNode("node", JcrCMIS.NT_FOLDER);
+      folder.addMixin(JcrCMIS.CMIS_MIX_FOLDER);
       folder.setProperty(CMIS.NAME, folder.getName());
       folder.setProperty(CMIS.OBJECT_TYPE_ID, "cmis:folder");
       folder.setProperty(CMIS.BASE_TYPE_ID, "cmis:folder");

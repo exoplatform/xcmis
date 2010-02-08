@@ -25,7 +25,9 @@ import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.object.Entry;
 import org.xcmis.spi.object.ItemsIterator;
 
+import java.util.HashSet;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
@@ -36,22 +38,30 @@ import javax.jcr.NodeIterator;
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id$
  */
-class ItemsIteratorImpl implements ItemsIterator<Entry>
+class FolderChildrenIterator implements ItemsIterator<Entry>
 {
 
    /** Logger. */
-   private static final Log LOG = ExoLogger.getLogger(ItemsIteratorImpl.class.getName());
+   private static final Log LOG = ExoLogger.getLogger(FolderChildrenIterator.class.getName());
 
    /** JCR node iterator. */
    protected final NodeIterator iter;
 
    /** Next CMIS item instance. */
    protected Entry next;
+   
+   static Set<String> skipItems = new HashSet<String>();
+   
+   static
+   {
+      skipItems.add("jcr:system");
+      skipItems.add("cmis:system");
+   }
 
    /**
     * @param iter back-end NodeIterator
     */
-   public ItemsIteratorImpl(NodeIterator iter)
+   public FolderChildrenIterator(NodeIterator iter)
    {
       this.iter = iter;
       fetchNext();
@@ -97,6 +107,10 @@ class ItemsIteratorImpl implements ItemsIterator<Entry>
          Node node = iter.nextNode();
          try
          {
+            if (skipItems.contains(node.getName()))
+               continue;
+//            Entry e = new EntryImpl(node);
+//            if (e.isLatest())
             next = new EntryImpl(node);
          }
          catch (InvalidArgumentException iae)

@@ -221,7 +221,7 @@ public class RepositoryTest extends BaseTest
       NodeTypeValue nodeTypeValue = new NodeTypeValue();
       List<String> declaredSupertypeNames = new ArrayList<String>();
       declaredSupertypeNames.add("nt:file");
-      declaredSupertypeNames.add(JcrCMIS.CMIS_DOCUMENT);
+      declaredSupertypeNames.add(JcrCMIS.CMIS_MIX_DOCUMENT);
       nodeTypeValue.setDeclaredSupertypeNames(declaredSupertypeNames);
       nodeTypeValue.setMixin(false);
       nodeTypeValue.setName(typeId);
@@ -420,41 +420,41 @@ public class RepositoryTest extends BaseTest
    public void testNameProducer0() throws Exception
    {
       assertEquals("New Document", ((RepositoryImpl)cmisRepository).getEntryName(JcrCMIS.ROOT_FOLDER_ID,
-         EnumBaseObjectTypeIds.CMIS_DOCUMENT, JcrCMIS.NT_CMIS_DOCUMENT));
+         EnumBaseObjectTypeIds.CMIS_DOCUMENT, JcrCMIS.NT_FILE));
       createDocument(JcrCMIS.ROOT_FOLDER_ID, "New Document", new byte[0], "");
       assertEquals("New Document (2)", ((RepositoryImpl)cmisRepository).getEntryName(JcrCMIS.ROOT_FOLDER_ID,
-         EnumBaseObjectTypeIds.CMIS_DOCUMENT, JcrCMIS.NT_CMIS_DOCUMENT));
+         EnumBaseObjectTypeIds.CMIS_DOCUMENT, JcrCMIS.NT_FILE));
    }
 
    public void testNameProducer() throws Exception
    {
       EntryImpl folder = createFolder(testRootFolderId, "New Folder");
       assertEquals("New Document", ((RepositoryImpl)cmisRepository).getEntryName(folder.getObjectId(),
-         EnumBaseObjectTypeIds.CMIS_DOCUMENT, JcrCMIS.NT_CMIS_DOCUMENT));
+         EnumBaseObjectTypeIds.CMIS_DOCUMENT, JcrCMIS.NT_FILE));
       createDocument(folder.getObjectId(), "New Document", new byte[0], "");
       assertEquals("New Document (2)", ((RepositoryImpl)cmisRepository).getEntryName(folder.getObjectId(),
-         EnumBaseObjectTypeIds.CMIS_DOCUMENT, JcrCMIS.NT_CMIS_DOCUMENT));
+         EnumBaseObjectTypeIds.CMIS_DOCUMENT, JcrCMIS.NT_FILE));
       createDocument(folder.getObjectId(), "New Document (2)", new byte[0], "");
       assertEquals("New Document (3)", ((RepositoryImpl)cmisRepository).getEntryName(folder.getObjectId(),
-         EnumBaseObjectTypeIds.CMIS_DOCUMENT, JcrCMIS.NT_CMIS_DOCUMENT));
+         EnumBaseObjectTypeIds.CMIS_DOCUMENT, JcrCMIS.NT_FILE));
       createDocument(folder.getObjectId(), "New Document (3)", new byte[0], "");
       assertEquals("New Document (4)", ((RepositoryImpl)cmisRepository).getEntryName(folder.getObjectId(),
-         EnumBaseObjectTypeIds.CMIS_DOCUMENT, JcrCMIS.NT_CMIS_DOCUMENT));
+         EnumBaseObjectTypeIds.CMIS_DOCUMENT, JcrCMIS.NT_FILE));
 
       // check folder
       assertEquals("New Folder (2)", ((RepositoryImpl)cmisRepository).getEntryName(testRootFolderId,
-         EnumBaseObjectTypeIds.CMIS_FOLDER, JcrCMIS.NT_CMIS_FOLDER));
+         EnumBaseObjectTypeIds.CMIS_FOLDER, JcrCMIS.NT_FOLDER));
 
       // remove one document
       folder.getNode().getNode("New Document").remove();
       session.save();
       // next name must be the same even one item in folder removed.
       assertEquals("New Document (4)", ((RepositoryImpl)cmisRepository).getEntryName(folder.getObjectId(),
-         EnumBaseObjectTypeIds.CMIS_DOCUMENT, JcrCMIS.NT_CMIS_DOCUMENT));
+         EnumBaseObjectTypeIds.CMIS_DOCUMENT, JcrCMIS.NT_FILE));
       createDocument(folder.getObjectId(), "New Document (4)", new byte[0], "");
       // must be incremented
       assertEquals("New Document (5)", ((RepositoryImpl)cmisRepository).getEntryName(folder.getObjectId(),
-         EnumBaseObjectTypeIds.CMIS_DOCUMENT, JcrCMIS.NT_CMIS_DOCUMENT));
+         EnumBaseObjectTypeIds.CMIS_DOCUMENT, JcrCMIS.NT_FILE));
    }
 
    public void testMoveDocument() throws Exception
@@ -472,7 +472,7 @@ public class RepositoryTest extends BaseTest
       // Try move document that is not inversion series
       EntryImpl sourceFolder = createFolder(testRootFolderId, "source");
       EntryImpl targetFolder = createFolder(testRootFolderId, "target");
-      Node docNode = sourceFolder.getNode().addNode("doc", JcrCMIS.NT_CMIS_DOCUMENT);
+      Node docNode = sourceFolder.getNode().addNode("doc", JcrCMIS.NT_FILE);
       docNode.addMixin("mix:referenceable");
       Node content = docNode.addNode(JcrCMIS.JCR_CONTENT, "nt:resource");
       content.setProperty(JcrCMIS.JCR_MIMETYPE, "");

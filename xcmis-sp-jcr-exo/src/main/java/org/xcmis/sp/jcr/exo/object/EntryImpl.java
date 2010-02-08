@@ -33,6 +33,7 @@ import org.exoplatform.services.jcr.access.AccessControlEntry;
 import org.exoplatform.services.jcr.access.AccessControlList;
 import org.exoplatform.services.jcr.access.PermissionType;
 import org.exoplatform.services.jcr.core.ExtendedNode;
+import org.exoplatform.services.jcr.core.ExtendedSession;
 import org.exoplatform.services.jcr.impl.core.PropertyImpl;
 import org.exoplatform.services.jcr.impl.core.value.BooleanValue;
 import org.exoplatform.services.jcr.impl.core.value.DateValue;
@@ -42,7 +43,6 @@ import org.exoplatform.services.jcr.impl.core.value.StringValue;
 import org.exoplatform.services.jcr.util.IdGenerator;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.exoplatform.services.security.ConversationState;
 import org.xcmis.sp.jcr.exo.JcrCMIS;
 import org.xcmis.sp.jcr.exo.TypeManagerImpl;
 import org.xcmis.sp.jcr.exo.rendition.RenditionContentStream;
@@ -91,6 +91,7 @@ import javax.jcr.Value;
 import javax.jcr.ValueFormatException;
 import javax.jcr.nodetype.NoSuchNodeTypeException;
 import javax.jcr.nodetype.NodeType;
+import javax.jcr.version.VersionHistory;
 
 /**
  * Instances of this class represent current version of CMIS Document.
@@ -112,6 +113,7 @@ public class EntryImpl extends TypeManagerImpl implements Entry
       cmis2jcr.put(CMIS.CREATED_BY, "exo:owner");
       cmis2jcr.put(CMIS.CONTENT_STREAM_MIME_TYPE, "jcr:content/jcr:mimeType");
       cmis2jcr.put(CMIS.CONTENT_STREAM_ID, "jcr:content/jcr:uuid");
+      //      cmis2jcr.put(CMIS.VERSION_SERIES_ID, "jcr:versionHistory");
    }
 
    static String latestLabel = "latest";
@@ -126,6 +128,9 @@ public class EntryImpl extends TypeManagerImpl implements Entry
 
    /** Object Id. */
    protected String id;
+
+   /** Object name. */
+   protected String objName;
 
    /** JCR session. */
    protected final Session session;
@@ -184,7 +189,8 @@ public class EntryImpl extends TypeManagerImpl implements Entry
 
       try
       {
-         preUpdate();
+         validateUpdate();
+         checkJcrCheckedoutState();
          if (!node.isNodeType(JcrCMIS.EXO_PRIVILEGABLE))
             node.addMixin(JcrCMIS.EXO_PRIVILEGABLE);
          ((ExtendedNode)node).setPermissions(createPermissionMap(aces));
@@ -210,11 +216,13 @@ public class EntryImpl extends TypeManagerImpl implements Entry
     * <pre>
     *  /ROOT
     *   |
-    *   - RELATIONSHIPS_FOLDER
+    *   - cmis:system
+    *     |
+    *     - cmis:relationships
     *     |
     *      - relHierarchy (container node for relationships that has the same name as current (source) object Id)
     *        |
-    *        - relationships (each one has the specified name)
+    *        - relationship (each one has the specified name)
     *        - ...
     * </pre>
     */
@@ -277,7 +285,8 @@ public class EntryImpl extends TypeManagerImpl implements Entry
 
       try
       {
-         preUpdate();
+         validateUpdate();
+         checkJcrCheckedoutState();
          node.setProperty(policy.getObjectId(), ((EntryImpl)policy).getNode());
       }
       catch (javax.jcr.RepositoryException re)
@@ -638,18 +647,19 @@ public class EntryImpl extends TypeManagerImpl implements Entry
    {
       try
       {
-         preDelete();
+         validateDelete();
+         checkJcrCheckedoutState();
 
          // TODO : simplify delete
          if (getScope() == EnumBaseObjectTypeIds.CMIS_DOCUMENT)
          {
-            VersionSeries versionSeries = getVersionSeries();
-            Entry pwc = versionSeries.getCheckedOut();
-            if (pwc != null)
+            String pwcId = getCheckedOutId();
+            if (pwcId != null)
             {
-               if (this.equals(pwc))
+               // Current document is PWC.
+               if (pwcId.equals(getObjectId()))
                {
-                  versionSeries.cancelCheckout();
+                  getVersionSeries().cancelCheckout();
                   return;
                }
                else
@@ -662,6 +672,7 @@ public class EntryImpl extends TypeManagerImpl implements Entry
 
          // Remove all relationships in which current object is target or source.
          removeRelationships();
+
          node.remove();
          session.save();
       }
@@ -701,7 +712,7 @@ public class EntryImpl extends TypeManagerImpl implements Entry
                try
                {
                   Node rs = prop.getNode();
-                  if (rs.getPrimaryNodeType().isNodeType(JcrCMIS.CMIS_POLICY))
+                  if (rs.getPrimaryNodeType().isNodeType(JcrCMIS.CMIS_NT_POLICY))
                   {
                      if (LOG.isDebugEnabled())
                         LOG.debug("Add policy " + prop.getName());
@@ -738,24 +749,11 @@ public class EntryImpl extends TypeManagerImpl implements Entry
       catch (javax.jcr.PathNotFoundException pnfe)
       {
          // TODO
-         if (CMIS.IS_IMMUTABLE.equals(name))
-         {
-            return false;
-         }
-         else if (CMIS.IS_LATEST_VERSION.equals(name))
-         {
+         if (CMIS.IS_LATEST_VERSION.equals(name))
             return true;
-         }
-         else if (CMIS.IS_MAJOR_VERSION.equals(name))
-         {
-            return false;
-         }
          else if (CMIS.IS_LATEST_MAJOR_VERSION.equals(name))
-         {
-            if (getScope() == EnumBaseObjectTypeIds.CMIS_DOCUMENT)
-               return isLatest() && isMajor();
-            return false;
-         }
+            return type.getBaseId() == EnumBaseObjectTypeIds.CMIS_DOCUMENT && getBoolean(CMIS.IS_LATEST_VERSION)
+               && getBoolean(CMIS.IS_MAJOR_VERSION);
 
          return false;
       }
@@ -780,7 +778,8 @@ public class EntryImpl extends TypeManagerImpl implements Entry
       {
          if (LOG.isDebugEnabled())
             LOG.debug("Get boolean[] " + name);
-         Property jcrProp = node.getProperty(name);
+         //         Property jcrProp = node.getProperty(name);
+         Property jcrProp = node.getProperty(getJcrPropertyName(name));
          if (((PropertyImpl)jcrProp).isMultiValued())
          {
             Value[] values = jcrProp.getValues();
@@ -845,7 +844,7 @@ public class EntryImpl extends TypeManagerImpl implements Entry
       {
          if (LOG.isDebugEnabled())
             LOG.debug("Get children of " + node.getPath());
-         return new ItemsIteratorImpl(node.getNodes());
+         return new FolderChildrenIterator(node.getNodes());
       }
       catch (javax.jcr.RepositoryException re)
       {
@@ -1146,17 +1145,7 @@ public class EntryImpl extends TypeManagerImpl implements Entry
     */
    public String getName() throws RepositoryException
    {
-      try
-      {
-         if (node.getDepth() == 0)
-            return CMIS.ROOT_FOLDER_NAME;
-         return node.getName();
-      }
-      catch (javax.jcr.RepositoryException re)
-      {
-         String msg = "Unable to get object name. " + re.getMessage();
-         throw new RepositoryException(msg);
-      }
+      return objName;
    }
 
    /**
@@ -1316,11 +1305,11 @@ public class EntryImpl extends TypeManagerImpl implements Entry
             // TODO
             if (CMIS.OBJECT_ID.equals(name))
             {
-               return getObjectId();
+               return this.id;
             }
             else if (CMIS.NAME.equals(name))
             {
-               return getName();
+               return this.objName;
             }
             else if (CMIS.CONTENT_STREAM_FILE_NAME.equals(name))
             {
@@ -1328,47 +1317,21 @@ public class EntryImpl extends TypeManagerImpl implements Entry
             }
             else if (CMIS.BASE_TYPE_ID.equals(name))
             {
-               return getType().getBaseId().value();
+               return this.type.getBaseId().value();
             }
             else if (CMIS.OBJECT_TYPE_ID.equals(name))
             {
-               return getType().getId();
+               return this.type.getId();
             }
             else if (CMIS.PATH.equals(name))
             {
-               return node.getPath();
+               return this.type.isFileable() ? node.getPath() : null;
             }
             else if (CMIS.PARENT_ID.equals(name))
             {
                Entry parent = getParent(this);
                return parent != null ? parent.getObjectId() : null;
             }
-            else if (CMIS.VERSION_LABEL.equals(name))
-            {
-               return null;
-            }
-            else if (CMIS.VERSION_SERIES_ID.equals(name))
-            {
-               if (getScope() == EnumBaseObjectTypeIds.CMIS_DOCUMENT)
-                  return getVersionSeries().getVersionSeriesId();
-               return null;
-            }
-            else if (CMIS.VERSION_SERIES_CHECKED_OUT_ID.equals(name))
-            {
-               Entry checkedout = getVersionSeries().getCheckedOut();
-               if (checkedout != null)
-                  return checkedout.getObjectId();
-               return null;
-            }
-            else if (CMIS.VERSION_SERIES_CHECKED_OUT_BY.equals(name))
-            {
-               return null;
-            }
-            else if (CMIS.CHECKIN_COMMENT.equals(name))
-            {
-               return null;
-            }
-
             return null;
          }
       }
@@ -1403,7 +1366,7 @@ public class EntryImpl extends TypeManagerImpl implements Entry
                res[i] = values[i].getString();
             return res;
          }
-         
+
          return new String[]{jcrProp.getString()};
       }
       catch (javax.jcr.PathNotFoundException pnfe)
@@ -1577,7 +1540,8 @@ public class EntryImpl extends TypeManagerImpl implements Entry
       }
 
       Map<String, String[]> aces = createPermissionMap(remove);
-      preUpdate();
+      validateUpdate();
+      checkJcrCheckedoutState();
       try
       {
          for (String principal : aces.keySet())
@@ -1611,7 +1575,8 @@ public class EntryImpl extends TypeManagerImpl implements Entry
       }
       try
       {
-         preUpdate();
+         validateUpdate();
+         checkJcrCheckedoutState();
          node.setProperty(policy.getObjectId(), (Node)null);
       }
       catch (javax.jcr.RepositoryException re)
@@ -1629,24 +1594,15 @@ public class EntryImpl extends TypeManagerImpl implements Entry
       try
       {
          // Update properties for nodes that have required mixin.
-         if (node.isNodeType(JcrCMIS.CMIS_OBJECT))
+         if (node.isNodeType(JcrCMIS.CMIS_MIX_OBJECT))
          {
             Calendar date = Calendar.getInstance();
-            //            if (node.isNew())
-            //               node.setProperty(CMIS.CREATION_DATE, date);
             node.setProperty(CMIS.LAST_MODIFICATION_DATE, date);
             node.setProperty(CMIS.CHANGE_TOKEN, IdGenerator.generate());
 
-            ConversationState cstate = ConversationState.getCurrent();
-            if (cstate != null)
-            {
-               String userId = cstate.getIdentity().getUserId();
-               //               if (node.isNew())
-               //                  node.setProperty(CMIS.CREATED_BY, userId);
-               node.setProperty(CMIS.LAST_MODIFIED_BY, userId);
-            }
+            node.setProperty(CMIS.LAST_MODIFIED_BY, session.getUserID());
          }
-         node.getParent().save();
+         session.save();
       }
       catch (javax.jcr.RepositoryException re)
       {
@@ -1665,7 +1621,8 @@ public class EntryImpl extends TypeManagerImpl implements Entry
       {
          if (LOG.isDebugEnabled())
             LOG.debug("Set boolean " + name + " value: " + value);
-         preUpdate();
+         validateUpdate();
+         checkJcrCheckedoutState();
          node.setProperty(name, value);
          return this;
       }
@@ -1694,7 +1651,8 @@ public class EntryImpl extends TypeManagerImpl implements Entry
          Value[] jcrValue = new Value[value.length];
          for (int i = 0; i < value.length; i++)
             jcrValue[i] = new BooleanValue(value[i]);
-         preUpdate();
+         validateUpdate();
+         checkJcrCheckedoutState();
          node.setProperty(name, jcrValue);
          return this;
       }
@@ -1730,7 +1688,8 @@ public class EntryImpl extends TypeManagerImpl implements Entry
       {
          if (LOG.isDebugEnabled())
             LOG.debug("Set document content.");
-         preUpdate();
+         validateUpdate();
+         checkJcrCheckedoutState();
          Node contentNode = node.getNode(JcrCMIS.JCR_CONTENT);
          if (content == null)
          {
@@ -1745,7 +1704,7 @@ public class EntryImpl extends TypeManagerImpl implements Entry
             contentNode.setProperty(JcrCMIS.JCR_LAST_MODIFIED, Calendar.getInstance());
             // If work with existed nt:files (files were created not via CMIS services)
             // they may not have mixin that extends property definitions.
-            if (node.isNodeType(JcrCMIS.CMIS_DOCUMENT))
+            if (node.isNodeType(JcrCMIS.CMIS_MIX_DOCUMENT))
             {
                node.setProperty(CMIS.CONTENT_STREAM_MIME_TYPE, (String)null);
                node.setProperty(CMIS.CONTENT_STREAM_LENGTH, 0);
@@ -1758,7 +1717,7 @@ public class EntryImpl extends TypeManagerImpl implements Entry
             Property contentProperty = contentNode.setProperty(JcrCMIS.JCR_DATA, content.getStream());
             // If work with existed nt:files (files were created not via CMIS services)
             // they may not have mixin that extends property definitions.
-            if (node.isNodeType(JcrCMIS.CMIS_DOCUMENT))
+            if (node.isNodeType(JcrCMIS.CMIS_MIX_DOCUMENT))
             {
                node.setProperty(CMIS.CONTENT_STREAM_MIME_TYPE, content.getMediaType());
                // re-count content-length
@@ -1785,7 +1744,8 @@ public class EntryImpl extends TypeManagerImpl implements Entry
       {
          if (LOG.isDebugEnabled())
             LOG.debug("Set date " + name + " value: " + value);
-         preUpdate();
+         validateUpdate();
+         checkJcrCheckedoutState();
          node.setProperty(name, value);
          return this;
       }
@@ -1814,7 +1774,8 @@ public class EntryImpl extends TypeManagerImpl implements Entry
          Value[] jcrValue = new Value[value.length];
          for (int i = 0; i < value.length; i++)
             jcrValue[i] = new DateValue(value[i]);
-         preUpdate();
+         validateUpdate();
+         checkJcrCheckedoutState();
          node.setProperty(name, jcrValue);
          return this;
       }
@@ -1845,7 +1806,8 @@ public class EntryImpl extends TypeManagerImpl implements Entry
       {
          if (LOG.isDebugEnabled())
             LOG.debug("Set decimal " + name + " value: " + value);
-         preUpdate();
+         validateUpdate();
+         checkJcrCheckedoutState();
          node.setProperty(name, value.doubleValue());
          return this;
       }
@@ -1874,7 +1836,8 @@ public class EntryImpl extends TypeManagerImpl implements Entry
          Value[] jcrValue = new Value[value.length];
          for (int i = 0; i < value.length; i++)
             jcrValue[i] = new DoubleValue(value[i].doubleValue());
-         preUpdate();
+         validateUpdate();
+         checkJcrCheckedoutState();
          node.setProperty(name, jcrValue);
          return this;
       }
@@ -1903,7 +1866,6 @@ public class EntryImpl extends TypeManagerImpl implements Entry
    {
       if (LOG.isDebugEnabled())
          LOG.debug("Set HTML " + name + " value: " + value);
-      preUpdate();
       setString(name, value);
       return this;
    }
@@ -1916,7 +1878,6 @@ public class EntryImpl extends TypeManagerImpl implements Entry
    {
       if (LOG.isDebugEnabled())
          LOG.debug("Set HTML " + name + " value: " + value);
-      preUpdate();
       setStrings(name, value);
       return this;
    }
@@ -1931,7 +1892,8 @@ public class EntryImpl extends TypeManagerImpl implements Entry
       {
          if (LOG.isDebugEnabled())
             LOG.debug("Set integer.");
-         preUpdate();
+         validateUpdate();
+         checkJcrCheckedoutState();
          node.setProperty(name, value.longValue());
          return this;
       }
@@ -1960,7 +1922,8 @@ public class EntryImpl extends TypeManagerImpl implements Entry
          Value[] jcrValue = new Value[value.length];
          for (int i = 0; i < value.length; i++)
             jcrValue[i] = new LongValue(value[i].intValue());
-         preUpdate();
+         validateUpdate();
+         checkJcrCheckedoutState();
          node.setProperty(name, jcrValue);
          return this;
       }
@@ -1988,7 +1951,8 @@ public class EntryImpl extends TypeManagerImpl implements Entry
    {
       if (name == null)
          throw new NullPointerException("Name may not be null.");
-      preUpdate();
+      validateUpdate();
+      checkJcrCheckedoutState();
       try
       {
          String srcPath = node.getPath();
@@ -1996,11 +1960,10 @@ public class EntryImpl extends TypeManagerImpl implements Entry
          session.getWorkspace().move(srcPath, destPath);
          node = (Node)session.getItem(destPath);
 
-         if (node.isNodeType(JcrCMIS.CMIS_OBJECT))
-         {
-            node.setProperty(CMIS.NAME, name);
-            save();
-         }
+         node.setProperty(CMIS.NAME, name);
+         save();
+
+         this.objName = name;
       }
       catch (ItemExistsException ie)
       {
@@ -2024,7 +1987,8 @@ public class EntryImpl extends TypeManagerImpl implements Entry
       {
          if (LOG.isDebugEnabled())
             LOG.debug("Set string " + name + " value: " + value);
-         preUpdate();
+         validateUpdate();
+         checkJcrCheckedoutState();
          node.setProperty(name, value);
          return this;
       }
@@ -2053,7 +2017,8 @@ public class EntryImpl extends TypeManagerImpl implements Entry
          Value[] jcrValue = new Value[value.length];
          for (int i = 0; i < value.length; i++)
             jcrValue[i] = new StringValue(value[i]);
-         preUpdate();
+         validateUpdate();
+         checkJcrCheckedoutState();
          node.setProperty(name, jcrValue);
          return this;
       }
@@ -2084,7 +2049,8 @@ public class EntryImpl extends TypeManagerImpl implements Entry
       {
          if (LOG.isDebugEnabled())
             LOG.debug("Set URI " + name + " value: " + value);
-         preUpdate();
+         validateUpdate();
+         checkJcrCheckedoutState();
          node.setProperty(name, value.toString());
          return this;
       }
@@ -2113,7 +2079,8 @@ public class EntryImpl extends TypeManagerImpl implements Entry
          Value[] jcrValue = new Value[value.length];
          for (int i = 0; i < value.length; i++)
             jcrValue[i] = new StringValue(value[i].toString());
-         preUpdate();
+         validateUpdate();
+         checkJcrCheckedoutState();
          node.setProperty(name, jcrValue);
          return this;
       }
@@ -2238,7 +2205,7 @@ public class EntryImpl extends TypeManagerImpl implements Entry
             refs.put(((ExtendedNode)ref).getIdentifier(), ref);
          }
       }
-      if (node.isNodeType(JcrCMIS.NT_CMIS_FOLDER))
+      if (node.isNodeType(JcrCMIS.NT_FOLDER))
       {
          for (NodeIterator iter = node.getNodes(); iter.hasNext();)
             relationships(iter.nextNode(), refs);
@@ -2258,29 +2225,28 @@ public class EntryImpl extends TypeManagerImpl implements Entry
       throws javax.jcr.RepositoryException
    {
       Node childDocNode = node.addNode(name, getNodeTypeName(type.getId()));
-      if (!childDocNode.isNodeType(JcrCMIS.CMIS_DOCUMENT)) // May be already inherited.
-         childDocNode.addMixin(JcrCMIS.CMIS_DOCUMENT);
-      // Initialize required structure of nodes.
-      // From start document has not content. It may be added later.
+      if (!childDocNode.isNodeType(JcrCMIS.CMIS_MIX_DOCUMENT)) // May be already inherited.
+         childDocNode.addMixin(JcrCMIS.CMIS_MIX_DOCUMENT);
+      if (childDocNode.canAddMixin(JcrCMIS.MIX_VERSIONABLE))
+         childDocNode.addMixin(JcrCMIS.MIX_VERSIONABLE);
+
+      // Content
       Node content = childDocNode.addNode(JcrCMIS.JCR_CONTENT, JcrCMIS.NT_RESOURCE);
       content.setProperty(JcrCMIS.JCR_MIMETYPE, "");
       content.setProperty(JcrCMIS.JCR_DATA, new ByteArrayInputStream(new byte[0]));
       content.setProperty(JcrCMIS.JCR_LAST_MODIFIED, Calendar.getInstance());
-      //
+
+      // CMIS properties
       childDocNode.setProperty(CMIS.NAME, childDocNode.getName());
       childDocNode.setProperty(CMIS.BASE_TYPE_ID, type.getBaseId().value());
       childDocNode.setProperty(CMIS.OBJECT_TYPE_ID, type.getId());
-      childDocNode.setProperty(CMIS.IS_IMMUTABLE, false);
-      childDocNode.setProperty(JcrCMIS.CMIS_LATEST_VERSION, childDocNode);
+      childDocNode.setProperty(CMIS.VERSION_SERIES_ID, childDocNode.getProperty("jcr:versionHistory").getString());
       childDocNode.setProperty(CMIS.IS_LATEST_VERSION, true);
       childDocNode.setProperty(CMIS.IS_MAJOR_VERSION, versioningState == EnumVersioningState.MAJOR);
       childDocNode.setProperty(CMIS.VERSION_LABEL, versioningState == EnumVersioningState.CHECKEDOUT ? pwcLabel
          : latestLabel);
-      if (versioningState == EnumVersioningState.CHECKEDOUT)
-      {
-         childDocNode.setProperty(CMIS.IS_VERSION_SERIES_CHECKED_OUT, true);
-         childDocNode.setProperty(CMIS.VERSION_SERIES_CHECKED_OUT_ID, ((ExtendedNode)childDocNode).getIdentifier());
-      }
+      childDocNode.setProperty(CMIS.IS_VERSION_SERIES_CHECKED_OUT, versioningState == EnumVersioningState.CHECKEDOUT);
+
       return new EntryImpl(childDocNode, type);
    }
 
@@ -2295,8 +2261,8 @@ public class EntryImpl extends TypeManagerImpl implements Entry
    protected Entry createFolder(CmisTypeDefinitionType type, String name) throws javax.jcr.RepositoryException
    {
       Node childFolderNode = node.addNode(name, getNodeTypeName(type.getId()));
-      if (!childFolderNode.isNodeType(JcrCMIS.CMIS_FOLDER)) // May be already inherited.
-         childFolderNode.addMixin(JcrCMIS.CMIS_FOLDER);
+      if (!childFolderNode.isNodeType(JcrCMIS.CMIS_MIX_FOLDER)) // May be already inherited.
+         childFolderNode.addMixin(JcrCMIS.CMIS_MIX_FOLDER);
       childFolderNode.setProperty(CMIS.NAME, childFolderNode.getName());
       childFolderNode.setProperty(CMIS.OBJECT_ID, ((ExtendedNode)childFolderNode).getIdentifier());
       childFolderNode.setProperty(CMIS.OBJECT_TYPE_ID, type.getId());
@@ -2337,11 +2303,13 @@ public class EntryImpl extends TypeManagerImpl implements Entry
    protected Entry createRelationship(String name, CmisTypeDefinitionType relationshipType, Entry target)
       throws javax.jcr.RepositoryException, RepositoryException
    {
-      Node relationships = (Node)session.getItem("/" + JcrCMIS.CMIS_RELATIONSHIPS);
+      Node relationships =
+         (Node)session.getItem(new StringBuilder().append('/').append(JcrCMIS.CMIS_SYSTEM).append('/').append(
+            JcrCMIS.CMIS_RELATIONSHIPS).toString());
       Node relHierarchy;
       String tContName = getObjectId();
       if (!relationships.hasNode(tContName))
-         relHierarchy = relationships.addNode(tContName, JcrCMIS.CMIS_RELATIONSHIPS_HIERARCHY);
+         relHierarchy = relationships.addNode(tContName, JcrCMIS.NT_UNSTRUCTURED);
       else
          relHierarchy = relationships.getNode(tContName);
       Node relationshipNode = relHierarchy.addNode(name, getNodeTypeName(relationshipType.getId()));
@@ -2423,7 +2391,8 @@ public class EntryImpl extends TypeManagerImpl implements Entry
       {
          try
          {
-            return new VersionSeriesImpl(node);
+            return new VersionSeriesImpl((VersionHistory)((ExtendedSession)session)
+               .getNodeByIdentifier(getVersionSeriesId()));
          }
          catch (javax.jcr.RepositoryException re)
          {
@@ -2454,23 +2423,32 @@ public class EntryImpl extends TypeManagerImpl implements Entry
     */
    protected void init(Node node, CmisTypeDefinitionType type) throws javax.jcr.RepositoryException
    {
+      if (!node.isNodeType(JcrCMIS.CMIS_MIX_OBJECT))
+      {
+         if (!node.isCheckedOut())
+            node.checkout();
+         if (node.isNodeType(JcrCMIS.NT_FILE))
+         {
+            node.addMixin(JcrCMIS.CMIS_MIX_DOCUMENT);
+            if (node.canAddMixin(JcrCMIS.MIX_VERSIONABLE))
+               node.addMixin(JcrCMIS.MIX_VERSIONABLE);
+            node.setProperty(CMIS.NAME, node.getName());
+            node.setProperty(CMIS.BASE_TYPE_ID, type.getBaseId().value());
+            node.setProperty(CMIS.OBJECT_TYPE_ID, type.getId());
+            node.setProperty(CMIS.VERSION_SERIES_ID, node.getProperty("jcr:versionHistory").getString());
+            node.setProperty(CMIS.IS_LATEST_VERSION, true);
+            node.setProperty(CMIS.VERSION_LABEL, latestLabel);
+         }
+         else if (node.isNodeType(JcrCMIS.NT_FOLDER))
+         {
+            node.addMixin(JcrCMIS.CMIS_MIX_FOLDER);
+         }
+         session.save();
+      }
+      this.objName = node.getDepth() == 0 ? CMIS.ROOT_FOLDER_NAME : node.getName();
       this.node = node;
       this.type = type;
       this.id = ((ExtendedNode)node).getIdentifier();
-   }
-
-   protected void preDelete() throws RepositoryException
-   {
-      validateDelete();
-      // TODO : check it. For now be sure node is in checked-out state.
-      checkJcrCheckedoutState();
-   }
-
-   protected void preUpdate() throws RepositoryException
-   {
-      validateUpdate();
-      // TODO : check it. For now be sure node is in checked-out state.
-      checkJcrCheckedoutState();
    }
 
    /**
@@ -2481,8 +2459,8 @@ public class EntryImpl extends TypeManagerImpl implements Entry
     */
    protected void removeRelationships() throws javax.jcr.RepositoryException
    {
-      if (node.isNodeType(JcrCMIS.NT_CMIS_DOCUMENT) || node.isNodeType(JcrCMIS.NT_CMIS_FOLDER)
-         || node.isNodeType(JcrCMIS.CMIS_POLICY))
+      if (node.isNodeType(JcrCMIS.NT_FILE) || node.isNodeType(JcrCMIS.NT_FOLDER)
+         || node.isNodeType(JcrCMIS.CMIS_NT_POLICY))
       {
          // Only independent object (Document, Folder or Policy) may have relationships.
          // Policy may not be removed if it is applied to object, for JCR it minds
@@ -2518,9 +2496,9 @@ public class EntryImpl extends TypeManagerImpl implements Entry
             for (PropertyIterator iter = node.getReferences(); iter.hasNext();)
             {
                Node controllable = iter.nextProperty().getParent();
-               if (controllable.isNodeType(JcrCMIS.NT_CMIS_DOCUMENT) //
-                  || controllable.isNodeType(JcrCMIS.NT_CMIS_FOLDER) //
-                  || controllable.isNodeType(JcrCMIS.CMIS_POLICY))
+               if (controllable.isNodeType(JcrCMIS.NT_FILE) //
+                  || controllable.isNodeType(JcrCMIS.NT_FOLDER) //
+                  || controllable.isNodeType(JcrCMIS.CMIS_NT_POLICY))
                {
                   String msg = "Unable to delete applied policy.";
                   throw new ConstraintException(msg);

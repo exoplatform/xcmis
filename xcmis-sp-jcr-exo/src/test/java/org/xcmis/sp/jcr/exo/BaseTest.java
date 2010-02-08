@@ -103,7 +103,7 @@ public abstract class BaseTest extends TestCase
       session = (SessionImpl)repository.login(credentials, wsName);
 
       root = session.getRootNode();
-      relationshipsNode = root.getNode(JcrCMIS.CMIS_RELATIONSHIPS);
+      relationshipsNode = root.getNode(JcrCMIS.CMIS_SYSTEM + "/" + JcrCMIS.CMIS_RELATIONSHIPS);
 
       testRootFolder = createFolder(JcrCMIS.ROOT_FOLDER_ID, "testRoot");
       testRootFolderId = testRootFolder.getObjectId();
@@ -136,18 +136,17 @@ public abstract class BaseTest extends TestCase
       {
          session.refresh(false);
          Node rootNode = session.getRootNode();
-         for (NodeIterator relationships = rootNode.getNode(JcrCMIS.CMIS_RELATIONSHIPS).getNodes(); relationships
+         for (NodeIterator relationships =
+            rootNode.getNode(JcrCMIS.CMIS_SYSTEM + "/" + JcrCMIS.CMIS_RELATIONSHIPS).getNodes(); relationships
             .hasNext();)
          {
             relationships.nextNode().remove();
          }
          session.save();
-         if (rootNode.hasNode("cmis:workingCopies"))
+         for (NodeIterator wc = rootNode.getNode(JcrCMIS.CMIS_SYSTEM + "/" + JcrCMIS.CMIS_WORKING_COPIES).getNodes(); wc
+            .hasNext();)
          {
-            for (NodeIterator wc = rootNode.getNode("cmis:workingCopies").getNodes(); wc.hasNext();)
-            {
-               wc.nextNode().remove();
-            }
+            wc.nextNode().remove();
          }
          session.save();
          if (rootNode.hasNodes())
@@ -159,8 +158,7 @@ public abstract class BaseTest extends TestCase
                if (!node.getPath().startsWith("/jcr:system") //
                   && !node.getPath().startsWith("/exo:audit") //
                   && !node.getPath().startsWith("/exo:organization") //
-                  && !node.getPath().equals("/" + JcrCMIS.CMIS_RELATIONSHIPS) //
-                  && !node.getPath().equals("/cmis:workingCopies"))
+                  && !node.getPath().equals("/" + JcrCMIS.CMIS_SYSTEM))
                {
                   node.remove();
                }
@@ -182,7 +180,7 @@ public abstract class BaseTest extends TestCase
 
    protected EntryImpl createDocument(String parentId, String name, byte[] data, String contentType) throws Exception
    {
-      return createDocument(parentId, name, JcrCMIS.NT_CMIS_DOCUMENT, data, contentType);
+      return createDocument(parentId, name, JcrCMIS.NT_FILE, data, contentType);
    }
 
    protected EntryImpl createDocument(String parentId, String name, String type, byte[] data, String contentType)
@@ -202,14 +200,15 @@ public abstract class BaseTest extends TestCase
    protected EntryImpl createDocument(Node parent, String name, byte[] data, String contentType) throws Exception
    {
 
-      return createDocument(parent, name, JcrCMIS.NT_CMIS_DOCUMENT, data, contentType, EnumVersioningState.MAJOR);
+      return createDocument(parent, name, JcrCMIS.NT_FILE, data, contentType, EnumVersioningState.MAJOR);
    }
 
    protected EntryImpl createDocument(Node parent, String name, String type, byte[] data, String contentType,
       EnumVersioningState versioningState) throws Exception
    {
       Node doc = parent.addNode(name, type);
-      doc.addMixin(JcrCMIS.CMIS_DOCUMENT);
+      doc.addMixin(JcrCMIS.CMIS_MIX_DOCUMENT);
+      doc.addMixin("mix:versionable");
       String docId = ((ExtendedNode)doc).getIdentifier();
       doc.setProperty(CMIS.NAME, doc.getName());
       doc.setProperty(CMIS.OBJECT_TYPE_ID, "cmis:document");
@@ -225,7 +224,7 @@ public abstract class BaseTest extends TestCase
       doc.setProperty(CMIS.CONTENT_STREAM_FILE_NAME, doc.getName());
       doc.setProperty(CMIS.CONTENT_STREAM_ID, docId);
 
-      doc.setProperty("cmis:latestVersion", doc);
+      doc.setProperty(CMIS.VERSION_SERIES_ID, doc.getProperty("jcr:versionHistory").getString());
       doc.setProperty(CMIS.IS_LATEST_VERSION, true);
       doc.setProperty(CMIS.VERSION_LABEL, versioningState == EnumVersioningState.CHECKEDOUT ? "pwc" : "current");
       doc.setProperty(CMIS.IS_MAJOR_VERSION, versioningState == EnumVersioningState.MAJOR);
@@ -246,7 +245,7 @@ public abstract class BaseTest extends TestCase
 
    protected EntryImpl createPolicy(Node parent, String name, String policyText) throws Exception
    {
-      Node policy = parent.addNode(name, JcrCMIS.CMIS_POLICY);
+      Node policy = parent.addNode(name, JcrCMIS.CMIS_NT_POLICY);
       policy.setProperty(CMIS.NAME, policy.getName());
       //      policy.setProperty(CMIS.OBJECT_ID, idResolver.getNodeIdentifier(policy));
       policy.setProperty(CMIS.OBJECT_TYPE_ID, "cmis:policy");
@@ -268,8 +267,8 @@ public abstract class BaseTest extends TestCase
 
    protected EntryImpl createFolder(Node parent, String name) throws Exception
    {
-      Node folder = parent.addNode(name, JcrCMIS.NT_CMIS_FOLDER);
-      folder.addMixin(JcrCMIS.CMIS_FOLDER);
+      Node folder = parent.addNode(name, JcrCMIS.NT_FOLDER);
+      folder.addMixin(JcrCMIS.CMIS_MIX_FOLDER);
       folder.setProperty(CMIS.NAME, folder.getName());
       //      folder.setProperty(CMIS.OBJECT_ID, idResolver.getNodeIdentifier(folder));
       folder.setProperty(CMIS.OBJECT_TYPE_ID, "cmis:folder");
@@ -288,8 +287,8 @@ public abstract class BaseTest extends TestCase
       if (relationshipsNode.hasNode(sourceId))
          relationshipHierarchy = relationshipsNode.getNode(sourceId);
       else
-         relationshipHierarchy = relationshipsNode.addNode(sourceId, JcrCMIS.CMIS_RELATIONSHIPS_HIERARCHY);
-      Node relationship = relationshipHierarchy.addNode(targetId, JcrCMIS.CMIS_RELATIONSHIP);
+         relationshipHierarchy = relationshipsNode.addNode(sourceId, JcrCMIS.NT_UNSTRUCTURED);
+      Node relationship = relationshipHierarchy.addNode(targetId, JcrCMIS.CMIS_NT_RELATIONSHIP);
       relationship.setProperty(CMIS.NAME, relationship.getName());
       //      relationship.setProperty(CMIS.OBJECT_ID, idResolver.getNodeIdentifier(relationship));
       relationship.setProperty(CMIS.OBJECT_TYPE_ID, "cmis:relationship");

@@ -49,7 +49,7 @@ public class IncludedInSupertypeQueryTest extends BaseQueryTest
             EnumVersioningState.MAJOR);
       doc2.setContent(new BaseContentStream(" hello world".getBytes(), null, "text/plain"));
       doc2.save();
-      String stat = "SELECT * FROM " + JcrCMIS.NT_CMIS_DOCUMENT + " WHERE IN_FOLDER( '" + folder1.getObjectId() + "')";
+      String stat = "SELECT * FROM " + JcrCMIS.NT_FILE + " WHERE IN_FOLDER( '" + folder1.getObjectId() + "')";
 
       Query query = new Query(stat, false);
       ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);

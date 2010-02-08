@@ -19,10 +19,9 @@
 
 package org.xcmis.sp.jcr.exo.object;
 
-import org.xcmis.core.EnumVersioningState;
 import org.exoplatform.services.jcr.core.ExtendedNode;
+import org.xcmis.core.EnumVersioningState;
 import org.xcmis.sp.jcr.exo.BaseTest;
-import org.xcmis.sp.jcr.exo.object.EntryImpl;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.object.BaseContentStream;
@@ -30,12 +29,10 @@ import org.xcmis.spi.object.ContentStream;
 import org.xcmis.spi.object.Entry;
 import org.xcmis.spi.object.VersionSeries;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.jcr.Node;
-import javax.jcr.NodeIterator;
 import javax.jcr.version.Version;
 
 /**
@@ -139,11 +136,11 @@ public class VersionSeriesTest extends BaseTest
       VersionSeries series = cmisRepository.getVersionSeries(doc.getVersionSeriesId());
       Entry pwc = series.checkout(doc.getObjectId());
 
-      List<String> l = new ArrayList<String>();
-      for (NodeIterator iter = root.getNode("cmis:workingCopies").getNodes(); iter.hasNext();)
-         l.add(iter.nextNode().getPath());
-      assertEquals(1, l.size());
-      assertEquals("/cmis:workingCopies/" + series.getVersionSeriesId(), l.get(0));
+      //      List<String> l = new ArrayList<String>();
+      //      for (NodeIterator iter = root.getNode("cmis:system/cmis:workingCopies").getNodes(); iter.hasNext();)
+      //         l.add(iter.nextNode().getPath());
+      //      assertEquals(1, l.size());
+      //      assertEquals("/cmis:system/cmis:workingCopies/" + series.getVersionSeriesId(), l.get(0));
 
       assertFalse(pwc.isLatest());
       assertTrue(doc.isLatest());
@@ -163,7 +160,7 @@ public class VersionSeriesTest extends BaseTest
       assertNotNull(series.getLatestMajorVersion());
       assertFalse(pwc.equals(series.getLatestMajorVersion()));
       assertEquals(pwc, series.getCheckedOut());
-      
+
       pwc.delete();
       doc.delete(); // <<<<<<<<<<<<<<<<<
    }
@@ -179,24 +176,11 @@ public class VersionSeriesTest extends BaseTest
       {
          doc.delete();
          fail("org.xcmis.ConstraintException must be thrown, doc has checkedout version.");
-//         fail("org.xcmis.RepositoryException must be thrown, doc has checkedout version.");
       }
       catch (org.xcmis.spi.ConstraintException e)
       {
          // OK
       }
-//      catch (org.xcmis.RepositoryException e)
-//      {
-//         if (e.getCause() instanceof javax.jcr.ReferentialIntegrityException)
-//         {
-//            // it's ok
-//         }
-//         else
-//         {
-//            fail("Cause of exception is not instance of javax.jcr.ReferentialIntegrityException");
-//         }
-//      }
-
    }
 
    public void testCreateDocumentInCheckedOutState() throws Exception
@@ -205,8 +189,8 @@ public class VersionSeriesTest extends BaseTest
          createDocument(testRootFolderId, "doc", "nt:file", new byte[0], "", EnumVersioningState.CHECKEDOUT);
       VersionSeries series = cmisRepository.getVersionSeries(doc.getVersionSeriesId());
       assertEquals(1, series.getAllVersions().size());
-//      assertFalse(doc.isLatest());
-//      assertNull(series.getLatestVersion());
+      //      assertFalse(doc.isLatest());
+      //      assertNull(series.getLatestVersion());
       assertNull(series.getLatestMajorVersion());
    }
 
@@ -215,7 +199,7 @@ public class VersionSeriesTest extends BaseTest
       Entry doc = createDocument(testRootFolderId, "doc", new byte[0], "");
       // Create versions via JCR API.
       Node node = ((EntryImpl)doc).getNode();
-//      node.addMixin(JcrCMIS.MIX_VERSIONABLE);
+      //      node.addMixin(JcrCMIS.MIX_VERSIONABLE);
       node.save();
       Version v1 = node.checkin();
       node.checkout();
@@ -231,7 +215,6 @@ public class VersionSeriesTest extends BaseTest
       assertEquals(((ExtendedNode)v3).getIdentifier(), versions.get(1).getObjectId());
       assertEquals(((ExtendedNode)v2).getIdentifier(), versions.get(2).getObjectId());
       assertEquals(((ExtendedNode)v1).getIdentifier(), versions.get(3).getObjectId());
-      
    }
 
    public void testGetCheckedOut() throws Exception

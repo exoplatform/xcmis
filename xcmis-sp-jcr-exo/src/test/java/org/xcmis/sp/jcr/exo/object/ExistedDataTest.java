@@ -20,13 +20,7 @@
 package org.xcmis.sp.jcr.exo.object;
 
 import org.xcmis.core.EnumBaseObjectTypeIds;
-import org.exoplatform.services.jcr.core.ExtendedNode;
 import org.xcmis.sp.jcr.exo.BaseTest;
-import org.xcmis.sp.jcr.exo.JcrCMIS;
-import org.xcmis.sp.jcr.exo.object.EntryImpl;
-import org.xcmis.sp.jcr.exo.object.EntryVersion;
-import org.xcmis.sp.jcr.exo.object.VersionSeriesImpl;
-import org.xcmis.spi.CMIS;
 import org.xcmis.spi.object.BaseContentStream;
 import org.xcmis.spi.object.ContentStream;
 import org.xcmis.spi.object.Entry;
@@ -37,8 +31,6 @@ import java.util.Calendar;
 import java.util.List;
 
 import javax.jcr.Node;
-import javax.jcr.version.Version;
-import javax.jcr.version.VersionHistory;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
@@ -117,7 +109,7 @@ public class ExistedDataTest extends BaseTest
       EntryVersion v3 = new EntryVersion(file.checkin());
       file.checkout();
 
-      VersionSeries versionSeries = new VersionSeriesImpl(file);
+      VersionSeries versionSeries = new VersionSeriesImpl(file.getVersionHistory());
       EntryImpl latest = new EntryImpl(file);
       assertEquals(latest.getObjectId(), versionSeries.getLatestVersion().getObjectId());
       List<Entry> allVersions = versionSeries.getAllVersions();
@@ -128,113 +120,4 @@ public class ExistedDataTest extends BaseTest
       assertEquals(v1.getObjectId(), allVersions.get(3).getObjectId());
    }
 
-   public void testCheckout() throws Exception
-   {
-      // Check CMIS versioning with simple nt:file.
-      VersionSeries versionSeries = new VersionSeriesImpl(file);
-      // Not need document id in fact. Only current node may be in use.
-      Node pwc = ((EntryImpl)versionSeries.checkout(null)).getNode();
-
-      String latestId = ((ExtendedNode)file).getIdentifier();
-      String pwcId = ((ExtendedNode)pwc).getIdentifier();
-
-      assertEquals("/cmis:workingCopies/" + versionSeries.getVersionSeriesId(), pwc.getPath());
-
-      assertEquals(false, pwc.getProperty(CMIS.IS_LATEST_VERSION).getBoolean());
-      assertEquals(false, pwc.getProperty(CMIS.IS_MAJOR_VERSION).getBoolean());
-      assertEquals(true, pwc.getProperty(CMIS.IS_VERSION_SERIES_CHECKED_OUT).getBoolean());
-      assertEquals(pwcId, pwc.getProperty(CMIS.VERSION_SERIES_CHECKED_OUT_ID).getString());
-      assertEquals("pwc", pwc.getProperty(CMIS.VERSION_LABEL).getString());
-      assertEquals(latestId, pwc.getProperty(JcrCMIS.CMIS_LATEST_VERSION).getString());
-      assertEquals(latestId, pwc.getProperty(CMIS.VERSION_SERIES_ID).getString());
-
-      assertEquals(true, file.getProperty(CMIS.IS_LATEST_VERSION).getBoolean());
-      assertEquals(false, file.getProperty(CMIS.IS_MAJOR_VERSION).getBoolean());
-      assertEquals(true, file.getProperty(CMIS.IS_VERSION_SERIES_CHECKED_OUT).getBoolean());
-      assertEquals(pwcId, file.getProperty(CMIS.VERSION_SERIES_CHECKED_OUT_ID).getString());
-      assertEquals("latest", file.getProperty(CMIS.VERSION_LABEL).getString());
-      assertEquals(latestId, file.getProperty(JcrCMIS.CMIS_LATEST_VERSION).getString());
-      assertEquals(latestId, file.getProperty(CMIS.VERSION_SERIES_ID).getString());
-
-      try
-      {
-         file.remove();
-         session.save();
-         fail("Must not be able to delete node.");
-      }
-      catch (javax.jcr.ReferentialIntegrityException e)
-      {
-         // OK
-      }
-   }
-
-   public void testCancelCheckout() throws Exception
-   {
-      VersionSeries versionSeries = new VersionSeriesImpl(file);
-      file.addMixin(JcrCMIS.CMIS_VERSIONABLE);
-      file.setProperty(JcrCMIS.CMIS_LATEST_VERSION, file);
-      file.setProperty(JcrCMIS.IS_LATEST_VERSION, true);
-      file.setProperty(JcrCMIS.VERSION_LABEL, EntryImpl.latestLabel);
-      file.setProperty(JcrCMIS.VERSION_SERIES_ID, versionSeries.getVersionSeriesId());
-      session.save();
-
-      String pwcPath = "/cmis:workingCopies/" + versionSeries.getVersionSeriesId();
-      session.getWorkspace().copy(file.getPath(), pwcPath);
-      Node pwcNode = (Node)session.getItem(pwcPath);
-
-      file.setProperty(JcrCMIS.VERSION_SERIES_CHECKED_OUT_ID, ((ExtendedNode)pwcNode).getIdentifier());
-      file.setProperty(JcrCMIS.IS_VERSION_SERIES_CHECKED_OUT, true);
-      session.save();
-
-      assertNotNull(versionSeries.getCheckedOut());
-      EntryImpl pwc = (EntryImpl)versionSeries.getCheckedOut();
-      assertEquals(((ExtendedNode)pwcNode).getIdentifier(), ((ExtendedNode)pwc.getNode()).getIdentifier());
-
-      versionSeries.cancelCheckout();
-
-      assertEquals(false, session.itemExists(pwcPath));
-      assertEquals(false, file.getProperty(JcrCMIS.IS_VERSION_SERIES_CHECKED_OUT).getBoolean());
-      assertEquals(false, file.hasProperty(JcrCMIS.VERSION_SERIES_CHECKED_OUT_ID));
-   }
-
-   public void testCheckin() throws Exception
-   {
-      VersionSeries versionSeries = new VersionSeriesImpl(file);
-      file.addMixin(JcrCMIS.CMIS_VERSIONABLE);
-      file.setProperty(JcrCMIS.CMIS_LATEST_VERSION, file);
-      file.setProperty(JcrCMIS.IS_LATEST_VERSION, true);
-      file.setProperty(JcrCMIS.VERSION_LABEL, EntryImpl.latestLabel);
-      file.setProperty(JcrCMIS.VERSION_SERIES_ID, versionSeries.getVersionSeriesId());
-      session.save();
-
-      String pwcPath = "/cmis:workingCopies/" + versionSeries.getVersionSeriesId();
-      session.getWorkspace().copy(file.getPath(), pwcPath);
-      Node pwcNode = (Node)session.getItem(pwcPath);
-
-      file.setProperty(JcrCMIS.VERSION_SERIES_CHECKED_OUT_ID, ((ExtendedNode)pwcNode).getIdentifier());
-      file.setProperty(JcrCMIS.IS_VERSION_SERIES_CHECKED_OUT, true);
-      session.save();
-
-      versionSeries.checkin(true, "to be or not to be");
-      assertEquals(false, session.itemExists(pwcPath));
-      assertEquals(false, file.getProperty(JcrCMIS.IS_VERSION_SERIES_CHECKED_OUT).getBoolean());
-      assertEquals(false, file.hasProperty(JcrCMIS.VERSION_SERIES_CHECKED_OUT_ID));
-
-      assertNull(versionSeries.getCheckedOut());
-      assertEquals(2, versionSeries.getAllVersions().size());
-
-      VersionHistory vh = file.getVersionHistory();
-      Version v1 = vh.getVersion("1");
-      Entry e1 = new EntryVersion(v1);
-      assertEquals("1", e1.getVersionLabel());
-      assertEquals(false, e1.isLatest());
-      assertEquals(false, e1.isMajor());
-
-      Entry latest = new EntryImpl(file);
-      assertEquals("latest", latest.getVersionLabel());
-      assertEquals(true, latest.isLatest());
-      assertEquals(true, latest.isMajor());
-      assertEquals(true, latest.isLatestMajor());
-      assertEquals("to be or not to be", latest.getCheckInComment());
-   }
 }

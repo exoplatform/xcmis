@@ -114,6 +114,7 @@ import javax.jcr.nodetype.NodeType;
 import javax.jcr.nodetype.NodeTypeIterator;
 import javax.jcr.version.OnParentVersionAction;
 import javax.jcr.version.Version;
+import javax.jcr.version.VersionHistory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
@@ -196,9 +197,9 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
          List<String> declaredSupertypeNames = new ArrayList<String>();
          declaredSupertypeNames.add(getNodeTypeName(parentId));
          if (parentType.getBaseId() == EnumBaseObjectTypeIds.CMIS_DOCUMENT)
-            declaredSupertypeNames.add(JcrCMIS.CMIS_DOCUMENT);
+            declaredSupertypeNames.add(JcrCMIS.CMIS_MIX_DOCUMENT);
          else if (parentType.getBaseId() == EnumBaseObjectTypeIds.CMIS_FOLDER)
-            declaredSupertypeNames.add(JcrCMIS.CMIS_FOLDER);
+            declaredSupertypeNames.add(JcrCMIS.CMIS_MIX_FOLDER);
          nodeTypeValue.setDeclaredSupertypeNames(declaredSupertypeNames);
          nodeTypeValue.setMixin(false);
          nodeTypeValue.setName(type.getId());
@@ -449,7 +450,7 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
             {
                RenditionProvider renditionProvider = e.getValue();
                RenditionContentStream renditionContentStream = renditionProvider.getRenditionStream(entry);
-               Node rendition = ((EntryImpl)entry).getNode().addNode(IdGenerator.generate(), JcrCMIS.CMIS_RENDITION);
+               Node rendition = ((EntryImpl)entry).getNode().addNode(IdGenerator.generate(), JcrCMIS.CMIS_NT_RENDITION);
                rendition.setProperty(JcrCMIS.CMIS_RENDITION_STREAM, renditionContentStream.getStream());
                rendition.setProperty(JcrCMIS.CMIS_RENDITION_MIME_TYPE, renditionContentStream.getMediaType());
                rendition.setProperty(JcrCMIS.CMIS_RENDITION_KIND, renditionContentStream.getKind());
@@ -1014,7 +1015,7 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
       try
       {
          Node node = ((ExtendedSession)getSession()).getNodeByIdentifier(versionSeriesId);
-         return new VersionSeriesImpl(node);
+         return new VersionSeriesImpl((VersionHistory)node);
       }
       catch (ItemNotFoundException infe)
       {
@@ -1098,7 +1099,7 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
          for (NodeIterator iter = ((EntryImpl)entry).getNode().getNodes(); iter.hasNext();)
          {
             Node item = iter.nextNode();
-            if (item.isNodeType(JcrCMIS.CMIS_RENDITION))
+            if (item.isNodeType(JcrCMIS.CMIS_NT_RENDITION))
             {
                item.remove();
                count++;
@@ -1181,7 +1182,7 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
       for (NodeIterator iter = folder.getNodes(); iter.hasNext();)
       {
          Node node = iter.nextNode();
-         if (node.isNodeType(JcrCMIS.NT_CMIS_DOCUMENT))
+         if (node.isNodeType(JcrCMIS.NT_FILE))
          {
             try
             {
@@ -1195,7 +1196,7 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
                // If property 'isVersionSeriesCheckedOut' does not set.
             }
          }
-         else if (recursive && node.isNodeType(JcrCMIS.NT_CMIS_FOLDER))
+         else if (recursive && node.isNodeType(JcrCMIS.NT_FOLDER))
             checkedOutDocuments(node, docs, recursive);
       }
    }

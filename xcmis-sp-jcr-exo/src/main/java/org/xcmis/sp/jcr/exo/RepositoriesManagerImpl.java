@@ -45,6 +45,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.jcr.Node;
+import javax.jcr.Session;
+
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id$
@@ -99,8 +102,8 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
    private final ThreadLocalSessionProviderService sessionProviderService;
 
    /** The map for the rendition providers. */
-   private final Map<MimeType, RenditionProvider> renditionProviders =
-      new TreeMap<MimeType, RenditionProvider>(new Comparator<MimeType>()
+   private final Map<MimeType, RenditionProvider> renditionProviders = new TreeMap<MimeType, RenditionProvider>(
+      new Comparator<MimeType>()
       {
          public int compare(MimeType m1, MimeType m2)
          {
@@ -212,9 +215,9 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
             // --- FIXME : Should never happen if environment is correct.
             // Top services must prepare session provider.
             // But need it for commons test environment at the moment.
-            if (sessionProvider == null)
-               sessionProvider = SessionProvider.createAnonimProvider();
-            sessionProviderService.setSessionProvider(null, sessionProvider);
+            //            if (sessionProvider == null)
+            //               sessionProvider = SessionProvider.createAnonimProvider();
+            //            sessionProviderService.setSessionProvider(null, sessionProvider);
             // ----
             return new RepositoryImpl(jcrRepository, sessionProvider, indexingServices.get(repositoryId),
                repositoryConfiguration, renditionProviders);
@@ -272,20 +275,24 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
          {
             ManageableRepository repository =
                jcrRepositoryService.getRepository(cmisRepositoryConfiguration.getRepository());
-            javax.jcr.Session session =
-               systemProvider.getSession(cmisRepositoryConfiguration.getWorkspace(), repository);
-            javax.jcr.Node root = session.getRootNode();
-            if (!root.hasNode(JcrCMIS.CMIS_RELATIONSHIPS))
+            Session session = systemProvider.getSession(cmisRepositoryConfiguration.getWorkspace(), repository);
+            Node root = session.getRootNode();
+            Node cmisSystem = null;
+            if (!root.hasNode(JcrCMIS.CMIS_SYSTEM))
+               cmisSystem = root.addNode(JcrCMIS.CMIS_SYSTEM, JcrCMIS.NT_UNSTRUCTURED);
+            else
+               cmisSystem = root.getNode(JcrCMIS.CMIS_SYSTEM);
+            if (!cmisSystem.hasNode(JcrCMIS.CMIS_RELATIONSHIPS))
             {
-               root.addNode(JcrCMIS.CMIS_RELATIONSHIPS, JcrCMIS.CMIS_RELATIONSHIPS_STORAGE);
+               cmisSystem.addNode(JcrCMIS.CMIS_RELATIONSHIPS, JcrCMIS.NT_UNSTRUCTURED);
                if (LOG.isDebugEnabled())
-                  LOG.debug("CMIS relationships folder '/" + JcrCMIS.CMIS_RELATIONSHIPS + "' created.");
+                  LOG.debug("CMIS relationships storage " + JcrCMIS.CMIS_RELATIONSHIPS + " created.");
             }
-            if (!root.hasNode("cmis:workingCopies"))
+            if (!cmisSystem.hasNode(JcrCMIS.CMIS_WORKING_COPIES))
             {
-               root.addNode("cmis:workingCopies", "cmis:workingCopies");
+               cmisSystem.addNode(JcrCMIS.CMIS_WORKING_COPIES);
                if (LOG.isDebugEnabled())
-                  LOG.debug("CMIS Working Copies storage '/cmis:workingCopies' created.");
+                  LOG.debug("CMIS Working Copies storage " + JcrCMIS.CMIS_WORKING_COPIES + " created.");
             }
             session.save();
          }

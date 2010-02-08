@@ -400,7 +400,7 @@ public class QueryUsecasesTest extends BaseQueryTest
       EntryImpl folder4 = this.createFolder(folder3.getObjectId(), "folder4");
 
       String statement =
-         "SELECT * FROM " + JcrCMIS.NT_CMIS_FOLDER + " WHERE IN_FOLDER( '" + folder1.getObjectId() + "')";
+         "SELECT * FROM " + JcrCMIS.NT_FOLDER + " WHERE IN_FOLDER( '" + folder1.getObjectId() + "')";
 
       Query query = new Query(statement, true);
       ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
@@ -446,7 +446,7 @@ public class QueryUsecasesTest extends BaseQueryTest
 
       String statement =
          "SELECT doc.* FROM " + EnumBaseObjectTypeIds.CMIS_DOCUMENT.value() + " AS doc LEFT JOIN "
-            + JcrCMIS.NT_CMIS_FOLDER + " AS folder ON (doc.parentFolderName = folder.folderName)";
+            + JcrCMIS.NT_FOLDER + " AS folder ON (doc.parentFolderName = folder.folderName)";
 
       Query query = new Query(statement, true);
       ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);

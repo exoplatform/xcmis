@@ -360,6 +360,15 @@ public class EntryVersion extends EntryImpl
    {
       throw new VersioningException("Can't update property of non-latest version of object.");
    }
+   
+   /**
+    * {@inheritDoc}
+    */
+   @Override
+   public void setName(String name) throws RepositoryException
+   {
+      throw new VersioningException("Can't update non-latest version of object.");
+   }
 
    /**
     * {@inheritDoc}
@@ -422,7 +431,7 @@ public class EntryVersion extends EntryImpl
    {
       try
       {
-         return new VersionSeriesImpl(node.getParent());
+         return new VersionSeriesImpl(((Version)node.getParent()).getContainingHistory());
       }
       catch (javax.jcr.RepositoryException re)
       {

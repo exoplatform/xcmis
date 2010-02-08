@@ -118,7 +118,7 @@ class RenditionIterator implements ItemsIterator<CmisRenditionType>
          Node node = iter.nextNode();
          try
          {
-            if (node.isNodeType(JcrCMIS.CMIS_RENDITION))
+            if (node.isNodeType(JcrCMIS.CMIS_NT_RENDITION))
             {
                CmisRenditionType rendition = new CmisRenditionType();
                rendition.setStreamId(node.getName());

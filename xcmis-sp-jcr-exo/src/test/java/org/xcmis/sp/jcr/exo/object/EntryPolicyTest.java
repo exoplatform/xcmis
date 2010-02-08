@@ -405,7 +405,7 @@ public class EntryPolicyTest extends EntryTest
 
    protected Node createNode() throws Exception
    {
-      Node policy = testRootFolder.getNode().addNode("node", JcrCMIS.CMIS_POLICY);
+      Node policy = testRootFolder.getNode().addNode("node", JcrCMIS.CMIS_NT_POLICY);
       policy.setProperty(CMIS.NAME, policy.getName());
       policy.setProperty(CMIS.OBJECT_TYPE_ID, "cmis:policy");
       policy.setProperty(CMIS.BASE_TYPE_ID, "cmis:policy");

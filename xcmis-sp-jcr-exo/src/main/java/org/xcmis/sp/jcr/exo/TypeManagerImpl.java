@@ -258,9 +258,9 @@ public abstract class TypeManagerImpl implements TypeManager
     */
    protected String getCmisTypeId(String ntName)
    {
-      if (ntName.equals(JcrCMIS.NT_CMIS_DOCUMENT))
+      if (ntName.equals(JcrCMIS.NT_FILE))
          return EnumBaseObjectTypeIds.CMIS_DOCUMENT.value();
-      if (ntName.equals(JcrCMIS.NT_CMIS_FOLDER) || ntName.equals(JcrCMIS.NT_UNSTRUCTURED))
+      if (ntName.equals(JcrCMIS.NT_FOLDER) || ntName.equals(JcrCMIS.NT_UNSTRUCTURED))
          return EnumBaseObjectTypeIds.CMIS_FOLDER.value();
       return ntName;
    }
@@ -299,7 +299,7 @@ public abstract class TypeManagerImpl implements TypeManager
          NodeType[] superTypes = nt.getDeclaredSupertypes();
          for (NodeType superType : superTypes)
          {
-            if (superType.isNodeType(JcrCMIS.NT_CMIS_DOCUMENT))
+            if (superType.isNodeType(JcrCMIS.NT_FILE))
             {
                // Take first type that is super for cmis:document or is cmis:document.
                def.setParentId(getCmisTypeId(superType.getName()));
@@ -348,7 +348,7 @@ public abstract class TypeManagerImpl implements TypeManager
          NodeType[] superTypes = nt.getDeclaredSupertypes();
          for (NodeType superType : superTypes)
          {
-            if (superType.isNodeType(JcrCMIS.NT_CMIS_FOLDER))
+            if (superType.isNodeType(JcrCMIS.NT_FOLDER))
             {
                // Take first type that is super for cmis:folder or is cmis:folder.
                def.setParentId(getCmisTypeId(superType.getName()));
@@ -392,9 +392,9 @@ public abstract class TypeManagerImpl implements TypeManager
    protected String getNodeTypeName(String typeId)
    {
       if (typeId.equals(EnumBaseObjectTypeIds.CMIS_DOCUMENT.value()))
-         return JcrCMIS.NT_CMIS_DOCUMENT;
+         return JcrCMIS.NT_FILE;
       if (typeId.equals(EnumBaseObjectTypeIds.CMIS_FOLDER.value()))
-         return JcrCMIS.NT_CMIS_FOLDER;
+         return JcrCMIS.NT_FOLDER;
       return typeId;
    }
 
@@ -431,7 +431,7 @@ public abstract class TypeManagerImpl implements TypeManager
          NodeType[] superTypes = nt.getDeclaredSupertypes();
          for (NodeType superType : superTypes)
          {
-            if (superType.isNodeType(JcrCMIS.CMIS_POLICY))
+            if (superType.isNodeType(JcrCMIS.CMIS_NT_POLICY))
             {
                // Take first type that is super for cmis:policy or is cmis:policy.
                def.setParentId(getCmisTypeId(superType.getName()));
@@ -479,7 +479,7 @@ public abstract class TypeManagerImpl implements TypeManager
          NodeType[] superTypes = nt.getDeclaredSupertypes();
          for (NodeType superType : superTypes)
          {
-            if (superType.isNodeType(JcrCMIS.CMIS_RELATIONSHIP))
+            if (superType.isNodeType(JcrCMIS.CMIS_NT_RELATIONSHIP))
             {
                // Take first type that is super for cmis:relationship or is cmis:relationship.
                def.setParentId(getCmisTypeId(superType.getName()));
@@ -505,13 +505,13 @@ public abstract class TypeManagerImpl implements TypeManager
    protected CmisTypeDefinitionType getTypeDefinition(NodeType nt, boolean includePropertyDefinition)
       throws InvalidArgumentException
    {
-      if (nt.isNodeType(JcrCMIS.NT_CMIS_DOCUMENT))
+      if (nt.isNodeType(JcrCMIS.NT_FILE))
          return getDocumentDefinition(nt, includePropertyDefinition);
-      else if (nt.isNodeType(JcrCMIS.NT_CMIS_FOLDER) || nt.isNodeType(JcrCMIS.NT_UNSTRUCTURED))
+      else if (nt.isNodeType(JcrCMIS.NT_FOLDER) || nt.isNodeType(JcrCMIS.NT_UNSTRUCTURED))
          return getFolderDefinition(nt, includePropertyDefinition);
-      else if (nt.isNodeType(JcrCMIS.CMIS_RELATIONSHIP))
+      else if (nt.isNodeType(JcrCMIS.CMIS_NT_RELATIONSHIP))
          return getRelationshipDefinition(nt, includePropertyDefinition);
-      else if (nt.isNodeType(JcrCMIS.CMIS_POLICY))
+      else if (nt.isNodeType(JcrCMIS.CMIS_NT_POLICY))
          return getPolicyDefinition(nt, includePropertyDefinition);
       else
       {

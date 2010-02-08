@@ -59,12 +59,12 @@ public class EntryDocumentTest extends EntryTest
       assertTrue(relationshipsNode.getNode(doc1.getObjectId()).hasNode("relationship1"));
       int count = 0;
       for (PropertyIterator iter = doc1.getNode().getReferences(); iter.hasNext();)
-         if (iter.nextProperty().getParent().isNodeType(JcrCMIS.CMIS_RELATIONSHIP))
+         if (iter.nextProperty().getParent().isNodeType(JcrCMIS.CMIS_NT_RELATIONSHIP))
             count++;
       assertEquals(1, count);
       count = 0;
       for (PropertyIterator iter = doc2.getNode().getReferences(); iter.hasNext();)
-         if (iter.nextProperty().getParent().isNodeType(JcrCMIS.CMIS_RELATIONSHIP))
+         if (iter.nextProperty().getParent().isNodeType(JcrCMIS.CMIS_NT_RELATIONSHIP))
             count++;
       assertEquals(1, count);
    }
@@ -435,7 +435,8 @@ public class EntryDocumentTest extends EntryTest
    protected Node createNode() throws Exception
    {
       Node node = testRootFolder.getNode().addNode("node", "nt:file");
-      node.addMixin(JcrCMIS.CMIS_DOCUMENT);
+      node.addMixin(JcrCMIS.CMIS_MIX_DOCUMENT);
+      node.addMixin("mix:versionable");
       //      String docId = idResolver.getNodeIdentifier(node);
       node.setProperty(CMIS.NAME, node.getName());
       //      node.setProperty(CMIS.OBJECT_ID, docId);
@@ -452,7 +453,7 @@ public class EntryDocumentTest extends EntryTest
       node.setProperty(CMIS.CONTENT_STREAM_FILE_NAME, node.getName());
       //      node.setProperty(CMIS.CONTENT_STREAM_ID, docId);
       node.setProperty(CMIS.IS_LATEST_VERSION, true);
-      node.setProperty("cmis:latestVersion", node);
+//      node.setProperty("cmis:latestVersion", node);
       node.setProperty(CMIS.IS_MAJOR_VERSION, false);
       node.setProperty(CMIS.IS_LATEST_MAJOR_VERSION, false);
       node.setProperty(CMIS.VERSION_LABEL, "current");

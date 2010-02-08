@@ -538,8 +538,8 @@ public class EntryRelationshipTest extends EntryTest
    @Override
    protected Node createNode() throws Exception
    {
-      Node hierarchy = relationshipsNode.addNode("source", JcrCMIS.CMIS_RELATIONSHIPS_HIERARCHY);
-      Node relationship = hierarchy.addNode("target", JcrCMIS.CMIS_RELATIONSHIP);
+      Node hierarchy = relationshipsNode.addNode("source", JcrCMIS.NT_UNSTRUCTURED);
+      Node relationship = hierarchy.addNode("target", JcrCMIS.CMIS_NT_RELATIONSHIP);
       relationship.setProperty(CMIS.NAME, relationship.getName());
       relationship.setProperty(CMIS.OBJECT_TYPE_ID, "cmis:relationship");
       relationship.setProperty(CMIS.BASE_TYPE_ID, "cmis:relationship");
