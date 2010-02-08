@@ -113,6 +113,7 @@ public class RelationshipsCollection extends CmisObjectCollection
 
       ObjectTypeElement objectElement = entry.getFirstChild(AtomCMIS.OBJECT);
       CmisObjectType object = objectElement.getObject();
+      updatePropertiesFromEntry(object, entry);
 
       String typeId = null;
       String sourceId = null;

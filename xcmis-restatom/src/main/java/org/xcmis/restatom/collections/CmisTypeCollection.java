@@ -200,7 +200,7 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<CmisType
       throws ResponseContextException
    {
       entry.setId(type.getId());
-      entry.setTitle(type.getDescription());
+      entry.setTitle(type.getDisplayName());
       entry.setUpdated(AtomUtils.getAtomDate(Calendar.getInstance()));
       entry.setPublished(AtomUtils.getAtomDate(Calendar.getInstance()));
       entry.setSummary("");

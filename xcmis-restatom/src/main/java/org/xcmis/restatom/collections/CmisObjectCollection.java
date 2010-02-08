@@ -519,7 +519,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       }
       catch (ResponseContextException rce)
       {
-         //         rce.printStackTrace();
+         rce.printStackTrace();
          return rce.getResponseContext();
       }
 
@@ -527,6 +527,8 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          ObjectTypeElement objectElement = entry.getFirstChild(AtomCMIS.OBJECT);
          CmisObjectType object = objectElement.getObject();
+         updatePropertiesFromEntry(object, entry);
+         
          boolean checkin = Boolean.parseBoolean(request.getParameter(AtomCMIS.PARAM_CHECKIN));
          CmisObjectType updated;
 
@@ -1395,6 +1397,38 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       if ((path = request.getTarget().getParameter("objectpath")) != null)
          return path.charAt(0) == '/' ? path : ('/' + path);
       return super.getResourceName(request);
+   }
+
+   /**
+    * From specification (1.0-cd06), section 3.5.2 Entries.
+    * When POSTing an Atom Document, the Atom elements MUST take precedence over
+    * the corresponding writable CMIS property.
+    * For example, atom:title will overwrite cmis:name.
+    * 
+    * @param object CMIS object
+    * @param entry entry that delivered CMIS object.
+    */
+   protected void updatePropertiesFromEntry(CmisObjectType object, Entry entry)
+   {
+      String title = entry.getTitle();
+      if (title != null)
+      {
+         // Should never be null, but check it to avoid overwriting existed cmis:name property.
+         CmisPropertyString name = (CmisPropertyString)getProperty(object, CMIS.NAME);
+         if (name == null)
+         {
+            name = new CmisPropertyString();
+            name.setPropertyDefinitionId(CMIS.NAME);
+            name.getValue().add(title);
+            object.getProperties().getProperty().add(name);
+         }
+         else
+         {
+            name.getValue().clear();
+            name.getValue().add(title);
+         }
+      }
+      // TODO : check about other properties.
    }
 
 }

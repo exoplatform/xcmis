@@ -22,7 +22,6 @@ package org.xcmis.restatom.collections;
 import org.apache.abdera.i18n.iri.IRI;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.Entry;
-import org.apache.abdera.model.ExtensibleElement;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.ResponseContext;
@@ -30,10 +29,8 @@ import org.apache.abdera.protocol.server.TargetType;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.core.CmisAccessControlListType;
 import org.xcmis.core.CmisObjectType;
-import org.xcmis.core.CmisPropertiesType;
 import org.xcmis.core.CmisProperty;
 import org.xcmis.core.CmisPropertyId;
-import org.xcmis.core.CmisPropertyString;
 import org.xcmis.core.CmisTypeDefinitionType;
 import org.xcmis.core.EnumBaseObjectTypeIds;
 import org.xcmis.core.EnumIncludeRelationships;
@@ -46,8 +43,6 @@ import org.xcmis.messaging.CmisObjectInFolderListType;
 import org.xcmis.messaging.CmisObjectInFolderType;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.abdera.ObjectTypeElement;
-import org.xcmis.restatom.abdera.PropertiesTypeElement;
-import org.xcmis.restatom.abdera.PropertyIdElement;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FilterNotValidException;
@@ -62,8 +57,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.namespace.QName;
-
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id: FolderChildrenCollection.java 2487 2009-07-31 14:14:34Z
@@ -77,18 +70,6 @@ public class FolderChildrenCollection extends CmisObjectCollection
    /** The navigation service. */
    protected final NavigationService navigationService;
 
-   // ----- Cmis Spaces client. ------
-   // TODO : Remove when CMIS Spaces will be fixed. 
-   private static final QName SPACES_AIR_SPECIFIC_OBJECT =
-      new QName(AtomCMIS.CMIS_NS_URI, "object", AtomCMIS.CMIS_PREFIX);
-
-   private static final QName SPACES_AIR_SPECIFIC_NAME =
-      new QName(AtomCMIS.CMIS_NS_URI, "name", AtomCMIS.CMIS_PREFIX);
-
-   private static final String SPACES_AIR_SPECIFIC_OBJECT_TYPE_ID = "ObjectTypeId";
-
-   // ----- Cmis SpAces client. ------
-   
    /**
     * Instantiates a new folder children collection.
     * 
@@ -226,42 +207,18 @@ public class FolderChildrenCollection extends CmisObjectCollection
 
       String typeId = null;
       String id = null;
-      CmisObjectType object = null;
 
       ObjectTypeElement objectElement = entry.getFirstChild(AtomCMIS.OBJECT);
-      if (objectElement != null)
+      CmisObjectType object = objectElement.getObject();
+
+      updatePropertiesFromEntry(object, entry);
+      for (CmisProperty p : object.getProperties().getProperty())
       {
-         object = objectElement.getObject();
-         CmisPropertiesType properties = object.getProperties();
-         if (properties != null)
-         {
-            for (CmisProperty p : properties.getProperty())
-            {
-               String pName = p.getPropertyDefinitionId();
-               if (CMIS.OBJECT_TYPE_ID.equals(pName))
-                  typeId = ((CmisPropertyId)p).getValue().get(0);
-               else if (CMIS.OBJECT_ID.equals(pName))
-                  id = ((CmisPropertyId)p).getValue().get(0);
-            }
-         }
-      }
-      else if (SPACES_AIR_SPECIFIC_REFERER.equalsIgnoreCase(request.getHeader("referer")))
-      {
-         // TODO : remove this
-         ExtensibleElement element = entry.getFirstChild(SPACES_AIR_SPECIFIC_OBJECT);
-         PropertiesTypeElement pe = element.getExtension(AtomCMIS.PROPERTIES);
-         PropertyIdElement pi = pe.getExtension(AtomCMIS.PROPERTY_ID);
-         if (SPACES_AIR_SPECIFIC_OBJECT_TYPE_ID.equalsIgnoreCase(pi.getAttributeValue(SPACES_AIR_SPECIFIC_NAME)))
-            typeId = pi.getElements().get(0).getText();
-         if (!typeId.startsWith(CMIS.CMIS_PREFIX + ":"))
-            typeId = CMIS.CMIS_PREFIX + ":" + typeId;
-         object = new CmisObjectType();
-         CmisPropertiesType properties = new CmisPropertiesType();
-         CmisPropertyId typeIdProperty = new CmisPropertyId();
-         typeIdProperty.setPropertyDefinitionId(CMIS.OBJECT_TYPE_ID);
-         typeIdProperty.getValue().add(typeId);
-         properties.getProperty().add(typeIdProperty);
-         object.setProperties(properties);
+         String pName = p.getPropertyDefinitionId();
+         if (CMIS.OBJECT_TYPE_ID.equals(pName))
+            typeId = ((CmisPropertyId)p).getValue().get(0);
+         else if (CMIS.OBJECT_ID.equals(pName))
+            id = ((CmisPropertyId)p).getValue().get(0);
       }
 
       try
@@ -273,19 +230,6 @@ public class FolderChildrenCollection extends CmisObjectCollection
          }
          else
          {
-            CmisPropertyString name = (CmisPropertyString)getProperty(object, CMIS.NAME);
-            if (name == null)
-            {
-               name = new CmisPropertyString();
-               name.setPropertyDefinitionId(CMIS.NAME);
-               name.getValue().add(entry.getTitle());
-               object.getProperties().getProperty().add(name);
-            }
-            else if (name.getValue().size() == 0)
-            {
-               name.getValue().add(entry.getTitle());
-            }
-
             CmisAccessControlListType addACL = object.getAcl();
             // TODO : ACEs for removing. Not clear from specification how to
             // pass (obtain) ACEs for adding and removing from one object.
@@ -351,8 +295,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
       }
       catch (StreamNotSupportedException se)
       {
-         return createErrorResponse(se, 400); // XXX in specification (page 14)
-         // status is set as 403, correct ???
+         return createErrorResponse(se, 400); // XXX in specification status is set as 403, correct ???
       }
       catch (RepositoryException re)
       {

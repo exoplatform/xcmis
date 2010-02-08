@@ -66,11 +66,12 @@ public class PropertiesTypeElement extends ExtensibleElementWrapper
    public CmisPropertiesType getProperties()
    {
       List<Element> elements = getElements();
-      if (elements != null && elements.size() == 0)
-         return null;
       CmisPropertiesType properties = new CmisPropertiesType();
-      for (Element element : elements)
-         properties.getProperty().add(((PropertyElement<?>)element).getProperty());
+      if (elements != null)
+      {
+         for (Element element : elements)
+            properties.getProperty().add(((PropertyElement<?>)element).getProperty());
+      }
       return properties;
    }
 

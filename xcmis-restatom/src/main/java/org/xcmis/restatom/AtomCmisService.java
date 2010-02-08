@@ -189,9 +189,17 @@ public class AtomCmisService implements ResourceContainer
    @POST
    @Path("{repositoryId}/children/{folderId}")
    @Produces("application/atom+xml;type=entry")
-   // TODO proper method's name
-   public Response createEntry(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
+   public Response createChild(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
    {
+      return createItem(repositoryId, httpRequest);
+   }
+
+   @POST
+   @Path("{repositoryId}/object/{folderId}")
+   @Produces("application/atom+xml;type=entry")
+   public Response createChildObj(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
+   {
+      // Found some clients those use direct object (folder) link for adding child.
       return createItem(repositoryId, httpRequest);
    }
 
