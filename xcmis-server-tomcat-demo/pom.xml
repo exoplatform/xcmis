@@ -112,37 +112,35 @@
          <artifactId>slf4j-log4j12</artifactId>
          <scope>runtime</scope>
       </dependency>
-      
+
       <dependency>
          <groupId>org.apache.shindig</groupId>
          <artifactId>shindig-common</artifactId>
          <scope>runtime</scope>
       </dependency>
       <dependency>
-        <groupId>org.apache.shindig</groupId>
-        <artifactId>shindig-features</artifactId>
-        <scope>runtime</scope>
+         <groupId>org.apache.shindig</groupId>
+         <artifactId>shindig-features</artifactId>
+         <scope>runtime</scope>
       </dependency>
       <dependency>
-       <groupId>org.apache.shindig</groupId>
-       <artifactId>shindig-gadgets</artifactId>
-       <scope>runtime</scope>
+         <groupId>org.apache.shindig</groupId>
+         <artifactId>shindig-gadgets</artifactId>
+         <scope>runtime</scope>
       </dependency>
       <dependency>
-      <groupId>org.apache.shindig</groupId>
-        <artifactId>shindig-social-api</artifactId>
-        <scope>runtime</scope>
+         <groupId>org.apache.shindig</groupId>
+         <artifactId>shindig-social-api</artifactId>
+         <scope>runtime</scope>
       </dependency>
-       <dependency> 
-        <groupId>com.google.code.guice</groupId>
-        <artifactId>guice</artifactId>
+      <dependency>
+         <groupId>com.google.code.guice</groupId>
+         <artifactId>guice</artifactId>
       </dependency>
-
       <dependency>
          <groupId>com.google.code.guice</groupId>
          <artifactId>guice-jmx</artifactId>
       </dependency>
-
 
    </dependencies>
 
@@ -156,49 +154,49 @@
             <version>2.0.2</version>
             <configuration>
                <warSourceExcludes>
-                  **/spring-*.jar,
-                  **/servlet-api-*.jar,
-                  **/ejb-*.jar,
                   **/ant-*.jar,
                   **/ant-launcher-*.jar,
+                  **/bcel-*.jar,
+                  **/bcmail-jdk14-*.jar,
                   **/carol-*.jar,
-                  **/xbean-spring-*.jar,
-                  **/xbean-*.jar,
-                  **/xml-apis-*.jar,
-                  **/xmlParserAPIs-*.jar,
-                  **/portlet-api-*.jar,
-                  **/slf4j-simple-*.jar,
-                  **/exo.tool.framework.junit-*.jar,
-                  **/geronimo-activation_1.0.2_spec-*.jar,
-                  **/geronimo-activation_1.1_spec-*.jar,
-                  **/geronimo-stax-api_1.0_spec-*.jar,
-                  **/geronimo-annotation_1.0_spec-*.jar,
-                  **/geronimo-servlet_2.5_spec-*.jar,
-                  **/junit-*.jar,
-                  **/xerces-*.jar,
                   **/cxf-rt-databinding-aegis-*.jar,
                   **/cxf-rt-javascript-*.jar,
                   **/cxf-rt-transports-local-*.jar,
                   **/cxf-tools-java2ws-*.jar,
                   **/cxf-tools-validator-*.jar,
                   **/cxf-tools-wsdlto-frontend-jaxws-*.jar,
-                  **/bcel-*.jar,
-                  **/bcmail-jdk14-*.jar,
+                  **/ejb-*.jar,
+                  **/exo.tool.framework.junit-*.jar,
                   **/fontbox-*.jar,
+                  **/geronimo-activation_1.0.2_spec-*.jar,
+                  **/geronimo-activation_1.1_spec-*.jar,
+                  **/geronimo-annotation_1.0_spec-*.jar,
                   **/geronimo-javamail_1.4_spec-*.jar,
+                  **/geronimo-servlet_2.5_spec-*.jar,
+                  **/geronimo-stax-api_1.0_spec-*.jar,
                   **/groovy-all-*.jar,
                   **/itext-*.jar,
                   **/jempbox-*.jar,
                   **/jline-*.jar,
                   **/jmock-*.jar,
                   **/jsf-api-*.jar,
+                  **/junit-*.jar,
                   **/lucene-spellchecker-*.jar,
+                  **/portlet-api-*.jar,
+                  **/servlet-api-*.jar,
+                  **/slf4j-simple-*.jar,
+                  **/spring-*.jar,
                   **/velocity-*.jar,
                   **/velocity-dep-*.jar,
+                  **/xbean-*.jar,
+                  **/xbean-spring-*.jar,
                   **/xdoclet-*.jar,
                   **/xdoclet-hibernate-module-*.jar,
                   **/xdoclet-xdoclet-module-*.jar,
+                  **/xerces-*.jar,
                   **/xjavadoc-*.jar,
+                  **/xml-apis-*.jar,
+                  **/xmlParserAPIs-*.jar,
                </warSourceExcludes>
                <archive>
                   <manifest>
@@ -217,7 +215,7 @@
                </archive>
             </configuration>
          </plugin>
-         
+
          <plugin>
             <artifactId>maven-assembly-plugin</artifactId>
             <executions>
@@ -250,7 +248,7 @@
                <tasks>
                   <delete dir="${project.build.directory}/xcmis-tomcat" includeEmptyDirs="true" quiet="yes" />
                   <copy todir="${project.build.directory}/xcmis-tomcat" verbose="false" overwrite="true">
-                     <fileset dir="${basedir}/../${xcmis.deploy.tomcat.dependency}" />
+                     <fileset dir="${tomcat.distrib.location}" />
                   </copy>
                   <copy todir="${project.build.directory}/xcmis-tomcat/" verbose="true" overwrite="true">
                      <fileset dir="${basedir}/tomcat">

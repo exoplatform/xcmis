@@ -50,7 +50,7 @@
       <!-- Will be an entry in the POM in the future -->
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-      <xcmis.deploy.tomcat.dependency>../apache-tomcat-6.0.16</xcmis.deploy.tomcat.dependency>
+      <tomcat.distrib.location>${tomcat.distrib}</tomcat.distrib.location>
       <shindig.version>1.1-BETA5-incubating</shindig.version>
 
    </properties>
