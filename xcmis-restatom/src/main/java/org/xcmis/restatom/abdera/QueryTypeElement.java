@@ -26,6 +26,7 @@ import org.xcmis.core.CmisQueryType;
 import org.xcmis.core.EnumIncludeRelationships;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.InvalidArgumentException;
 
 import java.math.BigInteger;
 
@@ -91,8 +92,17 @@ public class QueryTypeElement extends ExtensibleElementWrapper
     */
    public EnumIncludeRelationships getIncludeRelationships()
    {
-      String tmp = getText(AtomCMIS.INCLUDE_RELATIONSHIPS);
-      return tmp == null ? EnumIncludeRelationships.NONE : EnumIncludeRelationships.fromValue(tmp);
+      String includeRelationships = getText(AtomCMIS.INCLUDE_RELATIONSHIPS);
+      try
+      {
+         return includeRelationships == null ? EnumIncludeRelationships.NONE : EnumIncludeRelationships
+            .fromValue(includeRelationships);
+      }
+      catch (IllegalArgumentException e)
+      {
+         throw new InvalidArgumentException(
+            "Unable to parse CMIS query element. Unsupported 'includeRelationships' attribute: " + includeRelationships);
+      }
    }
 
    /**

@@ -98,43 +98,44 @@ public class TypeDefinitionTypeElement extends ExtensibleElementWrapper
       EnumBaseObjectTypeIds baseType;
       try
       {
-         baseType = EnumBaseObjectTypeIds.fromValue(getSimpleExtension(AtomCMIS.BASE_ID));
+         baseType = EnumBaseObjectTypeIds.fromValue(baseId);
       }
       catch (IllegalArgumentException e)
       {
-         throw new InvalidArgumentException("Unknown baseTypeId " + baseId);
+         throw new InvalidArgumentException("Unable to parse Type Definition element. Unknown baseTypeId " + baseId);
       }
 
       CmisTypeDefinitionType type = null;
-      try
+      switch (baseType)
       {
-         switch (baseType)
-         {
-            case CMIS_DOCUMENT :
-               type = new CmisTypeDocumentDefinitionType();
-               ((CmisTypeDocumentDefinitionType)type).setVersionable(Boolean
-                  .parseBoolean(getSimpleExtension(AtomCMIS.VERSIONABLE)));
-               ((CmisTypeDocumentDefinitionType)type).setContentStreamAllowed(EnumContentStreamAllowed
-                  .fromValue(getSimpleExtension(AtomCMIS.CONTENT_STREAM_ALLOWED)));
-               break;
-            case CMIS_FOLDER :
-               type = new CmisTypeFolderDefinitionType();
-               break;
-            case CMIS_POLICY :
-               type = new CmisTypePolicyDefinitionType();
-               break;
-            case CMIS_RELATIONSHIP :
-               type = new CmisTypeRelationshipDefinitionType();
-               ((CmisTypeRelationshipDefinitionType)type).getAllowedSourceTypes().add(
-                  getSimpleExtension(AtomCMIS.ALLOWED_SOURCE_TYPES));
-               ((CmisTypeRelationshipDefinitionType)type).getAllowedTargetTypes().add(
-                  getSimpleExtension(AtomCMIS.ALLOWED_TARGET_TYPES));
-               break;
-         }
-      }
-      catch (IllegalArgumentException e)
-      {
-         throw new InvalidArgumentException("Invalid argument " + e.getMessage());
+         case CMIS_DOCUMENT :
+            CmisTypeDocumentDefinitionType documentType = new CmisTypeDocumentDefinitionType();
+            documentType.setVersionable(Boolean.parseBoolean(getSimpleExtension(AtomCMIS.VERSIONABLE)));
+            String contentAllowed = getSimpleExtension(AtomCMIS.CONTENT_STREAM_ALLOWED);
+            try
+            {
+               documentType.setContentStreamAllowed(EnumContentStreamAllowed.fromValue(contentAllowed));
+            }
+            catch (IllegalArgumentException e)
+            {
+               throw new InvalidArgumentException(
+                  "Unable to parse Type Definition element. Unsupported 'content stream allowed attribute': "
+                     + contentAllowed);
+            }
+            type = documentType;
+            break;
+         case CMIS_FOLDER :
+            type = new CmisTypeFolderDefinitionType();
+            break;
+         case CMIS_POLICY :
+            type = new CmisTypePolicyDefinitionType();
+            break;
+         case CMIS_RELATIONSHIP :
+            CmisTypeRelationshipDefinitionType relationshipType = new CmisTypeRelationshipDefinitionType();
+            relationshipType.getAllowedSourceTypes().add(getSimpleExtension(AtomCMIS.ALLOWED_SOURCE_TYPES));
+            relationshipType.getAllowedTargetTypes().add(getSimpleExtension(AtomCMIS.ALLOWED_TARGET_TYPES));
+            type = relationshipType;
+            break;
       }
 
       if (type == null)

@@ -194,6 +194,7 @@ public class TypesChildrenCollectionTest extends BaseTest
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
 
       ContainerResponse resp = service("POST", requestURI, "http://localhost:8080/rest", null, req.getBytes(), writer);
+      //      printBody(writer.getBody());
       assertEquals(201, resp.getStatus());
 
       CmisTypeDefinitionType type = null;
@@ -209,7 +210,7 @@ public class TypesChildrenCollectionTest extends BaseTest
       for (CmisPropertyDefinitionType d : type.getPropertyDefinition())
          if (d.getId().equals("cmis:newProperty"))
             propDef = true;
-      
+
       assertTrue("Property definition for newly created type not found.", propDef);
    }
 }

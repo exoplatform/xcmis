@@ -20,14 +20,18 @@
 package org.xcmis.restatom;
 
 import org.apache.abdera.protocol.server.ResponseContext;
+import org.apache.abdera.protocol.server.context.EmptyResponseContext;
 import org.apache.abdera.protocol.server.context.MediaResponseContext;
 import org.exoplatform.services.rest.provider.EntityProvider;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.nio.charset.Charset;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -89,6 +93,28 @@ public class AbderaResponseEntityProvider implements EntityProvider<ResponseCont
             t.writeTo(entityStream);
          else
             t.writeTo(entityStream, new XmlWriter());
+      }
+      else
+      {
+         if (t instanceof EmptyResponseContext)
+         {
+            String text = t.getStatusText();
+            if (text != null)
+            {
+               String csname = mediaType.getParameters().get("charset");
+               Charset cs = csname != null ? Charset.forName(csname) : Charset.forName("UTF-8");
+               Writer w = new OutputStreamWriter(entityStream, cs);
+               try
+               {
+                  w.write(text);
+               }
+               finally
+               {
+                  w.flush();
+                  w.close();
+               }
+            }
+         }
       }
    }
 

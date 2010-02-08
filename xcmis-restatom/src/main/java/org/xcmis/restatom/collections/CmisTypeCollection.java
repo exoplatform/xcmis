@@ -162,10 +162,10 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<CmisType
          return rce.getResponseContext();
       }
 
-      TypeDefinitionTypeElement typeElement = entry.getFirstChild(AtomCMIS.TYPE);
-      CmisTypeDefinitionType type = typeElement.getTypeDefinition();
       try
       {
+         TypeDefinitionTypeElement typeElement = entry.getFirstChild(AtomCMIS.TYPE);
+         CmisTypeDefinitionType type = typeElement.getTypeDefinition();
          String typeId = type.getId();
          Repository repository = repositoryService.getRepository(getRepositoryId(request));
          repository.addType(type);
@@ -296,15 +296,15 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<CmisType
       }
       catch (TypeNotFoundException tnfe)
       {
-         createErrorResponse(tnfe.getMessage(), 404);
+         createErrorResponse(tnfe, 404);
       }
       catch (InvalidArgumentException iae)
       {
-         createErrorResponse(iae.getMessage(), 400);
+         createErrorResponse(iae, 400);
       }
       catch (RepositoryException re)
       {
-         createErrorResponse(re.getMessage(), 500);
+         createErrorResponse(re, 500);
       }
    }
 

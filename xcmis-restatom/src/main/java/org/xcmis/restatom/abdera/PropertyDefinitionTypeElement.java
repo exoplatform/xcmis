@@ -76,8 +76,17 @@ public abstract class PropertyDefinitionTypeElement<T extends CmisPropertyDefini
     */
    public CmisPropertyDefinitionType getPropertyDefinition()
    {
-      // May throw IllegalArgumentException.
-      EnumPropertyType propertyType = EnumPropertyType.fromValue(getSimpleExtension(AtomCMIS.PROPERTY_TYPE));
+      String propertyTypeName = getSimpleExtension(AtomCMIS.PROPERTY_TYPE);
+      EnumPropertyType propertyType;
+      try
+      {
+         propertyType = EnumPropertyType.fromValue(propertyTypeName);
+      }
+      catch (IllegalArgumentException e)
+      {
+         throw new InvalidArgumentException("Unable to parse Property Definition element. Unsupported property type: "
+            + propertyTypeName);
+      }
       CmisPropertyDefinitionType propDef = null;
       switch (propertyType)
       {
@@ -111,9 +120,30 @@ public abstract class PropertyDefinitionTypeElement<T extends CmisPropertyDefini
             throw new InvalidArgumentException("Unknown property type " + propertyType.value());
       }
       propDef.setId(getSimpleExtension(AtomCMIS.ID));
-      propDef.setPropertyType(EnumPropertyType.fromValue(getSimpleExtension(AtomCMIS.PROPERTY_TYPE)));
-      propDef.setCardinality(EnumCardinality.fromValue(getSimpleExtension(AtomCMIS.CARDINALITY)));
-      propDef.setUpdatability(EnumUpdatability.fromValue(getSimpleExtension(AtomCMIS.UPDATABILITY)));
+      propDef.setPropertyType(propertyType);
+      
+      String cardinality = getSimpleExtension(AtomCMIS.CARDINALITY);
+      try
+      {
+         propDef.setCardinality(EnumCardinality.fromValue(cardinality));
+      }
+      catch (IllegalArgumentException e)
+      {
+         throw new InvalidArgumentException(
+            "Unable to parse Property Definition element. Unsupported 'cardinality' attribute: " + cardinality);
+      }
+      
+      String updatability = getSimpleExtension(AtomCMIS.UPDATABILITY);
+      try
+      {
+         propDef.setUpdatability(EnumUpdatability.fromValue(updatability));
+      }
+      catch (IllegalArgumentException e)
+      {
+         throw new InvalidArgumentException(
+            "Unable to parse Property Definition element. Unsupported 'updatability' attribute: " + updatability);
+      }
+      
       propDef.setQueryName(getSimpleExtension(AtomCMIS.QUERY_NAME));
       if (getSimpleExtension(AtomCMIS.LOCAL_NAME) != null)
          propDef.setLocalName(getSimpleExtension(AtomCMIS.LOCAL_NAME));

@@ -519,6 +519,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       }
       catch (ResponseContextException rce)
       {
+         //         rce.printStackTrace();
          return rce.getResponseContext();
       }
 

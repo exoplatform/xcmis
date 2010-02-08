@@ -135,14 +135,6 @@ public class AtomCmisService implements ResourceContainer
       provider.init(AbderaFactory.getInstance(), new HashMap<String, String>());
    }
 
-   @POST
-   @Path("{repositoryId}/types")
-   @RolesAllowed({"administrator"})
-   public Response addType(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
-   {
-      return createItem(repositoryId, httpRequest);
-   }
-
    @PUT
    @Path("{repositoryId}/addacl/{objectId}")
    @Produces("application/cmisacl+xml")
@@ -168,6 +160,14 @@ public class AtomCmisService implements ResourceContainer
       }
 
       return Response.status(201).build();
+   }
+
+   @POST
+   @Path("{repositoryId}/types")
+   @RolesAllowed({"administrator"})
+   public Response addType(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
+   {
+      return createItem(repositoryId, httpRequest);
    }
 
    @POST
@@ -227,10 +227,21 @@ public class AtomCmisService implements ResourceContainer
       @QueryParam("unfileObject") String unfileNonfolderObjects,
       @DefaultValue("false") @QueryParam("continueOnFailure") boolean continueOnFailure)
    {
+      EnumUnfileObject unfileObject;
       try
       {
-         objectService.deleteTree(repositoryId, folderId, unfileNonfolderObjects == null ? EnumUnfileObject.DELETE
-            : EnumUnfileObject.fromValue(unfileNonfolderObjects), continueOnFailure);
+         unfileObject =
+            unfileNonfolderObjects == null ? EnumUnfileObject.DELETE : EnumUnfileObject
+               .fromValue(unfileNonfolderObjects);
+      }
+      catch (IllegalArgumentException e)
+      {
+         throw new IllegalArgumentException("Unsupported 'unfileObject' attribute: " + unfileNonfolderObjects);
+      }
+
+      try
+      {
+         objectService.deleteTree(repositoryId, folderId, unfileObject, continueOnFailure);
          return Response.noContent().build();
       }
       catch (RepositoryException re)
@@ -257,6 +268,7 @@ public class AtomCmisService implements ResourceContainer
 
    @DELETE
    @Path("{repositoryId}/types/{typeId}")
+   @RolesAllowed({"administrator"})
    public Response deleteType(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
    {
       return deleteItem(repositoryId, httpRequest);
@@ -317,6 +329,16 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @GET
+   @Path("{repositoryId}/typedescendants")
+   @Produces("application/cmistree+xml")
+   public Response getAllTypeDescendants(@Context HttpServletRequest httpRequest,
+      @PathParam("repositoryId") String repositoryId)
+   {
+      // The same jobs as 'getTypeDescendants()' but respect URL pattern.
+      return getFeed(repositoryId, httpRequest);
+   }
+
+   @GET
    @Path("{repositoryId}/types")
    @Produces("application/atom+xml;type=entry")
    public Response getAllTypes(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
@@ -331,10 +353,7 @@ public class AtomCmisService implements ResourceContainer
    public Response getAllVersions(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
-      ResponseContext abderaResponse = getCollection(request).getFeed(request);
-      return Response.status(abderaResponse.getStatus()).header(HttpHeaders.CACHE_CONTROL, "no-cache").entity(
-         abderaResponse).build();
+      return getFeed(repositoryId, httpRequest);
    }
 
    @GET
@@ -342,20 +361,14 @@ public class AtomCmisService implements ResourceContainer
    public Response getAppliedPolicies(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
-      ResponseContext abderaResponse = getCollection(request).getFeed(request);
-      return Response.status(abderaResponse.getStatus()).header(HttpHeaders.CACHE_CONTROL, "no-cache").entity(
-         abderaResponse).build();
+      return getFeed(repositoryId, httpRequest);
    }
 
    @GET
    @Path("{repositoryId}/checkedout{rubbish:(/)?}{folderId:.*}")
    public Response getCheckedOut(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
-      ResponseContext abderaResponse = getCollection(request).getFeed(request);
-      return Response.status(abderaResponse.getStatus()).header(HttpHeaders.CACHE_CONTROL, "no-cache").entity(
-         abderaResponse).build();
+      return getFeed(repositoryId, httpRequest);
    }
 
    @GET
@@ -363,10 +376,7 @@ public class AtomCmisService implements ResourceContainer
    @Produces("application/atom+xml;type=feed")
    public Response getChildren(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
-      ResponseContext abderaResponse = getCollection(request).getFeed(request);
-      return Response.status(abderaResponse.getStatus()).header(HttpHeaders.CACHE_CONTROL, "no-cache").entity(
-         abderaResponse).build();
+      return getFeed(repositoryId, httpRequest);
    }
 
    @GET
@@ -377,15 +387,8 @@ public class AtomCmisService implements ResourceContainer
       RequestContext request = initRequestContext(repositoryId, httpRequest);
       @SuppressWarnings("unchecked")
       ResponseContext abderaResponse = ((AbstractEntityCollectionAdapter)getCollection(request)).getMedia(request);
-
       ResponseBuilder builder = Response.status(abderaResponse.getStatus());
-      for (String headerName : abderaResponse.getHeaderNames())
-      {
-         for (Object v : abderaResponse.getHeaders(headerName))
-            // TODO : need avoid direct casting to String.
-            // For now just be sure not get errors if RESTful framework.
-            builder.header(headerName, v.toString());
-      }
+      copyAbderaHeaders(builder, abderaResponse);
       builder.entity(abderaResponse);
       // Cache-Control headers ?
       return builder.build();
@@ -397,10 +400,7 @@ public class AtomCmisService implements ResourceContainer
    public Response getDescendants(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
-      ResponseContext abderaResponse = getCollection(request).getFeed(request);
-      return Response.status(abderaResponse.getStatus()).header(HttpHeaders.CACHE_CONTROL, "no-cache").entity(
-         abderaResponse).build();
+      return getFeed(repositoryId, httpRequest);
    }
 
    @GET
@@ -408,10 +408,7 @@ public class AtomCmisService implements ResourceContainer
    @Produces("application/atom+xml;type=feed")
    public Response getFolderTree(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
-      ResponseContext abderaResponse = getCollection(request).getFeed(request);
-      return Response.status(abderaResponse.getStatus()).header(HttpHeaders.CACHE_CONTROL, "no-cache").entity(
-         abderaResponse).build();
+      return getFeed(repositoryId, httpRequest);
    }
 
    @GET
@@ -419,10 +416,7 @@ public class AtomCmisService implements ResourceContainer
    @Produces("application/atom+xml;type=entry")
    public Response getObjectById(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
-      ResponseContext abderaResponse = getCollection(request).getEntry(request);
-      return Response.status(abderaResponse.getStatus()).header(HttpHeaders.CACHE_CONTROL, "no-cache").entity(
-         abderaResponse).build();
+      return getEntry(repositoryId, httpRequest);
    }
 
    @GET
@@ -431,10 +425,7 @@ public class AtomCmisService implements ResourceContainer
    public Response getObjectByPath(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
-      ResponseContext abderaResponse = getCollection(request).getEntry(request);
-      return Response.status(abderaResponse.getStatus()).header(HttpHeaders.CACHE_CONTROL, "no-cache").entity(
-         abderaResponse).build();
+      return getEntry(repositoryId, httpRequest);
    }
 
    @GET
@@ -442,10 +433,7 @@ public class AtomCmisService implements ResourceContainer
    public Response getObjectParents(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
-      ResponseContext abderaResponse = getCollection(request).getFeed(request);
-      return Response.status(abderaResponse.getStatus()).header(HttpHeaders.CACHE_CONTROL, "no-cache").entity(
-         abderaResponse).build();
+      return getFeed(repositoryId, httpRequest);
    }
 
    @GET
@@ -454,10 +442,7 @@ public class AtomCmisService implements ResourceContainer
    public Response getRelationships(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
-      ResponseContext abderaResponse = getCollection(request).getFeed(request);
-      return Response.status(abderaResponse.getStatus()).header(HttpHeaders.CACHE_CONTROL, "no-cache").entity(
-         abderaResponse).build();
+      return getFeed(repositoryId, httpRequest);
    }
 
    @GET
@@ -505,22 +490,16 @@ public class AtomCmisService implements ResourceContainer
    @Produces("application/atom+xml;type=entry")
    public Response getTypeById(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
-      ResponseContext abderaResponse = getCollection(request).getEntry(request);
-      return Response.status(abderaResponse.getStatus()).header(HttpHeaders.CACHE_CONTROL, "no-cache").entity(
-         abderaResponse).build();
+      return getEntry(repositoryId, httpRequest);
    }
 
    @GET
-   @Path("{repositoryId}/typedescendants{rubbish:(/)?}{typeId:.*}")
+   @Path("{repositoryId}/typedescendants/{typeId}")
    @Produces("application/cmistree+xml")
    public Response getTypeDescendants(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
-      ResponseContext abderaResponse = getCollection(request).getFeed(request);
-      return Response.status(abderaResponse.getStatus()).header(HttpHeaders.CACHE_CONTROL, "no-cache").entity(
-         abderaResponse).build();
+      return getFeed(repositoryId, httpRequest);
    }
 
    @GET
@@ -528,18 +507,14 @@ public class AtomCmisService implements ResourceContainer
    @Produces("application/atom+xml;type=entry")
    public Response getTypes(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
-      ResponseContext abderaResponse = getCollection(request).getFeed(request);
-      return Response.ok().header(HttpHeaders.CACHE_CONTROL, "no-cache").entity(abderaResponse).build();
+      return getFeed(repositoryId, httpRequest);
    }
 
    @POST
    @Path("{repositoryId}/query")
    public Response query(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
-      ResponseContext abderaResponse = getCollection(request).getFeed(request);
-      return Response.ok().entity(abderaResponse).build();
+      return getFeed(repositoryId, httpRequest);
    }
 
    @DELETE
@@ -557,7 +532,9 @@ public class AtomCmisService implements ResourceContainer
       RequestContext request = initRequestContext(repositoryId, httpRequest);
       @SuppressWarnings("unchecked")
       ResponseContext abderaResponse = ((AbstractEntityCollectionAdapter)getCollection(request)).putMedia(request);
-      return Response.status(abderaResponse.getStatus()).entity(abderaResponse).build();
+      ResponseBuilder builder = Response.status(abderaResponse.getStatus());
+      copyAbderaHeaders(builder, abderaResponse);
+      return builder.entity(abderaResponse).build();
    }
 
    @POST
@@ -616,7 +593,20 @@ public class AtomCmisService implements ResourceContainer
       RequestContext request = initRequestContext(repositoryId, httpRequest);
       @SuppressWarnings("unchecked")
       ResponseContext abderaResponse = ((AbstractEntityCollectionAdapter)getCollection(request)).putEntry(request);
-      return Response.status(abderaResponse.getStatus()).entity(abderaResponse).build();
+      ResponseBuilder builder = Response.status(abderaResponse.getStatus());
+      copyAbderaHeaders(builder, abderaResponse);
+      return builder.entity(abderaResponse).build();
+   }
+
+   private void copyAbderaHeaders(ResponseBuilder responseBuilder, ResponseContext abderaResponse)
+   {
+      for (String headerName : abderaResponse.getHeaderNames())
+      {
+         for (Object v : abderaResponse.getHeaders(headerName))
+            // TODO : need avoid direct casting to String.
+            // For now just be sure not get errors if RESTful framework.
+            responseBuilder.header(headerName, v.toString());
+      }
    }
 
    protected Workspace addCmisRepository(HttpServletRequest httpRequest, Service service, String repositoryId,
@@ -737,20 +727,14 @@ public class AtomCmisService implements ResourceContainer
    protected Response createErrorResponse(Throwable t, int status)
    {
       return Response.status(status).entity(t.getMessage()).type("text/plain").build();
-
    }
 
    protected Response createItem(String repositoryId, HttpServletRequest httpRequest)
    {
       RequestContext request = initRequestContext(repositoryId, httpRequest);
       ResponseContext abderaResponse = getCollection(request).postEntry(request);
-
       ResponseBuilder builder = Response.status(abderaResponse.getStatus());
-      if (abderaResponse.getLocation() != null)
-      {
-         String location = abderaResponse.getLocation().toString();
-         builder.header(HttpHeaders.LOCATION, location);
-      }
+      copyAbderaHeaders(builder, abderaResponse);
       return builder.entity(abderaResponse).build();
    }
 
@@ -758,7 +742,9 @@ public class AtomCmisService implements ResourceContainer
    {
       RequestContext request = initRequestContext(repositoryId, httpRequest);
       ResponseContext abderaResponse = getCollection(request).deleteEntry(request);
-      return Response.status(abderaResponse.getStatus()).entity(abderaResponse).build();
+      ResponseBuilder builder = Response.status(abderaResponse.getStatus());
+      copyAbderaHeaders(builder, abderaResponse);
+      return builder.entity(abderaResponse).build();
    }
 
    protected CollectionAdapter getCollection(RequestContext request)
@@ -773,6 +759,26 @@ public class AtomCmisService implements ResourceContainer
       Collection<CollectionInfo> collections =
          (Collection<CollectionInfo>)workspaces.iterator().next().getCollections(request);
       return collections;
+   }
+
+   protected Response getEntry(String repositoryId, HttpServletRequest httpRequest)
+   {
+      RequestContext request = initRequestContext(repositoryId, httpRequest);
+      ResponseContext abderaResponse = getCollection(request).getEntry(request);
+      ResponseBuilder builder = Response.status(abderaResponse.getStatus());
+      copyAbderaHeaders(builder, abderaResponse);
+      builder.header(HttpHeaders.CACHE_CONTROL, "no-cache");
+      return builder.entity(abderaResponse).build();
+   }
+
+   protected Response getFeed(String repositoryId, HttpServletRequest httpRequest)
+   {
+      RequestContext request = initRequestContext(repositoryId, httpRequest);
+      ResponseContext abderaResponse = getCollection(request).getFeed(request);
+      ResponseBuilder builder = Response.status(abderaResponse.getStatus());
+      copyAbderaHeaders(builder, abderaResponse);
+      builder.header(HttpHeaders.CACHE_CONTROL, "no-cache");
+      return builder.entity(abderaResponse).build();
    }
 
    protected RequestContext initRequestContext(String repositoryId, HttpServletRequest httpRequest)

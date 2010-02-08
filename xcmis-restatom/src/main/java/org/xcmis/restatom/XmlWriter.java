@@ -59,8 +59,8 @@ class XmlWriter extends PrettyWriter
          w.writeStartDocument();
          om.serialize(w);
          w.writeEndDocument();
-         if (options.getAutoClose())
-            out.close();
+         //         if (options.getAutoClose())
+         out.close();
       }
       catch (XMLStreamException e)
       {
