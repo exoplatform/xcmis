@@ -55,7 +55,7 @@
                <tasks>
                   <delete dir="${project.build.directory}/xcmis-tomcat" includeEmptyDirs="true" quiet="yes" />
                   <copy todir="${project.build.directory}/xcmis-tomcat" verbose="false" overwrite="true">
-                     <fileset dir="${tomcat.distrib.location}" />
+                     <fileset dir="${tomcat.distrib}" />
                   </copy>
                   <copy todir="${project.build.directory}/xcmis-tomcat/" verbose="true" overwrite="true">
                      <fileset dir="${basedir}/src/main/resources">
