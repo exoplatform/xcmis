@@ -183,15 +183,21 @@ public class VersionSeriesTest extends BaseTest
       }
    }
 
-   public void testCreateDocumentInCheckedOutState() throws Exception
+   public void testDocumentInCheckedOutState() throws Exception
    {
       EntryImpl doc =
          createDocument(testRootFolderId, "doc", "nt:file", new byte[0], "", EnumVersioningState.CHECKEDOUT);
       VersionSeries series = cmisRepository.getVersionSeries(doc.getVersionSeriesId());
+      assertEquals(doc.getObjectId(), series.getCheckedOut().getObjectId());
       assertEquals(1, series.getAllVersions().size());
       //      assertFalse(doc.isLatest());
       //      assertNull(series.getLatestVersion());
       assertNull(series.getLatestMajorVersion());
+      Entry v = series.checkin(true, "comment");
+      assertNull(v.getCheckedOutId());
+      assertNull(v.getCheckedOutBy());
+      assertFalse(v.getBoolean(CMIS.IS_VERSION_SERIES_CHECKED_OUT));
+      assertNull(series.getCheckedOut());
    }
 
    public void testGetAllVersions() throws Exception
@@ -215,6 +221,8 @@ public class VersionSeriesTest extends BaseTest
       assertEquals(((ExtendedNode)v3).getIdentifier(), versions.get(1).getObjectId());
       assertEquals(((ExtendedNode)v2).getIdentifier(), versions.get(2).getObjectId());
       assertEquals(((ExtendedNode)v1).getIdentifier(), versions.get(3).getObjectId());
+      
+      series.checkout(null);
    }
 
    public void testGetCheckedOut() throws Exception

@@ -228,6 +228,13 @@ public abstract class BaseTest extends TestCase
       doc.setProperty(CMIS.IS_LATEST_VERSION, true);
       doc.setProperty(CMIS.VERSION_LABEL, versioningState == EnumVersioningState.CHECKEDOUT ? "pwc" : "current");
       doc.setProperty(CMIS.IS_MAJOR_VERSION, versioningState == EnumVersioningState.MAJOR);
+      if (versioningState == EnumVersioningState.CHECKEDOUT)
+      {
+         doc.addMixin("cmis:pwc");
+         doc.setProperty(JcrCMIS.CMIS_LATEST_VERSION, doc);
+         doc.setProperty(CMIS.VERSION_SERIES_CHECKED_OUT_ID, ((ExtendedNode)doc).getIdentifier());
+         doc.setProperty(CMIS.VERSION_SERIES_CHECKED_OUT_BY, session.getUserID());
+      }
 
       Node content = doc.addNode(JcrCMIS.JCR_CONTENT, "nt:resource");
       content.setProperty(JcrCMIS.JCR_MIMETYPE, contentType);

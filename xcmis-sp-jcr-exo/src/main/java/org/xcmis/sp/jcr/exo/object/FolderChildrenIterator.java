@@ -143,7 +143,7 @@ class FolderChildrenIterator implements ItemsIterator<Entry>
     */
    public long size()
    {
-      return iter.getSize();
+      return -1 /*iter.getSize()*/;
    }
 
 }

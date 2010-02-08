@@ -19,6 +19,19 @@
 
 package org.xcmis.sp.jcr.exo.object;
 
+import org.exoplatform.services.jcr.access.AccessControlEntry;
+import org.exoplatform.services.jcr.access.AccessControlList;
+import org.exoplatform.services.jcr.access.PermissionType;
+import org.exoplatform.services.jcr.core.ExtendedNode;
+import org.exoplatform.services.jcr.impl.core.PropertyImpl;
+import org.exoplatform.services.jcr.impl.core.value.BooleanValue;
+import org.exoplatform.services.jcr.impl.core.value.DateValue;
+import org.exoplatform.services.jcr.impl.core.value.DoubleValue;
+import org.exoplatform.services.jcr.impl.core.value.LongValue;
+import org.exoplatform.services.jcr.impl.core.value.StringValue;
+import org.exoplatform.services.jcr.util.IdGenerator;
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
 import org.xcmis.core.CmisAccessControlEntryType;
 import org.xcmis.core.CmisAccessControlPrincipalType;
 import org.xcmis.core.CmisTypeDefinitionType;
@@ -29,20 +42,6 @@ import org.xcmis.core.EnumBasicPermissions;
 import org.xcmis.core.EnumContentStreamAllowed;
 import org.xcmis.core.EnumRelationshipDirection;
 import org.xcmis.core.EnumVersioningState;
-import org.exoplatform.services.jcr.access.AccessControlEntry;
-import org.exoplatform.services.jcr.access.AccessControlList;
-import org.exoplatform.services.jcr.access.PermissionType;
-import org.exoplatform.services.jcr.core.ExtendedNode;
-import org.exoplatform.services.jcr.core.ExtendedSession;
-import org.exoplatform.services.jcr.impl.core.PropertyImpl;
-import org.exoplatform.services.jcr.impl.core.value.BooleanValue;
-import org.exoplatform.services.jcr.impl.core.value.DateValue;
-import org.exoplatform.services.jcr.impl.core.value.DoubleValue;
-import org.exoplatform.services.jcr.impl.core.value.LongValue;
-import org.exoplatform.services.jcr.impl.core.value.StringValue;
-import org.exoplatform.services.jcr.util.IdGenerator;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.sp.jcr.exo.JcrCMIS;
 import org.xcmis.sp.jcr.exo.TypeManagerImpl;
 import org.xcmis.sp.jcr.exo.rendition.RenditionContentStream;
@@ -58,7 +57,6 @@ import org.xcmis.spi.object.BaseItemsIterator;
 import org.xcmis.spi.object.ContentStream;
 import org.xcmis.spi.object.Entry;
 import org.xcmis.spi.object.ItemsIterator;
-import org.xcmis.spi.object.VersionSeries;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -91,7 +89,6 @@ import javax.jcr.Value;
 import javax.jcr.ValueFormatException;
 import javax.jcr.nodetype.NoSuchNodeTypeException;
 import javax.jcr.nodetype.NodeType;
-import javax.jcr.version.VersionHistory;
 
 /**
  * Instances of this class represent current version of CMIS Document.
@@ -657,10 +654,13 @@ public class EntryImpl extends TypeManagerImpl implements Entry
             if (pwcId != null)
             {
                // Current document is PWC.
-               if (pwcId.equals(getObjectId()))
+               if (node.isNodeType("cmis:pwc"))
                {
-                  getVersionSeries().cancelCheckout();
-                  return;
+                  Node latest = node.getProperty(JcrCMIS.CMIS_LATEST_VERSION).getNode();
+                  latest.setProperty(CMIS.IS_VERSION_SERIES_CHECKED_OUT, false);
+                  latest.setProperty(CMIS.VERSION_SERIES_CHECKED_OUT_ID, (String)null);
+                  latest.setProperty(CMIS.VERSION_SERIES_CHECKED_OUT_BY, (String)null);
+                  latest.save();
                }
                else
                {
@@ -673,8 +673,9 @@ public class EntryImpl extends TypeManagerImpl implements Entry
          // Remove all relationships in which current object is target or source.
          removeRelationships();
 
+         Node parent = node.getParent();
          node.remove();
-         session.save();
+         parent.save();
       }
       catch (javax.jcr.RepositoryException re)
       {
@@ -1602,7 +1603,7 @@ public class EntryImpl extends TypeManagerImpl implements Entry
 
             node.setProperty(CMIS.LAST_MODIFIED_BY, session.getUserID());
          }
-         session.save();
+         node.getParent().save();
       }
       catch (javax.jcr.RepositoryException re)
       {
@@ -2246,7 +2247,14 @@ public class EntryImpl extends TypeManagerImpl implements Entry
       childDocNode.setProperty(CMIS.VERSION_LABEL, versioningState == EnumVersioningState.CHECKEDOUT ? pwcLabel
          : latestLabel);
       childDocNode.setProperty(CMIS.IS_VERSION_SERIES_CHECKED_OUT, versioningState == EnumVersioningState.CHECKEDOUT);
-
+      if (versioningState == EnumVersioningState.CHECKEDOUT)
+      {
+         childDocNode.addMixin("cmis:pwc");
+         childDocNode.setProperty(JcrCMIS.CMIS_LATEST_VERSION, childDocNode);
+         childDocNode.setProperty(CMIS.VERSION_SERIES_CHECKED_OUT_ID, ((ExtendedNode)childDocNode).getIdentifier());
+         childDocNode.setProperty(CMIS.VERSION_SERIES_CHECKED_OUT_BY, session.getUserID());
+      }
+      
       return new EntryImpl(childDocNode, type);
    }
 
@@ -2385,23 +2393,23 @@ public class EntryImpl extends TypeManagerImpl implements Entry
     * @return version series or null if object is not versionable
     * @throws RepositoryException if any CMIS repository error occurs
     */
-   protected VersionSeries getVersionSeries() throws RepositoryException
-   {
-      if (isVersionable())
-      {
-         try
-         {
-            return new VersionSeriesImpl((VersionHistory)((ExtendedSession)session)
-               .getNodeByIdentifier(getVersionSeriesId()));
-         }
-         catch (javax.jcr.RepositoryException re)
-         {
-            String msg = "Unable get version series. " + re.getMessage();
-            throw new RepositoryException(msg, re);
-         }
-      }
-      return null;
-   }
+//   protected VersionSeries getVersionSeries() throws RepositoryException
+//   {
+//      if (isVersionable())
+//      {
+//         try
+//         {
+//            return new VersionSeriesImpl((VersionHistory)((ExtendedSession)session)
+//               .getNodeByIdentifier(getVersionSeriesId()));
+//         }
+//         catch (javax.jcr.RepositoryException re)
+//         {
+//            String msg = "Unable get version series. " + re.getMessage();
+//            throw new RepositoryException(msg, re);
+//         }
+//      }
+//      return null;
+//   }
 
    /**
     * Initialize <code>EntryImpl</code> instance.
@@ -2438,12 +2446,13 @@ public class EntryImpl extends TypeManagerImpl implements Entry
             node.setProperty(CMIS.VERSION_SERIES_ID, node.getProperty("jcr:versionHistory").getString());
             node.setProperty(CMIS.IS_LATEST_VERSION, true);
             node.setProperty(CMIS.VERSION_LABEL, latestLabel);
+            node.save();
          }
          else if (node.isNodeType(JcrCMIS.NT_FOLDER))
          {
             node.addMixin(JcrCMIS.CMIS_MIX_FOLDER);
+            node.save();
          }
-         session.save();
       }
       this.objName = node.getDepth() == 0 ? CMIS.ROOT_FOLDER_NAME : node.getName();
       this.node = node;
@@ -2476,6 +2485,10 @@ public class EntryImpl extends TypeManagerImpl implements Entry
             if (!parent.hasNodes())
                parent.remove();
          }
+         Node relationships =
+            (Node)session.getItem(new StringBuilder().append('/').append(JcrCMIS.CMIS_SYSTEM).append('/').append(
+               JcrCMIS.CMIS_RELATIONSHIPS).toString());
+         relationships.save();
       }
    }
 

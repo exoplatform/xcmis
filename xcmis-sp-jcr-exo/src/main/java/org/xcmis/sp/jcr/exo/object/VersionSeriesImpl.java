@@ -102,26 +102,9 @@ public class VersionSeriesImpl implements VersionSeries
    {
       // Document MAY be created in checked-out state and PWC is exactly
       // one document in this Version Series.
-
       Entry pwc = getCheckedOut();
       if (pwc != null)
-      {
-         Entry latest = getLatestVersion();
-         String pwcId = pwc.getObjectId();
-         // Reset properties to be able delete entry.
-         pwc.setBoolean(CMIS.IS_VERSION_SERIES_CHECKED_OUT, false);
-         pwc.setString(CMIS.VERSION_SERIES_CHECKED_OUT_ID, (String)null);
-         latest.setString(CMIS.VERSION_SERIES_CHECKED_OUT_BY, (String)null);
          pwc.delete();
-         if (!pwcId.equals(latest.getObjectId()))
-         {
-            // Update latest version.
-            latest.setBoolean(CMIS.IS_VERSION_SERIES_CHECKED_OUT, false);
-            latest.setString(CMIS.VERSION_SERIES_CHECKED_OUT_ID, (String)null);
-            latest.setString(CMIS.VERSION_SERIES_CHECKED_OUT_BY, (String)null);
-            latest.save();
-         }
-      }
    }
 
    /**
@@ -147,11 +130,19 @@ public class VersionSeriesImpl implements VersionSeries
             latest.getNode().checkin();
             latest.getNode().checkout();
             updateFromPwc();
+            pwc.delete();
+         }
+         else
+         {
+            // PWC is just one version of document.
+            // Do not remove it just turn off PWC state.
+            latest.getNode().removeMixin("cmis:pwc");
+            latest.setBoolean(CMIS.IS_VERSION_SERIES_CHECKED_OUT, false);
+            latest.setString(CMIS.VERSION_SERIES_CHECKED_OUT_ID, null);
+            latest.setString(CMIS.VERSION_SERIES_CHECKED_OUT_BY, null);
          }
          latest.setBoolean(CMIS.IS_MAJOR_VERSION, major);
          latest.setString(CMIS.CHECKIN_COMMENT, checkinComment);
-         if (!pwc.equals(latest))
-            pwc.delete();
          latest.save();
          return latest;
       }
@@ -240,15 +231,10 @@ public class VersionSeriesImpl implements VersionSeries
          Node pwcNode = getPwcNode();
          if (pwcNode != null)
             return new EntryImpl(pwcNode);
-         Node latest = getLatestVersionNode();
-         if (latest.hasProperty(CMIS.VERSION_SERIES_CHECKED_OUT_ID)
-            && latest.getProperty(CMIS.VERSION_SERIES_CHECKED_OUT_ID).getString().equals(
-               ((ExtendedNode)latest).getIdentifier()))
-         {
+         Node latestNode = getLatestVersionNode();
+         if (latestNode.isNodeType("cmis:pwc"))
             // Document created in checked-out state.
-            // TODO : Need better solution for this.
-            return new EntryImpl(latest);
-         }
+            return new EntryImpl(latestNode);
          return null;
       }
       catch (javax.jcr.RepositoryException re)
@@ -264,11 +250,6 @@ public class VersionSeriesImpl implements VersionSeries
    public Entry getLatestMajorVersion() throws RepositoryException
    {
       Entry latest = getLatestVersion();
-      if (latest == null)
-         // No latest version minds version series contains exactly one document that
-         // was created in checked-out state. This document may not be major version.
-         return null;
-
       if (latest.isMajor())
          return latest;
       try
@@ -318,6 +299,7 @@ public class VersionSeriesImpl implements VersionSeries
       String destPath = getPwcLocation();
       session.getWorkspace().copy(getLatestVersionNode().getPath(), destPath);
       Node pwc = (Node)session.getItem(destPath);
+      // Set required CMIS properties.
       pwc.setProperty(CMIS.IS_VERSION_SERIES_CHECKED_OUT, true);
       // PWC must not be considered as 'latest major version'.
       pwc.setProperty(CMIS.IS_LATEST_VERSION, false);
@@ -383,9 +365,6 @@ public class VersionSeriesImpl implements VersionSeries
          else
             currentContent.setProperty(prop.getName(), prop.getValue());
       }
-      latest.setProperty(CMIS.IS_VERSION_SERIES_CHECKED_OUT, false);
-      latest.setProperty(CMIS.VERSION_SERIES_CHECKED_OUT_ID, (String)null);
-      latest.setProperty(CMIS.VERSION_SERIES_CHECKED_OUT_BY, (String)null);
    }
 
    /**

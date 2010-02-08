@@ -22,6 +22,7 @@ package org.xcmis.sp.jcr.exo.object;
 import org.xcmis.core.CmisAccessControlEntryType;
 import org.exoplatform.services.jcr.core.ExtendedNode;
 import org.xcmis.sp.jcr.exo.JcrCMIS;
+import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.RepositoryException;
@@ -178,24 +179,6 @@ public class EntryVersion extends EntryImpl
    {
       throw new ConstraintException("Operation is not permited for non-latest version of object.");
    }
-   
-   /**
-    * {@inheritDoc}
-    */
-   @Override
-   public String getCheckedOutBy() throws RepositoryException
-   {
-      return getVersionSeries().getLatestVersion().getCheckedOutBy();
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   @Override
-   public String getCheckedOutId() throws RepositoryException
-   {
-      return getVersionSeries().getLatestVersion().getCheckedOutId();
-   }
 
    /**
     * {@inheritDoc}
@@ -213,6 +196,21 @@ public class EntryVersion extends EntryImpl
    public List<Entry> getParents() throws RepositoryException
    {
       return Collections.singletonList(getParent((EntryImpl)getVersionSeries().getLatestVersion()));
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   @Override
+   public String getString(String name) throws RepositoryException
+   {
+      // TODO : How to use common properties/attributes/etc to avoid getting latest version.
+      if (CMIS.VERSION_SERIES_CHECKED_OUT_ID.equals(name))
+         return getVersionSeries().getLatestVersion().getCheckedOutId();
+      else if ((CMIS.VERSION_SERIES_CHECKED_OUT_BY.equals(name)))
+         return getVersionSeries().getLatestVersion().getCheckedOutBy();
+
+      return super.getString(name);
    }
 
    /**
@@ -360,7 +358,7 @@ public class EntryVersion extends EntryImpl
    {
       throw new VersioningException("Can't update property of non-latest version of object.");
    }
-   
+
    /**
     * {@inheritDoc}
     */
@@ -423,10 +421,6 @@ public class EntryVersion extends EntryImpl
       throw new VersioningException("Can't update property of non-latest version of object.");
    }
 
-   /**
-    * {@inheritDoc}
-    */
-   @Override
    protected VersionSeries getVersionSeries() throws RepositoryException
    {
       try
