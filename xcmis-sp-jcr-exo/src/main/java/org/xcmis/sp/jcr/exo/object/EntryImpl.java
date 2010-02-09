@@ -57,6 +57,7 @@ import org.xcmis.spi.object.BaseItemsIterator;
 import org.xcmis.spi.object.ContentStream;
 import org.xcmis.spi.object.Entry;
 import org.xcmis.spi.object.ItemsIterator;
+import org.xcmis.spi.object.VersionSeries;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -1467,6 +1468,23 @@ public class EntryImpl extends TypeManagerImpl implements Entry
       return getString(CMIS.VERSION_LABEL);
    }
 
+   public VersionSeries getVersionSeries() throws RepositoryException
+   {
+      if (isVersionable())
+      {
+         try
+         {
+            return new VersionSeriesImpl(node.getVersionHistory());
+         }
+         catch (javax.jcr.RepositoryException re)
+         {
+            String msg = "Unable get version series.";
+            throw new RepositoryException(msg, re);
+         }
+      }
+      return null;
+   }
+
    /**
     * {@inheritDoc}
     */
@@ -2254,7 +2272,7 @@ public class EntryImpl extends TypeManagerImpl implements Entry
          childDocNode.setProperty(CMIS.VERSION_SERIES_CHECKED_OUT_ID, ((ExtendedNode)childDocNode).getIdentifier());
          childDocNode.setProperty(CMIS.VERSION_SERIES_CHECKED_OUT_BY, session.getUserID());
       }
-      
+
       return new EntryImpl(childDocNode, type);
    }
 
@@ -2393,23 +2411,23 @@ public class EntryImpl extends TypeManagerImpl implements Entry
     * @return version series or null if object is not versionable
     * @throws RepositoryException if any CMIS repository error occurs
     */
-//   protected VersionSeries getVersionSeries() throws RepositoryException
-//   {
-//      if (isVersionable())
-//      {
-//         try
-//         {
-//            return new VersionSeriesImpl((VersionHistory)((ExtendedSession)session)
-//               .getNodeByIdentifier(getVersionSeriesId()));
-//         }
-//         catch (javax.jcr.RepositoryException re)
-//         {
-//            String msg = "Unable get version series. " + re.getMessage();
-//            throw new RepositoryException(msg, re);
-//         }
-//      }
-//      return null;
-//   }
+   //   protected VersionSeries getVersionSeries() throws RepositoryException
+   //   {
+   //      if (isVersionable())
+   //      {
+   //         try
+   //         {
+   //            return new VersionSeriesImpl((VersionHistory)((ExtendedSession)session)
+   //               .getNodeByIdentifier(getVersionSeriesId()));
+   //         }
+   //         catch (javax.jcr.RepositoryException re)
+   //         {
+   //            String msg = "Unable get version series. " + re.getMessage();
+   //            throw new RepositoryException(msg, re);
+   //         }
+   //      }
+   //      return null;
+   //   }
 
    /**
     * Initialize <code>EntryImpl</code> instance.

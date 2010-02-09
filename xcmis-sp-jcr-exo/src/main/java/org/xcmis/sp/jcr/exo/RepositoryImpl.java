@@ -19,6 +19,17 @@
 
 package org.xcmis.sp.jcr.exo;
 
+import org.exoplatform.services.jcr.access.SystemIdentity;
+import org.exoplatform.services.jcr.core.ExtendedSession;
+import org.exoplatform.services.jcr.core.ManageableRepository;
+import org.exoplatform.services.jcr.core.nodetype.ExtendedNodeTypeManager;
+import org.exoplatform.services.jcr.core.nodetype.NodeTypeValue;
+import org.exoplatform.services.jcr.core.nodetype.PropertyDefinitionValue;
+import org.exoplatform.services.jcr.ext.common.SessionProvider;
+import org.exoplatform.services.jcr.util.IdGenerator;
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
+import org.exoplatform.services.security.ConversationState;
 import org.xcmis.core.CmisACLCapabilityType;
 import org.xcmis.core.CmisPermissionDefinition;
 import org.xcmis.core.CmisPermissionMapping;
@@ -58,18 +69,6 @@ import org.xcmis.core.EnumSupportedPermissions;
 import org.xcmis.core.EnumUpdatability;
 import org.xcmis.core.EnumVersioningState;
 import org.xcmis.messaging.CmisTypeContainer;
-import org.exoplatform.services.jcr.access.SystemIdentity;
-import org.exoplatform.services.jcr.core.ExtendedNode;
-import org.exoplatform.services.jcr.core.ExtendedSession;
-import org.exoplatform.services.jcr.core.ManageableRepository;
-import org.exoplatform.services.jcr.core.nodetype.ExtendedNodeTypeManager;
-import org.exoplatform.services.jcr.core.nodetype.NodeTypeValue;
-import org.exoplatform.services.jcr.core.nodetype.PropertyDefinitionValue;
-import org.exoplatform.services.jcr.ext.common.SessionProvider;
-import org.exoplatform.services.jcr.util.IdGenerator;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
-import org.exoplatform.services.security.ConversationState;
 import org.xcmis.sp.jcr.exo.object.EntryImpl;
 import org.xcmis.sp.jcr.exo.object.EntryVersion;
 import org.xcmis.sp.jcr.exo.object.VersionSeriesImpl;
@@ -141,7 +140,7 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
    protected final boolean changeTokenFeature;
 
    /** JCR session. */
-   protected Session session;
+   private Session session;
 
    /** SQL Query handler. */
    private final QueryHandler queryHandler;
@@ -150,7 +149,7 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
    private CmisRepositoryInfoType info;
 
    private final Map<MimeType, RenditionProvider> renditionProviders;
-   
+
    /**
     * Construct instance <tt>RepositoryImpl</tt>.
     * 
@@ -500,9 +499,9 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
       try
       {
          if (folderId == null)
-            checkedOutDocuments(getSession().getRootNode(), checkedout, true);
+            checkedOutDocuments(new EntryImpl(getSession().getRootNode()), checkedout, true);
          else
-            checkedOutDocuments(((ExtendedSession)getSession()).getNodeByIdentifier(folderId), checkedout, false);
+            checkedOutDocuments(getObjectById(folderId), checkedout, false);
       }
       catch (javax.jcr.RepositoryException re)
       {
@@ -1176,28 +1175,20 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
     * @param recursive whether it is recursive
     * @throws javax.jcr.RepositoryException if any JCR repository errors
     */
-   private void checkedOutDocuments(Node folder, List<Entry> docs, boolean recursive)
-      throws javax.jcr.RepositoryException
+   private void checkedOutDocuments(Entry folder, List<Entry> docs, boolean recursive)
+      throws RepositoryException
    {
-      for (NodeIterator iter = folder.getNodes(); iter.hasNext();)
+      for (ItemsIterator<Entry> iter = folder.getChildren(); iter.hasNext();)
       {
-         Node node = iter.nextNode();
-         if (node.isNodeType(JcrCMIS.NT_FILE))
+         EntryImpl entry = (EntryImpl)iter.next();
+         if (entry.getScope() == EnumBaseObjectTypeIds.CMIS_DOCUMENT)
          {
-            try
-            {
-               if (node.getProperty(CMIS.IS_VERSION_SERIES_CHECKED_OUT).getBoolean())
-                  // TODO : use VersionSeries for getting checked-out doc ??
-                  docs.add(new EntryImpl((Node)getSession().getItem(
-                     "/cmis:workingCopies/" + ((ExtendedNode)node).getIdentifier())));
-            }
-            catch (PathNotFoundException pnfe)
-            {
-               // If property 'isVersionSeriesCheckedOut' does not set.
-            }
+            Entry pwc = entry.getVersionSeries().getCheckedOut();
+            if (pwc != null)
+               docs.add(pwc);
          }
-         else if (recursive && node.isNodeType(JcrCMIS.NT_FOLDER))
-            checkedOutDocuments(node, docs, recursive);
+         else if (recursive && entry.getScope() == EnumBaseObjectTypeIds.CMIS_FOLDER)
+            checkedOutDocuments(entry, docs, recursive);
       }
    }
 

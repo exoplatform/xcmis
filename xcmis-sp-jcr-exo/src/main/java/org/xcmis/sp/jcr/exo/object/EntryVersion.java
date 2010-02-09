@@ -206,9 +206,25 @@ public class EntryVersion extends EntryImpl
    {
       // TODO : How to use common properties/attributes/etc to avoid getting latest version.
       if (CMIS.VERSION_SERIES_CHECKED_OUT_ID.equals(name))
+      {
          return getVersionSeries().getLatestVersion().getCheckedOutId();
+      }
       else if ((CMIS.VERSION_SERIES_CHECKED_OUT_BY.equals(name)))
+      {
          return getVersionSeries().getLatestVersion().getCheckedOutBy();
+      }
+      else if ((CMIS.VERSION_LABEL.equals(name)))
+      {
+         try
+         {
+            return node.getParent().getName();
+         }
+         catch (javax.jcr.RepositoryException re)
+         {
+            String msg = "Unable get version label. " + re.getMessage();
+            throw new RepositoryException(msg);
+         }
+      }
 
       return super.getString(name);
    }
@@ -421,7 +437,8 @@ public class EntryVersion extends EntryImpl
       throw new VersioningException("Can't update property of non-latest version of object.");
    }
 
-   protected VersionSeries getVersionSeries() throws RepositoryException
+   @Override
+   public VersionSeries getVersionSeries() throws RepositoryException
    {
       try
       {
@@ -430,7 +447,7 @@ public class EntryVersion extends EntryImpl
       catch (javax.jcr.RepositoryException re)
       {
          String msg = "Unable get version series.";
-         throw new org.xcmis.spi.RepositoryException(msg, re);
+         throw new RepositoryException(msg, re);
       }
    }
 
