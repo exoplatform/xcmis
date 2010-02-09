@@ -9,7 +9,7 @@
           <!-- for system storage -->
           <container class="org.exoplatform.services.jcr.impl.storage.jdbc.JDBCWorkspaceDataContainer">
             <properties>
-              <property name="source-name" value="jdbcjcr" />
+              <property name="source-name" value="jdbcexo" />
               <property name="dialect" value="hsqldb" />
               <property name="multi-db" value="false" />
               <property name="update-storage" value="false" />
@@ -51,7 +51,7 @@
         <workspace name="cmis">
           <container class="org.exoplatform.services.jcr.impl.storage.jdbc.JDBCWorkspaceDataContainer">
             <properties>
-              <property name="source-name" value="jdbcjcr" />
+              <property name="source-name" value="jdbcexo" />
               <property name="dialect" value="hsqldb" />
               <property name="multi-db" value="false" />
               <property name="update-storage" value="false" />

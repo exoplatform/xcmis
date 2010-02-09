@@ -173,7 +173,7 @@
          <init-params>
             <value-param>
                <name>bind-name</name>
-               <value>jdbcjcr</value>
+               <value>jdbcexo</value>
             </value-param>
             <value-param>
                <name>class-name</name>
@@ -200,7 +200,7 @@
          <init-params>
             <value-param>
                <name>bind-name</name>
-               <value>jdbcjcr1</value>
+               <value>jdbcexo1</value>
             </value-param>
             <value-param>
                <name>class-name</name>

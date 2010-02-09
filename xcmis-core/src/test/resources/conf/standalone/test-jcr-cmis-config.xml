@@ -9,7 +9,7 @@
           <!-- for system storage -->
           <container class="org.exoplatform.services.jcr.impl.storage.jdbc.JDBCWorkspaceDataContainer">
             <properties>
-              <property name="source-name" value="jdbcjcr"/>
+              <property name="source-name" value="jdbcexo"/>
               <property name="dialect" value="hsqldb"/>
               <property name="multi-db" value="true"/>
               <property name="update-storage" value="true"/>
@@ -27,7 +27,7 @@
         <workspace name="ws1" auto-init-root-nodetype="nt:unstructured">
           <container class="org.exoplatform.services.jcr.impl.storage.jdbc.JDBCWorkspaceDataContainer">
             <properties>
-              <property name="source-name" value="jdbcjcr1"/>
+              <property name="source-name" value="jdbcexo1"/>
               <property name="dialect" value="hsqldb"/>
               <property name="multi-db" value="true"/>
               <property name="update-storage" value="true"/>
