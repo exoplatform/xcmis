@@ -113,7 +113,12 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
    {
       if (objectType != null)
       {
-
+         // XXX: Workaround to get work updating properties under 'Cmis Connector Firefox plugin'.
+         // Plugin miss namespace when create entry for updating. Namespace for prefix 'cmisra' 
+         // declared in entry tag. But this tag is overwritten in plugin and has no namespace
+         // declaration any more. 
+         setAttributeValue("xmlns:cmisra", "http://docs.oasis-open.org/ns/cmis/restatom/200908/");
+         
          CmisPropertiesType properties = objectType.getProperties();
          if (properties != null)
          {
