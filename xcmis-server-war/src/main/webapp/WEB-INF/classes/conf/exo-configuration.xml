@@ -2,6 +2,55 @@
 <configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.exoplaform.org/xml/ns/kernel_1_0.xsd http://www.exoplaform.org/xml/ns/kernel_1_0.xsd" xmlns="http://www.exoplaform.org/xml/ns/kernel_1_0.xsd">
 
    <component>
+      <type>org.xcmis.sp.jcr.exo.RepositoriesManagerImpl</type>
+      <init-params>
+         <object-param>
+            <name>configs</name>
+            <object type="org.xcmis.sp.jcr.exo.RepositoriesManagerImpl$ServiceConfig">
+               <field name="configs">
+                  <collection type="java.util.ArrayList">
+                     <value>
+                        <object type="org.xcmis.sp.jcr.exo.CMISRepositoryConfiguration">
+                           <field name="id">
+                              <!-- ID of CMIS repository -->
+                              <string>cmis1</string>
+                           </field>
+                           <field name="repository">
+                              <string>repository</string>
+                           </field>
+                           <field name="workspace">
+                              <string>cmis</string>
+                           </field>
+                           <field name="indexConfiguration">
+                              <object type="org.xcmis.sp.jcr.exo.IndexConfiguration">
+                                 <field name="indexPath">
+                                    <string>../temp/cmis-index/repository/cmis</string>
+                                 </field>
+                              </object>
+                           </field>
+                           <field name="properties">
+                              <map type="java.util.HashMap">
+                                 <entry>
+                                    <key>
+                                       <string>exo.cmis.changetoken.feature</string>
+                                    </key>
+                                    <value>
+                                       <!-- Enable/Disable change token feature. -->
+                                       <boolean>false</boolean>
+                                    </value>
+                                 </entry>
+                              </map>
+                           </field>
+                        </object>
+                     </value>
+                  </collection>
+               </field>
+            </object>
+         </object-param>
+      </init-params>
+   </component>
+   
+   <component>
       <key>org.exoplatform.services.log.LogConfigurationInitializer</key>
       <type>org.exoplatform.services.log.LogConfigurationInitializer</type>
       <init-params>
