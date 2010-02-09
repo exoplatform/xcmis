@@ -174,7 +174,8 @@
                         **/xjavadoc-*.jar,
                         **/xml-apis-*.jar,
                         **/xmlParserAPIs-*.jar,
-               </warSourceExcludes>
+                        **/xercesImpl-*.jar,
+                     </warSourceExcludes>
                      <archive>
                         <manifest>
                            <addClasspath>true</addClasspath>
@@ -258,7 +259,8 @@
                         **/xjavadoc-*.jar,
                         **/xml-apis-*.jar,
                         **/xmlParserAPIs-*.jar,
-               </warSourceExcludes>
+                        **/xercesImpl-*.jar,
+                     </warSourceExcludes>
                      <archive>
                         <manifest>
                            <addClasspath>true</addClasspath>
@@ -342,6 +344,7 @@
                         **/xjavadoc-*.jar,
                         **/xml-apis-*.jar,
                         **/xmlParserAPIs-*.jar,
+                        **/xercesImpl-*.jar,
                </warSourceExcludes>
                      <archive>
                         <manifest>

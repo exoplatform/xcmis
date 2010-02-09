@@ -45,94 +45,6 @@
    <component>
       <key>org.exoplatform.services.jcr.RepositoryService</key>
       <type>org.exoplatform.services.jcr.impl.RepositoryServiceImpl</type>
-      <component-plugins>
-         <component-plugin>
-            <name>add.namespaces</name>
-            <set-method>addPlugin</set-method>
-            <type>org.exoplatform.services.jcr.impl.AddNamespacesPlugin</type>
-            <init-params>
-               <properties-param>
-                  <name>namespaces</name>
-                  <property name="dc" value="http://purl.org/dc/elements/1.1/" />
-                  <property name="webdav" value="http://www.exoplatform.org/jcr/webdav" />
-                  <property name="cmis" value="http://www.exoplatform.com/jcr/cmis/1.0" />
-               </properties-param>
-            </init-params>
-         </component-plugin>
-         <component-plugin>
-            <name>add.nodeType</name>
-            <set-method>addPlugin</set-method>
-            <type>org.exoplatform.services.jcr.impl.AddNodeTypePlugin</type>
-            <init-params>
-               <values-param>
-                  <name>autoCreatedInNewRepository</name>
-                  <description>Node types configuration file</description>
-                  <value>jar:/conf/ext-nodetypes-config.xml</value>
-                  <!--            <value>jar:/conf/organization-nodetypes.xml</value>-->
-                  <value>jar:/conf/webdav-nodetypes.xml</value>
-                  <value>jar:/conf/cmis-nodetypes-config.xml</value>
-               </values-param>
-            </init-params>
-         </component-plugin>
-         <component-plugin>
-            <name>register.listener</name>
-            <set-method>addPlugin</set-method>
-            <type>org.exoplatform.services.jcr.impl.RepositoryChangesListenerRegisterPlugin</type>
-            <init-params>
-               <value-param>
-                  <name>repository-name</name>
-                  <value>repository</value>
-               </value-param>
-               <value-param>
-                  <name>workspaces</name>
-                  <value>cmis</value>
-               </value-param>
-               <value-param>
-                  <name>component-class-name</name>
-                  <value>org.xcmis.sp.jcr.exo.query.index.StartableJcrIndexingService</value>
-               </value-param>
-            </init-params>
-         </component-plugin>
-      </component-plugins>
-   </component>
-
-   <component>
-      <type>org.exoplatform.services.jcr.impl.ext.action.SessionActionCatalog</type>
-      <component-plugins>
-         <component-plugin>
-            <name>addActions</name>
-            <set-method>addPlugin</set-method>
-            <type>org.exoplatform.services.jcr.impl.ext.action.AddActionsPlugin</type>
-            <description>add actions plugin</description>
-            <init-params>
-               <object-param>
-                  <name>actions</name>
-                  <object type="org.exoplatform.services.jcr.impl.ext.action.AddActionsPlugin$ActionsConfig">
-                     <field name="actions">
-                        <collection type="java.util.ArrayList">
-                           <value>
-                              <object type="org.exoplatform.services.jcr.impl.ext.action.ActionConfiguration">
-                                 <field name="eventTypes">
-                                    <string>addProperty,changeProperty</string>
-                                 </field>
-                                 <!--<field  name="path"><string>/test</string></field>-->
-                                 <!--<field  name="isDeep"><boolean>true</boolean></field>-->
-                                 <field name="nodeTypes">
-                                    <string>nt:resource</string>
-                                 </field>
-                                 <!-- field  name="workspace"><string>production</string></field -->
-                                 <field name="actionClassName">
-                                    <string>org.exoplatform.services.jcr.ext.metadata.AddMetadataAction</string>
-                                 </field>
-                              </object>
-                           </value>
-                        </collection>
-                     </field>
-                  </object>
-               </object-param>
-            </init-params>
-         </component-plugin>
-      </component-plugins>
    </component>
 
    <component>
@@ -180,11 +92,92 @@
          </value-param>
       </init-params>
    </component>
-   
-   <component>
-      <type>org.exoplatform.services.rest.ext.proxy.ProxyService</type>
-   </component>
 
+   <external-component-plugins>
+      <target-component>org.exoplatform.services.jcr.impl.ext.action.SessionActionCatalog</target-component>
+      <component-plugin>
+         <name>addActions</name>
+         <set-method>addPlugin</set-method>
+         <type>org.exoplatform.services.jcr.impl.ext.action.AddActionsPlugin</type>
+         <description>add actions plugin</description>
+         <init-params>
+            <object-param>
+               <name>actions</name>
+               <object type="org.exoplatform.services.jcr.impl.ext.action.AddActionsPlugin$ActionsConfig">
+                  <field name="actions">
+                     <collection type="java.util.ArrayList">
+                        <value>
+                           <object type="org.exoplatform.services.jcr.impl.ext.action.ActionConfiguration">
+                              <field name="eventTypes">
+                                 <string>addProperty,changeProperty</string>
+                              </field>
+                              <!--<field  name="path"><string>/test</string></field>-->
+                              <!--<field  name="isDeep"><boolean>true</boolean></field>-->
+                              <field name="nodeTypes">
+                                 <string>nt:resource</string>
+                              </field>
+                              <!-- field  name="workspace"><string>production</string></field -->
+                              <field name="actionClassName">
+                                 <string>org.exoplatform.services.jcr.ext.metadata.AddMetadataAction</string>
+                              </field>
+                           </object>
+                        </value>
+                     </collection>
+                  </field>
+               </object>
+            </object-param>
+         </init-params>
+      </component-plugin>
+   </external-component-plugins>
+
+   <external-component-plugins>
+      <target-component>org.exoplatform.services.jcr.RepositoryService</target-component>
+      <component-plugin>
+         <name>add.namespaces</name>
+         <set-method>addPlugin</set-method>
+         <type>org.exoplatform.services.jcr.impl.AddNamespacesPlugin</type>
+         <init-params>
+            <properties-param>
+               <name>namespaces</name>
+               <property name="dc" value="http://purl.org/dc/elements/1.1/" />
+               <property name="webdav" value="http://www.exoplatform.org/jcr/webdav" />
+            </properties-param>
+         </init-params>
+      </component-plugin>
+      <component-plugin>
+         <name>add.nodeType</name>
+         <set-method>addPlugin</set-method>
+         <type>org.exoplatform.services.jcr.impl.AddNodeTypePlugin</type>
+         <init-params>
+            <values-param>
+               <name>autoCreatedInNewRepository</name>
+               <description>Node types configuration file</description>
+               <value>jar:/conf/ext-nodetypes-config.xml</value>
+               <!--            <value>jar:/conf/organization-nodetypes.xml</value>-->
+               <value>jar:/conf/webdav-nodetypes.xml</value>
+            </values-param>
+         </init-params>
+      </component-plugin>
+      <component-plugin>
+         <name>register.listener</name>
+         <set-method>addPlugin</set-method>
+         <type>org.exoplatform.services.jcr.impl.RepositoryChangesListenerRegisterPlugin</type>
+         <init-params>
+            <value-param>
+               <name>repository-name</name>
+               <value>repository</value>
+            </value-param>
+            <value-param>
+               <name>workspaces</name>
+               <value>cmis</value>
+            </value-param>
+            <value-param>
+               <name>component-class-name</name>
+               <value>org.xcmis.sp.jcr.exo.query.index.StartableJcrIndexingService</value>
+            </value-param>
+         </init-params>
+      </component-plugin>
+   </external-component-plugins>
 
    <external-component-plugins>
       <target-component>org.exoplatform.services.naming.InitialContextInitializer</target-component>
@@ -275,7 +268,7 @@
             <value-param>
                <name>CMISClient</name>
                <value>
-<![CDATA[<CMISClient><context>/cmis/atom</context></CMISClient>]]>
+                  <![CDATA[<CMISClient><context>/cmis/atom</context></CMISClient>]]>
                </value>
             </value-param>
          </init-params>
