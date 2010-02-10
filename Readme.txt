@@ -3,7 +3,7 @@
 For assembly "xCMIS" or "xCMIS Demo" with Tomcat server application:
 
   Make sure you have correct: 
-   * Maven version 2.0.9 (or higher). 
+   * Maven version 2.2.0 (or higher). 
    * Apache Tomcat 6.0.16+ application server distributive. 
 
 # Build xCMIS Demo application and assembly it with Tomcat server application.

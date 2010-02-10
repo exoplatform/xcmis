@@ -222,21 +222,4 @@
       </component-plugin>
    </external-component-plugins>
 
-   <external-component-plugins>
-      <target-component>org.exoplatform.services.jcr.ext.registry.RegistryService</target-component>
-      <component-plugin>
-         <name>appConfig</name>
-         <set-method>addPlugin</set-method>
-         <type>org.exoplatform.services.jcr.ext.registry.RegistryInitializationEntryPlugin</type>
-         <init-params>
-            <value-param>
-               <name>CMISClient</name>
-               <value>
-                  <![CDATA[<CMISClient><context>/cmis/atom</context></CMISClient>]]>
-               </value>
-            </value-param>
-         </init-params>
-      </component-plugin>
-   </external-component-plugins>
-
 </configuration>
