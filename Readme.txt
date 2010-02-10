@@ -7,6 +7,7 @@ For assembly "xCMIS" or "xCMIS Demo" with Tomcat server application:
    * Apache Tomcat 6.0.16+ application server distributive. 
 
 # Build xCMIS Demo application and assembly it with Tomcat server application.
+   * Run "mvn clean install" command within root project folder.
    * Run "mvn clean install -Dtomcat.distrib=/PATH/TO/TOMCAT/DISTRIBUTIVE" command within "xcmis-server-tomcat-demo" folder.
    * The result of that you'll have the Tomcat with xCMIS Demo web application archive bundle "xcmis-tomcat", placed at "xcmis-server-tomcat-demo/target".
    Run Tomcat
