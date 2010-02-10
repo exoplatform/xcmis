@@ -3,7 +3,7 @@
    <parent>
       <groupId>org.xcmis</groupId>
       <artifactId>xcmis-parent</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>1.0-Beta01</version>
    </parent>
    <artifactId>xcmis-sp-jcr-exo</artifactId>
    <name>xCMIS :: SP :: JCR :: eXo</name>

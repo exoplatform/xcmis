@@ -4,7 +4,7 @@
    <groupId>org.xcmis</groupId>
    <artifactId>xcmis-parent</artifactId>
    <name>xCMIS :: Parent</name>
-   <version>1.0-SNAPSHOT</version>
+   <version>1.0-Beta01</version>
    <packaging>pom</packaging>
 
    <organization>

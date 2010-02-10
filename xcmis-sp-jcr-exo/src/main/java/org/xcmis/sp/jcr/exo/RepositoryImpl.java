@@ -712,7 +712,7 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
          info.setRepositoryDescription(""); // ?
          info.setProductName("eXo CMIS");
          info.setVendorName("eXo CMIS");
-         info.setProductVersion("1.0-SNAPSHOT");
+         info.setProductVersion("1.0-Beta01");
          info.setRootFolderId(JcrCMIS.ROOT_FOLDER_ID);
          CmisRepositoryCapabilitiesType capabilities = new CmisRepositoryCapabilitiesType();
          capabilities.setCapabilityACL(EnumCapabilityACL.DISCOVER);
