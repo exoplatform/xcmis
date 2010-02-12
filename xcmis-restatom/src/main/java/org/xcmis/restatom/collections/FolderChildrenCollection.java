@@ -97,8 +97,10 @@ public class FolderChildrenCollection extends CmisObjectCollection
       try
       {
          includeRelationships =
-            request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS) == null ? EnumIncludeRelationships.NONE
-               : EnumIncludeRelationships.fromValue(request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
+            request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS) == null
+               || request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS).length() == 0
+               ? EnumIncludeRelationships.NONE : EnumIncludeRelationships.fromValue(request
+                  .getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
       }
       catch (IllegalArgumentException iae)
       {
@@ -109,8 +111,9 @@ public class FolderChildrenCollection extends CmisObjectCollection
       try
       {
          maxItems =
-            request.getParameter(AtomCMIS.PARAM_MAX_ITEMS) == null ? CMIS.MAX_ITEMS : Integer.parseInt(request
-               .getParameter(AtomCMIS.PARAM_MAX_ITEMS));
+            request.getParameter(AtomCMIS.PARAM_MAX_ITEMS) == null
+               || request.getParameter(AtomCMIS.PARAM_MAX_ITEMS).length() == 0 ? CMIS.MAX_ITEMS : Integer
+               .parseInt(request.getParameter(AtomCMIS.PARAM_MAX_ITEMS));
       }
       catch (NumberFormatException nfe)
       {
@@ -121,7 +124,8 @@ public class FolderChildrenCollection extends CmisObjectCollection
       try
       {
          skipCount =
-            request.getParameter(AtomCMIS.PARAM_SKIP_COUNT) == null ? 0 : Integer.parseInt(request
+            request.getParameter(AtomCMIS.PARAM_SKIP_COUNT) == null
+               || request.getParameter(AtomCMIS.PARAM_SKIP_COUNT).length() == 0 ? 0 : Integer.parseInt(request
                .getParameter(AtomCMIS.PARAM_SKIP_COUNT));
       }
       catch (NumberFormatException nfe)
@@ -130,7 +134,10 @@ public class FolderChildrenCollection extends CmisObjectCollection
          throw new ResponseContextException(msg, 400);
       }
       boolean includePathSegments = Boolean.parseBoolean(request.getParameter(AtomCMIS.PARAM_INCLUDE_PATH_SEGMENT));
-      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
+      // XXX At the moment get all properties from back-end. We need some of them for build correct feed.
+      // Filter will be applied during build final Atom Document.
+      //      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
+      String propertyFilter = null;
       String renditionFilter = request.getParameter(AtomCMIS.PARAM_RENDITION_FILTER);
       String orderBy = request.getParameter(AtomCMIS.PARAM_ORDER_BY);
       try
@@ -243,12 +250,13 @@ public class FolderChildrenCollection extends CmisObjectCollection
 
             if (type.getBaseId() == EnumBaseObjectTypeIds.CMIS_DOCUMENT)
             {
-               String versioningStateParam = request.getParameter(AtomCMIS.PARAM_VERSIONING_STATE);
+               String versioningStateParam = request.getParameter(AtomCMIS.PARAM_VERSIONING_SSTATE);
                EnumVersioningState versioningState;
                try
                {
                   versioningState =
-                     versioningStateParam == null ? null : EnumVersioningState.fromValue(versioningStateParam);
+                     versioningStateParam == null || versioningStateParam.length() == 0 ? EnumVersioningState.MAJOR
+                        : EnumVersioningState.fromValue(versioningStateParam);
                }
                catch (IllegalArgumentException iae)
                {

@@ -53,7 +53,7 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
 
    /** The logger. */
    private static final Log LOG = ExoLogger.getLogger(AbstractCmisCollection.class);
-   
+
    /**
     * Instantiates a new abstract cmis collection.
     */
@@ -226,7 +226,7 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
     */
    protected ResponseContext createErrorResponse(Throwable t, int status)
    {
-//      LOG.error(t.getMessage());
+      //      LOG.error(t.getMessage());
       LOG.error(t.getMessage(), t);
       return new EmptyResponseContext(status, t.getMessage());
    }

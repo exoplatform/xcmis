@@ -48,7 +48,7 @@ public class QueryCollection extends CmisObjectCollection
 
    /** The query service. */
    protected final DiscoveryService queryService;
-   
+
    /**
     * Instantiates a new query collection.
     * 

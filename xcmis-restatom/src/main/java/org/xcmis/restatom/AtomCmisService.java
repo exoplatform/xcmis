@@ -230,8 +230,17 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @DELETE
+   @Path("{repositoryId}/foldertree/{folderId}")
+   public Response deleteFolderTree(@PathParam("repositoryId") String repositoryId, @PathParam("folderId") String folderId,
+      @QueryParam("unfileObject") String unfileNonfolderObjects,
+      @DefaultValue("false") @QueryParam("continueOnFailure") boolean continueOnFailure)
+   {
+      return deleteDescendants(repositoryId, folderId, unfileNonfolderObjects, continueOnFailure);
+   }
+   
+   @DELETE
    @Path("{repositoryId}/descendants/{folderId}")
-   public Response deleteTree(@PathParam("repositoryId") String repositoryId, @PathParam("folderId") String folderId,
+   public Response deleteDescendants(@PathParam("repositoryId") String repositoryId, @PathParam("folderId") String folderId,
       @QueryParam("unfileObject") String unfileNonfolderObjects,
       @DefaultValue("false") @QueryParam("continueOnFailure") boolean continueOnFailure)
    {
@@ -683,10 +692,10 @@ public class AtomCmisService implements ResourceContainer
       objectById.setTemplate(new StringBuilder() //
          .append(repoPath) //
          .append("/object/{id}?") //
-         .append("filter={filter}&amp;") //
-         .append("includeAllowableActions={includeAllowableActions}&amp;") //
-         .append("includePolicyIds={includePolicyIds}&amp;") //
-         .append("includeRelationships={includeRelationships}&amp;") //
+         .append("filter={filter}&") //
+         .append("includeAllowableActions={includeAllowableActions}&") //
+         .append("includePolicyIds={includePolicyIds}&") //
+         .append("includeRelationships={includeRelationships}&") //
          .append("includeACL={includeACL}").toString());
       objectById.setType(AtomCMIS.URITEMPLATE_OBJECTBYID);
       UriTemplateTypeElement objectByIdElement = ws.addExtension(AtomCMIS.URITEMPLATE);
@@ -698,10 +707,10 @@ public class AtomCmisService implements ResourceContainer
       folderByPath.setTemplate(new StringBuilder() //
          .append(repoPath) //
          .append("/objectbypath/{objectpath}?")//
-         .append("filter={filter}&amp;")//
-         .append("includeAllowableActions={includeAllowableActions}&amp;")//
-         .append("includePolicyIds={includePolicyIds}&amp;")//
-         .append("includeRelationships={includeRelationships}&amp;")//
+         .append("filter={filter}&")//
+         .append("includeAllowableActions={includeAllowableActions}&")//
+         .append("includePolicyIds={includePolicyIds}&")//
+         .append("includeRelationships={includeRelationships}&")//
          .append("includeACL={includeACL}").toString());
       folderByPath.setType(AtomCMIS.URITEMPLATE_OBJECTBYPATH);
       UriTemplateTypeElement folderByPathElement = ws.addExtension(AtomCMIS.URITEMPLATE);
@@ -711,10 +720,10 @@ public class AtomCmisService implements ResourceContainer
       //      CmisUriTemplateType query = new CmisUriTemplateType();
       //      query.setMediatype(AtomCMIS.MEDIATYPE_ATOM_FEED);
       //      query.setTemplate(repoPath + "/query?"//
-      //         + "q={q}&amp;"//
-      //         + "searchAllVersions={searchAllVersions}&amp;"//
-      //         + "maxItems={maxItems}&amp;skipCount={skipCount}&amp;"//
-      //         + "includeAllowableActions={includeAllowableActions}=&amp;"//
+      //         + "q={q}&"//
+      //         + "searchAllVersions={searchAllVersions}&"//
+      //         + "maxItems={maxItems}&skipCount={skipCount}&"//
+      //         + "includeAllowableActions={includeAllowableActions}=&"//
       //         + "includeRelationships={includeRelationships}");
       //      query.setType(AtomCMIS.URITEMPLATE_QUERY);
       //      UriTemplateTypeElement queryElement = ws.addExtension(AtomCMIS.URITEMPLATE);

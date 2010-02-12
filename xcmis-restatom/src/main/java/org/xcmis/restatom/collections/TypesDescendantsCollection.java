@@ -84,7 +84,8 @@ public class TypesDescendantsCollection extends CmisTypeCollection
       try
       {
          depth =
-            request.getParameter(AtomCMIS.PARAM_DEPTH) == null ? 1 : Integer.parseInt(request
+            request.getParameter(AtomCMIS.PARAM_DEPTH) == null
+               || request.getParameter(AtomCMIS.PARAM_DEPTH).length() == 0 ? 1 : Integer.parseInt(request
                .getParameter(AtomCMIS.PARAM_DEPTH));
       }
       catch (NumberFormatException e)

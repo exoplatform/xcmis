@@ -70,8 +70,9 @@ public class TypesChildrenCollection extends CmisTypeCollection
       try
       {
          maxItems =
-            request.getParameter(AtomCMIS.PARAM_MAX_ITEMS) == null ? CMIS.MAX_ITEMS : Integer.parseInt(request
-               .getParameter(AtomCMIS.PARAM_MAX_ITEMS));
+            request.getParameter(AtomCMIS.PARAM_MAX_ITEMS) == null
+               || request.getParameter(AtomCMIS.PARAM_MAX_ITEMS).length() == 0 ? CMIS.MAX_ITEMS : Integer
+               .parseInt(request.getParameter(AtomCMIS.PARAM_MAX_ITEMS));
       }
       catch (NumberFormatException nfe)
       {
@@ -82,7 +83,8 @@ public class TypesChildrenCollection extends CmisTypeCollection
       try
       {
          skipCount =
-            request.getParameter(AtomCMIS.PARAM_SKIP_COUNT) == null ? 0 : Integer.parseInt(request
+            request.getParameter(AtomCMIS.PARAM_SKIP_COUNT) == null
+               || request.getParameter(AtomCMIS.PARAM_SKIP_COUNT).length() == 0 ? 0 : Integer.parseInt(request
                .getParameter(AtomCMIS.PARAM_SKIP_COUNT));
       }
       catch (NumberFormatException nfe)
@@ -97,7 +99,7 @@ public class TypesChildrenCollection extends CmisTypeCollection
             repositoryService.getTypeChildren(repositoryId, typeId, includePropertyDefinitions, maxItems, skipCount);
          addPageLinks(typeId, feed, "types", maxItems, skipCount, list.getNumItems() == null ? -1 : list.getNumItems()
             .intValue(), list.isHasMoreItems(), request);
-         
+
          String down = getTypeDescendantsLink(typeId, request);
          feed.addLink(down, AtomCMIS.LINK_DOWN, AtomCMIS.MEDIATYPE_CMISTREE, null, null, -1);
 
@@ -159,17 +161,17 @@ public class TypesChildrenCollection extends CmisTypeCollection
       feed.setTitle(getTitle(request));
       feed.addAuthor(getAuthor(request));
       feed.setUpdated(AtomUtils.getAtomDate(Calendar.getInstance()));
-      
+
       // Service link.
       feed.addLink(getServiceLink(request), AtomCMIS.LINK_SERVICE, AtomCMIS.MEDIATYPE_ATOM_SERVICE, null, null, -1);
-      
+
       Map<String, String> params = new HashMap<String, String>();
       params.put("repoid", getRepositoryId(request));
       params.put("atomdoctype", "types");
       params.put("id", request.getTarget().getParameter("typeid"));
       String self = request.absoluteUrlFor(TargetType.ENTRY, params);
       feed.addLink(self, AtomCMIS.LINK_SELF, AtomCMIS.MEDIATYPE_ATOM_FEED, null, null, -1);
-      
+
       return feed;
    }
 

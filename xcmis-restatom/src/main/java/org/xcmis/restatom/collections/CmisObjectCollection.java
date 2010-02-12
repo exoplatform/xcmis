@@ -328,8 +328,10 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       try
       {
          includeRelationships =
-            request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS) == null ? EnumIncludeRelationships.NONE
-               : EnumIncludeRelationships.fromValue(request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
+            request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS) == null
+               || request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS).length() == 0
+               ? EnumIncludeRelationships.NONE : EnumIncludeRelationships.fromValue(request
+                  .getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
       }
       catch (IllegalArgumentException iae)
       {
@@ -353,7 +355,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          if (type == EnumBaseObjectTypeIds.CMIS_DOCUMENT)
          {
             String returnVersion = request.getParameter(AtomCMIS.PARAM_RETURN_VERSION);
-            if (returnVersion == null)
+            if (returnVersion == null || returnVersion.length() == 0)
                return object;
             EnumReturnVersion enumReturnVersion;
             try
@@ -528,7 +530,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          ObjectTypeElement objectElement = entry.getFirstChild(AtomCMIS.OBJECT);
          CmisObjectType object = objectElement.getObject();
          updatePropertiesFromEntry(object, entry);
-         
+
          boolean checkin = Boolean.parseBoolean(request.getParameter(AtomCMIS.PARAM_CHECKIN));
          CmisObjectType updated;
 
@@ -623,7 +625,9 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          // TODO : is correct ?
          String changeToken = request.getHeader(HttpHeaders.IF_MATCH);
          String overwriteFlagParameter = request.getParameter(AtomCMIS.PARAM_OVERWRITE_FLAG);
-         boolean overwriteFlag = overwriteFlagParameter == null ? true : Boolean.parseBoolean(overwriteFlagParameter);
+         boolean overwriteFlag =
+            overwriteFlagParameter == null || overwriteFlagParameter.length() == 0 ? true : Boolean
+               .parseBoolean(overwriteFlagParameter);
          objectService.setContentStream(getRepositoryId(request), getId(request), content, changeToken, overwriteFlag);
       }
       catch (IOException ioe)
@@ -672,7 +676,9 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          // TODO : is correct ?
          String changeToken = request.getHeader(HttpHeaders.IF_MATCH);
          String overwriteFlagParameter = request.getParameter(AtomCMIS.PARAM_OVERWRITE_FLAG);
-         boolean overwriteFlag = overwriteFlagParameter == null ? true : Boolean.parseBoolean(overwriteFlagParameter);
+         boolean overwriteFlag =
+            overwriteFlagParameter == null || overwriteFlagParameter.length() == 0 ? true : Boolean
+               .parseBoolean(overwriteFlagParameter);
          CmisObjectType updated =
             objectService.setContentStream(getRepositoryId(request), getId(request), content, changeToken,
                overwriteFlag);

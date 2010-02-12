@@ -75,8 +75,9 @@ public class AllVersionsCollection extends CmisObjectCollection
       try
       {
          maxItems =
-            request.getParameter(AtomCMIS.PARAM_MAX_ITEMS) == null ? CMIS.MAX_ITEMS : Integer.parseInt(request
-               .getParameter(AtomCMIS.PARAM_MAX_ITEMS));
+            request.getParameter(AtomCMIS.PARAM_MAX_ITEMS) == null
+               || request.getParameter(AtomCMIS.PARAM_MAX_ITEMS).length() == 0 ? CMIS.MAX_ITEMS : Integer
+               .parseInt(request.getParameter(AtomCMIS.PARAM_MAX_ITEMS));
       }
       catch (NumberFormatException nfe)
       {
@@ -87,7 +88,8 @@ public class AllVersionsCollection extends CmisObjectCollection
       try
       {
          skipCount =
-            request.getParameter(AtomCMIS.PARAM_SKIP_COUNT) == null ? 0 : Integer.parseInt(request
+            request.getParameter(AtomCMIS.PARAM_SKIP_COUNT) == null
+               || request.getParameter(AtomCMIS.PARAM_SKIP_COUNT).length() == 0 ? 0 : Integer.parseInt(request
                .getParameter(AtomCMIS.PARAM_SKIP_COUNT));
       }
       catch (NumberFormatException nfe)

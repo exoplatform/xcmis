@@ -108,8 +108,10 @@ public class ParentsCollection extends CmisObjectCollection
       try
       {
          includeRelationships =
-            request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS) == null ? EnumIncludeRelationships.NONE
-               : EnumIncludeRelationships.fromValue(request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
+            request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS) == null
+               || request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS).length() == 0
+               ? EnumIncludeRelationships.NONE : EnumIncludeRelationships.fromValue(request
+                  .getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
       }
       catch (IllegalArgumentException iae)
       {

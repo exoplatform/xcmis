@@ -202,8 +202,9 @@ public class RelationshipsCollection extends CmisObjectCollection
       try
       {
          maxItems =
-            request.getParameter(AtomCMIS.PARAM_MAX_ITEMS) == null ? CMIS.MAX_ITEMS : Integer.parseInt(request
-               .getParameter(AtomCMIS.PARAM_MAX_ITEMS));
+            request.getParameter(AtomCMIS.PARAM_MAX_ITEMS) == null
+               || request.getParameter(AtomCMIS.PARAM_MAX_ITEMS).length() == 0 ? CMIS.MAX_ITEMS : Integer
+               .parseInt(request.getParameter(AtomCMIS.PARAM_MAX_ITEMS));
       }
       catch (NumberFormatException nfe)
       {
@@ -214,7 +215,8 @@ public class RelationshipsCollection extends CmisObjectCollection
       try
       {
          skipCount =
-            request.getParameter(AtomCMIS.PARAM_SKIP_COUNT) == null ? 0 : Integer.parseInt(request
+            request.getParameter(AtomCMIS.PARAM_SKIP_COUNT) == null
+               || request.getParameter(AtomCMIS.PARAM_SKIP_COUNT).length() == 0 ? 0 : Integer.parseInt(request
                .getParameter(AtomCMIS.PARAM_SKIP_COUNT));
       }
       catch (NumberFormatException nfe)
@@ -226,8 +228,10 @@ public class RelationshipsCollection extends CmisObjectCollection
       try
       {
          direction =
-            request.getParameter(AtomCMIS.PARAM_RELATIONSHIP_DIRECTION) == null ? EnumRelationshipDirection.EITHER
-               : EnumRelationshipDirection.fromValue(AtomCMIS.PARAM_RELATIONSHIP_DIRECTION);
+            request.getParameter(AtomCMIS.PARAM_RELATIONSHIP_DIRECTION) == null
+               || request.getParameter(AtomCMIS.PARAM_RELATIONSHIP_DIRECTION).length() == 0
+               ? EnumRelationshipDirection.EITHER : EnumRelationshipDirection
+                  .fromValue(AtomCMIS.PARAM_RELATIONSHIP_DIRECTION);
       }
       catch (IllegalArgumentException iae)
       {

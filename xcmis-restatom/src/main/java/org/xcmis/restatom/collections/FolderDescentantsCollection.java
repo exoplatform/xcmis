@@ -153,8 +153,10 @@ public class FolderDescentantsCollection extends CmisObjectCollection
       try
       {
          includeRelationships =
-            request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS) == null ? EnumIncludeRelationships.NONE
-               : EnumIncludeRelationships.fromValue(request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
+            request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS) == null
+               || request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS).length() == 0
+               ? EnumIncludeRelationships.NONE : EnumIncludeRelationships.fromValue(request
+                  .getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
       }
       catch (IllegalArgumentException iae)
       {
@@ -165,7 +167,8 @@ public class FolderDescentantsCollection extends CmisObjectCollection
       try
       {
          depth =
-            request.getParameter(AtomCMIS.PARAM_DEPTH) == null ? 1 : Integer.parseInt(request
+            request.getParameter(AtomCMIS.PARAM_DEPTH) == null
+               || request.getParameter(AtomCMIS.PARAM_DEPTH).length() == 0 ? 1 : Integer.parseInt(request
                .getParameter(AtomCMIS.PARAM_DEPTH));
       }
       catch (NumberFormatException nfe)
