@@ -51,7 +51,6 @@
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
       <shindig.version>1.1-BETA5-incubating</shindig.version>
-
    </properties>
 
    <prerequisites>
@@ -418,36 +417,36 @@
             <version>0.1.0</version>
          </dependency>
          <dependency>
-           <groupId>org.apache.shindig</groupId>
-           <artifactId>shindig-common</artifactId>
-           <version>${shindig.version}</version>
+            <groupId>org.apache.shindig</groupId>
+            <artifactId>shindig-common</artifactId>
+            <version>${shindig.version}</version>
          </dependency>
          <dependency>
-           <groupId>org.apache.shindig</groupId>
-           <artifactId>shindig-features</artifactId>
-           <version>${shindig.version}</version>
+            <groupId>org.apache.shindig</groupId>
+            <artifactId>shindig-features</artifactId>
+            <version>${shindig.version}</version>
          </dependency>
          <dependency>
-           <groupId>org.apache.shindig</groupId>
-           <artifactId>shindig-gadgets</artifactId>
-           <version>${shindig.version}</version>
+            <groupId>org.apache.shindig</groupId>
+            <artifactId>shindig-gadgets</artifactId>
+            <version>${shindig.version}</version>
          </dependency>
          <dependency>
-           <groupId>org.apache.shindig</groupId>
-           <artifactId>shindig-social-api</artifactId>
-           <version>${shindig.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>com.google.code.guice</groupId>
-          <artifactId>guice</artifactId>
-          <version>2.0</version>
-      </dependency>
-      <dependency>
-         <groupId>com.google.code.guice</groupId>
-         <artifactId>guice-jmx</artifactId>
-         <version>2.0</version>
-      </dependency>
-     </dependencies>
+            <groupId>org.apache.shindig</groupId>
+            <artifactId>shindig-social-api</artifactId>
+            <version>${shindig.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.google.code.guice</groupId>
+            <artifactId>guice</artifactId>
+            <version>2.0</version>
+         </dependency>
+         <dependency>
+            <groupId>com.google.code.guice</groupId>
+            <artifactId>guice-jmx</artifactId>
+            <version>2.0</version>
+         </dependency>
+      </dependencies>
    </dependencyManagement>
 
    <build>
@@ -533,8 +532,42 @@
                <artifactId>maven-license-plugin</artifactId>
                <version>1.5.0</version>
             </plugin>
+            <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-checkstyle-plugin</artifactId>
+               <version>2.3</version>
+            </plugin>
+            <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-javadoc-plugin</artifactId>
+               <version>2.6</version>
+            </plugin>
+            <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-source-plugin</artifactId>
+               <version>2.1</version>
+            </plugin>
          </plugins>
       </pluginManagement>
+      
+      <plugins>
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <executions>
+               <execution>
+                  <id>attach-sources</id>
+                  <goals>
+                     <goal>jar-no-fork</goal>
+                  </goals>
+               </execution>
+            </executions>
+            <configuration>
+               <includePom>true</includePom>
+            </configuration>
+         </plugin>
+      </plugins>
+      
    </build>
 
    <reporting>
@@ -542,12 +575,36 @@
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-checkstyle-plugin</artifactId>
-            <version>2.3</version>
             <configuration>
                <configLocation>${project.parent.basedir}/checkstyle-checker.xml</configLocation>
                <suppressionsLocation>${project.parent.basedir}/checkstyle-suppressions.xml</suppressionsLocation>
             </configuration>
          </plugin>
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <configuration>
+               <aggregate>true</aggregate>
+               <reportOutputDirectory>${project.build.directory}/javadoc</reportOutputDirectory>
+               <maxmemory>512m</maxmemory>
+               <minmemory>256m</minmemory>
+               <links>
+                  <link>http://java.sun.com/j2ee/1.4/docs/api</link>
+                  <link>http://java.sun.com/j2se/1.5.0/docs/api</link>
+                  <link>http://jakarta.apache.org/commons/collections/apidocs-COLLECTIONS_3_0/</link>
+                  <link>http://jakarta.apache.org/commons/dbcp/apidocs/</link>
+                  <link>http://jakarta.apache.org/commons/fileupload/apidocs/</link>
+                  <link>http://jakarta.apache.org/commons/httpclient/apidocs/</link>
+                  <link>http://jakarta.apache.org/commons/logging/api/</link>
+                  <link>http://jakarta.apache.org/commons/pool/apidocs/</link>
+                  <link>http://www.junit.org/junit/javadoc/</link>
+                  <link>http://logging.apache.org/log4j/docs/api/</link>
+                  <link>http://jakarta.apache.org/regexp/apidocs/</link>
+                  <link>http://jakarta.apache.org/velocity/api/</link>
+               </links>
+            </configuration>
+         </plugin>
       </plugins>
    </reporting>
+   
 </project>
