@@ -486,7 +486,7 @@ public interface AtomCMIS extends CMIS
 
    String PARAM_UNFILE_OBJECT = EnumArguments.UNFILE_OBJECTS.value();
 
-   String PARAM_VERSIONING_SSTATE = EnumArguments.VERSIONING_SSTATE.value();
+   String PARAM_VERSIONING_STATE = EnumArguments.VERSIONING_STATE.value();
 
    String LINK_SELF = EnumLinkRelations.SELF.value();
 
