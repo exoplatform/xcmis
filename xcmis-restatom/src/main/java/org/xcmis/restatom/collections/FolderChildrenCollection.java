@@ -250,7 +250,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
 
             if (type.getBaseId() == EnumBaseObjectTypeIds.CMIS_DOCUMENT)
             {
-               String versioningStateParam = request.getParameter(AtomCMIS.PARAM_VERSIONING_SSTATE);
+               String versioningStateParam = request.getParameter(AtomCMIS.PARAM_VERSIONING_STATE);
                EnumVersioningState versioningState;
                try
                {
