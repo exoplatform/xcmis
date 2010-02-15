@@ -95,8 +95,6 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
       PropertiesTypeElement propertiesElement = getPropertiesElement();
       if (propertiesElement != null)
          object.setProperties(propertiesElement.getProperties());
-      else
-         object.setProperties(new CmisPropertiesType());
       // XXX At the moment do not process other stuff from XML.
       // Don't need this now. It is not clear from specification 
       // how to process (apply) policies.

@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1213,7 +1214,14 @@ public class EntryImpl extends TypeManagerImpl implements Entry
       }
       else
       {
-         storage.getContents().put(objectId, content);
+         ByteArrayOutputStream out = new ByteArrayOutputStream();
+         InputStream in = content.getStream();
+         byte[] buf = new byte[1024];
+         int r = -1;
+         while ((r = in.read(buf)) != -1)
+            out.write(buf, 0, r);
+         storage.getContents().put(objectId,
+            (new SimpleContentStream(out.toByteArray(), getName(), content.getMediaType())));
          setInteger(CMIS.CONTENT_STREAM_LENGTH, BigInteger.valueOf(content.length()));
          setString(CMIS.CONTENT_STREAM_ID, getObjectId());
          setString(CMIS.CONTENT_STREAM_MIME_TYPE, content.getMediaType());
@@ -1597,6 +1605,26 @@ public class EntryImpl extends TypeManagerImpl implements Entry
       if (userId != null)
          child.put(CMIS.CREATED_BY, new String[]{userId});
       child.put(CMIS.CREATION_DATE, new Calendar[]{date});
+
+      List<Entry> parents = this.getParents();
+      LinkedList<String> pathSegms = new LinkedList<String>();
+      pathSegms.add(getName());
+      pathSegms.add(name);
+      while (parents.size() > 0)
+      {
+         Entry parent = parents.get(0);
+         pathSegms.addFirst(parent.getName());
+         parents = parent.getParents();
+      }
+
+      StringBuilder path = new StringBuilder();
+      for (String seg : pathSegms)
+      {
+         if (path.length() > 1)
+            path.append('/');
+         path.append(CMIS.ROOT_FOLDER_NAME.equals(seg) ? "/" : seg);
+      }
+      child.put(CMIS.PATH, new String[]{path.toString()});
 
       storage.getObjects().put(childId, child);
 

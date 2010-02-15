@@ -39,6 +39,7 @@ import org.exoplatform.common.http.client.HTTPResponse;
 import org.exoplatform.common.http.client.ModuleException;
 import org.xcmis.atom.CmisContentType;
 import org.xcmis.atom.EnumReturnVersion;
+import org.xcmis.core.CmisAccessControlListType;
 import org.xcmis.core.CmisListOfIdsType;
 import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.CmisPropertiesType;
@@ -448,8 +449,9 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
             getStreamId(request), //
             0, // 
             Long.MAX_VALUE);
-         if (content == null)
-            return new EmptyResponseContext(200);
+         /*         if (content == null)
+                     return new EmptyResponseContext(200);
+         */
          ResponseContext response = new MediaResponseContext(content.getStream(), 200);
          response.setContentType(content.getMediaType());
          response.setContentLength(content.length());
@@ -521,37 +523,35 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       }
       catch (ResponseContextException rce)
       {
-         rce.printStackTrace();
+         //         rce.printStackTrace();
          return rce.getResponseContext();
       }
 
       try
       {
          ObjectTypeElement objectElement = entry.getFirstChild(AtomCMIS.OBJECT);
-         CmisObjectType object = objectElement.getObject();
+         CmisObjectType object = objectElement != null ? object = objectElement.getObject() : new CmisObjectType();
+         if (object.getProperties() == null)
+            object.setProperties(new CmisPropertiesType());
          updatePropertiesFromEntry(object, entry);
+
+         CmisPropertiesType properties = object.getProperties();
+         CmisListOfIdsType policyIds = object.getPolicyIds();
+         CmisAccessControlListType acl = object.getAcl();
+         ContentStream contentStream = getContentStream(entry, request);
 
          boolean checkin = Boolean.parseBoolean(request.getParameter(AtomCMIS.PARAM_CHECKIN));
          CmisObjectType updated;
-
          if (checkin)
          {
             boolean major = Boolean.parseBoolean(request.getParameter(AtomCMIS.PARAM_MAJOR));
             String checkinComment = request.getParameter(AtomCMIS.PARAM_CHECKIN_COMMENT);
-            CmisListOfIdsType policyIds = object.getPolicyIds();
             // TODO : ACEs for removing. Not clear from specification how to
             // pass (obtain) ACEs for adding and removing from one object.
-            updated = versioningService.checkin(//
-               getRepositoryId(request), //
-               getId(request), //
-               major, //
-               object.getProperties(), //
-               getContentStream(entry, request), //
-               checkinComment, //
-               object.getAcl(), // Add ACEs
-               null, //
-               policyIds != null && policyIds.getId().size() > 0 ? policyIds.getId() : null //
-               );
+            updated =
+               versioningService.checkin(getRepositoryId(request), getId(request), major, properties, contentStream,
+                  checkinComment, acl, null, policyIds != null && policyIds.getId().size() > 0 ? policyIds.getId()
+                     : null);
          }
          else
          {
@@ -565,11 +565,13 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
             // ------------------------------------------
             // Method is PUT - use strong comparison. 
             String changeToken = request.getHeader(HttpHeaders.IF_MATCH);
-            updated =
-               objectService.updateProperties(getRepositoryId(request), getId(request), changeToken, object
-                  .getProperties());
+
+            updated = objectService.updateProperties(getRepositoryId(request), getId(request), changeToken, properties);
+            if (contentStream != null)
+               updated =
+                  objectService.setContentStream(getRepositoryId(request), getId(request), contentStream, changeToken,
+                     true);
          }
-         // TODO update content
          entry = request.getAbdera().getFactory().newEntry();
          addEntryDetails(request, entry, request.getResolvedUri(), updated);
          return buildGetEntryResponse(request, entry);

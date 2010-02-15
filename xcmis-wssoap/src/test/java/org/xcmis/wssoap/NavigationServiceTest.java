@@ -42,7 +42,7 @@ public class NavigationServiceTest extends BaseTest
    private final static String SERVICE_NAME = "NavigationService";
 
    /** Address. */
-   private final static String SERVICE_ADDRESS = "http://localhost:8080/" + SERVICE_NAME;
+   private final static String SERVICE_ADDRESS = "http://localhost:8081/" + SERVICE_NAME;
 
    /** Server. */
    private Server server;

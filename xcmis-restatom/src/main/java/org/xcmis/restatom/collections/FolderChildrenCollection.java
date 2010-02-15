@@ -29,8 +29,10 @@ import org.apache.abdera.protocol.server.TargetType;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.core.CmisAccessControlListType;
 import org.xcmis.core.CmisObjectType;
+import org.xcmis.core.CmisPropertiesType;
 import org.xcmis.core.CmisProperty;
 import org.xcmis.core.CmisPropertyId;
+import org.xcmis.core.CmisPropertyString;
 import org.xcmis.core.CmisTypeDefinitionType;
 import org.xcmis.core.EnumBaseObjectTypeIds;
 import org.xcmis.core.EnumIncludeRelationships;
@@ -216,16 +218,30 @@ public class FolderChildrenCollection extends CmisObjectCollection
       String id = null;
 
       ObjectTypeElement objectElement = entry.getFirstChild(AtomCMIS.OBJECT);
-      CmisObjectType object = objectElement.getObject();
-
+      //      CmisObjectType object = objectElement.getObject();
+      boolean hasCMISElement = objectElement != null;
+      CmisObjectType object = hasCMISElement ? object = objectElement.getObject() : new CmisObjectType();
+      if (object.getProperties() == null)
+         object.setProperties(new CmisPropertiesType());
       updatePropertiesFromEntry(object, entry);
-      for (CmisProperty p : object.getProperties().getProperty())
+      if (hasCMISElement)
       {
-         String pName = p.getPropertyDefinitionId();
-         if (CMIS.OBJECT_TYPE_ID.equals(pName))
-            typeId = ((CmisPropertyId)p).getValue().get(0);
-         else if (CMIS.OBJECT_ID.equals(pName))
-            id = ((CmisPropertyId)p).getValue().get(0);
+         for (CmisProperty p : object.getProperties().getProperty())
+         {
+            String pName = p.getPropertyDefinitionId();
+            if (CMIS.OBJECT_TYPE_ID.equals(pName))
+               typeId = ((CmisPropertyId)p).getValue().get(0);
+            else if (CMIS.OBJECT_ID.equals(pName))
+               id = ((CmisPropertyId)p).getValue().get(0);
+         }
+      }
+      else
+      {
+         typeId = "cmis:document";
+         CmisPropertyId idProperty = new CmisPropertyId();
+         idProperty.setPropertyDefinitionId(CMIS.OBJECT_TYPE_ID);
+         idProperty.getValue().add(typeId);
+         object.getProperties().getProperty().add(idProperty);
       }
 
       try

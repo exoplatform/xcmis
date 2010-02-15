@@ -197,4 +197,22 @@ public class EntryTest extends BaseTest
 
    }
 
+   public void testGetPath() throws Exception
+   {
+      Entry folder1 =
+         repository.getRootFolder().createChild(repository.getTypeDefinition("cmis:folder"), "folder1", null);
+      Entry folder2 = folder1.createChild(repository.getTypeDefinition("cmis:folder"), "folder2", null);
+      Entry folder3 = folder2.createChild(repository.getTypeDefinition("cmis:folder"), "folder3", null);
+      Entry folder4 = folder3.createChild(repository.getTypeDefinition("cmis:folder"), "folder4", null);
+      Entry folder5 = folder4.createChild(repository.getTypeDefinition("cmis:folder"), "folder5", null);
+      Entry folder6 = folder5.createChild(repository.getTypeDefinition("cmis:folder"), "folder6", null);
+      assertEquals("/folder1/folder2/folder3/folder4/folder5/folder6", folder6.getString("cmis:path"));
+      assertEquals("/folder1/folder2/folder3/folder4/folder5", folder5.getString("cmis:path"));
+      assertEquals("/folder1/folder2/folder3/folder4", folder4.getString("cmis:path"));
+      assertEquals("/folder1/folder2/folder3", folder3.getString("cmis:path"));
+      assertEquals("/folder1/folder2", folder2.getString("cmis:path"));
+      assertEquals("/folder1", folder1.getString("cmis:path"));
+      assertEquals("/", repository.getRootFolder().getString("cmis:path"));
+   }
+
 }

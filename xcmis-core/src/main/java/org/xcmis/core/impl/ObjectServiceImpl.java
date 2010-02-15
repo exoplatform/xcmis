@@ -589,7 +589,14 @@ public class ObjectServiceImpl extends CmisObjectProducer implements ObjectServi
          LOG.debug("Get content stream, repository " + repositoryId + ", document " + documentId);
       Repository repository = repositoryService.getRepository(repositoryId);
       Entry doc = repository.getObjectById(documentId);
-      return doc.getContent(streamId);
+      ContentStream content = doc.getContent(streamId);
+      /*      if (content == null)
+            {
+               String msg = "Document has not content.";
+               throw new ConstraintException(msg);
+            }
+      */
+      return content;
    }
 
    /**
@@ -745,7 +752,7 @@ public class ObjectServiceImpl extends CmisObjectProducer implements ObjectServi
          if (renditionCreated)
             LOG.debug("Created renditions for document with content stream media type " + content.getMediaType());
       }
-      return getCmisObject(doc, false, EnumIncludeRelationships.NONE, false, false, PropertyFilter.DEFAULT,
+      return getCmisObject(doc, false, EnumIncludeRelationships.NONE, false, false, PropertyFilter.ALL,
          RenditionFilter.NONE, repository.getRenditionManager());
    }
 

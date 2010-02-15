@@ -146,6 +146,7 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
       root.put(CMIS.OBJECT_TYPE_ID, new String[]{type.getId()});
       root.put(CMIS.BASE_TYPE_ID, new String[]{type.getBaseId().value()});
       root.put(CMIS.PARENT_ID, new String[]{});
+      root.put(CMIS.PATH, new String[]{"/"});
       Calendar date = Calendar.getInstance();
       ConversationState cstate = ConversationState.getCurrent();
       String userId = null;
@@ -479,7 +480,7 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
          capabilities.setCapabilityPWCSearchable(true);
          capabilities.setCapabilityPWCUpdatable(true);
          capabilities.setCapabilityQuery(EnumCapabilityQuery.NONE);
-         capabilities.setCapabilityRenditions(EnumCapabilityRendition.READ);
+         capabilities.setCapabilityRenditions(EnumCapabilityRendition.NONE);
          capabilities.setCapabilityUnfiling(true);
          capabilities.setCapabilityVersionSpecificFiling(false);
          info.setCapabilities(capabilities);
