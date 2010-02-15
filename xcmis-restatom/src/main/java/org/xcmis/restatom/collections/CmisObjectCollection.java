@@ -449,9 +449,9 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
             getStreamId(request), //
             0, // 
             Long.MAX_VALUE);
-         /*         if (content == null)
-                     return new EmptyResponseContext(200);
-         */
+         if (content == null)
+            return new EmptyResponseContext(200);
+
          ResponseContext response = new MediaResponseContext(content.getStream(), 200);
          response.setContentType(content.getMediaType());
          response.setContentLength(content.length());
