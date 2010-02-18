@@ -20,40 +20,40 @@
 package org.xcmis.spi;
 
 /**
- * Should thrown by CMIS service it got not valid argument.
- * 
- * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
+ * Should be thrown for any others errors that are not expressible by another
+ * CMIS exception.
+ *
+ * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-public class InvalidArgumentException extends CmisRuntimeException
+public class CmisRuntimeException extends RuntimeException
 {
-
    /**
     * Serial version UID.
     */
-   private static final long serialVersionUID = 16179547915588323L;
+   private static final long serialVersionUID = 2382756988364004750L;
 
    /**
-    * Construct instance <tt>InvalidArgumentException</tt> without message.
+    * Construct instance <tt>CmisRuntimeException</tt> without message.
     */
-   public InvalidArgumentException()
+   public CmisRuntimeException()
    {
       super();
    }
 
    /**
-    * Construct instance <tt>InvalidArgumentException</tt> with message.
+    * Construct instance <tt>CmisRuntimeException</tt> with message.
     * 
     * @param message the detail message about exception
     * @see Throwable#getMessage()
     */
-   public InvalidArgumentException(String message)
+   public CmisRuntimeException(String message)
    {
       super(message);
    }
 
    /**
-    * Construct instance <tt>InvalidArgumentException</tt> with message and cause
+    * Construct instance <tt>CmisRuntimeException</tt> with message and cause
     * exception.
     * 
     * @param message the detail message about exception
@@ -61,18 +61,18 @@ public class InvalidArgumentException extends CmisRuntimeException
     * @see Throwable#getCause()
     * @see Throwable#getMessage()
     */
-   public InvalidArgumentException(String message, Throwable cause)
+   public CmisRuntimeException(String message, Throwable cause)
    {
       super(message, cause);
    }
 
    /**
-    * Construct instance <tt>InvalidArgumentException</tt> with cause exception.
+    * Construct instance <tt>CmisRuntimeException</tt> with cause exception.
     * 
     * @param cause the cause exception
     * @see Throwable#getCause()
     */
-   public InvalidArgumentException(Throwable cause)
+   public CmisRuntimeException(Throwable cause)
    {
       super(cause);
    }
