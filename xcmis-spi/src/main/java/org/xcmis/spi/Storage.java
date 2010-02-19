@@ -22,6 +22,8 @@ package org.xcmis.spi;
 import org.exoplatform.services.security.ConversationState;
 import org.xcmis.core.CmisRepositoryInfoType;
 
+import javax.security.auth.login.LoginException;
+
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
@@ -29,9 +31,33 @@ import org.xcmis.core.CmisRepositoryInfoType;
 public interface Storage
 {
 
-   // TODO : exceptions
+   /**
+    * Create new connection for user that has specified
+    * <code>conversation</code>.
+    * 
+    * @param conversation user's state that contains user identity and some
+    *        optional context specific attributes
+    * @return connection
+    */
    Connection login(ConversationState conversation);
-   
+
+   /**
+    * Connect to storage by using plain user name and password.
+    * 
+    * @param user user name
+    * @param password user password
+    * @return connection
+    * @throws LoginException if parameters <code>user</code> or
+    *         <code>password</code> in invalid
+    */
+   Connection login(String user, String password) throws LoginException;
+
+   /**
+    * Get description of storage and its capabilities.
+    * 
+    * @return storage description
+    * @see CmisRepositoryInfoType
+    */
    CmisRepositoryInfoType getInfo();
-   
+
 }

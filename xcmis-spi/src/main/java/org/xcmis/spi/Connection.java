@@ -24,6 +24,7 @@ import org.xcmis.core.CmisAllowableActionsType;
 import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.CmisPropertiesType;
 import org.xcmis.core.CmisRenditionType;
+import org.xcmis.core.CmisTypeDefinitionType;
 import org.xcmis.core.EnumACLPropagation;
 import org.xcmis.core.EnumBaseObjectTypeIds;
 import org.xcmis.core.EnumIncludeRelationships;
@@ -32,6 +33,7 @@ import org.xcmis.core.EnumUnfileObject;
 import org.xcmis.core.EnumVersioningState;
 import org.xcmis.messaging.CmisObjectInFolderContainerType;
 import org.xcmis.messaging.CmisObjectParentsType;
+import org.xcmis.messaging.CmisTypeContainer;
 import org.xcmis.spi.object.ContentStream;
 import org.xcmis.spi.object.ItemsIterator;
 
@@ -39,6 +41,8 @@ import java.io.IOException;
 import java.util.List;
 
 /**
+ * Connection to CMIS storage.
+ * 
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
@@ -1409,13 +1413,101 @@ public interface Connection
    CmisPropertiesType getPropertiesOfLatestVersion(String versionSeriesId, boolean major, String propertyFilter)
       throws FilterNotValidException, ObjectNotFoundException, CmisRuntimeException;
 
+   // Type Managment
+
    /**
-    * Get type manager.
+    * Add new type.
     * 
-    * @return {@link TypeManagerI}
+    * @param type type definition
+    * @throws ConstraintException if any of the following conditions are met:
+    *         <ul>
+    *         <li>Storage already has type with the same id, see
+    *         {@link CmisTypeDefinitionType#getId()}</li>
+    *         <li>Base type is not specified or is one of optional type that is
+    *         not supported by storage, see
+    *         {@link CmisTypeDefinitionType#getBaseId()}</li>
+    *         <li>Parent type is not specified or does not exists, see
+    *         {@link CmisTypeDefinitionType#getParentId()}</li>
+    *         <li>New type has at least one property definitions that has
+    *         unsupported type, invalid id, so on</li>
+    * @throws StorageException if type can't be added (save changes) cause to
+    *         storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   TypeManagerI getTypeManager() throws CmisRuntimeException;
+   void addType(CmisTypeDefinitionType type) throws CmisRuntimeException;
+
+   /**
+    * Iterator of object types.
+    * 
+    * @param typeId the type id, if not <code>null</code> then return only
+    *        specified Object Type and its direct descendant. If
+    *        <code>null</code> then return base types.
+    * @param includePropertyDefinition <code>true</code> if property definition
+    *        should be included <code>false</code> otherwise
+    * @return list of all base types or specified object type and its direct
+    *         children
+    * @throws TypeNotFoundException if type <code>typeId</code> does not exist
+    * @throws CmisRuntimeException if any others errors occur
+    */
+   ItemsIterator<CmisTypeDefinitionType> getTypeChildren(String typeId, boolean includePropertyDefinition)
+      throws TypeNotFoundException, CmisRuntimeException;
+
+   /**
+    * Get type definition for type <code>typeId</code> include property
+    * definition, see {@link #getTypeDefinition(String, boolean)}
+    * 
+    * @param typeId type Id
+    * @return type definition
+    * @throws TypeNotFoundException if type <code>typeId</code> does not exist
+    * @throws CmisRuntimeException if any others errors occur
+    */
+   CmisTypeDefinitionType getTypeDefinition(String typeId) throws TypeNotFoundException, CmisRuntimeException;
+
+   /**
+    * Get type definition for type <code>typeId</code>.
+    * 
+    * @param typeId type Id
+    * @param includePropertyDefinition if <code>true</code> property definition
+    *        should be included
+    * @return type definition
+    * @throws TypeNotFoundException if type <code>typeId</code> does not exist
+    * @throws CmisRuntimeException if any others errors occur
+    */
+   CmisTypeDefinitionType getTypeDefinition(String typeId, boolean includePropertyDefinition)
+      throws TypeNotFoundException, CmisRuntimeException;
+
+   /**
+    * Get all descendants of specified <code>typeId</code> in hierarchy. If
+    * <code>typeId</code> is <code>null</code> then return all types and ignore
+    * the value of the <code>depth</code> parameter.
+    * 
+    * @param typeId the type id
+    * @param depth the depth of level in hierarchy
+    * @param includePropertyDefinition true if property definition should be
+    *        included false otherwise
+    * @return list of descendant types
+    * @throws TypeNotFoundException if type <code>typeId</code> does not exist
+    * @throws CmisRuntimeException if any others errors occur
+    */
+   List<CmisTypeContainer> getTypeDescendants(String typeId, int depth, boolean includePropertyDefinition)
+      throws TypeNotFoundException, CmisRuntimeException;
+
+   /**
+    * Remove type definition for type <code>typeId</code> .
+    * 
+    * @param typeId type Id
+    * @throws TypeNotFoundException if type <code>typeId</code> does not exist
+    * @throws ConstraintException if removing type violates a storage
+    *         constraint. For example, if storage already contains object of
+    *         this type
+    * @throws StorageException if type can't be removed (save changes) cause to
+    *         storage internal problem
+    * @throws CmisRuntimeException if any others errors occur
+    */
+   void removeType(String typeId) throws TypeNotFoundException, ConstraintException, StorageException,
+      CmisRuntimeException;
+
+   // ---
 
    /**
     * Close this connection.

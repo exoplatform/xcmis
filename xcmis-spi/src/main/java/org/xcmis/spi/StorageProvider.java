@@ -19,17 +19,33 @@
 
 package org.xcmis.spi;
 
-import java.util.Collection;
+import java.util.Set;
 
 /**
+ * Provide access to all available CMIS storages.
+ * 
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
 public interface StorageProvider
 {
-   
+
+   /**
+    * Get storage with specified id.
+    * 
+    * @param id storage id
+    * @return storage
+    * @throws InvalidArgumentException if storage with <code>id</code> does not
+    *         exists
+    */
    Storage getStorage(String id) throws InvalidArgumentException;
-   
-   Collection<String> getStorageIDs(); 
+
+   /**
+    * Get id of all available storages.
+    * 
+    * @return storages iDs if no one storages configured than empty set returned
+    *         never null
+    */
+   Set<String> getStorageIDs();
 
 }
