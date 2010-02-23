@@ -696,7 +696,8 @@ public class AtomCmisService implements ResourceContainer
          .append("includeAllowableActions={includeAllowableActions}&") //
          .append("includePolicyIds={includePolicyIds}&") //
          .append("includeRelationships={includeRelationships}&") //
-         .append("includeACL={includeACL}").toString());
+         .append("includeACL={includeACL}&")//
+         .append("renditionFilter={renditionFilter}").toString());
       objectById.setType(AtomCMIS.URITEMPLATE_OBJECTBYID);
       UriTemplateTypeElement objectByIdElement = ws.addExtension(AtomCMIS.URITEMPLATE);
       objectByIdElement.build(objectById);
@@ -706,12 +707,13 @@ public class AtomCmisService implements ResourceContainer
       folderByPath.setMediatype(AtomCMIS.MEDIATYPE_ATOM_ENTRY);
       folderByPath.setTemplate(new StringBuilder() //
          .append(repoPath) //
-         .append("/objectbypath/{objectpath}?")//
+         .append("/objectbypath/{path}?")//
          .append("filter={filter}&")//
          .append("includeAllowableActions={includeAllowableActions}&")//
          .append("includePolicyIds={includePolicyIds}&")//
          .append("includeRelationships={includeRelationships}&")//
-         .append("includeACL={includeACL}").toString());
+         .append("includeACL={includeACL}&")//
+         .append("renditionFilter={renditionFilter}").toString());
       folderByPath.setType(AtomCMIS.URITEMPLATE_OBJECTBYPATH);
       UriTemplateTypeElement folderByPathElement = ws.addExtension(AtomCMIS.URITEMPLATE);
       folderByPathElement.build(folderByPath);
@@ -722,7 +724,8 @@ public class AtomCmisService implements ResourceContainer
       //      query.setTemplate(repoPath + "/query?"//
       //         + "q={q}&"//
       //         + "searchAllVersions={searchAllVersions}&"//
-      //         + "maxItems={maxItems}&skipCount={skipCount}&"//
+      //         + "maxItems={maxItems}&"//
+      //         + "skipCount={skipCount}&"//
       //         + "includeAllowableActions={includeAllowableActions}=&"//
       //         + "includeRelationships={includeRelationships}");
       //      query.setType(AtomCMIS.URITEMPLATE_QUERY);
