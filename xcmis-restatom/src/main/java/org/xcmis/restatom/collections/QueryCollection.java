@@ -25,6 +25,9 @@ import org.apache.abdera.model.Element;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.parser.ParseException;
 import org.apache.abdera.protocol.server.RequestContext;
+import org.apache.abdera.protocol.server.ResponseContext;
+import org.apache.abdera.protocol.server.context.AbstractResponseContext;
+import org.apache.abdera.protocol.server.context.BaseResponseContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.DiscoveryService;
@@ -71,6 +74,19 @@ public class QueryCollection extends CmisObjectCollection
    public String getId(RequestContext request)
    {
       return "cmis:query:" + getRepositoryId(request);
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   @Override
+   protected ResponseContext buildGetFeedResponse(Feed feed)
+   {
+      ResponseContext rc = super.buildGetFeedResponse(feed);
+      // spec. says need 201 instead 200
+      if (rc.getStatus() == 200)
+         rc.setStatus(201);
+      return rc;
    }
 
    /**
