@@ -703,9 +703,9 @@ public class AtomCmisService implements ResourceContainer
       objectByIdElement.build(objectById);
 
       // objectbypath template
-      CmisUriTemplateType folderByPath = new CmisUriTemplateType();
-      folderByPath.setMediatype(AtomCMIS.MEDIATYPE_ATOM_ENTRY);
-      folderByPath.setTemplate(new StringBuilder() //
+      CmisUriTemplateType objectByPath = new CmisUriTemplateType();
+      objectByPath.setMediatype(AtomCMIS.MEDIATYPE_ATOM_ENTRY);
+      objectByPath.setTemplate(new StringBuilder() //
          .append(repoPath) //
          .append("/objectbypath/{path}?")//
          .append("filter={filter}&")//
@@ -714,9 +714,9 @@ public class AtomCmisService implements ResourceContainer
          .append("includeRelationships={includeRelationships}&")//
          .append("includeACL={includeACL}&")//
          .append("renditionFilter={renditionFilter}").toString());
-      folderByPath.setType(AtomCMIS.URITEMPLATE_OBJECTBYPATH);
+      objectByPath.setType(AtomCMIS.URITEMPLATE_OBJECTBYPATH);
       UriTemplateTypeElement folderByPathElement = ws.addExtension(AtomCMIS.URITEMPLATE);
-      folderByPathElement.build(folderByPath);
+      folderByPathElement.build(objectByPath);
 
       //      // query template
       //      CmisUriTemplateType query = new CmisUriTemplateType();

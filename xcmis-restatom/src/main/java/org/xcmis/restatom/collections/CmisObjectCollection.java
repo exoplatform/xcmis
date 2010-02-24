@@ -1402,7 +1402,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    {
       // TODO : can get smarter?
       String path;
-      if ((path = request.getTarget().getParameter("objectpath")) != null)
+      if ((path = request.getTarget().getParameter("path")) != null)
          return path.charAt(0) == '/' ? path : ('/' + path);
       return super.getResourceName(request);
    }

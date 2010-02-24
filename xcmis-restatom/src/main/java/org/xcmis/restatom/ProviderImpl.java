@@ -131,10 +131,10 @@ public class ProviderImpl extends AbstractProvider
          "repoid", //
          "objectid");
 
-      resolver.setPattern("/cmisatom/([^/]+?)/objectbypath([^\\??]+)(\\??.*)?", //
+      resolver.setPattern("/cmisatom/([^/]+?)/objectbypath/([^\\??]+)(\\??.*)?", //
          TargetType.TYPE_ENTRY, //
          "repoid", //
-         "objectpath");
+         "path");
 
       resolver.setPattern("/cmisatom/([^/]+)/parents/([^/?]+)(\\??.*)?", //
          TargetType.TYPE_COLLECTION, //
