@@ -81,7 +81,7 @@ public class RepositoryServiceImpl implements RepositoryService
       Repository repository = repositoriesManager.getRepository(repositoryId);
       if (repository == null)
       {
-         String msg = "Repository " + repositoryId + " does not exists or unreachable.";
+         String msg = "Repository '" + repositoryId + "' does not exists or unreachable.";
          throw new InvalidArgumentException(msg);
       }
       return repository;

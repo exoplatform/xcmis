@@ -115,8 +115,9 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
          // Plugin miss namespace when create entry for updating. Namespace for prefix 'cmisra' 
          // declared in entry tag. But this tag is overwritten in plugin and has no namespace
          // declaration any more. 
-         setAttributeValue("xmlns:cmisra", "http://docs.oasis-open.org/ns/cmis/restatom/200908/");
-         
+         setAttributeValue("xmlns:" + AtomCMIS.CMISRA_PREFIX, AtomCMIS.CMISRA_NS_URI);
+
+         // Properties
          CmisPropertiesType properties = objectType.getProperties();
          if (properties != null)
          {
@@ -124,6 +125,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
             propertiesElement.build(properties, filter);
          }
 
+         // AllowableActions
          CmisAllowableActionsType allowableActions = objectType.getAllowableActions();
          if (allowableActions != null)
          {
@@ -131,12 +133,17 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
             actionsElement.build(allowableActions);
          }
 
+         // Relationship
          List<CmisObjectType> relationship = objectType.getRelationship();
-         if (relationship != null && relationship.size() > 0)
+         if (relationship != null)
          {
-            ObjectTypeElement relationshipElement = addExtension(AtomCMIS.RELATIOSNHIP);
-            for (CmisObjectType cmisObjectType : relationship)
-               relationshipElement.build(cmisObjectType);
+            // TODO How to implement that relationship type element extension?
+            // Would it contain full information of element or just ID info.
+            // java.lang.ClassCastException: org.apache.abdera.parser.stax.FOMExtensibleElement 
+            // cannot be cast to org.xcmis.restatom.abdera.ObjectTypeElement
+            //            ObjectTypeElement relationshipElement = addExtension(AtomCMIS.RELATIOSNHIP);
+            //            for (CmisObjectType cmisObjectType : relationship)
+            //               relationshipElement.build(cmisObjectType);
          }
 
          // ChangeEventInfo
@@ -147,9 +154,9 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
             changeEventInfoElement.build(changeEventInfo);
          }
 
-         // acl
+         // ACL
          CmisAccessControlListType accessControlList = objectType.getAcl();
-         if (accessControlList != null && accessControlList.getPermission().size() > 0)
+         if (accessControlList != null)
          {
             AccessControlListTypeElement accessControlListTypeElement = addExtension(AtomCMIS.ACL);
             accessControlListTypeElement.build(accessControlList);
@@ -161,7 +168,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
 
          // policyIds
          CmisListOfIdsType policyIds = objectType.getPolicyIds();
-         if (policyIds != null && policyIds.getId().size() > 0)
+         if (policyIds != null)
          {
             ListOfIdsTypeElement listOfIdsTypeTypeElement = addExtension(AtomCMIS.POLICY_IDS);
             listOfIdsTypeTypeElement.build(policyIds);
@@ -169,7 +176,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
 
          // rendition
          List<CmisRenditionType> listRendition = objectType.getRendition();
-         if (listRendition != null && listRendition.size() > 0)
+         if (listRendition != null)
          {
             RenditionTypeElement renditionElement = addExtension(AtomCMIS.RENDITION);
             for (CmisRenditionType rendition : listRendition)

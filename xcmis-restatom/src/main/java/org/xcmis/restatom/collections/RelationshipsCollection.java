@@ -134,11 +134,11 @@ public class RelationshipsCollection extends CmisObjectCollection
       }
 
       if (typeId == null)
-         return createErrorResponse("ObjectTypeId is not specified.", 400);
+         return createErrorResponse("cmis:objectTypeId is not specified.", 400);
       if (sourceId == null)
-         return createErrorResponse("Source id is not specified.", 400);
+         return createErrorResponse("cmis:sourceId is not specified.", 400);
       if (targetId == null)
-         return createErrorResponse("Traget id is not specified.", 400);
+         return createErrorResponse("cmis:targetId is not specified.", 400);
 
       CmisAccessControlListType addACL = null;
       CmisAccessControlListType removeACL = null;

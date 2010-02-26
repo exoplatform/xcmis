@@ -47,8 +47,6 @@ public interface AtomCMIS extends CMIS
 
    QName X_TYPE = new QName(XML_SCHEMA_INST_URI, "type", XML_SCHEMA_INST_PREFIX);
 
-   QName ACCESS_CONTROL = new QName(CMIS_NS_URI, "acl", CMIS_PREFIX);
-
    QName ABSTRACT = new QName(CMIS_NS_URI, "abstract", CMIS_PREFIX);
 
    QName ALLOWABLE_ACTIONS = new QName(CMIS_NS_URI, "allowableActions", CMIS_PREFIX);

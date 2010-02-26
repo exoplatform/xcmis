@@ -76,6 +76,8 @@ import org.xcmis.spi.object.ContentStream;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.security.Principal;
 import java.util.Calendar;
 import java.util.Collections;
@@ -1403,7 +1405,16 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       // TODO : can get smarter?
       String path;
       if ((path = request.getTarget().getParameter("path")) != null)
+      {
+         try
+         {
+            path = URLDecoder.decode(path, "UTF-8");
+         }
+         catch (UnsupportedEncodingException uee)
+         {
+         }
          return path.charAt(0) == '/' ? path : ('/' + path);
+      }
       return super.getResourceName(request);
    }
 

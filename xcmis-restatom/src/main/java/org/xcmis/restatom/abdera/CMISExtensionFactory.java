@@ -119,7 +119,7 @@ public class CMISExtensionFactory extends AbstractExtensionFactory
       addImpl(AtomCMIS.PROPERTY_STRING, PropertyStringElement.class);
       addImpl(AtomCMIS.PROPERTY_URI, PropertyUriElement.class);
       addImpl(AtomCMIS.ALLOWABLE_ACTIONS, AllowableActionsElement.class);
-      addImpl(AtomCMIS.ACCESS_CONTROL, AccessControlListTypeElement.class);
+      addImpl(AtomCMIS.ACL, AccessControlListTypeElement.class);
       addImpl(AtomCMIS.QUERY, QueryTypeElement.class);
       addImpl(AtomCMIS.CHANGE_EVENT_INFO, ChangeEventTypeElement.class);
       addImpl(AtomCMIS.PERMISSIONS, PermissionDefinitionElement.class);
@@ -129,7 +129,7 @@ public class CMISExtensionFactory extends AbstractExtensionFactory
       addImpl(AtomCMIS.RENDITION, RenditionTypeElement.class);
       addImpl(AtomCMIS.URITEMPLATE, UriTemplateTypeElement.class);
       addImpl(AtomCMIS.CONTENT, ContentTypeElement.class);
-
+      
       // fill the MAP
       classes2QName.put(CmisRepositoryEntryType.class, AtomCMIS.REPOSITORY_ENTRY);
       classes2QName.put(CmisRepositoryInfoType.class, AtomCMIS.REPOSITORY_INFO);
@@ -164,7 +164,7 @@ public class CMISExtensionFactory extends AbstractExtensionFactory
       classes2QName.put(CmisPropertyString.class, AtomCMIS.PROPERTY_STRING);
       classes2QName.put(CmisPropertyUri.class, AtomCMIS.PROPERTY_URI);
       classes2QName.put(CmisAllowableActionsType.class, AtomCMIS.ALLOWABLE_ACTIONS);
-      classes2QName.put(CmisAccessControlListType.class, AtomCMIS.ACCESS_CONTROL);
+      classes2QName.put(CmisAccessControlListType.class, AtomCMIS.ACL);
       classes2QName.put(CmisAccessControlPrincipalType.class, AtomCMIS.PRINCIPAL);
       classes2QName.put(CmisQueryType.class, AtomCMIS.QUERY);
       classes2QName.put(CmisChangeEventType.class, AtomCMIS.CHANGE_EVENT_INFO);

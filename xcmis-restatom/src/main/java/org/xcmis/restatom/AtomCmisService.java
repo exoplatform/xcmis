@@ -300,7 +300,7 @@ public class AtomCmisService implements ResourceContainer
       try
       {
          CmisAccessControlListType list = aclService.getACL(repositoryId, objectId, onlyBasicPermissions);
-         AccessControlListTypeElement el = AbderaFactory.getInstance().getFactory().newElement(AtomCMIS.ACCESS_CONTROL);
+         AccessControlListTypeElement el = AbderaFactory.getInstance().getFactory().newElement(AtomCMIS.ACL);
          el.build(list);
          return Response.ok(el).header(HttpHeaders.CACHE_CONTROL, "no-cache").build();
       }
@@ -437,7 +437,7 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @GET
-   @Path("{repositoryId}/objectbypath/{path:.*}")
+   @Path("{repositoryId}/objectbypath")
    @Produces("application/atom+xml;type=entry")
    public Response getObjectByPath(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId)
@@ -707,7 +707,8 @@ public class AtomCmisService implements ResourceContainer
       objectByPath.setMediatype(AtomCMIS.MEDIATYPE_ATOM_ENTRY);
       objectByPath.setTemplate(new StringBuilder() //
          .append(repoPath) //
-         .append("/objectbypath/{path}?")//
+         .append("/objectbypath?")//
+         .append("path={path}&")//
          .append("filter={filter}&")//
          .append("includeAllowableActions={includeAllowableActions}&")//
          .append("includePolicyIds={includePolicyIds}&")//
