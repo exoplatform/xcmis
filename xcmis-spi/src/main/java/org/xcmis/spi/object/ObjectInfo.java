@@ -130,4 +130,11 @@ public interface ObjectInfo
 
    public void setContentStreamId(String contentStreamId);
 
+   /**
+    * CMIS.CONTENT_STREAM_MIME_TYPE
+    */
+   public String getContentStreamMimeType();
+
+   public void setContentStreamMimeType(String contentStreamMimeType);
+
 }

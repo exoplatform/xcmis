@@ -62,6 +62,8 @@ public class ObjectInfoImpl implements ObjectInfo
 
    private String versionSeriesId;
 
+   private String contentStreamMimeType;
+
    /**
     * @see org.xcmis.spi.object.ObjectInfo#getBaseTypeId()
     */
@@ -332,6 +334,16 @@ public class ObjectInfoImpl implements ObjectInfo
    public void setVersionSeriesId(String versionSeriesId)
    {
       this.versionSeriesId = versionSeriesId;
+   }
+   
+   public String getContentStreamMimeType()
+   {
+      return contentStreamMimeType;
+   }
+   
+   public void setContentStreamMimeType(String contentStreamMimeType)
+   {
+      this.contentStreamMimeType = contentStreamMimeType;
    }
 
 }
