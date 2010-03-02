@@ -10,7 +10,7 @@
          <init-params>
             <properties-param>
                <name>namespaces</name>
-               <property name="cmis" value="http://www.exoplatform.com/jcr/cmis/1.0" />
+                <property name="xcmis" value="http://www.exoplatform.com/jcr/xcmis/1.0" />
             </properties-param>
          </init-params>
       </component-plugin>

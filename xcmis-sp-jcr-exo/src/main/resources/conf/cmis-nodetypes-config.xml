@@ -1,6 +1,6 @@
 <nodeTypes xmlns:nt="http://www.jcp.org/jcr/nt/1.0" xmlns:mix="http://www.jcp.org/jcr/mix/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:dc="http://purl.org/dc/elements/1.1">
 
-   <nodeType name="cmis:object" isMixin="true" hasOrderableChildNodes="false" primaryItemName="">
+   <nodeType name="xcmis:object" isMixin="true" hasOrderableChildNodes="false" primaryItemName="">
       <supertypes>
          <supertype>mix:referenceable</supertype>
          <supertype>exo:owneable</supertype>
@@ -35,9 +35,9 @@
       </propertyDefinitions>
    </nodeType>
 
-   <nodeType name="cmis:document" isMixin="true" hasOrderableChildNodes="false" primaryItemName="">
+   <nodeType name="xcmis:document" isMixin="true" hasOrderableChildNodes="false" primaryItemName="">
       <supertypes>
-         <supertype>cmis:object</supertype>
+         <supertype>xcmis:object</supertype>
       </supertypes>
       <propertyDefinitions>
          <propertyDefinition name="cmis:isImmutable" requiredType="Boolean" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
@@ -83,22 +83,22 @@
       <childNodeDefinitions>
          <childNodeDefinition name="*" defaultPrimaryType="" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" sameNameSiblings="false">
             <requiredPrimaryTypes>
-               <requiredPrimaryType>cmis:rendition</requiredPrimaryType>
+               <requiredPrimaryType>xcmis:rendition</requiredPrimaryType>
             </requiredPrimaryTypes>
          </childNodeDefinition>
       </childNodeDefinitions>
    </nodeType>
 
-   <nodeType name="cmis:pwc" isMixin="true" hasOrderableChildNodes="false" primaryItemName="">
+   <nodeType name="xcmis:pwc" isMixin="true" hasOrderableChildNodes="false" primaryItemName="">
       <propertyDefinitions>
          <propertyDefinition name="cmis:latestVersion" requiredType="Reference" autoCreated="false" mandatory="true" onParentVersion="COPY" protected="false" multiple="false">
          </propertyDefinition>
       </propertyDefinitions>
    </nodeType>
 
-   <nodeType name="cmis:folder" isMixin="true" hasOrderableChildNodes="false" primaryItemName="">
+   <nodeType name="xcmis:folder" isMixin="true" hasOrderableChildNodes="false" primaryItemName="">
       <supertypes>
-         <supertype>cmis:object</supertype>
+         <supertype>xcmis:object</supertype>
       </supertypes>
       <propertyDefinitions>
          <propertyDefinition name="cmis:parentId" requiredType="String" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
@@ -117,10 +117,10 @@
       </childNodeDefinitions>
    </nodeType>
 
-   <nodeType name="cmis:relationship" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
+   <nodeType name="xcmis:relationship" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
       <supertypes>
          <supertype>nt:hierarchyNode</supertype>
-         <supertype>cmis:object</supertype>
+         <supertype>xcmis:object</supertype>
       </supertypes>
       <propertyDefinitions>
          <propertyDefinition name="cmis:targetId" requiredType="Reference" autoCreated="false" mandatory="true" onParentVersion="COPY" protected="false" multiple="false">
@@ -130,10 +130,10 @@
       </propertyDefinitions>
    </nodeType>
 
-   <nodeType name="cmis:policy" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
+   <nodeType name="xcmis:policy" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
       <supertypes>
          <supertype>nt:hierarchyNode</supertype>
-         <supertype>cmis:object</supertype>
+         <supertype>xcmis:object</supertype>
       </supertypes>
       <propertyDefinitions>
          <propertyDefinition name="cmis:policyText" requiredType="String" autoCreated="false" mandatory="true" onParentVersion="COPY" protected="false" multiple="false">
@@ -141,7 +141,7 @@
       </propertyDefinitions>
    </nodeType>
 
-   <nodeType name="cmis:rendition" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
+   <nodeType name="xcmis:rendition" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
       <supertypes>
          <supertype>nt:base</supertype>
       </supertypes>
@@ -164,7 +164,7 @@
       </propertyDefinitions>
    </nodeType>
 
-   <nodeType name="cmis:workingCopies" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
+   <nodeType name="xcmis:workingCopies" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
       <supertypes>
          <supertype>nt:base</supertype>
       </supertypes>
@@ -177,4 +177,17 @@
       </childNodeDefinitions>
    </nodeType>
 
+
+  <nodeType name="xcmis:system" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
+      <supertypes>
+         <supertype>nt:base</supertype>
+      </supertypes>
+      <childNodeDefinitions>
+         <childNodeDefinition name="*" defaultPrimaryType="" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" sameNameSiblings="false">
+            <requiredPrimaryTypes>
+               <requiredPrimaryType>nt:base</requiredPrimaryType>
+            </requiredPrimaryTypes>
+         </childNodeDefinition>
+      </childNodeDefinitions>
+   </nodeType>
 </nodeTypes>
