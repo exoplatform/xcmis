@@ -34,17 +34,19 @@ public interface JcrCMIS extends CMIS
    
    // --- CMIS node-types ---
 
-   String CMIS_MIX_OBJECT = "cmis:object";
+   String CMIS_MIX_OBJECT = "xcmis:object";
 
-   String CMIS_MIX_DOCUMENT = "cmis:document";
+   String CMIS_MIX_DOCUMENT = "xcmis:document";
    
-   String CMIS_MIX_FOLDER = "cmis:folder";
+   String CMIS_MIX_FOLDER = "xcmis:folder";
 
-   String CMIS_NT_RELATIONSHIP = "cmis:relationship";
+   String CMIS_NT_RELATIONSHIP = "xcmis:relationship";
 
-   String CMIS_NT_POLICY = "cmis:policy";
+   String CMIS_NT_POLICY = "xcmis:policy";
 
-   String CMIS_NT_RENDITION = "cmis:rendition";
+   String CMIS_NT_RENDITION = "xcmis:rendition";
+   
+   String CMIS_SYSTEM_NODETYPE = "xcmis:system";
    
    // --- CMIS system ---
 
