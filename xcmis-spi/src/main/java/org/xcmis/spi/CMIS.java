@@ -19,6 +19,7 @@
 
 package org.xcmis.spi;
 
+import org.xcmis.core.EnumBaseObjectTypeIds;
 import org.xcmis.core.EnumPropertiesBase;
 import org.xcmis.core.EnumPropertiesDocument;
 import org.xcmis.core.EnumPropertiesFolder;
@@ -44,7 +45,15 @@ public interface CMIS
    String ROOT_FOLDER_NAME = "CMIS_Root_Folder";
 
    String WILDCARD = "*";
-   
+
+   String DOCUMENT = EnumBaseObjectTypeIds.CMIS_DOCUMENT.value();
+
+   String FOLDER = EnumBaseObjectTypeIds.CMIS_FOLDER.value();
+
+   String POLICY = EnumBaseObjectTypeIds.CMIS_POLICY.value();
+
+   String RELATIONSHIP = EnumBaseObjectTypeIds.CMIS_RELATIONSHIP.value();
+
    // TODO need have configurable ?
    int MAX_ITEMS = 10;
 
@@ -90,14 +99,11 @@ public interface CMIS
 
    String CHECKIN_COMMENT = EnumPropertiesDocument.CMIS_CHECKIN_COMMENT.value();
 
-   String IS_VERSION_SERIES_CHECKED_OUT =
-      EnumPropertiesDocument.CMIS_IS_VERSION_SERIES_CHECKED_OUT.value();
+   String IS_VERSION_SERIES_CHECKED_OUT = EnumPropertiesDocument.CMIS_IS_VERSION_SERIES_CHECKED_OUT.value();
 
-   String VERSION_SERIES_CHECKED_OUT_BY =
-      EnumPropertiesDocument.CMIS_VERSION_SERIES_CHECKED_OUT_BY.value();
+   String VERSION_SERIES_CHECKED_OUT_BY = EnumPropertiesDocument.CMIS_VERSION_SERIES_CHECKED_OUT_BY.value();
 
-   String VERSION_SERIES_CHECKED_OUT_ID =
-      EnumPropertiesDocument.CMIS_VERSION_SERIES_CHECKED_OUT_ID.value();
+   String VERSION_SERIES_CHECKED_OUT_ID = EnumPropertiesDocument.CMIS_VERSION_SERIES_CHECKED_OUT_ID.value();
 
    String NAME = EnumPropertiesBase.CMIS_NAME.value();
 
@@ -123,7 +129,6 @@ public interface CMIS
 
    String PATH = EnumPropertiesFolder.CMIS_PATH.value();
 
-   String ALLOWED_CHILD_OBJECT_TYPE_IDS =
-      EnumPropertiesFolder.CMIS_ALLOWED_CHILD_OBJECT_TYPE_IDS.value();
+   String ALLOWED_CHILD_OBJECT_TYPE_IDS = EnumPropertiesFolder.CMIS_ALLOWED_CHILD_OBJECT_TYPE_IDS.value();
 
 }

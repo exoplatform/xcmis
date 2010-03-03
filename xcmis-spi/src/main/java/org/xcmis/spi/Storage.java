@@ -52,12 +52,4 @@ public interface Storage
     */
    Connection login(String user, String password) throws LoginException;
 
-   /**
-    * Get description of storage and its capabilities.
-    * 
-    * @return storage description
-    * @see CmisRepositoryInfoType
-    */
-   CmisRepositoryInfoType getInfo();
-
 }

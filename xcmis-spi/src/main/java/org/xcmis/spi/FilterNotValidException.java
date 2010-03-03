@@ -25,7 +25,7 @@ package org.xcmis.spi;
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id$
  */
-public final class FilterNotValidException extends Exception
+public final class FilterNotValidException extends InvalidArgumentException
 {
 
    /**
