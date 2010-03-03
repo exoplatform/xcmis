@@ -28,7 +28,7 @@ public class CmisObjectImpl implements CmisObject
 
    protected CmisAllowableActionsType allowableActions;
 
-   protected List<CmisObjectType> relationship;
+   protected List<CmisObject> relationship;
 
    protected CmisChangeEventType changeEventInfo;
 
@@ -45,6 +45,32 @@ public class CmisObjectImpl implements CmisObject
    private Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
    protected ObjectInfo objectInfo;
+
+   public CmisObjectImpl()
+   {
+   }
+
+   public CmisObjectImpl(CmisObjectType cmisObjectType)
+   {
+      this.properties = cmisObjectType.getProperties();
+      this.allowableActions = cmisObjectType.getAllowableActions();
+      if (cmisObjectType.getRelationship() != null)
+      {
+         this.relationship = new ArrayList<CmisObject>();
+         for (CmisObjectType rel : cmisObjectType.getRelationship())
+         {
+            this.relationship.add(new CmisObjectImpl(rel));
+         }
+      }
+      this.changeEventInfo = cmisObjectType.getChangeEventInfo();
+      this.acl = cmisObjectType.getAcl();
+      this.exactACL = cmisObjectType.isExactACL();
+      this.policyIds = cmisObjectType.getPolicyIds();
+      this.rendition = cmisObjectType.getRendition();
+      this.any = cmisObjectType.getAny();
+      this.otherAttributes = cmisObjectType.getOtherAttributes();
+      this.objectInfo = null;
+   }
 
    /**
     * @see org.xcmis.spi.object.CmisObject#getProperties()
@@ -81,11 +107,11 @@ public class CmisObjectImpl implements CmisObject
    /**
     * @see org.xcmis.spi.object.CmisObject#getRelationship()
     */
-   public List<CmisObjectType> getRelationship()
+   public List<CmisObject> getRelationship()
    {
       if (relationship == null)
       {
-         relationship = new ArrayList<CmisObjectType>();
+         relationship = new ArrayList<CmisObject>();
       }
       return this.relationship;
    }
@@ -200,6 +226,31 @@ public class CmisObjectImpl implements CmisObject
    public void setObjectInfo(ObjectInfo objectInfo)
    {
       this.objectInfo = objectInfo;
+   }
+
+   public CmisObjectType toCmisObjectType()
+   {
+      CmisObjectType result = new CmisObjectType();
+      result.setProperties(this.properties);
+      result.setAllowableActions(this.allowableActions);
+      if (this.relationship != null)
+      {
+         for (CmisObject rel : this.relationship)
+         {
+            result.getRelationship().add(rel.toCmisObjectType());
+         }
+      }
+      result.setChangeEventInfo(this.changeEventInfo);
+      result.setAcl(this.acl);
+      result.setExactACL(this.exactACL);
+      result.setPolicyIds(this.policyIds);
+      if (this.rendition != null)
+         result.getRendition().addAll(this.rendition);
+      if (this.any != null)
+         result.getAny().addAll(this.any);
+      if (this.otherAttributes != null)
+         result.getOtherAttributes().putAll(this.otherAttributes);
+      return result;
    }
 
 }

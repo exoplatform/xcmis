@@ -14,6 +14,12 @@ import java.util.Map;
 
 import javax.xml.namespace.QName;
 
+/**
+ * 
+ * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey Zavizionov</a>
+ * @version $Id: CmisObject.java 34360 2009-07-22 23:58:59Z sunman $
+ *
+ */
 public interface CmisObject
 {
 
@@ -79,7 +85,7 @@ public interface CmisObject
     * 
     * 
     */
-   public abstract List<CmisObjectType> getRelationship();
+   public abstract List<CmisObject> getRelationship();
 
    /**
     * Gets the value of the changeEventInfo property.
@@ -239,5 +245,11 @@ public interface CmisObject
     * @param objectInfo
     */
    public abstract void setObjectInfo(ObjectInfo objectInfo);
+   
+   /**
+    * Create an CmisObjectType instance from currebt object.
+    * @return
+    */
+   public CmisObjectType toCmisObjectType();
 
 }

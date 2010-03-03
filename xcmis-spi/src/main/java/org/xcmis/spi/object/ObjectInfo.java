@@ -1,5 +1,7 @@
 package org.xcmis.spi.object;
 
+import org.xcmis.core.CmisProperty;
+
 import java.util.GregorianCalendar;
 
 /**
@@ -137,4 +139,12 @@ public interface ObjectInfo
 
    public void setContentStreamMimeType(String contentStreamMimeType);
 
+   /**
+    * CMIS.CHANGE_TOKEN
+    */
+   public String getChangeToken();
+
+   public void setChangeToken(String changeToken);
+
+   public void setProperty(CmisProperty property);
 }

@@ -18,6 +18,12 @@
  */
 package org.xcmis.spi.object;
 
+import org.xcmis.core.CmisProperty;
+import org.xcmis.core.CmisPropertyDateTime;
+import org.xcmis.core.CmisPropertyId;
+import org.xcmis.core.CmisPropertyString;
+import org.xcmis.core.EnumPropertiesBase;
+
 import java.util.GregorianCalendar;
 
 /**
@@ -63,6 +69,8 @@ public class ObjectInfoImpl implements ObjectInfo
    private String versionSeriesId;
 
    private String contentStreamMimeType;
+
+   private String changeToken;
 
    /**
     * @see org.xcmis.spi.object.ObjectInfo#getBaseTypeId()
@@ -335,15 +343,88 @@ public class ObjectInfoImpl implements ObjectInfo
    {
       this.versionSeriesId = versionSeriesId;
    }
-   
+
    public String getContentStreamMimeType()
    {
       return contentStreamMimeType;
    }
-   
+
    public void setContentStreamMimeType(String contentStreamMimeType)
    {
       this.contentStreamMimeType = contentStreamMimeType;
+   }
+
+   public String getChangeToken()
+   {
+      return changeToken;
+   }
+
+   public void setChangeToken(String changeToken)
+   {
+      this.changeToken = changeToken;
+   }
+
+   public void setProperty(CmisProperty property)
+   {
+      try
+      {
+         EnumPropertiesBase propDefId = EnumPropertiesBase.fromValue(property.getPropertyDefinitionId());
+         switch (propDefId)
+         {
+            case CMIS_BASE_TYPE_ID :
+               if (((CmisPropertyId)property).getValue() != null && !((CmisPropertyId)property).getValue().isEmpty())
+                  setBaseTypeId(((CmisPropertyId)property).getValue().get(0));
+               break;
+            case CMIS_CHANGE_TOKEN :
+               if (((CmisPropertyString)property).getValue() != null
+                  && !((CmisPropertyString)property).getValue().isEmpty())
+                  setChangeToken(((CmisPropertyString)property).getValue().get(0));
+               break;
+            case CMIS_CREATED_BY :
+               if (((CmisPropertyString)property).getValue() != null
+                  && !((CmisPropertyString)property).getValue().isEmpty())
+                  setCreatedBy(((CmisPropertyString)property).getValue().get(0));
+               break;
+            case CMIS_CREATION_DATE :
+               if (((CmisPropertyDateTime)property).getValue() != null
+                  && !((CmisPropertyDateTime)property).getValue().isEmpty())
+                  setCreationDate(((CmisPropertyDateTime)property).getValue().get(0).toGregorianCalendar());
+               break;
+            case CMIS_OBJECT_ID :
+               if (((CmisPropertyId)property).getValue() != null && !((CmisPropertyId)property).getValue().isEmpty())
+                  setId(((CmisPropertyId)property).getValue().get(0));
+               break;
+            case CMIS_NAME :
+               if (((CmisPropertyString)property).getValue() != null
+                  && !((CmisPropertyString)property).getValue().isEmpty())
+                  setName(((CmisPropertyString)property).getValue().get(0));
+               break;
+            case CMIS_LAST_MODIFICATION_DATE :
+               if (((CmisPropertyDateTime)property).getValue() != null
+                  && !((CmisPropertyDateTime)property).getValue().isEmpty())
+                  setLastModificationDate(((CmisPropertyDateTime)property).getValue().get(0).toGregorianCalendar());
+               break;
+            case CMIS_LAST_MODIFIED_BY :
+               if (((CmisPropertyString)property).getValue() != null
+                  && !((CmisPropertyString)property).getValue().isEmpty())
+                  setLastModifiedBy(((CmisPropertyString)property).getValue().get(0));
+               break;
+            case CMIS_OBJECT_TYPE_ID :
+               if (((CmisPropertyId)property).getValue() != null && !((CmisPropertyId)property).getValue().isEmpty())
+                  setObjectTypeId(((CmisPropertyId)property).getValue().get(0));
+               break;
+            default :
+               break;
+         }
+      }
+      catch (java.lang.IllegalArgumentException e)
+      {
+         System.out.println(">>> alexey: ObjectInfoImpl.setProperty property.getPropertyDefinitionId() = "
+            + property.getPropertyDefinitionId());
+         // handle exception if the property from other Enum
+      }
+      // TODO to fill other fields with property Enum
+
    }
 
 }
