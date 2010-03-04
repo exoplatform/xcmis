@@ -34,17 +34,17 @@ public interface JcrCMIS extends CMIS
    
    // --- CMIS node-types ---
 
-   String CMIS_MIX_OBJECT = "xcmis:object";
+   String CMIS_MIX_OBJECT = "cmis:object";
 
-   String CMIS_MIX_DOCUMENT = "xcmis:document";
+   String CMIS_MIX_DOCUMENT = "cmis:document";
    
-   String CMIS_MIX_FOLDER = "xcmis:folder";
+   String CMIS_MIX_FOLDER = "cmis:folder";
 
-   String CMIS_NT_RELATIONSHIP = "xcmis:relationship";
+   String CMIS_NT_RELATIONSHIP = "cmis:relationship";
 
-   String CMIS_NT_POLICY = "xcmis:policy";
+   String CMIS_NT_POLICY = "cmis:policy";
 
-   String CMIS_NT_RENDITION = "xcmis:rendition";
+   String CMIS_NT_RENDITION = "cmis:rendition";
    
    String CMIS_SYSTEM_NODETYPE = "xcmis:system";
    
@@ -52,27 +52,27 @@ public interface JcrCMIS extends CMIS
 
    String ROOT_FOLDER_ID = org.exoplatform.services.jcr.impl.Constants.ROOT_UUID;
    
-   String CMIS_SYSTEM = "cmis:system";
+   String CMIS_SYSTEM = "xcmis:system";
 
-   String CMIS_RELATIONSHIPS = "cmis:relationships";
+   String CMIS_RELATIONSHIPS = "xcmis:relationships";
 
-   String CMIS_WORKING_COPIES = "cmis:workingCopies";
+   String CMIS_WORKING_COPIES = "xcmis:workingCopies";
 
    // --- Renditions ---
    
-   String CMIS_RENDITION_STREAM = "cmis:renditionStream";
+   String CMIS_RENDITION_STREAM = "xcmis:renditionStream";
 
-   String CMIS_RENDITION_MIME_TYPE = "cmis:renditionMimeType";
+   String CMIS_RENDITION_MIME_TYPE = "xcmis:renditionMimeType";
 
-   String CMIS_RENDITION_KIND = "cmis:renditionKind";
+   String CMIS_RENDITION_KIND = "xcmis:renditionKind";
 
-   String CMIS_RENDITION_HEIGHT = "cmis:renditionHeight";
+   String CMIS_RENDITION_HEIGHT = "xcmis:renditionHeight";
 
-   String CMIS_RENDITION_WIDTH = "cmis:renditionWidth";
+   String CMIS_RENDITION_WIDTH = "xcmis:renditionWidth";
    
    // ---
    
-   String CMIS_LATEST_VERSION = "cmis:latestVersion";
+   String CMIS_LATEST_VERSION = "xcmis:latestVersion";
 
    // TODO =============== move in configuration ===============
 
