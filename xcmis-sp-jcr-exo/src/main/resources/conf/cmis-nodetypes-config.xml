@@ -164,7 +164,7 @@
       </propertyDefinitions>
    </nodeType>
 
-   <nodeType name="cmis:workingCopies" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
+   <nodeType name="xcmis:workingCopies" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
       <supertypes>
          <supertype>nt:base</supertype>
       </supertypes>
