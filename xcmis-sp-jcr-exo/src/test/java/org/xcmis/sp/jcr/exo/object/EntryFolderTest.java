@@ -367,7 +367,7 @@ public class EntryFolderTest extends EntryTest
       Entry doc3 = createDocument(folder2.getObjectId(), "doc3", new byte[0], "");
       doc3.addRelationship("relationship3", doc3, relType);
       doc3.addRelationship("relationship4", doc1, relType);
-      assertTrue(root.getNode("cmis:system/cmis:relationships").hasNodes());
+      assertTrue(root.getNode(JcrCMIS.CMIS_SYSTEM + "/" + JcrCMIS.CMIS_RELATIONSHIPS).hasNodes());
       try
       {
          folder.delete();
@@ -376,7 +376,7 @@ public class EntryFolderTest extends EntryTest
       {
          fail("Unable delete folder");
       }
-      assertFalse(root.getNode("cmis:system/cmis:relationships").hasNodes());
+      assertFalse(root.getNode(JcrCMIS.CMIS_SYSTEM + "/" + JcrCMIS.CMIS_RELATIONSHIPS).hasNodes());
    }
 
    public void testSetContentStream() throws Exception
