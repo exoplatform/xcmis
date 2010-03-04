@@ -17,38 +17,16 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.xcmis.spi;
+package org.xcmis.spi.impl;
 
-import org.exoplatform.services.security.ConversationState;
-
-import javax.security.auth.login.LoginException;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-public interface Storage
+public interface CmisVisitor
 {
 
-   /**
-    * Create new connection for user that has specified
-    * <code>conversation</code>.
-    * 
-    * @param conversation user's state that contains user identity and some
-    *        optional context specific attributes
-    * @return connection
-    */
-   Connection login(ConversationState conversation);
-
-   /**
-    * Connect to storage by using plain user name and password.
-    * 
-    * @param user user name
-    * @param password user password
-    * @return connection
-    * @throws LoginException if parameters <code>user</code> or
-    *         <code>password</code> in invalid
-    */
-   Connection login(String user, String password) throws LoginException;
-
+   void visit(CmisObjectIdentifier object);
+   
 }
