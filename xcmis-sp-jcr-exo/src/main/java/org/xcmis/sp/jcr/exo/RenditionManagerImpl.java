@@ -88,7 +88,7 @@ public class RenditionManagerImpl implements RenditionManager
                if (e.getKey().match(contentType))
                {
                   RenditionProvider renditionProvider = e.getValue();
-                  RenditionContentStream renditionContentStream = renditionProvider.getRenditionStream(entry);
+                  RenditionContentStream renditionContentStream = renditionProvider.getRenditionStream(entry.getContent(null));
                   //String id = IdGenerator.generate();
                   String id = entry.getObjectId();
                   streamsMap.put(id, renditionContentStream);

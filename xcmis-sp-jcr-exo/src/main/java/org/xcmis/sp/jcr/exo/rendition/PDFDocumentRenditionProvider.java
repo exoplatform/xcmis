@@ -23,6 +23,7 @@ import org.xcmis.core.EnumRenditionKind;
 import org.pdfbox.pdmodel.PDDocument;
 import org.pdfbox.pdmodel.PDPage;
 import org.xcmis.spi.RepositoryException;
+import org.xcmis.spi.object.ContentStream;
 import org.xcmis.spi.object.Entry;
 
 import java.awt.Graphics2D;
@@ -56,12 +57,12 @@ public class PDFDocumentRenditionProvider implements RenditionProvider
    /**
     * {@inheritDoc}
     */
-   public RenditionContentStream getRenditionStream(Entry entry) throws IOException, RepositoryException
+   public RenditionContentStream getRenditionStream(ContentStream stream) throws IOException, RepositoryException
    {
       PDDocument pdf = null;
       try
       {
-         pdf = PDDocument.load(entry.getContent(null).getStream());
+         pdf = PDDocument.load(stream.getStream());
          PDPage page = (PDPage)pdf.getDocumentCatalog().getAllPages().get(0);
          BufferedImage image = page.convertToImage();
          // Determine scale and be sure both width and height are not greater the max

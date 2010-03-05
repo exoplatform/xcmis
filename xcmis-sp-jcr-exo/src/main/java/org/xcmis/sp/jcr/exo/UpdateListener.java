@@ -21,6 +21,7 @@ package org.xcmis.sp.jcr.exo;
 import java.util.Map;
 
 import javax.jcr.Node;
+import javax.jcr.Property;
 import javax.jcr.Repository;
 import javax.jcr.Session;
 import javax.jcr.observation.Event;
@@ -35,6 +36,8 @@ import org.exoplatform.services.log.Log;
 import org.xcmis.sp.jcr.exo.object.EntryImpl;
 import org.xcmis.sp.jcr.exo.rendition.RenditionContentStream;
 import org.xcmis.sp.jcr.exo.rendition.RenditionProvider;
+import org.xcmis.spi.CMIS;
+import org.xcmis.spi.object.BaseContentStream;
 import org.xcmis.spi.object.ContentStream;
 import org.xcmis.spi.object.Entry;
 import org.xcmis.spi.utils.MimeType;
@@ -88,9 +91,20 @@ public class UpdateListener implements EventListener
               session = prov.getSession(workspace, (ManageableRepository)repository);
 
                Node node = session.getItem(path).getParent();
-               Entry entry = new EntryImpl(node);
+              //Entry entry = new EntryImpl(node);
                ContentStream content;
-               content = entry.getContent(null);
+               //content = entry.getContent(null);
+               Node contentNode = node.getNode(JcrCMIS.JCR_CONTENT);
+               Property fileContent = contentNode.getProperty(JcrCMIS.JCR_DATA);
+               long length = fileContent.getLength();
+               if (length == 0)
+                  content =  null; // No content, but node has empty stream.
+               content = new BaseContentStream(fileContent.getStream(), //
+                  length, //
+                  node.getDepth() == 0 ? CMIS.ROOT_FOLDER_NAME : node.getName(), //
+                  contentNode.getProperty(JcrCMIS.JCR_MIMETYPE).getString());
+               
+               
                if (content != null)
                {
                   int count = 0;
@@ -101,9 +115,9 @@ public class UpdateListener implements EventListener
                         RenditionProvider renditionProvider = e.getValue();
                         if (renditionProvider.canStoreRendition())
                         {
-                           RenditionContentStream renditionContentStream = renditionProvider.getRenditionStream(entry);
+                           RenditionContentStream renditionContentStream = renditionProvider.getRenditionStream(content);
                            Node rendition =
-                              ((EntryImpl)entry).getNode().addNode(IdGenerator.generate(), JcrCMIS.CMIS_NT_RENDITION);
+                              node.addNode(IdGenerator.generate(), JcrCMIS.CMIS_NT_RENDITION);
                            rendition.setProperty(JcrCMIS.CMIS_RENDITION_STREAM, renditionContentStream.getStream());
                            rendition.setProperty(JcrCMIS.CMIS_RENDITION_MIME_TYPE, renditionContentStream
                               .getMediaType());

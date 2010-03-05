@@ -20,6 +20,7 @@
 package org.xcmis.sp.jcr.exo.rendition;
 
 import org.xcmis.spi.RepositoryException;
+import org.xcmis.spi.object.ContentStream;
 import org.xcmis.spi.object.Entry;
 
 import java.io.IOException;
@@ -39,7 +40,7 @@ public interface RenditionProvider
     * @throws IOException if any i/o error occurs
     * @throws RepositoryException if any other CMIS repository error occurs
     */
-  RenditionContentStream getRenditionStream(Entry entry) throws IOException, RepositoryException;
+  RenditionContentStream getRenditionStream(ContentStream stream) throws IOException, RepositoryException;
 
    /**
     * Get a list of source media types supported by this provider.

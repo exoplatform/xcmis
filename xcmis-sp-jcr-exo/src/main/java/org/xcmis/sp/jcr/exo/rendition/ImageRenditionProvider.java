@@ -20,6 +20,7 @@
 package org.xcmis.sp.jcr.exo.rendition;
 
 import org.xcmis.core.EnumRenditionKind;
+import org.xcmis.spi.object.ContentStream;
 import org.xcmis.spi.object.Entry;
 
 import java.awt.Graphics2D;
@@ -54,10 +55,10 @@ public class ImageRenditionProvider implements RenditionProvider
    /**
     * {@inheritDoc}
     */
-   public RenditionContentStream getRenditionStream(Entry entry) throws IOException,
+   public RenditionContentStream getRenditionStream(ContentStream stream) throws IOException,
       org.xcmis.spi.RepositoryException
    {
-      BufferedImage image = ImageIO.read(entry.getContent(null).getStream());
+      BufferedImage image = ImageIO.read(stream.getStream());
       // Determine scale and be sure both width and height are not greater the max
       int scale = (int)Math.max(//
          Math.floor((image.getHeight() / maxHeight) + 1.0d), // 
