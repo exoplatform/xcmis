@@ -154,13 +154,17 @@ abstract class CmisObjectProducer
       }
 
       // renditions
-      if (renditionManager != null)
+      if (renditionManager != null && entry.canGetRenditions())
       {
-         for (ItemsIterator<CmisRenditionType> iter = renditionManager.getRenditions(entry); iter.hasNext();)
+         ItemsIterator<CmisRenditionType> iter = renditionManager.getRenditions(entry);
+         if (iter != null)
          {
-            CmisRenditionType item = iter.next();
-            if (renditionFilter.accept(item))
-               cmis.getRendition().add(item);
+            while (iter.hasNext())
+            {
+               CmisRenditionType item = iter.next();
+               if (renditionFilter.accept(item))
+                  cmis.getRendition().add(item);
+            }
          }
       }
 
