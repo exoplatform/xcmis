@@ -24,11 +24,13 @@ import org.xcmis.core.CmisAllowableActionsType;
 import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.CmisPropertiesType;
 import org.xcmis.core.CmisProperty;
+import org.xcmis.core.CmisPropertyBoolean;
 import org.xcmis.core.CmisPropertyId;
 import org.xcmis.core.CmisPropertyString;
 import org.xcmis.core.CmisTypeDefinitionType;
 import org.xcmis.core.CmisTypeDocumentDefinitionType;
 import org.xcmis.core.CmisTypeRelationshipDefinitionType;
+import org.xcmis.core.EnumACLPropagation;
 import org.xcmis.core.EnumBaseObjectTypeIds;
 import org.xcmis.core.EnumContentStreamAllowed;
 import org.xcmis.core.EnumIncludeRelationships;
@@ -39,6 +41,7 @@ import org.xcmis.messaging.CmisObjectInFolderListType;
 import org.xcmis.messaging.CmisObjectInFolderType;
 import org.xcmis.messaging.CmisObjectListType;
 import org.xcmis.messaging.CmisObjectParentsType;
+import org.xcmis.messaging.CmisTypeDefinitionListType;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.Connection;
@@ -67,6 +70,41 @@ import java.util.NoSuchElementException;
  */
 public abstract class BaseConnection implements Connection
 {
+
+   public void addObjectToFolder(String objectId, String folderId, boolean allVersions) throws ObjectNotFoundException,
+      InvalidArgumentException, ConstraintException, CmisRuntimeException
+   {
+      CmisObjectIdentifier object = getObject(objectId);
+      String typeId = object.getTypeId();
+      CmisTypeDefinitionType typeDefinition = getTypeDefinition(typeId, false);
+      if (!typeDefinition.isFileable())
+         throw new InvalidArgumentException("Object " + objectId + " is not fileable.");
+      CmisObjectIdentifier folder = getObject(folderId);
+      if (folder.getBaseType() != EnumBaseObjectTypeIds.CMIS_FOLDER)
+         throw new InvalidArgumentException("Object " + folderId + " is not Folder.");
+      CmisPropertyId allowedChildTypes = (CmisPropertyId)getProperty(folder, CMIS.ALLOWED_CHILD_OBJECT_TYPE_IDS);
+      if (allowedChildTypes != null && allowedChildTypes.getValue().size() > 0
+         && !allowedChildTypes.getValue().contains(typeId))
+         throw new ConstraintException("Type " + typeId + " is not allowed as child for " + folder.getTypeId());
+      addObjectToFolder(object, folder, allVersions);
+   }
+
+   protected abstract void addObjectToFolder(CmisObjectIdentifier object, CmisObjectIdentifier folder,
+      boolean allVersions) throws CmisRuntimeException;
+
+   public void applyAcl(String objectId, CmisAccessControlListType addAcl, CmisAccessControlListType removeAcl,
+      EnumACLPropagation propagation) throws ObjectNotFoundException, ConstraintException, CmisRuntimeException
+   {
+      CmisObjectIdentifier object = getObject(objectId);
+      String typeId = object.getTypeId();
+      CmisTypeDefinitionType typeDefinition = getTypeDefinition(typeId, false);
+      if (!typeDefinition.isControllableACL())
+         throw new ConstraintException("Type " + typeId + " is not controllable by ACL.");
+      applyAcl(object, addAcl, removeAcl, propagation);
+   }
+
+   protected abstract void applyAcl(CmisObjectIdentifier object, CmisAccessControlListType addAcl,
+      CmisAccessControlListType removeAcl, EnumACLPropagation propagation) throws CmisRuntimeException;
 
    /**
     * {@inheritDoc}
@@ -372,6 +410,7 @@ public abstract class BaseConnection implements Connection
       if (document.getBaseType() != EnumBaseObjectTypeIds.CMIS_DOCUMENT)
          throw new InvalidArgumentException("Object " + documentId + " is not Document.");
 
+      validateChangeToken(changeToken);
       String typeId = document.getTypeId();
       CmisTypeDefinitionType typeDefinition = getTypeDefinition(typeId, false);
 
@@ -380,7 +419,7 @@ public abstract class BaseConnection implements Connection
       if (contentStreamAllowed == EnumContentStreamAllowed.REQUIRED)
          throw new ConstraintException("Content required for type " + typeId + " and can't be removed.");
 
-      deleteContentStream(document, changeToken);
+      deleteContentStream(document);
    }
 
    /**
@@ -422,6 +461,20 @@ public abstract class BaseConnection implements Connection
       deleteTree(folder, deleteAllVersions, failedDelete, unfileObject, continueOnFailure);
       return failedDelete;
    }
+
+   public CmisAccessControlListType getAcl(String objectId, boolean onlyBasicPermissions)
+      throws ObjectNotFoundException, ConstraintException, CmisRuntimeException
+   {
+      CmisObjectIdentifier object = getObject(objectId);
+      String typeId = object.getTypeId();
+      CmisTypeDefinitionType typeDefinition = getTypeDefinition(typeId, false);
+      if (!typeDefinition.isControllableACL())
+         throw new ConstraintException("Type " + typeId + " is not controllable by ACL.");
+      return getAcl(object, onlyBasicPermissions);
+   }
+
+   protected abstract CmisAccessControlListType getAcl(CmisObjectIdentifier object, boolean onlyBasicPermissions)
+      throws CmisRuntimeException;
 
    /**
     * {@inheritDoc}
@@ -594,6 +647,33 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
+   public CmisObjectType getObjectOfLatestVersion(String versionSeriesId, boolean major,
+      boolean includeAllowableActions, EnumIncludeRelationships includeRelationships, boolean includePolicyIDs,
+      boolean includeAcl, String propertyFilter, String renditionFilter) throws ObjectNotFoundException,
+      FilterNotValidException, CmisRuntimeException
+   {
+      List<CmisObjectIdentifier> versions = getVersions(versionSeriesId);
+      PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
+      RenditionFilter parsedRenditionFilter = new RenditionFilter(renditionFilter);
+      if (includeRelationships == null)
+         includeRelationships = EnumIncludeRelationships.NONE;
+      if (major)
+         return createCmisObject(versions.get(0), includeAllowableActions, includeRelationships, false, false,
+            parsedPropertyFilter, parsedRenditionFilter);
+
+      for (CmisObjectIdentifier object : versions)
+      {
+         CmisPropertyBoolean majorProperty = (CmisPropertyBoolean)getProperty(object, CMIS.IS_MAJOR_VERSION);
+         if (majorProperty.getValue().get(0))
+            return createCmisObject(object, includeAllowableActions, includeRelationships, false, false,
+               parsedPropertyFilter, parsedRenditionFilter);
+      }
+      throw new ObjectNotFoundException("Not found any major versions in version series.");
+   }
+
+   /**
+    * {@inheritDoc}
+    */
    public List<CmisObjectParentsType> getObjectParents(String objectId, boolean includeAllowableActions,
       EnumIncludeRelationships includeRelationships, boolean includeRelativePathSegment, String propertyFilter,
       String renditionFilter) throws ObjectNotFoundException, ConstraintException, FilterNotValidException,
@@ -698,6 +778,23 @@ public abstract class BaseConnection implements Connection
       return getProperties(object, parsedPropertyFilter);
    }
 
+   public CmisPropertiesType getPropertiesOfLatestVersion(String versionSeriesId, boolean major, String propertyFilter)
+      throws FilterNotValidException, ObjectNotFoundException, CmisRuntimeException
+   {
+      List<CmisObjectIdentifier> versions = getVersions(versionSeriesId);
+      PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
+      if (major)
+         return getProperties(versions.get(0), parsedPropertyFilter);
+
+      for (CmisObjectIdentifier object : versions)
+      {
+         CmisPropertyBoolean majorProperty = (CmisPropertyBoolean)getProperty(object, CMIS.IS_MAJOR_VERSION);
+         if (majorProperty.getValue().get(0))
+            return getProperties(object, parsedPropertyFilter);
+      }
+      throw new ObjectNotFoundException("Not found any major versions in version series.");
+   }
+
    /**
     * {@inheritDoc}
     */
@@ -761,6 +858,7 @@ public abstract class BaseConnection implements Connection
       if (document.getBaseType() != EnumBaseObjectTypeIds.CMIS_DOCUMENT)
          throw new InvalidArgumentException("Object " + documentId + " is not a Document.");
 
+      validateChangeToken(changeToken);
       String typeId = document.getTypeId();
       CmisTypeDefinitionType typeDefinition = getTypeDefinition(typeId, false);
       EnumContentStreamAllowed contentStreamAllowed =
@@ -771,7 +869,7 @@ public abstract class BaseConnection implements Connection
       if (!overwriteFlag && hasContent(document))
          throw new ContentAlreadyExistsException("Document already has content stream and 'overwriteFlag' is false.");
 
-      setContentStream(document, content, changeToken);
+      setContentStream(document, content);
    }
 
    /**
@@ -782,57 +880,81 @@ public abstract class BaseConnection implements Connection
       StorageException, CmisRuntimeException
    {
       CmisObjectIdentifier object = getObject(objectId);
-      return updateProperties(object, changeToken, properties);
+      validateChangeToken(changeToken);
+      return updateProperties(object, properties);
    }
 
-   protected abstract void applyPolicy(CmisObjectIdentifier object, CmisObjectIdentifier policy) throws CmisRuntimeException;
+   public List<CmisObjectType> getAllVersions(String versionSeriesId, boolean includeAllowableActions,
+      String propertyFilter) throws ObjectNotFoundException, FilterNotValidException, CmisRuntimeException
+   {
+      PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
+      List<CmisObjectType> versions = new ArrayList<CmisObjectType>();
+      for (CmisObjectIdentifier object : getVersions(versionSeriesId))
+      {
+         versions.add(createCmisObject(object, includeAllowableActions, EnumIncludeRelationships.NONE, false, false,
+            parsedPropertyFilter, RenditionFilter.NONE));
+      }
+      return versions;
+   }
 
-   protected abstract CmisObjectIdentifier createDocument(CmisObjectIdentifier folder, CmisTypeDefinitionType typeDefinition,
-      CmisPropertiesType properties, ContentStream content, CmisAccessControlListType addAcl,
-      CmisAccessControlListType removeACEs, List<String> policies, EnumVersioningState versioningState)
+   protected abstract List<CmisObjectIdentifier> getVersions(String versionSeriesId) throws ObjectNotFoundException;
+
+   protected abstract void validateChangeToken(String changeToken) throws UpdateConflictException;
+
+   protected abstract void applyPolicy(CmisObjectIdentifier object, CmisObjectIdentifier policy)
+      throws CmisRuntimeException;
+
+   protected abstract CmisObjectIdentifier createDocument(CmisObjectIdentifier folder,
+      CmisTypeDefinitionType typeDefinition, CmisPropertiesType properties, ContentStream content,
+      CmisAccessControlListType addAcl, CmisAccessControlListType removeACEs, List<String> policies,
+      EnumVersioningState versioningState) throws StorageException, NameConstraintViolationException,
+      CmisRuntimeException;
+
+   protected abstract CmisObjectIdentifier createDocumentFromSource(CmisObjectIdentifier source,
+      CmisObjectIdentifier folder, CmisPropertiesType properties, CmisAccessControlListType addAcl,
+      CmisAccessControlListType removeAcl, List<String> policies, EnumVersioningState versioningState)
       throws StorageException, NameConstraintViolationException, CmisRuntimeException;
 
-   protected abstract CmisObjectIdentifier createDocumentFromSource(CmisObjectIdentifier source, CmisObjectIdentifier folder,
-      CmisPropertiesType properties, CmisAccessControlListType addAcl, CmisAccessControlListType removeAcl,
-      List<String> policies, EnumVersioningState versioningState) throws StorageException,
-      NameConstraintViolationException, CmisRuntimeException;
-
-   protected abstract CmisObjectIdentifier createFolder(CmisObjectIdentifier folder, CmisTypeDefinitionType typeDefinition,
-      CmisPropertiesType properties, CmisAccessControlListType addAcl, CmisAccessControlListType removeAcl,
-      List<String> policies) throws StorageException, NameConstraintViolationException, CmisRuntimeException;
-
-   protected abstract CmisObjectIdentifier createPolicy(CmisObjectIdentifier folder, CmisTypeDefinitionType typeDefinition,
-      CmisPropertiesType properties, CmisAccessControlListType addAcl, CmisAccessControlListType removeAcl,
-      List<String> policies) throws StorageException, NameConstraintViolationException, CmisRuntimeException;
-
-   protected abstract CmisObjectIdentifier createRelationship(CmisTypeDefinitionType typeDefinition, CmisObjectIdentifier source,
-      CmisObjectIdentifier target, CmisPropertiesType properties, CmisAccessControlListType addAcl,
+   protected abstract CmisObjectIdentifier createFolder(CmisObjectIdentifier folder,
+      CmisTypeDefinitionType typeDefinition, CmisPropertiesType properties, CmisAccessControlListType addAcl,
       CmisAccessControlListType removeAcl, List<String> policies) throws StorageException,
       NameConstraintViolationException, CmisRuntimeException;
 
-   protected abstract void deleteContentStream(CmisObjectIdentifier document, String changeToken) throws StorageException,
-      UpdateConflictException, CmisRuntimeException;
+   protected abstract CmisObjectIdentifier createPolicy(CmisObjectIdentifier folder,
+      CmisTypeDefinitionType typeDefinition, CmisPropertiesType properties, CmisAccessControlListType addAcl,
+      CmisAccessControlListType removeAcl, List<String> policies) throws StorageException,
+      NameConstraintViolationException, CmisRuntimeException;
 
-   protected abstract void deleteTree(CmisObjectIdentifier folder, boolean deleteAllVersions, List<String> failedDelete,
-      EnumUnfileObject unfileObject, boolean continueOnFailure) throws UpdateConflictException, StorageException,
+   protected abstract CmisObjectIdentifier createRelationship(CmisTypeDefinitionType typeDefinition,
+      CmisObjectIdentifier source, CmisObjectIdentifier target, CmisPropertiesType properties,
+      CmisAccessControlListType addAcl, CmisAccessControlListType removeAcl, List<String> policies)
+      throws StorageException, NameConstraintViolationException, CmisRuntimeException;
+
+   protected abstract void deleteContentStream(CmisObjectIdentifier document) throws StorageException,
       CmisRuntimeException;
+
+   protected abstract void deleteTree(CmisObjectIdentifier folder, boolean deleteAllVersions,
+      List<String> failedDelete, EnumUnfileObject unfileObject, boolean continueOnFailure)
+      throws UpdateConflictException, StorageException, CmisRuntimeException;
 
    protected abstract void deleteObject(CmisObjectIdentifier object, boolean deleteAllVersion)
       throws UpdateConflictException, StorageException, CmisRuntimeException;
 
-   protected abstract CmisAllowableActionsType getAllowableActions(CmisObjectIdentifier object) throws CmisRuntimeException;
+   protected abstract CmisAllowableActionsType getAllowableActions(CmisObjectIdentifier object)
+      throws CmisRuntimeException;
 
-   protected abstract List<CmisObjectIdentifier> getAppliedPolicies(CmisObjectIdentifier object) throws CmisRuntimeException;
+   protected abstract List<CmisObjectIdentifier> getAppliedPolicies(CmisObjectIdentifier object)
+      throws CmisRuntimeException;
 
    protected abstract ItemsIterator<CmisObjectIdentifier> getChildren(CmisObjectIdentifier folder, String orderBy)
       throws CmisRuntimeException;
 
-   protected abstract CmisObjectType createCmisObject(CmisObjectIdentifier objectData, boolean includeAllowableActions,
+   protected abstract CmisObjectType createCmisObject(CmisObjectIdentifier object, boolean includeAllowableActions,
       EnumIncludeRelationships includeRelationships, boolean includePolicyIds, boolean includeAcl,
       PropertyFilter parsedPropertyFilter, RenditionFilter parsedRenditionFilter);
 
-   protected abstract ContentStream getContentStream(CmisObjectIdentifier object, String streamId, long offset, long length)
-      throws ConstraintException, CmisRuntimeException;
+   protected abstract ContentStream getContentStream(CmisObjectIdentifier object, String streamId, long offset,
+      long length) throws ConstraintException, CmisRuntimeException;
 
    protected abstract CmisObjectIdentifier getFolderParent(CmisObjectIdentifier folder) throws CmisRuntimeException;
 
@@ -844,11 +966,14 @@ public abstract class BaseConnection implements Connection
       return null;
    }
 
-   protected abstract CmisObjectIdentifier getObject(String objectId) throws ObjectNotFoundException, CmisRuntimeException;
+   protected abstract CmisObjectIdentifier getObject(String objectId) throws ObjectNotFoundException,
+      CmisRuntimeException;
 
-   protected abstract CmisObjectIdentifier getObjectByPath(String path) throws ObjectNotFoundException, CmisRuntimeException;
+   protected abstract CmisObjectIdentifier getObjectByPath(String path) throws ObjectNotFoundException,
+      CmisRuntimeException;
 
-   protected abstract List<CmisObjectIdentifier> getObjectParents(CmisObjectIdentifier object) throws CmisRuntimeException;
+   protected abstract List<CmisObjectIdentifier> getObjectParents(CmisObjectIdentifier object)
+      throws CmisRuntimeException;
 
    protected abstract ItemsIterator<CmisObjectIdentifier> getObjectRelationships(CmisObjectIdentifier object,
       EnumRelationshipDirection direction, String typeId, boolean includeSubRelationshipTypes,
@@ -857,7 +982,8 @@ public abstract class BaseConnection implements Connection
    protected abstract CmisPropertiesType getProperties(CmisObjectIdentifier object, PropertyFilter propertyFilter)
       throws CmisRuntimeException;
 
-   protected abstract CmisProperty getProperty(CmisObjectIdentifier object, String propertyId) throws CmisRuntimeException;
+   protected abstract CmisProperty getProperty(CmisObjectIdentifier object, String propertyId)
+      throws CmisRuntimeException;
 
    protected CmisProperty getProperty(CmisPropertiesType all, String propertyId)
    {
@@ -901,16 +1027,65 @@ public abstract class BaseConnection implements Connection
 
    protected abstract boolean hasContent(CmisObjectIdentifier document) throws CmisRuntimeException;
 
-   protected abstract CmisObjectType moveObject(CmisObjectIdentifier object, CmisObjectIdentifier target, CmisObjectIdentifier source)
-      throws UpdateConflictException, StorageException, CmisRuntimeException;
+   protected abstract CmisObjectType moveObject(CmisObjectIdentifier object, CmisObjectIdentifier target,
+      CmisObjectIdentifier source) throws UpdateConflictException, StorageException, CmisRuntimeException;
 
-   protected abstract void removePolicy(CmisObjectIdentifier object, CmisObjectIdentifier policy) throws CmisRuntimeException;
+   protected abstract void removePolicy(CmisObjectIdentifier object, CmisObjectIdentifier policy)
+      throws CmisRuntimeException;
 
-   protected abstract void setContentStream(CmisObjectIdentifier document, ContentStream content, String changeToken)
-      throws UpdateConflictException, IOException, StorageException, CmisRuntimeException;
+   protected abstract void setContentStream(CmisObjectIdentifier document, ContentStream content) throws IOException,
+      StorageException, CmisRuntimeException;
 
-   protected abstract CmisObjectType updateProperties(CmisObjectIdentifier object, String changeToken,
-      CmisPropertiesType properties) throws ConstraintException, NameConstraintViolationException,
-      UpdateConflictException, StorageException, CmisRuntimeException;
+   protected abstract CmisObjectType updateProperties(CmisObjectIdentifier object, CmisPropertiesType properties)
+      throws ConstraintException, NameConstraintViolationException, StorageException, CmisRuntimeException;
 
+   protected abstract CmisTypeIdentifier getType(String typeId) throws TypeNotFoundException, CmisRuntimeException;
+
+   protected abstract ItemsIterator<CmisTypeIdentifier> getTypeChildren(CmisTypeIdentifier type)
+      throws CmisRuntimeException;
+
+   /**
+    * {@inheritDoc}
+    */
+   public CmisTypeDefinitionListType getTypeChildren(String typeId, boolean includePropertyDefinition, int maxItems,
+      int skipCount) throws TypeNotFoundException, CmisRuntimeException
+   {
+      if (skipCount < 0)
+      {
+         String msg = "skipCount parameter is negative.";
+         throw new InvalidArgumentException(msg);
+      }
+      if (maxItems < 0)
+      {
+         String msg = "maxItems parameter is negative.";
+         throw new InvalidArgumentException(msg);
+      }
+
+      CmisTypeIdentifier type = getType(typeId);
+      ItemsIterator<CmisTypeIdentifier> iterator = getTypeChildren(type);
+      try
+      {
+         if (skipCount > 0)
+            iterator.skip(skipCount);
+      }
+      catch (NoSuchElementException nse)
+      {
+         String msg = "skipCount parameter is greater then total number of argument";
+         throw new InvalidArgumentException(msg);
+      }
+
+      CmisTypeDefinitionListType children = new CmisTypeDefinitionListType();
+      int count = 0;
+      while (iterator.hasNext() && count < maxItems)
+      {
+         CmisTypeIdentifier identf = iterator.next();
+         children.getTypes().add(getTypeDefinition(identf.getTypeId(), includePropertyDefinition));
+      }
+      // Indicate that we have some more results.
+      children.setHasMoreItems(iterator.hasNext());
+      long total = iterator.size();
+      if (total != -1)
+         children.setNumItems(BigInteger.valueOf(total));
+      return children;
+   }
 }

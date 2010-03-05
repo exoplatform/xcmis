@@ -19,15 +19,16 @@
 
 package org.xcmis.spi.impl;
 
+
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-public interface CmisVisitor
+public interface CmisTypeIdentifier
 {
 
-   void visit(CmisObjectIdentifier object);
-   
-   void visit(CmisTypeIdentifier type);
-   
+   String getTypeId();
+
+   void accept(CmisVisitor visitor);
+
 }

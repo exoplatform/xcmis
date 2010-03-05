@@ -484,7 +484,7 @@ public interface Connection
     *         invalid syntax or contains at least one unknown rendition
     * @throws CmisRuntimeException if any others errors occur
     */
-   List<CmisObjectInFolderContainerType> getDescendats(String folderId, int depth, boolean includeAllowableActions,
+   List<CmisObjectInFolderContainerType> getDescendants(String folderId, int depth, boolean includeAllowableActions,
       EnumIncludeRelationships includeRelationships, boolean includePathSegments, String propertyFilter,
       String renditionFilter) throws ObjectNotFoundException, InvalidArgumentException, FilterNotValidException,
       CmisRuntimeException;
@@ -1474,7 +1474,7 @@ public interface Connection
     *         storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   void addType(CmisTypeDefinitionType type) throws CmisRuntimeException;
+   void addType(CmisTypeDefinitionType type) throws StorageException, CmisRuntimeException;
 
    /**
     * Iterator of object types.
