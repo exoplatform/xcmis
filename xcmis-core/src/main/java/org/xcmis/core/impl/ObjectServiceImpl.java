@@ -175,15 +175,15 @@ public class ObjectServiceImpl extends CmisObjectProducer implements ObjectServi
       newDoc.setContent(content);
       newDoc.save();
       RenditionManager renditionManager = repository.getRenditionManager();
-      boolean renditionCreated = renditionManager.createRenditions(newDoc);
-      if (LOG.isDebugEnabled())
-      {
-         if (renditionCreated)
-            LOG.debug("Created renditions for document with content stream media type " + content.getMediaType());
-         LOG.debug("Created new document " + newDoc.getObjectId());
-      }
+//      boolean renditionCreated = renditionManager.createRenditions(newDoc);
+//      if (LOG.isDebugEnabled())
+//      {
+//         if (renditionCreated)
+//            LOG.debug("Created renditions for document with content stream media type " + content.getMediaType());
+//         LOG.debug("Created new document " + newDoc.getObjectId());
+//      }
       return getCmisObject(newDoc, false, EnumIncludeRelationships.NONE, false, false, PropertyFilter.ALL,
-         RenditionFilter.NONE, renditionManager, includeObjectInfo);
+         RenditionFilter.ANY, renditionManager, includeObjectInfo);
    }
 
    /**
@@ -591,12 +591,15 @@ public class ObjectServiceImpl extends CmisObjectProducer implements ObjectServi
       Repository repository = repositoryService.getRepository(repositoryId);
       Entry doc = repository.getObjectById(documentId);
       ContentStream content = doc.getContent(streamId);
-      /*      if (content == null)
-            {
-               String msg = "Document has not content.";
-               throw new ConstraintException(msg);
-            }
-      */
+      if (content == null)
+      {
+         RenditionManager renditionManager = repository.getRenditionManager();
+         ContentStream stream = renditionManager.getStream(streamId);
+         if (stream == null)
+            throw new ConstraintException("Content stream not found");
+         return stream;
+      }
+
       return content;
    }
 
@@ -746,13 +749,13 @@ public class ObjectServiceImpl extends CmisObjectProducer implements ObjectServi
       doc.save();
       RenditionManager renditionManager = repository.getRenditionManager();
       renditionManager.removeRenditions(doc);
-      boolean renditionCreated = renditionManager.createRenditions(doc);
-      if (LOG.isDebugEnabled())
-      {
-         LOG.debug("Update content stream of document " + doc.getObjectId());
-         if (renditionCreated)
-            LOG.debug("Created renditions for document with content stream media type " + content.getMediaType());
-      }
+//      boolean renditionCreated = renditionManager.createRenditions(doc);
+//      if (LOG.isDebugEnabled())
+//      {
+//         LOG.debug("Update content stream of document " + doc.getObjectId());
+//         if (renditionCreated)
+//            LOG.debug("Created renditions for document with content stream media type " + content.getMediaType());
+//      }
       return getCmisObject(doc, false, EnumIncludeRelationships.NONE, false, false, PropertyFilter.ALL,
          RenditionFilter.NONE, repository.getRenditionManager(), includeObjectInfo);
    }
