@@ -233,7 +233,7 @@ public class ObjectServiceTest extends BaseTest
          stream, //
          null, // change token
          true // overwrite
-         );
+         , false).toCmisObjectType();
       Holder<String> hId = new Holder<String>(getObjectId(updated));
 
       ContentStream cs = objectService.getContentStream(repositoryId, hId.value, null, 0, -1);

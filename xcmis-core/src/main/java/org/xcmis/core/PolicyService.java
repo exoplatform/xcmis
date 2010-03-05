@@ -19,11 +19,11 @@
 
 package org.xcmis.core;
 
-import org.xcmis.core.CmisObjectType;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.RepositoryException;
+import org.xcmis.spi.object.CmisObject;
 
 import java.util.List;
 
@@ -58,12 +58,13 @@ public interface PolicyService
     * @param repositoryId the repository id
     * @param objectId the object id
     * @param propertyFilter property filter as string
+    * @param includeObjectInfo TODO
     * @return set of object's policies
     * @throws FilterNotValidException if <code>propertyFilter</code> is invalid
     * @throws ObjectNotFoundException if object with <code>objectId</code> does not exist            
     * @throws RepositoryException if any other errors in CMIS repository occurs
     */
-   List<CmisObjectType> getAppliedPolicies(String repositoryId, String objectId, String propertyFilter)
+   List<CmisObject> getAppliedPolicies(String repositoryId, String objectId, String propertyFilter, boolean includeObjectInfo)
       throws FilterNotValidException, ObjectNotFoundException, RepositoryException;
 
    /**

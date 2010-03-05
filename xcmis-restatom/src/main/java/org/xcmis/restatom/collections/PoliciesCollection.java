@@ -45,6 +45,7 @@ import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.RepositoryException;
+import org.xcmis.spi.object.CmisObject;
 
 import java.util.HashMap;
 import java.util.List;
@@ -114,8 +115,8 @@ public class PoliciesCollection extends CmisObjectCollection
       try
       {
          String objectId = getId(request);
-         List<CmisObjectType> list =
-            policyService.getAppliedPolicies(getRepositoryId(request), objectId, propertyFilter);
+         List<CmisObject> list =
+            policyService.getAppliedPolicies(getRepositoryId(request), objectId, propertyFilter, true);
          if (list.size() > 0)
          {
             // add cmisra:numItems
@@ -132,7 +133,7 @@ public class PoliciesCollection extends CmisObjectCollection
                (skipCount + maxItems) < list.size(), //
                request);
 
-            for (CmisObjectType one : list)
+            for (CmisObject one : list)
             {
                Entry e = feed.addEntry();
                IRI feedIri = new IRI(getFeedIriForEntry(one, request));
@@ -219,8 +220,8 @@ public class PoliciesCollection extends CmisObjectCollection
       try
       {
          // updated object
-         addEntryDetails(request, entry, request.getResolvedUri(), (CmisObjectType)objectService.getObject(
-            repositoryId, policyId, true, EnumIncludeRelationships.BOTH, true, true, null, null));
+         addEntryDetails(request, entry, request.getResolvedUri(), (CmisObject)objectService.getObject(
+            repositoryId, policyId, true, EnumIncludeRelationships.BOTH, true, true, null, null, true));
       }
       catch (ResponseContextException rce)
       {
@@ -306,7 +307,7 @@ public class PoliciesCollection extends CmisObjectCollection
     * {@inheritDoc}
     */
    @Override
-   public Iterable<CmisObjectType> getEntries(RequestContext request) throws ResponseContextException
+   public Iterable<CmisObject> getEntries(RequestContext request) throws ResponseContextException
    {
       // To process hierarchically structure override addFeedDetails(Feed, RequestContext) method.
       throw new UnsupportedOperationException("policies");

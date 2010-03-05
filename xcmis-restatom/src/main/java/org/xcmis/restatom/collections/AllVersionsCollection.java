@@ -30,13 +30,19 @@ import org.xcmis.core.ObjectService;
 import org.xcmis.core.RepositoryService;
 import org.xcmis.core.VersioningService;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.restatom.AtomCmisObject;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.RepositoryException;
+import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.object.ObjectInfo;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Collection of all versions of document.
@@ -100,9 +106,11 @@ public class AllVersionsCollection extends CmisObjectCollection
 
       try
       {
-         List<CmisObjectType> list =
+         Map<String, ObjectInfo> oiMap = new HashMap<String, ObjectInfo>();
+
+         List<CmisObject> list =
             versioningService.getAllVersions(getRepositoryId(request), objectId, includeAllowableActions,
-               propertyFilter);
+               propertyFilter, true);
          if (list.size() > 0)
          {
             // add cmisra:numItems
@@ -118,7 +126,7 @@ public class AllVersionsCollection extends CmisObjectCollection
                (skipCount + maxItems) < list.size(), //
                request);
 
-            for (CmisObjectType one : list)
+            for (CmisObject one : list)
             {
                Entry entry = feed.addEntry();
                IRI feedIri = new IRI(getFeedIriForEntry(one, request));
@@ -151,7 +159,7 @@ public class AllVersionsCollection extends CmisObjectCollection
    /**
     * {@inheritDoc}
     */
-   public Iterable<CmisObjectType> getEntries(RequestContext request) throws ResponseContextException
+   public Iterable<CmisObject> getEntries(RequestContext request) throws ResponseContextException
    {
       // To process hierarchically structure override addFeedDetails(Feed, RequestContext) method.
       throw new UnsupportedOperationException("versions");

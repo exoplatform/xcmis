@@ -19,12 +19,11 @@
 
 package org.xcmis.core.impl;
 
-import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.VersioningService;
-import org.xcmis.core.impl.VersioningServiceImpl;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.object.BaseContentStream;
+import org.xcmis.spi.object.CmisObject;
 import org.xcmis.spi.object.ContentStream;
 import org.xcmis.spi.object.Entry;
 import org.xcmis.spi.object.VersionSeries;
@@ -54,8 +53,8 @@ public class VersioningServiceTest extends BaseTest
    {
       Entry doc = createDocument(testFolder, "doc1", null);
       String docId = doc.getObjectId();
-      CmisObjectType pwc = versioningService.checkout(repositoryId, docId);
-      String pwcId = CmisUtils.getObjectId(pwc);
+      CmisObject pwc = versioningService.checkout(repositoryId, docId, false);
+      String pwcId = CmisUtils.getObjectId(pwc.getProperties());
       try
       {
          repository.getObjectById(pwcId);
@@ -69,10 +68,10 @@ public class VersioningServiceTest extends BaseTest
    public void testCheckOutFail() throws Exception
    {
       Entry doc = createDocument(testFolder, "doc1", null);
-      versioningService.checkout(repositoryId, doc.getObjectId());
+      versioningService.checkout(repositoryId, doc.getObjectId(), false);
       try
       {
-         versioningService.checkout(repositoryId, doc.getObjectId());
+         versioningService.checkout(repositoryId, doc.getObjectId(), false);
          fail("One document in version series checked-out, second check-out should be fail.");
       }
       catch (VersioningException e)
@@ -87,9 +86,9 @@ public class VersioningServiceTest extends BaseTest
       VersionSeries vs = repository.getVersionSeries(doc.getVersionSeriesId());
       String pwcId = vs.checkout(doc.getObjectId()).getObjectId();
       data = new BaseContentStream("test111".getBytes("UTF-8"), "test", "text/plain");
-      CmisObjectType version =
-         versioningService.checkin(repositoryId, pwcId, false, null, data, "checkin comment", null, null, null);
-      ContentStream cs2 = repository.getObjectById(CmisUtils.getObjectId(version)).getContent(null);
+      CmisObject version =
+         versioningService.checkin(repositoryId, pwcId, false, null, data, "checkin comment", null, null, null, false);
+      ContentStream cs2 = repository.getObjectById(CmisUtils.getObjectId(version.getProperties())).getContent(null);
       byte[] b = new byte[128];
       int r = cs2.getStream().read(b);
       assertEquals("test111", new String(b, 0, r));
@@ -98,7 +97,8 @@ public class VersioningServiceTest extends BaseTest
    public void testCancelCheckOut() throws Exception
    {
       Entry doc = createDocument(testFolder, "doc1", null);
-      String pwcId = CmisUtils.getObjectId(versioningService.checkout(repositoryId, doc.getObjectId()));
+      String pwcId =
+         CmisUtils.getObjectId(versioningService.checkout(repositoryId, doc.getObjectId(), false).getProperties());
       String seriesId = doc.getVersionSeriesId();
       VersionSeries series = repository.getVersionSeries(seriesId);
       assertNotNull(series.getCheckedOut());
@@ -111,13 +111,13 @@ public class VersioningServiceTest extends BaseTest
       Entry doc = createDocument(testFolder, "doc1", null);
       String docId = doc.getObjectId();
       String versionSeriesId = doc.getVersionSeriesId();
-      List<CmisObjectType> versions = versioningService.getAllVersions(repositoryId, versionSeriesId, false, null);
+      List<CmisObject> versions = versioningService.getAllVersions(repositoryId, versionSeriesId, false, null, false);
       assertEquals(1, versions.size());
-      assertEquals(docId, CmisUtils.getObjectId(versions.get(0)));
-      String pwcId = CmisUtils.getObjectId(versioningService.checkout(repositoryId, docId));
-      versioningService.checkin(repositoryId, pwcId, false, null, null, null, null, null, null);
+      assertEquals(docId, CmisUtils.getObjectId(versions.get(0).getProperties()));
+      String pwcId = CmisUtils.getObjectId(versioningService.checkout(repositoryId, docId, false).getProperties());
+      versioningService.checkin(repositoryId, pwcId, false, null, null, null, null, null, null, false);
 
-      versions = versioningService.getAllVersions(repositoryId, versionSeriesId, false, null);
+      versions = versioningService.getAllVersions(repositoryId, versionSeriesId, false, null, false);
       assertEquals(2, versions.size());
    }
 
@@ -133,9 +133,12 @@ public class VersioningServiceTest extends BaseTest
       createDocument(folder3, "doc4", null);
       createDocument(folder3, "doc5", null);
       Entry doc6 = createDocument(folder3, "doc6", null);
-      String pwcId6 = CmisUtils.getObjectId(versioningService.checkout(repositoryId, doc6.getObjectId()));
-      String pwcId1 = CmisUtils.getObjectId(versioningService.checkout(repositoryId, doc1.getObjectId()));
-      String pwcId3 = CmisUtils.getObjectId(versioningService.checkout(repositoryId, doc3.getObjectId()));
+      String pwcId6 =
+         CmisUtils.getObjectId(versioningService.checkout(repositoryId, doc6.getObjectId(), false).getProperties());
+      String pwcId1 =
+         CmisUtils.getObjectId(versioningService.checkout(repositoryId, doc1.getObjectId(), false).getProperties());
+      String pwcId3 =
+         CmisUtils.getObjectId(versioningService.checkout(repositoryId, doc3.getObjectId(), false).getProperties());
       Iterator<Entry> iter = repository.getCheckedOutDocuments(null);
       List<String> l = new ArrayList<String>();
       while (iter.hasNext())
@@ -158,11 +161,11 @@ public class VersioningServiceTest extends BaseTest
       createDocument(folder3, "doc4", null);
       createDocument(folder3, "doc5", null);
       Entry doc33 = createDocument(folder3, "doc6", null);
-      versioningService.checkout(repositoryId, doc33.getObjectId());
-      versioningService.checkout(repositoryId, doc1.getObjectId());
+      versioningService.checkout(repositoryId, doc33.getObjectId(), false);
+      versioningService.checkout(repositoryId, doc1.getObjectId(), false);
       // Only this should be in iterator.
-      CmisObjectType pwc = versioningService.checkout(repositoryId, doc22.getObjectId());
-      String pwcId = CmisUtils.getObjectId(pwc);
+      CmisObject pwc = versioningService.checkout(repositoryId, doc22.getObjectId(), false);
+      String pwcId = CmisUtils.getObjectId(pwc.getProperties());
       Iterator<Entry> iter = repository.getCheckedOutDocuments(folder2.getObjectId());
       assertEquals(pwcId, iter.next().getObjectId());
       assertFalse(iter.hasNext());

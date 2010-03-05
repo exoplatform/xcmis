@@ -44,7 +44,7 @@ public class CheckedOutCollectionTest extends BaseTest
       String docId = doc.getObjectId();
 
       assertNull("Should be no checkedout document.", doc.getCheckedOutId());
-      String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/checkedout/" + docId;
+      String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/checkedout?objectid=" + docId;
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
       ContainerResponse response = service("POST", requestURI, "http://localhost:8080/rest", null, null, writer);
 
@@ -64,11 +64,11 @@ public class CheckedOutCollectionTest extends BaseTest
    {
       Entry doc1 = createDocument(testFolderId, "doc1", null, null);
       String doc1Id = doc1.getObjectId();
-      String pwc1 = getObjectId(versioningService.checkout(cmisRepositoryId, doc1Id));
+      String pwc1 = versioningService.checkout(cmisRepositoryId, doc1Id, true).getObjectInfo().getId();
 
       Entry doc2 = createDocument(testFolderId, "doc2", null, null);
       String doc2Id = doc2.getObjectId();
-      String pwc2 = getObjectId(versioningService.checkout(cmisRepositoryId, doc2Id));
+      String pwc2 = versioningService.checkout(cmisRepositoryId, doc2Id, true).getObjectInfo().getId();
 
       String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/checkedout/";
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();

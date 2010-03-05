@@ -19,7 +19,8 @@
 
 package org.xcmis.core.impl;
 
-import org.xcmis.core.CmisObjectType;
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
 import org.xcmis.core.CmisPropertyDecimal;
 import org.xcmis.core.DiscoveryService;
 import org.xcmis.core.EnumIncludeRelationships;
@@ -28,13 +29,14 @@ import org.xcmis.core.impl.object.RenditionFilter;
 import org.xcmis.core.impl.property.PropertyFilter;
 import org.xcmis.core.impl.property.PropertyService;
 import org.xcmis.messaging.CmisObjectListType;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.NotSupportedException;
 import org.xcmis.spi.Repository;
 import org.xcmis.spi.RepositoryException;
+import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.object.CmisObjectList;
+import org.xcmis.spi.object.CmisObjectListImpl;
 import org.xcmis.spi.object.ItemsIterator;
 import org.xcmis.spi.object.RenditionManager;
 import org.xcmis.spi.query.Query;
@@ -83,9 +85,9 @@ public class DiscoveryServiceImpl extends CmisObjectProducer implements Discover
    /**
     * {@inheritDoc}
     */
-   public CmisObjectListType query(String repositoryId, String statement, boolean searchAllVersions,
+   public CmisObjectList query(String repositoryId, String statement, boolean searchAllVersions,
       boolean includeAllowableActions, EnumIncludeRelationships includeRelationships, String renditionFilter,
-      int maxItems, int skipCount) throws RepositoryException, FilterNotValidException
+      int maxItems, int skipCount, boolean includeObjectInfo) throws RepositoryException, FilterNotValidException
    {
 
       if (LOG.isDebugEnabled())
@@ -118,7 +120,7 @@ public class DiscoveryServiceImpl extends CmisObjectProducer implements Discover
          throw new InvalidArgumentException(msg);
       }
 
-      CmisObjectListType list = new CmisObjectListType();
+      CmisObjectList list = new CmisObjectListImpl();
       int count = 0;
       while (items.hasNext() && count < maxItems)
       {
@@ -133,10 +135,10 @@ public class DiscoveryServiceImpl extends CmisObjectProducer implements Discover
                propertyFilter.append(s);
             }
          }
-         CmisObjectType object =
+         CmisObject object =
             getCmisObject(repository.getObjectById(result.getObjectId()), includeAllowableActions, includeRelationships,
                false, false, new PropertyFilter(propertyFilter.toString()), new RenditionFilter(renditionFilter),
-               (RenditionManager)repository);
+               (RenditionManager)repository, includeObjectInfo);
          
          Score score = result.getScore();
          if (score != null)

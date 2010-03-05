@@ -32,7 +32,6 @@ import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.CmisPropertiesType;
 import org.xcmis.core.CmisProperty;
 import org.xcmis.core.CmisPropertyId;
-import org.xcmis.core.CmisPropertyString;
 import org.xcmis.core.CmisTypeDefinitionType;
 import org.xcmis.core.EnumBaseObjectTypeIds;
 import org.xcmis.core.EnumIncludeRelationships;
@@ -41,8 +40,6 @@ import org.xcmis.core.NavigationService;
 import org.xcmis.core.ObjectService;
 import org.xcmis.core.RepositoryService;
 import org.xcmis.core.VersioningService;
-import org.xcmis.messaging.CmisObjectInFolderListType;
-import org.xcmis.messaging.CmisObjectInFolderType;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.abdera.ObjectTypeElement;
 import org.xcmis.spi.CMIS;
@@ -54,6 +51,10 @@ import org.xcmis.spi.RepositoryException;
 import org.xcmis.spi.StreamNotSupportedException;
 import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.UpdateConflictException;
+import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.object.CmisObjectImpl;
+import org.xcmis.spi.object.CmisObjectInFolder;
+import org.xcmis.spi.object.CmisObjectInFolderList;
 
 import java.util.HashMap;
 import java.util.List;
@@ -145,10 +146,10 @@ public class FolderChildrenCollection extends CmisObjectCollection
       try
       {
          String objectId = getId(request);
-         CmisObjectInFolderListType list =
-            navigationService
-               .getChildren(getRepositoryId(request), objectId, includeAllowableActions, includeRelationships,
-                  includePathSegments, propertyFilter, renditionFilter, orderBy, maxItems, skipCount);
+         CmisObjectInFolderList list =
+            navigationService.getChildren(getRepositoryId(request), objectId, includeAllowableActions,
+               includeRelationships, includePathSegments, propertyFilter, renditionFilter, orderBy, maxItems,
+               skipCount, true);
          addPageLinks(objectId, feed, "children", maxItems, skipCount, list.getNumItems() == null ? -1 : list
             .getNumItems().intValue(), list.isHasMoreItems(), request);
          if (list.getObjects().size() > 0)
@@ -160,7 +161,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
                numItems.setText(list.getNumItems().toString());
             }
 
-            for (CmisObjectInFolderType oif : list.getObjects())
+            for (CmisObjectInFolder oif : list.getObjects())
             {
                Entry e = feed.addEntry();
                IRI feedIri = new IRI(getFeedIriForEntry(oif.getObject(), request));
@@ -193,7 +194,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
    /**
     * {@inheritDoc}
     */
-   public Iterable<CmisObjectType> getEntries(RequestContext request) throws ResponseContextException
+   public Iterable<CmisObject> getEntries(RequestContext request) throws ResponseContextException
    {
       throw new UnsupportedOperationException("entries");
    }
@@ -220,7 +221,8 @@ public class FolderChildrenCollection extends CmisObjectCollection
       ObjectTypeElement objectElement = entry.getFirstChild(AtomCMIS.OBJECT);
       //      CmisObjectType object = objectElement.getObject();
       boolean hasCMISElement = objectElement != null;
-      CmisObjectType object = hasCMISElement ? object = objectElement.getObject() : new CmisObjectType();
+      CmisObjectType cmisObjectType = hasCMISElement ? objectElement.getObject() : new CmisObjectType();
+      CmisObject object = new CmisObjectImpl(cmisObjectType);
       if (object.getProperties() == null)
          object.setProperties(new CmisPropertiesType());
       updatePropertiesFromEntry(object, entry);
@@ -249,7 +251,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
          if (id != null)
          {
             // move object
-            object = objectService.moveObject(getRepositoryId(request), id, getId(request), null);
+            object = objectService.moveObject(getRepositoryId(request), id, getId(request), null, true);
          }
          else
          {
@@ -280,19 +282,19 @@ public class FolderChildrenCollection extends CmisObjectCollection
                }
                object =
                   objectService.createDocument(getRepositoryId(request), getId(request), object.getProperties(),
-                     getContentStream(entry, request), versioningState, addACL, removeACL, policies);
+                     getContentStream(entry, request), versioningState, addACL, removeACL, policies, true);
             }
             else if (type.getBaseId() == EnumBaseObjectTypeIds.CMIS_FOLDER)
             {
                object =
                   objectService.createFolder(getRepositoryId(request), getId(request), object.getProperties(), addACL,
-                     removeACL, policies);
+                     removeACL, policies, true);
             }
             else if (type.getBaseId() == EnumBaseObjectTypeIds.CMIS_POLICY)
             {
                object =
                   objectService.createPolicy(getRepositoryId(request), getId(request), object.getProperties(), addACL,
-                     removeACL, policies);
+                     removeACL, policies, true);
             }
          }
 
@@ -383,7 +385,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
       {
          try
          {
-            CmisObjectType parent = navigationService.getFolderParent(repositoryId, id, null);
+            CmisObject parent = navigationService.getFolderParent(repositoryId, id, null, true);
             feed.addLink(getObjectLink(getId(parent), request), AtomCMIS.LINK_UP, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null,
                null, -1);
          }

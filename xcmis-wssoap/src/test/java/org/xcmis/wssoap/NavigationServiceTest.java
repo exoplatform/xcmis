@@ -117,7 +117,7 @@ public class NavigationServiceTest extends BaseTest
    public void testGetCheckedoutDocs() throws Exception
    {
       String id = createDocument(testFolderId, "doc");
-      versioningService.checkout(repositoryId, id);
+      versioningService.checkout(repositoryId, id, false);
       CmisObjectListType checkedout = port.getCheckedOutDocs(//
          repositoryId, //
          testFolderId, //

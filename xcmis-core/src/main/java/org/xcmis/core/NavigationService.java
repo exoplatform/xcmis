@@ -19,15 +19,14 @@
 
 package org.xcmis.core;
 
-import org.xcmis.core.CmisObjectType;
-import org.xcmis.core.EnumIncludeRelationships;
-import org.xcmis.messaging.CmisObjectInFolderContainerType;
-import org.xcmis.messaging.CmisObjectInFolderListType;
-import org.xcmis.messaging.CmisObjectListType;
-import org.xcmis.messaging.CmisObjectParentsType;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.RepositoryException;
+import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.object.CmisObjectInFolderContainer;
+import org.xcmis.spi.object.CmisObjectInFolderList;
+import org.xcmis.spi.object.CmisObjectList;
+import org.xcmis.spi.object.CmisObjectParents;
 
 import java.util.List;
 
@@ -56,14 +55,15 @@ public interface NavigationService
     * @param orderBy order by
     * @param maxItems number of max items in result set
     * @param skipCount skip items
+    * @param includeObjectInfo TODO
     * @return set of checked-out documents
     * @throws FilterNotValidException if <code>propertyFilter</code> or
     *            <code>renditionFilter</code> is invalid
     * @throws RepositoryException if any other errors in repository occur
     */
-   CmisObjectListType getCheckedOutDocs(String repositoryId, String folderId, boolean includeAllowableActions,
+   CmisObjectList getCheckedOutDocs(String repositoryId, String folderId, boolean includeAllowableActions,
       EnumIncludeRelationships includeRelationships, String propertyFilter, String renditionFilter, String orderBy,
-      int maxItems, int skipCount) throws FilterNotValidException, RepositoryException;
+      int maxItems, int skipCount, boolean includeObjectInfo) throws FilterNotValidException, RepositoryException;
 
    /**
     * Get the list of child objects contained in the specified folder.
@@ -81,6 +81,7 @@ public interface NavigationService
     * @param orderBy order by
     * @param maxItems number of max items in result set
     * @param skipCount skip items
+    * @param includeObjectInfo TODO
     * @return set of folder's children
     * @throws FilterNotValidException if <code>propertyFilter</code> or
     *            <code>renditionFilter</code> is invalid
@@ -88,9 +89,9 @@ public interface NavigationService
     *            is not a folder
     * @throws RepositoryException if any other errors in repository occur
     */
-   CmisObjectInFolderListType getChildren(String repositoryId, String folderId, boolean includeAllowableActions,
+   CmisObjectInFolderList getChildren(String repositoryId, String folderId, boolean includeAllowableActions,
       EnumIncludeRelationships includeRelationships, boolean includePathSegments, String propertyFilter,
-      String renditionFilter, String orderBy, int maxItems, int skipCount) throws FilterNotValidException,
+      String renditionFilter, String orderBy, int maxItems, int skipCount, boolean includeObjectInfo) throws FilterNotValidException,
       InvalidArgumentException, RepositoryException;
 
    /**
@@ -108,6 +109,7 @@ public interface NavigationService
     * @param includePathSegments if TRUE then returns a PathSegment for each child object
     * @param propertyFilter property filter as string
     * @param renditionFilter rendition filter as string
+    * @param includeObjectInfo TODO
     * @return set of folder's descendants
     * @throws FilterNotValidException if <code>propertyFilter</code> or
     *            <code>renditionFilter</code> is invalid
@@ -118,9 +120,9 @@ public interface NavigationService
     *            </ul>
     * @throws RepositoryException if any other errors in repository occur
     */
-   List<CmisObjectInFolderContainerType> getDescendants(String repositoryId, String folderId, int depth,
+   List<CmisObjectInFolderContainer> getDescendants(String repositoryId, String folderId, int depth,
       boolean includeAllowableActions, EnumIncludeRelationships includeRelationships, boolean includePathSegments,
-      String propertyFilter, String renditionFilter) throws FilterNotValidException, InvalidArgumentException,
+      String propertyFilter, String renditionFilter, boolean includeObjectInfo) throws FilterNotValidException, InvalidArgumentException,
       RepositoryException;
 
    /**
@@ -129,13 +131,14 @@ public interface NavigationService
     * @param repositoryId repository id
     * @param folderId folder id
     * @param propertyFilter property filter as string
+    * @param includeObjectInfo TODO
     * @return folder's parent
     * @throws FilterNotValidException if <code>propertyFilter</code> is invalid
     * @throws InvalidArgumentException if the <code>folderId</code> is id of the
     *            root folder
     * @throws RepositoryException if any other errors in repository occur
     */
-   CmisObjectType getFolderParent(String repositoryId, String folderId, String propertyFilter)
+   CmisObject getFolderParent(String repositoryId, String folderId, String propertyFilter, boolean includeObjectInfo)
       throws FilterNotValidException, InvalidArgumentException, RepositoryException;
 
    /**
@@ -152,6 +155,7 @@ public interface NavigationService
     * @param includePathSegments  if TRUE then returns a PathSegment for each child object
     * @param propertyFilter property filter as string
     * @param renditionFilter rendition filter as string
+    * @param includeObjectInfo TODO
     * @return hierarchical set of folders
     * @throws FilterNotValidException if <code>propertyFilter</code> or
     *            <code>renditionFilter</code> is invalid
@@ -162,9 +166,9 @@ public interface NavigationService
     *            </ul>
     * @throws RepositoryException if any other errors in repository occur
     */
-   List<CmisObjectInFolderContainerType> getFolderTree(String repositoryId, String folderId, int depth,
+   List<CmisObjectInFolderContainer> getFolderTree(String repositoryId, String folderId, int depth,
       boolean includeAllowableActions, EnumIncludeRelationships includeRelationships, boolean includePathSegments,
-      String propertyFilter, String renditionFilter) throws FilterNotValidException, InvalidArgumentException,
+      String propertyFilter, String renditionFilter, boolean includeObjectInfo) throws FilterNotValidException, InvalidArgumentException,
       RepositoryException;
 
    /**
@@ -179,15 +183,16 @@ public interface NavigationService
     * @param includeRelativePathSegment  if TRUE, returns a PathSegment for each child object
     * @param propertyFilter property filter as string
     * @param renditionFilter rendition filter as string
+    * @param includeObjectInfo TODO
     * @return object's parents
     * @throws FilterNotValidException if <code>propertyFilter</code> is invalid
     * @throws InvalidArgumentException if object with id <code>objectId</code> is a folder.
-    *            For getting parent of folder method {@link #getFolderParent(String, String, String)}
+    *            For getting parent of folder method {@link #getFolderParent(String, String, String, boolean)}
     *            must be used.
     * @throws RepositoryException if any other errors in repository occur
     */
-   List<CmisObjectParentsType> getObjectParents(String repositoryId, String objectId, boolean includeAllowableActions,
+   List<CmisObjectParents> getObjectParents(String repositoryId, String objectId, boolean includeAllowableActions,
       EnumIncludeRelationships includeRelationships, boolean includeRelativePathSegment, String propertyFilter,
-      String renditionFilter) throws FilterNotValidException, InvalidArgumentException, RepositoryException;
+      String renditionFilter, boolean includeObjectInfo) throws FilterNotValidException, InvalidArgumentException, RepositoryException;
 
 }

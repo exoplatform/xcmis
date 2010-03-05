@@ -25,20 +25,20 @@ import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
-import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.CmisPropertyString;
 import org.xcmis.core.EnumIncludeRelationships;
 import org.xcmis.core.NavigationService;
 import org.xcmis.core.ObjectService;
 import org.xcmis.core.RepositoryService;
 import org.xcmis.core.VersioningService;
-import org.xcmis.messaging.CmisObjectParentsType;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.RepositoryException;
+import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.object.CmisObjectParents;
 
 import java.util.List;
 
@@ -71,7 +71,7 @@ public class ParentsCollection extends CmisObjectCollection
    /**
     * {@inheritDoc}
     */
-   public Iterable<CmisObjectType> getEntries(RequestContext request) throws ResponseContextException
+   public Iterable<CmisObject> getEntries(RequestContext request) throws ResponseContextException
    {
       // To process hierarchically structure override addFeedDetails(Feed, RequestContext) method.
       throw new UnsupportedOperationException("entries");
@@ -123,14 +123,15 @@ public class ParentsCollection extends CmisObjectCollection
       try
       {
          String objectId = getId(request);
-         CmisObjectType object =
+         CmisObject object =
             objectService.getObject(repositoryId, objectId, false, EnumIncludeRelationships.NONE, false, false,
-               CMIS.BASE_TYPE_ID, null);
+               CMIS.BASE_TYPE_ID, null, true);
 
          switch (getBaseObjectType(object))
          {
             case CMIS_FOLDER :
-               CmisObjectType folderParent = navigationService.getFolderParent(repositoryId, objectId, propertyFilter);
+               CmisObject folderParent =
+                  navigationService.getFolderParent(repositoryId, objectId, propertyFilter, true);
                if (folderParent != null)
                {
                   // add cmisra:numItems
@@ -139,26 +140,26 @@ public class ParentsCollection extends CmisObjectCollection
                   Entry e = feed.addEntry();
                   IRI feedIri = new IRI(getFeedIriForEntry(folderParent, request));
                   addEntryDetails(request, e, feedIri, folderParent);
-                  CmisPropertyString name = (CmisPropertyString)getProperty(folderParent, CMIS.NAME);
-                  if (name != null && name.getValue().size() > 0)
+                  String name = folderParent.getObjectInfo().getName();
+                  if (name != null)
                   {
                      // add cmisra:relativePathSegment
                      Element pathSegment = e.addExtension(AtomCMIS.RELATIVE_PATH_SEGMENT);
-                     pathSegment.setText(name.getValue().get(0));
+                     pathSegment.setText(name);
                   }
                }
                break;
             default :
-               List<CmisObjectParentsType> parents =
+               List<CmisObjectParents> parents =
                   navigationService.getObjectParents(repositoryId, objectId, includeAllowableActions,
-                     includeRelationships, includeRelativePathSegment, propertyFilter, renditionFilter);
+                     includeRelationships, includeRelativePathSegment, propertyFilter, renditionFilter, true);
                if (parents.size() > 0)
                {
                   // add cmisra:numItems
                   Element numItems = feed.addExtension(AtomCMIS.NUM_ITEMS);
                   numItems.setText(Integer.toString(parents.size()));
 
-                  for (CmisObjectParentsType parent : parents)
+                  for (CmisObjectParents parent : parents)
                   {
                      Entry e = feed.addEntry();
                      IRI feedIri = new IRI(getFeedIriForEntry(parent.getObject(), request));

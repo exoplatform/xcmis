@@ -21,7 +21,6 @@ package org.xcmis.core;
 
 import org.xcmis.core.CmisAccessControlListType;
 import org.xcmis.core.CmisAllowableActionsType;
-import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.CmisPropertiesType;
 import org.xcmis.core.CmisRenditionType;
 import org.xcmis.core.EnumIncludeRelationships;
@@ -35,6 +34,7 @@ import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.RepositoryException;
 import org.xcmis.spi.StreamNotSupportedException;
 import org.xcmis.spi.UpdateConflictException;
+import org.xcmis.spi.object.CmisObject;
 import org.xcmis.spi.object.ContentStream;
 
 import java.io.IOException;
@@ -69,6 +69,7 @@ public interface ObjectService
     *           <code>folderId</code> is specified
     * @param policies list of policy id that MUST be applied to the newly
     *           created document
+    * @param includeObjectInfo TODO
     * @return newly created document
     * @throws StreamNotSupportedException if the contentStreamAllowed attribute
     *            of the object type definition specified by the cmis:objectTypeId
@@ -113,9 +114,9 @@ public interface ObjectService
     *           content stream
     * @throws RepositoryException if any CMIS repository errors occurs
     */
-   CmisObjectType createDocument(String repositoryId, String folderId, CmisPropertiesType properties,
+   CmisObject createDocument(String repositoryId, String folderId, CmisPropertiesType properties,
       ContentStream content, EnumVersioningState versioningState, CmisAccessControlListType addACL,
-      CmisAccessControlListType removeACL, List<String> policies) throws StreamNotSupportedException,
+      CmisAccessControlListType removeACL, List<String> policies, boolean includeObjectInfo) throws StreamNotSupportedException,
       ConstraintException, NameConstraintViolationException, ObjectNotFoundException, IOException, RepositoryException;
 
    /**
@@ -139,6 +140,7 @@ public interface ObjectService
     *           <code>folderId</code> is specified
     * @param policies list of policy id that MUST be applied to the newly
     *           created document
+    * @param includeObjectInfo TODO
     * @return newly created document
     * @throws ConstraintException if any of following condition are met:
     *           <ul>
@@ -169,9 +171,9 @@ public interface ObjectService
     *            <code>folderId</code> does not exist
     * @throws RepositoryException if any CMIS repository errors occurs
     */
-   CmisObjectType createDocumentFromSource(String repositoryId, String sourceId, String folderId,
+   CmisObject createDocumentFromSource(String repositoryId, String sourceId, String folderId,
       CmisPropertiesType properties, EnumVersioningState versioningState, CmisAccessControlListType addACL,
-      CmisAccessControlListType removeACL, List<String> policies) throws ConstraintException,
+      CmisAccessControlListType removeACL, List<String> policies, boolean includeObjectInfo) throws ConstraintException,
       NameConstraintViolationException, ObjectNotFoundException, RepositoryException;
 
    /**
@@ -190,6 +192,7 @@ public interface ObjectService
     *          <code>folderId</code> is specified
     * @param policies list of policy id that MUST be applied to the newly
     *          created folder
+    * @param includeObjectInfo TODO
     * @return newly created folder
     * @throws ConstraintException if any of following condition are met:
     *         <ul>
@@ -215,8 +218,8 @@ public interface ObjectService
     *            <code>folderId</code> does not exist
     * @throws RepositoryException if any CMIS repository errors occurs
     */
-   CmisObjectType createFolder(String repositoryId, String folderId, CmisPropertiesType properties,
-      CmisAccessControlListType addACL, CmisAccessControlListType removeACL, List<String> policies)
+   CmisObject createFolder(String repositoryId, String folderId, CmisPropertiesType properties,
+      CmisAccessControlListType addACL, CmisAccessControlListType removeACL, List<String> policies, boolean includeObjectInfo)
       throws ConstraintException, NameConstraintViolationException, ObjectNotFoundException, RepositoryException;
 
    /**
@@ -236,6 +239,7 @@ public interface ObjectService
     *          <code>folderId</code> is specified
     * @param policies list of policy id that MUST be applied to the newly
     *          created policy
+    * @param includeObjectInfo TODO
     * @return newly created policy
     * @throws ConstraintException if any of following condition are met:
     *           <ul>
@@ -261,8 +265,8 @@ public interface ObjectService
     *            <code>folderId</code> does not exist
     * @throws RepositoryException if any CMIS repository errors occurs
     */
-   CmisObjectType createPolicy(String repositoryId, String folderId, CmisPropertiesType properties,
-      CmisAccessControlListType addACL, CmisAccessControlListType removeACL, List<String> policies)
+   CmisObject createPolicy(String repositoryId, String folderId, CmisPropertiesType properties,
+      CmisAccessControlListType addACL, CmisAccessControlListType removeACL, List<String> policies, boolean includeObjectInfo)
       throws ConstraintException, NameConstraintViolationException, ObjectNotFoundException, RepositoryException;
 
    /**
@@ -276,6 +280,7 @@ public interface ObjectService
     *          the newly created relationship
     * @param policies list of policy id that MUST be applied to the newly
     *          created relationship
+    * @param includeObjectInfo TODO
     * @return newly created relationship
     * @throws ConstraintException if any of following condition are met:
     *            <ul>
@@ -303,8 +308,8 @@ public interface ObjectService
     *            does not exist
     * @throws RepositoryException if any CMIS repository errors occurs
     */
-   CmisObjectType createRelationship(String repositoryId, CmisPropertiesType properties,
-      CmisAccessControlListType addACL, CmisAccessControlListType removeACL, List<String> policies)
+   CmisObject createRelationship(String repositoryId, CmisPropertiesType properties,
+      CmisAccessControlListType addACL, CmisAccessControlListType removeACL, List<String> policies, boolean includeObjectInfo)
       throws ConstraintException, ObjectNotFoundException, RepositoryException;
 
    /**
@@ -314,6 +319,7 @@ public interface ObjectService
     * @param documentId document id
     * @param changeToken is used for optimistic locking and/or concurrency
     *           checking to ensure that user updates do not conflict
+    * @param includeObjectInfo TODO
     * @return CMIS object 
     * @throws ConstraintException if object's type definition
     *            contentStreamAllowed attribute is set to <i>required</i>
@@ -321,7 +327,7 @@ public interface ObjectService
     *            Repository determine this by using change token
     * @throws RepositoryException if any CMIS repository errors occurs
     */
-   CmisObjectType deleteContentStream(String repositoryId, String documentId, String changeToken)
+   CmisObject deleteContentStream(String repositoryId, String documentId, String changeToken, boolean includeObjectInfo)
       throws ConstraintException, UpdateConflictException, RepositoryException;
 
    /**
@@ -418,6 +424,7 @@ public interface ObjectService
     * @param includeACL include object's ACL
     * @param propertyFilter property filter as string
     * @param renditionFilter rendition filter as string
+    * @param includeObjectInfo TODO
     * @return retrieval object
     * @throws ObjectNotFoundException if object with specified id
     *            <code>objectId</code> does not exist
@@ -425,9 +432,9 @@ public interface ObjectService
     *           <code>renditionFilter</code> is invalid 
     * @throws RepositoryException if any CMIS repository errors occurs
     */
-   CmisObjectType getObject(String repositoryId, String objectId, boolean includeAllowableActions,
+   CmisObject getObject(String repositoryId, String objectId, boolean includeAllowableActions,
       EnumIncludeRelationships includeRelationships, boolean includePolicyIds, boolean includeACL,
-      String propertyFilter, String renditionFilter) throws ObjectNotFoundException, FilterNotValidException,
+      String propertyFilter, String renditionFilter, boolean includeObjectInfo) throws ObjectNotFoundException, FilterNotValidException,
       RepositoryException;
 
    /**
@@ -442,6 +449,7 @@ public interface ObjectService
     * @param includeACL include ACL
     * @param propertyFilter property filter as string
     * @param renditionFilter rendition filter as string 
+    * @param includeObjectInfo TODO
     * @return object
     * @throws ObjectNotFoundException if object with specified <code>path</code>
     *            not found in repository
@@ -449,9 +457,9 @@ public interface ObjectService
     *            <code>renditionFilter</code> is invalid. 
     * @throws RepositoryException if any CMIS repository errors occurs
     */
-   CmisObjectType getObjectByPath(String repositoryId, String path, boolean includeAllowableActions,
+   CmisObject getObjectByPath(String repositoryId, String path, boolean includeAllowableActions,
       EnumIncludeRelationships includeRelationships, boolean includePolicyIds, boolean includeACL,
-      String propertyFilter, String renditionFilter) throws ObjectNotFoundException, FilterNotValidException,
+      String propertyFilter, String renditionFilter, boolean includeObjectInfo) throws ObjectNotFoundException, FilterNotValidException,
       RepositoryException;
 
    /**
@@ -494,6 +502,7 @@ public interface ObjectService
     * @param objectId object id
     * @param targetFolderId target folder for moving object
     * @param sourceFolderId move object from which object to be moved
+    * @param includeObjectInfo TODO
     * @return moved object
     * @throws ConstraintException if cmis:objectTypeId property value
     *            of the given object is NOT in the list of AllowedChildObjectTypeIds
@@ -503,7 +512,7 @@ public interface ObjectService
     * @throws RepositoryException if any CMIS repository errors occurs
     */
    // TODO : not clear about UpdateConflictException in this case.
-   CmisObjectType moveObject(String repositoryId, String objectId, String targetFolderId, String sourceFolderId)
+   CmisObject moveObject(String repositoryId, String objectId, String targetFolderId, String sourceFolderId, boolean includeObjectInfo)
       throws ConstraintException, UpdateConflictException, RepositoryException;
 
    /**
@@ -517,6 +526,7 @@ public interface ObjectService
     * @param overwriteFlag if TRUE on object's content stream  exists it
     *          will be overridden. If FALSE and context stream already exists
     *          then ContentAlreadyExistsException will be thrown
+    * @param includeObjectInfo TODO
     * @return updated object 
     * @throws ContentAlreadyExistsException if the input parameter overwriteFlag
     *           is FALSE and the Object already has a content-stream.
@@ -532,8 +542,8 @@ public interface ObjectService
     *           content stream
     * @throws RepositoryException if any CMIS repository errors occurs
     */
-   CmisObjectType setContentStream(String repositoryId, String documentId, ContentStream content, String changeToken,
-      boolean overwriteFlag) throws ContentAlreadyExistsException, ObjectNotFoundException,
+   CmisObject setContentStream(String repositoryId, String documentId, ContentStream content, String changeToken,
+      boolean overwriteFlag, boolean includeObjectInfo) throws ContentAlreadyExistsException, ObjectNotFoundException,
       StreamNotSupportedException, UpdateConflictException, RepositoryException, IOException;
 
    /**
@@ -544,6 +554,7 @@ public interface ObjectService
     * @param changeToken is used for optimistic locking and/or concurrency
     *           checking to ensure that user updates do not conflict
     * @param properties properties to be applied for object
+    * @param includeObjectInfo TODO
     * @return updated object
     * @throws ConstraintException if value of any of the properties violates the
     *            min/max/required/length constraints specified in the property definition
@@ -554,8 +565,8 @@ public interface ObjectService
     *            Repository determine this by using change token
     * @throws RepositoryException if any CMIS repository errors occurs
     */
-   CmisObjectType updateProperties(String repositoryId, String objectId, String changeToken,
-      CmisPropertiesType properties) throws ConstraintException, NameConstraintViolationException,
+   CmisObject updateProperties(String repositoryId, String objectId, String changeToken,
+      CmisPropertiesType properties, boolean includeObjectInfo) throws ConstraintException, NameConstraintViolationException,
       UpdateConflictException, RepositoryException;
 
 }

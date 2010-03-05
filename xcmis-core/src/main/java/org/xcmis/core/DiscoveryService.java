@@ -24,6 +24,7 @@ import org.xcmis.messaging.CmisObjectListType;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.RepositoryException;
+import org.xcmis.spi.object.CmisObjectList;
 
 /**
  * Is used to search for query-able objects in the Repository.
@@ -83,11 +84,12 @@ public interface DiscoveryService
     * @param renditionFilter rendition filter as string
     * @param maxItems max items in result
     * @param skipCount skip items
+    * @param includeObjectInfo TODO
     * @return set of query results
     * @throws FilterNotValidException if <code>renditionFilter</code> is invalid
     * @throws RepositoryException if any error in repository occurs
     */
-   CmisObjectListType query(String repositoryId, String statement, boolean searchAllVersions,
+   CmisObjectList query(String repositoryId, String statement, boolean searchAllVersions,
       boolean includeAllowableActions, EnumIncludeRelationships includeRelationships, String renditionFilter,
-      int maxItems, int skipCount) throws FilterNotValidException, RepositoryException;
+      int maxItems, int skipCount, boolean includeObjectInfo) throws FilterNotValidException, RepositoryException;
 }

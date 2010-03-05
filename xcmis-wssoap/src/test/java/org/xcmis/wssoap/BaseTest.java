@@ -175,7 +175,7 @@ public abstract class BaseTest extends TestCase
       props.getProperty().add(propName);
       CmisObjectType document =
          objectService.createDocument(repositoryId, parentId, props, null, EnumVersioningState.MAJOR, null, null,
-            null);
+            null, false).toCmisObjectType();
       return getObjectId(document);
    }
 
@@ -193,7 +193,7 @@ public abstract class BaseTest extends TestCase
 
       props.getProperty().add(propTypeId);
       props.getProperty().add(propName);
-      CmisObjectType folder = objectService.createFolder(repositoryId, parentId, props, null, null, null);
+      CmisObjectType folder = objectService.createFolder(repositoryId, parentId, props, null, null, null, false).toCmisObjectType();
       return getObjectId(folder);
    }
 
@@ -216,7 +216,7 @@ public abstract class BaseTest extends TestCase
       props.getProperty().add(propTypeId);
       props.getProperty().add(propName);
       props.getProperty().add(propText);
-      CmisObjectType policy = objectService.createPolicy(repositoryId, parentId, props, null, null, null);
+      CmisObjectType policy = objectService.createPolicy(repositoryId, parentId, props, null, null, null, false).toCmisObjectType();
       return getObjectId(policy);
    }
 
@@ -245,7 +245,7 @@ public abstract class BaseTest extends TestCase
       props.getProperty().add(sourceId);
       props.getProperty().add(targetId);
 
-      CmisObjectType relationship = objectService.createRelationship(repositoryId, props, null, null, null);
+      CmisObjectType relationship = objectService.createRelationship(repositoryId, props, null, null, null, false).toCmisObjectType();
       return getObjectId(relationship);
    }
 

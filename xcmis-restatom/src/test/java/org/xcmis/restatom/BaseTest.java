@@ -24,20 +24,6 @@ import junit.framework.TestCase;
 import org.apache.abdera.Abdera;
 import org.apache.abdera.factory.Factory;
 import org.exoplatform.container.StandaloneContainer;
-import org.xcmis.core.AccessControlService;
-import org.xcmis.core.CmisObjectType;
-import org.xcmis.core.CmisPropertiesType;
-import org.xcmis.core.CmisProperty;
-import org.xcmis.core.CmisPropertyId;
-import org.xcmis.core.CmisPropertyString;
-import org.xcmis.core.EnumBaseObjectTypeIds;
-import org.xcmis.core.EnumVersioningState;
-import org.xcmis.core.NavigationService;
-import org.xcmis.core.ObjectService;
-import org.xcmis.core.PolicyService;
-import org.xcmis.core.RelationshipService;
-import org.xcmis.core.RepositoryService;
-import org.xcmis.core.VersioningService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.ContainerResponseWriter;
@@ -53,10 +39,23 @@ import org.exoplatform.services.security.Identity;
 import org.exoplatform.services.test.mock.MockHttpServletRequest;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.core.AccessControlService;
+import org.xcmis.core.CmisPropertiesType;
+import org.xcmis.core.CmisProperty;
+import org.xcmis.core.CmisPropertyId;
+import org.xcmis.core.CmisPropertyString;
+import org.xcmis.core.EnumBaseObjectTypeIds;
+import org.xcmis.core.EnumVersioningState;
+import org.xcmis.core.NavigationService;
+import org.xcmis.core.ObjectService;
+import org.xcmis.core.PolicyService;
+import org.xcmis.core.RelationshipService;
+import org.xcmis.core.RepositoryService;
+import org.xcmis.core.VersioningService;
 import org.xcmis.restatom.abdera.CMISExtensionFactory;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.Repository;
+import org.xcmis.spi.object.CmisObject;
 import org.xcmis.spi.object.ContentStream;
 import org.xcmis.spi.object.Entry;
 
@@ -133,26 +132,21 @@ public abstract class BaseTest extends TestCase
       factory.registerExtension(new CMISExtensionFactory());
 
       cmisRepositoryService =
-         (org.xcmis.core.RepositoryService)container
-            .getComponentInstanceOfType(org.xcmis.core.RepositoryService.class);
+         (org.xcmis.core.RepositoryService)container.getComponentInstanceOfType(org.xcmis.core.RepositoryService.class);
       objectService =
-         (org.xcmis.core.ObjectService)container
-            .getComponentInstanceOfType(org.xcmis.core.ObjectService.class);
+         (org.xcmis.core.ObjectService)container.getComponentInstanceOfType(org.xcmis.core.ObjectService.class);
       navigationService =
-         (org.xcmis.core.NavigationService)container
-            .getComponentInstanceOfType(org.xcmis.core.NavigationService.class);
+         (org.xcmis.core.NavigationService)container.getComponentInstanceOfType(org.xcmis.core.NavigationService.class);
       relationshipService =
          (org.xcmis.core.RelationshipService)container
             .getComponentInstanceOfType(org.xcmis.core.RelationshipService.class);
       versioningService =
-         (org.xcmis.core.VersioningService)container
-            .getComponentInstanceOfType(org.xcmis.core.VersioningService.class);
+         (org.xcmis.core.VersioningService)container.getComponentInstanceOfType(org.xcmis.core.VersioningService.class);
       aclService =
          (org.xcmis.core.AccessControlService)container
             .getComponentInstanceOfType(org.xcmis.core.AccessControlService.class);
       policyService =
-         (org.xcmis.core.PolicyService)container
-            .getComponentInstanceOfType(org.xcmis.core.PolicyService.class);
+         (org.xcmis.core.PolicyService)container.getComponentInstanceOfType(org.xcmis.core.PolicyService.class);
 
       ConversationState state = new ConversationState(new Identity("root"));
       ConversationState.setCurrent(state);
@@ -170,7 +164,8 @@ public abstract class BaseTest extends TestCase
       props.getProperty().add(propId);
       props.getProperty().add(propName);
 
-      testFolderId = getObjectId(objectService.createFolder(cmisRepositoryId, rootFolderId, props, null, null, null));
+      CmisObject object = objectService.createFolder(cmisRepositoryId, rootFolderId, props, null, null, null, true);
+      testFolderId = object.getObjectInfo().getId();
 
       xp = XPathFactory.newInstance().newXPath();
       xp.setNamespaceContext(new NamespaceResolver());
@@ -312,14 +307,9 @@ public abstract class BaseTest extends TestCase
          + "']/cmis:value", xmlDoc);
    }
 
-   protected String getObjectId(CmisObjectType object)
+   protected CmisProperty getProperty(CmisPropertiesType object, String propertyName)
    {
-      return ((CmisPropertyId)getProperty(object, CMIS.OBJECT_ID)).getValue().get(0);
-   }
-
-   protected CmisProperty getProperty(CmisObjectType object, String propertyName)
-   {
-      CmisPropertiesType properties = object.getProperties();
+      CmisPropertiesType properties = object;
       if (properties != null)
       {
          for (CmisProperty prop : properties.getProperty())
@@ -475,7 +465,7 @@ public abstract class BaseTest extends TestCase
       assertTrue(hasLink(AtomCMIS.LINK_SELF, xmlEntry));
       assertTrue(hasLink(AtomCMIS.LINK_DOWN, xmlEntry));
       // TODO : check links for not root types
-      
+
       org.w3c.dom.Node xmlType = getNode("cmisra:type", xmlEntry);
       assertTrue("Not found 'cmis:id' element", hasElementValue("cmis:id", xmlType));
       //    assertTrue("Not found 'cmis:displayName' element", hasElementValue("cmis:displayName", xmlDoc));
@@ -489,12 +479,13 @@ public abstract class BaseTest extends TestCase
          xmlType));
       assertTrue("Not found 'cmis:controllable' element", hasElementValue("cmis:controllable", xmlType));
       assertTrue("Not found 'cmis:controllablePolicy' element", hasElementValue("cmis:controllablePolicy", xmlType));
-      
+
       String baseId = getStringElement("cmis:baseId", xmlType);
       if (baseId.equals("cmis:document"))
       {
          assertTrue("Not found 'cmis:versionable' element", hasElementValue("cmis:versionable", xmlType));
-         assertTrue("Not found 'cmis:contentStreamAllowed' element", hasElementValue("cmis:contentStreamAllowed", xmlType));
+         assertTrue("Not found 'cmis:contentStreamAllowed' element", hasElementValue("cmis:contentStreamAllowed",
+            xmlType));
       }
       // TODO : property-definitions
    }

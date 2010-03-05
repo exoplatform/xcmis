@@ -597,7 +597,7 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
    public Entry getObjectById(String objectId) throws ObjectNotFoundException, RepositoryException
    {
       if (LOG.isDebugEnabled())
-         LOG.debug("Get object with id " + objectId);
+         LOG.debug("Get object with id '" + objectId + "'");
       try
       {
          Node node = ((ExtendedSession)getSession()).getNodeByIdentifier(objectId);
@@ -610,7 +610,7 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
       }
       catch (ItemNotFoundException infe)
       {
-         String msg = "Object " + objectId + " not found.";
+         String msg = "Object '" + objectId + "' not found.";
          throw new ObjectNotFoundException(msg);
       }
       catch (javax.jcr.RepositoryException re)

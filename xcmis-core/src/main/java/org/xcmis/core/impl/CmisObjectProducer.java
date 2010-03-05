@@ -23,7 +23,6 @@ import org.xcmis.core.CmisAccessControlEntryType;
 import org.xcmis.core.CmisAccessControlListType;
 import org.xcmis.core.CmisAllowableActionsType;
 import org.xcmis.core.CmisListOfIdsType;
-import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.CmisPropertiesType;
 import org.xcmis.core.CmisProperty;
 import org.xcmis.core.CmisPropertyDefinitionType;
@@ -33,11 +32,18 @@ import org.xcmis.core.EnumRelationshipDirection;
 import org.xcmis.core.impl.object.RenditionFilter;
 import org.xcmis.core.impl.property.PropertyFilter;
 import org.xcmis.core.impl.property.PropertyService;
+import org.xcmis.spi.CMIS;
 import org.xcmis.spi.RepositoryException;
+import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.object.CmisObjectImpl;
 import org.xcmis.spi.object.Entry;
 import org.xcmis.spi.object.ItemsIterator;
+import org.xcmis.spi.object.ObjectInfo;
+import org.xcmis.spi.object.ObjectInfoImpl;
 import org.xcmis.spi.object.RenditionManager;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
 
 /**
@@ -75,15 +81,16 @@ abstract class CmisObjectProducer
     * @param propertyFilter the property filter
     * @param renditionFilter the rendition filter
     * @param renditionManager the rendition manager
+    * @param includeObjectInfo TODO
     * @return CmisObjectType 
     * @throws RepositoryException if any repository error occurs
     */
-   public CmisObjectType getCmisObject(Entry entry, boolean includeAllowableActions,
+   public CmisObject getCmisObject(Entry entry, boolean includeAllowableActions,
       EnumIncludeRelationships includeRelationships, boolean includePolicyIds, boolean includeACL,
-      PropertyFilter propertyFilter, RenditionFilter renditionFilter, RenditionManager renditionManager)
-      throws RepositoryException
+      PropertyFilter propertyFilter, RenditionFilter renditionFilter, RenditionManager renditionManager,
+      boolean includeObjectInfo) throws RepositoryException
    {
-      CmisObjectType cmis = new CmisObjectType();
+      CmisObject cmis = new CmisObjectImpl();
 
       // allowable actions
       if (includeAllowableActions && entry.canGetAppliedPolicies())
@@ -103,9 +110,9 @@ abstract class CmisObjectProducer
          {
             while (relationships.hasNext())
             {
-               CmisObjectType relationship =
+               CmisObject relationship =
                   getCmisObject(relationships.next(), false, EnumIncludeRelationships.NONE, false, false,
-                     PropertyFilter.ALL, RenditionFilter.NONE, renditionManager);
+                     PropertyFilter.ALL, RenditionFilter.NONE, renditionManager, includeObjectInfo);
                cmis.getRelationship().add(relationship);
             }
          }
@@ -140,6 +147,12 @@ abstract class CmisObjectProducer
          }
       }
 
+      // include Object Info
+      if (includeObjectInfo)
+      {
+         cmis.setObjectInfo(createObjectInfo(entry));
+      }
+
       // renditions
       if (renditionManager != null)
       {
@@ -150,7 +163,76 @@ abstract class CmisObjectProducer
                cmis.getRendition().add(item);
          }
       }
+
       return cmis;
+   }
+
+   private ObjectInfo createObjectInfo(Entry entry)
+   {
+      ObjectInfoImpl result = new ObjectInfoImpl();
+      result.setBaseTypeId(entry.getType().getId());
+      result.setContentStreamFileName(getEntryPropertyString(entry, CMIS.CONTENT_STREAM_FILE_NAME));
+      result.setContentStreamId(getEntryPropertyString(entry, CMIS.CONTENT_STREAM_ID));
+      result.setCreatedBy(getEntryPropertyString(entry, CMIS.CREATED_BY));
+      result.setCreationDate((GregorianCalendar)getEntryPropertyDate(entry, CMIS.CREATION_DATE));
+      result.setId(getEntryPropertyString(entry, CMIS.OBJECT_ID));
+      result.setIsLatestMajorVersion(getEntryPropertyBoolean(entry, CMIS.IS_LATEST_MAJOR_VERSION));
+      result.setIsLatestVersion(getEntryPropertyBoolean(entry, CMIS.IS_LATEST_VERSION));
+      result.setIsMajorVersion(getEntryPropertyBoolean(entry, CMIS.IS_MAJOR_VERSION));
+      result.setIsVersionSeriesCheckedOut(getEntryPropertyBoolean(entry, CMIS.IS_VERSION_SERIES_CHECKED_OUT));
+      result.setLastModificationDate((GregorianCalendar)getEntryPropertyDate(entry, CMIS.LAST_MODIFICATION_DATE));
+      result.setLastModifiedBy(getEntryPropertyString(entry, CMIS.LAST_MODIFIED_BY));
+      result.setName(getEntryPropertyString(entry, CMIS.NAME));
+      result.setObjectTypeId(getEntryPropertyString(entry, CMIS.OBJECT_TYPE_ID));
+      result.setParentId(getEntryPropertyString(entry, CMIS.PARENT_ID));
+      result.setVersionLabel(getEntryPropertyString(entry, CMIS.VERSION_LABEL));
+      result.setVersionSeriesId(getEntryPropertyString(entry, CMIS.VERSION_SERIES_ID));
+      String contentStreamMimeType = getEntryPropertyString(entry, CMIS.CONTENT_STREAM_MIME_TYPE);
+      result.setContentStreamMimeType(contentStreamMimeType != "" ? contentStreamMimeType : null);
+      result.setChangeToken(getEntryPropertyString(entry, CMIS.CHANGE_TOKEN));
+      result.setTargetId(getEntryPropertyString(entry, CMIS.TARGET_ID));
+      result.setVersionSeriesCheckedOutId(getEntryPropertyString(entry, CMIS.VERSION_SERIES_CHECKED_OUT_ID));
+      result.setSourceId(getEntryPropertyString(entry, CMIS.SOURCE_ID));
+      return result;
+   }
+
+   private String getEntryPropertyString(Entry entry, String propertyName)
+   {
+      try
+      {
+         return entry.getString(propertyName);
+      }
+      catch (RepositoryException e)
+      {
+         // TODO: handle exception
+      }
+      return null;
+   }
+
+   private Calendar getEntryPropertyDate(Entry entry, String propertyName)
+   {
+      try
+      {
+         return entry.getDate(propertyName);
+      }
+      catch (RepositoryException e)
+      {
+         // TODO: handle exception
+      }
+      return null;
+   }
+
+   private boolean getEntryPropertyBoolean(Entry entry, String propertyName)
+   {
+      try
+      {
+         return entry.getBoolean(propertyName);
+      }
+      catch (RepositoryException e)
+      {
+         // TODO: handle exception
+      }
+      return false;
    }
 
    /**

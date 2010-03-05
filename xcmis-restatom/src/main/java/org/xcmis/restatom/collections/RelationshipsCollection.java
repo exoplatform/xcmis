@@ -37,7 +37,6 @@ import org.xcmis.core.ObjectService;
 import org.xcmis.core.RelationshipService;
 import org.xcmis.core.RepositoryService;
 import org.xcmis.core.VersioningService;
-import org.xcmis.messaging.CmisObjectListType;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.abdera.ObjectTypeElement;
 import org.xcmis.spi.CMIS;
@@ -46,6 +45,9 @@ import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.RepositoryException;
+import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.object.CmisObjectImpl;
+import org.xcmis.spi.object.CmisObjectList;
 
 import java.util.HashMap;
 import java.util.List;
@@ -81,7 +83,7 @@ public class RelationshipsCollection extends CmisObjectCollection
    /**
     * {@inheritDoc}
     */
-   public Iterable<CmisObjectType> getEntries(RequestContext request) throws ResponseContextException
+   public Iterable<CmisObject> getEntries(RequestContext request) throws ResponseContextException
    {
       // To process hierarchically structure override addFeedDetails(Feed, RequestContext) method.
       throw new UnsupportedOperationException("entries");
@@ -112,7 +114,8 @@ public class RelationshipsCollection extends CmisObjectCollection
       }
 
       ObjectTypeElement objectElement = entry.getFirstChild(AtomCMIS.OBJECT);
-      CmisObjectType object = objectElement.getObject();
+      CmisObjectType cmisObjectType = objectElement.getObject();
+      CmisObject object = new CmisObjectImpl(cmisObjectType);
       if (object.getProperties() == null)
          object.setProperties(new CmisPropertiesType());
       updatePropertiesFromEntry(object, entry);
@@ -143,11 +146,11 @@ public class RelationshipsCollection extends CmisObjectCollection
       CmisAccessControlListType addACL = null;
       CmisAccessControlListType removeACL = null;
       List<String> policies = null;
-      CmisObjectType relationship;
+      CmisObject relationship;
       try
       {
          relationship =
-            objectService.createRelationship(getRepositoryId(request), properties, addACL, removeACL, policies);
+            objectService.createRelationship(getRepositoryId(request), properties, addACL, removeACL, policies, true);
       }
       catch (ConstraintException cve)
       {
@@ -242,9 +245,9 @@ public class RelationshipsCollection extends CmisObjectCollection
       }
       try
       {
-         CmisObjectListType list =
+         CmisObjectList list =
             relationshipService.getObjectRelationships(getRepositoryId(request), objectId, direction, typeId,
-               includeSubRelationship, includeAllowableActions, propertyFilter, maxItems, skipCount);
+               includeSubRelationship, includeAllowableActions, propertyFilter, maxItems, skipCount, true);
          if (list.getObjects().size() > 0)
          {
             // add cmisra:numItems
@@ -258,7 +261,7 @@ public class RelationshipsCollection extends CmisObjectCollection
             addPageLinks(objectId, feed, "relationships", maxItems, skipCount, list.getNumItems() == null ? -1 : list
                .getNumItems().intValue(), list.isHasMoreItems(), request);
 
-            for (CmisObjectType object : list.getObjects())
+            for (CmisObject object : list.getObjects())
             {
                Entry e = feed.addEntry();
                IRI feedIri = new IRI(getFeedIriForEntry(object, request));

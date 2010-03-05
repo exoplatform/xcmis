@@ -19,10 +19,9 @@
 
 package org.xcmis.restatom;
 
-import org.xcmis.core.CmisObjectType;
 import org.exoplatform.services.rest.impl.ContainerResponse;
 import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
-import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.spi.object.CmisObject;
 import org.xcmis.spi.object.Entry;
 
 import java.io.ByteArrayInputStream;
@@ -169,7 +168,7 @@ public class PoliciesCollectionTest extends BaseTest
       ContainerResponse resp = service("DELETE", requestURI, "http://localhost:8080/rest", null, s.getBytes(), writer);
 
       assertEquals(200, resp.getStatus());
-      List<CmisObjectType> res = policyService.getAppliedPolicies(cmisRepositoryId, docId, null);
+      List<CmisObject> res = policyService.getAppliedPolicies(cmisRepositoryId, docId, null, true);
       assertEquals(0, res.size()); // No policies 
    }
 }

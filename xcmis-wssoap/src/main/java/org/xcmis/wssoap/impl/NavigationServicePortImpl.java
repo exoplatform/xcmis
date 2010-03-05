@@ -32,8 +32,11 @@ import org.xcmis.messaging.CmisObjectParentsType;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.NavigationServicePort;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.object.CmisObjectInFolderContainer;
+import org.xcmis.spi.object.CmisObjectParents;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -92,7 +95,7 @@ public class NavigationServicePortImpl implements NavigationServicePort
             renditionFilter, //
             orderBy, //
             maxItems == null ? CMIS.MAX_ITEMS : maxItems.intValue(), //
-            skipCount == null ? 0 : skipCount.intValue());
+            skipCount == null ? 0 : skipCount.intValue(), false).toCmisObjectList();
       }
       catch (Exception e)
       {
@@ -131,7 +134,7 @@ public class NavigationServicePortImpl implements NavigationServicePort
             renditionFilter, //
             orderBy, //
             maxItems == null ? CMIS.MAX_ITEMS : maxItems.intValue(), //
-            skipCount == null ? 0 : skipCount.intValue()).getObjects());
+            skipCount == null ? 0 : skipCount.intValue(), false).toCmisObjectInFolderListType().getObjects());
 
       }
       catch (Exception e)
@@ -159,14 +162,20 @@ public class NavigationServicePortImpl implements NavigationServicePort
          LOG.debug("Executing operation getDescendants");
       try
       {
-         return navigationService.getDescendants(repositoryId, //
+         List<CmisObjectInFolderContainer> descendants = navigationService.getDescendants(repositoryId, //
             folderId, //
             depth == null ? 1 : depth.intValue(), //
             includeAllowableActions == null ? false : includeAllowableActions, //
             includeRelationships == null ? EnumIncludeRelationships.NONE : includeRelationships, //
             includePathSegments == null ? false : includePathSegments, //
             propertyFilter, //
-            renditionFilter);
+            renditionFilter, false);
+         List<CmisObjectInFolderContainerType> result = new ArrayList<CmisObjectInFolderContainerType>();
+         for (CmisObjectInFolderContainer objectInFolderCont : descendants)
+         {
+            result.add(objectInFolderCont.toCmisObjectInFolderContainerType());
+         }
+         return result;
       }
       catch (Exception e)
       {
@@ -185,7 +194,7 @@ public class NavigationServicePortImpl implements NavigationServicePort
          LOG.debug("Executing operation getFolderParent");
       try
       {
-         return navigationService.getFolderParent(repositoryId, folderId, propertyFilter);
+         return navigationService.getFolderParent(repositoryId, folderId, propertyFilter, false).toCmisObjectType();
       }
       catch (Exception e)
       {
@@ -211,14 +220,21 @@ public class NavigationServicePortImpl implements NavigationServicePort
          LOG.debug("Executing operation getFolderTree");
       try
       {
-         return navigationService.getFolderTree(repositoryId, //
+         List<CmisObjectInFolderContainer> tree = navigationService.getFolderTree(repositoryId, //
             folderId, //
             depth == null ? 1 : depth.intValue(), //
             includeAllowableActions == null ? false : includeAllowableActions, //
             includeRelationships == null ? EnumIncludeRelationships.NONE : includeRelationships, //
             includePathSegments == null ? false : includePathSegments, //
             propertyFilter, //
-            renditionFilter);
+            renditionFilter, false);
+         List<CmisObjectInFolderContainerType> result = new ArrayList<CmisObjectInFolderContainerType>();
+         for (CmisObjectInFolderContainer objectInFolderCont : tree)
+         {
+            result.add(objectInFolderCont.toCmisObjectInFolderContainerType());
+         }
+         return result;
+
       }
       catch (Exception e)
       {
@@ -243,13 +259,20 @@ public class NavigationServicePortImpl implements NavigationServicePort
          LOG.debug("Executing operation getObjectParents");
       try
       {
-         return navigationService.getObjectParents(repositoryId, //
+         List<CmisObjectParents> parents = navigationService.getObjectParents(repositoryId, //
             objectId, //
             includeAllowableActions == null ? false : includeAllowableActions, //
             includeRelationships == null ? EnumIncludeRelationships.NONE : includeRelationships, //
             includeRelativePathSegment == null ? true : includeRelativePathSegment, //
             propertyFilter, //
-            renditionFilter);
+            renditionFilter, false);
+         List<CmisObjectParentsType> result = new ArrayList<CmisObjectParentsType>();
+         for (CmisObjectParents objectInFolderCont : parents)
+         {
+            result.add(objectInFolderCont.toCmisObjectParentsType());
+         }
+         return result;
+
       }
       catch (Exception e)
       {

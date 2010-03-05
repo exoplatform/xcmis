@@ -35,6 +35,7 @@ import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.RepositoryException;
+import org.xcmis.spi.object.CmisObjectInFolderContainer;
 
 import java.util.List;
 
@@ -111,16 +112,16 @@ public class FolderTreeCollection extends FolderDescentantsCollection
       }
       try
       {
-         List<CmisObjectInFolderContainerType> tree =
+         List<CmisObjectInFolderContainer> tree =
             navigationService.getFolderTree(getRepositoryId(request), getId(request), depth, includeAllowableActions,
-               includeRelationships, includePathSegments, propertyFilter, renditionFilter);
+               includeRelationships, includePathSegments, propertyFilter, renditionFilter, true);
          if (tree.size() > 0)
          {
             // add cmisra:numItems
             Element numItems = feed.addExtension(AtomCMIS.NUM_ITEMS);
             numItems.setText(Integer.toString(tree.size()));
 
-            for (CmisObjectInFolderContainerType oifContainer : tree)
+            for (CmisObjectInFolderContainer oifContainer : tree)
             {
                Entry e = feed.addEntry();
                IRI feedIri = new IRI(getFeedIriForEntry(oifContainer.getObjectInFolder().getObject(), request));

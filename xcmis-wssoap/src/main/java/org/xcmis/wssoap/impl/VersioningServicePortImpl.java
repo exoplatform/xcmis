@@ -31,8 +31,10 @@ import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.VersioningServicePort;
 import org.xcmis.spi.object.BaseContentStream;
+import org.xcmis.spi.object.CmisObject;
 import org.xcmis.spi.utils.CmisUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -52,7 +54,7 @@ public class VersioningServicePortImpl implements VersioningServicePort
    /** Logger. */
    private static final Log LOG = ExoLogger.getLogger(VersioningServicePortImpl.class);
 
-   /** Versioning service. */   
+   /** Versioning service. */
    private VersioningService versioningService;
 
    /**
@@ -116,8 +118,8 @@ public class VersioningServicePortImpl implements VersioningServicePort
             checkinComment, //
             addACEs, //
             removeACEs, //
-            policies);
-         documentId.value = CmisUtils.getObjectId(res);
+            policies, false).toCmisObjectType();
+         documentId.value = CmisUtils.getObjectId(res.getProperties());
          CmisExtensionType ext = new CmisExtensionType();
          ext.getAny().addAll(res.getAny());
          extension.value = ext;
@@ -140,8 +142,8 @@ public class VersioningServicePortImpl implements VersioningServicePort
          LOG.debug("Executing operation checkOut");
       try
       {
-         CmisObjectType res = versioningService.checkout(repositoryId, documentId.value);
-         documentId.value = CmisUtils.getObjectId(res);
+         CmisObjectType res = versioningService.checkout(repositoryId, documentId.value, false).toCmisObjectType();
+         documentId.value = CmisUtils.getObjectId(res.getProperties());
          CmisExtensionType ext = new CmisExtensionType();
          ext.getAny().addAll(res.getAny());
          extension.value = ext;
@@ -164,10 +166,16 @@ public class VersioningServicePortImpl implements VersioningServicePort
          LOG.debug("Executing operation getAllVersions");
       try
       {
-         return versioningService.getAllVersions(repositoryId, //
+         List<CmisObject> versions = versioningService.getAllVersions(repositoryId, //
             versionSeriesId, //
             includeAllowableActions == null ? false : includeAllowableActions, //
-            propertyFilter);
+            propertyFilter, false);
+         List<CmisObjectType> result = new ArrayList<CmisObjectType>();
+         for (CmisObject cmisObject : versions)
+         {
+            result.add(cmisObject.toCmisObjectType());
+         }
+         return result;
       }
       catch (Exception e)
       {
@@ -199,7 +207,7 @@ public class VersioningServicePortImpl implements VersioningServicePort
             includePolicyIds == null ? false : includePolicyIds, //
             includeACL == null ? false : includeACL, //
             propertyFilter, //
-            renditionFilter);
+            renditionFilter, false).toCmisObjectType();
       }
       catch (Exception e)
       {
@@ -221,7 +229,7 @@ public class VersioningServicePortImpl implements VersioningServicePort
          return versioningService.getPropertiesOfLatestVersion(repositoryId, //
             objectId, //
             major == null ? false : major, //
-            filter);
+            filter, false);
       }
       catch (Exception e)
       {

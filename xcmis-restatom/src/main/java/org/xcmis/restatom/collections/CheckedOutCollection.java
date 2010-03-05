@@ -27,13 +27,11 @@ import org.apache.abdera.model.Feed;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.ResponseContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
-import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.EnumIncludeRelationships;
 import org.xcmis.core.NavigationService;
 import org.xcmis.core.ObjectService;
 import org.xcmis.core.RepositoryService;
 import org.xcmis.core.VersioningService;
-import org.xcmis.messaging.CmisObjectListType;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
 import org.xcmis.spi.CMIS;
@@ -43,6 +41,8 @@ import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.RepositoryException;
 import org.xcmis.spi.UpdateConflictException;
+import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.object.CmisObjectList;
 
 import java.util.Calendar;
 
@@ -131,9 +131,9 @@ public class CheckedOutCollection extends CmisObjectCollection
       {
          // NOTE : Not use method getId(request) here. It may gives incorrect id.
          String folderId = request.getTarget().getParameter("objectid");
-         CmisObjectListType list =
+         CmisObjectList list =
             navigationService.getCheckedOutDocs(getRepositoryId(request), folderId, includeAllowableActions,
-               includeRelationships, renditionFilter, propertyFilter, orderBy, maxItems, skipCount);
+               includeRelationships, renditionFilter, propertyFilter, orderBy, maxItems, skipCount, true);
          addPageLinks(folderId, feed, "checkedout", maxItems, skipCount, list.getNumItems() == null ? -1 : list
             .getNumItems().intValue(), list.isHasMoreItems(), request);
          if (list.getObjects().size() > 0)
@@ -144,7 +144,7 @@ public class CheckedOutCollection extends CmisObjectCollection
                Element numItems = feed.addExtension(AtomCMIS.NUM_ITEMS);
                numItems.setText(list.getNumItems().toString());
             }
-            for (CmisObjectType object : list.getObjects())
+            for (CmisObject object : list.getObjects())
             {
                Entry e = feed.addEntry();
                IRI feedIri = new IRI(getFeedIriForEntry(object, request));
@@ -177,7 +177,7 @@ public class CheckedOutCollection extends CmisObjectCollection
    /**
     * {@inheritDoc}
     */
-   public Iterable<CmisObjectType> getEntries(RequestContext request) throws ResponseContextException
+   public Iterable<CmisObject> getEntries(RequestContext request) throws ResponseContextException
    {
       throw new UnsupportedOperationException("entries");
    }
@@ -223,7 +223,8 @@ public class CheckedOutCollection extends CmisObjectCollection
       }
       try
       {
-         String pwcId = getId(versioningService.checkout(getRepositoryId(request), id == null ? getId(request) : id));
+         String pwcId =
+            getId(versioningService.checkout(getRepositoryId(request), id == null ? getId(request) : id, true));
          Entry entry = request.getAbdera().getFactory().newEntry();
          try
          {

@@ -39,6 +39,7 @@ import org.xcmis.spi.RepositoryException;
 import org.xcmis.spi.StreamNotSupportedException;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.VersioningException;
+import org.xcmis.spi.object.CmisObject;
 import org.xcmis.spi.object.ContentStream;
 import org.xcmis.spi.object.Entry;
 import org.xcmis.spi.object.VersionSeries;
@@ -88,9 +89,9 @@ public class VersioningServiceImpl extends CmisObjectProducer implements Version
    /**
     * {@inheritDoc}
     */
-   public CmisObjectType checkin(String repositoryId, String documentId, boolean major, CmisPropertiesType properties,
+   public CmisObject checkin(String repositoryId, String documentId, boolean major, CmisPropertiesType properties,
       ContentStream content, String checkinComment, CmisAccessControlListType addACL,
-      CmisAccessControlListType removeACL, List<String> policies) throws UpdateConflictException, VersioningException,
+      CmisAccessControlListType removeACL, List<String> policies, boolean includeObjectInfo) throws UpdateConflictException, VersioningException,
       StreamNotSupportedException, IOException, RepositoryException
    {
       if (LOG.isDebugEnabled())
@@ -124,13 +125,13 @@ public class VersioningServiceImpl extends CmisObjectProducer implements Version
       pwc.save();
       Entry newDoc = versionSeries.checkin(major, checkinComment);
       return getCmisObject(newDoc, false, EnumIncludeRelationships.NONE, false, false, PropertyFilter.ALL,
-         RenditionFilter.NONE, repository.getRenditionManager());
+         RenditionFilter.NONE, repository.getRenditionManager(), includeObjectInfo);
    }
 
    /**
     * {@inheritDoc}
     */
-   public CmisObjectType checkout(String repositoryId, String documentId) throws RepositoryException,
+   public CmisObject checkout(String repositoryId, String documentId, boolean includeObjectInfo) throws RepositoryException,
       UpdateConflictException, VersioningException
    {
       if (LOG.isDebugEnabled())
@@ -139,33 +140,33 @@ public class VersioningServiceImpl extends CmisObjectProducer implements Version
       Entry checkedOut =
          repository.getVersionSeries(repository.getObjectById(documentId).getVersionSeriesId()).checkout(documentId);
       return getCmisObject(checkedOut, false, EnumIncludeRelationships.NONE, false, false, PropertyFilter.ALL,
-         RenditionFilter.NONE, repository.getRenditionManager());
+         RenditionFilter.NONE, repository.getRenditionManager(), includeObjectInfo);
    }
 
    /**
     * {@inheritDoc}
     */
-   public List<CmisObjectType> getAllVersions(String repositoryId, String versionSeriesId,
-      boolean includeAllowableActions, String propertyFilter) throws RepositoryException, FilterNotValidException
+   public List<CmisObject> getAllVersions(String repositoryId, String versionSeriesId,
+      boolean includeAllowableActions, String propertyFilter, boolean includeObjectInfo) throws RepositoryException, FilterNotValidException
    {
       if (LOG.isDebugEnabled())
          LOG.debug("In getAllVersions repository " + repositoryId + ", versionSeriesId " + versionSeriesId);
       Repository repository = repositoryService.getRepository(repositoryId);
       VersionSeries versionSeries = repository.getVersionSeries(versionSeriesId);
       List<Entry> entries = versionSeries.getAllVersions();
-      List<CmisObjectType> list = new ArrayList<CmisObjectType>(entries.size());
+      List<CmisObject> list = new ArrayList<CmisObject>(entries.size());
       for (Entry entry : entries)
          list.add(getCmisObject(entry, includeAllowableActions, EnumIncludeRelationships.NONE, false, false,
-            new PropertyFilter(propertyFilter), RenditionFilter.NONE, repository.getRenditionManager()));
+            new PropertyFilter(propertyFilter), RenditionFilter.NONE, repository.getRenditionManager(), includeObjectInfo));
       return list;
    }
 
    /**
     * {@inheritDoc}
     */
-   public CmisObjectType getObjectOfLatestVersion(String repositoryId, String versionSeriesId, boolean major,
+   public CmisObject getObjectOfLatestVersion(String repositoryId, String versionSeriesId, boolean major,
       boolean includeAllowableActions, EnumIncludeRelationships includeRelationships, boolean includePolicyIds,
-      boolean includeACL, String propertyFilter, String renditionFilter) throws ObjectNotFoundException,
+      boolean includeACL, String propertyFilter, String renditionFilter, boolean includeObjectInfo) throws ObjectNotFoundException,
       FilterNotValidException, RepositoryException
    {
       if (LOG.isDebugEnabled())
@@ -178,20 +179,20 @@ public class VersioningServiceImpl extends CmisObjectProducer implements Version
       if (entry == null)
          throw new ObjectNotFoundException();
       return getCmisObject(entry, includeAllowableActions, includeRelationships, includePolicyIds, includeACL,
-         new PropertyFilter(propertyFilter), new RenditionFilter(renditionFilter), repository.getRenditionManager());
+         new PropertyFilter(propertyFilter), new RenditionFilter(renditionFilter), repository.getRenditionManager(), includeObjectInfo);
    }
 
    /**
     * {@inheritDoc}
     */
    public CmisPropertiesType getPropertiesOfLatestVersion(String repositoryId, String versionSeriesId, boolean major,
-      String propertyFilter) throws FilterNotValidException, ObjectNotFoundException, RepositoryException
+      String propertyFilter, boolean includeObjectInfo) throws FilterNotValidException, ObjectNotFoundException, RepositoryException
    {
       if (LOG.isDebugEnabled())
          LOG.debug("In getPropertiesOfLatestVersion repository " + repositoryId + ", versionSeriesId "
             + versionSeriesId);
       return getObjectOfLatestVersion(repositoryId, versionSeriesId, major, false, EnumIncludeRelationships.NONE,
-         false, false, propertyFilter, null).getProperties();
+         false, false, propertyFilter, null, includeObjectInfo).getProperties();
    }
 
 }

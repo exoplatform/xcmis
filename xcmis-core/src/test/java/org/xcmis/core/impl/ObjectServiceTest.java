@@ -20,7 +20,6 @@
 package org.xcmis.core.impl;
 
 import org.xcmis.core.CmisAllowableActionsType;
-import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.CmisPropertiesType;
 import org.xcmis.core.CmisProperty;
 import org.xcmis.core.CmisPropertyId;
@@ -28,12 +27,12 @@ import org.xcmis.core.EnumBaseObjectTypeIds;
 import org.xcmis.core.EnumPropertiesBase;
 import org.xcmis.core.EnumUnfileObject;
 import org.xcmis.core.EnumVersioningState;
-import org.xcmis.core.impl.ObjectServiceImpl;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentAlreadyExistsException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.object.BaseContentStream;
+import org.xcmis.spi.object.CmisObject;
 import org.xcmis.spi.object.ContentStream;
 import org.xcmis.spi.object.Entry;
 import org.xcmis.spi.utils.CmisUtils;
@@ -66,10 +65,10 @@ public class ObjectServiceTest extends BaseTest
       type.getValue().add(EnumBaseObjectTypeIds.CMIS_DOCUMENT.value());
       properties.getProperty().add(type);
 
-      CmisObjectType obj =
+      CmisObject obj =
          objectService.createDocument(repositoryId, testFolderId, properties, null, EnumVersioningState.NONE, null,
-            null, null);
-      String id = CmisUtils.getObjectId(obj);
+            null, null, false);
+      String id = CmisUtils.getObjectId(obj.getProperties());
       Entry doc = repository.getObjectById(id);
       assertEquals(EnumBaseObjectTypeIds.CMIS_DOCUMENT.value(), doc.getType().getId());
 
@@ -79,7 +78,8 @@ public class ObjectServiceTest extends BaseTest
       type.getValue().add(EnumBaseObjectTypeIds.CMIS_POLICY.value());
       properties.getProperty().add(type);
 
-      CmisObjectType newPolicy = objectService.createPolicy(repositoryId, testFolderId, properties, null, null, null);
+      CmisObject newPolicy =
+         objectService.createPolicy(repositoryId, testFolderId, properties, null, null, null, false);
       String policyId = null;
       for (CmisProperty p : newPolicy.getProperties().getProperty())
       {
@@ -115,10 +115,10 @@ public class ObjectServiceTest extends BaseTest
       type.getValue().add(EnumBaseObjectTypeIds.CMIS_DOCUMENT.value());
       properties.getProperty().add(type);
 
-      CmisObjectType obj =
+      CmisObject obj =
          objectService.createDocument(repositoryId, testFolderId, properties, null, EnumVersioningState.CHECKEDOUT,
-            null, null, null);
-      String id = CmisUtils.getObjectId(obj);
+            null, null, null, false);
+      String id = CmisUtils.getObjectId(obj.getProperties());
 
       Entry doc = null;
       try
@@ -142,10 +142,10 @@ public class ObjectServiceTest extends BaseTest
       type.getValue().add(EnumBaseObjectTypeIds.CMIS_DOCUMENT.value());
       properties.getProperty().add(type);
 
-      CmisObjectType obj =
+      CmisObject obj =
          objectService.createDocument(repositoryId, testFolderId, properties, null, EnumVersioningState.NONE, null,
-            null, null);
-      String id = CmisUtils.getObjectId(obj);
+            null, null, false);
+      String id = CmisUtils.getObjectId(obj.getProperties());
       Entry doc = null;
       try
       {
@@ -168,9 +168,10 @@ public class ObjectServiceTest extends BaseTest
       type.getValue().add(EnumBaseObjectTypeIds.CMIS_DOCUMENT.value());
       properties.getProperty().add(type);
 
-      CmisObjectType obj =
-         objectService.createDocument(repositoryId, null, properties, null, EnumVersioningState.NONE, null, null, null);
-      String id = CmisUtils.getObjectId(obj);
+      CmisObject obj =
+         objectService.createDocument(repositoryId, null, properties, null, EnumVersioningState.NONE, null, null, null,
+            false);
+      String id = CmisUtils.getObjectId(obj.getProperties());
       Entry doc = null;
       try
       {
@@ -226,11 +227,11 @@ public class ObjectServiceTest extends BaseTest
       prop.setPropertyDefinitionId(CMIS.LAST_MODIFIED_BY);
       properties.getProperty().add(prop);
 
-      CmisObjectType copy =
+      CmisObject copy =
          objectService.createDocumentFromSource(repositoryId, doc1.getObjectId(), target.getObjectId(), properties,
-            EnumVersioningState.MAJOR, null, null, null);
+            EnumVersioningState.MAJOR, null, null, null, false);
       assertNotNull(copy);
-      String copyId = CmisUtils.getObjectId(copy);
+      String copyId = CmisUtils.getObjectId(copy.getProperties());
       assertFalse("Copy must have different ID!", doc1.getObjectId().equals(copyId));
       // Check is content copied.
       byte[] b = new byte[128];
@@ -246,8 +247,8 @@ public class ObjectServiceTest extends BaseTest
       type.getValue().add(EnumBaseObjectTypeIds.CMIS_FOLDER.value());
       properties.getProperty().add(type);
 
-      CmisObjectType obj = objectService.createFolder(repositoryId, testFolderId, properties, null, null, null);
-      String id = CmisUtils.getObjectId(obj);
+      CmisObject obj = objectService.createFolder(repositoryId, testFolderId, properties, null, null, null, false);
+      String id = CmisUtils.getObjectId(obj.getProperties());
 
       Entry folder = null;
       try
@@ -270,10 +271,10 @@ public class ObjectServiceTest extends BaseTest
       type.getValue().add(EnumBaseObjectTypeIds.CMIS_DOCUMENT.value());
       properties.getProperty().add(type);
 
-      CmisObjectType obj =
+      CmisObject obj =
          objectService.createDocument(repositoryId, testFolderId, properties, null, EnumVersioningState.MAJOR, null,
-            null, null);
-      String id = CmisUtils.getObjectId(obj);
+            null, null, false);
+      String id = CmisUtils.getObjectId(obj.getProperties());
 
       Entry doc = null;
       try
@@ -307,8 +308,8 @@ public class ObjectServiceTest extends BaseTest
       properties.getProperty().add(sourceId);
       properties.getProperty().add(targetId);
 
-      CmisObjectType obj = objectService.createRelationship(repositoryId, properties, null, null, null);
-      String id = CmisUtils.getObjectId(obj);
+      CmisObject obj = objectService.createRelationship(repositoryId, properties, null, null, null, false);
+      String id = CmisUtils.getObjectId(obj.getProperties());
 
       Entry relationship = null;
       try
@@ -331,7 +332,7 @@ public class ObjectServiceTest extends BaseTest
       Entry doc = createDocument(testFolder, "doc1", cs);
       String id = doc.getObjectId();
 
-      objectService.deleteContentStream(repositoryId, id, null);
+      objectService.deleteContentStream(repositoryId, id, null, false);
       // Stream must be empty.
       assertNull(repository.getObjectById(id).getContent(null));
    }
@@ -719,7 +720,7 @@ public class ObjectServiceTest extends BaseTest
       try
       {
          objectService.getObjectByPath(repositoryId, "/testFolder/" + folder1.getName() + "/" + doc.getName(), true,
-            null, false, false, null, null);
+            null, false, false, null, null, false);
       }
       catch (ConstraintException e)
       {
@@ -745,7 +746,7 @@ public class ObjectServiceTest extends BaseTest
       String folderId = folder.getObjectId();
       Entry target = createFolder(testFolder, "target");
 
-      objectService.moveObject(repositoryId, folder.getObjectId(), target.getObjectId(), source.getObjectId());
+      objectService.moveObject(repositoryId, folder.getObjectId(), target.getObjectId(), source.getObjectId(), false);
       assertEquals(target.getObjectId(), repository.getObjectById(folderId).getParents().get(0).getObjectId());
    }
 
@@ -757,19 +758,19 @@ public class ObjectServiceTest extends BaseTest
 
       ContentStream cs1 = new BaseContentStream("test111".getBytes("UTF-8"), "test", "text/plain");
 
-      CmisObjectType cmis = null;
+      CmisObject cmis = null;
       try
       {
-         cmis = objectService.setContentStream(repositoryId, doc.getObjectId(), cs1, null, false);
+         cmis = objectService.setContentStream(repositoryId, doc.getObjectId(), cs1, null, false, false);
          fail("ContentAlreadyExistsException must be thrown. Overwrite is not specified.");
       }
       catch (ContentAlreadyExistsException e)
       {
       }
 
-      cmis = objectService.setContentStream(repositoryId, doc.getObjectId(), cs1, null, true);
+      cmis = objectService.setContentStream(repositoryId, doc.getObjectId(), cs1, null, true, false);
 
-      assertEquals(doc.getObjectId(), CmisUtils.getObjectId(cmis));
+      assertEquals(doc.getObjectId(), CmisUtils.getObjectId(cmis.getProperties()));
       byte[] b = new byte[128];
       int r = doc.getContent(null).getStream().read(b);
       assertEquals("test111", new String(b, 0, r));

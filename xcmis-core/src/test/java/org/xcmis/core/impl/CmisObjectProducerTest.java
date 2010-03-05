@@ -20,14 +20,12 @@
 package org.xcmis.core.impl;
 
 import org.xcmis.core.CmisAllowableActionsType;
-import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.CmisProperty;
 import org.xcmis.core.EnumIncludeRelationships;
-import org.xcmis.core.impl.CmisObjectProducer;
-import org.xcmis.core.impl.ObjectServiceImpl;
 import org.xcmis.core.impl.object.RenditionFilter;
 import org.xcmis.core.impl.property.PropertyFilter;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.object.CmisObject;
 import org.xcmis.spi.object.Entry;
 
 import java.util.ArrayList;
@@ -52,9 +50,9 @@ public class CmisObjectProducerTest extends BaseTest
    public void testDocumentAllowalableActions() throws Exception
    {
       Entry doc = createDocument(testFolder, "doc1", null);
-      CmisObjectType cmis =
+      CmisObject cmis =
          objProducer.getCmisObject(doc, true, EnumIncludeRelationships.NONE, false, false, PropertyFilter.DEFAULT,
-            RenditionFilter.NONE, repository.getRenditionManager());
+            RenditionFilter.NONE, repository.getRenditionManager(), false);
       assertNotNull(cmis.getAllowableActions());
       CmisAllowableActionsType actions = cmis.getAllowableActions();
       assertTrue(actions.isCanApplyPolicy());
@@ -121,9 +119,9 @@ public class CmisObjectProducerTest extends BaseTest
    public void testProperties() throws Exception
    {
       Entry doc = createDocument(testFolder, "doc1", null);
-      CmisObjectType cmis =
+      CmisObject cmis =
          objProducer.getCmisObject(doc, true, EnumIncludeRelationships.NONE, false, false, new PropertyFilter("*"),
-            RenditionFilter.NONE, repository.getRenditionManager());
+            RenditionFilter.NONE, repository.getRenditionManager(), false);
       List<CmisProperty> props = cmis.getProperties().getProperty();
       List<String> names = new ArrayList<String>(props.size());
       for (CmisProperty prop : props)
@@ -155,7 +153,7 @@ public class CmisObjectProducerTest extends BaseTest
       String filter = CMIS.OBJECT_ID + "," + CMIS.OBJECT_TYPE_ID;
       cmis =
          objProducer.getCmisObject(doc, true, EnumIncludeRelationships.NONE, false, false, new PropertyFilter(filter),
-            RenditionFilter.NONE, repository.getRenditionManager());
+            RenditionFilter.NONE, repository.getRenditionManager(), false);
       props = cmis.getProperties().getProperty();
       names.clear();
       for (CmisProperty prop : props)

@@ -28,8 +28,10 @@ import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.messaging.CmisObjectListType;
 import org.xcmis.soap.VersioningServicePort;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.object.CmisObject;
 import org.xcmis.wssoap.impl.VersioningServicePortImpl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.ws.Holder;
@@ -63,8 +65,8 @@ public class VersioningServiceTest extends BaseTest
       String id = createDocument(testFolderId, "doc1");
       Holder<String> idHolder = new Holder<String>(id);
       Holder<Boolean> contentCopiedHolder = new Holder<Boolean>();
-      port.checkOut(repositoryId, idHolder, new Holder<CmisExtensionType>(new CmisExtensionType()),
-         contentCopiedHolder);
+      port
+         .checkOut(repositoryId, idHolder, new Holder<CmisExtensionType>(new CmisExtensionType()), contentCopiedHolder);
       CmisObjectListType checkedout = navigationService.getCheckedOutDocs(//
          repositoryId, //
          testFolderId, //
@@ -75,14 +77,14 @@ public class VersioningServiceTest extends BaseTest
          null, // Order by
          10, // Max items
          0 // Skip count
-         );
+         , false).toCmisObjectList();
       assertEquals(1, checkedout.getObjects().size());
    }
 
    public void testCancelCheckOut() throws Exception
    {
       String id = createDocument(testFolderId, "doc1");
-      CmisObjectType resp = versioningService.checkout(repositoryId, id);
+      CmisObjectType resp = versioningService.checkout(repositoryId, id, false).toCmisObjectType();
       CmisObjectListType checkedout = navigationService.getCheckedOutDocs(//
          repositoryId, //
          testFolderId, //
@@ -93,7 +95,7 @@ public class VersioningServiceTest extends BaseTest
          null, // Order by
          10, // Max items
          0 // Skip count
-         );
+         , false).toCmisObjectList();
       assertEquals(1, checkedout.getObjects().size());
       String pwcId = getObjectId(resp);
       port.cancelCheckOut(repositoryId, pwcId, new CmisExtensionType());
@@ -108,20 +110,24 @@ public class VersioningServiceTest extends BaseTest
          null, // Order by
          10, // Max items
          0 // Skip count
-         );
+         , false).toCmisObjectList();
       assertEquals(0, checkedout.getObjects().size());
    }
 
    public void testCheckIn() throws Exception
    {
       String id = createDocument(testFolderId, "doc1");
-      CmisObjectType pwc = versioningService.checkout(repositoryId, id);
+      CmisObjectType pwc = versioningService.checkout(repositoryId, id, false).toCmisObjectType();
       String pwcId = getObjectId(pwc);
       Holder<String> pwcHolder = new Holder<String>(pwcId);
       CmisPropertyId versionSeriesIdProp = (CmisPropertyId)getProperty(pwc, CMIS.VERSION_SERIES_ID);
       String versionSeriesId = versionSeriesIdProp.getValue().get(0);
-      List<CmisObjectType> allVersions =
-         versioningService.getAllVersions(repositoryId, versionSeriesId, false, null);
+      List<CmisObject> allVer = versioningService.getAllVersions(repositoryId, versionSeriesId, false, null, false);
+      List<CmisObjectType> allVersions = new ArrayList<CmisObjectType>();
+      for (CmisObject cmisObject : allVer)
+      {
+         allVersions.add(cmisObject.toCmisObjectType());
+      }
       //      assertEquals(1, allVersions.size());
       assertEquals(2, allVersions.size());
       port.checkIn(//
@@ -136,14 +142,19 @@ public class VersioningServiceTest extends BaseTest
          null, // Remove ACL
          new Holder<CmisExtensionType>() // Extensions
          );
-      allVersions = versioningService.getAllVersions(repositoryId, versionSeriesId, false, null);
+      allVer = versioningService.getAllVersions(repositoryId, versionSeriesId, false, null, false);
+      allVersions = new ArrayList<CmisObjectType>();
+      for (CmisObject cmisObject : allVer)
+      {
+         allVersions.add(cmisObject.toCmisObjectType());
+      }
       assertEquals(2, allVersions.size());
    }
 
    public void testGetAllVersions() throws Exception
    {
       String docId = createDocument(testFolderId, "doc1");
-      CmisObjectType pwc = versioningService.checkout(repositoryId, docId);
+      CmisObjectType pwc = versioningService.checkout(repositoryId, docId, false).toCmisObjectType();
       String pwcId = getObjectId(pwc);
       versioningService.checkin(//
          repositoryId, //
@@ -155,7 +166,7 @@ public class VersioningServiceTest extends BaseTest
          null, // Add ACL
          null, // Remove ACL
          null // Policies
-         );
+         , false);
       CmisPropertyId versionSeriesIdProp = (CmisPropertyId)getProperty(pwc, CMIS.VERSION_SERIES_ID);
       String versionSeriesId = versionSeriesIdProp.getValue().get(0);
       List<CmisObjectType> allVersions = port.getAllVersions(repositoryId, versionSeriesId, null, false, null);
@@ -168,7 +179,7 @@ public class VersioningServiceTest extends BaseTest
       String id = createDocument(testFolderId, "doc1");
       // XXX : Be sure creation document and PWC have different Last Modification dates.
       Thread.sleep(500);
-      CmisObjectType pwc = versioningService.checkout(repositoryId, id);
+      CmisObjectType pwc = versioningService.checkout(repositoryId, id, false).toCmisObjectType();
       String pwcId = getObjectId(pwc);
       String lv = getObjectId(versioningService.checkin(//
          repositoryId, //
@@ -180,7 +191,7 @@ public class VersioningServiceTest extends BaseTest
          null, // Add ACL
          null, // Remove ACL
          null // Policies
-         ));
+         , false).toCmisObjectType());
       CmisPropertyId versionSeriesIdProp = (CmisPropertyId)getProperty(pwc, CMIS.VERSION_SERIES_ID);
       String versionSeriesId = versionSeriesIdProp.getValue().get(0);
 

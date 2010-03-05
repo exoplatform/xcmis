@@ -23,8 +23,7 @@ import org.xcmis.core.CmisTypeDefinitionType;
 import org.xcmis.core.EnumBaseObjectTypeIds;
 import org.xcmis.core.EnumRelationshipDirection;
 import org.xcmis.core.RelationshipService;
-import org.xcmis.core.impl.RelationshipServiceImpl;
-import org.xcmis.messaging.CmisObjectListType;
+import org.xcmis.spi.object.CmisObjectList;
 import org.xcmis.spi.object.Entry;
 
 /**
@@ -54,9 +53,9 @@ public class RelationshipServiceTest extends BaseTest
       doc2.addRelationship("relationship3", doc1, type);
       doc2.addRelationship("relationship4", doc2, type);
       EnumRelationshipDirection direction = EnumRelationshipDirection.EITHER;
-      CmisObjectListType relationships =
-         relationshipService.getObjectRelationships(repositoryId, doc1.getObjectId(), direction, null, true, false, null, 10,
-            0);
+      CmisObjectList relationships =
+         relationshipService.getObjectRelationships(repositoryId, doc1.getObjectId(), direction, null, true, false,
+            null, 10, 0, false);
       assertEquals(3, relationships.getObjects().size());
    }
 

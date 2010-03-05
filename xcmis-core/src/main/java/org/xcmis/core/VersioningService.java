@@ -20,7 +20,6 @@
 package org.xcmis.core;
 
 import org.xcmis.core.CmisAccessControlListType;
-import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.CmisPropertiesType;
 import org.xcmis.core.EnumIncludeRelationships;
 import org.xcmis.spi.ConstraintException;
@@ -30,6 +29,7 @@ import org.xcmis.spi.RepositoryException;
 import org.xcmis.spi.StreamNotSupportedException;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.VersioningException;
+import org.xcmis.spi.object.CmisObject;
 import org.xcmis.spi.object.ContentStream;
 
 import java.io.IOException;
@@ -77,6 +77,7 @@ public interface VersioningService
     *           <code>folderId</code> is specified
     * @param policies list of policy id that MUST be applied to the newly
     *           created document
+    * @param includeObjectInfo TODO
     * @return checked-in document
     * @throws ConstraintException if the object is not versionable
     * @throws UpdateConflictException if update an object that is no longer current
@@ -87,9 +88,9 @@ public interface VersioningService
     * @throws RepositoryException if any errors in CMIS repository occurs
     */
    // TODO : Specification is still not clear about UpdateConflictException in this case.
-   CmisObjectType checkin(String repositoryId, String documentId, boolean major, CmisPropertiesType properties,
+   CmisObject checkin(String repositoryId, String documentId, boolean major, CmisPropertiesType properties,
       ContentStream content, String checkinComment, CmisAccessControlListType addACL,
-      CmisAccessControlListType removeACL, List<String> policies) throws ConstraintException,
+      CmisAccessControlListType removeACL, List<String> policies, boolean includeObjectInfo) throws ConstraintException,
       UpdateConflictException, StreamNotSupportedException, IOException, RepositoryException;
 
    /**
@@ -97,6 +98,7 @@ public interface VersioningService
     * 
     * @param repositoryId repository id
     * @param documentId document id
+    * @param includeObjectInfo TODO
     * @return checked-out document
     * @throws ConstraintException if the object is not versionable
     * @throws UpdateConflictException if update an object that is no longer current
@@ -104,7 +106,7 @@ public interface VersioningService
     * @throws RepositoryException if any errors in CMIS repository occurs
     */
    // TODO : Specification is still not clear about UpdateConflictException in this case.
-   CmisObjectType checkout(String repositoryId, String documentId) throws ConstraintException,
+   CmisObject checkout(String repositoryId, String documentId, boolean includeObjectInfo) throws ConstraintException,
       UpdateConflictException, VersioningException, RepositoryException;
 
    /**
@@ -115,12 +117,13 @@ public interface VersioningService
     * @param includeAllowableActions true if allowable actions should be included
     *          in response false otherwise
     * @param propertyFilter property filter as string
+    * @param includeObjectInfo TODO
     * @return set of documents in the specified <code>versionSeriesId</code>
     * @throws FilterNotValidException if <code>propertyFilter</code> is invalid 
     * @throws RepositoryException if any errors in CMIS repository occurs
     */
-   List<CmisObjectType> getAllVersions(String repositoryId, String versionSeriesId, boolean includeAllowableActions,
-      String propertyFilter) throws RepositoryException, FilterNotValidException;
+   List<CmisObject> getAllVersions(String repositoryId, String versionSeriesId, boolean includeAllowableActions,
+      String propertyFilter, boolean includeObjectInfo) throws RepositoryException, FilterNotValidException;
 
    /**
     * Get the latest Document object in the version series. 
@@ -139,6 +142,7 @@ public interface VersioningService
     * @param includeACL include ACL
     * @param propertyFilter property filter as string
     * @param renditionFilter rendition filter as string 
+    * @param includeObjectInfo TODO
     * @throws FilterNotValidException if <code>propertyFilter</code> or
     *           <code>renditionFilter</code> is invalid 
     * @throws ObjectNotFoundException if the input parameter <code>major</code>
@@ -146,9 +150,9 @@ public interface VersioningService
     * @return object of latest version in version series
     * @throws RepositoryException if any errors in CMIS repository occurs
     */
-   CmisObjectType getObjectOfLatestVersion(String repositoryId, String versionSeriesId, boolean major,
+   CmisObject getObjectOfLatestVersion(String repositoryId, String versionSeriesId, boolean major,
       boolean includeAllowableActions, EnumIncludeRelationships includeRelationships, boolean includePolicyIds,
-      boolean includeACL, String propertyFilter, String renditionFilter) throws ObjectNotFoundException,
+      boolean includeACL, String propertyFilter, String renditionFilter, boolean includeObjectInfo) throws ObjectNotFoundException,
       FilterNotValidException, RepositoryException;
 
    /**
@@ -162,6 +166,7 @@ public interface VersioningService
     *           input parameter major is true and the Version Series contains no
     *           major versions, then the ObjectNotFoundException will be thrown.
     * @param propertyFilter property filter as string
+    * @param includeObjectInfo TODO
     * @return properties of latest version of object in version series
     * @throws FilterNotValidException if <code>propertyFilter</code> is invalid 
     * @throws ObjectNotFoundException if the input parameter <code>major</code>
@@ -169,6 +174,6 @@ public interface VersioningService
     * @throws RepositoryException if any errors in CMIS repository occurs
     */
    CmisPropertiesType getPropertiesOfLatestVersion(String repositoryId, String versionSeriesId, boolean major,
-      String propertyFilter) throws FilterNotValidException, ObjectNotFoundException, RepositoryException;
+      String propertyFilter, boolean includeObjectInfo) throws FilterNotValidException, ObjectNotFoundException, RepositoryException;
 
 }

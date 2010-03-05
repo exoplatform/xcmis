@@ -44,7 +44,6 @@ import org.xcmis.core.CmisListOfIdsType;
 import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.CmisPropertiesType;
 import org.xcmis.core.CmisProperty;
-import org.xcmis.core.CmisPropertyBoolean;
 import org.xcmis.core.CmisPropertyDateTime;
 import org.xcmis.core.CmisPropertyId;
 import org.xcmis.core.CmisPropertyString;
@@ -72,6 +71,8 @@ import org.xcmis.spi.RepositoryException;
 import org.xcmis.spi.StreamNotSupportedException;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.object.BaseContentStream;
+import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.object.CmisObjectImpl;
 import org.xcmis.spi.object.ContentStream;
 
 import java.io.IOException;
@@ -94,7 +95,7 @@ import javax.ws.rs.core.HttpHeaders;
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id$
  */
-public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisObjectType>
+public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisObject>
 {
 
    //   private static final Log LOG = ExoLogger.getLogger(CmisObjectCollection.class);
@@ -187,16 +188,14 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       try
       {
          // TODO : Is it correct to use 'If-Match' header ?
-         CmisObjectType object = objectService.deleteContentStream(//
+         CmisObject object = objectService.deleteContentStream(//
             getRepositoryId(request), //
             getId(request), //
             request.getHeader(HttpHeaders.IF_MATCH) // changeToken
-            );
-         CmisPropertyString changeToken = (CmisPropertyString)getProperty(object, CMIS.CHANGE_TOKEN);
+            , true);
          // TODO : 204, is it correct ? It used by default when delete content of ATOM resource
          ResponseContext response = new EmptyResponseContext(204);
-         if (changeToken != null && changeToken.getValue().size() > 0)
-            response.setEntityTag(changeToken.getValue().get(0));
+         response.setEntityTag(object.getObjectInfo().getChangeToken());
          return response;
       }
       catch (ConstraintException cve)
@@ -237,7 +236,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
             getRepositoryId(request), //
             documentId, //
             request.getHeader(HttpHeaders.IF_MATCH) // changeToken
-            );
+            , true);
       }
       catch (ConstraintException cve)
       {
@@ -280,12 +279,11 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
     * {@inheritDoc}
     */
    @Override
-   public List<Person> getAuthors(CmisObjectType object, RequestContext request) throws ResponseContextException
+   public List<Person> getAuthors(CmisObject object, RequestContext request) throws ResponseContextException
    {
-      CmisPropertyString created = (CmisPropertyString)getProperty(object, CMIS.CREATED_BY);
       String author = null;
-      if (created != null && created.getValue().size() > 0)
-         author = created.getValue().get(0); // single-valued property
+      if (object.getObjectInfo().getCreatedBy() != null)
+         author = object.getObjectInfo().getCreatedBy(); // single-valued property
       Person p = request.getAbdera().getFactory().newAuthor();
       if (author != null)
          p.setName(author);
@@ -298,25 +296,16 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
     * {@inheritDoc}
     */
    @Override
-   public String getContentType(CmisObjectType object)
+   public String getContentType(CmisObject object)
    {
-      CmisPropertyString contentTypeProperty = (CmisPropertyString)getProperty(object, CMIS.CONTENT_STREAM_MIME_TYPE);
-      if (contentTypeProperty != null //
-         && contentTypeProperty.getValue().size() > 0 //
-         && contentTypeProperty.getValue().get(0) != null //
-         && !"".equals(contentTypeProperty.getValue().get(0)))
-      {
-         String contentType =
-            ((CmisPropertyString)getProperty(object, CMIS.CONTENT_STREAM_MIME_TYPE)).getValue().get(0);
-         return contentType;
-      }
-      return null;
+      String contentType = object.getObjectInfo().getContentStreamMimeType();
+      return contentType;
    }
 
    /**
     * {@inheritDoc}
     */
-   public CmisObjectType getEntry(String id, RequestContext request) throws ResponseContextException
+   public CmisObject getEntry(String id, RequestContext request) throws ResponseContextException
    {
       boolean includeAllowableActions =
          Boolean.parseBoolean(request.getParameter(AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS));
@@ -343,17 +332,17 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       }
       try
       {
-         CmisObjectType object;
+         CmisObject object;
          if (id.charAt(0) != '/')
             // Get by id. 
             object =
                objectService.getObject(getRepositoryId(request), id, includeAllowableActions, includeRelationships,
-                  includePolicies, includeACL, propertyFilter, renditionFilter);
+                  includePolicies, includeACL, propertyFilter, renditionFilter, true);
          else
             // Get by path.
             object =
                objectService.getObjectByPath(getRepositoryId(request), id, includeAllowableActions,
-                  includeRelationships, includePolicies, includeACL, propertyFilter, renditionFilter);
+                  includeRelationships, includePolicies, includeACL, propertyFilter, renditionFilter, true);
          EnumBaseObjectTypeIds type = getBaseObjectType(object);
          if (type == EnumBaseObjectTypeIds.CMIS_DOCUMENT)
          {
@@ -373,16 +362,14 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
             if (enumReturnVersion == EnumReturnVersion.THIS)
                return object;
 
-            if (enumReturnVersion == EnumReturnVersion.LATEST
-               && ((CmisPropertyBoolean)getProperty(object, CMIS.IS_LATEST_VERSION)).getValue().get(0))
+            if (enumReturnVersion == EnumReturnVersion.LATEST && object.getObjectInfo().isLatestVersion())
                return object;
 
-            if (enumReturnVersion == EnumReturnVersion.LATESTMAJOR
-               && ((CmisPropertyBoolean)getProperty(object, CMIS.IS_LATEST_MAJOR_VERSION)).getValue().get(0))
+            if (enumReturnVersion == EnumReturnVersion.LATESTMAJOR && object.getObjectInfo().isLatestMajorVersion())
                return object;
 
             // Find latest in Version series.
-            String versionSeriesId = ((CmisPropertyId)getProperty(object, CMIS.VERSION_SERIES_ID)).getValue().get(0);
+            String versionSeriesId = object.getObjectInfo().getVersionSeriesId();
             return versioningService.getObjectOfLatestVersion(//
                getRepositoryId(request), //
                versionSeriesId, //
@@ -392,7 +379,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
                includePolicies, //
                includeACL, //
                propertyFilter, //
-               renditionFilter);
+               renditionFilter, true);
          }
 
          // Is not document.
@@ -423,9 +410,9 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    /**
     * {@inheritDoc}
     */
-   public String getId(CmisObjectType object) throws ResponseContextException
+   public String getId(CmisObject object) throws ResponseContextException
    {
-      return ((CmisPropertyId)getProperty(object, CMIS.OBJECT_ID)).getValue().get(0);
+      return object.getObjectInfo().getId();
    }
 
    /**
@@ -483,9 +470,9 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    /**
     * {@inheritDoc}
     */
-   public String getName(CmisObjectType object) throws ResponseContextException
+   public String getName(CmisObject object) throws ResponseContextException
    {
-      return ((CmisPropertyString)getProperty(object, CMIS.NAME)).getValue().get(0);
+      return object.getObjectInfo().getName();
    }
 
    /**
@@ -499,15 +486,15 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    /**
     * {@inheritDoc}
     */
-   public String getTitle(CmisObjectType object) throws ResponseContextException
+   public String getTitle(CmisObject object) throws ResponseContextException
    {
-      return ((CmisPropertyString)getProperty(object, CMIS.NAME)).getValue().get(0);
+      return object.getObjectInfo().getName();
    }
 
    /**
     * {@inheritDoc}
     */
-   public Date getUpdated(CmisObjectType object) throws ResponseContextException
+   public Date getUpdated(CmisObject object) throws ResponseContextException
    {
       return getLastModificationDate(object).getTime();
    }
@@ -532,7 +519,8 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       try
       {
          ObjectTypeElement objectElement = entry.getFirstChild(AtomCMIS.OBJECT);
-         CmisObjectType object = objectElement != null ? object = objectElement.getObject() : new CmisObjectType();
+         CmisObjectType cmisObjectType = objectElement != null ? objectElement.getObject() : new CmisObjectType();
+         CmisObject object = new CmisObjectImpl(cmisObjectType);
          if (object.getProperties() == null)
             object.setProperties(new CmisPropertiesType());
          updatePropertiesFromEntry(object, entry);
@@ -543,7 +531,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          ContentStream contentStream = getContentStream(entry, request);
 
          boolean checkin = Boolean.parseBoolean(request.getParameter(AtomCMIS.PARAM_CHECKIN));
-         CmisObjectType updated;
+         CmisObject updated;
          if (checkin)
          {
             boolean major = Boolean.parseBoolean(request.getParameter(AtomCMIS.PARAM_MAJOR));
@@ -553,7 +541,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
             updated =
                versioningService.checkin(getRepositoryId(request), getId(request), major, properties, contentStream,
                   checkinComment, acl, null, policyIds != null && policyIds.getId().size() > 0 ? policyIds.getId()
-                     : null);
+                     : null, true);
          }
          else
          {
@@ -568,11 +556,12 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
             // Method is PUT - use strong comparison. 
             String changeToken = request.getHeader(HttpHeaders.IF_MATCH);
 
-            updated = objectService.updateProperties(getRepositoryId(request), getId(request), changeToken, properties);
+            updated =
+               objectService.updateProperties(getRepositoryId(request), getId(request), changeToken, properties, true);
             if (contentStream != null)
                updated =
                   objectService.setContentStream(getRepositoryId(request), getId(request), contentStream, changeToken,
-                     true);
+                     true, true);
          }
          entry = request.getAbdera().getFactory().newEntry();
          addEntryDetails(request, entry, request.getResolvedUri(), updated);
@@ -620,7 +609,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
     * @throws ResponseContextException the response context exception
     */
    @Override
-   public void putMedia(CmisObjectType entryObj, MimeType contentType, String slug, InputStream inputStream,
+   public void putMedia(CmisObject entryObj, MimeType contentType, String slug, InputStream inputStream,
       RequestContext request) throws ResponseContextException
    {
       try
@@ -632,7 +621,8 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          boolean overwriteFlag =
             overwriteFlagParameter == null || overwriteFlagParameter.length() == 0 ? true : Boolean
                .parseBoolean(overwriteFlagParameter);
-         objectService.setContentStream(getRepositoryId(request), getId(request), content, changeToken, overwriteFlag);
+         objectService.setContentStream(getRepositoryId(request), getId(request), content, changeToken, overwriteFlag,
+            false);
       }
       catch (IOException ioe)
       {
@@ -683,9 +673,9 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          boolean overwriteFlag =
             overwriteFlagParameter == null || overwriteFlagParameter.length() == 0 ? true : Boolean
                .parseBoolean(overwriteFlagParameter);
-         CmisObjectType updated =
+         CmisObject updated =
             objectService.setContentStream(getRepositoryId(request), getId(request), content, changeToken,
-               overwriteFlag);
+               overwriteFlag, true);
          ResponseContext response = new EmptyResponseContext(201);
          String contentLink = getContentLink(getId(request), request);
          response.setHeader(HttpHeaders.CONTENT_LOCATION, contentLink);
@@ -738,7 +728,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
     * 
     * @throws ResponseContextException the response context exception
     */
-   private void processRenditionLinks(Entry entry, CmisObjectType object, RequestContext request)
+   private void processRenditionLinks(Entry entry, CmisObject object, RequestContext request)
       throws ResponseContextException
    {
       String baseRenditionHref = getBaseRenditionHref(getId(object), request);
@@ -762,7 +752,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
     * {@inheritDoc}
     */
    @Override
-   protected String addEntryDetails(RequestContext request, Entry entry, IRI feedIri, CmisObjectType object)
+   protected String addEntryDetails(RequestContext request, Entry entry, IRI feedIri, CmisObject object)
       throws ResponseContextException
    {
       String objectId = getId(object);
@@ -792,7 +782,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       processRenditionLinks(entry, object, request);
 
       // Object type link.
-      String typeId = ((CmisPropertyId)getProperty(object, CMIS.OBJECT_TYPE_ID)).getValue().get(0);
+      String typeId = object.getObjectInfo().getBaseTypeId();
       entry.addLink(getObjectTypeLink(typeId, request), AtomCMIS.LINK_DESCRIBEDBY, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null,
          null, -1);
 
@@ -830,17 +820,17 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
             entry.addLink(folderTree, AtomCMIS.LINK_CMIS_FOLDERTREE, AtomCMIS.MEDIATYPE_ATOM_FEED, null, null, -1);
 
          // Parent link.
-         CmisPropertyId parentId = (CmisPropertyId)getProperty(object, CMIS.PARENT_ID);
-         if (parentId.getValue().size() > 0)
+         String parentId = object.getObjectInfo().getParentId();
+         if (parentId != null)
          {
             // Not provided for root folder.
-            String parent = getObjectLink(parentId.getValue().get(0), request);
+            String parent = getObjectLink(parentId, request);
             entry.addLink(parent, AtomCMIS.LINK_UP, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null, null, -1);
          }
 
          // Must have 'content' element to conform Atom specification.
-         CmisPropertyString nameProperty = (CmisPropertyString)getProperty(object, CMIS.NAME);
-         entry.setContent(nameProperty.getValue().get(0));
+         String nameProperty = object.getObjectInfo().getName();
+         entry.setContent(nameProperty);
       }
       else if (baseType == EnumBaseObjectTypeIds.CMIS_DOCUMENT)
       {
@@ -857,7 +847,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          entry.addLink(acl, AtomCMIS.LINK_CMIS_ACL, AtomCMIS.MEDIATYPE_ACL, null, null, -1);
 
          // All versions
-         String versionSeriesId = ((CmisPropertyId)getProperty(object, CMIS.VERSION_SERIES_ID)).getValue().get(0);
+         String versionSeriesId = object.getObjectInfo().getVersionSeriesId();
          String allVersions = getAllVersionsLink(versionSeriesId, request);
          entry.addLink(allVersions, AtomCMIS.LINK_VERSION_HISTORY, AtomCMIS.MEDIATYPE_ATOM_FEED, null, null, -1);
 
@@ -868,12 +858,10 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          entry.addLink(sb.toString(), AtomCMIS.LINK_CURRENT_VERSION, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null, null, -1);
 
          // PWC link if it exists.
-         CmisPropertyId checkedoutProperty = (CmisPropertyId)getProperty(object, CMIS.VERSION_SERIES_CHECKED_OUT_ID);
-         if (checkedoutProperty != null //
-            && checkedoutProperty.getValue().size() > 0 //
-            && checkedoutProperty.getValue().get(0) != null)
+         String checkedoutProperty = object.getObjectInfo().getVersionSeriesCheckedOutId();
+         if (checkedoutProperty != null)
          {
-            String pwcLink = getObjectLink(checkedoutProperty.getValue().get(0), request);
+            String pwcLink = getObjectLink(checkedoutProperty, request);
             entry.addLink(pwcLink, AtomCMIS.LINK_WORKING_COPY, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null, null, -1);
          }
 
@@ -919,24 +907,23 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          entry.addLink(parent, AtomCMIS.LINK_UP, AtomCMIS.MEDIATYPE_ATOM_FEED, null, null, -1);
 
          // Must have 'content' element to conform Atom specification.
-         CmisPropertyString nameProperty = (CmisPropertyString)getProperty(object, CMIS.NAME);
-         entry.setContent(nameProperty.getValue().get(0));
+         String nameProperty = object.getObjectInfo().getName();
+         entry.setContent(nameProperty);
       }
       else if (baseType == EnumBaseObjectTypeIds.CMIS_RELATIONSHIP)
       {
          // Relationship source link.
-         String sourceId = ((CmisPropertyId)getProperty(object, CMIS.SOURCE_ID)).getValue().get(0);
+         String sourceId = object.getObjectInfo().getSourceId();
          entry.addLink(getObjectLink(sourceId, request), AtomCMIS.LINK_CMIS_SOURCE, AtomCMIS.MEDIATYPE_ATOM_ENTRY,
             null, null, -1);
 
          // Relationship target link.
-         String targetId = ((CmisPropertyId)getProperty(object, CMIS.TARGET_ID)).getValue().get(0);
+         String targetId = object.getObjectInfo().getTargetId();
          entry.addLink(getObjectLink(targetId, request), AtomCMIS.LINK_CMIS_TARGET, AtomCMIS.MEDIATYPE_ATOM_ENTRY,
             null, null, -1);
 
          // Must have 'content' element to conform Atom specification.
-         CmisPropertyString nameProperty = (CmisPropertyString)getProperty(object, CMIS.NAME);
-         entry.setContent(nameProperty.getValue().get(0));
+         entry.setContent(object.getObjectInfo().getName());
       }
 
       ObjectTypeElement objectElement =
@@ -1041,9 +1028,9 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
     * @param object object
     * @return object's base type
     */
-   protected EnumBaseObjectTypeIds getBaseObjectType(CmisObjectType object)
+   protected EnumBaseObjectTypeIds getBaseObjectType(CmisObject object)
    {
-      String type = ((CmisPropertyId)getProperty(object, CMIS.BASE_TYPE_ID)).getValue().get(0);
+      String type = object.getObjectInfo().getBaseTypeId();
       return EnumBaseObjectTypeIds.fromValue(type);
    }
 
@@ -1232,11 +1219,10 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
     * @param object source object
     * @return creation date
     */
-   protected Calendar getCreationDate(CmisObjectType object)
+   protected Calendar getCreationDate(CmisObject object)
    {
-      CmisPropertyDateTime dateProperty = ((CmisPropertyDateTime)getProperty(object, CMIS.CREATION_DATE));
-      if (dateProperty.getValue().size() > 0 && dateProperty.getValue().get(0) != null)
-         return dateProperty.getValue().get(0).toGregorianCalendar();
+      if (object.getObjectInfo().getCreationDate() != null)
+         return object.getObjectInfo().getCreationDate();
       else
          return Calendar.getInstance();
    }
@@ -1299,11 +1285,10 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
     * @param object source object
     * @return creation date
     */
-   protected Calendar getLastModificationDate(CmisObjectType object)
+   protected Calendar getLastModificationDate(CmisObject object)
    {
-      CmisPropertyDateTime dateProperty = ((CmisPropertyDateTime)getProperty(object, CMIS.LAST_MODIFICATION_DATE));
-      if (dateProperty.getValue().size() > 0 && dateProperty.getValue().get(0) != null)
-         return dateProperty.getValue().get(0).toGregorianCalendar();
+      if (object.getObjectInfo().getLastModificationDate() != null)
+         return object.getObjectInfo().getLastModificationDate();
       else
          return Calendar.getInstance();
    }
@@ -1366,7 +1351,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
     * @param propertyName property name
     * @return property or null if property does not exists
     */
-   protected CmisProperty getProperty(CmisObjectType object, String propertyName)
+   protected CmisProperty getProperty(CmisObject object, String propertyName)
    {
       CmisPropertiesType properties = object.getProperties();
       if (properties != null)
@@ -1427,13 +1412,22 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
     * @param object CMIS object
     * @param entry entry that delivered CMIS object.
     */
-   protected void updatePropertiesFromEntry(CmisObjectType object, Entry entry)
+   protected void updatePropertiesFromEntry(CmisObject object, Entry entry)
    {
       String title = entry.getTitle();
       if (title != null)
       {
          // Should never be null, but check it to avoid overwriting existed cmis:name property.
-         CmisPropertyString name = (CmisPropertyString)getProperty(object, CMIS.NAME);
+         CmisPropertyString name = null;
+         CmisPropertiesType properties = object.getProperties();
+         if (properties != null)
+         {
+            for (CmisProperty prop : properties.getProperty())
+            {
+               if (CMIS.NAME.equals(prop.getPropertyDefinitionId()))
+                  name = (CmisPropertyString)prop;
+            }
+         }
          if (name == null)
          {
             name = new CmisPropertyString();

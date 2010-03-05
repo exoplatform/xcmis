@@ -1,7 +1,5 @@
 package org.xcmis.spi.object;
 
-import org.xcmis.core.CmisProperty;
-
 import java.util.GregorianCalendar;
 
 /**
@@ -146,5 +144,25 @@ public interface ObjectInfo
 
    public void setChangeToken(String changeToken);
 
-   public void setProperty(CmisProperty property);
+   /**
+    * CMIS.TARGET_ID
+    */
+   public String getTargetId();
+
+   public void setTargetId(String targetId);
+
+   /**
+    * CMIS.VERSION_SERIES_CHECKED_OUT_ID
+    */
+   public String getVersionSeriesCheckedOutId();
+
+   public void setVersionSeriesCheckedOutId(String versionSeriesCheckedOutId);
+
+   /**
+    * CMIS.SOURCE_ID 
+    */
+   public String getSourceId();
+
+   public void setSourceId(String sourceId);
+
 }

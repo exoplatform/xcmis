@@ -34,6 +34,7 @@ import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.Repository;
 import org.xcmis.spi.RepositoryException;
+import org.xcmis.spi.object.CmisObject;
 import org.xcmis.spi.object.Entry;
 
 import java.util.ArrayList;
@@ -91,17 +92,17 @@ public class PolicyServiceImpl extends CmisObjectProducer implements PolicyServi
    /**
     * {@inheritDoc}
     */
-   public List<CmisObjectType> getAppliedPolicies(String repositoryId, String objectId, String propertyFilter)
+   public List<CmisObject> getAppliedPolicies(String repositoryId, String objectId, String propertyFilter, boolean includeObjectInfo)
       throws FilterNotValidException, RepositoryException
    {
       if (LOG.isDebugEnabled())
          LOG.debug("Get applied policies policy in repository " + repositoryId + " object Id " + objectId);
-      List<CmisObjectType> list = new ArrayList<CmisObjectType>();
+      List<CmisObject> list = new ArrayList<CmisObject>();
       Repository repository = repositoryService.getRepository(repositoryId);
       Entry entry = repository.getObjectById(objectId);
       for (Entry policy : entry.getAppliedPolicies())
          list.add(getCmisObject(policy, false, EnumIncludeRelationships.NONE, true, false, new PropertyFilter(
-            propertyFilter), RenditionFilter.NONE, repository.getRenditionManager()));
+            propertyFilter), RenditionFilter.NONE, repository.getRenditionManager(), includeObjectInfo));
       return list;
    }
 

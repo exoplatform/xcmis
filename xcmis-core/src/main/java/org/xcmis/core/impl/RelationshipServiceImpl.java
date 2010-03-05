@@ -19,7 +19,8 @@
 
 package org.xcmis.core.impl;
 
-import org.xcmis.core.CmisObjectType;
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
 import org.xcmis.core.CmisTypeDefinitionType;
 import org.xcmis.core.EnumRelationshipDirection;
 import org.xcmis.core.RelationshipService;
@@ -28,12 +29,13 @@ import org.xcmis.core.impl.object.RenditionFilter;
 import org.xcmis.core.impl.property.PropertyFilter;
 import org.xcmis.core.impl.property.PropertyService;
 import org.xcmis.messaging.CmisObjectListType;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.Repository;
 import org.xcmis.spi.RepositoryException;
+import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.object.CmisObjectList;
+import org.xcmis.spi.object.CmisObjectListImpl;
 import org.xcmis.spi.object.Entry;
 import org.xcmis.spi.object.ItemsIterator;
 import org.xcmis.spi.object.RenditionManager;
@@ -72,9 +74,9 @@ public class RelationshipServiceImpl extends CmisObjectProducer implements Relat
    /**
     * {@inheritDoc}
     */
-   public CmisObjectListType getObjectRelationships(String repositoryId, String objectId,
+   public CmisObjectList getObjectRelationships(String repositoryId, String objectId,
       EnumRelationshipDirection direction, String typeId, boolean includeSubRelationshipTypes,
-      boolean includeAllowableActions, String propertyFilter, int maxItems, int skipCount)
+      boolean includeAllowableActions, String propertyFilter, int maxItems, int skipCount, boolean includeObjectInfo)
       throws FilterNotValidException, RepositoryException
    {
       if (LOG.isDebugEnabled())
@@ -95,7 +97,7 @@ public class RelationshipServiceImpl extends CmisObjectProducer implements Relat
       Repository repository = repositoryService.getRepository(repositoryId);
       Entry obj = repository.getObjectById(objectId);
 
-      CmisTypeDefinitionType type = typeId != null ? repository.getTypeDefinition(typeId, false) : null;
+      CmisTypeDefinitionType type = typeId != null ? repository.getTypeDefinition(typeId, includeObjectInfo) : null;
       ItemsIterator<Entry> items;
       try
       {
@@ -118,15 +120,15 @@ public class RelationshipServiceImpl extends CmisObjectProducer implements Relat
          throw new InvalidArgumentException(msg);
       }
 
-      CmisObjectListType list = new CmisObjectListType();
+      CmisObjectList list = new CmisObjectListImpl();
       long count = 0;
       RenditionManager renditionManager = repository.getRenditionManager();
       while (items.hasNext() && count < maxItems)
       {
          Entry entry = items.next();
-         CmisObjectType cmis =
+         CmisObject cmis =
             getCmisObject(entry, includeAllowableActions, null, false, false, new PropertyFilter(propertyFilter),
-               RenditionFilter.NONE, renditionManager);
+               RenditionFilter.NONE, renditionManager, includeObjectInfo);
          list.getObjects().add(cmis);
          count++;
       }

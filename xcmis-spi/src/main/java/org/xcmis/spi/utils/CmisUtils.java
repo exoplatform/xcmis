@@ -19,7 +19,7 @@
 
 package org.xcmis.spi.utils;
 
-import org.xcmis.core.CmisObjectType;
+import org.xcmis.core.CmisPropertiesType;
 import org.xcmis.core.CmisProperty;
 import org.xcmis.core.CmisPropertyId;
 import org.xcmis.spi.CMIS;
@@ -77,7 +77,7 @@ public final class CmisUtils
     * @param cmis the CMIS Object Type.
     * @return the object id property.
     */
-   public static String getObjectId(CmisObjectType cmis)
+   public static String getObjectId(CmisPropertiesType cmis)
    {
       return ((CmisPropertyId)getProperty(cmis, CMIS.OBJECT_ID)).getValue().get(0);
    }
@@ -89,9 +89,9 @@ public final class CmisUtils
     * @param propName the property name.
     * @return the CMIS property.
     */
-   public static CmisProperty getProperty(CmisObjectType cmis, String propName)
+   public static CmisProperty getProperty(CmisPropertiesType cmis, String propName)
    {
-      List<CmisProperty> props = cmis.getProperties().getProperty();
+      List<CmisProperty> props = cmis.getProperty();
       for (CmisProperty prop : props)
       {
          if (prop.getPropertyDefinitionId().equals(propName))

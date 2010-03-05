@@ -90,7 +90,7 @@ public class RelationshipServicePortImpl implements RelationshipServicePort
             propertyFilter, //
             maxItems == null ? CMIS.MAX_ITEMS : maxItems.intValue(), //
             skipCount == null ? 0 : skipCount.intValue() //
-         ).getObjects());
+            , false).toCmisObjectList().getObjects());
       }
       catch (Exception e)
       {

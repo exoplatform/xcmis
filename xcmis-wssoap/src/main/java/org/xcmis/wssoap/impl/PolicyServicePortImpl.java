@@ -24,9 +24,14 @@ import org.exoplatform.services.log.Log;
 import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.PolicyService;
 import org.xcmis.messaging.CmisExtensionType;
+import org.xcmis.messaging.CmisObjectParentsType;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.PolicyServicePort;
+import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.object.CmisObjectParents;
 
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author <a href="mailto:max.shaposhnik@exoplatform.com">Max Shaposhnik</a>
@@ -81,14 +86,20 @@ public class PolicyServicePortImpl implements PolicyServicePort
    /**
     * {@inheritDoc}
     */
-   public java.util.List<CmisObjectType> getAppliedPolicies(java.lang.String repositoryId, java.lang.String objectId,
+   public List<CmisObjectType> getAppliedPolicies(java.lang.String repositoryId, java.lang.String objectId,
       java.lang.String propertyFilter, CmisExtensionType extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
          LOG.debug("Executing operation getAppliedPolicies");
       try
       {
-         return policyService.getAppliedPolicies(repositoryId, objectId, propertyFilter);
+         List<CmisObject> policies = policyService.getAppliedPolicies(repositoryId, objectId, propertyFilter, false);
+         List<CmisObjectType> result = new ArrayList<CmisObjectType>();
+         for (CmisObject cmisObject : policies)
+         {
+            result.add(cmisObject.toCmisObjectType());
+         }
+         return result;
       }
       catch (Exception e)
       {

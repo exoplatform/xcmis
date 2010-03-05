@@ -54,6 +54,7 @@ import org.xcmis.spi.Repository;
 import org.xcmis.spi.RepositoryException;
 import org.xcmis.spi.StreamNotSupportedException;
 import org.xcmis.spi.UpdateConflictException;
+import org.xcmis.spi.object.CmisObject;
 import org.xcmis.spi.object.ContentStream;
 import org.xcmis.spi.object.Entry;
 import org.xcmis.spi.object.ItemsIterator;
@@ -97,9 +98,9 @@ public class ObjectServiceImpl extends CmisObjectProducer implements ObjectServi
    /**
     * {@inheritDoc}
     */
-   public CmisObjectType createDocument(String repositoryId, String folderId, CmisPropertiesType properties,
+   public CmisObject createDocument(String repositoryId, String folderId, CmisPropertiesType properties,
       ContentStream content, EnumVersioningState versioningState, CmisAccessControlListType addACL,
-      CmisAccessControlListType removeACL, List<String> policies) throws IOException, StreamNotSupportedException,
+      CmisAccessControlListType removeACL, List<String> policies, boolean includeObjectInfo) throws IOException, StreamNotSupportedException,
       ConstraintException, NameConstraintViolationException, RepositoryException
    {
       String typeId = null;
@@ -182,15 +183,15 @@ public class ObjectServiceImpl extends CmisObjectProducer implements ObjectServi
          LOG.debug("Created new document " + newDoc.getObjectId());
       }
       return getCmisObject(newDoc, false, EnumIncludeRelationships.NONE, false, false, PropertyFilter.ALL,
-         RenditionFilter.NONE, renditionManager);
+         RenditionFilter.NONE, renditionManager, includeObjectInfo);
    }
 
    /**
     * {@inheritDoc}
     */
-   public CmisObjectType createDocumentFromSource(String repositoryId, String sourceId, String folderId,
+   public CmisObject createDocumentFromSource(String repositoryId, String sourceId, String folderId,
       CmisPropertiesType properties, EnumVersioningState versioningState, CmisAccessControlListType addACL,
-      CmisAccessControlListType removeACL, List<String> policies) throws ConstraintException,
+      CmisAccessControlListType removeACL, List<String> policies, boolean includeObjectInfo) throws ConstraintException,
       NameConstraintViolationException, RepositoryException
    {
       if (sourceId == null)
@@ -227,14 +228,14 @@ public class ObjectServiceImpl extends CmisObjectProducer implements ObjectServi
       if (LOG.isDebugEnabled())
          LOG.debug("Created new document " + newDoc.getObjectId() + " from source document " + sourceId);
       return getCmisObject(newDoc, false, EnumIncludeRelationships.NONE, false, false, PropertyFilter.ALL,
-         RenditionFilter.NONE, repository.getRenditionManager());
+         RenditionFilter.NONE, repository.getRenditionManager(), includeObjectInfo);
    }
 
    /**
     * {@inheritDoc}
     */
-   public CmisObjectType createFolder(String repositoryId, String folderId, CmisPropertiesType properties,
-      CmisAccessControlListType addACL, CmisAccessControlListType removeACL, List<String> policies)
+   public CmisObject createFolder(String repositoryId, String folderId, CmisPropertiesType properties,
+      CmisAccessControlListType addACL, CmisAccessControlListType removeACL, List<String> policies, boolean includeObjectInfo)
       throws ConstraintException, NameConstraintViolationException, RepositoryException
    {
       String typeId = null;
@@ -295,14 +296,14 @@ public class ObjectServiceImpl extends CmisObjectProducer implements ObjectServi
       if (LOG.isDebugEnabled())
          LOG.debug("Created new folder " + newFolder.getObjectId());
       return getCmisObject(newFolder, false, EnumIncludeRelationships.NONE, false, false, PropertyFilter.ALL,
-         RenditionFilter.NONE, repository.getRenditionManager());
+         RenditionFilter.NONE, repository.getRenditionManager(), includeObjectInfo);
    }
 
    /**
     * {@inheritDoc}
     */
-   public CmisObjectType createPolicy(String repositoryId, String folderId, CmisPropertiesType properties,
-      CmisAccessControlListType addACL, CmisAccessControlListType removeACL, List<String> policies)
+   public CmisObject createPolicy(String repositoryId, String folderId, CmisPropertiesType properties,
+      CmisAccessControlListType addACL, CmisAccessControlListType removeACL, List<String> policies, boolean includeObjectInfo)
       throws ConstraintException, NameConstraintViolationException, RepositoryException
    {
       String typeId = null;
@@ -364,14 +365,14 @@ public class ObjectServiceImpl extends CmisObjectProducer implements ObjectServi
       if (LOG.isDebugEnabled())
          LOG.debug("Created new policy " + newPolicy.getObjectId());
       return getCmisObject(newPolicy, false, EnumIncludeRelationships.NONE, false, false, PropertyFilter.ALL,
-         RenditionFilter.NONE, repository.getRenditionManager());
+         RenditionFilter.NONE, repository.getRenditionManager(), includeObjectInfo);
    }
 
    /**
     * {@inheritDoc}
     */
-   public CmisObjectType createRelationship(String repositoryId, CmisPropertiesType properties,
-      CmisAccessControlListType addACL, CmisAccessControlListType removeACL, List<String> policies)
+   public CmisObject createRelationship(String repositoryId, CmisPropertiesType properties,
+      CmisAccessControlListType addACL, CmisAccessControlListType removeACL, List<String> policies, boolean includeObjectInfo)
       throws ConstraintException, RepositoryException
    {
       String typeId = null;
@@ -446,13 +447,13 @@ public class ObjectServiceImpl extends CmisObjectProducer implements ObjectServi
       if (LOG.isDebugEnabled())
          LOG.debug("Created new relationship " + newRelationship.getObjectId());
       return getCmisObject(newRelationship, false, EnumIncludeRelationships.NONE, false, false, PropertyFilter.ALL,
-         RenditionFilter.NONE, repository.getRenditionManager());
+         RenditionFilter.NONE, repository.getRenditionManager(), includeObjectInfo);
    }
 
    /**
     * {@inheritDoc}
     */
-   public CmisObjectType deleteContentStream(String repositoryId, String documentId, String changeToken)
+   public CmisObject deleteContentStream(String repositoryId, String documentId, String changeToken, boolean includeObjectInfo)
       throws ConstraintException, UpdateConflictException, RepositoryException
    {
       if (LOG.isDebugEnabled())
@@ -483,7 +484,7 @@ public class ObjectServiceImpl extends CmisObjectProducer implements ObjectServi
       if (LOG.isDebugEnabled())
          LOG.debug("Deleted contents stream of document " + documentId);
       return getCmisObject(doc, false, EnumIncludeRelationships.NONE, false, false, PropertyFilter.ALL,
-         RenditionFilter.NONE, repository.getRenditionManager());
+         RenditionFilter.NONE, repository.getRenditionManager(), includeObjectInfo);
    }
 
    /**
@@ -602,9 +603,9 @@ public class ObjectServiceImpl extends CmisObjectProducer implements ObjectServi
    /**
     * {@inheritDoc}
     */
-   public CmisObjectType getObject(String repositoryId, String objectId, boolean includeAllowableActions,
+   public CmisObject getObject(String repositoryId, String objectId, boolean includeAllowableActions,
       EnumIncludeRelationships includeRelationships, boolean includePolicyIds, boolean includeACL,
-      String propertyFilter, String renditionFilter) throws ObjectNotFoundException, FilterNotValidException,
+      String propertyFilter, String renditionFilter, boolean includeObjectInfo) throws ObjectNotFoundException, FilterNotValidException,
       RepositoryException
    {
       if (LOG.isDebugEnabled())
@@ -612,16 +613,16 @@ public class ObjectServiceImpl extends CmisObjectProducer implements ObjectServi
       Repository repository = repositoryService.getRepository(repositoryId);
       Entry entry = repository.getObjectById(objectId);
       return getCmisObject(entry, includeAllowableActions, EnumIncludeRelationships.NONE, includePolicyIds, includeACL,
-         new PropertyFilter(propertyFilter), new RenditionFilter(renditionFilter), repository.getRenditionManager());
+         new PropertyFilter(propertyFilter), new RenditionFilter(renditionFilter), repository.getRenditionManager(), includeObjectInfo);
    }
 
    /**
     * {@inheritDoc}
     * @throws ObjectNotFoundException 
     */
-   public CmisObjectType getObjectByPath(String repositoryId, String path, boolean includeAllowableActions,
+   public CmisObject getObjectByPath(String repositoryId, String path, boolean includeAllowableActions,
       EnumIncludeRelationships includeRelationships, boolean includePolicyIds, boolean includeACL,
-      String propertyFilter, String renditionFilter) throws ObjectNotFoundException, FilterNotValidException,
+      String propertyFilter, String renditionFilter, boolean includeObjectInfo) throws ObjectNotFoundException, FilterNotValidException,
       RepositoryException
    {
       if (LOG.isDebugEnabled())
@@ -629,7 +630,7 @@ public class ObjectServiceImpl extends CmisObjectProducer implements ObjectServi
       Repository repository = repositoryService.getRepository(repositoryId);
       Entry entry = repository.getObjectByPath(path);
       return getCmisObject(entry, includeAllowableActions, EnumIncludeRelationships.NONE, includePolicyIds, includeACL,
-         new PropertyFilter(propertyFilter), new RenditionFilter(renditionFilter), repository.getRenditionManager());
+         new PropertyFilter(propertyFilter), new RenditionFilter(renditionFilter), repository.getRenditionManager(), includeObjectInfo);
    }
 
    /**
@@ -645,7 +646,7 @@ public class ObjectServiceImpl extends CmisObjectProducer implements ObjectServi
       CmisPropertiesType resp = new CmisPropertiesType();
       resp.getProperty().addAll(
          getCmisObject(entry, false, EnumIncludeRelationships.NONE, false, false, new PropertyFilter(propertyFilter),
-            RenditionFilter.NONE, repository.getRenditionManager()).getProperties().getProperty());
+            RenditionFilter.NONE, repository.getRenditionManager(), false).getProperties().getProperty());
       return resp;
    }
 
@@ -703,7 +704,7 @@ public class ObjectServiceImpl extends CmisObjectProducer implements ObjectServi
    /**
     * {@inheritDoc}
     */
-   public CmisObjectType moveObject(String repositoryId, String objectId, String targetFolderId, String sourceFolderId)
+   public CmisObject moveObject(String repositoryId, String objectId, String targetFolderId, String sourceFolderId, boolean includeObjectInfo)
       throws ConstraintException, UpdateConflictException, RepositoryException
    {
       if (LOG.isDebugEnabled())
@@ -713,17 +714,17 @@ public class ObjectServiceImpl extends CmisObjectProducer implements ObjectServi
       repository.moveObject(objectId, targetFolderId, sourceFolderId);
 
       // ID of object is the same.
-      CmisObjectType moved =
+      CmisObject moved =
          getCmisObject(repository.getObjectById(objectId), false, EnumIncludeRelationships.NONE, false, false,
-            PropertyFilter.ALL, RenditionFilter.NONE, repository.getRenditionManager());
+            PropertyFilter.ALL, RenditionFilter.NONE, repository.getRenditionManager(), includeObjectInfo);
       return moved;
    }
 
    /**
     * {@inheritDoc}
     */
-   public CmisObjectType setContentStream(String repositoryId, String documentId, ContentStream content,
-      String changeToken, boolean overwriteFlag) throws ConstraintException, ContentAlreadyExistsException,
+   public CmisObject setContentStream(String repositoryId, String documentId, ContentStream content,
+      String changeToken, boolean overwriteFlag, boolean includeObjectInfo) throws ConstraintException, ContentAlreadyExistsException,
       StreamNotSupportedException, UpdateConflictException, IOException, RepositoryException
    {
       if (LOG.isDebugEnabled())
@@ -753,14 +754,14 @@ public class ObjectServiceImpl extends CmisObjectProducer implements ObjectServi
             LOG.debug("Created renditions for document with content stream media type " + content.getMediaType());
       }
       return getCmisObject(doc, false, EnumIncludeRelationships.NONE, false, false, PropertyFilter.ALL,
-         RenditionFilter.NONE, repository.getRenditionManager());
+         RenditionFilter.NONE, repository.getRenditionManager(), includeObjectInfo);
    }
 
    /**
     * {@inheritDoc}
     */
-   public CmisObjectType updateProperties(String repositoryId, String objectId, String changeToken,
-      CmisPropertiesType properties) throws ConstraintException, NameConstraintViolationException,
+   public CmisObject updateProperties(String repositoryId, String objectId, String changeToken,
+      CmisPropertiesType properties, boolean includeObjectInfo) throws ConstraintException, NameConstraintViolationException,
       UpdateConflictException, RepositoryException
    {
       if (LOG.isDebugEnabled())
@@ -782,7 +783,7 @@ public class ObjectServiceImpl extends CmisObjectProducer implements ObjectServi
       if (LOG.isDebugEnabled())
          LOG.debug("Update properties of object " + object.getObjectId());
       return getCmisObject(object, false, EnumIncludeRelationships.NONE, false, false, PropertyFilter.ALL,
-         RenditionFilter.NONE, repository.getRenditionManager());
+         RenditionFilter.NONE, repository.getRenditionManager(), includeObjectInfo);
    }
 
    private void deleteSingleFiled(Entry folder, Set<Entry> discovered) throws UnsupportedOperationException,

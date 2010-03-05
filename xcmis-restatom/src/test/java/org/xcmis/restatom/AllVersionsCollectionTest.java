@@ -42,7 +42,7 @@ public class AllVersionsCollectionTest extends BaseTest
    {
       Entry doc = createDocument(testFolderId, "doc1", null, null);
       String docId = doc.getObjectId();
-      versioningService.checkout(cmisRepositoryId, docId);
+      versioningService.checkout(cmisRepositoryId, docId, true);
 
       String versionSeriesId = doc.getVersionSeriesId();
 
@@ -83,12 +83,12 @@ public class AllVersionsCollectionTest extends BaseTest
    {
       Entry doc = createDocument(testFolderId, "doc1", null, null);
       String docId = doc.getObjectId();
-      versioningService.checkout(cmisRepositoryId, docId);
+      versioningService.checkout(cmisRepositoryId, docId, true);
 
       String versionSeriesId = doc.getVersionSeriesId();
 
       ContentStream data = new BaseContentStream("test".getBytes("UTF-8"), "test", "text/plain");
-      versioningService.checkin(cmisRepositoryId, docId, true, null, data, "checkin comment", null, null, null);
+      versioningService.checkin(cmisRepositoryId, docId, true, null, data, "checkin comment", null, null, null, true);
 
       // One source document and new version in version series.
       String requestURI = "http://localhost:8080/rest" + "/cmisatom/" + cmisRepositoryId + "/versions/" + versionSeriesId;// + "?filter=*";

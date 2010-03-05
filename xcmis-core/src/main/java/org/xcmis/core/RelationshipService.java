@@ -20,10 +20,10 @@
 package org.xcmis.core;
 
 import org.xcmis.core.EnumRelationshipDirection;
-import org.xcmis.messaging.CmisObjectListType;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.RepositoryException;
+import org.xcmis.spi.object.CmisObjectList;
 
 /**
  * The RelationshipService are used to retrieve the relationship objects
@@ -50,14 +50,15 @@ public interface RelationshipService
     * @param propertyFilter property filter as string
     * @param maxItems number of max items in response
     * @param skipCount skip items
+    * @param includeObjectInfo TODO
     * @return set of object's relationships
     * @throws FilterNotValidException if <code>propertyFilter</code> is invalid
     * @throws ObjectNotFoundException if object with <code>objectId</code> does not exist            
     * @throws RepositoryException if any other errors in repository occur
     * @see EnumRelationshipDirection
     */
-   CmisObjectListType getObjectRelationships(String repositoryId, String objectId, EnumRelationshipDirection direction,
+   CmisObjectList getObjectRelationships(String repositoryId, String objectId, EnumRelationshipDirection direction,
       String typeId, boolean includeSubRelationshipTypes, boolean includeAllowableActions, String propertyFilter,
-      int maxItems, int skipCount) throws FilterNotValidException, ObjectNotFoundException, RepositoryException;
+      int maxItems, int skipCount, boolean includeObjectInfo) throws FilterNotValidException, ObjectNotFoundException, RepositoryException;
 
 }

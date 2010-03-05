@@ -106,7 +106,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
             versioningState == null ? EnumVersioningState.MAJOR : versioningState, //
             addACEs, //
             removeACEs, //
-            policies));
+            policies, false).getProperties());
       }
       catch (Exception e)
       {
@@ -140,7 +140,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
             versioningState == null ? EnumVersioningState.MAJOR : versioningState, //
             addACEs, //
             removeACEs, //
-            policies));
+            policies, false).getProperties());
       }
       catch (Exception e)
       {
@@ -168,7 +168,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
       {
          objectId.value =
             CmisUtils.getObjectId(objectService.createFolder(repositoryId, folderId, properties, addACEs, removeACEs,
-               policies));
+               policies, false).getProperties());
       }
       catch (Exception e)
       {
@@ -195,7 +195,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
       {
          objectId.value =
             CmisUtils.getObjectId(objectService.createPolicy(repositoryId, folderId, properties, addACEs, removeACEs,
-               policies));
+               policies, false).getProperties());
       }
       catch (Exception e)
       {
@@ -221,7 +221,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
       {
          objectId.value =
             CmisUtils.getObjectId(objectService.createRelationship(repositoryId, properties, addACEs, removeACEs,
-               policies));
+               policies, false).getProperties());
       }
       catch (Exception e)
       {
@@ -242,10 +242,11 @@ public class ObjectServicePortImpl implements ObjectServicePort
       {
          CmisObjectType document = objectService.deleteContentStream(repositoryId, //
             documentId.value, //
-            changeToken != null ? changeToken.value : null);
+            changeToken != null ? changeToken.value : null, false).toCmisObjectType();
 
-         documentId.value = CmisUtils.getObjectId(document);
-         CmisPropertyString token = (CmisPropertyString)CmisUtils.getProperty(document, CMIS.CHANGE_TOKEN);
+         documentId.value = CmisUtils.getObjectId(document.getProperties());
+         CmisPropertyString token =
+            (CmisPropertyString)CmisUtils.getProperty(document.getProperties(), CMIS.CHANGE_TOKEN);
          if (token != null && token.getValue().size() > 0)
             changeToken.value = token.getValue().get(0);
       }
@@ -307,8 +308,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
    /**
     * {@inheritDoc}
     */
-   public CmisAllowableActionsType getAllowableActions(String repositoryId, String objectId, 
-      CmisExtensionType extension)
+   public CmisAllowableActionsType getAllowableActions(String repositoryId, String objectId, CmisExtensionType extension)
       throws CmisException
    {
       if (LOG.isDebugEnabled())
@@ -383,7 +383,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
             includePolicyIds == null ? false : includePolicyIds, //
             includeACL == null ? false : includeACL, //
             propertyFilter, //
-            renditionFilter);
+            renditionFilter, false).toCmisObjectType();
       }
       catch (Exception e)
       {
@@ -417,7 +417,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
             includePolicyIds == null ? false : includePolicyIds, //
             includeACL == null ? false : includeACL, //
             propertyFilter, //
-            renditionFilter);
+            renditionFilter, false).toCmisObjectType();
       }
       catch (Exception e)
       {
@@ -480,8 +480,8 @@ public class ObjectServicePortImpl implements ObjectServicePort
       try
       {
          objectId.value =
-            CmisUtils.getObjectId(objectService
-               .moveObject(repositoryId, objectId.value, targetFolderId, sourceFolderId));
+            CmisUtils.getObjectId(objectService.moveObject(repositoryId, objectId.value, targetFolderId,
+               sourceFolderId, false).getProperties());
       }
       catch (Exception e)
       {
@@ -514,10 +514,11 @@ public class ObjectServicePortImpl implements ObjectServicePort
             documentId.value, //
             cs, //
             changeToken == null ? null : changeToken.value, //
-            overwriteFlag == null ? true : overwriteFlag);
+            overwriteFlag == null ? true : overwriteFlag, false).toCmisObjectType();
 
-         documentId.value = CmisUtils.getObjectId(document);
-         CmisPropertyString token = (CmisPropertyString)CmisUtils.getProperty(document, CMIS.CHANGE_TOKEN);
+         documentId.value = CmisUtils.getObjectId(document.getProperties());
+         CmisPropertyString token =
+            (CmisPropertyString)CmisUtils.getProperty(document.getProperties(), CMIS.CHANGE_TOKEN);
          if (token != null && token.getValue().size() > 0)
             changeToken.value = token.getValue().get(0);
       }
@@ -544,9 +545,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
          CmisObjectType object = objectService.updateProperties(repositoryId, //
             objectId.value, //
             changeToken.value == null ? null : changeToken.value, //
-            properties);
-         objectId.value = CmisUtils.getObjectId(object);
-         CmisPropertyString token = (CmisPropertyString)CmisUtils.getProperty(object, CMIS.CHANGE_TOKEN);
+            properties, false).toCmisObjectType();
+         objectId.value = CmisUtils.getObjectId(object.getProperties());
+         CmisPropertyString token =
+            (CmisPropertyString)CmisUtils.getProperty(object.getProperties(), CMIS.CHANGE_TOKEN);
          if (token != null && token.getValue().size() > 0)
             changeToken.value = token.getValue().get(0);
       }

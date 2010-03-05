@@ -19,9 +19,8 @@
 
 package org.xcmis.core.impl;
 
-import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.PolicyService;
-import org.xcmis.core.impl.PolicyServiceImpl;
+import org.xcmis.spi.object.CmisObject;
 import org.xcmis.spi.object.Entry;
 
 import java.util.List;
@@ -64,7 +63,7 @@ public class PolicyServiceTest extends BaseTest
    {
       doc.applyPolicy(policy);
       doc.save();
-      List<CmisObjectType> policies = policyService.getAppliedPolicies(repositoryId, doc.getObjectId(), null);
+      List<CmisObject> policies = policyService.getAppliedPolicies(repositoryId, doc.getObjectId(), null, false);
       assertEquals(1, policies.size());
    }
 

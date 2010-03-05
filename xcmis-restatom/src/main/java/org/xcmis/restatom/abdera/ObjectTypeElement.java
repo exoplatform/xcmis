@@ -31,6 +31,7 @@ import org.xcmis.core.CmisPropertiesType;
 import org.xcmis.core.CmisRenditionType;
 import org.xcmis.core.impl.property.PropertyFilter;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.spi.object.CmisObject;
 
 import java.util.List;
 
@@ -104,12 +105,12 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
    /**
     * Builds the element.
     * 
-    * @param objectType the object type
+    * @param object the object type
     * @param filter the filter
     */
-   public void build(CmisObjectType objectType, PropertyFilter filter)
+   public void build(CmisObject object, PropertyFilter filter)
    {
-      if (objectType != null)
+      if (object != null)
       {
          // XXX: Workaround to get work updating properties under 'Cmis Connector Firefox plugin'.
          // Plugin miss namespace when create entry for updating. Namespace for prefix 'cmisra' 
@@ -118,7 +119,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
          setAttributeValue("xmlns:" + AtomCMIS.CMISRA_PREFIX, AtomCMIS.CMISRA_NS_URI);
 
          // Properties
-         CmisPropertiesType properties = objectType.getProperties();
+         CmisPropertiesType properties = object.getProperties();
          if (properties != null)
          {
             PropertiesTypeElement propertiesElement = addExtension(AtomCMIS.PROPERTIES);
@@ -126,7 +127,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
          }
 
          // AllowableActions
-         CmisAllowableActionsType allowableActions = objectType.getAllowableActions();
+         CmisAllowableActionsType allowableActions = object.getAllowableActions();
          if (allowableActions != null)
          {
             AllowableActionsElement actionsElement = addExtension(AtomCMIS.ALLOWABLE_ACTIONS);
@@ -134,7 +135,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
          }
 
          // Relationship
-         List<CmisObjectType> relationship = objectType.getRelationship();
+         List<CmisObject> relationship = object.getRelationship();
          if (relationship != null)
          {
             // TODO How to implement that relationship type element extension?
@@ -147,7 +148,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
          }
 
          // ChangeEventInfo
-         CmisChangeEventType changeEventInfo = objectType.getChangeEventInfo();
+         CmisChangeEventType changeEventInfo = object.getChangeEventInfo();
          if (changeEventInfo != null)
          {
             ChangeEventTypeElement changeEventInfoElement = addExtension(AtomCMIS.CHANGE_EVENT_INFO);
@@ -155,7 +156,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
          }
 
          // ACL
-         CmisAccessControlListType accessControlList = objectType.getAcl();
+         CmisAccessControlListType accessControlList = object.getAcl();
          if (accessControlList != null)
          {
             AccessControlListTypeElement accessControlListTypeElement = addExtension(AtomCMIS.ACL);
@@ -163,11 +164,11 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
          }
 
          // exactACL
-         if (objectType.isExactACL() != null)
-            addSimpleExtension(AtomCMIS.EXACT_ACL, objectType.isExactACL().toString());
+         if (object.isExactACL() != null)
+            addSimpleExtension(AtomCMIS.EXACT_ACL, object.isExactACL().toString());
 
          // policyIds
-         CmisListOfIdsType policyIds = objectType.getPolicyIds();
+         CmisListOfIdsType policyIds = object.getPolicyIds();
          if (policyIds != null)
          {
             ListOfIdsTypeElement listOfIdsTypeTypeElement = addExtension(AtomCMIS.POLICY_IDS);
@@ -175,7 +176,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
          }
 
          // rendition
-         List<CmisRenditionType> listRendition = objectType.getRendition();
+         List<CmisRenditionType> listRendition = object.getRendition();
          if (listRendition != null)
          {
             RenditionTypeElement renditionElement = addExtension(AtomCMIS.RENDITION);
@@ -188,10 +189,10 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
    /**
     * Builds the element.
     * 
-    * @param objectType the object type
+    * @param object the object type
     */
-   public void build(CmisObjectType objectType)
+   public void build(CmisObject object)
    {
-      build(objectType, null);
+      build(object, null);
    }
 }

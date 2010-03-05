@@ -30,6 +30,7 @@ import org.xcmis.messaging.QueryResponse;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.DiscoveryServicePort;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.object.CmisObjectList;
 
 
 /**
@@ -93,11 +94,11 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
                .getValue().intValue();
 
          QueryResponse response = new QueryResponse();
-         CmisObjectListType result =
+         CmisObjectList result =
             discoveryService.query(repositoryId, statement, allVersions, includeAllowableActions, includeRelationships,
-               renditionFilter, maxItems, skipCount);
+               renditionFilter, maxItems, skipCount, false);
 
-         response.setObjects(result);
+         response.setObjects(result.toCmisObjectList());
          return response;
       }
       catch (Exception e)

@@ -26,18 +26,18 @@ import org.apache.abdera.model.Feed;
 import org.apache.abdera.model.Link;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
-import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.EnumIncludeRelationships;
 import org.xcmis.core.NavigationService;
 import org.xcmis.core.ObjectService;
 import org.xcmis.core.RepositoryService;
 import org.xcmis.core.VersioningService;
-import org.xcmis.messaging.CmisObjectInFolderContainerType;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.RepositoryException;
+import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.object.CmisObjectInFolderContainer;
 
 import java.util.List;
 
@@ -72,7 +72,7 @@ public class FolderDescentantsCollection extends CmisObjectCollection
     * {@inheritDoc}
     */
    @Override
-   public Iterable<CmisObjectType> getEntries(RequestContext request) throws ResponseContextException
+   public Iterable<CmisObject> getEntries(RequestContext request) throws ResponseContextException
    {
       // To process hierarchically structure override addFeedDetails(Feed, RequestContext) method.
       throw new UnsupportedOperationException("entries");
@@ -95,7 +95,7 @@ public class FolderDescentantsCollection extends CmisObjectCollection
     * @param request request
     * @throws ResponseContextException if error occurs
     */
-   protected void addChildren(Entry entry, List<CmisObjectInFolderContainerType> children, IRI feedIri,
+   protected void addChildren(Entry entry, List<CmisObjectInFolderContainer> children, IRI feedIri,
       RequestContext request) throws ResponseContextException
    {
       Element childrenElement = entry.addExtension(AtomCMIS.CHILDREN);
@@ -121,7 +121,7 @@ public class FolderDescentantsCollection extends CmisObjectCollection
       // add cmisra:numItems
       Element numItems = request.getAbdera().getFactory().newElement(AtomCMIS.NUM_ITEMS, childrenElement);
       numItems.setText(Integer.toString(children.size()));
-      for (CmisObjectInFolderContainerType oifContainer : children)
+      for (CmisObjectInFolderContainer oifContainer : children)
       {
          Entry ch = request.getAbdera().getFactory().newEntry(childFeed);
          addEntryDetails(request, ch, feedIri, oifContainer.getObjectInFolder().getObject());
@@ -178,9 +178,9 @@ public class FolderDescentantsCollection extends CmisObjectCollection
       }
       try
       {
-         List<CmisObjectInFolderContainerType> descendants =
+         List<CmisObjectInFolderContainer> descendants =
             navigationService.getDescendants(getRepositoryId(request), getId(request), depth, includeAllowableActions,
-               includeRelationships, includePathSegments, propertyFilter, renditionFilter);
+               includeRelationships, includePathSegments, propertyFilter, renditionFilter, true);
 
          if (descendants.size() > 0)
          {
@@ -188,7 +188,7 @@ public class FolderDescentantsCollection extends CmisObjectCollection
             Element numItems = feed.addExtension(AtomCMIS.NUM_ITEMS);
             numItems.setText(Integer.toString(descendants.size()));
 
-            for (CmisObjectInFolderContainerType oifContainer : descendants)
+            for (CmisObjectInFolderContainer oifContainer : descendants)
             {
                Entry e = feed.addEntry();
                IRI feedIri = new IRI(getFeedIriForEntry(oifContainer.getObjectInFolder().getObject(), request));
@@ -249,7 +249,7 @@ public class FolderDescentantsCollection extends CmisObjectCollection
       {
          try
          {
-            CmisObjectType parent = navigationService.getFolderParent(repositoryId, id, null);
+            CmisObject parent = navigationService.getFolderParent(repositoryId, id, null, true);
             feed.addLink(getObjectLink(getId(parent), request), AtomCMIS.LINK_UP, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null,
                null, -1);
          }

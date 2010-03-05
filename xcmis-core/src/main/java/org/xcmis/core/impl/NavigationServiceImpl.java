@@ -19,6 +19,8 @@
 
 package org.xcmis.core.impl;
 
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
 import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.EnumBaseObjectTypeIds;
 import org.xcmis.core.EnumIncludeRelationships;
@@ -28,16 +30,23 @@ import org.xcmis.core.impl.object.RenditionFilter;
 import org.xcmis.core.impl.property.PropertyFilter;
 import org.xcmis.core.impl.property.PropertyService;
 import org.xcmis.messaging.CmisObjectInFolderContainerType;
-import org.xcmis.messaging.CmisObjectInFolderListType;
 import org.xcmis.messaging.CmisObjectInFolderType;
-import org.xcmis.messaging.CmisObjectListType;
 import org.xcmis.messaging.CmisObjectParentsType;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.Repository;
 import org.xcmis.spi.RepositoryException;
+import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.object.CmisObjectInFolder;
+import org.xcmis.spi.object.CmisObjectInFolderContainer;
+import org.xcmis.spi.object.CmisObjectInFolderContainerImpl;
+import org.xcmis.spi.object.CmisObjectInFolderImpl;
+import org.xcmis.spi.object.CmisObjectInFolderList;
+import org.xcmis.spi.object.CmisObjectInFolderListImpl;
+import org.xcmis.spi.object.CmisObjectList;
+import org.xcmis.spi.object.CmisObjectListImpl;
+import org.xcmis.spi.object.CmisObjectParents;
+import org.xcmis.spi.object.CmisObjectParentsImpl;
 import org.xcmis.spi.object.Entry;
 import org.xcmis.spi.object.ItemsIterator;
 import org.xcmis.spi.object.RenditionManager;
@@ -78,9 +87,9 @@ public class NavigationServiceImpl extends CmisObjectProducer implements Navigat
    /**
     * {@inheritDoc}
     */
-   public CmisObjectListType getCheckedOutDocs(String repositoryId, String folderId,
+   public CmisObjectList getCheckedOutDocs(String repositoryId, String folderId,
       boolean includeAllowableActions, EnumIncludeRelationships includeRelationships, String propertyFilter,
-      String renditionFilter, String orderBy, int maxItems, int skipCount) throws FilterNotValidException,
+      String renditionFilter, String orderBy, int maxItems, int skipCount, boolean includeObjectInfo) throws FilterNotValidException,
       RepositoryException
    {
 
@@ -111,15 +120,15 @@ public class NavigationServiceImpl extends CmisObjectProducer implements Navigat
          throw new InvalidArgumentException(msg);
       }
 
-      CmisObjectListType list = new CmisObjectListType();
+      CmisObjectList list = new CmisObjectListImpl();
       int count = 0;
       RenditionManager renditionManager = repository.getRenditionManager();
       while (items.hasNext() && count < maxItems)
       {
          Entry entry = items.next();
-         CmisObjectType cmis =
+         CmisObject cmis =
             getCmisObject(entry, includeAllowableActions, includeRelationships, false, false, new PropertyFilter(
-               propertyFilter), new RenditionFilter(renditionFilter), renditionManager);
+               propertyFilter), new RenditionFilter(renditionFilter), renditionManager, includeObjectInfo);
          list.getObjects().add(cmis);
          count++;
       }
@@ -134,9 +143,9 @@ public class NavigationServiceImpl extends CmisObjectProducer implements Navigat
    /**
     * {@inheritDoc}
     */
-   public CmisObjectInFolderListType getChildren(String repositoryId, String folderId, boolean includeAllowableActions,
+   public CmisObjectInFolderList getChildren(String repositoryId, String folderId, boolean includeAllowableActions,
       EnumIncludeRelationships includeRelationships, boolean includePathSegments, String propertyFilter,
-      String renditionFilter, String orderBy, int maxItems, int skipCount) throws FilterNotValidException,
+      String renditionFilter, String orderBy, int maxItems, int skipCount, boolean includeObjectInfo) throws FilterNotValidException,
       RepositoryException
    {
       if (LOG.isDebugEnabled())
@@ -178,16 +187,16 @@ public class NavigationServiceImpl extends CmisObjectProducer implements Navigat
          throw new InvalidArgumentException(msg);
       }
 
-      CmisObjectInFolderListType list = new CmisObjectInFolderListType();
+      CmisObjectInFolderList list = new CmisObjectInFolderListImpl();
       RenditionManager renditionManager = repository.getRenditionManager();
       int count = 0;
       while (items.hasNext() && count < maxItems)
       {
          Entry obj = items.next();
-         CmisObjectType cmis =
+         CmisObject cmis =
             getCmisObject(obj, includeAllowableActions, includeRelationships, false, false, new PropertyFilter(
-               propertyFilter), new RenditionFilter(renditionFilter), renditionManager);
-         CmisObjectInFolderType objectInFolder = new CmisObjectInFolderType();
+               propertyFilter), new RenditionFilter(renditionFilter), renditionManager, includeObjectInfo);
+         CmisObjectInFolder objectInFolder = new CmisObjectInFolderImpl();
          objectInFolder.setObject(cmis);
          objectInFolder.setPathSegment(obj.getName());
          list.getObjects().add(objectInFolder);
@@ -205,9 +214,9 @@ public class NavigationServiceImpl extends CmisObjectProducer implements Navigat
    /**
     * {@inheritDoc}
     */
-   public List<CmisObjectInFolderContainerType> getDescendants(String repositoryId, String folderId, int depth,
+   public List<CmisObjectInFolderContainer> getDescendants(String repositoryId, String folderId, int depth,
       boolean includeAllowableActions, EnumIncludeRelationships includeRelationships, boolean includePathSegments,
-      String propertyFilter, String renditionFilter) throws FilterNotValidException, RepositoryException
+      String propertyFilter, String renditionFilter, boolean includeObjectInfo) throws FilterNotValidException, RepositoryException
    {
 
       if (LOG.isDebugEnabled())
@@ -231,13 +240,13 @@ public class NavigationServiceImpl extends CmisObjectProducer implements Navigat
          // Object is not fileable.
          throw new InvalidArgumentException(usoe.getMessage());
       }
-      List<CmisObjectInFolderContainerType> list = new ArrayList<CmisObjectInFolderContainerType>();
+      List<CmisObjectInFolderContainer> list = new ArrayList<CmisObjectInFolderContainer>();
       RenditionManager renditionManager = repository.getRenditionManager();
       while (children.hasNext())
       {
          list.add(getDescendants(children.next(), null, depth != -1 ? depth - 1 : depth, includeAllowableActions,
             includeRelationships, includePathSegments, new PropertyFilter(propertyFilter), new RenditionFilter(
-               renditionFilter), renditionManager));
+               renditionFilter), renditionManager, includeObjectInfo));
       }
 
       return list;
@@ -246,7 +255,7 @@ public class NavigationServiceImpl extends CmisObjectProducer implements Navigat
    /**
     * {@inheritDoc}
     */
-   public CmisObjectType getFolderParent(String repositoryId, String folderId, String propertyFilter)
+   public CmisObject getFolderParent(String repositoryId, String folderId, String propertyFilter, boolean includeObjectInfo)
       throws FilterNotValidException, RepositoryException
    {
       if (LOG.isDebugEnabled())
@@ -267,18 +276,18 @@ public class NavigationServiceImpl extends CmisObjectProducer implements Navigat
       }
 
       RenditionManager renditionManager = repository.getRenditionManager();
-      CmisObjectType cmis =
+      CmisObject cmis =
          getCmisObject(parents.get(0), false, EnumIncludeRelationships.NONE, false, false, new PropertyFilter(
-            propertyFilter), RenditionFilter.NONE, renditionManager);
+            propertyFilter), RenditionFilter.NONE, renditionManager, includeObjectInfo);
       return cmis;
    }
 
    /**
     * {@inheritDoc}
     */
-   public List<CmisObjectInFolderContainerType> getFolderTree(String repositoryId, String folderId, int depth,
+   public List<CmisObjectInFolderContainer> getFolderTree(String repositoryId, String folderId, int depth,
       boolean includeAllowableActions, EnumIncludeRelationships includeRelationships, boolean includePathSegments,
-      String propertyFilter, String renditionFilter) throws FilterNotValidException, RepositoryException
+      String propertyFilter, String renditionFilter, boolean includeObjectInfo) throws FilterNotValidException, RepositoryException
    {
 
       if (LOG.isDebugEnabled())
@@ -308,7 +317,7 @@ public class NavigationServiceImpl extends CmisObjectProducer implements Navigat
          // Object is not fileable.
          throw new InvalidArgumentException(usoe.getMessage());
       }
-      List<CmisObjectInFolderContainerType> list = new ArrayList<CmisObjectInFolderContainerType>();
+      List<CmisObjectInFolderContainer> list = new ArrayList<CmisObjectInFolderContainer>();
       RenditionManager renditionManager = repository.getRenditionManager();
       while (children.hasNext())
       {
@@ -316,7 +325,7 @@ public class NavigationServiceImpl extends CmisObjectProducer implements Navigat
          if (child.getScope() == EnumBaseObjectTypeIds.CMIS_FOLDER)
             list.add(getDescendants(child, EnumBaseObjectTypeIds.CMIS_FOLDER, depth != -1 ? depth - 1 : depth,
                includeAllowableActions, includeRelationships, includePathSegments, new PropertyFilter(
-                  propertyFilter), new RenditionFilter(renditionFilter), renditionManager));
+                  propertyFilter), new RenditionFilter(renditionFilter), renditionManager, includeObjectInfo));
       }
 
       return list;
@@ -325,9 +334,9 @@ public class NavigationServiceImpl extends CmisObjectProducer implements Navigat
    /**
     * {@inheritDoc}
     */
-   public List<CmisObjectParentsType> getObjectParents(String repositoryId, String objectId,
+   public List<CmisObjectParents> getObjectParents(String repositoryId, String objectId,
       boolean includeAllowableActions, EnumIncludeRelationships includeRelationships,
-      boolean includeRelativePathSegment, String propertyFilter, String renditionFilter)
+      boolean includeRelativePathSegment, String propertyFilter, String renditionFilter, boolean includeObjectInfo)
       throws FilterNotValidException, RepositoryException
    {
 
@@ -352,14 +361,14 @@ public class NavigationServiceImpl extends CmisObjectProducer implements Navigat
          throw new InvalidArgumentException(usoe.getMessage());
       }
 
-      List<CmisObjectParentsType> cmisParents = new ArrayList<CmisObjectParentsType>(parents.size());
+      List<CmisObjectParents> cmisParents = new ArrayList<CmisObjectParents>(parents.size());
       RenditionManager renditionManager = repository.getRenditionManager();
       for (Entry parent : parents)
       {
-         CmisObjectType cmis =
+         CmisObject cmis =
             getCmisObject(parent, includeAllowableActions, EnumIncludeRelationships.NONE, false, false,
-               new PropertyFilter(propertyFilter), new RenditionFilter(renditionFilter), renditionManager);
-         CmisObjectParentsType cmisParent = new CmisObjectParentsType();
+               new PropertyFilter(propertyFilter), new RenditionFilter(renditionFilter), renditionManager, includeObjectInfo);
+         CmisObjectParents cmisParent = new CmisObjectParentsImpl();
          cmisParent.setObject(cmis);
          cmisParent.setRelativePathSegment(parent.getName());
          cmisParents.add(cmisParent);
@@ -379,18 +388,19 @@ public class NavigationServiceImpl extends CmisObjectProducer implements Navigat
     * @param propertyFilter the property filter
     * @param renditionFilter the rendition filter
     * @param renditionManager the rendition manager
+    * @param includeObjectInfo TODO
     * @return the CMIS container for the object in folder
     * @throws RepositoryException if any repository error occurs
     */
-   protected CmisObjectInFolderContainerType getDescendants(Entry parent, EnumBaseObjectTypeIds typeFilter, int depth,
+   protected CmisObjectInFolderContainer getDescendants(Entry parent, EnumBaseObjectTypeIds typeFilter, int depth,
       boolean includeAllowableActions, EnumIncludeRelationships includeRelationships, boolean includePathSegments,
-      PropertyFilter propertyFilter, RenditionFilter renditionFilter, RenditionManager renditionManager)
+      PropertyFilter propertyFilter, RenditionFilter renditionFilter, RenditionManager renditionManager, boolean includeObjectInfo)
       throws RepositoryException
    {
-      CmisObjectInFolderContainerType objectContainer = new CmisObjectInFolderContainerType();
-      CmisObjectInFolderType objInFolder = new CmisObjectInFolderType();
+      CmisObjectInFolderContainer objectContainer = new CmisObjectInFolderContainerImpl();
+      CmisObjectInFolder objInFolder = new CmisObjectInFolderImpl();
       objInFolder.setObject(getCmisObject(parent, includeAllowableActions, includeRelationships, false, false,
-         propertyFilter, renditionFilter, renditionManager));
+         propertyFilter, renditionFilter, renditionManager, includeObjectInfo));
       objInFolder.setPathSegment(parent.getName());
       objectContainer.setObjectInFolder(objInFolder);
 
@@ -403,7 +413,7 @@ public class NavigationServiceImpl extends CmisObjectProducer implements Navigat
             {
                objectContainer.getChildren().add(
                   getDescendants(item, typeFilter, depth != -1 ? depth - 1 : depth, includeAllowableActions,
-                     includeRelationships, includePathSegments, propertyFilter, renditionFilter, renditionManager));
+                     includeRelationships, includePathSegments, propertyFilter, renditionFilter, renditionManager, includeObjectInfo));
             }
          }
       }
