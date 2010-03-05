@@ -33,16 +33,16 @@ import org.xcmis.spi.RepositoryException;
 public interface RenditionManager
 {
 
-   /**
-    * Create renditions for specified CMISEntry <code>entry</code>.
-    * Renditions will be saved in repository immediately.
-    * 
-    * @param entry CMISEntry
-    * @return TRUE if at least one rendition was created for object FALSE otherwise
-    * @throws InvalidArgumentException if entry has type that may not have renditions
-    * @throws RepositoryException if any other CMIS repository error occurs
-    */
-   boolean createRenditions(Entry entry) throws InvalidArgumentException, RepositoryException;
+//   /**
+//    * Create renditions for specified CMISEntry <code>entry</code>.
+//    * Renditions will be saved in repository immediately.
+//    * 
+//    * @param entry CMISEntry
+//    * @return TRUE if at least one rendition was created for object FALSE otherwise
+//    * @throws InvalidArgumentException if entry has type that may not have renditions
+//    * @throws RepositoryException if any other CMIS repository error occurs
+//    */
+//   boolean createRenditions(Entry entry) throws InvalidArgumentException, RepositoryException;
 
    /**
     * Get all renditions of specified entry.
@@ -65,6 +65,15 @@ public interface RenditionManager
     * @throws RepositoryException if any other CMIS repository error occurs
     */
    ItemsIterator<CmisRenditionType> getRenditions(String objectId) throws ObjectNotFoundException, RepositoryException;
+
+   /**
+    * Get rendition stream for objects with specified id.
+    * 
+    * @param streamId object id 
+    * @return Renditions content stream
+    * 
+    */
+    ContentStream getStream(String streamId);
 
    /**
     * Remove rendition for specified CMISEntry <code>entry</code>.
