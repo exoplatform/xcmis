@@ -614,6 +614,13 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
    /**
     * {@inheritDoc}
     */
+   public ContentStream getStream(String streamId) {
+    return null;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
    public ItemsIterator<CmisTypeDefinitionType> getTypeChildren(String typeId, boolean includePropertyDefinition)
       throws TypeNotFoundException, RepositoryException
    {
