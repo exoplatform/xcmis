@@ -108,9 +108,13 @@ import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.PathNotFoundException;
 import javax.jcr.Session;
+import javax.jcr.Workspace;
 import javax.jcr.nodetype.NoSuchNodeTypeException;
 import javax.jcr.nodetype.NodeType;
 import javax.jcr.nodetype.NodeTypeIterator;
+import javax.jcr.observation.Event;
+import javax.jcr.observation.EventListener;
+import javax.jcr.observation.EventListenerIterator;
 import javax.jcr.version.OnParentVersionAction;
 import javax.jcr.version.Version;
 import javax.jcr.version.VersionHistory;
@@ -120,7 +124,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id$
  */
-public class RepositoryImpl extends TypeManagerImpl implements Repository, EntryNameProducer, RenditionManager,
+public class RepositoryImpl extends TypeManagerImpl implements Repository, EntryNameProducer, 
    QueryNameResolver, ChangeTokenMatcher
 {
 
@@ -147,8 +151,11 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
 
    /** Repository info & capabilities. */
    private CmisRepositoryInfoType info;
+   
+   /** The rendition manager. */
+   private RenditionManager renditionManager;
 
-   private final Map<MimeType, RenditionProvider> renditionProviders;
+   //private final Map<MimeType, RenditionProvider> renditionProviders;
 
    /**
     * Construct instance <tt>RepositoryImpl</tt>.
@@ -160,15 +167,16 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
     * @throws javax.jcr.RepositoryException if any repository error occurs
     */
    public RepositoryImpl(javax.jcr.Repository backendRepo, SessionProvider sesProv, JcrIndexingService indexingService,
-      CMISRepositoryConfiguration config, Map<MimeType, RenditionProvider> renditionProviders)
+      CMISRepositoryConfiguration config,  RenditionManager renditionManager)
       throws javax.jcr.RepositoryException
    {
       this.backendRepo = backendRepo;
       this.sesProv = sesProv;
       this.queryHandler = new QueryHandlerImpl(indexingService, this);
       this.config = config;
-      this.renditionProviders = renditionProviders;
-
+     // this.renditionProviders = renditionProviders;
+      this.renditionManager = renditionManager;
+      
       changeTokenFeature =
          config.getProperties().get("exo.cmis.changetoken.feature") != null ? (Boolean)config.getProperties().get(
             "exo.cmis.changetoken.feature") : true;
@@ -421,62 +429,62 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
       throw new UnsupportedOperationException("createObject");
    }
 
-   /**
-    * {@inheritDoc}
-    */
-   public boolean createRenditions(Entry entry) throws InvalidArgumentException, RepositoryException
-   {
-      if (!entry.canGetContent())
-         return false;
-      ContentStream content;
-      try
-      {
-         content = entry.getContent(null);
-      }
-      catch (ConstraintException cve)
-      {
-         return false;
-      }
-      if (content == null)
-         return false;
-      try
-      {
-         MimeType contentType = MimeType.fromString(content.getMediaType());
-         int count = 0;
-         for (Map.Entry<MimeType, RenditionProvider> e : renditionProviders.entrySet())
-         {
-            if (e.getKey().match(contentType))
-            {
-               RenditionProvider renditionProvider = e.getValue();
-               RenditionContentStream renditionContentStream = renditionProvider.getRenditionStream(entry);
-               Node rendition = ((EntryImpl)entry).getNode().addNode(IdGenerator.generate(), JcrCMIS.CMIS_NT_RENDITION);
-               rendition.setProperty(JcrCMIS.CMIS_RENDITION_STREAM, renditionContentStream.getStream());
-               rendition.setProperty(JcrCMIS.CMIS_RENDITION_MIME_TYPE, renditionContentStream.getMediaType());
-               rendition.setProperty(JcrCMIS.CMIS_RENDITION_KIND, renditionContentStream.getKind());
-               rendition.setProperty(JcrCMIS.CMIS_RENDITION_HEIGHT, renditionContentStream.getHeight());
-               rendition.setProperty(JcrCMIS.CMIS_RENDITION_WIDTH, renditionContentStream.getWidth());
-               count++;
-            }
-         }
-         if (count > 0)
-         {
-            ((EntryImpl)entry).getNode().save();
-            return true;
-         }
-         return false;
-      }
-      catch (javax.jcr.RepositoryException re)
-      {
-         String msg = "Failed create rendtions for object " + entry.getObjectId() + ". " + re.getMessage();
-         throw new RepositoryException(msg, re);
-      }
-      catch (Exception other)
-      {
-         String msg = "Failed create rendtions for object " + entry.getObjectId() + ". " + other.getMessage();
-         LOG.error(msg);
-         return false;
-      }
-   }
+//   /**
+//    * {@inheritDoc}
+//    */
+//   public boolean createRenditions(Entry entry) throws InvalidArgumentException, RepositoryException
+//   {
+//      if (!entry.canGetContent())
+//         return false;
+//      ContentStream content;
+//      try
+//      {
+//         content = entry.getContent(null);
+//      }
+//      catch (ConstraintException cve)
+//      {
+//         return false;
+//      }
+//      if (content == null)
+//         return false;
+//      try
+//      {
+//         MimeType contentType = MimeType.fromString(content.getMediaType());
+//         int count = 0;
+//         for (Map.Entry<MimeType, RenditionProvider> e : renditionProviders.entrySet())
+//         {
+//            if (e.getKey().match(contentType))
+//            {
+//               RenditionProvider renditionProvider = e.getValue();
+//               RenditionContentStream renditionContentStream = renditionProvider.getRenditionStream(entry);
+//               Node rendition = ((EntryImpl)entry).getNode().addNode(IdGenerator.generate(), JcrCMIS.CMIS_NT_RENDITION);
+//               rendition.setProperty(JcrCMIS.CMIS_RENDITION_STREAM, renditionContentStream.getStream());
+//               rendition.setProperty(JcrCMIS.CMIS_RENDITION_MIME_TYPE, renditionContentStream.getMediaType());
+//               rendition.setProperty(JcrCMIS.CMIS_RENDITION_KIND, renditionContentStream.getKind());
+//               rendition.setProperty(JcrCMIS.CMIS_RENDITION_HEIGHT, renditionContentStream.getHeight());
+//               rendition.setProperty(JcrCMIS.CMIS_RENDITION_WIDTH, renditionContentStream.getWidth());
+//               count++;
+//            }
+//         }
+//         if (count > 0)
+//         {
+//            ((EntryImpl)entry).getNode().save();
+//            return true;
+//         }
+//         return false;
+//      }
+//      catch (javax.jcr.RepositoryException re)
+//      {
+//         String msg = "Failed create rendtions for object " + entry.getObjectId() + ". " + re.getMessage();
+//         throw new RepositoryException(msg, re);
+//      }
+//      catch (Exception other)
+//      {
+//         String msg = "Failed create rendtions for object " + entry.getObjectId() + ". " + other.getMessage();
+//         LOG.error(msg);
+//         return false;
+//      }
+//   }
 
    /**
     * {@inheritDoc}
@@ -656,34 +664,34 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
     */
    public RenditionManager getRenditionManager()
    {
-      return this;
+      return renditionManager;
    }
 
-   /**
-    * {@inheritDoc}
-    */
-   public ItemsIterator<CmisRenditionType> getRenditions(Entry entry) throws RepositoryException
-   {
-      try
-      {
-         return new RenditionIterator(((EntryImpl)entry).getNode().getNodes());
-      }
-      catch (javax.jcr.RepositoryException re)
-      {
-         String msg =
-            "Unable get renditions for object " + entry.getObjectId() + " Unexpected error " + re.getMessage();
-         throw new RepositoryException(msg, re);
-      }
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public ItemsIterator<CmisRenditionType> getRenditions(String objectId) throws ObjectNotFoundException,
-      RepositoryException
-   {
-      return getRenditions(getObjectById(objectId));
-   }
+//   /**
+//    * {@inheritDoc}
+//    */
+//   public ItemsIterator<CmisRenditionType> getRenditions(Entry entry) throws RepositoryException
+//   {
+//      try
+//      {
+//         return new RenditionIterator(((EntryImpl)entry).getNode().getNodes());
+//      }
+//      catch (javax.jcr.RepositoryException re)
+//      {
+//         String msg =
+//            "Unable get renditions for object " + entry.getObjectId() + " Unexpected error " + re.getMessage();
+//         throw new RepositoryException(msg, re);
+//      }
+//   }
+//
+//   /**
+//    * {@inheritDoc}
+//    */
+//   public ItemsIterator<CmisRenditionType> getRenditions(String objectId) throws ObjectNotFoundException,
+//      RepositoryException
+//   {
+//      return getRenditions(getObjectById(objectId));
+//   }
 
    /**
     * Get repository configuration.
@@ -1087,40 +1095,40 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
       }
    }
 
-   /**
-    * {@inheritDoc}
-    */
-   public void removeRenditions(Entry entry) throws RepositoryException
-   {
-      try
-      {
-         int count = 0;
-         for (NodeIterator iter = ((EntryImpl)entry).getNode().getNodes(); iter.hasNext();)
-         {
-            Node item = iter.nextNode();
-            if (item.isNodeType(JcrCMIS.CMIS_NT_RENDITION))
-            {
-               item.remove();
-               count++;
-            }
-         }
-         if (count > 0)
-            ((EntryImpl)entry).getNode().save();
-      }
-      catch (javax.jcr.RepositoryException re)
-      {
-         String msg = "Unable to remove renditions for object " + entry.getObjectId() + ". " + re.getMessage();
-         throw new RepositoryException(msg, re);
-      }
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public void removeRenditions(String objectId) throws ObjectNotFoundException, RepositoryException
-   {
-      removeRenditions(getObjectById(objectId));
-   }
+//   /**
+//    * {@inheritDoc}
+//    */
+//   public void removeRenditions(Entry entry) throws RepositoryException
+//   {
+//      try
+//      {
+//         int count = 0;
+//         for (NodeIterator iter = ((EntryImpl)entry).getNode().getNodes(); iter.hasNext();)
+//         {
+//            Node item = iter.nextNode();
+//            if (item.isNodeType(JcrCMIS.CMIS_NT_RENDITION))
+//            {
+//               item.remove();
+//               count++;
+//            }
+//         }
+//         if (count > 0)
+//            ((EntryImpl)entry).getNode().save();
+//      }
+//      catch (javax.jcr.RepositoryException re)
+//      {
+//         String msg = "Unable to remove renditions for object " + entry.getObjectId() + ". " + re.getMessage();
+//         throw new RepositoryException(msg, re);
+//      }
+//   }
+//
+//   /**
+//    * {@inheritDoc}
+//    */
+//   public void removeRenditions(String objectId) throws ObjectNotFoundException, RepositoryException
+//   {
+//      removeRenditions(getObjectById(objectId));
+//   }
 
    /**
     * {@inheritDoc}

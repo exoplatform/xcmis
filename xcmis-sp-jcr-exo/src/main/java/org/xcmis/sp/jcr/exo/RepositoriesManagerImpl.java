@@ -32,10 +32,12 @@ import org.exoplatform.services.log.Log;
 import org.picocontainer.Startable;
 import org.xcmis.sp.jcr.exo.query.index.JcrIndexingService;
 import org.xcmis.sp.jcr.exo.rendition.ImageRenditionProvider;
+import org.xcmis.sp.jcr.exo.rendition.PDFDocumentRenditionProvider;
 import org.xcmis.sp.jcr.exo.rendition.RenditionProvider;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.RepositoriesManager;
 import org.xcmis.spi.Repository;
+import org.xcmis.spi.object.RenditionManager;
 import org.xcmis.spi.utils.MimeType;
 
 import java.util.ArrayList;
@@ -47,6 +49,10 @@ import java.util.TreeMap;
 
 import javax.jcr.Node;
 import javax.jcr.Session;
+import javax.jcr.Workspace;
+import javax.jcr.observation.Event;
+import javax.jcr.observation.EventListener;
+import javax.jcr.observation.EventListenerIterator;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
@@ -65,6 +71,8 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
        * The list of CMIS repository configuration.
        */
       private List<CMISRepositoryConfiguration> configs;
+      
+      
 
       /**
        * Get configurations.
@@ -100,10 +108,15 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
 
    /** Session provider service. */
    private final ThreadLocalSessionProviderService sessionProviderService;
+   
+   /** The rendition manager. */
+   private RenditionManager renditionManager;
+   
+   private Session session;
 
    /** The map for the rendition providers. */
-   private final Map<MimeType, RenditionProvider> renditionProviders = new TreeMap<MimeType, RenditionProvider>(
-      new Comparator<MimeType>()
+   private final Map<MimeType, RenditionProvider> renditionProviders =
+      new TreeMap<MimeType, RenditionProvider>(new Comparator<MimeType>()
       {
          public int compare(MimeType m1, MimeType m2)
          {
@@ -132,7 +145,7 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
       this.indexingServices = new HashMap<String, JcrIndexingService>();
       this.cmisRepositories = new HashMap<String, CMISRepositoryConfiguration>();
       addRenditionProvider(new ImageRenditionProvider()); /* TODO : add form configuration ?? */
-      //      addRenditionProvider(new PDFDocumentRenditionProvider()); /* TODO : add form configuration ?? */
+            addRenditionProvider(new PDFDocumentRenditionProvider()); /* TODO : add form configuration ?? */
       if (initParams != null)
       {
          ObjectParameter param = initParams.getObjectParam("configs");
@@ -215,12 +228,15 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
             // --- FIXME : Should never happen if environment is correct.
             // Top services must prepare session provider.
             // But need it for commons test environment at the moment.
-            //            if (sessionProvider == null)
-            //               sessionProvider = SessionProvider.createAnonimProvider();
-            //            sessionProviderService.setSessionProvider(null, sessionProvider);
+            //                       if (sessionProvider == null)
+            //                          sessionProvider = SessionProvider.createAnonimProvider();
+            //                        sessionProviderService.setSessionProvider(null, sessionProvider);
             // ----
+            if (renditionManager == null)
+               renditionManager  =  new RenditionManagerImpl(renditionProviders, session);
+               
             return new RepositoryImpl(jcrRepository, sessionProvider, indexingServices.get(repositoryId),
-               repositoryConfiguration, renditionProviders);
+               repositoryConfiguration,renditionManager);
          }
          catch (javax.jcr.RepositoryException re)
          {
@@ -256,8 +272,16 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
          {
             javax.jcr.Repository jcrRepository = jcrRepositoryService.getRepository(jcrRepositoryId);
             SessionProvider sessionProvider = sessionProviderService.getSessionProvider(null);
+
+            if (sessionProvider == null)
+               sessionProvider = SessionProvider.createSystemProvider();
+            sessionProviderService.setSessionProvider(null, sessionProvider);
+            
+            if (renditionManager == null)
+               renditionManager  =  new RenditionManagerImpl(renditionProviders, session);
+            
             return new RepositoryImpl(jcrRepository, sessionProvider, indexingServices.get(repositoryConfiguration
-               .getId()), repositoryConfiguration, renditionProviders);
+               .getId()), repositoryConfiguration, renditionManager);
          }
       }
       return null;
@@ -269,19 +293,21 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
    public void start()
    {
       SessionProvider systemProvider = SessionProvider.createSystemProvider();
+    
       try
       {
          for (CMISRepositoryConfiguration cmisRepositoryConfiguration : cmisRepositories.values())
          {
             ManageableRepository repository =
                jcrRepositoryService.getRepository(cmisRepositoryConfiguration.getRepository());
-            Session session = systemProvider.getSession(cmisRepositoryConfiguration.getWorkspace(), repository);
+            session = systemProvider.getSession(cmisRepositoryConfiguration.getWorkspace(), repository);
             Node root = session.getRootNode();
             Node cmisSystem = null;
             if (!root.hasNode(JcrCMIS.CMIS_SYSTEM))
-               cmisSystem = root.addNode(JcrCMIS.CMIS_SYSTEM, JcrCMIS.NT_UNSTRUCTURED);
+               cmisSystem = root.addNode(JcrCMIS.CMIS_SYSTEM, JcrCMIS.CMIS_SYSTEM_NODETYPE);
             else
                cmisSystem = root.getNode(JcrCMIS.CMIS_SYSTEM);
+            
             if (!cmisSystem.hasNode(JcrCMIS.CMIS_RELATIONSHIPS))
             {
                cmisSystem.addNode(JcrCMIS.CMIS_RELATIONSHIPS, JcrCMIS.NT_UNSTRUCTURED);
@@ -295,7 +321,32 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
                   LOG.debug("CMIS Working Copies storage " + JcrCMIS.CMIS_WORKING_COPIES + " created.");
             }
             session.save();
+
+            Workspace workspace = session.getWorkspace();
+            try
+            {
+               EventListenerIterator it = workspace.getObservationManager().getRegisteredEventListeners();
+               boolean exist = false;
+               while (it.hasNext())
+               {
+                  EventListener one = it.nextEventListener();
+                  if (one.getClass() == UpdateListener.class)
+                     exist = true;
+               }
+
+               if (!exist)
+                  workspace.getObservationManager().addEventListener(
+                     new UpdateListener((ManageableRepository)repository, cmisRepositoryConfiguration.getWorkspace(),
+                        renditionProviders),
+                     Event.NODE_ADDED | Event.PROPERTY_ADDED | Event.PROPERTY_CHANGED | Event.PROPERTY_REMOVED, "/",
+                     true, null, new String[]{JcrCMIS.NT_FILE}, false);
+            }
+            catch (Exception ex)
+            {
+               LOG.error("Ubable to create event listener, " + ex.getMessage());
+            }
          }
+
       }
       catch (RepositoryConfigurationException rce)
       {

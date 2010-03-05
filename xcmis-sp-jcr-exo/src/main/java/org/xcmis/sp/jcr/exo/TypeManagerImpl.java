@@ -58,7 +58,7 @@ public abstract class TypeManagerImpl implements TypeManager
 {
 
    /** Constant for CMIS property prefix. */
-   private static final String CMIS_PROPERTY_NAME_PREFIX = "cmis:";
+   private static final String CMIS_PROPERTY_NAME_PREFIX = "xcmis:";
 
    /**
     * {@inheritDoc}
