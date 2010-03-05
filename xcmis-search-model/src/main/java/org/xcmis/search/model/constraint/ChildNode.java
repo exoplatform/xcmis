@@ -38,7 +38,7 @@ public class ChildNode extends Constraint
 
    private final SelectorName selectorName;
 
-   private final int hc;
+   private final int hcode;
 
    /**
     * Create a constraint requiring that the node identified by the selector is a child of the node reachable by the supplied
@@ -55,7 +55,7 @@ public class ChildNode extends Constraint
       this.selectorName = selectorName;
       this.parentPath = parentPath;
 
-      this.hc = new HashCodeBuilder().append(selectorName).append(parentPath).toHashCode();
+      this.hcode = new HashCodeBuilder().append(selectorName).append(parentPath).toHashCode();
    }
 
    /**
@@ -123,7 +123,7 @@ public class ChildNode extends Constraint
    @Override
    public int hashCode()
    {
-      return hc;
+      return hcode;
    }
 
    /**

@@ -18,6 +18,9 @@
  */
 package org.xcmis.search.model.constraint;
 
+import org.apache.commons.lang.Validate;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.xcmis.search.QueryObjectModelVisitor;
 import org.xcmis.search.VisitException;
 import org.xcmis.search.Visitors;
@@ -39,11 +42,20 @@ public class Comparison extends Constraint
 
    private final Operator operator;
 
+   private int hcode;
+
    public Comparison(DynamicOperand operand1, Operator operator, StaticOperand operand2)
    {
+      Validate.notNull(operand1, "The operand1 argument may not be null");
+      Validate.notNull(operator, "The operator argument may not be null");
+      Validate.notNull(operand2, "The selectorName operand2 may not be null");
       this.operand1 = operand1;
       this.operand2 = operand2;
       this.operator = operator;
+      this.hcode = new HashCodeBuilder()
+                   .append(operand1)
+                   .append(operator)
+                   .append(operand2).toHashCode();
    }
 
    /**
@@ -63,28 +75,26 @@ public class Comparison extends Constraint
    @Override
    public boolean equals(Object obj)
    {
+      if (obj == null)
+      {
+         return false;
+      }
       if (obj == this)
       {
          return true;
       }
-      if (obj instanceof Comparison)
+      if (obj.getClass() != getClass())
       {
-         Comparison that = (Comparison)obj;
-         if (!this.operator.equals(that.operator))
-         {
-            return false;
-         }
-         if (!this.operand1.equals(that.operand1))
-         {
-            return false;
-         }
-         if (!this.operand2.equals(that.operand2))
-         {
-            return false;
-         }
-         return true;
+         return false;
       }
-      return false;
+      Comparison rhs = (Comparison)obj;
+      return new EqualsBuilder()
+                    .appendSuper(super.equals(obj))
+                    .append(operand1, rhs.operand1)
+                    .append(operator, operator)
+                    .append(operand2, rhs.operand2)
+                    .isEquals();
+
    }
 
    /**
@@ -115,6 +125,17 @@ public class Comparison extends Constraint
    public final Operator getOperator()
    {
       return operator;
+   }
+
+   /**
+    * {@inheritDoc}
+    * 
+    * @see java.lang.Object#hashCode()
+    */
+   @Override
+   public int hashCode()
+   {
+      return hcode;
    }
 
    /**

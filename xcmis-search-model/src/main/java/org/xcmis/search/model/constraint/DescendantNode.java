@@ -18,6 +18,9 @@
  */
 package org.xcmis.search.model.constraint;
 
+import org.apache.commons.lang.Validate;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.xcmis.search.QueryObjectModelVisitor;
 import org.xcmis.search.VisitException;
 import org.xcmis.search.Visitors;
@@ -34,6 +37,8 @@ public class DescendantNode extends Constraint
 
    private final SelectorName selectorName;
 
+   private final int hcode;
+
    /**
     * Create a constraint requiring that the node identified by the selector is a descendant of the node reachable by the
     * supplied absolute path.
@@ -43,8 +48,13 @@ public class DescendantNode extends Constraint
     */
    public DescendantNode(SelectorName selectorName, String ancestorPath)
    {
+      Validate.notNull(selectorName, "The selectorName argument may not be null");
+      Validate.notNull(ancestorPath, "The ancestorPath argument may not be null");
       this.selectorName = selectorName;
       this.ancestorPath = ancestorPath;
+      this.hcode = new HashCodeBuilder()
+                       .append(selectorName)
+                       .append(ancestorPath).toHashCode();
    }
 
    /**
@@ -64,24 +74,24 @@ public class DescendantNode extends Constraint
    @Override
    public boolean equals(Object obj)
    {
+      if (obj == null)
+      {
+         return false;
+      }
       if (obj == this)
       {
          return true;
       }
-      if (obj instanceof DescendantNode)
+      if (obj.getClass() != getClass())
       {
-         DescendantNode that = (DescendantNode)obj;
-         if (!this.selectorName.equals(that.selectorName))
-         {
-            return false;
-         }
-         if (!this.ancestorPath.equals(that.ancestorPath))
-         {
-            return false;
-         }
-         return true;
+         return false;
       }
-      return false;
+      DescendantNode rhs = (DescendantNode)obj;
+      return new EqualsBuilder()
+                    .append(selectorName, rhs.selectorName)
+                    .append(ancestorPath, rhs.ancestorPath)
+                    .isEquals();
+
    }
 
    /**
@@ -112,7 +122,7 @@ public class DescendantNode extends Constraint
    @Override
    public int hashCode()
    {
-      return getSelectorName().hashCode();
+      return hcode;
    }
 
    /**
