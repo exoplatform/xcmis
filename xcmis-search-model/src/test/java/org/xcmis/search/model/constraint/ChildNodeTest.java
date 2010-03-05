@@ -24,52 +24,53 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
 import org.junit.Test;
+import org.xcmis.search.model.source.SelectorName;
 
 /**
  * @author <a href="mailto:Sergey.Kabashnyuk@exoplatform.org">Sergey Kabashnyuk</a>
  * @version $Id: exo-jboss-codetemplates.xml 34360 2009-07-22 23:58:59Z ksm $
  *
  */
-public class AndTest
+public class ChildNodeTest
 {
 
    /**
     * Test method for constructor
-    * {@link And#And(Constraint, Constraint)
+    * {@link ChildNode#ChildNode(org.xcmis.search.model.source.SelectorName, String)
     * 
     */
    @Test(expected = IllegalArgumentException.class)
-   public void testShouldNotCreateWithNullLeftConstraint()
+   public void testShouldNotCreateWithNullSelectorNameWhenSupplyingParentPath()
    {
-      Constraint constraint = mock(Constraint.class);
-      new And(null, constraint);
+
+      new ChildNode(null, "path");
    }
 
    /**
     * Test method for constructor
-    * {@link And#And(Constraint, Constraint)
+    * {@link ChildNode#ChildNode(org.xcmis.search.model.source.SelectorName, String)
     * 
     */
    @Test(expected = IllegalArgumentException.class)
-   public void testShouldNotCreateWithNullRightConstraint()
+   public void testShouldNotCreateWithNullParentPathWhenSupplyingSelectorName()
    {
-      Constraint constraint = mock(Constraint.class);
-      new And(constraint, null);
+      SelectorName selectorName = mock(SelectorName.class);
+      new ChildNode(selectorName, null);
    }
 
    /**
     * Test method for constructor
-    * {@link And#And(Constraint, Constraint)
+    * {@link ChildNode#ChildNode(org.xcmis.search.model.source.SelectorName, String)
     * 
     */
    @Test
    public void testShouldCreateWithNonNullParameters()
    {
-      Constraint left = mock(Constraint.class);
-      Constraint right = mock(Constraint.class);
-      And and = new And(left, right);
+      SelectorName selectorName = mock(SelectorName.class);
+      String parentPath = "parentPath";
+      ChildNode childNode = new ChildNode(selectorName, parentPath);
 
-      assertThat(and.getLeft(), is(sameInstance(left)));
-      assertThat(and.getRight(), is(sameInstance(right)));
+      assertThat(childNode.getSelectorName(), is(sameInstance(selectorName)));
+      assertThat(childNode.getParentPath(), is(sameInstance(parentPath)));
    }
 }

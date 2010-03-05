@@ -118,22 +118,22 @@ public class ChildNode extends Constraint
    /**
     * {@inheritDoc}
     * 
-    * @see java.lang.Object#toString()
-    */
-   @Override
-   public String toString()
-   {
-      return Visitors.readable(this);
-   }
-
-   /**
-    * {@inheritDoc}
-    * 
     * @see java.lang.Object#hashCode()
     */
    @Override
    public int hashCode()
    {
       return hc;
+   }
+
+   /**
+    * {@inheritDoc}
+    * 
+    * @see java.lang.Object#toString()
+    */
+   @Override
+   public String toString()
+   {
+      return Visitors.readable(this);
    }
 }

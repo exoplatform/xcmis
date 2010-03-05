@@ -81,7 +81,7 @@ public class ColumnTest
    }
 
    @Test
-   public void testShouldCreateWithActualParameters() throws Exception
+   public void testShouldCreateWithNonNullParameters() throws Exception
    {
       SelectorName selectorName = mock(SelectorName.class);
       String propertyName = "name";
