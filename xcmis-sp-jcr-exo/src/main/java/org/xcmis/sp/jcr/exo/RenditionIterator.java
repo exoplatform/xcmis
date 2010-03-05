@@ -59,6 +59,16 @@ class RenditionIterator implements ItemsIterator<CmisRenditionType>
       this.iter = iter;
       fetchNext();
    }
+   
+   /**
+    * Create RenditionIterator instance with elready defined element.
+    * 
+    * @param iter the node iterator
+    */
+   public RenditionIterator (CmisRenditionType type){
+      this.iter = null;
+      this.next = type;
+   }
 
    /**
     * {@inheritDoc}
@@ -113,6 +123,8 @@ class RenditionIterator implements ItemsIterator<CmisRenditionType>
    protected void fetchNext()
    {
       next = null;
+      if (iter == null) // iter can be null if rendition is created in runtime and not stored in JCR
+         return;
       while (next == null && iter.hasNext())
       {
          Node node = iter.nextNode();
