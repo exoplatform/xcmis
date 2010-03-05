@@ -30,7 +30,7 @@ import java.io.IOException;
  */
 public interface RenditionProvider
 {
-
+   
    /**
     * Create rendition for specified entry.
     * 
@@ -48,5 +48,12 @@ public interface RenditionProvider
     * @return set of supported media types
     */
    String[] getSupportedMediaType();
+   
+   /**
+    * Indicates whether rendition must be stored in JCR or generated in runtime.
+    * 
+    * @return boolean store in JCR
+    */
+   boolean canStoreRendition();
 
 }

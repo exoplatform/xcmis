@@ -40,8 +40,11 @@ import javax.imageio.ImageIO;
 public class PDFDocumentRenditionProvider implements RenditionProvider
 {
 
-   /** The String[] SUPPORTED_MIEDIA_TYPES. */
-   private static final String[] SUPPORTED_MIEDIA_TYPES = new String[]{"application/pdf"};
+   /** The String[] SUPPORTED_MEDIA_TYPES. */
+   private static final String[] SUPPORTED_MEDIA_TYPES = new String[]{"application/pdf"};
+   
+   /** Can store renditions. */
+   private static final boolean CAN_STORE_RENDITIONS=  false;
 
    // TODO configurable maxHeigth & maxWidth 
    /** The max height. */
@@ -95,7 +98,14 @@ public class PDFDocumentRenditionProvider implements RenditionProvider
     */
    public String[] getSupportedMediaType()
    {
-      return SUPPORTED_MIEDIA_TYPES;
+      return SUPPORTED_MEDIA_TYPES;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public boolean canStoreRendition() {
+      return CAN_STORE_RENDITIONS;
    }
 
 }
