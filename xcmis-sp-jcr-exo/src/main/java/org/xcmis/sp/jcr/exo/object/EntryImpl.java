@@ -898,13 +898,13 @@ public class EntryImpl extends TypeManagerImpl implements Entry
             catch (PathNotFoundException pnfe)
             {
                String msg = "Stream with id " + streamId + " does not exist.";
-               throw new InvalidArgumentException(msg);
+               return null;
             }
             Property renditionContent = rendition.getProperty(JcrCMIS.CMIS_RENDITION_STREAM);
             return new RenditionContentStream(//
                renditionContent.getStream(), //
                renditionContent.getLength(), //
-               null, //
+               rendition.getName(),
                rendition.getProperty(JcrCMIS.CMIS_RENDITION_MIME_TYPE).getString(), // 
                rendition.getProperty(JcrCMIS.CMIS_RENDITION_KIND).getString() //
             );
