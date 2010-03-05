@@ -25,24 +25,18 @@ import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
-import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.ObjectService;
 import org.xcmis.core.RepositoryService;
 import org.xcmis.core.VersioningService;
 import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.restatom.AtomCmisObject;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.RepositoryException;
 import org.xcmis.spi.object.CmisObject;
-import org.xcmis.spi.object.ObjectInfo;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Collection of all versions of document.
@@ -106,8 +100,6 @@ public class AllVersionsCollection extends CmisObjectCollection
 
       try
       {
-         Map<String, ObjectInfo> oiMap = new HashMap<String, ObjectInfo>();
-
          List<CmisObject> list =
             versioningService.getAllVersions(getRepositoryId(request), objectId, includeAllowableActions,
                propertyFilter, true);
