@@ -50,8 +50,6 @@ public class ImageRenditionProvider implements RenditionProvider
 
    /** The max width. */
    private int maxWidth = 100;
-   
-   private boolean canPersist = true;
 
    /**
     * {@inheritDoc}
