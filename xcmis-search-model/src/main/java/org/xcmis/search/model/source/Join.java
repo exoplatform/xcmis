@@ -72,7 +72,7 @@ public class Join extends Source
     * @param joinCondition
     *           - join condition.
     */
-   public Join(Source left, Source right, JoinType joinType, JoinCondition joinCondition)
+   public Join(Source left, JoinType joinType, Source right, JoinCondition joinCondition)
    {
       Validate.notNull(left, "The left argument may not be null");
       Validate.notNull(right, "The right argument may not be null");
@@ -170,7 +170,7 @@ public class Join extends Source
       return joinType;
    }
 
-  /**
+   /**
     * {@inheritDoc}
     * 
     * @see java.lang.Object#hashCode()

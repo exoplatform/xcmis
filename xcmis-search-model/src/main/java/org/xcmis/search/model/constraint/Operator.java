@@ -1,20 +1,20 @@
 /*
  * Copyright (C) 2009 eXo Platform SAS.
- *
- * This is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation; either version 2.1 of
- * the License, or (at your option) any later version.
- *
- * This software is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this software; if not, write to the Free
- * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
- * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ * 
+ * This is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either version 2.1 of the License, or (at your option)
+ * any later version.
+ * 
+ * This software is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this software; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA, or see the FSF
+ * site: http://www.fsf.org.
  */
 package org.xcmis.search.model.constraint;
 
@@ -26,10 +26,16 @@ import java.util.Map;
  * Comparison operator.
  */
 public enum Operator {
-   EQUAL_TO("="), GREATER_THAN(">"), GREATER_THAN_OR_EQUAL_TO(
-      ">="), LESS_THAN("<"), LESS_THAN_OR_EQUAL_TO("<="), LIKE("LIKE"), NOT_EQUAL_TO("!=");
+      EQUAL_TO("="),
+      GREATER_THAN(">"),
+      GREATER_THAN_OR_EQUAL_TO(">="),
+      LESS_THAN("<"),
+      LESS_THAN_OR_EQUAL_TO("<="),
+      LIKE("LIKE"),
+      NOT_EQUAL_TO("!=");
 
    private static final Map<String, Operator> OPERATORS_BY_SYMBOL;
+   
    static
    {
       Map<String, Operator> opsBySymbol = new HashMap<String, Operator>();
@@ -84,8 +90,10 @@ public enum Operator {
    }
 
    /**
-    * Determine whether this operator is one that is used to define a range of values: {@link #LESS_THAN <},
-    * {@link #GREATER_THAN >}, {@link #LESS_THAN_OR_EQUAL_TO <=}, or {@link #GREATER_THAN_OR_EQUAL_TO >=}.
+    * Determine whether this operator is one that is used to define a range of
+    * values: {@link #LESS_THAN <}, {@link #GREATER_THAN >},
+    * {@link #LESS_THAN_OR_EQUAL_TO <=}, or {@link #GREATER_THAN_OR_EQUAL_TO >=}
+    * .
     * 
     * @return true if this operator is a range operator, or false otherwise
     */
@@ -118,11 +126,15 @@ public enum Operator {
    }
 
    /**
-    * Attempt to find the Operator given a symbol. The matching is done independent of case.
+    * Attempt to find the Operator given a symbol. The matching is done
+    * independent of case.
     * 
-    * @param symbol the symbol
-    * @return the Operator having the supplied symbol, or null if there is no Operator with the supplied symbol
-    * @throws IllegalArgumentException if the symbol is null
+    * @param symbol
+    *           the symbol
+    * @return the Operator having the supplied symbol, or null if there is no
+    *         Operator with the supplied symbol
+    * @throws IllegalArgumentException
+    *            if the symbol is null
     */
    public static Operator forSymbol(String symbol)
    {

@@ -73,7 +73,7 @@ public class Selector extends Source
     * @throws IllegalArgumentException
     *            if the selector name is null
     */
-   protected Selector(SelectorName name, SelectorName alias)
+   public Selector(SelectorName name, SelectorName alias)
    {
       Validate.notNull(name, "The name argument may not be null");
 
