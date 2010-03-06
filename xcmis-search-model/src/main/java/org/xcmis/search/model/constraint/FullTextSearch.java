@@ -1,23 +1,26 @@
 /*
  * Copyright (C) 2009 eXo Platform SAS.
- *
- * This is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation; either version 2.1 of
- * the License, or (at your option) any later version.
- *
- * This software is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this software; if not, write to the Free
- * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
- * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ * 
+ * This is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either version 2.1 of the License, or (at your option)
+ * any later version.
+ * 
+ * This software is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this software; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA, or see the FSF
+ * site: http://www.fsf.org.
  */
 package org.xcmis.search.model.constraint;
 
+import org.apache.commons.lang.Validate;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.xcmis.search.QueryObjectModelVisitor;
 import org.xcmis.search.VisitException;
 import org.xcmis.search.Visitors;
@@ -25,8 +28,10 @@ import org.xcmis.search.model.operand.StaticOperand;
 import org.xcmis.search.model.source.SelectorName;
 
 /**
- * A constraint that evaluates to true only when a full-text search applied to the search scope results in positive findings. If a
- * property name is supplied, then the search is limited to the value(s) of the named property on the node(s) in the search scope.
+ * A constraint that evaluates to true only when a full-text search applied to
+ * the search scope results in positive findings. If a property name is
+ * supplied, then the search is limited to the value(s) of the named property on
+ * the node(s) in the search scope.
  */
 public class FullTextSearch extends Constraint
 {
@@ -38,7 +43,7 @@ public class FullTextSearch extends Constraint
    /**
     * Full-text search expression.
     */
-   private final StaticOperand fullTextSearchExpression;
+   private final String fullTextSearchExpression;
 
    /**
     * Name of the property.
@@ -50,18 +55,31 @@ public class FullTextSearch extends Constraint
     */
    private final SelectorName selectorName;
 
+   private final int hcode;
+
    /**
-    * Create a constraint defining a full-text search against the property values on node within the search scope.
+    * Create a constraint defining a full-text search against the property
+    * values on node within the search scope.
     * 
-    * @param selectorName the name of the node selector defining the search scope
-    * @param propertyName the name of the property to be searched; may be null if all property values are to be searched
-    * @param fullTextSearchExpression the search expression
+    * @param selectorName
+    *           the name of the node selector defining the search scope
+    * @param propertyName
+    *           the name of the property to be searched; may be null if all
+    *           property values are to be searched
+    * @param fullTextSearchExpression
+    *           the search expression
     */
-   public FullTextSearch(SelectorName selectorName, String propertyName, StaticOperand fullTextSearchExpression)
+   public FullTextSearch(SelectorName selectorName, String propertyName, String fullTextSearchExpression)
    {
+      Validate.notNull(selectorName, "The selectorName argument may not be null");
+      Validate.notEmpty(fullTextSearchExpression, " The fullTextSearchExpression argument may not be empty");
       this.selectorName = selectorName;
       this.propertyName = propertyName;
       this.fullTextSearchExpression = fullTextSearchExpression;
+      this.hcode = new HashCodeBuilder()
+                       .append(selectorName)
+                       .append(fullTextSearchExpression)
+                       .append(propertyName).toHashCode();
    }
 
    /**
@@ -81,28 +99,25 @@ public class FullTextSearch extends Constraint
    @Override
    public boolean equals(Object obj)
    {
+      if (obj == null)
+      {
+         return false;
+      }
       if (obj == this)
       {
          return true;
       }
-      if (obj instanceof FullTextSearch)
+      if (obj.getClass() != getClass())
       {
-         FullTextSearch that = (FullTextSearch)obj;
-         if (!this.selectorName.equals(that.selectorName))
-         {
-            return false;
-         }
-         if (!this.propertyName.equals(that.propertyName))
-         {
-            return false;
-         }
-         if (!this.fullTextSearchExpression.equals(that.fullTextSearchExpression))
-         {
-            return false;
-         }
-         return true;
+         return false;
       }
-      return false;
+      FullTextSearch rhs = (FullTextSearch)obj;
+      return new EqualsBuilder()
+                    .append(selectorName, rhs.selectorName)
+                    .append(fullTextSearchExpression, rhs.fullTextSearchExpression)
+                    .append(propertyName, rhs.propertyName)
+                    .isEquals();
+
    }
 
    /**
@@ -110,7 +125,7 @@ public class FullTextSearch extends Constraint
     * 
     * @return the search expression; never null
     */
-   public final StaticOperand getFullTextSearchExpression()
+   public final String getFullTextSearchExpression()
    {
       return fullTextSearchExpression;
    }
@@ -136,10 +151,21 @@ public class FullTextSearch extends Constraint
    }
 
    /**
-   * {@inheritDoc}
-   * 
-   * @see java.lang.Object#toString()
-   */
+    * {@inheritDoc}
+    * 
+    * @see java.lang.Object#hashCode()
+    */
+   @Override
+   public int hashCode()
+   {
+      return hcode;
+   }
+
+   /**
+    * {@inheritDoc}
+    * 
+    * @see java.lang.Object#toString()
+    */
    @Override
    public String toString()
    {

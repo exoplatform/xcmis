@@ -18,6 +18,8 @@
  */
 package org.xcmis.search.model.constraint;
 
+import org.apache.commons.lang.Validate;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.xcmis.search.QueryObjectModelVisitor;
 import org.xcmis.search.VisitException;
 import org.xcmis.search.Visitors;
@@ -32,6 +34,7 @@ public class Not extends Constraint
 
    private final Constraint constraint;
 
+
    /**
     * Create a constraint that negates another constraint.
     * 
@@ -40,6 +43,7 @@ public class Not extends Constraint
     */
    public Not(Constraint constraint)
    {
+      Validate.notNull(constraint, "The constraint argument may not be null");
       this.constraint = constraint;
    }
 
@@ -61,16 +65,21 @@ public class Not extends Constraint
    @Override
    public boolean equals(Object obj)
    {
+      if (obj == null)
+      {
+         return false;
+      }
       if (obj == this)
       {
          return true;
       }
-      if (obj instanceof Not)
+      if (obj.getClass() != getClass())
       {
-         Not that = (Not)obj;
-         return this.constraint.equals(that.constraint);
+         return false;
       }
-      return false;
+      Not rhs = (Not)obj;
+      
+      return this.constraint.equals(rhs.constraint);
    }
 
    /**
