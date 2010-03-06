@@ -22,9 +22,6 @@ package org.xcmis.search.model.source;
  * 
  * A representation of a selector  name.
  *
- * @author <a href="mailto:Sergey.Kabashnyuk@gmail.com">Sergey Kabashnyuk</a>
- * @version $Id: exo-jboss-codetemplates.xml 34360 2009-07-22 23:58:59Z aheritier $
- *
  */
 public class SelectorName
 {

@@ -18,6 +18,8 @@
  */
 package org.xcmis.search.model;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.xcmis.search.QueryObjectModelVisitor;
 import org.xcmis.search.VisitException;
 import org.xcmis.search.Visitors;
@@ -36,6 +38,8 @@ public class Limit implements QueryElement
 
    private final int rowLimit;
 
+   private final int hcode;
+
    /**
     * Create a limit on the number of rows.
     * 
@@ -46,9 +50,7 @@ public class Limit implements QueryElement
     */
    public Limit(int rowLimit)
    {
-
-      this.rowLimit = rowLimit;
-      this.offset = 0;
+      this(rowLimit, 0);
    }
 
    /**
@@ -66,6 +68,11 @@ public class Limit implements QueryElement
    {
       this.rowLimit = rowLimit;
       this.offset = offset;
+      this.hcode = new HashCodeBuilder()
+                   .append(rowLimit)
+                   .append(offset)
+                   .toHashCode();
+
    }
 
    /**
@@ -84,16 +91,23 @@ public class Limit implements QueryElement
    @Override
    public boolean equals(Object obj)
    {
+      if (obj == null)
+      {
+         return false;
+      }
       if (obj == this)
       {
          return true;
       }
-      if (obj instanceof Limit)
+      if (obj.getClass() != getClass())
       {
-         Limit that = (Limit)obj;
-         return this.offset == that.offset && this.rowLimit == that.rowLimit;
+         return false;
       }
-      return false;
+      Limit rhs = (Limit)obj;
+      return new EqualsBuilder()
+                    .append(rowLimit, rhs.rowLimit)
+                    .append(offset, rhs.offset)
+                    .isEquals();
    }
 
    /**
@@ -125,7 +139,7 @@ public class Limit implements QueryElement
    @Override
    public int hashCode()
    {
-      return rowLimit;
+      return hcode;
    }
 
    /**
