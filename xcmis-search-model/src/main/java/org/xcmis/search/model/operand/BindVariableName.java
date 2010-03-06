@@ -18,6 +18,8 @@
  */
 package org.xcmis.search.model.operand;
 
+import org.apache.commons.lang.Validate;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.xcmis.search.QueryObjectModelVisitor;
 import org.xcmis.search.VisitException;
 import org.xcmis.search.Visitors;
@@ -34,9 +36,16 @@ public class BindVariableName extends StaticOperand
 
    private final String variableName;
 
+   private final int hcode;
+
    public BindVariableName(String variableName)
    {
+      Validate.notNull(variableName, "The variableName argument may not be null");
       this.variableName = variableName;
+      this.hcode = new HashCodeBuilder()
+                   .append(variableName)
+                   .toHashCode();
+
    }
 
    /**
