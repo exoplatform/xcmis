@@ -1,4 +1,4 @@
-package org.xcmis.spi.object;
+package org.xcmis.spi.object.impl;
 
 import org.xcmis.core.CmisAccessControlListType;
 import org.xcmis.core.CmisAllowableActionsType;
@@ -7,6 +7,8 @@ import org.xcmis.core.CmisListOfIdsType;
 import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.CmisPropertiesType;
 import org.xcmis.core.CmisRenditionType;
+import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.object.ObjectInfo;
 
 import java.util.ArrayList;
 import java.util.List;

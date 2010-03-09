@@ -17,37 +17,36 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.xcmis.spi.object;
+package org.xcmis.spi.data;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
- * Common iterator for CMIS items.
- * 
- * @param <T>
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id$
- * @deprecated
  */
-public interface ItemsIterator<T> extends Iterator<T>
+public interface ContentStream
 {
+   /**
+    * @return content stream file name
+    */
+   String getFileName();
 
    /**
-    * Skip specified number of element in collection.
-    * 
-    * @param skip the number of items to skip
-    * @throws NoSuchElementException if skipped past the last item in the
-    *           iterator
+    * @return content stream media type
     */
-   void skip(long skip) throws NoSuchElementException;
+   String getMediaType();
 
    /**
-    * Get total number of items in iterator. If not able determine number
-    * of items then -1 will be returned.
-    * 
-    * @return number of items or -1
+    * @return byte stream
+    * @throws IOException if i/o error occurs
     */
-   long size();
+   InputStream getStream() throws IOException;
+
+   /**
+    * @return content stream length
+    */
+   long length();
 
 }

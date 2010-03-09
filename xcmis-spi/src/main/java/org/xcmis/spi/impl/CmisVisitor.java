@@ -19,6 +19,8 @@
 
 package org.xcmis.spi.impl;
 
+import org.xcmis.spi.data.ObjectData;
+
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
@@ -26,8 +28,6 @@ package org.xcmis.spi.impl;
 public interface CmisVisitor
 {
 
-   void visit(CmisObjectIdentifier object);
-   
-   void visit(CmisTypeIdentifier type);
+   void visit(ObjectData object);
    
 }

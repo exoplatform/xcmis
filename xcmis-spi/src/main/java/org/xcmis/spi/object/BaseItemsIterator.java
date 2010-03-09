@@ -29,6 +29,7 @@ import java.util.NoSuchElementException;
  * @version $Id$
  * 
  * @param <T> 
+ * @deprecated
  */
 public class BaseItemsIterator<T> implements ItemsIterator<T>
 {

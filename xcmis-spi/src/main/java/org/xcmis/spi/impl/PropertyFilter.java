@@ -22,7 +22,6 @@ package org.xcmis.spi.impl;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.FilterNotValidException;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -37,25 +36,11 @@ public class PropertyFilter
    /** Property filter for all properties. */
    public static final String ALL_FILTER = CMIS.WILDCARD;
 
-   /** Default property filter. */
-   public static final PropertyFilter DEFAULT;
-
    /** Property filter for all properties. */
    public static final PropertyFilter ALL;
 
    static
    {
-      Set<String> names = new HashSet<String>();
-      names.add(CMIS.OBJECT_ID);
-      names.add(CMIS.NAME);
-      names.add(CMIS.OBJECT_TYPE_ID);
-      names.add(CMIS.BASE_TYPE_ID);
-      names.add(CMIS.CREATION_DATE);
-      names.add(CMIS.CREATED_BY);
-      names.add(CMIS.LAST_MODIFICATION_DATE);
-      names.add(CMIS.LAST_MODIFIED_BY);
-      DEFAULT = new PropertyFilter();
-      DEFAULT.propertyNames = Collections.unmodifiableSet(names);
       ALL = new PropertyFilter();
       ALL.retrievalAllProperties = true;
    }

@@ -28,6 +28,7 @@ import org.xcmis.spi.object.ItemsIterator;
  * 
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id$
+ * @deprecated
  */
 public interface QueryHandler
 {

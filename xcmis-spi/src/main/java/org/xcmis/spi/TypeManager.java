@@ -26,6 +26,7 @@ import org.xcmis.core.CmisTypeDefinitionType;
  * 
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id$
+ * @deprecated
  */
 public interface TypeManager
 {

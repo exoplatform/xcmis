@@ -17,37 +17,21 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.xcmis.spi.object;
+package org.xcmis.spi;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import org.xcmis.core.EnumTypeOfChanges;
 
 /**
- * Common iterator for CMIS items.
- * 
- * @param <T>
- * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
+ * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
- * @deprecated
  */
-public interface ItemsIterator<T> extends Iterator<T>
+public interface ChangeEvent
 {
 
-   /**
-    * Skip specified number of element in collection.
-    * 
-    * @param skip the number of items to skip
-    * @throws NoSuchElementException if skipped past the last item in the
-    *           iterator
-    */
-   void skip(long skip) throws NoSuchElementException;
-
-   /**
-    * Get total number of items in iterator. If not able determine number
-    * of items then -1 will be returned.
-    * 
-    * @return number of items or -1
-    */
-   long size();
-
+   String getLogToken();
+   
+   String getObjectId();
+   
+   EnumTypeOfChanges getType();
+   
 }

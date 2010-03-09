@@ -1,6 +1,8 @@
-package org.xcmis.spi.object;
+package org.xcmis.spi.object.impl;
 
 import org.xcmis.messaging.CmisObjectInFolderListType;
+import org.xcmis.spi.object.CmisObjectInFolder;
+import org.xcmis.spi.object.CmisObjectInFolderList;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

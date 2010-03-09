@@ -19,36 +19,123 @@
 
 package org.xcmis.spi;
 
-import org.exoplatform.services.security.ConversationState;
+import org.xcmis.core.CmisAccessControlListType;
+import org.xcmis.core.CmisAllowableActionsType;
+import org.xcmis.core.CmisPropertiesType;
+import org.xcmis.core.CmisRenditionType;
+import org.xcmis.core.CmisRepositoryInfoType;
+import org.xcmis.core.CmisTypeDefinitionType;
+import org.xcmis.core.EnumUnfileObject;
+import org.xcmis.core.EnumVersioningState;
+import org.xcmis.spi.data.ContentStream;
+import org.xcmis.spi.data.ObjectData;
+import org.xcmis.spi.query.Query;
+import org.xcmis.spi.query.Result;
 
-import javax.security.auth.login.LoginException;
+import java.io.IOException;
+import java.util.Collection;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-public interface Storage
+public interface Storage extends org.xcmis.spi.impl.TypeManager
 {
 
-   /**
-    * Create new connection for user that has specified
-    * <code>conversation</code>.
-    * 
-    * @param conversation user's state that contains user identity and some
-    *        optional context specific attributes
-    * @return connection
-    */
-   Connection login(ConversationState conversation);
+   CmisAllowableActionsType calculateAllowableActions(ObjectData object) throws CmisRuntimeException;
+
+   //
+   void cancelCheckout(String versionSeriesId) throws StorageException, CmisRuntimeException;
+
+   ObjectData checkin(ObjectData document, boolean major, CmisPropertiesType properties, ContentStream content,
+      String checkinComment, CmisAccessControlListType addACL, CmisAccessControlListType removeACL,
+      Collection<String> policies) throws IOException, StorageException, CmisRuntimeException;
+
+   ObjectData checkout(ObjectData document) throws VersioningException, StorageException, CmisRuntimeException;
+
+   Collection<ObjectData> getVersions(String versionSeriesId) throws ObjectNotFoundException;
+
+   ItemsIterator<ObjectData> getCheckedOutDocuments(ObjectData folder, String orderBy) throws CmisRuntimeException;
+
+   //
+   ObjectData createDocument(ObjectData folder, CmisTypeDefinitionType typeDefinition, CmisPropertiesType properties,
+      ContentStream content, CmisAccessControlListType addAcl, CmisAccessControlListType removeACEs,
+      Collection<String> policies, EnumVersioningState versioningState) throws StorageException,
+      NameConstraintViolationException, CmisRuntimeException;
+
+   ObjectData createDocumentFromSource(ObjectData source, ObjectData folder, CmisPropertiesType properties,
+      CmisAccessControlListType addAcl, CmisAccessControlListType removeAcl, Collection<String> policies,
+      EnumVersioningState versioningState) throws StorageException, NameConstraintViolationException,
+      CmisRuntimeException;
+
+   ObjectData createFolder(ObjectData folder, CmisTypeDefinitionType typeDefinition, CmisPropertiesType properties,
+      CmisAccessControlListType addAcl, CmisAccessControlListType removeAcl, Collection<String> policies)
+      throws StorageException, NameConstraintViolationException, CmisRuntimeException;
+
+   ObjectData createPolicy(ObjectData folder, CmisTypeDefinitionType typeDefinition, CmisPropertiesType properties,
+      CmisAccessControlListType addAcl, CmisAccessControlListType removeAcl, Collection<String> policies)
+      throws StorageException, NameConstraintViolationException, CmisRuntimeException;
+
+   ObjectData createRelationship(CmisTypeDefinitionType typeDefinition, ObjectData source, ObjectData target,
+      CmisPropertiesType properties, CmisAccessControlListType addAcl, CmisAccessControlListType removeAcl,
+      Collection<String> policies) throws StorageException, NameConstraintViolationException, CmisRuntimeException;
+
+   //
+   void deleteObject(ObjectData object, boolean deleteAllVersion) throws UpdateConflictException, StorageException,
+      CmisRuntimeException;
+
+   Collection<ObjectData> deleteTree(ObjectData folder, boolean deleteAllVersions, EnumUnfileObject unfileObject,
+      boolean continueOnFailure) throws UpdateConflictException, StorageException, CmisRuntimeException;
+
+   //
+   ItemsIterator<ChangeEvent> getChangeLog(String changeLogToken) throws ConstraintException, CmisRuntimeException;
 
    /**
-    * Connect to storage by using plain user name and password.
+    * Handle specified SQL query.
     * 
-    * @param user user name
-    * @param password user password
-    * @return connection
-    * @throws LoginException if parameters <code>user</code> or
-    *         <code>password</code> in invalid
+    * @param query SQL query
+    * @return set of query results
+    * @throws InvalidArgumentException if specified <code>query</code> is
+    *         invalid
+    * @throws CmisRuntimeException if any other CMIS repository errors
     */
-   Connection login(String user, String password) throws LoginException;
+   ItemsIterator<Result> query(Query query) throws InvalidArgumentException, CmisRuntimeException;
+
+   //
+   ObjectData getObject(String objectId) throws CmisRuntimeException;
+
+   ObjectData getObjectByPath(String path) throws CmisRuntimeException;
+
+   ItemsIterator<ObjectData> getChildren(ObjectData folder, String orderBy) throws CmisRuntimeException;
+
+   //
+   void addObjectToFolder(ObjectData object, ObjectData folder, boolean allVersions) throws CmisRuntimeException;
+
+   void removeObjectFromFolder(ObjectData object, ObjectData folder) throws CmisRuntimeException;
+
+   void moveObject(ObjectData object, ObjectData target, ObjectData source) throws UpdateConflictException,
+      StorageException, CmisRuntimeException;
+
+   //
+   ContentStream getContentStream(ObjectData objectData, String streamId, long offset, long length);
+
+   void setContentStream(ObjectData document, ContentStream content) throws IOException, StorageException,
+      CmisRuntimeException;
+
+   void deleteContentStream(ObjectData document) throws StorageException, CmisRuntimeException;
+   
+   ItemsIterator<CmisRenditionType> getRenditions(ObjectData object) throws CmisRuntimeException;
+
+   boolean hasContent(ObjectData documentData);
+
+   //
+   void saveObject(ObjectData object) throws StorageException;
+
+   /**
+    * Get description of storage and its capabilities.
+    * 
+    * @return storage description
+    */
+   CmisRepositoryInfoType getRepositoryInfo() throws CmisRuntimeException;
 
 }

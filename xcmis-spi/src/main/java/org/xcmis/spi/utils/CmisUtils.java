@@ -19,13 +19,22 @@
 
 package org.xcmis.spi.utils;
 
+import org.xcmis.core.CmisAccessControlEntryType;
+import org.xcmis.core.CmisAccessControlListType;
+import org.xcmis.core.CmisAccessControlPrincipalType;
 import org.xcmis.core.CmisPropertiesType;
 import org.xcmis.core.CmisProperty;
 import org.xcmis.core.CmisPropertyId;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.data.ObjectData;
 
 import java.util.Calendar;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -37,12 +46,31 @@ import javax.xml.datatype.XMLGregorianCalendar;
  */
 public final class CmisUtils
 {
-
-   /**
-    * Private constructor.
-    */
-   private CmisUtils()
+   public static final Comparator<ObjectData> versionComparator = new Comparator<ObjectData>()
    {
+
+      public int compare(ObjectData object1, ObjectData object2)
+      {
+         Calendar c1 = object1.getDate(CMIS.LAST_MODIFICATION_DATE);
+         Calendar c2 = object2.getDate(CMIS.LAST_MODIFICATION_DATE);
+         return c2.compareTo(c1);
+      }
+
+   };
+
+   public static CmisAccessControlListType createAclFromPermissionMap(Map<String, Set<String>> permissions)
+   {
+      CmisAccessControlListType acl = new CmisAccessControlListType();
+      for (Map.Entry<String, Set<String>> e : permissions.entrySet())
+      {
+         CmisAccessControlEntryType ace = new CmisAccessControlEntryType();
+         CmisAccessControlPrincipalType principal = new CmisAccessControlPrincipalType();
+         principal.setPrincipalId(e.getKey());
+         ace.getPermission().addAll(e.getValue());
+         ace.setPrincipal(principal);
+         acl.getPermission().add(ace);
+      }
+      return acl;
    }
 
    /**
@@ -98,6 +126,65 @@ public final class CmisUtils
             return prop;
       }
       return null;
+   }
+
+   public static CmisAccessControlListType mergeAcls(CmisAccessControlListType existedAcl,
+      CmisAccessControlListType addAcl, CmisAccessControlListType removeAcl)
+   {
+      Map<String, Set<String>> cache = new HashMap<String, Set<String>>();
+      addAclToPermissionMap(cache, existedAcl);
+      addAclToPermissionMap(cache, addAcl);
+      removeAclFromPermissionMap(cache, removeAcl);
+      return createAclFromPermissionMap(cache);
+   }
+
+   private static void addAclToPermissionMap(Map<String, Set<String>> map, CmisAccessControlListType acl)
+   {
+      if (acl != null)
+      {
+         for (CmisAccessControlEntryType ace : acl.getPermission())
+         {
+            String principal = ace.getPrincipal() != null ? ace.getPrincipal().getPrincipalId() : null;
+            if (principal == null)
+               continue;
+
+            Set<String> permissions = map.get(principal);
+            if (permissions == null)
+            {
+               permissions = new HashSet<String>();
+               map.put(principal, permissions);
+            }
+            permissions.addAll(ace.getPermission());
+         }
+      }
+   }
+
+   private static void removeAclFromPermissionMap(Map<String, Set<String>> map, CmisAccessControlListType acl)
+   {
+      if (acl != null)
+      {
+         for (CmisAccessControlEntryType ace : acl.getPermission())
+         {
+            String principal = ace.getPrincipal() != null ? ace.getPrincipal().getPrincipalId() : null;
+            if (principal == null)
+               continue;
+
+            Set<String> permissions = map.get(principal);
+            if (permissions != null)
+            {
+               permissions.removeAll(ace.getPermission());
+               if (permissions.size() == 0)
+                  map.remove(principal);
+            }
+         }
+      }
+   }
+
+   /**
+    * Not instantiable.
+    */
+   private CmisUtils()
+   {
    }
 
 }

@@ -1,6 +1,8 @@
-package org.xcmis.spi.object;
+package org.xcmis.spi.object.impl;
 
 import org.xcmis.messaging.CmisObjectParentsType;
+import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.object.CmisObjectParents;
 
 /**
  * 

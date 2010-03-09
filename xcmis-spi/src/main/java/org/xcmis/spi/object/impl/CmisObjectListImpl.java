@@ -1,6 +1,8 @@
-package org.xcmis.spi.object;
+package org.xcmis.spi.object.impl;
 
 import org.xcmis.messaging.CmisObjectListType;
+import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.object.CmisObjectList;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

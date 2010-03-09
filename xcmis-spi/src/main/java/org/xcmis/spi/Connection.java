@@ -21,23 +21,22 @@ package org.xcmis.spi;
 
 import org.xcmis.core.CmisAccessControlListType;
 import org.xcmis.core.CmisAllowableActionsType;
-import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.CmisPropertiesType;
 import org.xcmis.core.CmisRenditionType;
-import org.xcmis.core.CmisRepositoryInfoType;
 import org.xcmis.core.CmisTypeDefinitionType;
 import org.xcmis.core.EnumACLPropagation;
 import org.xcmis.core.EnumIncludeRelationships;
 import org.xcmis.core.EnumRelationshipDirection;
 import org.xcmis.core.EnumUnfileObject;
 import org.xcmis.core.EnumVersioningState;
-import org.xcmis.messaging.CmisObjectInFolderContainerType;
-import org.xcmis.messaging.CmisObjectInFolderListType;
-import org.xcmis.messaging.CmisObjectListType;
-import org.xcmis.messaging.CmisObjectParentsType;
 import org.xcmis.messaging.CmisTypeContainer;
 import org.xcmis.messaging.CmisTypeDefinitionListType;
-import org.xcmis.spi.object.ContentStream;
+import org.xcmis.spi.data.ContentStream;
+import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.object.CmisObjectInFolderContainer;
+import org.xcmis.spi.object.CmisObjectInFolderList;
+import org.xcmis.spi.object.CmisObjectList;
+import org.xcmis.spi.object.CmisObjectParents;
 
 import java.io.IOException;
 import java.util.List;
@@ -107,10 +106,14 @@ public interface Connection
     * crawlers or other applications that need to efficiently understand what
     * has changed in the storage.
     * 
-    * @param changeLogToken if specified, then change event corresponded to the
-    *        value of the specified change log token will be returned as the
-    *        first result in the output. If not specified, then will be returned
-    *        the first change event recorded in the change log
+    * @param changeLogToken if {@link ChangeLogTokenHolder#getToken()} return
+    *        value other than <code>null</code>, then change event corresponded
+    *        to the value of the specified change log token will be returned as
+    *        the first result in the output. If not specified, then will be
+    *        returned the first change event recorded in the change log. When
+    *        set of changes passed is returned then <code>changeLogToken</code>
+    *        must contains log token corresponded to the last change event. Then
+    *        it may be used by client for getting next set on change events.
     * @param includeProperties if <code>true</code>, then the result includes
     *        the updated property values for 'updated' change events. If
     *        <code>false</code>, then the result will not include the updated
@@ -126,7 +129,6 @@ public interface Connection
     * @param includeAcl if <code>true</code>, then include ACL applied to the
     *        object referenced in each change event
     * @param maxItems max items in result
-    * @param skipCount skip items
     * @return content changes
     * @throws ConstraintException if the event corresponding to the change log
     *         token provided as an input parameter is no longer available in the
@@ -136,8 +138,8 @@ public interface Connection
     *         object's property definition
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObjectListType getContentChanges(String changeLogToken, boolean includeProperties, String propertyFilter,
-      boolean includePolicyIDs, boolean includeAcl, int maxItems, int skipCount) throws ConstraintException,
+   CmisObjectList getContentChanges(ChangeLogTokenHolder changeLogToken, boolean includeProperties,
+      String propertyFilter, boolean includePolicyIDs, boolean includeAcl, int maxItems) throws ConstraintException,
       FilterNotValidException, CmisRuntimeException;
 
    /**
@@ -187,7 +189,7 @@ public interface Connection
     *         invalid syntax or contains unknown rendition kinds or mimetypes
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObjectListType query(String statement, boolean searchAllVersions, boolean includeAllowableActions,
+   CmisObjectList query(String statement, boolean searchAllVersions, boolean includeAllowableActions,
       EnumIncludeRelationships includeRelationships, String renditionFilter, int maxItems, int skipCount)
       throws FilterNotValidException, CmisRuntimeException;
 
@@ -284,7 +286,7 @@ public interface Connection
     *         invalid syntax or contains at least one unknown rendition
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObjectListType getCheckedOutDocs(String folderId, boolean includeAllowableActions,
+   CmisObjectList getCheckedOutDocs(String folderId, boolean includeAllowableActions,
       EnumIncludeRelationships includeRelationships, String propertyFilter, String renditionFilter, String orderBy,
       int maxItems, int skipCount) throws ObjectNotFoundException, InvalidArgumentException, FilterNotValidException,
       CmisRuntimeException;
@@ -346,7 +348,7 @@ public interface Connection
     *         invalid syntax or contains at least one unknown rendition
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObjectInFolderListType getChildren(String folderId, boolean includeAllowableActions,
+   CmisObjectInFolderList getChildren(String folderId, boolean includeAllowableActions,
       EnumIncludeRelationships includeRelationships, boolean includePathSegments, String propertyFilter,
       String renditionFilter, String orderBy, int maxItems, int skipCount) throws ObjectNotFoundException,
       InvalidArgumentException, FilterNotValidException, CmisRuntimeException;
@@ -370,7 +372,7 @@ public interface Connection
     *         object's property definition
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObjectType getFolderParent(String folderId, String propertyFilter) throws ObjectNotFoundException,
+   CmisObject getFolderParent(String folderId, String propertyFilter) throws ObjectNotFoundException,
       InvalidArgumentException, FilterNotValidException, CmisRuntimeException;
 
    /**
@@ -425,7 +427,7 @@ public interface Connection
     *         invalid syntax or contains at least one unknown rendition
     * @throws CmisRuntimeException if any others errors occur
     */
-   List<CmisObjectParentsType> getObjectParents(String objectId, boolean includeAllowableActions,
+   List<CmisObjectParents> getObjectParents(String objectId, boolean includeAllowableActions,
       EnumIncludeRelationships includeRelationships, boolean includeRelativePathSegment, String propertyFilter,
       String renditionFilter) throws ObjectNotFoundException, ConstraintException, FilterNotValidException,
       CmisRuntimeException;
@@ -484,7 +486,7 @@ public interface Connection
     *         invalid syntax or contains at least one unknown rendition
     * @throws CmisRuntimeException if any others errors occur
     */
-   List<CmisObjectInFolderContainerType> getDescendants(String folderId, int depth, boolean includeAllowableActions,
+   List<CmisObjectInFolderContainer> getDescendants(String folderId, int depth, boolean includeAllowableActions,
       EnumIncludeRelationships includeRelationships, boolean includePathSegments, String propertyFilter,
       String renditionFilter) throws ObjectNotFoundException, InvalidArgumentException, FilterNotValidException,
       CmisRuntimeException;
@@ -543,7 +545,7 @@ public interface Connection
     *         invalid syntax or contains at least one unknown rendition
     * @throws CmisRuntimeException if any others errors occur
     */
-   List<CmisObjectInFolderContainerType> getFolderTree(String folderId, int depth, boolean includeAllowableActions,
+   List<CmisObjectInFolderContainer> getFolderTree(String folderId, int depth, boolean includeAllowableActions,
       EnumIncludeRelationships includeRelationships, boolean includePathSegments, String propertyFilter,
       String renditionFilter) throws ObjectNotFoundException, InvalidArgumentException, FilterNotValidException,
       CmisRuntimeException;
@@ -618,7 +620,7 @@ public interface Connection
     *         to storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObjectType createDocument(String folderId, CmisPropertiesType properties, ContentStream content,
+   CmisObject createDocument(String folderId, CmisPropertiesType properties, ContentStream content,
       CmisAccessControlListType addAcl, CmisAccessControlListType removeAcl, List<String> policies,
       EnumVersioningState versioningState) throws ObjectNotFoundException, ConstraintException,
       InvalidArgumentException, StreamNotSupportedException, NameConstraintViolationException, IOException,
@@ -680,7 +682,7 @@ public interface Connection
     *         to storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObjectType createDocumentFromSource(String sourceId, String folderId, CmisPropertiesType properties,
+   CmisObject createDocumentFromSource(String sourceId, String folderId, CmisPropertiesType properties,
       CmisAccessControlListType addAcl, CmisAccessControlListType removeAcl, List<String> policies,
       EnumVersioningState versioningState) throws ObjectNotFoundException, ConstraintException,
       InvalidArgumentException, NameConstraintViolationException, StorageException, CmisRuntimeException;
@@ -731,7 +733,7 @@ public interface Connection
     *         storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObjectType createFolder(String folderId, CmisPropertiesType properties, CmisAccessControlListType addAcl,
+   CmisObject createFolder(String folderId, CmisPropertiesType properties, CmisAccessControlListType addAcl,
       CmisAccessControlListType removeAcl, List<String> policies) throws ObjectNotFoundException, ConstraintException,
       InvalidArgumentException, NameConstraintViolationException, StorageException, CmisRuntimeException;
 
@@ -782,7 +784,7 @@ public interface Connection
     *         storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObjectType createPolicy(String folderId, CmisPropertiesType properties, CmisAccessControlListType addAcl,
+   CmisObject createPolicy(String folderId, CmisPropertiesType properties, CmisAccessControlListType addAcl,
       CmisAccessControlListType removeAcl, List<String> policies) throws ObjectNotFoundException, ConstraintException,
       InvalidArgumentException, NameConstraintViolationException, StorageException, CmisRuntimeException;
 
@@ -829,7 +831,7 @@ public interface Connection
     *         cause to storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObjectType createRelationship(CmisPropertiesType properties, CmisAccessControlListType addAcl,
+   CmisObject createRelationship(CmisPropertiesType properties, CmisAccessControlListType addAcl,
       CmisAccessControlListType removeAcl, List<String> policies) throws ObjectNotFoundException, ConstraintException,
       NameConstraintViolationException, StorageException, CmisRuntimeException;
 
@@ -905,8 +907,9 @@ public interface Connection
     *         internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   List<String> deleteTree(String folderId, boolean deleteAllVersions, EnumUnfileObject unfileObject, boolean continueOnFailure)
-      throws ObjectNotFoundException, UpdateConflictException, StorageException, CmisRuntimeException;
+   List<String> deleteTree(String folderId, boolean deleteAllVersions, EnumUnfileObject unfileObject,
+      boolean continueOnFailure) throws ObjectNotFoundException, UpdateConflictException, StorageException,
+      CmisRuntimeException;
 
    /**
     * Get the list of allowable actions for an Object.
@@ -988,7 +991,7 @@ public interface Connection
     *         invalid syntax or contains at least one unknown rendition
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObjectType getObject(String objectId, boolean includeAllowableActions,
+   CmisObject getObject(String objectId, boolean includeAllowableActions,
       EnumIncludeRelationships includeRelationships, boolean includePolicyIDs, boolean includeAcl,
       String propertyFilter, String renditionFilter) throws ObjectNotFoundException, FilterNotValidException,
       CmisRuntimeException;
@@ -1041,7 +1044,7 @@ public interface Connection
     *         invalid syntax or contains at least one unknown rendition
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObjectType getObjectByPath(String path, boolean includeAllowableActions,
+   CmisObject getObjectByPath(String path, boolean includeAllowableActions,
       EnumIncludeRelationships includeRelationships, boolean includePolicyIDs, boolean includeAcl,
       String propertyFilter, String renditionFilter) throws ObjectNotFoundException, FilterNotValidException,
       CmisRuntimeException;
@@ -1131,9 +1134,8 @@ public interface Connection
     *         to storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObjectType moveObject(String objectId, String targetFolderId, String sourceFolderId)
-      throws ObjectNotFoundException, ConstraintException, InvalidArgumentException, UpdateConflictException,
-      StorageException, CmisRuntimeException;
+   CmisObject moveObject(String objectId, String targetFolderId, String sourceFolderId) throws ObjectNotFoundException,
+      ConstraintException, InvalidArgumentException, UpdateConflictException, StorageException, CmisRuntimeException;
 
    /**
     * Sets the content stream for the specified Document object.
@@ -1189,7 +1191,7 @@ public interface Connection
     *         changes) cause to storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObjectType updateProperties(String objectId, String changeToken, CmisPropertiesType properties)
+   CmisObject updateProperties(String objectId, String changeToken, CmisPropertiesType properties)
       throws ObjectNotFoundException, ConstraintException, NameConstraintViolationException, UpdateConflictException,
       StorageException, CmisRuntimeException;
 
@@ -1226,7 +1228,7 @@ public interface Connection
     *         object's property definition
     * @throws CmisRuntimeException if any others errors occur
     */
-   List<CmisObjectType> getAppliedPolicies(String objectId, String propertyFilter) throws ObjectNotFoundException,
+   List<CmisObject> getAppliedPolicies(String objectId, String propertyFilter) throws ObjectNotFoundException,
       FilterNotValidException, CmisRuntimeException;
 
    /**
@@ -1268,7 +1270,7 @@ public interface Connection
     *         object's property definition
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObjectListType getObjectRelationships(String objectId, EnumRelationshipDirection direction, String typeId,
+   CmisObjectList getObjectRelationships(String objectId, EnumRelationshipDirection direction, String typeId,
       boolean includeSubRelationshipTypes, boolean includeAllowableActions, String propertyFilter, int maxItems,
       int skipCount) throws FilterNotValidException, ObjectNotFoundException, CmisRuntimeException;
 
@@ -1288,7 +1290,7 @@ public interface Connection
     *         cause to storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObjectType checkout(String documentId) throws ConstraintException, UpdateConflictException, VersioningException,
+   CmisObject checkout(String documentId) throws ConstraintException, UpdateConflictException, VersioningException,
       StorageException, CmisRuntimeException;
 
    /**
@@ -1339,7 +1341,7 @@ public interface Connection
     *         storage cause to its internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObjectType checkin(String documentId, boolean major, CmisPropertiesType properties, ContentStream content,
+   CmisObject checkin(String documentId, boolean major, CmisPropertiesType properties, ContentStream content,
       String checkinComment, CmisAccessControlListType addACL, CmisAccessControlListType removeACL,
       List<String> policies) throws ConstraintException, UpdateConflictException, StreamNotSupportedException,
       IOException, StorageException;
@@ -1354,7 +1356,8 @@ public interface Connection
     *        Names. A wildcard '*' is supported and minds return all properties.
     *        If empty string or <code>null</code> provided than storage MAY
     *        return storage specific set of properties
-    * @return documents in the specified <code>versionSeriesId</code>
+    * @return documents in the specified <code>versionSeriesId</code>sorted by
+    *         'cmis:creationDate' descending
     * @throws ObjectNotFoundException if object with specified id
     *         <code>versionSeriesId</code> does not exist
     * @throws FilterNotValidException if <code>propertyFilter</code> has invalid
@@ -1362,7 +1365,7 @@ public interface Connection
     *         object's property definition
     * @throws CmisRuntimeException if any others errors occur
     */
-   List<CmisObjectType> getAllVersions(String versionSeriesId, boolean includeAllowableActions, String propertyFilter)
+   List<CmisObject> getAllVersions(String versionSeriesId, boolean includeAllowableActions, String propertyFilter)
       throws ObjectNotFoundException, FilterNotValidException, CmisRuntimeException;
 
    /**
@@ -1421,7 +1424,7 @@ public interface Connection
     *         invalid syntax or contains at least one unknown rendition
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObjectType getObjectOfLatestVersion(String versionSeriesId, boolean major, boolean includeAllowableActions,
+   CmisObject getObjectOfLatestVersion(String versionSeriesId, boolean major, boolean includeAllowableActions,
       EnumIncludeRelationships includeRelationships, boolean includePolicyIDs, boolean includeAcl,
       String propertyFilter, String renditionFilter) throws ObjectNotFoundException, FilterNotValidException,
       CmisRuntimeException;
@@ -1477,7 +1480,7 @@ public interface Connection
    void addType(CmisTypeDefinitionType type) throws StorageException, CmisRuntimeException;
 
    /**
-    * Iterator of object types.
+    * Set of object types.
     * 
     * @param typeId the type id, if not <code>null</code> then return only
     *        specified Object Type and its direct descendant. If
@@ -1548,15 +1551,6 @@ public interface Connection
     */
    void removeType(String typeId) throws TypeNotFoundException, ConstraintException, StorageException,
       CmisRuntimeException;
-
-   // ---
-
-   /**
-    * Get description of storage and its capabilities.
-    * 
-    * @return storage description
-    */
-   CmisRepositoryInfoType getStorageInfo() throws CmisRuntimeException;
 
    /**
     * Close this connection.

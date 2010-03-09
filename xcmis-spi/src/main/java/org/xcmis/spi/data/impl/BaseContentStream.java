@@ -17,8 +17,10 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.xcmis.spi.object;
+package org.xcmis.spi.data.impl;
 
+
+import org.xcmis.spi.data.ContentStream;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -27,7 +29,6 @@ import java.io.InputStream;
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id$
- * @deprecated
  */
 public class BaseContentStream implements ContentStream
 {

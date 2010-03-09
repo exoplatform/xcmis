@@ -17,7 +17,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.xcmis.spi.object;
+package org.xcmis.spi;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -28,7 +28,6 @@ import java.util.NoSuchElementException;
  * @param <T>
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id$
- * @deprecated
  */
 public interface ItemsIterator<T> extends Iterator<T>
 {
