@@ -23,7 +23,7 @@ import org.xcmis.core.CmisRenditionType;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.RepositoryException;
-import org.xcmis.spi.data.ContentStream;
+import org.xcmis.spi.object.ContentStream;
 
 /**
  * Manage object's renditions.
