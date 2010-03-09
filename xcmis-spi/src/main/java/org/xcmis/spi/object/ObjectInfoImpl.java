@@ -30,10 +30,6 @@ public class ObjectInfoImpl implements ObjectInfo
 
    private String baseTypeId;
 
-   private String contentStreamFileName;
-
-   private String contentStreamId;
-
    private String createdBy;
 
    private GregorianCalendar creationDate;
@@ -44,21 +40,11 @@ public class ObjectInfoImpl implements ObjectInfo
 
    private boolean latestVersion;
 
-   private boolean majorVersion;
-
-   private boolean versionSeriesCheckedOut;
-
    private GregorianCalendar lastModificationDate;
-
-   private String lastModifiedBy;
 
    private String name;
 
-   private String objectTypeId;
-
    private String parentId;
-
-   private String versionLabel;
 
    private String versionSeriesId;
 
@@ -78,22 +64,6 @@ public class ObjectInfoImpl implements ObjectInfo
    public String getBaseTypeId()
    {
       return baseTypeId;
-   }
-
-   /**
-    * @see org.xcmis.spi.object.ObjectInfo#getContentStreamFileName()
-    */
-   public String getContentStreamFileName()
-   {
-      return contentStreamFileName;
-   }
-
-   /**
-    * @see org.xcmis.spi.object.ObjectInfo#getContentStreamId()
-    */
-   public String getContentStreamId()
-   {
-      return contentStreamId;
    }
 
    /**
@@ -129,14 +99,6 @@ public class ObjectInfoImpl implements ObjectInfo
    }
 
    /**
-    * @see org.xcmis.spi.object.ObjectInfo#getLastModifiedBy()
-    */
-   public String getLastModifiedBy()
-   {
-      return lastModifiedBy;
-   }
-
-   /**
     * @see org.xcmis.spi.object.ObjectInfo#getName()
     */
    public String getName()
@@ -145,27 +107,11 @@ public class ObjectInfoImpl implements ObjectInfo
    }
 
    /**
-    * @see org.xcmis.spi.object.ObjectInfo#getObjectTypeId()
-    */
-   public String getObjectTypeId()
-   {
-      return objectTypeId;
-   }
-
-   /**
     * @see org.xcmis.spi.object.ObjectInfo#getParentId()
     */
    public String getParentId()
    {
       return parentId;
-   }
-
-   /**
-    * @see org.xcmis.spi.object.ObjectInfo#getVersionLabel()
-    */
-   public String getVersionLabel()
-   {
-      return versionLabel;
    }
 
    /**
@@ -193,43 +139,11 @@ public class ObjectInfoImpl implements ObjectInfo
    }
 
    /**
-    * @see org.xcmis.spi.object.ObjectInfo#isMajorVersion()
-    */
-   public boolean isMajorVersion()
-   {
-      return majorVersion;
-   }
-
-   /**
-    * @see org.xcmis.spi.object.ObjectInfo#isVersionSeriesCheckedOut()
-    */
-   public boolean isVersionSeriesCheckedOut()
-   {
-      return versionSeriesCheckedOut;
-   }
-
-   /**
     * @see org.xcmis.spi.object.ObjectInfo#setBaseTypeId(java.lang.String)
     */
    public void setBaseTypeId(String baseTypeId)
    {
       this.baseTypeId = baseTypeId;
-   }
-
-   /**
-    * @see org.xcmis.spi.object.ObjectInfo#setContentStreamFileName(java.lang.String)
-    */
-   public void setContentStreamFileName(String contentStreamFileName)
-   {
-      this.contentStreamFileName = contentStreamFileName;
-   }
-
-   /**
-    * @see org.xcmis.spi.object.ObjectInfo#setContentStreamId(java.lang.String)
-    */
-   public void setContentStreamId(String contentStreamId)
-   {
-      this.contentStreamId = contentStreamId;
    }
 
    /**
@@ -273,35 +187,11 @@ public class ObjectInfoImpl implements ObjectInfo
    }
 
    /**
-    * @see org.xcmis.spi.object.ObjectInfo#setIsMajorVersion(boolean)
-    */
-   public void setIsMajorVersion(boolean majorVersion)
-   {
-      this.majorVersion = majorVersion;
-   }
-
-   /**
-    * @see org.xcmis.spi.object.ObjectInfo#setIsVersionSeriesCheckedOut(boolean)
-    */
-   public void setIsVersionSeriesCheckedOut(boolean versionSeriesCheckedOut)
-   {
-      this.versionSeriesCheckedOut = versionSeriesCheckedOut;
-   }
-
-   /**
     * @see org.xcmis.spi.object.ObjectInfo#setLastModificationDate(java.util.GregorianCalendar)
     */
    public void setLastModificationDate(GregorianCalendar lastModificationDate)
    {
       this.lastModificationDate = lastModificationDate;
-   }
-
-   /**
-    * @see org.xcmis.spi.object.ObjectInfo#setLastModifiedBy(java.lang.String)
-    */
-   public void setLastModifiedBy(String lastModifiedBy)
-   {
-      this.lastModifiedBy = lastModifiedBy;
    }
 
    /**
@@ -313,27 +203,11 @@ public class ObjectInfoImpl implements ObjectInfo
    }
 
    /**
-    * @see org.xcmis.spi.object.ObjectInfo#setObjectTypeId(java.lang.String)
-    */
-   public void setObjectTypeId(String objectTypeId)
-   {
-      this.objectTypeId = objectTypeId;
-   }
-
-   /**
     * @see org.xcmis.spi.object.ObjectInfo#setParentId(java.lang.String)
     */
    public void setParentId(String parentId)
    {
       this.parentId = parentId;
-   }
-
-   /**
-    * @see org.xcmis.spi.object.ObjectInfo#setVersionLabel(java.lang.String)
-    */
-   public void setVersionLabel(String versionLabel)
-   {
-      this.versionLabel = versionLabel;
    }
 
    /**

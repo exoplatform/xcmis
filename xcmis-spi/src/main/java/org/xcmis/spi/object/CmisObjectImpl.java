@@ -9,11 +9,7 @@ import org.xcmis.core.CmisPropertiesType;
 import org.xcmis.core.CmisRenditionType;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import javax.xml.namespace.QName;
 
 /**
  * Java class for CmisObject complex type.
@@ -40,10 +36,6 @@ public class CmisObjectImpl implements CmisObject
 
    protected List<CmisRenditionType> rendition;
 
-   protected List<Object> any;
-
-   private Map<QName, String> otherAttributes = new HashMap<QName, String>();
-
    protected ObjectInfo objectInfo;
 
    public CmisObjectImpl()
@@ -67,8 +59,6 @@ public class CmisObjectImpl implements CmisObject
       this.exactACL = cmisObjectType.isExactACL();
       this.policyIds = cmisObjectType.getPolicyIds();
       this.rendition = cmisObjectType.getRendition();
-      this.any = cmisObjectType.getAny();
-      this.otherAttributes = cmisObjectType.getOtherAttributes();
       this.objectInfo = null;
    }
 
@@ -193,26 +183,6 @@ public class CmisObjectImpl implements CmisObject
    }
 
    /**
-    * @see org.xcmis.spi.object.CmisObject#getAny()
-    */
-   public List<Object> getAny()
-   {
-      if (any == null)
-      {
-         any = new ArrayList<Object>();
-      }
-      return this.any;
-   }
-
-   /**
-    * @see org.xcmis.spi.object.CmisObject#getOtherAttributes()
-    */
-   public Map<QName, String> getOtherAttributes()
-   {
-      return otherAttributes;
-   }
-
-   /**
     * @see org.xcmis.spi.object.CmisObject#getObjectInfo()
     */
    public ObjectInfo getObjectInfo()
@@ -228,6 +198,9 @@ public class CmisObjectImpl implements CmisObject
       this.objectInfo = objectInfo;
    }
 
+   /**
+    * @see org.xcmis.spi.object.CmisObject#toCmisObjectType()
+    */
    public CmisObjectType toCmisObjectType()
    {
       CmisObjectType result = new CmisObjectType();
@@ -246,10 +219,6 @@ public class CmisObjectImpl implements CmisObject
       result.setPolicyIds(this.policyIds);
       if (this.rendition != null)
          result.getRendition().addAll(this.rendition);
-      if (this.any != null)
-         result.getAny().addAll(this.any);
-      if (this.otherAttributes != null)
-         result.getOtherAttributes().putAll(this.otherAttributes);
       return result;
    }
 

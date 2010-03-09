@@ -2,13 +2,6 @@ package org.xcmis.spi.object;
 
 import org.xcmis.messaging.CmisObjectParentsType;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.xml.namespace.QName;
-
 /**
  * 
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey Zavizionov</a>
@@ -21,10 +14,6 @@ public class CmisObjectParentsImpl implements CmisObjectParents
    protected CmisObject object;
 
    protected String relativePathSegment;
-
-   protected List<Object> any;
-
-   private Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
    /**
     * @see org.xcmis.spi.object.CmisObjectParents#getObject()
@@ -59,35 +48,14 @@ public class CmisObjectParentsImpl implements CmisObjectParents
    }
 
    /**
-    * @see org.xcmis.spi.object.CmisObjectParents#getAny()
+    * @see org.xcmis.spi.object.CmisObjectParents#toCmisObjectParentsType()
     */
-   public List<Object> getAny()
-   {
-      if (any == null)
-      {
-         any = new ArrayList<Object>();
-      }
-      return this.any;
-   }
-
-   /**
-    * @see org.xcmis.spi.object.CmisObjectParents#getOtherAttributes()
-    */
-   public Map<QName, String> getOtherAttributes()
-   {
-      return otherAttributes;
-   }
-
    public CmisObjectParentsType toCmisObjectParentsType()
    {
       CmisObjectParentsType result = new CmisObjectParentsType();
       if (this.object != null)
          result.setObject(this.object.toCmisObjectType());
       result.setRelativePathSegment(this.relativePathSegment);
-      if (this.any != null)
-         result.getAny().addAll(this.any);
-      if (this.otherAttributes != null)
-         result.getOtherAttributes().putAll(this.otherAttributes);
       return result;
    }
 

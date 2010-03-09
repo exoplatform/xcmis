@@ -4,11 +4,7 @@ import org.xcmis.messaging.CmisObjectInFolderListType;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import javax.xml.namespace.QName;
 
 /**
  * 
@@ -24,10 +20,6 @@ public class CmisObjectInFolderListImpl implements CmisObjectInFolderList
    protected boolean hasMoreItems;
 
    protected BigInteger numItems;
-
-   protected List<Object> any;
-
-   private Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
    /**
     * @see org.xcmis.spi.object.CmisObjectInFolderList#getObjects()
@@ -74,25 +66,8 @@ public class CmisObjectInFolderListImpl implements CmisObjectInFolderList
    }
 
    /**
-    * @see org.xcmis.spi.object.CmisObjectInFolderList#getAny()
+    * @see org.xcmis.spi.object.CmisObjectInFolderList#toCmisObjectInFolderListType()
     */
-   public List<Object> getAny()
-   {
-      if (any == null)
-      {
-         any = new ArrayList<Object>();
-      }
-      return this.any;
-   }
-
-   /**
-    * @see org.xcmis.spi.object.CmisObjectInFolderList#getOtherAttributes()
-    */
-   public Map<QName, String> getOtherAttributes()
-   {
-      return otherAttributes;
-   }
-
    public CmisObjectInFolderListType toCmisObjectInFolderListType()
    {
       CmisObjectInFolderListType result = new CmisObjectInFolderListType();
@@ -105,10 +80,6 @@ public class CmisObjectInFolderListImpl implements CmisObjectInFolderList
             result.getObjects().add(obj.toCmisObjectInFolderType());
          }
       }
-      if (this.any != null)
-         result.getAny().addAll(this.any);
-      if (this.otherAttributes != null)
-         result.getOtherAttributes().putAll(this.otherAttributes);
       return result;
    }
 

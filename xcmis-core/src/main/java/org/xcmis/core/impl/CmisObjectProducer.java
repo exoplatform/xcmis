@@ -175,21 +175,14 @@ abstract class CmisObjectProducer
    {
       ObjectInfoImpl result = new ObjectInfoImpl();
       result.setBaseTypeId(entry.getType().getId());
-      result.setContentStreamFileName(getEntryPropertyString(entry, CMIS.CONTENT_STREAM_FILE_NAME));
-      result.setContentStreamId(getEntryPropertyString(entry, CMIS.CONTENT_STREAM_ID));
       result.setCreatedBy(getEntryPropertyString(entry, CMIS.CREATED_BY));
       result.setCreationDate((GregorianCalendar)getEntryPropertyDate(entry, CMIS.CREATION_DATE));
       result.setId(getEntryPropertyString(entry, CMIS.OBJECT_ID));
       result.setIsLatestMajorVersion(getEntryPropertyBoolean(entry, CMIS.IS_LATEST_MAJOR_VERSION));
       result.setIsLatestVersion(getEntryPropertyBoolean(entry, CMIS.IS_LATEST_VERSION));
-      result.setIsMajorVersion(getEntryPropertyBoolean(entry, CMIS.IS_MAJOR_VERSION));
-      result.setIsVersionSeriesCheckedOut(getEntryPropertyBoolean(entry, CMIS.IS_VERSION_SERIES_CHECKED_OUT));
       result.setLastModificationDate((GregorianCalendar)getEntryPropertyDate(entry, CMIS.LAST_MODIFICATION_DATE));
-      result.setLastModifiedBy(getEntryPropertyString(entry, CMIS.LAST_MODIFIED_BY));
       result.setName(getEntryPropertyString(entry, CMIS.NAME));
-      result.setObjectTypeId(getEntryPropertyString(entry, CMIS.OBJECT_TYPE_ID));
       result.setParentId(getEntryPropertyString(entry, CMIS.PARENT_ID));
-      result.setVersionLabel(getEntryPropertyString(entry, CMIS.VERSION_LABEL));
       result.setVersionSeriesId(getEntryPropertyString(entry, CMIS.VERSION_SERIES_ID));
       String contentStreamMimeType = getEntryPropertyString(entry, CMIS.CONTENT_STREAM_MIME_TYPE);
       result.setContentStreamMimeType(contentStreamMimeType != "" ? contentStreamMimeType : null);

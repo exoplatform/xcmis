@@ -3,11 +3,7 @@ package org.xcmis.spi.object;
 import org.xcmis.messaging.CmisObjectInFolderContainerType;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import javax.xml.namespace.QName;
 
 /**
  * 
@@ -21,10 +17,6 @@ public class CmisObjectInFolderContainerImpl implements CmisObjectInFolderContai
    protected CmisObjectInFolder objectInFolder;
 
    protected List<CmisObjectInFolderContainer> children;
-
-   protected List<Object> any;
-
-   private Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
    /**
     * @see org.xcmis.spi.object.CmisObjectInFolderContainer#getObjectInFolder()
@@ -55,25 +47,8 @@ public class CmisObjectInFolderContainerImpl implements CmisObjectInFolderContai
    }
 
    /**
-    * @see org.xcmis.spi.object.CmisObjectInFolderContainer#getAny()
+    * @see org.xcmis.spi.object.CmisObjectInFolderContainer#toCmisObjectInFolderContainerType()
     */
-   public List<Object> getAny()
-   {
-      if (any == null)
-      {
-         any = new ArrayList<Object>();
-      }
-      return this.any;
-   }
-
-   /**
-    * @see org.xcmis.spi.object.CmisObjectInFolderContainer#getOtherAttributes()
-    */
-   public Map<QName, String> getOtherAttributes()
-   {
-      return otherAttributes;
-   }
-
    public CmisObjectInFolderContainerType toCmisObjectInFolderContainerType()
    {
       CmisObjectInFolderContainerType result = new CmisObjectInFolderContainerType();
@@ -85,10 +60,6 @@ public class CmisObjectInFolderContainerImpl implements CmisObjectInFolderContai
          }
       }
       result.setObjectInFolder(this.objectInFolder.toCmisObjectInFolderType());
-      if (this.any != null)
-         result.getAny().addAll(this.any);
-      if (this.otherAttributes != null)
-         result.getOtherAttributes().putAll(this.otherAttributes);
       return result;
    }
 }

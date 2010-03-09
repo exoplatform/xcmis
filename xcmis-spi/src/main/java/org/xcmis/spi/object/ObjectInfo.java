@@ -40,25 +40,11 @@ public interface ObjectInfo
    public void setCreationDate(GregorianCalendar creationDate);
 
    /**
-    * CMIS.LAST_MODIFIED_BY
-    */
-   public String getLastModifiedBy();
-
-   public void setLastModifiedBy(String lastModifiedBy);
-
-   /**
     * CMIS.LAST_MODIFICATION_DATE
     */
    public GregorianCalendar getLastModificationDate();
 
    public void setLastModificationDate(GregorianCalendar lastModificationDate);
-
-   /**
-    * CMIS.OBJECT_TYPE_ID
-    */
-   public String getObjectTypeId();
-
-   public void setObjectTypeId(String objectTypeId);
 
    /**
     *  CMIS.BASE_TYPE_ID
@@ -82,13 +68,6 @@ public interface ObjectInfo
    public void setIsLatestVersion(boolean latestVersion);
 
    /**
-    * CMIS.IS_MAJOR_VERSION
-    */
-   public boolean isMajorVersion();
-
-   public void setIsMajorVersion(boolean majorVersion);
-
-   /**
     * CMIS.IS_LATEST_MAJOR_VERSION
     */
    public boolean isLatestMajorVersion();
@@ -96,39 +75,11 @@ public interface ObjectInfo
    public void setIsLatestMajorVersion(boolean latestMajorVersion);
 
    /**
-    * CMIS.VERSION_LABEL
-    */
-   public String getVersionLabel();
-
-   public void setVersionLabel(String versionLabel);
-
-   /**
-    * CMIS.IS_VERSION_SERIES_CHECKED_OUT
-    */
-   public boolean isVersionSeriesCheckedOut();
-
-   public void setIsVersionSeriesCheckedOut(boolean versionSeriesCheckedOut);
-
-   /**
     * CMIS.VERSION_SERIES_ID
     */
    public String getVersionSeriesId();
 
    public void setVersionSeriesId(String versionSeriesId);
-
-   /**
-    * CMIS.CONTENT_STREAM_FILE_NAME
-    */
-   public String getContentStreamFileName();
-
-   public void setContentStreamFileName(String contentStreamFileName);
-
-   /**
-    * CMIS.CONTENT_STREAM_ID
-    */
-   public String getContentStreamId();
-
-   public void setContentStreamId(String contentStreamId);
 
    /**
     * CMIS.CONTENT_STREAM_MIME_TYPE
