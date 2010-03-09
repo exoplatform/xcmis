@@ -33,13 +33,11 @@ import org.exoplatform.services.jcr.ext.common.SessionProvider;
 import org.exoplatform.services.jcr.util.IdGenerator;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.sp.jcr.exo.object.EntryImpl;
 import org.xcmis.sp.jcr.exo.rendition.RenditionContentStream;
 import org.xcmis.sp.jcr.exo.rendition.RenditionProvider;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.object.BaseContentStream;
 import org.xcmis.spi.object.ContentStream;
-import org.xcmis.spi.object.Entry;
 import org.xcmis.spi.utils.MimeType;
 
 public class UpdateListener implements EventListener

@@ -31,7 +31,6 @@ import org.xcmis.spi.utils.MimeType;
 import javax.jcr.ItemNotFoundException;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
-import javax.jcr.PathNotFoundException;
 import javax.jcr.Session;
 import javax.jcr.version.Version;
 
@@ -82,7 +81,6 @@ public class RenditionManagerImpl implements RenditionManager
          else
          {
             MimeType contentType = MimeType.fromString(entry.getContent(null).getMediaType());
-            int count = 0;
             for (Map.Entry<MimeType, RenditionProvider> e : renditionProviders.entrySet())
             {
                if (e.getKey().match(contentType))

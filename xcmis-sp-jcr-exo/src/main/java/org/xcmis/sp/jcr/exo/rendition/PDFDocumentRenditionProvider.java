@@ -24,7 +24,6 @@ import org.pdfbox.pdmodel.PDDocument;
 import org.pdfbox.pdmodel.PDPage;
 import org.xcmis.spi.RepositoryException;
 import org.xcmis.spi.object.ContentStream;
-import org.xcmis.spi.object.Entry;
 
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;

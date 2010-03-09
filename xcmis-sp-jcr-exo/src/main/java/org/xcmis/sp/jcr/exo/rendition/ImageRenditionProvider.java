@@ -21,7 +21,6 @@ package org.xcmis.sp.jcr.exo.rendition;
 
 import org.xcmis.core.EnumRenditionKind;
 import org.xcmis.spi.object.ContentStream;
-import org.xcmis.spi.object.Entry;
 
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
