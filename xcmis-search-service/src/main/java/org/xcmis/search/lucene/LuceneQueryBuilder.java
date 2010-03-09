@@ -40,6 +40,8 @@ import org.xcmis.search.QueryObjectModelVisitor;
 import org.xcmis.search.SearchServiceException;
 import org.xcmis.search.VisitException;
 import org.xcmis.search.Visitors;
+import org.xcmis.search.antlr.FullTextLexer;
+import org.xcmis.search.antlr.FullTextParser;
 import org.xcmis.search.lucene.search.CaseInsensitiveRangeQuery;
 import org.xcmis.search.lucene.search.CaseInsensitiveRegexCapImpl;
 import org.xcmis.search.lucene.search.CaseInsensitiveTermQuery;
@@ -75,8 +77,6 @@ import org.xcmis.search.model.source.join.ChildNodeJoinCondition;
 import org.xcmis.search.model.source.join.DescendantNodeJoinCondition;
 import org.xcmis.search.model.source.join.EquiJoinCondition;
 import org.xcmis.search.model.source.join.SameNodeJoinCondition;
-import org.xcmis.search.antlr.FullTextLexer;
-import org.xcmis.search.antlr.FullTextParser;
 import org.xcmis.search.result.ResultSorterFactory;
 import org.xcmis.search.value.NameConverter;
 import org.xcmis.search.value.PathSplitter;
@@ -709,7 +709,7 @@ public class LuceneQueryBuilder implements NativeQueryBuilder<Query>, QueryObjec
                RegexQuery query = new RegexQuery(new Term(FieldNames.LABEL, term));
                if (caseInsensitiveSearch)
                {
-                  ((RegexQuery)query).setRegexImplementation(new CaseInsensitiveRegexCapImpl());
+                  (query).setRegexImplementation(new CaseInsensitiveRegexCapImpl());
                }
                queryBuilderStack.push(query);
             }
