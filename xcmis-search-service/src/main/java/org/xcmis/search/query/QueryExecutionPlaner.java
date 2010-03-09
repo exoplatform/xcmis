@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 eXo Platform SAS.
+ * Copyright (C) 2010 eXo Platform SAS.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -16,34 +16,21 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xcmis.search;
+package org.xcmis.search.query;
+
+import org.xcmis.search.model.Query;
 
 /**
- * @author <a href="mailto:Sergey.Kabashnyuk@gmail.com">Sergey Kabashnyuk</a>
- * @version $Id: exo-jboss-codetemplates.xml 34027 2009-07-15 23:26:43Z
- *          aheritier $
+ * Interface for a query  execution planner.
  */
-@Deprecated
-public interface IndexConstants
+public interface QueryExecutionPlaner
 {
    /**
-    * eXo JCR default Strings encoding.
+    * Create a canonical query plan for the given command.
+    * 
+    * @param context the context in which the query is being planned
+    * @param query the query command to be planned
+    * @return the root node of the plan tree representing the canonical plan
     */
-   public static final String DEFAULT_ENCODING = "UTF-8";
-
-   /**
-    * Default namespace URI (empty).
-    */
-   public static final String NS_DEFAULT_URI = "";
-
-   /**
-    * Default namespace prefix (empty uri).
-    */
-   public static final String NS_EMPTY_PREFIX = "";
-
-   /**
-    * Workspace root node UUID.
-    */
-   public static final String ROOT_UUID = "00exo0jcr0root0uuid0000000000000";
-
+   public QueryExecutionPlan createPlan(QueryExecutionContext context, Query query);
 }

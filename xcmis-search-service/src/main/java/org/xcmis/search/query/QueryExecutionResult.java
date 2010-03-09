@@ -16,52 +16,12 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xcmis.search.lucene;
-
-import org.xcmis.search.SearchServiceException;
+package org.xcmis.search.query;
 
 /**
- * @author <a href="mailto:Sergey.Kabashnyuk@gmail.com">Sergey Kabashnyuk</a>
- * @version $Id: exo-jboss-codetemplates.xml 34360 2009-07-22 23:58:59Z aheritier $
- *
+ * The result of the query execution.
  */
-public class InvalidQueryException extends SearchServiceException
+public class QueryExecutionResult
 {
-
-   /**
-    * 
-    */
-   public InvalidQueryException()
-   {
-      
-   }
-
-   /**
-    * @param message
-    */
-   public InvalidQueryException(String message)
-   {
-      super(message);
-      
-   }
-
-   /**
-    * @param cause
-    */
-   public InvalidQueryException(Throwable cause)
-   {
-      super(cause);
-      
-   }
-
-   /**
-    * @param message
-    * @param cause
-    */
-   public InvalidQueryException(String message, Throwable cause)
-   {
-      super(message, cause);
-      
-   }
 
 }

@@ -18,8 +18,9 @@
  */
 package org.xcmis.search.query;
 
-import org.xcmis.search.content.request.RequestProcessor;
+import org.apache.commons.lang.Validate;
 import org.xcmis.search.model.Query;
+import org.xcmis.search.query.request.QueryProcessor;
 
 /**
  * A query engine that is able to execute formal queries expressed in the
@@ -27,20 +28,48 @@ import org.xcmis.search.model.Query;
  */
 public class QueryExecutionEngine
 {
-   private final RequestProcessor requestProcessor;
+
+   private final QueryExecutionPlaner planner;
+
+   private final Optimizer optimizer;
+
+   private final QueryProcessor processor;
 
    /**
-    * @param requestProcessor
+    * Create a new query engine given the {@link QueryExecutionPlaner planner}, {@link Optimizer optimizer}, {@link QueryProcessor processor}.
+    * 
+    * @param planner the planner that should be used to generate canonical query plans for the queries;
+    * @param optimizer the optimizer that should be used to optimize the canonical query plan
+    * @param processor the processor implementation that should be used to process the planned query and return the results
+    * @throws IllegalArgumentException if the processor reference is null
     */
-   public QueryExecutionEngine(RequestProcessor requestProcessor)
+   public QueryExecutionEngine(QueryExecutionPlaner planner, Optimizer optimizer, QueryProcessor processor)
    {
       super();
-      this.requestProcessor = requestProcessor;
+      this.planner = planner;
+      this.optimizer = optimizer;
+      this.processor = processor;
+
    }
 
-   //TODO Add result
-   public void execute(Query query)
+   /**
+   * Execute the supplied query by planning, optimizing, and then processing it.
+   * 
+   * @param context the context in which the query should be executed
+   * @param query the query that is to be executed
+   * @return the query results; never null
+   * @throws IllegalArgumentException if the context or query references are null
+   */
+   public QueryExecutionResult execute(QueryExecutionContext context, Query query)
    {
+      Validate.notNull(context, "The context argument may not be null");
+      Validate.notNull(query, "The query argument may not be null");
 
+      // Create the plan ...
+      QueryExecutionPlan executionPlan = planner.createPlan(context, query);
+      // Optimize the plan ...
+      QueryExecutionPlan optimizedPlan = optimizer.optimize(context, executionPlan);
+      // Execute the plan ...
+      return processor.execute(context, query, optimizedPlan);
    };
 }
