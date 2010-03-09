@@ -71,7 +71,6 @@ public abstract class AbstractResultSorterFactory extends Visitors.AbstractModel
       return sorter;
    }
 
-   @Override
    public ResultSorter getDefaultResultSorter(String[] selectorNames)
    {
       return new DummyResultSorter();
@@ -117,7 +116,9 @@ public abstract class AbstractResultSorterFactory extends Visitors.AbstractModel
       {
          int result = majorSorter.compare(o1, o2);
          if (result == 0)
+         {
             result = minorSorter.compare(o1, o2);
+         }
          return result;
       }
 

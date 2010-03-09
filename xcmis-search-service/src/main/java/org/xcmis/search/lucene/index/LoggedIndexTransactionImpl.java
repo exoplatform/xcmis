@@ -19,11 +19,11 @@
 package org.xcmis.search.lucene.index;
 
 import org.apache.lucene.document.Document;
-import org.xcmis.search.index.IndexTransaction;
-import org.xcmis.search.index.IndexTransactionException;
-import org.xcmis.search.index.IndexTransactionModificationReport;
-import org.xcmis.search.index.IndexTransactionService;
-import org.xcmis.search.index.TransactionLog;
+import org.xcmis.search.lucene.IndexTransaction;
+import org.xcmis.search.lucene.IndexTransactionException;
+import org.xcmis.search.lucene.IndexTransactionModificationReport;
+import org.xcmis.search.lucene.IndexTransactionService;
+import org.xcmis.search.lucene.TransactionLog;
 
 import java.util.Map;
 import java.util.Set;

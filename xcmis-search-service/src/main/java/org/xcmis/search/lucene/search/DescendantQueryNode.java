@@ -31,7 +31,7 @@ import org.apache.lucene.search.Weight;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.search.index.FieldNames;
+import org.xcmis.search.lucene.FieldNames;
 
 import java.io.IOException;
 import java.util.Set;

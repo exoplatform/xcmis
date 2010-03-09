@@ -18,9 +18,9 @@
  */
 package org.xcmis.search.lucene.index;
 
-import org.xcmis.search.index.IndexTransaction;
-import org.xcmis.search.index.IndexTransactionException;
-import org.xcmis.search.index.IndexTransactionResource;
+import org.xcmis.search.lucene.IndexTransaction;
+import org.xcmis.search.lucene.IndexTransactionException;
+import org.xcmis.search.lucene.IndexTransactionResource;
 
 /**
  * Created by The eXo Platform SAS.

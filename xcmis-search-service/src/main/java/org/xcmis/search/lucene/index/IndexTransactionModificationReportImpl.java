@@ -20,7 +20,7 @@ package org.xcmis.search.lucene.index;
 
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.search.index.IndexTransactionModificationReport;
+import org.xcmis.search.lucene.IndexTransactionModificationReport;
 
 import java.util.Set;
 

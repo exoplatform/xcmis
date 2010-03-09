@@ -36,20 +36,10 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.regex.RegexQuery;
-import org.xcmis.search.IndexConstants;
-import org.xcmis.search.InvalidQueryException;
-import org.xcmis.search.NameConverter;
-import org.xcmis.search.NativeQuery;
-import org.xcmis.search.NativeQueryBuilder;
-import org.xcmis.search.PathSplitter;
 import org.xcmis.search.QueryObjectModelVisitor;
-import org.xcmis.search.SearchIndexingService;
 import org.xcmis.search.SearchServiceException;
-import org.xcmis.search.VirtualTableResolver;
 import org.xcmis.search.VisitException;
 import org.xcmis.search.Visitors;
-import org.xcmis.search.index.FieldNames;
-import org.xcmis.search.index.IndexException;
 import org.xcmis.search.lucene.search.CaseInsensitiveRangeQuery;
 import org.xcmis.search.lucene.search.CaseInsensitiveRegexCapImpl;
 import org.xcmis.search.lucene.search.CaseInsensitiveTermQuery;
@@ -88,6 +78,8 @@ import org.xcmis.search.model.source.join.SameNodeJoinCondition;
 import org.xcmis.search.antlr.FullTextLexer;
 import org.xcmis.search.antlr.FullTextParser;
 import org.xcmis.search.result.ResultSorterFactory;
+import org.xcmis.search.value.NameConverter;
+import org.xcmis.search.value.PathSplitter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -153,7 +145,7 @@ public class LuceneQueryBuilder implements NativeQueryBuilder<Query>, QueryObjec
    }
 
    /**
-    * @see org.xcmis.search.NativeQueryBuilder#createNativeQuery(org.xcmis.search.model.Query,
+    * @see org.xcmis.search.lucene.NativeQueryBuilder#createNativeQuery(org.xcmis.search.model.Query,
     *      java.util.Map)
     */
    @Override

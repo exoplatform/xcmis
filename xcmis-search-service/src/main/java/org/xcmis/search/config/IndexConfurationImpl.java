@@ -32,7 +32,6 @@ public class IndexConfurationImpl implements IndexConfuguration
     */
    public String getIndexDir()
    {
-      // TODO Auto-generated method stub
       return indexDir;
    }
 

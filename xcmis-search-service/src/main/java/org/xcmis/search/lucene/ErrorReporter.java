@@ -18,7 +18,6 @@
  */
 package org.xcmis.search.lucene;
 
-import org.xcmis.search.InvalidQueryException;
 
 
 /**

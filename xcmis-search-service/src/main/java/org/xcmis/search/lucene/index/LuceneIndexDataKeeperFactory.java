@@ -23,9 +23,9 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.search.index.IndexDataKeeper;
-import org.xcmis.search.index.IndexDataKeeperFactory;
-import org.xcmis.search.index.IndexException;
+import org.xcmis.search.lucene.IndexDataKeeper;
+import org.xcmis.search.lucene.IndexDataKeeperFactory;
+import org.xcmis.search.lucene.IndexException;
 
 public abstract class LuceneIndexDataKeeperFactory implements IndexDataKeeperFactory<Document, Analyzer, IndexReader>
 {

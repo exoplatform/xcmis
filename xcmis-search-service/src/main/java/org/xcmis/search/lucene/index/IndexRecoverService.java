@@ -18,7 +18,7 @@
  */
 package org.xcmis.search.lucene.index;
 
-import org.xcmis.search.index.IndexException;
+import org.xcmis.search.lucene.IndexException;
 
 import java.util.Set;
 

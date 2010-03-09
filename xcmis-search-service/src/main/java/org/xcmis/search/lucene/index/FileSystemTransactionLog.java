@@ -22,9 +22,9 @@ package org.xcmis.search.lucene.index;
 import org.apache.commons.lang.StringUtils;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.search.IndexConstants;
-import org.xcmis.search.index.TransactionLog;
-import org.xcmis.search.index.TransactionLogException;
+import org.xcmis.search.lucene.IndexConstants;
+import org.xcmis.search.lucene.TransactionLog;
+import org.xcmis.search.lucene.TransactionLogException;
 
 import java.io.BufferedOutputStream;
 import java.io.EOFException;

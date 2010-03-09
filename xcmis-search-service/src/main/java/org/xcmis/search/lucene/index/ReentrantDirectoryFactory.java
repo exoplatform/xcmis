@@ -18,7 +18,7 @@
  */
 package org.xcmis.search.lucene.index;
 
-import org.xcmis.search.index.TransactionLogException;
+import org.xcmis.search.lucene.TransactionLogException;
 
 import java.io.File;
 import java.io.IOException;

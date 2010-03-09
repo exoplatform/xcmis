@@ -26,12 +26,12 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.search.index.IndexDataKeeper;
-import org.xcmis.search.index.IndexException;
-import org.xcmis.search.index.IndexTransaction;
-import org.xcmis.search.index.LuceneIndexDataManager;
-import org.xcmis.search.index.TransactionLog;
-import org.xcmis.search.index.TransactionLogException;
+import org.xcmis.search.lucene.IndexDataKeeper;
+import org.xcmis.search.lucene.IndexException;
+import org.xcmis.search.lucene.IndexTransaction;
+import org.xcmis.search.lucene.LuceneIndexDataManager;
+import org.xcmis.search.lucene.TransactionLog;
+import org.xcmis.search.lucene.TransactionLogException;
 
 import java.io.IOException;
 import java.util.ArrayList;

@@ -18,8 +18,8 @@
  */
 package org.xcmis.search.lucene.index;
 
-import org.xcmis.search.index.TransactionLog;
-import org.xcmis.search.index.TransactionLogException;
+import org.xcmis.search.lucene.TransactionLog;
+import org.xcmis.search.lucene.TransactionLogException;
 
 import java.util.ArrayList;
 import java.util.Collection;

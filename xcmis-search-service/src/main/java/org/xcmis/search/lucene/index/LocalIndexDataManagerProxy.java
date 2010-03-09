@@ -23,10 +23,10 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.search.config.IndexConfigurationException;
 import org.xcmis.search.config.IndexConfuguration;
-import org.xcmis.search.index.IndexException;
-import org.xcmis.search.index.IndexTransaction;
-import org.xcmis.search.index.IndexTransactionException;
-import org.xcmis.search.index.IndexTransactionModificationReport;
+import org.xcmis.search.lucene.IndexException;
+import org.xcmis.search.lucene.IndexTransaction;
+import org.xcmis.search.lucene.IndexTransactionException;
+import org.xcmis.search.lucene.IndexTransactionModificationReport;
 
 /**
  * Created by The eXo Platform SAS.

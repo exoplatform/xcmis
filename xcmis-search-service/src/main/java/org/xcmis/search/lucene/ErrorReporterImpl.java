@@ -18,7 +18,6 @@
  */
 package org.xcmis.search.lucene;
 
-import org.xcmis.search.InvalidQueryException;
 
 import java.util.ArrayList;
 import java.util.Iterator;

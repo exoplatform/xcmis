@@ -18,7 +18,7 @@
  */
 package org.xcmis.search.config;
 
-import org.xcmis.search.index.IndexException;
+import org.xcmis.search.lucene.IndexException;
 
 /**
  * Created by The eXo Platform SAS.
