@@ -33,6 +33,7 @@ import org.xcmis.messaging.CmisContentStreamType;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.soap.ObjectServicePort;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.object.BaseContentStream;
 import org.xcmis.spi.object.ContentStream;
@@ -244,8 +245,16 @@ public class ObjectServiceTest extends BaseTest
       // delete content
       port.deleteContentStream(repositoryId, hId, new Holder<String>(null), new Holder<CmisExtensionType>(
          new CmisExtensionType()));
-      cs = objectService.getContentStream(repositoryId, hId.value, null, 0, -1);
-      assertNull(cs);
+      try
+      {
+         cs = objectService.getContentStream(repositoryId, hId.value, null, 0, -1);
+         fail("Content stream has not been deleted.");
+      }
+      catch (ConstraintException e)
+      {
+         // It's OK. No content.
+         assertEquals("Content stream not found", e.getMessage());
+      }
    }
 
    public void testDeleteObject() throws Exception
@@ -337,8 +346,18 @@ public class ObjectServiceTest extends BaseTest
    public void testSetContentStream() throws Exception
    {
       String docId = createDocument(testFolderId, "doc1");
-      ContentStream cs = objectService.getContentStream(repositoryId, docId, null, 0, -1);
-      assertNull(cs); // no content
+
+      ContentStream cs = null;
+      try
+      {
+         cs = objectService.getContentStream(repositoryId, docId, null, 0, -1);
+         fail("Content stream has not been deleted.");
+      }
+      catch (ConstraintException e)
+      {
+         // It's OK. No content.
+         assertEquals("Content stream not found", e.getMessage());
+      }
 
       String content = "hello";
       Holder<String> hId = new Holder<String>(docId);
