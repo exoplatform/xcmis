@@ -18,7 +18,7 @@
  */
 package org.xcmis.search.lucene;
 
-
+import org.xcmis.search.SearchServiceException;
 
 /**
  * Error reporter hold all error messages placed by ANTLR lexer and parser.
@@ -35,7 +35,7 @@ public interface ErrorReporter
     * 
     * @return InvalidQueryException.
     */
-   public InvalidQueryException getException();
+   public SearchServiceException getException();
 
    /**
     * Return true if ErrorReporter hold any error message.

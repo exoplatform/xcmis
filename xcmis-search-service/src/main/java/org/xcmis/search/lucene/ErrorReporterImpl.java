@@ -18,6 +18,7 @@
  */
 package org.xcmis.search.lucene;
 
+import org.xcmis.search.SearchServiceException;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -46,7 +47,7 @@ public class ErrorReporterImpl implements ErrorReporter
    /**
     * {@inheritDoc}
     */
-   public InvalidQueryException getException()
+   public SearchServiceException getException()
    {
 
       if (hasErrors())
@@ -64,9 +65,9 @@ public class ErrorReporterImpl implements ErrorReporter
             b.append(ei.next().getMessage() + '\n');
          }
 
-         InvalidQueryException ex =
-            (exceptionsList.size() > 0) ? new InvalidQueryException(b.toString(), exceptionsList.get(0))
-               : new InvalidQueryException(b.toString());
+         SearchServiceException ex =
+            (exceptionsList.size() > 0) ? new SearchServiceException(b.toString(), exceptionsList.get(0))
+               : new SearchServiceException(b.toString());
 
          return ex;
       }

@@ -379,7 +379,7 @@ public class LuceneQueryBuilder implements NativeQueryBuilder<Query>, QueryObjec
       {
          parser.fulltext(fields, new StandardAnalyzer());
          query = parser.getQuery();
-         final InvalidQueryException ex = reporter.getException();
+         final SearchServiceException ex = reporter.getException();
          if (ex != null)
          {
             throw new VisitException(ex.getLocalizedMessage());
