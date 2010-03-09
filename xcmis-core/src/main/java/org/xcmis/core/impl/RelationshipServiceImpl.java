@@ -28,17 +28,16 @@ import org.xcmis.core.RepositoryService;
 import org.xcmis.core.impl.object.RenditionFilter;
 import org.xcmis.core.impl.property.PropertyFilter;
 import org.xcmis.core.impl.property.PropertyService;
-import org.xcmis.messaging.CmisObjectListType;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.Repository;
 import org.xcmis.spi.RepositoryException;
 import org.xcmis.spi.object.CmisObject;
 import org.xcmis.spi.object.CmisObjectList;
-import org.xcmis.spi.object.CmisObjectListImpl;
 import org.xcmis.spi.object.Entry;
 import org.xcmis.spi.object.ItemsIterator;
 import org.xcmis.spi.object.RenditionManager;
+import org.xcmis.spi.object.impl.CmisObjectListImpl;
 
 import java.math.BigInteger;
 import java.util.NoSuchElementException;

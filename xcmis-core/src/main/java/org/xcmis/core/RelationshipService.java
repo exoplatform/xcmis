@@ -19,7 +19,6 @@
 
 package org.xcmis.core;
 
-import org.xcmis.core.EnumRelationshipDirection;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.RepositoryException;

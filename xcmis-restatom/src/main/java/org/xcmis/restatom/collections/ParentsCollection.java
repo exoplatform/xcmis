@@ -25,7 +25,6 @@ import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
-import org.xcmis.core.CmisPropertyString;
 import org.xcmis.core.EnumIncludeRelationships;
 import org.xcmis.core.NavigationService;
 import org.xcmis.core.ObjectService;

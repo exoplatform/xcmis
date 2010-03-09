@@ -19,8 +19,6 @@
 
 package org.xcmis.core;
 
-import org.xcmis.core.CmisRepositoryInfoType;
-import org.xcmis.core.CmisTypeDefinitionType;
 import org.xcmis.messaging.CmisRepositoryEntryType;
 import org.xcmis.messaging.CmisTypeContainer;
 import org.xcmis.messaging.CmisTypeDefinitionListType;

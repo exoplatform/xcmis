@@ -19,14 +19,14 @@
 
 package org.xcmis.core.impl;
 
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
 import org.xcmis.core.CmisRepositoryInfoType;
 import org.xcmis.core.CmisTypeDefinitionType;
 import org.xcmis.core.RepositoryService;
 import org.xcmis.messaging.CmisRepositoryEntryType;
 import org.xcmis.messaging.CmisTypeContainer;
 import org.xcmis.messaging.CmisTypeDefinitionListType;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.RepositoriesManager;
 import org.xcmis.spi.Repository;

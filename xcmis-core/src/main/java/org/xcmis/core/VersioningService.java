@@ -19,9 +19,6 @@
 
 package org.xcmis.core;
 
-import org.xcmis.core.CmisAccessControlListType;
-import org.xcmis.core.CmisPropertiesType;
-import org.xcmis.core.EnumIncludeRelationships;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.ObjectNotFoundException;

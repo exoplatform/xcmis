@@ -19,7 +19,6 @@
 
 package org.xcmis.core;
 
-import org.xcmis.core.EnumIncludeRelationships;
 import org.xcmis.messaging.CmisObjectListType;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FilterNotValidException;

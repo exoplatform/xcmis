@@ -46,8 +46,8 @@ import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.RepositoryException;
 import org.xcmis.spi.object.CmisObject;
-import org.xcmis.spi.object.CmisObjectImpl;
 import org.xcmis.spi.object.CmisObjectList;
+import org.xcmis.spi.object.impl.CmisObjectImpl;
 
 import java.util.HashMap;
 import java.util.List;

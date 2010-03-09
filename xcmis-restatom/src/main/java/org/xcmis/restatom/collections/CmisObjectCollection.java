@@ -44,8 +44,6 @@ import org.xcmis.core.CmisListOfIdsType;
 import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.CmisPropertiesType;
 import org.xcmis.core.CmisProperty;
-import org.xcmis.core.CmisPropertyDateTime;
-import org.xcmis.core.CmisPropertyId;
 import org.xcmis.core.CmisPropertyString;
 import org.xcmis.core.CmisRenditionType;
 import org.xcmis.core.CmisRepositoryCapabilitiesType;
@@ -72,8 +70,8 @@ import org.xcmis.spi.StreamNotSupportedException;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.object.BaseContentStream;
 import org.xcmis.spi.object.CmisObject;
-import org.xcmis.spi.object.CmisObjectImpl;
 import org.xcmis.spi.object.ContentStream;
+import org.xcmis.spi.object.impl.CmisObjectImpl;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -19,14 +19,14 @@
 
 package org.xcmis.core.impl;
 
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
 import org.xcmis.core.AccessControlService;
 import org.xcmis.core.CmisAccessControlEntryType;
 import org.xcmis.core.CmisAccessControlListType;
 import org.xcmis.core.EnumACLPropagation;
 import org.xcmis.core.RepositoryService;
 import org.xcmis.core.impl.property.PropertyService;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.Repository;
 import org.xcmis.spi.RepositoryException;

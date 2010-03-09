@@ -19,13 +19,6 @@
 
 package org.xcmis.core;
 
-import org.xcmis.core.CmisAccessControlListType;
-import org.xcmis.core.CmisAllowableActionsType;
-import org.xcmis.core.CmisPropertiesType;
-import org.xcmis.core.CmisRenditionType;
-import org.xcmis.core.EnumIncludeRelationships;
-import org.xcmis.core.EnumUnfileObject;
-import org.xcmis.core.EnumVersioningState;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentAlreadyExistsException;
 import org.xcmis.spi.FilterNotValidException;

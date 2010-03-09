@@ -19,8 +19,6 @@
 
 package org.xcmis.core;
 
-import org.xcmis.core.CmisAccessControlListType;
-import org.xcmis.core.EnumACLPropagation;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.RepositoryException;
 

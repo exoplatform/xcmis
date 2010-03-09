@@ -35,12 +35,12 @@ import org.xcmis.core.impl.property.PropertyService;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.RepositoryException;
 import org.xcmis.spi.object.CmisObject;
-import org.xcmis.spi.object.CmisObjectImpl;
 import org.xcmis.spi.object.Entry;
 import org.xcmis.spi.object.ItemsIterator;
 import org.xcmis.spi.object.ObjectInfo;
-import org.xcmis.spi.object.ObjectInfoImpl;
 import org.xcmis.spi.object.RenditionManager;
+import org.xcmis.spi.object.impl.CmisObjectImpl;
+import org.xcmis.spi.object.impl.ObjectInfoImpl;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;

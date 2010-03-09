@@ -52,9 +52,9 @@ import org.xcmis.spi.StreamNotSupportedException;
 import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.object.CmisObject;
-import org.xcmis.spi.object.CmisObjectImpl;
 import org.xcmis.spi.object.CmisObjectInFolder;
 import org.xcmis.spi.object.CmisObjectInFolderList;
+import org.xcmis.spi.object.impl.CmisObjectImpl;
 
 import java.util.HashMap;
 import java.util.List;
