@@ -16,12 +16,19 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xcmis.search.query;
+package org.xcmis.search.content;
+
+import org.xcmis.search.model.Query;
 
 /**
- * Plan of the query execution.
+ * Information about a view that is defined in terms of other views/tables.
  */
-public class QueryExecutionPlan
+public interface View extends Table
 {
-
+   /**
+    * Get the {@link Query query} that is the definition of the view.
+    * 
+    * @return the view definition; never null
+    */
+   Query getDefinition();
 }

@@ -16,22 +16,26 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xcmis.search.query;
+package org.xcmis.search.query.plan;
+
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 /**
- * Interface for an optimizer.
+ * Plan of the query execution.
  */
-public interface Optimizer
+public class QueryExecutionPlan extends LinkedList<QueryExecutionStep>
 {
 
+   private static final long serialVersionUID = 1L;
+
    /**
-    * Optimize the supplied query plan and produce an executable processor plan.
-    * 
-    * @param context the context in which the query is being optimized
-    * @param plan the query plan to be optimized
-    * @return the optimized query plan; never null
+    * @see java.lang.Iterable#iterator()
     */
-   QueryExecutionPlan optimize(QueryExecutionContext context,
-      QueryExecutionPlan plan);
+   public Iterator<QueryExecutionStep> iterator()
+   {
+      return Collections.unmodifiableList(this).iterator();
+   }
 
 }

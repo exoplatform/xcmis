@@ -4,7 +4,7 @@
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation; either version 2.1 of
- * the License, or (at your option) any later version.
+ * the License, or (at your option) any later version.w night. http://bit.ly/aWpXiU
  *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -16,21 +16,11 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xcmis.search.query;
-
-import org.xcmis.search.model.Query;
+package org.xcmis.search.query.plan;
 
 /**
- * Interface for a query  execution planner.
+ * Implementation of join algorithm.
  */
-public interface QueryExecutionPlaner
-{
-   /**
-    * Create a canonical query plan for the given command.
-    * 
-    * @param context the context in which the query is being planned
-    * @param query the query command to be planned
-    * @return the root node of the plan tree representing the canonical plan
-    */
-   public QueryExecutionPlan createPlan(QueryExecutionContext context, Query query);
+public enum JoinAlgorithm {
+   NESTED_LOOP, MERGE
 }

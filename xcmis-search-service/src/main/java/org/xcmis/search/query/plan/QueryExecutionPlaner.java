@@ -16,27 +16,22 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xcmis.search.query.request;
+package org.xcmis.search.query.plan;
 
 import org.xcmis.search.model.Query;
 import org.xcmis.search.query.QueryExecutionContext;
-import org.xcmis.search.query.QueryExecutionResult;
-import org.xcmis.search.query.plan.QueryExecutionPlan;
 
 /**
- * Interface for a query processor.
+ * Interface for a query  execution planner.
  */
-public interface QueryProcessor
+public interface QueryExecutionPlaner
 {
    /**
-    * Process the supplied query plan for the given query and return the results.
+    * Create a canonical query plan for the given command.
     * 
-    * @param context the context in which the query is being processed
-    * @param query the query being executed
-    * @param plan the plan to be processed
-    * @return the results of the query
+    * @param context the context in which the query is being planned
+    * @param query the query command to be planned
+    * @return the root node of the plan tree representing the canonical plan
     */
-   QueryExecutionResult execute(QueryExecutionContext context,
-                         Query query,
-                         QueryExecutionPlan plan);
+   public QueryExecutionPlan createPlan(QueryExecutionContext context, Query query);
 }

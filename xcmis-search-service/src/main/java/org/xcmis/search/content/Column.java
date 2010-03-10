@@ -16,27 +16,32 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xcmis.search.query.request;
-
-import org.xcmis.search.model.Query;
-import org.xcmis.search.query.QueryExecutionContext;
-import org.xcmis.search.query.QueryExecutionResult;
-import org.xcmis.search.query.plan.QueryExecutionPlan;
+package org.xcmis.search.content;
 
 /**
- * Interface for a query processor.
+ * Information about a queryable column.
  */
-public interface QueryProcessor
+public interface Column
 {
    /**
-    * Process the supplied query plan for the given query and return the results.
+    * Get the name for this column.
     * 
-    * @param context the context in which the query is being processed
-    * @param query the query being executed
-    * @param plan the plan to be processed
-    * @return the results of the query
+    * @return the column name; never null
     */
-   QueryExecutionResult execute(QueryExecutionContext context,
-                         Query query,
-                         QueryExecutionPlan plan);
+   String getName();
+
+   /**
+    * Get the property type for this column.
+    * 
+    * @return the property type; never null
+    */
+   String getPropertyType();
+
+   /**
+    * Get whether the column can be used in a full-text search.
+    * 
+    * @return true if the column is full-text searchable, or false otherwise
+    */
+   boolean isFullTextSearchable();
+
 }

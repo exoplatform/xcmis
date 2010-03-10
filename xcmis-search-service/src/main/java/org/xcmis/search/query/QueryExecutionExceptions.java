@@ -16,27 +16,39 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xcmis.search.query.request;
+package org.xcmis.search.query;
 
-import org.xcmis.search.model.Query;
-import org.xcmis.search.query.QueryExecutionContext;
-import org.xcmis.search.query.QueryExecutionResult;
-import org.xcmis.search.query.plan.QueryExecutionPlan;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Interface for a query processor.
+ * Exceptions what occurs during execution of query.
  */
-public interface QueryProcessor
+public class QueryExecutionExceptions
 {
+   private final List<Throwable> exceptions;
+
    /**
-    * Process the supplied query plan for the given query and return the results.
     * 
-    * @param context the context in which the query is being processed
-    * @param query the query being executed
-    * @param plan the plan to be processed
-    * @return the results of the query
     */
-   QueryExecutionResult execute(QueryExecutionContext context,
-                         Query query,
-                         QueryExecutionPlan plan);
+   public QueryExecutionExceptions()
+   {
+      this.exceptions = new ArrayList<Throwable>();
+   }
+
+   public void addException(Throwable throwable)
+   {
+      exceptions.add(throwable);
+   }
+
+   /**
+    * Determine if there are problems in this collection.
+    * 
+    * @return true if there is at least one exception, or false if it is empty
+    */
+   public boolean hasProblems()
+   {
+      return !exceptions.isEmpty();
+   };
+
 }

@@ -20,6 +20,9 @@ package org.xcmis.search.query;
 
 import org.apache.commons.lang.Validate;
 import org.xcmis.search.model.Query;
+import org.xcmis.search.query.plan.Optimizer;
+import org.xcmis.search.query.plan.QueryExecutionPlan;
+import org.xcmis.search.query.plan.QueryExecutionPlaner;
 import org.xcmis.search.query.request.QueryProcessor;
 
 /**

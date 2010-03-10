@@ -16,27 +16,50 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xcmis.search.query.request;
+package org.xcmis.search.content;
 
-import org.xcmis.search.model.Query;
-import org.xcmis.search.query.QueryExecutionContext;
-import org.xcmis.search.query.QueryExecutionResult;
-import org.xcmis.search.query.plan.QueryExecutionPlan;
+import org.xcmis.search.SearchServiceException;
 
 /**
- * Interface for a query processor.
+ *  
  */
-public interface QueryProcessor
+public class ColumnDoesNotExistOnTable extends SearchServiceException
 {
+
    /**
-    * Process the supplied query plan for the given query and return the results.
     * 
-    * @param context the context in which the query is being processed
-    * @param query the query being executed
-    * @param plan the plan to be processed
-    * @return the results of the query
     */
-   QueryExecutionResult execute(QueryExecutionContext context,
-                         Query query,
-                         QueryExecutionPlan plan);
+   public ColumnDoesNotExistOnTable()
+   {
+      // TODO Auto-generated constructor stub
+   }
+
+   /**
+    * @param message
+    */
+   public ColumnDoesNotExistOnTable(String message)
+   {
+      super(message);
+      // TODO Auto-generated constructor stub
+   }
+
+   /**
+    * @param cause
+    */
+   public ColumnDoesNotExistOnTable(Throwable cause)
+   {
+      super(cause);
+      // TODO Auto-generated constructor stub
+   }
+
+   /**
+    * @param message
+    * @param cause
+    */
+   public ColumnDoesNotExistOnTable(String message, Throwable cause)
+   {
+      super(message, cause);
+      // TODO Auto-generated constructor stub
+   }
+
 }

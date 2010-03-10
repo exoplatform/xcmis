@@ -18,6 +18,7 @@
  */
 package org.xcmis.search.query;
 
+import org.xcmis.search.content.Schema;
 import org.xcmis.search.model.operand.BindVariableName;
 
 import java.util.Map;
@@ -31,12 +32,43 @@ public class QueryExecutionContext
 {
    private final Map<String, Object> variables;
 
+   private final Schema schema;
+
+   private final QueryExecutionExceptions executionExceptions;
+
    /**
     * @param variables the mapping of variables and values, or null if there are no such variables
     */
-   public QueryExecutionContext(Map<String, Object> variables)
+   public QueryExecutionContext(Schema schema, QueryExecutionExceptions executionExceptions,
+      Map<String, Object> variables)
    {
+      this.schema = schema;
+      this.executionExceptions = executionExceptions;
       this.variables = variables;
+   }
+
+   /**
+     * Get the definition of the tables available within this query context.
+     * 
+     * @return the schemata; never null
+
+    * @return the schema
+    */
+   public Schema getSchema()
+   {
+      return schema;
+   }
+
+   /**
+      * Get the exceptions container used by this query context. Any problems that have been encountered will be accumlated in this
+     * container.
+     * 
+     * @return the executionExceptions container; never null
+
+    */
+   public QueryExecutionExceptions getExecutionExceptions()
+   {
+      return executionExceptions;
    }
 
    /**
@@ -48,4 +80,5 @@ public class QueryExecutionContext
    {
       return variables;
    }
+
 }
