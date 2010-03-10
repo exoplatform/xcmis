@@ -366,7 +366,7 @@ public class NavigationServiceImpl extends CmisObjectProducer implements Navigat
                new PropertyFilter(propertyFilter), new RenditionFilter(renditionFilter), renditionManager, includeObjectInfo);
          CmisObjectParents cmisParent = new CmisObjectParentsImpl();
          cmisParent.setObject(cmis);
-         cmisParent.setRelativePathSegment(parent.getName());
+         cmisParent.setRelativePathSegment(obj.getName());
          cmisParents.add(cmisParent);
       }
       return cmisParents;

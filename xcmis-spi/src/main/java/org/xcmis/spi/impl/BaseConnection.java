@@ -1146,7 +1146,7 @@ public abstract class BaseConnection implements Connection
          CmisObjectParents parentType = new CmisObjectParentsImpl();
          parentType.setObject(cmisParent);
          if (includeRelativePathSegment)
-            parentType.setRelativePathSegment(parentData.getName());
+            parentType.setRelativePathSegment(object.getName());
          cmisParents.add(parentType);
       }
       return cmisParents;
