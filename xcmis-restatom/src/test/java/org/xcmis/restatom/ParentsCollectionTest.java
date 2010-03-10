@@ -113,6 +113,6 @@ public class ParentsCollectionTest extends BaseTest
       org.w3c.dom.Node xmlEntry = getNode("atom:entry", xmlFeed);
       validateObjectEntry(xmlEntry, "cmis:folder");
 
-      assertEquals(testFolderName, getStringElement("cmisra:relativePathSegment", xmlEntry));
+      assertEquals(doc.getName(), getStringElement("cmisra:relativePathSegment", xmlEntry));
    }
 }
