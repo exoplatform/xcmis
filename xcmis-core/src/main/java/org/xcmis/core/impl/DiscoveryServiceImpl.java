@@ -138,7 +138,7 @@ public class DiscoveryServiceImpl extends CmisObjectProducer implements Discover
          CmisObject object =
             getCmisObject(repository.getObjectById(result.getObjectId()), includeAllowableActions, includeRelationships,
                false, false, new PropertyFilter(propertyFilter.toString()), new RenditionFilter(renditionFilter),
-               (RenditionManager)repository, includeObjectInfo);
+               repository.getRenditionManager(), includeObjectInfo);
          
          Score score = result.getScore();
          if (score != null)
