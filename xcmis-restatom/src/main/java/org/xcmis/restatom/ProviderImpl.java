@@ -93,8 +93,9 @@ public class ProviderImpl extends AbstractProvider
       targetBuilder = new TemplateTargetBuilder();
       targetBuilder.setTemplate(TargetType.ENTRY, "{target_base}/cmisatom/{repoid}/{atomdoctype}/{id}");
       targetBuilder.setTemplate(TargetType.SERVICE, "{target_base}/cmisatom/{repoid}");
-      targetBuilder.setTemplate("feed",
-         "{target_base}/cmisatom/{repoid}/{atomdoctype}/{id}{-opt|?|maxItems,skipCount}{-join|&|maxItems,skipCount}");
+      targetBuilder
+         .setTemplate("feed",
+            "{target_base}/cmisatom/{repoid}/{atomdoctype}/{id}{-opt|?|q,maxItems,skipCount}{-join|&|q,maxItems,skipCount}");
 
       resolver = new RegexTargetResolver();
 
@@ -158,9 +159,10 @@ public class ProviderImpl extends AbstractProvider
          "repoid", //
          "objectid");
 
-      resolver.setPattern("/cmisatom/([^/]+)/query(\\??.*)?", //
+      resolver.setPattern("/cmisatom/([^/]+)/query(/)?(\\??.*)?", //
          TargetType.TYPE_COLLECTION, //
-         "repoid"); //
+         "repoid", //
+         "slash"); // Slash. 
 
       resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+)/file/([^/?]+)(\\??.*)?", //
          TargetType.TYPE_MEDIA, //

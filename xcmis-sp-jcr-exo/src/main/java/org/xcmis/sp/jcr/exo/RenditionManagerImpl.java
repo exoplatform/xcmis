@@ -80,24 +80,28 @@ public class RenditionManagerImpl implements RenditionManager
          }
          else
          {
-            MimeType contentType = MimeType.fromString(entry.getContent(null).getMediaType());
-            for (Map.Entry<MimeType, RenditionProvider> e : renditionProviders.entrySet())
+            if (entry.getContent(null) != null)
             {
-               if (e.getKey().match(contentType))
+               MimeType contentType = MimeType.fromString(entry.getContent(null).getMediaType());
+               for (Map.Entry<MimeType, RenditionProvider> e : renditionProviders.entrySet())
                {
-                  RenditionProvider renditionProvider = e.getValue();
-                  RenditionContentStream renditionContentStream = renditionProvider.getRenditionStream(entry.getContent(null));
-                  //String id = IdGenerator.generate();
-                  String id = entry.getObjectId();
-                  streamsMap.put(id, renditionContentStream);
-                  CmisRenditionType rendition = new CmisRenditionType();
-                  rendition.setStreamId(id);
-                  rendition.setKind(renditionContentStream.getKind());
-                  rendition.setMimetype(renditionContentStream.getMediaType());
-                  rendition.setLength(BigInteger.valueOf(renditionContentStream.length()));
-                  rendition.setHeight(BigInteger.valueOf(renditionContentStream.getHeight()));
-                  rendition.setWidth(BigInteger.valueOf(renditionContentStream.getWidth()));
-                  return new RenditionIterator(rendition);
+                  if (e.getKey().match(contentType))
+                  {
+                     RenditionProvider renditionProvider = e.getValue();
+                     RenditionContentStream renditionContentStream =
+                        renditionProvider.getRenditionStream(entry.getContent(null));
+                     //String id = IdGenerator.generate();
+                     String id = entry.getObjectId();
+                     streamsMap.put(id, renditionContentStream);
+                     CmisRenditionType rendition = new CmisRenditionType();
+                     rendition.setStreamId(id);
+                     rendition.setKind(renditionContentStream.getKind());
+                     rendition.setMimetype(renditionContentStream.getMediaType());
+                     rendition.setLength(BigInteger.valueOf(renditionContentStream.length()));
+                     rendition.setHeight(BigInteger.valueOf(renditionContentStream.getHeight()));
+                     rendition.setWidth(BigInteger.valueOf(renditionContentStream.getWidth()));
+                     return new RenditionIterator(rendition);
+                  }
                }
             }
          }
@@ -110,8 +114,7 @@ public class RenditionManagerImpl implements RenditionManager
       }
       catch (IOException e)
       {
-         String msg =
-            "Unable get renditions for object " + entry.getObjectId() + " Unexpected error " + e.getMessage();
+         String msg = "Unable get renditions for object " + entry.getObjectId() + " Unexpected error " + e.getMessage();
          throw new RepositoryException(msg, e);
       }
       return null;
@@ -154,7 +157,7 @@ public class RenditionManagerImpl implements RenditionManager
          }
          if (count > 0)
             ((EntryImpl)entry).getNode().save();
-         else 
+         else
             streamsMap.remove(entry.getObjectId());
       }
       catch (javax.jcr.RepositoryException re)

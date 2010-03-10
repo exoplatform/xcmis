@@ -185,7 +185,7 @@ abstract class CmisObjectProducer
       result.setParentId(getEntryPropertyString(entry, CMIS.PARENT_ID));
       result.setVersionSeriesId(getEntryPropertyString(entry, CMIS.VERSION_SERIES_ID));
       String contentStreamMimeType = getEntryPropertyString(entry, CMIS.CONTENT_STREAM_MIME_TYPE);
-      result.setContentStreamMimeType(contentStreamMimeType != "" ? contentStreamMimeType : null);
+      result.setContentStreamMimeType("".equalsIgnoreCase(contentStreamMimeType) ? null : contentStreamMimeType);
       result.setChangeToken(getEntryPropertyString(entry, CMIS.CHANGE_TOKEN));
       result.setTargetId(getEntryPropertyString(entry, CMIS.TARGET_ID));
       result.setVersionSeriesCheckedOutId(getEntryPropertyString(entry, CMIS.VERSION_SERIES_CHECKED_OUT_ID));

@@ -36,7 +36,7 @@ public interface AtomCMIS extends CMIS
     * Value for &#64;javax.ws.rs.Path on JAX-RS service.
     */
    String CMIS_REST_RESOURCE_PATH = "cmisatom";
-   
+
    String CMISRA_NS_URI = "http://docs.oasis-open.org/ns/cmis/restatom/200908/";
 
    String CMISRA_PREFIX = "cmisra";
@@ -485,6 +485,8 @@ public interface AtomCMIS extends CMIS
    String PARAM_UNFILE_OBJECT = EnumArguments.UNFILE_OBJECTS.value();
 
    String PARAM_VERSIONING_STATE = EnumArguments.VERSIONING_STATE.value();
+
+   String PARAM_SEARCH_ALL_VERSIONS = "searchAllVersions";
 
    String LINK_SELF = EnumLinkRelations.SELF.value();
 

@@ -197,7 +197,8 @@ public class AtomCmisService implements ResourceContainer
    @POST
    @Path("{repositoryId}/object/{folderId}")
    @Produces("application/atom+xml;type=entry")
-   public Response createChildObj(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
+   public Response createChildObj(@Context HttpServletRequest httpRequest,
+      @PathParam("repositoryId") String repositoryId)
    {
       // Found some clients those use direct object (folder) link for adding child.
       return createItem(repositoryId, httpRequest);
@@ -231,17 +232,17 @@ public class AtomCmisService implements ResourceContainer
 
    @DELETE
    @Path("{repositoryId}/foldertree/{folderId}")
-   public Response deleteFolderTree(@PathParam("repositoryId") String repositoryId, @PathParam("folderId") String folderId,
-      @QueryParam("unfileObject") String unfileNonfolderObjects,
+   public Response deleteFolderTree(@PathParam("repositoryId") String repositoryId,
+      @PathParam("folderId") String folderId, @QueryParam("unfileObject") String unfileNonfolderObjects,
       @DefaultValue("false") @QueryParam("continueOnFailure") boolean continueOnFailure)
    {
       return deleteDescendants(repositoryId, folderId, unfileNonfolderObjects, continueOnFailure);
    }
-   
+
    @DELETE
    @Path("{repositoryId}/descendants/{folderId}")
-   public Response deleteDescendants(@PathParam("repositoryId") String repositoryId, @PathParam("folderId") String folderId,
-      @QueryParam("unfileObject") String unfileNonfolderObjects,
+   public Response deleteDescendants(@PathParam("repositoryId") String repositoryId,
+      @PathParam("folderId") String folderId, @QueryParam("unfileObject") String unfileNonfolderObjects,
       @DefaultValue("false") @QueryParam("continueOnFailure") boolean continueOnFailure)
    {
       EnumUnfileObject unfileObject;
@@ -719,19 +720,22 @@ public class AtomCmisService implements ResourceContainer
       UriTemplateTypeElement folderByPathElement = ws.addExtension(AtomCMIS.URITEMPLATE);
       folderByPathElement.build(objectByPath);
 
-      //      // query template
-      //      CmisUriTemplateType query = new CmisUriTemplateType();
-      //      query.setMediatype(AtomCMIS.MEDIATYPE_ATOM_FEED);
-      //      query.setTemplate(repoPath + "/query?"//
-      //         + "q={q}&"//
-      //         + "searchAllVersions={searchAllVersions}&"//
-      //         + "maxItems={maxItems}&"//
-      //         + "skipCount={skipCount}&"//
-      //         + "includeAllowableActions={includeAllowableActions}=&"//
-      //         + "includeRelationships={includeRelationships}");
-      //      query.setType(AtomCMIS.URITEMPLATE_QUERY);
-      //      UriTemplateTypeElement queryElement = ws.addExtension(AtomCMIS.URITEMPLATE);
-      //      queryElement.build(query);
+      // query template
+      CmisUriTemplateType query = new CmisUriTemplateType();
+      query.setMediatype(AtomCMIS.MEDIATYPE_ATOM_FEED);
+      query.setTemplate(new StringBuilder() //
+         .append(repoPath) //
+         .append("/query?")//
+         .append("q={q}&")//
+         .append("searchAllVersions={searchAllVersions}&")//
+         .append("maxItems={maxItems}&")//
+         .append("skipCount={skipCount}&")//
+         .append("includeAllowableActions={includeAllowableActions}=&")//
+         .append("includeRelationships={includeRelationships}&")//
+         .append("renditionFilter={renditionFilter}").toString());
+      query.setType(AtomCMIS.URITEMPLATE_QUERY);
+      UriTemplateTypeElement queryElement = ws.addExtension(AtomCMIS.URITEMPLATE);
+      queryElement.build(query);
 
       // typebyid template
       CmisUriTemplateType typeById = new CmisUriTemplateType();
