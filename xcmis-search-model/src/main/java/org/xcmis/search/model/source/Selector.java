@@ -80,10 +80,7 @@ public class Selector extends Source
       this.name = name;
       this.alias = alias;
 
-      this.hcode = new HashCodeBuilder()
-                   .append(name)
-                   .append(alias)
-                   .toHashCode();
+      this.hcode = new HashCodeBuilder().append(name).append(alias).toHashCode();
 
    }
 
@@ -157,10 +154,7 @@ public class Selector extends Source
       }
       Selector rhs = (Selector)obj;
 
-      return new EqualsBuilder()
-                    .append(name, rhs.name)
-                    .append(alias, rhs.alias)
-                    .isEquals();
+      return new EqualsBuilder().append(name, rhs.name).append(alias, rhs.alias).isEquals();
    }
 
    /**

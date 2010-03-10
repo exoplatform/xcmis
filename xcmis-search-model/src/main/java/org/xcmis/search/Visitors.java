@@ -50,7 +50,9 @@ import org.xcmis.search.model.source.join.DescendantNodeJoinCondition;
 import org.xcmis.search.model.source.join.EquiJoinCondition;
 import org.xcmis.search.model.source.join.SameNodeJoinCondition;
 
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Set;
 
 /**
  * @author <a href="mailto:Sergey.Kabashnyuk@exoplatform.org">Sergey Kabashnyuk</a>
@@ -70,7 +72,7 @@ public class Visitors
     * @throws VisitException 
     */
    public static <GeneralVisitor extends QueryObjectModelVisitor> GeneralVisitor visit(QueryElement visitable,
-                                                                        GeneralVisitor visitor) throws VisitException
+      GeneralVisitor visitor) throws VisitException
    {
       if (visitable != null)
       {
@@ -95,6 +97,142 @@ public class Visitors
       {
          return "";
       }
+   }
+
+   /**
+    * Get the names of the selectors referenced by the QueryElement object.
+    * 
+    * @param visitable the object to be visited
+    * @return the set of selector names referenced in some way by the visitable; never null
+    */
+   public static Set<SelectorName> getSelectorsReferencedBy(QueryElement visitable)
+   {
+      final Set<SelectorName> symbols = new HashSet<SelectorName>();
+      // Walk the entire structure, so only supply a StrategyVisitor (that does no navigation) ...
+      try
+      {
+         visit(visitable, new WalkAllVisitor(new AbstractModelVisitor()
+         {
+
+            @Override
+            public void visit(ChildNode childNode)
+            {
+               symbols.add(childNode.getSelectorName());
+            }
+
+            @Override
+            public void visit(ChildNodeJoinCondition joinCondition)
+            {
+               symbols.add(joinCondition.getChildSelectorName());
+               symbols.add(joinCondition.getParentSelectorName());
+            }
+
+            @Override
+            public void visit(Column column)
+            {
+               symbols.add(column.getSelectorName());
+            }
+
+            @Override
+            public void visit(DescendantNode descendant)
+            {
+               symbols.add(descendant.getSelectorName());
+            }
+
+            @Override
+            public void visit(DescendantNodeJoinCondition joinCondition)
+            {
+               symbols.add(joinCondition.getAncestorSelectorName());
+               symbols.add(joinCondition.getDescendantSelectorName());
+            }
+
+            @Override
+            public void visit(EquiJoinCondition joinCondition)
+            {
+               symbols.add(joinCondition.getSelector1Name());
+               symbols.add(joinCondition.getSelector2Name());
+            }
+
+            @Override
+            public void visit(FullTextSearch fullTextSearch)
+            {
+               symbols.add(fullTextSearch.getSelectorName());
+            }
+
+            @Override
+            public void visit(FullTextSearchScore fullTextSearchScore)
+            {
+               symbols.add(fullTextSearchScore.getSelectorName());
+            }
+
+            @Override
+            public void visit(Length length)
+            {
+               symbols.add(length.getSelectorName());
+            }
+
+            @Override
+            public void visit(NodeDepth depth)
+            {
+               symbols.add(depth.getSelectorName());
+            }
+
+            @Override
+            public void visit(NodeLocalName node)
+            {
+               symbols.add(node.getSelectorName());
+            }
+
+            @Override
+            public void visit(NodeName node)
+            {
+               symbols.add(node.getSelectorName());
+            }
+
+            @Override
+            public void visit(Selector node)
+            {
+               if (node.hasAlias())
+               {
+                  symbols.add(node.getAlias());
+               }
+               else
+               {
+                  symbols.add(node.getName());
+               }
+            }
+
+            @Override
+            public void visit(PropertyExistence prop)
+            {
+               symbols.add(prop.getSelectorName());
+            }
+
+            @Override
+            public void visit(PropertyValue prop)
+            {
+               symbols.add(prop.getSelectorName());
+            }
+
+            @Override
+            public void visit(SameNode node)
+            {
+               symbols.add(node.getSelectorName());
+            }
+
+            @Override
+            public void visit(SameNodeJoinCondition joinCondition)
+            {
+               symbols.add(joinCondition.getSelector1Name());
+               symbols.add(joinCondition.getSelector2Name());
+            }
+         }));
+      }
+      catch (VisitException e)
+      {
+         //never happen
+      }
+      return symbols;
    }
 
    /**
