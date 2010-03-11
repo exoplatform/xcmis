@@ -61,7 +61,7 @@ public class SimpleQueryPlanerTest
 
    private QueryExecutionExceptions problems;
 
-   private Schema schemata;
+   private Schema schema;
 
    private InMemorySchema.Builder schemataBuilder;
 
@@ -151,9 +151,9 @@ public class SimpleQueryPlanerTest
    @Test
    public void testShouldProducePlanForSelectStarFromTable() throws InvalidQueryException
    {
-      schemata = schemataBuilder.addTable("my:mytype", "column1", "column2", "column3").build();
+      schema = schemataBuilder.addTable("my:mytype", "column1", "column2", "column3").build();
       query = builder.selectStar().from("my:mytype").query();
-      queryContext = new QueryExecutionContext(schemata, problems, null);
+      queryContext = new QueryExecutionContext(schema, problems, null);
       plan = planner.createPlan(queryContext, query);
       assertThat(problems.hasProblems(), is(false));
       assertProjectNode(plan.findStep(Type.PROJECT), "column1", "column2", "column3");
@@ -164,9 +164,9 @@ public class SimpleQueryPlanerTest
    @Test
    public void testShouldProduceErrorWhenSelectingNonExistantTable() throws InvalidQueryException
    {
-      schemata = schemataBuilder.addTable("someTable", "column1", "column2", "column3").build();
+      schema = schemataBuilder.addTable("someTable", "column1", "column2", "column3").build();
       query = builder.selectStar().from("otheTable").query();
-      queryContext = new QueryExecutionContext(schemata, problems, null);
+      queryContext = new QueryExecutionContext(schema, problems, null);
       plan = planner.createPlan(queryContext, query);
       assertThat(problems.hasProblems(), is(true));
    }
@@ -174,116 +174,120 @@ public class SimpleQueryPlanerTest
    @Test
    public void testShouldProduceErrorWhenSelectingNonExistantColumnOnExistingTable() throws InvalidQueryException
    {
-      schemata = schemataBuilder.addTable("someTable", "column1", "column2", "column3").build();
+      schema = schemataBuilder.addTable("someTable", "column1", "column2", "column3").build();
       query = builder.select("column1", "column4").from("someTable").query();
-      queryContext = new QueryExecutionContext(schemata, problems, null);
+      queryContext = new QueryExecutionContext(schema, problems, null);
       plan = planner.createPlan(queryContext, query);
       assertThat(problems.hasProblems(), is(true));
 
    }
 
-   //
-   //   @Test
-   //   public void testShouldProducePlanWhenSelectingAllColumnsOnExistingTable()
-   //   {
-   //      schemata = schemataBuilder.addTable("someTable", "column1", "column2", "column3").build();
-   //      query = builder.selectStar().from("someTable").query();
-   //      queryContext = new QueryContext(schemata, typeSystem, hints, problems);
-   //      plan = planner.createPlan(queryContext, query);
-   //      print(plan);
-   //      assertThat(problems.hasErrors(), is(false));
-   //      assertThat(problems.isEmpty(), is(true));
-   //      assertProjectNode(plan, "column1", "column2", "column3");
-   //      assertThat(plan.getType(), is(PlanNode.Type.PROJECT));
-   //      assertThat(plan.getChildCount(), is(1));
-   //      PlanNode source = plan.getFirstChild();
-   //      assertSourceNode(source, "someTable", null, "column1", "column2", "column3");
-   //      assertThat(source.getChildCount(), is(0));
-   //   }
-   //
-   //   @Test
-   //   public void testShouldProducePlanWhenSelectingColumnsFromTableWithoutAlias()
-   //   {
-   //      schemata = schemataBuilder.addTable("someTable", "column1", "column2", "column3").build();
-   //      query =
-   //         builder.select("column1", "column2").from("someTable").where().path("someTable").isEqualTo(1L).end().query();
-   //      queryContext = new QueryContext(schemata, typeSystem, hints, problems);
-   //      plan = planner.createPlan(queryContext, query);
-   //      assertThat(problems.hasErrors(), is(false));
-   //      assertThat(plan.getType(), is(PlanNode.Type.PROJECT));
-   //      assertThat(plan.getSelectors(), is(selectors("someTable")));
-   //   }
-   //
-   //   @Test
-   //   public void testShouldProducePlanWhenSelectingColumnsFromTableWithAlias()
-   //   {
-   //      schemata = schemataBuilder.addTable("dna:someTable", "column1", "column2", "column3").build();
-   //      query =
-   //         builder.select("column1", "column2").from("dna:someTable AS t1").where().path("t1").isEqualTo(1L).end()
-   //            .query();
-   //      queryContext = new QueryContext(schemata, typeSystem, hints, problems);
-   //      plan = planner.createPlan(queryContext, query);
-   //      assertThat(problems.hasErrors(), is(false));
-   //      print(plan);
-   //      assertThat(plan.getType(), is(PlanNode.Type.PROJECT));
-   //      assertThat(plan.getSelectors(), is(selectors("t1")));
-   //   }
-   //
-   //   @Test
-   //   public void testShouldProducePlanWhenSelectingAllColumnsFromTableWithAlias()
-   //   {
-   //      schemata = schemataBuilder.addTable("dna:someTable", "column1", "column2", "column3").build();
-   //      query = builder.selectStar().from("dna:someTable AS t1").where().path("t1").isEqualTo(1L).end().query();
-   //      queryContext = new QueryContext(schemata, typeSystem, hints, problems);
-   //      plan = planner.createPlan(queryContext, query);
-   //      assertThat(problems.hasErrors(), is(false));
-   //      print(plan);
-   //      assertThat(plan.getType(), is(PlanNode.Type.PROJECT));
-   //      assertThat(plan.getSelectors(), is(selectors("t1")));
-   //   }
-   //
-   //   @Test
-   //   public void testShouldProduceErrorWhenFullTextSearchingTableWithNoSearchableColumns()
-   //   {
-   //      schemata = schemataBuilder.addTable("someTable", "column1", "column2", "column3").build();
-   //      // Make sure the query without the search criteria does not have an error
-   //      query = builder.select("column1", "column2").from("someTable").query();
-   //      queryContext = new QueryContext(schemata, typeSystem, hints, problems);
-   //      plan = planner.createPlan(queryContext, query);
-   //      assertThat(problems.hasErrors(), is(false));
-   //
-   //      query = builder.select("column1", "column2").from("someTable").where().search("someTable", "term1").end().query();
-   //      queryContext = new QueryContext(schemata, typeSystem, hints, problems);
-   //      plan = planner.createPlan(queryContext, query);
-   //      assertThat(problems.hasErrors(), is(true));
-   //   }
-   //
-   //   @Test
-   //   public void testShouldProducePlanWhenFullTextSearchingTableWithAtLeastOneSearchableColumn()
-   //   {
-   //      schemata =
-   //         schemataBuilder.addTable("someTable", "column1", "column2", "column3").makeSearchable("someTable", "column1")
-   //            .build();
-   //      query = builder.select("column1", "column4").from("someTable").where().search("someTable", "term1").end().query();
-   //      queryContext = new QueryContext(schemata, typeSystem, hints, problems);
-   //      plan = planner.createPlan(queryContext, query);
-   //      assertThat(problems.hasErrors(), is(true));
-   //   }
-   //
+   @Test
+   public void testShouldProducePlanWhenSelectingAllColumnsOnExistingTable() throws InvalidQueryException
+   {
+      schema = schemataBuilder.addTable("someTable", "column1", "column2", "column3").build();
+      query = builder.selectStar().from("someTable").query();
+      queryContext = new QueryExecutionContext(schema, problems, null);
+      plan = planner.createPlan(queryContext, query);
+
+      assertThat(problems.hasProblems(), is(false));
+      assertProjectNode(plan.findStep(Type.PROJECT), "column1", "column2", "column3");
+      assertThat(plan.size(), is(2));
+      assertSourceNode(plan.findStep(Type.SOURCE), "someTable", null, "column1", "column2", "column3");
+
+   }
+
+   @Test
+   public void testShouldProducePlanWhenSelectingColumnsFromTableWithoutAlias() throws InvalidQueryException
+   {
+      schema = schemataBuilder.addTable("someTable", "column1", "column2", "column3").build();
+      query =
+         builder.select("column1", "column2").from("someTable").where().nodeName("someTable").isEqualTo("nodeTestName")
+            .end().query();
+      queryContext = new QueryExecutionContext(schema, problems, null);
+      plan = planner.createPlan(queryContext, query);
+      assertThat(problems.hasProblems(), is(false));
+      assertThat(plan.findStep(Type.PROJECT), notNullValue());
+      QueryExecutionStep executionStep = plan.findStep(Type.PROJECT);
+      assertThat(executionStep.getType(), is(Type.PROJECT));
+
+      assertThat(executionStep.getSelectors(), is(selectors("someTable")));
+   }
+
+   @Test
+   public void testShouldProducePlanWhenSelectingColumnsFromTableWithAlias() throws InvalidQueryException
+   {
+      schema = schemataBuilder.addTable("test:someTable", "column1", "column2", "column3").build();
+      query =
+         builder.select("column1", "column2").from("test:someTable AS t1").where().nodeName("t1").isEqualTo(
+            "nodeTestName").end().query();
+      queryContext = new QueryExecutionContext(schema, problems, null);
+      plan = planner.createPlan(queryContext, query);
+      assertThat(problems.hasProblems(), is(false));
+      assertThat(plan.findStep(Type.PROJECT), notNullValue());
+      QueryExecutionStep executionStep = plan.findStep(Type.PROJECT);
+
+      assertThat(executionStep.getSelectors(), is(selectors("t1")));
+   }
+
+   @Test
+   public void testShouldProducePlanWhenSelectingAllColumnsFromTableWithAlias() throws InvalidQueryException
+   {
+      schema = schemataBuilder.addTable("test:someTable", "column1", "column2", "column3").build();
+      query =
+         builder.selectStar().from("test:someTable AS t1").where().nodeName("t1").isEqualTo("node name").end().query();
+      queryContext = new QueryExecutionContext(schema, problems, null);
+      plan = planner.createPlan(queryContext, query);
+      assertThat(problems.hasProblems(), is(false));
+      assertThat(plan.findStep(Type.PROJECT), notNullValue());
+      QueryExecutionStep executionStep = plan.findStep(Type.PROJECT);
+
+      assertThat(executionStep.getSelectors(), is(selectors("t1")));
+   }
+
+   @Test
+   public void testShouldProduceErrorWhenFullTextSearchingTableWithNoSearchableColumns() throws InvalidQueryException
+   {
+      schema = schemataBuilder.addTable("someTable", "column1", "column2", "column3").build();
+      // Make sure the query without the search criteria does not have an error
+      query = builder.select("column1", "column2").from("someTable").query();
+      queryContext = new QueryExecutionContext(schema, problems, null);
+      plan = planner.createPlan(queryContext, query);
+      assertThat(problems.hasProblems(), is(false));
+
+      query = builder.select("column1", "column2").from("someTable").where().search("someTable", "term1").end().query();
+      queryContext = new QueryExecutionContext(schema, problems, null);
+      plan = planner.createPlan(queryContext, query);
+      assertThat(problems.hasProblems(), is(true));
+   }
+
+   @Test
+   public void testShouldProducePlanWhenFullTextSearchingTableWithAtLeastOneSearchableColumn()
+      throws InvalidQueryException
+   {
+      schema =
+         schemataBuilder.addTable("someTable", "column1", "column2", "column3").makeSearchable("someTable", "column1")
+            .build();
+      query = builder.select("column1", "column4").from("someTable").where().search("someTable", "term1").end().query();
+      queryContext = new QueryExecutionContext(schema, problems, null);
+      plan = planner.createPlan(queryContext, query);
+      assertThat(problems.hasProblems(), is(true));
+   }
+
    @Test
    public void testShouldProduceErrorWhenFullTextSearchingColumnThatIsNotSearchable() throws InvalidQueryException
    {
-      schemata = schemataBuilder.addTable("someTable", "column1", "column2", "column3").build();
+      schema = schemataBuilder.addTable("someTable", "column1", "column2", "column3").build();
       // Make sure the query without the search criteria does not have an error
       query = builder.select("column1", "column2").from("someTable").query();
-      queryContext = new QueryExecutionContext(schemata, problems, null);
+      queryContext = new QueryExecutionContext(schema, problems, null);
       plan = planner.createPlan(queryContext, query);
       assertThat(problems.hasProblems(), is(false));
 
       query =
          builder.select("column1", "column2").from("someTable").where().search("someTable", "column2", "term1").end()
             .query();
-      queryContext = new QueryExecutionContext(schemata, problems, null);
+      queryContext = new QueryExecutionContext(schema, problems, null);
       plan = planner.createPlan(queryContext, query);
       assertThat(problems.hasProblems(), is(true));
    }
@@ -291,44 +295,55 @@ public class SimpleQueryPlanerTest
    @Test
    public void testShouldProducePlanWhenFullTextSearchingColumnThatIsSearchable() throws InvalidQueryException
    {
-      schemata =
+      schema =
          schemataBuilder.addTable("someTable", "column1", "column2", "column3").makeSearchable("someTable", "column1")
             .build();
       query =
          builder.select("column1", "column4").from("someTable").where().search("someTable", "column1", "term1").end()
             .query();
-      queryContext = new QueryExecutionContext(schemata, problems, null);
+      queryContext = new QueryExecutionContext(schema, problems, null);
       plan = planner.createPlan(queryContext, query);
       assertThat(problems.hasProblems(), is(true));
    }
-   //
-   //   @Test
-   //   public void testShouldProducePlanWhenOrderByClauseIsUsed()
-   //   {
-   //      schemata = schemataBuilder.addTable("dna:someTable", "column1", "column2", "column3").build();
-   //      query =
-   //         builder.selectStar().from("dna:someTable AS t1").where().path("t1").isEqualTo(1L).end().orderBy().ascending()
-   //            .propertyValue("t1", "column1").end().query();
-   //      queryContext = new QueryContext(schemata, typeSystem, hints, problems);
-   //      plan = planner.createPlan(queryContext, query);
-   //      assertThat(problems.hasErrors(), is(false));
-   //      print(plan);
-   //      assertThat(plan.getType(), is(PlanNode.Type.SORT));
-   //      assertThat(plan.getSelectors(), is(selectors("t1")));
-   //   }
-   //
-   //   @Test
-   //   public void testShouldProducePlanWhenOrderByClauseWithScoreIsUsed()
-   //   {
-   //      schemata = schemataBuilder.addTable("dna:someTable", "column1", "column2", "column3").build();
-   //      query =
-   //         builder.selectStar().from("dna:someTable AS t1").where().path("t1").isEqualTo(1L).end().orderBy().ascending()
-   //            .fullTextSearchScore("t1").end().query();
-   //      queryContext = new QueryContext(schemata, typeSystem, hints, problems);
-   //      plan = planner.createPlan(queryContext, query);
-   //      assertThat(problems.hasErrors(), is(false));
-   //      print(plan);
-   //      assertThat(plan.getType(), is(PlanNode.Type.SORT));
-   //      assertThat(plan.getSelectors(), is(selectors("t1")));
-   //   }
+
+   @Test
+   public void testShouldProducePlanWhenOrderByClauseIsUsed() throws InvalidQueryException
+   {
+      schema =
+         schemataBuilder.addTable("test:someTable", "column1", "column2", "column3").makeSearchable("test:someTable",
+            "column1").build();
+      query =
+         builder.selectStar().from("test:someTable AS t1").where().search("t1", "column1", "term1").end().orderBy()
+            .ascending().propertyValue("t1", "column1").end().query();
+      queryContext = new QueryExecutionContext(schema, problems, null);
+      plan = planner.createPlan(queryContext, query);
+      assertThat(problems.hasProblems(), is(false));
+
+      assertThat(plan.findStep(Type.SORT), notNullValue());
+      QueryExecutionStep executionStep = plan.findStep(Type.SORT);
+
+      assertThat(executionStep.getSelectors(), is(selectors("t1")));
+      //TODO ASC
+
+   }
+
+   @Test
+   public void testShouldProducePlanWhenOrderByClauseWithScoreIsUsed() throws InvalidQueryException
+   {
+      schema =
+         schemataBuilder.addTable("test:someTable", "column1", "column2", "column3").makeSearchable("test:someTable",
+            "column1").build();
+      query =
+         builder.selectStar().from("test:someTable AS t1").where().search("t1", "column1", "term1").end().orderBy()
+            .ascending().fullTextSearchScore("t1").end().query();
+      queryContext = new QueryExecutionContext(schema, problems, null);
+      plan = planner.createPlan(queryContext, query);
+      assertThat(problems.hasProblems(), is(false));
+
+      assertThat(plan.findStep(Type.SORT), notNullValue());
+      QueryExecutionStep executionStep = plan.findStep(Type.SORT);
+
+      assertThat(executionStep.getSelectors(), is(selectors("t1")));
+      //TODO ASC
+   }
 }

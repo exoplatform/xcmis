@@ -28,6 +28,7 @@ import org.xcmis.search.model.Query;
 import org.xcmis.search.model.column.Column;
 import org.xcmis.search.model.constraint.And;
 import org.xcmis.search.model.constraint.Constraint;
+import org.xcmis.search.model.ordering.Ordering;
 import org.xcmis.search.model.source.Join;
 import org.xcmis.search.model.source.Selector;
 import org.xcmis.search.model.source.SelectorName;
@@ -91,6 +92,8 @@ public class SimplePlaner implements QueryExecutionPlaner
          populateConstrainPlan(context, query.getConstraint(), querySelectorsMap, executionPlan);
          //columns
          populateProject(context, query.getColumns(), querySelectorsMap, executionPlan);
+         //order by
+         populateSorting(context, query.getOrderings(), executionPlan);
 
          Visitors.visitAll(query, new Validator(context, querySelectorsMap));
       }
@@ -174,13 +177,13 @@ public class SimplePlaner implements QueryExecutionPlaner
             QueryExecutionStep executionStep = new QueryExecutionStep(QueryExecutionStep.Type.SOURCE);
             if (selector.hasAlias())
             {
-               executionStep.setProperty("SELECTOR", selector.getAlias());
+               executionStep.addSelector(selector.getAlias());
                executionStep.setProperty("SOURCE_ALIAS", selector.getAlias());
                executionStep.setProperty("SOURCE_NAME", selector.getName());
             }
             else
             {
-               executionStep.setProperty("SELECTOR", selector.getName());
+               executionStep.addSelector(selector.getName());
                executionStep.setProperty("SOURCE_NAME", selector.getName());
             }
             // Validate the source name and set the available columns ...
@@ -204,7 +207,32 @@ public class SimplePlaner implements QueryExecutionPlaner
          }
       });
 
-      executionPlan.addLast(stepsStack.pop());
+      executionPlan.addFirst(stepsStack.pop());
+   }
+
+   /**
+    * populate SORT node at top of executionPlan. The SORT may be pushed down to a source (or sources) if possible by the optimizer.
+    * 
+    * @param context the context in which the query is being planned
+    * @param orderings list of orderings from the query
+    * @param executionPlan the existing plan
+    */
+   protected void populateSorting(final QueryExecutionContext context, List<Ordering> orderings,
+      final QueryExecutionPlan executionPlan)
+   {
+      if (!orderings.isEmpty())
+      {
+
+         QueryExecutionStep sortNode = new QueryExecutionStep(QueryExecutionStep.Type.SORT);
+
+         sortNode.setProperty("SORT_ORDER_BY", orderings);
+         for (Ordering ordering : orderings)
+         {
+            sortNode.addSelectors(Visitors.getSelectorsReferencedBy(ordering));
+         }
+
+         executionPlan.addFirst(sortNode);
+      }
    }
 
    /**
@@ -234,7 +262,7 @@ public class SimplePlaner implements QueryExecutionPlaner
             SelectorName tableName = entry.getKey();
             Table table = entry.getValue();
             // Add the selector that is being used ...
-            projectNode.setProperty("SELECTOR", tableName);
+            projectNode.addSelector(tableName);
             // Compute the columns from this selector ...
             for (org.xcmis.search.content.Schema.Column column : table.getColumns())
             {
@@ -251,7 +279,7 @@ public class SimplePlaner implements QueryExecutionPlaner
          {
             SelectorName tableName = column.getSelectorName();
             // Add the selector that is being used ...
-            projectNode.setProperty("SELECTOR", tableName);
+            projectNode.addSelector(tableName);
             // Verify that each column is available in the appropriate source ...
             Table table = selectors.get(tableName);
             if (table == null)
@@ -273,7 +301,7 @@ public class SimplePlaner implements QueryExecutionPlaner
          }
       }
       projectNode.setProperty("PROJECT_COLUMNS", columns);
-      executionPlan.addLast(projectNode);
+      executionPlan.addFirst(projectNode);
    }
 
    /**

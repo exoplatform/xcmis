@@ -19,10 +19,13 @@
 package org.xcmis.search.query.plan;
 
 import org.apache.commons.lang.Validate;
+import org.xcmis.search.model.source.SelectorName;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * One step from query execution plan.
@@ -41,8 +44,11 @@ public class QueryExecutionStep
 
       PROJECT("Project"), //A node that defines the columns returned from the node.
 
-      WHERE("Where");//A node that selects a filters the tuples by applying a criteria evaluation filter node (WHERE )
+      WHERE("Where"), //A node that selects a filters the tuples by applying a criteria evaluation filter node (WHERE )
 
+      SORT("Sort"), //A node that defines the columns to sort on, the sort direction for each column, and whether to remove duplicates.
+
+      LIMIT("Limit"); //A node that limits the number of tuples returned
       private static final Map<String, Type> TYPE_BY_SYMBOL;
       static
       {
@@ -101,6 +107,9 @@ public class QueryExecutionStep
     */
    private final Map<String, Object> properties;
 
+   /** The set of named selectors (e.g., tables) that this node deals with. */
+   private Set<SelectorName> selectors;
+
    private final Type type;
 
    /**
@@ -109,6 +118,7 @@ public class QueryExecutionStep
    {
       this.type = type;
       this.properties = new HashMap<String, Object>();
+      this.selectors = new HashSet<SelectorName>();
    }
 
    /**
@@ -151,4 +161,60 @@ public class QueryExecutionStep
       return type + "[" + properties + "]";
    }
 
+   /**
+    * Add a selector to this plan node. This method does nothing if the supplied selector is null.
+    * 
+    * @param symbol the symbol of the selector
+    */
+   public void addSelector(SelectorName symbol)
+   {
+      if (symbol != null)
+      {
+         selectors.add(symbol);
+      }
+   }
+
+   /**
+    * Add the selectors to this execution step. This method does nothing for any supplied selector that is null.
+    * 
+    * @param first the first symbol to be added
+    * @param second the second symbol to be added
+    */
+   public void addSelector(SelectorName first, SelectorName second)
+   {
+      if (first != null)
+      {
+         selectors.add(first);
+      }
+      if (second != null)
+      {
+         selectors.add(second);
+      }
+   }
+
+   /**
+    * Add the selectors to this execution step. This method does nothing for any supplied selector that is null.
+    * 
+    * @param names the symbols to be added
+    */
+   public void addSelectors(Iterable<SelectorName> names)
+   {
+      for (SelectorName name : names)
+      {
+         if (name != null)
+         {
+            selectors.add(name);
+         }
+      }
+   }
+
+   /**
+    * Get the selectors that are referenced by this execution step.
+    * 
+    * @return the names of the selectors; never null but possibly empty
+    */
+   public Set<SelectorName> getSelectors()
+   {
+      return selectors;
+   }
 }
