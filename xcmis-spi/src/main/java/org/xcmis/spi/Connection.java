@@ -858,11 +858,11 @@ public interface Connection
     * Delete the specified object.
     * 
     * @param objectId document id
-    * @param deleteAllVersions if <code>true</code> then delete all versions of
-    *        the document. If <code>false</code>, delete only the document
-    *        object specified. This parameter will be ignored if parameter when
-    *        <code>objectId</code> non-document object or non-versionable
-    *        document
+    * @param deleteAllVersions if <code>true</code> (Default if not specified)
+    *        then delete all versions of the document. If <code>false</code>,
+    *        delete only the document object specified. This parameter will be
+    *        ignored if parameter when <code>objectId</code> non-document object
+    *        or non-versionable document
     * @throws ObjectNotFoundException if object with specified id
     *         <code>objectId</code> does not exist
     * @throws ConstraintException if objectId is folder that contains one or
@@ -873,7 +873,7 @@ public interface Connection
     *         internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   void deleteObject(String objectId, boolean deleteAllVersions) throws ObjectNotFoundException, ConstraintException,
+   void deleteObject(String objectId, Boolean deleteAllVersions) throws ObjectNotFoundException, ConstraintException,
       UpdateConflictException, StorageException, CmisRuntimeException;
 
    /**
@@ -881,11 +881,11 @@ public interface Connection
     * descendant-objects.
     * 
     * @param folderId folder id
-    * @param deleteAllVersions if <code>true</code> then delete all versions of
-    *        the document. If <code>false</code>, delete only the document
-    *        object specified. This parameter will be ignored if parameter when
-    *        <code>objectId</code> non-document object or non-versionable
-    *        document
+    * @param deleteAllVersions if <code>true</code> (Default if not specified)
+    *        then delete all versions of the document. If <code>false</code>,
+    *        delete only the document object specified. This parameter will be
+    *        ignored if parameter when <code>objectId</code> non-document object
+    *        or non-versionable document
     * @param unfileObject an enumeration specifying how the storage MUST process
     *        file-able child objects:
     *        <ul>
@@ -908,7 +908,7 @@ public interface Connection
     * @throws CmisRuntimeException if any others errors occur
     */
    List<String> deleteTree(String folderId, boolean deleteAllVersions, EnumUnfileObject unfileObject,
-      boolean continueOnFailure) throws ObjectNotFoundException, UpdateConflictException, StorageException,
+      Boolean continueOnFailure) throws ObjectNotFoundException, UpdateConflictException, StorageException,
       CmisRuntimeException;
 
    /**

@@ -25,7 +25,9 @@ import org.xcmis.core.CmisAccessControlPrincipalType;
 import org.xcmis.core.CmisPropertiesType;
 import org.xcmis.core.CmisProperty;
 import org.xcmis.core.CmisPropertyId;
+import org.xcmis.core.CmisPropertyString;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.data.ObjectData;
 
 import java.util.Calendar;
@@ -34,6 +36,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -57,6 +60,43 @@ public final class CmisUtils
       }
 
    };
+
+   public static ItemsIterator<Object> EMPTY_ITEMS_ITERATOR = new EmptyItemsIterator();
+
+   private static class EmptyItemsIterator implements ItemsIterator<Object>
+   {
+
+      public long size()
+      {
+         return 0;
+      }
+
+      public void skip(long skip) throws NoSuchElementException
+      {
+         throw new NoSuchElementException("skip");
+      }
+
+      public boolean hasNext()
+      {
+         return false;
+      }
+
+      public Object next()
+      {
+         throw new NoSuchElementException("next");
+      }
+
+      public void remove()
+      {
+         throw new UnsupportedOperationException();
+      }
+
+   }
+
+   public static <T> ItemsIterator<T> emptyItemsIterator()
+   {
+      return (ItemsIterator<T>)EMPTY_ITEMS_ITERATOR;
+   }
 
    public static CmisAccessControlListType createAclFromPermissionMap(Map<String, Set<String>> permissions)
    {
@@ -100,31 +140,108 @@ public final class CmisUtils
    }
 
    /**
-    * Get object id from "cmis:objectId" property.
+    * Get "cmis:objectId" property.
     * 
-    * @param cmis the CMIS Object Type.
-    * @return the object id property.
+    * @param properties the CMIS Object Type
+    * @return the "cmis:objectId" property or <code>null</code>
     */
-   public static String getObjectId(CmisPropertiesType cmis)
+   public static String getObjectId(CmisPropertiesType properties)
    {
-      return ((CmisPropertyId)getProperty(cmis, CMIS.OBJECT_ID)).getValue().get(0);
+      CmisPropertyId property = (CmisPropertyId)getProperty(properties, CMIS.OBJECT_ID);
+      if (property != null && property.getValue().size() > 0)
+         return property.getValue().get(0);
+      return null;
    }
 
    /**
     * Get property from CMIS object type with provided property name.
     * 
-    * @param cmis the CMIS object type.
-    * @param propName the property name.
-    * @return the CMIS property.
+    * @param cmis the CMIS object type
+    * @param propertyId the property ID
+    * @return the CMIS property
     */
-   public static CmisProperty getProperty(CmisPropertiesType cmis, String propName)
+   public static CmisProperty getProperty(CmisPropertiesType properties, String propertyId)
    {
-      List<CmisProperty> props = cmis.getProperty();
-      for (CmisProperty prop : props)
+      if (properties != null)
       {
-         if (prop.getPropertyDefinitionId().equals(propName))
-            return prop;
+         List<CmisProperty> props = properties.getProperty();
+         for (CmisProperty prop : props)
+         {
+            if (prop.getPropertyDefinitionId().equals(propertyId))
+               return prop;
+         }
       }
+      return null;
+
+   }
+
+   /**
+    * Get "cmis:name" property.
+    * 
+    * @param properties the CMIS Properties Type.
+    * @return the "cmis:name" property or <code>null</code>
+    */
+   public static String getName(CmisPropertiesType properties)
+   {
+      CmisPropertyString property = (CmisPropertyString)getProperty(properties, CMIS.NAME);
+      if (property != null && property.getValue().size() > 0)
+         return property.getValue().get(0);
+      return null;
+   }
+
+   /**
+    * Get "cmis:policyText" property.
+    * 
+    * @param properties the CMIS Properties Type.
+    * @return the "cmis:policyText" property or <code>null</code>
+    */
+   public static String getPolicyText(CmisPropertiesType properties)
+   {
+      CmisPropertyString property = (CmisPropertyString)getProperty(properties, CMIS.POLICY_TEXT);
+      if (property != null && property.getValue().size() > 0)
+         return property.getValue().get(0);
+      return null;
+   }
+
+   /**
+    * Get "cmis:sourceId" property.
+    * 
+    * @param properties the CMIS Properties Type.
+    * @return the "cmis:sourceId" property or <code>null</code>
+    */
+   public static String getSourceId(CmisPropertiesType properties)
+   {
+      CmisPropertyId property = (CmisPropertyId)getProperty(properties, CMIS.SOURCE_ID);
+      if (property != null && property.getValue().size() > 0)
+         return property.getValue().get(0);
+      return null;
+   }
+
+   /**
+    * Get "cmis:targetId" property.
+    * 
+    * @param properties the CMIS Properties Type.
+    * @return the object "cmis:targetId" property or <code>null</code>
+    */
+   public static String getTargetId(CmisPropertiesType properties)
+   {
+      CmisPropertyId property = (CmisPropertyId)getProperty(properties, CMIS.TARGET_ID);
+      if (property != null && property.getValue().size() > 0)
+         return property.getValue().get(0);
+      return null;
+   }
+
+   /**
+    * Get "cmis:objectTypeId" property.
+    * 
+    * @param properties the CMIS Properties Type.
+    * @return the "cmis:objectTypeId" property or <code>null</code>
+    */
+   public static String getTypeId(CmisPropertiesType properties)
+   {
+      CmisPropertyId property = (CmisPropertyId)getProperty(properties, CMIS.OBJECT_TYPE_ID);
+      if (property != null && property.getValue().size() > 0)
+         return property.getValue().get(0);
       return null;
    }
 

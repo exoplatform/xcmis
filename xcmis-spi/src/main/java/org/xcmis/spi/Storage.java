@@ -42,6 +42,9 @@ import java.util.Collection;
 public interface Storage extends org.xcmis.spi.impl.TypeManager
 {
 
+   String getId();
+   
+   //
    CmisAllowableActionsType calculateAllowableActions(ObjectData object) throws CmisRuntimeException;
 
    //
@@ -61,7 +64,7 @@ public interface Storage extends org.xcmis.spi.impl.TypeManager
    ObjectData createDocument(ObjectData folder, CmisTypeDefinitionType typeDefinition, CmisPropertiesType properties,
       ContentStream content, CmisAccessControlListType addAcl, CmisAccessControlListType removeACEs,
       Collection<String> policies, EnumVersioningState versioningState) throws StorageException,
-      NameConstraintViolationException, CmisRuntimeException;
+      NameConstraintViolationException, IOException, CmisRuntimeException;
 
    ObjectData createDocumentFromSource(ObjectData source, ObjectData folder, CmisPropertiesType properties,
       CmisAccessControlListType addAcl, CmisAccessControlListType removeAcl, Collection<String> policies,
@@ -81,7 +84,7 @@ public interface Storage extends org.xcmis.spi.impl.TypeManager
       Collection<String> policies) throws StorageException, NameConstraintViolationException, CmisRuntimeException;
 
    //
-   void deleteObject(ObjectData object, boolean deleteAllVersion) throws UpdateConflictException, StorageException,
+   void deleteObject(ObjectData object, boolean deleteAllVersions) throws UpdateConflictException, StorageException,
       CmisRuntimeException;
 
    Collection<ObjectData> deleteTree(ObjectData folder, boolean deleteAllVersions, EnumUnfileObject unfileObject,

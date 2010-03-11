@@ -26,7 +26,6 @@ import org.xcmis.core.CmisProperty;
 import org.xcmis.core.CmisPropertyDecimal;
 import org.xcmis.core.CmisPropertyDefinitionType;
 import org.xcmis.core.CmisPropertyId;
-import org.xcmis.core.CmisPropertyString;
 import org.xcmis.core.CmisRenditionType;
 import org.xcmis.core.CmisTypeDefinitionType;
 import org.xcmis.core.CmisTypeDocumentDefinitionType;
@@ -51,6 +50,7 @@ import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentAlreadyExistsException;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
+import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.NotSupportedException;
 import org.xcmis.spi.ObjectNotFoundException;
@@ -68,7 +68,6 @@ import org.xcmis.spi.object.CmisObjectInFolderContainer;
 import org.xcmis.spi.object.CmisObjectInFolderList;
 import org.xcmis.spi.object.CmisObjectList;
 import org.xcmis.spi.object.CmisObjectParents;
-import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.object.impl.CmisObjectImpl;
 import org.xcmis.spi.object.impl.CmisObjectInFolderContainerImpl;
 import org.xcmis.spi.object.impl.CmisObjectInFolderImpl;
@@ -295,7 +294,7 @@ public abstract class BaseConnection implements Connection
       InvalidArgumentException, StreamNotSupportedException, NameConstraintViolationException, IOException,
       StorageException, CmisRuntimeException
    {
-      String typeId = getTypeId(properties);
+      String typeId = CmisUtils.getTypeId(properties);
       if (typeId == null)
          throw new InvalidArgumentException("Type is not specified.");
       CmisTypeDefinitionType typeDefinition = getTypeDefinition(typeId);
@@ -448,7 +447,7 @@ public abstract class BaseConnection implements Connection
       CmisAccessControlListType removeAcl, List<String> policies) throws ObjectNotFoundException, ConstraintException,
       InvalidArgumentException, NameConstraintViolationException, StorageException, CmisRuntimeException
    {
-      String typeId = getTypeId(properties);
+      String typeId = CmisUtils.getTypeId(properties);
       if (typeId == null)
          throw new InvalidArgumentException("Type is not specified.");
 
@@ -495,10 +494,14 @@ public abstract class BaseConnection implements Connection
       CmisAccessControlListType removeAcl, List<String> policies) throws ObjectNotFoundException, ConstraintException,
       InvalidArgumentException, NameConstraintViolationException, StorageException, CmisRuntimeException
    {
-      String typeId = getTypeId(properties);
+      String typeId = CmisUtils.getTypeId(properties);
       if (typeId == null)
          throw new InvalidArgumentException("Type is not specified.");
 
+      String policyText = CmisUtils.getPolicyText(properties);
+      if (policyText == null)
+         throw new ConstraintException("Required property 'cmis:policyText' is not provided.");
+      
       CmisTypeDefinitionType typeDefinition = getTypeDefinition(typeId);
 
       if (EnumBaseObjectTypeIds.CMIS_POLICY != typeDefinition.getBaseId())
@@ -547,7 +550,7 @@ public abstract class BaseConnection implements Connection
       CmisAccessControlListType removeAcl, List<String> policies) throws ObjectNotFoundException, ConstraintException,
       NameConstraintViolationException, StorageException, CmisRuntimeException
    {
-      String typeId = getTypeId(properties);
+      String typeId = CmisUtils.getTypeId(properties);
       if (typeId == null)
          throw new InvalidArgumentException("Type is not specified.");
 
@@ -557,11 +560,11 @@ public abstract class BaseConnection implements Connection
          throw new ConstraintException("The typeId " + typeId
             + " represents object-type whose baseType is not a Relationship.");
 
-      String sourceId = getSourceId(properties);
+      String sourceId = CmisUtils.getSourceId(properties);
       if (sourceId == null)
          throw new InvalidArgumentException("Required property 'cmis:sourceId' is not specified.");
 
-      String targetId = getTargetId(properties);
+      String targetId = CmisUtils.getTargetId(properties);
       if (targetId == null)
          throw new InvalidArgumentException("Required property 'cmis:targetId' is not specified.");
 
@@ -652,12 +655,14 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public void deleteObject(String objectId, boolean deleteAllVersions) throws ObjectNotFoundException,
+   public void deleteObject(String objectId, Boolean deleteAllVersions) throws ObjectNotFoundException,
       ConstraintException, UpdateConflictException, StorageException, CmisRuntimeException
    {
       ObjectData objectData = storage.getObject(objectId);
       if (objectData == null)
          throw new ObjectNotFoundException("Object " + objectId + " does not exists.");
+      if (deleteAllVersions == null)
+         deleteAllVersions = true; // Default.
       if (objectData.getBaseType() == EnumBaseObjectTypeIds.CMIS_FOLDER)
       {
          if (storage.getRepositoryInfo().getRootFolderId().equals(objectId))
@@ -672,7 +677,7 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public List<String> deleteTree(String folderId, boolean deleteAllVersions, EnumUnfileObject unfileObject,
+   public List<String> deleteTree(String folderId, Boolean deleteAllVersions, EnumUnfileObject unfileObject,
       boolean continueOnFailure) throws ObjectNotFoundException, UpdateConflictException, StorageException,
       CmisRuntimeException
    {
@@ -686,6 +691,8 @@ public abstract class BaseConnection implements Connection
 
       if (unfileObject == null)
          unfileObject = EnumUnfileObject.DELETE; // Default value.
+      if (deleteAllVersions == null)
+         deleteAllVersions = true; // Default value.
 
       // TODO : need to check unfiling capability if 'unfileObject' is other then delete ??
       Collection<ObjectData> failedDelete =
@@ -1146,7 +1153,7 @@ public abstract class BaseConnection implements Connection
          CmisObjectParents parentType = new CmisObjectParentsImpl();
          parentType.setObject(cmisParent);
          if (includeRelativePathSegment)
-            parentType.setRelativePathSegment(object.getName());
+            parentType.setRelativePathSegment(parentData.getName());
          cmisParents.add(parentType);
       }
       return cmisParents;
@@ -1552,52 +1559,6 @@ public abstract class BaseConnection implements Connection
 
    protected abstract void validateChangeToken(ObjectData documentData, String changeToken)
       throws UpdateConflictException;
-
-   protected String getName(CmisPropertiesType properties)
-   {
-      CmisPropertyString property = (CmisPropertyString)getProperty(properties, CMIS.NAME);
-      if (property != null && property.getValue().size() > 0)
-         return property.getValue().get(0);
-      return null;
-   }
-
-   protected CmisProperty getProperty(CmisPropertiesType all, String propertyId)
-   {
-      if (all != null)
-      {
-         List<CmisProperty> props = all.getProperty();
-         for (CmisProperty prop : props)
-         {
-            if (prop.getPropertyDefinitionId().equals(propertyId))
-               return prop;
-         }
-      }
-      return null;
-   }
-
-   protected String getSourceId(CmisPropertiesType properties)
-   {
-      CmisPropertyId property = (CmisPropertyId)getProperty(properties, CMIS.SOURCE_ID);
-      if (property != null && property.getValue().size() > 0)
-         return property.getValue().get(0);
-      return null;
-   }
-
-   protected String getTargetId(CmisPropertiesType properties)
-   {
-      CmisPropertyId property = (CmisPropertyId)getProperty(properties, CMIS.TARGET_ID);
-      if (property != null && property.getValue().size() > 0)
-         return property.getValue().get(0);
-      return null;
-   }
-
-   protected String getTypeId(CmisPropertiesType properties)
-   {
-      CmisPropertyId property = (CmisPropertyId)getProperty(properties, CMIS.OBJECT_TYPE_ID);
-      if (property != null && property.getValue().size() > 0)
-         return property.getValue().get(0);
-      return null;
-   }
 
    /**
     * {@inheritDoc}
