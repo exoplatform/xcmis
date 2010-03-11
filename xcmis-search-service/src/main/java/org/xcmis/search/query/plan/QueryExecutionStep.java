@@ -33,7 +33,7 @@ public class QueryExecutionStep
    /**
     * An enumeration dictating the type of plan tree nodes.
     */
-   public enum Type {
+   public static enum Type {
 
       JOIN("Join"), // A node that defines the join type, join criteria, and join strategy
 
@@ -141,4 +141,14 @@ public class QueryExecutionStep
    {
       return this.properties.get(propertyName);
    }
+
+   /**
+    * @see java.lang.Object#toString()
+    */
+   @Override
+   public String toString()
+   {
+      return type + "[" + properties + "]";
+   }
+
 }

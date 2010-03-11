@@ -18,6 +18,8 @@
  */
 package org.xcmis.search.query.plan;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -38,4 +40,42 @@ public class QueryExecutionPlan extends LinkedList<QueryExecutionStep>
       return Collections.unmodifiableList(this).iterator();
    }
 
+   /**
+    * Find nearest query execution step of given type
+    * @param type - type of the step.
+    * @return - query execution step or null.
+    */
+   public QueryExecutionStep findStep(QueryExecutionStep.Type type)
+   {
+      Iterator<QueryExecutionStep> iterator = super.iterator();
+      while (iterator.hasNext())
+      {
+         QueryExecutionStep queryExecutionStep = iterator.next();
+         if (queryExecutionStep.getType().equals(type))
+         {
+            return queryExecutionStep;
+         }
+      }
+      return null;
+   }
+
+   /**
+    * @see java.util.AbstractCollection#toString()
+    */
+   @Override
+   public String toString()
+   {
+      StringBuilder sb = new StringBuilder();
+      int indentLevel = 0;
+      Iterator<QueryExecutionStep> iterator = super.iterator();
+      while (iterator.hasNext())
+      {
+         QueryExecutionStep queryExecutionStep = iterator.next();
+         sb.append(StringUtils.repeat("  ", indentLevel));
+         sb.append(queryExecutionStep.toString());
+         sb.append("\n");
+         indentLevel++;
+      }
+      return sb.toString();
+   }
 }

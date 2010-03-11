@@ -22,8 +22,8 @@ import org.xcmis.search.InvalidQueryException;
 import org.xcmis.search.VisitException;
 import org.xcmis.search.Visitors;
 import org.xcmis.search.content.ColumnDoesNotExistOnTable;
-import org.xcmis.search.content.Table;
 import org.xcmis.search.content.TableDoesntExistException;
+import org.xcmis.search.content.Schema.Table;
 import org.xcmis.search.model.Query;
 import org.xcmis.search.model.column.Column;
 import org.xcmis.search.model.constraint.And;
@@ -33,6 +33,7 @@ import org.xcmis.search.model.source.Selector;
 import org.xcmis.search.model.source.SelectorName;
 import org.xcmis.search.model.source.Source;
 import org.xcmis.search.query.QueryExecutionContext;
+import org.xcmis.search.query.validate.Validator;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -81,11 +82,23 @@ public class SimplePlaner implements QueryExecutionPlaner
 
    {
       QueryExecutionPlan executionPlan = new QueryExecutionPlan();
-      Map<SelectorName, Table> querySelectorsMap = new HashMap<SelectorName, Table>();
-      //source
-      populateSelectorPlan(context, query.getSource(), querySelectorsMap, executionPlan);
-      //constrain
-      populateConstrainPlan(context, query.getConstraint(), querySelectorsMap, executionPlan);
+      try
+      {
+         Map<SelectorName, Table> querySelectorsMap = new HashMap<SelectorName, Table>();
+         //source
+         populateSelectorPlan(context, query.getSource(), querySelectorsMap, executionPlan);
+         //constrain
+         populateConstrainPlan(context, query.getConstraint(), querySelectorsMap, executionPlan);
+         //columns
+         populateProject(context, query.getColumns(), querySelectorsMap, executionPlan);
+
+         Visitors.visitAll(query, new Validator(context, querySelectorsMap));
+      }
+      catch (VisitException e)
+      {
+         context.getExecutionExceptions()
+            .addException(new InvalidQueryException(e.getLocalizedMessage(), e.getCause()));
+      }
 
       return executionPlan;
    }
@@ -124,78 +137,73 @@ public class SimplePlaner implements QueryExecutionPlaner
     * @param querySelectorsMap
     * @param executionPlan 
     * @return
+    * @throws VisitException 
     */
    protected void populateSelectorPlan(final QueryExecutionContext context, final Source source,
-      final Map<SelectorName, Table> querySelectorsMap, final QueryExecutionPlan executionPlan)
+      final Map<SelectorName, Table> querySelectorsMap, final QueryExecutionPlan executionPlan) throws VisitException
    {
       final Stack<QueryExecutionStep> stepsStack = new Stack<QueryExecutionStep>();
-      try
+
+      Visitors.visit(source, new Visitors.AbstractModelVisitor()
       {
-         Visitors.visit(source, new Visitors.AbstractModelVisitor()
+         /**
+          * @see org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search.model.source.Join)
+          */
+         @Override
+         public void visit(Join node) throws VisitException
          {
-            /**
-             * @see org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search.model.source.Join)
-             */
-            @Override
-            public void visit(Join node) throws VisitException
+            QueryExecutionStep executionStep = new QueryExecutionStep(QueryExecutionStep.Type.JOIN);
+            executionStep.setProperty("JOIN_TYPE", node.getType());
+            executionStep.setProperty("JOIN_ALGORITHM", JoinAlgorithm.NESTED_LOOP);
+            executionStep.setProperty("JOIN_CONDITION", node.getJoinCondition());
+            //left plan
+            node.getLeft().accept(this);
+            executionStep.setProperty("JOIN_LEFT_PLAN", stepsStack.pop());
+            //right plan
+            node.getRight().accept(this);
+            executionStep.setProperty("JOIN_RIGHT_PLAN", stepsStack.pop());
+
+         }
+
+         /**
+          * @see org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search.model.source.Selector)
+          */
+         @Override
+         public void visit(Selector selector)
+         {
+            QueryExecutionStep executionStep = new QueryExecutionStep(QueryExecutionStep.Type.SOURCE);
+            if (selector.hasAlias())
             {
-               QueryExecutionStep executionStep = new QueryExecutionStep(QueryExecutionStep.Type.JOIN);
-               executionStep.setProperty("JOIN_TYPE", node.getType());
-               executionStep.setProperty("JOIN_ALGORITHM", JoinAlgorithm.NESTED_LOOP);
-               executionStep.setProperty("JOIN_CONDITION", node.getJoinCondition());
-               //left plan
-               node.getLeft().accept(this);
-               executionStep.setProperty("JOIN_LEFT_PLAN", stepsStack.pop());
-               //right plan
-               node.getRight().accept(this);
-               executionStep.setProperty("JOIN_RIGHT_PLAN", stepsStack.pop());
-
+               executionStep.setProperty("SELECTOR", selector.getAlias());
+               executionStep.setProperty("SOURCE_ALIAS", selector.getAlias());
+               executionStep.setProperty("SOURCE_NAME", selector.getName());
             }
-
-            /**
-             * @see org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search.model.source.Selector)
-             */
-            @Override
-            public void visit(Selector selector)
+            else
             {
-               QueryExecutionStep executionStep = new QueryExecutionStep(QueryExecutionStep.Type.SOURCE);
-               if (selector.hasAlias())
-               {
-                  executionStep.setProperty("SELECTOR", selector.getAlias());
-                  executionStep.setProperty("SOURCE_ALIAS", selector.getAlias());
-                  executionStep.setProperty("SOURCE_NAME", selector.getName());
-               }
-               else
-               {
-                  executionStep.setProperty("SELECTOR", selector.getName());
-                  executionStep.setProperty("SOURCE_NAME", selector.getName());
-               }
-               // Validate the source name and set the available columns ...
-               Table table = context.getSchema().getTable(selector.getName());
-               if (table != null)
-               {
-
-                  if (querySelectorsMap.put(selector.getAliasOrName(), table) != null)
-                  {
-                     // There was already a table with this alias or name ...
-                  }
-
-                  executionStep.setProperty("SOURCE_COLUMNS", table.getColumns());
-               }
-               else
-               {
-                  context.getExecutionExceptions().addException(
-                     new TableDoesntExistException("Table " + selector.getName() + " doesnt exist"));
-               }
-               stepsStack.push(executionStep);
+               executionStep.setProperty("SELECTOR", selector.getName());
+               executionStep.setProperty("SOURCE_NAME", selector.getName());
             }
-         });
-      }
-      catch (VisitException e)
-      {
-         context.getExecutionExceptions()
-            .addException(new InvalidQueryException(e.getLocalizedMessage(), e.getCause()));
-      }
+            // Validate the source name and set the available columns ...
+            Table table = context.getSchema().getTable(selector.getName());
+            if (table != null)
+            {
+
+               if (querySelectorsMap.put(selector.getAliasOrName(), table) != null)
+               {
+                  // There was already a table with this alias or name ...
+               }
+
+               executionStep.setProperty("SOURCE_COLUMNS", table.getColumns());
+            }
+            else
+            {
+               context.getExecutionExceptions().addException(
+                  new TableDoesntExistException("Table " + selector.getName() + " doesnt exist"));
+            }
+            stepsStack.push(executionStep);
+         }
+      });
+
       executionPlan.addLast(stepsStack.pop());
    }
 
@@ -228,7 +236,7 @@ public class SimplePlaner implements QueryExecutionPlaner
             // Add the selector that is being used ...
             projectNode.setProperty("SELECTOR", tableName);
             // Compute the columns from this selector ...
-            for (org.xcmis.search.content.Column column : table.getColumns())
+            for (org.xcmis.search.content.Schema.Column column : table.getColumns())
             {
                String columnName = column.getName();
                String propertyName = columnName;
@@ -259,7 +267,7 @@ public class SimplePlaner implements QueryExecutionPlaner
                if (table.getColumn(name) == null)
                {
                   context.getExecutionExceptions().addException(
-                     new ColumnDoesNotExistOnTable("Columnt  " + name + " on " + tableName + " doesnt exist"));
+                     new ColumnDoesNotExistOnTable("Column  " + name + " on " + tableName + " doesnt exist"));
                }
             }
          }

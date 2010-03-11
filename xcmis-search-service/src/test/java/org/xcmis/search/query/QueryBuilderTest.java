@@ -21,7 +21,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xcmis.search;
+package org.xcmis.search.query;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -30,6 +30,7 @@ import static org.mockito.Mockito.mock;
 import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
+import org.xcmis.search.Visitors;
 import org.xcmis.search.model.Query;
 import org.xcmis.search.query.QueryBuilder;
 import org.xcmis.search.value.CastSystem;
