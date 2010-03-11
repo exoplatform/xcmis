@@ -19,9 +19,7 @@
 package org.xcmis.search;
 
 /**
- * @author <a href="mailto:Sergey.Kabashnyuk@gmail.com">Sergey Kabashnyuk</a>
- * @version $Id: exo-jboss-codetemplates.xml 34360 2009-07-22 23:58:59Z
- *          aheritier $
+ * TODO add cause of exception   
  * 
  */
 public class VisitException extends QueryObjectModelException

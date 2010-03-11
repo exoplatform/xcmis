@@ -62,6 +62,28 @@ import java.util.Set;
 public class Visitors
 {
    /**
+    * Visit all objects in the supplied {@link QueryElement object} using a {@link NavigationVisitor} (specifically a
+    * {@link WalkAllVisitor}), and with each of these visited objects calling the appropriate {@code visit(...)} method on the
+    * supplied {@link QueryObjectModelVisitor}.
+    * 
+    * @param <StrategyVisitor> the type of strategy visitor
+    * @param visitable the top-level object to be visited
+    * @param strategyVisitor the visitor that is to be called for each visited objects, but that does <i>not</i> call
+    *        {@link Visitable#accept(Visitor)}
+    * @return the strategy visitor, allowing the caller to easily invoke operations on the visitor after visitation has completed
+    * @throws VisitException 
+    */
+   public static <StrategyVisitor extends QueryObjectModelVisitor> StrategyVisitor visitAll(QueryElement visitable,
+      StrategyVisitor strategyVisitor) throws VisitException
+   {
+      if (visitable != null)
+      {
+         visitable.accept(new WalkAllVisitor(strategyVisitor));
+      }
+      return strategyVisitor;
+   }
+
+   /**
     * Visit the supplied {@link QueryElement object} using the supplied {@link QueryObjectModelVisitor}, which must be responsible for navigation as
     * well as any business logic.
     * 
