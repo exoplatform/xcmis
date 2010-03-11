@@ -510,7 +510,7 @@ public class QueryBuilder
     */
    public QueryBuilder limit(int rowLimit)
    {
-      this.limit.withRowLimit(rowLimit);
+      this.limit = this.limit.withRowLimit(rowLimit);
       return this;
    }
 
@@ -526,7 +526,7 @@ public class QueryBuilder
     */
    public QueryBuilder offset(int offset)
    {
-      this.limit.withOffset(offset);
+      this.limit = this.limit.withOffset(offset);
       return this;
    }
 
@@ -573,8 +573,7 @@ public class QueryBuilder
        * @return the interface for completing the order-by specification; never
        *         null
        */
-      public OrderByBuilder length(String table,
-                                      String property);
+      public OrderByBuilder length(String table, String property);
 
       /**
        * Adds to the order-by clause by using the value for the given table and
@@ -589,8 +588,7 @@ public class QueryBuilder
        * @return the interface for completing the order-by specification; never
        *         null
        */
-      public OrderByBuilder propertyValue(String table,
-                                             String property);
+      public OrderByBuilder propertyValue(String table, String property);
 
       /**
        * Adds to the order-by clause by using the full-text search score for the
@@ -723,8 +721,7 @@ public class QueryBuilder
 
       private final OrderByBuilder builder;
 
-      protected SingleOrderByOperandBuilder(OrderByBuilder builder,
-                                               Order order)
+      protected SingleOrderByOperandBuilder(OrderByBuilder builder, Order order)
       {
          this.order = order;
          this.builder = builder;
@@ -743,8 +740,7 @@ public class QueryBuilder
        * @see org.modeshape.graph.query.QueryBuilder.OrderByOperandBuilder#propertyValue(java.lang.String,
        *      java.lang.String)
        */
-      public OrderByBuilder propertyValue(String table,
-                                             String property)
+      public OrderByBuilder propertyValue(String table, String property)
       {
          return addOrdering(new PropertyValue(selector(table), property));
       }
@@ -755,8 +751,7 @@ public class QueryBuilder
        * @see org.modeshape.graph.query.QueryBuilder.OrderByOperandBuilder#length(java.lang.String,
        *      java.lang.String)
        */
-      public OrderByBuilder length(String table,
-                                      String property)
+      public OrderByBuilder length(String table, String property)
       {
          return addOrdering(new Length(new PropertyValue(selector(table), property)));
       }
@@ -861,8 +856,7 @@ public class QueryBuilder
 
       private final JoinType type;
 
-      protected JoinClause(Selector rightTable,
-                              JoinType type)
+      protected JoinClause(Selector rightTable, JoinType type)
       {
          this.rightSource = rightTable;
          this.type = type;
@@ -891,16 +885,16 @@ public class QueryBuilder
          try
          {
             Visitors.visit(source, new Visitors.AbstractModelVisitor()
-                        {
+            {
 
                @Override
                public void visit(Selector selector)
-                           {
-               if (notFound.get() && selector.getAliasOrName().equals(name))
-                              {
-               notFound.set(false);
-            }
-         }
+               {
+                  if (notFound.get() && selector.getAliasOrName().equals(name))
+                  {
+                     notFound.set(false);
+                  }
+               }
             });
          }
          catch (VisitException e)
@@ -932,7 +926,7 @@ public class QueryBuilder
          if (parts.length != 2)
          {
             throw new IllegalArgumentException("Expected equality expression for columns, but found \""
-                                                   + columnEqualExpression + "\"");
+               + columnEqualExpression + "\"");
          }
          return createJoin(new EquiJoinCondition(column(parts[0]), column(parts[1])));
       }
@@ -947,8 +941,7 @@ public class QueryBuilder
        *           the name or alias of the second table
        * @return the query builder instance, for method chaining purposes
        */
-      public QueryBuilder onSameNode(String table1,
-                                        String table2)
+      public QueryBuilder onSameNode(String table1, String table2)
       {
          return createJoin(new SameNodeJoinCondition(nameOf(table1), nameOf(table2)));
       }
@@ -964,8 +957,7 @@ public class QueryBuilder
        *           the name or alias of the table containing the descendant node
        * @return the query builder instance, for method chaining purposes
        */
-      public QueryBuilder onDescendant(String ancestorTable,
-                                          String descendantTable)
+      public QueryBuilder onDescendant(String ancestorTable, String descendantTable)
       {
          return createJoin(new DescendantNodeJoinCondition(nameOf(ancestorTable), nameOf(descendantTable)));
       }
@@ -981,8 +973,7 @@ public class QueryBuilder
        *           the name or alias of the table containing the child node
        * @return the query builder instance, for method chaining purposes
        */
-      public QueryBuilder onChildNode(String parentTable,
-                                         String childTable)
+      public QueryBuilder onChildNode(String parentTable, String childTable)
       {
          return createJoin(new ChildNodeJoinCondition(nameOf(parentTable), nameOf(childTable)));
       }
@@ -1015,8 +1006,7 @@ public class QueryBuilder
        * @return the interface for completing the value portion of the criteria
        *         specification; never null
        */
-      public ComparisonBuilder length(String table,
-                                         String property);
+      public ComparisonBuilder length(String table, String property);
 
       /**
        * Constrains the nodes in the the supplied table such that they must have
@@ -1031,8 +1021,7 @@ public class QueryBuilder
        * @return the interface for completing the value portion of the criteria
        *         specification; never null
        */
-      public ComparisonBuilder propertyValue(String table,
-                                                String property);
+      public ComparisonBuilder propertyValue(String table, String property);
 
       /**
        * Constrains the nodes in the the supplied table such that they must
@@ -1253,8 +1242,7 @@ public class QueryBuilder
        * @return the constraint builder that was used to create this clause;
        *         never null
        */
-      public ConstraintBuilder isSameNode(String table,
-                                             String asNodeAtPath)
+      public ConstraintBuilder isSameNode(String table, String asNodeAtPath)
       {
          return setConstraint(new SameNode(selector(table), asNodeAtPath));
       }
@@ -1271,8 +1259,7 @@ public class QueryBuilder
        * @return the constraint builder that was used to create this clause;
        *         never null
        */
-      public ConstraintBuilder isChild(String childTable,
-                                          String parentPath)
+      public ConstraintBuilder isChild(String childTable, String parentPath)
       {
          return setConstraint(new ChildNode(selector(childTable), parentPath));
       }
@@ -1289,8 +1276,7 @@ public class QueryBuilder
        * @return the constraint builder that was used to create this clause;
        *         never null
        */
-      public ConstraintBuilder isBelowPath(String descendantTable,
-                                              String ancestorPath)
+      public ConstraintBuilder isBelowPath(String descendantTable, String ancestorPath)
       {
          return setConstraint(new DescendantNode(selector(descendantTable), ancestorPath));
       }
@@ -1307,8 +1293,7 @@ public class QueryBuilder
        * @return the constraint builder that was used to create this clause;
        *         never null
        */
-      public ConstraintBuilder hasProperty(String table,
-                                              String propertyName)
+      public ConstraintBuilder hasProperty(String table, String propertyName)
       {
          return setConstraint(new PropertyExistence(selector(table), propertyName));
       }
@@ -1325,8 +1310,7 @@ public class QueryBuilder
        * @return the constraint builder that was used to create this clause;
        *         never null
        */
-      public ConstraintBuilder search(String table,
-                                         String searchExpression)
+      public ConstraintBuilder search(String table, String searchExpression)
       {
          return setConstraint(new FullTextSearch(selector(table), null, searchExpression));
       }
@@ -1346,9 +1330,7 @@ public class QueryBuilder
        * @return the constraint builder that was used to create this clause;
        *         never null
        */
-      public ConstraintBuilder search(String table,
-                                         String propertyName,
-                                         String searchExpression)
+      public ConstraintBuilder search(String table, String propertyName, String searchExpression)
       {
          return setConstraint(new FullTextSearch(selector(table), propertyName, searchExpression));
       }
@@ -1364,8 +1346,7 @@ public class QueryBuilder
        * @see org.modeshape.graph.query.QueryBuilder.DynamicOperandBuilder#length(java.lang.String,
        *      java.lang.String)
        */
-      public ComparisonBuilder length(String table,
-                                         String property)
+      public ComparisonBuilder length(String table, String property)
       {
          return comparisonBuilder(new Length(new PropertyValue(selector(table), property)));
       }
@@ -1376,8 +1357,7 @@ public class QueryBuilder
        * @see org.modeshape.graph.query.QueryBuilder.DynamicOperandBuilder#propertyValue(String,
        *      String)
        */
-      public ComparisonBuilder propertyValue(String table,
-                                                String property)
+      public ComparisonBuilder propertyValue(String table, String property)
       {
          return comparisonBuilder(new PropertyValue(selector(table), property));
       }
@@ -1472,8 +1452,7 @@ public class QueryBuilder
       {
          Comparison comparison = (Comparison)constraint;
          return delegate.setConstraint(new Comparison(new UpperCase(comparison.getOperand1()),
-            comparison.getOperator(),
-                                                         comparison.getOperand2()));
+            comparison.getOperator(), comparison.getOperand2()));
       }
    }
 
@@ -1496,8 +1475,7 @@ public class QueryBuilder
       {
          Comparison comparison = (Comparison)constraint;
          return delegate.setConstraint(new Comparison(new LowerCase(comparison.getOperand1()),
-            comparison.getOperator(),
-                                                         comparison.getOperand2()));
+            comparison.getOperator(), comparison.getOperand2()));
       }
    }
 
@@ -1590,8 +1568,7 @@ public class QueryBuilder
    {
       private final RightHandSide rhs;
 
-      protected CastAsRightHandSide(RightHandSide rhs,
-                                       Object value)
+      protected CastAsRightHandSide(RightHandSide rhs, Object value)
       {
          super(value);
          this.rhs = rhs;
@@ -1617,8 +1594,7 @@ public class QueryBuilder
 
       protected final ComparisonBuilder comparisonBuilder;
 
-      protected RightHandSide(ComparisonBuilder comparisonBuilder,
-                                 Operator operator)
+      protected RightHandSide(ComparisonBuilder comparisonBuilder, Operator operator)
       {
          this.operator = operator;
          this.comparisonBuilder = comparisonBuilder;
@@ -1874,8 +1850,7 @@ public class QueryBuilder
 
       protected final ConstraintBuilder constraintBuilder;
 
-      protected ComparisonBuilder(ConstraintBuilder constraintBuilder,
-                                    DynamicOperand left)
+      protected ComparisonBuilder(ConstraintBuilder constraintBuilder, DynamicOperand left)
       {
          this.left = left;
          this.constraintBuilder = constraintBuilder;
@@ -1993,8 +1968,7 @@ public class QueryBuilder
        *         used to create other constraints clauses or complete
        *         already-started clauses; never null
        */
-      public ConstraintBuilder isVariable(Operator operator,
-                                            String variableName)
+      public ConstraintBuilder isVariable(Operator operator, String variableName)
       {
 
          Validate.notNull(operator, "The operator argument may not be null");
@@ -2014,8 +1988,7 @@ public class QueryBuilder
        *         used to create other constraints clauses or complete
        *         already-started clauses; never null
        */
-      public ConstraintBuilder is(Operator operator,
-                                    Object literal)
+      public ConstraintBuilder is(Operator operator, Object literal)
       {
          assert operator != null;
          Literal value = literal instanceof Literal ? (Literal)literal : new Literal(literal);

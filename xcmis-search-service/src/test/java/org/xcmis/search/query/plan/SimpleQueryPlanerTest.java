@@ -346,4 +346,45 @@ public class SimpleQueryPlanerTest
       assertThat(executionStep.getSelectors(), is(selectors("t1")));
       //TODO ASC
    }
+
+   @Test
+   public void testShouldProducePlanWhenLimitClauseIsUsed() throws InvalidQueryException
+   {
+      schema =
+         schemataBuilder.addTable("test:someTable", "column1", "column2", "column3").makeSearchable("test:someTable",
+            "column1").build();
+      query =
+         builder.selectStar().from("test:someTable AS t1").where().search("t1", "column1", "term1").end().limit(10)
+            .query();
+      queryContext = new QueryExecutionContext(schema, problems, null);
+      plan = planner.createPlan(queryContext, query);
+      assertThat(problems.hasProblems(), is(false));
+
+      assertThat(plan.findStep(Type.LIMIT), notNullValue());
+      QueryExecutionStep executionStep = plan.findStep(Type.LIMIT);
+
+      assertThat(((Integer)executionStep.getPropertyValue("LIMIT_COUNT")), is(10));
+      assertThat(executionStep.getPropertyValue("LIMIT_OFFSET"), nullValue());
+   }
+
+   @Test
+   public void testShouldProducePlanWhenOffsetClauseIsUsed() throws InvalidQueryException
+   {
+      schema =
+         schemataBuilder.addTable("test:someTable", "column1", "column2", "column3").makeSearchable("test:someTable",
+            "column1").build();
+      query =
+         builder.selectStar().from("test:someTable AS t1").where().search("t1", "column1", "term1").end().limit(20)
+            .offset(10).query();
+      queryContext = new QueryExecutionContext(schema, problems, null);
+      plan = planner.createPlan(queryContext, query);
+      assertThat(problems.hasProblems(), is(false));
+
+      assertThat(plan.findStep(Type.LIMIT), notNullValue());
+      QueryExecutionStep executionStep = plan.findStep(Type.LIMIT);
+
+      assertThat(((Integer)executionStep.getPropertyValue("LIMIT_COUNT")), is(20));
+      assertThat(((Integer)executionStep.getPropertyValue("LIMIT_OFFSET")), is(10));
+
+   }
 }

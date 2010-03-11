@@ -24,6 +24,7 @@ import org.xcmis.search.Visitors;
 import org.xcmis.search.content.ColumnDoesNotExistOnTable;
 import org.xcmis.search.content.TableDoesntExistException;
 import org.xcmis.search.content.Schema.Table;
+import org.xcmis.search.model.Limit;
 import org.xcmis.search.model.Query;
 import org.xcmis.search.model.column.Column;
 import org.xcmis.search.model.constraint.And;
@@ -94,6 +95,8 @@ public class SimplePlaner implements QueryExecutionPlaner
          populateProject(context, query.getColumns(), querySelectorsMap, executionPlan);
          //order by
          populateSorting(context, query.getOrderings(), executionPlan);
+         //limit 
+         populateLimits(context, query.getLimits(), executionPlan);
 
          Visitors.visitAll(query, new Validator(context, querySelectorsMap));
       }
@@ -302,6 +305,38 @@ public class SimplePlaner implements QueryExecutionPlaner
       }
       projectNode.setProperty("PROJECT_COLUMNS", columns);
       executionPlan.addFirst(projectNode);
+   }
+
+   /**
+    * Attach a LIMIT node at the top of the plan tree.
+    * 
+    * @param context the context in which the query is being planned
+    * @param limit the limit definition; may be null
+    * @param plan the existing plan    *
+    */
+   protected void populateLimits(QueryExecutionContext context, Limit limit, final QueryExecutionPlan executionPlan)
+   {
+      if (!limit.isUnlimited())
+      {
+
+         QueryExecutionStep limitNode = new QueryExecutionStep(QueryExecutionStep.Type.LIMIT);
+
+         boolean attach = false;
+         if (limit.getOffset() != 0)
+         {
+            limitNode.setProperty("LIMIT_OFFSET", limit.getOffset());
+            attach = true;
+         }
+         if (!limit.isUnlimited())
+         {
+            limitNode.setProperty("LIMIT_COUNT", limit.getRowLimit());
+            attach = true;
+         }
+         if (attach)
+         {
+            executionPlan.addFirst(limitNode);
+         }
+      }
    }
 
    /**
