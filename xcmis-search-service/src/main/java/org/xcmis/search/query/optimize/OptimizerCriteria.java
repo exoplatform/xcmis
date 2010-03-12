@@ -16,28 +16,28 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xcmis.search.query.request;
+package org.xcmis.search.query.optimize;
 
-import org.xcmis.search.model.Query;
 import org.xcmis.search.query.QueryExecutionContext;
-import org.xcmis.search.query.QueryExecutionResult;
-import org.xcmis.search.query.QueryResults.Statistics;
+import org.xcmis.search.query.plan.Optimizer;
 import org.xcmis.search.query.plan.QueryExecutionPlan;
 
+import java.util.LinkedList;
+
 /**
- * Interface for a query processor.
- * Build chain of commands to the content engine.
+ * Interface that defines an {@link Optimizer} criteria.
  */
-public interface QueryProcessor
+public interface OptimizerCriteria
 {
    /**
-    * Process the supplied query plan for the given query and return the results.
+    * Optimize the supplied plan using the supplied context, hints, and yet-to-be-run rules.
     * 
-    * @param context the context in which the query is being processed
-    * @param query the query being executed
-    * @param stats 
-    * @param plan the plan to be processed
-    * @return the results of the query
+    * @param context the context in which the query is being optimized; never null
+    * @param plan the plan to be optimized; never null
+    * @param criteriaStack the stack of rules that will be run after this rule; never null
+    * @return the optimized plan; never null
     */
-   QueryExecutionResult execute(QueryExecutionContext context, Query query, Statistics stats, QueryExecutionPlan plan);
+   QueryExecutionPlan execute(QueryExecutionContext context, QueryExecutionPlan plan,
+      LinkedList<OptimizerCriteria> criteriaStack);
+
 }

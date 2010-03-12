@@ -16,24 +16,23 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xcmis.search.lucene;
+package org.xcmis.search.content.command.read;
 
-
-import org.xcmis.search.Startable;
-
-import java.io.IOException;
+import org.xcmis.search.content.command.InvocationContext;
+import org.xcmis.search.content.interceptors.Visitor;
 
 /**
- * Created by The eXo Platform SAS.
- * 
- * @author <a href="mailto:Sergey.Kabashnyuk@gmail.com">Sergey Kabashnyuk</a>
- * @version $Id: PersistentIndexManager.java 2 2010-02-04 17:21:49Z andrew00x $
+ * Command for add property to node.
  */
-public interface PersistentIndexManager<W, S> extends Startable
+public class GetPropertyCommand implements AbstractReadDataCommand
 {
-   public W getIndexWriter() throws IOException;
 
-   public S getIndexSearcher() throws IOException;
+   /**
+    * @see org.exoplatform.services.jcr.impl.storage.command.JcrCommand#acceptVisitor(org.exoplatform.services.jcr.impl.storage.command.JcrInvocationContext, org.jboss.cache.commands.Visitor)
+    */
+   public Object acceptVisitor(InvocationContext ctx, Visitor visitor) throws Throwable
+   {
+      return visitor.visitGetPropertyCommand(ctx, this);
+   }
 
-   public S getIndexSearcher(boolean reopen) throws IOException;
 }

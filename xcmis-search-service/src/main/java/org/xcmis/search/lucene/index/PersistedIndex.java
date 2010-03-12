@@ -29,12 +29,12 @@ import org.apache.lucene.index.IndexWriter.MaxFieldLength;
 import org.apache.lucene.store.Directory;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.xcmis.search.Startable;
 import org.xcmis.search.lucene.FieldNames;
 import org.xcmis.search.lucene.IndexException;
 import org.xcmis.search.lucene.IndexTransaction;
 import org.xcmis.search.lucene.IndexTransactionModificationReport;
 import org.xcmis.search.lucene.LuceneIndexDataManager;
-import org.xcmis.search.lucene.Startable;
 
 import java.io.IOException;
 import java.util.HashSet;

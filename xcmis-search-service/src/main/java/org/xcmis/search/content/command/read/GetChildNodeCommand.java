@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 eXo Platform SAS.
+ * Copyright (C) 2009 eXo Platform SAS.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -16,15 +16,23 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xcmis.search.lucene;
+package org.xcmis.search.content.command.read;
+
+import org.xcmis.search.content.command.InvocationContext;
+import org.xcmis.search.content.interceptors.Visitor;
 
 /**
- * @author <a href="mailto:Sergey.Kabashnyuk@gmail.com">Sergey Kabashnyuk</a>
- * @version $Id: exo-jboss-codetemplates.xml 34360 2009-07-22 23:58:59Z aheritier $
- *
+ *  Add node command
  */
-public interface Startable
+public class GetChildNodeCommand implements AbstractReadDataCommand
 {
-   void start();
-   void stop();
+
+   /**
+    * @see org.exoplatform.services.jcr.impl.storage.command.JcrCommand#acceptVisitor(org.exoplatform.services.jcr.impl.storage.command.JcrInvocationContext, org.jboss.cache.commands.Visitor)
+    */
+   public Object acceptVisitor(InvocationContext ctx, Visitor visitor) throws Throwable
+   {
+      return visitor.visitGetChildNodeCommand(ctx, this);
+   }
+
 }

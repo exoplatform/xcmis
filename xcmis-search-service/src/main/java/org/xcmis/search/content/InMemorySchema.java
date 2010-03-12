@@ -18,33 +18,24 @@
  */
 package org.xcmis.search.content;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang.Validate;
 import org.xcmis.search.InvalidQueryException;
-import org.xcmis.search.Visitors;
 import org.xcmis.search.model.Query;
 import org.xcmis.search.model.source.SelectorName;
-import org.xcmis.search.query.QueryExecutionContext;
-import org.xcmis.search.query.plan.QueryExecutionPlan;
-import org.xcmis.search.query.plan.SimplePlaner;
-import org.xcmis.search.query.plan.QueryExecutionPlan.ProjectExecutionPlan;
-import org.xcmis.search.query.plan.QueryExecutionPlan.Type;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
- * In memory {@link Schemata} implementation.
+ * In memory {@link Schema} implementation.
  */
 public class InMemorySchema implements Schema
 {
    /**
-    * Obtain a new instance for building Schemata objects.
+    * Obtain a new instance for building Schema objects.
     * 
     * @return the new builder; never null
     */
@@ -54,7 +45,7 @@ public class InMemorySchema implements Schema
    }
 
    /**
-    * A builder of immutable {@link Schemata} objects.
+    * A builder of immutable {@link Schema} objects.
     */
 
    public static class Builder
@@ -122,38 +113,6 @@ public class InMemorySchema implements Schema
          }
          InMemoryTable table = new InMemoryTable(new SelectorName(name), columns);
          tables.put(table.getName(), table);
-         return this;
-      }
-
-      /**
-       * Add a view with the supplied name and SQL string definition. The column names and types will be inferred from the
-       * source table(s) and views(s) used in the definition.
-       * 
-       * @param name the name of the new view
-       * @param definition the SQL definition of the view
-       * @return this builder, for convenience in method chaining; never null
-       * @throws IllegalArgumentException if the view name is null or empty or the definition is null
-       * @throws ParsingException if the supplied definition is cannot be parsed as a SQL query
-       */
-      public Builder addView(String name, String definition)
-      {
-         throw new NotImplementedException("Method addView(String name, String definition) not implemented");
-      }
-
-      /**
-       * Add a view with the supplied name and definition. The column names and types will be inferred from the source table(s)
-       * used in the definition.
-       * 
-       * @param name the name of the new view
-       * @param definition the definition of the view
-       * @return this builder, for convenience in method chaining; never null
-       * @throws IllegalArgumentException if the view name is null or empty or the definition is null
-       */
-      public Builder addView(String name, Query definition)
-      {
-         Validate.notEmpty(name, " name may not be empty");
-         Validate.notNull(definition, " definition may not be null");
-         this.viewDefinitions.put(new SelectorName(name), definition);
          return this;
       }
 
@@ -249,86 +208,16 @@ public class InMemorySchema implements Schema
       }
 
       /**
-       * Build the {@link Schemata} instance, using the current state of the builder. This method creates a snapshot of the
+       * Build the {@link Schema} instance, using the current state of the builder. This method creates a snapshot of the
        * tables (with their columns) as they exist at the moment this method is called.
        * 
-       * @return the new Schemata; never null
+       * @return the new Schema; never null
        * @throws InvalidQueryException 
        * @throws InvalidQueryException if any of the view definitions is invalid and cannot be resolved
        */
       public Schema build() throws InvalidQueryException
       {
          InMemorySchema schemata = new InMemorySchema(new HashMap<SelectorName, Table>(tables));
-
-         // Make a copy of the view definitions, and create the views ...
-         Map<SelectorName, Query> definitions = new HashMap<SelectorName, Query>(viewDefinitions);
-         boolean added = false;
-         do
-         {
-            added = false;
-            Set<SelectorName> viewNames = new HashSet<SelectorName>(definitions.keySet());
-            for (SelectorName name : viewNames)
-            {
-               Query command = definitions.get(name);
-               // Create the canonical plan for the definition ...
-               //TODO null
-               QueryExecutionContext queryContext = new QueryExecutionContext(schemata, null, null);
-               SimplePlaner planner = new SimplePlaner();
-               QueryExecutionPlan plan = planner.createPlan(queryContext, command);
-               if (queryContext.getExecutionExceptions().hasProblems())
-               {
-                  continue;
-               }
-
-               // Get the columns from the top-level PROJECT ...
-               ProjectExecutionPlan project = (ProjectExecutionPlan)plan.findPlanByType(Type.PROJECT);
-               assert project != null;
-               List<org.xcmis.search.model.column.Column> columns = project.getColumns();
-
-               // Go through all the columns and look up the types ...
-               List<Column> viewColumns = new ArrayList<Column>(columns.size());
-               for (org.xcmis.search.model.column.Column column : columns)
-               {
-                  // Find the table that the column came from ...
-                  Table source = schemata.getTable(column.getSelectorName());
-                  if (source == null)
-                  {
-                     break;
-                  }
-                  String viewColumnName = column.getColumnName();
-                  String sourceColumnName = column.getPropertyName(); // getColumnName() returns alias
-                  Column sourceColumn = source.getColumn(sourceColumnName);
-                  if (sourceColumn == null)
-                  {
-                     throw new InvalidQueryException(Visitors.readable(command)
-                        + "The view references a non-existant column '" + column.getColumnName() + "' in '"
-                        + source.getName() + "'");
-                  }
-                  viewColumns.add(new InMemoryColumn(viewColumnName, sourceColumn.getPropertyType(), sourceColumn
-                     .isFullTextSearchable()));
-               }
-               if (viewColumns.size() != columns.size())
-               {
-                  // We weren't able to resolve all of the columns,
-                  // so maybe the columns were referencing yet-to-be-built views ...
-                  continue;
-               }
-
-               // If we could resolve the definition ...
-               InMemoryView view = new InMemoryView(name, viewColumns, command);
-               definitions.remove(name);
-               schemata = schemata.with(view);
-               added = true;
-            }
-         }
-         while (added && !definitions.isEmpty());
-
-         if (!definitions.isEmpty())
-         {
-            Query command = definitions.values().iterator().next();
-            throw new InvalidQueryException(Visitors.readable(command) + "The view definition cannot be resolved: "
-               + Visitors.readable(command));
-         }
 
          return schemata;
       }
@@ -344,7 +233,7 @@ public class InMemorySchema implements Schema
    /**
     * {@inheritDoc}
     * 
-    * @see org.modeshape.graph.query.validate.Schemata#getTable(org.modeshape.graph.query.model.SelectorName)
+    * @see org.modeshape.graph.query.validate.Schema#getTable(org.modeshape.graph.query.model.SelectorName)
     */
    public Table getTable(SelectorName name)
    {

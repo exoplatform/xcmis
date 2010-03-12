@@ -20,6 +20,7 @@ package org.xcmis.search.query;
 
 import org.apache.commons.lang.Validate;
 import org.xcmis.search.model.Query;
+import org.xcmis.search.query.QueryResults.Statistics;
 import org.xcmis.search.query.plan.Optimizer;
 import org.xcmis.search.query.plan.QueryExecutionPlan;
 import org.xcmis.search.query.plan.QueryExecutionPlaner;
@@ -29,6 +30,7 @@ import org.xcmis.search.query.request.QueryProcessor;
  * A query engine that is able to execute formal queries expressed in the
  * Abstract Query Model on given RequestProcessor.
  */
+@Deprecated
 public class QueryExecutionEngine
 {
 
@@ -69,10 +71,34 @@ public class QueryExecutionEngine
       Validate.notNull(query, "The query argument may not be null");
 
       // Create the plan ...
+      long start = System.nanoTime();
       QueryExecutionPlan executionPlan = planner.createPlan(context, query);
-      // Optimize the plan ...
-      QueryExecutionPlan optimizedPlan = optimizer.optimize(context, executionPlan);
-      // Execute the plan ...
-      return processor.execute(context, query, optimizedPlan);
+      long duration = System.nanoTime() - start;
+      Statistics stats = new Statistics(duration);
+      if (!context.getExecutionExceptions().hasProblems())
+      {
+         // Optimize the plan ...
+         start = System.nanoTime();
+         QueryExecutionPlan optimizedPlan = optimizer.optimize(context, executionPlan);
+
+         duration = System.nanoTime() - start;
+         stats = stats.withOptimizationTime(duration);
+         if (!context.getExecutionExceptions().hasProblems())
+         {
+
+            // Execute the plan ...
+            try
+            {
+               start = System.nanoTime();
+               return processor.execute(context, query, stats, optimizedPlan);
+            }
+            finally
+            {
+               duration = System.nanoTime() - start;
+               stats = stats.withOptimizationTime(duration);
+            }
+         }
+      }
+      return null;
    };
 }

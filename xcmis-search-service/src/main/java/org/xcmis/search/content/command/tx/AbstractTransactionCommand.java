@@ -16,24 +16,14 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xcmis.search.lucene;
+package org.xcmis.search.content.command.tx;
 
-
-import org.xcmis.search.Startable;
-
-import java.io.IOException;
+import org.xcmis.search.content.command.VisitableCommand;
 
 /**
- * Created by The eXo Platform SAS.
- * 
- * @author <a href="mailto:Sergey.Kabashnyuk@gmail.com">Sergey Kabashnyuk</a>
- * @version $Id: PersistentIndexManager.java 2 2010-02-04 17:21:49Z andrew00x $
+ * Interface for transactions.  
  */
-public interface PersistentIndexManager<W, S> extends Startable
+public interface AbstractTransactionCommand extends VisitableCommand
 {
-   public W getIndexWriter() throws IOException;
 
-   public S getIndexSearcher() throws IOException;
-
-   public S getIndexSearcher(boolean reopen) throws IOException;
 }

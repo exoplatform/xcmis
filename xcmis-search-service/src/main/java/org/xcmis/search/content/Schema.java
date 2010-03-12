@@ -18,7 +18,6 @@
  */
 package org.xcmis.search.content;
 
-import org.xcmis.search.model.Query;
 import org.xcmis.search.model.source.SelectorName;
 
 import java.util.List;
@@ -76,19 +75,6 @@ public interface Schema
        * @return the immutable, ordered list of immutable column objects; never null
        */
       List<Column> getColumns();
-   }
-
-   /**
-    * Information about a view that is defined in terms of other views/tables.
-    */
-   public static interface View extends Table
-   {
-      /**
-       * Get the {@link Query query} that is the definition of the view.
-       * 
-       * @return the view definition; never null
-       */
-      Query getDefinition();
    }
 
    /**

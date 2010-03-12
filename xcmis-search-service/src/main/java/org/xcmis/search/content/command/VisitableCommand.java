@@ -16,24 +16,22 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xcmis.search.lucene;
+package org.xcmis.search.content.command;
 
-
-import org.xcmis.search.Startable;
-
-import java.io.IOException;
+import org.xcmis.search.content.interceptors.Visitor;
 
 /**
- * Created by The eXo Platform SAS.
- * 
- * @author <a href="mailto:Sergey.Kabashnyuk@gmail.com">Sergey Kabashnyuk</a>
- * @version $Id: PersistentIndexManager.java 2 2010-02-04 17:21:49Z andrew00x $
+ * A type of command that can accept {@link Visitor}s.
  */
-public interface PersistentIndexManager<W, S> extends Startable
+public interface VisitableCommand
 {
-   public W getIndexWriter() throws IOException;
-
-   public S getIndexSearcher() throws IOException;
-
-   public S getIndexSearcher(boolean reopen) throws IOException;
+   /**
+    * Accept a visitor, and return the result of accepting this visitor.
+    *
+    * @param ctx     invocation context
+    * @param visitor visitor to accept
+    * @return arbitrary return value
+    * @throws Throwable in the event of problems
+    */
+   Object acceptVisitor(InvocationContext ctx, Visitor visitor) throws Throwable;
 }

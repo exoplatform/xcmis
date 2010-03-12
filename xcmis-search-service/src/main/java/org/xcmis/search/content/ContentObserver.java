@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 eXo Platform SAS.
+ * Copyright (C) 2010 eXo Platform SAS.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -16,24 +16,15 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xcmis.search.lucene;
+package org.xcmis.search.content;
 
-
-import org.xcmis.search.Startable;
-
-import java.io.IOException;
+import java.util.List;
 
 /**
- * Created by The eXo Platform SAS.
- * 
- * @author <a href="mailto:Sergey.Kabashnyuk@gmail.com">Sergey Kabashnyuk</a>
- * @version $Id: PersistentIndexManager.java 2 2010-02-04 17:21:49Z andrew00x $
+ * Interface of listener changes of content. 
  */
-public interface PersistentIndexManager<W, S> extends Startable
+public interface ContentObserver
 {
-   public W getIndexWriter() throws IOException;
-
-   public S getIndexSearcher() throws IOException;
-
-   public S getIndexSearcher(boolean reopen) throws IOException;
+   void update(List<Object> changes);
 }
+

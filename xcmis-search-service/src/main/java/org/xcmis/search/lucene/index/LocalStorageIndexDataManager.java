@@ -29,6 +29,7 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.LockObtainFailedException;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.xcmis.search.Startable;
 import org.xcmis.search.config.IndexConfigurationException;
 import org.xcmis.search.config.IndexConfuguration;
 import org.xcmis.search.lucene.IndexException;
@@ -36,7 +37,6 @@ import org.xcmis.search.lucene.IndexTransaction;
 import org.xcmis.search.lucene.IndexTransactionException;
 import org.xcmis.search.lucene.IndexTransactionModificationReport;
 import org.xcmis.search.lucene.LuceneIndexDataManager;
-import org.xcmis.search.lucene.Startable;
 import org.xcmis.search.lucene.index.merge.IndexAggregator;
 
 import java.io.IOException;
