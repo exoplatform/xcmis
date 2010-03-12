@@ -33,7 +33,6 @@ public interface Optimizer
     * @param plan the query plan to be optimized
     * @return the optimized query plan; never null
     */
-   QueryExecutionPlan optimize(QueryExecutionContext context,
-      QueryExecutionPlan plan);
+   QueryExecutionPlan optimize(QueryExecutionContext context, QueryExecutionPlan plan);
 
 }

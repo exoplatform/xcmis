@@ -35,7 +35,10 @@ import org.xcmis.search.model.source.SelectorName;
 import org.xcmis.search.query.QueryBuilder;
 import org.xcmis.search.query.QueryExecutionContext;
 import org.xcmis.search.query.QueryExecutionExceptions;
-import org.xcmis.search.query.plan.QueryExecutionStep.Type;
+import org.xcmis.search.query.plan.QueryExecutionPlan.LimitExecutionPlan;
+import org.xcmis.search.query.plan.QueryExecutionPlan.ProjectExecutionPlan;
+import org.xcmis.search.query.plan.QueryExecutionPlan.SelectorExecutionPlan;
+import org.xcmis.search.query.plan.QueryExecutionPlan.Type;
 import org.xcmis.search.value.CastSystem;
 
 import java.util.Collection;
@@ -82,7 +85,7 @@ public class SimpleQueryPlanerTest
       print = false;
    }
 
-   protected void print(QueryExecutionPlan plan)
+   protected void print(QueryExecutionPlan2 plan)
    {
       if (print)
       {
@@ -106,14 +109,16 @@ public class SimpleQueryPlanerTest
    }
 
    @SuppressWarnings("unchecked")
-   protected void assertProjectNode(QueryExecutionStep node, String... columnNames)
+   protected void assertProjectNode(QueryExecutionPlan executionPlan, String... columnNames)
    {
-      assertThat(node.getType(), is(Type.PROJECT));
+
+      assertThat(plan.getType(), is(Type.PROJECT));
+      ProjectExecutionPlan node = (ProjectExecutionPlan)executionPlan;
       if (columnNames.length != 0)
       {
-         assertThat(node.getPropertyValue("PROJECT_COLUMNS"), notNullValue());
+         assertThat(node.getColumns(), notNullValue());
       }
-      List<Column> columns = (List<Column>)node.getPropertyValue("PROJECT_COLUMNS");
+      List<Column> columns = node.getColumns();
       assertThat(columns.size(), is(columnNames.length));
       for (int i = 0; i != columns.size(); ++i)
       {
@@ -123,22 +128,24 @@ public class SimpleQueryPlanerTest
    }
 
    @SuppressWarnings("unchecked")
-   protected void assertSourceNode(QueryExecutionStep node, String sourceName, String sourceAlias,
+   protected void assertSourceNode(QueryExecutionPlan executionPlan, String sourceName, String sourceAlias,
       String... availableColumns)
    {
-      assertThat(node.getType(), is(Type.SOURCE));
-      assertThat(((SelectorName)node.getPropertyValue("SOURCE_NAME")), is(selector(sourceName)));
+      assertThat(executionPlan.getType(), is(Type.SELECTOR));
+      SelectorExecutionPlan node = (SelectorExecutionPlan)executionPlan;
+
+      assertThat(node.getName(), is(selector(sourceName)));
 
       if (sourceAlias != null)
       {
-         assertThat(((SelectorName)node.getPropertyValue("SOURCE_ALIAS")), is(selector(sourceAlias)));
+         assertThat(node.getAlias(), is(selector(sourceAlias)));
       }
       else
       {
 
-         assertThat((node.getPropertyValue("SOURCE_ALIAS")), nullValue());
+         assertThat(node.getAlias(), nullValue());
       }
-      Collection<Schema.Column> columns = (Collection)node.getPropertyValue("SOURCE_COLUMNS");
+      Collection<Schema.Column> columns = node.getColumns();
       assertThat(columns.size(), is(availableColumns.length));
       int i = 0;
       for (Schema.Column column : columns)
@@ -156,9 +163,9 @@ public class SimpleQueryPlanerTest
       queryContext = new QueryExecutionContext(schema, problems, null);
       plan = planner.createPlan(queryContext, query);
       assertThat(problems.hasProblems(), is(false));
-      assertProjectNode(plan.findStep(Type.PROJECT), "column1", "column2", "column3");
-      assertThat(plan.size(), is(2));
-      assertSourceNode(plan.findStep(Type.SOURCE), "my:mytype", null, "column1", "column2", "column3");
+      assertProjectNode(plan.findPlanByType(Type.PROJECT), "column1", "column2", "column3");
+      assertThat(plan.getSize(), is(2));
+      assertSourceNode(plan.findPlanByType(Type.SELECTOR), "my:mytype", null, "column1", "column2", "column3");
    }
 
    @Test
@@ -191,9 +198,9 @@ public class SimpleQueryPlanerTest
       plan = planner.createPlan(queryContext, query);
 
       assertThat(problems.hasProblems(), is(false));
-      assertProjectNode(plan.findStep(Type.PROJECT), "column1", "column2", "column3");
-      assertThat(plan.size(), is(2));
-      assertSourceNode(plan.findStep(Type.SOURCE), "someTable", null, "column1", "column2", "column3");
+      assertProjectNode(plan.findPlanByType(Type.PROJECT), "column1", "column2", "column3");
+      assertThat(plan.getSize(), is(2));
+      assertSourceNode(plan.findPlanByType(Type.SELECTOR), "someTable", null, "column1", "column2", "column3");
 
    }
 
@@ -207,8 +214,8 @@ public class SimpleQueryPlanerTest
       queryContext = new QueryExecutionContext(schema, problems, null);
       plan = planner.createPlan(queryContext, query);
       assertThat(problems.hasProblems(), is(false));
-      assertThat(plan.findStep(Type.PROJECT), notNullValue());
-      QueryExecutionStep executionStep = plan.findStep(Type.PROJECT);
+      assertThat(plan.findPlanByType(Type.PROJECT), notNullValue());
+      QueryExecutionPlan executionStep = plan.findPlanByType(Type.PROJECT);
       assertThat(executionStep.getType(), is(Type.PROJECT));
 
       assertThat(executionStep.getSelectors(), is(selectors("someTable")));
@@ -224,8 +231,8 @@ public class SimpleQueryPlanerTest
       queryContext = new QueryExecutionContext(schema, problems, null);
       plan = planner.createPlan(queryContext, query);
       assertThat(problems.hasProblems(), is(false));
-      assertThat(plan.findStep(Type.PROJECT), notNullValue());
-      QueryExecutionStep executionStep = plan.findStep(Type.PROJECT);
+      assertThat(plan.findPlanByType(Type.PROJECT), notNullValue());
+      QueryExecutionPlan executionStep = plan.findPlanByType(Type.PROJECT);
 
       assertThat(executionStep.getSelectors(), is(selectors("t1")));
    }
@@ -239,8 +246,8 @@ public class SimpleQueryPlanerTest
       queryContext = new QueryExecutionContext(schema, problems, null);
       plan = planner.createPlan(queryContext, query);
       assertThat(problems.hasProblems(), is(false));
-      assertThat(plan.findStep(Type.PROJECT), notNullValue());
-      QueryExecutionStep executionStep = plan.findStep(Type.PROJECT);
+      assertThat(plan.findPlanByType(Type.PROJECT), notNullValue());
+      QueryExecutionPlan executionStep = plan.findPlanByType(Type.PROJECT);
 
       assertThat(executionStep.getSelectors(), is(selectors("t1")));
    }
@@ -319,8 +326,8 @@ public class SimpleQueryPlanerTest
       plan = planner.createPlan(queryContext, query);
       assertThat(problems.hasProblems(), is(false));
 
-      assertThat(plan.findStep(Type.SORT), notNullValue());
-      QueryExecutionStep executionStep = plan.findStep(Type.SORT);
+      assertThat(plan.findPlanByType(Type.SORT), notNullValue());
+      QueryExecutionPlan executionStep = plan.findPlanByType(Type.SORT);
 
       assertThat(executionStep.getSelectors(), is(selectors("t1")));
       //TODO ASC
@@ -340,8 +347,8 @@ public class SimpleQueryPlanerTest
       plan = planner.createPlan(queryContext, query);
       assertThat(problems.hasProblems(), is(false));
 
-      assertThat(plan.findStep(Type.SORT), notNullValue());
-      QueryExecutionStep executionStep = plan.findStep(Type.SORT);
+      assertThat(plan.findPlanByType(Type.SORT), notNullValue());
+      QueryExecutionPlan executionStep = plan.findPlanByType(Type.SORT);
 
       assertThat(executionStep.getSelectors(), is(selectors("t1")));
       //TODO ASC
@@ -360,11 +367,11 @@ public class SimpleQueryPlanerTest
       plan = planner.createPlan(queryContext, query);
       assertThat(problems.hasProblems(), is(false));
 
-      assertThat(plan.findStep(Type.LIMIT), notNullValue());
-      QueryExecutionStep executionStep = plan.findStep(Type.LIMIT);
+      assertThat(plan.findPlanByType(Type.LIMIT), notNullValue());
+      LimitExecutionPlan executionStep = (LimitExecutionPlan)plan.findPlanByType(Type.LIMIT);
 
-      assertThat(((Integer)executionStep.getPropertyValue("LIMIT_COUNT")), is(10));
-      assertThat(executionStep.getPropertyValue("LIMIT_OFFSET"), nullValue());
+      assertThat(executionStep.getLimit().getRowLimit(), is(10));
+      assertThat(executionStep.getLimit().getOffset(), is(0));
    }
 
    @Test
@@ -380,11 +387,11 @@ public class SimpleQueryPlanerTest
       plan = planner.createPlan(queryContext, query);
       assertThat(problems.hasProblems(), is(false));
 
-      assertThat(plan.findStep(Type.LIMIT), notNullValue());
-      QueryExecutionStep executionStep = plan.findStep(Type.LIMIT);
+      assertThat(plan.findPlanByType(Type.LIMIT), notNullValue());
+      LimitExecutionPlan executionStep = (LimitExecutionPlan)plan.findPlanByType(Type.LIMIT);
 
-      assertThat(((Integer)executionStep.getPropertyValue("LIMIT_COUNT")), is(20));
-      assertThat(((Integer)executionStep.getPropertyValue("LIMIT_OFFSET")), is(10));
+      assertThat(executionStep.getLimit().getRowLimit(), is(20));
+      assertThat(executionStep.getLimit().getOffset(), is(10));
 
    }
 }

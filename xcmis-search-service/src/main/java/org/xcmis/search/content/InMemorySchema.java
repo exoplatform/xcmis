@@ -26,9 +26,9 @@ import org.xcmis.search.model.Query;
 import org.xcmis.search.model.source.SelectorName;
 import org.xcmis.search.query.QueryExecutionContext;
 import org.xcmis.search.query.plan.QueryExecutionPlan;
-import org.xcmis.search.query.plan.QueryExecutionStep;
 import org.xcmis.search.query.plan.SimplePlaner;
-import org.xcmis.search.query.plan.QueryExecutionStep.Type;
+import org.xcmis.search.query.plan.QueryExecutionPlan.ProjectExecutionPlan;
+import org.xcmis.search.query.plan.QueryExecutionPlan.Type;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -281,10 +281,9 @@ public class InMemorySchema implements Schema
                }
 
                // Get the columns from the top-level PROJECT ...
-               QueryExecutionStep project = plan.findStep(Type.PROJECT);
+               ProjectExecutionPlan project = (ProjectExecutionPlan)plan.findPlanByType(Type.PROJECT);
                assert project != null;
-               List<org.xcmis.search.model.column.Column> columns =
-                  (List<org.xcmis.search.model.column.Column>)project.getPropertyValue("PROJECT_COLUMNS");
+               List<org.xcmis.search.model.column.Column> columns = project.getColumns();
 
                // Go through all the columns and look up the types ...
                List<Column> viewColumns = new ArrayList<Column>(columns.size());

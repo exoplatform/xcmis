@@ -36,7 +36,5 @@ public interface QueryProcessor
     * @param plan the plan to be processed
     * @return the results of the query
     */
-   QueryExecutionResult execute(QueryExecutionContext context,
-                         Query query,
-                         QueryExecutionPlan plan);
+   QueryExecutionResult execute(QueryExecutionContext context, Query query, QueryExecutionPlan plan);
 }

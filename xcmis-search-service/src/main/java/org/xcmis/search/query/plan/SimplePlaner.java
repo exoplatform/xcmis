@@ -35,6 +35,13 @@ import org.xcmis.search.model.source.Selector;
 import org.xcmis.search.model.source.SelectorName;
 import org.xcmis.search.model.source.Source;
 import org.xcmis.search.query.QueryExecutionContext;
+import org.xcmis.search.query.plan.QueryExecutionPlan.JoinExecutionPlan;
+import org.xcmis.search.query.plan.QueryExecutionPlan.LimitExecutionPlan;
+import org.xcmis.search.query.plan.QueryExecutionPlan.ProjectExecutionPlan;
+import org.xcmis.search.query.plan.QueryExecutionPlan.SelectorExecutionPlan;
+import org.xcmis.search.query.plan.QueryExecutionPlan.SortExecutionPlan;
+import org.xcmis.search.query.plan.QueryExecutionPlan.SourceExecutionPlan;
+import org.xcmis.search.query.plan.QueryExecutionPlan.WhereExecutionPlan;
 import org.xcmis.search.query.validate.Validator;
 
 import java.util.Collections;
@@ -83,22 +90,22 @@ public class SimplePlaner implements QueryExecutionPlaner
    public QueryExecutionPlan createPlan(QueryExecutionContext context, Query query)
 
    {
-      QueryExecutionPlan executionPlan = new QueryExecutionPlan();
       try
       {
          Map<SelectorName, Table> querySelectorsMap = new HashMap<SelectorName, Table>();
          //source
-         populateSelectorPlan(context, query.getSource(), querySelectorsMap, executionPlan);
+         QueryExecutionPlan plan = createSelectorPlan(context, query.getSource(), querySelectorsMap);
          //constrain
-         populateConstrainPlan(context, query.getConstraint(), querySelectorsMap, executionPlan);
+         plan = createConstrainPlan(context, query.getConstraint(), querySelectorsMap, plan);
          //columns
-         populateProject(context, query.getColumns(), querySelectorsMap, executionPlan);
+         plan = createProject(context, query.getColumns(), querySelectorsMap, plan);
          //order by
-         populateSorting(context, query.getOrderings(), executionPlan);
+         plan = createSorting(context, query.getOrderings(), plan);
          //limit 
-         populateLimits(context, query.getLimits(), executionPlan);
+         plan = createLimits(context, query.getLimits(), plan);
 
          Visitors.visitAll(query, new Validator(context, querySelectorsMap));
+         return plan;
       }
       catch (VisitException e)
       {
@@ -106,7 +113,7 @@ public class SimplePlaner implements QueryExecutionPlaner
             .addException(new InvalidQueryException(e.getLocalizedMessage(), e.getCause()));
       }
 
-      return executionPlan;
+      return null;
    }
 
    /**
@@ -116,7 +123,7 @@ public class SimplePlaner implements QueryExecutionPlaner
     * @param executionPlan 
     * @return
     */
-   protected void populateConstrainPlan(final QueryExecutionContext context, final Constraint constraint,
+   protected QueryExecutionPlan createConstrainPlan(final QueryExecutionContext context, final Constraint constraint,
       final Map<SelectorName, Table> querySelectorsMap, QueryExecutionPlan executionPlan)
    {
       // Extract the list of Constraint objects that all must be satisfied ...
@@ -127,13 +134,16 @@ public class SimplePlaner implements QueryExecutionPlaner
       for (Constraint andedConstrain : andableConstraints)
       {
          // Create the where step ...
-         QueryExecutionStep criteriaSterp = new QueryExecutionStep(QueryExecutionStep.Type.WHERE);
-         criteriaSterp.setProperty("WHERE_CRITERIA", andedConstrain);
 
+         WhereExecutionPlan whereExecutionPlan = new WhereExecutionPlan(executionPlan);
+         whereExecutionPlan.setConstraint(andedConstrain);
          // Add selectors to the criteria node ...
-         criteriaSterp.setProperty("WHERE_SELECTORS", Visitors.getSelectorsReferencedBy(andedConstrain));
-         executionPlan.addFirst(criteriaSterp);
+
+         whereExecutionPlan.addSelectors(Visitors.getSelectorsReferencedBy(andedConstrain));
+
+         executionPlan = whereExecutionPlan;
       }
+      return executionPlan;
    }
 
    /**
@@ -142,13 +152,14 @@ public class SimplePlaner implements QueryExecutionPlaner
     * @param source
     * @param querySelectorsMap
     * @param executionPlan 
+    * @return 
     * @return
     * @throws VisitException 
     */
-   protected void populateSelectorPlan(final QueryExecutionContext context, final Source source,
-      final Map<SelectorName, Table> querySelectorsMap, final QueryExecutionPlan executionPlan) throws VisitException
+   protected QueryExecutionPlan createSelectorPlan(final QueryExecutionContext context, final Source source,
+      final Map<SelectorName, Table> querySelectorsMap) throws VisitException
    {
-      final Stack<QueryExecutionStep> stepsStack = new Stack<QueryExecutionStep>();
+      final Stack<QueryExecutionPlan> stepsStack = new Stack<QueryExecutionPlan>();
 
       Visitors.visit(source, new Visitors.AbstractModelVisitor()
       {
@@ -158,16 +169,16 @@ public class SimplePlaner implements QueryExecutionPlaner
          @Override
          public void visit(Join node) throws VisitException
          {
-            QueryExecutionStep executionStep = new QueryExecutionStep(QueryExecutionStep.Type.JOIN);
-            executionStep.setProperty("JOIN_TYPE", node.getType());
-            executionStep.setProperty("JOIN_ALGORITHM", JoinAlgorithm.NESTED_LOOP);
-            executionStep.setProperty("JOIN_CONDITION", node.getJoinCondition());
+            JoinExecutionPlan joinPlan = new JoinExecutionPlan();
+            joinPlan.setJoinType(node.getType());
+            joinPlan.setJoinAlgorithm(JoinAlgorithm.NESTED_LOOP);
+            joinPlan.setJoinCondition(node.getJoinCondition());
             //left plan
             node.getLeft().accept(this);
-            executionStep.setProperty("JOIN_LEFT_PLAN", stepsStack.pop());
+            joinPlan.setLeftPlan((SourceExecutionPlan)stepsStack.pop());
             //right plan
             node.getRight().accept(this);
-            executionStep.setProperty("JOIN_RIGHT_PLAN", stepsStack.pop());
+            joinPlan.setRightPlan((SourceExecutionPlan)stepsStack.pop());
 
          }
 
@@ -177,17 +188,18 @@ public class SimplePlaner implements QueryExecutionPlaner
          @Override
          public void visit(Selector selector)
          {
-            QueryExecutionStep executionStep = new QueryExecutionStep(QueryExecutionStep.Type.SOURCE);
+            //QueryExecutionPlan executionPlan = new QueryExecutionPlan(QueryExecutionPlan.Type.SELECTOR);
+            SelectorExecutionPlan selectorPlan = new SelectorExecutionPlan();
             if (selector.hasAlias())
             {
-               executionStep.addSelector(selector.getAlias());
-               executionStep.setProperty("SOURCE_ALIAS", selector.getAlias());
-               executionStep.setProperty("SOURCE_NAME", selector.getName());
+               selectorPlan.addSelector(selector.getAlias());
+               selectorPlan.setAlias(selector.getAlias());
+               selectorPlan.setName(selector.getName());
             }
             else
             {
-               executionStep.addSelector(selector.getName());
-               executionStep.setProperty("SOURCE_NAME", selector.getName());
+               selectorPlan.addSelector(selector.getAlias());
+               selectorPlan.setName(selector.getName());
             }
             // Validate the source name and set the available columns ...
             Table table = context.getSchema().getTable(selector.getName());
@@ -198,19 +210,18 @@ public class SimplePlaner implements QueryExecutionPlaner
                {
                   // There was already a table with this alias or name ...
                }
-
-               executionStep.setProperty("SOURCE_COLUMNS", table.getColumns());
+               selectorPlan.setColumns(table.getColumns());
             }
             else
             {
                context.getExecutionExceptions().addException(
                   new TableDoesntExistException("Table " + selector.getName() + " doesnt exist"));
             }
-            stepsStack.push(executionStep);
+            stepsStack.push(selectorPlan);
          }
       });
 
-      executionPlan.addFirst(stepsStack.pop());
+      return stepsStack.pop();
    }
 
    /**
@@ -220,22 +231,21 @@ public class SimplePlaner implements QueryExecutionPlaner
     * @param orderings list of orderings from the query
     * @param executionPlan the existing plan
     */
-   protected void populateSorting(final QueryExecutionContext context, List<Ordering> orderings,
+   protected QueryExecutionPlan createSorting(final QueryExecutionContext context, List<Ordering> orderings,
       final QueryExecutionPlan executionPlan)
    {
       if (!orderings.isEmpty())
       {
 
-         QueryExecutionStep sortNode = new QueryExecutionStep(QueryExecutionStep.Type.SORT);
-
-         sortNode.setProperty("SORT_ORDER_BY", orderings);
+         SortExecutionPlan sortExecutionPlan = new SortExecutionPlan(executionPlan);
+         sortExecutionPlan.setOrderings(orderings);
          for (Ordering ordering : orderings)
          {
-            sortNode.addSelectors(Visitors.getSelectorsReferencedBy(ordering));
+            sortExecutionPlan.addSelectors(Visitors.getSelectorsReferencedBy(ordering));
          }
-
-         executionPlan.addFirst(sortNode);
+         return sortExecutionPlan;
       }
+      return executionPlan;
    }
 
    /**
@@ -247,14 +257,15 @@ public class SimplePlaner implements QueryExecutionPlaner
     * @param selectors the selectors keyed by their alias or name
     * @return the updated plan
     */
-   protected void populateProject(final QueryExecutionContext context, List<Column> columns,
-      Map<SelectorName, Table> selectors, final QueryExecutionPlan executionPlan)
+   protected QueryExecutionPlan createProject(final QueryExecutionContext context, List<Column> columns,
+      Map<SelectorName, Table> selectors, QueryExecutionPlan executionPlan)
    {
       if (columns == null)
       {
          columns = Collections.emptyList();
       }
-      QueryExecutionStep projectNode = new QueryExecutionStep(QueryExecutionStep.Type.PROJECT);
+      //QueryExecutionPlan projectNode = new QueryExecutionPlan(QueryExecutionPlan.Type.PROJECT);
+      ProjectExecutionPlan projectPlan = new ProjectExecutionPlan(executionPlan);
 
       if (columns.isEmpty())
       {
@@ -265,7 +276,7 @@ public class SimplePlaner implements QueryExecutionPlaner
             SelectorName tableName = entry.getKey();
             Table table = entry.getValue();
             // Add the selector that is being used ...
-            projectNode.addSelector(tableName);
+            projectPlan.addSelector(tableName);
             // Compute the columns from this selector ...
             for (org.xcmis.search.content.Schema.Column column : table.getColumns())
             {
@@ -282,7 +293,7 @@ public class SimplePlaner implements QueryExecutionPlaner
          {
             SelectorName tableName = column.getSelectorName();
             // Add the selector that is being used ...
-            projectNode.addSelector(tableName);
+            projectPlan.addSelector(tableName);
             // Verify that each column is available in the appropriate source ...
             Table table = selectors.get(tableName);
             if (table == null)
@@ -303,8 +314,8 @@ public class SimplePlaner implements QueryExecutionPlaner
             }
          }
       }
-      projectNode.setProperty("PROJECT_COLUMNS", columns);
-      executionPlan.addFirst(projectNode);
+      projectPlan.setColumns(columns);
+      return projectPlan;
    }
 
    /**
@@ -314,29 +325,17 @@ public class SimplePlaner implements QueryExecutionPlaner
     * @param limit the limit definition; may be null
     * @param plan the existing plan    *
     */
-   protected void populateLimits(QueryExecutionContext context, Limit limit, final QueryExecutionPlan executionPlan)
+   protected QueryExecutionPlan createLimits(QueryExecutionContext context, Limit limit,
+      QueryExecutionPlan executionPlan)
    {
-      if (!limit.isUnlimited())
+      if (limit != null && !limit.isUnlimited())
       {
 
-         QueryExecutionStep limitNode = new QueryExecutionStep(QueryExecutionStep.Type.LIMIT);
-
-         boolean attach = false;
-         if (limit.getOffset() != 0)
-         {
-            limitNode.setProperty("LIMIT_OFFSET", limit.getOffset());
-            attach = true;
-         }
-         if (!limit.isUnlimited())
-         {
-            limitNode.setProperty("LIMIT_COUNT", limit.getRowLimit());
-            attach = true;
-         }
-         if (attach)
-         {
-            executionPlan.addFirst(limitNode);
-         }
+         LimitExecutionPlan limitExecutionPlan = new LimitExecutionPlan(executionPlan);
+         limitExecutionPlan.setLimit(limit);
+         return limitExecutionPlan;
       }
+      return executionPlan;
    }
 
    /**
