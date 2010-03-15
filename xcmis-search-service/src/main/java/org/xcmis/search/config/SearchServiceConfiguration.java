@@ -19,7 +19,7 @@
 package org.xcmis.search.config;
 
 import org.xcmis.search.content.interceptors.ReadOnlyInterceptor;
-import org.xcmis.search.lucene2.content.VirtualTableResolver;
+import org.xcmis.search.lucene.content.VirtualTableResolver;
 import org.xcmis.search.value.NameConverter;
 import org.xcmis.search.value.PathSplitter;
 

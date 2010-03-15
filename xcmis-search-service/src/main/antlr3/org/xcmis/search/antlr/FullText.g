@@ -26,7 +26,7 @@ tokens {
 
 @parser::header {
 package  org.xcmis.search.antlr;
-import  org.xcmis.search.lucene2.content.ErrorReporter;
+import  org.xcmis.search.lucene.content.ErrorReporter;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.QueryParser;
@@ -40,7 +40,7 @@ import org.apache.lucene.search.MatchAllDocsQuery;
 
 @lexer::header {
 package  org.xcmis.search.antlr;
-import  org.xcmis.search.lucene2.content.ErrorReporter;
+import  org.xcmis.search.lucene.content.ErrorReporter;
 }
 
 @members{
