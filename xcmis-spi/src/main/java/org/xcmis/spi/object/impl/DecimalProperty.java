@@ -31,6 +31,14 @@ import java.util.List;
 public class DecimalProperty extends BaseProperty<BigDecimal>
 {
 
+   /**
+    * Default constructor.
+    */
+   public DecimalProperty()
+   {
+      super();
+   }
+
    public DecimalProperty(String id, String queryName, String localName, String displayName, List<BigDecimal> values)
    {
       super(id, queryName, localName, displayName, values);

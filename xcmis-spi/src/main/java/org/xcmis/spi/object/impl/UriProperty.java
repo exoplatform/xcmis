@@ -31,6 +31,14 @@ import java.util.List;
 public class UriProperty extends BaseProperty<URI>
 {
 
+   /**
+    * Default constructor.
+    */
+   public UriProperty()
+   {
+      super();
+   }
+
    public UriProperty(String id, String queryName, String localName, String displayName, List<URI> values)
    {
       super(id, queryName, localName, displayName, values);

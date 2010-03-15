@@ -30,6 +30,14 @@ import java.util.List;
 public class StringProperty extends BaseProperty<String>
 {
 
+   /**
+    * Default constructor.
+    */
+   public StringProperty()
+   {
+      super();
+   }
+
    public StringProperty(String id, String queryName, String localName, String displayName, List<String> values)
    {
       super(id, queryName, localName, displayName, values);

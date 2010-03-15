@@ -30,6 +30,14 @@ import java.util.List;
 public class BooleanProperty extends BaseProperty<Boolean>
 {
 
+   /**
+    * Default constructor.
+    */
+   public BooleanProperty()
+   {
+      super();
+   }
+   
    public BooleanProperty(String id, String queryName, String localName, String displayName, List<Boolean> values)
    {
       super(id, queryName, localName, displayName, values);

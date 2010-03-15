@@ -30,6 +30,14 @@ import java.util.List;
 public class HtmlProperty extends BaseProperty<String>
 {
 
+   /**
+    * Default constructor.
+    */
+   public HtmlProperty()
+   {
+      super();
+   }
+
    public HtmlProperty(String id, String queryName, String localName, String displayName, List<String> values)
    {
       super(id, queryName, localName, displayName, values);

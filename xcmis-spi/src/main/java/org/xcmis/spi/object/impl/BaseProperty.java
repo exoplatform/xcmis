@@ -41,6 +41,13 @@ public abstract class BaseProperty<T> implements Property<T>
 
    private List<T> values;
 
+   /**
+    * Default constructor.
+    */
+   public BaseProperty()
+   {
+   }
+
    public BaseProperty(String id, String queryName, String localName, String displayName, List<T> values)
    {
       this.id = id;
@@ -91,6 +98,42 @@ public abstract class BaseProperty<T> implements Property<T>
       if (values == null)
          values = new ArrayList<T>();
       return values;
+   }
+
+   /**
+    * Setter for displayName.
+    * @param displayName
+    */
+   public void setDisplayName(String displayName)
+   {
+      this.displayName = displayName;
+   }
+
+   /**
+    * Setter for id.
+    * @param id
+    */
+   public void setId(String id)
+   {
+      this.id = id;
+   }
+
+   /**
+    * Setter for localName.
+    * @param localName
+    */
+   public void setLocalName(String localName)
+   {
+      this.localName = localName;
+   }
+
+   /**
+    * Setter for queryName.
+    * @param queryName
+    */
+   public void setQueryName(String queryName)
+   {
+      this.queryName = queryName;
    }
 
 }

@@ -31,6 +31,14 @@ import java.util.List;
 public class IntegerProperty extends BaseProperty<BigInteger>
 {
 
+   /**
+    * Default constructor.
+    */
+   public IntegerProperty()
+   {
+      super();
+   }
+
    public IntegerProperty(String id, String queryName, String localName, String displayName, List<BigInteger> values)
    {
       super(id, queryName, localName, displayName, values);
