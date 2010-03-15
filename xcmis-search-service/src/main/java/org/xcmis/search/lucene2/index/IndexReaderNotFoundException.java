@@ -16,62 +16,53 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xcmis.search.config;
+package org.xcmis.search.lucene2.index;
 
-import org.xcmis.search.lucene2.index.IndexException;
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
 
 /**
  * Created by The eXo Platform SAS.
- *
- * @author <a href="mailto:geaz@users.sourceforge.net">Gennady Azarenkov</a>
- * @version $Id: IndexConfigurationException.java 2 2010-02-04 17:21:49Z andrew00x $
+ * 
+ * @author <a href="mailto:Sergey.Kabashnyuk@gmail.com">Sergey Kabashnyuk</a>
+ * @version $Id: IndexReaderNotFoundException.java 2 2010-02-04 17:21:49Z andrew00x $
  */
-
-/**
- * This exception is thrown when condition occurred.
- */
-public class IndexConfigurationException extends IndexException
+public class IndexReaderNotFoundException extends IndexException
 {
    /**
+    * Class logger.
+    */
+   private static final Log LOG = ExoLogger.getLogger(IndexReaderNotFoundException.class);
+
+   /**
     * 
     */
-   public IndexConfigurationException()
+   public IndexReaderNotFoundException()
    {
-      super();
-      // TODO Auto-generated constructor stub
    }
 
    /**
     * @param message
     * @param cause
     */
-   public IndexConfigurationException(String message, Throwable cause)
+   public IndexReaderNotFoundException(String message, Throwable cause)
    {
       super(message, cause);
-      // TODO Auto-generated constructor stub
    }
 
    /**
     * @param message
     */
-   public IndexConfigurationException(String message)
+   public IndexReaderNotFoundException(String message)
    {
       super(message);
-      // TODO Auto-generated constructor stub
    }
 
    /**
     * @param cause
     */
-   public IndexConfigurationException(Throwable cause)
+   public IndexReaderNotFoundException(Throwable cause)
    {
       super(cause);
-      // TODO Auto-generated constructor stub
    }
-
-   /**
-    * 
-    */
-   private static final long serialVersionUID = -3029464014145259931L;
-
 }

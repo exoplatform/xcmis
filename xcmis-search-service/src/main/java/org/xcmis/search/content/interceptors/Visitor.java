@@ -20,10 +20,9 @@ package org.xcmis.search.content.interceptors;
 
 import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.content.command.VisitableCommand;
-import org.xcmis.search.content.command.index.AddDocumentsToTheIndexCommand;
-import org.xcmis.search.content.command.index.RemoveDocumentsFromIndexCommand;
-import org.xcmis.search.content.command.query.ParseQueryCommand;
+import org.xcmis.search.content.command.index.ApplyChangesToTheIndexCommand;
 import org.xcmis.search.content.command.query.ExecuteSelectorCommand;
+import org.xcmis.search.content.command.query.ParseQueryCommand;
 import org.xcmis.search.content.command.query.ProcessQueryCommand;
 import org.xcmis.search.content.command.query.SubmitStatementCommand;
 import org.xcmis.search.content.command.read.GetChildNodeCommand;
@@ -49,8 +48,8 @@ public interface Visitor
     * @param putDocumentsToTheIndexCommand
     * @return
     */
-   Object visitAddDocumentsToTheIndexCommand(InvocationContext ctx,
-      AddDocumentsToTheIndexCommand command) throws Throwable;
+   Object visitApplyChangesToTheIndexCommand(InvocationContext ctx, ApplyChangesToTheIndexCommand command)
+      throws Throwable;
 
    /**
     * Visits a CommitCommand.
@@ -77,8 +76,7 @@ public interface Visitor
     * @param executeQueryCommand
     * @return
     */
-   Object visitExecuteSelectorCommand(InvocationContext ctx, ExecuteSelectorCommand command)
-      throws Throwable;
+   Object visitExecuteSelectorCommand(InvocationContext ctx, ExecuteSelectorCommand command) throws Throwable;
 
    /**
     * @param ctx
@@ -115,14 +113,6 @@ public interface Visitor
     * @return
     */
    Object visitGetPropertyCommand(InvocationContext ctx, GetPropertyCommand command) throws Throwable;
-
-   /**
-    * @param ctx
-    * @param removeDocumentsFromIndexCommand
-    * @return
-    */
-   Object visitRemoveDocumentsFromIndexCommand(InvocationContext ctx,
-      RemoveDocumentsFromIndexCommand command) throws Throwable;
 
    /**
     * Visits a RollBackCommand.

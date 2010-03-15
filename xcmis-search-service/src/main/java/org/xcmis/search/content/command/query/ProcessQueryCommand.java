@@ -30,6 +30,7 @@ import org.xcmis.search.model.Query;
 public class ProcessQueryCommand implements VisitableCommand
 {
    private final Query query;
+
    /**
     * @param query
     */
@@ -39,7 +40,6 @@ public class ProcessQueryCommand implements VisitableCommand
       this.query = query;
    }
 
-
    /**
     * @return the query
     */
@@ -48,14 +48,13 @@ public class ProcessQueryCommand implements VisitableCommand
       return query;
    }
 
-
    /**
     * @see org.xcmis.search.content.command.VisitableCommand#acceptVisitor(org.xcmis.search.content.command.InvocationContext, org.xcmis.search.content.interceptors.Visitor)
     */
-   @Override
+
    public Object acceptVisitor(InvocationContext ctx, Visitor visitor) throws Throwable
    {
-      
+
       return visitor.visitProcessQueryCommand(ctx, this);
    }
 

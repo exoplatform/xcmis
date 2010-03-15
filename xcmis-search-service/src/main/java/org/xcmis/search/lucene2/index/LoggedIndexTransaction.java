@@ -16,16 +16,29 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xcmis.search.config;
+package org.xcmis.search.lucene2.index;
 
 
 /**
+ * Created by The eXo Platform SAS.
+ * 
  * @author <a href="mailto:Sergey.Kabashnyuk@gmail.com">Sergey Kabashnyuk</a>
- * @version $Id: exo-jboss-codetemplates.xml 34027 2009-07-15 23:26:43Z
- *          aheritier $
+ * @version $Id: LoggedIndexTransaction.java 2 2010-02-04 17:21:49Z andrew00x $
+ * @param <D> Document class.
  */
-public interface IndexConfuguration
+public interface LoggedIndexTransaction<D> extends IndexTransaction<D>, IndexTransactionResource
 {
-   String getIndexDir();
+   /**
+    * Remove information from persistence storage.
+    * 
+    * @throws IndexTransactionException
+    */
+   void end() throws IndexTransactionException;
 
+   /**
+    * Save information about transaction to the persistence storage.
+    * 
+    * @throws IndexTransactionException
+    */
+   void log() throws IndexTransactionException;
 }

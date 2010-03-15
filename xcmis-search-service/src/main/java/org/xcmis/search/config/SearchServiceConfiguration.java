@@ -18,8 +18,10 @@
  */
 package org.xcmis.search.config;
 
-import org.apache.commons.lang.Validate;
 import org.xcmis.search.content.interceptors.ReadOnlyInterceptor;
+import org.xcmis.search.lucene2.content.VirtualTableResolver;
+import org.xcmis.search.value.NameConverter;
+import org.xcmis.search.value.PathSplitter;
 
 /**
  * Configuration of search service.
@@ -30,19 +32,99 @@ public class SearchServiceConfiguration
     * Mandatory parameter for service. To be able to read content from base
     * storage.
     */
-   private final ReadOnlyInterceptor contentReader;
+   private ReadOnlyInterceptor contentReader;
 
    /**
-    * @param contentReader
+    * Reselve selector names to lucene querys.
     */
-   public SearchServiceConfiguration(ReadOnlyInterceptor contentReader)
-   {
-      Validate.notNull(contentReader, "The contentReader argument may not be null");
-      this.contentReader = contentReader;
-   }
+   private VirtualTableResolver tableResolver;
+
+   /**
+    * Convert one Sting name to other String name.
+    */
+   private NameConverter nameConverter;
+
+   /**
+    * Split path  string to names
+    */
+   private PathSplitter pathSplitter;
+
+   private IndexConfuguration indexConfuguration;
 
    public ReadOnlyInterceptor getContentReader()
    {
       return contentReader;
+   }
+
+   /**
+    * @return the indexConfuguration
+    */
+   public IndexConfuguration getIndexConfuguration()
+   {
+      return indexConfuguration;
+   }
+
+   /**
+    * @return
+    */
+   public NameConverter getNameConverter()
+   {
+      return nameConverter;
+   }
+
+   /**
+    * @return
+    */
+   public PathSplitter getPathSplitter()
+   {
+      return pathSplitter;
+   }
+
+   /**
+    * @return
+    */
+   public VirtualTableResolver getTableResolver()
+   {
+      return tableResolver;
+   }
+
+   /**
+    * @param contentReader the contentReader to set
+    */
+   public void setContentReader(ReadOnlyInterceptor contentReader)
+   {
+      this.contentReader = contentReader;
+   }
+
+   /**
+    * @param indexConfuguration the indexConfuguration to set
+    */
+   public void setIndexConfuguration(IndexConfuguration indexConfuguration)
+   {
+      this.indexConfuguration = indexConfuguration;
+   }
+
+   /**
+    * @param nameConverter the nameConverter to set
+    */
+   public void setNameConverter(NameConverter nameConverter)
+   {
+      this.nameConverter = nameConverter;
+   }
+
+   /**
+    * @param pathSplitter the pathSplitter to set
+    */
+   public void setPathSplitter(PathSplitter pathSplitter)
+   {
+      this.pathSplitter = pathSplitter;
+   }
+
+   /**
+    * @param tableResolver the tableResolver to set
+    */
+   public void setTableResolver(VirtualTableResolver tableResolver)
+   {
+      this.tableResolver = tableResolver;
    }
 }

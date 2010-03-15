@@ -28,6 +28,7 @@ import org.xcmis.search.model.ordering.Ordering;
 import org.xcmis.search.model.source.Selector;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Command for execution query with one single {@link Selector} filtered by
@@ -44,22 +45,67 @@ public class ExecuteSelectorCommand implements VisitableCommand
 
    private final List<Ordering> orderings;
 
+   private final Map<String, Object> bindVariablesValues;
+
    /**
     * @param source
     * @param constrain
     * @param limit
     * @param orderings
     */
-   public ExecuteSelectorCommand(Selector selector, Constraint constrain, Limit limit, List<Ordering> orderings)
+   public ExecuteSelectorCommand(Selector selector, Constraint constrain, Limit limit, List<Ordering> orderings,
+      Map<String, Object> bindVariablesValues)
    {
+      this.bindVariablesValues = bindVariablesValues;
       Validate.notNull(selector, "The selector argument may not be null");
       Validate.notNull(constrain, "The constrain argument may not be null");
       Validate.notNull(limit, "The limit argument may not be null");
       Validate.notNull(orderings, "The orderings argument may not be null");
+      Validate.notNull(bindVariablesValues, "The bindVariablesValues argument may not be null");
       this.selector = selector;
       this.constrain = constrain;
       this.limit = limit;
       this.orderings = orderings;
+   }
+
+   /**
+    * @return the bindVariablesValues
+    */
+   public Map<String, Object> getBindVariablesValues()
+   {
+      return bindVariablesValues;
+   }
+
+   /**
+    * @return the selector
+    */
+   public Selector getSelector()
+   {
+      return selector;
+   }
+
+   /**
+    * @return the constrain
+    */
+   public Constraint getConstrain()
+   {
+      return constrain;
+   }
+
+   /**
+    * @return the limit
+    */
+   public Limit getLimit()
+   {
+      return limit;
+   }
+
+   /**
+    * @return the orderings
+    */
+   public List<Ordering> getOrderings()
+   {
+      return orderings;
    }
 
    /**

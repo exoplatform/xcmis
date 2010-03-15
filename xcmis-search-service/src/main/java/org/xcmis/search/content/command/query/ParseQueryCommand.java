@@ -29,8 +29,9 @@ import org.xcmis.search.content.interceptors.Visitor;
 public class ParseQueryCommand implements VisitableCommand
 {
    private final String query;
-   
+
    private final String type;
+
    /**
     * @param query
     * @param type
@@ -41,15 +42,16 @@ public class ParseQueryCommand implements VisitableCommand
       this.query = query;
       this.type = type;
    }
+
    /**
     * @see org.xcmis.search.content.command.VisitableCommand#acceptVisitor(org.xcmis.search.content.command.InvocationContext, org.xcmis.search.content.interceptors.Visitor)
     */
-   @Override
    public Object acceptVisitor(InvocationContext ctx, Visitor visitor) throws Throwable
    {
 
       return visitor.visitParseQueryCommand(ctx, this);
    }
+
    /**
     * @return the query
     */
@@ -57,6 +59,7 @@ public class ParseQueryCommand implements VisitableCommand
    {
       return query;
    }
+
    /**
     * @return the type
     */

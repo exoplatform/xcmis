@@ -16,16 +16,34 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xcmis.search.config;
+package org.xcmis.search.lucene2.search;
 
+import org.apache.lucene.search.regex.RegexCapabilities;
+
+import java.util.regex.Pattern;
 
 /**
- * @author <a href="mailto:Sergey.Kabashnyuk@gmail.com">Sergey Kabashnyuk</a>
- * @version $Id: exo-jboss-codetemplates.xml 34027 2009-07-15 23:26:43Z
- *          aheritier $
+ * Created by The eXo Platform SAS
+ * Author : Sergey Karpenko <sergey.karpenko@exoplatform.com.ua>
+ * @version $Id: CaseInsensitiveRegexCapImpl.java 2 2010-02-04 17:21:49Z andrew00x $
  */
-public interface IndexConfuguration
-{
-   String getIndexDir();
 
+public class CaseInsensitiveRegexCapImpl implements RegexCapabilities
+{
+   private Pattern pattern;
+
+   public void compile(String regex)
+   {
+      pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+   }
+
+   public boolean match(String regex)
+   {
+      return pattern.matcher(regex).lookingAt();
+   }
+
+   public String prefix()
+   {
+      return null;
+   }
 }

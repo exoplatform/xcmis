@@ -19,6 +19,8 @@
 package org.xcmis.search;
 
 import org.xcmis.search.config.SearchServiceConfiguration;
+import org.xcmis.search.content.command.index.ApplyChangesToTheIndexCommand;
+import org.xcmis.search.content.command.query.ExecuteSelectorCommand;
 import org.xcmis.search.content.command.query.ParseQueryCommand;
 import org.xcmis.search.content.command.query.ProcessQueryCommand;
 import org.xcmis.search.content.command.query.SubmitStatementCommand;
@@ -42,16 +44,16 @@ public abstract class SearchService implements Startable
 
    /**
     * @param configuration
+    * @throws SearchServiceException 
     */
-   public SearchService(SearchServiceConfiguration configuration)
+   public SearchService(SearchServiceConfiguration configuration) throws SearchServiceException
    {
       super();
       this.configuration = configuration;
       this.interceptorChain = new InterceptorChain(configuration.getContentReader());
 
-      addIndexStarageInterceptor(interceptorChain);
-      addQueryExecutorInterceptor(interceptorChain);
-      
+      addQueryableIndexStorageInterceptor(interceptorChain);
+
       addQueryParserInterceptor(interceptorChain);
       // parse and execute statements
       interceptorChain.setFirstInChain(new StatementProcessorInterceptor());
@@ -100,12 +102,11 @@ public abstract class SearchService implements Startable
          throw new InvalidQueryException(e.getLocalizedMessage(), e);
       }
    }
-   
 
    /**
     * @see org.xcmis.search.Startable#start()
     */
-   @Override
+
    public void start()
    {
 
@@ -114,26 +115,20 @@ public abstract class SearchService implements Startable
    /**
     * @see org.xcmis.search.Startable#stop()
     */
-   @Override
    public void stop()
    {
 
    }
 
    /**
-    * Add interceptors that handle {@link AddDocumentsToTheIndexCommand} and
-    * {@link RemoveDocumentsFromIndexCommand}
+    * Add interceptors that handle {@link ApplyChangesToTheIndexCommand} and
+    * {@link ExecuteSelectorCommand}
     * 
     * @param interceptorChain
+    * @throws SearchServiceException 
     */
-   protected abstract void addIndexStarageInterceptor(InterceptorChain interceptorChain);
-
-   /**
-    * Add interceptors that handle {@link ExecuteSelectorCommand} a
-    * 
-    * @param interceptorChain
-    */
-   protected abstract void addQueryExecutorInterceptor(InterceptorChain interceptorChain);
+   protected abstract void addQueryableIndexStorageInterceptor(InterceptorChain interceptorChain)
+      throws SearchServiceException;
 
    /**
     * Add interceptors that handle {@link ParseQueryCommand}.

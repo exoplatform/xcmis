@@ -20,10 +20,9 @@ package org.xcmis.search.content.interceptors;
 
 import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.content.command.VisitableCommand;
-import org.xcmis.search.content.command.index.AddDocumentsToTheIndexCommand;
-import org.xcmis.search.content.command.index.RemoveDocumentsFromIndexCommand;
-import org.xcmis.search.content.command.query.ParseQueryCommand;
+import org.xcmis.search.content.command.index.ApplyChangesToTheIndexCommand;
 import org.xcmis.search.content.command.query.ExecuteSelectorCommand;
+import org.xcmis.search.content.command.query.ParseQueryCommand;
 import org.xcmis.search.content.command.query.ProcessQueryCommand;
 import org.xcmis.search.content.command.query.SubmitStatementCommand;
 import org.xcmis.search.content.command.read.GetChildNodeCommand;
@@ -44,12 +43,11 @@ public class AbstractVisitor implements Visitor
 {
 
    /**
-    * @see org.xcmis.search.content.interceptors.Visitor#visitAddDocumentsToTheIndexCommand(org.xcmis.search.content.command.InvocationContext,
-    *      org.xcmis.search.content.command.index.AddDocumentsToTheIndexCommand)
+    * @see org.xcmis.search.content.interceptors.Visitor#visitApplyChangesToTheIndexCommand(org.xcmis.search.content.command.InvocationContext,
+    *      org.xcmis.search.content.command.index.ApplyChangesToTheIndexCommand)
     */
-   @Override
-   public Object visitAddDocumentsToTheIndexCommand(InvocationContext ctx,
-      AddDocumentsToTheIndexCommand command) throws Throwable
+   public Object visitApplyChangesToTheIndexCommand(InvocationContext ctx, ApplyChangesToTheIndexCommand command)
+      throws Throwable
    {
       return handleDefault(ctx, command);
    }
@@ -67,9 +65,7 @@ public class AbstractVisitor implements Visitor
     * @see org.xcmis.search.content.interceptors.Visitor#visitParseQueryCommand(org.xcmis.search.content.command.InvocationContext,
     *      org.xcmis.search.content.command.query.ParseQueryCommand)
     */
-   @Override
-   public Object visitParseQueryCommand(InvocationContext ctx, ParseQueryCommand command)
-      throws Throwable
+   public Object visitParseQueryCommand(InvocationContext ctx, ParseQueryCommand command) throws Throwable
    {
       return handleDefault(ctx, command);
    }
@@ -78,8 +74,7 @@ public class AbstractVisitor implements Visitor
     * @see org.xcmis.search.content.interceptors.Visitor#visitExecuteSelectorCommand(org.xcmis.search.content.command.InvocationContext,
     *      org.xcmis.search.content.command.query.ExecuteSelectorCommand)
     */
-   public Object visitExecuteSelectorCommand(InvocationContext ctx, ExecuteSelectorCommand command)
-      throws Throwable
+   public Object visitExecuteSelectorCommand(InvocationContext ctx, ExecuteSelectorCommand command) throws Throwable
    {
       return handleDefault(ctx, command);
    }
@@ -134,17 +129,6 @@ public class AbstractVisitor implements Visitor
    }
 
    /**
-    * @see org.xcmis.search.content.interceptors.Visitor#visitRemoveDocumentsFromIndexCommand(org.xcmis.search.content.command.InvocationContext,
-    *      org.xcmis.search.content.command.index.RemoveDocumentsFromIndexCommand)
-    */
-   @Override
-   public Object visitRemoveDocumentsFromIndexCommand(InvocationContext ctx,
-      RemoveDocumentsFromIndexCommand command) throws Throwable
-   {
-      return handleDefault(ctx, command);
-   }
-
-   /**
     * @see org.xcmis.search.content.interceptors.Visitor#visitRollBackCommand(org.xcmis.search.content.command.InvocationContext,
     *      org.xcmis.search.content.command.tx.RollBackCommand)
     */
@@ -175,7 +159,6 @@ public class AbstractVisitor implements Visitor
     * @see org.xcmis.search.content.interceptors.Visitor#visitProcessQueryCommand(org.xcmis.search.content.command.InvocationContext,
     *      org.xcmis.search.content.command.query.ProcessQueryCommand)
     */
-   @Override
    public Object visitProcessQueryCommand(InvocationContext ctx, ProcessQueryCommand command) throws Throwable
    {
       return handleDefault(ctx, command);
@@ -185,7 +168,6 @@ public class AbstractVisitor implements Visitor
     * @see org.xcmis.search.content.interceptors.Visitor#visitSubmitStatementCommand(org.xcmis.search.content.command.InvocationContext,
     *      org.xcmis.search.content.command.query.SubmitStatementCommand)
     */
-   @Override
    public Object visitSubmitStatementCommand(InvocationContext ctx, SubmitStatementCommand command) throws Throwable
    {
       return handleDefault(ctx, command);

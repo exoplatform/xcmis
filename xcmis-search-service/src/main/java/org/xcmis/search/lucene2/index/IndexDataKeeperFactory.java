@@ -16,16 +16,40 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xcmis.search.config;
+package org.xcmis.search.lucene2.index;
 
+import java.util.Collection;
 
 /**
+ * Created by The eXo Platform SAS.
+ * 
  * @author <a href="mailto:Sergey.Kabashnyuk@gmail.com">Sergey Kabashnyuk</a>
- * @version $Id: exo-jboss-codetemplates.xml 34027 2009-07-15 23:26:43Z
- *          aheritier $
+ * @version $Id: IndexDataKeeperFactory.java 2 2010-02-04 17:21:49Z andrew00x $
  */
-public interface IndexConfuguration
+public interface IndexDataKeeperFactory<D, A, R>
 {
-   String getIndexDir();
 
+   /**
+    * @param changes
+    * @return new index data keeper.
+    * @throws IndexException
+    */
+   LuceneIndexDataManager createNewIndexDataKeeper(IndexTransaction<D> changes) throws IndexException;
+
+   /**
+    * Free allocated resources
+    * 
+    * @param indexDataKeepers
+    * @throws IndexException
+    */
+   void dispose(IndexDataKeeper<D> indexDataKeeper) throws IndexException;
+
+   /**
+    * Merge two data keepers.
+    * 
+    * @param chains
+    * @param otherKeeper
+    * @return result index data keeper.
+    */
+   LuceneIndexDataManager merge(Collection<LuceneIndexDataManager> chains) throws IndexException;
 }

@@ -16,16 +16,34 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xcmis.search.config;
+package org.xcmis.search.lucene2.index;
 
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.index.IndexReader;
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
 
-/**
- * @author <a href="mailto:Sergey.Kabashnyuk@gmail.com">Sergey Kabashnyuk</a>
- * @version $Id: exo-jboss-codetemplates.xml 34027 2009-07-15 23:26:43Z
- *          aheritier $
- */
-public interface IndexConfuguration
+public abstract class LuceneIndexDataKeeperFactory implements IndexDataKeeperFactory<Document, Analyzer, IndexReader>
 {
-   String getIndexDir();
+   /**
+    * Class logger.
+    */
+   private static final Log LOG = ExoLogger.getLogger(LuceneIndexDataKeeperFactory.class);
 
+   /**
+    * 
+    */
+   public LuceneIndexDataKeeperFactory()
+   {
+      super();
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public void dispose(final IndexDataKeeper<Document> indexDataKeeper) throws IndexException
+   {
+      indexDataKeeper.stop();
+   }
 }

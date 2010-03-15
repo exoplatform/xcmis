@@ -16,16 +16,45 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xcmis.search.config;
+package org.xcmis.search.lucene2.index;
 
+import java.util.Set;
 
 /**
+ * Created by The eXo Platform SAS.
+ * 
  * @author <a href="mailto:Sergey.Kabashnyuk@gmail.com">Sergey Kabashnyuk</a>
- * @version $Id: exo-jboss-codetemplates.xml 34027 2009-07-15 23:26:43Z
- *          aheritier $
+ * @version $Id: IndexTransactionModificationReport.java 2 2010-02-04 17:21:49Z andrew00x $
  */
-public interface IndexConfuguration
+public interface IndexTransactionModificationReport
 {
-   String getIndexDir();
+
+   /**
+    * Map of documents what should be added to index.
+    * 
+    * @return map of documents.
+    */
+   Set<String> getAddedDocuments();
+
+   /**
+    * Set of identifiers of documents what should be removed from index.
+    * 
+    * @return set of identifiers.
+    */
+   Set<String> getRemovedDocuments();
+
+   /**
+    * Map of documents what should be updated in index.
+    * 
+    * @return map of documents.
+    */
+   Set<String> getUpdatedDocuments();
+
+   /**
+    * Indicates what some modifications happens.
+    * 
+    * @return flag what some modifications happens.
+    */
+   boolean isModifed();
 
 }

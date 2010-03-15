@@ -16,16 +16,21 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xcmis.search.config;
+package org.xcmis.search.lucene2.index;
 
+import java.util.Set;
 
 /**
  * @author <a href="mailto:Sergey.Kabashnyuk@gmail.com">Sergey Kabashnyuk</a>
  * @version $Id: exo-jboss-codetemplates.xml 34027 2009-07-15 23:26:43Z
  *          aheritier $
  */
-public interface IndexConfuguration
+public interface IndexRecoverService
 {
-   String getIndexDir();
 
+   /**
+    * @param uuids - set of unsaved to the persisted storage uuids.
+    * @throws IndexException
+    */
+   void recover(Set<String> uuids) throws IndexException;
 }

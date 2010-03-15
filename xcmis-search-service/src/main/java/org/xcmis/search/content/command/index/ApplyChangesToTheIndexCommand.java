@@ -16,58 +16,57 @@
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA, or see the FSF
  * site: http://www.fsf.org.
  */
-package org.xcmis.search.content.command.query;
+package org.xcmis.search.content.command.index;
 
 import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.content.command.VisitableCommand;
 import org.xcmis.search.content.interceptors.Visitor;
 
+import java.util.Map;
+import java.util.Set;
+
 /**
- * First command of the query of the given type. Next step will be
- * {@link ParseQueryCommand} then {@link ProcessQueryCommand}.
+ * Add and remove documents to the index storage.
  */
-public class SubmitStatementCommand implements VisitableCommand
+public class ApplyChangesToTheIndexCommand implements VisitableCommand
 {
+   private final Map<String, Object> addedDocuments;
 
-   private final String statement;
-
-   private final String type;
+   private final Set<String> deletedDocuments;
 
    /**
-    * @param query
-    * @param type
+    * @param addedDocuments
+    * @param deletedDocuments
     */
-   public SubmitStatementCommand(String statement, String type)
+   public ApplyChangesToTheIndexCommand(Map<String, Object> addedDocuments, Set<String> deletedDocuments)
    {
       super();
-      this.statement = statement;
-      this.type = type;
+      this.addedDocuments = addedDocuments;
+      this.deletedDocuments = deletedDocuments;
    }
 
    /**
-    * @see org.xcmis.search.content.command.VisitableCommand#acceptVisitor(org.xcmis.search.content.command.InvocationContext,
-    *      org.xcmis.search.content.interceptors.Visitor)
+    * @return the addedDocuments
+    */
+   public Map<String, Object> getAddedDocuments()
+   {
+      return addedDocuments;
+   }
+
+   /**
+    * @return the deletedDocuments
+    */
+   public Set<String> getDeletedDocuments()
+   {
+      return deletedDocuments;
+   }
+
+   /**
+    * @see org.xcmis.search.content.command.VisitableCommand#acceptVisitor(org.xcmis.search.content.command.InvocationContext, org.xcmis.search.content.interceptors.Visitor)
     */
    public Object acceptVisitor(InvocationContext ctx, Visitor visitor) throws Throwable
    {
-
-      return visitor.visitSubmitStatementCommand(ctx, this);
-   }
-
-   /**
-    * @return the statement
-    */
-   public String getStatement()
-   {
-      return statement;
-   }
-
-   /**
-    * @return the type
-    */
-   public String getType()
-   {
-      return type;
+      return visitor.visitApplyChangesToTheIndexCommand(ctx, this);
    }
 
 }

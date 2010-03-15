@@ -16,16 +16,22 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xcmis.search.config;
-
+package org.xcmis.search.lucene2.content;
 
 /**
  * @author <a href="mailto:Sergey.Kabashnyuk@gmail.com">Sergey Kabashnyuk</a>
  * @version $Id: exo-jboss-codetemplates.xml 34027 2009-07-15 23:26:43Z
  *          aheritier $
  */
-public interface IndexConfuguration
+public interface VirtualTableResolver<Q>
 {
-   String getIndexDir();
+   /**
+    * Construct <Q>query for given table.
+    * 
+    * @param tableName - name of the virtual table.
+    * @param includeInheritedTables - include inherited tables to the result.
+    * @return query.
+    */
+   Q resolve(String tableName, boolean includeInheritedTables);
 
 }
