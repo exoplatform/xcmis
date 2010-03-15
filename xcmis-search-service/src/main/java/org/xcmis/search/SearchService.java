@@ -18,6 +18,7 @@
  */
 package org.xcmis.search;
 
+import org.apache.commons.lang.Validate;
 import org.xcmis.search.config.SearchServiceConfiguration;
 import org.xcmis.search.content.command.index.ApplyChangesToTheIndexCommand;
 import org.xcmis.search.content.command.query.ExecuteSelectorCommand;
@@ -48,7 +49,8 @@ public abstract class SearchService implements Startable
     */
    public SearchService(SearchServiceConfiguration configuration) throws SearchServiceException
    {
-      super();
+      Validate.notNull(configuration, "The configuration argument may not be null");
+      Validate.notNull(configuration.getContentReader(), "The configuration.getContentReader()  may not be null");
       this.configuration = configuration;
       this.interceptorChain = new InterceptorChain(configuration.getContentReader());
 
