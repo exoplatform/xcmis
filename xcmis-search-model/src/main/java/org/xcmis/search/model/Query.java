@@ -104,12 +104,9 @@ public class Query implements QueryElement, Serializable
       this.orderings = orderings != null ? orderings : Collections.<Ordering> emptyList();
       this.limits = limit != null ? limit : Limit.NONE;;
       this.columns = columns != null ? columns : Collections.<Column> emptyList();
-      this.hcode = new HashCodeBuilder()
-                    .append(this.source)
-                    .append(this.constraint)
-                    .append(this.columns)
-                    .append(this.limits)
-                    .append(this.orderings).toHashCode();
+      this.hcode =
+         new HashCodeBuilder().append(this.source).append(this.constraint).append(this.columns).append(this.limits)
+            .append(this.orderings).toHashCode();
 
    }
 
@@ -223,12 +220,8 @@ public class Query implements QueryElement, Serializable
       }
       Query rhs = (Query)obj;
 
-      return new EqualsBuilder()
-                    .append(source, rhs.source)
-                    .append(constraint, rhs.constraint)
-                    .append(columns, rhs.columns)
-                    .append(limits, rhs.limits)
-                    .isEquals();
+      return new EqualsBuilder().append(source, rhs.source).append(constraint, rhs.constraint).append(columns,
+         rhs.columns).append(limits, rhs.limits).isEquals();
    }
 
    /**
@@ -281,18 +274,6 @@ public class Query implements QueryElement, Serializable
    public final Source getSource()
    {
       return source;
-   }
-
-   /**
-    * Create a copy of this query, but one in which there may be duplicate rows
-    * in the results.
-    * 
-    * @return the copy of the query with potentially duplicate result rows;
-    *         never null
-    */
-   public Query noDistinct()
-   {
-      return new Query(source, constraint, getOrderings(), columns, getLimits());
    }
 
    /**
