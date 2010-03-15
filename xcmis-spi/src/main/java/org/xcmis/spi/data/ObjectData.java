@@ -21,16 +21,19 @@ package org.xcmis.spi.data;
 
 import org.xcmis.spi.AccessControlEntry;
 import org.xcmis.spi.BaseType;
+import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
+import org.xcmis.spi.NotSupportedException;
+import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.RelationshipDirection;
+import org.xcmis.spi.Storage;
 import org.xcmis.spi.TypeDefinition;
+import org.xcmis.spi.Permission.BasicPermissions;
 import org.xcmis.spi.impl.CmisVisitor;
+import org.xcmis.spi.object.Properties;
 import org.xcmis.spi.object.Property;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.net.URI;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
@@ -47,19 +50,71 @@ public interface ObjectData
 
    // ACL
 
-   void setACL(List<AccessControlEntry> acl);
+   /**
+    * Get ACL currently applied to object. If ACL capability is not supported
+    * then this method must throw {@link NotSupportedException}.
+    * 
+    * @param acl ACL that should replace currently applied ACL
+    * @throws ConstraintException if current object is not controllable by ACL,
+    *         see {@link TypeDefinition#isControllableACL()}.
+    */
+   void setACL(List<AccessControlEntry> acl) throws ConstraintException;
 
+   /**
+    * Get ACL currently applied to object. If ACL capability is not supported
+    * then this method must throw {@link NotSupportedException}.
+    * 
+    * @param onlyBasicPermissions if <code>true</code> then only CMIS basic
+    *        permissions {@link BasicPermissions} must be returned if
+    *        <code>false</code> then basic permissions and repository specific
+    *        permissions must be returned
+    * @return applied ACL. It may return <code>null</code> or empty list if
+    *         there is no ACL applied to object or if object is not controllable
+    *         by ACL
+    * @see BasicPermissions
+    */
    List<AccessControlEntry> getACL(boolean onlyBasicPermissions);
 
    // Policies
 
-   void applyPolicy(PolicyData policy);
+   /**
+    * Applied specified policy to the current object. If Policy object type is
+    * not supported then this method must throw {@link NotSupportedException}.
+    * 
+    * @param policy policy to be applied
+    * @throws ConstraintException if current object is not controllable by
+    *         Policy, see {@link TypeDefinition#isControllablePolicy()}.
+    */
+   void applyPolicy(PolicyData policy) throws ConstraintException;
 
+   /**
+    * Get policies applied to the current object. If Policy object type is not
+    * supported then this method must throw {@link NotSupportedException}.
+    * 
+    * @return applied Policies. It may return <code>null</code> or empty list if
+    *         there is no policies applied to object or if object is not
+    *         controllable by policy
+    */
    Collection<PolicyData> getPolicies();
 
-   void removePolicy(PolicyData policy);
+   /**
+    * Remove specified policy from object. This method must not remove Policy
+    * object itself. If Policy object type is not supported then this method
+    * must throw {@link NotSupportedException}.
+    * 
+    * @param policy policy object
+    * @throws ConstraintException if current object is not controllable by
+    *         Policy, see {@link TypeDefinition#isControllablePolicy()}.
+    */
+   void removePolicy(PolicyData policy) throws ConstraintException;
 
    //
+   /**
+    * @return <code>true</code> if current object is newly created and was not
+    *         persisted yet. If may be created via
+    *         {@link Storage#createDocument(FolderData, String, org.xcmis.spi.VersioningState)}
+    *         , {@link Storage#createFolder(FolderData, String)}, etc.
+    */
    boolean isNew();
 
    // 
@@ -95,75 +150,10 @@ public interface ObjectData
 
    // Properties
 
-   Map<String, Property<?>> getProperties();
 
-   Boolean getBoolean(String id);
+   Properties getProperties();
 
-   Boolean[] getBooleans(String id);
-
-   Calendar getDate(String id);
-
-   Calendar[] getDates(String id);
-
-   BigDecimal getDecimal(String id);
-
-   BigDecimal[] getDecimals(String id);
-
-   String getHTML(String id);
-
-   String[] getHTMLs(String id);
-
-   String getId(String id);
-
-   String[] getIds(String id);
-
-   BigInteger getInteger(String id);
-
-   BigInteger[] getIntegers(String id);
-
-   String getString(String id);
-
-   String[] getStrings(String id);
-
-   URI getURI(String id);
-
-   URI[] getURIs(String id);
-
-   // 
-
-   void setProperties(Map<String, Property<?>> properties);
-
-   void setBoolean(String id, Boolean value);
-
-   void setBooleans(String id, Boolean[] value);
-
-   void setDate(String id, Calendar value);
-
-   void setDates(String id, Calendar[] value);
-
-   void setDecimal(String id, BigDecimal value);
-
-   void setDecimals(String id, BigDecimal[] value);
-
-   void setHTML(String id, String value);
-
-   void setHTMLs(String id, String[] value);
-
-   void setIds(String id, String value);
-
-   void setIds(String id, String[] value);
-
-   void setInteger(String id, BigInteger value);
-
-   void setIntegers(String id, BigInteger[] value);
-
-   void setString(String id, String value);
-
-   void setStrings(String id, String[] value);
-
-   void setURI(String id, URI value);
-
-   void setURIs(String id, URI[] value);
+   void setProperties(Properties properties);
 
    //
 

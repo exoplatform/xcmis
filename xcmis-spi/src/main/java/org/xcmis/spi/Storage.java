@@ -54,7 +54,7 @@ public interface Storage extends org.xcmis.spi.TypeManager
 
    PolicyData createPolicy(FolderData folder, String typeId);
 
-   RelationshipData createRelationship(String typeId, ObjectData source, ObjectData target);
+   RelationshipData createRelationship(ObjectData source, ObjectData target, String typeId);
 
    //
    void deleteObject(ObjectData object, boolean deleteAllVersions) throws UpdateConflictException, StorageException,
@@ -82,14 +82,7 @@ public interface Storage extends org.xcmis.spi.TypeManager
 
    ObjectData getObjectByPath(String path) throws CmisRuntimeException;
 
-   ItemsIterator<ObjectData> getChildren(ObjectData folder, String orderBy) throws CmisRuntimeException;
-
-   //
-   void addObjectToFolder(ObjectData object, FolderData folder, boolean allVersions) throws CmisRuntimeException;
-
-   void removeObjectFromFolder(ObjectData object, FolderData folder) throws CmisRuntimeException;
-
-   void moveObject(ObjectData object, FolderData target, FolderData source) throws UpdateConflictException,
+   ObjectData moveObject(ObjectData object, FolderData target, FolderData source) throws UpdateConflictException,
       StorageException, CmisRuntimeException;
 
    //
@@ -106,5 +99,7 @@ public interface Storage extends org.xcmis.spi.TypeManager
     * @return storage description
     */
    RepositoryInfo getRepositoryInfo() throws CmisRuntimeException;
+
+   Collection<DocumentData> getAllVersions(String versionSeriesId) throws ObjectNotFoundException;
 
 }

@@ -20,7 +20,6 @@
 package org.xcmis.spi.utils;
 
 import org.xcmis.spi.AccessControlEntry;
-import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.data.ObjectData;
 import org.xcmis.spi.impl.AccessControlEntryImpl;
@@ -50,8 +49,8 @@ public final class CmisUtils
 
       public int compare(ObjectData object1, ObjectData object2)
       {
-         Calendar c1 = object1.getDate(CMIS.LAST_MODIFICATION_DATE);
-         Calendar c2 = object2.getDate(CMIS.LAST_MODIFICATION_DATE);
+         Calendar c1 = object1.getLatsModificationDate();
+         Calendar c2 = object2.getLatsModificationDate();
          return c2.compareTo(c1);
       }
 
@@ -130,112 +129,6 @@ public final class CmisUtils
          .get(Calendar.SECOND), calendar.get(Calendar.MILLISECOND));
       return xmlCalendar;
    }
-
-   //   /**
-   //    * Get "cmis:objectId" property.
-   //    * 
-   //    * @param properties the CMIS Object Type
-   //    * @return the "cmis:objectId" property or <code>null</code>
-   //    */
-   //   public static String getObjectId(CmisPropertiesType properties)
-   //   {
-   //      CmisPropertyId property = (CmisPropertyId)getProperty(properties, CMIS.OBJECT_ID);
-   //      if (property != null && property.getValue().size() > 0)
-   //         return property.getValue().get(0);
-   //      return null;
-   //   }
-
-   //   /**
-   //    * Get property from CMIS object type with provided property name.
-   //    * 
-   //    * @param cmis the CMIS object type
-   //    * @param propertyId the property ID
-   //    * @return the CMIS property
-   //    */
-   //   public static CmisProperty getProperty(CmisPropertiesType properties, String propertyId)
-   //   {
-   //      if (properties != null)
-   //      {
-   //         List<CmisProperty> props = properties.getProperty();
-   //         for (CmisProperty prop : props)
-   //         {
-   //            if (prop.getPropertyDefinitionId().equals(propertyId))
-   //               return prop;
-   //         }
-   //      }
-   //      return null;
-   //
-   //   }
-   //
-   //   /**
-   //    * Get "cmis:name" property.
-   //    * 
-   //    * @param properties the CMIS Properties Type.
-   //    * @return the "cmis:name" property or <code>null</code>
-   //    */
-   //   public static String getName(CmisPropertiesType properties)
-   //   {
-   //      CmisPropertyString property = (CmisPropertyString)getProperty(properties, CMIS.NAME);
-   //      if (property != null && property.getValue().size() > 0)
-   //         return property.getValue().get(0);
-   //      return null;
-   //   }
-   //
-   //   /**
-   //    * Get "cmis:policyText" property.
-   //    * 
-   //    * @param properties the CMIS Properties Type.
-   //    * @return the "cmis:policyText" property or <code>null</code>
-   //    */
-   //   public static String getPolicyText(CmisPropertiesType properties)
-   //   {
-   //      CmisPropertyString property = (CmisPropertyString)getProperty(properties, CMIS.POLICY_TEXT);
-   //      if (property != null && property.getValue().size() > 0)
-   //         return property.getValue().get(0);
-   //      return null;
-   //   }
-   //
-   //   /**
-   //    * Get "cmis:sourceId" property.
-   //    * 
-   //    * @param properties the CMIS Properties Type.
-   //    * @return the "cmis:sourceId" property or <code>null</code>
-   //    */
-   //   public static String getSourceId(CmisPropertiesType properties)
-   //   {
-   //      CmisPropertyId property = (CmisPropertyId)getProperty(properties, CMIS.SOURCE_ID);
-   //      if (property != null && property.getValue().size() > 0)
-   //         return property.getValue().get(0);
-   //      return null;
-   //   }
-   //
-   //   /**
-   //    * Get "cmis:targetId" property.
-   //    * 
-   //    * @param properties the CMIS Properties Type.
-   //    * @return the object "cmis:targetId" property or <code>null</code>
-   //    */
-   //   public static String getTargetId(CmisPropertiesType properties)
-   //   {
-   //      CmisPropertyId property = (CmisPropertyId)getProperty(properties, CMIS.TARGET_ID);
-   //      if (property != null && property.getValue().size() > 0)
-   //         return property.getValue().get(0);
-   //      return null;
-   //   }
-   //
-   //   /**
-   //    * Get "cmis:objectTypeId" property.
-   //    * 
-   //    * @param properties the CMIS Properties Type.
-   //    * @return the "cmis:objectTypeId" property or <code>null</code>
-   //    */
-   //   public static String getTypeId(CmisPropertiesType properties)
-   //   {
-   //      CmisPropertyId property = (CmisPropertyId)getProperty(properties, CMIS.OBJECT_TYPE_ID);
-   //      if (property != null && property.getValue().size() > 0)
-   //         return property.getValue().get(0);
-   //      return null;
-   //   }
 
    public static List<AccessControlEntry> mergeACLs(List<AccessControlEntry> existedAcl,
       List<AccessControlEntry> addAcl, List<AccessControlEntry> removeAcl)

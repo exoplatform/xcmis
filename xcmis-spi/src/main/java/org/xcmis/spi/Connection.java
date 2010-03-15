@@ -25,6 +25,7 @@ import org.xcmis.spi.object.ObjectParent;
 import org.xcmis.spi.object.Properties;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -43,8 +44,8 @@ public interface Connection
     * 
     * @param objectId identifier of object for which should be added specified
     *        ACEs
-    * @param addAcl ACEs that will be added from object's ACL
-    * @param removeAcl ACEs that will be removed from object's ACL
+    * @param addACL ACEs that will be added from object's ACL
+    * @param removeACL ACEs that will be removed from object's ACL
     * @param propagation specifies how ACEs should be handled:
     *        <ul>
     *        <li>objectonly: ACEs must be applied without changing the ACLs of
@@ -68,7 +69,7 @@ public interface Connection
     *         </ul>
     * @throws CmisRuntimeException if any others errors occur
     */
-   void applyACL(String objectId, List<AccessControlEntry> addAcl, List<AccessControlEntry> removeAcl,
+   void applyACL(String objectId, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
       AccessControlPropagation propagation) throws ObjectNotFoundException, ConstraintException, CmisRuntimeException;
 
    /**
@@ -77,7 +78,7 @@ public interface Connection
     * @param objectId identifier of object
     * @param onlyBasicPermissions if <code>true</code> then return only the CMIS
     *        Basic permissions
-    * @return actual ACL
+    * @return actual ACL or <code>null</code> if no ACL applied to object
     * @throws ObjectNotFoundException if <code>objectId</code> or does not
     *         exists
     * @throws CmisRuntimeException if any others errors occur
@@ -545,11 +546,11 @@ public interface Connection
     *        supports unfiling
     * @param properties properties that MAY be applied to newly created document
     * @param content document content
-    * @param addAcl Access Control Entries that MUST added for newly created
+    * @param addACL Access Control Entries that MUST added for newly created
     *        document, either using the ACL from <code>folderId</code> if
     *        specified, or being applied if no <code>folderId</code> is
     *        specified
-    * @param removeAcl set Access Control Entries that MUST be removed from the
+    * @param removeACL set Access Control Entries that MUST be removed from the
     *        newly created document, either using the ACL from
     *        <code>folderId</code> if specified, or being ignored if no
     *        <code>folderId</code> is specified
@@ -607,7 +608,7 @@ public interface Connection
     * @throws CmisRuntimeException if any others errors occur
     */
    CmisObject createDocument(String folderId, Properties properties, ContentStream content,
-      List<AccessControlEntry> addAcl, List<AccessControlEntry> removeAcl, List<String> policies,
+      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, List<String> policies,
       VersioningState versioningState) throws ObjectNotFoundException, ConstraintException, InvalidArgumentException,
       StreamNotSupportedException, NameConstraintViolationException, IOException, StorageException,
       CmisRuntimeException;
@@ -620,11 +621,11 @@ public interface Connection
     * @param folderId parent folder id for object. May be null if storage
     *        supports unfiling
     * @param properties properties that MAY be applied to newly created document
-    * @param addAcl Access Control Entries that MUST added for newly created
+    * @param addACL Access Control Entries that MUST added for newly created
     *        document, either using the ACL from <code>folderId</code> if
     *        specified, or being applied if no <code>folderId</code> is
     *        specified
-    * @param removeAcl set Access Control Entries that MUST be removed from the
+    * @param removeACL set Access Control Entries that MUST be removed from the
     *        newly created document, either using the ACL from
     *        <code>folderId</code> if specified, or being ignored if no
     *        <code>folderId</code> is specified
@@ -669,7 +670,7 @@ public interface Connection
     * @throws CmisRuntimeException if any others errors occur
     */
    CmisObject createDocumentFromSource(String sourceId, String folderId, Properties properties,
-      List<AccessControlEntry> addAcl, List<AccessControlEntry> removeAcl, List<String> policies,
+      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, List<String> policies,
       VersioningState versioningState) throws ObjectNotFoundException, ConstraintException, InvalidArgumentException,
       NameConstraintViolationException, StorageException, CmisRuntimeException;
 
@@ -678,11 +679,11 @@ public interface Connection
     * 
     * @param folderId parent folder id for new folder
     * @param properties properties that MAY be applied to newly created folder
-    * @param addAcl Access Control Entries that MUST added for newly created
+    * @param addACL Access Control Entries that MUST added for newly created
     *        Folder, either using the ACL from <code>folderId</code> if
     *        specified, or being applied if no <code>folderId</code> is
     *        specified
-    * @param removeAcl set Access Control Entry that MUST be removed from the
+    * @param removeACL set Access Control Entry that MUST be removed from the
     *        newly created folder, either using the ACL from
     *        <code>folderId</code> if specified, or being ignored if no
     *        <code>folderId</code> is specified
@@ -719,8 +720,8 @@ public interface Connection
     *         storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObject createFolder(String folderId, Properties properties, List<AccessControlEntry> addAcl,
-      List<AccessControlEntry> removeAcl, List<String> policies) throws ObjectNotFoundException, ConstraintException,
+   CmisObject createFolder(String folderId, Properties properties, List<AccessControlEntry> addACL,
+      List<AccessControlEntry> removeACL, List<String> policies) throws ObjectNotFoundException, ConstraintException,
       InvalidArgumentException, NameConstraintViolationException, StorageException, CmisRuntimeException;
 
    /**
@@ -729,11 +730,11 @@ public interface Connection
     * @param folderId parent folder id may be null if policy object type is not
     *        fileable
     * @param properties properties to be applied to newly created Policy
-    * @param addAcl Access Control Entries that MUST added for newly created
+    * @param addACL Access Control Entries that MUST added for newly created
     *        Policy, either using the ACL from <code>folderId</code> if
     *        specified, or being applied if no <code>folderId</code> is
     *        specified
-    * @param removeAcl set Access Control Entry that MUST be removed from the
+    * @param removeACL set Access Control Entry that MUST be removed from the
     *        newly created Policy, either using the ACL from
     *        <code>folderId</code> if specified, or being ignored if no
     *        <code>folderId</code> is specified
@@ -770,17 +771,17 @@ public interface Connection
     *         storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObject createPolicy(String folderId, Properties properties, List<AccessControlEntry> addAcl,
-      List<AccessControlEntry> removeAcl, List<String> policies) throws ObjectNotFoundException, ConstraintException,
+   CmisObject createPolicy(String folderId, Properties properties, List<AccessControlEntry> addACL,
+      List<AccessControlEntry> removeACL, List<String> policies) throws ObjectNotFoundException, ConstraintException,
       InvalidArgumentException, NameConstraintViolationException, StorageException, CmisRuntimeException;
 
    /**
     * Create a relationship object.
     * 
     * @param properties properties to be applied to newly created relationship
-    * @param addAcl set Access Control Entry to be applied for newly created
+    * @param addACL set Access Control Entry to be applied for newly created
     *        relationship
-    * @param removeAcl set Access Control Entry that MUST be removed from the
+    * @param removeACL set Access Control Entry that MUST be removed from the
     *        newly created relationship
     * @param policies list of policy id that MUST be applied to the newly
     *        created relationship.
@@ -817,8 +818,8 @@ public interface Connection
     *         cause to storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObject createRelationship(Properties properties, List<AccessControlEntry> addAcl,
-      List<AccessControlEntry> removeAcl, List<String> policies) throws ObjectNotFoundException, ConstraintException,
+   CmisObject createRelationship(Properties properties, List<AccessControlEntry> addACL,
+      List<AccessControlEntry> removeACL, List<String> policies) throws ObjectNotFoundException, ConstraintException,
       NameConstraintViolationException, StorageException, CmisRuntimeException;
 
    /**
@@ -883,7 +884,8 @@ public interface Connection
     *        </ul>
     * @param continueOnFailure if <code>true</code>, then the stprage SHOULD
     *        continue attempting to perform this operation even if deletion of a
-    *        child object in the specified folder cannot be deleted
+    *        child object in the specified folder cannot be deleted. Default is
+    *        <code>false</code>.
     * @return list of id that were not deleted
     * @throws ObjectNotFoundException if folder with specified id
     *         <code>folderId</code> does not exist
@@ -891,8 +893,8 @@ public interface Connection
     *         determined by the storage)
     * @throws CmisRuntimeException if any others errors occur
     */
-   List<String> deleteTree(String folderId, Boolean deleteAllVersions, UnfileObject unfileObject,
-      boolean continueOnFailure) throws ObjectNotFoundException, UpdateConflictException, CmisRuntimeException;
+   Collection<String> deleteTree(String folderId, Boolean deleteAllVersions, UnfileObject unfileObject,
+      Boolean continueOnFailure) throws ObjectNotFoundException, UpdateConflictException, CmisRuntimeException;
 
    /**
     * Get the list of allowable actions for an Object.

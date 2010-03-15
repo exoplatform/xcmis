@@ -19,6 +19,12 @@
 
 package org.xcmis.spi.object;
 
+import org.xcmis.spi.impl.PropertyFilter;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.net.URI;
+import java.util.Calendar;
 import java.util.Map;
 
 /**
@@ -39,4 +45,72 @@ public interface Properties
     * @return property with specified ID or <code>null</code>
     */
    Property<?> getProperty(String id);
+   
+   Properties getSubset(PropertyFilter filter);
+
+   // Shortcut access to properties. 
+   
+   Boolean getBoolean(String id);
+
+   Boolean[] getBooleans(String id);
+
+   Calendar getDate(String id);
+
+   Calendar[] getDates(String id);
+
+   BigDecimal getDecimal(String id);
+
+   BigDecimal[] getDecimals(String id);
+
+   String getHTML(String id);
+
+   String[] getHTMLs(String id);
+
+   String getId(String id);
+
+   String[] getIds(String id);
+
+   BigInteger getInteger(String id);
+
+   BigInteger[] getIntegers(String id);
+
+   String getString(String id);
+
+   String[] getStrings(String id);
+
+   URI getURI(String id);
+
+   URI[] getURIs(String id);
+
+   void setBoolean(String id, Boolean value);
+
+   void setBooleans(String id, Boolean[] value);
+
+   void setDate(String id, Calendar value);
+
+   void setDates(String id, Calendar[] value);
+
+   void setDecimal(String id, BigDecimal value);
+
+   void setDecimals(String id, BigDecimal[] value);
+
+   void setHTML(String id, String value);
+
+   void setHTMLs(String id, String[] value);
+
+   void setIds(String id, String value);
+
+   void setIds(String id, String[] value);
+
+   void setInteger(String id, BigInteger value);
+
+   void setIntegers(String id, BigInteger[] value);
+
+   void setString(String id, String value);
+
+   void setStrings(String id, String[] value);
+
+   void setURI(String id, URI value);
+
+   void setURIs(String id, URI[] value);
 }

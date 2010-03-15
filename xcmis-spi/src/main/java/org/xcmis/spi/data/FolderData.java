@@ -19,7 +19,10 @@
 
 package org.xcmis.spi.data;
 
-import java.util.List;
+import org.xcmis.spi.CMIS;
+import org.xcmis.spi.ConstraintException;
+import org.xcmis.spi.ItemsIterator;
+import org.xcmis.spi.NotSupportedException;
 
 /**
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
@@ -28,6 +31,59 @@ import java.util.List;
 public interface FolderData extends ObjectData
 {
 
-   List<ObjectData> getChildren();
-   
+   /**
+    * Get children of current folder.
+    * 
+    * @return children iterator. If folder does not contains any children then
+    *         empty {@link ItemsIterator} must be returned, never
+    *         <code>null</code>.
+    */
+   ItemsIterator<ObjectData> getChildren();
+
+   /**
+    * @return <code>true</code> if current folder has children and
+    *         <code>otherwise</code>
+    */
+   boolean hasChildren();
+
+   /**
+    * Add existed fileable object in this folder. If multifiling capability is
+    * not supported then this method must throw {@link NotSupportedException}.
+    * 
+    * @param object object to be added
+    * @throws ConstraintException if <code>object</code> has type that is
+    *         unsupported by current folder. See
+    *         {@link CMIS#ALLOWED_CHILD_OBJECT_TYPE_IDS}
+    */
+   void addObject(ObjectData object) throws ConstraintException;
+
+   /**
+    * Remove fileable object from current folder. This method don't remove
+    * object just unsigned it as child of this folder. If unfiling capability is
+    * not supported then this method must throw {@link NotSupportedException}.
+    * 
+    * @param object object to be removed from current folder
+    */
+   void removeObject(ObjectData object);
+
+   /**
+    * Check is specified type in list of allowed child object types. Info about
+    * allowed child object types may be provided by property
+    * {@value CMIS#ALLOWED_CHILD_OBJECT_TYPE_IDS}. Empty or <code>null</code>
+    * property minds there is no any constrains about child type for this folder
+    * and any fileable objects may be created or added (if multifiling
+    * supported) in this folder.
+    * 
+    * @param typeId type to be checked
+    * @return <code>true</code> if type allowed as child and <code>false</code>
+    *         otherwise
+    */
+   boolean isAllowedChildType(String typeId);
+
+   /**
+    * @return <code>true</code> if current folder is root folder and
+    *         <code>otherwise</code>
+    */
+   boolean isRoot();
+
 }
