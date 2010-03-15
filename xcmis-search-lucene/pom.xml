@@ -1,0 +1,129 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd ">
+   <modelVersion>4.0.0</modelVersion>
+   <parent>
+      <groupId>org.xcmis</groupId>
+      <artifactId>xcmis-parent</artifactId>
+      <version>1.0-SNAPSHOT</version>
+   </parent>
+
+   <artifactId>xcmis-search-lucene</artifactId>
+   <packaging>jar</packaging>
+   <version>1.0-SNAPSHOT</version>
+   <name>xCMIS :: Index :: Lucene</name>
+   <url>http://www.exoplatform.org</url>
+   <description>eXo JQOM based indexing</description>
+
+   <dependencies>
+
+      <!-- JCR API -->
+
+      <dependency>
+         <groupId>org.antlr</groupId>
+         <artifactId>antlr-runtime</artifactId>
+         <scope>compile</scope>
+      </dependency>
+
+      <dependency>
+         <groupId>commons-logging</groupId>
+         <artifactId>commons-logging</artifactId>
+         <version>1.0.3</version>
+         <scope>provided</scope>
+      </dependency>
+
+      <dependency>
+         <groupId>org.exoplatform.kernel</groupId>
+         <artifactId>exo.kernel.component.common</artifactId>
+         <scope>provided</scope>
+      </dependency>
+
+      <dependency>
+         <groupId>org.exoplatform.jcr</groupId>
+         <artifactId>exo.jcr.component.core</artifactId>
+      </dependency>
+
+      <!-- Third party dependencies (eXo JCR Impl) -->
+
+      <dependency>
+         <groupId>org.apache.lucene</groupId>
+         <artifactId>lucene-core</artifactId>
+         <scope>compile</scope>
+      </dependency>
+
+      <dependency>
+         <groupId>org.apache.lucene</groupId>
+         <artifactId>lucene-spellchecker</artifactId>
+         <scope>compile</scope>
+      </dependency>
+
+      <dependency>
+         <groupId>org.apache.lucene</groupId>
+         <artifactId>lucene-memory</artifactId>
+         <scope>compile</scope>
+      </dependency>
+
+      <dependency>
+         <groupId>org.apache.lucene</groupId>
+         <artifactId>lucene-regex</artifactId>
+         <scope>compile</scope>
+      </dependency>
+   </dependencies>
+
+   <build>
+      <sourceDirectory>src/main/java</sourceDirectory>
+      <outputDirectory>target/classes</outputDirectory>
+
+      <testSourceDirectory>src/test/java</testSourceDirectory>
+      <testOutputDirectory>target/test-classes</testOutputDirectory>
+
+      <plugins>
+
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <!--version>2.4.3</version-->
+            <!-- normal mode: mvn -Dexo.test.skip=false -Dexo.tck.skip=false clean install -->
+            <!-- debug  mode: mvn -Dexo.test.skip=false -Dexo.tck.skip=false -Dexo.test.forkmode=never clean install -->
+            <!-- forking: to run both eXo test and TCK use forkMode=once, to run one of them (only) in Eclipse debug use forkMode=never -->
+            <configuration>
+               <systemProperties>
+                  <property>
+                     <name>jcr.test.configuration.file</name>
+                     <value>${jcr.test.configuration.file}</value>
+                  </property>
+               </systemProperties>
+               <includes>
+                  <include>**/integration/*Test.java</include>
+                  <include>**/query/**/Test*.java</include>
+               </includes>
+            </configuration>
+         </plugin>
+         <plugin>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr3-maven-plugin</artifactId>
+            <version>3.2</version>
+            <executions>
+               <execution>
+                  <goals>
+                     <goal>antlr</goal>
+                  </goals>
+               </execution>
+            </executions>
+         </plugin>
+      </plugins>
+   </build>
+   <profiles>
+      <profile>
+         <id>default</id>
+         <activation>
+            <property>
+               <name>default</name>
+            </property>
+            <activeByDefault>true</activeByDefault>
+         </activation>
+         <properties>
+            <jcr.test.configuration.file>/conf/standalone/test-configuration.xml</jcr.test.configuration.file>
+            <exo.devtest.skip>true</exo.devtest.skip>
+         </properties>
+      </profile>
+   </profiles>
+</project>
