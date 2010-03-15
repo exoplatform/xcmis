@@ -24,7 +24,6 @@ import org.xcmis.search.content.command.index.ApplyChangesToTheIndexCommand;
 import org.xcmis.search.content.command.query.ExecuteSelectorCommand;
 import org.xcmis.search.content.command.query.ParseQueryCommand;
 import org.xcmis.search.content.command.query.ProcessQueryCommand;
-import org.xcmis.search.content.command.query.SubmitStatementCommand;
 import org.xcmis.search.content.command.read.GetChildNodeCommand;
 import org.xcmis.search.content.command.read.GetChildNodesCommand;
 import org.xcmis.search.content.command.read.GetNodeCommand;
@@ -134,12 +133,4 @@ public interface Visitor
     * @throws Throwable
     */
    Object visitProcessQueryCommand(InvocationContext ctx, ProcessQueryCommand command) throws Throwable;
-
-   /**
-    * @param ctx
-    * @param submitStatementCommand
-    * @return
-    */
-   Object visitSubmitStatementCommand(InvocationContext ctx, SubmitStatementCommand command) throws Throwable;
-
 }

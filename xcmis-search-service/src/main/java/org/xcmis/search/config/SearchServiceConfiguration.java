@@ -18,6 +18,7 @@
  */
 package org.xcmis.search.config;
 
+import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.content.interceptors.ReadOnlyInterceptor;
 import org.xcmis.search.lucene.content.VirtualTableResolver;
 import org.xcmis.search.value.NameConverter;
@@ -49,7 +50,31 @@ public class SearchServiceConfiguration
     */
    private PathSplitter pathSplitter;
 
+   /**
+    * Index configuration.
+    */
    private IndexConfuguration indexConfuguration;
+
+   /**
+    * @return the defaultInvocationContext
+    */
+   public InvocationContext getDefaultInvocationContext()
+   {
+      return defaultInvocationContext;
+   }
+
+   /**
+    * @param defaultInvocationContext the defaultInvocationContext to set
+    */
+   public void setDefaultInvocationContext(InvocationContext defaultInvocationContext)
+   {
+      this.defaultInvocationContext = defaultInvocationContext;
+   }
+
+   /**
+    * Default invocation context;
+    */
+   private InvocationContext defaultInvocationContext;
 
    public ReadOnlyInterceptor getContentReader()
    {

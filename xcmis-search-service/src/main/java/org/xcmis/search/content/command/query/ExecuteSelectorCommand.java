@@ -26,6 +26,7 @@ import org.xcmis.search.model.Limit;
 import org.xcmis.search.model.constraint.Constraint;
 import org.xcmis.search.model.ordering.Ordering;
 import org.xcmis.search.model.source.Selector;
+import org.xcmis.search.model.source.SelectorName;
 
 import java.util.List;
 import java.util.Map;
@@ -37,9 +38,9 @@ import java.util.Map;
  */
 public class ExecuteSelectorCommand implements VisitableCommand
 {
-   private final Selector selector;
+   private final SelectorName selector;
 
-   private final Constraint constrain;
+   private final List<Constraint> constrains;
 
    private final Limit limit;
 
@@ -53,17 +54,17 @@ public class ExecuteSelectorCommand implements VisitableCommand
     * @param limit
     * @param orderings
     */
-   public ExecuteSelectorCommand(Selector selector, Constraint constrain, Limit limit, List<Ordering> orderings,
-      Map<String, Object> bindVariablesValues)
+   public ExecuteSelectorCommand(SelectorName selector, List<Constraint> constrains, Limit limit,
+      List<Ordering> orderings, Map<String, Object> bindVariablesValues)
    {
       this.bindVariablesValues = bindVariablesValues;
       Validate.notNull(selector, "The selector argument may not be null");
-      Validate.notNull(constrain, "The constrain argument may not be null");
-      Validate.notNull(limit, "The limit argument may not be null");
+      //Validate.notNull(constrain, "The constrain argument may not be null");
+      //Validate.notNull(limit, "The limit argument may not be null");
       Validate.notNull(orderings, "The orderings argument may not be null");
       Validate.notNull(bindVariablesValues, "The bindVariablesValues argument may not be null");
       this.selector = selector;
-      this.constrain = constrain;
+      this.constrains = constrains;
       this.limit = limit;
       this.orderings = orderings;
    }
@@ -79,7 +80,7 @@ public class ExecuteSelectorCommand implements VisitableCommand
    /**
     * @return the selector
     */
-   public Selector getSelector()
+   public SelectorName getSelector()
    {
       return selector;
    }
@@ -87,9 +88,9 @@ public class ExecuteSelectorCommand implements VisitableCommand
    /**
     * @return the constrain
     */
-   public Constraint getConstrain()
+   public List<Constraint> getConstrains()
    {
-      return constrain;
+      return constrains;
    }
 
    /**

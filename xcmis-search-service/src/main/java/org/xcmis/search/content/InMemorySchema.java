@@ -215,7 +215,7 @@ public class InMemorySchema implements Schema
        * @throws InvalidQueryException 
        * @throws InvalidQueryException if any of the view definitions is invalid and cannot be resolved
        */
-      public Schema build() throws InvalidQueryException
+      public Schema build()
       {
          InMemorySchema schemata = new InMemorySchema(new HashMap<SelectorName, Table>(tables));
 

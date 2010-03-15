@@ -24,7 +24,6 @@ import org.xcmis.search.content.command.index.ApplyChangesToTheIndexCommand;
 import org.xcmis.search.content.command.query.ExecuteSelectorCommand;
 import org.xcmis.search.content.command.query.ParseQueryCommand;
 import org.xcmis.search.content.command.query.ProcessQueryCommand;
-import org.xcmis.search.content.command.query.SubmitStatementCommand;
 import org.xcmis.search.content.command.read.GetChildNodeCommand;
 import org.xcmis.search.content.command.read.GetChildNodesCommand;
 import org.xcmis.search.content.command.read.GetNodeCommand;
@@ -160,15 +159,6 @@ public class AbstractVisitor implements Visitor
     *      org.xcmis.search.content.command.query.ProcessQueryCommand)
     */
    public Object visitProcessQueryCommand(InvocationContext ctx, ProcessQueryCommand command) throws Throwable
-   {
-      return handleDefault(ctx, command);
-   }
-
-   /**
-    * @see org.xcmis.search.content.interceptors.Visitor#visitSubmitStatementCommand(org.xcmis.search.content.command.InvocationContext,
-    *      org.xcmis.search.content.command.query.SubmitStatementCommand)
-    */
-   public Object visitSubmitStatementCommand(InvocationContext ctx, SubmitStatementCommand command) throws Throwable
    {
       return handleDefault(ctx, command);
    }

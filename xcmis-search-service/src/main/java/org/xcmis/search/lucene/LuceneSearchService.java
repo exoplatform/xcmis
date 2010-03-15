@@ -30,8 +30,6 @@ import org.xcmis.search.content.interceptors.ReadOnlyInterceptor;
 public class LuceneSearchService extends SearchService
 {
 
-   private LuceneQueryableIndexStorage luceneQueryableIndexStorage;
-
    /**
     * @param configuration
     * @throws SearchServiceException 
@@ -39,7 +37,6 @@ public class LuceneSearchService extends SearchService
    public LuceneSearchService(SearchServiceConfiguration configuration) throws SearchServiceException
    {
       super(configuration);
-      luceneQueryableIndexStorage = new LuceneQueryableIndexStorage(configuration);
    }
 
    /**
@@ -49,7 +46,7 @@ public class LuceneSearchService extends SearchService
    protected void addQueryableIndexStorageInterceptor(InterceptorChain interceptorChain) throws SearchServiceException
    {
 
-      interceptorChain.addBeforeInterceptor(luceneQueryableIndexStorage, ReadOnlyInterceptor.class);
+      interceptorChain.addBeforeInterceptor(new LuceneQueryableIndexStorage(configuration), ReadOnlyInterceptor.class);
 
    }
 

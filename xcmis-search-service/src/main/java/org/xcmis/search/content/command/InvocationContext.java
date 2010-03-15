@@ -18,10 +18,98 @@
  */
 package org.xcmis.search.content.command;
 
+import org.xcmis.search.content.Schema;
+import org.xcmis.search.lucene.content.VirtualTableResolver;
+import org.xcmis.search.value.NameConverter;
+import org.xcmis.search.value.PathSplitter;
+
 /**
  * Context of command invocation.  
  */
 public class InvocationContext
 {
+   /**
+    * Content Schema.
+    */
+   private Schema schema;
+
+   /**
+    * Reselve selector names to lucene querys.
+    */
+   private VirtualTableResolver tableResolver;
+
+   /**
+    * Convert one Sting name to other String name.
+    */
+   private NameConverter nameConverter;
+
+   /**
+    * Split path  string to names
+    */
+   private PathSplitter pathSplitter;
+
+   /**
+    * @return the nameConverter
+    */
+   public NameConverter getNameConverter()
+   {
+      return nameConverter;
+   }
+
+   /**
+    * @return the pathSplitter
+    */
+   public PathSplitter getPathSplitter()
+   {
+      return pathSplitter;
+   }
+
+   /**
+    * @return the schema
+    */
+   public Schema getSchema()
+   {
+      return schema;
+   }
+
+   /**
+    * @return the tableResolver
+    */
+   public VirtualTableResolver getTableResolver()
+   {
+      return tableResolver;
+   }
+
+   /**
+    * @param nameConverter the nameConverter to set
+    */
+   public void setNameConverter(NameConverter nameConverter)
+   {
+      this.nameConverter = nameConverter;
+   }
+
+   /**
+    * @param pathSplitter the pathSplitter to set
+    */
+   public void setPathSplitter(PathSplitter pathSplitter)
+   {
+      this.pathSplitter = pathSplitter;
+   }
+
+   /**
+    * @param schema the schema to set
+    */
+   public void setSchema(Schema schema)
+   {
+      this.schema = schema;
+   }
+
+   /**
+    * @param tableResolver the tableResolver to set
+    */
+   public void setTableResolver(VirtualTableResolver tableResolver)
+   {
+      this.tableResolver = tableResolver;
+   }
 
 }

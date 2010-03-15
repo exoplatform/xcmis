@@ -124,9 +124,12 @@ public class LuceneQueryableIndexStorage extends QueryableIndexStorage
 
       List<ScoredRow> resultNodes = new ArrayList<ScoredRow>();
       BooleanQuery query = new BooleanQuery();
-      query.add((Query)tableResolver.resolve(command.getSelector().getName().getName(), true), Occur.MUST);
-      query.add(getConstrainQuery(command.getConstrain(), command.getBindVariablesValues()), Occur.MUST);
 
+      for (Constraint constrain : command.getConstrains())
+      {
+         query.add(getConstrainQuery(constrain, command.getBindVariablesValues()), Occur.MUST);
+      }
+      query.add((Query)tableResolver.resolve(command.getSelector().getName(), true), Occur.MUST);
       // Open writer
 
       IndexSearcher searcher = null;
@@ -146,8 +149,7 @@ public class LuceneQueryableIndexStorage extends QueryableIndexStorage
             // get identifiers
             final Document doc = searcher.doc(docs.scoreDocs[i].doc, new UUIDFieldSelector());
             final String id = doc.get(FieldNames.UUID);
-            resultNodes
-               .add(new ScoredNodesImpl(command.getSelector().getName().getName(), id, docs.scoreDocs[i].score));
+            resultNodes.add(new ScoredNodesImpl(command.getSelector().getName(), id, docs.scoreDocs[i].score));
          }
       }
       catch (final CorruptIndexException e)

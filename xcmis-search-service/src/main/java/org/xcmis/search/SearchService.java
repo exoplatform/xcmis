@@ -20,15 +20,20 @@ package org.xcmis.search;
 
 import org.apache.commons.lang.Validate;
 import org.xcmis.search.config.SearchServiceConfiguration;
+import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.content.command.index.ApplyChangesToTheIndexCommand;
 import org.xcmis.search.content.command.query.ExecuteSelectorCommand;
 import org.xcmis.search.content.command.query.ParseQueryCommand;
 import org.xcmis.search.content.command.query.ProcessQueryCommand;
-import org.xcmis.search.content.command.query.SubmitStatementCommand;
 import org.xcmis.search.content.interceptors.InterceptorChain;
-import org.xcmis.search.content.interceptors.StatementProcessorInterceptor;
+import org.xcmis.search.content.interceptors.QueryProcessorInterceptor;
+import org.xcmis.search.content.interceptors.QueryableIndexStorage;
 import org.xcmis.search.model.Query;
 import org.xcmis.search.query.QueryResults;
+import org.xcmis.search.query.optimize.CriteriaBasedOptimizer;
+import org.xcmis.search.query.plan.SimplePlaner;
+
+import java.util.Map;
 
 /**
  * Main entry point to the search service.
@@ -44,6 +49,11 @@ public abstract class SearchService implements Startable
    private final InterceptorChain interceptorChain;
 
    /**
+    * Default invocation context;
+    */
+   private InvocationContext invocationContext;
+
+   /**
     * @param configuration
     * @throws SearchServiceException 
     */
@@ -56,9 +66,10 @@ public abstract class SearchService implements Startable
 
       addQueryableIndexStorageInterceptor(interceptorChain);
 
+      interceptorChain.addBeforeInterceptor(new QueryProcessorInterceptor(new SimplePlaner(),
+         new CriteriaBasedOptimizer()), QueryableIndexStorage.class);
+      // parse statements
       addQueryParserInterceptor(interceptorChain);
-      // parse and execute statements
-      interceptorChain.setFirstInChain(new StatementProcessorInterceptor());
    }
 
    /**
@@ -69,13 +80,13 @@ public abstract class SearchService implements Startable
     * @return
     * @throws InvalidQueryException
     */
-   public QueryResults execute(String query, String type) throws InvalidQueryException
+   public QueryResults execute(Query query, Map<String, Object> bindVariablesValues) throws InvalidQueryException
    {
-      SubmitStatementCommand submitStatementCommand = new SubmitStatementCommand(query, type);
+      ProcessQueryCommand processQueryCommand = new ProcessQueryCommand(query, bindVariablesValues);
 
       try
       {
-         return (QueryResults)interceptorChain.invoke(null, submitStatementCommand);
+         return (QueryResults)interceptorChain.invoke(getInvocationContext(), processQueryCommand);
       }
       catch (Throwable e)
       {
@@ -91,18 +102,34 @@ public abstract class SearchService implements Startable
     * @return
     * @throws InvalidQueryException
     */
-   public QueryResults execute(Query query) throws InvalidQueryException
+   public Query parse(String query, String type) throws InvalidQueryException
    {
-      ProcessQueryCommand processQueryCommand = new ProcessQueryCommand(query);
+      ParseQueryCommand submitStatementCommand = new ParseQueryCommand(query, type);
 
       try
       {
-         return (QueryResults)interceptorChain.invoke(null, processQueryCommand);
+         return (Query)interceptorChain.invoke(getInvocationContext(), submitStatementCommand);
       }
       catch (Throwable e)
       {
          throw new InvalidQueryException(e.getLocalizedMessage(), e);
       }
+   }
+
+   /**
+    * @return the invocationContext
+    */
+   public InvocationContext getInvocationContext()
+   {
+      return invocationContext == null ? configuration.getDefaultInvocationContext() : invocationContext;
+   }
+
+   /**
+    * @param invocationContext the invocationContext to set
+    */
+   public void setInvocationContext(InvocationContext invocationContext)
+   {
+      this.invocationContext = invocationContext;
    }
 
    /**

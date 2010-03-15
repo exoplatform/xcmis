@@ -224,7 +224,8 @@ public class InterceptorChain
    public synchronized boolean addBeforeInterceptor(CommandInterceptor toAdd,
       Class<? extends CommandInterceptor> beforeInterceptor)
    {
-      if (firstInChain.getClass().equals(beforeInterceptor))
+      if (firstInChain.getClass().equals(beforeInterceptor)
+         || beforeInterceptor.isAssignableFrom(firstInChain.getClass()))
       {
          toAdd.setNext(firstInChain);
          firstInChain = toAdd;

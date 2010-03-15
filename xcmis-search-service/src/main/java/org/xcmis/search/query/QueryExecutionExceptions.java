@@ -51,4 +51,12 @@ public class QueryExecutionExceptions
       return !exceptions.isEmpty();
    };
 
+   public Throwable getTopException()
+   {
+      if (!exceptions.isEmpty())
+      {
+         return exceptions.get(0);
+      }
+      return null;
+   }
 }

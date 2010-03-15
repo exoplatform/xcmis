@@ -18,6 +18,7 @@
  */
 package org.xcmis.search.query.plan;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.xcmis.search.content.Schema.Column;
 import org.xcmis.search.model.Limit;
@@ -30,6 +31,7 @@ import org.xcmis.search.model.source.join.JoinType;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,13 +39,8 @@ import java.util.Set;
 /**
  * One step from query execution plan.
  */
-public abstract class QueryExecutionPlan
+public abstract class QueryExecutionPlan implements Iterator<QueryExecutionPlan>
 {
-
-   /**
-    * Plan properties.
-    */
-   private final Map<String, Object> properties;
 
    /** The set of named selectors (e.g., tables) that this node deals with. */
    private Set<SelectorName> selectors;
@@ -55,8 +52,32 @@ public abstract class QueryExecutionPlan
    public QueryExecutionPlan(Type type)
    {
       this.type = type;
-      this.properties = new HashMap<String, Object>();
       this.selectors = new HashSet<SelectorName>();
+   }
+
+   /**
+    * @see java.util.Iterator#hasNext()
+    */
+   public boolean hasNext()
+   {
+      return false;
+   }
+
+   /**
+    * @see java.util.Iterator#next()
+    */
+   public QueryExecutionPlan next()
+   {
+      return null;
+   }
+
+   /**
+    * @see java.util.Iterator#remove()
+    */
+   public void remove()
+   {
+      throw new UnsupportedOperationException();
+
    }
 
    /**
@@ -148,13 +169,21 @@ public abstract class QueryExecutionPlan
       return 1;
    }
 
+   protected void getRecursiveString(StringBuilder str, int indentLevel)
+   {
+      str.append("\n");
+      str.append(StringUtils.repeat("\t", indentLevel));
+   }
+
    /**
     * @see java.lang.Object#toString()
     */
    @Override
    public String toString()
    {
-      return type + "[" + properties + "]";
+      StringBuilder sb = new StringBuilder();
+      getRecursiveString(sb, 0);
+      return sb.toString();
    }
 
    /**
@@ -285,6 +314,17 @@ public abstract class QueryExecutionPlan
          this.rightPlan = rightPlan;
       }
 
+      /**
+       * @see org.xcmis.search.query.plan.QueryExecutionPlan#getRecursiveString(java.lang.StringBuilder, int)
+       */
+      @Override
+      protected void getRecursiveString(StringBuilder str, int indentLevel)
+      {
+         super.getRecursiveString(str, indentLevel);
+         str.append("Left:" + leftPlan.toString());
+         str.append("Right:" + rightPlan.toString());
+      }
+
    }
 
    /**
@@ -329,11 +369,48 @@ public abstract class QueryExecutionPlan
          this.limit = limit;
       }
 
+      /**
+       * @see org.xcmis.search.query.plan.QueryExecutionPlan#getRecursiveString(java.lang.StringBuilder, int)
+       */
+      @Override
+      protected void getRecursiveString(StringBuilder str, int indentLevel)
+      {
+         super.getRecursiveString(str, indentLevel);
+         str.append(getType().getSymbol() + "=" + limit);
+         childPlan.getRecursiveString(str, indentLevel++);
+      }
+
    }
 
    public static class NestedExecutionPlan extends QueryExecutionPlan
    {
-      private QueryExecutionPlan childPlan;
+      /**
+       * @see org.xcmis.search.query.plan.QueryExecutionPlan#hasNext()
+       */
+      @Override
+      public boolean hasNext()
+      {
+         return next != null;
+      }
+
+      /**
+       * @see org.xcmis.search.query.plan.QueryExecutionPlan#next()
+       */
+      @Override
+      public QueryExecutionPlan next()
+      {
+         if (next != null)
+         {
+            QueryExecutionPlan result = next;
+            next = null;
+            return result;
+         }
+         return null;
+      }
+
+      protected QueryExecutionPlan childPlan;
+
+      private QueryExecutionPlan next;
 
       /**
        * @param type
@@ -351,7 +428,7 @@ public abstract class QueryExecutionPlan
       {
          super(type);
          this.childPlan = childPlan;
-
+         this.next = childPlan;
       }
 
       /**
@@ -417,6 +494,17 @@ public abstract class QueryExecutionPlan
       {
          super(Type.PROJECT, childPlan);
 
+      }
+
+      /**
+       * @see org.xcmis.search.query.plan.QueryExecutionPlan#getRecursiveString(java.lang.StringBuilder, int)
+       */
+      @Override
+      protected void getRecursiveString(StringBuilder str, int indentLevel)
+      {
+         super.getRecursiveString(str, indentLevel);
+         str.append(getType().getSymbol() + "=" + columns);
+         childPlan.getRecursiveString(str, ++indentLevel);
       }
 
       /**
@@ -511,6 +599,16 @@ public abstract class QueryExecutionPlan
       {
          this.name = name;
       }
+
+      /**
+       * @see org.xcmis.search.query.plan.QueryExecutionPlan#getRecursiveString(java.lang.StringBuilder, int)
+       */
+      @Override
+      protected void getRecursiveString(StringBuilder str, int indentLevel)
+      {
+         super.getRecursiveString(str, indentLevel);
+         str.append(getType().getSymbol() + "[" + name + "=" + alias + "{" + columns + "}]");
+      }
    }
 
    /**
@@ -553,6 +651,17 @@ public abstract class QueryExecutionPlan
       public void setOrderings(List<Ordering> orderings)
       {
          this.orderings = orderings;
+      }
+
+      /**
+       * @see org.xcmis.search.query.plan.QueryExecutionPlan#getRecursiveString(java.lang.StringBuilder, int)
+       */
+      @Override
+      protected void getRecursiveString(StringBuilder str, int indentLevel)
+      {
+         super.getRecursiveString(str, indentLevel);
+         str.append(getType().getSymbol() + "=" + orderings);
+         childPlan.getRecursiveString(str, indentLevel++);
       }
 
    }
@@ -617,6 +726,17 @@ public abstract class QueryExecutionPlan
       public void setConstraint(Constraint constraint)
       {
          this.constraint = constraint;
+      }
+
+      /**
+       * @see org.xcmis.search.query.plan.QueryExecutionPlan#getRecursiveString(java.lang.StringBuilder, int)
+       */
+      @Override
+      protected void getRecursiveString(StringBuilder str, int indentLevel)
+      {
+         super.getRecursiveString(str, indentLevel);
+         str.append("Type.WHERE=" + constraint);
+         childPlan.getRecursiveString(str, indentLevel++);
       }
    }
 

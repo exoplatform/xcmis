@@ -23,6 +23,8 @@ import org.xcmis.search.content.command.VisitableCommand;
 import org.xcmis.search.content.interceptors.Visitor;
 import org.xcmis.search.model.Query;
 
+import java.util.Map;
+
 /**
  * Process {@link Query} for execution.
  * 
@@ -31,13 +33,16 @@ public class ProcessQueryCommand implements VisitableCommand
 {
    private final Query query;
 
+   private final Map<String, Object> bindVariablesValues;
+
    /**
     * @param query
     */
-   public ProcessQueryCommand(Query query)
+   public ProcessQueryCommand(Query query, Map<String, Object> bindVariablesValues)
    {
       super();
       this.query = query;
+      this.bindVariablesValues = bindVariablesValues;
    }
 
    /**
@@ -49,7 +54,15 @@ public class ProcessQueryCommand implements VisitableCommand
    }
 
    /**
-    * @see org.xcmis.search.content.command.VisitableCommand#acceptVisitor(org.xcmis.search.content.command.InvocationContext, org.xcmis.search.content.interceptors.Visitor)
+    * @return the bindVariablesValues
+    */
+   public Map<String, Object> getBindVariablesValues()
+   {
+      return bindVariablesValues;
+   }
+
+   /**
+    * @see org.xcmis.search.content.command.appendIntereceptorVisitableCommand#acceptVisitor(org.xcmis.search.content.command.InvocationContext, org.xcmis.search.content.interceptors.Visitor)
     */
 
    public Object acceptVisitor(InvocationContext ctx, Visitor visitor) throws Throwable
