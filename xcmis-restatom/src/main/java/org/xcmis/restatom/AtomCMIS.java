@@ -269,9 +269,7 @@ public interface AtomCMIS extends CMIS
 
    QName PROPERTY_DEFINITION = new QName(CMIS_NS_URI, "propertyDefinition", CMIS_PREFIX);
 
-   QName PROPERTY_DEFINITION_ID = new QName(/*CMIS_NS_URI, */"propertyDefinitionId"/*, CMIS_PREFIX*/);
-
-   QName PROPERTY_LOCAL_NAME = new QName(/*CMIS_NS_URI, */"localName"/*, CMIS_PREFIX*/);
+   QName PROPERTY_DEFINITION_ID = new QName(CMIS_NS_URI, "propertyDefinitionId", CMIS_PREFIX);
 
    QName LOCAL_NAME = new QName(CMIS_NS_URI, "localName", CMIS_PREFIX);
 

@@ -22,8 +22,8 @@ package org.xcmis.restatom.abdera;
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
-import org.xcmis.core.CmisProperty;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.spi.object.impl.BaseProperty;
 
 import javax.xml.namespace.QName;
 
@@ -31,7 +31,7 @@ import javax.xml.namespace.QName;
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id: PropertyElement.java 2 2010-02-04 17:21:49Z andrew00x $
  */
-public abstract class PropertyElement<T extends CmisProperty> extends ExtensibleElementWrapper
+public abstract class PropertyElement<T extends BaseProperty<?>> extends ExtensibleElementWrapper
 {
 
    /**
@@ -60,15 +60,14 @@ public abstract class PropertyElement<T extends CmisProperty> extends Extensible
     * 
     * @param property the property
     */
-   public void build(CmisProperty property)
+   public void build(T property)
    {
       if (property != null)
       {
-         setAttributeValue(AtomCMIS.PROPERTY_DEFINITION_ID, property.getPropertyDefinitionId());
-//         setAttributeValue(AtomCMIS.LOCAL_NAME, property.getLocalName());
-         setAttributeValue(AtomCMIS.PROPERTY_LOCAL_NAME, property.getLocalName());
-//         setAttributeValue(AtomCMIS.DISPLAY_NAME, property.getDisplayName());
-//         setAttributeValue(AtomCMIS.QUERY_NAME, property.getQueryName());
+         setAttributeValue(AtomCMIS.PROPERTY_DEFINITION_ID, property.getId());
+         setAttributeValue(AtomCMIS.LOCAL_NAME, property.getLocalName());
+         setAttributeValue(AtomCMIS.DISPLAY_NAME, property.getDisplayName());
+         setAttributeValue(AtomCMIS.QUERY_NAME, property.getQueryName());
       }
    }
 
@@ -86,12 +85,10 @@ public abstract class PropertyElement<T extends CmisProperty> extends Extensible
     */
    protected void processPropertyElement(T obj)
    {
-      obj.setPropertyDefinitionId(getAttributeValue(AtomCMIS.PROPERTY_DEFINITION_ID));
-//      obj.setLocalName(getAttributeValue(AtomCMIS.LOCAL_NAME));
-      obj.setLocalName(getAttributeValue(AtomCMIS.PROPERTY_LOCAL_NAME));
-//      obj.setDisplayName(getAttributeValue(AtomCMIS.DISPLAY_NAME));
-//      obj.setQueryName(getAttributeValue(AtomCMIS.QUERY_NAME));
+      obj.setId(getAttributeValue(AtomCMIS.PROPERTY_DEFINITION_ID));
+      obj.setLocalName(getAttributeValue(AtomCMIS.LOCAL_NAME));
+      obj.setDisplayName(getAttributeValue(AtomCMIS.DISPLAY_NAME));
+      obj.setQueryName(getAttributeValue(AtomCMIS.QUERY_NAME));
    }
-   
 
 }

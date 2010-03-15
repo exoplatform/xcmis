@@ -21,11 +21,11 @@ package org.xcmis.restatom.abdera;
 
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
-import org.xcmis.core.CmisProperty;
-import org.xcmis.core.CmisPropertyDateTime;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
+import org.xcmis.spi.object.impl.DateTimeProperty;
 
+import java.util.Calendar;
 import java.util.List;
 
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -35,7 +35,7 @@ import javax.xml.namespace.QName;
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id: PropertyDateTimeElement.java 2 2010-02-04 17:21:49Z andrew00x $
  */
-public class PropertyDateTimeElement extends PropertyElement<CmisPropertyDateTime>
+public class PropertyDateTimeElement extends PropertyElement<DateTimeProperty>
 {
 
    /**
@@ -63,16 +63,16 @@ public class PropertyDateTimeElement extends PropertyElement<CmisPropertyDateTim
     * {@inheritDoc}
     */
    @Override
-   public void build(CmisProperty value)
+   public void build(DateTimeProperty value)
    {
       if (value != null)
       {
          super.build(value);
-         List<XMLGregorianCalendar> listXMLGregorianCalendar = ((CmisPropertyDateTime)value).getValue();
-         if (listXMLGregorianCalendar != null && listXMLGregorianCalendar.size() > 0)
+         List<Calendar> listCalendar = value.getValues();
+         if (listCalendar != null && listCalendar.size() > 0)
          {
-            for (XMLGregorianCalendar v : listXMLGregorianCalendar)
-               addSimpleExtension(AtomCMIS.VALUE, AtomUtils.getAtomDate(v.toGregorianCalendar()));
+            for (Calendar v : listCalendar)
+               addSimpleExtension(AtomCMIS.VALUE, AtomUtils.getAtomDate(v));
          }
       }
    }
@@ -80,17 +80,14 @@ public class PropertyDateTimeElement extends PropertyElement<CmisPropertyDateTim
    /**
     * {@inheritDoc}
     */
-   public CmisPropertyDateTime getProperty()
+   public DateTimeProperty getProperty()
    {
-      CmisPropertyDateTime d = new CmisPropertyDateTime();
+      DateTimeProperty d = new DateTimeProperty();
       processPropertyElement(d);
       if (getElements() != null && getElements().size() > 0)
       {
          for (Element el : getElements())
-         {
-            XMLGregorianCalendar c = AtomUtils.parseXMLCalendar(el.getText());
-            d.getValue().add(c);
-         }
+            d.getValues().add(AtomUtils.parseCalendar(el.getText()));
       }
       return d;
    }

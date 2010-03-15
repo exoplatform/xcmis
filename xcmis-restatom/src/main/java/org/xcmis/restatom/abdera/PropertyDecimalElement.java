@@ -21,9 +21,8 @@ package org.xcmis.restatom.abdera;
 
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
-import org.xcmis.core.CmisProperty;
-import org.xcmis.core.CmisPropertyDecimal;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.spi.object.impl.DecimalProperty;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -34,7 +33,7 @@ import javax.xml.namespace.QName;
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id: PropertyDecimalElement.java 2 2010-02-04 17:21:49Z andrew00x $
  */
-public class PropertyDecimalElement extends PropertyElement<CmisPropertyDecimal>
+public class PropertyDecimalElement extends PropertyElement<DecimalProperty>
 {
 
    /**
@@ -62,12 +61,12 @@ public class PropertyDecimalElement extends PropertyElement<CmisPropertyDecimal>
     * {@inheritDoc}
     */
    @Override
-   public void build(CmisProperty value)
+   public void build(DecimalProperty value)
    {
       if (value != null)
       {
          super.build(value);
-         List<BigDecimal> listBigDecimal = ((CmisPropertyDecimal)value).getValue();
+         List<BigDecimal> listBigDecimal = value.getValues();
          if (listBigDecimal != null && listBigDecimal.size() > 0)
          {
             for (BigDecimal v : listBigDecimal)
@@ -79,14 +78,14 @@ public class PropertyDecimalElement extends PropertyElement<CmisPropertyDecimal>
    /** 
     * {@inheritDoc}
     */
-   public CmisPropertyDecimal getProperty()
+   public DecimalProperty getProperty()
    {
-      CmisPropertyDecimal d = new CmisPropertyDecimal();
+      DecimalProperty d = new DecimalProperty();
       processPropertyElement(d);
       if (getElements() != null && getElements().size() > 0)
       {
          for (Element el : getElements())
-            d.getValue().add(new BigDecimal(el.getText()));
+            d.getValues().add(new BigDecimal(el.getText()));
       }
       return d;
    }

@@ -21,10 +21,10 @@ package org.xcmis.restatom.abdera;
 
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
-import org.xcmis.core.CmisProperty;
-import org.xcmis.core.CmisPropertyUri;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.spi.object.impl.UriProperty;
 
+import java.net.URI;
 import java.util.List;
 
 import javax.xml.namespace.QName;
@@ -33,7 +33,7 @@ import javax.xml.namespace.QName;
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id: PropertyUriElement.java 2 2010-02-04 17:21:49Z andrew00x $
  */
-public class PropertyUriElement extends PropertyElement<CmisPropertyUri>
+public class PropertyUriElement extends PropertyElement<UriProperty>
 {
 
    /**
@@ -61,17 +61,17 @@ public class PropertyUriElement extends PropertyElement<CmisPropertyUri>
     * {@inheritDoc}
     */
    @Override
-   public void build(CmisProperty value)
+   public void build(UriProperty value)
    {
       if (value != null)
       {
          super.build(value);
 
-         List<String> listString = ((CmisPropertyUri)value).getValue();
+         List<URI> listString = value.getValues();
          if (listString != null && listString.size() > 0)
          {
-            for (String v : listString)
-               addSimpleExtension(AtomCMIS.VALUE, v);
+            for (URI v : listString)
+               addSimpleExtension(AtomCMIS.VALUE, v.toString());
          }
       }
    }
@@ -79,14 +79,14 @@ public class PropertyUriElement extends PropertyElement<CmisPropertyUri>
    /**
     * {@inheritDoc}
     */
-   public CmisPropertyUri getProperty()
+   public UriProperty getProperty()
    {
-      CmisPropertyUri uri = new CmisPropertyUri();
+      UriProperty uri = new UriProperty();
       processPropertyElement(uri);
       if (getElements() != null && getElements().size() > 0)
       {
          for (Element el : getElements())
-            uri.getValue().add(el.getText());
+            uri.getValues().add(URI.create(getText()));
       }
       return uri;
    }

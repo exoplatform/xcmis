@@ -21,9 +21,8 @@ package org.xcmis.restatom.abdera;
 
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
-import org.xcmis.core.CmisProperty;
-import org.xcmis.core.CmisPropertyBoolean;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.spi.object.impl.BooleanProperty;
 
 import java.util.List;
 
@@ -33,7 +32,7 @@ import javax.xml.namespace.QName;
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id: PropertyBooleanElement.java 2 2010-02-04 17:21:49Z andrew00x $
  */
-public class PropertyBooleanElement extends PropertyElement<CmisPropertyBoolean>
+public class PropertyBooleanElement extends PropertyElement<BooleanProperty>
 {
 
    /**
@@ -61,13 +60,12 @@ public class PropertyBooleanElement extends PropertyElement<CmisPropertyBoolean>
     * {@inheritDoc}
     */
    @Override
-   public void build(CmisProperty value)
+   public void build(BooleanProperty value)
    {
       if (value != null)
       {
          super.build(value);
-
-         List<Boolean> listBoolean = ((CmisPropertyBoolean)value).getValue();
+         List<Boolean> listBoolean = value.getValues();
          if (listBoolean != null && listBoolean.size() > 0)
          {
             for (Boolean v : listBoolean)
@@ -79,14 +77,14 @@ public class PropertyBooleanElement extends PropertyElement<CmisPropertyBoolean>
    /**
     * {@inheritDoc}
     */
-   public CmisPropertyBoolean getProperty()
+   public BooleanProperty getProperty()
    {
-      CmisPropertyBoolean b = new CmisPropertyBoolean();
+      BooleanProperty b = new BooleanProperty();
       processPropertyElement(b);
       if (getElements() != null && getElements().size() > 0)
       {
          for (Element el : getElements())
-            b.getValue().add(Boolean.valueOf(el.getText()));
+            b.getValues().add(Boolean.valueOf(el.getText()));
       }
       return b;
    }
