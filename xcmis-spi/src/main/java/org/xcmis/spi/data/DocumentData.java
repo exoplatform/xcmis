@@ -19,10 +19,12 @@
 
 package org.xcmis.spi.data;
 
-import org.xcmis.spi.CmisRuntimeException;
+import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.TypeDefinition;
+import org.xcmis.spi.UpdateConflictException;
+import org.xcmis.spi.VersioningException;
 
 /**
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
@@ -30,20 +32,60 @@ import org.xcmis.spi.TypeDefinition;
  */
 public interface DocumentData extends ObjectData
 {
+   /**
+    * Shortcut to 'cmis:versionLabel' property.
+    * 
+    * @return 'cmis:versionLabel' property
+    */
    String getVersionLabel();
 
+   /**
+    * Shortcut to 'cmis:versionSeriesCheckedOutBy' property.
+    * 
+    * @return 'cmis:versionSeriesCheckedOutBy' property
+    */
    String getVersionSeriesCheckedOutBy();
 
+   /**
+    * Shortcut to 'cmis:versionSeriesCheckedOutId' property.
+    * 
+    * @return 'cmis:versionSeriesCheckedOutId' property
+    */
    String getVersionSeriesCheckedOutId();
 
+   /**
+    * Shortcut to 'cmis:versionSeriesId' property.
+    * 
+    * @return 'cmis:versionSeriesId' property
+    */
    String getVersionSeriesId();
 
+   /**
+    * Shortcut to 'cmis:isLatestMajorVersion' property.
+    * 
+    * @return 'cmis:isLatestMajorVersion' property
+    */
    boolean isLatestMajorVersion();
 
+   /**
+    * Shortcut to 'cmis:isLatestVersion' property.
+    * 
+    * @return 'cmis:isLatestVersion' property
+    */
    boolean isLatestVersion();
 
+   /**
+    * Shortcut to 'cmis:isMajorVersion' property.
+    * 
+    * @return 'cmis:isMajorVersion' property
+    */
    boolean isMajorVersion();
 
+   /**
+    * Shortcut to 'cmis:isVersionSeriesCheckedOut' property.
+    * 
+    * @return 'cmis:isVersionSeriesCheckedOut' property
+    */
    boolean isVersionSeriesCheckedOut();
 
    //
@@ -76,16 +118,47 @@ public interface DocumentData extends ObjectData
     */
    boolean hasContent();
 
-   //
-   void cancelCheckout() throws StorageException, CmisRuntimeException;
+   /**
+    * Discard checkout operation. See {@link Connection#cancelCheckout(String)}.
+    * 
+    * @throws StorageException if any storage error occurs
+    */
+   void cancelCheckout() throws StorageException;
 
-   DocumentData checkin(boolean major, String checkinComment) throws StorageException, CmisRuntimeException;
+   /**
+    * Set private working copy as latest (current) version of
+    * 
+    * @param major
+    * @param checkinComment
+    * @return
+    * @throws ConstraintException if the object is not versionable
+    * @throws StorageException if newly version of Document can't be saved in
+    *         storage cause to its internal problem
+    */
+   DocumentData checkin(boolean major, String checkinComment) throws ConstraintException, StorageException;
 
-   DocumentData checkout() throws StorageException, CmisRuntimeException;
+   /**
+    * Create PWC from this document. Properties and content (optionally) of this
+    * document copied to PWC.
+    * 
+    * @return PWC
+    * @throws ConstraintException if the object is not versionable
+    * @throws UpdateConflictException if update an object that is no longer
+    *         current
+    * @throws VersioningException if object is not latest version of document
+    *         version and it is not supported to checked-out other then latest
+    *         version
+    * @throws StorageException if newly created PWC was not saved in storage
+    *         cause to storage internal problem
+    */
+   DocumentData checkout() throws ConstraintException, VersioningException, StorageException;
 
+   /**
+    * @return <code>true</code> if current Document is private working copy and
+    *         <code>false</code> otherwise
+    */
    boolean isPWC();
 
-   //
    //   Collection<DocumentData> getAllVersions() throws CmisRuntimeException;
 
 }

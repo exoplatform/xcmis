@@ -36,35 +36,239 @@ import java.util.Collection;
 public interface Storage extends org.xcmis.spi.TypeManager
 {
 
+   /**
+    * Get storage unique id.
+    * 
+    * @return storage id
+    */
    String getId();
 
-   //
-   AllowableActions calculateAllowableActions(ObjectData object) throws CmisRuntimeException;
+   /**
+    * Calculate allowable actions for specified object.
+    * 
+    * @param object object
+    * @return allowable actions for object
+    */
+   AllowableActions calculateAllowableActions(ObjectData object);
 
    //
 
    ItemsIterator<ObjectData> getCheckedOutDocuments(ObjectData folder, String orderBy) throws CmisRuntimeException;
 
-   //
-   DocumentData createDocument(FolderData folder, String typeId, VersioningState versioningState);
+   /**
+    * Create new instance of document with type <code>typeId</code> using
+    * <code>folder</code> as parent. If <code>folder == null</code> then
+    * document created in unfiling state. If unfiling is not supported
+    * {@link ConstraintException} should be thrown. It is not persisted instance
+    * and has not ID (method {@link ObjectData#getObjectId()} returns
+    * <code>null</code>). To save this document method
+    * {@link Storage#saveObject(ObjectData)} must be used.
+    * 
+    * @param folder parent folder or <code>null</code> if document should be
+    *        created in unfiling state
+    * @param typeId type id
+    * @param versioningState versioning state
+    * @return new unsaved instance of document
+    * @throws ConstraintException if any of following condition are met:
+    *         <ul>
+    *         <li><code>folder == null</code> and unfiling capability is not
+    *         supported</li>
+    *         <li><code>typeId</code> is id of type whose baseType is not
+    *         Document</li>
+    *         <li><code>typeId</code> is not in the list of
+    *         AllowedChildObjectTypeIds of the <code>folder</code> (method
+    *         {@link FolderData#isAllowedChildType(String)} returns
+    *         <code>false</code> for <code>typeId</code>)</li>
+    *         <li>versionable attribute of the object type definition is
+    *         <code>false</code> and a value of the versioningState parameter is
+    *         other than <i>none</i></li>
+    *         <li>versionable attribute of the object type definition is
+    *         <code>true</code> and and the value of the versioningState
+    *         parameter is <i>none</i></li>
+    *         </ul>
+    * @see VersioningState
+    */
+   DocumentData createDocument(FolderData folder, String typeId, VersioningState versioningState)
+      throws ConstraintException;
 
-   DocumentData createCopyOfDocument(DocumentData source, FolderData folder, VersioningState versioningState);
+   /**
+    * Create new document as copy of the given <code>source</code> document and
+    * use <code>folder</code> as parent. If <code>folder == null</code> then
+    * document created in unfiling state. If unfiling is not supported
+    * {@link ConstraintException} should be thrown. New document may be
+    * persisted immediately and then updated to apply new properties or not
+    * persisted instance may be created. This behavior is implementation
+    * specific. In both cases caller may apply new properties and save it. See
+    * {@link Storage#saveObject(ObjectData)}.
+    * 
+    * @param source source document
+    * @param folder parent folder or <code>null</code> if document should be
+    *        created in unfiling state
+    * @param versioningState versioning state
+    * @return new instance of document
+    * @throws ConstraintException if any of following condition are met:
+    *         <ul>
+    *         <li><code>folder == null</code> and unfiling capability is not
+    *         supported</li>
+    *         <li><code>typeId</code> is id of type whose baseType is not
+    *         Document</li>
+    *         <li><code>typeId</code> is not in the list of
+    *         AllowedChildObjectTypeIds of the <code>folder</code> (method
+    *         {@link FolderData#isAllowedChildType(String)} returns
+    *         <code>false</code> for <code>typeId</code>)</li>
+    *         <li>versionable attribute of the object type definition is
+    *         <code>false</code> and a value of the versioningState parameter is
+    *         other than <i>none</i></li>
+    *         <li>versionable attribute of the object type definition is
+    *         <code>true</code> and and the value of the versioningState
+    *         parameter is <i>none</i></li>
+    *         </ul>
+    * @throws StorageException if new document can be saved cause to storage
+    *         internal problem
+    * @see VersioningState
+    */
+   DocumentData createCopyOfDocument(DocumentData source, FolderData folder, VersioningState versioningState)
+      throws ConstraintException, StorageException;
 
-   FolderData createFolder(FolderData folder, String typeId);
+   /**
+    * Create new instance of folder with type <code>typeId</code> using
+    * <code>folder</code> as parent. It is not persisted instance and has not ID
+    * (method {@link ObjectData#getObjectId()} returns <code>null</code>). To
+    * save this folder method {@link Storage#saveObject(ObjectData)} must be
+    * used.
+    * 
+    * @param folder parent folder
+    * @param typeId type id
+    * @return new unsaved instance of folder
+    * @throws ConstraintException if any of following condition are met:
+    *         <ul>
+    *         <li><code>typeId</code> is id of type whose baseType is not Folder
+    *         </li>
+    *         <li><code>typeId</code> is not in the list of
+    *         AllowedChildObjectTypeIds of the <code>folder</code> (method
+    *         {@link FolderData#isAllowedChildType(String)} returns
+    *         <code>false</code> for <code>typeId</code>)</li>
+    *         </ul>
+    */
+   FolderData createFolder(FolderData folder, String typeId) throws ConstraintException;
 
-   PolicyData createPolicy(FolderData folder, String typeId);
+   /**
+    * Create new instance of policy with type <code>typeId</code> using
+    * <code>folder</code> as parent. If <code>folder == null</code> then policy
+    * created in unfiling state. It is not persisted instance and has not ID
+    * (method {@link ObjectData#getObjectId()} returns <code>null</code>). To
+    * save this policy method {@link Storage#saveObject(ObjectData)} must be
+    * used.
+    * 
+    * @param folder parent folder
+    * @param typeId type id
+    * @return new unsaved instance of policy
+    * @throws ConstraintException if any of following condition are met:
+    *         <ul>
+    *         <li><code>folder == null</code> and unfiling capability is not
+    *         supported</li>
+    *         <li><code>folder != null</code> and <code>typeId</code> is id of
+    *         not fileable type</li>
+    *         <li><code>typeId</code> is id of type whose baseType is not Policy
+    *         </li>
+    *         <li><code>typeId</code> is not in the list of
+    *         AllowedChildObjectTypeIds of the <code>folder</code> (method
+    *         {@link FolderData#isAllowedChildType(String)} returns
+    *         <code>false</code> for <code>typeId</code>)</li>
+    *         </ul>
+    */
+   PolicyData createPolicy(FolderData folder, String typeId) throws ConstraintException;
 
-   RelationshipData createRelationship(ObjectData source, ObjectData target, String typeId);
+   /**
+    * Create new instance of relationship for specified <code>source</code> and
+    * <code>target</code>. It is not persisted instance and has not ID (method
+    * {@link ObjectData#getObjectId()} returns <code>null</code>). To save this
+    * relationship method {@link Storage#saveObject(ObjectData)} must be used.
+    * 
+    * @param source source of relationship
+    * @param target target of relationship
+    * @param typeId type of relationship
+    * @return new unsaved instance of relationship
+    * @throws ConstraintException if any of following condition are met:
+    *         <ul>
+    *         <li><code>typeId</code> is id of type whose baseType is not
+    *         Relationship</li>
+    *         <li><code>source</code> has object type that is not in the list of
+    *         AllowedSourceTypes specified by the object type definition</li>
+    *         <li><code>target</code> has object type that is not in the list of
+    *         AllowedTargetTypes specified by the object type definition</li>
+    *         </ul>
+    */
+   RelationshipData createRelationship(ObjectData source, ObjectData target, String typeId) throws ConstraintException;
 
-   //
-   void deleteObject(ObjectData object, boolean deleteAllVersions) throws UpdateConflictException, StorageException,
-      CmisRuntimeException;
+   /**
+    * Delete specified object. If multi-filed object is deleted then it is
+    * removed from all folders it is filed in. If specified object is private
+    * working copy the deletion object is the same as to cancel checkout
+    * operation. See {@link DocumentData#cancelCheckout()}.
+    * 
+    * @param object object to be deleted
+    * @param deleteAllVersions if <code>false</code> then delete only the object
+    *        specified, if <code>true</code> delete all versions of versionable
+    *        document. This parameter must be ignored if specified object is not
+    *        document or not versionable document
+    * @throws ConstraintException if specified object is folder that contains
+    *         one or more object or root folder
+    * @throws UpdateConflictException if specified object is not current any
+    *         more
+    * @throws StorageException if object can't be delete (persist operation)
+    *         cause to storage internal problem
+    */
+   void deleteObject(ObjectData object, boolean deleteAllVersions) throws ConstraintException, UpdateConflictException,
+      StorageException;
 
+   /**
+    * Delete the specified folder object and all of its child- and
+    * descendant-objects.
+    * 
+    * @param folder folder to be deleted
+    * @param deleteAllVersions if <code>true</code> then delete all versions of
+    *        the document in this folder. If <code>false</code>, delete only the
+    *        document object specified. This parameter will be ignored if
+    *        parameter when <code>objectId</code> non-document object or
+    *        non-versionable document
+    * @param unfileObject an enumeration specifying how the storage MUST process
+    *        file-able child objects:
+    *        <ul>
+    *        <li>unfile: Unfile all fileable objects</li>
+    *        <li>deletesinglefiled: Delete all fileable non-folder objects whose
+    *        only parent-folders are in the current folder tree. Unfile all
+    *        other fileable non-folder objects from the current folder tree</li>
+    *        <li>delete: Delete all fileable objects</li>
+    *        </ul>
+    * @param continueOnFailure if <code>true</code>, then the stprage SHOULD
+    *        continue attempting to perform this operation even if deletion of a
+    *        child object in the specified folder cannot be deleted. Default is
+    *        <code>false</code>.
+    * @return list of id that were not deleted
+    * @throws UpdateConflictException if object that is no longer current (as
+    *         determined by the storage)
+    */
    Collection<String> deleteTree(FolderData folder, boolean deleteAllVersions, UnfileObject unfileObject,
-      boolean continueOnFailure) throws UpdateConflictException, CmisRuntimeException;
+      boolean continueOnFailure) throws UpdateConflictException;
 
-   //
-   ItemsIterator<ChangeEvent> getChangeLog(String changeLogToken) throws ConstraintException, CmisRuntimeException;
+   /**
+    * Gets content changes.
+    * 
+    * @param changeLogToken if return value other than <code>null</code>, then
+    *        change event corresponded to the value of the specified change log
+    *        token will be returned as the first result in the output. If not
+    *        specified, then will be returned the first change event recorded in
+    *        the change log. When set of changes passed is returned then
+    *        <code>changeLogToken</code> must contains log token corresponded to
+    *        the last change event. Then it may be used by caller for getting
+    *        next set on change events
+    * @return iterator over change log events
+    * @throws ConstraintException if the event corresponding to the change log
+    *         token provided as an input parameter is no longer available in the
+    *         change log. (E.g. because the change log was truncated)
+    */
+   ItemsIterator<ChangeEvent> getChangeLog(String changeLogToken) throws ConstraintException;
 
    /**
     * Handle specified SQL query.
@@ -73,9 +277,8 @@ public interface Storage extends org.xcmis.spi.TypeManager
     * @return set of query results
     * @throws InvalidArgumentException if specified <code>query</code> is
     *         invalid
-    * @throws CmisRuntimeException if any other CMIS repository errors
     */
-   ItemsIterator<Result> query(Query query) throws InvalidArgumentException, CmisRuntimeException;
+   ItemsIterator<Result> query(Query query) throws InvalidArgumentException;
 
    //
    ObjectData getObject(String objectId) throws CmisRuntimeException;

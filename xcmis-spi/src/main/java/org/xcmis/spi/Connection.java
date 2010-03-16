@@ -206,10 +206,9 @@ public interface Connection
     *         that base type is not Folder
     * @throws ConstraintException if destination folder is not supported object
     *         type that should be added
-    * @throws CmisRuntimeException if any others errors occur
     */
    void addObjectToFolder(String objectId, String folderId, boolean allVersions) throws ObjectNotFoundException,
-      InvalidArgumentException, ConstraintException, CmisRuntimeException;
+      InvalidArgumentException, ConstraintException;
 
    /**
     * Remove an existing fileable non-folder object from a folder.
@@ -220,9 +219,8 @@ public interface Connection
     *        currently filed
     * @throws ObjectNotFoundException if <code>objectId</code> or
     *         <code>folderId</code> were not found
-    * @throws CmisRuntimeException if any others errors occur
     */
-   void removeObjectFromFolder(String objectId, String folderId) throws ObjectNotFoundException, CmisRuntimeException;
+   void removeObjectFromFolder(String objectId, String folderId) throws ObjectNotFoundException;
 
    // Navigation Services
 
@@ -285,12 +283,11 @@ public interface Connection
     *         syntax or contains at least one property name that is not in
     *         object's property definition or <code>renditionFilter</code> has
     *         invalid syntax or contains at least one unknown rendition
-    * @throws CmisRuntimeException if any others errors occur
     */
    ItemsList<CmisObject> getCheckedOutDocs(String folderId, boolean includeAllowableActions,
       IncludeRelationships includeRelationships, boolean includeObjectInfo, String propertyFilter,
       String renditionFilter, String orderBy, int maxItems, int skipCount) throws ObjectNotFoundException,
-      InvalidArgumentException, FilterNotValidException, CmisRuntimeException;
+      InvalidArgumentException, FilterNotValidException;
 
    /**
     * Get the list of child objects contained in the specified folder.
@@ -351,12 +348,11 @@ public interface Connection
     *         syntax or contains at least one property name that is not in
     *         object's property definition or <code>renditionFilter</code> has
     *         invalid syntax or contains at least one unknown rendition
-    * @throws CmisRuntimeException if any others errors occur
     */
    ItemsList<CmisObject> getChildren(String folderId, boolean includeAllowableActions,
       IncludeRelationships includeRelationships, boolean includePathSegments, boolean includeObjectInfo,
       String propertyFilter, String renditionFilter, String orderBy, int maxItems, int skipCount)
-      throws ObjectNotFoundException, InvalidArgumentException, FilterNotValidException, CmisRuntimeException;
+      throws ObjectNotFoundException, InvalidArgumentException, FilterNotValidException;
 
    /**
     * Get parent for specified folder. This method MUST NOT be used for getting
@@ -379,10 +375,9 @@ public interface Connection
     * @throws FilterNotValidException if <code>propertyFilter</code> has invalid
     *         syntax or contains at least one property name that is not in
     *         object's property definition
-    * @throws CmisRuntimeException if any others errors occur
     */
    CmisObject getFolderParent(String folderId, boolean includeObjectInfo, String propertyFilter)
-      throws ObjectNotFoundException, InvalidArgumentException, FilterNotValidException, CmisRuntimeException;
+      throws ObjectNotFoundException, InvalidArgumentException, FilterNotValidException;
 
    /**
     * Gets the parent folder(s) for the specified object.
@@ -429,7 +424,7 @@ public interface Connection
     *        <li>cmis:none: exclude all associated Renditions</li>
     *        </ul>
     * @return object's parents. Empty list for unfiled objects or for the root
-    *         folder.
+    *         folder
     * @throws ObjectNotFoundException if object with <code>objectId</code> was
     *         not found
     * @throws ConstraintException if this method is invoked on an not fileable
@@ -438,12 +433,11 @@ public interface Connection
     *         syntax or contains at least one property name that is not in
     *         object's property definition or <code>renditionFilter</code> has
     *         invalid syntax or contains at least one unknown rendition
-    * @throws CmisRuntimeException if any others errors occur
     */
    List<ObjectParent> getObjectParents(String objectId, boolean includeAllowableActions,
       IncludeRelationships includeRelationships, boolean includeRelativePathSegment, boolean includeObjectInfo,
       String propertyFilter, String renditionFilter) throws ObjectNotFoundException, ConstraintException,
-      FilterNotValidException, CmisRuntimeException;
+      FilterNotValidException;
 
    /**
     * Get the collection of descendant objects contained in the specified folder
@@ -501,12 +495,11 @@ public interface Connection
     *         syntax or contains at least one property name that is not in
     *         object's property definition or <code>renditionFilter</code> has
     *         invalid syntax or contains at least one unknown rendition
-    * @throws CmisRuntimeException if any others errors occur
     */
    List<ItemsTree<CmisObject>> getDescendants(String folderId, int depth, boolean includeAllowableActions,
       IncludeRelationships includeRelationships, boolean includePathSegments, boolean includeObjectInfo,
       String propertyFilter, String renditionFilter) throws ObjectNotFoundException, InvalidArgumentException,
-      FilterNotValidException, CmisRuntimeException;
+      FilterNotValidException;
 
    /**
     * Get the collection of descendant folder objects contained in the specified
@@ -569,7 +562,7 @@ public interface Connection
    List<ItemsTree<CmisObject>> getFolderTree(String folderId, int depth, boolean includeAllowableActions,
       IncludeRelationships includeRelationships, boolean includePathSegments, boolean includeObjectInfo,
       String propertyFilter, String renditionFilter) throws ObjectNotFoundException, InvalidArgumentException,
-      FilterNotValidException, CmisRuntimeException;
+      FilterNotValidException;
 
    // Object Services
 
@@ -1232,13 +1225,19 @@ public interface Connection
     *         properties throws conflict
     * @throws UpdateConflictException if update an object that is no longer
     *         current. Storage determine this by using change token
+    * @throws VersioningException if any of following conditions are met:
+    *         <ul>
+    *         <li>The object is not checked out and any of the properties being
+    *         updated are defined in their object type definition have an
+    *         attribute value of Updatability 'when checked-out'</li>
+    *         <li>If the object is a non-current Document Version</li>
+    *         </ul>
     * @throws StorageException if object's properties can not be updated (save
     *         changes) cause to storage internal problem
-    * @throws CmisRuntimeException if any others errors occur
     */
    String updateProperties(String objectId, ChangeTokenHolder changeTokenHolder, Map<String, Property<?>> properties)
       throws ObjectNotFoundException, ConstraintException, NameConstraintViolationException, UpdateConflictException,
-      StorageException, CmisRuntimeException;
+      VersioningException, StorageException;
 
    // ---
 

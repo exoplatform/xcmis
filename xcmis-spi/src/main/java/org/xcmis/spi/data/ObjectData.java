@@ -106,7 +106,7 @@ public interface ObjectData
    void removePolicy(PolicyData policy) throws ConstraintException;
 
    // ------
-   
+
    /**
     * @return <code>true</code> if current object is newly created and was not
     *         persisted yet. If may be created via
@@ -164,7 +164,8 @@ public interface ObjectData
    String getName();
 
    /**
-    * Shortcut to 'cmis:objectId' property.
+    * Shortcut to 'cmis:objectId' property. This method always return
+    * <code>null</code> for newly created unsaved objects. See {@link #isNew()}.
     * 
     * @return 'cmis:objectId' property
     */

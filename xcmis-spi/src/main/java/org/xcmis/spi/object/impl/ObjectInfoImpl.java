@@ -62,81 +62,154 @@ public class ObjectInfoImpl implements ObjectInfo
 
    private String sourceId;
 
+   public ObjectInfoImpl()
+   {
+   }
+
+   public ObjectInfoImpl(String baseTypeId, String createdBy, Calendar creationDate, String id,
+      Boolean latestMajorVersion, Boolean latestVersion, Calendar lastModificationDate, String name, String parentId,
+      String versionSeriesId, String contentStreamMimeType, String changeToken, String targetId,
+      String versionSeriesCheckedOutId, String sourceId)
+   {
+      this.baseTypeId = baseTypeId;
+      this.createdBy = createdBy;
+      this.creationDate = creationDate;
+      this.id = id;
+      this.latestMajorVersion = latestMajorVersion;
+      this.latestVersion = latestVersion;
+      this.lastModificationDate = lastModificationDate;
+      this.name = name;
+      this.parentId = parentId;
+      this.versionSeriesId = versionSeriesId;
+      this.contentStreamMimeType = contentStreamMimeType;
+      this.changeToken = changeToken;
+      this.targetId = targetId;
+      this.versionSeriesCheckedOutId = versionSeriesCheckedOutId;
+      this.sourceId = sourceId;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
    public String getBaseTypeId()
    {
       return baseTypeId;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public String getChangeToken()
    {
       return changeToken;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public String getContentStreamMimeType()
    {
       return contentStreamMimeType;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public String getCreatedBy()
    {
       return createdBy;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public Calendar getCreationDate()
    {
       return creationDate;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public String getId()
    {
       return id;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public Calendar getLastModificationDate()
    {
       return lastModificationDate;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public String getName()
    {
       return name;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public String getParentId()
    {
       return parentId;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public String getSourceId()
    {
       return sourceId;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public String getTargetId()
    {
       return targetId;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public String getVersionSeriesCheckedOutId()
    {
       return versionSeriesCheckedOutId;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public String getVersionSeriesId()
    {
       return versionSeriesId;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public Boolean isLatestMajorVersion()
    {
       return latestMajorVersion;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public Boolean isLatestVersion()
    {
       return latestVersion;
    }
 
+   // --- Setters
+   
    public void setBaseTypeId(String baseTypeId)
    {
       this.baseTypeId = baseTypeId;

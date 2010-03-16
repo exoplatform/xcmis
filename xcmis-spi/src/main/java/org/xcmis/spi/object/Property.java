@@ -24,7 +24,10 @@ import org.xcmis.spi.PropertyType;
 import java.util.List;
 
 /**
- * CMIS property.
+ * CMIS property. Each property potential multi-valued. Single-valued property
+ * contain just one item in list. Method {@link #getValues()} never return
+ * <code>null</code>. Even if property has not value empty list must be
+ * returned.
  * 
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $

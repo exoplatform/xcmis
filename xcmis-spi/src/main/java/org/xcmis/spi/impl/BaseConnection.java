@@ -101,7 +101,7 @@ public abstract class BaseConnection implements Connection
     * {@inheritDoc}
     */
    public void addObjectToFolder(String objectId, String folderId, boolean allVersions) throws ObjectNotFoundException,
-      InvalidArgumentException, ConstraintException, CmisRuntimeException
+      InvalidArgumentException, ConstraintException
    {
       checkConnection();
 
@@ -123,8 +123,8 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public void removeObjectFromFolder(String objectId, String folderId) throws ObjectNotFoundException,
-      CmisRuntimeException
+   public void removeObjectFromFolder(String objectId, String folderId) throws ObjectNotFoundException
+
    {
       checkConnection();
 
@@ -132,12 +132,23 @@ public abstract class BaseConnection implements Connection
          throw new NotSupportedException("Unfiling is not supported.");
 
       ObjectData object = storage.getObject(objectId);
-      ObjectData folder = storage.getObject(folderId);
+      if (folderId != null)
+      {
+         ObjectData folder = storage.getObject(folderId);
 
-      if (folder.getBaseType() != BaseType.FOLDER)
-         throw new InvalidArgumentException("Object " + folderId + " is not a Folder object.");
+         if (folder.getBaseType() != BaseType.FOLDER)
+            throw new InvalidArgumentException("Object " + folderId + " is not a Folder object.");
 
-      ((FolderData)folder).removeObject(object);
+         ((FolderData)folder).removeObject(object);
+      }
+      else
+      {
+         // If folder id is not specified the remove object from all folders.
+         Collection<FolderData> parents = object.getParents();
+
+         for (FolderData folder : parents)
+            folder.removeObject(object);
+      }
    }
 
    // ------- ACL Services -------
@@ -507,15 +518,16 @@ public abstract class BaseConnection implements Connection
       if (deleteAllVersions == null)
          deleteAllVersions = true; // Default.
 
-      if (object.getBaseType() == BaseType.FOLDER)
-      {
-         if (((FolderData)object).isRoot())
-            throw new ConstraintException("Root folder can't be removed.");
+      //      if (object.getBaseType() == BaseType.FOLDER)
+      //      {
+      //         if (((FolderData)object).isRoot())
+      //            throw new ConstraintException("Root folder can't be removed.");
+      //
+      //         if (((FolderData)object).hasChildren())
+      //            throw new ConstraintException("Failed delete object. Object " + objectId
+      //               + " is Folder and contains one or more objects.");
+      //      }
 
-         if (((FolderData)object).hasChildren())
-            throw new ConstraintException("Failed delete object. Object " + objectId
-               + " is Folder and contains one or more objects.");
-      }
       storage.deleteObject(object, deleteAllVersions);
    }
 
@@ -940,7 +952,7 @@ public abstract class BaseConnection implements Connection
    public ItemsList<CmisObject> getChildren(String folderId, boolean includeAllowableActions,
       IncludeRelationships includeRelationships, boolean includePathSegments, boolean includeObjectInfo,
       String propertyFilter, String renditionFilter, String orderBy, int maxItems, int skipCount)
-      throws ObjectNotFoundException, InvalidArgumentException, FilterNotValidException, CmisRuntimeException
+      throws ObjectNotFoundException, InvalidArgumentException, FilterNotValidException
    {
       checkConnection();
 
@@ -991,7 +1003,7 @@ public abstract class BaseConnection implements Connection
     * {@inheritDoc}
     */
    public CmisObject getFolderParent(String folderId, boolean includeObjectInfo, String propertyFilter)
-      throws ObjectNotFoundException, InvalidArgumentException, FilterNotValidException, CmisRuntimeException
+      throws ObjectNotFoundException, InvalidArgumentException, FilterNotValidException
    {
       checkConnection();
 
@@ -1019,7 +1031,7 @@ public abstract class BaseConnection implements Connection
    public List<ObjectParent> getObjectParents(String objectId, boolean includeAllowableActions,
       IncludeRelationships includeRelationships, boolean includeRelativePathSegment, boolean includeObjectInfo,
       String propertyFilter, String renditionFilter) throws ObjectNotFoundException, ConstraintException,
-      FilterNotValidException, CmisRuntimeException
+      FilterNotValidException
    {
       checkConnection();
 
@@ -1061,7 +1073,7 @@ public abstract class BaseConnection implements Connection
    public List<ItemsTree<CmisObject>> getDescendants(String folderId, int depth, boolean includeAllowableActions,
       IncludeRelationships includeRelationships, boolean includePathSegments, boolean includeObjectInfo,
       String propertyFilter, String renditionFilter) throws ObjectNotFoundException, InvalidArgumentException,
-      FilterNotValidException, CmisRuntimeException
+      FilterNotValidException
    {
       return getTree(folderId, depth, null, includeAllowableActions, includeRelationships, includePathSegments,
          includeObjectInfo, propertyFilter, renditionFilter);
@@ -1073,7 +1085,7 @@ public abstract class BaseConnection implements Connection
    public List<ItemsTree<CmisObject>> getFolderTree(String folderId, int depth, boolean includeAllowableActions,
       IncludeRelationships includeRelationships, boolean includePathSegments, boolean includeObjectInfo,
       String propertyFilter, String renditionFilter) throws ObjectNotFoundException, InvalidArgumentException,
-      FilterNotValidException, CmisRuntimeException
+      FilterNotValidException
    {
       return getTree(folderId, depth, BaseType.FOLDER, includeAllowableActions, includeRelationships,
          includePathSegments, includeObjectInfo, propertyFilter, renditionFilter);
@@ -1082,7 +1094,7 @@ public abstract class BaseConnection implements Connection
    protected List<ItemsTree<CmisObject>> getTree(String folderId, int depth, BaseType typeFilter,
       boolean includeAllowableActions, IncludeRelationships includeRelationships, boolean includePathSegments,
       boolean includeObjectInfo, String propertyFilter, String renditionFilter) throws ObjectNotFoundException,
-      InvalidArgumentException, FilterNotValidException, CmisRuntimeException
+      InvalidArgumentException, FilterNotValidException
    {
       checkConnection();
 
@@ -1124,7 +1136,7 @@ public abstract class BaseConnection implements Connection
    public ItemsList<CmisObject> getCheckedOutDocs(String folderId, boolean includeAllowableActions,
       IncludeRelationships includeRelationships, boolean includeObjectInfo, String propertyFilter,
       String renditionFilter, String orderBy, int maxItems, int skipCount) throws ObjectNotFoundException,
-      InvalidArgumentException, FilterNotValidException, CmisRuntimeException
+      InvalidArgumentException, FilterNotValidException
    {
       checkConnection();
 
@@ -1164,9 +1176,11 @@ public abstract class BaseConnection implements Connection
       for (int count = 0; iterator.hasNext() && (maxItems < 0 || count < maxItems); count++)
       {
          ObjectData pwcData = iterator.next();
+
          CmisObject pwc =
             getCmisObject(pwcData, includeAllowableActions, includeRelationships, false, false, includeObjectInfo,
                parsedPropertyFilter, parsedRenditionFilter);
+
          checkedout.getItems().add(pwc);
       }
 

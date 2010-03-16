@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Base implementation of CMIS property.
+ * 
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */
@@ -102,6 +104,7 @@ public abstract class BaseProperty<T> implements Property<T>
 
    /**
     * Setter for displayName.
+    * 
     * @param displayName
     */
    public void setDisplayName(String displayName)
@@ -111,6 +114,7 @@ public abstract class BaseProperty<T> implements Property<T>
 
    /**
     * Setter for id.
+    * 
     * @param id
     */
    public void setId(String id)
@@ -120,6 +124,7 @@ public abstract class BaseProperty<T> implements Property<T>
 
    /**
     * Setter for localName.
+    * 
     * @param localName
     */
    public void setLocalName(String localName)
@@ -129,6 +134,7 @@ public abstract class BaseProperty<T> implements Property<T>
 
    /**
     * Setter for queryName.
+    * 
     * @param queryName
     */
    public void setQueryName(String queryName)
