@@ -20,22 +20,17 @@
 package org.xcmis.spi;
 
 /**
+ * Holder for change log token. It must be used for passing in method
+ * {@link Connection#getContentChanges(ChangeLogTokenHolder, boolean, String, boolean, boolean, int)}
+ * change log token from which new set of changes event should be started. Also
+ * this holder will kept change log token of latest retrieved change event. This
+ * token will be passed to caller of
+ * {@link Connection#getContentChanges(ChangeLogTokenHolder, boolean, String, boolean, boolean, int)}
+ * . After that caller can use this token to get next set of change event.
+ * 
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: ChangeLogTokenHolder.java 316 2010-03-09 15:20:28Z andrew00x $
  */
-public class ChangeLogTokenHolder
+public final class ChangeLogTokenHolder extends AbstractHolder<String>
 {
-
-   private String token;
-
-   public String getToken()
-   {
-      return token;
-   }
-
-   public void setToken(String token)
-   {
-      this.token = token;
-   }
-   
 }

@@ -27,7 +27,8 @@ import org.xcmis.spi.AllowableActions;
 import org.xcmis.spi.BaseType;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.CapabilityACL;
-import org.xcmis.spi.ChangeLogTokenHolder;
+import org.xcmis.spi.ChangeLogTokenHolder; //import org.xcmis.spi.ChangeTokenHolder;
+import org.xcmis.spi.ChangeTokenHolder;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
@@ -41,8 +42,10 @@ import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.NotSupportedException;
 import org.xcmis.spi.ObjectNotFoundException;
+import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.RelationshipDirection;
 import org.xcmis.spi.Rendition;
+import org.xcmis.spi.RenditionFilter;
 import org.xcmis.spi.Storage;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.StreamNotSupportedException;
@@ -60,7 +63,7 @@ import org.xcmis.spi.data.PolicyData;
 import org.xcmis.spi.data.RelationshipData;
 import org.xcmis.spi.object.CmisObject;
 import org.xcmis.spi.object.ObjectParent;
-import org.xcmis.spi.object.Properties;
+import org.xcmis.spi.object.Property;
 import org.xcmis.spi.object.impl.DecimalProperty;
 import org.xcmis.spi.object.impl.ObjectParentImpl;
 import org.xcmis.spi.query.Query;
@@ -73,6 +76,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
@@ -194,8 +198,8 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public List<CmisObject> getAppliedPolicies(String objectId, String propertyFilter) throws ObjectNotFoundException,
-      FilterNotValidException, CmisRuntimeException
+   public List<CmisObject> getAppliedPolicies(String objectId, boolean includeObjectInfo, String propertyFilter)
+      throws ObjectNotFoundException, FilterNotValidException, CmisRuntimeException
    {
       checkConnection();
 
@@ -207,8 +211,8 @@ public abstract class BaseConnection implements Connection
       for (ObjectData policy : policies)
       {
          CmisObject cmisPolicy =
-            getCmisObject(policy, false, IncludeRelationships.NONE, false, false, parsedPropertyFilter,
-               RenditionFilter.NONE);
+            getCmisObject(policy, false, IncludeRelationships.NONE, false, false, includeObjectInfo,
+               parsedPropertyFilter, RenditionFilter.NONE);
          policyIDs.add(cmisPolicy);
       }
       return policyIDs;
@@ -238,18 +242,21 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public CmisObject createDocument(String folderId, Properties propertyData, ContentStream content,
+   public String createDocument(String folderId, Map<String, Property<?>> properties, ContentStream content,
       List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, List<String> policies,
       VersioningState versioningState) throws ObjectNotFoundException, ConstraintException, InvalidArgumentException,
       StreamNotSupportedException, NameConstraintViolationException, IOException, StorageException,
       CmisRuntimeException
    {
-      if (propertyData == null)
+      if (properties == null)
          throw new InvalidArgumentException("Properties may not by null.");
 
       checkConnection();
 
-      String typeId = propertyData.getId(CMIS.OBJECT_TYPE_ID);
+      String typeId = null;
+      Property<?> typeProperty = properties.get(CMIS.OBJECT_TYPE_ID);
+      if (typeProperty != null && typeProperty.getValues().size() > 0)
+         typeId = (String)typeProperty.getValues().get(0);
       if (typeId == null)
          throw new InvalidArgumentException("Type is not specified.");
 
@@ -270,7 +277,7 @@ public abstract class BaseConnection implements Connection
 
       DocumentData newDocument = storage.createDocument((FolderData)folder, typeId, versioningState);
 
-      newDocument.getProperties().setProperties(propertyData.getAll());
+      newDocument.getProperties().setValues(properties);
 
       newDocument.setContentStream(content);
 
@@ -282,17 +289,13 @@ public abstract class BaseConnection implements Connection
 
       storage.saveObject(newDocument);
 
-      CmisObject cmis =
-         getCmisObject(newDocument, false, IncludeRelationships.NONE, false, true, PropertyFilter.ALL,
-            RenditionFilter.NONE);
-
-      return cmis;
+      return newDocument.getObjectId();
    }
 
    /**
     * {@inheritDoc}
     */
-   public CmisObject createDocumentFromSource(String sourceId, String folderId, Properties propertyData,
+   public String createDocumentFromSource(String sourceId, String folderId, Map<String, Property<?>> properties,
       List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, List<String> policies,
       VersioningState versioningState) throws ObjectNotFoundException, ConstraintException, InvalidArgumentException,
       NameConstraintViolationException, StorageException, CmisRuntimeException
@@ -319,8 +322,8 @@ public abstract class BaseConnection implements Connection
       DocumentData newDocument =
          storage.createCopyOfDocument((DocumentData)source, (FolderData)folder, versioningState);
 
-      if (propertyData != null)
-         newDocument.getProperties().setProperties(propertyData.getAll());
+      if (properties != null)
+         newDocument.getProperties().setValues(properties);
 
       if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
          applyACL(newDocument, addACL, removeACL);
@@ -330,26 +333,25 @@ public abstract class BaseConnection implements Connection
 
       storage.saveObject(newDocument);
 
-      CmisObject cmis =
-         getCmisObject(newDocument, false, IncludeRelationships.NONE, false, true, PropertyFilter.ALL,
-            RenditionFilter.NONE);
-
-      return cmis;
+      return newDocument.getObjectId();
    }
 
    /**
     * {@inheritDoc}
     */
-   public CmisObject createFolder(String folderId, Properties propertiesData, List<AccessControlEntry> addACL,
+   public String createFolder(String folderId, Map<String, Property<?>> properties, List<AccessControlEntry> addACL,
       List<AccessControlEntry> removeACL, List<String> policies) throws ObjectNotFoundException, ConstraintException,
       InvalidArgumentException, NameConstraintViolationException, StorageException, CmisRuntimeException
    {
-      if (propertiesData == null)
+      if (properties == null)
          throw new InvalidArgumentException("Properties may not by null.");
 
       checkConnection();
 
-      String typeId = propertiesData.getId(CMIS.OBJECT_TYPE_ID);
+      String typeId = null;
+      Property<?> typeProperty = properties.get(CMIS.OBJECT_TYPE_ID);
+      if (typeProperty != null && typeProperty.getValues().size() > 0)
+         typeId = (String)typeProperty.getValues().get(0);
       if (typeId == null)
          throw new InvalidArgumentException("Type is not specified.");
 
@@ -362,7 +364,7 @@ public abstract class BaseConnection implements Connection
 
       ObjectData newFolder = storage.createFolder((FolderData)folder, typeId);
 
-      newFolder.getProperties().setProperties(propertiesData.getAll());
+      newFolder.getProperties().setValues(properties);
 
       if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
          applyACL(newFolder, addACL, removeACL);
@@ -372,26 +374,25 @@ public abstract class BaseConnection implements Connection
 
       storage.saveObject(newFolder);
 
-      CmisObject cmis =
-         getCmisObject(newFolder, false, IncludeRelationships.NONE, false, true, PropertyFilter.ALL,
-            RenditionFilter.NONE);
-
-      return cmis;
+      return newFolder.getObjectId();
    }
 
    /**
     * {@inheritDoc}
     */
-   public CmisObject createPolicy(String folderId, Properties propertyData, List<AccessControlEntry> addACL,
+   public String createPolicy(String folderId, Map<String, Property<?>> properties, List<AccessControlEntry> addACL,
       List<AccessControlEntry> removeACL, List<String> policies) throws ObjectNotFoundException, ConstraintException,
       InvalidArgumentException, NameConstraintViolationException, StorageException, CmisRuntimeException
    {
-      if (propertyData == null)
+      if (properties == null)
          throw new InvalidArgumentException("Properties may not by null.");
 
       checkConnection();
 
-      String typeId = propertyData.getId(CMIS.OBJECT_TYPE_ID);
+      String typeId = null;
+      Property<?> typeProperty = properties.get(CMIS.OBJECT_TYPE_ID);
+      if (typeProperty != null && typeProperty.getValues().size() > 0)
+         typeId = (String)typeProperty.getValues().get(0);
       if (typeId == null)
          throw new InvalidArgumentException("Type is not specified.");
 
@@ -409,7 +410,7 @@ public abstract class BaseConnection implements Connection
 
       ObjectData newPolicy = storage.createPolicy((FolderData)folder, typeId);
 
-      newPolicy.getProperties().setProperties(propertyData.getAll());
+      newPolicy.getProperties().setValues(properties);
 
       if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
          applyACL(newPolicy, addACL, removeACL);
@@ -419,41 +420,46 @@ public abstract class BaseConnection implements Connection
 
       storage.saveObject(newPolicy);
 
-      CmisObject cmis =
-         getCmisObject(newPolicy, false, IncludeRelationships.NONE, false, false, PropertyFilter.ALL,
-            RenditionFilter.NONE);
-
-      return cmis;
+      return newPolicy.getObjectId();
    }
 
    /**
     * {@inheritDoc}
     */
-   public CmisObject createRelationship(Properties propertyData, List<AccessControlEntry> addACL,
+   public String createRelationship(Map<String, Property<?>> properties, List<AccessControlEntry> addACL,
       List<AccessControlEntry> removeACL, List<String> policies) throws ObjectNotFoundException, ConstraintException,
       NameConstraintViolationException, StorageException, CmisRuntimeException
    {
-      if (propertyData == null)
+      if (properties == null)
          throw new InvalidArgumentException("Properties may not by null.");
 
       checkConnection();
 
-      String typeId = propertyData.getId(CMIS.OBJECT_TYPE_ID);
+      String typeId = null;
+      Property<?> typeProperty = properties.get(CMIS.OBJECT_TYPE_ID);
+      if (typeProperty != null && typeProperty.getValues().size() > 0)
+         typeId = (String)typeProperty.getValues().get(0);
       if (typeId == null)
          throw new InvalidArgumentException("Type is not specified.");
 
-      String sourceId = propertyData.getId(CMIS.SOURCE_ID);
+      String sourceId = null;
+      Property<?> sourceProperty = properties.get(CMIS.SOURCE_ID);
+      if (sourceProperty != null && sourceProperty.getValues().size() > 0)
+         sourceId = (String)sourceProperty.getValues().get(0);
       if (sourceId == null)
          throw new InvalidArgumentException("Required property 'cmis:sourceId' is not specified.");
 
-      String targetId = propertyData.getId(CMIS.TARGET_ID);
+      String targetId = null;
+      Property<?> targetProperty = properties.get(CMIS.TARGET_ID);
+      if (targetProperty != null && targetProperty.getValues().size() > 0)
+         targetId = (String)targetProperty.getValues().get(0);
       if (targetId == null)
          throw new InvalidArgumentException("Required property 'cmis:targetId' is not specified.");
 
       ObjectData newRelationship =
          storage.createRelationship(storage.getObject(sourceId), storage.getObject(targetId), typeId);
 
-      newRelationship.getProperties().setProperties(propertyData.getAll());
+      newRelationship.getProperties().setValues(properties);
 
       if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
          applyACL(newRelationship, addACL, removeACL);
@@ -463,32 +469,7 @@ public abstract class BaseConnection implements Connection
 
       storage.saveObject(newRelationship);
 
-      CmisObject cmisRelationship =
-         getCmisObject(newRelationship, false, IncludeRelationships.NONE, false, false, PropertyFilter.ALL,
-            RenditionFilter.NONE);
-
-      return cmisRelationship;
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public void deleteContentStream(String documentId, String changeToken) throws ObjectNotFoundException,
-      ConstraintException, UpdateConflictException, StorageException, CmisRuntimeException
-   {
-      checkConnection();
-
-      ObjectData document = storage.getObject(documentId);
-
-      if (document.getBaseType() != BaseType.DOCUMENT)
-         throw new InvalidArgumentException("Object " + documentId + " is not Document.");
-
-      // Validate change token, object may be already updated.
-      validateChangeToken(document, changeToken);
-
-      ((DocumentData)document).setContentStream(null);
-
-      storage.saveObject(document);
+      return newRelationship.getObjectId();
    }
 
    /**
@@ -585,8 +566,9 @@ public abstract class BaseConnection implements Connection
     * {@inheritDoc}
     */
    public CmisObject getObject(String objectId, boolean includeAllowableActions,
-      IncludeRelationships includeRelationships, boolean includePolicyIDs, boolean includeAcl, String propertyFilter,
-      String renditionFilter) throws ObjectNotFoundException, FilterNotValidException, CmisRuntimeException
+      IncludeRelationships includeRelationships, boolean includePolicyIDs, boolean includeAcl,
+      boolean includeObjectInfo, String propertyFilter, String renditionFilter) throws ObjectNotFoundException,
+      FilterNotValidException, CmisRuntimeException
    {
       checkConnection();
 
@@ -598,7 +580,7 @@ public abstract class BaseConnection implements Connection
       ObjectData objectData = storage.getObject(objectId);
       CmisObject cmisObject =
          getCmisObject(objectData, includeAllowableActions, includeRelationships, includePolicyIDs, includeAcl,
-            parsedPropertyFilter, parsedRenditionFilter);
+            includeObjectInfo, parsedPropertyFilter, parsedRenditionFilter);
       return cmisObject;
    }
 
@@ -606,8 +588,9 @@ public abstract class BaseConnection implements Connection
     * {@inheritDoc}
     */
    public CmisObject getObjectByPath(String path, boolean includeAllowableActions,
-      IncludeRelationships includeRelationships, boolean includePolicyIDs, boolean includeAcl, String propertyFilter,
-      String renditionFilter) throws ObjectNotFoundException, FilterNotValidException, CmisRuntimeException
+      IncludeRelationships includeRelationships, boolean includePolicyIDs, boolean includeAcl,
+      boolean includeObjectInfo, String propertyFilter, String renditionFilter) throws ObjectNotFoundException,
+      FilterNotValidException, CmisRuntimeException
    {
       checkConnection();
 
@@ -621,7 +604,7 @@ public abstract class BaseConnection implements Connection
 
       CmisObject cmis =
          getCmisObject(object, includeAllowableActions, includeRelationships, includePolicyIDs, includeAcl,
-            parsedPropertyFilter, parsedRenditionFilter);
+            includeObjectInfo, parsedPropertyFilter, parsedRenditionFilter);
 
       return cmis;
    }
@@ -629,14 +612,19 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public Properties getProperties(String objectId, String propertyFilter) throws ObjectNotFoundException,
-      FilterNotValidException, CmisRuntimeException
+   public CmisObject getProperties(String objectId, boolean includeObjectInfo, String propertyFilter)
+      throws ObjectNotFoundException, FilterNotValidException, CmisRuntimeException
    {
       checkConnection();
 
       ObjectData object = storage.getObject(objectId);
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
-      return object.getProperties().getSubset(parsedPropertyFilter);
+
+      CmisObject cmis =
+         getCmisObject(object, false, IncludeRelationships.NONE, false, false, includeObjectInfo, parsedPropertyFilter,
+            RenditionFilter.NONE);
+
+      return cmis;
    }
 
    /**
@@ -644,7 +632,7 @@ public abstract class BaseConnection implements Connection
     * 
     * @return
     */
-   public CmisObject moveObject(String objectId, String targetFolderId, String sourceFolderId)
+   public String moveObject(String objectId, String targetFolderId, String sourceFolderId)
       throws ObjectNotFoundException, ConstraintException, InvalidArgumentException, UpdateConflictException,
       StorageException, CmisRuntimeException
    {
@@ -662,20 +650,49 @@ public abstract class BaseConnection implements Connection
 
       ObjectData movedObject = storage.moveObject(object, (FolderData)target, (FolderData)source);
 
-      CmisObject cmis =
-         getCmisObject(movedObject, false, IncludeRelationships.NONE, false, false, PropertyFilter.ALL,
-            RenditionFilter.NONE);
-
-      return cmis;
+      return movedObject.getObjectId();
    }
 
    /**
     * {@inheritDoc}
     */
-   public void setContentStream(String documentId, ContentStream content, String changeToken, boolean overwriteFlag)
-      throws ObjectNotFoundException, ContentAlreadyExistsException, StreamNotSupportedException,
-      UpdateConflictException, IOException, StorageException, CmisRuntimeException
+   public String deleteContentStream(String documentId, ChangeTokenHolder changeTokenHolder)
+      throws ObjectNotFoundException, ConstraintException, UpdateConflictException, StorageException,
+      CmisRuntimeException
    {
+      if (changeTokenHolder == null)
+         throw new InvalidArgumentException("changeTokenHolder may not by null.");
+
+      checkConnection();
+
+      ObjectData document = storage.getObject(documentId);
+
+      if (document.getBaseType() != BaseType.DOCUMENT)
+         throw new InvalidArgumentException("Object " + documentId + " is not Document.");
+
+      // Validate change token, object may be already updated.
+      validateChangeToken(document, changeTokenHolder.getValue());
+
+      ((DocumentData)document).setContentStream(null);
+
+      storage.saveObject(document);
+
+      String changeToken = document.getProperties().getString(CMIS.CHANGE_TOKEN);
+      changeTokenHolder.setValue(changeToken);
+
+      return document.getObjectId();
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public String setContentStream(String documentId, ContentStream content, ChangeTokenHolder changeTokenHolder,
+      boolean overwriteFlag) throws ObjectNotFoundException, ContentAlreadyExistsException,
+      StreamNotSupportedException, UpdateConflictException, IOException, StorageException, CmisRuntimeException
+   {
+      if (changeTokenHolder == null)
+         throw new InvalidArgumentException("changeTokenHolder may not by null.");
+
       checkConnection();
 
       ObjectData document = storage.getObject(documentId);
@@ -687,33 +704,46 @@ public abstract class BaseConnection implements Connection
          throw new ContentAlreadyExistsException("Document already has content stream and 'overwriteFlag' is false.");
 
       // Validate change token, object may be already updated.
-      validateChangeToken(document, changeToken);
+      validateChangeToken(document, changeTokenHolder.getValue());
 
       ((DocumentData)document).setContentStream(null);
 
       storage.saveObject(document);
+
+      String changeToken = document.getProperties().getString(CMIS.CHANGE_TOKEN);
+      changeTokenHolder.setValue(changeToken);
+
+      return document.getObjectId();
    }
 
    /**
     * {@inheritDoc}
     */
-   public CmisObject updateProperties(String objectId, String changeToken, Properties propertiesData)
-      throws ObjectNotFoundException, ConstraintException, NameConstraintViolationException, UpdateConflictException,
-      StorageException, CmisRuntimeException
+   public String updateProperties(String objectId, ChangeTokenHolder changeTokenHolder,
+      Map<String, Property<?>> properties) throws ObjectNotFoundException, ConstraintException,
+      NameConstraintViolationException, UpdateConflictException, StorageException, CmisRuntimeException
    {
+      if (properties == null)
+         throw new InvalidArgumentException("Properties may not by null.");
+
+      if (changeTokenHolder == null)
+         throw new InvalidArgumentException("changeTokenHolder may not by null.");
+
       checkConnection();
 
       ObjectData object = storage.getObject(objectId);
 
       // Validate change token, object may be already updated.
-      validateChangeToken(object, changeToken);
+      validateChangeToken(object, changeTokenHolder.getValue());
 
-      object.getProperties().setProperties(propertiesData.getAll());
+      object.getProperties().setValues(properties);
 
       storage.saveObject(object);
 
-      return getCmisObject(object, false, IncludeRelationships.NONE, false, false, PropertyFilter.ALL,
-         RenditionFilter.NONE);
+      String changeToken = object.getProperties().getString(CMIS.CHANGE_TOKEN);
+      changeTokenHolder.setValue(changeToken);
+
+      return object.getObjectId();
    }
 
    /**
@@ -759,8 +789,9 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public List<CmisObject> getAllVersions(String versionSeriesId, boolean includeAllowableActions, String propertyFilter)
-      throws ObjectNotFoundException, FilterNotValidException, CmisRuntimeException
+   public List<CmisObject> getAllVersions(String versionSeriesId, boolean includeAllowableActions,
+      boolean includeObjectInfo, String propertyFilter) throws ObjectNotFoundException, FilterNotValidException,
+      CmisRuntimeException
    {
       checkConnection();
 
@@ -772,7 +803,7 @@ public abstract class BaseConnection implements Connection
       for (ObjectData objectData : versions)
       {
          cmisVersions.add(getCmisObject(objectData, includeAllowableActions, IncludeRelationships.NONE, false, false,
-            parsedPropertyFilter, RenditionFilter.NONE));
+            includeObjectInfo, parsedPropertyFilter, RenditionFilter.NONE));
       }
 
       return cmisVersions;
@@ -798,7 +829,7 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public CmisObject checkin(String documentId, boolean major, Properties propertyData, ContentStream content,
+   public String checkin(String documentId, boolean major, Map<String, Property<?>> properties, ContentStream content,
       String checkinComment, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, List<String> policies)
       throws ConstraintException, UpdateConflictException, StreamNotSupportedException, IOException, StorageException
    {
@@ -812,8 +843,8 @@ public abstract class BaseConnection implements Connection
       if (!((DocumentData)pwc).isPWC())
          throw new VersioningException("Object " + documentId + " is not Private Working Copy.");
 
-      if (propertyData != null)
-         pwc.getProperties().setProperties(propertyData.getAll());
+      if (properties != null)
+         pwc.getProperties().setValues(properties);
 
       if (content != null)
          ((DocumentData)pwc).setContentStream(content);
@@ -826,18 +857,14 @@ public abstract class BaseConnection implements Connection
 
       DocumentData version = ((DocumentData)pwc).checkin(major, checkinComment);
 
-      CmisObject cmis =
-         getCmisObject(version, false, IncludeRelationships.NONE, false, false, PropertyFilter.ALL,
-            RenditionFilter.NONE);
-
-      return cmis;
+      return version.getObjectId();
    }
 
    /**
     * {@inheritDoc}
     */
-   public CmisObject checkout(String documentId) throws ConstraintException, UpdateConflictException,
-      VersioningException, StorageException, CmisRuntimeException
+   public String checkout(String documentId) throws ConstraintException, UpdateConflictException, VersioningException,
+      StorageException, CmisRuntimeException
    {
       checkConnection();
 
@@ -848,18 +875,16 @@ public abstract class BaseConnection implements Connection
 
       DocumentData pwc = ((DocumentData)document).checkout();
 
-      CmisObject cmis =
-         getCmisObject(pwc, false, IncludeRelationships.NONE, false, false, PropertyFilter.ALL, RenditionFilter.NONE);
-
-      return cmis;
+      return pwc.getObjectId();
    }
 
    /**
     * {@inheritDoc}
     */
    public CmisObject getObjectOfLatestVersion(String versionSeriesId, boolean major, boolean includeAllowableActions,
-      IncludeRelationships includeRelationships, boolean includePolicyIDs, boolean includeAcl, String propertyFilter,
-      String renditionFilter) throws ObjectNotFoundException, FilterNotValidException, CmisRuntimeException
+      IncludeRelationships includeRelationships, boolean includePolicyIDs, boolean includeAcl,
+      boolean includeObjectInfo, String propertyFilter, String renditionFilter) throws ObjectNotFoundException,
+      FilterNotValidException, CmisRuntimeException
    {
       checkConnection();
 
@@ -874,7 +899,7 @@ public abstract class BaseConnection implements Connection
       // Even for not-versionable documents version series contains exactly one version of document.
       if (versions.size() == 1)
          return getCmisObject(versions.iterator().next(), includeAllowableActions, includeRelationships, false, false,
-            parsedPropertyFilter, parsedRenditionFilter);
+            includeObjectInfo, parsedPropertyFilter, parsedRenditionFilter);
 
       // Storage#getAllVersions(versionSeriesId) return sorted by
       // 'cmis:creationDate' descending. Latest version is version with latest
@@ -883,14 +908,14 @@ public abstract class BaseConnection implements Connection
       Collections.sort(v, CmisUtils.versionComparator);
 
       if (!major) // If not need major version that simply take first in list. 
-         return getCmisObject(v.get(0), includeAllowableActions, includeRelationships, false, false,
+         return getCmisObject(v.get(0), includeAllowableActions, includeRelationships, false, false, includeObjectInfo,
             parsedPropertyFilter, parsedRenditionFilter);
 
       for (DocumentData document : v)
       {
          if (document.isMajorVersion())
             return getCmisObject(document, includeAllowableActions, includeRelationships, false, false,
-               parsedPropertyFilter, parsedRenditionFilter);
+               includeObjectInfo, parsedPropertyFilter, parsedRenditionFilter);
       }
 
       // May happen only if major version requested but there is no any major version.
@@ -900,11 +925,11 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public Properties getPropertiesOfLatestVersion(String versionSeriesId, boolean major, String propertyFilter)
-      throws FilterNotValidException, ObjectNotFoundException, CmisRuntimeException
+   public CmisObject getPropertiesOfLatestVersion(String versionSeriesId, boolean major, boolean includeObjectInfo,
+      String propertyFilter) throws FilterNotValidException, ObjectNotFoundException, CmisRuntimeException
    {
-      return getObjectOfLatestVersion(versionSeriesId, major, false, null, false, false, propertyFilter,
-         RenditionFilter.NONE_FILTER).getProperties();
+      return getObjectOfLatestVersion(versionSeriesId, major, false, null, false, false, includeObjectInfo,
+         propertyFilter, RenditionFilter.NONE_FILTER);
    }
 
    // ------- Navigation Services -------
@@ -913,9 +938,9 @@ public abstract class BaseConnection implements Connection
     * {@inheritDoc}
     */
    public ItemsList<CmisObject> getChildren(String folderId, boolean includeAllowableActions,
-      IncludeRelationships includeRelationships, boolean includePathSegments, String propertyFilter,
-      String renditionFilter, String orderBy, int maxItems, int skipCount) throws ObjectNotFoundException,
-      InvalidArgumentException, FilterNotValidException, CmisRuntimeException
+      IncludeRelationships includeRelationships, boolean includePathSegments, boolean includeObjectInfo,
+      String propertyFilter, String renditionFilter, String orderBy, int maxItems, int skipCount)
+      throws ObjectNotFoundException, InvalidArgumentException, FilterNotValidException, CmisRuntimeException
    {
       checkConnection();
 
@@ -949,8 +974,8 @@ public abstract class BaseConnection implements Connection
          ObjectData chilData = iterator.next();
 
          CmisObject child =
-            getCmisObject(chilData, includeAllowableActions, includeRelationships, false, false, parsedPropertyFilter,
-               parsedRenditionFilter);
+            getCmisObject(chilData, includeAllowableActions, includeRelationships, false, false, includeObjectInfo,
+               parsedPropertyFilter, parsedRenditionFilter);
 
          cmisChildren.getItems().add(child);
       }
@@ -965,8 +990,8 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public CmisObject getFolderParent(String folderId, String propertyFilter) throws ObjectNotFoundException,
-      InvalidArgumentException, FilterNotValidException, CmisRuntimeException
+   public CmisObject getFolderParent(String folderId, boolean includeObjectInfo, String propertyFilter)
+      throws ObjectNotFoundException, InvalidArgumentException, FilterNotValidException, CmisRuntimeException
    {
       checkConnection();
 
@@ -982,7 +1007,7 @@ public abstract class BaseConnection implements Connection
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
 
       CmisObject cmisParent =
-         getCmisObject(parent, false, IncludeRelationships.NONE, false, false, parsedPropertyFilter,
+         getCmisObject(parent, false, IncludeRelationships.NONE, false, false, includeObjectInfo, parsedPropertyFilter,
             RenditionFilter.NONE);
 
       return cmisParent;
@@ -992,9 +1017,9 @@ public abstract class BaseConnection implements Connection
     * {@inheritDoc}
     */
    public List<ObjectParent> getObjectParents(String objectId, boolean includeAllowableActions,
-      IncludeRelationships includeRelationships, boolean includeRelativePathSegment, String propertyFilter,
-      String renditionFilter) throws ObjectNotFoundException, ConstraintException, FilterNotValidException,
-      CmisRuntimeException
+      IncludeRelationships includeRelationships, boolean includeRelativePathSegment, boolean includeObjectInfo,
+      String propertyFilter, String renditionFilter) throws ObjectNotFoundException, ConstraintException,
+      FilterNotValidException, CmisRuntimeException
    {
       checkConnection();
 
@@ -1018,8 +1043,8 @@ public abstract class BaseConnection implements Connection
       for (ObjectData parent : parents)
       {
          CmisObject cmisParent =
-            getCmisObject(parent, includeAllowableActions, includeRelationships, false, false, parsedPropertyFilter,
-               parsedRenditionFilter);
+            getCmisObject(parent, includeAllowableActions, includeRelationships, false, false, includeObjectInfo,
+               parsedPropertyFilter, parsedRenditionFilter);
 
          ObjectParent parentType =
             new ObjectParentImpl(cmisParent, includeRelativePathSegment ? object.getName() : null);
@@ -1034,30 +1059,30 @@ public abstract class BaseConnection implements Connection
     * {@inheritDoc}
     */
    public List<ItemsTree<CmisObject>> getDescendants(String folderId, int depth, boolean includeAllowableActions,
-      IncludeRelationships includeRelationships, boolean includePathSegments, String propertyFilter,
-      String renditionFilter) throws ObjectNotFoundException, InvalidArgumentException, FilterNotValidException,
-      CmisRuntimeException
+      IncludeRelationships includeRelationships, boolean includePathSegments, boolean includeObjectInfo,
+      String propertyFilter, String renditionFilter) throws ObjectNotFoundException, InvalidArgumentException,
+      FilterNotValidException, CmisRuntimeException
    {
       return getTree(folderId, depth, null, includeAllowableActions, includeRelationships, includePathSegments,
-         propertyFilter, renditionFilter);
+         includeObjectInfo, propertyFilter, renditionFilter);
    }
 
    /**
     * {@inheritDoc}
     */
    public List<ItemsTree<CmisObject>> getFolderTree(String folderId, int depth, boolean includeAllowableActions,
-      IncludeRelationships includeRelationships, boolean includePathSegments, String propertyFilter,
-      String renditionFilter) throws ObjectNotFoundException, InvalidArgumentException, FilterNotValidException,
-      CmisRuntimeException
+      IncludeRelationships includeRelationships, boolean includePathSegments, boolean includeObjectInfo,
+      String propertyFilter, String renditionFilter) throws ObjectNotFoundException, InvalidArgumentException,
+      FilterNotValidException, CmisRuntimeException
    {
       return getTree(folderId, depth, BaseType.FOLDER, includeAllowableActions, includeRelationships,
-         includePathSegments, propertyFilter, renditionFilter);
+         includePathSegments, includeObjectInfo, propertyFilter, renditionFilter);
    }
 
    protected List<ItemsTree<CmisObject>> getTree(String folderId, int depth, BaseType typeFilter,
       boolean includeAllowableActions, IncludeRelationships includeRelationships, boolean includePathSegments,
-      String propertyFilter, String renditionFilter) throws ObjectNotFoundException, InvalidArgumentException,
-      FilterNotValidException, CmisRuntimeException
+      boolean includeObjectInfo, String propertyFilter, String renditionFilter) throws ObjectNotFoundException,
+      InvalidArgumentException, FilterNotValidException, CmisRuntimeException
    {
       checkConnection();
 
@@ -1078,13 +1103,13 @@ public abstract class BaseConnection implements Connection
             continue;
 
          CmisObject container =
-            getCmisObject(child, includeAllowableActions, includeRelationships, false, false, parsedPropertyFilter,
-               parsedRenditionFilter);
+            getCmisObject(child, includeAllowableActions, includeRelationships, false, false, includeObjectInfo,
+               parsedPropertyFilter, parsedRenditionFilter);
 
          List<ItemsTree<CmisObject>> subTree =
             (child.getBaseType() == BaseType.FOLDER && depth > 1) // 
                ? getTree(child.getObjectId(), depth - 1, typeFilter, includeAllowableActions, includeRelationships,
-                  includePathSegments, propertyFilter, renditionFilter) //
+                  includePathSegments, includeObjectInfo, propertyFilter, renditionFilter) //
                : null;
 
          tree.add(new ItemsTreeImpl<CmisObject>(container, subTree));
@@ -1097,9 +1122,9 @@ public abstract class BaseConnection implements Connection
     * {@inheritDoc}
     */
    public ItemsList<CmisObject> getCheckedOutDocs(String folderId, boolean includeAllowableActions,
-      IncludeRelationships includeRelationships, String propertyFilter, String renditionFilter, String orderBy,
-      int maxItems, int skipCount) throws ObjectNotFoundException, InvalidArgumentException, FilterNotValidException,
-      CmisRuntimeException
+      IncludeRelationships includeRelationships, boolean includeObjectInfo, String propertyFilter,
+      String renditionFilter, String orderBy, int maxItems, int skipCount) throws ObjectNotFoundException,
+      InvalidArgumentException, FilterNotValidException, CmisRuntimeException
    {
       checkConnection();
 
@@ -1140,8 +1165,8 @@ public abstract class BaseConnection implements Connection
       {
          ObjectData pwcData = iterator.next();
          CmisObject pwc =
-            getCmisObject(pwcData, includeAllowableActions, includeRelationships, false, false, parsedPropertyFilter,
-               parsedRenditionFilter);
+            getCmisObject(pwcData, includeAllowableActions, includeRelationships, false, false, includeObjectInfo,
+               parsedPropertyFilter, parsedRenditionFilter);
          checkedout.getItems().add(pwc);
       }
 
@@ -1157,8 +1182,8 @@ public abstract class BaseConnection implements Connection
     * {@inheritDoc}
     */
    public ItemsList<CmisObject> getObjectRelationships(String objectId, RelationshipDirection direction, String typeId,
-      boolean includeSubRelationshipTypes, boolean includeAllowableActions, String propertyFilter, int maxItems,
-      int skipCount) throws FilterNotValidException, ObjectNotFoundException
+      boolean includeSubRelationshipTypes, boolean includeAllowableActions, boolean includeObjectInfo,
+      String propertyFilter, int maxItems, int skipCount) throws FilterNotValidException, ObjectNotFoundException
    {
       checkConnection();
 
@@ -1191,7 +1216,8 @@ public abstract class BaseConnection implements Connection
          ObjectData rel = iterator.next();
 
          CmisObject cmis =
-            getCmisObject(rel, includeAllowableActions, null, false, false, parsedPropertyFilter, RenditionFilter.NONE);
+            getCmisObject(rel, includeAllowableActions, null, false, false, includeObjectInfo, parsedPropertyFilter,
+               RenditionFilter.NONE);
 
          relationships.getItems().add(cmis);
       }
@@ -1263,11 +1289,12 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public void addType(TypeDefinition type) throws StorageException, CmisRuntimeException
+   public String addType(TypeDefinition type) throws StorageException, CmisRuntimeException
    {
       checkConnection();
 
-      storage.addType(type);
+      String id = storage.addType(type);
+      return id;
    }
 
    /**
@@ -1312,8 +1339,8 @@ public abstract class BaseConnection implements Connection
     * {@inheritDoc}
     */
    public ItemsList<CmisObject> getContentChanges(ChangeLogTokenHolder changeLogToken, boolean includeProperties,
-      String propertyFilter, boolean includePolicyIDs, boolean includeAcl, int maxItems) throws ConstraintException,
-      FilterNotValidException, CmisRuntimeException
+      String propertyFilter, boolean includePolicyIDs, boolean includeAcl, boolean includeObjectInfo, int maxItems)
+      throws ConstraintException, FilterNotValidException, CmisRuntimeException
    {
       // TODO : implement
       throw new NotSupportedException("Changes log feature is not supported.");
@@ -1323,8 +1350,8 @@ public abstract class BaseConnection implements Connection
     * {@inheritDoc}
     */
    public ItemsList<CmisObject> query(String statement, boolean searchAllVersions, boolean includeAllowableActions,
-      IncludeRelationships includeRelationships, String renditionFilter, int maxItems, int skipCount)
-      throws FilterNotValidException, CmisRuntimeException
+      IncludeRelationships includeRelationships, boolean includeObjectInfo, String renditionFilter, int maxItems,
+      int skipCount) throws FilterNotValidException, CmisRuntimeException
    {
       checkConnection();
 
@@ -1376,8 +1403,8 @@ public abstract class BaseConnection implements Connection
          }
 
          CmisObject object =
-            getCmisObject(data, includeAllowableActions, includeRelationships, false, false, new PropertyFilter(
-               propertyFilter.toString()), parsedRenditionFilter);
+            getCmisObject(data, includeAllowableActions, includeRelationships, false, false, includeObjectInfo,
+               new PropertyFilter(propertyFilter.toString()), parsedRenditionFilter);
 
          Score score = result.getScore();
          if (score != null)
@@ -1398,11 +1425,21 @@ public abstract class BaseConnection implements Connection
       return list;
    }
 
+   //
+
+   /**
+    * {@inheritDoc}
+    */
+   public Storage getStorage()
+   {
+      return storage;
+   }
+
    //---------
 
    protected CmisObject getCmisObject(ObjectData object, boolean includeAllowableActions,
       IncludeRelationships includeRelationships, boolean includePolicyIds, boolean includeAcl,
-      PropertyFilter parsedPropertyFilter, RenditionFilter parsedRenditionFilter)
+      boolean includeObjectInfo, PropertyFilter parsedPropertyFilter, RenditionFilter parsedRenditionFilter)
    {
       // TODO : 
       return null;
@@ -1459,16 +1496,6 @@ public abstract class BaseConnection implements Connection
       List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(object.getACL(false), addACL, removeACL);
 
       object.setACL(mergedACL);
-   }
-
-   //
-   
-   /**
-    * {@inheritDoc}
-    */
-   public Storage getStorage()
-   {
-      return storage;
    }
 
 }

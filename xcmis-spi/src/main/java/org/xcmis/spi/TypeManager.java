@@ -33,11 +33,12 @@ public interface TypeManager
     * Add new type in repository.
     * 
     * @param type type definition
+    * @return ID of added type
     * @throws StorageException if type can't be added cause to storage internal
     *         problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   void addType(TypeDefinition type) throws StorageException, CmisRuntimeException;
+   String addType(TypeDefinition type) throws StorageException, CmisRuntimeException;
 
    /**
     * Get type definition for type <code>typeId</code> .

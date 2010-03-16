@@ -21,9 +21,9 @@ package org.xcmis.spi.object;
 
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.NameConstraintViolationException;
+import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.Storage;
 import org.xcmis.spi.data.ObjectData;
-import org.xcmis.spi.impl.PropertyFilter;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -56,7 +56,7 @@ public interface Properties
     * @param filter property filter
     * @return subset of properties
     */
-   Properties getSubset(PropertyFilter filter);
+   Map<String, Property<?>> getSubset(PropertyFilter filter);
 
    /**
     * Set or add new properties. Properties will be merged with existed one and
@@ -73,7 +73,7 @@ public interface Properties
     * @throws NameConstraintViolationException if <i>cmis:name</i> specified in
     *         properties throws conflict
     */
-   void setProperties(Map<String, Property<?>> properties) throws ConstraintException, NameConstraintViolationException;
+   void setValues(Map<String, Property<?>> properties) throws ConstraintException, NameConstraintViolationException;
 
    // ---------- Shortcut access to properties. ------------- 
 

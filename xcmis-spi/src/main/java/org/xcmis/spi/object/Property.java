@@ -36,7 +36,7 @@ public interface Property<T>
     * @return property id
     */
    String getId();
-   
+
    /**
     * @return property type
     */
@@ -58,8 +58,9 @@ public interface Property<T>
    String getDisplayName();
 
    /**
-    * @return property values
+    * @return property values. Never return <code>null</code>, if property has
+    *         not values empty list must be returned
     */
    List<T> getValues();
-   
+
 }

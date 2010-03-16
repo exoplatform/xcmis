@@ -17,10 +17,8 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.xcmis.spi.impl;
+package org.xcmis.spi;
 
-import org.xcmis.spi.CMIS;
-import org.xcmis.spi.FilterNotValidException;
 
 import java.util.HashSet;
 import java.util.Set;

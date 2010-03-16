@@ -21,12 +21,14 @@ package org.xcmis.spi;
 
 import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.object.ObjectInfo;
 import org.xcmis.spi.object.ObjectParent;
-import org.xcmis.spi.object.Properties;
+import org.xcmis.spi.object.Property;
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Connection to CMIS storage.
@@ -115,6 +117,10 @@ public interface Connection
     *        the change event modified the set of policies applied to the object
     * @param includeAcl if <code>true</code>, then include ACL applied to the
     *        object referenced in each change event
+    * @param includeObjectInfo if <code>true</code> then result must include
+    *        external information about each object. See {@link ObjectInfo}.
+    *        Particular this info may be used by REST Atom binding for building
+    *        correct Atom document
     * @param maxItems max items in result
     * @return content changes
     * @throws ConstraintException if the event corresponding to the change log
@@ -126,8 +132,8 @@ public interface Connection
     * @throws CmisRuntimeException if any others errors occur
     */
    ItemsList<CmisObject> getContentChanges(ChangeLogTokenHolder changeLogToken, boolean includeProperties,
-      String propertyFilter, boolean includePolicyIDs, boolean includeAcl, int maxItems) throws ConstraintException,
-      FilterNotValidException, CmisRuntimeException;
+      String propertyFilter, boolean includePolicyIDs, boolean includeAcl, boolean includeObjectInfo, int maxItems)
+      throws ConstraintException, FilterNotValidException, CmisRuntimeException;
 
    /**
     * Executes a CMIS-SQL query statement against the contents of the CMIS
@@ -143,6 +149,10 @@ public interface Connection
     *        actions in request
     * @param includeRelationships indicates what relationships of object must be
     *        returned
+    * @param includeObjectInfo if <code>true</code> then result must include
+    *        external information about each object. See {@link ObjectInfo}.
+    *        Particular this info may be used by REST Atom binding for building
+    *        correct Atom document
     * @param renditionFilter renditions kinds or mimetypes that must be included
     *        in result. If <code>null</code> or empty string provided then no
     *        renditions will be returned. The Rendition Filter grammar is
@@ -177,8 +187,8 @@ public interface Connection
     * @throws CmisRuntimeException if any others errors occur
     */
    ItemsList<CmisObject> query(String statement, boolean searchAllVersions, boolean includeAllowableActions,
-      IncludeRelationships includeRelationships, String renditionFilter, int maxItems, int skipCount)
-      throws FilterNotValidException, CmisRuntimeException;
+      IncludeRelationships includeRelationships, boolean includeObjectInfo, String renditionFilter, int maxItems,
+      int skipCount) throws FilterNotValidException, CmisRuntimeException;
 
    // Multi-filing Services
 
@@ -225,6 +235,10 @@ public interface Connection
     *        should be included in response
     * @param includeRelationships indicates what relationships of object must be
     *        returned
+    * @param includeObjectInfo if <code>true</code> then result must include
+    *        external information about each object. See {@link ObjectInfo}.
+    *        Particular this info may be used by REST Atom binding for building
+    *        correct Atom document
     * @param propertyFilter comma-delimited list of property definition Query
     *        Names. A wildcard '*' is supported and minds return all properties.
     *        If empty string or <code>null</code> provided than storage MAY
@@ -274,9 +288,9 @@ public interface Connection
     * @throws CmisRuntimeException if any others errors occur
     */
    ItemsList<CmisObject> getCheckedOutDocs(String folderId, boolean includeAllowableActions,
-      IncludeRelationships includeRelationships, String propertyFilter, String renditionFilter, String orderBy,
-      int maxItems, int skipCount) throws ObjectNotFoundException, InvalidArgumentException, FilterNotValidException,
-      CmisRuntimeException;
+      IncludeRelationships includeRelationships, boolean includeObjectInfo, String propertyFilter,
+      String renditionFilter, String orderBy, int maxItems, int skipCount) throws ObjectNotFoundException,
+      InvalidArgumentException, FilterNotValidException, CmisRuntimeException;
 
    /**
     * Get the list of child objects contained in the specified folder.
@@ -288,6 +302,10 @@ public interface Connection
     *        returned
     * @param includePathSegments if <code>true</code> then returns a PathSegment
     *        for each child object
+    * @param includeObjectInfo if <code>true</code> then result must include
+    *        external information about each object. See {@link ObjectInfo}.
+    *        Particular this info may be used by REST Atom binding for building
+    *        correct Atom document
     * @param propertyFilter comma-delimited list of property definition Query
     *        Names. A wildcard '*' is supported and minds return all properties.
     *        If empty string or <code>null</code> provided than storage MAY
@@ -336,15 +354,19 @@ public interface Connection
     * @throws CmisRuntimeException if any others errors occur
     */
    ItemsList<CmisObject> getChildren(String folderId, boolean includeAllowableActions,
-      IncludeRelationships includeRelationships, boolean includePathSegments, String propertyFilter,
-      String renditionFilter, String orderBy, int maxItems, int skipCount) throws ObjectNotFoundException,
-      InvalidArgumentException, FilterNotValidException, CmisRuntimeException;
+      IncludeRelationships includeRelationships, boolean includePathSegments, boolean includeObjectInfo,
+      String propertyFilter, String renditionFilter, String orderBy, int maxItems, int skipCount)
+      throws ObjectNotFoundException, InvalidArgumentException, FilterNotValidException, CmisRuntimeException;
 
    /**
     * Get parent for specified folder. This method MUST NOT be used for getting
     * parents of other fileable objects.
     * 
     * @param folderId folder id
+    * @param includeObjectInfo if <code>true</code> then result must include
+    *        external information about object. See {@link ObjectInfo}.
+    *        Particular this info may be used by REST Atom binding for building
+    *        correct Atom document
     * @param propertyFilter comma-delimited list of property definition Query
     *        Names. A wildcard '*' is supported and minds return all properties.
     *        If empty string or <code>null</code> provided than storage MAY
@@ -359,8 +381,8 @@ public interface Connection
     *         object's property definition
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObject getFolderParent(String folderId, String propertyFilter) throws ObjectNotFoundException,
-      InvalidArgumentException, FilterNotValidException, CmisRuntimeException;
+   CmisObject getFolderParent(String folderId, boolean includeObjectInfo, String propertyFilter)
+      throws ObjectNotFoundException, InvalidArgumentException, FilterNotValidException, CmisRuntimeException;
 
    /**
     * Gets the parent folder(s) for the specified object.
@@ -372,6 +394,10 @@ public interface Connection
     *        returned
     * @param includeRelativePathSegment if <code>true</code>, returns a
     *        PathSegment for each child object
+    * @param includeObjectInfo if <code>true</code> then result must include
+    *        external information about object. See {@link ObjectInfo} and
+    *        {@link ObjectParent#getObject()}. Particular this info may be used
+    *        by REST Atom binding for building correct Atom document
     * @param propertyFilter comma-delimited list of property definition Query
     *        Names. A wildcard '*' is supported and minds return all properties.
     *        If empty string or <code>null</code> provided than storage MAY
@@ -415,9 +441,9 @@ public interface Connection
     * @throws CmisRuntimeException if any others errors occur
     */
    List<ObjectParent> getObjectParents(String objectId, boolean includeAllowableActions,
-      IncludeRelationships includeRelationships, boolean includeRelativePathSegment, String propertyFilter,
-      String renditionFilter) throws ObjectNotFoundException, ConstraintException, FilterNotValidException,
-      CmisRuntimeException;
+      IncludeRelationships includeRelationships, boolean includeRelativePathSegment, boolean includeObjectInfo,
+      String propertyFilter, String renditionFilter) throws ObjectNotFoundException, ConstraintException,
+      FilterNotValidException, CmisRuntimeException;
 
    /**
     * Get the collection of descendant objects contained in the specified folder
@@ -432,6 +458,10 @@ public interface Connection
     *        returned
     * @param includePathSegments if <code>true</code> then returns a PathSegment
     *        for each child object
+    * @param includeObjectInfo if <code>true</code> then result must include
+    *        external information about each object. See {@link ObjectInfo}.
+    *        Particular this info may be used by REST Atom binding for building
+    *        correct Atom document
     * @param propertyFilter comma-delimited list of property definition Query
     *        Names. A wildcard '*' is supported and minds return all properties.
     *        If empty string or <code>null</code> provided than storage MAY
@@ -474,9 +504,9 @@ public interface Connection
     * @throws CmisRuntimeException if any others errors occur
     */
    List<ItemsTree<CmisObject>> getDescendants(String folderId, int depth, boolean includeAllowableActions,
-      IncludeRelationships includeRelationships, boolean includePathSegments, String propertyFilter,
-      String renditionFilter) throws ObjectNotFoundException, InvalidArgumentException, FilterNotValidException,
-      CmisRuntimeException;
+      IncludeRelationships includeRelationships, boolean includePathSegments, boolean includeObjectInfo,
+      String propertyFilter, String renditionFilter) throws ObjectNotFoundException, InvalidArgumentException,
+      FilterNotValidException, CmisRuntimeException;
 
    /**
     * Get the collection of descendant folder objects contained in the specified
@@ -491,6 +521,10 @@ public interface Connection
     *        returned
     * @param includePathSegments if <code>true</code> then returns a PathSegment
     *        for each child object
+    * @param includeObjectInfo if <code>true</code> then result must include
+    *        external information about each object. See {@link ObjectInfo}.
+    *        Particular this info may be used by REST Atom binding for building
+    *        correct Atom document
     * @param propertyFilter comma-delimited list of property definition Query
     *        Names. A wildcard '*' is supported and minds return all properties.
     *        If empty string or <code>null</code> provided than storage MAY
@@ -533,9 +567,9 @@ public interface Connection
     * @throws CmisRuntimeException if any others errors occur
     */
    List<ItemsTree<CmisObject>> getFolderTree(String folderId, int depth, boolean includeAllowableActions,
-      IncludeRelationships includeRelationships, boolean includePathSegments, String propertyFilter,
-      String renditionFilter) throws ObjectNotFoundException, InvalidArgumentException, FilterNotValidException,
-      CmisRuntimeException;
+      IncludeRelationships includeRelationships, boolean includePathSegments, boolean includeObjectInfo,
+      String propertyFilter, String renditionFilter) throws ObjectNotFoundException, InvalidArgumentException,
+      FilterNotValidException, CmisRuntimeException;
 
    // Object Services
 
@@ -544,7 +578,7 @@ public interface Connection
     * 
     * @param folderId parent folder id for object. May be null if storage
     *        supports unfiling
-    * @param propertyData properties that MAY be applied to newly created document
+    * @param properties properties that MAY be applied to newly created document
     * @param content document content
     * @param addACL Access Control Entries that MUST added for newly created
     *        document, either using the ACL from <code>folderId</code> if
@@ -558,7 +592,7 @@ public interface Connection
     *        created document
     * @param versioningState enumeration specifying what the versioning state of
     *        the newly created object shall be
-    * @return newly created document
+    * @return ID of newly created document
     * @throws ObjectNotFoundException if target folder with specified id
     *         <code>folderId</code> does not exist
     * @throws ConstraintException if any of following condition are met:
@@ -607,7 +641,7 @@ public interface Connection
     *         to storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObject createDocument(String folderId, Properties propertyData, ContentStream content,
+   String createDocument(String folderId, Map<String, Property<?>> properties, ContentStream content,
       List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, List<String> policies,
       VersioningState versioningState) throws ObjectNotFoundException, ConstraintException, InvalidArgumentException,
       StreamNotSupportedException, NameConstraintViolationException, IOException, StorageException,
@@ -620,7 +654,7 @@ public interface Connection
     * @param sourceId id for the source document
     * @param folderId parent folder id for object. May be null if storage
     *        supports unfiling
-    * @param propertyData properties that MAY be applied to newly created document
+    * @param properties properties that MAY be applied to newly created document
     * @param addACL Access Control Entries that MUST added for newly created
     *        document, either using the ACL from <code>folderId</code> if
     *        specified, or being applied if no <code>folderId</code> is
@@ -633,7 +667,7 @@ public interface Connection
     *        created document
     * @param versioningState enumeration specifying what the versioning state of
     *        the newly created object shall be
-    * @return newly created document
+    * @return ID of newly created document
     * @throws ObjectNotFoundException if target folder with specified id
     *         <code>folderId</code> or source document with id
     *         <code>sourceId</code> does not exist
@@ -669,7 +703,7 @@ public interface Connection
     *         to storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObject createDocumentFromSource(String sourceId, String folderId, Properties propertyData,
+   String createDocumentFromSource(String sourceId, String folderId, Map<String, Property<?>> propertiesa,
       List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, List<String> policies,
       VersioningState versioningState) throws ObjectNotFoundException, ConstraintException, InvalidArgumentException,
       NameConstraintViolationException, StorageException, CmisRuntimeException;
@@ -678,7 +712,7 @@ public interface Connection
     * Create a folder object.
     * 
     * @param folderId parent folder id for new folder
-    * @param propertyData properties that MAY be applied to newly created folder
+    * @param properties properties that MAY be applied to newly created folder
     * @param addACL Access Control Entries that MUST added for newly created
     *        Folder, either using the ACL from <code>folderId</code> if
     *        specified, or being applied if no <code>folderId</code> is
@@ -689,7 +723,7 @@ public interface Connection
     *        <code>folderId</code> is specified
     * @param policies list of policy id that MUST be applied to the newly
     *        created folder
-    * @return newly created folder
+    * @return ID of newly created folder
     * @throws ObjectNotFoundException if target folder with specified id
     *         <code>folderId</code> does not exist
     * @throws ConstraintException if any of following condition are met:
@@ -720,7 +754,7 @@ public interface Connection
     *         storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObject createFolder(String folderId, Properties propertyData, List<AccessControlEntry> addACL,
+   String createFolder(String folderId, Map<String, Property<?>> properties, List<AccessControlEntry> addACL,
       List<AccessControlEntry> removeACL, List<String> policies) throws ObjectNotFoundException, ConstraintException,
       InvalidArgumentException, NameConstraintViolationException, StorageException, CmisRuntimeException;
 
@@ -729,7 +763,7 @@ public interface Connection
     * 
     * @param folderId parent folder id may be null if policy object type is not
     *        fileable
-    * @param propertyData properties to be applied to newly created Policy
+    * @param properties properties to be applied to newly created Policy
     * @param addACL Access Control Entries that MUST added for newly created
     *        Policy, either using the ACL from <code>folderId</code> if
     *        specified, or being applied if no <code>folderId</code> is
@@ -740,7 +774,7 @@ public interface Connection
     *        <code>folderId</code> is specified
     * @param policies list of policy id that MUST be applied to the newly
     *        created policy
-    * @return newly created policy
+    * @return ID of newly created policy
     * @throws ObjectNotFoundException if target folder with specified id
     *         <code>folderId</code> does not exist
     * @throws ConstraintException if any of following condition are met:
@@ -771,21 +805,21 @@ public interface Connection
     *         storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObject createPolicy(String folderId, Properties propertyData, List<AccessControlEntry> addACL,
+   String createPolicy(String folderId, Map<String, Property<?>> properties, List<AccessControlEntry> addACL,
       List<AccessControlEntry> removeACL, List<String> policies) throws ObjectNotFoundException, ConstraintException,
       InvalidArgumentException, NameConstraintViolationException, StorageException, CmisRuntimeException;
 
    /**
     * Create a relationship object.
     * 
-    * @param propertyData properties to be applied to newly created relationship
+    * @param properties properties to be applied to newly created relationship
     * @param addACL set Access Control Entry to be applied for newly created
     *        relationship
     * @param removeACL set Access Control Entry that MUST be removed from the
     *        newly created relationship
     * @param policies list of policy id that MUST be applied to the newly
     *        created relationship.
-    * @return newly created relationship
+    * @return ID of newly created relationship
     * @throws ObjectNotFoundException if <code>cmis:sourceId</code> or
     *         <code>cmis:targetId</code> property value is id of object that
     *         can't be found in storage
@@ -818,7 +852,7 @@ public interface Connection
     *         cause to storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObject createRelationship(Properties propertyData, List<AccessControlEntry> addACL,
+   String createRelationship(Map<String, Property<?>> properties, List<AccessControlEntry> addACL,
       List<AccessControlEntry> removeACL, List<String> policies) throws ObjectNotFoundException, ConstraintException,
       NameConstraintViolationException, StorageException, CmisRuntimeException;
 
@@ -826,8 +860,14 @@ public interface Connection
     * Delete the content stream for the specified Document object.
     * 
     * @param documentId document id
-    * @param changeToken is used for optimistic locking and/or concurrency
-    *        checking to ensure that user updates do not conflict
+    * @param changeTokenHolder is used for optimistic locking and/or concurrency
+    *        checking to ensure that user updates do not conflict. This
+    *        parameter must never be <code>null</code> but
+    *        {@link ChangeTokenHolder#getValue()} may return <code>null</code>
+    *        if caller does not provide change token. After successful deleting
+    *        content stream <code>changeTokenHolder</code> may contains updated
+    *        change token if backend support this feature
+    * @return ID of updated object
     * @throws ObjectNotFoundException if document with specified id
     *         <code>documentId</code> does not exist
     * @throws ConstraintException if object's type definition
@@ -838,8 +878,8 @@ public interface Connection
     *         to storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   void deleteContentStream(String documentId, String changeToken) throws ObjectNotFoundException, ConstraintException,
-      UpdateConflictException, StorageException, CmisRuntimeException;
+   String deleteContentStream(String documentId, ChangeTokenHolder changeTokenHolder) throws ObjectNotFoundException,
+      ConstraintException, UpdateConflictException, StorageException, CmisRuntimeException;
 
    /**
     * Delete the specified object.
@@ -937,6 +977,10 @@ public interface Connection
     * @param includeRelationships include object relationships
     * @param includePolicyIDs include policies applied to object
     * @param includeAcl include object's ACL
+    * @param includeObjectInfo if <code>true</code> then in result must be
+    *        included external information about object. See {@link ObjectInfo}.
+    *        Particular this info may be used by REST Atom binding for building
+    *        correct Atom document.
     * @param propertyFilter comma-delimited list of property definition Query
     *        Names. A wildcard '*' is supported and minds return all properties.
     *        If empty string or <code>null</code> provided than storage MAY
@@ -977,8 +1021,8 @@ public interface Connection
     * @throws CmisRuntimeException if any others errors occur
     */
    CmisObject getObject(String objectId, boolean includeAllowableActions, IncludeRelationships includeRelationships,
-      boolean includePolicyIDs, boolean includeAcl, String propertyFilter, String renditionFilter)
-      throws ObjectNotFoundException, FilterNotValidException, CmisRuntimeException;
+      boolean includePolicyIDs, boolean includeAcl, boolean includeObjectInfo, String propertyFilter,
+      String renditionFilter) throws ObjectNotFoundException, FilterNotValidException, CmisRuntimeException;
 
    /**
     * Get object by specified path.
@@ -989,6 +1033,10 @@ public interface Connection
     * @param includeRelationships include object's relationship
     * @param includePolicyIDs include policies IDs applied to object
     * @param includeAcl include ACL
+    * @param includeObjectInfo if <code>true</code> then in result must be
+    *        included external information about object. See {@link ObjectInfo}.
+    *        Particular this info may be used by REST Atom binding for building
+    *        correct Atom document
     * @param propertyFilter comma-delimited list of property definition Query
     *        Names. A wildcard '*' is supported and minds return all properties.
     *        If empty string or <code>null</code> provided than storage MAY
@@ -1029,18 +1077,22 @@ public interface Connection
     * @throws CmisRuntimeException if any others errors occur
     */
    CmisObject getObjectByPath(String path, boolean includeAllowableActions, IncludeRelationships includeRelationships,
-      boolean includePolicyIDs, boolean includeAcl, String propertyFilter, String renditionFilter)
-      throws ObjectNotFoundException, FilterNotValidException, CmisRuntimeException;
+      boolean includePolicyIDs, boolean includeAcl, boolean includeObjectInfo, String propertyFilter,
+      String renditionFilter) throws ObjectNotFoundException, FilterNotValidException, CmisRuntimeException;
 
    /**
     * Get object's properties.
     * 
     * @param objectId object id
+    * @param includeObjectInfo if <code>true</code> then in result must be
+    *        included external information about object. See {@link ObjectInfo}.
+    *        Particular this info may be used by REST Atom binding for building
+    *        correct Atom document
     * @param propertyFilter comma-delimited list of property definition Query
     *        Names. A wildcard '*' is supported and minds return all properties.
     *        If empty string or <code>null</code> provided than storage MAY
     *        return storage specific set of properties
-    * @return object's properties
+    * @return CMIS object that contains properties
     * @throws ObjectNotFoundException if object with specified id
     *         <code>objectId</code> does not exist
     * @throws FilterNotValidException if <code>propertyFilter</code> has invalid
@@ -1048,8 +1100,8 @@ public interface Connection
     *         object's property definition
     * @throws CmisRuntimeException if any others errors occur
     */
-   Properties getProperties(String objectId, String propertyFilter) throws ObjectNotFoundException,
-      FilterNotValidException, CmisRuntimeException;
+   CmisObject getProperties(String objectId, boolean includeObjectInfo, String propertyFilter)
+      throws ObjectNotFoundException, FilterNotValidException, CmisRuntimeException;
 
    /**
     * Get the list of associated Renditions for the specified object. Only
@@ -1100,7 +1152,7 @@ public interface Connection
     * @param objectId object id
     * @param targetFolderId target folder for moving object
     * @param sourceFolderId move object from which object to be moved
-    * @return moved object
+    * @return moved object ID
     * @throws ObjectNotFoundException if object with <code>objectId</code> or
     *         <code>sourceFolderId</code> or <code>targetFolderId</code> were
     *         not found
@@ -1117,7 +1169,7 @@ public interface Connection
     *         to storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObject moveObject(String objectId, String targetFolderId, String sourceFolderId) throws ObjectNotFoundException,
+   String moveObject(String objectId, String targetFolderId, String sourceFolderId) throws ObjectNotFoundException,
       ConstraintException, InvalidArgumentException, UpdateConflictException, StorageException, CmisRuntimeException;
 
    /**
@@ -1125,13 +1177,18 @@ public interface Connection
     * 
     * @param documentId document id
     * @param content content stream to be applied to object
-    * @param changeToken is used for optimistic locking and/or concurrency
-    *        checking to ensure that user updates do not conflict
+    * @param changeTokenHolder is used for optimistic locking and/or concurrency
+    *        checking to ensure that user updates do not conflict. This
+    *        parameter must never be <code>null</code> but
+    *        {@link ChangeTokenHolder#getValue()} may return <code>null</code>
+    *        if caller does not provide change token. After successful updating
+    *        content stream <code>changeTokenHolder</code> may contains updated
+    *        change token if backend support this feature
     * @param overwriteFlag if <code>true</code> on object's content stream
     *        exists it will be overridden. If <code>false</code> and context
     *        stream already exists then ContentAlreadyExistsException will be
     *        thrown
-    * @return updated object
+    * @return ID of updated object
     * @throws ObjectNotFoundException if document with specified id
     *         <code>documentId</code> does not exist
     * @throws ContentAlreadyExistsException if the input parameter
@@ -1149,18 +1206,23 @@ public interface Connection
     *         (save changes) cause to storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   void setContentStream(String documentId, ContentStream content, String changeToken, boolean overwriteFlag)
-      throws ObjectNotFoundException, ContentAlreadyExistsException, StreamNotSupportedException,
-      UpdateConflictException, IOException, StorageException, CmisRuntimeException;
+   String setContentStream(String documentId, ContentStream content, ChangeTokenHolder changeTokenHolder,
+      boolean overwriteFlag) throws ObjectNotFoundException, ContentAlreadyExistsException,
+      StreamNotSupportedException, UpdateConflictException, IOException, StorageException, CmisRuntimeException;
 
    /**
     * Update object properties.
     * 
     * @param objectId object id
-    * @param changeToken is used for optimistic locking and/or concurrency
-    *        checking to ensure that user updates do not conflict
-    * @param propertyData properties to be applied for object
-    * @return updated object
+    * @param changeTokenHolder is used for optimistic locking and/or concurrency
+    *        checking to ensure that user updates do not conflict. This
+    *        parameter must never be <code>null</code> but
+    *        {@link ChangeTokenHolder#getValue()} may return <code>null</code>
+    *        if caller does not provide change token. After successful updating
+    *        properties <code>changeTokenHolder</code> may contains updated
+    *        change token if backend support this feature
+    * @param properties properties to be applied for object
+    * @return ID of updated object
     * @throws ObjectNotFoundException if document with specified id
     *         <code>objectId</code> does not exist
     * @throws ConstraintException if value of any of the properties violates the
@@ -1174,7 +1236,7 @@ public interface Connection
     *         changes) cause to storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObject updateProperties(String objectId, String changeToken, Properties propertyData)
+   String updateProperties(String objectId, ChangeTokenHolder changeTokenHolder, Map<String, Property<?>> properties)
       throws ObjectNotFoundException, ConstraintException, NameConstraintViolationException, UpdateConflictException,
       StorageException, CmisRuntimeException;
 
@@ -1198,6 +1260,10 @@ public interface Connection
     * Gets the list of policies currently applied to the specified object.
     * 
     * @param objectId the object id
+    * @param includeObjectInfo if <code>true</code> then in result must be
+    *        included external information about each object. See
+    *        {@link ObjectInfo}. Particular this info may be used by REST Atom
+    *        binding for building correct Atom document
     * @param propertyFilter comma-delimited list of property definition Query
     *        Names. A wildcard '*' is supported and minds return all properties.
     *        If empty string or <code>null</code> provided than storage MAY
@@ -1211,8 +1277,8 @@ public interface Connection
     *         object's property definition
     * @throws CmisRuntimeException if any others errors occur
     */
-   List<CmisObject> getAppliedPolicies(String objectId, String propertyFilter) throws ObjectNotFoundException,
-      FilterNotValidException, CmisRuntimeException;
+   List<CmisObject> getAppliedPolicies(String objectId, boolean includeObjectInfo, String propertyFilter)
+      throws ObjectNotFoundException, FilterNotValidException, CmisRuntimeException;
 
    /**
     * Removes a specified policy from an object.
@@ -1243,6 +1309,10 @@ public interface Connection
     *        <code>typeId</code>.
     * @param includeAllowableActions if <code>true</code> then allowable actions
     *        should be included in response
+    * @param includeObjectInfo if <code>true</code> then in result must be
+    *        included external information about each object. See
+    *        {@link ObjectInfo}. Particular this info may be used by REST Atom
+    *        binding for building correct Atom document
     * @param propertyFilter property filter as string
     * @param maxItems max items in result
     * @param skipCount skip items
@@ -1255,8 +1325,9 @@ public interface Connection
     * @throws CmisRuntimeException if any others errors occur
     */
    ItemsList<CmisObject> getObjectRelationships(String objectId, RelationshipDirection direction, String typeId,
-      boolean includeSubRelationshipTypes, boolean includeAllowableActions, String propertyFilter, int maxItems,
-      int skipCount) throws FilterNotValidException, ObjectNotFoundException, CmisRuntimeException;
+      boolean includeSubRelationshipTypes, boolean includeAllowableActions, boolean includeObjectInfo,
+      String propertyFilter, int maxItems, int skipCount) throws FilterNotValidException, ObjectNotFoundException,
+      CmisRuntimeException;
 
    // Versioning Service
 
@@ -1265,7 +1336,7 @@ public interface Connection
     * 
     * @param documentId document id. Storage MAY allow checked-out ONLY latest
     *        version of Document
-    * @return checked-out document (PWC)
+    * @return ID of checked-out document (PWC)
     * @throws ConstraintException if the object is not versionable
     * @throws UpdateConflictException if update an object that is no longer
     *         current
@@ -1274,7 +1345,7 @@ public interface Connection
     *         cause to storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObject checkout(String documentId) throws ConstraintException, UpdateConflictException, VersioningException,
+   String checkout(String documentId) throws ConstraintException, UpdateConflictException, VersioningException,
       StorageException, CmisRuntimeException;
 
    /**
@@ -1300,7 +1371,7 @@ public interface Connection
     * @param documentId document id
     * @param major <code>true</code> is new version should be marked as major
     *        <code>false</code> otherwise
-    * @param propertyData properties to be applied to new version
+    * @param properties properties to be applied to new version
     * @param content content of document
     * @param checkinComment check-in comment
     * @param addACL set Access Control Entry to be applied for newly created
@@ -1313,7 +1384,7 @@ public interface Connection
     *        <code>folderId</code> is specified
     * @param policies list of policy id that MUST be applied to the newly
     *        created document
-    * @return checked-in document
+    * @return ID of checked-in document
     * @throws ConstraintException if the object is not versionable
     * @throws UpdateConflictException if update an object that is no longer
     *         current
@@ -1325,7 +1396,7 @@ public interface Connection
     *         storage cause to its internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObject checkin(String documentId, boolean major, Properties propertyData, ContentStream content,
+   String checkin(String documentId, boolean major, Map<String, Property<?>> properties, ContentStream content,
       String checkinComment, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, List<String> policies)
       throws ConstraintException, UpdateConflictException, StreamNotSupportedException, IOException, StorageException;
 
@@ -1335,6 +1406,10 @@ public interface Connection
     * @param versionSeriesId version series id
     * @param includeAllowableActions <code>true</code> if allowable actions
     *        should be included in response <code>false</code> otherwise
+    * @param includeObjectInfo if <code>true</code> then in result must be
+    *        included external information about each object. See
+    *        {@link ObjectInfo}. Particular this info may be used by REST Atom
+    *        binding for building correct Atom document
     * @param propertyFilter comma-delimited list of property definition Query
     *        Names. A wildcard '*' is supported and minds return all properties.
     *        If empty string or <code>null</code> provided than storage MAY
@@ -1348,8 +1423,8 @@ public interface Connection
     *         object's property definition
     * @throws CmisRuntimeException if any others errors occur
     */
-   List<CmisObject> getAllVersions(String versionSeriesId, boolean includeAllowableActions, String propertyFilter)
-      throws ObjectNotFoundException, FilterNotValidException, CmisRuntimeException;
+   List<CmisObject> getAllVersions(String versionSeriesId, boolean includeAllowableActions, boolean includeObjectInfo,
+      String propertyFilter) throws ObjectNotFoundException, FilterNotValidException, CmisRuntimeException;
 
    /**
     * Get the latest Document object in the version series.
@@ -1366,6 +1441,10 @@ public interface Connection
     * @param includeRelationships include object's relationship
     * @param includePolicyIDs include policies IDs applied to object
     * @param includeAcl include ACL
+    * @param includeObjectInfo if <code>true</code> then in result must be
+    *        included external information about object. See {@link ObjectInfo}.
+    *        Particular this info may be used by REST Atom binding for building
+    *        correct Atom document
     * @param propertyFilter comma-delimited list of property definition Query
     *        Names. A wildcard '*' is supported and minds return all properties.
     *        If empty string or <code>null</code> provided than storage MAY
@@ -1408,8 +1487,9 @@ public interface Connection
     * @throws CmisRuntimeException if any others errors occur
     */
    CmisObject getObjectOfLatestVersion(String versionSeriesId, boolean major, boolean includeAllowableActions,
-      IncludeRelationships includeRelationships, boolean includePolicyIDs, boolean includeAcl, String propertyFilter,
-      String renditionFilter) throws ObjectNotFoundException, FilterNotValidException, CmisRuntimeException;
+      IncludeRelationships includeRelationships, boolean includePolicyIDs, boolean includeAcl,
+      boolean includeObjectInfo, String propertyFilter, String renditionFilter) throws ObjectNotFoundException,
+      FilterNotValidException, CmisRuntimeException;
 
    /**
     * Get properties of latest version in version series.
@@ -1421,11 +1501,16 @@ public interface Connection
     *        input parameter major is <code>true</code> and the Version Series
     *        contains no major versions, then the ObjectNotFoundException will
     *        be thrown.
+    * @param includeObjectInfo if <code>true</code> then in result must be
+    *        included external information about object. See {@link ObjectInfo}.
+    *        Particular this info may be used by REST Atom binding for building
+    *        correct Atom document
     * @param propertyFilter comma-delimited list of property definition Query
     *        Names. A wildcard '*' is supported and minds return all properties.
     *        If empty string or <code>null</code> provided than storage MAY
     *        return storage specific set of properties
-    * @return properties of latest version of object in version series
+    * @return CMIS object that contains properties of latest version of object
+    *         in version series
     * @throws ObjectNotFoundException if Version Series with id
     *         <code>versionSeriesId</code> does not exists or the input
     *         parameter <code>major</code> is <code>true</code> and the Version
@@ -1435,8 +1520,8 @@ public interface Connection
     *         object's property definition
     * @throws CmisRuntimeException if any others errors occur
     */
-   Properties getPropertiesOfLatestVersion(String versionSeriesId, boolean major, String propertyFilter)
-      throws FilterNotValidException, ObjectNotFoundException, CmisRuntimeException;
+   CmisObject getPropertiesOfLatestVersion(String versionSeriesId, boolean major, boolean includeObjectInfo,
+      String propertyFilter) throws FilterNotValidException, ObjectNotFoundException, CmisRuntimeException;
 
    // Type Managment
 
@@ -1444,6 +1529,7 @@ public interface Connection
     * Add new type.
     * 
     * @param type type definition
+    * @return ID of newly added type
     * @throws ConstraintException if any of the following conditions are met:
     *         <ul>
     *         <li>Storage already has type with the same id, see
@@ -1459,7 +1545,7 @@ public interface Connection
     *         storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   void addType(TypeDefinition type) throws StorageException, CmisRuntimeException;
+   String addType(TypeDefinition type) throws StorageException, CmisRuntimeException;
 
    /**
     * Set of object types.
@@ -1543,7 +1629,8 @@ public interface Connection
    Storage getStorage();
 
    /**
-    * Close this connection.
+    * Close this connection. Release underlying resources. Not able to use this
+    * connection any more.
     */
    void close();
 
