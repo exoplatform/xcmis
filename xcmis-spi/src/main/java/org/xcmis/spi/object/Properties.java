@@ -37,12 +37,12 @@ import java.util.Map;
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */
-public interface PropertyData
+public interface Properties
 {
    /**
     * @return set of CMIS properties
     */
-   Map<String, Property<?>> getProperties();
+   Map<String, Property<?>> getAll();
 
    /**
     * @param id property ID
@@ -56,7 +56,7 @@ public interface PropertyData
     * @param filter property filter
     * @return subset of properties
     */
-   PropertyData getSubset(PropertyFilter filter);
+   Properties getSubset(PropertyFilter filter);
 
    /**
     * Set or add new properties. Properties will be merged with existed one and

@@ -25,7 +25,7 @@ import org.xcmis.spi.Rendition;
 import org.xcmis.spi.object.ChangeInfo;
 import org.xcmis.spi.object.CmisObject;
 import org.xcmis.spi.object.ObjectInfo;
-import org.xcmis.spi.object.PropertyData;
+import org.xcmis.spi.object.Properties;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,7 +40,7 @@ import java.util.Set;
 public class CmisObjectImpl implements CmisObject
 {
 
-   private PropertyData properties;
+   private Properties properties;
 
    private List<AccessControlEntry> acl;
 
@@ -64,7 +64,7 @@ public class CmisObjectImpl implements CmisObject
    {
    }
 
-   public CmisObjectImpl(PropertyData properties, List<AccessControlEntry> acl, boolean exactACL, Set<String> policyIds,
+   public CmisObjectImpl(Properties properties, List<AccessControlEntry> acl, boolean exactACL, Set<String> policyIds,
       List<CmisObject> relationships, List<Rendition> renditions, AllowableActions allowableActions,
       ChangeInfo changeInfo, ObjectInfo objectInfo, String pathSegment)
    {
@@ -135,7 +135,7 @@ public class CmisObjectImpl implements CmisObject
    /**
     * {@inheritDoc}
     */
-   public PropertyData getProperties()
+   public Properties getProperties()
    {
       return properties;
    }
@@ -183,7 +183,7 @@ public class CmisObjectImpl implements CmisObject
       this.objectInfo = objectInfo;
    }
 
-   public void setProperties(PropertyData properties)
+   public void setProperties(Properties properties)
    {
       this.properties = properties;
    }

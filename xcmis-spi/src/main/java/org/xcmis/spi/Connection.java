@@ -22,7 +22,7 @@ package org.xcmis.spi;
 import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.object.CmisObject;
 import org.xcmis.spi.object.ObjectParent;
-import org.xcmis.spi.object.PropertyData;
+import org.xcmis.spi.object.Properties;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -607,7 +607,7 @@ public interface Connection
     *         to storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObject createDocument(String folderId, PropertyData propertyData, ContentStream content,
+   CmisObject createDocument(String folderId, Properties propertyData, ContentStream content,
       List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, List<String> policies,
       VersioningState versioningState) throws ObjectNotFoundException, ConstraintException, InvalidArgumentException,
       StreamNotSupportedException, NameConstraintViolationException, IOException, StorageException,
@@ -669,7 +669,7 @@ public interface Connection
     *         to storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObject createDocumentFromSource(String sourceId, String folderId, PropertyData propertyData,
+   CmisObject createDocumentFromSource(String sourceId, String folderId, Properties propertyData,
       List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, List<String> policies,
       VersioningState versioningState) throws ObjectNotFoundException, ConstraintException, InvalidArgumentException,
       NameConstraintViolationException, StorageException, CmisRuntimeException;
@@ -720,7 +720,7 @@ public interface Connection
     *         storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObject createFolder(String folderId, PropertyData propertyData, List<AccessControlEntry> addACL,
+   CmisObject createFolder(String folderId, Properties propertyData, List<AccessControlEntry> addACL,
       List<AccessControlEntry> removeACL, List<String> policies) throws ObjectNotFoundException, ConstraintException,
       InvalidArgumentException, NameConstraintViolationException, StorageException, CmisRuntimeException;
 
@@ -771,7 +771,7 @@ public interface Connection
     *         storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObject createPolicy(String folderId, PropertyData propertyData, List<AccessControlEntry> addACL,
+   CmisObject createPolicy(String folderId, Properties propertyData, List<AccessControlEntry> addACL,
       List<AccessControlEntry> removeACL, List<String> policies) throws ObjectNotFoundException, ConstraintException,
       InvalidArgumentException, NameConstraintViolationException, StorageException, CmisRuntimeException;
 
@@ -818,7 +818,7 @@ public interface Connection
     *         cause to storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObject createRelationship(PropertyData propertyData, List<AccessControlEntry> addACL,
+   CmisObject createRelationship(Properties propertyData, List<AccessControlEntry> addACL,
       List<AccessControlEntry> removeACL, List<String> policies) throws ObjectNotFoundException, ConstraintException,
       NameConstraintViolationException, StorageException, CmisRuntimeException;
 
@@ -1048,7 +1048,7 @@ public interface Connection
     *         object's property definition
     * @throws CmisRuntimeException if any others errors occur
     */
-   PropertyData getProperties(String objectId, String propertyFilter) throws ObjectNotFoundException,
+   Properties getProperties(String objectId, String propertyFilter) throws ObjectNotFoundException,
       FilterNotValidException, CmisRuntimeException;
 
    /**
@@ -1174,7 +1174,7 @@ public interface Connection
     *         changes) cause to storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObject updateProperties(String objectId, String changeToken, PropertyData propertyData)
+   CmisObject updateProperties(String objectId, String changeToken, Properties propertyData)
       throws ObjectNotFoundException, ConstraintException, NameConstraintViolationException, UpdateConflictException,
       StorageException, CmisRuntimeException;
 
@@ -1325,7 +1325,7 @@ public interface Connection
     *         storage cause to its internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObject checkin(String documentId, boolean major, PropertyData propertyData, ContentStream content,
+   CmisObject checkin(String documentId, boolean major, Properties propertyData, ContentStream content,
       String checkinComment, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, List<String> policies)
       throws ConstraintException, UpdateConflictException, StreamNotSupportedException, IOException, StorageException;
 
@@ -1435,7 +1435,7 @@ public interface Connection
     *         object's property definition
     * @throws CmisRuntimeException if any others errors occur
     */
-   PropertyData getPropertiesOfLatestVersion(String versionSeriesId, boolean major, String propertyFilter)
+   Properties getPropertiesOfLatestVersion(String versionSeriesId, boolean major, String propertyFilter)
       throws FilterNotValidException, ObjectNotFoundException, CmisRuntimeException;
 
    // Type Managment

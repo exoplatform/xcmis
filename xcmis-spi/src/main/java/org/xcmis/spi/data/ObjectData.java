@@ -30,7 +30,7 @@ import org.xcmis.spi.Storage;
 import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.Permission.BasicPermissions;
 import org.xcmis.spi.impl.CmisVisitor;
-import org.xcmis.spi.object.PropertyData;
+import org.xcmis.spi.object.Properties;
 
 import java.util.Calendar;
 import java.util.Collection;
@@ -223,7 +223,7 @@ public interface ObjectData
    /**
     * @return object properties, never <code>null</code>
     */
-   PropertyData getPropertyData();
+   Properties getProperties();
 
    /**
     * Get the content stream with specified id. Often it should be rendition

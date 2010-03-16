@@ -60,7 +60,7 @@ import org.xcmis.spi.data.PolicyData;
 import org.xcmis.spi.data.RelationshipData;
 import org.xcmis.spi.object.CmisObject;
 import org.xcmis.spi.object.ObjectParent;
-import org.xcmis.spi.object.PropertyData;
+import org.xcmis.spi.object.Properties;
 import org.xcmis.spi.object.impl.DecimalProperty;
 import org.xcmis.spi.object.impl.ObjectParentImpl;
 import org.xcmis.spi.query.Query;
@@ -238,7 +238,7 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public CmisObject createDocument(String folderId, PropertyData propertyData, ContentStream content,
+   public CmisObject createDocument(String folderId, Properties propertyData, ContentStream content,
       List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, List<String> policies,
       VersioningState versioningState) throws ObjectNotFoundException, ConstraintException, InvalidArgumentException,
       StreamNotSupportedException, NameConstraintViolationException, IOException, StorageException,
@@ -270,7 +270,7 @@ public abstract class BaseConnection implements Connection
 
       DocumentData newDocument = storage.createDocument((FolderData)folder, typeId, versioningState);
 
-      newDocument.getPropertyData().setProperties(propertyData.getProperties());
+      newDocument.getProperties().setProperties(propertyData.getAll());
 
       newDocument.setContentStream(content);
 
@@ -292,7 +292,7 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public CmisObject createDocumentFromSource(String sourceId, String folderId, PropertyData propertyData,
+   public CmisObject createDocumentFromSource(String sourceId, String folderId, Properties propertyData,
       List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, List<String> policies,
       VersioningState versioningState) throws ObjectNotFoundException, ConstraintException, InvalidArgumentException,
       NameConstraintViolationException, StorageException, CmisRuntimeException
@@ -320,7 +320,7 @@ public abstract class BaseConnection implements Connection
          storage.createCopyOfDocument((DocumentData)source, (FolderData)folder, versioningState);
 
       if (propertyData != null)
-         newDocument.getPropertyData().setProperties(propertyData.getProperties());
+         newDocument.getProperties().setProperties(propertyData.getAll());
 
       if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
          applyACL(newDocument, addACL, removeACL);
@@ -340,7 +340,7 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public CmisObject createFolder(String folderId, PropertyData propertiesData, List<AccessControlEntry> addACL,
+   public CmisObject createFolder(String folderId, Properties propertiesData, List<AccessControlEntry> addACL,
       List<AccessControlEntry> removeACL, List<String> policies) throws ObjectNotFoundException, ConstraintException,
       InvalidArgumentException, NameConstraintViolationException, StorageException, CmisRuntimeException
    {
@@ -362,7 +362,7 @@ public abstract class BaseConnection implements Connection
 
       ObjectData newFolder = storage.createFolder((FolderData)folder, typeId);
 
-      newFolder.getPropertyData().setProperties(propertiesData.getProperties());
+      newFolder.getProperties().setProperties(propertiesData.getAll());
 
       if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
          applyACL(newFolder, addACL, removeACL);
@@ -382,7 +382,7 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public CmisObject createPolicy(String folderId, PropertyData propertyData, List<AccessControlEntry> addACL,
+   public CmisObject createPolicy(String folderId, Properties propertyData, List<AccessControlEntry> addACL,
       List<AccessControlEntry> removeACL, List<String> policies) throws ObjectNotFoundException, ConstraintException,
       InvalidArgumentException, NameConstraintViolationException, StorageException, CmisRuntimeException
    {
@@ -409,7 +409,7 @@ public abstract class BaseConnection implements Connection
 
       ObjectData newPolicy = storage.createPolicy((FolderData)folder, typeId);
 
-      newPolicy.getPropertyData().setProperties(propertyData.getProperties());
+      newPolicy.getProperties().setProperties(propertyData.getAll());
 
       if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
          applyACL(newPolicy, addACL, removeACL);
@@ -429,7 +429,7 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public CmisObject createRelationship(PropertyData propertyData, List<AccessControlEntry> addACL,
+   public CmisObject createRelationship(Properties propertyData, List<AccessControlEntry> addACL,
       List<AccessControlEntry> removeACL, List<String> policies) throws ObjectNotFoundException, ConstraintException,
       NameConstraintViolationException, StorageException, CmisRuntimeException
    {
@@ -453,7 +453,7 @@ public abstract class BaseConnection implements Connection
       ObjectData newRelationship =
          storage.createRelationship(storage.getObject(sourceId), storage.getObject(targetId), typeId);
 
-      newRelationship.getPropertyData().setProperties(propertyData.getProperties());
+      newRelationship.getProperties().setProperties(propertyData.getAll());
 
       if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
          applyACL(newRelationship, addACL, removeACL);
@@ -629,14 +629,14 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public PropertyData getProperties(String objectId, String propertyFilter) throws ObjectNotFoundException,
+   public Properties getProperties(String objectId, String propertyFilter) throws ObjectNotFoundException,
       FilterNotValidException, CmisRuntimeException
    {
       checkConnection();
 
       ObjectData object = storage.getObject(objectId);
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
-      return object.getPropertyData().getSubset(parsedPropertyFilter);
+      return object.getProperties().getSubset(parsedPropertyFilter);
    }
 
    /**
@@ -697,7 +697,7 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public CmisObject updateProperties(String objectId, String changeToken, PropertyData propertiesData)
+   public CmisObject updateProperties(String objectId, String changeToken, Properties propertiesData)
       throws ObjectNotFoundException, ConstraintException, NameConstraintViolationException, UpdateConflictException,
       StorageException, CmisRuntimeException
    {
@@ -708,7 +708,7 @@ public abstract class BaseConnection implements Connection
       // Validate change token, object may be already updated.
       validateChangeToken(object, changeToken);
 
-      object.getPropertyData().setProperties(propertiesData.getProperties());
+      object.getProperties().setProperties(propertiesData.getAll());
 
       storage.saveObject(object);
 
@@ -798,7 +798,7 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public CmisObject checkin(String documentId, boolean major, PropertyData propertyData, ContentStream content,
+   public CmisObject checkin(String documentId, boolean major, Properties propertyData, ContentStream content,
       String checkinComment, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, List<String> policies)
       throws ConstraintException, UpdateConflictException, StreamNotSupportedException, IOException, StorageException
    {
@@ -813,7 +813,7 @@ public abstract class BaseConnection implements Connection
          throw new VersioningException("Object " + documentId + " is not Private Working Copy.");
 
       if (propertyData != null)
-         pwc.getPropertyData().setProperties(propertyData.getProperties());
+         pwc.getProperties().setProperties(propertyData.getAll());
 
       if (content != null)
          ((DocumentData)pwc).setContentStream(content);
@@ -900,7 +900,7 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public PropertyData getPropertiesOfLatestVersion(String versionSeriesId, boolean major, String propertyFilter)
+   public Properties getPropertiesOfLatestVersion(String versionSeriesId, boolean major, String propertyFilter)
       throws FilterNotValidException, ObjectNotFoundException, CmisRuntimeException
    {
       return getObjectOfLatestVersion(versionSeriesId, major, false, null, false, false, propertyFilter,
@@ -1386,7 +1386,7 @@ public abstract class BaseConnection implements Connection
             DecimalProperty scoreProperty =
                new DecimalProperty(scoreColumnName, scoreColumnName, scoreColumnName, scoreColumnName, Collections
                   .singletonList(score.getScoreValue()));
-            object.getProperties().getProperties().put(scoreColumnName, scoreProperty);
+            object.getProperties().getAll().put(scoreColumnName, scoreProperty);
          }
          list.getItems().add(object);
       }
