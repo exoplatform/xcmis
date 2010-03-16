@@ -19,6 +19,10 @@
 
 package org.xcmis.spi.object;
 
+import org.xcmis.spi.ConstraintException;
+import org.xcmis.spi.NameConstraintViolationException;
+import org.xcmis.spi.Storage;
+import org.xcmis.spi.data.ObjectData;
 import org.xcmis.spi.impl.PropertyFilter;
 
 import java.math.BigDecimal;
@@ -28,12 +32,12 @@ import java.util.Calendar;
 import java.util.Map;
 
 /**
- * Set of CMIS properties.
+ * CMIS properties.
  * 
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */
-public interface Properties
+public interface PropertyData
 {
    /**
     * @return set of CMIS properties
@@ -45,11 +49,34 @@ public interface Properties
     * @return property with specified ID or <code>null</code>
     */
    Property<?> getProperty(String id);
-   
-   Properties getSubset(PropertyFilter filter);
 
-   // Shortcut access to properties. 
-   
+   /**
+    * Get subset of properties accepted by {@link PropertyFilter}
+    * 
+    * @param filter property filter
+    * @return subset of properties
+    */
+   PropertyData getSubset(PropertyFilter filter);
+
+   /**
+    * Set or add new properties. Properties will be merged with existed one and
+    * not replace whole set of existed properties. Properties may be updated
+    * immediately or after calling {@link Storage#saveObject(ObjectData)}. This
+    * is implementation specific. <code>null</code> value for property minds the
+    * property will be in 'value not set' state. If property is required then
+    * {@link ConstraintException} will be thrown.
+    * 
+    * @param properties new set of properties
+    * @throws ConstraintException if value of any of the properties violates the
+    *         min/max/required/length constraints specified in the property
+    *         definition in the object type
+    * @throws NameConstraintViolationException if <i>cmis:name</i> specified in
+    *         properties throws conflict
+    */
+   void setProperties(Map<String, Property<?>> properties) throws ConstraintException, NameConstraintViolationException;
+
+   // ---------- Shortcut access to properties. ------------- 
+
    Boolean getBoolean(String id);
 
    Boolean[] getBooleans(String id);
@@ -81,6 +108,8 @@ public interface Properties
    URI getURI(String id);
 
    URI[] getURIs(String id);
+
+   // Setters
 
    void setBoolean(String id, Boolean value);
 

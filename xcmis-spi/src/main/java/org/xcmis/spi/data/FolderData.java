@@ -34,11 +34,15 @@ public interface FolderData extends ObjectData
    /**
     * Get children of current folder.
     * 
+    * @param orderBy comma-separated list of query names and the ascending
+    *        modifier 'ASC' or the descending modifier 'DESC' for each query
+    *        name. This parameter may be ignored if implementation has not
+    *        possibility to sort items
     * @return children iterator. If folder does not contains any children then
     *         empty {@link ItemsIterator} must be returned, never
     *         <code>null</code>.
     */
-   ItemsIterator<ObjectData> getChildren();
+   ItemsIterator<ObjectData> getChildren(String orderBy);
 
    /**
     * @return <code>true</code> if current folder has children and

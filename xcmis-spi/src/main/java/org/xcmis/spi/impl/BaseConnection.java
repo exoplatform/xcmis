@@ -19,20 +19,19 @@
 
 package org.xcmis.spi.impl;
 
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
 import org.xcmis.spi.AccessControlEntry;
 import org.xcmis.spi.AccessControlPropagation;
 import org.xcmis.spi.AllowableActions;
 import org.xcmis.spi.BaseType;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.CapabilityACL;
-import org.xcmis.spi.CapabilityChanges;
-import org.xcmis.spi.ChangeEvent;
 import org.xcmis.spi.ChangeLogTokenHolder;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentAlreadyExistsException;
-import org.xcmis.spi.ContentStreamAllowed;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
@@ -42,7 +41,6 @@ import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.NotSupportedException;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.PropertyDefinition;
 import org.xcmis.spi.RelationshipDirection;
 import org.xcmis.spi.Rendition;
 import org.xcmis.spi.Storage;
@@ -51,7 +49,6 @@ import org.xcmis.spi.StreamNotSupportedException;
 import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.UnfileObject;
-import org.xcmis.spi.Updatability;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.VersioningState;
@@ -63,9 +60,8 @@ import org.xcmis.spi.data.PolicyData;
 import org.xcmis.spi.data.RelationshipData;
 import org.xcmis.spi.object.CmisObject;
 import org.xcmis.spi.object.ObjectParent;
-import org.xcmis.spi.object.Properties;
-import org.xcmis.spi.object.Property;
-import org.xcmis.spi.object.impl.CmisObjectImpl;
+import org.xcmis.spi.object.PropertyData;
+import org.xcmis.spi.object.impl.DecimalProperty;
 import org.xcmis.spi.object.impl.ObjectParentImpl;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
@@ -73,9 +69,7 @@ import org.xcmis.spi.query.Score;
 import org.xcmis.spi.utils.CmisUtils;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -87,6 +81,8 @@ import java.util.NoSuchElementException;
  */
 public abstract class BaseConnection implements Connection
 {
+
+   private static final Log LOG = ExoLogger.getLogger(BaseConnection.class);
 
    protected Storage storage;
 
@@ -173,8 +169,6 @@ public abstract class BaseConnection implements Connection
       ObjectData object = storage.getObject(objectId);
 
       List<AccessControlEntry> acl = object.getACL(onlyBasicPermissions);
-      if (acl == null)
-         acl = Collections.emptyList();
 
       return acl;
    }
@@ -209,19 +203,15 @@ public abstract class BaseConnection implements Connection
 
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
       Collection<PolicyData> policies = object.getPolicies();
-      if (policies != null)
+      List<CmisObject> policyIDs = new ArrayList<CmisObject>(policies.size());
+      for (ObjectData policy : policies)
       {
-         List<CmisObject> policyIDs = new ArrayList<CmisObject>(policies.size());
-         for (ObjectData policy : policies)
-         {
-            CmisObject cmisPolicy =
-               getCmisObject(policy, false, IncludeRelationships.NONE, false, false, parsedPropertyFilter,
-                  RenditionFilter.NONE);
-            policyIDs.add(cmisPolicy);
-         }
-         return policyIDs;
+         CmisObject cmisPolicy =
+            getCmisObject(policy, false, IncludeRelationships.NONE, false, false, parsedPropertyFilter,
+               RenditionFilter.NONE);
+         policyIDs.add(cmisPolicy);
       }
-      return Collections.emptyList();
+      return policyIDs;
    }
 
    /**
@@ -248,18 +238,18 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public CmisObject createDocument(String folderId, Properties properties, ContentStream content,
+   public CmisObject createDocument(String folderId, PropertyData propertyData, ContentStream content,
       List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, List<String> policies,
       VersioningState versioningState) throws ObjectNotFoundException, ConstraintException, InvalidArgumentException,
       StreamNotSupportedException, NameConstraintViolationException, IOException, StorageException,
       CmisRuntimeException
    {
-      if (properties == null)
+      if (propertyData == null)
          throw new InvalidArgumentException("Properties may not by null.");
 
       checkConnection();
 
-      String typeId = properties.getId(CMIS.OBJECT_TYPE_ID);
+      String typeId = propertyData.getId(CMIS.OBJECT_TYPE_ID);
       if (typeId == null)
          throw new InvalidArgumentException("Type is not specified.");
 
@@ -280,7 +270,7 @@ public abstract class BaseConnection implements Connection
 
       DocumentData newDocument = storage.createDocument((FolderData)folder, typeId, versioningState);
 
-      newDocument.setProperties(properties);
+      newDocument.getPropertyData().setProperties(propertyData.getProperties());
 
       newDocument.setContentStream(content);
 
@@ -302,7 +292,7 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public CmisObject createDocumentFromSource(String sourceId, String folderId, Properties properties,
+   public CmisObject createDocumentFromSource(String sourceId, String folderId, PropertyData propertyData,
       List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, List<String> policies,
       VersioningState versioningState) throws ObjectNotFoundException, ConstraintException, InvalidArgumentException,
       NameConstraintViolationException, StorageException, CmisRuntimeException
@@ -329,8 +319,8 @@ public abstract class BaseConnection implements Connection
       DocumentData newDocument =
          storage.createCopyOfDocument((DocumentData)source, (FolderData)folder, versioningState);
 
-      if (properties != null)
-         newDocument.setProperties(properties);
+      if (propertyData != null)
+         newDocument.getPropertyData().setProperties(propertyData.getProperties());
 
       if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
          applyACL(newDocument, addACL, removeACL);
@@ -350,16 +340,16 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public CmisObject createFolder(String folderId, Properties properties, List<AccessControlEntry> addACL,
+   public CmisObject createFolder(String folderId, PropertyData propertiesData, List<AccessControlEntry> addACL,
       List<AccessControlEntry> removeACL, List<String> policies) throws ObjectNotFoundException, ConstraintException,
       InvalidArgumentException, NameConstraintViolationException, StorageException, CmisRuntimeException
    {
-      if (properties == null)
+      if (propertiesData == null)
          throw new InvalidArgumentException("Properties may not by null.");
 
       checkConnection();
 
-      String typeId = properties.getId(CMIS.OBJECT_TYPE_ID);
+      String typeId = propertiesData.getId(CMIS.OBJECT_TYPE_ID);
       if (typeId == null)
          throw new InvalidArgumentException("Type is not specified.");
 
@@ -372,7 +362,7 @@ public abstract class BaseConnection implements Connection
 
       ObjectData newFolder = storage.createFolder((FolderData)folder, typeId);
 
-      newFolder.setProperties(properties);
+      newFolder.getPropertyData().setProperties(propertiesData.getProperties());
 
       if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
          applyACL(newFolder, addACL, removeACL);
@@ -392,16 +382,16 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public CmisObject createPolicy(String folderId, Properties properties, List<AccessControlEntry> addACL,
+   public CmisObject createPolicy(String folderId, PropertyData propertyData, List<AccessControlEntry> addACL,
       List<AccessControlEntry> removeACL, List<String> policies) throws ObjectNotFoundException, ConstraintException,
       InvalidArgumentException, NameConstraintViolationException, StorageException, CmisRuntimeException
    {
-      if (properties == null)
+      if (propertyData == null)
          throw new InvalidArgumentException("Properties may not by null.");
 
       checkConnection();
 
-      String typeId = properties.getId(CMIS.OBJECT_TYPE_ID);
+      String typeId = propertyData.getId(CMIS.OBJECT_TYPE_ID);
       if (typeId == null)
          throw new InvalidArgumentException("Type is not specified.");
 
@@ -419,7 +409,7 @@ public abstract class BaseConnection implements Connection
 
       ObjectData newPolicy = storage.createPolicy((FolderData)folder, typeId);
 
-      newPolicy.setProperties(properties);
+      newPolicy.getPropertyData().setProperties(propertyData.getProperties());
 
       if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
          applyACL(newPolicy, addACL, removeACL);
@@ -439,31 +429,31 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public CmisObject createRelationship(Properties properties, List<AccessControlEntry> addACL,
+   public CmisObject createRelationship(PropertyData propertyData, List<AccessControlEntry> addACL,
       List<AccessControlEntry> removeACL, List<String> policies) throws ObjectNotFoundException, ConstraintException,
       NameConstraintViolationException, StorageException, CmisRuntimeException
    {
-      if (properties == null)
+      if (propertyData == null)
          throw new InvalidArgumentException("Properties may not by null.");
 
       checkConnection();
 
-      String typeId = properties.getId(CMIS.OBJECT_TYPE_ID);
+      String typeId = propertyData.getId(CMIS.OBJECT_TYPE_ID);
       if (typeId == null)
          throw new InvalidArgumentException("Type is not specified.");
 
-      String sourceId = properties.getId(CMIS.SOURCE_ID);
+      String sourceId = propertyData.getId(CMIS.SOURCE_ID);
       if (sourceId == null)
          throw new InvalidArgumentException("Required property 'cmis:sourceId' is not specified.");
 
-      String targetId = properties.getId(CMIS.TARGET_ID);
+      String targetId = propertyData.getId(CMIS.TARGET_ID);
       if (targetId == null)
          throw new InvalidArgumentException("Required property 'cmis:targetId' is not specified.");
 
       ObjectData newRelationship =
          storage.createRelationship(storage.getObject(sourceId), storage.getObject(targetId), typeId);
 
-      newRelationship.setProperties(properties);
+      newRelationship.getPropertyData().setProperties(propertyData.getProperties());
 
       if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
          applyACL(newRelationship, addACL, removeACL);
@@ -552,7 +542,7 @@ public abstract class BaseConnection implements Connection
     * {@inheritDoc}
     */
    public Collection<String> deleteTree(String folderId, Boolean deleteAllVersions, UnfileObject unfileObject,
-      boolean continueOnFailure) throws ObjectNotFoundException, UpdateConflictException, CmisRuntimeException
+      Boolean continueOnFailure) throws ObjectNotFoundException, UpdateConflictException, CmisRuntimeException
    {
       checkConnection();
 
@@ -569,6 +559,9 @@ public abstract class BaseConnection implements Connection
 
       if (deleteAllVersions == null)
          deleteAllVersions = true; // Default value.
+
+      if (continueOnFailure == null)
+         continueOnFailure = false;
 
       // TODO : Check unfiling capability if 'unfileObject' is other then 'DELETE'
 
@@ -636,14 +629,14 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public Properties getProperties(String objectId, String propertyFilter) throws ObjectNotFoundException,
+   public PropertyData getProperties(String objectId, String propertyFilter) throws ObjectNotFoundException,
       FilterNotValidException, CmisRuntimeException
    {
       checkConnection();
 
       ObjectData object = storage.getObject(objectId);
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
-      return object.getProperties().getSubset(parsedPropertyFilter);
+      return object.getPropertyData().getSubset(parsedPropertyFilter);
    }
 
    /**
@@ -704,7 +697,7 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public CmisObject updateProperties(String objectId, String changeToken, Properties properties)
+   public CmisObject updateProperties(String objectId, String changeToken, PropertyData propertiesData)
       throws ObjectNotFoundException, ConstraintException, NameConstraintViolationException, UpdateConflictException,
       StorageException, CmisRuntimeException
    {
@@ -715,7 +708,7 @@ public abstract class BaseConnection implements Connection
       // Validate change token, object may be already updated.
       validateChangeToken(object, changeToken);
 
-      object.setProperties(properties);
+      object.getPropertyData().setProperties(propertiesData.getProperties());
 
       storage.saveObject(object);
 
@@ -794,18 +787,18 @@ public abstract class BaseConnection implements Connection
       checkConnection();
 
       ObjectData document = storage.getObject(documentId);
-      if (!document.isVersionSeriesCheckedOut())
-         return; // No PWC.
-      // cancelCheckedOut may be invoked on any object in version series. In other way 
-      // 'cmis:versionSeriesCheckedOutId' may not reflect current PWC id. 
-      String versionSeriesId = document.getVersionSeriesId();
-      // Than assume via version series should be able to cancel checkout even if 
-      // 'cmis:versionSeriesCheckedOutId' for all document in version series is not 
-      // specified.
-      storage.cancelCheckout(versionSeriesId);
+      if (document.getBaseType() != BaseType.DOCUMENT)
+         throw new InvalidArgumentException("Object " + documentId + " is not a Document object.");
+      // cancelCheckedOut may be invoked on any object in version series.
+      // In other way 'cmis:versionSeriesCheckedOutId' may not reflect
+      // current PWC id. 
+      ((DocumentData)document).cancelCheckout();
    }
 
-   public CmisObject checkin(String documentId, boolean major, Properties properties, ContentStream content,
+   /**
+    * {@inheritDoc}
+    */
+   public CmisObject checkin(String documentId, boolean major, PropertyData propertyData, ContentStream content,
       String checkinComment, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, List<String> policies)
       throws ConstraintException, UpdateConflictException, StreamNotSupportedException, IOException, StorageException
    {
@@ -819,8 +812,8 @@ public abstract class BaseConnection implements Connection
       if (!((DocumentData)pwc).isPWC())
          throw new VersioningException("Object " + documentId + " is not Private Working Copy.");
 
-      if (properties != null)
-         pwc.setProperties(properties);
+      if (propertyData != null)
+         pwc.getPropertyData().setProperties(propertyData.getProperties());
 
       if (content != null)
          ((DocumentData)pwc).setContentStream(content);
@@ -870,30 +863,33 @@ public abstract class BaseConnection implements Connection
    {
       checkConnection();
 
-      Collection<ObjectData> versions = storage.getVersions(versionSeriesId);
-      if (versions == null)
-         throw new ObjectNotFoundException("Version series " + versionSeriesId + " does not exists.");
+      Collection<DocumentData> versions = storage.getAllVersions(versionSeriesId);
 
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
       RenditionFilter parsedRenditionFilter = new RenditionFilter(renditionFilter);
+
       if (includeRelationships == null)
-         includeRelationships = IncludeRelationships.NONE;
+         includeRelationships = IncludeRelationships.NONE; // Default
+
       // Even for not-versionable documents version series contains exactly one version of document.
       if (versions.size() == 1)
          return getCmisObject(versions.iterator().next(), includeAllowableActions, includeRelationships, false, false,
             parsedPropertyFilter, parsedRenditionFilter);
 
-      List<ObjectData> v = new ArrayList<ObjectData>(versions);
+      // Storage#getAllVersions(versionSeriesId) return sorted by
+      // 'cmis:creationDate' descending. Latest version is version with latest
+      // 'cmis:lastModificationDate'.
+      List<DocumentData> v = new ArrayList<DocumentData>(versions);
       Collections.sort(v, CmisUtils.versionComparator);
-      if (!major)
+
+      if (!major) // If not need major version that simply take first in list. 
          return getCmisObject(v.get(0), includeAllowableActions, includeRelationships, false, false,
             parsedPropertyFilter, parsedRenditionFilter);
 
-      for (ObjectData object : v)
+      for (DocumentData document : v)
       {
-         boolean majorProperty = object.getBoolean(CMIS.IS_MAJOR_VERSION);
-         if (majorProperty)
-            return getCmisObject(object, includeAllowableActions, includeRelationships, false, false,
+         if (document.isMajorVersion())
+            return getCmisObject(document, includeAllowableActions, includeRelationships, false, false,
                parsedPropertyFilter, parsedRenditionFilter);
       }
 
@@ -904,33 +900,11 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public Properties getPropertiesOfLatestVersion(String versionSeriesId, boolean major, String propertyFilter)
+   public PropertyData getPropertiesOfLatestVersion(String versionSeriesId, boolean major, String propertyFilter)
       throws FilterNotValidException, ObjectNotFoundException, CmisRuntimeException
    {
-      checkConnection();
-
-      Collection<ObjectData> versions = storage.getVersions(versionSeriesId);
-      if (versions == null)
-         throw new ObjectNotFoundException("Version series " + versionSeriesId + " does not exists.");
-      PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
-      // Even for not-versionable documents version series contains exactly one version of document.
-      if (versions.size() == 1)
-         return getProperties(versions.iterator().next(), parsedPropertyFilter);
-
-      List<ObjectData> v = new ArrayList<ObjectData>(versions);
-      Collections.sort(v, CmisUtils.versionComparator);
-      if (!major)
-         return getProperties(v.get(0), parsedPropertyFilter);
-
-      for (ObjectData object : v)
-      {
-         boolean majorProperty = object.getBoolean(CMIS.IS_MAJOR_VERSION);
-         if (majorProperty)
-            return getProperties(object, parsedPropertyFilter);
-      }
-
-      // May happen only if major version requested but there is no any major version.
-      throw new ObjectNotFoundException("Not found any major versions in version series.");
+      return getObjectOfLatestVersion(versionSeriesId, major, false, null, false, false, propertyFilter,
+         RenditionFilter.NONE_FILTER).getProperties();
    }
 
    // ------- Navigation Services -------
@@ -948,14 +922,12 @@ public abstract class BaseConnection implements Connection
       if (skipCount < 0)
          throw new InvalidArgumentException("skipCount parameter is negative.");
 
-      ObjectData folderData = storage.getObject(folderId);
-      if (folderData == null)
-         throw new ObjectNotFoundException("Fodler object " + folderId + " does not exists.");
-      if (folderData.getBaseType() != BaseType.FOLDER)
+      ObjectData folder = storage.getObject(folderId);
+      if (folder.getBaseType() != BaseType.FOLDER)
          throw new InvalidArgumentException("Can't get children. Object " + folderId + " is not a Folder.");
 
       /* TODO : orderBy in some more usable form */
-      ItemsIterator<ObjectData> iterator = storage.getChildren(folderData, orderBy);
+      ItemsIterator<ObjectData> iterator = ((FolderData)folder).getChildren(orderBy);
       try
       {
          if (skipCount > 0)
@@ -963,29 +935,31 @@ public abstract class BaseConnection implements Connection
       }
       catch (NoSuchElementException nse)
       {
-         throw new InvalidArgumentException("skipCount parameter is greater then total number of argument");
+         throw new InvalidArgumentException("'skipCount' parameter is greater then total number of argument");
       }
 
-      ItemsListImpl<CmisObject> children = new ItemsListImpl<CmisObject>();
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
       RenditionFilter parsedRenditionFilter = new RenditionFilter(renditionFilter);
       if (includeRelationships == null)
-         includeRelationships = IncludeRelationships.NONE;
-      int count = 0;
-      while (iterator.hasNext() && (maxItems < 0 || count < maxItems))
+         includeRelationships = IncludeRelationships.NONE; // Default
+
+      ItemsListImpl<CmisObject> cmisChildren = new ItemsListImpl<CmisObject>();
+      for (int count = 0; iterator.hasNext() && (maxItems < 0 || count < maxItems); count++)
       {
          ObjectData chilData = iterator.next();
+
          CmisObject child =
             getCmisObject(chilData, includeAllowableActions, includeRelationships, false, false, parsedPropertyFilter,
                parsedRenditionFilter);
-         children.getItems().add(child);
-         count++;
+
+         cmisChildren.getItems().add(child);
       }
 
       // Indicate that we have some more results.
-      children.setHasMoreItems(iterator.hasNext());
-      children.setNumItems(iterator.size()); // ItemsIterator gives -1 if total number is unknown.
-      return children;
+      cmisChildren.setHasMoreItems(iterator.hasNext());
+      cmisChildren.setNumItems(iterator.size()); // ItemsIterator gives -1 if total number is unknown.
+
+      return cmisChildren;
    }
 
    /**
@@ -996,19 +970,21 @@ public abstract class BaseConnection implements Connection
    {
       checkConnection();
 
-      ObjectData folderData = storage.getObject(folderId);
-      if (folderData == null)
-         throw new ObjectNotFoundException("Fodler object " + folderId + " does not exists.");
-      if (folderData.getBaseType() != BaseType.FOLDER)
+      ObjectData folder = storage.getObject(folderId);
+      if (folder.getBaseType() != BaseType.FOLDER)
          throw new InvalidArgumentException("Object " + folderId + " is not a Folder.");
-      if (storage.getRepositoryInfo().getRootFolderId().equals(folderId))
+
+      if (((FolderData)folder).isRoot())
          throw new InvalidArgumentException("Can't get parent of root folder.");
 
+      ObjectData parent = folder.getParent();
+
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
-      ObjectData parentData = folderData.getParent();
+
       CmisObject cmisParent =
-         getCmisObject(parentData, false, IncludeRelationships.NONE, false, false, parsedPropertyFilter,
+         getCmisObject(parent, false, IncludeRelationships.NONE, false, false, parsedPropertyFilter,
             RenditionFilter.NONE);
+
       return cmisParent;
    }
 
@@ -1023,8 +999,6 @@ public abstract class BaseConnection implements Connection
       checkConnection();
 
       ObjectData object = storage.getObject(objectId);
-      if (object == null)
-         throw new ObjectNotFoundException("Object " + objectId + " does not exists.");
 
       String typeId = object.getTypeId();
       TypeDefinition typeDefinition = getTypeDefinition(typeId, false);
@@ -1032,21 +1006,27 @@ public abstract class BaseConnection implements Connection
          throw new ConstraintException("Can't get parents. Object " + objectId + " has type " + typeId
             + " that is not fileable");
 
-      Collection<ObjectData> parentDatas = object.getParents();
+      Collection<FolderData> parents = object.getParents();
+
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
       RenditionFilter parsedRenditionFilter = new RenditionFilter(renditionFilter);
+
       if (includeRelationships == null)
-         includeRelationships = IncludeRelationships.NONE;
-      List<ObjectParent> cmisParents = new ArrayList<ObjectParent>(parentDatas.size());
-      for (ObjectData parentData : parentDatas)
+         includeRelationships = IncludeRelationships.NONE; // Default
+
+      List<ObjectParent> cmisParents = new ArrayList<ObjectParent>(parents.size());
+      for (ObjectData parent : parents)
       {
          CmisObject cmisParent =
-            getCmisObject(parentData, includeAllowableActions, includeRelationships, false, false,
-               parsedPropertyFilter, parsedRenditionFilter);
+            getCmisObject(parent, includeAllowableActions, includeRelationships, false, false, parsedPropertyFilter,
+               parsedRenditionFilter);
+
          ObjectParent parentType =
             new ObjectParentImpl(cmisParent, includeRelativePathSegment ? object.getName() : null);
+
          cmisParents.add(parentType);
       }
+
       return cmisParents;
    }
 
@@ -1081,29 +1061,35 @@ public abstract class BaseConnection implements Connection
    {
       checkConnection();
 
-      ObjectData folderData = storage.getObject(folderId);
-      if (folderData == null)
-         throw new ObjectNotFoundException("Object " + folderId + " does not exists.");
-      if (folderData.getBaseType() != BaseType.FOLDER)
+      ObjectData folder = storage.getObject(folderId);
+
+      if (folder.getBaseType() != BaseType.FOLDER)
          throw new InvalidArgumentException("Can't get children. Object " + folderId + " is not a Folder.");
+
       List<ItemsTree<CmisObject>> tree = new ArrayList<ItemsTree<CmisObject>>();
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
       RenditionFilter parsedRenditionFilter = new RenditionFilter(renditionFilter);
-      for (ItemsIterator<ObjectData> children = storage.getChildren(folderData, null); children.hasNext();)
+
+      for (ItemsIterator<ObjectData> children = ((FolderData)folder).getChildren(null); children.hasNext();)
       {
          ObjectData child = children.next();
+
          if (typeFilter != null && child.getBaseType() != typeFilter)
             continue;
+
          CmisObject container =
             getCmisObject(child, includeAllowableActions, includeRelationships, false, false, parsedPropertyFilter,
                parsedRenditionFilter);
+
          List<ItemsTree<CmisObject>> subTree =
-            (child.getBaseType() == BaseType.FOLDER && depth > 1) //
+            (child.getBaseType() == BaseType.FOLDER && depth > 1) // 
                ? getTree(child.getObjectId(), depth - 1, typeFilter, includeAllowableActions, includeRelationships,
                   includePathSegments, propertyFilter, renditionFilter) //
                : null;
+
          tree.add(new ItemsTreeImpl<CmisObject>(container, subTree));
       }
+
       return tree;
    }
 
@@ -1120,18 +1106,18 @@ public abstract class BaseConnection implements Connection
       if (skipCount < 0)
          throw new InvalidArgumentException("skipCount parameter is negative.");
 
-      ObjectData folderData = null;
+      ObjectData folder = null;
+
       if (folderId != null)
       {
-         folderData = storage.getObject(folderId);
-         if (folderData == null)
-            throw new ObjectNotFoundException("Fodler object " + folderId + " does not exists.");
-         if (folderData.getBaseType() != BaseType.FOLDER)
+         folder = storage.getObject(folderId);
+
+         if (folder.getBaseType() != BaseType.FOLDER)
             throw new InvalidArgumentException("Can't get checkedout documents. Object " + folderId
                + " is not a Folder.");
       }
 
-      ItemsIterator<ObjectData> iterator = storage.getCheckedOutDocuments(folderData, orderBy);
+      ItemsIterator<ObjectData> iterator = storage.getCheckedOutDocuments(folder, orderBy);
 
       try
       {
@@ -1146,20 +1132,22 @@ public abstract class BaseConnection implements Connection
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
       RenditionFilter parsedRenditionFilter = new RenditionFilter(renditionFilter);
       if (includeRelationships == null)
-         includeRelationships = IncludeRelationships.NONE;
+         includeRelationships = IncludeRelationships.NONE; // Default.
+
       ItemsListImpl<CmisObject> checkedout = new ItemsListImpl<CmisObject>();
-      int count = 0;
-      while (iterator.hasNext() && (maxItems < 0 || count < maxItems))
+
+      for (int count = 0; iterator.hasNext() && (maxItems < 0 || count < maxItems); count++)
       {
          ObjectData pwcData = iterator.next();
          CmisObject pwc =
             getCmisObject(pwcData, includeAllowableActions, includeRelationships, false, false, parsedPropertyFilter,
                parsedRenditionFilter);
          checkedout.getItems().add(pwc);
-         count++;
       }
+
       checkedout.setHasMoreItems(iterator.hasNext());
       checkedout.setNumItems(iterator.size()); // ItemsIterator gives -1 if total number is unknown
+
       return checkedout;
    }
 
@@ -1181,10 +1169,9 @@ public abstract class BaseConnection implements Connection
          direction = RelationshipDirection.SOURCE;
 
       ObjectData objectData = storage.getObject(objectId);
-      if (objectData == null)
-         throw new ObjectNotFoundException("Object " + objectId + " does not exists.");
 
-      ItemsIterator<ObjectData> iterator = objectData.getRelationships(direction, typeId, includeSubRelationshipTypes);
+      ItemsIterator<RelationshipData> iterator =
+         objectData.getRelationships(direction, typeId, includeSubRelationshipTypes);
 
       try
       {
@@ -1197,31 +1184,24 @@ public abstract class BaseConnection implements Connection
       }
 
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
-      ItemsListImpl<CmisObject> relationship = new ItemsListImpl<CmisObject>();
-      long count = 0;
-      while (iterator.hasNext() && (maxItems < 0 || count < maxItems))
+      ItemsListImpl<CmisObject> relationships = new ItemsListImpl<CmisObject>();
+
+      for (int count = 0; iterator.hasNext() && (maxItems < 0 || count < maxItems); count++)
       {
-         ObjectData relationshipData = iterator.next();
+         ObjectData rel = iterator.next();
+
          CmisObject cmis =
-            getCmisObject(relationshipData, includeAllowableActions, null, false, false, parsedPropertyFilter,
-               RenditionFilter.NONE);
-         relationship.getItems().add(cmis);
-         count++;
+            getCmisObject(rel, includeAllowableActions, null, false, false, parsedPropertyFilter, RenditionFilter.NONE);
+
+         relationships.getItems().add(cmis);
       }
 
       // Indicate we have some more results or not
-      relationship.setHasMoreItems(iterator.hasNext());
-      relationship.setNumItems(iterator.size()); // ItemsIterator gives -1 if total number is unknown
-      return relationship;
-   }
+      relationships.setHasMoreItems(iterator.hasNext());
+      relationships.setNumItems(iterator.size()); // ItemsIterator gives -1 if total number is unknown
 
-   //   private CmisPropertiesType getProperties(ObjectData objectData, PropertyFilter parsedPropertyFilter)
-   //   {
-   //      CmisPropertiesType properties = new CmisPropertiesType();
-   //      for (Map.Entry<String, CmisProperty> e : objectData.getProperties(parsedPropertyFilter).entrySet())
-   //         properties.getProperty().add(e.getValue());
-   //      return properties;
-   //   }
+      return relationships;
+   }
 
    // ------- Repository Services. (Type Manager) -------
 
@@ -1247,18 +1227,18 @@ public abstract class BaseConnection implements Connection
          throw new InvalidArgumentException("skipCount parameter is greater then total number of argument");
       }
 
-      ItemsListImpl<TypeDefinition> children = new ItemsListImpl<TypeDefinition>();
-      int count = 0;
-      while (iterator.hasNext() && (maxItems < 0 || count < maxItems))
+      ItemsListImpl<TypeDefinition> typeChildren = new ItemsListImpl<TypeDefinition>();
+
+      for (int count = 0; iterator.hasNext() && (maxItems < 0 || count < maxItems); count++)
       {
          TypeDefinition type = iterator.next();
-         children.getItems().add(type);
-         count++;
+         typeChildren.getItems().add(type);
       }
       // Indicate that we have some more results.
-      children.setHasMoreItems(iterator.hasNext());
-      children.setNumItems(iterator.size()); // ItemsIterator gives -1 if total number is unknown
-      return children;
+      typeChildren.setHasMoreItems(iterator.hasNext());
+      typeChildren.setNumItems(iterator.size()); // ItemsIterator gives -1 if total number is unknown
+
+      return typeChildren;
    }
 
    /**
@@ -1299,15 +1279,19 @@ public abstract class BaseConnection implements Connection
       checkConnection();
 
       List<ItemsTree<TypeDefinition>> tree = new ArrayList<ItemsTree<TypeDefinition>>();
+
       for (ItemsIterator<TypeDefinition> children = storage.getTypeChildren(typeId, includePropertyDefinition); children
          .hasNext();)
       {
          TypeDefinition container = children.next();
+
          List<ItemsTree<TypeDefinition>> subTree = (typeId != null && depth > 1) // 
             ? getTypeDescendants(container.getId(), depth - 1, includePropertyDefinition) //
             : null;
+
          tree.add(new ItemsTreeImpl<TypeDefinition>(container, subTree));
       }
+
       return tree;
    }
 
@@ -1331,46 +1315,14 @@ public abstract class BaseConnection implements Connection
       String propertyFilter, boolean includePolicyIDs, boolean includeAcl, int maxItems) throws ConstraintException,
       FilterNotValidException, CmisRuntimeException
    {
-      checkConnection();
-
-      CapabilityChanges capabilityChanges = storage.getRepositoryInfo().getCapabilities().getCapabilityChanges();
-      if (capabilityChanges == CapabilityChanges.NONE)
-         throw new NotSupportedException("Changes log feature is not supported.");
-      if (changeLogToken == null)
-         throw new CmisRuntimeException("Change log token holder may not be null.");
-
-      ItemsIterator<ChangeEvent> iterator = storage.getChangeLog(changeLogToken.getToken());
-      int count = 0;
-      ItemsListImpl<CmisObject> changes = new ItemsListImpl<CmisObject>();
-      // TODO :
-      // 1. How-to include changes type ?? Id id not clear how to pass this info via generated code.
-      // 2. Add policy IDs, ACL, properties. Need have this in storage, first.
-      while (iterator.hasNext() && (maxItems < 0 || count < maxItems))
-      {
-         CmisObject ch = new CmisObjectImpl();
-         CmisPropertiesType properties = new CmisPropertiesType();
-         CmisPropertyId id = new CmisPropertyId();
-         id.setPropertyDefinitionId(CMIS.OBJECT_ID);
-         id.setDisplayName(CMIS.OBJECT_ID);
-         id.setQueryName(CMIS.OBJECT_ID);
-         id.setLocalName(CMIS.OBJECT_ID);
-         id.getValue().add(iterator.next().getObjectId());
-         properties.getProperty().add(id);
-         ch.setProperties(properties);
-         changes.getItems().add(ch);
-         count++;
-      }
-      changes.setHasMoreItems(iterator.hasNext());
-      long total = iterator.size();
-      if (total != -1)
-         changes.setNumItems(BigInteger.valueOf(total));
-      return changes;
+      // TODO : implement
+      throw new NotSupportedException("Changes log feature is not supported.");
    }
 
    /**
     * {@inheritDoc}
     */
-   public CmisObjectList query(String statement, boolean searchAllVersions, boolean includeAllowableActions,
+   public ItemsList<CmisObject> query(String statement, boolean searchAllVersions, boolean includeAllowableActions,
       IncludeRelationships includeRelationships, String renditionFilter, int maxItems, int skipCount)
       throws FilterNotValidException, CmisRuntimeException
    {
@@ -1393,11 +1345,13 @@ public abstract class BaseConnection implements Connection
       }
 
       if (includeRelationships == null)
-         includeRelationships = IncludeRelationships.NONE;
+         includeRelationships = IncludeRelationships.NONE; // Default.
+
       RenditionFilter parsedRenditionFilter = new RenditionFilter(renditionFilter);
-      CmisObjectList list = new CmisObjectListImpl();
-      int count = 0;
-      while (iterator.hasNext() && count < maxItems)
+
+      ItemsListImpl<CmisObject> list = new ItemsListImpl<CmisObject>();
+
+      for (int count = 0; iterator.hasNext() && (maxItems < 0 || count < maxItems); count++)
       {
          Result result = iterator.next();
          StringBuilder propertyFilter = new StringBuilder();
@@ -1410,9 +1364,17 @@ public abstract class BaseConnection implements Connection
                propertyFilter.append(s);
             }
          }
-         ObjectData data = storage.getObject(result.getObjectId());
-         if (data == null)
-            throw new CmisRuntimeException("Object " + result.getObjectId() + " was removed.");
+
+         ObjectData data = null;
+         try
+         {
+            data = storage.getObject(result.getObjectId());
+         }
+         catch (ObjectNotFoundException e)
+         {
+            LOG.warn("Object " + result.getObjectId() + " was removed.");
+         }
+
          CmisObject object =
             getCmisObject(data, includeAllowableActions, includeRelationships, false, false, new PropertyFilter(
                propertyFilter.toString()), parsedRenditionFilter);
@@ -1420,66 +1382,31 @@ public abstract class BaseConnection implements Connection
          Score score = result.getScore();
          if (score != null)
          {
-            CmisPropertyDecimal scoreProperty = new CmisPropertyDecimal();
-            scoreProperty.setLocalName(score.getScoreColumnName());
-            scoreProperty.setDisplayName(score.getScoreColumnName());
-            scoreProperty.setPropertyDefinitionId(score.getScoreColumnName());
-            scoreProperty.getValue().add(score.getScoreValue());
-            object.getProperties().getProperty().add(0, scoreProperty);
+            String scoreColumnName = score.getScoreColumnName();
+            DecimalProperty scoreProperty =
+               new DecimalProperty(scoreColumnName, scoreColumnName, scoreColumnName, scoreColumnName, Collections
+                  .singletonList(score.getScoreValue()));
+            object.getProperties().getProperties().put(scoreColumnName, scoreProperty);
          }
          list.getItems().add(object);
-         count++;
       }
 
       // Indicate that we have some more results.
       list.setHasMoreItems(iterator.hasNext());
-      long total = iterator.size();
-      if (total != -1)
-         list.setNumItems(BigInteger.valueOf(total));
+      list.setNumItems(iterator.size()); // ItemsIterator gives -1 if total number is unknown
+
       return list;
    }
 
    //---------
 
-   //   protected void validateSourceType(RelationshipData relationship, String sourceTypeId)
-   //   {
-   //      
-   //   }
-   //
-   //   protected void validateTargetType(RelationshipData relationship, String targetTypeId)
-   //   {
-   //      
-   //   }
-
-   protected void setContentStream(ObjectData document, ContentStream contentStream) throws StreamNotSupportedException
-   {
-      TypeDefinition typeDefinition = document.getTypeDefinition();
-
-      ContentStreamAllowed contentStreamAllowed = typeDefinition.getContentStreamAllowed();
-      if (contentStreamAllowed == ContentStreamAllowed.NOT_ALLOWED)
-      {
-         if (contentStream != null)
-            throw new StreamNotSupportedException("Content is not allowed for type " + typeDefinition.getId());
-      }
-      else if (contentStreamAllowed == ContentStreamAllowed.REQUIRED)
-      {
-         if (contentStream == null)
-            throw new ConstraintException("Content required for type " + typeDefinition.getId() + " but it is null.");
-      }
-
-      // Content may be null if it is allowed by type definition 
-      ((DocumentData)document).setContentStream(contentStream);
-   }
-
-   // -------
-
-   protected abstract CmisObject getCmisObject(ObjectData object, boolean includeAllowableActions,
+   protected CmisObject getCmisObject(ObjectData object, boolean includeAllowableActions,
       IncludeRelationships includeRelationships, boolean includePolicyIds, boolean includeAcl,
-      PropertyFilter parsedPropertyFilter, RenditionFilter parsedRenditionFilter);
-
-   protected abstract void validateChangeToken(ObjectData object, String changeToken) throws UpdateConflictException;
-
-   // ------------------------------- Helpers ---------------------------
+      PropertyFilter parsedPropertyFilter, RenditionFilter parsedRenditionFilter)
+   {
+      // TODO : 
+      return null;
+   }
 
    /**
     * Check is connection may be used at the moment, e.g. it may be already
@@ -1488,6 +1415,10 @@ public abstract class BaseConnection implements Connection
     * @throws IllegalStateException if connection may not be used any more
     */
    protected abstract void checkConnection() throws IllegalStateException;
+
+   protected abstract void validateChangeToken(ObjectData object, String changeToken) throws UpdateConflictException;
+
+   // ------------------------------- Helpers ---------------------------
 
    private void applyPolicies(ObjectData object, List<String> policies)
    {
@@ -1528,6 +1459,16 @@ public abstract class BaseConnection implements Connection
       List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(object.getACL(false), addACL, removeACL);
 
       object.setACL(mergedACL);
+   }
+
+   //
+   
+   /**
+    * {@inheritDoc}
+    */
+   public Storage getStorage()
+   {
+      return storage;
    }
 
 }

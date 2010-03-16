@@ -101,7 +101,7 @@ class FolderChildrenIterator implements ItemsIterator<ObjectData>
    /**
     * {@inheritDoc}
     */
-   public long size()
+   public int size()
    {
       return -1 /*iter.getSize()*/;
    }
@@ -109,7 +109,7 @@ class FolderChildrenIterator implements ItemsIterator<ObjectData>
    /**
     * {@inheritDoc}
     */
-   public void skip(long skip) throws NoSuchElementException
+   public void skip(int skip) throws NoSuchElementException
    {
       while (skip-- > 0)
       {

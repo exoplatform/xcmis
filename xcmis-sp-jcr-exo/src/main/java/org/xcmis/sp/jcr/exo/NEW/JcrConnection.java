@@ -19,14 +19,10 @@
 
 package org.xcmis.sp.jcr.exo.NEW;
 
-import org.xcmis.core.EnumIncludeRelationships;
 import org.xcmis.spi.Storage;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.data.ObjectData;
 import org.xcmis.spi.impl.BaseConnection;
-import org.xcmis.spi.impl.PropertyFilter;
-import org.xcmis.spi.impl.RenditionFilter;
-import org.xcmis.spi.object.CmisObject;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
@@ -35,19 +31,9 @@ import org.xcmis.spi.object.CmisObject;
 public class JcrConnection extends BaseConnection
 {
 
-   private final Storage storage;
-
    public JcrConnection(Storage storage)
    {
-      this.storage = storage;
-   }
-
-   protected CmisObject getCmisObject(ObjectData object, boolean includeAllowableActions,
-      EnumIncludeRelationships includeRelationships, boolean includePolicyIds, boolean includeAcl,
-      PropertyFilter parsedPropertyFilter, RenditionFilter parsedRenditionFilter)
-   {
-      // TODO Auto-generated method stub
-      return null;
+      super(storage);
    }
 
    public void close()
@@ -60,16 +46,9 @@ public class JcrConnection extends BaseConnection
       // TODO Auto-generated method stub
    }
 
-   @Override
    protected void checkConnection() throws IllegalStateException
    {
       // TODO Auto-generated method stub
-   }
-
-   public Storage getStorage()
-   {
-      // TODO Auto-generated method stub
-      return null;
    }
 
 }

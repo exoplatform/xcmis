@@ -25,19 +25,16 @@ import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.NotSupportedException;
-import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.RelationshipDirection;
 import org.xcmis.spi.Storage;
 import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.Permission.BasicPermissions;
 import org.xcmis.spi.impl.CmisVisitor;
-import org.xcmis.spi.object.Properties;
-import org.xcmis.spi.object.Property;
+import org.xcmis.spi.object.PropertyData;
 
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
@@ -68,9 +65,9 @@ public interface ObjectData
     *        permissions {@link BasicPermissions} must be returned if
     *        <code>false</code> then basic permissions and repository specific
     *        permissions must be returned
-    * @return applied ACL. It may return <code>null</code> or empty list if
-    *         there is no ACL applied to object or if object is not controllable
-    *         by ACL
+    * @return applied ACL. If there is no ACL applied to object or if object is
+    *         not controllable by ACL empty list must be returned, never
+    *         <code>null</code>
     * @see BasicPermissions
     */
    List<AccessControlEntry> getACL(boolean onlyBasicPermissions);
@@ -91,9 +88,9 @@ public interface ObjectData
     * Get policies applied to the current object. If Policy object type is not
     * supported then this method must throw {@link NotSupportedException}.
     * 
-    * @return applied Policies. It may return <code>null</code> or empty list if
-    *         there is no policies applied to object or if object is not
-    *         controllable by policy
+    * @return applied Policies. If there is no policies applied to object or if
+    *         object is not controllable by policy then empty list must be
+    *         returned, never <code>null</code>
     */
    Collection<PolicyData> getPolicies();
 
@@ -108,7 +105,8 @@ public interface ObjectData
     */
    void removePolicy(PolicyData policy) throws ConstraintException;
 
-   //
+   // ------
+   
    /**
     * @return <code>true</code> if current object is newly created and was not
     *         persisted yet. If may be created via
@@ -117,46 +115,125 @@ public interface ObjectData
     */
    boolean isNew();
 
-   // 
-
+   /**
+    * @return base type of object
+    * @see BaseType
+    */
    BaseType getBaseType();
 
+   /**
+    * Shortcut to 'cmis:changeToken' property.
+    * 
+    * @return 'cmis:changeToken' property
+    */
    String getChangeToken();
 
+   /**
+    * Shortcut to 'cmis:createdBy' property.
+    * 
+    * @return 'cmis:createdBy' property
+    */
    String getCreatedBy();
 
+   /**
+    * Shortcut to 'cmis:creationDate' property.
+    * 
+    * @return 'cmis:creationDate' property
+    */
    Calendar getCreationDate();
 
+   /**
+    * Shortcut to 'cmis:lastModifiedBy' property.
+    * 
+    * @return 'cmis:lastModifiedBy' property
+    */
    String getLastModifiedBy();
 
+   /**
+    * Shortcut to 'cmis:lastModificationDate' property.
+    * 
+    * @return 'cmis:lastModificationDate' property
+    */
    Calendar getLatsModificationDate();
 
+   /**
+    * Shortcut to 'cmis:name' property.
+    * 
+    * @return 'cmis:name' property
+    */
    String getName();
 
+   /**
+    * Shortcut to 'cmis:objectId' property.
+    * 
+    * @return 'cmis:objectId' property
+    */
    String getObjectId();
 
-   FolderData getParent();
+   /**
+    * Get object parent.
+    * 
+    * @return parent of current object
+    * @throws ConstraintException if object has more then one parent or if
+    *         current object is root folder
+    */
+   FolderData getParent() throws ConstraintException;
 
+   /**
+    * Get collections of parent folders. It may contains exactly one object for
+    * single-filed and empty collection for unfiled object or root folder.
+    * 
+    * @return collection of object's parents
+    */
    Collection<FolderData> getParents();
 
+   /**
+    * Objects relationships.
+    * 
+    * @param direction relationship's direction.
+    * @param typeId relationship type id. If <code>null</code> then return
+    *        relationships of all types
+    * @param includeSubRelationshipTypes if <code>true</code>, then the return
+    *        all relationships whose object types are descendant types of
+    *        <code>typeId</code>.
+    * @return relationships
+    * @see RelationshipDirection
+    */
    ItemsIterator<RelationshipData> getRelationships(RelationshipDirection direction, String typeId,
       boolean includeSubRelationshipTypes);
 
+   /**
+    * @return type id
+    */
    String getTypeId();
 
+   /**
+    * @return type definition of object
+    */
    TypeDefinition getTypeDefinition();
 
+   /**
+    * Shortcut setter for 'cmis:name' property.
+    * 
+    * @throws NameConstraintViolationException if <i>cmis:name</i> specified in
+    *         properties throws conflict
+    */
    void setName(String name) throws NameConstraintViolationException;
 
-   // Properties
+   /**
+    * @return object properties, never <code>null</code>
+    */
+   PropertyData getPropertyData();
 
-
-   Properties getProperties();
-
-   void setProperties(Properties properties);
-
-   //
-
+   /**
+    * Get the content stream with specified id. Often it should be rendition
+    * stream. If object has type other then Document and
+    * <code>streamId == null</code> then this method return <code>null</code>.
+    * For Document objects default content stream will be returned.
+    * 
+    * @param streamId content stream id
+    * @return content stream or <code>null</code>
+    */
    ContentStream getContentStream(String streamId);
 
 }

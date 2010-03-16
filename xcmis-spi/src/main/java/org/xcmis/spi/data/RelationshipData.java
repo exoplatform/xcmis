@@ -26,4 +26,16 @@ package org.xcmis.spi.data;
 public interface RelationshipData extends ObjectData
 {
 
+   /**
+    * @return id of source object of this relationship. This is shortcut to
+    *         'cmis:sourceId' property
+    */
+   String getSourceId();
+
+   /**
+    * @return id of target object of this relationship. This is shortcut to
+    *         'cmis:targetId' property
+    */
+   String getTargetId();
+
 }

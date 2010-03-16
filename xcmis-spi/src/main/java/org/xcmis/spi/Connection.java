@@ -22,7 +22,7 @@ package org.xcmis.spi;
 import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.object.CmisObject;
 import org.xcmis.spi.object.ObjectParent;
-import org.xcmis.spi.object.Properties;
+import org.xcmis.spi.object.PropertyData;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -544,7 +544,7 @@ public interface Connection
     * 
     * @param folderId parent folder id for object. May be null if storage
     *        supports unfiling
-    * @param properties properties that MAY be applied to newly created document
+    * @param propertyData properties that MAY be applied to newly created document
     * @param content document content
     * @param addACL Access Control Entries that MUST added for newly created
     *        document, either using the ACL from <code>folderId</code> if
@@ -607,7 +607,7 @@ public interface Connection
     *         to storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObject createDocument(String folderId, Properties properties, ContentStream content,
+   CmisObject createDocument(String folderId, PropertyData propertyData, ContentStream content,
       List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, List<String> policies,
       VersioningState versioningState) throws ObjectNotFoundException, ConstraintException, InvalidArgumentException,
       StreamNotSupportedException, NameConstraintViolationException, IOException, StorageException,
@@ -620,7 +620,7 @@ public interface Connection
     * @param sourceId id for the source document
     * @param folderId parent folder id for object. May be null if storage
     *        supports unfiling
-    * @param properties properties that MAY be applied to newly created document
+    * @param propertyData properties that MAY be applied to newly created document
     * @param addACL Access Control Entries that MUST added for newly created
     *        document, either using the ACL from <code>folderId</code> if
     *        specified, or being applied if no <code>folderId</code> is
@@ -669,7 +669,7 @@ public interface Connection
     *         to storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObject createDocumentFromSource(String sourceId, String folderId, Properties properties,
+   CmisObject createDocumentFromSource(String sourceId, String folderId, PropertyData propertyData,
       List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, List<String> policies,
       VersioningState versioningState) throws ObjectNotFoundException, ConstraintException, InvalidArgumentException,
       NameConstraintViolationException, StorageException, CmisRuntimeException;
@@ -678,7 +678,7 @@ public interface Connection
     * Create a folder object.
     * 
     * @param folderId parent folder id for new folder
-    * @param properties properties that MAY be applied to newly created folder
+    * @param propertyData properties that MAY be applied to newly created folder
     * @param addACL Access Control Entries that MUST added for newly created
     *        Folder, either using the ACL from <code>folderId</code> if
     *        specified, or being applied if no <code>folderId</code> is
@@ -720,7 +720,7 @@ public interface Connection
     *         storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObject createFolder(String folderId, Properties properties, List<AccessControlEntry> addACL,
+   CmisObject createFolder(String folderId, PropertyData propertyData, List<AccessControlEntry> addACL,
       List<AccessControlEntry> removeACL, List<String> policies) throws ObjectNotFoundException, ConstraintException,
       InvalidArgumentException, NameConstraintViolationException, StorageException, CmisRuntimeException;
 
@@ -729,7 +729,7 @@ public interface Connection
     * 
     * @param folderId parent folder id may be null if policy object type is not
     *        fileable
-    * @param properties properties to be applied to newly created Policy
+    * @param propertyData properties to be applied to newly created Policy
     * @param addACL Access Control Entries that MUST added for newly created
     *        Policy, either using the ACL from <code>folderId</code> if
     *        specified, or being applied if no <code>folderId</code> is
@@ -771,14 +771,14 @@ public interface Connection
     *         storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObject createPolicy(String folderId, Properties properties, List<AccessControlEntry> addACL,
+   CmisObject createPolicy(String folderId, PropertyData propertyData, List<AccessControlEntry> addACL,
       List<AccessControlEntry> removeACL, List<String> policies) throws ObjectNotFoundException, ConstraintException,
       InvalidArgumentException, NameConstraintViolationException, StorageException, CmisRuntimeException;
 
    /**
     * Create a relationship object.
     * 
-    * @param properties properties to be applied to newly created relationship
+    * @param propertyData properties to be applied to newly created relationship
     * @param addACL set Access Control Entry to be applied for newly created
     *        relationship
     * @param removeACL set Access Control Entry that MUST be removed from the
@@ -818,7 +818,7 @@ public interface Connection
     *         cause to storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObject createRelationship(Properties properties, List<AccessControlEntry> addACL,
+   CmisObject createRelationship(PropertyData propertyData, List<AccessControlEntry> addACL,
       List<AccessControlEntry> removeACL, List<String> policies) throws ObjectNotFoundException, ConstraintException,
       NameConstraintViolationException, StorageException, CmisRuntimeException;
 
@@ -1048,7 +1048,7 @@ public interface Connection
     *         object's property definition
     * @throws CmisRuntimeException if any others errors occur
     */
-   Properties getProperties(String objectId, String propertyFilter) throws ObjectNotFoundException,
+   PropertyData getProperties(String objectId, String propertyFilter) throws ObjectNotFoundException,
       FilterNotValidException, CmisRuntimeException;
 
    /**
@@ -1159,7 +1159,7 @@ public interface Connection
     * @param objectId object id
     * @param changeToken is used for optimistic locking and/or concurrency
     *        checking to ensure that user updates do not conflict
-    * @param properties properties to be applied for object
+    * @param propertyData properties to be applied for object
     * @return updated object
     * @throws ObjectNotFoundException if document with specified id
     *         <code>objectId</code> does not exist
@@ -1174,7 +1174,7 @@ public interface Connection
     *         changes) cause to storage internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObject updateProperties(String objectId, String changeToken, Properties properties)
+   CmisObject updateProperties(String objectId, String changeToken, PropertyData propertyData)
       throws ObjectNotFoundException, ConstraintException, NameConstraintViolationException, UpdateConflictException,
       StorageException, CmisRuntimeException;
 
@@ -1236,7 +1236,8 @@ public interface Connection
     * 
     * @param objectId object id
     * @param direction relationship direction
-    * @param typeId relationship type id
+    * @param typeId relationship type id. If <code>null</code> then return
+    *        relationships of all types
     * @param includeSubRelationshipTypes if <code>true</code>, then the return
     *        all relationships whose object types are descendant types of
     *        <code>typeId</code>.
@@ -1299,7 +1300,7 @@ public interface Connection
     * @param documentId document id
     * @param major <code>true</code> is new version should be marked as major
     *        <code>false</code> otherwise
-    * @param properties properties to be applied to new version
+    * @param propertyData properties to be applied to new version
     * @param content content of document
     * @param checkinComment check-in comment
     * @param addACL set Access Control Entry to be applied for newly created
@@ -1324,7 +1325,7 @@ public interface Connection
     *         storage cause to its internal problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   CmisObject checkin(String documentId, boolean major, Properties properties, ContentStream content,
+   CmisObject checkin(String documentId, boolean major, PropertyData propertyData, ContentStream content,
       String checkinComment, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, List<String> policies)
       throws ConstraintException, UpdateConflictException, StreamNotSupportedException, IOException, StorageException;
 
@@ -1434,7 +1435,7 @@ public interface Connection
     *         object's property definition
     * @throws CmisRuntimeException if any others errors occur
     */
-   Properties getPropertiesOfLatestVersion(String versionSeriesId, boolean major, String propertyFilter)
+   PropertyData getPropertiesOfLatestVersion(String versionSeriesId, boolean major, String propertyFilter)
       throws FilterNotValidException, ObjectNotFoundException, CmisRuntimeException;
 
    // Type Managment

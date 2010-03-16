@@ -98,8 +98,17 @@ public interface Storage extends org.xcmis.spi.TypeManager
     * 
     * @return storage description
     */
-   RepositoryInfo getRepositoryInfo() throws CmisRuntimeException;
+   RepositoryInfo getRepositoryInfo();
 
+   /**
+    * Collection of all Document in the specified version series, sorted by
+    * cmis:creationDate descending.
+    * 
+    * @param versionSeriesId id of version series
+    * @return document versions
+    * @throws ObjectNotFoundException if version series with
+    *         <code>versionSeriesId</code> does not exists
+    */
    Collection<DocumentData> getAllVersions(String versionSeriesId) throws ObjectNotFoundException;
 
 }

@@ -26,4 +26,11 @@ package org.xcmis.spi.data;
 public interface PolicyData extends ObjectData
 {
 
+   /**
+    * Value of 'cmis:policyText' property.
+    * 
+    * @return 'cmis:policyText' property
+    */
+   String getPolicyText();
+
 }

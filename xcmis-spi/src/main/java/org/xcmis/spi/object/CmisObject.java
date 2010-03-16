@@ -25,7 +25,7 @@ public interface CmisObject
    /**
     * @return object's properties
     */
-   Properties getProperties();
+   PropertyData getProperties();
 
    /**
     * @return allowable actions

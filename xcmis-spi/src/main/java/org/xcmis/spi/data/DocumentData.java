@@ -84,7 +84,7 @@ public interface DocumentData extends ObjectData
    DocumentData checkout() throws StorageException, CmisRuntimeException;
 
    boolean isPWC();
-   
+
    //
    //   Collection<DocumentData> getAllVersions() throws CmisRuntimeException;
 
