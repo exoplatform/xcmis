@@ -29,10 +29,11 @@ import org.xcmis.search.content.interceptors.InterceptorChain;
 import org.xcmis.search.content.interceptors.QueryProcessorInterceptor;
 import org.xcmis.search.content.interceptors.QueryableIndexStorage;
 import org.xcmis.search.model.Query;
-import org.xcmis.search.query.QueryResults;
 import org.xcmis.search.query.optimize.CriteriaBasedOptimizer;
 import org.xcmis.search.query.plan.SimplePlaner;
+import org.xcmis.search.result.ScoredRow;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -80,13 +81,14 @@ public abstract class SearchService implements Startable
     * @return
     * @throws InvalidQueryException
     */
-   public QueryResults execute(Query query, Map<String, Object> bindVariablesValues) throws InvalidQueryException
+   @SuppressWarnings("unchecked")
+   public List<ScoredRow> execute(Query query, Map<String, Object> bindVariablesValues) throws InvalidQueryException
    {
       ProcessQueryCommand processQueryCommand = new ProcessQueryCommand(query, bindVariablesValues);
 
       try
       {
-         return (QueryResults)interceptorChain.invoke(getInvocationContext(), processQueryCommand);
+         return (List<ScoredRow>)interceptorChain.invoke(getInvocationContext(), processQueryCommand);
       }
       catch (Throwable e)
       {

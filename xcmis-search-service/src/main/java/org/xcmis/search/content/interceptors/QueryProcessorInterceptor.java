@@ -29,7 +29,6 @@ import org.xcmis.search.model.constraint.Constraint;
 import org.xcmis.search.model.ordering.Ordering;
 import org.xcmis.search.query.QueryExecutionContext;
 import org.xcmis.search.query.QueryExecutionExceptions;
-import org.xcmis.search.query.QueryExecutionResult;
 import org.xcmis.search.query.QueryResults.Statistics;
 import org.xcmis.search.query.plan.Optimizer;
 import org.xcmis.search.query.plan.QueryExecutionPlan;
@@ -43,8 +42,10 @@ import org.xcmis.search.query.plan.QueryExecutionPlan.Type;
 import org.xcmis.search.query.plan.QueryExecutionPlan.WhereExecutionPlan;
 import org.xcmis.search.query.process.QueryResultColumns;
 import org.xcmis.search.query.request.QueryProcessor;
+import org.xcmis.search.result.ScoredRow;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -89,7 +90,7 @@ public class QueryProcessorInterceptor extends CommandInterceptor
       QueryExecutionExceptions executionExceptions = new QueryExecutionExceptions();
       try
       {
-         return execute(new QueryExecutionContext(ctx.getSchema(), executionExceptions, command
+         return execute(ctx, new QueryExecutionContext(ctx.getSchema(), executionExceptions, command
             .getBindVariablesValues()), command.getQuery());
       }
       finally
@@ -104,13 +105,14 @@ public class QueryProcessorInterceptor extends CommandInterceptor
 
    /**
     * Execute the supplied query by planning, optimizing, and then processing it.
+    * @param ctx 
     * 
     * @param context the context in which the query should be executed
     * @param query the query that is to be executed
     * @return the query results; never null
     * @throws IllegalArgumentException if the context or query references are null
     */
-   public QueryExecutionResult execute(QueryExecutionContext context, Query query)
+   public List<ScoredRow> execute(InvocationContext ctx, QueryExecutionContext context, Query query)
    {
       Validate.notNull(context, "The context argument may not be null");
       Validate.notNull(query, "The query argument may not be null");
@@ -136,7 +138,7 @@ public class QueryProcessorInterceptor extends CommandInterceptor
             try
             {
                start = System.nanoTime();
-               execute(context, query, stats, optimizedPlan);
+               return execute(ctx, context, query, stats, optimizedPlan);
             }
             finally
             {
@@ -145,24 +147,26 @@ public class QueryProcessorInterceptor extends CommandInterceptor
             }
          }
       }
-      return null;
+      return Collections.emptyList();
    }
 
    /**
     * Execute the supplied query by plann
+    * @param ctx 
     * @param context
     * @param query
     * @param stats
     * @param queryPlan
     */
-   private Object execute(QueryExecutionContext context, Query query, Statistics stats, QueryExecutionPlan queryPlan)
+   private List<ScoredRow> execute(InvocationContext ctx, QueryExecutionContext context, Query query, Statistics stats,
+      QueryExecutionPlan queryPlan)
    {
       ProjectExecutionPlan project = (ProjectExecutionPlan)queryPlan.findPlanByType(Type.PROJECT);
 
       QueryResultColumns columns = new QueryResultColumns(project.getColumns(), true);
       QueryExecuteableComponent component = createQueryExecuteableComponent(queryPlan);
 
-      return component.executeComponent(context);
+      return component.executeComponent(ctx, context);
    };
 
    /**
@@ -317,7 +321,7 @@ public class QueryProcessorInterceptor extends CommandInterceptor
          return constraints;
       }
 
-      public abstract Object executeComponent(QueryExecutionContext context);
+      public abstract List<ScoredRow> executeComponent(InvocationContext ctx, QueryExecutionContext context);
    }
 
    /**
@@ -356,14 +360,14 @@ public class QueryProcessorInterceptor extends CommandInterceptor
        * @see org.xcmis.search.content.interceptors.QueryProcessorInterceptor.QueryExecuteableComponent#executeComponent(org.xcmis.search.query.QueryExecutionContext)
        */
       @Override
-      public Object executeComponent(QueryExecutionContext context)
+      public List<ScoredRow> executeComponent(InvocationContext ctx, QueryExecutionContext context)
       {
          try
          {
             ExecuteSelectorCommand command =
                new ExecuteSelectorCommand(selectorExecutionPlan.getName(), getConstraints(), getLimit(), getOrder(),
                   context.getVariables());
-            return getInterceptor().invokeNextInterceptor(null, command);
+            return (List<ScoredRow>)getInterceptor().invokeNextInterceptor(ctx, command);
          }
          catch (Throwable e)
          {
@@ -397,7 +401,7 @@ public class QueryProcessorInterceptor extends CommandInterceptor
        * @see org.xcmis.search.content.interceptors.QueryProcessorInterceptor.QueryExecuteableComponent#executeComponent(org.xcmis.search.query.QueryExecutionContext)
        */
       @Override
-      public Object executeComponent(QueryExecutionContext context)
+      public List<ScoredRow> executeComponent(InvocationContext ctx, QueryExecutionContext context)
       {
          throw new NotImplementedException("Method not implemented");
       }

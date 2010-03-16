@@ -24,7 +24,6 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TopDocCollector;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.xcmis.search.VisitException;
@@ -99,7 +98,7 @@ public class LuceneQueryableIndexStorage extends QueryableIndexStorage
       this.tableResolver = serviveConfuguration.getTableResolver();
       this.nameConverter = serviveConfuguration.getNameConverter();
       this.pathSplitter = serviveConfuguration.getPathSplitter();
-
+      this.indexDataManager.start();
    }
 
    /**
@@ -136,20 +135,22 @@ public class LuceneQueryableIndexStorage extends QueryableIndexStorage
       try
       {
          // get result
-         searcher = new IndexSearcher(indexDataManager.getIndexReader());
-
-         final TopDocCollector collector = new TopDocCollector(10000);
-         //query
-         Limit limit = command.getLimit();
-         searcher.search(query, limit.getOffset() + limit.getOffset());
-         final TopDocs docs = collector.topDocs();
-         resultNodes = new LinkedList<ScoredRow>();
-         for (int i = limit.getOffset(); i < docs.totalHits; i++)
+         IndexReader indexReader = indexDataManager.getIndexReader();
+         if (indexReader != null)
          {
-            // get identifiers
-            final Document doc = searcher.doc(docs.scoreDocs[i].doc, new UUIDFieldSelector());
-            final String id = doc.get(FieldNames.UUID);
-            resultNodes.add(new ScoredNodesImpl(command.getSelector().getName(), id, docs.scoreDocs[i].score));
+            searcher = new IndexSearcher(indexReader);
+
+            //query
+            Limit limit = command.getLimit();
+            final TopDocs docs = searcher.search(query, limit.getOffset() + limit.getOffset());
+            resultNodes = new LinkedList<ScoredRow>();
+            for (int i = limit.getOffset(); i < docs.totalHits; i++)
+            {
+               // get identifiers
+               final Document doc = searcher.doc(docs.scoreDocs[i].doc, new UUIDFieldSelector());
+               final String id = doc.get(FieldNames.UUID);
+               resultNodes.add(new ScoredNodesImpl(command.getSelector().getName(), id, docs.scoreDocs[i].score));
+            }
          }
       }
       catch (final CorruptIndexException e)

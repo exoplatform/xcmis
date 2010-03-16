@@ -254,7 +254,9 @@ public class CacheableIndexDataManager extends LocalIndexDataManagerProxy
       }
       if (result == null)
       {
-         throw new IndexReaderNotFoundException("No readers found");
+         //TODO check this
+
+         //throw new IndexReaderNotFoundException("No readers found");
       }
       return result;
    }

@@ -35,6 +35,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * The resulting output of a query.
  */
+@Deprecated
 public interface QueryResults extends Serializable
 {
 
