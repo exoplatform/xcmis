@@ -22,8 +22,9 @@ package org.xcmis.restatom.abdera;
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
-import org.xcmis.core.CmisAllowableActionsType;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.spi.AllowableActions;
+import org.xcmis.spi.impl.AllowableActionsImpl;
 
 import javax.xml.namespace.QName;
 
@@ -61,9 +62,9 @@ public class AllowableActionsElement extends ExtensibleElementWrapper
     * 
     * @return the allowable actions
     */
-   public CmisAllowableActionsType getAllowableActions()
+   public AllowableActions getAllowableActions()
    {
-      CmisAllowableActionsType actions = new CmisAllowableActionsType();
+      AllowableActionsImpl actions = new AllowableActionsImpl();
 
       Element el = null;
       el = getExtension(AtomCMIS.CAN_DELETE_OBJECT);
@@ -116,8 +117,6 @@ public class AllowableActionsElement extends ExtensibleElementWrapper
       actions.setCanCreateFolder(Boolean.valueOf(el != null ? el.getText() : null));
       el = getExtension(AtomCMIS.CAN_CREATE_RELATIONSHIP);
       actions.setCanCreateRelationship(Boolean.valueOf(el != null ? el.getText() : null));
-      el = getExtension(AtomCMIS.CAN_CREATE_POLICY);
-      // XXX Removed from schemas     actions.setCanCreatePolicy(Boolean.valueOf(el != null ? el.getText() : null));
       el = getExtension(AtomCMIS.CAN_DELETE_TREE);
       actions.setCanDeleteTree(Boolean.valueOf(el != null ? el.getText() : null));
 
@@ -139,77 +138,48 @@ public class AllowableActionsElement extends ExtensibleElementWrapper
     * 
     * @param actions the actions
     */
-   public void build(CmisAllowableActionsType actions)
+   public void build(AllowableActions actions)
    {
       if (actions != null)
       {
          declareNS(org.apache.abdera.util.Constants.ATOM_NS, "atom");
          declareNS(org.apache.abdera.util.Constants.APP_NS, "app");
 
-         if (actions.isCanDeleteObject() != null)
-            addSimpleExtension(AtomCMIS.CAN_DELETE_OBJECT, actions.isCanDeleteObject().toString());
-         if (actions.isCanUpdateProperties() != null)
-            addSimpleExtension(AtomCMIS.CAN_UPDATE_PROPERTIES, actions.isCanUpdateProperties().toString());
-         if (actions.isCanGetFolderTree() != null)
-            addSimpleExtension(AtomCMIS.CAN_GET_FOLDER_TREE, actions.isCanGetFolderTree().toString());
-         if (actions.isCanGetProperties() != null)
-            addSimpleExtension(AtomCMIS.CAN_GET_PROPERTIES, actions.isCanGetProperties().toString());
-         if (actions.isCanGetObjectRelationships() != null)
-            addSimpleExtension(AtomCMIS.CAN_GET_OBJECT_RELATIONSHIPS, actions.isCanGetObjectRelationships().toString());
-         if (actions.isCanGetObjectParents() != null)
-            addSimpleExtension(AtomCMIS.CAN_GET_OBJECT_PARENTS, actions.isCanGetObjectParents().toString());
-         if (actions.isCanGetFolderParent() != null)
-            addSimpleExtension(AtomCMIS.CAN_GET_FOLDER_PARENT, actions.isCanGetFolderParent().toString());
-         if (actions.isCanGetDescendants() != null)
-            addSimpleExtension(AtomCMIS.CAN_GET_DESCENDANTS, actions.isCanGetDescendants().toString());
-         if (actions.isCanMoveObject() != null)
-            addSimpleExtension(AtomCMIS.CAN_MOVE_OBJECT, actions.isCanMoveObject().toString());
-         if (actions.isCanDeleteContentStream() != null)
-            addSimpleExtension(AtomCMIS.CAN_DELETE_CONTENT_STREAM, actions.isCanDeleteContentStream().toString());
-         if (actions.isCanCheckOut() != null)
-            addSimpleExtension(AtomCMIS.CAN_CHECK_OUT, actions.isCanCheckOut().toString());
-         if (actions.isCanCancelCheckOut() != null)
-            addSimpleExtension(AtomCMIS.CAN_CANCEL_CHECK_OUT, actions.isCanCancelCheckOut().toString());
-         if (actions.isCanCheckIn() != null)
-            addSimpleExtension(AtomCMIS.CAN_CHECK_IN, actions.isCanCheckIn().toString());
-         if (actions.isCanSetContentStream() != null)
-            addSimpleExtension(AtomCMIS.CAN_SET_CONTENT_STREAM, actions.isCanSetContentStream().toString());
-         if (actions.isCanGetAllVersions() != null)
-            addSimpleExtension(AtomCMIS.CAN_GET_ALL_VERSIONS, actions.isCanGetAllVersions().toString());
-         if (actions.isCanAddObjectToFolder() != null)
-            addSimpleExtension(AtomCMIS.CAN_ADD_OBJECT_TO_FOLDER, actions.isCanAddObjectToFolder().toString());
-         if (actions.isCanRemoveObjectFromFolder() != null)
-            addSimpleExtension(AtomCMIS.CAN_REMOVE_OBJECT_FROM_FOLDER, actions.isCanRemoveObjectFromFolder().toString());
-         if (actions.isCanGetContentStream() != null)
-            addSimpleExtension(AtomCMIS.CAN_GET_CONTENT_STREAM, actions.isCanGetContentStream().toString());
-         if (actions.isCanApplyPolicy() != null)
-            addSimpleExtension(AtomCMIS.CAN_APPLY_POLICY, actions.isCanApplyPolicy().toString());
-         if (actions.isCanGetAppliedPolicies() != null)
-            addSimpleExtension(AtomCMIS.CAN_GET_APPLIED_POLICIES, actions.isCanGetAppliedPolicies().toString());
-         if (actions.isCanRemovePolicy() != null)
-            addSimpleExtension(AtomCMIS.CAN_REMOVE_POLICY, actions.isCanRemovePolicy().toString());
-         if (actions.isCanGetChildren() != null)
-            addSimpleExtension(AtomCMIS.CAN_GET_CHILDREN, actions.isCanGetChildren().toString());
-         if (actions.isCanCreateDocument() != null)
-            addSimpleExtension(AtomCMIS.CAN_CREATE_DOCUMENT, actions.isCanCreateDocument().toString());
-         if (actions.isCanCreateFolder() != null)
-            addSimpleExtension(AtomCMIS.CAN_CREATE_FOLDER, actions.isCanCreateFolder().toString());
-         if (actions.isCanCreateRelationship() != null)
-            addSimpleExtension(AtomCMIS.CAN_CREATE_RELATIONSHIP, actions.isCanCreateRelationship().toString());
-         //  XXX Removed from schemas     if (actions.isCanCreatePolicy() != null)
-         //            addSimpleExtension(AtomCMIS.CAN_CREATE_POLICY, actions.isCanCreatePolicy().toString());
-         if (actions.isCanDeleteTree() != null)
-            addSimpleExtension(AtomCMIS.CAN_DELETE_TREE, actions.isCanDeleteTree().toString());
+         addSimpleExtension(AtomCMIS.CAN_DELETE_OBJECT, Boolean.toString(actions.isCanDeleteObject()));
+         addSimpleExtension(AtomCMIS.CAN_UPDATE_PROPERTIES, Boolean.toString(actions.isCanUpdateProperties()));
+         addSimpleExtension(AtomCMIS.CAN_GET_FOLDER_TREE, Boolean.toString(actions.isCanGetFolderTree()));
+         addSimpleExtension(AtomCMIS.CAN_GET_PROPERTIES, Boolean.toString(actions.isCanGetProperties()));
+         addSimpleExtension(AtomCMIS.CAN_GET_OBJECT_RELATIONSHIPS, Boolean.toString(actions
+            .isCanGetObjectRelationships()));
+         addSimpleExtension(AtomCMIS.CAN_GET_OBJECT_PARENTS, Boolean.toString(actions.isCanGetObjectParents()));
+         addSimpleExtension(AtomCMIS.CAN_GET_FOLDER_PARENT, Boolean.toString(actions.isCanGetFolderParent()));
+         addSimpleExtension(AtomCMIS.CAN_GET_DESCENDANTS, Boolean.toString(actions.isCanGetDescendants()));
+         addSimpleExtension(AtomCMIS.CAN_MOVE_OBJECT, Boolean.toString(actions.isCanMoveObject()));
+         addSimpleExtension(AtomCMIS.CAN_DELETE_CONTENT_STREAM, Boolean.toString(actions.isCanDeleteContentStream()));
+         addSimpleExtension(AtomCMIS.CAN_CHECK_OUT, Boolean.toString(actions.isCanCheckOut()));
+         addSimpleExtension(AtomCMIS.CAN_CANCEL_CHECK_OUT, Boolean.toString(actions.isCanCancelCheckOut()));
+         addSimpleExtension(AtomCMIS.CAN_CHECK_IN, Boolean.toString(actions.isCanCheckIn()));
+         addSimpleExtension(AtomCMIS.CAN_SET_CONTENT_STREAM, Boolean.toString(actions.isCanSetContentStream()));
+         addSimpleExtension(AtomCMIS.CAN_GET_ALL_VERSIONS, Boolean.toString(actions.isCanGetAllVersions()));
+         addSimpleExtension(AtomCMIS.CAN_ADD_OBJECT_TO_FOLDER, Boolean.toString(actions.isCanAddObjectToFolder()));
+         addSimpleExtension(AtomCMIS.CAN_REMOVE_OBJECT_FROM_FOLDER, Boolean.toString(actions
+            .isCanRemoveObjectFromFolder()));
+         addSimpleExtension(AtomCMIS.CAN_GET_CONTENT_STREAM, Boolean.toString(actions.isCanGetContentStream()));
+         addSimpleExtension(AtomCMIS.CAN_APPLY_POLICY, Boolean.toString(actions.isCanApplyPolicy()));
+         addSimpleExtension(AtomCMIS.CAN_GET_APPLIED_POLICIES, Boolean.toString(actions.isCanGetAppliedPolicies()));
+         addSimpleExtension(AtomCMIS.CAN_REMOVE_POLICY, Boolean.toString(actions.isCanRemovePolicy()));
+         addSimpleExtension(AtomCMIS.CAN_GET_CHILDREN, Boolean.toString(actions.isCanGetChildren()));
+         addSimpleExtension(AtomCMIS.CAN_CREATE_DOCUMENT, Boolean.toString(actions.isCanCreateDocument()));
+         addSimpleExtension(AtomCMIS.CAN_CREATE_FOLDER, Boolean.toString(actions.isCanCreateFolder()));
+         addSimpleExtension(AtomCMIS.CAN_CREATE_RELATIONSHIP, Boolean.toString(actions.isCanCreateRelationship()));
+         addSimpleExtension(AtomCMIS.CAN_DELETE_TREE, Boolean.toString(actions.isCanDeleteTree()));
 
          /* renditions */
-         if (actions.isCanGetRenditions() != null)
-            addSimpleExtension(AtomCMIS.CAN_GET_RENDITIONS, actions.isCanGetRenditions().toString());
+         addSimpleExtension(AtomCMIS.CAN_GET_RENDITIONS, Boolean.toString(actions.isCanGetRenditions()));
 
          /* ACL */
-         if (actions.isCanGetACL() != null)
-            addSimpleExtension(AtomCMIS.CAN_GET_ACL, actions.isCanGetACL().toString());
-         if (actions.isCanApplyACL() != null)
-            addSimpleExtension(AtomCMIS.CAN_APPLY_ACL, actions.isCanApplyACL().toString());
+         addSimpleExtension(AtomCMIS.CAN_GET_ACL, Boolean.toString(actions.isCanGetACL()));
+         addSimpleExtension(AtomCMIS.CAN_APPLY_ACL, Boolean.toString(actions.isCanApplyACL()));
 
       }
    }

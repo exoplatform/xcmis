@@ -22,11 +22,14 @@ package org.xcmis.restatom.abdera;
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
-import org.xcmis.core.CmisChangeEventType;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
+import org.xcmis.spi.ChangeType;
+import org.xcmis.spi.object.ChangeInfo;
+import org.xcmis.spi.object.impl.ChangeInfoImpl;
 
-import javax.xml.datatype.XMLGregorianCalendar;
+import java.util.Calendar;
+
 import javax.xml.namespace.QName;
 
 /**
@@ -60,20 +63,31 @@ public class ChangeEventTypeElement extends ExtensibleElementWrapper
    /**
     * Builds the element.
     * 
-    * @param changeEventType the change event type
+    * @param changeInfo the change event type
     */
-   public void build(CmisChangeEventType changeEventType)
+   public void build(ChangeInfo changeInfo)
    {
-      if (changeEventType != null)
+      if (changeInfo != null)
       {
-         if (changeEventType.getChangeType() != null)
-            addSimpleExtension(AtomCMIS.CHANGE_TYPE, changeEventType.getChangeType().value());
-         if (changeEventType.getChangeTime() != null)
+         if (changeInfo.getChangeType() != null)
+            addSimpleExtension(AtomCMIS.CHANGE_TYPE, changeInfo.getChangeType().value());
+         if (changeInfo.getChangeTime() != null)
          {
-            XMLGregorianCalendar v = changeEventType.getChangeTime();
-            addSimpleExtension(AtomCMIS.CHANGE_TIME, AtomUtils.getAtomDate(v.toGregorianCalendar()));
+            Calendar v = changeInfo.getChangeTime();
+            addSimpleExtension(AtomCMIS.CHANGE_TIME, AtomUtils.getAtomDate(v));
          }
       }
    }
 
+   public ChangeInfo getChangeInfo()
+   {
+      ChangeInfoImpl changeInfo = new ChangeInfoImpl();
+      String changeTypeString = getSimpleExtension(AtomCMIS.CHANGE_TYPE);
+      if (changeTypeString != null)
+         changeInfo.setChangeType(ChangeType.fromValue(changeTypeString));
+      String changeTimeString = getSimpleExtension(AtomCMIS.CHANGE_TIME);
+      if (changeTimeString != null)
+         changeInfo.setChangeTime(AtomUtils.parseCalendar(changeTimeString));
+      return changeInfo;
+   }
 }

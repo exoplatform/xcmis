@@ -22,11 +22,11 @@ package org.xcmis.restatom.abdera;
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
-import org.xcmis.core.CmisPropertiesType;
-import org.xcmis.core.CmisProperty;
-import org.xcmis.core.impl.property.PropertyFilter;
+import org.xcmis.spi.PropertyFilter;
+import org.xcmis.spi.object.Property;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 
@@ -63,7 +63,7 @@ public class PropertiesTypeElement extends ExtensibleElementWrapper
     * 
     * @return the properties
     */
-   public CmisPropertiesType getProperties()
+   public Map<String, Property<?>> getProperties()
    {
       List<Element> elements = getElements();
       CmisPropertiesType properties = new CmisPropertiesType();
@@ -81,7 +81,7 @@ public class PropertiesTypeElement extends ExtensibleElementWrapper
     * @param properties the properties
     * @param filter the filter
     */
-   public void build(CmisPropertiesType properties, PropertyFilter filter)
+   public void build(Map<String, Property<?>> properties)
    {
       if (properties != null)
       {

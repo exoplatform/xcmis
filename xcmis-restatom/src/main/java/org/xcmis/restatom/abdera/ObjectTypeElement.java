@@ -22,17 +22,30 @@ package org.xcmis.restatom.abdera;
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
-import org.xcmis.core.CmisAccessControlListType;
-import org.xcmis.core.CmisAllowableActionsType;
-import org.xcmis.core.CmisChangeEventType;
-import org.xcmis.core.CmisListOfIdsType;
-import org.xcmis.core.CmisObjectType;
-import org.xcmis.core.CmisPropertiesType;
-import org.xcmis.core.CmisRenditionType;
-import org.xcmis.core.impl.property.PropertyFilter;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.spi.AccessControlEntry;
+import org.xcmis.spi.AllowableActions;
+import org.xcmis.spi.InvalidArgumentException;
+import org.xcmis.spi.PropertyFilter;
+import org.xcmis.spi.PropertyType;
+import org.xcmis.spi.Rendition;
+import org.xcmis.spi.object.ChangeInfo;
+import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.object.Property;
+import org.xcmis.spi.object.impl.BooleanProperty;
+import org.xcmis.spi.object.impl.CmisObjectImpl;
+import org.xcmis.spi.object.impl.DateTimeProperty;
+import org.xcmis.spi.object.impl.DecimalProperty;
+import org.xcmis.spi.object.impl.HtmlProperty;
+import org.xcmis.spi.object.impl.IdProperty;
+import org.xcmis.spi.object.impl.IntegerProperty;
+import org.xcmis.spi.object.impl.StringProperty;
+import org.xcmis.spi.object.impl.UriProperty;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.xml.namespace.QName;
 
@@ -65,16 +78,6 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
    }
 
    /**
-    * Gets the properties element.
-    * 
-    * @return the properties element
-    */
-   public PropertiesTypeElement getPropertiesElement()
-   {
-      return getExtension(AtomCMIS.PROPERTIES);
-   }
-
-   /**
     * Gets the allowable actions element.
     * 
     * @return the allowable actions element
@@ -89,12 +92,30 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
     * 
     * @return the object
     */
-   public CmisObjectType getObject()
+   public CmisObject getObject()
    {
-      CmisObjectType object = new CmisObjectType();
-      PropertiesTypeElement propertiesElement = getPropertiesElement();
+      CmisObjectImpl object = new CmisObjectImpl();
+      ExtensibleElementWrapper propertiesElement = getExtension(AtomCMIS.PROPERTIES);
       if (propertiesElement != null)
-         object.setProperties(propertiesElement.getProperties());
+      {
+         Map<String, Property<?>> properties = object.getProperties();
+         List<PropertyElement<?>> ll = propertiesElement.getElements();
+         for (PropertyElement<?> propertyElement : ll)
+         {
+            properties.put(propertyElement.getProperty().getId(), propertyElement.getProperty());
+         }
+      }
+      // TODO
+      //      object.getACL()
+      //      object.getPolicyIds()
+      //      object.getRelationship()
+      //      object.getRenditions()
+      //      object.setAllowableActions(allowableActions)
+      //      object.setChangeInfo(changeInfo)
+      //      object.setExactACL(exactACL)
+      //      object.setObjectInfo(objectInfo)
+      //      object.setPathSegment(pathSegment)
+
       // XXX At the moment do not process other stuff from XML.
       // Don't need this now. It is not clear from specification 
       // how to process (apply) policies.
@@ -107,7 +128,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
     * @param objectType the object type
     * @param filter the filter
     */
-   public void build(CmisObjectType objectType, PropertyFilter filter)
+   public void build(CmisObject objectType, PropertyFilter filter)
    {
       if (objectType != null)
       {
@@ -116,63 +137,124 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
          // declared in entry tag. But this tag is overwritten in plugin and has no namespace
          // declaration any more. 
          setAttributeValue("xmlns:cmisra", "http://docs.oasis-open.org/ns/cmis/restatom/200908/");
-         
-         CmisPropertiesType properties = objectType.getProperties();
-         if (properties != null)
+
+         // PROPERTIES
+         Map<String, Property<?>> properties = objectType.getProperties();
+         if (properties != null && !properties.isEmpty())
          {
-            PropertiesTypeElement propertiesElement = addExtension(AtomCMIS.PROPERTIES);
-            propertiesElement.build(properties, filter);
+            ExtensibleElementWrapper propertiesElement = addExtension(AtomCMIS.PROPERTIES);
+            Set<String> keys = properties.keySet();
+            for (String key : keys)
+            {
+               Property<?> prop = properties.get(key);
+               PropertyType propertyType = prop.getType();
+
+               switch (propertyType)
+               {
+                  case BOOLEAN : {
+                     PropertyBooleanElement propElement = propertiesElement.addExtension(AtomCMIS.PROPERTY_BOOLEAN);
+                     propElement.build((BooleanProperty)prop);
+                     break;
+                  }
+                  case DATETIME : {
+                     PropertyDateTimeElement propElement = propertiesElement.addExtension(AtomCMIS.PROPERTY_DATE_TIME);
+                     propElement.build((DateTimeProperty)prop);
+                     break;
+                  }
+                  case DECIMAL : {
+                     PropertyDecimalElement propElement = propertiesElement.addExtension(AtomCMIS.PROPERTY_DECIMAL);
+                     propElement.build((DecimalProperty)prop);
+                     break;
+                  }
+                  case HTML : {
+                     PropertyHtmlElement propElement = propertiesElement.addExtension(AtomCMIS.PROPERTY_HTML);
+                     propElement.build((HtmlProperty)prop);
+                     break;
+                  }
+                  case ID : {
+                     PropertyIdElement propElement = propertiesElement.addExtension(AtomCMIS.PROPERTY_ID);
+                     propElement.build((IdProperty)prop);
+                     break;
+                  }
+                  case STRING : {
+                     PropertyStringElement propElement = propertiesElement.addExtension(AtomCMIS.PROPERTY_STRING);
+                     propElement.build((StringProperty)prop);
+                     break;
+                  }
+                  case INTEGER : {
+                     PropertyIntegerElement propElement = propertiesElement.addExtension(AtomCMIS.PROPERTY_INTEGER);
+                     propElement.build((IntegerProperty)prop);
+                     break;
+                  }
+                  case URI : {
+                     PropertyUriElement propElement = propertiesElement.addExtension(AtomCMIS.PROPERTY_URI);
+                     propElement.build((UriProperty)prop);
+                     break;
+                  }
+                  default :
+                     // Should never happen. Exception will throw early.
+                     throw new InvalidArgumentException("Unknown property type " + propertyType.value());
+               }
+            }
          }
 
-         CmisAllowableActionsType allowableActions = objectType.getAllowableActions();
+         // ALLOWABLE_ACTIONS
+         AllowableActions allowableActions = objectType.getAllowableActions();
          if (allowableActions != null)
          {
             AllowableActionsElement actionsElement = addExtension(AtomCMIS.ALLOWABLE_ACTIONS);
             actionsElement.build(allowableActions);
          }
 
-         List<CmisObjectType> relationship = objectType.getRelationship();
+         // RELATIOSNHIP
+         List<CmisObject> relationship = objectType.getRelationship();
          if (relationship != null && relationship.size() > 0)
          {
             ObjectTypeElement relationshipElement = addExtension(AtomCMIS.RELATIOSNHIP);
-            for (CmisObjectType cmisObjectType : relationship)
+            for (CmisObject cmisObjectType : relationship)
                relationshipElement.build(cmisObjectType);
          }
 
          // ChangeEventInfo
-         CmisChangeEventType changeEventInfo = objectType.getChangeEventInfo();
-         if (changeEventInfo != null)
+         ChangeInfo changeInfo = objectType.getChangeInfo();
+         if (changeInfo != null)
          {
             ChangeEventTypeElement changeEventInfoElement = addExtension(AtomCMIS.CHANGE_EVENT_INFO);
-            changeEventInfoElement.build(changeEventInfo);
+            changeEventInfoElement.build(changeInfo);
          }
 
          // acl
-         CmisAccessControlListType accessControlList = objectType.getAcl();
-         if (accessControlList != null && accessControlList.getPermission().size() > 0)
+         List<AccessControlEntry> accessControlList = objectType.getACL();
+         if (accessControlList != null && accessControlList.size() > 0)
          {
-            AccessControlListTypeElement accessControlListTypeElement = addExtension(AtomCMIS.ACL);
-            accessControlListTypeElement.build(accessControlList);
+            ExtensibleElementWrapper accessControlListTypeElement = addExtension(AtomCMIS.ACL);
+            for (AccessControlEntry element : accessControlList)
+            {
+               AccessControlEntryTypeElement ace = accessControlListTypeElement.addExtension(AtomCMIS.PERMISSION);
+               ace.build(element);
+            }
          }
 
          // exactACL
-         if (objectType.isExactACL() != null)
-            addSimpleExtension(AtomCMIS.EXACT_ACL, objectType.isExactACL().toString());
+         addSimpleExtension(AtomCMIS.EXACT_ACL, Boolean.valueOf(objectType.isExactACL()).toString());
 
          // policyIds
-         CmisListOfIdsType policyIds = objectType.getPolicyIds();
-         if (policyIds != null && policyIds.getId().size() > 0)
+         Collection<String> policyIds = objectType.getPolicyIds();
+         if (policyIds != null && policyIds.size() > 0)
          {
-            ListOfIdsTypeElement listOfIdsTypeTypeElement = addExtension(AtomCMIS.POLICY_IDS);
-            listOfIdsTypeTypeElement.build(policyIds);
+            ExtensibleElementWrapper listOfIdsTypeTypeElement = addExtension(AtomCMIS.POLICY_IDS);
+            for (Element element : listOfIdsTypeTypeElement)
+            {
+               listOfIdsTypeTypeElement.addSimpleExtension(AtomCMIS.ID, element.getText());
+            }
          }
 
          // rendition
-         List<CmisRenditionType> listRendition = objectType.getRenditions();
+         List<Rendition> listRendition = objectType.getRenditions();
          if (listRendition != null && listRendition.size() > 0)
          {
             RenditionTypeElement renditionElement = addExtension(AtomCMIS.RENDITION);
-            for (CmisRenditionType rendition : listRendition)
+            for (Rendition rendition : listRendition)
                renditionElement.build(rendition);
          }
       }
@@ -183,7 +265,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
     * 
     * @param objectType the object type
     */
-   public void build(CmisObjectType objectType)
+   public void build(CmisObject objectType)
    {
       build(objectType, null);
    }

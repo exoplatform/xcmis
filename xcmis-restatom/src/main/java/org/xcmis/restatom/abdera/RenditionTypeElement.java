@@ -22,8 +22,8 @@ package org.xcmis.restatom.abdera;
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
-import org.xcmis.core.CmisRenditionType;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.spi.Rendition;
 
 import javax.xml.namespace.QName;
 
@@ -60,20 +60,17 @@ public class RenditionTypeElement extends ExtensibleElementWrapper
     * 
     * @param value the value
     */
-   public void build(CmisRenditionType value)
+   public void build(Rendition value)
    {
       if (value != null)
       {
          addSimpleExtension(AtomCMIS.STREAM_ID, value.getStreamId());
-         addSimpleExtension(AtomCMIS.MIMETYPE, value.getMimetype());
-         if (value.getLength() != null)
-            addSimpleExtension(AtomCMIS.LENGTH, value.getLength().toString());
+         addSimpleExtension(AtomCMIS.MIMETYPE, value.getMimeType());
+         addSimpleExtension(AtomCMIS.LENGTH, Long.toString(value.getLength()));
          addSimpleExtension(AtomCMIS.KIND, value.getKind());
          addSimpleExtension(AtomCMIS.TITLE, value.getTitle());
-         if (value.getHeight() != null)
-            addSimpleExtension(AtomCMIS.HEIGHT, value.getHeight().toString());
-         if (value.getWidth() != null)
-            addSimpleExtension(AtomCMIS.WIDTH, value.getWidth().toString());
+         addSimpleExtension(AtomCMIS.HEIGHT, Integer.toString(value.getHeight()));
+         addSimpleExtension(AtomCMIS.WIDTH, Integer.toString(value.getWidth()));
          addSimpleExtension(AtomCMIS.RENDITION_DOCUMENT_ID, value.getRenditionDocumentId());
       }
    }

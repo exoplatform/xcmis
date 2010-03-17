@@ -69,8 +69,6 @@ public interface AtomCMIS extends CMIS
 
    QName CAN_CREATE_FOLDER = new QName(CMIS_NS_URI, "canCreateFolder", CMIS_PREFIX);
 
-   QName CAN_CREATE_POLICY = new QName(CMIS_NS_URI, "canCreatePolicy", CMIS_PREFIX);
-
    QName CAN_CREATE_RELATIONSHIP = new QName(CMIS_NS_URI, "canCreateRelationship", CMIS_PREFIX);
 
    QName CAN_DELETE_CONTENT_STREAM = new QName(CMIS_NS_URI, "canDeleteContentStream", CMIS_PREFIX);

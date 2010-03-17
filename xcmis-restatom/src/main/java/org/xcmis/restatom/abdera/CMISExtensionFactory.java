@@ -20,50 +20,18 @@
 package org.xcmis.restatom.abdera;
 
 import org.apache.abdera.util.AbstractExtensionFactory;
-import org.xcmis.atom.CmisUriTemplateType;
-import org.xcmis.core.CmisACLCapabilityType;
-import org.xcmis.core.CmisAccessControlEntryType;
-import org.xcmis.core.CmisAccessControlListType;
-import org.xcmis.core.CmisAccessControlPrincipalType;
-import org.xcmis.core.CmisAllowableActionsType;
-import org.xcmis.core.CmisChangeEventType;
-import org.xcmis.core.CmisChoiceBoolean;
-import org.xcmis.core.CmisChoiceDateTime;
-import org.xcmis.core.CmisChoiceDecimal;
-import org.xcmis.core.CmisChoiceHtml;
-import org.xcmis.core.CmisChoiceId;
-import org.xcmis.core.CmisChoiceInteger;
-import org.xcmis.core.CmisChoiceString;
-import org.xcmis.core.CmisChoiceUri;
-import org.xcmis.core.CmisListOfIdsType;
-import org.xcmis.core.CmisObjectType;
-import org.xcmis.core.CmisPermissionDefinition;
-import org.xcmis.core.CmisPropertiesType;
-import org.xcmis.core.CmisPropertyBoolean;
-import org.xcmis.core.CmisPropertyBooleanDefinitionType;
-import org.xcmis.core.CmisPropertyDateTime;
-import org.xcmis.core.CmisPropertyDateTimeDefinitionType;
-import org.xcmis.core.CmisPropertyDecimal;
-import org.xcmis.core.CmisPropertyDecimalDefinitionType;
-import org.xcmis.core.CmisPropertyHtml;
-import org.xcmis.core.CmisPropertyHtmlDefinitionType;
-import org.xcmis.core.CmisPropertyId;
-import org.xcmis.core.CmisPropertyIdDefinitionType;
-import org.xcmis.core.CmisPropertyInteger;
-import org.xcmis.core.CmisPropertyIntegerDefinitionType;
-import org.xcmis.core.CmisPropertyString;
-import org.xcmis.core.CmisPropertyStringDefinitionType;
-import org.xcmis.core.CmisPropertyUri;
-import org.xcmis.core.CmisPropertyUriDefinitionType;
-import org.xcmis.core.CmisQueryType;
-import org.xcmis.core.CmisRenditionType;
-import org.xcmis.core.CmisRepositoryCapabilitiesType;
-import org.xcmis.core.CmisRepositoryInfoType;
-import org.xcmis.core.CmisTypeDefinitionType;
-import org.xcmis.messaging.CmisRepositoryEntryType;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.impl.PropertyDefinitionImpl;
+import org.xcmis.spi.object.impl.BooleanProperty;
+import org.xcmis.spi.object.impl.CmisObjectImpl;
+import org.xcmis.spi.object.impl.DateTimeProperty;
+import org.xcmis.spi.object.impl.DecimalProperty;
+import org.xcmis.spi.object.impl.HtmlProperty;
+import org.xcmis.spi.object.impl.IdProperty;
+import org.xcmis.spi.object.impl.IntegerProperty;
+import org.xcmis.spi.object.impl.StringProperty;
+import org.xcmis.spi.object.impl.UriProperty;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -89,7 +57,7 @@ public class CMISExtensionFactory extends AbstractExtensionFactory
       addImpl(AtomCMIS.REPOSITORY_INFO, RepositoryInfoTypeElement.class);
       addImpl(AtomCMIS.CAPABILITIES, RepositoryCapabilitiesTypeElement.class);
       addImpl(AtomCMIS.TYPE, TypeDefinitionTypeElement.class);
-
+      // OK
       addImpl(AtomCMIS.CHOICE_BOOLEAN, ChoiceBooleanElement.class);
       addImpl(AtomCMIS.CHOICE_DATE_TIME, ChoiceDateTimeElement.class);
       addImpl(AtomCMIS.CHOICE_DECIMAL, ChoiceDecimalElement.class);
@@ -98,9 +66,10 @@ public class CMISExtensionFactory extends AbstractExtensionFactory
       addImpl(AtomCMIS.CHOICE_INTEGER, ChoiceIntegerElement.class);
       addImpl(AtomCMIS.CHOICE_STRING, ChoiceStringElement.class);
       addImpl(AtomCMIS.CHOICE_URI, ChoiceUriElement.class);
+
       addImpl(AtomCMIS.PERMISSION, AccessControlEntryTypeElement.class);
       addImpl(AtomCMIS.PERMISSIONS, PermissionDefinitionElement.class);
-      addImpl(AtomCMIS.PRINCIPAL, AccessControlPrincipalTypeElement.class);
+      // OK
       addImpl(AtomCMIS.PROPERTY_BOOLEAN_DEFINITION, PropertyDefinitionTypeElement.class);
       addImpl(AtomCMIS.PROPERTY_DATE_TIME_DEFINITION, PropertyDefinitionTypeElement.class);
       addImpl(AtomCMIS.PROPERTY_DECIMAL_DEFINITION, PropertyDefinitionTypeElement.class);
@@ -109,8 +78,11 @@ public class CMISExtensionFactory extends AbstractExtensionFactory
       addImpl(AtomCMIS.PROPERTY_INTEGER_DEFINITION, PropertyDefinitionTypeElement.class);
       addImpl(AtomCMIS.PROPERTY_STRING_DEFINITION, PropertyDefinitionTypeElement.class);
       addImpl(AtomCMIS.PROPERTY_URI_DEFINITION, PropertyDefinitionTypeElement.class);
+
+      // OK
       addImpl(AtomCMIS.OBJECT, ObjectTypeElement.class);
-      addImpl(AtomCMIS.PROPERTIES, PropertiesTypeElement.class);
+      addImpl(AtomCMIS.RELATIOSNHIP, ObjectTypeElement.class);
+      // OK
       addImpl(AtomCMIS.PROPERTY_BOOLEAN, PropertyBooleanElement.class);
       addImpl(AtomCMIS.PROPERTY_DATE_TIME, PropertyDateTimeElement.class);
       addImpl(AtomCMIS.PROPERTY_DECIMAL, PropertyDecimalElement.class);
@@ -119,8 +91,10 @@ public class CMISExtensionFactory extends AbstractExtensionFactory
       addImpl(AtomCMIS.PROPERTY_INTEGER, PropertyIntegerElement.class);
       addImpl(AtomCMIS.PROPERTY_STRING, PropertyStringElement.class);
       addImpl(AtomCMIS.PROPERTY_URI, PropertyUriElement.class);
+
+      // OK
       addImpl(AtomCMIS.ALLOWABLE_ACTIONS, AllowableActionsElement.class);
-      addImpl(AtomCMIS.ACCESS_CONTROL, AccessControlListTypeElement.class);
+      
       addImpl(AtomCMIS.QUERY, QueryTypeElement.class);
       addImpl(AtomCMIS.CHANGE_EVENT_INFO, ChangeEventTypeElement.class);
       addImpl(AtomCMIS.PERMISSIONS, PermissionDefinitionElement.class);
@@ -136,6 +110,7 @@ public class CMISExtensionFactory extends AbstractExtensionFactory
       classes2QName.put(CmisRepositoryInfoType.class, AtomCMIS.REPOSITORY_INFO);
       classes2QName.put(CmisRepositoryCapabilitiesType.class, AtomCMIS.CAPABILITIES);
       classes2QName.put(CmisTypeDefinitionType.class, AtomCMIS.TYPE);
+
       classes2QName.put(CmisChoiceBoolean.class, AtomCMIS.CHOICE_BOOLEAN);
       classes2QName.put(CmisChoiceDateTime.class, AtomCMIS.CHOICE_DATE_TIME);
       classes2QName.put(CmisChoiceDecimal.class, AtomCMIS.CHOICE_DECIMAL);
@@ -144,8 +119,10 @@ public class CMISExtensionFactory extends AbstractExtensionFactory
       classes2QName.put(CmisChoiceInteger.class, AtomCMIS.CHOICE_INTEGER);
       classes2QName.put(CmisChoiceString.class, AtomCMIS.CHOICE_STRING);
       classes2QName.put(CmisChoiceUri.class, AtomCMIS.CHOICE_URI);
+
       classes2QName.put(CmisPermissionDefinition.class, AtomCMIS.PERMISSIONS);
       classes2QName.put(CmisAccessControlEntryType.class, AtomCMIS.PERMISSION);
+
       classes2QName.put(PropertyDefinitionImpl.class, AtomCMIS.PROPERTY_BOOLEAN_DEFINITION);
       classes2QName.put(PropertyDefinitionImpl.class, AtomCMIS.PROPERTY_DATE_TIME_DEFINITION);
       classes2QName.put(PropertyDefinitionImpl.class, AtomCMIS.PROPERTY_DECIMAL_DEFINITION);
@@ -154,19 +131,20 @@ public class CMISExtensionFactory extends AbstractExtensionFactory
       classes2QName.put(PropertyDefinitionImpl.class, AtomCMIS.PROPERTY_INTEGER_DEFINITION);
       classes2QName.put(PropertyDefinitionImpl.class, AtomCMIS.PROPERTY_STRING_DEFINITION);
       classes2QName.put(PropertyDefinitionImpl.class, AtomCMIS.PROPERTY_URI_DEFINITION);
-      classes2QName.put(CmisObjectType.class, AtomCMIS.OBJECT);
-      classes2QName.put(CmisPropertiesType.class, AtomCMIS.PROPERTIES);
-      classes2QName.put(CmisPropertyBoolean.class, AtomCMIS.PROPERTY_BOOLEAN);
-      classes2QName.put(CmisPropertyDateTime.class, AtomCMIS.PROPERTY_DATE_TIME);
-      classes2QName.put(CmisPropertyDecimal.class, AtomCMIS.PROPERTY_DECIMAL);
-      classes2QName.put(CmisPropertyHtml.class, AtomCMIS.PROPERTY_HTML);
-      classes2QName.put(CmisPropertyId.class, AtomCMIS.PROPERTY_ID);
-      classes2QName.put(CmisPropertyInteger.class, AtomCMIS.PROPERTY_INTEGER);
-      classes2QName.put(CmisPropertyString.class, AtomCMIS.PROPERTY_STRING);
-      classes2QName.put(CmisPropertyUri.class, AtomCMIS.PROPERTY_URI);
+
+      classes2QName.put(CmisObjectImpl.class, AtomCMIS.OBJECT);
+      classes2QName.put(CmisObjectImpl.class, AtomCMIS.RELATIOSNHIP);
+
+      classes2QName.put(BooleanProperty.class, AtomCMIS.PROPERTY_BOOLEAN);
+      classes2QName.put(DateTimeProperty.class, AtomCMIS.PROPERTY_DATE_TIME);
+      classes2QName.put(DecimalProperty.class, AtomCMIS.PROPERTY_DECIMAL);
+      classes2QName.put(HtmlProperty.class, AtomCMIS.PROPERTY_HTML);
+      classes2QName.put(IdProperty.class, AtomCMIS.PROPERTY_ID);
+      classes2QName.put(IntegerProperty.class, AtomCMIS.PROPERTY_INTEGER);
+      classes2QName.put(StringProperty.class, AtomCMIS.PROPERTY_STRING);
+      classes2QName.put(UriProperty.class, AtomCMIS.PROPERTY_URI);
+
       classes2QName.put(CmisAllowableActionsType.class, AtomCMIS.ALLOWABLE_ACTIONS);
-      classes2QName.put(CmisAccessControlListType.class, AtomCMIS.ACCESS_CONTROL);
-      classes2QName.put(CmisAccessControlPrincipalType.class, AtomCMIS.PRINCIPAL);
       classes2QName.put(CmisQueryType.class, AtomCMIS.QUERY);
       classes2QName.put(CmisChangeEventType.class, AtomCMIS.CHANGE_EVENT_INFO);
       classes2QName.put(CmisPermissionDefinition.class, AtomCMIS.PERMISSIONS);
