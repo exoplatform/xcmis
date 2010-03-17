@@ -33,8 +33,8 @@ import java.util.Calendar;
 public class ChangeInfoImpl implements ChangeInfo
 {
 
-   /** Change date. */
-   private Calendar changeDate;
+   /** Change time. */
+   private Calendar changeTime;
 
    /** Change type. */
    private ChangeType changeType;
@@ -43,9 +43,9 @@ public class ChangeInfoImpl implements ChangeInfo
    {
    }
 
-   public ChangeInfoImpl(Calendar changeDate, ChangeType changeType)
+   public ChangeInfoImpl(Calendar changeTime, ChangeType changeType)
    {
-      this.changeDate = changeDate;
+      this.changeTime = changeTime;
       this.changeType = changeType;
    }
 
@@ -54,7 +54,7 @@ public class ChangeInfoImpl implements ChangeInfo
     */
    public Calendar getChangeTime()
    {
-      return changeDate;
+      return changeTime;
    }
 
    /**
@@ -68,11 +68,11 @@ public class ChangeInfoImpl implements ChangeInfo
    /**
     * Set date of change.
     * 
-    * @param changeDate date of change
+    * @param changeTime date of change
     */
-   public void setChangeDate(Calendar changeDate)
+   public void setChangeTime(Calendar changeTime)
    {
-      this.changeDate = changeDate;
+      this.changeTime = changeTime;
    }
 
    /**
