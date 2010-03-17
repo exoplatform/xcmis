@@ -22,6 +22,8 @@ package org.xcmis.spi;
 import java.util.Collection;
 
 /**
+ * Information about CMIS repository and its capabilities.
+ * 
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */

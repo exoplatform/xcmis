@@ -33,7 +33,7 @@ import java.util.Collection;
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: Storage.java 332 2010-03-11 17:24:56Z andrew00x $
  */
-public interface Storage extends org.xcmis.spi.TypeManager
+public interface Storage extends TypeManager
 {
 
    /**
@@ -51,9 +51,18 @@ public interface Storage extends org.xcmis.spi.TypeManager
     */
    AllowableActions calculateAllowableActions(ObjectData object);
 
-   //
-
-   ItemsIterator<ObjectData> getCheckedOutDocuments(ObjectData folder, String orderBy) throws CmisRuntimeException;
+   /**
+    * Get checkedout objects (private working copies) that user has access to.
+    * 
+    * @param folder folder, if <code>null</code> then get all checked out
+    *        objects in any folders
+    * @param orderBy comma-separated list of query names and the ascending
+    *        modifier 'ASC' or the descending modifier 'DESC' for each query
+    *        name. A storage's handling of the orderBy input is storage-specific
+    *        and storage may ignore this parameter if it not able sort items
+    * @return iterator over checked out objects
+    */
+   ItemsIterator<ObjectData> getCheckedOutDocuments(ObjectData folder, String orderBy);
 
    /**
     * Create new instance of document with type <code>typeId</code> using
@@ -220,7 +229,7 @@ public interface Storage extends org.xcmis.spi.TypeManager
     *         cause to storage internal problem
     */
    void deleteObject(ObjectData object, boolean deleteAllVersions) throws ConstraintException, UpdateConflictException,
-      StorageException;
+       StorageException;
 
    /**
     * Delete the specified folder object and all of its child- and
@@ -255,9 +264,9 @@ public interface Storage extends org.xcmis.spi.TypeManager
    /**
     * Gets content changes.
     * 
-    * @param changeLogToken if return value other than <code>null</code>, then
-    *        change event corresponded to the value of the specified change log
-    *        token will be returned as the first result in the output. If not
+    * @param changeLogToken if value other than <code>null</code>, then change
+    *        event corresponded to the value of the specified change log token
+    *        will be returned as the first result in the output. If not
     *        specified, then will be returned the first change event recorded in
     *        the change log. When set of changes passed is returned then
     *        <code>changeLogToken</code> must contains log token corresponded to
@@ -280,19 +289,72 @@ public interface Storage extends org.xcmis.spi.TypeManager
     */
    ItemsIterator<Result> query(Query query) throws InvalidArgumentException;
 
-   //
-   ObjectData getObject(String objectId) throws CmisRuntimeException;
+   /**
+    * Get object by unique identifier.
+    * 
+    * @param objectId object's ID
+    * @return object
+    * @throws ObjectNotFoundException if object with specified ID was not found
+    */
+   ObjectData getObject(String objectId) throws ObjectNotFoundException;
 
-   ObjectData getObjectByPath(String path) throws CmisRuntimeException;
+   /**
+    * Get object by path.
+    * 
+    * @param path path
+    * @return object
+    * @throws ObjectNotFoundException if object with specified path was not
+    *         found
+    */
+   ObjectData getObjectByPath(String path) throws ObjectNotFoundException;
 
-   ObjectData moveObject(ObjectData object, FolderData target, FolderData source) throws UpdateConflictException,
-      StorageException, CmisRuntimeException;
+   /**
+    * Move <code>object</code> from <code>source</code> to <code>target</code>.
+    * If operation successful then changes saved immediately.
+    * 
+    * @param object object to be moved
+    * @param target destination folder
+    * @param source folder from which object must be moved
+    * @return
+    * @throws ConstraintException if type of the given object is NOT in the list
+    *         of AllowedChildObjectTypeIds of the <code>target</code>
+    * @throws InvalidArgumentException if <code>source</code> is not object's
+    *         parent folder (or one of the parent folders if the storage
+    *         supports multi-filing.).
+    * @throws UpdateConflictException if object that is no longer current (as
+    *         determined by the storage).
+    * @throws VersioningException if object is a non-current document version
+    * @throws NameConstraintViolationException if moving operation cause name
+    *         conflict, e.g. destination folder already contains object with the
+    *         same name
+    * @throws StorageException if object can not be moved (save changes) cause
+    *         to storage internal problem
+    */
+   ObjectData moveObject(ObjectData object, FolderData target, FolderData source) throws ConstraintException,
+      InvalidArgumentException, UpdateConflictException, VersioningException, NameConstraintViolationException,
+      StorageException;
 
-   //
+   /**
+    * Get object renditions.
+    * 
+    * @param object object
+    * @return iterator over object's renditions. If object has not any
+    *         renditions then empty iterator must be returned but never
+    *         <code>null</code>
+    */
+   ItemsIterator<Rendition> getRenditions(ObjectData object);
 
-   ItemsIterator<Rendition> getRenditions(ObjectData object) throws CmisRuntimeException;
-
-   //
+   /**
+    * Save updated object.
+    * 
+    * @param object object to be saved
+    * @throws StorageException if changes can't be saved cause storage internal
+    *         errors
+    * @throws NameConstraintViolationException if updated name (property
+    *         'cmis:name') cause name conflict, e.g. object with the same name
+    *         already exists
+    * @throws UpdateConflictException if saved object is not current any more
+    */
    void saveObject(ObjectData object) throws StorageException, NameConstraintViolationException,
       UpdateConflictException;
 

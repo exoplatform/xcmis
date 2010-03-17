@@ -58,6 +58,7 @@ public class MimeType
     *           All parameters after ';' in <code>source</code> will be ignored. 
     * @return MimeType
     */
+   // TODO : support for parameter. 
    public static MimeType fromString(String source)
    {
       if (source == null || source.length() == 0 || source.charAt(0) == ';')

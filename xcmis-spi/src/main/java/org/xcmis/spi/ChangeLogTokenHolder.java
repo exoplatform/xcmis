@@ -31,6 +31,6 @@ package org.xcmis.spi;
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: ChangeLogTokenHolder.java 316 2010-03-09 15:20:28Z andrew00x $
  */
-public final class ChangeLogTokenHolder extends AbstractHolder<String>
+public class ChangeLogTokenHolder extends AbstractHolder<String>
 {
 }

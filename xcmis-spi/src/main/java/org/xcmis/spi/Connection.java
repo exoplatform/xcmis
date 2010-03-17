@@ -69,10 +69,9 @@ public interface Connection
     *         the ACEs does not match ANY of the permissionNames as returned by
     *         getACLCapability and is not a CMIS Basic permission</li>
     *         </ul>
-    * @throws CmisRuntimeException if any others errors occur
     */
    void applyACL(String objectId, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
-      AccessControlPropagation propagation) throws ObjectNotFoundException, ConstraintException, CmisRuntimeException;
+      AccessControlPropagation propagation) throws ObjectNotFoundException, ConstraintException;
 
    /**
     * Get the ACL currently applied to the specified object.
@@ -83,12 +82,10 @@ public interface Connection
     * @return actual ACL or <code>null</code> if no ACL applied to object
     * @throws ObjectNotFoundException if <code>objectId</code> or does not
     *         exists
-    * @throws CmisRuntimeException if any others errors occur
     */
-   List<AccessControlEntry> getACL(String objectId, boolean onlyBasicPermissions) throws ObjectNotFoundException,
-      CmisRuntimeException;
+   List<AccessControlEntry> getACL(String objectId, boolean onlyBasicPermissions) throws ObjectNotFoundException;
 
-   // Query Services
+   // Discovery Services
 
    /**
     * Gets content changes. This service is intended to be used by search
@@ -129,11 +126,10 @@ public interface Connection
     * @throws FilterNotValidException if <code>propertyFilter</code> has invalid
     *         syntax or contains at least one property name that is not in
     *         object's property definition
-    * @throws CmisRuntimeException if any others errors occur
     */
    ItemsList<CmisObject> getContentChanges(ChangeLogTokenHolder changeLogToken, boolean includeProperties,
       String propertyFilter, boolean includePolicyIDs, boolean includeAcl, boolean includeObjectInfo, int maxItems)
-      throws ConstraintException, FilterNotValidException, CmisRuntimeException;
+      throws ConstraintException, FilterNotValidException;
 
    /**
     * Executes a CMIS-SQL query statement against the contents of the CMIS
@@ -184,11 +180,10 @@ public interface Connection
     * @return query results
     * @throws FilterNotValidException if <code>renditionFilter</code> has
     *         invalid syntax or contains unknown rendition kinds or mimetypes
-    * @throws CmisRuntimeException if any others errors occur
     */
    ItemsList<CmisObject> query(String statement, boolean searchAllVersions, boolean includeAllowableActions,
       IncludeRelationships includeRelationships, boolean includeObjectInfo, String renditionFilter, int maxItems,
-      int skipCount) throws FilterNotValidException, CmisRuntimeException;
+      int skipCount) throws FilterNotValidException;
 
    // Multi-filing Services
 
@@ -557,7 +552,6 @@ public interface Connection
     *         syntax or contains at least one property name that is not in
     *         object's property definition or <code>renditionFilter</code> has
     *         invalid syntax or contains at least one unknown rendition
-    * @throws CmisRuntimeException if any others errors occur
     */
    List<ItemsTree<CmisObject>> getFolderTree(String folderId, int depth, boolean includeAllowableActions,
       IncludeRelationships includeRelationships, boolean includePathSegments, boolean includeObjectInfo,
@@ -632,13 +626,11 @@ public interface Connection
     *         content stream
     * @throws StorageException if new Document can't be saved in storage cause
     *         to storage internal problem
-    * @throws CmisRuntimeException if any others errors occur
     */
    String createDocument(String folderId, Map<String, Property<?>> properties, ContentStream content,
       List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, List<String> policies,
       VersioningState versioningState) throws ObjectNotFoundException, ConstraintException, InvalidArgumentException,
-      StreamNotSupportedException, NameConstraintViolationException, IOException, StorageException,
-      CmisRuntimeException;
+      StreamNotSupportedException, NameConstraintViolationException, IOException, StorageException;
 
    /**
     * Create a document object as a copy of the given source document in the
@@ -694,12 +686,11 @@ public interface Connection
     *         other name which does not conflict
     * @throws StorageException if new Document can't be saved in storage cause
     *         to storage internal problem
-    * @throws CmisRuntimeException if any others errors occur
     */
    String createDocumentFromSource(String sourceId, String folderId, Map<String, Property<?>> propertiesa,
       List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, List<String> policies,
       VersioningState versioningState) throws ObjectNotFoundException, ConstraintException, InvalidArgumentException,
-      NameConstraintViolationException, StorageException, CmisRuntimeException;
+      NameConstraintViolationException, StorageException;
 
    /**
     * Create a folder object.
@@ -745,11 +736,10 @@ public interface Connection
     *         other name which does not conflict.
     * @throws StorageException if new Folder can't be saved in storage cause to
     *         storage internal problem
-    * @throws CmisRuntimeException if any others errors occur
     */
    String createFolder(String folderId, Map<String, Property<?>> properties, List<AccessControlEntry> addACL,
       List<AccessControlEntry> removeACL, List<String> policies) throws ObjectNotFoundException, ConstraintException,
-      InvalidArgumentException, NameConstraintViolationException, StorageException, CmisRuntimeException;
+      InvalidArgumentException, NameConstraintViolationException, StorageException;
 
    /**
     * Create a policy object.
@@ -796,11 +786,10 @@ public interface Connection
     *         other name which does not conflict
     * @throws StorageException if new Policy can't be saved in storage cause to
     *         storage internal problem
-    * @throws CmisRuntimeException if any others errors occur
     */
    String createPolicy(String folderId, Map<String, Property<?>> properties, List<AccessControlEntry> addACL,
       List<AccessControlEntry> removeACL, List<String> policies) throws ObjectNotFoundException, ConstraintException,
-      InvalidArgumentException, NameConstraintViolationException, StorageException, CmisRuntimeException;
+      InvalidArgumentException, NameConstraintViolationException, StorageException;
 
    /**
     * Create a relationship object.
@@ -843,11 +832,10 @@ public interface Connection
     *         other name which does not conflict
     * @throws StorageException if new Relationship can't be saved in storage
     *         cause to storage internal problem
-    * @throws CmisRuntimeException if any others errors occur
     */
    String createRelationship(Map<String, Property<?>> properties, List<AccessControlEntry> addACL,
       List<AccessControlEntry> removeACL, List<String> policies) throws ObjectNotFoundException, ConstraintException,
-      NameConstraintViolationException, StorageException, CmisRuntimeException;
+      NameConstraintViolationException, StorageException;
 
    /**
     * Delete the content stream for the specified Document object.
@@ -867,12 +855,13 @@ public interface Connection
     *         <i>contentStreamAllowed</i> attribute is set to <i>required</i>
     * @throws UpdateConflictException if update an object that is no longer
     *         current. Storage determine this by using change token
+    * @throws VersioningException if object is a non-current (latest) document
+    *         version and updatiing other then latest version is not supported
     * @throws StorageException if content of document can not be removed cause
     *         to storage internal problem
-    * @throws CmisRuntimeException if any others errors occur
     */
    String deleteContentStream(String documentId, ChangeTokenHolder changeTokenHolder) throws ObjectNotFoundException,
-      ConstraintException, UpdateConflictException, StorageException, CmisRuntimeException;
+      ConstraintException, UpdateConflictException, VersioningException, StorageException;
 
    /**
     * Delete the specified object.
@@ -891,10 +880,9 @@ public interface Connection
     *         determined by the storage)
     * @throws StorageException if object can not be removed cause to storage
     *         internal problem
-    * @throws CmisRuntimeException if any others errors occur
     */
    void deleteObject(String objectId, Boolean deleteAllVersions) throws ObjectNotFoundException, ConstraintException,
-      UpdateConflictException, StorageException, CmisRuntimeException;
+      UpdateConflictException, VersioningException, StorageException;
 
    /**
     * Delete the specified folder object and all of its child- and
@@ -924,10 +912,9 @@ public interface Connection
     *         <code>folderId</code> does not exist
     * @throws UpdateConflictException if object that is no longer current (as
     *         determined by the storage)
-    * @throws CmisRuntimeException if any others errors occur
     */
    Collection<String> deleteTree(String folderId, Boolean deleteAllVersions, UnfileObject unfileObject,
-      Boolean continueOnFailure) throws ObjectNotFoundException, UpdateConflictException, CmisRuntimeException;
+      Boolean continueOnFailure) throws ObjectNotFoundException, UpdateConflictException;
 
    /**
     * Get the list of allowable actions for an Object.
@@ -936,9 +923,8 @@ public interface Connection
     * @return allowable actions for object
     * @throws ObjectNotFoundException if object with specified id
     *         <code>objectId</code> does not exist
-    * @throws CmisRuntimeException if any others errors occur
     */
-   AllowableActions getAllowableActions(String objectId) throws ObjectNotFoundException, CmisRuntimeException;
+   AllowableActions getAllowableActions(String objectId) throws ObjectNotFoundException;
 
    /**
     * Get object's content stream.
@@ -956,10 +942,9 @@ public interface Connection
     *         <code>objectId</code> does not exist
     * @throws ConstraintException if the object specified by objectId does NOT
     *         have a content stream or rendition stream
-    * @throws CmisRuntimeException if any others errors occur
     */
    ContentStream getContentStream(String objectId, String streamId, long offset, long length)
-      throws ObjectNotFoundException, ConstraintException, CmisRuntimeException;
+      throws ObjectNotFoundException, ConstraintException;
 
    /**
     * Get object.
@@ -1011,11 +996,10 @@ public interface Connection
     *         syntax or contains at least one property name that is not in
     *         object's property definition or <code>renditionFilter</code> has
     *         invalid syntax or contains at least one unknown rendition
-    * @throws CmisRuntimeException if any others errors occur
     */
    CmisObject getObject(String objectId, boolean includeAllowableActions, IncludeRelationships includeRelationships,
       boolean includePolicyIDs, boolean includeAcl, boolean includeObjectInfo, String propertyFilter,
-      String renditionFilter) throws ObjectNotFoundException, FilterNotValidException, CmisRuntimeException;
+      String renditionFilter) throws ObjectNotFoundException, FilterNotValidException;
 
    /**
     * Get object by specified path.
@@ -1067,11 +1051,10 @@ public interface Connection
     *         syntax or contains at least one property name that is not in
     *         object's property definition or <code>renditionFilter</code> has
     *         invalid syntax or contains at least one unknown rendition
-    * @throws CmisRuntimeException if any others errors occur
     */
    CmisObject getObjectByPath(String path, boolean includeAllowableActions, IncludeRelationships includeRelationships,
       boolean includePolicyIDs, boolean includeAcl, boolean includeObjectInfo, String propertyFilter,
-      String renditionFilter) throws ObjectNotFoundException, FilterNotValidException, CmisRuntimeException;
+      String renditionFilter) throws ObjectNotFoundException, FilterNotValidException;
 
    /**
     * Get object's properties.
@@ -1091,10 +1074,9 @@ public interface Connection
     * @throws FilterNotValidException if <code>propertyFilter</code> has invalid
     *         syntax or contains at least one property name that is not in
     *         object's property definition
-    * @throws CmisRuntimeException if any others errors occur
     */
    CmisObject getProperties(String objectId, boolean includeObjectInfo, String propertyFilter)
-      throws ObjectNotFoundException, FilterNotValidException, CmisRuntimeException;
+      throws ObjectNotFoundException, FilterNotValidException;
 
    /**
     * Get the list of associated Renditions for the specified object. Only
@@ -1134,10 +1116,9 @@ public interface Connection
     *         <code>objectId</code> does not exists
     * @throws FilterNotValidException if <code>renditionFilter</code> has
     *         invalid syntax or contains at least one unknown rendition
-    * @throws CmisRuntimeException if any others errors occur
     */
    List<Rendition> getRenditions(String objectId, String renditionFilter, int maxItems, int skipCount)
-      throws ObjectNotFoundException, FilterNotValidException, CmisRuntimeException;
+      throws ObjectNotFoundException, FilterNotValidException;
 
    /**
     * Moves the specified file-able object from one folder to another.
@@ -1157,13 +1138,14 @@ public interface Connection
     *         doesn't match the specified object's parent folder (or one of the
     *         parent folders if the storage supports multifiling.).
     * @throws UpdateConflictException if object that is no longer current (as
-    *         determined by the storage).
+    *         determined by the storage)
+    * @throws VersioningException if object is a non-current (latest) document
+    *         version
     * @throws StorageException if object can not be moved (save changes) cause
     *         to storage internal problem
-    * @throws CmisRuntimeException if any others errors occur
     */
    String moveObject(String objectId, String targetFolderId, String sourceFolderId) throws ObjectNotFoundException,
-      ConstraintException, InvalidArgumentException, UpdateConflictException, StorageException, CmisRuntimeException;
+      ConstraintException, InvalidArgumentException, UpdateConflictException, VersioningException, StorageException;
 
    /**
     * Sets the content stream for the specified Document object.
@@ -1193,15 +1175,16 @@ public interface Connection
     *         the given document is set to not allowed
     * @throws UpdateConflictException if update an object that is no longer
     *         current. Storage determine this by using change token
+    * @throws VersioningException if object is a non-current (latest) document
+    *         version and updatiing other then latest version is not supported
     * @throws IOException if any i/o error occurs when try to set document's
     *         content stream
     * @throws StorageException if object's content stream can not be updated
     *         (save changes) cause to storage internal problem
-    * @throws CmisRuntimeException if any others errors occur
     */
    String setContentStream(String documentId, ContentStream content, ChangeTokenHolder changeTokenHolder,
       boolean overwriteFlag) throws ObjectNotFoundException, ContentAlreadyExistsException,
-      StreamNotSupportedException, UpdateConflictException, IOException, StorageException, CmisRuntimeException;
+      StreamNotSupportedException, UpdateConflictException, VersioningException, IOException, StorageException;
 
    /**
     * Update object properties.
@@ -1230,7 +1213,8 @@ public interface Connection
     *         <li>The object is not checked out and any of the properties being
     *         updated are defined in their object type definition have an
     *         attribute value of Updatability 'when checked-out'</li>
-    *         <li>If the object is a non-current Document Version</li>
+    *         <li>if object is a non-current (latest) document version and
+    *         updatiing other then latest version is not supported</li>
     *         </ul>
     * @throws StorageException if object's properties can not be updated (save
     *         changes) cause to storage internal problem
@@ -1250,10 +1234,8 @@ public interface Connection
     *         <code>policyId</code> does not exist
     * @throws ConstraintException if object with id <code>objectId</code> is not
     *         controllable by policy
-    * @throws CmisRuntimeException if any others errors occur
     */
-   void applyPolicy(String policyId, String objectId) throws ConstraintException, ObjectNotFoundException,
-      CmisRuntimeException;
+   void applyPolicy(String policyId, String objectId) throws ConstraintException, ObjectNotFoundException;
 
    /**
     * Gets the list of policies currently applied to the specified object.
@@ -1274,10 +1256,9 @@ public interface Connection
     * @throws FilterNotValidException if <code>propertyFilter</code> has invalid
     *         syntax or contains at least one property name that is not in
     *         object's property definition
-    * @throws CmisRuntimeException if any others errors occur
     */
    List<CmisObject> getAppliedPolicies(String objectId, boolean includeObjectInfo, String propertyFilter)
-      throws ObjectNotFoundException, FilterNotValidException, CmisRuntimeException;
+      throws ObjectNotFoundException, FilterNotValidException;
 
    /**
     * Removes a specified policy from an object.
@@ -1288,10 +1269,8 @@ public interface Connection
     *         not exist
     * @throws ConstraintException if object with id <code>objectId</code> is not
     *         controllable by policy
-    * @throws CmisRuntimeException if any others errors occur
     */
-   void removePolicy(String policyId, String objectId) throws ConstraintException, ObjectNotFoundException,
-      CmisRuntimeException;
+   void removePolicy(String policyId, String objectId) throws ConstraintException, ObjectNotFoundException;
 
    // ---
 
@@ -1321,12 +1300,10 @@ public interface Connection
     * @throws FilterNotValidException if <code>propertyFilter</code> has invalid
     *         syntax or contains at least one property name that is not in
     *         object's property definition
-    * @throws CmisRuntimeException if any others errors occur
     */
    ItemsList<CmisObject> getObjectRelationships(String objectId, RelationshipDirection direction, String typeId,
       boolean includeSubRelationshipTypes, boolean includeAllowableActions, boolean includeObjectInfo,
-      String propertyFilter, int maxItems, int skipCount) throws FilterNotValidException, ObjectNotFoundException,
-      CmisRuntimeException;
+      String propertyFilter, int maxItems, int skipCount) throws FilterNotValidException, ObjectNotFoundException;
 
    // Versioning Service
 
@@ -1342,10 +1319,9 @@ public interface Connection
     * @throws VersioningException if object is a non-current document version
     * @throws StorageException if newly created PWC can't be saved in storage
     *         cause to storage internal problem
-    * @throws CmisRuntimeException if any others errors occur
     */
    String checkout(String documentId) throws ConstraintException, UpdateConflictException, VersioningException,
-      StorageException, CmisRuntimeException;
+      StorageException;
 
    /**
     * Discard the check-out operation. As result Private Working Copy (PWC) must
@@ -1359,10 +1335,9 @@ public interface Connection
     * @throws VersioningException if object is a non-current document version
     * @throws StorageException if PWC can't be removed from storage cause to
     *         storage internal problem
-    * @throws CmisRuntimeException if any others errors occur
     */
    void cancelCheckout(String documentId) throws ConstraintException, UpdateConflictException, VersioningException,
-      StorageException, CmisRuntimeException;
+      StorageException;
 
    /**
     * Check-in Private Working Copy.
@@ -1393,11 +1368,10 @@ public interface Connection
     *         content stream
     * @throws StorageException if newly version of Document can't be saved in
     *         storage cause to its internal problem
-    * @throws CmisRuntimeException if any others errors occur
     */
    String checkin(String documentId, boolean major, Map<String, Property<?>> properties, ContentStream content,
       String checkinComment, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, List<String> policies)
-      throws ConstraintException, UpdateConflictException, StreamNotSupportedException, IOException, StorageException;
+      throws ConstraintException, UpdateConflictException, StreamNotSupportedException, IOException;
 
    /**
     * Get all documents in version series.
@@ -1420,10 +1394,9 @@ public interface Connection
     * @throws FilterNotValidException if <code>propertyFilter</code> has invalid
     *         syntax or contains at least one property name that is not in
     *         object's property definition
-    * @throws CmisRuntimeException if any others errors occur
     */
    List<CmisObject> getAllVersions(String versionSeriesId, boolean includeAllowableActions, boolean includeObjectInfo,
-      String propertyFilter) throws ObjectNotFoundException, FilterNotValidException, CmisRuntimeException;
+      String propertyFilter) throws ObjectNotFoundException, FilterNotValidException;
 
    /**
     * Get the latest Document object in the version series.
@@ -1483,12 +1456,11 @@ public interface Connection
     *         syntax or contains at least one property name that is not in
     *         object's property definition or <code>renditionFilter</code> has
     *         invalid syntax or contains at least one unknown rendition
-    * @throws CmisRuntimeException if any others errors occur
     */
    CmisObject getObjectOfLatestVersion(String versionSeriesId, boolean major, boolean includeAllowableActions,
       IncludeRelationships includeRelationships, boolean includePolicyIDs, boolean includeAcl,
       boolean includeObjectInfo, String propertyFilter, String renditionFilter) throws ObjectNotFoundException,
-      FilterNotValidException, CmisRuntimeException;
+      FilterNotValidException;
 
    /**
     * Get properties of latest version in version series.
@@ -1517,10 +1489,9 @@ public interface Connection
     * @throws FilterNotValidException if <code>propertyFilter</code> has invalid
     *         syntax or contains at least one property name that is not in
     *         object's property definition
-    * @throws CmisRuntimeException if any others errors occur
     */
    CmisObject getPropertiesOfLatestVersion(String versionSeriesId, boolean major, boolean includeObjectInfo,
-      String propertyFilter) throws FilterNotValidException, ObjectNotFoundException, CmisRuntimeException;
+      String propertyFilter) throws FilterNotValidException, ObjectNotFoundException;
 
    // Type Managment
 
@@ -1542,9 +1513,8 @@ public interface Connection
     *         unsupported type, invalid id, so on</li>
     * @throws StorageException if type can't be added (save changes) cause to
     *         storage internal problem
-    * @throws CmisRuntimeException if any others errors occur
     */
-   String addType(TypeDefinition type) throws StorageException, CmisRuntimeException;
+   String addType(TypeDefinition type) throws ConstraintException, StorageException;
 
    /**
     * Set of object types.
@@ -1559,10 +1529,9 @@ public interface Connection
     * @return list of all base types or specified object type and its direct
     *         children
     * @throws TypeNotFoundException if type <code>typeId</code> does not exist
-    * @throws CmisRuntimeException if any others errors occur
     */
    ItemsList<TypeDefinition> getTypeChildren(String typeId, boolean includePropertyDefinition, int maxItems,
-      int skipCount) throws TypeNotFoundException, CmisRuntimeException;
+      int skipCount) throws TypeNotFoundException;
 
    /**
     * Get type definition for type <code>typeId</code> include property
@@ -1571,9 +1540,8 @@ public interface Connection
     * @param typeId type Id
     * @return type definition
     * @throws TypeNotFoundException if type <code>typeId</code> does not exist
-    * @throws CmisRuntimeException if any others errors occur
     */
-   TypeDefinition getTypeDefinition(String typeId) throws TypeNotFoundException, CmisRuntimeException;
+   TypeDefinition getTypeDefinition(String typeId) throws TypeNotFoundException;
 
    /**
     * Get type definition for type <code>typeId</code>.
@@ -1583,10 +1551,8 @@ public interface Connection
     *        should be included
     * @return type definition
     * @throws TypeNotFoundException if type <code>typeId</code> does not exist
-    * @throws CmisRuntimeException if any others errors occur
     */
-   TypeDefinition getTypeDefinition(String typeId, boolean includePropertyDefinition) throws TypeNotFoundException,
-      CmisRuntimeException;
+   TypeDefinition getTypeDefinition(String typeId, boolean includePropertyDefinition) throws TypeNotFoundException;
 
    /**
     * Get all descendants of specified <code>typeId</code> in hierarchy. If
@@ -1599,10 +1565,9 @@ public interface Connection
     *        included false otherwise
     * @return list of descendant types
     * @throws TypeNotFoundException if type <code>typeId</code> does not exist
-    * @throws CmisRuntimeException if any others errors occur
     */
    List<ItemsTree<TypeDefinition>> getTypeDescendants(String typeId, int depth, boolean includePropertyDefinition)
-      throws TypeNotFoundException, CmisRuntimeException;
+      throws TypeNotFoundException;
 
    /**
     * Remove type definition for type <code>typeId</code> .
@@ -1614,10 +1579,8 @@ public interface Connection
     *         this type
     * @throws StorageException if type can't be removed (save changes) cause to
     *         storage internal problem
-    * @throws CmisRuntimeException if any others errors occur
     */
-   void removeType(String typeId) throws TypeNotFoundException, ConstraintException, StorageException,
-      CmisRuntimeException;
+   void removeType(String typeId) throws TypeNotFoundException, ConstraintException, StorageException;
 
    //---------
    /**

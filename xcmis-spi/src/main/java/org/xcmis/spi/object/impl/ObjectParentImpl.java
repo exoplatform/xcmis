@@ -31,9 +31,9 @@ import org.xcmis.spi.object.ObjectParent;
 public class ObjectParentImpl implements ObjectParent
 {
 
-   private final CmisObject parent;
+   private CmisObject parent;
 
-   private final String relativePathSegment;
+   private String relativePathSegment;
 
    public ObjectParentImpl(CmisObject parent, String relativePathSegment)
    {

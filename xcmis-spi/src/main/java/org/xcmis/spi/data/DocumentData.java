@@ -88,6 +88,14 @@ public interface DocumentData extends ObjectData
     */
    boolean isVersionSeriesCheckedOut();
 
+   /**
+    * Shortcut to 'cmis:contentStreamMimeType' property.
+    * 
+    * @return 'cmis:contentStreamMimeType' property or <code>null</code> if
+    *         document has not content
+    */
+   String getContentStreamMimeType();
+
    //
 
    /**

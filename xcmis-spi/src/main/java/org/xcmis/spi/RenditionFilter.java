@@ -47,7 +47,7 @@ public class RenditionFilter
 
    /** Filter instance with all renditions included. */
    public static final RenditionFilter ANY;
-   
+
    /** Filter instance with none renditions included. */
    public static final RenditionFilter NONE;
 
@@ -57,6 +57,7 @@ public class RenditionFilter
       Set<String> tmp = new HashSet<String>();
       tmp.add(THUMBNAIL_FILTER);
       THUMBNAIL.kinds = Collections.unmodifiableSet(tmp);
+      THUMBNAIL.mediaTypes = Collections.emptySet();
       ANY = new RenditionFilter();
       ANY.anyRenditions = true;
       NONE = new RenditionFilter();
@@ -67,7 +68,7 @@ public class RenditionFilter
    /** Pattern for parsing source filter string. */
    private static final Pattern SPLITTER = Pattern.compile("\\s*,\\s*");
 
-   /** Whether any renditions.*/
+   /** Whether any renditions. */
    private boolean anyRenditions = false;
 
    /** Kinds. */
@@ -79,11 +80,11 @@ public class RenditionFilter
    /**
     * Construct new Rendition Filter.
     * 
-    * @param filterString string that contains either '*' or comma-separated list
-    *          of rendition's kind or mime-types. An arbitrary number of space
-    *          allowed before and after each comma. Each token will be interpreted
-    *          as rendition mime-type if it has form 'type/sub-type' otherwise 
-    *          it will be interpreted as kind. 
+    * @param filterString string that contains either '*' or comma-separated
+    *        list of rendition's kind or mime-types. An arbitrary number of
+    *        space allowed before and after each comma. Each token will be
+    *        interpreted as rendition mime-type if it has form 'type/sub-type'
+    *        otherwise it will be interpreted as kind.
     * @throws FilterNotValidException if <code>filterString</code> is invalid
     */
    public RenditionFilter(String filterString) throws FilterNotValidException
@@ -156,4 +157,11 @@ public class RenditionFilter
       }
       return false;
    }
+
+   // TODO : do smarter with filter. Temporary just avoid to do unnecessary work and skip results. 
+   public boolean isNone()
+   {
+      return !anyRenditions && mediaTypes.size() == 0 && kinds.size() == 0;
+   }
+
 }

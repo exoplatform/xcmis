@@ -49,8 +49,8 @@ public final class CmisUtils
 
       public int compare(ObjectData object1, ObjectData object2)
       {
-         Calendar c1 = object1.getLatsModificationDate();
-         Calendar c2 = object2.getLatsModificationDate();
+         Calendar c1 = object1.getLastModificationDate();
+         Calendar c2 = object2.getLastModificationDate();
          return c2.compareTo(c1);
       }
 

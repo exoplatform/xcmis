@@ -27,6 +27,6 @@ package org.xcmis.spi;
  * @version $Id$
  * @see Connection
  */
-public final class ChangeTokenHolder extends AbstractHolder<String>
+public class ChangeTokenHolder extends AbstractHolder<String>
 {
 }

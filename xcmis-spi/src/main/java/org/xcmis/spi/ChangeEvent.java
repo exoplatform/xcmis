@@ -31,10 +31,22 @@ import java.util.List;
 public interface ChangeEvent
 {
 
+   /**
+    * Get change log token. It is unique identifier of change.
+    * 
+    * @return change log token
+    */
    String getLogToken();
 
+   /**
+    * @return id of changed object
+    */
    String getObjectId();
 
+   /**
+    * @return type of changes
+    * @see ChangeType
+    */
    ChangeType getType();
 
    /**

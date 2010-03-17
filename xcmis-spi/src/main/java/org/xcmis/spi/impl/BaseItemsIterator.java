@@ -17,8 +17,10 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.xcmis.spi;
+package org.xcmis.spi.impl;
 
+
+import org.xcmis.spi.ItemsIterator;
 
 import java.util.Collection;
 import java.util.Iterator;

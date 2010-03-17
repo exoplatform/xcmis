@@ -7,6 +7,7 @@ import org.xcmis.spi.Permission.BasicPermissions;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Info about CMISobject that contains properties, allowable actions,
@@ -23,9 +24,9 @@ public interface CmisObject
 {
 
    /**
-    * @return object's properties
+    * @return object's properties, never <code>null</code>
     */
-   Properties getProperties();
+   Map<String, Property<?>> getProperties();
 
    /**
     * @return allowable actions
@@ -33,7 +34,8 @@ public interface CmisObject
    AllowableActions getAllowableActions();
 
    /**
-    * @return objects relationships
+    * @return objects relationships. Even object has not any relationships this
+    *         method must return empty list but never <code>null</code>
     */
    List<CmisObject> getRelationship();
 
@@ -43,7 +45,8 @@ public interface CmisObject
    ChangeInfo getChangeInfo();
 
    /**
-    * @return object's ACL
+    * @return object's ACL. Even object has not any applied ACL this method must
+    *         return empty list but never <code>null</code>
     */
    List<AccessControlEntry> getACL();
 
@@ -56,13 +59,17 @@ public interface CmisObject
    boolean isExactACL();
 
    /**
-    * @return set of policy IDs applied to the object
+    * @return set of policy IDs applied to the object. Even object has not any
+    *         applied policies this method must return empty collection but
+    *         never <code>null</code>
     */
    Collection<String> getPolicyIds();
 
    /**
     * @return content stream renditions. There is no rendition contents stream
-    *         just information about available renditions
+    *         just information about available renditions. Even object has not
+    *         any renditions this method must return empty list but never
+    *         <code>null</code>
     */
    List<Rendition> getRenditions();
 

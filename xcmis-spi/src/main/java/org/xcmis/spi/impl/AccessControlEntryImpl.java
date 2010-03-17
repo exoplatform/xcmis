@@ -46,6 +46,9 @@ public class AccessControlEntryImpl implements AccessControlEntry
       this.permissions = permissions;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public Collection<String> getPermissions()
    {
       if (permissions == null)
@@ -53,6 +56,9 @@ public class AccessControlEntryImpl implements AccessControlEntry
       return permissions;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public String getPrincipal()
    {
       return principal;

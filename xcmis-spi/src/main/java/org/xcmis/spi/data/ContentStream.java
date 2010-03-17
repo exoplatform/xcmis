@@ -36,6 +36,8 @@ public interface ContentStream
    /**
     * @return content stream media type
     */
+   // TODO : use org.xcmis.spi.utils.MimeType instead String !!!
+   // Have problem with encoding text content now.
    String getMediaType();
 
    /**

@@ -105,7 +105,7 @@ public interface ObjectData
     */
    void removePolicy(PolicyData policy) throws ConstraintException;
 
-   // ------
+   //
 
    /**
     * @return <code>true</code> if current object is newly created and was not
@@ -154,7 +154,7 @@ public interface ObjectData
     * 
     * @return 'cmis:lastModificationDate' property
     */
-   Calendar getLatsModificationDate();
+   Calendar getLastModificationDate();
 
    /**
     * Shortcut to 'cmis:name' property.

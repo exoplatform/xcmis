@@ -19,8 +19,9 @@
 
 package org.xcmis.spi;
 
-
 /**
+ * Capabilities of CMIS repository.
+ * 
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */

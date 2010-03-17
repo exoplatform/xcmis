@@ -25,12 +25,14 @@ import org.xcmis.spi.Rendition;
 import org.xcmis.spi.object.ChangeInfo;
 import org.xcmis.spi.object.CmisObject;
 import org.xcmis.spi.object.ObjectInfo;
-import org.xcmis.spi.object.Properties;
+import org.xcmis.spi.object.Property;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -40,7 +42,7 @@ import java.util.Set;
 public class CmisObjectImpl implements CmisObject
 {
 
-   private Properties properties;
+   private Map<String, Property<?>> properties;
 
    private List<AccessControlEntry> acl;
 
@@ -64,7 +66,7 @@ public class CmisObjectImpl implements CmisObject
    {
    }
 
-   public CmisObjectImpl(Properties properties, List<AccessControlEntry> acl, boolean exactACL, Set<String> policyIds,
+   public CmisObjectImpl(Map<String, Property<?>> properties, List<AccessControlEntry> acl, boolean exactACL, Set<String> policyIds,
       List<CmisObject> relationships, List<Rendition> renditions, AllowableActions allowableActions,
       ChangeInfo changeInfo, ObjectInfo objectInfo, String pathSegment)
    {
@@ -135,8 +137,10 @@ public class CmisObjectImpl implements CmisObject
    /**
     * {@inheritDoc}
     */
-   public Properties getProperties()
+   public Map<String, Property<?>> getProperties()
    {
+      if (properties == null)
+         properties = new HashMap<String, Property<?>>();
       return properties;
    }
 
@@ -183,9 +187,14 @@ public class CmisObjectImpl implements CmisObject
       this.objectInfo = objectInfo;
    }
 
-   public void setProperties(Properties properties)
+   public void setExactACL(boolean exactACL)
    {
-      this.properties = properties;
+      this.exactACL = exactACL;
+   }
+
+   public void setPathSegment(String pathSegment)
+   {
+      this.pathSegment = pathSegment;
    }
 
 }

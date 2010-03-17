@@ -18,10 +18,10 @@
  */
 package org.xcmis.spi.object.impl;
 
+import org.xcmis.spi.BaseType;
 import org.xcmis.spi.object.ObjectInfo;
 
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 
 /**
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey
@@ -32,84 +32,118 @@ import java.util.GregorianCalendar;
 public class ObjectInfoImpl implements ObjectInfo
 {
 
-   private String baseTypeId;
+   // Common
+
+   private BaseType baseType;
+
+   private String typeId;
+
+   private String id;
+
+   private String name;
 
    private String createdBy;
 
    private Calendar creationDate;
 
-   private String id;
-
-   private Boolean latestMajorVersion;
-
-   private Boolean latestVersion;
+   private String lastModifiedBy;
 
    private Calendar lastModificationDate;
 
-   private String name;
+   private String changeToken;
+
+   // Folder
 
    private String parentId;
 
+   // Document
+
+   private Boolean latestVersion;
+
+   private Boolean majorVersion;
+
+   private Boolean latestMajorVersion;
+
    private String versionSeriesId;
-
-   private String contentStreamMimeType;
-
-   private String changeToken;
-
-   private String targetId;
 
    private String versionSeriesCheckedOutId;
 
+   private String versionSeriesCheckedOutBy;
+
+   private String versionLabel;
+
+   private String contentStreamMimeType;
+
+   // Relationship
+
    private String sourceId;
+
+   private String targetId;
 
    public ObjectInfoImpl()
    {
    }
 
-   public ObjectInfoImpl(String baseTypeId, String createdBy, Calendar creationDate, String id,
-      Boolean latestMajorVersion, Boolean latestVersion, Calendar lastModificationDate, String name, String parentId,
-      String versionSeriesId, String contentStreamMimeType, String changeToken, String targetId,
-      String versionSeriesCheckedOutId, String sourceId)
+   // Common
+
+   public ObjectInfoImpl(BaseType baseType, String typeId, String id, String name, String createdBy,
+      Calendar creationDate, String lastModifiedBy, Calendar lastModificationDate, String changeToken, String parentId,
+      Boolean latestVersion, Boolean majorVersion, Boolean latestMajorVersion, String versionSeriesId,
+      String versionSeriesCheckedOutId, String versionSeriesCheckedOutBy, String versionLabel,
+      String contentStreamMimeType, String sourceId, String targetId)
    {
-      this.baseTypeId = baseTypeId;
+      this.baseType = baseType;
+      this.typeId = typeId;
+      this.id = id;
+      this.name = name;
       this.createdBy = createdBy;
       this.creationDate = creationDate;
-      this.id = id;
-      this.latestMajorVersion = latestMajorVersion;
-      this.latestVersion = latestVersion;
+      this.lastModifiedBy = lastModifiedBy;
       this.lastModificationDate = lastModificationDate;
-      this.name = name;
-      this.parentId = parentId;
-      this.versionSeriesId = versionSeriesId;
-      this.contentStreamMimeType = contentStreamMimeType;
       this.changeToken = changeToken;
-      this.targetId = targetId;
+      this.parentId = parentId;
+      this.latestVersion = latestVersion;
+      this.majorVersion = majorVersion;
+      this.latestMajorVersion = latestMajorVersion;
+      this.versionSeriesId = versionSeriesId;
       this.versionSeriesCheckedOutId = versionSeriesCheckedOutId;
+      this.versionSeriesCheckedOutBy = versionSeriesCheckedOutBy;
+      this.versionLabel = versionLabel;
+      this.contentStreamMimeType = contentStreamMimeType;
       this.sourceId = sourceId;
+      this.targetId = targetId;
    }
 
    /**
     * {@inheritDoc}
     */
-   public String getBaseTypeId()
+   public BaseType getBaseType()
    {
-      return baseTypeId;
+      return baseType;
    }
 
    /**
     * {@inheritDoc}
     */
-   public String getChangeToken()
+   public String getTypeId()
    {
-      return changeToken;
+      return typeId;
    }
 
    /**
     * {@inheritDoc}
     */
-   public String getContentStreamMimeType()
+   public String getId()
    {
-      return contentStreamMimeType;
+      return id;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public String getName()
+   {
+      return name;
    }
 
    /**
@@ -131,9 +165,9 @@ public class ObjectInfoImpl implements ObjectInfo
    /**
     * {@inheritDoc}
     */
-   public String getId()
+   public String getLastModifiedBy()
    {
-      return id;
+      return lastModifiedBy;
    }
 
    /**
@@ -147,10 +181,12 @@ public class ObjectInfoImpl implements ObjectInfo
    /**
     * {@inheritDoc}
     */
-   public String getName()
+   public String getChangeToken()
    {
-      return name;
+      return changeToken;
    }
+
+   // Folder
 
    /**
     * {@inheritDoc}
@@ -159,6 +195,71 @@ public class ObjectInfoImpl implements ObjectInfo
    {
       return parentId;
    }
+
+   // Document
+
+   /**
+    * {@inheritDoc}
+    */
+   public Boolean isLatestVersion()
+   {
+      return latestVersion;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public Boolean isMajorVersion()
+   {
+      return majorVersion;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public Boolean isLatestMajorVersion()
+   {
+      return latestMajorVersion;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public String getVersionSeriesId()
+   {
+      return versionSeriesId;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public String getVersionSeriesCheckedOutId()
+   {
+      return versionSeriesCheckedOutId;
+   }
+
+   public String getVersionSeriesCheckedOutBy()
+   {
+      return versionSeriesCheckedOutBy;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public String getVersionLabel()
+   {
+      return versionLabel;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public String getContentStreamMimeType()
+   {
+      return contentStreamMimeType;
+   }
+
+   // Relationship
 
    /**
     * {@inheritDoc}
@@ -176,63 +277,18 @@ public class ObjectInfoImpl implements ObjectInfo
       return targetId;
    }
 
-   /**
-    * {@inheritDoc}
-    */
-   public String getVersionSeriesCheckedOutId()
+   // ------------------- Setters --------------------------
+
+   // Common
+
+   public void setBaseType(BaseType baseType)
    {
-      return versionSeriesCheckedOutId;
+      this.baseType = baseType;
    }
 
-   /**
-    * {@inheritDoc}
-    */
-   public String getVersionSeriesId()
+   public void setTypeId(String typeId)
    {
-      return versionSeriesId;
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public Boolean isLatestMajorVersion()
-   {
-      return latestMajorVersion;
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public Boolean isLatestVersion()
-   {
-      return latestVersion;
-   }
-
-   // --- Setters
-   
-   public void setBaseTypeId(String baseTypeId)
-   {
-      this.baseTypeId = baseTypeId;
-   }
-
-   public void setChangeToken(String changeToken)
-   {
-      this.changeToken = changeToken;
-   }
-
-   public void setContentStreamMimeType(String contentStreamMimeType)
-   {
-      this.contentStreamMimeType = contentStreamMimeType;
-   }
-
-   public void setCreatedBy(String createdBy)
-   {
-      this.createdBy = createdBy;
-   }
-
-   public void setCreationDate(GregorianCalendar creationDate)
-   {
-      this.creationDate = creationDate;
+      this.typeId = typeId;
    }
 
    public void setId(String id)
@@ -240,30 +296,86 @@ public class ObjectInfoImpl implements ObjectInfo
       this.id = id;
    }
 
-   public void setIsLatestMajorVersion(boolean latestMajorVersion)
-   {
-      this.latestMajorVersion = latestMajorVersion;
-   }
-
-   public void setIsLatestVersion(boolean latestVersion)
-   {
-      this.latestVersion = latestVersion;
-   }
-
-   public void setLastModificationDate(GregorianCalendar lastModificationDate)
-   {
-      this.lastModificationDate = lastModificationDate;
-   }
-
    public void setName(String name)
    {
       this.name = name;
    }
 
+   public void setCreatedBy(String createdBy)
+   {
+      this.createdBy = createdBy;
+   }
+
+   public void setCreationDate(Calendar creationDate)
+   {
+      this.creationDate = creationDate;
+   }
+
+   public void setLastModifiedBy(String lastModifiedBy)
+   {
+      this.lastModifiedBy = lastModifiedBy;
+   }
+
+   public void setLastModificationDate(Calendar lastModificationDate)
+   {
+      this.lastModificationDate = lastModificationDate;
+   }
+
+   public void setChangeToken(String changeToken)
+   {
+      this.changeToken = changeToken;
+   }
+
+   // Folder
+
    public void setParentId(String parentId)
    {
       this.parentId = parentId;
    }
+
+   // Document
+
+   public void setLatestVersion(Boolean latestVersion)
+   {
+      this.latestVersion = latestVersion;
+   }
+
+   public void setMajorVersion(Boolean majorVersion)
+   {
+      this.majorVersion = majorVersion;
+   }
+
+   public void setLatestMajorVersion(Boolean latestMajorVersion)
+   {
+      this.latestMajorVersion = latestMajorVersion;
+   }
+
+   public void setVersionSeriesId(String versionSeriesId)
+   {
+      this.versionSeriesId = versionSeriesId;
+   }
+
+   public void setVersionSeriesCheckedOutId(String versionSeriesCheckedOutId)
+   {
+      this.versionSeriesCheckedOutId = versionSeriesCheckedOutId;
+   }
+
+   public void setVersionSeriesCheckedOutBy(String versionSeriesCheckedOutBy)
+   {
+      this.versionSeriesCheckedOutBy = versionSeriesCheckedOutBy;
+   }
+
+   public void setVersionLabel(String versionLabel)
+   {
+      this.versionLabel = versionLabel;
+   }
+
+   public void setContentStreamMimeType(String contentStreamMimeType)
+   {
+      this.contentStreamMimeType = contentStreamMimeType;
+   }
+
+   // Relationship
 
    public void setSourceId(String sourceId)
    {
@@ -273,16 +385,6 @@ public class ObjectInfoImpl implements ObjectInfo
    public void setTargetId(String targetId)
    {
       this.targetId = targetId;
-   }
-
-   public void setVersionSeriesCheckedOutId(String versionSeriesCheckedOutId)
-   {
-      this.versionSeriesCheckedOutId = versionSeriesCheckedOutId;
-   }
-
-   public void setVersionSeriesId(String versionSeriesId)
-   {
-      this.versionSeriesId = versionSeriesId;
    }
 
 }
