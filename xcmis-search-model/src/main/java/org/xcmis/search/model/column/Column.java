@@ -67,11 +67,7 @@ public class Column implements QueryElement
     */
    public Column(SelectorName selectorName)
    {
-      Validate.notNull(selectorName, "The selectorName argument may not be null");
-      this.selectorName = selectorName;
-      this.propertyName = null;
-      this.columnName = null;
-      this.hcode = new HashCodeBuilder().append(selectorName).toHashCode();
+      this(selectorName, "*", "*");
    }
 
    /**
@@ -127,10 +123,8 @@ public class Column implements QueryElement
       }
       Column rhs = (Column)obj;
 
-      return new EqualsBuilder()
-            .append(selectorName, rhs.selectorName)
-            .append(propertyName, rhs.propertyName)
-            .append(columnName, rhs.columnName).isEquals();
+      return new EqualsBuilder().append(selectorName, rhs.selectorName).append(propertyName, rhs.propertyName).append(
+         columnName, rhs.columnName).isEquals();
 
    }
 
