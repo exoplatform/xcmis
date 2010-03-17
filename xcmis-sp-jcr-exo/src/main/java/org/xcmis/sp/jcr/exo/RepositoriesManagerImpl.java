@@ -320,6 +320,20 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
                if (LOG.isDebugEnabled())
                   LOG.debug("CMIS Working Copies storage " + JcrCMIS.CMIS_WORKING_COPIES + " created.");
             }
+            
+            if (!cmisSystem.hasNode(JcrCMIS.CMIS_UNFILINGS))
+            {
+               cmisSystem.addNode(JcrCMIS.CMIS_UNFILINGS);
+               if (LOG.isDebugEnabled())
+                  LOG.debug("CMIS Working Copies storage " + JcrCMIS.CMIS_UNFILINGS + " created.");
+            }
+            
+            if (!cmisSystem.hasNode(JcrCMIS.CMIS_MULTIFILINGS))
+            {
+               cmisSystem.addNode(JcrCMIS.CMIS_MULTIFILINGS);
+               if (LOG.isDebugEnabled())
+                  LOG.debug("CMIS Working Copies storage " + JcrCMIS.CMIS_MULTIFILINGS + " created.");
+            }
             session.save();
 
             Workspace workspace = session.getWorkspace();
