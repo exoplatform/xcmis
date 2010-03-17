@@ -19,37 +19,27 @@
 
 package org.xcmis.sp.jcr.exo.NEW;
 
-import org.xcmis.spi.Storage;
-import org.xcmis.spi.UpdateConflictException;
-import org.xcmis.spi.data.ObjectData;
-import org.xcmis.spi.impl.BaseConnection;
+import org.xcmis.spi.TypeDefinition;
+import org.xcmis.spi.data.PolicyData;
+
+import javax.jcr.Node;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
- * @version $Id: $
+ * @version $Id$
  */
-public class JcrConnection extends BaseConnection
+public class PolicyDataImpl extends AbstractObjectData implements PolicyData
 {
 
-   public JcrConnection(Storage storage)
+   public PolicyDataImpl(Node node, TypeDefinition type)
    {
-      super(storage);
+      super(node, type);
    }
 
-   public void close()
+   public String getPolicyText()
    {
       // TODO Auto-generated method stub
-   }
-
-   protected void validateChangeToken(ObjectData object, String changeToken) throws UpdateConflictException
-   {
-      // TODO Auto-generated method stub
-   }
-
-   @Override
-   protected void checkConnection() throws IllegalStateException
-   {
-      // TODO Auto-generated method stub
+      return null;
    }
 
 }

@@ -19,37 +19,33 @@
 
 package org.xcmis.sp.jcr.exo.NEW;
 
-import org.xcmis.spi.Storage;
-import org.xcmis.spi.UpdateConflictException;
-import org.xcmis.spi.data.ObjectData;
-import org.xcmis.spi.impl.BaseConnection;
+import org.xcmis.spi.TypeDefinition;
+import org.xcmis.spi.data.RelationshipData;
+
+import javax.jcr.Node;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
- * @version $Id: $
+ * @version $Id$
  */
-public class JcrConnection extends BaseConnection
+public class RelationshipDataImpl extends AbstractObjectData implements RelationshipData
 {
 
-   public JcrConnection(Storage storage)
+   public RelationshipDataImpl(Node node, TypeDefinition type)
    {
-      super(storage);
+      super(node, type);
    }
 
-   public void close()
+   public String getSourceId()
    {
       // TODO Auto-generated method stub
+      return null;
    }
 
-   protected void validateChangeToken(ObjectData object, String changeToken) throws UpdateConflictException
+   public String getTargetId()
    {
       // TODO Auto-generated method stub
-   }
-
-   @Override
-   protected void checkConnection() throws IllegalStateException
-   {
-      // TODO Auto-generated method stub
+      return null;
    }
 
 }

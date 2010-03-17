@@ -19,37 +19,66 @@
 
 package org.xcmis.sp.jcr.exo.NEW;
 
-import org.xcmis.spi.Storage;
-import org.xcmis.spi.UpdateConflictException;
+import org.xcmis.spi.ConstraintException;
+import org.xcmis.spi.ItemsIterator;
+import org.xcmis.spi.TypeDefinition;
+import org.xcmis.spi.data.FolderData;
 import org.xcmis.spi.data.ObjectData;
-import org.xcmis.spi.impl.BaseConnection;
+
+import javax.jcr.Node;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
- * @version $Id: $
+ * @version $Id$
  */
-public class JcrConnection extends BaseConnection
+public class FolderDataImpl extends AbstractObjectData implements FolderData
 {
 
-   public JcrConnection(Storage storage)
+   public FolderDataImpl(Node node, TypeDefinition type)
    {
-      super(storage);
+      super(node, type);
    }
 
-   public void close()
+   public void addObject(ObjectData object) throws ConstraintException
    {
       // TODO Auto-generated method stub
+
    }
 
-   protected void validateChangeToken(ObjectData object, String changeToken) throws UpdateConflictException
+   public ObjectData createChild(TypeDefinition type) throws ConstraintException
    {
       // TODO Auto-generated method stub
+      return null;
    }
 
-   @Override
-   protected void checkConnection() throws IllegalStateException
+   public ItemsIterator<ObjectData> getChildren(String orderBy)
    {
       // TODO Auto-generated method stub
+      return null;
+   }
+
+   public boolean hasChildren()
+   {
+      // TODO Auto-generated method stub
+      return false;
+   }
+
+   public boolean isAllowedChildType(String typeId)
+   {
+      // TODO Auto-generated method stub
+      return false;
+   }
+
+   public boolean isRoot()
+   {
+      // TODO Auto-generated method stub
+      return false;
+   }
+
+   public void removeObject(ObjectData object)
+   {
+      // TODO Auto-generated method stub
+
    }
 
 }
