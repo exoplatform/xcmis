@@ -38,9 +38,7 @@ import org.xcmis.search.query.plan.QueryExecutionPlan.LimitExecutionPlan;
 import org.xcmis.search.query.plan.QueryExecutionPlan.ProjectExecutionPlan;
 import org.xcmis.search.query.plan.QueryExecutionPlan.SelectorExecutionPlan;
 import org.xcmis.search.query.plan.QueryExecutionPlan.SortExecutionPlan;
-import org.xcmis.search.query.plan.QueryExecutionPlan.Type;
 import org.xcmis.search.query.plan.QueryExecutionPlan.WhereExecutionPlan;
-import org.xcmis.search.query.process.QueryResultColumns;
 import org.xcmis.search.query.request.QueryProcessor;
 import org.xcmis.search.result.ScoredRow;
 
@@ -120,7 +118,6 @@ public class QueryProcessorInterceptor extends CommandInterceptor
       // Create the plan ...
       long start = System.nanoTime();
       QueryExecutionPlan executionPlan = planner.createPlan(context, query);
-      executionPlan.toString();
       long duration = System.nanoTime() - start;
       Statistics stats = new Statistics(duration);
       if (!context.getExecutionExceptions().hasProblems())
@@ -161,11 +158,7 @@ public class QueryProcessorInterceptor extends CommandInterceptor
    private List<ScoredRow> execute(InvocationContext ctx, QueryExecutionContext context, Query query, Statistics stats,
       QueryExecutionPlan queryPlan)
    {
-      ProjectExecutionPlan project = (ProjectExecutionPlan)queryPlan.findPlanByType(Type.PROJECT);
-
-      QueryResultColumns columns = new QueryResultColumns(project.getColumns(), true);
       QueryExecuteableComponent component = createQueryExecuteableComponent(queryPlan);
-
       return component.executeComponent(ctx, context);
    };
 
@@ -213,7 +206,7 @@ public class QueryProcessorInterceptor extends CommandInterceptor
                   + " not implemented");
          }
 
-         nextPlan = queryExecutionPlan.next();
+         nextPlan = nextPlan.next();
       }
       while (nextPlan != null);
       return null;

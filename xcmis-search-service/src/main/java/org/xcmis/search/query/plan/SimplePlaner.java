@@ -267,7 +267,7 @@ public class SimplePlaner implements QueryExecutionPlaner
       //QueryExecutionPlan projectNode = new QueryExecutionPlan(QueryExecutionPlan.Type.PROJECT);
       ProjectExecutionPlan projectPlan = new ProjectExecutionPlan(executionPlan);
 
-      if (columns.isEmpty())
+      if (columns.isEmpty() || (columns.size() == 1 && columns.get(0).getPropertyName().equals("*")))
       {
          columns = new LinkedList<Column>();
          // SELECT *, so find all of the columns that are available from all the sources ...

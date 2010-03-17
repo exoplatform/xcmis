@@ -142,6 +142,8 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
       this.pathSplitter = pathSplitter;
       //this.tableResolver = tableResolver;
       this.bindVariablesValues = bindVariablesValues;
+      this.queryBuilderStack = new Stack<Object>();
+      //this.queryBuilderStack.add(new MatchAllDocsQuery());
    }
 
    /**
@@ -150,7 +152,9 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
     */
    public Query getQuery()
    {
-      return (Query)queryBuilderStack.pop();
+      Query result = (Query)queryBuilderStack.pop();
+      this.queryBuilderStack = new Stack<Object>();
+      return result;
    }
 
    /**
@@ -261,13 +265,13 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
       // Push query from DynamicOperand to stack
       Visitors.visit(node.getOperand1(), this);
 
-      final BooleanQuery resultQuery = new BooleanQuery();
-      // get query builded by Operand1.
-      resultQuery.add((Query)queryBuilderStack.pop(), Occur.MUST);
-      // combine with previous
-      resultQuery.add((Query)queryBuilderStack.pop(), Occur.MUST);
-      //
-      queryBuilderStack.push(resultQuery);
+      //      final BooleanQuery resultQuery = new BooleanQuery();
+      //      // get query builded by Operand1.
+      //      resultQuery.add((Query)queryBuilderStack.pop(), Occur.MUST);
+      //      // combine with previous
+      //      resultQuery.add((Query)queryBuilderStack.pop(), Occur.MUST);
+      //      //
+      //      queryBuilderStack.push(resultQuery);
 
    }
 

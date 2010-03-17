@@ -122,13 +122,19 @@ public class LuceneQueryableIndexStorage extends QueryableIndexStorage
    {
 
       List<ScoredRow> resultNodes = new ArrayList<ScoredRow>();
-      BooleanQuery query = new BooleanQuery();
-
-      for (Constraint constrain : command.getConstrains())
+      Query query = (Query)tableResolver.resolve(command.getSelector().getName(), true);
+      if (command.getConstrains().size() > 0)
       {
-         query.add(getConstrainQuery(constrain, command.getBindVariablesValues()), Occur.MUST);
+         BooleanQuery booleanQuery = new BooleanQuery();
+
+         for (Constraint constrain : command.getConstrains())
+         {
+            booleanQuery.add(getConstrainQuery(constrain, command.getBindVariablesValues()), Occur.MUST);
+         }
+
+         booleanQuery.add(query, Occur.MUST);
+         query = booleanQuery;
       }
-      query.add((Query)tableResolver.resolve(command.getSelector().getName(), true), Occur.MUST);
       // Open writer
 
       IndexSearcher searcher = null;
@@ -182,7 +188,7 @@ public class LuceneQueryableIndexStorage extends QueryableIndexStorage
    {
       LuceneQueryBuilder luceneQueryBuilder =
          new LuceneQueryBuilder(fieldNameResolver, nameConverter, pathSplitter, bindVariablesValues);
-      Visitors.visitAll(constraint, null);
+      Visitors.visit(constraint, luceneQueryBuilder);
       return luceneQueryBuilder.getQuery();
    }
 
