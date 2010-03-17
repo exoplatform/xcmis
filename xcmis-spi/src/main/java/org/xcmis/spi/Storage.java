@@ -117,8 +117,6 @@ public interface Storage extends TypeManager
     * @return new instance of document
     * @throws ConstraintException if any of following condition are met:
     *         <ul>
-    *         <li><code>folder == null</code> and unfiling capability is not
-    *         supported</li>
     *         <li><code>typeId</code> is id of type whose baseType is not
     *         Document</li>
     *         <li><code>typeId</code> is not in the list of
@@ -174,8 +172,6 @@ public interface Storage extends TypeManager
     * @return new unsaved instance of policy
     * @throws ConstraintException if any of following condition are met:
     *         <ul>
-    *         <li><code>folder == null</code> and unfiling capability is not
-    *         supported</li>
     *         <li><code>folder != null</code> and <code>typeId</code> is id of
     *         not fileable type</li>
     *         <li><code>typeId</code> is id of type whose baseType is not Policy

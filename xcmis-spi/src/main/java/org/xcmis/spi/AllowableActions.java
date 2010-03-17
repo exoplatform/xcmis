@@ -25,62 +25,62 @@ package org.xcmis.spi;
  */
 public interface AllowableActions
 {
-   boolean canDeleteObject();
+   boolean isCanAddObjectToFolder();
 
-   boolean canUpdateProperties();
+   boolean isCanApplyACL();
 
-   boolean canGetFolderTree();
+   boolean isCanApplyPolicy();
 
-   boolean canGetProperties();
+   boolean isCanCancelCheckOut();
 
-   boolean canGetObjectRelationships();
+   boolean isCanCheckIn();
 
-   boolean canGetObjectParents();
+   boolean isCanCheckOut();
 
-   boolean canGetFolderParent();
+   boolean isCanCreateDocument();
 
-   boolean canGetDescendants();
+   boolean isCanCreateFolder();
 
-   boolean canMoveObject();
+   boolean isCanCreateRelationship();
 
-   boolean canDeleteContentStream();
+   boolean isCanDeleteContentStream();
 
-   boolean canCheckOut();
+   boolean isCanDeleteObject();
 
-   boolean canCancelCheckOut();
+   boolean isCanDeleteTree();
 
-   boolean canCheckIn();
+   boolean isCanGetACL();
 
-   boolean canSetContentStream();
+   boolean isCanGetAllVersions();
 
-   boolean canGetAllVersions();
+   boolean isCanGetAppliedPolicies();
 
-   boolean canAddObjectToFolder();
+   boolean isCanGetChildren();
 
-   boolean canRemoveObjectFromFolder();
+   boolean isCanGetContentStream();
 
-   boolean canGetContentStream();
+   boolean isCanGetDescendants();
 
-   boolean canApplyPolicy();
+   boolean isCanGetFolderParent();
 
-   boolean canGetAppliedPolicies();
+   boolean isCanGetFolderTree();
 
-   boolean canRemovePolicy();
+   boolean isCanGetObjectParents();
 
-   boolean canGetChildren();
+   boolean isCanGetObjectRelationships();
 
-   boolean canCreateDocument();
+   boolean isCanGetProperties();
 
-   boolean canCreateFolder();
+   boolean isCanGetRenditions();
 
-   boolean canCreateRelationship();
+   boolean isCanMoveObject();
 
-   boolean canDeleteTree();
+   boolean isCanRemoveObjectFromFolder();
 
-   boolean canGetRenditions();
+   boolean isCanRemovePolicy();
 
-   boolean canGetACL();
+   boolean isCanSetContentStream();
 
-   boolean canApplyACL();
+   boolean isCanUpdateProperties();
 
 }

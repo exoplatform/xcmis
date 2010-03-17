@@ -518,16 +518,6 @@ public abstract class BaseConnection implements Connection
       if (deleteAllVersions == null)
          deleteAllVersions = true; // Default.
 
-      //      if (object.getBaseType() == BaseType.FOLDER)
-      //      {
-      //         if (((FolderData)object).isRoot())
-      //            throw new ConstraintException("Root folder can't be removed.");
-      //
-      //         if (((FolderData)object).hasChildren())
-      //            throw new ConstraintException("Failed delete object. Object " + objectId
-      //               + " is Folder and contains one or more objects.");
-      //      }
-
       storage.deleteObject(object, deleteAllVersions);
    }
 

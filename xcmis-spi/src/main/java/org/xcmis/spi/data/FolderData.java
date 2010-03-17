@@ -23,6 +23,8 @@ import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NotSupportedException;
+import org.xcmis.spi.Storage;
+import org.xcmis.spi.TypeDefinition;
 
 /**
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
@@ -49,6 +51,18 @@ public interface FolderData extends ObjectData
     *         <code>otherwise</code>
     */
    boolean hasChildren();
+
+   /**
+    * Create child of <code>type</code> in this folder.
+    * 
+    * @param type type of object
+    * @return newly created unsaved object. TO persist it method
+    *         {@link Storage#saveObject(ObjectData)}
+    * @throws ConstraintException if <code>object</code> has type that is
+    *         unsupported by current folder. See
+    *         {@link CMIS#ALLOWED_CHILD_OBJECT_TYPE_IDS}
+    */
+   ObjectData createChild(TypeDefinition type) throws ConstraintException;
 
    /**
     * Add existed fileable object in this folder. If multifiling capability is
