@@ -21,6 +21,7 @@ package org.xcmis.sp.jcr.exo.object;
 
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.xcmis.sp.jcr.exo.JcrCMIS;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.object.Entry;
 import org.xcmis.spi.object.ItemsIterator;
@@ -31,6 +32,7 @@ import java.util.Set;
 
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
+import javax.jcr.Session;
 
 /**
  * Iterator over JCR NodeIterator. Iterator skips nodes unsupported by CMIS.
@@ -111,7 +113,10 @@ class FolderChildrenIterator implements ItemsIterator<Entry>
                continue;
 //            Entry e = new EntryImpl(node);
 //            if (e.isLatest())
-            next = new EntryImpl(node);
+            if (!node.isNodeType(JcrCMIS.NT_LINKEDFILE))
+              next = new EntryImpl(node);
+            else
+               next = new EntryImpl(node.getProperty(JcrCMIS.JCR_CONTENT).getNode().getParent());
          }
          catch (InvalidArgumentException iae)
          {
