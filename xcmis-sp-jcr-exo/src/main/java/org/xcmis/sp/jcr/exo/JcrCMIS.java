@@ -57,6 +57,10 @@ public interface JcrCMIS extends CMIS
    String CMIS_RELATIONSHIPS = "xcmis:relationships";
 
    String CMIS_WORKING_COPIES = "xcmis:workingCopies";
+   
+   String CMIS_UNFILINGS = "xcmis:unfilings";
+   
+   String CMIS_MULTIFILINGS = "xcmis:multifilings";
 
    // --- Renditions ---
    
@@ -91,6 +95,8 @@ public interface JcrCMIS extends CMIS
    String NT_FILE = "nt:file";
 
    String NT_FOLDER = "nt:folder";
+   
+   String NT_LINKEDFILE = "nt:linkedFile";
 
    String NT_RESOURCE = "nt:resource";
 
