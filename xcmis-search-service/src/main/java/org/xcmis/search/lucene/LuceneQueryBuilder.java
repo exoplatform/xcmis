@@ -37,8 +37,8 @@ import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.regex.RegexQuery;
 import org.xcmis.search.IndexConstants;
+import org.xcmis.search.InvalidQueryException;
 import org.xcmis.search.QueryObjectModelVisitor;
-import org.xcmis.search.SearchServiceException;
 import org.xcmis.search.VisitException;
 import org.xcmis.search.Visitors;
 import org.xcmis.search.antlr.FullTextLexer;
@@ -374,7 +374,7 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
       {
          parser.fulltext(fields, new StandardAnalyzer());
          query = parser.getQuery();
-         final SearchServiceException ex = reporter.getException();
+         final InvalidQueryException ex = reporter.getException();
          if (ex != null)
          {
             throw new VisitException(ex.getLocalizedMessage());

@@ -32,7 +32,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xcmis.search.Visitors;
 import org.xcmis.search.model.Query;
-import org.xcmis.search.query.QueryBuilder;
 import org.xcmis.search.value.CastSystem;
 
 /**

@@ -27,6 +27,7 @@ import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.xcmis.search.InvalidQueryException;
 import org.xcmis.search.SearchServiceException;
 import org.xcmis.search.config.IndexConfurationImpl;
 import org.xcmis.search.config.SearchServiceConfiguration;
@@ -108,7 +109,7 @@ public class SearchServiceTest
    }
 
    @Test
-   public void testShouldRunQuerySearchServie() throws SearchServiceException
+   public void testShouldRunQuerySearchServie() throws SearchServiceException, InvalidQueryException
    {
       //value
       NameConverter<String> nameConverter = new ToStringNameConverter();
@@ -140,7 +141,8 @@ public class SearchServiceTest
    }
 
    @Test
-   public void testShouldBuildQueryWithThreeHasPropertyConstraint() throws SearchServiceException
+   public void testShouldBuildQueryWithThreeHasPropertyConstraint() throws SearchServiceException,
+      InvalidQueryException
    {
 
       //index configuration
