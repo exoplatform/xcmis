@@ -21,8 +21,13 @@ package org.xcmis.restatom.abdera;
 
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
-import org.xcmis.core.CmisChoiceUri;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.spi.Choice;
+import org.xcmis.spi.impl.ChoiceImpl;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
 
 import javax.xml.namespace.QName;
 
@@ -31,7 +36,7 @@ import javax.xml.namespace.QName;
  * @version $Id: ChoiceUriElement.java 2 2010-02-04 17:21:49Z andrew00x $
  *          Jul 15, 2009
  */
-public class ChoiceUriElement extends ChoiceElement<CmisChoiceUri>
+public class ChoiceUriElement extends ChoiceElement<Choice<URI>>
 {
 
    /**
@@ -58,28 +63,62 @@ public class ChoiceUriElement extends ChoiceElement<CmisChoiceUri>
    /**
     * {@inheritDoc}
     */
-   public void build(CmisChoiceUri choice)
+   public void build(Choice<URI> choice)
    {
       if (choice != null)
       {
          super.build(choice);
-         if (choice.getValue() != null && choice.getValue().size() > 0)
+         // VALUES
+         if (choice.getValues() != null && choice.getValues().length > 0)
          {
-            for (String v : choice.getValue())
+            for (URI v : choice.getValues())
             {
                if (v != null)
-                  addSimpleExtension(AtomCMIS.VALUE, v);
+                  addSimpleExtension(AtomCMIS.VALUE, v.toString());
             }
          }
-         if (choice.getChoice() != null && choice.getChoice().size() > 0)
+         // CHOICE
+         if (choice.getChoices() != null && choice.getChoices().size() > 0)
          {
-            for (CmisChoiceUri ch : choice.getChoice())
+            for (Choice<URI> ch : choice.getChoices())
             {
-               ChoiceUriElement el = addExtension(AtomCMIS.CHOICE);
+               ChoiceUriElement el = addExtension(AtomCMIS.CHOICE_URI);
                el.build(ch);
             }
          }
       }
+   }
+
+   public Choice<URI> getChoice()
+   {
+      ChoiceImpl<URI> result = new ChoiceImpl<URI>();
+      // VALUES
+      List<Element> values = getExtensions(AtomCMIS.VALUE);
+      if (values != null && values.size() > 0)
+      {
+         URI[] array = new URI[values.size()];
+         int i = 0;
+         for (Element element : values)
+         {
+            try
+            {
+               array[i] = new URI(element.getText());
+            }
+            catch (URISyntaxException e)
+            {
+            }
+            i++;
+         }
+         result.setValues(array);
+      }
+      // CHOICE
+      List<ChoiceUriElement> choices = getExtensions(AtomCMIS.CHOICE_URI);
+      if (choices != null && choices.size() > 0)
+         for (ChoiceUriElement choiceUriElement : choices)
+         {
+            result.getChoices().add(choiceUriElement.getChoice());
+         }
+      return result;
    }
 
 }

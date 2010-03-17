@@ -21,8 +21,11 @@ package org.xcmis.restatom.abdera;
 
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
-import org.xcmis.core.CmisChoiceString;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.spi.Choice;
+import org.xcmis.spi.impl.ChoiceImpl;
+
+import java.util.List;
 
 import javax.xml.namespace.QName;
 
@@ -32,11 +35,11 @@ import javax.xml.namespace.QName;
  * @version $Id: CmisChoiceStringTypeElementWrapper.java 2279 2009-07-23
  *          11:47:50Z sunman $ Jul 16, 2009
  */
-public class ChoiceStringElement extends ChoiceElement<CmisChoiceString>
+public class ChoiceStringElement extends ChoiceElement<Choice<String>>
 {
 
    /**
-    * Instantiates a new choice string element.
+    * Instantiates a new choice html element.
     * 
     * @param internal the internal
     */
@@ -46,7 +49,7 @@ public class ChoiceStringElement extends ChoiceElement<CmisChoiceString>
    }
 
    /**
-    * Instantiates a new choice string element.
+    * Instantiates a new choice html element.
     * 
     * @param factory the factory
     * @param qname the qname
@@ -59,28 +62,56 @@ public class ChoiceStringElement extends ChoiceElement<CmisChoiceString>
    /**
     * {@inheritDoc}
     */
-   public void build(CmisChoiceString choice)
+   public void build(Choice<String> choice)
    {
       if (choice != null)
       {
          super.build(choice);
-         if (choice.getValue() != null && choice.getValue().size() > 0)
+         // VALUES
+         if (choice.getValues() != null && choice.getValues().length > 0)
          {
-            for (String v : choice.getValue())
+            for (String v : choice.getValues())
             {
                if (v != null)
                   addSimpleExtension(AtomCMIS.VALUE, v);
             }
          }
-         if (choice.getChoice() != null && choice.getChoice().size() > 0)
+         // CHOICE
+         if (choice.getChoices() != null && choice.getChoices().size() > 0)
          {
-            for (CmisChoiceString ch : choice.getChoice())
+            for (Choice<String> ch : choice.getChoices())
             {
-               ChoiceStringElement el = addExtension(AtomCMIS.CHOICE);
+               ChoiceStringElement el = addExtension(AtomCMIS.CHOICE_STRING);
                el.build(ch);
             }
          }
       }
+   }
+
+   public Choice<String> getChoice()
+   {
+      ChoiceImpl<String> result = new ChoiceImpl<String>();
+      // VALUES
+      List<Element> values = getExtensions(AtomCMIS.VALUE);
+      if (values != null && values.size() > 0)
+      {
+         String[] array = new String[values.size()];
+         int i = 0;
+         for (Element element : values)
+         {
+            array[i] = element.getText();
+            i++;
+         }
+         result.setValues(array);
+      }
+      // CHOICE
+      List<ChoiceStringElement> choices = getExtensions(AtomCMIS.CHOICE_STRING);
+      if (choices != null && choices.size() > 0)
+         for (ChoiceStringElement choiceStringElement : choices)
+         {
+            result.getChoices().add(choiceStringElement.getChoice());
+         }
+      return result;
    }
 
 }

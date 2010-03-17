@@ -21,10 +21,12 @@ package org.xcmis.restatom.abdera;
 
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
-import org.xcmis.core.CmisChoiceInteger;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.spi.Choice;
+import org.xcmis.spi.impl.ChoiceImpl;
 
 import java.math.BigInteger;
+import java.util.List;
 
 import javax.xml.namespace.QName;
 
@@ -34,7 +36,7 @@ import javax.xml.namespace.QName;
  * @version $Id: CmisChoiceIntegerTypeElementWrapper.java 2279 2009-07-23
  *          11:47:50Z sunman $ Jul 16, 2009
  */
-public class ChoiceIntegerElement extends ChoiceElement<CmisChoiceInteger>
+public class ChoiceIntegerElement extends ChoiceElement<Choice<BigInteger>>
 {
 
    /**
@@ -61,28 +63,56 @@ public class ChoiceIntegerElement extends ChoiceElement<CmisChoiceInteger>
    /**
     * {@inheritDoc}
     */
-   public void build(CmisChoiceInteger choice)
+   public void build(Choice<BigInteger> choice)
    {
       if (choice != null)
       {
          super.build(choice);
-         if (choice.getValue() != null && choice.getValue().size() > 0)
+         // VALUES
+         if (choice.getValues() != null && choice.getValues().length > 0)
          {
-            for (BigInteger v : choice.getValue())
+            for (BigInteger v : choice.getValues())
             {
                if (v != null)
                   addSimpleExtension(AtomCMIS.VALUE, v.toString());
             }
          }
-         if (choice.getChoice() != null && choice.getChoice().size() > 0)
+         // CHOICE
+         if (choice.getChoices() != null && choice.getChoices().size() > 0)
          {
-            for (CmisChoiceInteger ch : choice.getChoice())
+            for (Choice<BigInteger> ch : choice.getChoices())
             {
-               ChoiceIntegerElement el = addExtension(AtomCMIS.CHOICE);
+               ChoiceIntegerElement el = addExtension(AtomCMIS.CHOICE_INTEGER);
                el.build(ch);
             }
          }
       }
+   }
+
+   public Choice<BigInteger> getChoice()
+   {
+      ChoiceImpl<BigInteger> result = new ChoiceImpl<BigInteger>();
+      // VALUES
+      List<Element> values = getExtensions(AtomCMIS.VALUE);
+      if (values != null && values.size() > 0)
+      {
+         BigInteger[] array = new BigInteger[values.size()];
+         int i = 0;
+         for (Element element : values)
+         {
+            array[i] = new BigInteger(element.getText());
+            i++;
+         }
+         result.setValues(array);
+      }
+      // CHOICE
+      List<ChoiceIntegerElement> choices = getExtensions(AtomCMIS.CHOICE_INTEGER);
+      if (choices != null && choices.size() > 0)
+         for (ChoiceIntegerElement choiceIntegerElement : choices)
+         {
+            result.getChoices().add(choiceIntegerElement.getChoice());
+         }
+      return result;
    }
 
 }

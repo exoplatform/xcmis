@@ -22,8 +22,8 @@ package org.xcmis.restatom.abdera;
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
-import org.xcmis.core.CmisChoice;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.spi.Choice;
 
 import javax.xml.namespace.QName;
 
@@ -33,7 +33,7 @@ import javax.xml.namespace.QName;
  * @version $Id: CmisChoiceTypeElementWrapper.java 2279 2009-07-23 11:47:50Z
  *          sunman $ Jul 16, 2009
  */
-public abstract class ChoiceElement<T extends CmisChoice> extends ExtensibleElementWrapper
+public abstract class ChoiceElement<T extends Choice<?>> extends ExtensibleElementWrapper
 {
 
    /**
@@ -67,5 +67,7 @@ public abstract class ChoiceElement<T extends CmisChoice> extends ExtensibleElem
       if (choice != null)
          setAttributeValue(AtomCMIS.DISPLAY_NAME, choice.getDisplayName());
    }
+
+   public abstract T getChoice();
 
 }
