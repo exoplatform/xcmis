@@ -1544,7 +1544,9 @@ public class EntryImpl extends TypeManagerImpl implements Entry
    public Entry removeChild(String objectId) throws UnsupportedOperationException, InvalidArgumentException,
       RepositoryException
    {
-      throw new UnsupportedOperationException("removeChild");
+      if (getScope() != EnumBaseObjectTypeIds.CMIS_FOLDER)
+         throw new InvalidArgumentException("removeChild");
+      return null;
    }
 
    /**
