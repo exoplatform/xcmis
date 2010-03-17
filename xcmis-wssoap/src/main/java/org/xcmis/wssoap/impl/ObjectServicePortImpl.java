@@ -37,8 +37,8 @@ import org.xcmis.messaging.DeleteTreeResponse;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.ObjectServicePort;
 import org.xcmis.spi.CMIS;
-import org.xcmis.spi.object.BaseContentStream;
-import org.xcmis.spi.object.ContentStream;
+import org.xcmis.spi.data.BaseContentStream;
+import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.utils.CmisUtils;
 
 import java.math.BigInteger;

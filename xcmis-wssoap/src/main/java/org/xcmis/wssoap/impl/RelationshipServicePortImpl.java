@@ -81,7 +81,7 @@ public class RelationshipServicePortImpl implements RelationshipServicePort
       CmisObjectListType ret = new CmisObjectListType();
       try
       {
-         ret.getItems().addAll(relationshipService.getObjectRelationships(repositoryId, //
+         ret.getObjects().addAll(relationshipService.getObjectRelationships(repositoryId, //
             objectId, //
             relationshipDirection == null ? EnumRelationshipDirection.SOURCE : relationshipDirection, //
             typeId, //

@@ -30,7 +30,7 @@ import org.xcmis.messaging.CmisContentStreamType;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.VersioningServicePort;
-import org.xcmis.spi.object.BaseContentStream;
+import org.xcmis.spi.data.BaseContentStream;
 import org.xcmis.spi.utils.CmisUtils;
 
 import java.util.List;
