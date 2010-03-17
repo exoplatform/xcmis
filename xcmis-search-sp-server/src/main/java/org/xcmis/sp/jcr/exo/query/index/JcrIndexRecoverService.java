@@ -27,7 +27,7 @@ import org.exoplatform.services.jcr.datamodel.ItemData;
 import org.exoplatform.services.jcr.datamodel.NodeData;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.search.index.IndexException;
+import org.xcmis.search.lucene.index.IndexException;
 import org.xcmis.search.lucene.index.IndexRecoverService;
 import org.xcmis.search.lucene.index.LuceneIndexTransaction;
 
@@ -89,7 +89,7 @@ public class JcrIndexRecoverService implements IndexRecoverService
          throw new IndexException("IndexingService not inintialized");
       }
 
-      final HashMap<String, Document> updatedDocuments = new HashMap<String, Document>();
+      //final HashMap<String, Document> updatedDocuments = new HashMap<String, Document>();
       final HashMap<String, Document> addedDocuments = new HashMap<String, Document>();
       final HashSet<String> removedDocuments = new HashSet<String>();
       for (final String nodeUuid : uuids)
@@ -119,7 +119,8 @@ public class JcrIndexRecoverService implements IndexRecoverService
                   doc = ((JcrIndexingService)indexDataKeeper).crateDocumentFromPersistentStorage(nodeData);
                   if (indexDataKeeper.documentExists(nodeUuid))
                   {
-                     updatedDocuments.put(nodeUuid, doc);
+                     addedDocuments.put(nodeUuid, doc);
+                     removedDocuments.add(nodeUuid);
                   }
                   else
                   {
@@ -142,6 +143,6 @@ public class JcrIndexRecoverService implements IndexRecoverService
          }
       }
 
-      indexDataKeeper.save(new LuceneIndexTransaction(addedDocuments, updatedDocuments, removedDocuments));
+      indexDataKeeper.save(new LuceneIndexTransaction(addedDocuments, removedDocuments));
    }
 }

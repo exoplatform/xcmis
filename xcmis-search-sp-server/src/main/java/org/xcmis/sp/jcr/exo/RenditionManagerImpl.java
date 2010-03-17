@@ -18,22 +18,9 @@
  */
 package org.xcmis.sp.jcr.exo;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.exoplatform.services.jcr.core.ExtendedSession;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.spi.utils.MimeType;
-
-import javax.jcr.ItemNotFoundException;
-import javax.jcr.Node;
-import javax.jcr.NodeIterator;
-import javax.jcr.Session;
-import javax.jcr.version.Version;
-
 import org.xcmis.core.CmisRenditionType;
 import org.xcmis.sp.jcr.exo.object.EntryImpl;
 import org.xcmis.sp.jcr.exo.object.EntryVersion;
@@ -45,6 +32,18 @@ import org.xcmis.spi.object.ContentStream;
 import org.xcmis.spi.object.Entry;
 import org.xcmis.spi.object.ItemsIterator;
 import org.xcmis.spi.object.RenditionManager;
+import org.xcmis.spi.utils.MimeType;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.jcr.ItemNotFoundException;
+import javax.jcr.Node;
+import javax.jcr.NodeIterator;
+import javax.jcr.Session;
+import javax.jcr.version.Version;
 
 public class RenditionManagerImpl implements RenditionManager
 {

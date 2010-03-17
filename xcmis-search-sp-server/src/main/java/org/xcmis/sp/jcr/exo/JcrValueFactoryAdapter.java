@@ -19,8 +19,6 @@
 
 package org.xcmis.sp.jcr.exo;
 
-import org.xcmis.search.value.ValueAdapter;
-
 import javax.jcr.Value;
 import javax.jcr.ValueFactory;
 import javax.jcr.ValueFormatException;
@@ -32,7 +30,8 @@ import javax.jcr.ValueFormatException;
  * @version $Id: exo-jboss-codetemplates.xml 34027 2009-07-15 23:26:43Z
  *          aheritier $
  */
-public class JcrValueFactoryAdapter implements ValueAdapter
+@Deprecated
+public class JcrValueFactoryAdapter //implements ValueAdapter
 {
 
    /** Value factory. */

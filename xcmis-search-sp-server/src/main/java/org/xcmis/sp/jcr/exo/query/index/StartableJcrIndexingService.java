@@ -32,7 +32,7 @@ import org.exoplatform.services.jcr.impl.core.LocationFactory;
 import org.exoplatform.services.jcr.impl.dataflow.persistent.WorkspacePersistentDataManager;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.search.index.IndexException;
+import org.xcmis.search.lucene.index.IndexException;
 import org.xcmis.sp.jcr.exo.RepositoriesManagerImpl;
 import org.xcmis.sp.jcr.exo.RepositoryImpl;
 import org.xcmis.spi.RepositoriesManager;
@@ -98,12 +98,14 @@ public class StartableJcrIndexingService extends JcrIndexingService
     * 
     * @throws RepositoryConfigurationException the repository configuration exception
     * @throws RepositoryException the repository exception
+    * @throws IndexException 
     */
    public StartableJcrIndexingService(final RepositoryEntry repositoryEntry, final WorkspaceEntry workspaceEntry,
       final RepositoriesManager cmisRepositoriesManager,
       final WorkspacePersistentDataManager workspacePersistentDataManager, final NamespaceAccessor namespaceAccessor,
       final NodeTypeDataManager nodeTypeDataManager, final DocumentReaderService extractor,
-      final RepositoriesManagerImpl repositoriesManager) throws RepositoryConfigurationException, RepositoryException
+      final RepositoriesManagerImpl repositoriesManager) throws RepositoryConfigurationException, RepositoryException,
+      IndexException
    {
       super(repositoryEntry, workspaceEntry, cmisRepositoriesManager, workspacePersistentDataManager,
          namespaceAccessor, nodeTypeDataManager, extractor);
@@ -178,6 +180,11 @@ public class StartableJcrIndexingService extends JcrIndexingService
       {
          LOG.error(e.getMessage(), e);
       }
+      catch (IndexException e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
 
       changesLogBuffer.clear();
       changesLogBuffer = null;
@@ -232,8 +239,9 @@ public class StartableJcrIndexingService extends JcrIndexingService
     * 
     * @throws RepositoryException - restore exception
     * @throws IOException if reindex flag file was not created or was'nt removed.
+    * @throws IndexException 
     */
-   private void restoreIndex() throws RepositoryException, IOException
+   private void restoreIndex() throws RepositoryException, IOException, IndexException
    {
 
       if (workspacePersistentDataManager == null)

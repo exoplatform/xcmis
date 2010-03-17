@@ -45,8 +45,8 @@ import org.exoplatform.services.jcr.impl.dataflow.AbstractPersistedValueData;
 import org.exoplatform.services.jcr.impl.dataflow.TransientValueData;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.search.index.FieldNames;
-import org.xcmis.search.lucene.JCRNumberTools;
+import org.xcmis.search.lucene.index.ExtendedNumberTools;
+import org.xcmis.search.lucene.index.FieldNames;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -624,7 +624,7 @@ public class IndependentNodeIndexer
    private void addDoubleValue(final Document doc, final String fieldName, final Object internalValue)
    {
       final double doubleVal = ((Double)internalValue).doubleValue();
-      doc.add(createFieldWithoutNorms(fieldName, JCRNumberTools.doubleToString(doubleVal), false));
+      doc.add(createFieldWithoutNorms(fieldName, ExtendedNumberTools.doubleToString(doubleVal), false));
    }
 
    /**

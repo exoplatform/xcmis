@@ -21,7 +21,6 @@ package org.xcmis.sp.jcr.exo;
 
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.container.xml.ObjectParameter;
-import org.xcmis.messaging.CmisRepositoryEntryType;
 import org.exoplatform.services.jcr.RepositoryService;
 import org.exoplatform.services.jcr.config.RepositoryConfigurationException;
 import org.exoplatform.services.jcr.core.ManageableRepository;
@@ -30,6 +29,7 @@ import org.exoplatform.services.jcr.ext.common.SessionProvider;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.picocontainer.Startable;
+import org.xcmis.messaging.CmisRepositoryEntryType;
 import org.xcmis.sp.jcr.exo.query.index.JcrIndexingService;
 import org.xcmis.sp.jcr.exo.rendition.ImageRenditionProvider;
 import org.xcmis.sp.jcr.exo.rendition.PDFDocumentRenditionProvider;

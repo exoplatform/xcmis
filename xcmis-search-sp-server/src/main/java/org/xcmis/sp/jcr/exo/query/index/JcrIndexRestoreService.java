@@ -17,7 +17,6 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-
 package org.xcmis.sp.jcr.exo.query.index;
 
 import org.apache.lucene.document.Document;
@@ -26,10 +25,10 @@ import org.exoplatform.services.jcr.dataflow.ItemDataVisitor;
 import org.exoplatform.services.jcr.datamodel.NodeData;
 import org.exoplatform.services.jcr.datamodel.PropertyData;
 import org.exoplatform.services.jcr.impl.core.LocationFactory;
-import org.xcmis.search.index.IndexException;
-import org.xcmis.search.index.IndexRestoreService;
-import org.xcmis.search.index.IndexTransaction;
-import org.xcmis.search.index.IndexTransactionException;
+import org.xcmis.search.lucene.index.IndexException;
+import org.xcmis.search.lucene.index.IndexRestoreService;
+import org.xcmis.search.lucene.index.IndexTransaction;
+import org.xcmis.search.lucene.index.IndexTransactionException;
 import org.xcmis.search.lucene.index.LuceneIndexTransaction;
 
 import java.io.IOException;
@@ -85,7 +84,7 @@ public class JcrIndexRestoreService implements ItemDataVisitor, IndexRestoreServ
    private final HashSet<String> removedDocuments;
 
    /** The updated documents map. */
-   private final HashMap<String, Document> updatedDocuments;
+   //private final HashMap<String, Document> updatedDocuments;
 
    /**
     * The Constructor.
@@ -104,7 +103,7 @@ public class JcrIndexRestoreService implements ItemDataVisitor, IndexRestoreServ
       //      this.nodeIndexer = nodeIndexer;
       this.indexDataKeeper = indexDataKeeper;
       addedDocuments = new HashMap<String, Document>();
-      updatedDocuments = new HashMap<String, Document>();
+      //updatedDocuments = new HashMap<String, Document>();
       removedDocuments = new HashSet<String>();
    }
 
@@ -132,7 +131,20 @@ public class JcrIndexRestoreService implements ItemDataVisitor, IndexRestoreServ
       if (currentLevel == 0 && addedDocuments.size() > 0)
       {
          // It's a root - flush all documents.
-         flush();
+         try
+         {
+            flush();
+         }
+         catch (IndexException e)
+         {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+         }
+         catch (IndexTransactionException e)
+         {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+         }
       }
    }
 
@@ -152,12 +164,10 @@ public class JcrIndexRestoreService implements ItemDataVisitor, IndexRestoreServ
     */
    protected void flush() throws IndexException, IndexTransactionException
    {
-      final IndexTransaction<Document> indexTransaction =
-         new LuceneIndexTransaction(addedDocuments, updatedDocuments, removedDocuments);
+      final IndexTransaction<Document> indexTransaction = new LuceneIndexTransaction(addedDocuments, removedDocuments);
       indexDataKeeper.save(indexTransaction);
       // cleanup document storage
       addedDocuments.clear();
-      updatedDocuments.clear();
       removedDocuments.clear();
    }
 
@@ -168,8 +178,11 @@ public class JcrIndexRestoreService implements ItemDataVisitor, IndexRestoreServ
     * @param node - NodeData , set null if node not exists
     * @throws RepositoryException if indexing or save documents exceptions
     *           occurs.
+    * @throws IndexTransactionException 
+    * @throws IndexException 
     */
    protected void processNode(final String uuid, final NodeData node) throws RepositoryException
+
    {
       if (node == null)
       {
@@ -178,7 +191,7 @@ public class JcrIndexRestoreService implements ItemDataVisitor, IndexRestoreServ
       boolean forceFlush = false;
       if (node != null)
       {
-         Document doc;
+         Document doc = null;
          try
          {
             doc = indexDataKeeper.crateDocumentFromPersistentStorage(node);
@@ -191,11 +204,18 @@ public class JcrIndexRestoreService implements ItemDataVisitor, IndexRestoreServ
          {
             throw new RepositoryException(e.getLocalizedMessage(), e.getCause());
          }
+         catch (IndexException e)
+         {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+         }
 
          if (indexDataKeeper.documentExists(node.getIdentifier()))
          {
             // TODO if index already contains document, do we need update doc?
-            updatedDocuments.put(node.getIdentifier(), doc);
+            addedDocuments.put(node.getIdentifier(), doc);
+            removedDocuments.add(uuid);
+
          }
          else
          {
@@ -210,10 +230,22 @@ public class JcrIndexRestoreService implements ItemDataVisitor, IndexRestoreServ
          }
       }
 
-      if (forceFlush
-         || addedDocuments.size() + updatedDocuments.size() + removedDocuments.size() >= MAX_DOCUMENTS_COUNT)
+      if (forceFlush || addedDocuments.size() + removedDocuments.size() >= MAX_DOCUMENTS_COUNT)
       {
-         flush();
+         try
+         {
+            flush();
+         }
+         catch (IndexException e)
+         {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+         }
+         catch (IndexTransactionException e)
+         {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+         }
       }
    }
 

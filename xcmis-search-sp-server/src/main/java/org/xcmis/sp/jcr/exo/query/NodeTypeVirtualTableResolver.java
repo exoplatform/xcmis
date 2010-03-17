@@ -22,7 +22,7 @@ package org.xcmis.sp.jcr.exo.query;
 import org.exoplatform.services.jcr.core.nodetype.NodeTypeData;
 import org.exoplatform.services.jcr.core.nodetype.NodeTypeDataManager;
 import org.exoplatform.services.jcr.datamodel.InternalQName;
-import org.xcmis.search.VirtualTableResolver;
+import org.xcmis.search.lucene.content.VirtualTableResolver;
 
 import java.util.HashSet;
 import java.util.List;

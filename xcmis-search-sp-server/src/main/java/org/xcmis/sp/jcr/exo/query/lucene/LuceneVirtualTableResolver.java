@@ -33,7 +33,7 @@ import org.exoplatform.services.jcr.impl.Constants;
 import org.exoplatform.services.jcr.impl.core.LocationFactory;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.search.index.FieldNames;
+import org.xcmis.search.lucene.index.FieldNames;
 import org.xcmis.sp.jcr.exo.query.NodeTypeVirtualTableResolver;
 
 import java.util.ArrayList;
@@ -157,6 +157,23 @@ public class LuceneVirtualTableResolver extends NodeTypeVirtualTableResolver<Que
          query = b;
       }
       return query;
+   }
+
+   /**
+    * @see org.xcmis.search.lucene.content.VirtualTableResolver#resolve(java.lang.String, boolean)
+    */
+   public Query resolve(String tableName, boolean includeInheritedTables)
+   {
+
+      try
+      {
+         return resolve(locationFactory.parseJCRName(tableName).getInternalName(), includeInheritedTables);
+      }
+      catch (RepositoryException e)
+      {
+         //fail to parse name  
+      }
+      return new BooleanQuery();
    }
 
 }

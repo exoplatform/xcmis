@@ -19,9 +19,9 @@
 
 package org.xcmis.sp.jcr.exo;
 
-import org.xcmis.core.CmisRenditionType;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.xcmis.core.CmisRenditionType;
 import org.xcmis.spi.object.ItemsIterator;
 
 import java.math.BigInteger;

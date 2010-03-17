@@ -19,21 +19,11 @@
 
 package org.xcmis.sp.jcr.exo.query;
 
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CommonTokenStream;
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.tree.CommonTree;
-import org.antlr.runtime.tree.CommonTreeNodeStream;
-import org.apache.lucene.search.Query;
+import org.xcmis.search.model.Query;
+import org.xcmis.search.model.column.Column;
+import org.xcmis.search.parser.CmisQueryParser;
 import org.xcmis.search.result.ScoredRow;
-import org.xcmis.sp.jcr.exo.JcrValueFactoryAdapter;
-import org.xcmis.sp.jcr.exo.query.antlr.CMISSQLLexer;
-import org.xcmis.sp.jcr.exo.query.antlr.CMISSQLParser;
-import org.xcmis.sp.jcr.exo.query.antlr.CMISSQLTreeWalker;
 import org.xcmis.sp.jcr.exo.query.index.JcrIndexingService;
-import org.xcmis.sp.jcr.exo.query.qom.CmisQueryObjectModel;
-import org.xcmis.sp.jcr.exo.query.qom.CmisQueryObjectModelFactory;
-import org.xcmis.sp.jcr.exo.query.qom.ScoreColumn;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.RepositoryException;
 import org.xcmis.spi.object.ItemsIterator;
@@ -43,13 +33,10 @@ import org.xcmis.spi.query.Score;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-
-import javax.jcr.query.InvalidQueryException;
-import javax.jcr.query.qom.Column;
-import javax.jcr.query.qom.QueryObjectModel;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
@@ -57,6 +44,78 @@ import javax.jcr.query.qom.QueryObjectModel;
  */
 public class QueryHandlerImpl implements QueryHandler
 {
+
+   private JcrIndexingService indexingService;
+
+   private QueryNameResolver resolver;
+
+   private CmisQueryParser queryParser;
+
+   public QueryHandlerImpl(JcrIndexingService indexingService, QueryNameResolver resolver)
+   {
+      super();
+      this.indexingService = indexingService;
+      this.resolver = resolver;
+      this.queryParser = new CmisQueryParser();
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public ItemsIterator<Result> handleQuery(org.xcmis.spi.query.Query query) throws InvalidArgumentException,
+      RepositoryException
+   {
+      try
+      {
+         Query qom = queryParser.parseQuery(query.getStatement());
+
+         //qom.setSearchAllVersions(query.isSearchAllVersions());
+         List<ScoredRow> result = Collections.EMPTY_LIST;//qom.execute();
+         return new QueryResultIterator(result, new ArrayList<String>(Collections.EMPTY_LIST), qom);
+      }
+
+      catch (org.xcmis.search.InvalidQueryException e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+      return null;
+   }
+
+   //
+   //   private CmisQueryObjectModel createQOM(String statement) throws InvalidArgumentException
+   //   {
+   //      CmisQueryObjectModelFactory<Query> factory = indexingService.getQOMFactory();
+   //      try
+   //      {
+   //         final CMISSQLLexer lexer = new CMISSQLLexer(new ANTLRStringStream(statement));
+   //         final CommonTokenStream tokens = new CommonTokenStream(lexer);
+   //         // process parsing
+   //         final CMISSQLParser parser = new CMISSQLParser(tokens);
+   //         final CMISSQLParser.query_return result = parser.query();
+   //         // check exceptions
+   //         if (lexer.hasExceptions())
+   //         {
+   //            throw new InvalidArgumentException(lexer.getExceptionMessage());
+   //         }
+   //         if (parser.hasExceptions())
+   //         {
+   //            throw new InvalidArgumentException(parser.getExceptionMessage());
+   //         }
+   //
+   //         // process query build
+   //         final CommonTree tree = (CommonTree)result.getTree();
+   //         final CommonTreeNodeStream nodes = new CommonTreeNodeStream(tree);
+   //         final CMISSQLTreeWalker treeWalker = new CMISSQLTreeWalker(nodes);
+   //         CmisQueryObjectModel qom =
+   //            treeWalker.query(factory, resolver, new JcrValueFactoryAdapter(indexingService.getValueFactory()));
+   //         return qom;
+   //      }
+   //      catch (RecognitionException e)
+   //      {
+   //         throw new InvalidArgumentException(e.getLocalizedMessage(), e);
+   //      }
+   //   }
 
    class QueryResultIterator implements ItemsIterator<Result>
    {
@@ -67,11 +126,11 @@ public class QueryHandlerImpl implements QueryHandler
 
       private final int size;
 
-      private final QueryObjectModel qom;
+      private final Query qom;
 
       private Result next;
 
-      public QueryResultIterator(List<ScoredRow> rows, List<String> selectors, QueryObjectModel qom)
+      public QueryResultIterator(List<ScoredRow> rows, List<String> selectors, Query qom)
       {
          this.size = rows.size();
          this.rows = rows.iterator();
@@ -94,7 +153,9 @@ public class QueryHandlerImpl implements QueryHandler
       public Result next()
       {
          if (next == null)
+         {
             throw new NoSuchElementException();
+         }
          Result r = next;
          fetchNext();
          return r;
@@ -122,7 +183,9 @@ public class QueryHandlerImpl implements QueryHandler
       public void skip(long skip) throws NoSuchElementException
       {
          while (skip-- > 0)
+         {
             next();
+         }
       }
 
       /**
@@ -141,7 +204,8 @@ public class QueryHandlerImpl implements QueryHandler
                Score score = null;
                for (Column column : qom.getColumns())
                {
-                  if (column instanceof ScoreColumn)
+                  //TODO check
+                  if (true)
                   {
                      score = new Score(column.getColumnName(), BigDecimal.valueOf(row.getScore()));
                   }
@@ -152,7 +216,9 @@ public class QueryHandlerImpl implements QueryHandler
                         if (column.getPropertyName() != null)
                         {
                            if (properties == null)
+                           {
                               properties = new ArrayList<String>();
+                           }
                            properties.add(column.getPropertyName());
                         }
                      }
@@ -165,70 +231,6 @@ public class QueryHandlerImpl implements QueryHandler
          }
       }
 
-   }
-
-   private JcrIndexingService indexingService;
-
-   private QueryNameResolver resolver;
-
-   public QueryHandlerImpl(JcrIndexingService indexingService, QueryNameResolver resolver)
-   {
-      super();
-      this.indexingService = indexingService;
-      this.resolver = resolver;
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public ItemsIterator<Result> handleQuery(org.xcmis.spi.query.Query query)
-      throws InvalidArgumentException, RepositoryException
-   {
-      CmisQueryObjectModel qom = createQOM(query.getStatement());
-      try
-      {
-         qom.setSearchAllVersions(query.isSearchAllVersions());
-         List<ScoredRow> result = qom.execute();
-         return new QueryResultIterator(result, new ArrayList<String>(qom.getSelectors()), qom);
-      }
-      catch (InvalidQueryException e)
-      {
-         throw new InvalidArgumentException(e.getMessage(), e);
-      }
-      catch (javax.jcr.RepositoryException e)
-      {
-         throw new RepositoryException(e.getMessage(), e);
-      }
-   }
-
-   private CmisQueryObjectModel createQOM(String statement) throws InvalidArgumentException
-   {
-      CmisQueryObjectModelFactory<Query> factory = indexingService.getQOMFactory();
-      try
-      {
-         final CMISSQLLexer lexer = new CMISSQLLexer(new ANTLRStringStream(statement));
-         final CommonTokenStream tokens = new CommonTokenStream(lexer);
-         // process parsing
-         final CMISSQLParser parser = new CMISSQLParser(tokens);
-         final CMISSQLParser.query_return result = parser.query();
-         // check exceptions
-         if (lexer.hasExceptions())
-            throw new InvalidArgumentException(lexer.getExceptionMessage());
-         if (parser.hasExceptions())
-            throw new InvalidArgumentException(parser.getExceptionMessage());
-
-         // process query build
-         final CommonTree tree = (CommonTree)result.getTree();
-         final CommonTreeNodeStream nodes = new CommonTreeNodeStream(tree);
-         final CMISSQLTreeWalker treeWalker = new CMISSQLTreeWalker(nodes);
-         CmisQueryObjectModel qom =
-            treeWalker.query(factory, resolver, new JcrValueFactoryAdapter(indexingService.getValueFactory()));
-         return qom;
-      }
-      catch (RecognitionException e)
-      {
-         throw new InvalidArgumentException(e.getLocalizedMessage(), e);
-      }
    }
 
 }

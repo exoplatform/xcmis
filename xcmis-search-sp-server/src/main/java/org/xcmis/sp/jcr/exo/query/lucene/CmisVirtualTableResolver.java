@@ -17,7 +17,6 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-
 package org.xcmis.sp.jcr.exo.query.lucene;
 
 import org.apache.lucene.index.Term;
@@ -35,7 +34,7 @@ import org.exoplatform.services.jcr.impl.core.LocationFactory;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.core.CmisTypeDefinitionType;
-import org.xcmis.search.index.FieldNames;
+import org.xcmis.search.lucene.index.FieldNames;
 import org.xcmis.spi.Repository;
 import org.xcmis.spi.TypeNotFoundException;
 

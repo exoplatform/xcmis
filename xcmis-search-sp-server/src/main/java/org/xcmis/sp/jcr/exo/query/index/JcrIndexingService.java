@@ -42,9 +42,9 @@ import org.exoplatform.services.jcr.impl.core.value.ValueFactoryImpl;
 import org.exoplatform.services.jcr.impl.dataflow.ValueDataConvertor;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.search.index.FieldNames;
-import org.xcmis.search.index.IndexException;
-import org.xcmis.search.index.IndexTransaction;
+import org.xcmis.search.lucene.index.FieldNames;
+import org.xcmis.search.lucene.index.IndexException;
+import org.xcmis.search.lucene.index.IndexTransaction;
 import org.xcmis.search.lucene.index.LuceneIndexTransaction;
 import org.xcmis.spi.RepositoriesManager;
 
@@ -134,9 +134,10 @@ public class JcrIndexingService extends LuceneIndexingService implements ItemsPe
     * @throws RepositoryException if any errors in CMIS repository occurs
     * @throws UnsupportedEncodingException if encoding is bad
     * @throws IOException if any io error
+    * @throws IndexException 
     */
    public Document crateDocumentFromPersistentStorage(String nodeUuid) throws RepositoryException,
-      UnsupportedEncodingException, IOException
+      UnsupportedEncodingException, IOException, IndexException
    {
       ItemData item = itemDataConsumer.getItemData(nodeUuid);
       return crateDocumentFromPersistentStorage(item);
@@ -150,9 +151,10 @@ public class JcrIndexingService extends LuceneIndexingService implements ItemsPe
     * @throws RepositoryException the repository exception
     * @throws UnsupportedEncodingException the unsupported encoding exception
     * @throws IOException Signals that an I/O exception has occurred.
+    * @throws IndexException 
     */
    public Document crateDocumentFromPersistentStorage(ItemData item) throws RepositoryException,
-      UnsupportedEncodingException, IOException
+      UnsupportedEncodingException, IOException, IndexException
    {
 
       if (item == null)
@@ -237,7 +239,7 @@ public class JcrIndexingService extends LuceneIndexingService implements ItemsPe
       {
          // map of new documents
          final Map<String, Document> pendingDocuments = new HashMap<String, Document>();
-         // map of updated documents
+         //         // map of updated documents
          final Map<String, Document> updatedDocuments = new HashMap<String, Document>();
          // map of binary properties
          final Map<String, PropertyData> binaryProperties = new HashMap<String, PropertyData>();
@@ -406,8 +408,13 @@ public class JcrIndexingService extends LuceneIndexingService implements ItemsPe
 
          }
          // Open transaction
+         for (Entry<String, Document> entry : updatedDocuments.entrySet())
+         {
+            pendingDocuments.put(entry.getKey(), entry.getValue());
+            deletedDocuments.add(entry.getKey());
+         }
          final IndexTransaction<Document> indexTransaction =
-            new LuceneIndexTransaction(pendingDocuments, updatedDocuments, deletedDocuments);
+            new LuceneIndexTransaction(pendingDocuments, deletedDocuments);
 
          if (pendingDocuments.size() == 0 && updatedDocuments.size() == 0 && deletedDocuments.size() == 0)
          {
@@ -425,6 +432,11 @@ public class JcrIndexingService extends LuceneIndexingService implements ItemsPe
       catch (final RepositoryException e)
       {
          LOG.error("OnSaveItem exception " + e.getMessage(), e);
+      }
+      catch (IndexException e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
       }
    }
 
@@ -461,6 +473,11 @@ public class JcrIndexingService extends LuceneIndexingService implements ItemsPe
          catch (UnsupportedEncodingException e)
          {
             throw new RuntimeException("Fail to create document uuid:" + uuid + " path" + nodePath.getAsString());
+         }
+         catch (IndexException e)
+         {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
          }
          if (doc != null)
          {
