@@ -1,0 +1,71 @@
+<project
+   xmlns="http://maven.apache.org/POM/4.0.0"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd "
+>
+   <modelVersion>4.0.0</modelVersion>
+   <parent>
+      <groupId>org.xcmis</groupId>
+      <artifactId>xcmis-parent</artifactId>
+      <version>1.0-SNAPSHOT</version>
+   </parent>
+
+   <artifactId>xcmis-search-parser-cmis</artifactId>
+   <packaging>jar</packaging>
+   <version>1.0-SNAPSHOT</version>
+   <name>xCMIS :: Search :: Parser :: CMIS</name>
+   <url>http://www.exoplatform.org</url>
+   <description>eXo Search Service</description>
+
+   <dependencies>
+      <dependency>
+         <groupId>org.antlr</groupId>
+         <artifactId>antlr-runtime</artifactId>
+         <scope>compile</scope>
+      </dependency>
+
+      <dependency>
+         <groupId>org.xcmis</groupId>
+         <artifactId>xcmis-search-model</artifactId>
+         <version>1.0-SNAPSHOT</version>
+      </dependency>
+      
+      <!-- Time parsing -->
+      <dependency>
+         <groupId>org.exoplatform.kernel</groupId>
+         <artifactId>exo.kernel.commons</artifactId>
+         <version>2.2.0-CR1</version>
+      </dependency>
+
+      <dependency>
+         <groupId>org.mockito</groupId>
+         <artifactId>mockito-all</artifactId>
+         <version>1.8.2</version>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>junit</groupId>
+         <artifactId>junit</artifactId>
+         <version>4.8.1</version>
+         <scope>test</scope>
+      </dependency>
+
+   </dependencies>
+
+   <build>
+      <plugins>
+         <plugin>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr3-maven-plugin</artifactId>
+            <version>3.2</version>
+            <executions>
+               <execution>
+                  <goals>
+                     <goal>antlr</goal>
+                  </goals>
+               </execution>
+            </executions>
+         </plugin>
+      </plugins>
+   </build>
+</project>
