@@ -30,7 +30,8 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.picocontainer.Startable;
 import org.xcmis.messaging.CmisRepositoryEntryType;
-import org.xcmis.sp.jcr.exo.query.index.JcrIndexingService;
+import org.xcmis.search.SearchServiceException;
+import org.xcmis.sp.jcr.exo.query.ContentProxy;
 import org.xcmis.sp.jcr.exo.rendition.ImageRenditionProvider;
 import org.xcmis.sp.jcr.exo.rendition.PDFDocumentRenditionProvider;
 import org.xcmis.sp.jcr.exo.rendition.RenditionProvider;
@@ -71,8 +72,6 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
        * The list of CMIS repository configuration.
        */
       private List<CMISRepositoryConfiguration> configs;
-      
-      
 
       /**
        * Get configurations.
@@ -82,7 +81,9 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
       public List<CMISRepositoryConfiguration> getConfigs()
       {
          if (configs == null)
+         {
             configs = new ArrayList<CMISRepositoryConfiguration>();
+         }
          return configs;
       }
 
@@ -108,10 +109,10 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
 
    /** Session provider service. */
    private final ThreadLocalSessionProviderService sessionProviderService;
-   
+
    /** The rendition manager. */
    private RenditionManager renditionManager;
-   
+
    private Session session;
 
    /** The map for the rendition providers. */
@@ -121,13 +122,21 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
          public int compare(MimeType m1, MimeType m2)
          {
             if (m1.getType().equals(CMIS.WILDCARD) && !m2.getType().equals(CMIS.WILDCARD))
+            {
                return 1;
+            }
             if (!m1.getType().equals(CMIS.WILDCARD) && m2.getType().equals(CMIS.WILDCARD))
+            {
                return -1;
+            }
             if (m1.getSubType().equals(CMIS.WILDCARD) && !m2.getSubType().equals(CMIS.WILDCARD))
+            {
                return 1;
+            }
             if (!m1.getSubType().equals(CMIS.WILDCARD) && m2.getSubType().equals(CMIS.WILDCARD))
+            {
                return -1;
+            }
             return m1.toString().compareToIgnoreCase(m2.toString());
          }
       });
@@ -142,18 +151,22 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
    {
       this.jcrRepositoryService = jcrRepositoryService;
       this.sessionProviderService = sessionProviderService;
-      this.indexingServices = new HashMap<String, JcrIndexingService>();
+      this.indexingServices = new HashMap<String, ContentProxy>();
       this.cmisRepositories = new HashMap<String, CMISRepositoryConfiguration>();
       addRenditionProvider(new ImageRenditionProvider()); /* TODO : add form configuration ?? */
-            addRenditionProvider(new PDFDocumentRenditionProvider()); /* TODO : add form configuration ?? */
+      addRenditionProvider(new PDFDocumentRenditionProvider()); /* TODO : add form configuration ?? */
       if (initParams != null)
       {
          ObjectParameter param = initParams.getObjectParam("configs");
          if (param == null)
+         {
             LOG.error("Init-params does not contain configuration for any CMIS repository.");
+         }
          ServiceConfig confs = (ServiceConfig)param.getObject();
          for (CMISRepositoryConfiguration conf : confs.getConfigs())
+         {
             cmisRepositories.put(conf.getId(), conf);
+         }
       }
       else
       {
@@ -162,7 +175,7 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
    }
 
    /** The map for indexing services where the key is a repository id. */
-   private final Map<String, JcrIndexingService> indexingServices;
+   private final Map<String, ContentProxy> indexingServices;
 
    /**
     * Adding the index service.
@@ -170,7 +183,7 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
     * @param repositoryId the repository id
     * @param indexService the indexing service
     */
-   public void addIndexService(String repositoryId, JcrIndexingService indexService)
+   public void addIndexService(String repositoryId, ContentProxy indexService)
    {
       indexingServices.put(repositoryId, indexService);
    }
@@ -183,7 +196,9 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
    public void addRenditionProvider(RenditionProvider renditionProvider)
    {
       for (String mimeType : renditionProvider.getSupportedMediaType())
+      {
          renditionProviders.put(MimeType.fromString(mimeType), renditionProvider);
+      }
    }
 
    /**
@@ -233,10 +248,12 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
             //                        sessionProviderService.setSessionProvider(null, sessionProvider);
             // ----
             if (renditionManager == null)
-               renditionManager  =  new RenditionManagerImpl(renditionProviders, session);
-               
+            {
+               renditionManager = new RenditionManagerImpl(renditionProviders, session);
+            }
+
             return new RepositoryImpl(jcrRepository, sessionProvider, indexingServices.get(repositoryId),
-               repositoryConfiguration,renditionManager);
+               repositoryConfiguration, renditionManager);
          }
          catch (javax.jcr.RepositoryException re)
          {
@@ -245,6 +262,10 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
          catch (RepositoryConfigurationException rce)
          {
             LOG.error("Unable to get repository. " + rce.getMessage());
+         }
+         catch (SearchServiceException e)
+         {
+            LOG.error("Unable to get repository. " + e.getMessage());
          }
       }
       return null;
@@ -274,14 +295,25 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
             SessionProvider sessionProvider = sessionProviderService.getSessionProvider(null);
 
             if (sessionProvider == null)
+            {
                sessionProvider = SessionProvider.createSystemProvider();
+            }
             sessionProviderService.setSessionProvider(null, sessionProvider);
-            
+
             if (renditionManager == null)
-               renditionManager  =  new RenditionManagerImpl(renditionProviders, session);
-            
-            return new RepositoryImpl(jcrRepository, sessionProvider, indexingServices.get(repositoryConfiguration
-               .getId()), repositoryConfiguration, renditionManager);
+            {
+               renditionManager = new RenditionManagerImpl(renditionProviders, session);
+            }
+
+            try
+            {
+               return new RepositoryImpl(jcrRepository, sessionProvider, indexingServices.get(repositoryConfiguration
+                  .getId()), repositoryConfiguration, renditionManager);
+            }
+            catch (SearchServiceException e)
+            {
+               LOG.error("Unable to get repository. " + e.getMessage());
+            }
          }
       }
       return null;
@@ -293,7 +325,7 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
    public void start()
    {
       SessionProvider systemProvider = SessionProvider.createSystemProvider();
-    
+
       try
       {
          for (CMISRepositoryConfiguration cmisRepositoryConfiguration : cmisRepositories.values())
@@ -304,21 +336,29 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
             Node root = session.getRootNode();
             Node cmisSystem = null;
             if (!root.hasNode(JcrCMIS.CMIS_SYSTEM))
+            {
                cmisSystem = root.addNode(JcrCMIS.CMIS_SYSTEM, JcrCMIS.CMIS_SYSTEM_NODETYPE);
+            }
             else
+            {
                cmisSystem = root.getNode(JcrCMIS.CMIS_SYSTEM);
-            
+            }
+
             if (!cmisSystem.hasNode(JcrCMIS.CMIS_RELATIONSHIPS))
             {
                cmisSystem.addNode(JcrCMIS.CMIS_RELATIONSHIPS, JcrCMIS.NT_UNSTRUCTURED);
                if (LOG.isDebugEnabled())
+               {
                   LOG.debug("CMIS relationships storage " + JcrCMIS.CMIS_RELATIONSHIPS + " created.");
+               }
             }
             if (!cmisSystem.hasNode(JcrCMIS.CMIS_WORKING_COPIES))
             {
                cmisSystem.addNode(JcrCMIS.CMIS_WORKING_COPIES);
                if (LOG.isDebugEnabled())
+               {
                   LOG.debug("CMIS Working Copies storage " + JcrCMIS.CMIS_WORKING_COPIES + " created.");
+               }
             }
             session.save();
 
@@ -331,15 +371,18 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
                {
                   EventListener one = it.nextEventListener();
                   if (one.getClass() == UpdateListener.class)
+                  {
                      exist = true;
+                  }
                }
 
                if (!exist)
+               {
                   workspace.getObservationManager().addEventListener(
-                     new UpdateListener((ManageableRepository)repository, cmisRepositoryConfiguration.getWorkspace(),
-                        renditionProviders),
+                     new UpdateListener(repository, cmisRepositoryConfiguration.getWorkspace(), renditionProviders),
                      Event.NODE_ADDED | Event.PROPERTY_ADDED | Event.PROPERTY_CHANGED | Event.PROPERTY_REMOVED, "/",
                      true, null, new String[]{JcrCMIS.NT_FILE}, false);
+               }
             }
             catch (Exception ex)
             {

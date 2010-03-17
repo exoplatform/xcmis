@@ -68,12 +68,13 @@ import org.xcmis.core.EnumSupportedPermissions;
 import org.xcmis.core.EnumUpdatability;
 import org.xcmis.core.EnumVersioningState;
 import org.xcmis.messaging.CmisTypeContainer;
+import org.xcmis.search.SearchServiceException;
 import org.xcmis.sp.jcr.exo.object.EntryImpl;
 import org.xcmis.sp.jcr.exo.object.EntryVersion;
 import org.xcmis.sp.jcr.exo.object.VersionSeriesImpl;
+import org.xcmis.sp.jcr.exo.query.ContentProxy;
 import org.xcmis.sp.jcr.exo.query.QueryHandlerImpl;
 import org.xcmis.sp.jcr.exo.query.QueryNameResolver;
-import org.xcmis.sp.jcr.exo.query.index.JcrIndexingService;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ChangeTokenMatcher;
 import org.xcmis.spi.ConstraintException;
@@ -115,8 +116,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id: RepositoryImpl.java 282 2010-03-05 12:16:25Z ur3cma $
  */
-public class RepositoryImpl extends TypeManagerImpl implements Repository, EntryNameProducer, 
-   QueryNameResolver, ChangeTokenMatcher
+public class RepositoryImpl extends TypeManagerImpl implements Repository, EntryNameProducer, QueryNameResolver,
+   ChangeTokenMatcher
 {
 
    /** Logger. */
@@ -142,7 +143,7 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
 
    /** Repository info & capabilities. */
    private CmisRepositoryInfoType info;
-   
+
    /** The rendition manager. */
    private RenditionManager renditionManager;
 
@@ -156,18 +157,30 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
     * @param config the CMIS repository configuration
     * @param renditionProviders List of rendition providers
     * @throws javax.jcr.RepositoryException if any repository error occurs
+    * @throws SearchServiceException 
     */
-   public RepositoryImpl(javax.jcr.Repository backendRepo, SessionProvider sesProv, JcrIndexingService indexingService,
-      CMISRepositoryConfiguration config,  RenditionManager renditionManager)
-      throws javax.jcr.RepositoryException
+   public RepositoryImpl(javax.jcr.Repository backendRepo, SessionProvider sesProv, ContentProxy contenProxy,
+      CMISRepositoryConfiguration config, RenditionManager renditionManager) throws javax.jcr.RepositoryException,
+      SearchServiceException
    {
       this.backendRepo = backendRepo;
       this.sesProv = sesProv;
-      this.queryHandler = new QueryHandlerImpl(indexingService, this);
       this.config = config;
-     // this.renditionProviders = renditionProviders;
+      if (contenProxy != null && config != null)
+      {
+         this.queryHandler =
+            new QueryHandlerImpl(contenProxy, this, config.getIndexConfiguration(),
+               ((ExtendedNodeTypeManager)getSession().getWorkspace().getNodeTypeManager()).getNodeTypesHolder(),
+               ((ExtendedSession)getSession()).getLocationFactory());
+      }
+      else
+      {
+         this.queryHandler = null;
+      }
+
+      // this.renditionProviders = renditionProviders;
       this.renditionManager = renditionManager;
-      
+
       changeTokenFeature =
          config.getProperties().get("exo.cmis.changetoken.feature") != null ? (Boolean)config.getProperties().get(
             "exo.cmis.changetoken.feature") : true;
@@ -195,9 +208,13 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
          List<String> declaredSupertypeNames = new ArrayList<String>();
          declaredSupertypeNames.add(getNodeTypeName(parentId));
          if (parentType.getBaseId() == EnumBaseObjectTypeIds.CMIS_DOCUMENT)
+         {
             declaredSupertypeNames.add(JcrCMIS.CMIS_MIX_DOCUMENT);
+         }
          else if (parentType.getBaseId() == EnumBaseObjectTypeIds.CMIS_FOLDER)
+         {
             declaredSupertypeNames.add(JcrCMIS.CMIS_MIX_FOLDER);
+         }
          nodeTypeValue.setDeclaredSupertypeNames(declaredSupertypeNames);
          nodeTypeValue.setMixin(false);
          nodeTypeValue.setName(type.getId());
@@ -258,7 +275,9 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
                   {
                      defaultValues = new ArrayList<String>();
                      for (Boolean v : defaultBool.getValue())
+                     {
                         defaultValues.add(v.toString());
+                     }
                   }
                }
                else if (propDef instanceof CmisPropertyDateTimeDefinitionType)
@@ -268,7 +287,9 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
                   {
                      defaultValues = new ArrayList<String>();
                      for (XMLGregorianCalendar v : defaultDate.getValue())
+                     {
                         defaultValues.add(v.toXMLFormat());
+                     }
                   }
                }
                else if (propDef instanceof CmisPropertyDecimalDefinitionType)
@@ -278,7 +299,9 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
                   {
                      defaultValues = new ArrayList<String>();
                      for (BigDecimal v : defaultDecimal.getValue())
+                     {
                         defaultValues.add(v.toString());
+                     }
                   }
                }
                else if (propDef instanceof CmisPropertyHtmlDefinitionType)
@@ -306,7 +329,9 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
                   {
                      defaultValues = new ArrayList<String>();
                      for (BigInteger v : defaultInteger.getValue())
+                     {
                         defaultValues.add(v.toString());
+                     }
                   }
                }
                else if (propDef instanceof CmisPropertyStringDefinitionType)
@@ -360,7 +385,9 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
       throws ObjectNotFoundException, ConstraintException, RepositoryException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Copy object " + objectId + " to  folder " + destinationFolderId);
+      }
 
       EntryImpl object = (EntryImpl)getObjectById(objectId);
       if (object.getScope() != EnumBaseObjectTypeIds.CMIS_DOCUMENT)
@@ -381,27 +408,41 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
          String srcPath = srcNode.getPath();
          String destPath = destNode.getPath();
          if (destPath.equals("/"))
+         {
             destPath += srcNode.getName();
+         }
          else
+         {
             destPath += "/" + srcNode.getName();
+         }
 
          getSession().getWorkspace().copy(srcPath, destPath);
 
          if (LOG.isDebugEnabled())
+         {
             LOG.debug("Object copied in " + destPath);
+         }
 
          Entry copy = new EntryImpl((Node)getSession().getItem(destPath));
          copy.setDate(CMIS.CREATION_DATE, Calendar.getInstance());
          ConversationState cstate = ConversationState.getCurrent();
          String userId = null;
          if (cstate != null)
+         {
             userId = cstate.getIdentity().getUserId();
+         }
          if (userId != null)
+         {
             copy.setString(CMIS.CREATED_BY, userId);
+         }
          if (versioningState == EnumVersioningState.CHECKEDOUT)
+         {
             return copy.setBoolean(CMIS.IS_VERSION_SERIES_CHECKED_OUT, true);
+         }
          else if (versioningState == EnumVersioningState.MAJOR)
+         {
             copy.setBoolean(CMIS.IS_MAJOR_VERSION, true);
+         }
          copy.save();
          return copy;
       }
@@ -420,62 +461,62 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
       throw new UnsupportedOperationException("createObject");
    }
 
-//   /**
-//    * {@inheritDoc}
-//    */
-//   public boolean createRenditions(Entry entry) throws InvalidArgumentException, RepositoryException
-//   {
-//      if (!entry.canGetContent())
-//         return false;
-//      ContentStream content;
-//      try
-//      {
-//         content = entry.getContent(null);
-//      }
-//      catch (ConstraintException cve)
-//      {
-//         return false;
-//      }
-//      if (content == null)
-//         return false;
-//      try
-//      {
-//         MimeType contentType = MimeType.fromString(content.getMediaType());
-//         int count = 0;
-//         for (Map.Entry<MimeType, RenditionProvider> e : renditionProviders.entrySet())
-//         {
-//            if (e.getKey().match(contentType))
-//            {
-//               RenditionProvider renditionProvider = e.getValue();
-//               RenditionContentStream renditionContentStream = renditionProvider.getRenditionStream(entry);
-//               Node rendition = ((EntryImpl)entry).getNode().addNode(IdGenerator.generate(), JcrCMIS.CMIS_NT_RENDITION);
-//               rendition.setProperty(JcrCMIS.CMIS_RENDITION_STREAM, renditionContentStream.getStream());
-//               rendition.setProperty(JcrCMIS.CMIS_RENDITION_MIME_TYPE, renditionContentStream.getMediaType());
-//               rendition.setProperty(JcrCMIS.CMIS_RENDITION_KIND, renditionContentStream.getKind());
-//               rendition.setProperty(JcrCMIS.CMIS_RENDITION_HEIGHT, renditionContentStream.getHeight());
-//               rendition.setProperty(JcrCMIS.CMIS_RENDITION_WIDTH, renditionContentStream.getWidth());
-//               count++;
-//            }
-//         }
-//         if (count > 0)
-//         {
-//            ((EntryImpl)entry).getNode().save();
-//            return true;
-//         }
-//         return false;
-//      }
-//      catch (javax.jcr.RepositoryException re)
-//      {
-//         String msg = "Failed create rendtions for object " + entry.getObjectId() + ". " + re.getMessage();
-//         throw new RepositoryException(msg, re);
-//      }
-//      catch (Exception other)
-//      {
-//         String msg = "Failed create rendtions for object " + entry.getObjectId() + ". " + other.getMessage();
-//         LOG.error(msg);
-//         return false;
-//      }
-//   }
+   //   /**
+   //    * {@inheritDoc}
+   //    */
+   //   public boolean createRenditions(Entry entry) throws InvalidArgumentException, RepositoryException
+   //   {
+   //      if (!entry.canGetContent())
+   //         return false;
+   //      ContentStream content;
+   //      try
+   //      {
+   //         content = entry.getContent(null);
+   //      }
+   //      catch (ConstraintException cve)
+   //      {
+   //         return false;
+   //      }
+   //      if (content == null)
+   //         return false;
+   //      try
+   //      {
+   //         MimeType contentType = MimeType.fromString(content.getMediaType());
+   //         int count = 0;
+   //         for (Map.Entry<MimeType, RenditionProvider> e : renditionProviders.entrySet())
+   //         {
+   //            if (e.getKey().match(contentType))
+   //            {
+   //               RenditionProvider renditionProvider = e.getValue();
+   //               RenditionContentStream renditionContentStream = renditionProvider.getRenditionStream(entry);
+   //               Node rendition = ((EntryImpl)entry).getNode().addNode(IdGenerator.generate(), JcrCMIS.CMIS_NT_RENDITION);
+   //               rendition.setProperty(JcrCMIS.CMIS_RENDITION_STREAM, renditionContentStream.getStream());
+   //               rendition.setProperty(JcrCMIS.CMIS_RENDITION_MIME_TYPE, renditionContentStream.getMediaType());
+   //               rendition.setProperty(JcrCMIS.CMIS_RENDITION_KIND, renditionContentStream.getKind());
+   //               rendition.setProperty(JcrCMIS.CMIS_RENDITION_HEIGHT, renditionContentStream.getHeight());
+   //               rendition.setProperty(JcrCMIS.CMIS_RENDITION_WIDTH, renditionContentStream.getWidth());
+   //               count++;
+   //            }
+   //         }
+   //         if (count > 0)
+   //         {
+   //            ((EntryImpl)entry).getNode().save();
+   //            return true;
+   //         }
+   //         return false;
+   //      }
+   //      catch (javax.jcr.RepositoryException re)
+   //      {
+   //         String msg = "Failed create rendtions for object " + entry.getObjectId() + ". " + re.getMessage();
+   //         throw new RepositoryException(msg, re);
+   //      }
+   //      catch (Exception other)
+   //      {
+   //         String msg = "Failed create rendtions for object " + entry.getObjectId() + ". " + other.getMessage();
+   //         LOG.error(msg);
+   //         return false;
+   //      }
+   //   }
 
    /**
     * {@inheritDoc}
@@ -492,15 +533,21 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
    {
 
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Get all checked out document.");
+      }
 
       List<Entry> checkedout = new ArrayList<Entry>();
       try
       {
          if (folderId == null)
+         {
             checkedOutDocuments(new EntryImpl(getSession().getRootNode()), checkedout, true);
+         }
          else
+         {
             checkedOutDocuments(getObjectById(folderId), checkedout, false);
+         }
       }
       catch (javax.jcr.RepositoryException re)
       {
@@ -516,21 +563,33 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
    public String getEntryName(String parentId, EnumBaseObjectTypeIds scope, String typeId)
    {
       if (LOG.isDebugEnabled())
+      {
          LOG
             .debug("Generate name for entry, parentId " + parentId + ", typedId " + typeId + ", scope " + scope.value());
+      }
       try
       {
          String pattern;
          if (scope == EnumBaseObjectTypeIds.CMIS_DOCUMENT)
+         {
             pattern = JcrCMIS.DEFAULT_DOCUMENT_NAME;
+         }
          else if (scope == EnumBaseObjectTypeIds.CMIS_FOLDER)
+         {
             pattern = JcrCMIS.DEFAULT_FOLDER_NAME;
+         }
          else if (scope == EnumBaseObjectTypeIds.CMIS_POLICY)
+         {
             pattern = JcrCMIS.DEFAULT_POLICY_NAME;
+         }
          else if (scope == EnumBaseObjectTypeIds.CMIS_RELATIONSHIP)
+         {
             return IdGenerator.generate();
+         }
          else
+         {
             throw new UnsupportedOperationException();
+         }
          Node parent = ((ExtendedSession)getSession()).getNodeByIdentifier(parentId);
          NodeIterator items = parent.getNodes(pattern + CMIS.WILDCARD);
          long count = items.getSize();
@@ -562,7 +621,9 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
             name = pattern + " (" + String.valueOf(count) + ")";
          }
          if (LOG.isDebugEnabled())
+         {
             LOG.debug("Entry name: " + name);
+         }
          return name;
       }
       catch (javax.jcr.RepositoryException re)
@@ -578,7 +639,9 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
    public String getId()
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Get repository id");
+      }
       return config.getId();
    }
 
@@ -596,15 +659,21 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
    public Entry getObjectById(String objectId) throws ObjectNotFoundException, RepositoryException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Get object with id '" + objectId + "'");
+      }
       try
       {
          Node node = ((ExtendedSession)getSession()).getNodeByIdentifier(objectId);
          Entry object = null;
          if (node.isNodeType(JcrCMIS.NT_VERSION))
+         {
             object = new EntryVersion((Version)node);
+         }
          else
+         {
             object = new EntryImpl(node);
+         }
          return object;
       }
       catch (ItemNotFoundException infe)
@@ -625,7 +694,9 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
    public Entry getObjectByPath(String path) throws ObjectNotFoundException, RepositoryException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Get object with path " + path);
+      }
       try
       {
          return new EntryImpl((Node)getSession().getItem(path.charAt(0) == '/' ? path : '/' + path));
@@ -658,31 +729,31 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
       return renditionManager;
    }
 
-//   /**
-//    * {@inheritDoc}
-//    */
-//   public ItemsIterator<CmisRenditionType> getRenditions(Entry entry) throws RepositoryException
-//   {
-//      try
-//      {
-//         return new RenditionIterator(((EntryImpl)entry).getNode().getNodes());
-//      }
-//      catch (javax.jcr.RepositoryException re)
-//      {
-//         String msg =
-//            "Unable get renditions for object " + entry.getObjectId() + " Unexpected error " + re.getMessage();
-//         throw new RepositoryException(msg, re);
-//      }
-//   }
-//
-//   /**
-//    * {@inheritDoc}
-//    */
-//   public ItemsIterator<CmisRenditionType> getRenditions(String objectId) throws ObjectNotFoundException,
-//      RepositoryException
-//   {
-//      return getRenditions(getObjectById(objectId));
-//   }
+   //   /**
+   //    * {@inheritDoc}
+   //    */
+   //   public ItemsIterator<CmisRenditionType> getRenditions(Entry entry) throws RepositoryException
+   //   {
+   //      try
+   //      {
+   //         return new RenditionIterator(((EntryImpl)entry).getNode().getNodes());
+   //      }
+   //      catch (javax.jcr.RepositoryException re)
+   //      {
+   //         String msg =
+   //            "Unable get renditions for object " + entry.getObjectId() + " Unexpected error " + re.getMessage();
+   //         throw new RepositoryException(msg, re);
+   //      }
+   //   }
+   //
+   //   /**
+   //    * {@inheritDoc}
+   //    */
+   //   public ItemsIterator<CmisRenditionType> getRenditions(String objectId) throws ObjectNotFoundException,
+   //      RepositoryException
+   //   {
+   //      return getRenditions(getObjectById(objectId));
+   //   }
 
    /**
     * Get repository configuration.
@@ -700,7 +771,9 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
    public CmisRepositoryInfoType getRepositoryInfo()
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Get repository info");
+      }
 
       if (info == null)
       {
@@ -861,7 +934,9 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
    public Entry getRootFolder() throws RepositoryException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Get root folder.");
+      }
       try
       {
          return new EntryImpl(getSession().getRootNode());
@@ -880,7 +955,9 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
       throws RepositoryException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Get object types, typeId " + typeId);
+      }
       try
       {
          List<CmisTypeDefinitionType> types = new ArrayList<CmisTypeDefinitionType>();
@@ -900,7 +977,9 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
                String internalTypeId = getNodeTypeName(typeId);
                // Get only direct children of specified type.
                if (nt.isNodeType(internalTypeId) && getTypeLevelHierarchy(nt, internalTypeId) == 1)
+               {
                   types.add(getTypeDefinition(nt, includePropertyDefinition));
+               }
             }
          }
          // XXX: Not efficient to get all types in list. Better to do it in
@@ -921,7 +1000,9 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
       throws RepositoryException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Get descendants object types, typeId " + typeId + ", depth " + depth);
+      }
 
       List<CmisTypeContainer> types = new ArrayList<CmisTypeContainer>();
       if (typeId == null)
@@ -1009,7 +1090,9 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
    public VersionSeries getVersionSeries(String versionSeriesId) throws ObjectNotFoundException, RepositoryException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("In getVersionSeries " + versionSeriesId);
+      }
       try
       {
          Node node = ((ExtendedSession)getSession()).getNodeByIdentifier(versionSeriesId);
@@ -1033,7 +1116,9 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
    public boolean isMatch(Entry entry, String expected) throws RepositoryException
    {
       if (changeTokenFeature)
+      {
          return expected != null && expected.equals(entry.getString(CMIS.CHANGE_TOKEN));
+      }
       // If change token feature is disabled don't check anything. 
       // We are not care about change tokens at all.
       return true;
@@ -1046,7 +1131,9 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
       throws ObjectNotFoundException, ConstraintException, RepositoryException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Move object " + objectId + " to new folder " + destinationFolderId);
+      }
 
       EntryImpl object = (EntryImpl)getObjectById(objectId);
 
@@ -1070,14 +1157,20 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
          String srcPath = srcNode.getPath();
          String destPath = destNode.getPath();
          if (destPath.equals("/"))
+         {
             destPath += srcNode.getName();
+         }
          else
+         {
             destPath += "/" + srcNode.getName();
+         }
 
          getSession().getWorkspace().move(srcPath, destPath);
 
          if (LOG.isDebugEnabled())
+         {
             LOG.debug("Object moved in " + destPath);
+         }
       }
       catch (javax.jcr.RepositoryException re)
       {
@@ -1086,40 +1179,40 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
       }
    }
 
-//   /**
-//    * {@inheritDoc}
-//    */
-//   public void removeRenditions(Entry entry) throws RepositoryException
-//   {
-//      try
-//      {
-//         int count = 0;
-//         for (NodeIterator iter = ((EntryImpl)entry).getNode().getNodes(); iter.hasNext();)
-//         {
-//            Node item = iter.nextNode();
-//            if (item.isNodeType(JcrCMIS.CMIS_NT_RENDITION))
-//            {
-//               item.remove();
-//               count++;
-//            }
-//         }
-//         if (count > 0)
-//            ((EntryImpl)entry).getNode().save();
-//      }
-//      catch (javax.jcr.RepositoryException re)
-//      {
-//         String msg = "Unable to remove renditions for object " + entry.getObjectId() + ". " + re.getMessage();
-//         throw new RepositoryException(msg, re);
-//      }
-//   }
-//
-//   /**
-//    * {@inheritDoc}
-//    */
-//   public void removeRenditions(String objectId) throws ObjectNotFoundException, RepositoryException
-//   {
-//      removeRenditions(getObjectById(objectId));
-//   }
+   //   /**
+   //    * {@inheritDoc}
+   //    */
+   //   public void removeRenditions(Entry entry) throws RepositoryException
+   //   {
+   //      try
+   //      {
+   //         int count = 0;
+   //         for (NodeIterator iter = ((EntryImpl)entry).getNode().getNodes(); iter.hasNext();)
+   //         {
+   //            Node item = iter.nextNode();
+   //            if (item.isNodeType(JcrCMIS.CMIS_NT_RENDITION))
+   //            {
+   //               item.remove();
+   //               count++;
+   //            }
+   //         }
+   //         if (count > 0)
+   //            ((EntryImpl)entry).getNode().save();
+   //      }
+   //      catch (javax.jcr.RepositoryException re)
+   //      {
+   //         String msg = "Unable to remove renditions for object " + entry.getObjectId() + ". " + re.getMessage();
+   //         throw new RepositoryException(msg, re);
+   //      }
+   //   }
+   //
+   //   /**
+   //    * {@inheritDoc}
+   //    */
+   //   public void removeRenditions(String objectId) throws ObjectNotFoundException, RepositoryException
+   //   {
+   //      removeRenditions(getObjectById(objectId));
+   //   }
 
    /**
     * {@inheritDoc}
@@ -1160,7 +1253,9 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
             CmisTypeContainer t = new CmisTypeContainer();
             t.setType(type);
             if (containerType.getType().getId().equals(type.getParentId()))
+            {
                containerType.getChildren().add(t);
+            }
             addTypeDescendants(t, level + 1, cache);
          }
       }
@@ -1174,8 +1269,7 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
     * @param recursive whether it is recursive
     * @throws javax.jcr.RepositoryException if any JCR repository errors
     */
-   private void checkedOutDocuments(Entry folder, List<Entry> docs, boolean recursive)
-      throws RepositoryException
+   private void checkedOutDocuments(Entry folder, List<Entry> docs, boolean recursive) throws RepositoryException
    {
       for (ItemsIterator<Entry> iter = folder.getChildren(); iter.hasNext();)
       {
@@ -1184,10 +1278,14 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
          {
             Entry pwc = entry.getVersionSeries().getCheckedOut();
             if (pwc != null)
+            {
                docs.add(pwc);
+            }
          }
          else if (recursive && entry.getScope() == EnumBaseObjectTypeIds.CMIS_FOLDER)
+         {
             checkedOutDocuments(entry, docs, recursive);
+         }
       }
    }
 
@@ -1201,9 +1299,13 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
    private CmisPermissionMapping createPermissionMapping(EnumAllowableActionsKey actionsKey, String... permissions)
    {
       if (permissions == null)
+      {
          throw new NullPointerException("permissions is null.");
+      }
       if (actionsKey == null)
+      {
          throw new NullPointerException("actionsKey is null.");
+      }
       CmisPermissionMapping mapping = new CmisPermissionMapping();
       mapping.setKey(actionsKey);
       if (permissions.length == 0)
@@ -1213,7 +1315,9 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
       else
       {
          for (String permission : permissions)
+         {
             mapping.getPermission().add(permission);
+         }
       }
       return mapping;
    }
@@ -1227,7 +1331,9 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
    private Session getSession() throws javax.jcr.RepositoryException
    {
       if (session == null)
+      {
          session = sesProv.getSession(config.getWorkspace(), (ManageableRepository)backendRepo);
+      }
       return session;
    }
 
@@ -1245,7 +1351,9 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
       for (NodeType sup : discovered.getSupertypes())
       {
          if (sup.isNodeType(match))
+         {
             level++;
+         }
       }
       return level;
    }

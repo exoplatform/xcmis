@@ -45,7 +45,6 @@ import org.picocontainer.Startable;
 import org.xcmis.search.config.IndexConfurationImpl;
 import org.xcmis.search.lucene.index.IndexException;
 import org.xcmis.search.lucene.index.IndexTransaction;
-import org.xcmis.search.lucene.index.IndexTransactionException;
 import org.xcmis.search.lucene.index.IndexTransactionModificationReport;
 import org.xcmis.search.lucene.index.TransactionableIndexDataManager;
 import org.xcmis.sp.jcr.exo.RepositoriesManagerImpl;
@@ -147,14 +146,7 @@ public class LuceneIndexingService implements Startable
     */
    public boolean documentExists(final String uuid)
    {
-      try
-      {
-         return indexDataManager.getDocument(uuid) != null;
-      }
-      catch (final IndexException e)
-      {
-         LOG.error(e.getLocalizedMessage(), e);
-      }
+      //return true;//indexDataManager.getDocument(uuid) != null;
       return false;
    }
 
@@ -278,14 +270,7 @@ public class LuceneIndexingService implements Startable
     */
    public IndexTransactionModificationReport save(final IndexTransaction<Document> changes) throws IndexException
    {
-      try
-      {
-         return indexDataManager.save(changes);
-      }
-      catch (final IndexTransactionException e)
-      {
-         throw new IndexException(e.getLocalizedMessage(), e.getCause());
-      }
+      return null;//indexDataManager.save(changes);
    }
 
    //   /**
@@ -342,7 +327,7 @@ public class LuceneIndexingService implements Startable
     */
    public void start()
    {
-      indexDataManager.start();
+      //indexDataManager.start();
    }
 
    /**
@@ -350,7 +335,7 @@ public class LuceneIndexingService implements Startable
     */
    public void stop()
    {
-      indexDataManager.stop();
+      //indexDataManager.stop();
    }
 
    //
@@ -462,7 +447,7 @@ public class LuceneIndexingService implements Startable
     */
    protected long getDocumentCount()
    {
-      return indexDataManager.getDocumentCount();
+      return 0;//indexDataManager.getDocumentCount();
    }
 
    /**

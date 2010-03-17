@@ -19,6 +19,8 @@
 
 package org.xcmis.sp.jcr.exo;
 
+import org.xcmis.search.config.IndexConfuguration;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,7 +41,7 @@ public class CMISRepositoryConfiguration
    private String workspace;
 
    /** Configuration for the index. */
-   private IndexConfiguration indexConfiguration;
+   private IndexConfuguration indexConfiguration;
 
    /** ID of CMIS repository. */
    private String id;
@@ -62,7 +64,7 @@ public class CMISRepositoryConfiguration
     * 
     * @return the index configuration
     */
-   public IndexConfiguration getIndexConfiguration()
+   public IndexConfuguration getIndexConfiguration()
    {
       return indexConfiguration;
    }
@@ -75,7 +77,9 @@ public class CMISRepositoryConfiguration
    public Map<String, Object> getProperties()
    {
       if (properties == null)
+      {
          properties = new HashMap<String, Object>();
+      }
       return properties;
    }
 
@@ -114,7 +118,7 @@ public class CMISRepositoryConfiguration
     * 
     * @param indexConfiguration the index configuration
     */
-   public void setIndexConfiguration(IndexConfiguration indexConfiguration)
+   public void setIndexConfiguration(IndexConfuguration indexConfiguration)
    {
       this.indexConfiguration = indexConfiguration;
    }

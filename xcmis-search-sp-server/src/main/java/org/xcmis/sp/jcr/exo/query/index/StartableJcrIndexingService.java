@@ -153,7 +153,7 @@ public class StartableJcrIndexingService extends JcrIndexingService
    public void start()
    {
       super.start();
-      repositoriesManager.addIndexService(cmisRepositoryId, this);
+      //repositoriesManager.addIndexService(cmisRepositoryId, this);
       // save buffered logs
       isStarted = true;
       for (final ItemStateChangesLog bufferedChangesLog : changesLogBuffer)

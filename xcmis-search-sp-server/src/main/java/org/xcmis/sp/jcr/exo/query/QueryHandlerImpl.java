@@ -19,11 +19,27 @@
 
 package org.xcmis.sp.jcr.exo.query;
 
+import org.exoplatform.services.jcr.core.nodetype.NodeTypeData;
+import org.exoplatform.services.jcr.core.nodetype.NodeTypeDataManager;
+import org.exoplatform.services.jcr.core.nodetype.PropertyDefinitionData;
+import org.exoplatform.services.jcr.core.nodetype.PropertyDefinitionDatas;
+import org.exoplatform.services.jcr.datamodel.InternalQName;
+import org.exoplatform.services.jcr.impl.core.LocationFactory;
+import org.xcmis.search.SearchServiceException;
+import org.xcmis.search.config.IndexConfuguration;
+import org.xcmis.search.config.SearchServiceConfiguration;
+import org.xcmis.search.content.Schema;
+import org.xcmis.search.content.Schema.Table;
+import org.xcmis.search.content.command.InvocationContext;
+import org.xcmis.search.lucene.LuceneSearchService;
+import org.xcmis.search.lucene.content.SchemaTableResolver;
 import org.xcmis.search.model.Query;
 import org.xcmis.search.model.column.Column;
+import org.xcmis.search.model.source.SelectorName;
 import org.xcmis.search.parser.CmisQueryParser;
 import org.xcmis.search.result.ScoredRow;
-import org.xcmis.sp.jcr.exo.query.index.JcrIndexingService;
+import org.xcmis.search.value.NameConverter;
+import org.xcmis.search.value.ToStringNameConverter;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.RepositoryException;
 import org.xcmis.spi.object.ItemsIterator;
@@ -34,8 +50,10 @@ import org.xcmis.spi.query.Score;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
@@ -45,18 +63,38 @@ import java.util.NoSuchElementException;
 public class QueryHandlerImpl implements QueryHandler
 {
 
-   private JcrIndexingService indexingService;
+   private ContentProxy contenProxy;
 
    private QueryNameResolver resolver;
 
    private CmisQueryParser queryParser;
 
-   public QueryHandlerImpl(JcrIndexingService indexingService, QueryNameResolver resolver)
+   private LuceneSearchService luceneSearchService;
+
+   public QueryHandlerImpl(ContentProxy contenProxy, QueryNameResolver resolver, IndexConfuguration indexConfiguration,
+      NodeTypeDataManager nodeTypeManager, LocationFactory locationFactory) throws SearchServiceException
    {
       super();
-      this.indexingService = indexingService;
+
+      this.contenProxy = contenProxy;
       this.resolver = resolver;
       this.queryParser = new CmisQueryParser();
+      NameConverter<String> nameConverter = new ToStringNameConverter();
+      NodeTypeShema schema = new NodeTypeShema(nodeTypeManager, locationFactory);
+      SchemaTableResolver tableResolver = new SchemaTableResolver(nameConverter, schema);
+
+      SearchServiceConfiguration configuration = new SearchServiceConfiguration();
+      configuration.setIndexConfuguration(indexConfiguration);
+      configuration.setContentReader(contenProxy);
+      configuration.setNameConverter(nameConverter);
+      configuration.setTableResolver(tableResolver);
+      luceneSearchService = new LuceneSearchService(configuration);
+      InvocationContext invocationContext = new InvocationContext();
+      invocationContext.setSchema(schema);
+
+      invocationContext.setTableResolver(tableResolver);
+      invocationContext.setNameConverter(nameConverter);
+      luceneSearchService.setInvocationContext(invocationContext);
    }
 
    /**
@@ -68,9 +106,8 @@ public class QueryHandlerImpl implements QueryHandler
       try
       {
          Query qom = queryParser.parseQuery(query.getStatement());
-
+         List<ScoredRow> result = luceneSearchService.execute(qom, Collections.EMPTY_MAP);
          //qom.setSearchAllVersions(query.isSearchAllVersions());
-         List<ScoredRow> result = Collections.EMPTY_LIST;//qom.execute();
          return new QueryResultIterator(result, new ArrayList<String>(Collections.EMPTY_LIST), qom);
       }
 
@@ -80,6 +117,204 @@ public class QueryHandlerImpl implements QueryHandler
          e.printStackTrace();
       }
       return null;
+   }
+
+   /**
+    * 
+    * ExtendedNodeTypeManager based schema
+    *
+    */
+   private class NodeTypeShema implements Schema
+   {
+      private final NodeTypeDataManager nodeTypeDataManager;
+
+      private final LocationFactory locationFactory;
+
+      /**
+       * @param nodeTypeDataManager
+       * @param locationFactory 
+       */
+      public NodeTypeShema(NodeTypeDataManager nodeTypeDataManager, LocationFactory locationFactory)
+      {
+         super();
+         this.nodeTypeDataManager = nodeTypeDataManager;
+         this.locationFactory = locationFactory;
+      }
+
+      /**
+       * @see org.xcmis.search.content.Schema#getTable(org.xcmis.search.model.source.SelectorName)
+       */
+      public Table getTable(SelectorName name)
+      {
+
+         NodeTypeData nt;
+         try
+         {
+            nt = nodeTypeDataManager.getNodeType(locationFactory.parseJCRName(name.getName()).getInternalName());
+            if (nt != null)
+            {
+               return new NodeTypeTable(nt, nodeTypeDataManager, locationFactory);
+            }
+         }
+         catch (javax.jcr.RepositoryException e)
+         {
+         }
+         return null;
+
+      }
+
+   }
+
+   /**
+    * 
+    * NodeType based Table
+    *
+    */
+   private class NodeTypeTable implements Table
+   {
+
+      private final NodeTypeData nodeType;
+
+      private final NodeTypeDataManager nodeTypeDataManager;
+
+      private final LocationFactory locationFactory;
+
+      /**
+       * @param nt
+       * @param locationFactory 
+       * @param nodeTypeDataManager 
+       */
+      public NodeTypeTable(NodeTypeData nt, NodeTypeDataManager nodeTypeDataManager, LocationFactory locationFactory)
+      {
+         super();
+         this.nodeType = nt;
+         this.nodeTypeDataManager = nodeTypeDataManager;
+         this.locationFactory = locationFactory;
+      }
+
+      /**
+       * @see org.xcmis.search.content.Schema.Table#getColumn(java.lang.String)
+       */
+      public org.xcmis.search.content.Schema.Column getColumn(String name)
+      {
+         try
+         {
+            InternalQName columntName = locationFactory.parseJCRName(name).getInternalName();
+            final PropertyDefinitionDatas defs =
+               nodeTypeDataManager.getPropertyDefinitions(columntName, nodeType.getName());
+            if (defs != null)
+            {
+               return new PropertyDefinitionColumn(locationFactory.createJCRName(defs.getAnyDefinition().getName())
+                  .getAsString());
+            }
+         }
+         catch (javax.jcr.RepositoryException e)
+         {
+
+         }
+         return null;
+      }
+
+      /**
+       * @see org.xcmis.search.content.Schema.Table#getColumns()
+       */
+      public List<org.xcmis.search.content.Schema.Column> getColumns()
+      {
+         List<org.xcmis.search.content.Schema.Column> result = new ArrayList<org.xcmis.search.content.Schema.Column>();
+         final PropertyDefinitionData[] defs = nodeTypeDataManager.getAllPropertyDefinitions(nodeType.getName());
+         for (int i = 0; i < defs.length; i++)
+         {
+            try
+            {
+               result.add(new PropertyDefinitionColumn(locationFactory.createJCRName(defs[i].getName()).getAsString()));
+            }
+            catch (javax.jcr.RepositoryException e)
+            {
+               //TODO check ignore.
+            }
+         }
+         return result;
+      }
+
+      /**
+       * @see org.xcmis.search.content.Schema.Table#getColumnsByName()
+       */
+      public Map<String, org.xcmis.search.content.Schema.Column> getColumnsByName()
+      {
+         Map<String, org.xcmis.search.content.Schema.Column> result =
+            new HashMap<String, org.xcmis.search.content.Schema.Column>();
+         final PropertyDefinitionData[] defs = nodeTypeDataManager.getAllPropertyDefinitions(nodeType.getName());
+         for (int i = 0; i < defs.length; i++)
+         {
+            try
+            {
+               String name = locationFactory.createJCRName(defs[i].getName()).getAsString();
+               result.put(name, new PropertyDefinitionColumn(name));
+            }
+            catch (javax.jcr.RepositoryException e)
+            {
+               //TODO check ignore.
+            }
+
+         }
+         return result;
+      }
+
+      /**
+       * @see org.xcmis.search.content.Schema.Table#getName()
+       */
+      public SelectorName getName()
+      {
+         try
+         {
+            return new SelectorName(locationFactory.createJCRName(nodeType.getName()).getAsString());
+         }
+         catch (javax.jcr.RepositoryException e)
+         {
+
+         }
+         return null;
+      }
+   }
+
+   private class PropertyDefinitionColumn implements org.xcmis.search.content.Schema.Column
+   {
+
+      private final String name;
+
+      /**
+       * @param name
+       */
+      public PropertyDefinitionColumn(String name)
+      {
+         super();
+         this.name = name;
+      }
+
+      /**
+       * @see org.xcmis.search.content.Schema.Column#getName()
+       */
+      public String getName()
+      {
+         return name;
+      }
+
+      /**
+       * @see org.xcmis.search.content.Schema.Column#getPropertyType()
+       */
+      public String getPropertyType()
+      {
+         return "String";
+      }
+
+      /**
+       * @see org.xcmis.search.content.Schema.Column#isFullTextSearchable()
+       */
+      public boolean isFullTextSearchable()
+      {
+         return true;
+      }
+
    }
 
    //
