@@ -49,6 +49,7 @@ import org.xcmis.core.EnumSupportedPermissions;
 import org.xcmis.core.EnumTypeOfChanges;
 import org.xcmis.messaging.CmisContentStreamType;
 import org.xcmis.messaging.CmisExtensionType;
+import org.xcmis.messaging.CmisObjectInFolderType;
 import org.xcmis.messaging.CmisObjectListType;
 import org.xcmis.messaging.CmisRepositoryEntryType;
 import org.xcmis.messaging.CmisObjectParentsType;
@@ -129,6 +130,12 @@ public class TypeConverter
       return result;
    }
 
+   public static CmisExtensionType getCmisExtensionType(Object any)
+   {
+      CmisExtensionType result = new CmisExtensionType();
+      result.getAny().add(any);
+      return result;
+   }
    
    public static CmisObjectType getCmisObjectType(CmisObject object)
    {
@@ -148,12 +155,7 @@ public class TypeConverter
       return result;
    }
 
-   public static CmisExtensionType getCmisExtensionType(Object any)
-   {
-      CmisExtensionType result = new CmisExtensionType();
-      result.getAny().add(any);
-      return result;
-   }
+   
 
    public static CmisRepositoryInfoType getCmisRepositoryInfoType(RepositoryInfo source)
    {
@@ -191,6 +193,21 @@ public class TypeConverter
       return result;
    }
 
+   
+   public static CmisObjectInFolderType getCmisObjectInFolderType(CmisObject source){
+      CmisObjectInFolderType result = new CmisObjectInFolderType();
+      result.setObject(getCmisObjectType(source));
+      result.setPathSegment(source.getPathSegment());
+      return result;
+   } 
+   
+   public static CmisObjectParentsType getCmisObjectParentsType(ObjectParent source){
+      CmisObjectParentsType result = new CmisObjectParentsType();
+      result.setObject(getCmisObjectType(source.getObject()));
+      result.setRelativePathSegment(source.getRelativePathSegment());
+      return result;
+   }
+   
    public static CmisContentStreamType getCmisContentStreamType(ContentStream source)
    {
       CmisContentStreamType result = new CmisContentStreamType();
@@ -289,14 +306,6 @@ public class TypeConverter
       {
          result.getId().add(one);
       }
-      return result;
-   }
-
-   public static CmisObjectParentsType getCmisObjectParentsType(ObjectParent source)
-   {
-      CmisObjectParentsType result = new CmisObjectParentsType();
-      result.setObject(getCmisObjectType(source.getObject()));
-      result.setRelativePathSegment(source.getRelativePathSegment());
       return result;
    }
 
