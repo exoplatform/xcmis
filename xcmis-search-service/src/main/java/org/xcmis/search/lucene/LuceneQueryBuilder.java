@@ -108,11 +108,11 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
 
    public static final char LIKE_MATCH_ZERO_OR_MORE_CHAR = '%';
 
-   //private final ResultSorterFactory resultSorterFactory;
+   // private final ResultSorterFactory resultSorterFactory;
 
-   //private final VirtualTableResolver<Query> tableResolver;
+   // private final VirtualTableResolver<Query> tableResolver;
 
-   //private final DocumentMatcherFactory documentMatcherFactory;
+   // private final DocumentMatcherFactory documentMatcherFactory;
 
    private Stack<Object> queryBuilderStack;
 
@@ -137,13 +137,13 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
       PathSplitter pathSplitter, Map<String, Object> bindVariablesValues)
    {
       this.fieldNameResolver = fieldNameResolver;
-      //this.resultSorterFactory = resultSorterFactory;
+      // this.resultSorterFactory = resultSorterFactory;
       this.nameConverter = nameConverter;
       this.pathSplitter = pathSplitter;
-      //this.tableResolver = tableResolver;
+      // this.tableResolver = tableResolver;
       this.bindVariablesValues = bindVariablesValues;
       this.queryBuilderStack = new Stack<Object>();
-      //this.queryBuilderStack.add(new MatchAllDocsQuery());
+      // this.queryBuilderStack.add(new MatchAllDocsQuery());
    }
 
    /**
@@ -262,13 +262,13 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
       // Push query from DynamicOperand to stack
       Visitors.visit(node.getOperand1(), this);
 
-      //      final BooleanQuery resultQuery = new BooleanQuery();
-      //      // get query builded by Operand1.
-      //      resultQuery.add((Query)queryBuilderStack.pop(), Occur.MUST);
-      //      // combine with previous
-      //      resultQuery.add((Query)queryBuilderStack.pop(), Occur.MUST);
-      //      //
-      //      queryBuilderStack.push(resultQuery);
+      // final BooleanQuery resultQuery = new BooleanQuery();
+      // // get query builded by Operand1.
+      // resultQuery.add((Query)queryBuilderStack.pop(), Occur.MUST);
+      // // combine with previous
+      // resultQuery.add((Query)queryBuilderStack.pop(), Occur.MUST);
+      // //
+      // queryBuilderStack.push(resultQuery);
 
    }
 
@@ -722,7 +722,12 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
       // get query builded by Constraint.
       resultQuery.add((Query)queryBuilderStack.pop(), Occur.MUST_NOT);
       // combine with previous
-      resultQuery.add((Query)queryBuilderStack.pop(), Occur.MUST);
+      if (queryBuilderStack.size() > 0){
+         resultQuery.add((Query)queryBuilderStack.pop(), Occur.MUST);
+      }else{
+         //TODO optimize  by adding initial query
+         resultQuery.add(new MatchAllDocsQuery(), Occur.MUST);
+      }
 
       queryBuilderStack.push(resultQuery);
 
