@@ -26,7 +26,6 @@ import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.BooleanClause.Occur;
-import org.exoplatform.services.jcr.core.NamespaceAccessor;
 import org.exoplatform.services.jcr.core.nodetype.NodeTypeDataManager;
 import org.exoplatform.services.jcr.datamodel.InternalQName;
 import org.exoplatform.services.jcr.impl.Constants;
@@ -73,10 +72,10 @@ public class LuceneVirtualTableResolver extends NodeTypeVirtualTableResolver<Que
     * @throws RepositoryException if any errors in CMIS repository occurs
     */
    public LuceneVirtualTableResolver(final NodeTypeDataManager nodeTypeDataManager,
-      final NamespaceAccessor namespaceAccessor) throws RepositoryException
+      final LocationFactory locationFactory) throws RepositoryException
    {
       super(nodeTypeDataManager);
-      locationFactory = new LocationFactory(namespaceAccessor);
+      this.locationFactory = locationFactory;
       mixinTypesField = locationFactory.createJCRName(Constants.JCR_MIXINTYPES).getAsString();
       primaryTypeField = locationFactory.createJCRName(Constants.JCR_PRIMARYTYPE).getAsString();
    }

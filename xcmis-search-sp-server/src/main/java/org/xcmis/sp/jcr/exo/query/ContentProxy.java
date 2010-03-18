@@ -18,9 +18,12 @@
  */
 package org.xcmis.sp.jcr.exo.query;
 
+import org.exoplatform.services.document.DocumentReaderService;
 import org.exoplatform.services.jcr.config.RepositoryConfigurationException;
 import org.exoplatform.services.jcr.config.RepositoryEntry;
 import org.exoplatform.services.jcr.config.WorkspaceEntry;
+import org.exoplatform.services.jcr.core.NamespaceAccessor;
+import org.exoplatform.services.jcr.core.nodetype.NodeTypeDataManager;
 import org.exoplatform.services.jcr.dataflow.ItemStateChangesLog;
 import org.exoplatform.services.jcr.dataflow.persistent.ItemsPersistenceListener;
 import org.exoplatform.services.jcr.impl.dataflow.persistent.WorkspacePersistentDataManager;
@@ -31,8 +34,10 @@ import org.xcmis.search.content.command.read.GetNodeCommand;
 import org.xcmis.search.content.command.read.GetPropertiesCommand;
 import org.xcmis.search.content.command.read.GetPropertyCommand;
 import org.xcmis.search.content.interceptors.ReadOnlyInterceptor;
+import org.xcmis.search.lucene.index.IndexException;
 import org.xcmis.sp.jcr.exo.RepositoriesManagerImpl;
 import org.xcmis.sp.jcr.exo.RepositoryImpl;
+import org.xcmis.sp.jcr.exo.query.index.StartableJcrIndexingService;
 import org.xcmis.spi.RepositoriesManager;
 
 import javax.jcr.RepositoryException;
@@ -49,15 +54,20 @@ public class ContentProxy extends ReadOnlyInterceptor implements ItemsPersistenc
 
    private final RepositoriesManagerImpl repositoriesManager;
 
+   private final StartableJcrIndexingService indexigService;
+
    /**
     * @param workspacePersistentDataManager
     * @throws RepositoryConfigurationException 
     * @throws RepositoryException 
+    * @throws IndexException 
     */
    public ContentProxy(final RepositoryEntry repositoryEntry, final WorkspaceEntry workspaceEntry,
-      final RepositoriesManager cmisRepositoriesManager, final RepositoriesManagerImpl repositoriesManager,
-      WorkspacePersistentDataManager workspacePersistentDataManager) throws RepositoryException,
-      RepositoryConfigurationException
+      final RepositoriesManager cmisRepositoriesManager,
+      final WorkspacePersistentDataManager workspacePersistentDataManager, final NamespaceAccessor namespaceAccessor,
+      final NodeTypeDataManager nodeTypeDataManager, final DocumentReaderService extractor,
+      final RepositoriesManagerImpl repositoriesManager) throws RepositoryException, RepositoryConfigurationException,
+      IndexException
    {
       super();
       this.repositoriesManager = repositoriesManager;
@@ -69,8 +79,12 @@ public class ContentProxy extends ReadOnlyInterceptor implements ItemsPersistenc
             workspaceEntry.getName());
       this.cmisReposotoryId = cmisRepository.getId();
 
+      this.indexigService =
+         new StartableJcrIndexingService(repositoryEntry, workspaceEntry, cmisRepositoriesManager,
+            workspacePersistentDataManager, namespaceAccessor, nodeTypeDataManager, extractor, repositoriesManager);
       //register listener of changes.
       workspacePersistentDataManager.addItemPersistenceListener(this);
+
    }
 
    /**
@@ -127,7 +141,7 @@ public class ContentProxy extends ReadOnlyInterceptor implements ItemsPersistenc
     */
    public void onSaveItems(ItemStateChangesLog itemStates)
    {
-
+      this.indexigService.onSaveItems(itemStates);
    }
 
    /**
@@ -144,8 +158,14 @@ public class ContentProxy extends ReadOnlyInterceptor implements ItemsPersistenc
     */
    public void stop()
    {
-      // TODO Auto-generated method stub
-
+      this.indexigService.stop();
    }
 
+   /**
+    * @return the indexigService
+    */
+   public StartableJcrIndexingService getIndexigService()
+   {
+      return indexigService;
+   }
 }

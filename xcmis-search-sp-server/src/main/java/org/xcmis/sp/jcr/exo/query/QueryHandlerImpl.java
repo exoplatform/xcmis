@@ -26,13 +26,17 @@ import org.exoplatform.services.jcr.core.nodetype.PropertyDefinitionDatas;
 import org.exoplatform.services.jcr.datamodel.InternalQName;
 import org.exoplatform.services.jcr.impl.core.LocationFactory;
 import org.xcmis.search.SearchServiceException;
+import org.xcmis.search.Visitors;
 import org.xcmis.search.config.IndexConfuguration;
+import org.xcmis.search.config.IndexConfurationImpl;
 import org.xcmis.search.config.SearchServiceConfiguration;
 import org.xcmis.search.content.Schema;
 import org.xcmis.search.content.Schema.Table;
 import org.xcmis.search.content.command.InvocationContext;
+import org.xcmis.search.content.interceptors.CommandInterceptor;
+import org.xcmis.search.content.interceptors.InterceptorChain;
+import org.xcmis.search.lucene.LuceneQueryableIndexStorage;
 import org.xcmis.search.lucene.LuceneSearchService;
-import org.xcmis.search.lucene.content.SchemaTableResolver;
 import org.xcmis.search.model.Query;
 import org.xcmis.search.model.column.Column;
 import org.xcmis.search.model.source.SelectorName;
@@ -40,6 +44,8 @@ import org.xcmis.search.parser.CmisQueryParser;
 import org.xcmis.search.result.ScoredRow;
 import org.xcmis.search.value.NameConverter;
 import org.xcmis.search.value.ToStringNameConverter;
+import org.xcmis.sp.jcr.exo.query.index.StartableJcrIndexingService;
+import org.xcmis.sp.jcr.exo.query.lucene.LuceneVirtualTableResolver;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.RepositoryException;
 import org.xcmis.spi.object.ItemsIterator;
@@ -55,6 +61,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
@@ -63,38 +70,67 @@ import java.util.NoSuchElementException;
 public class QueryHandlerImpl implements QueryHandler
 {
 
-   private ContentProxy contenProxy;
+   private final ContentProxy contenProxy;
 
-   private QueryNameResolver resolver;
+   //private QueryNameResolver resolver;
 
    private CmisQueryParser queryParser;
 
    private LuceneSearchService luceneSearchService;
 
-   public QueryHandlerImpl(ContentProxy contenProxy, QueryNameResolver resolver, IndexConfuguration indexConfiguration,
+   private NodeTypeShema schema;
+
+   private NameConverter nameConverter;
+
+   public QueryHandlerImpl(final ContentProxy contenProxy, IndexConfuguration indexConfiguration,
       NodeTypeDataManager nodeTypeManager, LocationFactory locationFactory) throws SearchServiceException
    {
       super();
 
       this.contenProxy = contenProxy;
-      this.resolver = resolver;
+      //  this.resolver = resolver;
       this.queryParser = new CmisQueryParser();
       NameConverter<String> nameConverter = new ToStringNameConverter();
-      NodeTypeShema schema = new NodeTypeShema(nodeTypeManager, locationFactory);
-      SchemaTableResolver tableResolver = new SchemaTableResolver(nameConverter, schema);
+      schema = new NodeTypeShema(nodeTypeManager, locationFactory);
+      LuceneVirtualTableResolver tableResolver = null;
+      try
+      {
+         tableResolver = new LuceneVirtualTableResolver(nodeTypeManager, locationFactory);
+      }
+      catch (javax.jcr.RepositoryException e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+
+      ((IndexConfurationImpl)indexConfiguration).setIndexRecoverService(contenProxy.getIndexigService()
+         .getRecoverService());
 
       SearchServiceConfiguration configuration = new SearchServiceConfiguration();
       configuration.setIndexConfuguration(indexConfiguration);
       configuration.setContentReader(contenProxy);
       configuration.setNameConverter(nameConverter);
-      configuration.setTableResolver(tableResolver);
-      luceneSearchService = new LuceneSearchService(configuration);
-      InvocationContext invocationContext = new InvocationContext();
-      invocationContext.setSchema(schema);
 
-      invocationContext.setTableResolver(tableResolver);
-      invocationContext.setNameConverter(nameConverter);
-      luceneSearchService.setInvocationContext(invocationContext);
+      luceneSearchService = new LuceneSearchService(configuration)
+      {
+
+         /**
+          * @see org.xcmis.search.lucene.LuceneSearchService#addQueryableIndexStorageInterceptor(org.xcmis.search.content.interceptors.InterceptorChain)
+          */
+         @Override
+         protected void addQueryableIndexStorageInterceptor(InterceptorChain interceptorChain)
+            throws SearchServiceException
+         {
+            super.addQueryableIndexStorageInterceptor(interceptorChain);
+            List<CommandInterceptor> indexStorage =
+               interceptorChain.getInterceptorsWhichExtend(LuceneQueryableIndexStorage.class);
+            StartableJcrIndexingService indexigService = contenProxy.getIndexigService();
+            indexigService.initStorage(((LuceneQueryableIndexStorage)indexStorage.get(0)).getIndexDataManager());
+            indexigService.start();
+         }
+
+      };
+
    }
 
    /**
@@ -105,13 +141,25 @@ public class QueryHandlerImpl implements QueryHandler
    {
       try
       {
+         InvocationContext invocationContext = new InvocationContext();
+         invocationContext.setSchema(schema);
+         invocationContext.setTableResolver(contenProxy.getIndexigService().getVirtualTableResolver());
+         invocationContext.setNameConverter(nameConverter);
+         luceneSearchService.setInvocationContext(invocationContext);
+
          Query qom = queryParser.parseQuery(query.getStatement());
          List<ScoredRow> result = luceneSearchService.execute(qom, Collections.EMPTY_MAP);
          //qom.setSearchAllVersions(query.isSearchAllVersions());
-         return new QueryResultIterator(result, new ArrayList<String>(Collections.EMPTY_LIST), qom);
+
+         return new QueryResultIterator(result, Visitors.getSelectorsReferencedBy(qom), qom);
       }
 
       catch (org.xcmis.search.InvalidQueryException e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+      catch (javax.jcr.RepositoryException e)
       {
          // TODO Auto-generated catch block
          e.printStackTrace();
@@ -357,7 +405,7 @@ public class QueryHandlerImpl implements QueryHandler
 
       private final Iterator<ScoredRow> rows;
 
-      private final List<String> selectors;
+      private final Set<SelectorName> selectors;
 
       private final int size;
 
@@ -365,11 +413,11 @@ public class QueryHandlerImpl implements QueryHandler
 
       private Result next;
 
-      public QueryResultIterator(List<ScoredRow> rows, List<String> selectors, Query qom)
+      public QueryResultIterator(List<ScoredRow> rows, Set<SelectorName> set, Query qom)
       {
          this.size = rows.size();
          this.rows = rows.iterator();
-         this.selectors = selectors;
+         this.selectors = set;
          this.qom = qom;
          fetchNext();
       }
@@ -432,9 +480,9 @@ public class QueryHandlerImpl implements QueryHandler
          while (next == null && rows.hasNext())
          {
             ScoredRow row = rows.next();
-            for (String selectorName : selectors)
+            for (SelectorName selectorName : selectors)
             {
-               String objectId = row.getNodeIdentifer(selectorName);
+               String objectId = row.getNodeIdentifer(selectorName.getName());
                List<String> properties = null;
                Score score = null;
                for (Column column : qom.getColumns())
@@ -446,7 +494,7 @@ public class QueryHandlerImpl implements QueryHandler
                   }
                   else
                   {
-                     if (selectorName.equals(column.getSelectorName()))
+                     if (selectorName.getName().equals(column.getSelectorName()))
                      {
                         if (column.getPropertyName() != null)
                         {

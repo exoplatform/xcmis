@@ -72,8 +72,6 @@ import org.xcmis.search.SearchServiceException;
 import org.xcmis.sp.jcr.exo.object.EntryImpl;
 import org.xcmis.sp.jcr.exo.object.EntryVersion;
 import org.xcmis.sp.jcr.exo.object.VersionSeriesImpl;
-import org.xcmis.sp.jcr.exo.query.ContentProxy;
-import org.xcmis.sp.jcr.exo.query.QueryHandlerImpl;
 import org.xcmis.sp.jcr.exo.query.QueryNameResolver;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ChangeTokenMatcher;
@@ -159,24 +157,25 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
     * @throws javax.jcr.RepositoryException if any repository error occurs
     * @throws SearchServiceException 
     */
-   public RepositoryImpl(javax.jcr.Repository backendRepo, SessionProvider sesProv, ContentProxy contenProxy,
+   public RepositoryImpl(javax.jcr.Repository backendRepo, SessionProvider sesProv, QueryHandler queryHandler,
       CMISRepositoryConfiguration config, RenditionManager renditionManager) throws javax.jcr.RepositoryException,
       SearchServiceException
    {
       this.backendRepo = backendRepo;
       this.sesProv = sesProv;
+      this.queryHandler = queryHandler;
       this.config = config;
-      if (contenProxy != null && config != null)
-      {
-         this.queryHandler =
-            new QueryHandlerImpl(contenProxy, this, config.getIndexConfiguration(),
-               ((ExtendedNodeTypeManager)getSession().getWorkspace().getNodeTypeManager()).getNodeTypesHolder(),
-               ((ExtendedSession)getSession()).getLocationFactory());
-      }
-      else
-      {
-         this.queryHandler = null;
-      }
+      //      if (contenProxy != null && config != null)
+      //      {
+      //         this.queryHandler =
+      //            new QueryHandlerImpl(contenProxy, this, config.getIndexConfiguration(),
+      //               ((ExtendedNodeTypeManager)getSession().getWorkspace().getNodeTypeManager()).getNodeTypesHolder(),
+      //               ((ExtendedSession)getSession()).getLocationFactory());
+      //      }
+      //      else
+      //      {
+      //         this.queryHandler = null;
+      //      }
 
       // this.renditionProviders = renditionProviders;
       this.renditionManager = renditionManager;

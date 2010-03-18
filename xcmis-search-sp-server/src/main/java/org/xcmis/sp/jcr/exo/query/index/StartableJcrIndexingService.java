@@ -112,7 +112,7 @@ public class StartableJcrIndexingService extends JcrIndexingService
 
       this.workspacePersistentDataManager = workspacePersistentDataManager;
       this.repositoriesManager = repositoriesManager;
-      this.workspacePersistentDataManager.addItemPersistenceListener(this);
+      //this.workspacePersistentDataManager.addItemPersistenceListener(this);
       this.nodeIndexer = new IndependentNodeIndexer(namespaceAccessor, extractor);
       this.indexRestoreService =
          new JcrIndexRestoreService(this.workspacePersistentDataManager, new LocationFactory(namespaceAccessor),
@@ -123,7 +123,7 @@ public class StartableJcrIndexingService extends JcrIndexingService
             workspaceEntry.getName());
       this.cmisRepositoryId = cmisRepository.getId();
 
-      indexDir = new File(cmisRepository.getRepositoryConfiguration().getIndexConfiguration().getIndexPath());
+      indexDir = new File(cmisRepository.getRepositoryConfiguration().getIndexConfiguration().getIndexDir());
       if (!indexDir.exists() && !indexDir.mkdirs())
       {
          throw new IndexException("Fail to create index directory : " + indexDir.getAbsolutePath());

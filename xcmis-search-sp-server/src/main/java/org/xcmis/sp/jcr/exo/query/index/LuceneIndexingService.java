@@ -19,8 +19,15 @@
 
 package org.xcmis.sp.jcr.exo.query.index;
 
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriter.MaxFieldLength;
+import org.apache.lucene.search.MatchAllDocsQuery;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.LockObtainFailedException;
 import org.exoplatform.services.document.DocumentReaderService;
 import org.exoplatform.services.jcr.config.RepositoryConfigurationException;
 import org.exoplatform.services.jcr.config.RepositoryEntry;
@@ -29,22 +36,14 @@ import org.exoplatform.services.jcr.core.NamespaceAccessor;
 import org.exoplatform.services.jcr.core.nodetype.NodeTypeDataManager;
 import org.exoplatform.services.jcr.dataflow.ItemDataConsumer;
 import org.exoplatform.services.jcr.datamodel.InternalQName;
-import org.exoplatform.services.jcr.datamodel.ItemData;
-import org.exoplatform.services.jcr.datamodel.NodeData;
-import org.exoplatform.services.jcr.datamodel.PropertyData;
-import org.exoplatform.services.jcr.datamodel.QPath;
-import org.exoplatform.services.jcr.datamodel.ValueData;
 import org.exoplatform.services.jcr.impl.core.LocationFactory;
-import org.exoplatform.services.jcr.impl.core.value.NameValue;
-import org.exoplatform.services.jcr.impl.core.value.PathValue;
-import org.exoplatform.services.jcr.impl.core.value.ValueFactoryImpl;
-import org.exoplatform.services.jcr.impl.dataflow.AbstractPersistedValueData;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.picocontainer.Startable;
-import org.xcmis.search.config.IndexConfurationImpl;
+import org.xcmis.search.lucene.LuceneQueryableIndexStorage;
 import org.xcmis.search.lucene.index.IndexException;
 import org.xcmis.search.lucene.index.IndexTransaction;
+import org.xcmis.search.lucene.index.IndexTransactionException;
 import org.xcmis.search.lucene.index.IndexTransactionModificationReport;
 import org.xcmis.search.lucene.index.TransactionableIndexDataManager;
 import org.xcmis.sp.jcr.exo.RepositoriesManagerImpl;
@@ -53,14 +52,12 @@ import org.xcmis.sp.jcr.exo.query.lucene.CmisVirtualTableResolver;
 import org.xcmis.spi.RepositoriesManager;
 import org.xcmis.spi.Repository;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-import javax.jcr.PropertyType;
 import javax.jcr.RepositoryException;
-import javax.jcr.Value;
 
 /**
  * @author <a href="mailto:foo@bar.org">Foo Bar</a>
@@ -74,7 +71,7 @@ public class LuceneIndexingService implements Startable
    //   private final DocumentMatcherFactory documentMatcherFactory;
 
    /** The index data manager. */
-   private final TransactionableIndexDataManager indexDataManager;
+   private TransactionableIndexDataManager indexDataManager;
 
    /** The item data consumer. */
    private final ItemDataConsumer itemDataConsumer;
@@ -100,6 +97,8 @@ public class LuceneIndexingService implements Startable
    /** The recover service. */
    private final JcrIndexRecoverService recoverService;
 
+   private LuceneQueryableIndexStorage storage;
+
    /**
     * The Constructor.
     * 
@@ -110,6 +109,7 @@ public class LuceneIndexingService implements Startable
     * @param namespaceAccessor the namespace accessor
     * @param nodeTypeDataManager the node type data manager
     * @param extractor the extractor
+    * @param contentProxy 
     * 
     * @throws RepositoryConfigurationException the repository configuration exception
     * @throws RepositoryException if any errors in CMIS repository occurs
@@ -133,8 +133,8 @@ public class LuceneIndexingService implements Startable
 
       repositoryId = repo.getId();
 
-      IndexConfurationImpl indexConfuguration = new IndexConfurationImpl();
-      indexConfuguration.setIndexDir(repo.getRepositoryConfiguration().getIndexConfiguration().getIndexPath());
+      //      IndexConfurationImpl indexConfuguration = new IndexConfurationImpl();
+      //      indexConfuguration.setIndexDir(repo.getRepositoryConfiguration().getIndexConfiguration().getIndexPath());
 
       indexDataManager = null;//new TransactionableIndexDataManager(indexConfuguration, recoverService);
 
@@ -142,12 +142,27 @@ public class LuceneIndexingService implements Startable
    }
 
    /**
+    * @return the recoverService
+    */
+   public JcrIndexRecoverService getRecoverService()
+   {
+      return recoverService;
+   }
+
+   /**
     * {@inheritDoc}
     */
    public boolean documentExists(final String uuid)
    {
-      //return true;//indexDataManager.getDocument(uuid) != null;
+      try
+      {
+         return indexDataManager.getDocument(uuid) != null;
+      }
+      catch (IndexException e)
+      {
+      }
       return false;
+
    }
 
    /**
@@ -177,157 +192,36 @@ public class LuceneIndexingService implements Startable
       return fildsSet;
    }
 
-   //   /**
-   //    * Return set of uuid of nodes. Contains in names prefixes mapped to the given
-   //    * uri.
-   //    * 
-   //    * @param uri the uri
-   //    * @return the nodes set by uri
-   //    * 
-   //    * @throws RepositoryException if any errors in CMIS repository occurs
-   //    */
-   //   public Set<String> getNodesByUri(final String uri) throws RepositoryException
-   //   {
-   //      Set<String> result;
-   //      final int defaultClauseCount = BooleanQuery.getMaxClauseCount();
-   //      try
-   //      {
-   //         // final LocationFactory locationFactory = new LocationFactory(this);
-   //         final ValueFactoryImpl valueFactory = new ValueFactoryImpl(locationFactory);
-   //         BooleanQuery.setMaxClauseCount(Integer.MAX_VALUE);
-   //         BooleanQuery query = new BooleanQuery();
-   //
-   //         final String prefix = namespaceAccessor.getNamespacePrefixByURI(uri);
-   //         query.add(new WildcardQuery(new Term(FieldNames.LABEL, prefix + ":*")), Occur.SHOULD);
-   //         // name of the property
-   //         query.add(new WildcardQuery(new Term(FieldNames.PROPERTIES_SET, prefix + ":*")), Occur.SHOULD);
-   //
-   //         result = getNodes(query);
-   //
-   //         // value of the property
-   //         try
-   //         {
-   //            final Set<String> props = getFieldNames();
-   //            query = new BooleanQuery();
-   //            for (final String fieldName : props)
-   //            {
-   //               if (!FieldNames.PROPERTIES_SET.equals(fieldName))
-   //               {
-   //                  query.add(new WildcardQuery(new Term(fieldName, "*" + prefix + ":*")), Occur.SHOULD);
-   //               }
-   //            }
-   //         }
-   //         catch (final IndexException e)
-   //         {
-   //            throw new RepositoryException(e.getLocalizedMessage(), e);
-   //         }
-   //
-   //         final Set<String> propSet = getNodes(query);
-   //         // Manually check property values;
-   //         for (final String uuid : propSet)
-   //         {
-   //            if (isPrefixMatch(valueFactory, uuid, prefix))
-   //            {
-   //               result.add(uuid);
-   //            }
-   //         }
-   //      }
-   //      finally
-   //      {
-   //         BooleanQuery.setMaxClauseCount(defaultClauseCount);
-   //      }
-   //      return result;
-   //   }
-
-   //   /**
-   //    * {@inheritDoc}
-   //    */
-   //   public CmisQueryObjectModelFactory<Query> getQOMFactory()
-   //   {
-   //      return new CmisQueryObjectModelFactory<Query>(this, locationFactory);
-   //   }
-   //
-   //   /**
-   //    * {@inheritDoc}
-   //    */
-   //   public NativeQueryBuilder<Query> getQueryBuilder(final String language) throws IndexException
-   //   {
-   //      try
-   //      {
-   //         JcrResultSorterFactory resultSorterFactory = new JcrResultSorterFactory(itemDataConsumer, namespaceAccessor);
-   //         return new CmisLuceneNativeQueryBuilder(this, resultSorterFactory, namespaceAccessor,
-   //            getVirtualTableResolver(), documentMatcherFactory);
-   //      }
-   //      catch (RepositoryException e)
-   //      {
-   //         // TODO change method signature or wrap with cmis.RepositoryException
-   //         throw new IndexException(e.getLocalizedMessage(), e);
-   //      }
-   //   }
-
    /**
     * {@inheritDoc}
     */
    public IndexTransactionModificationReport save(final IndexTransaction<Document> changes) throws IndexException
    {
-      return null;//indexDataManager.save(changes);
+      try
+      {
+         return indexDataManager.save(changes);
+      }
+      catch (IndexTransactionException e)
+      {
+         throw new IndexException(e.getLocalizedMessage(), e);
+      }
    }
-
-   //   /**
-   //    * {@inheritDoc}
-   //    */
-   //   public List<ScoredRow> search(final SingleSourceNativeQuery<Query> nativeQuery) throws IndexException
-   //   {
-   //      List<ScoredRow> resultNodes = new ArrayList<ScoredRow>();
-   //      // Open writer
-   //
-   //      IndexSearcher searcher = null;
-   //      try
-   //      {
-   //         // get result
-   //         searcher = new org.apache.lucene.search.IndexSearcher(indexDataManager.getIndexReader());
-   //         // Hits hits = searcher.search(nativeQuery.getQuery());
-   //         final TopDocCollector collector = new TopDocCollector(10000);
-   //
-   //         searcher.search(nativeQuery.getQuery(), collector);
-   //         final TopDocs docs = collector.topDocs();
-   //         resultNodes = new LinkedList<ScoredRow>();
-   //         for (int i = 0; i < docs.totalHits; i++)
-   //         {
-   //            // get identifiers
-   //            final Document doc = searcher.doc(docs.scoreDocs[i].doc, new UUIDFieldSelector());
-   //            final String id = doc.get(FieldNames.UUID);
-   //            resultNodes.add(new ScoredNodesImpl(nativeQuery.getSelectorName(), id, docs.scoreDocs[i].score));
-   //         }
-   //      }
-   //      catch (final CorruptIndexException e)
-   //      {
-   //         throw new IndexException(e.getLocalizedMessage(), e);
-   //      }
-   //      catch (final IOException e)
-   //      {
-   //         throw new IndexException(e.getLocalizedMessage(), e);
-   //      }
-   //      finally
-   //      {
-   //         try
-   //         {
-   //            searcher.close();
-   //         }
-   //         catch (final IOException e)
-   //         {
-   //            throw new IndexException(e.getLocalizedMessage(), e);
-   //         }
-   //      }
-   //      return resultNodes;
-   //   }
 
    /**
     * {@inheritDoc}
     */
    public void start()
    {
-      //indexDataManager.start();
+      indexDataManager.start();
+   }
+
+   /**
+    * Initialize storage.
+    * @param storage
+    */
+   public void initStorage(TransactionableIndexDataManager indexDataManager)
+   {
+      this.indexDataManager = indexDataManager;
    }
 
    /**
@@ -335,29 +229,8 @@ public class LuceneIndexingService implements Startable
     */
    public void stop()
    {
-      //indexDataManager.stop();
+      indexDataManager.stop();
    }
-
-   //
-   //   /**
-   //    * Gets the nodes.
-   //    * 
-   //    * @param query the query
-   //    * @return the nodes
-   //    * @throws RepositoryException if any errors in CMIS repository occurs
-   //    */
-   //   private Set<String> getNodes(final Query query) throws RepositoryException
-   //   {
-   //      final SingleSourceNativeQuery<Query> nativeQuery =
-   //         new SingleSourceNativeQueryImpl<Query>(query, "nt", new Ordering[]{}, null, null, 0, 0);
-   //      final List<ScoredRow> hits = search(nativeQuery);
-   //      final Set<String> result = new HashSet<String>(hits.size());
-   //      for (final ScoredRow scoredRow : hits)
-   //      {
-   //         result.add(scoredRow.getNodeIdentifer(nativeQuery.getSelectorName()));
-   //      }
-   //      return result;
-   //   }
 
    /**
     * Checks if is prefix match.
@@ -373,73 +246,6 @@ public class LuceneIndexingService implements Startable
    }
 
    /**
-    * Checks if is prefix match.
-    * 
-    * @param value the value
-    * @param prefix the prefix
-    * @return true, if is prefix match
-    * @throws RepositoryException the repository exception
-    */
-   private boolean isPrefixMatch(final QPath value, final String prefix) throws RepositoryException
-   {
-      for (int i = 0; i < value.getEntries().length; i++)
-      {
-         if (isPrefixMatch(value.getEntries()[i], prefix))
-         {
-            return true;
-         }
-      }
-      return false;
-   }
-
-   /**
-    * Checks if is prefix match.
-    * 
-    * @param valueFactory the value factory
-    * @param uuid the uuid
-    * @param prefix the prefix
-    * @return true, if checks if is prefix match
-    * @throws RepositoryException if any errors in CMIS repository occurs
-    */
-   private boolean isPrefixMatch(final ValueFactoryImpl valueFactory, final String uuid, final String prefix)
-      throws RepositoryException
-   {
-
-      final ItemData node = itemDataConsumer.getItemData(uuid);
-      if (node != null && node.isNode())
-      {
-         final List<PropertyData> props = itemDataConsumer.getChildPropertiesData((NodeData)node);
-         for (final PropertyData propertyData : props)
-         {
-            if (propertyData.getType() == PropertyType.PATH || propertyData.getType() == PropertyType.NAME)
-            {
-               for (final ValueData vdata : propertyData.getValues())
-               {
-                  final Value val =
-                     valueFactory.loadValue(((AbstractPersistedValueData)vdata).createTransientCopy(), propertyData
-                        .getType());
-                  if (propertyData.getType() == PropertyType.PATH)
-                  {
-                     if (isPrefixMatch(((PathValue)val).getQPath(), prefix))
-                     {
-                        return true;
-                     }
-                  }
-                  else if (propertyData.getType() == PropertyType.NAME)
-                  {
-                     if (isPrefixMatch(((NameValue)val).getQName(), prefix))
-                     {
-                        return true;
-                     }
-                  }
-               }
-            }
-         }
-      }
-      return false;
-   }
-
-   /**
     * Gets the document count.
     * 
     * @return number of documents.
@@ -447,7 +253,7 @@ public class LuceneIndexingService implements Startable
     */
    protected long getDocumentCount()
    {
-      return 0;//indexDataManager.getDocumentCount();
+      return indexDataManager.getDocumentCount();
    }
 
    /**
@@ -457,45 +263,45 @@ public class LuceneIndexingService implements Startable
     * @throws javax.jcr.RepositoryException on CmisVirtualTableResolver
     *           constructor
     */
-   protected CmisVirtualTableResolver getVirtualTableResolver() throws RepositoryException
+   public CmisVirtualTableResolver getVirtualTableResolver() throws RepositoryException
    {
       Repository repo = cmisRepositoriesManager.getRepository(repositoryId);
-      return new CmisVirtualTableResolver(this.nodeTypeDataManager, this.namespaceAccessor, repo);
+      return new CmisVirtualTableResolver(this.nodeTypeDataManager, locationFactory, repo);
    }
 
    protected void softCleanIndex() throws IndexException
    {
-      //      if (indexDataManager.getDocumentCount() > 0)
-      //      {
-      //         final Directory dir = indexDataManager.getDirectory();
-      //         if (dir != null)
-      //         {
-      //            synchronized (dir)
-      //            {
-      //               try
-      //               {
-      //                  final IndexWriter writer =
-      //                     new IndexWriter(indexDataManager.getDirectory(), new StandardAnalyzer(), MaxFieldLength.UNLIMITED);
-      //                  writer.deleteDocuments(new MatchAllDocsQuery());
-      //                  writer.commit();
-      //                  writer.optimize();
-      //                  writer.close();
-      //               }
-      //               catch (final CorruptIndexException e)
-      //               {
-      //                  throw new IndexException(e.getLocalizedMessage(), e);
-      //               }
-      //               catch (final LockObtainFailedException e)
-      //               {
-      //                  throw new IndexException(e.getLocalizedMessage(), e);
-      //               }
-      //               catch (final IOException e)
-      //               {
-      //                  throw new IndexException(e.getLocalizedMessage(), e);
-      //               }
-      //            }
-      //         }
-      //      }
+      if (indexDataManager.getDocumentCount() > 0)
+      {
+         final Directory dir = indexDataManager.getDirectory();
+         if (dir != null)
+         {
+            synchronized (dir)
+            {
+               try
+               {
+                  final IndexWriter writer =
+                     new IndexWriter(indexDataManager.getDirectory(), new StandardAnalyzer(), MaxFieldLength.UNLIMITED);
+                  writer.deleteDocuments(new MatchAllDocsQuery());
+                  writer.commit();
+                  writer.optimize();
+                  writer.close();
+               }
+               catch (final CorruptIndexException e)
+               {
+                  throw new IndexException(e.getLocalizedMessage(), e);
+               }
+               catch (final LockObtainFailedException e)
+               {
+                  throw new IndexException(e.getLocalizedMessage(), e);
+               }
+               catch (final IOException e)
+               {
+                  throw new IndexException(e.getLocalizedMessage(), e);
+               }
+            }
+         }
+      }
    }
 
 }

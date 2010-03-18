@@ -26,7 +26,6 @@ import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.BooleanClause.Occur;
-import org.exoplatform.services.jcr.core.NamespaceAccessor;
 import org.exoplatform.services.jcr.core.nodetype.NodeTypeDataManager;
 import org.exoplatform.services.jcr.datamodel.InternalQName;
 import org.exoplatform.services.jcr.impl.Constants;
@@ -61,7 +60,7 @@ public class CmisVirtualTableResolver extends LuceneVirtualTableResolver
    private final LocationFactory locationFactory;
 
    /** Logger. */
-   private static final Log LOG = ExoLogger.getLogger(LuceneVirtualTableResolver.class);
+   private static final Log LOG = ExoLogger.getLogger(CmisVirtualTableResolver.class);
 
    /** The mixin types field. */
    private final String mixinTypesField;
@@ -78,11 +77,11 @@ public class CmisVirtualTableResolver extends LuceneVirtualTableResolver
     * 
     * @throws RepositoryException if any errors in CMIS repository occurs
     */
-   public CmisVirtualTableResolver(NodeTypeDataManager nodeTypeDataManager, NamespaceAccessor namespaceAccessor,
+   public CmisVirtualTableResolver(NodeTypeDataManager nodeTypeDataManager, LocationFactory locationFactory,
       Repository repository) throws RepositoryException
    {
-      super(nodeTypeDataManager, namespaceAccessor);
-      locationFactory = new LocationFactory(namespaceAccessor);
+      super(nodeTypeDataManager, locationFactory);
+      this.locationFactory = locationFactory;
       mixinTypesField = locationFactory.createJCRName(Constants.JCR_MIXINTYPES).getAsString();
       primaryTypeField = locationFactory.createJCRName(Constants.JCR_PRIMARYTYPE).getAsString();
       this.repository = repository;

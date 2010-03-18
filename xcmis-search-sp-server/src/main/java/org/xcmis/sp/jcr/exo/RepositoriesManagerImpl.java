@@ -23,7 +23,9 @@ import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.container.xml.ObjectParameter;
 import org.exoplatform.services.jcr.RepositoryService;
 import org.exoplatform.services.jcr.config.RepositoryConfigurationException;
+import org.exoplatform.services.jcr.core.ExtendedSession;
 import org.exoplatform.services.jcr.core.ManageableRepository;
+import org.exoplatform.services.jcr.core.nodetype.ExtendedNodeTypeManager;
 import org.exoplatform.services.jcr.ext.app.ThreadLocalSessionProviderService;
 import org.exoplatform.services.jcr.ext.common.SessionProvider;
 import org.exoplatform.services.log.ExoLogger;
@@ -32,6 +34,7 @@ import org.picocontainer.Startable;
 import org.xcmis.messaging.CmisRepositoryEntryType;
 import org.xcmis.search.SearchServiceException;
 import org.xcmis.sp.jcr.exo.query.ContentProxy;
+import org.xcmis.sp.jcr.exo.query.QueryHandlerImpl;
 import org.xcmis.sp.jcr.exo.rendition.ImageRenditionProvider;
 import org.xcmis.sp.jcr.exo.rendition.PDFDocumentRenditionProvider;
 import org.xcmis.sp.jcr.exo.rendition.RenditionProvider;
@@ -39,6 +42,7 @@ import org.xcmis.spi.CMIS;
 import org.xcmis.spi.RepositoriesManager;
 import org.xcmis.spi.Repository;
 import org.xcmis.spi.object.RenditionManager;
+import org.xcmis.spi.query.QueryHandler;
 import org.xcmis.spi.utils.MimeType;
 
 import java.util.ArrayList;
@@ -49,6 +53,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import javax.jcr.Node;
+import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.Workspace;
 import javax.jcr.observation.Event;
@@ -61,42 +66,6 @@ import javax.jcr.observation.EventListenerIterator;
  */
 public class RepositoriesManagerImpl implements RepositoriesManager, Startable
 {
-
-   /**
-    * Holds the list of CMIS repository configuration.
-    */
-   public static class ServiceConfig
-   {
-
-      /**
-       * The list of CMIS repository configuration.
-       */
-      private List<CMISRepositoryConfiguration> configs;
-
-      /**
-       * Get configurations.
-       * 
-       * @return the list of CMIS repository configuration
-       */
-      public List<CMISRepositoryConfiguration> getConfigs()
-      {
-         if (configs == null)
-         {
-            configs = new ArrayList<CMISRepositoryConfiguration>();
-         }
-         return configs;
-      }
-
-      /**
-       * Set configurations.
-       * 
-       * @param configs the list of CMIS repository configuration
-       */
-      public void setConfigs(List<CMISRepositoryConfiguration> configs)
-      {
-         this.configs = configs;
-      }
-   }
 
    /** Logger. */
    private static final Log LOG = ExoLogger.getLogger(RepositoriesManagerImpl.class);
@@ -141,6 +110,12 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
          }
       });
 
+   /** The map for indexing services where the key is a repository id. */
+   private final Map<String, ContentProxy> indexingServices;
+
+   /** The map for query handlers where the key is a repository id. */
+   private final Map<String, QueryHandler> queryHandlers;
+
    /**
     * @param jcrRepositoryService the back end repository service
     * @param sessionProviderService the JCR session provider service
@@ -152,6 +127,7 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
       this.jcrRepositoryService = jcrRepositoryService;
       this.sessionProviderService = sessionProviderService;
       this.indexingServices = new HashMap<String, ContentProxy>();
+      this.queryHandlers = new HashMap<String, QueryHandler>();
       this.cmisRepositories = new HashMap<String, CMISRepositoryConfiguration>();
       addRenditionProvider(new ImageRenditionProvider()); /* TODO : add form configuration ?? */
       addRenditionProvider(new PDFDocumentRenditionProvider()); /* TODO : add form configuration ?? */
@@ -173,9 +149,6 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
          LOG.error("Not found configuration for any CMIS repository.");
       }
    }
-
-   /** The map for indexing services where the key is a repository id. */
-   private final Map<String, ContentProxy> indexingServices;
 
    /**
     * Adding the index service.
@@ -199,16 +172,6 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
       {
          renditionProviders.put(MimeType.fromString(mimeType), renditionProvider);
       }
-   }
-
-   /**
-    * Remove the index service.
-    * 
-    * @param repositoryId the repository id
-    */
-   public void removeIndexService(String repositoryId)
-   {
-      indexingServices.remove(repositoryId);
    }
 
    /**
@@ -252,8 +215,7 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
                renditionManager = new RenditionManagerImpl(renditionProviders, session);
             }
 
-            return new RepositoryImpl(jcrRepository, sessionProvider, indexingServices.get(repositoryId),
-               repositoryConfiguration, renditionManager);
+            return getRepository(repositoryId, jcrRepository, sessionProvider, repositoryConfiguration);
          }
          catch (javax.jcr.RepositoryException re)
          {
@@ -307,8 +269,8 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
 
             try
             {
-               return new RepositoryImpl(jcrRepository, sessionProvider, indexingServices.get(repositoryConfiguration
-                  .getId()), repositoryConfiguration, renditionManager);
+               return getRepository(repositoryConfiguration.getId(), jcrRepository, sessionProvider,
+                  repositoryConfiguration);
             }
             catch (SearchServiceException e)
             {
@@ -317,6 +279,16 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
          }
       }
       return null;
+   }
+
+   /**
+    * Remove the index service.
+    * 
+    * @param repositoryId the repository id
+    */
+   public void removeIndexService(String repositoryId)
+   {
+      indexingServices.remove(repositoryId);
    }
 
    /**
@@ -410,6 +382,68 @@ public class RepositoriesManagerImpl implements RepositoriesManager, Startable
     */
    public void stop()
    {
+   }
+
+   private RepositoryImpl getRepository(String repositoryId, javax.jcr.Repository jcrRepository,
+      SessionProvider sessionProvider, CMISRepositoryConfiguration repositoryConfiguration) throws RepositoryException,
+      SearchServiceException
+   {
+      if (renditionManager == null)
+      {
+         renditionManager = new RenditionManagerImpl(renditionProviders, session);
+      }
+      QueryHandler queryHandler = queryHandlers.get(repositoryId);
+      if (queryHandler == null)
+      {
+         ContentProxy contenProxy = indexingServices.get(repositoryId);
+         if (contenProxy != null && repositoryConfiguration != null)
+         {
+
+            queryHandler =
+               new QueryHandlerImpl(contenProxy, repositoryConfiguration.getIndexConfiguration(),
+                  ((ExtendedNodeTypeManager)session.getWorkspace().getNodeTypeManager()).getNodeTypesHolder(),
+                  ((ExtendedSession)session).getLocationFactory());
+            queryHandlers.put(repositoryId, queryHandler);
+         }
+      }
+
+      return new RepositoryImpl(jcrRepository, sessionProvider, queryHandler, repositoryConfiguration, renditionManager);
+   }
+
+   /**
+    * Holds the list of CMIS repository configuration.
+    */
+   public static class ServiceConfig
+   {
+
+      /**
+       * The list of CMIS repository configuration.
+       */
+      private List<CMISRepositoryConfiguration> configs;
+
+      /**
+       * Get configurations.
+       * 
+       * @return the list of CMIS repository configuration
+       */
+      public List<CMISRepositoryConfiguration> getConfigs()
+      {
+         if (configs == null)
+         {
+            configs = new ArrayList<CMISRepositoryConfiguration>();
+         }
+         return configs;
+      }
+
+      /**
+       * Set configurations.
+       * 
+       * @param configs the list of CMIS repository configuration
+       */
+      public void setConfigs(List<CMISRepositoryConfiguration> configs)
+      {
+         this.configs = configs;
+      }
    }
 
 }
