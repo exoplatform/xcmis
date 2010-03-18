@@ -108,7 +108,8 @@ public class SearchServiceTest
       assertThat(luceneSearchService, notNullValue());
    }
 
-   @Test
+   //TODO check
+   @Test(expected = InvalidQueryException.class)
    public void testShouldRunQuerySearchServie() throws SearchServiceException, InvalidQueryException
    {
       //value

@@ -22,9 +22,10 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.HitCollector;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.xcmis.search.VisitException;
 import org.xcmis.search.Visitors;
@@ -63,7 +64,6 @@ import java.util.Set;
  */
 public class LuceneQueryableIndexStorage extends QueryableIndexStorage
 {
-
    private final TransactionableIndexDataManager indexDataManager;
 
    /**
@@ -92,13 +92,13 @@ public class LuceneQueryableIndexStorage extends QueryableIndexStorage
    public LuceneQueryableIndexStorage(SearchServiceConfiguration serviveConfuguration) throws IndexException
    {
       super();
-      this.indexDataManager = new TransactionableIndexDataManager(serviveConfuguration.getIndexConfuguration(), null);
+      this.indexDataManager = new TransactionableIndexDataManager(serviveConfuguration.getIndexConfuguration());
       this.fieldNameResolver = new FieldNameResolver(indexDataManager);
 
       this.tableResolver = serviveConfuguration.getTableResolver();
       this.nameConverter = serviveConfuguration.getNameConverter();
       this.pathSplitter = serviveConfuguration.getPathSplitter();
-      this.indexDataManager.start();
+
    }
 
    /**
@@ -122,7 +122,7 @@ public class LuceneQueryableIndexStorage extends QueryableIndexStorage
    {
 
       List<ScoredRow> resultNodes = new ArrayList<ScoredRow>();
-      Query query = (Query)tableResolver.resolve(command.getSelector().getName(), true);
+      Query query = (Query)ctx.getTableResolver().resolve(command.getSelector().getName(), true);
       if (command.getConstrains().size() > 0)
       {
          BooleanQuery booleanQuery = new BooleanQuery();
@@ -148,14 +148,24 @@ public class LuceneQueryableIndexStorage extends QueryableIndexStorage
 
             //query
             Limit limit = command.getLimit();
-            final TopDocs docs = searcher.search(query, limit.getOffset() + limit.getOffset());
+            LimitedHitCollector hitCollector = new LimitedHitCollector(limit.getOffset(), limit.getRowLimit());
+            try
+            {
+               searcher.search(query, hitCollector);
+            }
+            catch (LimitedException e)
+            {
+               //ok limit of hits exceeded 
+            }
+            List<ScoreDoc> docs = hitCollector.getScoreDocs();
+
             resultNodes = new LinkedList<ScoredRow>();
-            for (int i = limit.getOffset(); i < docs.totalHits; i++)
+            for (ScoreDoc scoreDoc : docs)
             {
                // get identifiers
-               final Document doc = searcher.doc(docs.scoreDocs[i].doc, new UUIDFieldSelector());
+               final Document doc = searcher.doc(scoreDoc.doc, new UUIDFieldSelector());
                final String id = doc.get(FieldNames.UUID);
-               resultNodes.add(new ScoredNodesImpl(command.getSelector().getName(), id, docs.scoreDocs[i].score));
+               resultNodes.add(new ScoredNodesImpl(command.getSelector().getName(), id, scoreDoc.score));
             }
          }
       }
@@ -193,6 +203,99 @@ public class LuceneQueryableIndexStorage extends QueryableIndexStorage
    }
 
    /**
+    * @return the indexDataManager
+    */
+   public TransactionableIndexDataManager getIndexDataManager()
+   {
+      return indexDataManager;
+   }
+
+   /**
+    * Collect hits from  offset untill limit exceeded
+    *
+    */
+   private class LimitedHitCollector extends HitCollector
+   {
+      private final int limit;
+
+      private final int offset;
+
+      private final List<ScoreDoc> scoreDocs;
+
+      private final static int MAX_INIT_SIZE = 1000;
+
+      /**
+       * Number of skipped hits;
+       */
+      private int skipped;
+
+      /**
+       * @param limit
+       * @param offset
+       */
+      public LimitedHitCollector(int offset, int limit)
+      {
+         super();
+         this.limit = limit;
+         this.offset = offset;
+         int hits = limit + offset;
+         this.scoreDocs = new ArrayList<ScoreDoc>(hits < MAX_INIT_SIZE ? hits : MAX_INIT_SIZE);
+      }
+
+      /**
+       * @see org.apache.lucene.search.HitCollector#collect(int, float)
+       */
+      @Override
+      public void collect(int doc, float score)
+      {
+         //skip if needed
+         if (skipped < offset)
+         {
+            skipped++;
+         }
+         else
+         {
+            scoreDocs.add(new ScoreDoc(doc, score));
+            if (scoreDocs.size() >= limit)
+            {
+               throw new LimitedException("Limit " + limit + " of hits exceeded");
+            }
+         }
+      }
+
+      /**
+       * @return the scoreDocs
+       */
+      public List<ScoreDoc> getScoreDocs()
+      {
+         return scoreDocs;
+      }
+
+   }
+
+   /**
+    * Throw if limit of hits exceeded 
+    *
+    */
+   private class LimitedException extends RuntimeException
+   {
+
+      /**
+       * @param string
+       */
+      public LimitedException(String string)
+      {
+         super(string);
+      }
+
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 7205608205464803956L;
+
+   }
+
+   /**
     * 
     * Return set of field in index. 
     */
@@ -225,4 +328,5 @@ public class LuceneQueryableIndexStorage extends QueryableIndexStorage
          return fildsSet;
       }
    }
+
 }

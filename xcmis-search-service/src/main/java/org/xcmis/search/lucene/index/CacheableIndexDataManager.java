@@ -27,7 +27,6 @@ import org.exoplatform.services.log.Log;
 import org.xcmis.search.config.IndexConfigurationException;
 import org.xcmis.search.config.IndexConfuguration;
 import org.xcmis.search.lucene.index.merge.AggregatePolicy;
-import org.xcmis.search.lucene.index.merge.DocumentCountAggregatePolicy;
 import org.xcmis.search.lucene.index.merge.MaxCandidatsCountAggrigatePolicy;
 import org.xcmis.search.lucene.index.merge.PendingAggregatePolicy;
 
@@ -288,7 +287,7 @@ public class CacheableIndexDataManager extends LocalIndexDataManagerProxy
          }
          // if transaction have less then DEFAULT_MAX_DOCUMENTS_4_DIR to add then
          // create memory index
-         if (DocumentCountAggregatePolicy.DEFAULT_MAX_DOCUMENTS_4_DIR > changes.getAddedDocuments().size())
+         if (0 > changes.getAddedDocuments().size())
          {
             changes = changes.apply(processAdded(changes));
          }

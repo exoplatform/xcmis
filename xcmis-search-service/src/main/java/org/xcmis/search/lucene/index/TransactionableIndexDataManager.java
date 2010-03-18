@@ -49,11 +49,11 @@ public class TransactionableIndexDataManager extends CacheableIndexDataManager
 
    private final FSIndexTransactionService transactionService;
 
-   public TransactionableIndexDataManager(final IndexConfuguration indexConfuguration,
-      final IndexRecoverService recoverService) throws IndexException, IndexConfigurationException
+   public TransactionableIndexDataManager(final IndexConfuguration indexConfuguration) throws IndexException,
+      IndexConfigurationException
    {
       super(indexConfuguration);
-      this.recoverService = recoverService;
+      this.recoverService = indexConfuguration.getIndexRecoverService();
 
       final File indexDir = new File(indexConfuguration.getIndexDir());
 

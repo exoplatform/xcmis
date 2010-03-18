@@ -18,6 +18,7 @@
  */
 package org.xcmis.search.config;
 
+import org.xcmis.search.lucene.index.IndexRecoverService;
 
 /**
  * @author <a href="mailto:Sergey.Kabashnyuk@gmail.com">Sergey Kabashnyuk</a>
@@ -27,5 +28,7 @@ package org.xcmis.search.config;
 public interface IndexConfuguration
 {
    String getIndexDir();
+
+   IndexRecoverService getIndexRecoverService();
 
 }

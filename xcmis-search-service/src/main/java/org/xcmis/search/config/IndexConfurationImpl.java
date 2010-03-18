@@ -18,6 +18,8 @@
  */
 package org.xcmis.search.config;
 
+import org.xcmis.search.lucene.index.IndexRecoverService;
+
 /**
  * @author <a href="mailto:Sergey.Kabashnyuk@gmail.com">Sergey Kabashnyuk</a>
  * @version $Id: exo-jboss-codetemplates.xml 34027 2009-07-15 23:26:43Z
@@ -26,6 +28,24 @@ package org.xcmis.search.config;
 public class IndexConfurationImpl implements IndexConfuguration
 {
    private String indexDir;
+
+   private IndexRecoverService indexRecoverService;
+
+   /**
+    * @return the indexRecoverService
+    */
+   public IndexRecoverService getIndexRecoverService()
+   {
+      return indexRecoverService;
+   }
+
+   /**
+    * @param indexRecoverService the indexRecoverService to set
+    */
+   public void setIndexRecoverService(IndexRecoverService indexRecoverService)
+   {
+      this.indexRecoverService = indexRecoverService;
+   }
 
    /**
     * {@inheritDoc}
