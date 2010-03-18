@@ -54,11 +54,12 @@ public interface RepositoryInfo
 
    String getThinClientURI();
 
-   boolean getChangesIncomplete();
+   boolean isChangesIncomplete();
 
    Collection<BaseType> getChangesOnType();
 
    String getPrincipalAnonymous();
 
    String getPrincipalAnyone();
+
 }

@@ -233,8 +233,7 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<CmisType
       entry.addLink(descendatsLink, AtomCMIS.LINK_DOWN, AtomCMIS.MEDIATYPE_CMISTREE, null, null, -1);
 
       TypeDefinitionTypeElement objectElement =
-         new TypeDefinitionTypeElement(request.getAbdera().getFactory(), CMISExtensionFactory
-            .getElementName(CmisTypeDefinitionType.class));
+         new TypeDefinitionTypeElement(request.getAbdera().getFactory(), AtomCMIS.TYPE);
       objectElement.build(type);
 
       entry.addExtension(objectElement);

@@ -89,7 +89,7 @@ public class AccessControlEntryTypeElement extends ExtensibleElementWrapper
 
       // DIRECT
       // TODO direct element
-      //            permissionElement.addSimpleExtension(AtomCMIS.DIRECT, accessControlEntry.isDirect() ? "true" : "false");
+      //      permissionElement.addSimpleExtension(AtomCMIS.DIRECT, accessControlEntry.isDirect() ? "true" : "false");
    }
 
    /**

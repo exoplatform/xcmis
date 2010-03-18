@@ -21,6 +21,7 @@ package org.xcmis.restatom.abdera;
 
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
+import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.spi.Choice;
 import org.xcmis.spi.impl.ChoiceImpl;
@@ -79,8 +80,8 @@ public class ChoiceIdElement extends ChoiceElement<Choice<String>>
          {
             for (Choice<String> ch : choice.getChoices())
             {
-               ChoiceIdElement el = addExtension(AtomCMIS.CHOICE_ID);
-               el.build(ch);
+               ExtensibleElementWrapper el = addExtension(AtomCMIS.CHOICE);
+               new ChoiceIdElement(el).build(ch);
             }
          }
       }
@@ -103,11 +104,11 @@ public class ChoiceIdElement extends ChoiceElement<Choice<String>>
          result.setValues(array);
       }
       // CHOICE
-      List<ChoiceIdElement> choices = getExtensions(AtomCMIS.CHOICE_ID);
+      List<ExtensibleElementWrapper> choices = getExtensions(AtomCMIS.CHOICE);
       if (choices != null && choices.size() > 0)
-         for (ChoiceIdElement choiceIdElement : choices)
+         for (ExtensibleElementWrapper choiceIdElement : choices)
          {
-            result.getChoices().add(choiceIdElement.getChoice());
+            result.getChoices().add(new ChoiceIdElement(choiceIdElement).getChoice());
          }
       return result;
    }

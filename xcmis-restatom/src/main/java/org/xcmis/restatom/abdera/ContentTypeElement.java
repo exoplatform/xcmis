@@ -22,8 +22,8 @@ package org.xcmis.restatom.abdera;
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
-import org.xcmis.atom.CmisContentType;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.restatom.types.CmisContentType;
 
 import javax.xml.namespace.QName;
 

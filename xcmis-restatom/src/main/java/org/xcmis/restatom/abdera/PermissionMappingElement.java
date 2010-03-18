@@ -22,10 +22,10 @@ package org.xcmis.restatom.abdera;
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
-import org.xcmis.core.CmisPermissionMapping;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.spi.PermissionMapping;
 
-import java.util.List;
+import java.util.Collection;
 
 import javax.xml.namespace.QName;
 
@@ -62,18 +62,19 @@ public class PermissionMappingElement extends ExtensibleElementWrapper
     * 
     * @param permissionMapping the permission mapping
     */
-   public void build(CmisPermissionMapping permissionMapping)
+   public void build(PermissionMapping permissionMapping)
    {
       if (permissionMapping != null)
       {
-         if (permissionMapping.getKey() != null)
-            addSimpleExtension(AtomCMIS.KEY, permissionMapping.getKey().value());
+         addSimpleExtension(AtomCMIS.KEY, permissionMapping.getKey());
 
-         List<String> listPermission = permissionMapping.getPermission();
+         Collection<String> listPermission = permissionMapping.getPermissions();
          if (listPermission != null && listPermission.size() > 0)
          {
             for (String string : listPermission)
+            {
                addSimpleExtension(AtomCMIS.PERMISSION, string);
+            }
          }
       }
    }

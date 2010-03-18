@@ -937,9 +937,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          entry.setContent(nameProperty.getValue().get(0));
       }
 
-      ObjectTypeElement objectElement =
-         new ObjectTypeElement(request.getAbdera().getFactory(), CMISExtensionFactory
-            .getElementName(CmisObjectType.class));
+      ObjectTypeElement objectElement = new ObjectTypeElement(request.getAbdera().getFactory(), AtomCMIS.OBJECT);
 
       // Apply property filter for serialized object.
       String filter = request.getParameter(AtomCMIS.PARAM_FILTER);

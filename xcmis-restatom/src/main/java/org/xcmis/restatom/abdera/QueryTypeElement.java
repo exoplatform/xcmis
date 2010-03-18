@@ -22,13 +22,10 @@ package org.xcmis.restatom.abdera;
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
-import org.xcmis.core.CmisQueryType;
-import org.xcmis.core.EnumIncludeRelationships;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
-
-import java.math.BigInteger;
 
 import javax.xml.namespace.QName;
 
@@ -60,42 +57,17 @@ public class QueryTypeElement extends ExtensibleElementWrapper
       super(factory, qname);
    }
 
-   // Never used in real life. Useful for tests.
-   /**
-    * Builds the element.
-    * 
-    * @param query the query
-    */
-   public void build(CmisQueryType query)
-   {
-      if (query != null)
-      {
-         setAttributeValue(AtomCMIS.STATEMENT, query.getStatement());
-         if (query.isSearchAllVersions() != null)
-            setAttributeValue(AtomCMIS.SEARCH_ALL_VERSIONS, query.isSearchAllVersions().toString());
-         if (query.isIncludeAllowableActions() != null)
-            setAttributeValue(AtomCMIS.INCLUDE_ALLOWABLE_ACTIONS, query.isIncludeAllowableActions().toString());
-         if (query.getIncludeRelationships() != null)
-            setAttributeValue(AtomCMIS.INCLUDE_RELATIONSHIPS, query.getIncludeRelationships().value());
-         setAttributeValue(AtomCMIS.RENDITION_FILTER, query.getRenditionFilter());
-         if (query.getMaxItems() != null)
-            setAttributeValue(AtomCMIS.MAX_ITEMS, query.getMaxItems().toString());
-         if (query.getSkipCount() != null)
-            setAttributeValue(AtomCMIS.SKIP_COUNT, query.getSkipCount().toString());
-      }
-   }
-
    /**
     * Gets the include relationships.
     * 
     * @return the include relationships
     */
-   public EnumIncludeRelationships getIncludeRelationships()
+   public IncludeRelationships getIncludeRelationships()
    {
       String includeRelationships = getText(AtomCMIS.INCLUDE_RELATIONSHIPS);
       try
       {
-         return includeRelationships == null ? EnumIncludeRelationships.NONE : EnumIncludeRelationships
+         return includeRelationships == null ? IncludeRelationships.NONE : IncludeRelationships
             .fromValue(includeRelationships);
       }
       catch (IllegalArgumentException e)
@@ -114,25 +86,6 @@ public class QueryTypeElement extends ExtensibleElementWrapper
    {
       String tmp = getText(AtomCMIS.MAX_ITEMS);
       return tmp == null ? CMIS.MAX_ITEMS : Integer.parseInt(tmp);
-   }
-
-   /**
-    * Gets the query.
-    * 
-    * @return the query
-    */
-   public CmisQueryType getQuery()
-   {
-      CmisQueryType query = new CmisQueryType();
-      query.setStatement(getText(AtomCMIS.STATEMENT));
-      query.setSearchAllVersions(isSearchAllVersions());
-      query.setIncludeAllowableActions(isIncludeAllowableActions());
-      query.setIncludeRelationships(getIncludeRelationships());
-      query.setRenditionFilter(getRenditionFilter());
-      query.setMaxItems(BigInteger.valueOf(getPageSize()));
-      query.setSkipCount(BigInteger.valueOf(getSkipCount()));
-
-      return query;
    }
 
    /**

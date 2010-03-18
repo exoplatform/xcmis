@@ -22,8 +22,8 @@ package org.xcmis.restatom.abdera;
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
-import org.xcmis.core.CmisPermissionDefinition;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.spi.Permission;
 
 import javax.xml.namespace.QName;
 
@@ -33,7 +33,7 @@ import javax.xml.namespace.QName;
  */
 public class PermissionDefinitionElement extends ExtensibleElementWrapper
 {
-   
+
    /**
     * Instantiates a new permission definition element.
     * 
@@ -58,14 +58,17 @@ public class PermissionDefinitionElement extends ExtensibleElementWrapper
    /**
     * Builds the element.
     * 
-    * @param aclCapability the acl capability
+    * @param permission the acl capability
     */
-   public void build(CmisPermissionDefinition aclCapability)
+   public void build(Permission permission)
    {
-      if (aclCapability != null)
+      if (permission != null)
       {
-         addSimpleExtension(AtomCMIS.PERMISSION, aclCapability.getPermission());
-         addSimpleExtension(AtomCMIS.DESCRIPTION, aclCapability.getDescription());
+         addSimpleExtension(AtomCMIS.PERMISSION, permission.getPermission());
+         if (permission.getDescription() != null)
+         {
+            addSimpleExtension(AtomCMIS.DESCRIPTION, permission.getDescription());
+         }
       }
    }
 }

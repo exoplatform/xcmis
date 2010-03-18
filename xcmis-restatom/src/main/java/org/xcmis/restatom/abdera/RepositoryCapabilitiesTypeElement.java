@@ -22,8 +22,8 @@ package org.xcmis.restatom.abdera;
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
-import org.xcmis.core.CmisRepositoryCapabilitiesType;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.spi.RepositoryCapabilities;
 
 import javax.xml.namespace.QName;
 
@@ -60,7 +60,7 @@ public class RepositoryCapabilitiesTypeElement extends ExtensibleElementWrapper
     * 
     * @param capabilities the capabilities
     */
-   public void build(CmisRepositoryCapabilitiesType capabilities)
+   public void build(RepositoryCapabilities capabilities)
    {
       if (capabilities != null)
       {
@@ -70,9 +70,9 @@ public class RepositoryCapabilitiesTypeElement extends ExtensibleElementWrapper
             .isCapabilityAllVersionsSearchable()));
          if (capabilities.getCapabilityChanges() != null)
             addSimpleExtension(AtomCMIS.CAPABILITY_CHANGES, capabilities.getCapabilityChanges().value());
-         if (capabilities.getCapabilityContentStreamUpdatability() != null)
+         if (capabilities.getCapabilityContentStreamUpdatable() != null)
             addSimpleExtension(AtomCMIS.CAPABILITY_CONTENT_STREAM_UPDATABILITY, capabilities
-               .getCapabilityContentStreamUpdatability().value());
+               .getCapabilityContentStreamUpdatable().value());
          addSimpleExtension(AtomCMIS.CAPABILITY_GET_DESCENDANTS, Boolean.toString(capabilities
             .isCapabilityGetDescendants()));
          addSimpleExtension(AtomCMIS.CAPABILITY_GET_FOLDER_TREE, Boolean.toString(capabilities

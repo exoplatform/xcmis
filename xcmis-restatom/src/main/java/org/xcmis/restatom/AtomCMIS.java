@@ -19,9 +19,6 @@
 
 package org.xcmis.restatom;
 
-import org.xcmis.atom.EnumArguments;
-import org.xcmis.atom.EnumCollectionType;
-import org.xcmis.atom.EnumLinkRelations;
 import org.xcmis.spi.CMIS;
 
 import javax.xml.namespace.QName;
@@ -36,7 +33,7 @@ public interface AtomCMIS extends CMIS
     * Value for &#64;javax.ws.rs.Path on JAX-RS service.
     */
    String CMIS_REST_RESOURCE_PATH = "cmisatom";
-   
+
    String CMISRA_NS_URI = "http://docs.oasis-open.org/ns/cmis/restatom/200908/";
 
    String CMISRA_PREFIX = "cmisra";
@@ -162,22 +159,6 @@ public interface AtomCMIS extends CMIS
 
    QName CHOICE = new QName(CMIS_NS_URI, "choice", CMIS_PREFIX);
 
-   QName CHOICE_BOOLEAN = new QName(CMIS_NS_URI, "choiceBoolean", CMIS_PREFIX);
-
-   QName CHOICE_DATE_TIME = new QName(CMIS_NS_URI, "choiceDateTime", CMIS_PREFIX);
-
-   QName CHOICE_DECIMAL = new QName(CMIS_NS_URI, "choiceDecimal", CMIS_PREFIX);
-
-   QName CHOICE_HTML = new QName(CMIS_NS_URI, "choiceHtml", CMIS_PREFIX);
-
-   QName CHOICE_ID = new QName(CMIS_NS_URI, "choiceId", CMIS_PREFIX);
-
-   QName CHOICE_INTEGER = new QName(CMIS_NS_URI, "choiceInteger", CMIS_PREFIX);
-
-   QName CHOICE_STRING = new QName(CMIS_NS_URI, "choiceString", CMIS_PREFIX);
-
-   QName CHOICE_URI = new QName(CMIS_NS_URI, "choiceUri", CMIS_PREFIX);
-
    QName RESOLUTION = new QName(CMIS_NS_URI, "resolution", CMIS_PREFIX);
 
    QName COLLECTION_TYPE = new QName(CMISRA_NS_URI, "collectionType", CMISRA_PREFIX);
@@ -243,7 +224,7 @@ public interface AtomCMIS extends CMIS
    QName KEY = new QName(CMIS_NS_URI, "key", CMIS_PREFIX);
 
    /* TODO : check name */
-   QName MAPPING = new QName(CMIS_NS_URI, "permissionMapping", CMIS_PREFIX);
+   QName MAPPING = new QName(CMIS_NS_URI, "mapping", CMIS_PREFIX);
 
    QName PRECISION = new QName(CMIS_NS_URI, "precision", CMIS_PREFIX);
 
