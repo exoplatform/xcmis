@@ -19,11 +19,15 @@
 
 package org.xcmis.sp.jcr.exo.query;
 
+import org.apache.tools.ant.taskdefs.PathConvert;
 import org.exoplatform.services.jcr.core.nodetype.NodeTypeData;
 import org.exoplatform.services.jcr.core.nodetype.NodeTypeDataManager;
 import org.exoplatform.services.jcr.core.nodetype.PropertyDefinitionData;
 import org.exoplatform.services.jcr.core.nodetype.PropertyDefinitionDatas;
 import org.exoplatform.services.jcr.datamodel.InternalQName;
+import org.exoplatform.services.jcr.datamodel.QPath;
+import org.exoplatform.services.jcr.datamodel.QPathEntry;
+import org.exoplatform.services.jcr.impl.core.JCRPath;
 import org.exoplatform.services.jcr.impl.core.LocationFactory;
 import org.xcmis.search.SearchServiceException;
 import org.xcmis.search.Visitors;
@@ -43,6 +47,7 @@ import org.xcmis.search.model.source.SelectorName;
 import org.xcmis.search.parser.CmisQueryParser;
 import org.xcmis.search.result.ScoredRow;
 import org.xcmis.search.value.NameConverter;
+import org.xcmis.search.value.PathSplitter;
 import org.xcmis.search.value.ToStringNameConverter;
 import org.xcmis.sp.jcr.exo.query.index.StartableJcrIndexingService;
 import org.xcmis.sp.jcr.exo.query.lucene.LuceneVirtualTableResolver;
@@ -82,12 +87,15 @@ public class QueryHandlerImpl implements QueryHandler
 
    private NameConverter nameConverter;
 
+   private final LocationFactory locationFactory;
+
    public QueryHandlerImpl(final ContentProxy contenProxy, IndexConfuguration indexConfiguration,
       NodeTypeDataManager nodeTypeManager, LocationFactory locationFactory) throws SearchServiceException
    {
       super();
 
       this.contenProxy = contenProxy;
+      this.locationFactory = locationFactory;
       //  this.resolver = resolver;
       this.queryParser = new CmisQueryParser();
       NameConverter<String> nameConverter = new ToStringNameConverter();
@@ -110,7 +118,8 @@ public class QueryHandlerImpl implements QueryHandler
       configuration.setIndexConfuguration(indexConfiguration);
       configuration.setContentReader(contenProxy);
       configuration.setNameConverter(nameConverter);
-
+      configuration.setPathSplitter(new JcrPathSplitter(locationFactory));
+      configuration.setNameConverter(new DoNothingNameConverter());
       luceneSearchService = new LuceneSearchService(configuration)
       {
 
@@ -145,6 +154,8 @@ public class QueryHandlerImpl implements QueryHandler
          invocationContext.setSchema(schema);
          invocationContext.setTableResolver(contenProxy.getIndexigService().getVirtualTableResolver());
          invocationContext.setNameConverter(nameConverter);
+         invocationContext.setPathSplitter(new JcrPathSplitter(locationFactory));
+         invocationContext.setNameConverter(new DoNothingNameConverter());
          luceneSearchService.setInvocationContext(invocationContext);
 
          Query qom = queryParser.parseQuery(query.getStatement());
@@ -166,7 +177,56 @@ public class QueryHandlerImpl implements QueryHandler
       }
       return null;
    }
+   private class DoNothingNameConverter implements NameConverter<String>{
 
+
+      /**
+       * @see org.xcmis.search.value.NameConverter#convertName(java.lang.Object)
+       */
+      @Override
+      public String convertName(String name)
+      {
+         return name;
+      }
+      
+   }
+   private  class JcrPathSplitter implements PathSplitter<String>{
+      private final LocationFactory locationFactory;
+      
+      /**
+       * @param locationFactory
+       */
+      public JcrPathSplitter(LocationFactory locationFactory)
+      {
+         super();
+         this.locationFactory = locationFactory;
+      }
+
+      /**
+       * @see org.xcmis.search.value.PathSplitter#splitPath(java.lang.String)
+       */
+      @Override
+      public String[] splitPath(String path)
+      {
+         String[] result = new String[0];
+         try
+         {
+            QPath jcrPath = locationFactory.parseJCRPath(path).getInternalPath();
+            QPathEntry[] pathEntries = jcrPath.getEntries();
+            result = new String[pathEntries.length];
+            for (int i = 0; i < pathEntries.length; i++)
+            {
+               result[i]= locationFactory.createJCRName(pathEntries[i]).getAsString();
+            }
+         }
+         catch (javax.jcr.RepositoryException e)
+         {
+            
+         }
+         return result;
+      }
+      
+   } 
    /**
     * 
     * ExtendedNodeTypeManager based schema
