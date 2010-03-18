@@ -200,7 +200,7 @@ public class MultifilingTest extends BaseTest
             }
 
             //Moving into unfilings if no more references;
-            if (count <= 1)
+            if (count < 1)
                session.getWorkspace().move(entryNode.getPath(), unfiling_path + "/" + entryNode.getName());
             session.save();
          }
@@ -221,7 +221,7 @@ public class MultifilingTest extends BaseTest
                }
             }
             //Moving into unfilings if no more references;
-            if (count <= 1)
+            if (count < 1)
                session.getWorkspace().move(main.getParent().getPath(), unfiling_path + "/" + entryNode.getName());
             session.save();
 
