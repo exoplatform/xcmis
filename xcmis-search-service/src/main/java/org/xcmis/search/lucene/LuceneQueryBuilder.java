@@ -224,10 +224,7 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
 
       // all child
       childNodeQuery = new ChildTraversingQueryNode(childNodeQuery, false);
-      final BooleanQuery resultQuery = new BooleanQuery();
-      resultQuery.add((Query)queryBuilderStack.pop(), Occur.MUST);
-      resultQuery.add(childNodeQuery, Occur.MUST);
-      queryBuilderStack.push(resultQuery);
+      queryBuilderStack.push(childNodeQuery);
    }
 
    /**
@@ -300,10 +297,8 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
       // all childs
 
       descendantQuery = new ChildTraversingQueryNode(descendantQuery, true);
-      final BooleanQuery resultQuery = new BooleanQuery();
-      resultQuery.add((Query)queryBuilderStack.pop(), Occur.MUST);
-      resultQuery.add(descendantQuery, Occur.MUST);
-      queryBuilderStack.push(resultQuery);
+
+      queryBuilderStack.push(descendantQuery);
 
    }
 
@@ -390,10 +385,7 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
          throw new VisitException(e.getMessage());
       }
 
-      final BooleanQuery resultQuery = new BooleanQuery();
-      resultQuery.add((Query)queryBuilderStack.pop(), Occur.MUST);
-      resultQuery.add(query, Occur.MUST);
-      queryBuilderStack.push(resultQuery);
+      queryBuilderStack.push(query);
 
    }
 
@@ -934,10 +926,7 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
          }
       }
 
-      final BooleanQuery resultQuery = new BooleanQuery();
-      resultQuery.add((Query)queryBuilderStack.pop(), Occur.MUST);
-      resultQuery.add(descendantQuery, Occur.MUST);
-      queryBuilderStack.push(resultQuery);
+      queryBuilderStack.push(descendantQuery);
 
    }
 
