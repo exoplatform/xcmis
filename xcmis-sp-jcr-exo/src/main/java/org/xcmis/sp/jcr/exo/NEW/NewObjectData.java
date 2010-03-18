@@ -20,16 +20,28 @@
 package org.xcmis.sp.jcr.exo.NEW;
 
 import org.xcmis.spi.AccessControlEntry;
-import org.xcmis.spi.PropertyType;
+import org.xcmis.spi.BaseType;
+import org.xcmis.spi.ConstraintException;
+import org.xcmis.spi.ItemsIterator;
+import org.xcmis.spi.NameConstraintViolationException;
+import org.xcmis.spi.RelationshipDirection;
+import org.xcmis.spi.Storage;
 import org.xcmis.spi.TypeDefinition;
+import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.data.FolderData;
+import org.xcmis.spi.data.ObjectData;
 import org.xcmis.spi.data.PolicyData;
+import org.xcmis.spi.data.RelationshipData;
 import org.xcmis.spi.impl.CmisVisitor;
+import org.xcmis.spi.object.Properties;
 import org.xcmis.spi.object.Property;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,379 +52,227 @@ import javax.jcr.Node;
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */
-public class NewObjectData extends AbstractObjectData
+public class NewObjectData implements ObjectData
 {
-   private final FolderData parent;
 
-   private final Map<String, Property<Object>> properties = new HashMap<String, Property<Object>>();
+   /** Type of new object. */
+   protected final TypeDefinition type;
 
-   private Set<PolicyData> policies;
+   /** Parent folder. */
+   protected final FolderData parent;
 
-   private List<AccessControlEntry> acl;
+   /**
+    * Temporary storage for object properties. For newly create object all
+    * properties will be stored here before calling
+    * {@link Storage#saveObject(ObjectData)}.
+    */
+   protected final Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+
+   /**
+    * Temporary storage for policies applied to object. For newly created all
+    * policies will be stored in here before calling
+    * {@link Storage#saveObject(ObjectData)}.
+    */
+   protected Set<PolicyData> policies;
+
+   /**
+    * Temporary storage for ACL applied to object. For newly created all ACL
+    * will be stored in here before calling
+    * {@link Storage#saveObject(ObjectData)}.
+    */
+   protected List<AccessControlEntry> acl;
+
+   protected boolean isNew;
+
+   protected Node node;
 
    public NewObjectData(FolderData parent, TypeDefinition type)
    {
-      super(null, type);
       this.parent = parent;
+      this.type = type;
+      this.isNew = true;
    }
 
    public void accept(CmisVisitor visitor)
    {
-      throw new UnsupportedOperationException("accept");
+      if (isNew)
+         throw new UnsupportedOperationException("accept");
+      
+      visitor.visit(this);
    }
 
+   /**
+    * {@inheritDoc}
+    */
+   public BaseType getBaseType()
+   {
+      return type.getBaseId();
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public String getChangeToken()
+   {
+      if (isNew)
+      return null;
+      getStri
+   }
+
+   public ContentStream getContentStream(String streamId)
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   public String getCreatedBy()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   public Calendar getCreationDate()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   public Calendar getLastModificationDate()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   public String getLastModifiedBy()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   public String getName()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   public String getObjectId()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   public FolderData getParent() throws ConstraintException
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   public Collection<FolderData> getParents()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   public Properties getProperties()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   public ItemsIterator<RelationshipData> getRelationships(RelationshipDirection direction, String typeId,
+      boolean includeSubRelationshipTypes)
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   public TypeDefinition getTypeDefinition()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   public String getTypeId()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isNew()
+   {
+      return isNew;
+   }
+
+   public void removePolicy(PolicyData policy) throws ConstraintException
+   {
+      // TODO Auto-generated method stub
+
+   }
+
+   public void setName(String name) throws NameConstraintViolationException
+   {
+      // TODO Auto-generated method stub
+
+   }
+
+   // Policies
+
+   /**
+    * {@inheritDoc}
+    */
    public void applyPolicy(PolicyData policy)
    {
-      getPolicies().add(policy);
+      if (!type.isControllablePolicy())
+         throw new ConstraintException("Object is not controllable by Policy.");
+
+      if (policies == null)
+         policies = new HashSet<PolicyData>();
+
+      policies.add(policy);
    }
 
+   /**
+    * {@inheritDoc}
+    */
+   public Collection<PolicyData> getPolicies()
+   {
+      if (!type.isControllablePolicy() || policies == null)
+         return Collections.emptySet();
+
+      return Collections.unmodifiableSet(policies);
+   }
+
+   // ACL
+
+   /**
+    * {@inheritDoc}
+    */
    public List<AccessControlEntry> getACL(boolean onlyBasicPermissions)
    {
-      if (acl == null)
-         acl = new ArrayList<AccessControlEntry>();
-      return acl;
+      if (!type.isControllableACL() || acl == null)
+         return Collections.emptyList();
+
+      return Collections.unmodifiableList(acl);
    }
 
-   ///////////////////////////////////////      
+   /**
+    * {@inheritDoc}
+    */
+   public void setACL(List<AccessControlEntry> acl) throws ConstraintException
+   {
+      if (!type.isControllableACL())
+         throw new ConstraintException("Object is not controllable by ACL.");
 
-   //   public Boolean getBoolean(String id)
-   //   {
-   //      return getValue(id, EnumPropertyType.BOOLEAN);
-   //   }
-   //
-   //   public Boolean[] getBooleans(String id)
-   //   {
-   //      return getValues(id, EnumPropertyType.BOOLEAN);
-   //   }
-   //
-   //   public String getChangeToken()
-   //   {
-   //      return null;
-   //   }
-   //
-   //   public String getCreatedBy()
-   //   {
-   //      return null;
-   //   }
-   //
-   //   public Calendar getCreationDate()
-   //   {
-   //      return null;
-   //   }
-   //
-   //   public Calendar getDate(String id)
-   //   {
-   //      return getValue(id, EnumPropertyType.DATETIME);
-   //   }
-   //
-   //   public Calendar[] getDates(String id)
-   //   {
-   //      return getValues(id, EnumPropertyType.DATETIME);
-   //   }
-   //
-   //   public BigDecimal getDecimal(String id)
-   //   {
-   //      return getValue(id, EnumPropertyType.DECIMAL);
-   //   }
-   //
-   //   public BigDecimal[] getDecimals(String id)
-   //   {
-   //      return getValues(id, EnumPropertyType.DECIMAL);
-   //   }
-   //
-   //   public String getHTML(String id)
-   //   {
-   //      return getValue(id, EnumPropertyType.HTML);
-   //   }
-   //
-   //   public String[] getHTMLs(String id)
-   //   {
-   //      return getValues(id, EnumPropertyType.HTML);
-   //   }
-   //
-   //   public String getId(String id)
-   //   {
-   //      return getValue(id, EnumPropertyType.ID);
-   //   }
-   //
-   //   public String[] getIds(String id)
-   //   {
-   //      return getValues(id, EnumPropertyType.ID);
-   //   }
-   //
-   //   public BigInteger getInteger(String id)
-   //   {
-   //      return getValue(id, EnumPropertyType.INTEGER);
-   //   }
-   //
-   //   public BigInteger[] getIntegers(String id)
-   //   {
-   //      return getValues(id, EnumPropertyType.INTEGER);
-   //   }
-   //
-   //   public String getLastModifiedBy()
-   //   {
-   //      return null;
-   //   }
-   //
-   //   public Calendar getLatsModificationDate()
-   //   {
-   //      return null;
-   //   }
-   //
-   //   public String getName()
-   //   {
-   //      return getString(CMIS.NAME);
-   //   }
-   //
-   //   public String getObjectId()
-   //   {
-   //      // No id for new object.
-   //      return null;
-   //   }
-   //
-   //   public ObjectData getParent()
-   //   {
-   //      return parent;
-   //   }
-   //
-   //   public Collection<ObjectData> getParents()
-   //   {
-   //      return Collections.singleton(parent);
-   //   }
-   //
-   //   public Collection<ObjectData> getPolicies()
-   //   {
-   //      if (policies == null)
-   //         policies = new ArrayList<ObjectData>();
-   //      return policies;
-   //   }
-   //
-   //   @Override
-   //   public Map<String, CmisProperty> getProperties()
-   //   {
-   //      // TODO Auto-generated method stub
-   //      return null;
-   //   }
-   //
-   //   @Override
-   //   public Map<String, CmisProperty> getProperties(PropertyFilter filter)
-   //   {
-   //      // TODO Auto-generated method stub
-   //      return null;
-   //   }
-   //
-   //   @Override
-   //   public CmisProperty getProperty(String id)
-   //   {
-   //      // TODO Auto-generated method stub
-   //      return null;
-   //   }
-   //
-   //   @Override
-   //   public ItemsIterator<ObjectData> getRelationships(EnumRelationshipDirection direction, String typeId,
-   //      boolean includeSubRelationshipTypes)
-   //   {
-   //      // TODO Auto-generated method stub
-   //      return null;
-   //   }
-   //
-   //   @Override
-   //   public String getString(String id)
-   //   {
-   //      // TODO Auto-generated method stub
-   //      return null;
-   //   }
-   //
-   //   @Override
-   //   public String[] getStrings(String id)
-   //   {
-   //      // TODO Auto-generated method stub
-   //      return null;
-   //   }
-   //
-   //   @Override
-   //   public String getTypeId()
-   //   {
-   //      // TODO Auto-generated method stub
-   //      return null;
-   //   }
-   //
-   //   @Override
-   //   public URI getURI(String id)
-   //   {
-   //      // TODO Auto-generated method stub
-   //      return null;
-   //   }
-   //
-   //   @Override
-   //   public URI[] getURIs(String id)
-   //   {
-   //      // TODO Auto-generated method stub
-   //      return null;
-   //   }
-   //
-   //   @Override
-   //   public String getVersionLabel()
-   //   {
-   //      // TODO Auto-generated method stub
-   //      return null;
-   //   }
-   //
-   //   @Override
-   //   public String getVersionSeriesCheckedOutBy()
-   //   {
-   //      // TODO Auto-generated method stub
-   //      return null;
-   //   }
-   //
-   //   @Override
-   //   public String getVersionSeriesCheckedOutId()
-   //   {
-   //      // TODO Auto-generated method stub
-   //      return null;
-   //   }
-   //
-   //   @Override
-   //   public String getVersionSeriesId()
-   //   {
-   //      // TODO Auto-generated method stub
-   //      return null;
-   //   }
-   //
-   //   @Override
-   //   public boolean isLatestMajorVersion()
-   //   {
-   //      // TODO Auto-generated method stub
-   //      return false;
-   //   }
-   //
-   //   @Override
-   //   public boolean isLatestVersion()
-   //   {
-   //      // TODO Auto-generated method stub
-   //      return false;
-   //   }
-   //
-   //   @Override
-   //   public boolean isMajorVersion()
-   //   {
-   //      // TODO Auto-generated method stub
-   //      return false;
-   //   }
-   //
-   //   @Override
-   //   public boolean isNew()
-   //   {
-   //      // TODO Auto-generated method stub
-   //      return false;
-   //   }
-   //
-   //   @Override
-   //   public boolean isVersionSeriesCheckedOut()
-   //   {
-   //      // TODO Auto-generated method stub
-   //      return false;
-   //   }
-   //
-   //   @Override
-   //   public void removePolicy(ObjectData policy)
-   //   {
-   //      // TODO Auto-generated method stub
-   //
-   //   }
-   //
-   //   @Override
-   //   public void setAcl(CmisAccessControlListType acl)
-   //   {
-   //      // TODO Auto-generated method stub
-   //
-   //   }
-   //
-   //   @Override
-   //   public void setBoolean(String id, Boolean... value)
-   //   {
-   //      // TODO Auto-generated method stub
-   //
-   //   }
-   //
-   //   @Override
-   //   public void setDate(String id, Calendar... value)
-   //   {
-   //      // TODO Auto-generated method stub
-   //
-   //   }
-   //
-   //   @Override
-   //   public void setDecimal(String id, BigDecimal... value)
-   //   {
-   //      // TODO Auto-generated method stub
-   //
-   //   }
-   //
-   //   @Override
-   //   public void setHTML(String id, String... value)
-   //   {
-   //      // TODO Auto-generated method stub
-   //
-   //   }
-   //
-   //   @Override
-   //   public void setId(String id, String... value)
-   //   {
-   //      // TODO Auto-generated method stub
-   //
-   //   }
-   //
-   //   @Override
-   //   public void setInteger(String id, BigInteger... value)
-   //   {
-   //      // TODO Auto-generated method stub
-   //
-   //   }
-   //
-   //   @Override
-   //   public void setName(String name) throws NameConstraintViolationException
-   //   {
-   //      // TODO Auto-generated method stub
-   //
-   //   }
-   //
-   //   @Override
-   //   public void setProperty(CmisProperty property)
-   //   {
-   //      // TODO Auto-generated method stub
-   //
-   //   }
-   //
-   //   @Override
-   //   public void setString(String id, String... value)
-   //   {
-   //      // TODO Auto-generated method stub
-   //
-   //   }
-   //
-   //   @Override
-   //   public void setURI(String id, URI... value)
-   //   {
-   //      // TODO Auto-generated method stub
-   //
-   //   }
-   //
-   //   private <T> T getValue(String id, EnumPropertyType type)
-   //   {
-   //      T[] values = getValues(id, type);
-   //      if (values != null && values.length > 0)
-   //         return values[0];
-   //      return null;
-   //   }
-   //
-   //   private <T> T[] getValues(String id, EnumPropertyType type)
-   //   {
-   //      PropertyData<T> propertyData =  (PropertyData<T>)properties.get(id);
-   //      if (propertyData != null && propertyData.getPropertyType() == type)
-   //         return (T[])propertyData.getValue();
-   //      return null;
-   //   }
+      if (this.acl == null)
+         this.acl = new ArrayList<AccessControlEntry>();
+      else
+         this.acl.clear(); // Not merged, just replaced.
+
+      if (acl != null) // assumes if null then remove ACL.
+         this.acl.addAll(acl);
+   }
 
 }

@@ -28,21 +28,17 @@ import org.exoplatform.services.log.Log;
 import org.xcmis.sp.jcr.exo.JcrCMIS;
 import org.xcmis.spi.AllowableActions;
 import org.xcmis.spi.BaseType;
-import org.xcmis.spi.CMIS;
 import org.xcmis.spi.CapabilityRendition;
 import org.xcmis.spi.ChangeEvent;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStreamAllowed;
-import org.xcmis.spi.DateResolution;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.NotSupportedException;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.Precision;
 import org.xcmis.spi.PropertyDefinition;
-import org.xcmis.spi.PropertyType;
 import org.xcmis.spi.Rendition;
 import org.xcmis.spi.RepositoryCapabilities;
 import org.xcmis.spi.RepositoryInfo;
@@ -63,8 +59,6 @@ import org.xcmis.spi.data.RelationshipData;
 import org.xcmis.spi.impl.AllowableActionsImpl;
 import org.xcmis.spi.impl.BaseItemsIterator;
 import org.xcmis.spi.impl.CmisVisitor;
-import org.xcmis.spi.impl.PropertyDefinitionImpl;
-import org.xcmis.spi.impl.TypeDefinitionImpl;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 
@@ -74,7 +68,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 import javax.jcr.Item;
 import javax.jcr.ItemExistsException;
@@ -99,36 +92,6 @@ public class StorageImpl implements Storage
    static String latestLabel = "latest";
 
    static String pwcLabel = "pwc";
-
-   /**
-    * Get CMIS object type id by the JCR node type name.
-    * 
-    * @param ntName the JCR node type name
-    * @return CMIS object type id
-    */
-   public static String getCmisTypeId(String ntName)
-   {
-      if (ntName.equals(JcrCMIS.NT_FILE))
-         return BaseType.DOCUMENT.value();
-      if (ntName.equals(JcrCMIS.NT_FOLDER) || ntName.equals(JcrCMIS.NT_UNSTRUCTURED))
-         return BaseType.FOLDER.value();
-      return ntName;
-   }
-
-   /**
-    * Get JCR node type name by the CMIS object type id.
-    * 
-    * @param typeId the CMIS base object type id
-    * @return JCR string node type
-    */
-   public static String getNodeTypeName(String typeId)
-   {
-      if (typeId.equals(BaseType.DOCUMENT.value()))
-         return JcrCMIS.NT_FILE;
-      if (typeId.equals(BaseType.FOLDER.value()))
-         return JcrCMIS.NT_FOLDER;
-      return typeId;
-   }
 
    protected final Session session;
 
@@ -416,7 +379,7 @@ public class StorageImpl implements Storage
       try
       {
          Node node = ((ExtendedSession)session).getNodeByIdentifier(objectId);
-         TypeDefinition type = getTypeDefinition(node.getPrimaryNodeType(), true);
+         TypeDefinition type = JcrTypeHelper.getTypeDefinition(node.getPrimaryNodeType(), true);
          
          if (type.getBaseId() == BaseType.DOCUMENT)
             return new DocumentDataImpl(node, type);
@@ -453,7 +416,7 @@ public class StorageImpl implements Storage
          
          Node node = (Node)item;
          
-         TypeDefinition type = getTypeDefinition(node.getPrimaryNodeType(), true);
+         TypeDefinition type = JcrTypeHelper.getTypeDefinition(node.getPrimaryNodeType(), true);
 
          if (type.getBaseId() == BaseType.DOCUMENT)
             return new DocumentDataImpl(node, type);
@@ -556,7 +519,7 @@ public class StorageImpl implements Storage
          TypeDefinition parentType = getTypeDefinition(parentId, false);
 
          List<String> declaredSupertypeNames = new ArrayList<String>();
-         declaredSupertypeNames.add(getNodeTypeName(parentId));
+         declaredSupertypeNames.add(JcrTypeHelper.getNodeTypeName(parentId));
          if (parentType.getBaseId() == BaseType.DOCUMENT)
             declaredSupertypeNames.add(JcrCMIS.CMIS_MIX_DOCUMENT);
          else if (parentType.getBaseId() == BaseType.FOLDER)
@@ -712,14 +675,14 @@ public class StorageImpl implements Storage
          }
          else
          {
-            String nodeTypeName = getNodeTypeName(typeId);
+            String nodeTypeName = JcrTypeHelper.getNodeTypeName(typeId);
             for (NodeTypeIterator iter = session.getWorkspace().getNodeTypeManager().getPrimaryNodeTypes(); iter
                .hasNext();)
             {
                NodeType nt = iter.nextNodeType();
                // Get only direct children of specified type.
                if (nt.isNodeType(nodeTypeName) && getTypeLevelHierarchy(nt, nodeTypeName) == 1)
-                  types.add(getTypeDefinition(nt, includePropertyDefinitions));
+                  types.add(JcrTypeHelper.getTypeDefinition(nt, includePropertyDefinitions));
             }
          }
          return new BaseItemsIterator<TypeDefinition>(types);
@@ -757,7 +720,7 @@ public class StorageImpl implements Storage
    {
       try
       {
-         return getTypeDefinition(getNodeType(getNodeTypeName(typeId)), includePropertyDefinition);
+         return JcrTypeHelper.getTypeDefinition(getNodeType(JcrTypeHelper.getNodeTypeName(typeId)), includePropertyDefinition);
       }
       catch (NoSuchNodeTypeException e)
       {
@@ -784,335 +747,6 @@ public class StorageImpl implements Storage
       catch (RepositoryException re)
       {
          throw new StorageException("Unable remove CMIS type " + typeId + ". " + re.getMessage(), re);
-      }
-   }
-
-   /**
-    * Get object type definition.
-    * 
-    * @param nt JCR back-end node
-    * @param includePropertyDefinition true if need include property definition
-    *        false otherwise
-    * @return object definition or <code>null</code> if specified JCR node-type
-    *         has not corresponded CMIS type
-    * @throws NotSupportedNodeTypeException if specified node-type is
-    *         unsupported by xCMIS
-    */
-   public TypeDefinition getTypeDefinition(NodeType nt, boolean includePropertyDefinition)
-      throws NotSupportedNodeTypeException
-   {
-      if (nt.isNodeType(JcrCMIS.NT_FILE))
-         return getDocumentDefinition(nt, includePropertyDefinition);
-      else if (nt.isNodeType(JcrCMIS.NT_FOLDER) || nt.isNodeType(JcrCMIS.NT_UNSTRUCTURED))
-         return getFolderDefinition(nt, includePropertyDefinition);
-      else if (nt.isNodeType(JcrCMIS.CMIS_NT_RELATIONSHIP))
-         return getRelationshipDefinition(nt, includePropertyDefinition);
-      else if (nt.isNodeType(JcrCMIS.CMIS_NT_POLICY))
-         return getPolicyDefinition(nt, includePropertyDefinition);
-      else
-         throw new NotSupportedNodeTypeException("Type " + nt.getName() + " is unsupported for xCMIS.");
-   }
-
-   /**
-    * Document type definition.
-    * 
-    * @param nt node type
-    * @param includePropertyDefinition true if need include property definition
-    *        false otherwise
-    * @return document type definition
-    */
-   protected TypeDefinition getDocumentDefinition(NodeType nt, boolean includePropertyDefinition)
-   {
-      TypeDefinitionImpl def = new TypeDefinitionImpl();
-      String localTypeName = nt.getName();
-      String typeId = getCmisTypeId(localTypeName);
-      def.setBaseId(BaseType.DOCUMENT);
-      def.setContentStreamAllowed(ContentStreamAllowed.ALLOWED);
-      def.setControllableACL(true);
-      def.setControllablePolicy(true);
-      def.setCreatable(true);
-      def.setDescription("Cmis Document Type");
-      def.setDisplayName(typeId);
-      def.setFileable(true);
-      def.setFulltextIndexed(true);
-      def.setId(typeId);
-      def.setIncludedInSupertypeQuery(true);
-      def.setLocalName(localTypeName);
-      def.setLocalNamespace(JcrCMIS.EXO_CMIS_NS_URI);
-      if (typeId.equals(BaseType.DOCUMENT.value()))
-      {
-         def.setParentId(null); // no parents for root type
-      }
-      else
-      {
-         // Try determine parent type.
-         NodeType[] superTypes = nt.getDeclaredSupertypes();
-         for (NodeType superType : superTypes)
-         {
-            if (superType.isNodeType(JcrCMIS.NT_FILE))
-            {
-               // Take first type that is super for cmis:document or is cmis:document.
-               def.setParentId(getCmisTypeId(superType.getName()));
-               break;
-            }
-         }
-      }
-      def.setQueryable(true);
-      def.setQueryName(typeId);
-      def.setVersionable(true);
-      if (includePropertyDefinition)
-         addPropertyDefinitions(def, nt);
-      return def;
-   }
-
-   /**
-    * Folder type definition.
-    * 
-    * @param nt node type
-    * @param includePropertyDefinition true if need include property definition
-    *        false otherwise
-    * @return folder type definition
-    */
-   protected TypeDefinition getFolderDefinition(NodeType nt, boolean includePropertyDefinition)
-   {
-      TypeDefinitionImpl def = new TypeDefinitionImpl();
-      String localTypeName = nt.getName();
-      String typeId = getCmisTypeId(localTypeName);
-      def.setBaseId(BaseType.FOLDER);
-      def.setControllableACL(true);
-      def.setControllablePolicy(true);
-      def.setCreatable(true);
-      def.setDescription("Cmis Folder Type");
-      def.setDisplayName(typeId);
-      def.setFileable(true);
-      def.setFulltextIndexed(false);
-      def.setId(typeId);
-      def.setIncludedInSupertypeQuery(true);
-      def.setLocalName(localTypeName);
-      def.setLocalNamespace(JcrCMIS.EXO_CMIS_NS_URI);
-      if (typeId.equals(BaseType.FOLDER.value()))
-      {
-         def.setParentId(null); // no parents for root type
-      }
-      else
-      {
-         // Try determine parent type.
-         NodeType[] superTypes = nt.getDeclaredSupertypes();
-         for (NodeType superType : superTypes)
-         {
-            if (superType.isNodeType(JcrCMIS.NT_FOLDER))
-            {
-               // Take first type that is super for cmis:folder or is cmis:folder.
-               def.setParentId(getCmisTypeId(superType.getName()));
-               break;
-            }
-         }
-      }
-      def.setQueryable(true);
-      def.setQueryName(typeId);
-      if (includePropertyDefinition)
-         addPropertyDefinitions(def, nt);
-      return def;
-   }
-
-   /**
-    * Get policy type definition.
-    * 
-    * @param nt node type
-    * @param includePropertyDefinition true if need include property definition
-    *        false otherwise
-    * @return type policy definition
-    */
-   protected TypeDefinition getPolicyDefinition(NodeType nt, boolean includePropertyDefinition)
-   {
-      TypeDefinitionImpl def = new TypeDefinitionImpl();
-      String localTypeName = nt.getName();
-      String typeId = getCmisTypeId(localTypeName);
-      def.setBaseId(BaseType.POLICY);
-      def.setControllableACL(true);
-      def.setControllablePolicy(true);
-      def.setCreatable(true);
-      def.setDescription("Cmis Policy Type");
-      def.setDisplayName(typeId);
-      def.setFileable(true);
-      def.setFulltextIndexed(false);
-      def.setId(typeId);
-      def.setIncludedInSupertypeQuery(true);
-      def.setLocalName(localTypeName);
-      def.setLocalNamespace(JcrCMIS.EXO_CMIS_NS_URI);
-      if (typeId.equals(BaseType.POLICY.value()))
-      {
-         def.setParentId(null); // no parents for root type
-      }
-      else
-      {
-         // Try determine parent type.
-         NodeType[] superTypes = nt.getDeclaredSupertypes();
-         for (NodeType superType : superTypes)
-         {
-            if (superType.isNodeType(JcrCMIS.CMIS_NT_POLICY))
-            {
-               // Take first type that is super for cmis:policy or is cmis:policy.
-               def.setParentId(getCmisTypeId(superType.getName()));
-               break;
-            }
-         }
-      }
-      def.setQueryable(false);
-      def.setQueryName(typeId);
-      if (includePropertyDefinition)
-         addPropertyDefinitions(def, nt);
-      return def;
-   }
-
-   /**
-    * Get relationship type definition.
-    * 
-    * @param nt node type
-    * @param includePropertyDefinition true if need include property definition
-    *        false otherwise
-    * @return type relationship definition
-    */
-   protected TypeDefinition getRelationshipDefinition(NodeType nt, boolean includePropertyDefinition)
-   {
-      TypeDefinitionImpl def = new TypeDefinitionImpl();
-      String localTypeName = nt.getName();
-      String typeId = getCmisTypeId(localTypeName);
-      def.setBaseId(BaseType.RELATIONSHIP);
-      def.setControllableACL(false);
-      def.setControllablePolicy(false);
-      def.setCreatable(true);
-      def.setDescription("Cmis Relationship Type");
-      def.setDisplayName(typeId);
-      def.setFileable(false);
-      def.setFulltextIndexed(false);
-      def.setId(typeId);
-      def.setIncludedInSupertypeQuery(false);
-      def.setLocalName(localTypeName);
-      def.setLocalNamespace(JcrCMIS.EXO_CMIS_NS_URI);
-      if (typeId.equals(BaseType.RELATIONSHIP.value()))
-      {
-         def.setParentId(null); // no parents for root type
-      }
-      else
-      {
-         // Try determine parent type.
-         NodeType[] superTypes = nt.getDeclaredSupertypes();
-         for (NodeType superType : superTypes)
-         {
-            if (superType.isNodeType(JcrCMIS.CMIS_NT_RELATIONSHIP))
-            {
-               // Take first type that is super for cmis:relationship or is cmis:relationship.
-               def.setParentId(getCmisTypeId(superType.getName()));
-               break;
-            }
-         }
-      }
-      def.setQueryable(false);
-      def.setQueryName(typeId);
-      if (includePropertyDefinition)
-         addPropertyDefinitions(def, nt);
-      return def;
-   }
-
-   /**
-    * Add property definitions.
-    * 
-    * @param typeDefinition the object type definition
-    * @param nt the JCR node type.
-    */
-   private void addPropertyDefinitions(TypeDefinition typeDefinition, NodeType nt)
-   {
-      // Known described in spec. property definitions
-      for (PropertyDefinition<?> propDef : PropertyDefinitionsMap.getAll(typeDefinition.getBaseId().value()))
-         typeDefinition.getPropertyDefinitions().add(propDef);
-
-      Set<String> knownIds = PropertyDefinitionsMap.getPropertyIds(typeDefinition.getBaseId().value());
-      for (javax.jcr.nodetype.PropertyDefinition jcrPropertyDef : nt.getPropertyDefinitions())
-      {
-         String pdName = jcrPropertyDef.getName();
-         // TODO : Do not use any constraint about prefixes, need discovery
-         // hierarchy of JCR types or so on.
-         if (pdName.startsWith("cmis:"))
-         {
-            // Do not process known properties
-            if (!knownIds.contains(pdName))
-            {
-               PropertyDefinition<?> cmisPropDef = null;
-               // TODO : default values.
-               switch (jcrPropertyDef.getRequiredType())
-               {
-
-                  case javax.jcr.PropertyType.BOOLEAN :
-                     PropertyDefinitionImpl<Boolean> boolDef =
-                        new PropertyDefinitionImpl<Boolean>(pdName, pdName, pdName, null, pdName, null,
-                           PropertyType.BOOLEAN, jcrPropertyDef.isProtected() ? Updatability.READONLY
-                              : Updatability.READWRITE, false, jcrPropertyDef.isMandatory(), true, true, null,
-                           jcrPropertyDef.isMultiple(), null, null);
-
-                     cmisPropDef = boolDef;
-                     break;
-
-                  case javax.jcr.PropertyType.DATE :
-                     PropertyDefinitionImpl<Calendar> dateDef =
-                        new PropertyDefinitionImpl<Calendar>(pdName, pdName, pdName, null, pdName, null,
-                           PropertyType.DATETIME, jcrPropertyDef.isProtected() ? Updatability.READONLY
-                              : Updatability.READWRITE, false, jcrPropertyDef.isMandatory(), true, true, null,
-                           jcrPropertyDef.isMultiple(), null, null);
-
-                     dateDef.setDateResolution(DateResolution.TIME);
-                     cmisPropDef = dateDef;
-                     break;
-
-                  case javax.jcr.PropertyType.DOUBLE :
-                     PropertyDefinitionImpl<BigDecimal> decimalDef =
-                        new PropertyDefinitionImpl<BigDecimal>(pdName, pdName, pdName, null, pdName, null,
-                           PropertyType.DECIMAL, jcrPropertyDef.isProtected() ? Updatability.READONLY
-                              : Updatability.READWRITE, false, jcrPropertyDef.isMandatory(), true, true, null,
-                           jcrPropertyDef.isMultiple(), null, null);
-
-                     decimalDef.setPrecision(Precision.Bit32);
-                     decimalDef.setMaxDecimal(CMIS.MAX_DECIMAL_VALUE);
-                     decimalDef.setMinDecimal(CMIS.MIN_DECIMAL_VALUE);
-                     cmisPropDef = decimalDef;
-                     break;
-
-                  case javax.jcr.PropertyType.LONG :
-                     PropertyDefinitionImpl<BigInteger> integerDef =
-                        new PropertyDefinitionImpl<BigInteger>(pdName, pdName, pdName, null, pdName, null,
-                           PropertyType.INTEGER, jcrPropertyDef.isProtected() ? Updatability.READONLY
-                              : Updatability.READWRITE, false, jcrPropertyDef.isMandatory(), true, true, null,
-                           jcrPropertyDef.isMultiple(), null, null);
-
-                     integerDef.setMaxInteger(CMIS.MAX_INTEGER_VALUE);
-                     integerDef.setMinInteger(CMIS.MIN_INTEGER_VALUE);
-                     cmisPropDef = integerDef;
-                     break;
-
-                  case javax.jcr.PropertyType.NAME : // TODO
-                     //                     CmisPropertyIdDefinitionType idDef = new CmisPropertyIdDefinitionType();
-                     //                     idDef.setPropertyType(EnumPropertyType.ID);
-                     //                     cmisPropDef = idDef;
-                     //                     break;
-                  case javax.jcr.PropertyType.REFERENCE :
-                  case javax.jcr.PropertyType.STRING :
-                  case javax.jcr.PropertyType.PATH :
-                  case javax.jcr.PropertyType.BINARY :
-                  case javax.jcr.PropertyType.UNDEFINED :
-                     PropertyDefinitionImpl<String> stringDef =
-                        new PropertyDefinitionImpl<String>(pdName, pdName, pdName, null, pdName, null,
-                           PropertyType.STRING, jcrPropertyDef.isProtected() ? Updatability.READONLY
-                              : Updatability.READWRITE, false, jcrPropertyDef.isMandatory(), true, true, null,
-                           jcrPropertyDef.isMultiple(), null, null);
-                     stringDef.setMaxLength(CMIS.MAX_STRING_LENGTH);
-                     cmisPropDef = stringDef;
-                     break;
-
-               }
-
-               typeDefinition.getPropertyDefinitions().add(cmisPropDef);
-            }
-         }
       }
    }
 

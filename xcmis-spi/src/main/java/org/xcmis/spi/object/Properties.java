@@ -51,6 +51,22 @@ public interface Properties
    Property<?> getProperty(String id);
 
    /**
+    * Set or update property. Changes may be updated immediately or after
+    * calling {@link Storage#saveObject(ObjectData)}. This is implementation
+    * specific. <code>null</code> value for property minds the property will be
+    * in 'value not set' state. If property is required then
+    * {@link ConstraintException} will be thrown.
+    * 
+    * @param value new property
+    * @throws ConstraintException if value of the property violates the
+    *         min/max/required/length constraints specified in the property
+    *         definition in the object type
+    * @throws NameConstraintViolationException if <i>cmis:name</i> specified in
+    *         properties throws conflict
+    */
+   void setProperty(Property<?> value) throws ConstraintException;
+
+   /**
     * Get subset of properties accepted by {@link PropertyFilter}
     * 
     * @param filter property filter
@@ -60,20 +76,20 @@ public interface Properties
 
    /**
     * Set or add new properties. Properties will be merged with existed one and
-    * not replace whole set of existed properties. Properties may be updated
+    * not replace whole set of existed properties. Changes may be updated
     * immediately or after calling {@link Storage#saveObject(ObjectData)}. This
     * is implementation specific. <code>null</code> value for property minds the
     * property will be in 'value not set' state. If property is required then
     * {@link ConstraintException} will be thrown.
     * 
-    * @param properties new set of properties
+    * @param values new set of properties
     * @throws ConstraintException if value of any of the properties violates the
     *         min/max/required/length constraints specified in the property
     *         definition in the object type
     * @throws NameConstraintViolationException if <i>cmis:name</i> specified in
     *         properties throws conflict
     */
-   void setValues(Map<String, Property<?>> properties) throws ConstraintException, NameConstraintViolationException;
+   void setValues(Map<String, Property<?>> values) throws ConstraintException, NameConstraintViolationException;
 
    // ---------- Shortcut access to properties. ------------- 
 
@@ -109,37 +125,4 @@ public interface Properties
 
    URI[] getURIs(String id);
 
-   // Setters
-
-   void setBoolean(String id, Boolean value);
-
-   void setBooleans(String id, Boolean[] value);
-
-   void setDate(String id, Calendar value);
-
-   void setDates(String id, Calendar[] value);
-
-   void setDecimal(String id, BigDecimal value);
-
-   void setDecimals(String id, BigDecimal[] value);
-
-   void setHTML(String id, String value);
-
-   void setHTMLs(String id, String[] value);
-
-   void setIds(String id, String value);
-
-   void setIds(String id, String[] value);
-
-   void setInteger(String id, BigInteger value);
-
-   void setIntegers(String id, BigInteger[] value);
-
-   void setString(String id, String value);
-
-   void setStrings(String id, String[] value);
-
-   void setURI(String id, URI value);
-
-   void setURIs(String id, URI[] value);
 }

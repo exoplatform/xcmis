@@ -20,6 +20,7 @@
 package org.xcmis.sp.jcr.exo.NEW;
 
 import org.xcmis.spi.TypeDefinition;
+import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.data.PolicyData;
 
 import javax.jcr.Node;
@@ -28,15 +29,21 @@ import javax.jcr.Node;
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-public class PolicyDataImpl extends AbstractObjectData implements PolicyData
+public class PolicyDataImpl extends BaseObjectData implements PolicyData
 {
 
    public PolicyDataImpl(Node node, TypeDefinition type)
    {
-      super(node, type);
+      super(type, node);
    }
 
    public String getPolicyText()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   public ContentStream getContentStream(String streamId)
    {
       // TODO Auto-generated method stub
       return null;

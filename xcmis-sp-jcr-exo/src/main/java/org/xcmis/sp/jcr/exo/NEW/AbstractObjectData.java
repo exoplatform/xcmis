@@ -19,21 +19,15 @@
 
 package org.xcmis.sp.jcr.exo.NEW;
 
-import org.xcmis.spi.AccessControlEntry;
 import org.xcmis.spi.BaseType;
+import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ConstraintException;
-import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
+import org.xcmis.spi.PropertyDefinition;
 import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.PropertyType;
-import org.xcmis.spi.RelationshipDirection;
-import org.xcmis.spi.StorageException;
 import org.xcmis.spi.TypeDefinition;
-import org.xcmis.spi.data.ContentStream;
-import org.xcmis.spi.data.FolderData;
 import org.xcmis.spi.data.ObjectData;
-import org.xcmis.spi.data.PolicyData;
-import org.xcmis.spi.data.RelationshipData;
 import org.xcmis.spi.impl.CmisVisitor;
 import org.xcmis.spi.object.Properties;
 import org.xcmis.spi.object.Property;
@@ -42,12 +36,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
 import java.util.Calendar;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
@@ -56,378 +47,381 @@ import javax.jcr.RepositoryException;
 public abstract class AbstractObjectData implements ObjectData, Properties
 {
 
-   protected Node node;
-
    protected final TypeDefinition type;
 
-   public AbstractObjectData(Node node, TypeDefinition type)
+   //   /**
+   //    * Temporary storage for object properties. For newly create object all
+   //    * properties will be stored here before calling
+   //    * {@link Storage#saveObject(ObjectData)}.
+   //    */
+   //   protected final Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+   //
+   //   /**
+   //    * Temporary storage for policies applied to object. For newly created all
+   //    * policies will be stored in here before calling
+   //    * {@link Storage#saveObject(ObjectData)}.
+   //    */
+   //   protected Set<PolicyData> policies;
+   //
+   //   /**
+   //    * Temporary storage for ACL applied to object. For newly created all ACL
+   //    * will be stored in here before calling
+   //    * {@link Storage#saveObject(ObjectData)}.
+   //    */
+   //   protected List<AccessControlEntry> acl;
+
+   public AbstractObjectData(TypeDefinition type)
    {
-      this.node = node;
       this.type = type;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public void accept(CmisVisitor visitor)
    {
       visitor.visit(this);
    }
 
-   public void applyPolicy(PolicyData policy) throws ConstraintException
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   public List<AccessControlEntry> getACL(boolean onlyBasicPermissions)
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
+   /**
+    * {@inheritDoc}
+    */
    public BaseType getBaseType()
    {
-      // TODO Auto-generated method stub
-      return null;
+      return type.getBaseId();
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public String getChangeToken()
    {
-      // TODO Auto-generated method stub
-      return null;
+      return getString(CMIS.CHANGE_TOKEN);
    }
 
-   public ContentStream getContentStream(String streamId)
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
+   /**
+    * {@inheritDoc}
+    */
    public String getCreatedBy()
    {
-      // TODO Auto-generated method stub
-      return null;
+      return getString(CMIS.CREATED_BY);
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public Calendar getCreationDate()
    {
-      // TODO Auto-generated method stub
-      return null;
+      return getDate(CMIS.CREATION_DATE);
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public Calendar getLastModificationDate()
    {
-      // TODO Auto-generated method stub
-      return null;
+      return getDate(CMIS.LAST_MODIFICATION_DATE);
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public String getLastModifiedBy()
    {
-      // TODO Auto-generated method stub
-      return null;
+      return getString(CMIS.LAST_MODIFIED_BY);
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public String getName()
    {
-      // TODO Auto-generated method stub
-      return null;
+      return getString(CMIS.NAME);
    }
 
-   public String getObjectId()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public FolderData getParent() throws ConstraintException
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public Collection<FolderData> getParents()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public Collection<PolicyData> getPolicies()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
+   /**
+    * {@inheritDoc}
+    */
    public Properties getProperties()
    {
-      // TODO Auto-generated method stub
-      return null;
+      return this;
    }
 
-   public ItemsIterator<RelationshipData> getRelationships(RelationshipDirection direction, String typeId,
-      boolean includeSubRelationshipTypes)
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
+   /**
+    * {@inheritDoc}
+    */
    public TypeDefinition getTypeDefinition()
    {
-      // TODO Auto-generated method stub
-      return null;
+      return type;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public String getTypeId()
    {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public boolean isNew()
-   {
-      // TODO Auto-generated method stub
-      return false;
-   }
-
-   public void removePolicy(PolicyData policy) throws ConstraintException
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   public void setACL(List<AccessControlEntry> acl) throws ConstraintException
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   public void setName(String name) throws NameConstraintViolationException
-   {
-      // TODO Auto-generated method stub
-
+      return type.getId();
    }
 
    // Properties
 
+   /**
+    * {@inheritDoc}
+    */
    public Map<String, Property<?>> getAll()
    {
-      // TODO Auto-generated method stub
-      return null;
+      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+      for (PropertyDefinition<?> def : type.getPropertyDefinitions())
+      {
+         String id = def.getId();
+         properties.put(id, getProperty(id));
+      }
+      return properties;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public Map<String, Property<?>> getSubset(PropertyFilter filter)
    {
-      // TODO Auto-generated method stub
-      return null;
+      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+      for (PropertyDefinition<?> def : type.getPropertyDefinitions())
+      {
+         String queryName = def.getQueryName();
+         if (!filter.accept(queryName))
+            continue;
+         String id = def.getId();
+         properties.put(id, getProperty(id));
+      }
+      return properties;
    }
 
-   public Property<?> getProperty(String id)
+   /**
+    * {@inheritDoc}
+    */
+   public void setValues(Map<String, Property<?>> values) throws ConstraintException, NameConstraintViolationException
    {
-      // TODO Auto-generated method stub
-      return null;
+      for (Property<?> value : values.values())
+      {
+         validate(value);
+         updateProperty(value);
+      }
    }
 
-   public void setValues(Map<String, Property<?>> properties) throws ConstraintException,
-      NameConstraintViolationException
+   public void setProperty(Property<?> value) throws ConstraintException
    {
-      // TODO Auto-generated method stub
-
+      validate(value);
+      updateProperty(value);
    }
 
+   protected abstract void updateProperty(Property<?> value);
+
+   // ------- Shortcuts for accessing properties. -------
+
+   /**
+    * {@inheritDoc}
+    */
    public Boolean getBoolean(String id)
    {
-      // TODO Auto-generated method stub
+      Property<?> property = getProperty(id);
+      if (property != null && property.getType() == PropertyType.BOOLEAN)
+         return (Boolean)getValue(property);
       return null;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public Boolean[] getBooleans(String id)
    {
-      // TODO Auto-generated method stub
+      Property<?> property = getProperty(id);
+      if (property != null && property.getType() == PropertyType.BOOLEAN)
+         return property.getValues().toArray(new Boolean[property.getValues().size()]);
       return null;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public Calendar getDate(String id)
    {
-      // TODO Auto-generated method stub
+      Property<?> property = getProperty(id);
+      if (property != null && property.getType() == PropertyType.DATETIME)
+         return (Calendar)getValue(property);
       return null;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public Calendar[] getDates(String id)
    {
-      // TODO Auto-generated method stub
+      Property<?> property = getProperty(id);
+      if (property != null && property.getType() == PropertyType.DATETIME)
+         return property.getValues().toArray(new Calendar[property.getValues().size()]);
       return null;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public BigDecimal getDecimal(String id)
    {
-      // TODO Auto-generated method stub
+      Property<?> property = getProperty(id);
+      if (property != null && property.getType() == PropertyType.DECIMAL)
+         return (BigDecimal)getValue(property);
       return null;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public BigDecimal[] getDecimals(String id)
    {
-      // TODO Auto-generated method stub
+      Property<?> property = getProperty(id);
+      if (property != null && property.getType() == PropertyType.DECIMAL)
+         return property.getValues().toArray(new BigDecimal[property.getValues().size()]);
       return null;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public String getHTML(String id)
    {
-      // TODO Auto-generated method stub
+      Property<?> property = getProperty(id);
+      if (property != null && property.getType() == PropertyType.HTML)
+         return (String)getValue(property);
       return null;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public String[] getHTMLs(String id)
    {
-      // TODO Auto-generated method stub
+      Property<?> property = getProperty(id);
+      if (property != null && property.getType() == PropertyType.HTML)
+         return property.getValues().toArray(new String[property.getValues().size()]);
       return null;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public String getId(String id)
    {
-      // TODO Auto-generated method stub
+      Property<?> property = getProperty(id);
+      if (property != null && property.getType() == PropertyType.ID)
+         return (String)getValue(property);
       return null;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public String[] getIds(String id)
    {
-      // TODO Auto-generated method stub
+      Property<?> property = getProperty(id);
+      if (property != null && property.getType() == PropertyType.ID)
+         return property.getValues().toArray(new String[property.getValues().size()]);
       return null;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public BigInteger getInteger(String id)
    {
-      // TODO Auto-generated method stub
+      Property<?> property = getProperty(id);
+      if (property != null && property.getType() == PropertyType.INTEGER)
+         return (BigInteger)getValue(property);
       return null;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public BigInteger[] getIntegers(String id)
    {
-      // TODO Auto-generated method stub
+      Property<?> property = getProperty(id);
+      if (property != null && property.getType() == PropertyType.INTEGER)
+         return property.getValues().toArray(new BigInteger[property.getValues().size()]);
       return null;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public String getString(String id)
    {
-      // TODO Auto-generated method stub
+      Property<?> property = getProperty(id);
+      if (property != null && property.getType() == PropertyType.STRING)
+         return (String)getValue(property);
       return null;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public String[] getStrings(String id)
    {
-      // TODO Auto-generated method stub
+      Property<?> property = getProperty(id);
+      if (property != null && property.getType() == PropertyType.STRING)
+         return property.getValues().toArray(new String[property.getValues().size()]);
       return null;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public URI getURI(String id)
    {
-      // TODO Auto-generated method stub
+      Property<?> property = getProperty(id);
+      if (property != null && property.getType() == PropertyType.URI)
+         return (URI)getValue(property);
       return null;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public URI[] getURIs(String id)
    {
-      // TODO Auto-generated method stub
+      Property<?> property = getProperty(id);
+      if (property != null && property.getType() == PropertyType.URI)
+         return property.getValues().toArray(new URI[property.getValues().size()]);
       return null;
    }
 
-   public void setBoolean(String id, Boolean value)
+   protected <V> void validate(Property<V> value)
    {
-      // TODO Auto-generated method stub
+      PropertyDefinition<?> def = type.getPropertyDefinition(value.getId());
 
+      if (def == null)
+         throw new ConstraintException("Property " + value.getId() + " is not in property definitions list of type "
+            + type.getId());
+
+      if (value.getType() != def.getPropertyType())
+         throw new ConstraintException("Property type is not match.");
+
+      if (!def.isMultivalued() && value.getValues().size() > 1)
+         throw new ConstraintException("Property " + value.getId() + " is not multi-valued.");
+
+      if (def.isRequired() && value.getValues().size() == 0)
+         throw new ConstraintException("Required property " + value.getId() + " can't be removed.");
+
+      // TODO : validate min/max/length
    }
 
-   public void setBooleans(String id, Boolean[] value)
+   // --------------- Implementation ----------------
+
+   protected <V> V getValue(Property<V> property)
    {
-      // TODO Auto-generated method stub
-
-   }
-
-   public void setDate(String id, Calendar value)
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   public void setDates(String id, Calendar[] value)
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   public void setDecimal(String id, BigDecimal value)
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   public void setDecimals(String id, BigDecimal[] value)
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   public void setHTML(String id, String value)
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   public void setHTMLs(String id, String[] value)
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   public void setIds(String id, String value)
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   public void setIds(String id, String[] value)
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   public void setInteger(String id, BigInteger value)
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   public void setIntegers(String id, BigInteger[] value)
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   public void setString(String id, String value)
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   public void setStrings(String id, String[] value)
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   public void setURI(String id, URI value)
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   public void setURIs(String id, URI[] value)
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   // --------------- Implementation -------------------
-
-   public void save()
-   {
-      // TODO Auto-generated method stub
+      List<V> v = property.getValues();
+      if (v.size() > 0)
+         return v.get(0);
+      return null;
    }
 
 }

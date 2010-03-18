@@ -48,8 +48,8 @@ public interface ObjectData
    // ACL
 
    /**
-    * Get ACL currently applied to object. If ACL capability is not supported
-    * then this method must throw {@link NotSupportedException}.
+    * Set new ACL for object. New ACL overwrite existed one. If ACL capability
+    * is not supported then this method must throw {@link NotSupportedException}.
     * 
     * @param acl ACL that should replace currently applied ACL
     * @throws ConstraintException if current object is not controllable by ACL,
