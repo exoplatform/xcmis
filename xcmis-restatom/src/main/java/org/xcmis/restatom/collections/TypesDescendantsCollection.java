@@ -27,14 +27,10 @@ import org.apache.abdera.model.Feed;
 import org.apache.abdera.model.Link;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
-import org.xcmis.core.CmisTypeDefinitionType;
-import org.xcmis.core.RepositoryService;
-import org.xcmis.messaging.CmisTypeContainer;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.RepositoryException;
 
 import java.util.Calendar;
 import java.util.List;
@@ -45,19 +41,14 @@ import java.util.List;
  */
 public class TypesDescendantsCollection extends CmisTypeCollection
 {
-
-   /** The repository service. */
-   protected final RepositoryService repositoryService;
-
    /**
     * Instantiates a new types descendants collection.
     * 
     * @param repositoryService the repository service
     */
-   public TypesDescendantsCollection(RepositoryService repositoryService)
+   public TypesDescendantsCollection()
    {
-      super(repositoryService);
-      this.repositoryService = repositoryService;
+      super();
       setHref("/typedescendants");
    }
 
@@ -97,7 +88,7 @@ public class TypesDescendantsCollection extends CmisTypeCollection
       {
          String repositoryId = getRepositoryId(request);
          List<CmisTypeContainer> descendants =
-            repositoryService.getTypeDescendants(repositoryId, typeId, depth, includePropertyDefinitions);
+            conn.getTypeDescendants(repositoryId, typeId, depth, includePropertyDefinitions);
 
          String down = getTypeChildrenLink(typeId, request);
          feed.addLink(down, AtomCMIS.LINK_DOWN, AtomCMIS.MEDIATYPE_ATOM_FEED, null, null, -1);
@@ -107,7 +98,7 @@ public class TypesDescendantsCollection extends CmisTypeCollection
             String typeLink = getObjectTypeLink(typeId, request);
             feed.addLink(typeLink, AtomCMIS.LINK_VIA, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null, null, -1);
 
-            CmisTypeDefinitionType type = repositoryService.getTypeDefinition(repositoryId, typeId);
+            CmisTypeDefinitionType type = conn.getTypeDefinition(repositoryId, typeId);
             String parentType = type.getParentId();
             if (parentType != null)
             {

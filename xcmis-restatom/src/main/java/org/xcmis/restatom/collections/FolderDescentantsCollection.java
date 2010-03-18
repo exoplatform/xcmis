@@ -26,18 +26,12 @@ import org.apache.abdera.model.Feed;
 import org.apache.abdera.model.Link;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
-import org.xcmis.core.CmisObjectType;
-import org.xcmis.core.EnumIncludeRelationships;
-import org.xcmis.core.NavigationService;
-import org.xcmis.core.ObjectService;
-import org.xcmis.core.RepositoryService;
-import org.xcmis.core.VersioningService;
-import org.xcmis.messaging.CmisObjectInFolderContainerType;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.spi.FilterNotValidException;
+import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.RepositoryException;
+import org.xcmis.spi.object.CmisObject;
 
 import java.util.List;
 
@@ -49,22 +43,12 @@ import java.util.List;
 public class FolderDescentantsCollection extends CmisObjectCollection
 {
 
-   /** The navigation service. */
-   protected NavigationService navigationService;
-
    /**
     * Instantiates a new folder descentants collection.
-    * 
-    * @param repositoryService the repository service
-    * @param objectService the object service
-    * @param versioningService the versioning service
-    * @param navigationService the navigation service
     */
-   public FolderDescentantsCollection(RepositoryService repositoryService, ObjectService objectService,
-      VersioningService versioningService, NavigationService navigationService)
+   public FolderDescentantsCollection()
    {
-      super(repositoryService, objectService, versioningService);
-      this.navigationService = navigationService;
+      super();
       setHref("/descendants");
    }
 
@@ -72,7 +56,7 @@ public class FolderDescentantsCollection extends CmisObjectCollection
     * {@inheritDoc}
     */
    @Override
-   public Iterable<CmisObjectType> getEntries(RequestContext request) throws ResponseContextException
+   public Iterable<CmisObject> getEntries(RequestContext request) throws ResponseContextException
    {
       // To process hierarchically structure override addFeedDetails(Feed, RequestContext) method.
       throw new UnsupportedOperationException("entries");
@@ -149,14 +133,13 @@ public class FolderDescentantsCollection extends CmisObjectCollection
       //      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
       String propertyFilter = null;
       String renditionFilter = request.getParameter(AtomCMIS.PARAM_RENDITION_FILTER);
-      EnumIncludeRelationships includeRelationships;
+      IncludeRelationships includeRelationships;
       try
       {
          includeRelationships =
             request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS) == null
-               || request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS).length() == 0
-               ? EnumIncludeRelationships.NONE : EnumIncludeRelationships.fromValue(request
-                  .getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
+               || request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS).length() == 0 ? IncludeRelationships.NONE
+               : IncludeRelationships.fromValue(request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
       }
       catch (IllegalArgumentException iae)
       {
@@ -179,7 +162,7 @@ public class FolderDescentantsCollection extends CmisObjectCollection
       try
       {
          List<CmisObjectInFolderContainerType> descendants =
-            navigationService.getDescendants(getRepositoryId(request), getId(request), depth, includeAllowableActions,
+            conn.getDescendants(getRepositoryId(request), getId(request), depth, includeAllowableActions,
                includeRelationships, includePathSegments, propertyFilter, renditionFilter);
 
          if (descendants.size() > 0)
@@ -245,11 +228,11 @@ public class FolderDescentantsCollection extends CmisObjectCollection
          feed.addLink(folderTree, AtomCMIS.LINK_CMIS_FOLDERTREE, AtomCMIS.MEDIATYPE_ATOM_FEED, null, null, -1);
 
       String repositoryId = getRepositoryId(request);
-      if (!id.equals(repositoryService.getRepositoryInfo(repositoryId).getRootFolderId()))
+      if (!id.equals(conn.getRepositoryInfo(repositoryId).getRootFolderId()))
       {
          try
          {
-            CmisObjectType parent = navigationService.getFolderParent(repositoryId, id, null);
+            CmisObject parent = conn.getFolderParent(repositoryId, id, null);
             feed.addLink(getObjectLink(getId(parent), request), AtomCMIS.LINK_UP, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null,
                null, -1);
          }

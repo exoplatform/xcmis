@@ -181,23 +181,17 @@ public class ProviderImpl extends AbstractProvider
          "streamid");
 
       SimpleWorkspaceInfo wInfo = new SimpleWorkspaceInfo();
-      wInfo.addCollection(new FolderChildrenCollection(repositoryService, objectService, versioningService,
-         navigationService));
-      wInfo
-         .addCollection(new ParentsCollection(repositoryService, objectService, versioningService, navigationService));
-      wInfo.addCollection(new RelationshipsCollection(repositoryService, objectService, versioningService,
-         relationshipService));
-      wInfo.addCollection(new FolderDescentantsCollection(repositoryService, objectService, versioningService,
-         navigationService));
-      wInfo.addCollection(new FolderTreeCollection(repositoryService, objectService, versioningService,
-         navigationService));
-      wInfo.addCollection(new TypesChildrenCollection(repositoryService));
-      wInfo.addCollection(new TypesDescendantsCollection(repositoryService));
-      wInfo.addCollection(new CheckedOutCollection(repositoryService, objectService, versioningService,
-         navigationService));
-      wInfo.addCollection(new AllVersionsCollection(repositoryService, objectService, versioningService));
-      wInfo.addCollection(new QueryCollection(repositoryService, objectService, versioningService, queryService));
-      wInfo.addCollection(new PoliciesCollection(repositoryService, objectService, versioningService, policyService));
+      wInfo.addCollection(new FolderChildrenCollection());
+      wInfo.addCollection(new ParentsCollection());
+      wInfo.addCollection(new RelationshipsCollection());
+      wInfo.addCollection(new FolderDescentantsCollection());
+      wInfo.addCollection(new FolderTreeCollection());
+      wInfo.addCollection(new TypesChildrenCollection());
+      wInfo.addCollection(new TypesDescendantsCollection());
+      wInfo.addCollection(new CheckedOutCollection());
+      wInfo.addCollection(new AllVersionsCollection());
+      wInfo.addCollection(new QueryCollection());
+      wInfo.addCollection(new PoliciesCollection());
       // The other described patterns according collections by WorkspaceManagerImpl#getCollectionAdapter 
       manager = new WorkspaceManagerImpl();
       manager.addWorkspace(wInfo);

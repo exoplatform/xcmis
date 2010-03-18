@@ -33,14 +33,9 @@ import org.apache.abdera.protocol.server.impl.AbstractCollectionAdapter;
 import org.apache.abdera.protocol.server.impl.AbstractEntityCollectionAdapter;
 import org.apache.abdera.protocol.server.servlet.ServletRequestContext;
 import org.apache.commons.fileupload.FileItem;
-import org.xcmis.atom.CmisUriTemplateType;
+import org.exoplatform.services.rest.resource.ResourceContainer;
 import org.xcmis.core.AccessControlService;
-import org.xcmis.core.CmisAccessControlListType;
-import org.xcmis.core.CmisAllowableActionsType;
-import org.xcmis.core.CmisRepositoryInfoType;
 import org.xcmis.core.DiscoveryService;
-import org.xcmis.core.EnumACLPropagation;
-import org.xcmis.core.EnumUnfileObject;
 import org.xcmis.core.MultifilingService;
 import org.xcmis.core.NavigationService;
 import org.xcmis.core.ObjectService;
@@ -48,15 +43,14 @@ import org.xcmis.core.PolicyService;
 import org.xcmis.core.RelationshipService;
 import org.xcmis.core.RepositoryService;
 import org.xcmis.core.VersioningService;
-import org.xcmis.messaging.CmisRepositoryEntryType;
-import org.exoplatform.services.rest.resource.ResourceContainer;
-import org.xcmis.restatom.abdera.AccessControlListTypeElement;
 import org.xcmis.restatom.abdera.AllowableActionsElement;
 import org.xcmis.restatom.abdera.RepositoryInfoTypeElement;
 import org.xcmis.restatom.abdera.UriTemplateTypeElement;
+import org.xcmis.restatom.types.CmisUriTemplateType;
+import org.xcmis.spi.AllowableActions;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.RepositoryException;
+import org.xcmis.spi.RepositoryInfo;
 import org.xcmis.spi.UpdateConflictException;
 
 import java.io.IOException;
@@ -322,7 +316,7 @@ public class AtomCmisService implements ResourceContainer
    {
       try
       {
-         CmisAllowableActionsType result = objectService.getAllowableActions(repositoryId, objectId);
+         AllowableActions result = objectService.getAllowableActions(repositoryId, objectId);
          AllowableActionsElement el = AbderaFactory.getInstance().getFactory().newElement(AtomCMIS.ALLOWABLE_ACTIONS);
          el.build(result);
          return Response.ok(el).header(HttpHeaders.CACHE_CONTROL, "no-cache").build();
@@ -629,7 +623,7 @@ public class AtomCmisService implements ResourceContainer
    protected Workspace addCmisRepository(HttpServletRequest httpRequest, Service service, String repositoryId,
       URI baseUri)
    {
-      CmisRepositoryInfoType repoInfo;
+      RepositoryInfo repoInfo;
       try
       {
          repoInfo = repositoryService.getRepositoryInfo(repositoryId);

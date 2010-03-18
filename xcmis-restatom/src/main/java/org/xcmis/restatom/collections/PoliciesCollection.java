@@ -28,23 +28,15 @@ import org.apache.abdera.protocol.server.ResponseContext;
 import org.apache.abdera.protocol.server.TargetType;
 import org.apache.abdera.protocol.server.context.EmptyResponseContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
-import org.xcmis.core.CmisObjectType;
-import org.xcmis.core.CmisProperty;
-import org.xcmis.core.CmisPropertyId;
-import org.xcmis.core.EnumIncludeRelationships;
-import org.xcmis.core.EnumPropertiesBase;
-import org.xcmis.core.ObjectService;
-import org.xcmis.core.PolicyService;
-import org.xcmis.core.RepositoryService;
-import org.xcmis.core.VersioningService;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.abdera.ObjectTypeElement;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FilterNotValidException;
+import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.RepositoryException;
+import org.xcmis.spi.object.CmisObject;
 
 import java.util.HashMap;
 import java.util.List;
@@ -58,22 +50,12 @@ import java.util.Map;
 public class PoliciesCollection extends CmisObjectCollection
 {
 
-   /** The policy service. */
-   protected final PolicyService policyService;
-
    /**
     * Instantiates a new policies collection.
-    * 
-    * @param repositoryService the repository service
-    * @param objectService the object service
-    * @param versioningService the versioning service
-    * @param policyService the policy service
     */
-   public PoliciesCollection(RepositoryService repositoryService, ObjectService objectService,
-      VersioningService versioningService, PolicyService policyService)
+   public PoliciesCollection()
    {
-      super(repositoryService, objectService, versioningService);
-      this.policyService = policyService;
+      super();
       setHref("/policies");
    }
 
@@ -114,8 +96,7 @@ public class PoliciesCollection extends CmisObjectCollection
       try
       {
          String objectId = getId(request);
-         List<CmisObjectType> list =
-            policyService.getAppliedPolicies(getRepositoryId(request), objectId, propertyFilter);
+         List<CmisObject> list = conn.getAppliedPolicies(getRepositoryId(request), objectId, propertyFilter);
          if (list.size() > 0)
          {
             // add cmisra:numItems
@@ -132,7 +113,7 @@ public class PoliciesCollection extends CmisObjectCollection
                (skipCount + maxItems) < list.size(), //
                request);
 
-            for (CmisObjectType one : list)
+            for (CmisObject one : list)
             {
                Entry e = feed.addEntry();
                IRI feedIri = new IRI(getFeedIriForEntry(one, request));
@@ -177,7 +158,7 @@ public class PoliciesCollection extends CmisObjectCollection
       }
 
       ObjectTypeElement objectElement = entry.getFirstChild(AtomCMIS.OBJECT);
-      CmisObjectType object = objectElement.getObject();
+      CmisObject object = objectElement.getObject();
 
       String policyId = null;
 
@@ -192,7 +173,7 @@ public class PoliciesCollection extends CmisObjectCollection
       {
          // apply policy
          if (policyId != null)
-            policyService.applyPolicy(repositoryId, policyId, objectId);
+            conn.applyPolicy(repositoryId, policyId, objectId);
       }
       catch (ConstraintException cve)
       {
@@ -219,8 +200,8 @@ public class PoliciesCollection extends CmisObjectCollection
       try
       {
          // updated object
-         addEntryDetails(request, entry, request.getResolvedUri(), (CmisObjectType)objectService.getObject(
-            repositoryId, policyId, true, EnumIncludeRelationships.BOTH, true, true, null, null));
+         addEntryDetails(request, entry, request.getResolvedUri(), (CmisObject)objectService.getObject(repositoryId,
+            policyId, true, IncludeRelationships.BOTH, true, true, null, null));
       }
       catch (ResponseContextException rce)
       {
@@ -263,7 +244,7 @@ public class PoliciesCollection extends CmisObjectCollection
       }
 
       ObjectTypeElement objectElement = entry.getFirstChild(AtomCMIS.OBJECT);
-      CmisObjectType object = objectElement.getObject();
+      CmisObject object = objectElement.getObject();
 
       String policyId = null;
 
@@ -276,7 +257,7 @@ public class PoliciesCollection extends CmisObjectCollection
       try
       {
          if (policyId != null)
-            policyService.removePolicy(getRepositoryId(request), policyId, objectId);
+            conn.removePolicy(getRepositoryId(request), policyId, objectId);
          ResponseContext response = new EmptyResponseContext(200);
          return response;
       }
@@ -306,7 +287,7 @@ public class PoliciesCollection extends CmisObjectCollection
     * {@inheritDoc}
     */
    @Override
-   public Iterable<CmisObjectType> getEntries(RequestContext request) throws ResponseContextException
+   public Iterable<CmisObject> getEntries(RequestContext request) throws ResponseContextException
    {
       // To process hierarchically structure override addFeedDetails(Feed, RequestContext) method.
       throw new UnsupportedOperationException("policies");

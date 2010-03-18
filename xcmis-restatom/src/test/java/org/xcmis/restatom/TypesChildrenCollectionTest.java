@@ -19,21 +19,14 @@
 
 package org.xcmis.restatom;
 
-import org.xcmis.core.CmisPropertyDefinitionType;
-import org.xcmis.core.CmisPropertyStringDefinitionType;
-import org.xcmis.core.CmisTypeDefinitionType;
-import org.xcmis.core.CmisTypeDocumentDefinitionType;
-import org.xcmis.core.EnumBaseObjectTypeIds;
-import org.xcmis.core.EnumCardinality;
-import org.xcmis.core.EnumContentStreamAllowed;
-import org.xcmis.core.EnumPropertyType;
-import org.xcmis.core.EnumUpdatability;
 import org.exoplatform.services.rest.impl.ContainerResponse;
 import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
 import org.w3c.dom.NodeList;
-import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.ContentStreamAllowed;
+import org.xcmis.spi.PropertyDefinition;
 import org.xcmis.spi.TypeNotFoundException;
+import org.xcmis.spi.impl.PropertyDefinitionImpl;
 
 import java.io.ByteArrayInputStream;
 
@@ -67,10 +60,10 @@ public class TypesChildrenCollectionTest extends BaseTest
       article.setParentId("cmis:document");
       article.setQueryable(false);
       article.setQueryName("cmis:article");
-      article.setContentStreamAllowed(EnumContentStreamAllowed.ALLOWED);
+      article.setContentStreamAllowed(ContentStreamAllowed.ALLOWED);
       article.setVersionable(false);
 
-      CmisPropertyStringDefinitionType pd = new CmisPropertyStringDefinitionType();
+      PropertyDefinition pd = new PropertyDefinitionImpl<T>
       pd.setCardinality(EnumCardinality.SINGLE);
       pd.setUpdatability(EnumUpdatability.READWRITE);
       pd.setDisplayName("cmis:hello");

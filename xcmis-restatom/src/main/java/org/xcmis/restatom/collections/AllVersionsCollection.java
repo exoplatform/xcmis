@@ -25,16 +25,12 @@ import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
-import org.xcmis.core.CmisObjectType;
-import org.xcmis.core.ObjectService;
-import org.xcmis.core.RepositoryService;
-import org.xcmis.core.VersioningService;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.RepositoryException;
+import org.xcmis.spi.object.CmisObject;
 
 import java.util.List;
 
@@ -50,15 +46,10 @@ public class AllVersionsCollection extends CmisObjectCollection
 
    /**
     * Instantiates a new all versions collection.
-    * 
-    * @param repositoryService the repository service
-    * @param objectService the object service
-    * @param versioningService the versioning service
     */
-   public AllVersionsCollection(RepositoryService repositoryService, ObjectService objectService,
-      VersioningService versioningService)
+   public AllVersionsCollection()
    {
-      super(repositoryService, objectService, versioningService);
+      super();
       setHref("/versions");
    }
 
@@ -100,8 +91,8 @@ public class AllVersionsCollection extends CmisObjectCollection
 
       try
       {
-         List<CmisObjectType> list =
-            versioningService.getAllVersions(getRepositoryId(request), objectId, includeAllowableActions,
+         List<CmisObject> list =
+            conn.getAllVersions(getRepositoryId(request), objectId, includeAllowableActions,
                propertyFilter);
          if (list.size() > 0)
          {
@@ -118,7 +109,7 @@ public class AllVersionsCollection extends CmisObjectCollection
                (skipCount + maxItems) < list.size(), //
                request);
 
-            for (CmisObjectType one : list)
+            for (CmisObject one : list)
             {
                Entry entry = feed.addEntry();
                IRI feedIri = new IRI(getFeedIriForEntry(one, request));
@@ -151,7 +142,7 @@ public class AllVersionsCollection extends CmisObjectCollection
    /**
     * {@inheritDoc}
     */
-   public Iterable<CmisObjectType> getEntries(RequestContext request) throws ResponseContextException
+   public Iterable<CmisObject> getEntries(RequestContext request) throws ResponseContextException
    {
       // To process hierarchically structure override addFeedDetails(Feed, RequestContext) method.
       throw new UnsupportedOperationException("versions");

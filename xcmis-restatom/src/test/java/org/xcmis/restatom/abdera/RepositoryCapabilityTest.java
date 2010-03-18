@@ -21,17 +21,10 @@ package org.xcmis.restatom.abdera;
 
 import junit.framework.TestCase;
 
-import org.xcmis.core.CmisRepositoryCapabilitiesType;
-import org.xcmis.core.EnumCapabilityACL;
-import org.xcmis.core.EnumCapabilityChanges;
-import org.xcmis.core.EnumCapabilityContentStreamUpdates;
-import org.xcmis.core.EnumCapabilityJoin;
-import org.xcmis.core.EnumCapabilityQuery;
-import org.xcmis.core.EnumCapabilityRendition;
 import org.xcmis.restatom.AbderaFactory;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.NamespaceResolver;
-import org.xcmis.restatom.abdera.RepositoryCapabilitiesTypeElement;
+import org.xcmis.spi.RepositoryCapabilities;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -50,7 +43,7 @@ public class RepositoryCapabilityTest extends TestCase
 
    public void testWriteCapability() throws Exception
    {
-      CmisRepositoryCapabilitiesType capabilities = new CmisRepositoryCapabilitiesType();
+      RepositoryCapabilities capabilities = new RepositoryCapabilities();
       capabilities.setCapabilityACL(EnumCapabilityACL.NONE);
       capabilities.setCapabilityAllVersionsSearchable(true);
       capabilities.setCapabilityChanges(EnumCapabilityChanges.NONE);

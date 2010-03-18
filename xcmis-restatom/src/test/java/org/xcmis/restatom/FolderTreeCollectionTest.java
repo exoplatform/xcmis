@@ -26,11 +26,10 @@ package org.xcmis.restatom;
  *         Zavizionov</a>
  * @version $Id: FolderTreeCollectionTest.java 2 2010-02-04 17:21:49Z andrew00x $ Jul 28, 2009
  */
-import org.xcmis.core.EnumIncludeRelationships;
-import org.xcmis.restatom.AtomCMIS;
 import org.exoplatform.services.rest.impl.ContainerResponse;
 import org.exoplatform.services.rest.impl.MultivaluedMapImpl;
 import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
+import org.xcmis.spi.IncludeRelationships;
 
 import java.io.ByteArrayInputStream;
 import java.util.Arrays;
@@ -81,7 +80,7 @@ public class FolderTreeCollectionTest extends BaseTest
          + cmisRepositoryId //
          + "/foldertree/" //
          + folderId + "?depth=" + depth //
-         + "&" + AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS + "=" + EnumIncludeRelationships.NONE.value() //
+         + "&" + AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS + "=" + IncludeRelationships.NONE.value() //
          + "&" + AtomCMIS.PARAM_INCLUDE_PATH_SEGMENT + "=" + "true";
 
       MultivaluedMap<String, String> headers = new MultivaluedMapImpl();

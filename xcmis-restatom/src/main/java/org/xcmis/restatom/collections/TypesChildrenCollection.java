@@ -26,13 +26,9 @@ import org.apache.abdera.model.Feed;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.TargetType;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
-import org.xcmis.core.CmisTypeDefinitionType;
-import org.xcmis.core.RepositoryService;
-import org.xcmis.messaging.CmisTypeDefinitionListType;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
 import org.xcmis.spi.CMIS;
-import org.xcmis.spi.RepositoryException;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -49,12 +45,9 @@ public class TypesChildrenCollection extends CmisTypeCollection
 
    /**
     * Instantiates a new types children collection.
-    * 
-    * @param repositoryService the repository service
     */
-   public TypesChildrenCollection(RepositoryService repositoryService)
+   public TypesChildrenCollection()
    {
-      super(repositoryService);
       setHref("/types");
    }
 
@@ -96,7 +89,7 @@ public class TypesChildrenCollection extends CmisTypeCollection
       {
          String repositoryId = getRepositoryId(request);
          CmisTypeDefinitionListType list =
-            repositoryService.getTypeChildren(repositoryId, typeId, includePropertyDefinitions, maxItems, skipCount);
+            conn.getTypeChildren(repositoryId, typeId, includePropertyDefinitions, maxItems, skipCount);
          addPageLinks(typeId, feed, "types", maxItems, skipCount, list.getNumItems() == null ? -1 : list.getNumItems()
             .intValue(), list.isHasMoreItems(), request);
 
@@ -108,7 +101,7 @@ public class TypesChildrenCollection extends CmisTypeCollection
             String typeLink = getObjectTypeLink(typeId, request);
             feed.addLink(typeLink, AtomCMIS.LINK_VIA, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null, null, -1);
 
-            CmisTypeDefinitionType type = repositoryService.getTypeDefinition(repositoryId, typeId);
+            CmisTypeDefinitionType type = conn.getTypeDefinition(repositoryId, typeId);
             String parentType = type.getParentId();
             if (parentType != null)
             {

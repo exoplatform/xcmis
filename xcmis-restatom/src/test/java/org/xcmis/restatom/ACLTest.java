@@ -19,15 +19,11 @@
 
 package org.xcmis.restatom;
 
-import org.xcmis.core.CmisAccessControlEntryType;
-import org.xcmis.core.CmisAccessControlListType;
-import org.xcmis.core.CmisAccessControlPrincipalType;
-import org.xcmis.core.EnumACLPropagation;
-import org.xcmis.core.EnumBasicPermissions;
+import org.apache.abdera.model.Entry;
 import org.exoplatform.services.rest.impl.ContainerResponse;
 import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
 import org.w3c.dom.NodeList;
-import org.xcmis.spi.object.Entry;
+import org.xcmis.spi.AccessControlEntry;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
@@ -50,13 +46,13 @@ public class ACLTest extends BaseTest
       Entry doc = createDocument(testFolderId, "doc1", null, null);
       String docId = doc.getObjectId();
       CmisAccessControlListType addACL = new CmisAccessControlListType();
-      CmisAccessControlEntryType entry = new CmisAccessControlEntryType();
+      AccessControlEntry entry = new AccessControlEntry();
       CmisAccessControlPrincipalType principal = new CmisAccessControlPrincipalType();
       principal.setPrincipalId("Makis");
       entry.setPrincipal(principal);
       entry.getPermission().add(EnumBasicPermissions.CMIS_WRITE.value());
       addACL.getPermission().add(entry);
-      CmisAccessControlEntryType entry1 = new CmisAccessControlEntryType();
+      AccessControlEntry entry1 = new AccessControlEntry();
       CmisAccessControlPrincipalType principal1 = new CmisAccessControlPrincipalType();
       principal1.setPrincipalId("root");
       entry1.setPrincipal(principal1);
@@ -130,7 +126,7 @@ public class ACLTest extends BaseTest
       assertEquals(201, resp.getStatus());
       
       CmisAccessControlListType acl = aclService.getACL(cmisRepositoryId, docId, true);
-      for(CmisAccessControlEntryType ace : acl.getPermission())
+      for(AccessControlEntry ace : acl.getPermission())
       {
          if ("Makis".equals(ace.getPrincipal().getPrincipalId()))
          {

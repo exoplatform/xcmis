@@ -211,8 +211,8 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
          if (relationship != null && relationship.size() > 0)
          {
             ObjectTypeElement relationshipElement = addExtension(AtomCMIS.RELATIOSNHIP);
-            for (CmisObject cmisObjectType : relationship)
-               relationshipElement.build(cmisObjectType);
+            for (CmisObject cmisObject : relationship)
+               relationshipElement.build(cmisObject);
          }
 
          // ChangeEventInfo

@@ -37,6 +37,7 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.ProviderImpl;
+import org.xcmis.spi.Connection;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -53,6 +54,8 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
 
    /** The logger. */
    private static final Log LOG = ExoLogger.getLogger(AbstractCmisCollection.class);
+   
+   protected Connection conn = null;
 
    /**
     * Instantiates a new abstract cmis collection.

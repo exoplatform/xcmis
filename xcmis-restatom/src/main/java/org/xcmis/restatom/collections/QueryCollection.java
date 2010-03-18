@@ -42,22 +42,12 @@ import java.util.Calendar;
 public class QueryCollection extends CmisObjectCollection
 {
 
-   /** The query service. */
-   protected final DiscoveryService queryService;
-
    /**
     * Instantiates a new query collection.
-    * 
-    * @param repositoryService the repository service
-    * @param objectService the object service
-    * @param versioningService the versioning service
-    * @param queryService the query service
     */
-   public QueryCollection(RepositoryService repositoryService, ObjectService objectService,
-      VersioningService versioningService, DiscoveryService queryService)
+   public QueryCollection()
    {
-      super(repositoryService, objectService, versioningService);
-      this.queryService = queryService;
+      super();
       setHref("/query");
    }
 
@@ -91,7 +81,7 @@ public class QueryCollection extends CmisObjectCollection
       {
          Document<Element> doc = request.getDocument();
          QueryTypeElement queryElement = (QueryTypeElement)doc.getRoot();
-         return queryService.query(getRepositoryId(request), queryElement.getStatement(),
+         return conn.query(getRepositoryId(request), queryElement.getStatement(),
             queryElement.isSearchAllVersions(), queryElement.isIncludeAllowableActions(),
             queryElement.getIncludeRelationships(), queryElement.getRenditionFilter(), queryElement.getPageSize(),
             queryElement.getSkipCount()).getItems();
