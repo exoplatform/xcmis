@@ -45,6 +45,7 @@ import org.xcmis.search.antlr.FullTextLexer;
 import org.xcmis.search.antlr.FullTextParser;
 import org.xcmis.search.lucene.LuceneQueryableIndexStorage.FieldNameResolver;
 import org.xcmis.search.lucene.content.ErrorReporterImpl;
+import org.xcmis.search.lucene.index.ExtendedNumberTools;
 import org.xcmis.search.lucene.index.FieldNames;
 import org.xcmis.search.lucene.index.IndexException;
 import org.xcmis.search.lucene.search.CaseInsensitiveRangeQuery;
@@ -722,10 +723,13 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
       // get query builded by Constraint.
       resultQuery.add((Query)queryBuilderStack.pop(), Occur.MUST_NOT);
       // combine with previous
-      if (queryBuilderStack.size() > 0){
+      if (queryBuilderStack.size() > 0)
+      {
          resultQuery.add((Query)queryBuilderStack.pop(), Occur.MUST);
-      }else{
-         //TODO optimize  by adding initial query
+      }
+      else
+      {
+         // TODO optimize by adding initial query
          resultQuery.add(new MatchAllDocsQuery(), Occur.MUST);
       }
 
@@ -785,10 +789,23 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
 
       Validate.isTrue(queryBuilderStack.peek() instanceof Operator, "Stack should contains comparation operator ");
       Operator operator = (Operator)queryBuilderStack.pop();
-
-      Validate.isTrue(queryBuilderStack.peek() instanceof String, "Stack should contains static value. But found "
-         + queryBuilderStack.peek().getClass().getCanonicalName());
-      String staticStingValue = (String)queryBuilderStack.pop();
+      Object staticValue = queryBuilderStack.peek();
+      Validate.isTrue((staticValue instanceof String || staticValue instanceof Double),
+         "Stack should contains static value. But found "
+            + queryBuilderStack.peek().getClass().getCanonicalName());
+      staticValue = queryBuilderStack.pop();
+      
+      String staticStingValue = null;
+      //convert static value to string
+      //TODO check cast system
+      if (staticValue instanceof String)
+      {
+         staticStingValue = (String)staticValue;
+      }
+      else if (staticValue instanceof Double)
+      {
+         staticStingValue = ExtendedNumberTools.doubleToString((Double)staticValue);
+      }
 
       Term propertyValueTerm = new Term(FieldNames.createPropertyFieldName(node.getPropertyName()), staticStingValue);
       TermQuery propertyValueQuery = new TermQuery(propertyValueTerm);
