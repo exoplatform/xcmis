@@ -116,7 +116,8 @@ public class Validator extends AbstractModelVisitor
       boolean columnIsRequired)
    {
       Table table = checkSelectorExistance(selectorName);
-      if (table != null)
+      //no need to check select ALL properties.
+      if (table != null && !propertyName.equals("*"))
       {
          Schema.Column column = table.getColumn(propertyName);
          if (column == null)
