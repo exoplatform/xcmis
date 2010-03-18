@@ -17,38 +17,49 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.xcmis.sp.jcr.exo.NEW;
+package org.xcmis.spi.impl;
 
-import org.xcmis.core.EnumPropertyType;
+import org.xcmis.spi.PermissionMapping;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */
-public class PropertyData<T>
+public class PermissionMappingImpl implements PermissionMapping
 {
-   private final EnumPropertyType type;
 
-   private final T[] value;
+   private String key;
 
-   public PropertyData(T[] value, EnumPropertyType type)
+   private Set<String> permissions;
+
+   public PermissionMappingImpl(String key, Collection<String> permissions)
    {
-      if (value == null)
-         throw new NullPointerException("Value may not be null.");
-      if (type == null)
-         throw new NullPointerException("Property type may not be null.");
-      this.value = value;
-      this.type = type;
+      this.key = key;
+      if (permissions != null)
+         this.permissions = new HashSet<String>(permissions);
    }
 
-   public EnumPropertyType getPropertyType()
+   /**
+    * {@inheritDoc}
+    */
+   public String getKey()
    {
-      return type;
+      return key;
    }
 
-   public T[] getValue()
+   /**
+    * {@inheritDoc}
+    */
+   public Collection<String> getPermissions()
    {
-      return value;
+      if (permissions == null)
+         return Collections.emptyList();
+      return Collections.unmodifiableSet(permissions);
    }
 
 }

@@ -123,12 +123,16 @@ public interface PropertyDefinition<T>
     * Indicates is choice for property value is open. If <code>false</code> then
     * value of property must be one of provided by {@link #getChoices()} If
     * <code>true</code> then value of can be other then provided by method
-    * described above.
+    * described above. This attribute should be provide only for properties that
+    * provides choices (method {@link #getChoices()} returns other then
+    * <code>null</code> or empty list). For other properties this method should
+    * return <code>null</code>.
     * 
     * @return <code>true</code> if choice of value of property is open
-    *         <code>false</code> otherwise
+    *         <code>false</code> otherwise and <code>null</code> for properties
+    *         that not provide choices
     */
-   boolean isOpenChoice();
+   Boolean isOpenChoice();
 
    /**
     * Indicates is property id multi-valued or not.

@@ -99,9 +99,13 @@ public interface PermissionMapping
    String CAN_APPLY_ACL_OBJECT = "canApplyACL.Object";
 
    /**
-    * @param actionName action name, by default expected to one of CAN_... .
-    * @return set of permission needed to perform specified action
+    * @return actionName action name, by default expected to one of CAN_... .
     */
-   Collection<String> getPermission(String actionName);
+   String getKey();
+   
+   /**
+    * @return set of permission needed to perform action {@link #getKey()}
+    */
+   Collection<String> getPermissions();
 
 }

@@ -20,27 +20,29 @@
 package org.xcmis.sp.jcr.exo.NEW;
 
 import org.exoplatform.services.jcr.core.ExtendedSession;
+import org.exoplatform.services.jcr.core.nodetype.ExtendedNodeTypeManager;
+import org.exoplatform.services.jcr.core.nodetype.NodeTypeValue;
+import org.exoplatform.services.jcr.core.nodetype.PropertyDefinitionValue;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.sp.jcr.exo.JcrCMIS;
-import org.xcmis.spi.ACLCapability;
 import org.xcmis.spi.AllowableActions;
 import org.xcmis.spi.BaseType;
-import org.xcmis.spi.CapabilityACL;
-import org.xcmis.spi.CapabilityChanges;
-import org.xcmis.spi.CapabilityContentStreamUpdatable;
-import org.xcmis.spi.CapabilityJoin;
-import org.xcmis.spi.CapabilityQuery;
+import org.xcmis.spi.CMIS;
 import org.xcmis.spi.CapabilityRendition;
 import org.xcmis.spi.ChangeEvent;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStreamAllowed;
+import org.xcmis.spi.DateResolution;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.NotSupportedException;
 import org.xcmis.spi.ObjectNotFoundException;
+import org.xcmis.spi.Precision;
+import org.xcmis.spi.PropertyDefinition;
+import org.xcmis.spi.PropertyType;
 import org.xcmis.spi.Rendition;
 import org.xcmis.spi.RepositoryCapabilities;
 import org.xcmis.spi.RepositoryInfo;
@@ -59,26 +61,37 @@ import org.xcmis.spi.data.ObjectData;
 import org.xcmis.spi.data.PolicyData;
 import org.xcmis.spi.data.RelationshipData;
 import org.xcmis.spi.impl.AllowableActionsImpl;
+import org.xcmis.spi.impl.BaseItemsIterator;
 import org.xcmis.spi.impl.CmisVisitor;
+import org.xcmis.spi.impl.PropertyDefinitionImpl;
+import org.xcmis.spi.impl.TypeDefinitionImpl;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
+import javax.jcr.Item;
+import javax.jcr.ItemExistsException;
 import javax.jcr.ItemNotFoundException;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.nodetype.NoSuchNodeTypeException;
 import javax.jcr.nodetype.NodeType;
+import javax.jcr.nodetype.NodeTypeIterator;
+import javax.jcr.version.OnParentVersionAction;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-public class StorageImpl implements Storage, RepositoryInfo, RepositoryCapabilities
+public class StorageImpl implements Storage
 {
 
    private static final Log LOG = ExoLogger.getLogger(StorageImpl.class);
@@ -134,6 +147,12 @@ public class StorageImpl implements Storage, RepositoryInfo, RepositoryCapabilit
       AllowableActionsImpl actions = new AllowableActionsImpl();
       TypeDefinition type = object.getTypeDefinition();
 
+      RepositoryCapabilities capabilities = getRepositoryInfo().getCapabilities();
+
+      boolean isCheckedout = type.getBaseId() == BaseType.DOCUMENT //
+         && type.isVersionable() //
+         && ((DocumentData)object).isVersionSeriesCheckedOut();
+
       actions.setCanGetProperties(true);
 
       actions.setCanUpdateProperties(true); // TODO : need to check is it latest version ??
@@ -152,18 +171,18 @@ public class StorageImpl implements Storage, RepositoryInfo, RepositoryCapabilit
 
       actions.setCanMoveObject(type.isFileable());
 
-      actions.setCanAddObjectToFolder(getCapabilities().isCapabilityMultifiling() //
+      actions.setCanAddObjectToFolder(capabilities.isCapabilityMultifiling() //
          && type.isFileable() //
          && type.getBaseId() != BaseType.FOLDER);
 
-      actions.setCanRemoveObjectFromFolder(getCapabilities().isCapabilityUnfiling() //
+      actions.setCanRemoveObjectFromFolder(capabilities.isCapabilityUnfiling() //
          && type.isFileable() //
          && type.getBaseId() != BaseType.FOLDER);
 
-      actions.setCanGetDescendants(getCapabilities().isCapabilityGetDescendants() //
+      actions.setCanGetDescendants(capabilities.isCapabilityGetDescendants() //
          && type.getBaseId() == BaseType.FOLDER);
 
-      actions.setCanGetFolderTree(getCapabilities().isCapabilityGetFolderTree() //
+      actions.setCanGetFolderTree(capabilities.isCapabilityGetFolderTree() //
          && type.getBaseId() == BaseType.FOLDER);
 
       actions.setCanCreateDocument(type.getBaseId() == BaseType.FOLDER);
@@ -187,11 +206,7 @@ public class StorageImpl implements Storage, RepositoryInfo, RepositoryCapabilit
 
       actions.setCanGetAllVersions(type.getBaseId() == BaseType.DOCUMENT);
 
-      actions.setCanGetRenditions(getCapabilities().getCapabilityRenditions() == CapabilityRendition.READ);
-
-      boolean isCheckedout = type.getBaseId() == BaseType.DOCUMENT //
-         && type.isVersionable() //
-         && ((DocumentData)object).isVersionSeriesCheckedOut();
+      actions.setCanGetRenditions(capabilities.getCapabilityRenditions() == CapabilityRendition.READ);
 
       actions.setCanCheckIn(isCheckedout);
 
@@ -319,8 +334,8 @@ public class StorageImpl implements Storage, RepositoryInfo, RepositoryCapabilit
       {
          // TODO : check is policy applied to any object
       }
-      
-      ((ObjectDataImpl)object).delete();
+
+      ((AbstractObjectData)object).delete();
    }
 
    /**
@@ -393,17 +408,31 @@ public class StorageImpl implements Storage, RepositoryInfo, RepositoryCapabilit
       return storageID;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public ObjectData getObject(String objectId) throws ObjectNotFoundException
    {
       try
       {
          Node node = ((ExtendedSession)session).getNodeByIdentifier(objectId);
          TypeDefinition type = getTypeDefinition(node.getPrimaryNodeType(), true);
-         return new ObjectDataImpl(node, type);
+         
+         if (type.getBaseId() == BaseType.DOCUMENT)
+            return new DocumentDataImpl(node, type);
+         else if (type.getBaseId() == BaseType.FOLDER)
+            return new FolderDataImpl(node, type);
+         else if (type.getBaseId() == BaseType.POLICY)
+            return new PolicyDataImpl(node, type);
+         else if (type.getBaseId() == BaseType.RELATIONSHIP)
+            return new RelationshipDataImpl(node, type);
+         
+         // Must never happen.
+         throw new CmisRuntimeException("Unknown base type. ");
       }
       catch (ItemNotFoundException nfe)
       {
-         return null;
+         throw new ObjectNotFoundException("Object " + objectId + " does not exists.");
       }
       catch (RepositoryException re)
       {
@@ -411,10 +440,41 @@ public class StorageImpl implements Storage, RepositoryInfo, RepositoryCapabilit
       }
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public ObjectData getObjectByPath(String path) throws ObjectNotFoundException
    {
-      // TODO Auto-generated method stub
-      return null;
+      try
+      {
+         Item item = session.getItem(path);
+         if (!item.isNode())
+            throw new ObjectNotFoundException("Object " + path + " does not exists.");
+         
+         Node node = (Node)item;
+         
+         TypeDefinition type = getTypeDefinition(node.getPrimaryNodeType(), true);
+
+         if (type.getBaseId() == BaseType.DOCUMENT)
+            return new DocumentDataImpl(node, type);
+         else if (type.getBaseId() == BaseType.FOLDER)
+            return new FolderDataImpl(node, type);
+         else if (type.getBaseId() == BaseType.POLICY)
+            return new PolicyDataImpl(node, type);
+         else if (type.getBaseId() == BaseType.RELATIONSHIP)
+            return new RelationshipDataImpl(node, type);
+         
+         // Must never happen.
+         throw new CmisRuntimeException("Unknown base type. ");
+      }
+      catch (ItemNotFoundException nfe)
+      {
+         throw new ObjectNotFoundException("Object  " + path + " does not exists.");
+      }
+      catch (RepositoryException re)
+      {
+         throw new CmisRuntimeException(re.getMessage(), re);
+      }
    }
 
    public ItemsIterator<Rendition> getRenditions(ObjectData object)
@@ -423,18 +483,39 @@ public class StorageImpl implements Storage, RepositoryInfo, RepositoryCapabilit
       return null;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public RepositoryInfo getRepositoryInfo()
    {
-      // TODO Auto-generated method stub
-      return null;
+      return new RepositoryInfoImpl(storageID);
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public ObjectData moveObject(ObjectData object, FolderData target, FolderData source) throws ConstraintException,
       InvalidArgumentException, UpdateConflictException, VersioningException, NameConstraintViolationException,
       StorageException
    {
-      // TODO Auto-generated method stub
-      return null;
+      try
+      {
+         LOG.info(">>> Move object " + object + " to " + target + " from " + source);
+         String objectPath = ((ObjectDataImpl)object).getPath();
+         String destinationPath = ((ObjectDataImpl)target).getPath();
+         destinationPath += destinationPath.equals("/") ? object.getName() : ("/" + object.getName());
+         session.getWorkspace().move(objectPath, destinationPath);
+         LOG.info("<<< Object moved in " + destinationPath);
+         return getObjectByPath(destinationPath);
+      }
+      catch (ItemExistsException ie)
+      {
+         throw new NameConstraintViolationException("Object with the same name already exists in target folder.");
+      }
+      catch (javax.jcr.RepositoryException re)
+      {
+         throw new StorageException("Unable to move object. " + re.getMessage(), re);
+      }
    }
 
    public ItemsIterator<Result> query(Query query) throws InvalidArgumentException
@@ -443,221 +524,269 @@ public class StorageImpl implements Storage, RepositoryInfo, RepositoryCapabilit
       return null;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public void saveObject(ObjectData object) throws StorageException, NameConstraintViolationException,
       UpdateConflictException
    {
-      // TODO Auto-generated method stub
-
+      LOG.info(">>> Save object " + object.getObjectId() + ", name " + object.getName());
+      ((AbstractObjectData)object).save();
    }
 
+   /**
+    * {@inheritDoc}
+    */
+   @SuppressWarnings("unchecked")
    public String addType(TypeDefinition type) throws StorageException, CmisRuntimeException
    {
-      // TODO Auto-generated method stub
-      return null;
+      try
+      {
+         ExtendedNodeTypeManager nodeTypeManager = (ExtendedNodeTypeManager)session.getWorkspace().getNodeTypeManager();
+
+         NodeTypeValue nodeTypeValue = new NodeTypeValue();
+         String parentId = type.getParentId();
+         if (parentId == null)
+         {
+            String msg = "Unable add root type. Parent Type Id must be specified.";
+            throw new InvalidArgumentException(msg);
+         }
+
+         // May throw exception if parent type is unknown or unsupported.
+         TypeDefinition parentType = getTypeDefinition(parentId, false);
+
+         List<String> declaredSupertypeNames = new ArrayList<String>();
+         declaredSupertypeNames.add(getNodeTypeName(parentId));
+         if (parentType.getBaseId() == BaseType.DOCUMENT)
+            declaredSupertypeNames.add(JcrCMIS.CMIS_MIX_DOCUMENT);
+         else if (parentType.getBaseId() == BaseType.FOLDER)
+            declaredSupertypeNames.add(JcrCMIS.CMIS_MIX_FOLDER);
+
+         nodeTypeValue.setDeclaredSupertypeNames(declaredSupertypeNames);
+         nodeTypeValue.setMixin(false);
+         nodeTypeValue.setName(type.getId());
+         nodeTypeValue.setOrderableChild(false);
+         nodeTypeValue.setPrimaryItemName("");
+
+         List<PropertyDefinitionValue> jcrPropDefintions = null;
+         if (type.getPropertyDefinitions().size() > 0)
+         {
+            jcrPropDefintions = new ArrayList<PropertyDefinitionValue>();
+
+            for (PropertyDefinition<?> propDef : type.getPropertyDefinitions())
+            {
+               PropertyDefinitionValue jcrPropDef = new PropertyDefinitionValue();
+               jcrPropDef.setMandatory(propDef.isRequired());
+               jcrPropDef.setMultiple(propDef.isMultivalued());
+               jcrPropDef.setName(propDef.getId());
+               jcrPropDef.setOnVersion(OnParentVersionAction.COPY);
+               jcrPropDef.setReadOnly(propDef.getUpdatability() != null
+                  && propDef.getUpdatability() == Updatability.READONLY);
+
+               if (propDef.getPropertyType() == null)
+               {
+                  String msg = "Property Type required.";
+                  throw new InvalidArgumentException(msg);
+               }
+
+               List<String> defaultValues = null;
+
+               switch (propDef.getPropertyType())
+               {
+                  case BOOLEAN :
+                     jcrPropDef.setRequiredType(javax.jcr.PropertyType.BOOLEAN);
+                     Boolean[] booleans = ((PropertyDefinition<Boolean>)propDef).getDefaultValue();
+                     if (booleans != null && booleans.length > 0)
+                     {
+                        defaultValues = new ArrayList<String>(booleans.length);
+                        for (Boolean v : booleans)
+                           defaultValues.add(v.toString());
+                     }
+                     break;
+
+                  case DATETIME :
+                     jcrPropDef.setRequiredType(javax.jcr.PropertyType.DATE);
+                     Calendar[] dates = ((PropertyDefinition<Calendar>)propDef).getDefaultValue();
+                     if (dates != null && dates.length > 0)
+                     {
+                        defaultValues = new ArrayList<String>(dates.length);
+                        for (Calendar v : dates)
+                           defaultValues.add(createJcrDate(v));
+                     }
+                     break;
+
+                  case DECIMAL :
+                     jcrPropDef.setRequiredType(javax.jcr.PropertyType.DOUBLE);
+                     BigDecimal[] decimals = ((PropertyDefinition<BigDecimal>)propDef).getDefaultValue();
+                     if (decimals != null && decimals.length > 0)
+                     {
+                        defaultValues = new ArrayList<String>(decimals.length);
+                        for (BigDecimal v : decimals)
+                           defaultValues.add(Double.toString(v.doubleValue()));
+                     }
+                     break;
+
+                  case INTEGER :
+                     jcrPropDef.setRequiredType(javax.jcr.PropertyType.LONG);
+                     BigInteger[] ints = ((PropertyDefinition<BigInteger>)propDef).getDefaultValue();
+                     if (ints != null && ints.length > 0)
+                     {
+                        defaultValues = new ArrayList<String>(ints.length);
+                        for (BigInteger v : ints)
+                           defaultValues.add(Long.toString(v.longValue()));
+                     }
+                     break;
+
+                  case ID : // TODO : need to separate ID type at least !!!
+                     //                     jcrPropDef.setRequiredType(javax.jcr.PropertyType.NAME);
+                     //                     break;
+                  case HTML :
+                  case URI :
+                  case STRING :
+                     jcrPropDef.setRequiredType(javax.jcr.PropertyType.STRING);
+                     String[] str = ((PropertyDefinition<String>)propDef).getDefaultValue();
+                     if (str != null && str.length > 0)
+                     {
+                        defaultValues = new ArrayList<String>(str.length);
+                        for (String v : str)
+                           defaultValues.add(v);
+                     }
+                     break;
+               }
+
+               if (defaultValues != null)
+               {
+                  jcrPropDef.setDefaultValueStrings(defaultValues);
+                  jcrPropDef.setAutoCreate(true);
+               }
+               else
+               {
+                  jcrPropDef.setAutoCreate(false);
+               }
+            
+               jcrPropDefintions.add(jcrPropDef);
+
+            }
+            
+            nodeTypeValue.setDeclaredPropertyDefinitionValues(jcrPropDefintions);
+         }
+
+         NodeType nodeType = nodeTypeManager.registerNodeType(nodeTypeValue, ExtendedNodeTypeManager.FAIL_IF_EXISTS);
+
+         return nodeType.getName();
+
+      }
+      catch (javax.jcr.RepositoryException re)
+      {
+         throw new StorageException("Unable add new CMIS type. " + re.getMessage(), re);
+      }
    }
 
+   /**
+    * Create String representation of date in format required by JCR.
+    * 
+    * @param c Calendar
+    * @return formated string date
+    */
+   // TODO : Add in common utils ?? 
+   protected String createJcrDate(Calendar c)
+   {
+      return String.format("%04d-%02d-%02dT%02d:%02d:%02d.%03dZ", c.get(Calendar.YEAR), c.get(Calendar.MONTH) + 1, c
+         .get(Calendar.DAY_OF_MONTH), c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND), c
+         .get(Calendar.MILLISECOND));
+   }
+
+   /**
+    * {@inheritDoc}
+    */
    public ItemsIterator<TypeDefinition> getTypeChildren(String typeId, boolean includePropertyDefinitions)
       throws TypeNotFoundException, CmisRuntimeException
    {
-      // TODO Auto-generated method stub
-      return null;
+      try
+      {
+         List<TypeDefinition> types = new ArrayList<TypeDefinition>();
+         if (typeId == null)
+         {
+            for (String t : new String[]{"cmis:document", "cmis:folder", "cmis:policy", "cmis:relationship"})
+               types.add(getTypeDefinition(t, includePropertyDefinitions));
+         }
+         else
+         {
+            String nodeTypeName = getNodeTypeName(typeId);
+            for (NodeTypeIterator iter = session.getWorkspace().getNodeTypeManager().getPrimaryNodeTypes(); iter
+               .hasNext();)
+            {
+               NodeType nt = iter.nextNodeType();
+               // Get only direct children of specified type.
+               if (nt.isNodeType(nodeTypeName) && getTypeLevelHierarchy(nt, nodeTypeName) == 1)
+                  types.add(getTypeDefinition(nt, includePropertyDefinitions));
+            }
+         }
+         return new BaseItemsIterator<TypeDefinition>(types);
+      }
+      catch (javax.jcr.RepositoryException re)
+      {
+         throw new CmisRuntimeException("Unable get type children. " + re.getMessage(), re);
+      }
    }
 
+   /**
+    * Get the level of hierarchy.
+    * 
+    * @param discovered the node type
+    * @param match the name of the node type
+    * @return hierarchical level for node type
+    */
+   private int getTypeLevelHierarchy(NodeType discovered, String match)
+   {
+      // determine level of hierarchy
+      int level = 0;
+      for (NodeType sup : discovered.getSupertypes())
+      {
+         if (sup.isNodeType(match))
+            level++;
+      }
+      return level;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
    public TypeDefinition getTypeDefinition(String typeId, boolean includePropertyDefinition)
       throws TypeNotFoundException, CmisRuntimeException
    {
-      // TODO Auto-generated method stub
-      return null;
+      try
+      {
+         return getTypeDefinition(getNodeType(getNodeTypeName(typeId)), includePropertyDefinition);
+      }
+      catch (NoSuchNodeTypeException e)
+      {
+         throw new TypeNotFoundException("Type with id " + typeId + " not found in repository.");
+      }
+      catch (javax.jcr.RepositoryException re)
+      {
+         throw new CmisRuntimeException("Unable get object type " + typeId, re);
+      }
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public void removeType(String typeId) throws TypeNotFoundException, StorageException, CmisRuntimeException
    {
-      // TODO Auto-generated method stub
-
+      // Throws exceptions if type with specified 'typeId' does not exists or is unsupported by CMIS.
+      getTypeDefinition(typeId, false);
+      try
+      {
+         ExtendedNodeTypeManager nodeTypeManager = (ExtendedNodeTypeManager)session.getWorkspace().getNodeTypeManager();
+         nodeTypeManager.unregisterNodeType(typeId);
+      }
+      catch (RepositoryException re)
+      {
+         throw new StorageException("Unable remove CMIS type " + typeId + ". " + re.getMessage(), re);
+      }
    }
 
-   public ACLCapability getAclCapability()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public RepositoryCapabilities getCapabilities()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public boolean getChangesIncomplete()
-   {
-      // TODO Auto-generated method stub
-      return false;
-   }
-
-   public Collection<BaseType> getChangesOnType()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public String getCmisVersionSupported()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public String getLatestChangeLogToken()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public String getPrincipalAnonymous()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public String getPrincipalAnyone()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public String getProductName()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public String getProductVersion()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public String getRepositoryDescription()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public String getRepositoryId()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public String getRepositoryName()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public String getRootFolderId()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public String getThinClientURI()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public String getVendorName()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public CapabilityACL getCapabilityACL()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public CapabilityChanges getCapabilityChanges()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public CapabilityContentStreamUpdatable getCapabilityContentStreamUpdatable()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public CapabilityJoin getCapabilityJoin()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public CapabilityQuery getCapabilityQuery()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public CapabilityRendition getCapabilityRenditions()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public boolean isCapabilityAllVersionsSearchable()
-   {
-      // TODO Auto-generated method stub
-      return false;
-   }
-
-   public boolean isCapabilityGetDescendants()
-   {
-      // TODO Auto-generated method stub
-      return false;
-   }
-
-   public boolean isCapabilityGetFolderTree()
-   {
-      // TODO Auto-generated method stub
-      return false;
-   }
-
-   public boolean isCapabilityMultifiling()
-   {
-      // TODO Auto-generated method stub
-      return false;
-   }
-
-   public boolean isCapabilityPWCSearchable()
-   {
-      // TODO Auto-generated method stub
-      return false;
-   }
-
-   public boolean isCapabilityPWCUpdatable()
-   {
-      // TODO Auto-generated method stub
-      return false;
-   }
-
-   public boolean isCapabilityUnfiling()
-   {
-      // TODO Auto-generated method stub
-      return false;
-   }
-
-   public boolean isCapabilityVersionSpecificFiling()
-   {
-      // TODO Auto-generated method stub
-      return false;
-   }
-   
-   // ------------ Implementation -----------------
-   
    /**
     * Get object type definition.
     * 
@@ -692,13 +821,13 @@ public class StorageImpl implements Storage, RepositoryInfo, RepositoryCapabilit
     *        false otherwise
     * @return document type definition
     */
-   protected CmisTypeDocumentDefinitionType getDocumentDefinition(NodeType nt, boolean includePropertyDefinition)
+   protected TypeDefinition getDocumentDefinition(NodeType nt, boolean includePropertyDefinition)
    {
-      CmisTypeDocumentDefinitionType def = new CmisTypeDocumentDefinitionType();
+      TypeDefinitionImpl def = new TypeDefinitionImpl();
       String localTypeName = nt.getName();
       String typeId = getCmisTypeId(localTypeName);
-      def.setBaseId(EnumBaseObjectTypeIds.CMIS_DOCUMENT);
-      def.setContentStreamAllowed(EnumContentStreamAllowed.ALLOWED);
+      def.setBaseId(BaseType.DOCUMENT);
+      def.setContentStreamAllowed(ContentStreamAllowed.ALLOWED);
       def.setControllableACL(true);
       def.setControllablePolicy(true);
       def.setCreatable(true);
@@ -710,7 +839,7 @@ public class StorageImpl implements Storage, RepositoryInfo, RepositoryCapabilit
       def.setIncludedInSupertypeQuery(true);
       def.setLocalName(localTypeName);
       def.setLocalNamespace(JcrCMIS.EXO_CMIS_NS_URI);
-      if (typeId.equals(EnumBaseObjectTypeIds.CMIS_DOCUMENT.value()))
+      if (typeId.equals(BaseType.DOCUMENT.value()))
       {
          def.setParentId(null); // no parents for root type
       }
@@ -744,12 +873,12 @@ public class StorageImpl implements Storage, RepositoryInfo, RepositoryCapabilit
     *        false otherwise
     * @return folder type definition
     */
-   protected CmisTypeFolderDefinitionType getFolderDefinition(NodeType nt, boolean includePropertyDefinition)
+   protected TypeDefinition getFolderDefinition(NodeType nt, boolean includePropertyDefinition)
    {
-      CmisTypeFolderDefinitionType def = new CmisTypeFolderDefinitionType();
+      TypeDefinitionImpl def = new TypeDefinitionImpl();
       String localTypeName = nt.getName();
       String typeId = getCmisTypeId(localTypeName);
-      def.setBaseId(EnumBaseObjectTypeIds.CMIS_FOLDER);
+      def.setBaseId(BaseType.FOLDER);
       def.setControllableACL(true);
       def.setControllablePolicy(true);
       def.setCreatable(true);
@@ -761,7 +890,7 @@ public class StorageImpl implements Storage, RepositoryInfo, RepositoryCapabilit
       def.setIncludedInSupertypeQuery(true);
       def.setLocalName(localTypeName);
       def.setLocalNamespace(JcrCMIS.EXO_CMIS_NS_URI);
-      if (typeId.equals(EnumBaseObjectTypeIds.CMIS_FOLDER.value()))
+      if (typeId.equals(BaseType.FOLDER.value()))
       {
          def.setParentId(null); // no parents for root type
       }
@@ -794,12 +923,12 @@ public class StorageImpl implements Storage, RepositoryInfo, RepositoryCapabilit
     *        false otherwise
     * @return type policy definition
     */
-   protected CmisTypeDefinitionType getPolicyDefinition(NodeType nt, boolean includePropertyDefinition)
+   protected TypeDefinition getPolicyDefinition(NodeType nt, boolean includePropertyDefinition)
    {
-      CmisTypePolicyDefinitionType def = new CmisTypePolicyDefinitionType();
+      TypeDefinitionImpl def = new TypeDefinitionImpl();
       String localTypeName = nt.getName();
       String typeId = getCmisTypeId(localTypeName);
-      def.setBaseId(EnumBaseObjectTypeIds.CMIS_POLICY);
+      def.setBaseId(BaseType.POLICY);
       def.setControllableACL(true);
       def.setControllablePolicy(true);
       def.setCreatable(true);
@@ -811,7 +940,7 @@ public class StorageImpl implements Storage, RepositoryInfo, RepositoryCapabilit
       def.setIncludedInSupertypeQuery(true);
       def.setLocalName(localTypeName);
       def.setLocalNamespace(JcrCMIS.EXO_CMIS_NS_URI);
-      if (typeId.equals(EnumBaseObjectTypeIds.CMIS_POLICY.value()))
+      if (typeId.equals(BaseType.POLICY.value()))
       {
          def.setParentId(null); // no parents for root type
       }
@@ -844,12 +973,12 @@ public class StorageImpl implements Storage, RepositoryInfo, RepositoryCapabilit
     *        false otherwise
     * @return type relationship definition
     */
-   protected CmisTypeRelationshipDefinitionType getRelationshipDefinition(NodeType nt, boolean includePropertyDefinition)
+   protected TypeDefinition getRelationshipDefinition(NodeType nt, boolean includePropertyDefinition)
    {
-      CmisTypeRelationshipDefinitionType def = new CmisTypeRelationshipDefinitionType();
+      TypeDefinitionImpl def = new TypeDefinitionImpl();
       String localTypeName = nt.getName();
       String typeId = getCmisTypeId(localTypeName);
-      def.setBaseId(EnumBaseObjectTypeIds.CMIS_RELATIONSHIP);
+      def.setBaseId(BaseType.RELATIONSHIP);
       def.setControllableACL(false);
       def.setControllablePolicy(false);
       def.setCreatable(true);
@@ -861,7 +990,7 @@ public class StorageImpl implements Storage, RepositoryInfo, RepositoryCapabilit
       def.setIncludedInSupertypeQuery(false);
       def.setLocalName(localTypeName);
       def.setLocalNamespace(JcrCMIS.EXO_CMIS_NS_URI);
-      if (typeId.equals(EnumBaseObjectTypeIds.CMIS_RELATIONSHIP.value()))
+      if (typeId.equals(BaseType.RELATIONSHIP.value()))
       {
          def.setParentId(null); // no parents for root type
       }
@@ -892,16 +1021,16 @@ public class StorageImpl implements Storage, RepositoryInfo, RepositoryCapabilit
     * @param typeDefinition the object type definition
     * @param nt the JCR node type.
     */
-   private void addPropertyDefinitions(CmisTypeDefinitionType typeDefinition, NodeType nt)
+   private void addPropertyDefinitions(TypeDefinition typeDefinition, NodeType nt)
    {
       // Known described in spec. property definitions
-      for (CmisPropertyDefinitionType propDef : PropertyDefinitionsMap.getAll(typeDefinition.getBaseId().value()))
-         typeDefinition.getPropertyDefinition().add(propDef);
+      for (PropertyDefinition<?> propDef : PropertyDefinitionsMap.getAll(typeDefinition.getBaseId().value()))
+         typeDefinition.getPropertyDefinitions().add(propDef);
 
       Set<String> knownIds = PropertyDefinitionsMap.getPropertyIds(typeDefinition.getBaseId().value());
-      for (javax.jcr.nodetype.PropertyDefinition pd : nt.getPropertyDefinitions())
+      for (javax.jcr.nodetype.PropertyDefinition jcrPropertyDef : nt.getPropertyDefinitions())
       {
-         String pdName = pd.getName();
+         String pdName = jcrPropertyDef.getName();
          // TODO : Do not use any constraint about prefixes, need discovery
          // hierarchy of JCR types or so on.
          if (pdName.startsWith("cmis:"))
@@ -909,33 +1038,57 @@ public class StorageImpl implements Storage, RepositoryInfo, RepositoryCapabilit
             // Do not process known properties
             if (!knownIds.contains(pdName))
             {
-               CmisPropertyDefinitionType cmisPropDef = null;
-               switch (pd.getRequiredType())
+               PropertyDefinition<?> cmisPropDef = null;
+               // TODO : default values.
+               switch (jcrPropertyDef.getRequiredType())
                {
+
                   case javax.jcr.PropertyType.BOOLEAN :
-                     CmisPropertyBooleanDefinitionType boolDef = new CmisPropertyBooleanDefinitionType();
-                     boolDef.setPropertyType(EnumPropertyType.BOOLEAN);
+                     PropertyDefinitionImpl<Boolean> boolDef =
+                        new PropertyDefinitionImpl<Boolean>(pdName, pdName, pdName, null, pdName, null,
+                           PropertyType.BOOLEAN, jcrPropertyDef.isProtected() ? Updatability.READONLY
+                              : Updatability.READWRITE, false, jcrPropertyDef.isMandatory(), true, true, null,
+                           jcrPropertyDef.isMultiple(), null, null);
+
                      cmisPropDef = boolDef;
                      break;
+
                   case javax.jcr.PropertyType.DATE :
-                     CmisPropertyDateTimeDefinitionType dateDef = new CmisPropertyDateTimeDefinitionType();
-                     dateDef.setPropertyType(EnumPropertyType.DATETIME);
-                     dateDef.setResolution(EnumDateTimeResolution.TIME);
+                     PropertyDefinitionImpl<Calendar> dateDef =
+                        new PropertyDefinitionImpl<Calendar>(pdName, pdName, pdName, null, pdName, null,
+                           PropertyType.DATETIME, jcrPropertyDef.isProtected() ? Updatability.READONLY
+                              : Updatability.READWRITE, false, jcrPropertyDef.isMandatory(), true, true, null,
+                           jcrPropertyDef.isMultiple(), null, null);
+
+                     dateDef.setDateResolution(DateResolution.TIME);
                      cmisPropDef = dateDef;
                      break;
+
                   case javax.jcr.PropertyType.DOUBLE :
-                     CmisPropertyDecimalDefinitionType decimalDef = new CmisPropertyDecimalDefinitionType();
-                     decimalDef.setPrecision(CMIS.PRECISION);
-                     decimalDef.setPropertyType(EnumPropertyType.DECIMAL);
+                     PropertyDefinitionImpl<BigDecimal> decimalDef =
+                        new PropertyDefinitionImpl<BigDecimal>(pdName, pdName, pdName, null, pdName, null,
+                           PropertyType.DECIMAL, jcrPropertyDef.isProtected() ? Updatability.READONLY
+                              : Updatability.READWRITE, false, jcrPropertyDef.isMandatory(), true, true, null,
+                           jcrPropertyDef.isMultiple(), null, null);
+
+                     decimalDef.setPrecision(Precision.Bit32);
+                     decimalDef.setMaxDecimal(CMIS.MAX_DECIMAL_VALUE);
+                     decimalDef.setMinDecimal(CMIS.MIN_DECIMAL_VALUE);
                      cmisPropDef = decimalDef;
                      break;
+
                   case javax.jcr.PropertyType.LONG :
-                     CmisPropertyIntegerDefinitionType integerDef = new CmisPropertyIntegerDefinitionType();
-                     integerDef.setMaxValue(CMIS.MAX_INTEGER_VALUE);
-                     integerDef.setMinValue(CMIS.MIN_INTEGER_VALUE);
-                     integerDef.setPropertyType(EnumPropertyType.INTEGER);
+                     PropertyDefinitionImpl<BigInteger> integerDef =
+                        new PropertyDefinitionImpl<BigInteger>(pdName, pdName, pdName, null, pdName, null,
+                           PropertyType.INTEGER, jcrPropertyDef.isProtected() ? Updatability.READONLY
+                              : Updatability.READWRITE, false, jcrPropertyDef.isMandatory(), true, true, null,
+                           jcrPropertyDef.isMultiple(), null, null);
+
+                     integerDef.setMaxInteger(CMIS.MAX_INTEGER_VALUE);
+                     integerDef.setMinInteger(CMIS.MIN_INTEGER_VALUE);
                      cmisPropDef = integerDef;
                      break;
+
                   case javax.jcr.PropertyType.NAME : // TODO
                      //                     CmisPropertyIdDefinitionType idDef = new CmisPropertyIdDefinitionType();
                      //                     idDef.setPropertyType(EnumPropertyType.ID);
@@ -946,25 +1099,18 @@ public class StorageImpl implements Storage, RepositoryInfo, RepositoryCapabilit
                   case javax.jcr.PropertyType.PATH :
                   case javax.jcr.PropertyType.BINARY :
                   case javax.jcr.PropertyType.UNDEFINED :
-                     CmisPropertyStringDefinitionType stringDef = new CmisPropertyStringDefinitionType();
-                     stringDef.setPropertyType(EnumPropertyType.STRING);
+                     PropertyDefinitionImpl<String> stringDef =
+                        new PropertyDefinitionImpl<String>(pdName, pdName, pdName, null, pdName, null,
+                           PropertyType.STRING, jcrPropertyDef.isProtected() ? Updatability.READONLY
+                              : Updatability.READWRITE, false, jcrPropertyDef.isMandatory(), true, true, null,
+                           jcrPropertyDef.isMultiple(), null, null);
                      stringDef.setMaxLength(CMIS.MAX_STRING_LENGTH);
                      cmisPropDef = stringDef;
                      break;
+
                }
-               // TODO : default values.
-               cmisPropDef.setM(pd.isMultiple() ? EnumCardinality.MULTI : Updatability.SINGLE);
-               cmisPropDef.setDescription("");
-               cmisPropDef.setDisplayName(pdName);
-               cmisPropDef.setId(pdName);
-               cmisPropDef.setInherited(false);
-               cmisPropDef.setLocalName(pdName);
-               cmisPropDef.setOrderable(true);
-               cmisPropDef.setQueryable(true);
-               cmisPropDef.setQueryName(pdName);
-               cmisPropDef.setRequired(pd.isMandatory());
-               cmisPropDef.setUpdatability(pd.isProtected() ? Updatability.READONLY : Updatability.READWRITE);
-               typeDefinition.getPropertyDefinition().add(cmisPropDef);
+
+               typeDefinition.getPropertyDefinitions().add(cmisPropDef);
             }
          }
       }

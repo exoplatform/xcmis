@@ -51,10 +51,7 @@ public interface CMIS
    int MAX_ITEMS = 10;
 
    /* 2^16 */
-   BigInteger MAX_STRING_LENGTH = BigInteger.valueOf(65536);
-
-   // TODO : get smarter about precisions
-   BigInteger PRECISION = BigInteger.valueOf(32);
+   int MAX_STRING_LENGTH = 65536;
 
    BigDecimal MAX_DECIMAL_VALUE = BigDecimal.valueOf(Double.MAX_VALUE);
 

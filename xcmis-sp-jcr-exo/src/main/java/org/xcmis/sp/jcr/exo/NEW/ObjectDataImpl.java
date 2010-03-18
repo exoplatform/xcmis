@@ -621,43 +621,43 @@ public class ObjectDataImpl implements ObjectData, PropertyData
    //      }
    //   }
 
-   //   public void save() throws NameConstraintViolationException, StorageException
-   //   {
-   //      try
-   //      {
-   //         try
-   //         {
-   //            // Update properties for nodes that have required mixin.
-   //            if (data.isNodeType(JcrCMIS.CMIS_MIX_OBJECT))
-   //            {
-   //               Calendar date = Calendar.getInstance();
-   //               data.setProperty(CMIS.LAST_MODIFICATION_DATE, date);
-   //               data.setProperty(CMIS.CHANGE_TOKEN, IdGenerator.generate());
-   //               data.setProperty(CMIS.LAST_MODIFIED_BY, data.getSession().getUserID());
-   //               if (data.isNew())
-   //               {
-   //                  data.setProperty(CMIS.CREATION_DATE, date);
-   //                  data.setProperty(CMIS.CREATED_BY, data.getSession().getUserID());
-   //               }
-   //            }
-   //            Node parent = data.getParent();
-   //            while (parent.isNew())
-   //               // parent also may be not saved yet if object is 'cmis:relationship'
-   //               parent = parent.getParent();
-   //            parent.save();
-   //         }
-   //         catch (ItemExistsException ie)
-   //         {
-   //            throw new NameConstraintViolationException("Object with name " + getName() + " already exists in "
-   //               + data.getParent().getName(), ie);
-   //         }
-   //      }
-   //      catch (RepositoryException re)
-   //      {
-   //         throw new StorageException("Unable save object. " + re.getMessage(), re);
-   //      }
-   //
-   //   }
+      public void save() throws NameConstraintViolationException, StorageException
+      {
+         try
+         {
+            try
+            {
+               // Update properties for nodes that have required mixin.
+               if (data.isNodeType(JcrCMIS.CMIS_MIX_OBJECT))
+               {
+                  Calendar date = Calendar.getInstance();
+                  data.setProperty(CMIS.LAST_MODIFICATION_DATE, date);
+                  data.setProperty(CMIS.CHANGE_TOKEN, IdGenerator.generate());
+                  data.setProperty(CMIS.LAST_MODIFIED_BY, data.getSession().getUserID());
+                  if (data.isNew())
+                  {
+                     data.setProperty(CMIS.CREATION_DATE, date);
+                     data.setProperty(CMIS.CREATED_BY, data.getSession().getUserID());
+                  }
+               }
+               Node parent = data.getParent();
+               while (parent.isNew())
+                  // parent also may be not saved yet if object is 'cmis:relationship'
+                  parent = parent.getParent();
+               parent.save();
+            }
+            catch (ItemExistsException ie)
+            {
+               throw new NameConstraintViolationException("Object with name " + getName() + " already exists in "
+                  + data.getParent().getName(), ie);
+            }
+         }
+         catch (RepositoryException re)
+         {
+            throw new StorageException("Unable save object. " + re.getMessage(), re);
+         }
+   
+      }
 
    //   public void setContentStream(ContentStream content) throws IOException, StorageException
    //   {

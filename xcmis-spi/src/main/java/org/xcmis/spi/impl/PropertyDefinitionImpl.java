@@ -63,7 +63,7 @@ public class PropertyDefinitionImpl<T> implements PropertyDefinition<T>
 
    private boolean orderable;
 
-   private boolean openChoice;
+   private Boolean openChoice;
 
    private boolean multivalued;
 
@@ -87,7 +87,7 @@ public class PropertyDefinitionImpl<T> implements PropertyDefinition<T>
 
    public PropertyDefinitionImpl(String id, String queryName, String localName, String localNamespace,
       String displayName, String description, PropertyType propertyType, Updatability updatability, boolean inherited,
-      boolean required, boolean queryable, boolean orderable, boolean openChoice, boolean multivalued,
+      boolean required, boolean queryable, boolean orderable, Boolean openChoice, boolean multivalued,
       List<Choice<T>> choices, T[] defaultValue)
    {
       this.id = id;
@@ -211,7 +211,7 @@ public class PropertyDefinitionImpl<T> implements PropertyDefinition<T>
    /**
     * {@inheritDoc}
     */
-   public boolean isOpenChoice()
+   public Boolean isOpenChoice()
    {
       return openChoice;
    }
@@ -358,7 +358,7 @@ public class PropertyDefinitionImpl<T> implements PropertyDefinition<T>
       this.orderable = orderable;
    }
 
-   public void setOpenChoice(boolean openChoice)
+   public void setOpenChoice(Boolean openChoice)
    {
       this.openChoice = openChoice;
    }

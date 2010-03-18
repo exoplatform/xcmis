@@ -64,11 +64,6 @@ public class AccessControlEntryImpl implements AccessControlEntry
       return principal;
    }
 
-   public void setPermissions(Set<String> permissions)
-   {
-      this.permissions = permissions;
-   }
-
    public void setPrincipal(String principal)
    {
       this.principal = principal;

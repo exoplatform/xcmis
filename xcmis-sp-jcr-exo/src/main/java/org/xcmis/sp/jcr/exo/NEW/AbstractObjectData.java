@@ -25,6 +25,7 @@ import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.PropertyFilter;
+import org.xcmis.spi.PropertyType;
 import org.xcmis.spi.RelationshipDirection;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.TypeDefinition;
@@ -55,10 +56,10 @@ import javax.jcr.RepositoryException;
 public abstract class AbstractObjectData implements ObjectData, Properties
 {
 
-   protected final Node node;
-   
+   protected Node node;
+
    protected final TypeDefinition type;
-   
+
    public AbstractObjectData(Node node, TypeDefinition type)
    {
       this.node = node;
@@ -204,11 +205,30 @@ public abstract class AbstractObjectData implements ObjectData, Properties
    }
 
    // Properties
-   
+
    public Map<String, Property<?>> getAll()
    {
       // TODO Auto-generated method stub
       return null;
+   }
+
+   public Map<String, Property<?>> getSubset(PropertyFilter filter)
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   public Property<?> getProperty(String id)
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   public void setValues(Map<String, Property<?>> properties) throws ConstraintException,
+      NameConstraintViolationException
+   {
+      // TODO Auto-generated method stub
+
    }
 
    public Boolean getBoolean(String id)
@@ -283,12 +303,6 @@ public abstract class AbstractObjectData implements ObjectData, Properties
       return null;
    }
 
-   public Property<?> getProperty(String id)
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
    public String getString(String id)
    {
       // TODO Auto-generated method stub
@@ -296,12 +310,6 @@ public abstract class AbstractObjectData implements ObjectData, Properties
    }
 
    public String[] getStrings(String id)
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public Map<String, Property<?>> getSubset(PropertyFilter filter)
    {
       // TODO Auto-generated method stub
       return null;
@@ -322,120 +330,104 @@ public abstract class AbstractObjectData implements ObjectData, Properties
    public void setBoolean(String id, Boolean value)
    {
       // TODO Auto-generated method stub
-      
+
    }
 
    public void setBooleans(String id, Boolean[] value)
    {
       // TODO Auto-generated method stub
-      
+
    }
 
    public void setDate(String id, Calendar value)
    {
       // TODO Auto-generated method stub
-      
+
    }
 
    public void setDates(String id, Calendar[] value)
    {
       // TODO Auto-generated method stub
-      
+
    }
 
    public void setDecimal(String id, BigDecimal value)
    {
       // TODO Auto-generated method stub
-      
+
    }
 
    public void setDecimals(String id, BigDecimal[] value)
    {
       // TODO Auto-generated method stub
-      
+
    }
 
    public void setHTML(String id, String value)
    {
       // TODO Auto-generated method stub
-      
+
    }
 
    public void setHTMLs(String id, String[] value)
    {
       // TODO Auto-generated method stub
-      
+
    }
 
    public void setIds(String id, String value)
    {
       // TODO Auto-generated method stub
-      
+
    }
 
    public void setIds(String id, String[] value)
    {
       // TODO Auto-generated method stub
-      
+
    }
 
    public void setInteger(String id, BigInteger value)
    {
       // TODO Auto-generated method stub
-      
+
    }
 
    public void setIntegers(String id, BigInteger[] value)
    {
       // TODO Auto-generated method stub
-      
+
    }
 
    public void setString(String id, String value)
    {
       // TODO Auto-generated method stub
-      
+
    }
 
    public void setStrings(String id, String[] value)
    {
       // TODO Auto-generated method stub
-      
+
    }
 
    public void setURI(String id, URI value)
    {
       // TODO Auto-generated method stub
-      
+
    }
 
    public void setURIs(String id, URI[] value)
    {
       // TODO Auto-generated method stub
-      
+
    }
 
-   public void setValues(Map<String, Property<?>> properties) throws ConstraintException,
-      NameConstraintViolationException
+   // --------------- Implementation -------------------
+
+   public void save()
    {
       // TODO Auto-generated method stub
-      
-   }
-   
-   // --------------- Implementation -------------------
-   
-   public void delete() throws StorageException
-   {
-      try
-      {
-         Node parent = node.getParent();
-         node.remove();
-         parent.save();
-      }
-      catch (RepositoryException re)
-      {
-         throw new StorageException("Unable delete object. " + re.getMessage(), re);
-      }
    }
 
 }
