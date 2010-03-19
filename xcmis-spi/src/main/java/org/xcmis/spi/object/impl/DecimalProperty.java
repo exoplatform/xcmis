@@ -39,6 +39,11 @@ public class DecimalProperty extends BaseProperty<BigDecimal>
       super();
    }
 
+   public DecimalProperty(String id, String queryName, String localName, String displayName, BigDecimal value)
+   {
+      super(id, queryName, localName, displayName, value);
+   }
+
    public DecimalProperty(String id, String queryName, String localName, String displayName, List<BigDecimal> values)
    {
       super(id, queryName, localName, displayName, values);

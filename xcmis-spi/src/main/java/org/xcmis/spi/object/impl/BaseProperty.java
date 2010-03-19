@@ -50,6 +50,18 @@ public abstract class BaseProperty<T> implements Property<T>
    {
    }
 
+   public BaseProperty(String id, String queryName, String localName, String displayName, T value)
+   {
+      this.id = id;
+      this.queryName = queryName;
+      this.localName = localName;
+      this.displayName = displayName;
+      if (value != null) {
+         this.values = new ArrayList<T>(1);
+         this.values.add(value);
+      }
+   }
+
    public BaseProperty(String id, String queryName, String localName, String displayName, List<T> values)
    {
       this.id = id;

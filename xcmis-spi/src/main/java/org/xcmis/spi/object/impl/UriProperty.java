@@ -39,6 +39,11 @@ public class UriProperty extends BaseProperty<URI>
       super();
    }
 
+   public UriProperty(String id, String queryName, String localName, String displayName, URI value)
+   {
+      super(id, queryName, localName, displayName, value);
+   }
+
    public UriProperty(String id, String queryName, String localName, String displayName, List<URI> values)
    {
       super(id, queryName, localName, displayName, values);

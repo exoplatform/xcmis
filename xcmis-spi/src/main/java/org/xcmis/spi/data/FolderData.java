@@ -52,17 +52,17 @@ public interface FolderData extends ObjectData
     */
    boolean hasChildren();
 
-   /**
-    * Create child of <code>type</code> in this folder.
-    * 
-    * @param type type of object
-    * @return newly created unsaved object. TO persist it method
-    *         {@link Storage#saveObject(ObjectData)}
-    * @throws ConstraintException if <code>object</code> has type that is
-    *         unsupported by current folder. See
-    *         {@link CMIS#ALLOWED_CHILD_OBJECT_TYPE_IDS}
-    */
-   ObjectData createChild(TypeDefinition type) throws ConstraintException;
+   //   /**
+   //    * Create child of <code>type</code> in this folder.
+   //    * 
+   //    * @param type type of object
+   //    * @return newly created unsaved object. TO persist it method
+   //    *         {@link Storage#saveObject(ObjectData)}
+   //    * @throws ConstraintException if <code>object</code> has type that is
+   //    *         unsupported by current folder. See
+   //    *         {@link CMIS#ALLOWED_CHILD_OBJECT_TYPE_IDS}
+   //    */
+   //   ObjectData createChild(TypeDefinition type) throws ConstraintException;
 
    /**
     * Add existed fileable object in this folder. If multifiling capability is

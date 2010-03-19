@@ -39,6 +39,11 @@ public class DateTimeProperty extends BaseProperty<Calendar>
       super();
    }
 
+   public DateTimeProperty(String id, String queryName, String localName, String displayName, Calendar value)
+   {
+      super(id, queryName, localName, displayName, value);
+   }
+
    public DateTimeProperty(String id, String queryName, String localName, String displayName, List<Calendar> values)
    {
       super(id, queryName, localName, displayName, values);

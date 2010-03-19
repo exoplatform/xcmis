@@ -38,6 +38,11 @@ public class BooleanProperty extends BaseProperty<Boolean>
       super();
    }
    
+   public BooleanProperty(String id, String queryName, String localName, String displayName, Boolean value)
+   {
+      super(id, queryName, localName, displayName, value);
+   }
+
    public BooleanProperty(String id, String queryName, String localName, String displayName, List<Boolean> values)
    {
       super(id, queryName, localName, displayName, values);

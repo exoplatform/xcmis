@@ -25,10 +25,6 @@ import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.Storage;
 import org.xcmis.spi.data.ObjectData;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.net.URI;
-import java.util.Calendar;
 import java.util.Map;
 
 /**
@@ -90,39 +86,5 @@ public interface Properties
     *         properties throws conflict
     */
    void setValues(Map<String, Property<?>> values) throws ConstraintException, NameConstraintViolationException;
-
-   // ---------- Shortcut access to properties. ------------- 
-
-   Boolean getBoolean(String id);
-
-   Boolean[] getBooleans(String id);
-
-   Calendar getDate(String id);
-
-   Calendar[] getDates(String id);
-
-   BigDecimal getDecimal(String id);
-
-   BigDecimal[] getDecimals(String id);
-
-   String getHTML(String id);
-
-   String[] getHTMLs(String id);
-
-   String getId(String id);
-
-   String[] getIds(String id);
-
-   BigInteger getInteger(String id);
-
-   BigInteger[] getIntegers(String id);
-
-   String getString(String id);
-
-   String[] getStrings(String id);
-
-   URI getURI(String id);
-
-   URI[] getURIs(String id);
 
 }

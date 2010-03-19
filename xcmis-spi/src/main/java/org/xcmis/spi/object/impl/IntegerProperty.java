@@ -39,6 +39,11 @@ public class IntegerProperty extends BaseProperty<BigInteger>
       super();
    }
 
+   public IntegerProperty(String id, String queryName, String localName, String displayName, BigInteger value)
+   {
+      super(id, queryName, localName, displayName, value);
+   }
+
    public IntegerProperty(String id, String queryName, String localName, String displayName, List<BigInteger> values)
    {
       super(id, queryName, localName, displayName, values);

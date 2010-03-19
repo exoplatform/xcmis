@@ -681,7 +681,7 @@ public abstract class BaseConnection implements Connection
 
       storage.saveObject(document);
 
-      String changeToken = document.getProperties().getString(CMIS.CHANGE_TOKEN);
+      String changeToken = document.getChangeToken(); 
       changeTokenHolder.setValue(changeToken);
 
       return document.getObjectId();
@@ -714,7 +714,7 @@ public abstract class BaseConnection implements Connection
 
       storage.saveObject(document);
 
-      String changeToken = document.getProperties().getString(CMIS.CHANGE_TOKEN);
+      String changeToken = document.getChangeToken(); 
       changeTokenHolder.setValue(changeToken);
 
       return document.getObjectId();
@@ -744,7 +744,7 @@ public abstract class BaseConnection implements Connection
 
       storage.saveObject(object);
 
-      String changeToken = object.getProperties().getString(CMIS.CHANGE_TOKEN);
+      String changeToken = object.getChangeToken(); 
       changeTokenHolder.setValue(changeToken);
 
       return object.getObjectId();

@@ -38,6 +38,11 @@ public class HtmlProperty extends BaseProperty<String>
       super();
    }
 
+   public HtmlProperty(String id, String queryName, String localName, String displayName, String value)
+   {
+      super(id, queryName, localName, displayName, value);
+   }
+
    public HtmlProperty(String id, String queryName, String localName, String displayName, List<String> values)
    {
       super(id, queryName, localName, displayName, values);

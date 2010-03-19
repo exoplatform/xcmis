@@ -38,6 +38,11 @@ public class IdProperty extends BaseProperty<String>
       super();
    }
 
+   public IdProperty(String id, String queryName, String localName, String displayName, String value)
+   {
+      super(id, queryName, localName, displayName, value);
+   }
+
    public IdProperty(String id, String queryName, String localName, String displayName, List<String> values)
    {
       super(id, queryName, localName, displayName, values);

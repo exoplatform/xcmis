@@ -26,6 +26,7 @@ import org.xcmis.spi.TypeDefinition;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -379,7 +380,7 @@ public class TypeDefinitionImpl implements TypeDefinition
 
    public void setPropertyDefinitions(Map<String, PropertyDefinition<?>> propertyDefinitions)
    {
-      this.propertyDefinitions = propertyDefinitions;
+      this.propertyDefinitions = new HashMap<String, PropertyDefinition<?>>(propertyDefinitions);
    }
 
 }
