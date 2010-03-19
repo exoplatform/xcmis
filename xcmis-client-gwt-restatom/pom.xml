@@ -9,7 +9,6 @@
 	
 	<artifactId>xcmis-client-gwt-restatom</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0-Beta02</version>
 	<name>xCMIS GWT Client Framework</name>
 
 	<properties>
