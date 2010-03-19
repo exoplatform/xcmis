@@ -21,8 +21,8 @@ package org.xcmis.sp.jcr.exo;
 
 import junit.framework.TestCase;
 
+import org.apache.commons.io.FileUtils;
 import org.exoplatform.container.StandaloneContainer;
-import org.xcmis.core.EnumVersioningState;
 import org.exoplatform.services.jcr.RepositoryService;
 import org.exoplatform.services.jcr.core.CredentialsImpl;
 import org.exoplatform.services.jcr.core.ExtendedNode;
@@ -35,11 +35,12 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.security.ConversationState;
 import org.exoplatform.services.security.Identity;
-import org.xcmis.sp.jcr.exo.JcrCMIS;
+import org.xcmis.core.EnumVersioningState;
 import org.xcmis.sp.jcr.exo.object.EntryImpl;
 import org.xcmis.spi.CMIS;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.util.Calendar;
 
 import javax.jcr.Node;
@@ -84,49 +85,59 @@ public abstract class BaseTest extends TestCase
 
    public void setUp() throws Exception
    {
-      String containerConf = getClass().getResource("/conf/standalone/test-configuration.xml").toString();
-      String loginConf = Thread.currentThread().getContextClassLoader().getResource("login.conf").toString();
-      StandaloneContainer.addConfigurationURL(containerConf);
-      container = StandaloneContainer.getInstance();
-
-      if (System.getProperty("java.security.auth.login.config") == null)
-         System.setProperty("java.security.auth.login.config", loginConf);
-
-      credentials = new CredentialsImpl("root", "exo".toCharArray());
-
-      repositoryService = (RepositoryService)container.getComponentInstanceOfType(RepositoryService.class);
-      cmisRepositoriesManager =
-         (org.xcmis.spi.RepositoriesManager)container
-            .getComponentInstanceOfType(org.xcmis.spi.RepositoriesManager.class);
-      repository = (RepositoryImpl)repositoryService.getRepository(jcrRepositoryName);
-
-      session = (SessionImpl)repository.login(credentials, wsName);
-
-      root = session.getRootNode();
-      relationshipsNode = root.getNode(JcrCMIS.CMIS_SYSTEM + "/" + JcrCMIS.CMIS_RELATIONSHIPS);
-
-      testRootFolder = createFolder(JcrCMIS.ROOT_FOLDER_ID, "testRoot");
-      testRootFolderId = testRootFolder.getObjectId();
-
-      sessionProviderService =
-         (ThreadLocalSessionProviderService)container
-            .getComponentInstanceOfType(ThreadLocalSessionProviderService.class);
-      assertNotNull(sessionProviderService);
-      sessionProviderService.setSessionProvider(null, new SessionProvider(new ConversationState(new Identity("root"))));
-      cmisRepository = (org.xcmis.sp.jcr.exo.RepositoryImpl)cmisRepositoriesManager.getRepository(cmisRepositoryId);
-
-      if (!shoutDown)
+      if (repositoryService == null)
       {
-         Runtime.getRuntime().addShutdownHook(new Thread()
+         if (!shoutDown)
          {
-            public void run()
+            FileUtils.deleteQuietly(new File("/java/exo/xcmis/branches/1.0/xcmis-search-sp-server/target/temp"));
+         }
+         String containerConf = getClass().getResource("/conf/standalone/test-configuration.xml").toString();
+         String loginConf = Thread.currentThread().getContextClassLoader().getResource("login.conf").toString();
+         StandaloneContainer.addConfigurationURL(containerConf);
+         container = StandaloneContainer.getInstance();
+
+         if (System.getProperty("java.security.auth.login.config") == null)
+         {
+            System.setProperty("java.security.auth.login.config", loginConf);
+         }
+
+         credentials = new CredentialsImpl("root", "exo".toCharArray());
+
+         repositoryService = (RepositoryService)container.getComponentInstanceOfType(RepositoryService.class);
+         cmisRepositoriesManager =
+            (org.xcmis.spi.RepositoriesManager)container
+               .getComponentInstanceOfType(org.xcmis.spi.RepositoriesManager.class);
+         repository = (RepositoryImpl)repositoryService.getRepository(jcrRepositoryName);
+
+         session = (SessionImpl)repository.login(credentials, wsName);
+
+         root = session.getRootNode();
+         relationshipsNode = root.getNode(JcrCMIS.CMIS_SYSTEM + "/" + JcrCMIS.CMIS_RELATIONSHIPS);
+
+         testRootFolder = createFolder(JcrCMIS.ROOT_FOLDER_ID, "testRoot");
+         testRootFolderId = testRootFolder.getObjectId();
+
+         sessionProviderService =
+            (ThreadLocalSessionProviderService)container
+               .getComponentInstanceOfType(ThreadLocalSessionProviderService.class);
+         assertNotNull(sessionProviderService);
+         sessionProviderService.setSessionProvider(null, new SessionProvider(
+            new ConversationState(new Identity("root"))));
+         cmisRepository = (org.xcmis.sp.jcr.exo.RepositoryImpl)cmisRepositoriesManager.getRepository(cmisRepositoryId);
+
+         if (!shoutDown)
+         {
+            Runtime.getRuntime().addShutdownHook(new Thread()
             {
-               // database.close();
-               container.stop();
-               System.out.println("The container are stopped");
-            }
-         });
-         shoutDown = true;
+               public void run()
+               {
+                  // database.close();
+                  container.stop();
+                  System.out.println("The container are stopped");
+               }
+            });
+            shoutDown = true;
+         }
       }
    }
 
@@ -292,9 +303,13 @@ public abstract class BaseTest extends TestCase
    {
       Node relationshipHierarchy = null;
       if (relationshipsNode.hasNode(sourceId))
+      {
          relationshipHierarchy = relationshipsNode.getNode(sourceId);
+      }
       else
+      {
          relationshipHierarchy = relationshipsNode.addNode(sourceId, JcrCMIS.NT_UNSTRUCTURED);
+      }
       Node relationship = relationshipHierarchy.addNode(targetId, JcrCMIS.CMIS_NT_RELATIONSHIP);
       relationship.setProperty(CMIS.NAME, relationship.getName());
       //      relationship.setProperty(CMIS.OBJECT_ID, idResolver.getNodeIdentifier(relationship));

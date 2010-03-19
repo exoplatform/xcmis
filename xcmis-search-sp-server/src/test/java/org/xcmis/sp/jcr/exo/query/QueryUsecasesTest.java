@@ -399,8 +399,7 @@ public class QueryUsecasesTest extends BaseQueryTest
 
       EntryImpl folder4 = this.createFolder(folder3.getObjectId(), "folder4");
 
-      String statement =
-         "SELECT * FROM " + JcrCMIS.NT_FOLDER + " WHERE IN_FOLDER( '" + folder1.getObjectId() + "')";
+      String statement = "SELECT * FROM " + JcrCMIS.NT_FOLDER + " WHERE IN_FOLDER( '" + folder1.getObjectId() + "')";
 
       Query query = new Query(statement, true);
       ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
@@ -445,8 +444,8 @@ public class QueryUsecasesTest extends BaseQueryTest
       doc2.setString("parentFolderName", "folderThree");
 
       String statement =
-         "SELECT doc.* FROM " + EnumBaseObjectTypeIds.CMIS_DOCUMENT.value() + " AS doc LEFT JOIN "
-            + JcrCMIS.NT_FOLDER + " AS folder ON (doc.parentFolderName = folder.folderName)";
+         "SELECT doc.* FROM " + EnumBaseObjectTypeIds.CMIS_DOCUMENT.value() + " AS doc LEFT JOIN " + JcrCMIS.NT_FOLDER
+            + " AS folder ON (doc.parentFolderName = folder.folderName)";
 
       Query query = new Query(statement, true);
       ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
@@ -799,7 +798,7 @@ public class QueryUsecasesTest extends BaseQueryTest
       ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
       // Apollo 13 (2)
       // Apollo 8 (1)
-      checkResultOrder(result, new Entry[]{appolloContent.get(1), appolloContent.get(2)});
+      checkResultOrder(result, new Entry[]{appolloContent.get(2), appolloContent.get(1)});
    }
 
    /**
