@@ -25,6 +25,7 @@ import org.antlr.runtime.RecognitionException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.NumberTools;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
@@ -86,6 +87,7 @@ import org.xcmis.search.value.NameConverter;
 import org.xcmis.search.value.PathSplitter;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -181,7 +183,11 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
 
          queryBuilderStack.push(booleanQuery);
       }
-      throw new UnsupportedOperationException("More then one selector used");
+      else
+      {
+         //TODO check
+         throw new UnsupportedOperationException("More then one selector used");
+      }
 
    }
 
@@ -790,11 +796,11 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
       Validate.isTrue(queryBuilderStack.peek() instanceof Operator, "Stack should contains comparation operator ");
       Operator operator = (Operator)queryBuilderStack.pop();
       Object staticValue = queryBuilderStack.peek();
-      Validate.isTrue((staticValue instanceof String || staticValue instanceof Double),
-         "Stack should contains static value. But found "
-            + queryBuilderStack.peek().getClass().getCanonicalName());
+      Validate.isTrue((staticValue instanceof String || staticValue instanceof Double
+         || staticValue instanceof Calendar || staticValue instanceof Boolean),
+         "Stack should contains static value. But found " + queryBuilderStack.peek().getClass().getCanonicalName());
       staticValue = queryBuilderStack.pop();
-      
+
       String staticStingValue = null;
       //convert static value to string
       //TODO check cast system
@@ -805,6 +811,14 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
       else if (staticValue instanceof Double)
       {
          staticStingValue = ExtendedNumberTools.doubleToString((Double)staticValue);
+      }
+      else if (staticValue instanceof Calendar)
+      {
+         staticStingValue = DateTools.dateToString(((Calendar)staticValue).getTime(), DateTools.Resolution.MILLISECOND);
+      }
+      else if (staticValue instanceof Boolean)
+      {
+         staticStingValue = staticValue.toString();
       }
 
       Term propertyValueTerm = new Term(FieldNames.createPropertyFieldName(node.getPropertyName()), staticStingValue);
