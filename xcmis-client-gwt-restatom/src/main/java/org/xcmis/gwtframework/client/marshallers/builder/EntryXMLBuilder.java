@@ -108,8 +108,7 @@ public class EntryXMLBuilder
       String request = XML + document.toString().trim();
       if (request.indexOf(XMLNS.getNamespaceURI()) == -1)
       {
-         return request.replaceAll("<" + CmisNameSpace.ENTRY, "<" + CmisNameSpace.ENTRY + " " + XMLNS.getPrefix() + ":"
-            + XMLNS.getLocalName() + "=" + "\"" + XMLNS.getNamespaceURI() + "\" ");
+         return request.replaceAll("<" + CmisNameSpace.ENTRY, "<" + CmisNameSpace.ENTRY + " " + XMLNS.getLocalName() + "=" + "\"" + XMLNS.getNamespaceURI() + "\" ");
       }
 
       GWT.log(request, null);
