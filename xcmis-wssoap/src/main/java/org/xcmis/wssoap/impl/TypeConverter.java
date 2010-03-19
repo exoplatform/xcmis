@@ -49,14 +49,17 @@ import org.xcmis.core.EnumSupportedPermissions;
 import org.xcmis.core.EnumTypeOfChanges;
 import org.xcmis.messaging.CmisContentStreamType;
 import org.xcmis.messaging.CmisExtensionType;
+import org.xcmis.messaging.CmisObjectInFolderContainerType;
 import org.xcmis.messaging.CmisObjectInFolderType;
 import org.xcmis.messaging.CmisObjectListType;
 import org.xcmis.messaging.CmisRepositoryEntryType;
 import org.xcmis.messaging.CmisObjectParentsType;
+import org.xcmis.messaging.CmisTypeContainer;
 import org.xcmis.spi.ACLCapability;
 import org.xcmis.spi.AccessControlEntry;
 import org.xcmis.spi.AllowableActions;
 import org.xcmis.spi.ItemsList;
+import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.RepositoryCapabilities;
 import org.xcmis.spi.RepositoryInfo;
 import org.xcmis.spi.TypeDefinition;
@@ -200,6 +203,25 @@ public class TypeConverter
       result.setPathSegment(source.getPathSegment());
       return result;
    } 
+   
+   public static CmisTypeContainer getCmisTypeContainer(ItemsTree source){
+      CmisTypeContainer result = new CmisTypeContainer();
+      result.setType(source.getContainer());
+      for (ItemsTree one : source.getChildren()) {
+         result.getChildren().add(getCmisTypeContainer(one)); //TODO: right?
+      }
+      return result;
+   } 
+   
+   
+   public static CmisObjectInFolderContainerType getCmisObjectInFolderContainerType(ItemsTree source){
+      CmisObjectInFolderContainerType result = new CmisObjectInFolderContainerType();
+      result.setObjectInFolder(source.getContainer());
+      for (ItemsTree one : source.getChildren()) {
+         result.getChildren().add(getCmisObjectInFolderContainerType(one)); //TODO: right?
+      }
+      return result;
+   }
    
    public static CmisObjectParentsType getCmisObjectParentsType(ObjectParent source){
       CmisObjectParentsType result = new CmisObjectParentsType();
