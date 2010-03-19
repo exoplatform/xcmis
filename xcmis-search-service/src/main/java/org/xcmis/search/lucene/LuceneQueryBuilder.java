@@ -212,26 +212,40 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
 
    public void visit(ChildNode node) throws VisitException
    {
-      final Object[] entries = pathSplitter.splitPath(node.getParentPath());
-      Query childNodeQuery = null;
-
-      for (int i = 0; i < entries.length; i++)
+      String parentPath = node.getParentPath();
+      if (parentPath.charAt(0) == '[')
       {
-         if (i == 0)
+         //uuid based absolute path
+         Query parentQuery = new TermQuery(new Term(FieldNames.UUID, parentPath.substring(1, parentPath.length() - 1)));
+         Query childNodeQuery = new ChildTraversingQueryNode(parentQuery, false);
+         queryBuilderStack.push(childNodeQuery);
+
+      }
+      else
+      {
+
+         final Object[] entries = pathSplitter.splitPath(parentPath);
+         Query childNodeQuery = null;
+
+         for (int i = 0; i < entries.length; i++)
          {
-            childNodeQuery = new TermQuery(new Term(FieldNames.UUID, IndexConstants.ROOT_UUID));
+            if (i == 0)
+            {
+               childNodeQuery = new TermQuery(new Term(FieldNames.UUID, IndexConstants.ROOT_UUID));
+            }
+            else
+            {
+               final String stepName = nameConverter.convertName(entries[i]);
+               final Query nameQuery = new TermQuery(new Term(FieldNames.LABEL, stepName));
+               childNodeQuery = new DescendantQueryNode(nameQuery, childNodeQuery);
+            }
          }
-         else
-         {
-            final String stepName = nameConverter.convertName(entries[i]);
-            final Query nameQuery = new TermQuery(new Term(FieldNames.LABEL, stepName));
-            childNodeQuery = new DescendantQueryNode(nameQuery, childNodeQuery);
-         }
+
+         // all child
+         childNodeQuery = new ChildTraversingQueryNode(childNodeQuery, false);
+         queryBuilderStack.push(childNodeQuery);
       }
 
-      // all child
-      childNodeQuery = new ChildTraversingQueryNode(childNodeQuery, false);
-      queryBuilderStack.push(childNodeQuery);
    }
 
    /**
@@ -285,28 +299,39 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
 
    public void visit(DescendantNode node) throws VisitException
    {
-      final Object[] entries = pathSplitter.splitPath(node.getAncestorPath());
-      Query descendantQuery = null;
-
-      for (int i = 0; i < entries.length; i++)
+      String parentPath = node.getAncestorPath();
+      if (parentPath.charAt(0) == '[')
       {
-         if (i == 0)
-         {
-            descendantQuery = new TermQuery(new Term(FieldNames.UUID, IndexConstants.ROOT_UUID));
-         }
-         else
-         {
-            final String stepName = nameConverter.convertName(entries[i]);
-            final Query nameQuery = new TermQuery(new Term(FieldNames.LABEL, stepName));
-            descendantQuery = new DescendantQueryNode(nameQuery, descendantQuery);
-         }
+         //uuid based absolute path
+         Query parentQuery = new TermQuery(new Term(FieldNames.UUID, parentPath.substring(1, parentPath.length() - 1)));
+         Query childNodeQuery = new ChildTraversingQueryNode(parentQuery, true);
+         queryBuilderStack.push(childNodeQuery);
       }
-      // all childs
+      else
+      {
+         final Object[] entries = pathSplitter.splitPath(parentPath);
 
-      descendantQuery = new ChildTraversingQueryNode(descendantQuery, true);
+         Query descendantQuery = null;
 
-      queryBuilderStack.push(descendantQuery);
+         for (int i = 0; i < entries.length; i++)
+         {
+            if (i == 0)
+            {
+               descendantQuery = new TermQuery(new Term(FieldNames.UUID, IndexConstants.ROOT_UUID));
+            }
+            else
+            {
+               final String stepName = nameConverter.convertName(entries[i]);
+               final Query nameQuery = new TermQuery(new Term(FieldNames.LABEL, stepName));
+               descendantQuery = new DescendantQueryNode(nameQuery, descendantQuery);
+            }
+         }
+         // all childs
 
+         descendantQuery = new ChildTraversingQueryNode(descendantQuery, true);
+
+         queryBuilderStack.push(descendantQuery);
+      }
    }
 
    /**
