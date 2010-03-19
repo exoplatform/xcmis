@@ -25,16 +25,20 @@ import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.NotSupportedException;
+import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.RelationshipDirection;
 import org.xcmis.spi.Storage;
+import org.xcmis.spi.StorageException;
 import org.xcmis.spi.TypeDefinition;
+import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.Permission.BasicPermissions;
 import org.xcmis.spi.impl.CmisVisitor;
-import org.xcmis.spi.object.Properties;
+import org.xcmis.spi.object.Property;
 
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
@@ -49,7 +53,8 @@ public interface ObjectData
 
    /**
     * Set new ACL for object. New ACL overwrite existed one. If ACL capability
-    * is not supported then this method must throw {@link NotSupportedException}.
+    * is not supported then this method must throw {@link NotSupportedException}
+    * .
     * 
     * @param acl ACL that should replace currently applied ACL
     * @throws ConstraintException if current object is not controllable by ACL,
@@ -82,7 +87,7 @@ public interface ObjectData
     * @throws ConstraintException if current object is not controllable by
     *         Policy, see {@link TypeDefinition#isControllablePolicy()}.
     */
-   void applyPolicy(PolicyData policy) throws ConstraintException;
+   void applyPolicy(Policy policy) throws ConstraintException;
 
    /**
     * Get policies applied to the current object. If Policy object type is not
@@ -92,7 +97,7 @@ public interface ObjectData
     *         object is not controllable by policy then empty list must be
     *         returned, never <code>null</code>
     */
-   Collection<PolicyData> getPolicies();
+   Collection<Policy> getPolicies();
 
    /**
     * Remove specified policy from object. This method must not remove Policy
@@ -103,15 +108,15 @@ public interface ObjectData
     * @throws ConstraintException if current object is not controllable by
     *         Policy, see {@link TypeDefinition#isControllablePolicy()}.
     */
-   void removePolicy(PolicyData policy) throws ConstraintException;
+   void removePolicy(Policy policy) throws ConstraintException;
 
    //
 
    /**
     * @return <code>true</code> if current object is newly created and was not
     *         persisted yet. If may be created via
-    *         {@link Storage#createDocument(FolderData, String, org.xcmis.spi.VersioningState)}
-    *         , {@link Storage#createFolder(FolderData, String)}, etc.
+    *         {@link Storage#createDocument(Folder, String, org.xcmis.spi.VersioningState)}
+    *         , {@link Storage#createFolder(Folder, String)}, etc.
     */
    boolean isNew();
 
@@ -178,7 +183,7 @@ public interface ObjectData
     * @throws ConstraintException if object has more then one parent or if
     *         current object is root folder
     */
-   FolderData getParent() throws ConstraintException;
+   Folder getParent() throws ConstraintException;
 
    /**
     * Get collections of parent folders. It may contains exactly one object for
@@ -186,21 +191,25 @@ public interface ObjectData
     * 
     * @return collection of object's parents
     */
-   Collection<FolderData> getParents();
+   Collection<Folder> getParents();
 
    /**
     * Objects relationships.
     * 
     * @param direction relationship's direction.
-    * @param typeId relationship type id. If <code>null</code> then return
-    *        relationships of all types
+    * @param type relationship type. If
+    *        <code>includeSubRelationshipTypes == true</code> then all
+    *        descendants of this type must be returned. If
+    *        <code>includeSubRelationshipTypes == true</code> only relationship
+    *        of the same type must be returned
     * @param includeSubRelationshipTypes if <code>true</code>, then the return
     *        all relationships whose object types are descendant types of
     *        <code>typeId</code>.
-    * @return relationships
+    * @return relationships if object has not any relationships then empty
+    *         {@link ItemsIterator} must be returned, never <code>null</code>
     * @see RelationshipDirection
     */
-   ItemsIterator<RelationshipData> getRelationships(RelationshipDirection direction, String typeId,
+   ItemsIterator<Relationship> getRelationships(RelationshipDirection direction, TypeDefinition type,
       boolean includeSubRelationshipTypes);
 
    /**
@@ -221,10 +230,61 @@ public interface ObjectData
     */
    void setName(String name) throws NameConstraintViolationException;
 
+   // Properties
+
    /**
-    * @return object properties, never <code>null</code>
+    * @param id property ID
+    * @return property with specified ID or <code>null</code>
     */
-   Properties getProperties();
+   Property<?> getProperty(String id);
+
+   /**
+    * @return set of CMIS properties
+    */
+   Map<String, Property<?>> getProperties();
+
+   /**
+    * Get subset of properties accepted by {@link PropertyFilter}
+    * 
+    * @param filter property filter
+    * @return subset of properties
+    */
+   Map<String, Property<?>> getSubset(PropertyFilter filter);
+
+   /**
+    * Set or update property. Changes may be updated immediately or after
+    * calling {@link ObjectData#save()}. This is implementation specific.
+    * <code>null</code> value for property minds the property will be in 'value
+    * not set' state. If property is required then {@link ConstraintException}
+    * will be thrown.
+    * 
+    * @param property new property
+    * @throws ConstraintException if value of the property violates the
+    *         min/max/required/length constraints specified in the property
+    *         definition in the object type
+    * @throws NameConstraintViolationException if <i>cmis:name</i> specified in
+    *         properties throws conflict
+    */
+   void setProperty(Property<?> property) throws ConstraintException;
+
+   /**
+    * Set or add new properties. Properties will be merged with existed one and
+    * not replace whole set of existed properties. Changes may be updated
+    * immediately or after calling {@link ObjectData#save()}. This is
+    * implementation specific. <code>null</code> value for property minds the
+    * property will be in 'value not set' state. If property is required then
+    * {@link ConstraintException} will be thrown.
+    * 
+    * @param properties new set of properties
+    * @throws ConstraintException if value of any of the properties violates the
+    *         min/max/required/length constraints specified in the property
+    *         definition in the object type
+    * @throws NameConstraintViolationException if <i>cmis:name</i> specified in
+    *         properties throws conflict
+    */
+   void setProperties(Map<String, Property<?>> properties) throws ConstraintException, NameConstraintViolationException;
+
+   //
 
    /**
     * Get the content stream with specified id. Often it should be rendition
@@ -236,5 +296,17 @@ public interface ObjectData
     * @return content stream or <code>null</code>
     */
    ContentStream getContentStream(String streamId);
+
+   /**
+    * Save updated object or newly created object..
+    * 
+    * @throws StorageException if changes can't be saved cause storage internal
+    *         errors
+    * @throws NameConstraintViolationException if updated name (property
+    *         'cmis:name') cause name conflict, e.g. object with the same name
+    *         already exists
+    * @throws UpdateConflictException if saved object is not current any more
+    */
+   void save() throws StorageException, NameConstraintViolationException, UpdateConflictException;
 
 }

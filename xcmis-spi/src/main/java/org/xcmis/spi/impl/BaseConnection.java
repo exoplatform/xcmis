@@ -56,11 +56,11 @@ import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.VersioningState;
 import org.xcmis.spi.data.ContentStream;
-import org.xcmis.spi.data.DocumentData;
-import org.xcmis.spi.data.FolderData;
+import org.xcmis.spi.data.Document;
+import org.xcmis.spi.data.Folder;
 import org.xcmis.spi.data.ObjectData;
-import org.xcmis.spi.data.PolicyData;
-import org.xcmis.spi.data.RelationshipData;
+import org.xcmis.spi.data.Policy;
+import org.xcmis.spi.data.Relationship;
 import org.xcmis.spi.object.CmisObject;
 import org.xcmis.spi.object.ObjectParent;
 import org.xcmis.spi.object.Property;
@@ -120,7 +120,7 @@ public abstract class BaseConnection implements Connection
       if (!object.getTypeDefinition().isFileable())
          throw new ConstraintException("Object " + objectId + " is not fileable.");
 
-      ((FolderData)folder).addObject(object);
+      ((Folder)folder).addObject(object);
    }
 
    /**
@@ -142,14 +142,14 @@ public abstract class BaseConnection implements Connection
          if (folder.getBaseType() != BaseType.FOLDER)
             throw new InvalidArgumentException("Object " + folderId + " is not a Folder object.");
 
-         ((FolderData)folder).removeObject(object);
+         ((Folder)folder).removeObject(object);
       }
       else
       {
          // If folder id is not specified the remove object from all folders.
-         Collection<FolderData> parents = object.getParents();
+         Collection<Folder> parents = object.getParents();
 
-         for (FolderData folder : parents)
+         for (Folder folder : parents)
             folder.removeObject(object);
       }
    }
@@ -171,7 +171,7 @@ public abstract class BaseConnection implements Connection
       ObjectData object = storage.getObject(objectId);
       applyACL(object, addACL, removeACL);
 
-      storage.saveObject(object);
+      object.save();
    }
 
    /**
@@ -204,8 +204,8 @@ public abstract class BaseConnection implements Connection
       ObjectData policy = storage.getObject(policyId);
       if (policy.getBaseType() != BaseType.POLICY)
          throw new InvalidArgumentException("Object " + policy.getObjectId() + " is not a Policy object.");
-      object.applyPolicy((PolicyData)policy);
-      storage.saveObject(object);
+      object.applyPolicy((Policy)policy);
+      object.save();
    }
 
    /**
@@ -219,7 +219,7 @@ public abstract class BaseConnection implements Connection
       ObjectData object = storage.getObject(objectId);
 
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
-      Collection<PolicyData> policies = object.getPolicies();
+      Collection<Policy> policies = object.getPolicies();
       List<CmisObject> policyIDs = new ArrayList<CmisObject>(policies.size());
       for (ObjectData policy : policies)
       {
@@ -238,15 +238,15 @@ public abstract class BaseConnection implements Connection
    {
       checkConnection();
 
-      ObjectData objectData = storage.getObject(objectId);
+      ObjectData object = storage.getObject(objectId);
       ObjectData policyData = storage.getObject(policyId);
 
       if (policyData.getBaseType() != BaseType.POLICY)
          throw new InvalidArgumentException("Object " + policyId + " is not a Policy object.");
 
-      objectData.removePolicy((PolicyData)policyData);
+      object.removePolicy((Policy)policyData);
 
-      storage.saveObject(objectData);
+      object.save();
    }
 
    // ------- Object Services --------
@@ -286,9 +286,9 @@ public abstract class BaseConnection implements Connection
       if (versioningState == null)
          versioningState = VersioningState.MAJOR;
 
-      DocumentData newDocument = storage.createDocument((FolderData)folder, typeId, versioningState);
+      Document newDocument = storage.createDocument((Folder)folder, typeId, versioningState);
 
-      newDocument.getProperties().setValues(properties);
+      newDocument.setProperties(properties);
 
       newDocument.setContentStream(content);
 
@@ -298,7 +298,7 @@ public abstract class BaseConnection implements Connection
       if (policies != null && policies.size() > 0)
          applyPolicies(newDocument, policies);
 
-      storage.saveObject(newDocument);
+      newDocument.save();
 
       return newDocument.getObjectId();
    }
@@ -330,11 +330,11 @@ public abstract class BaseConnection implements Connection
          throw new ConstraintException("Unfiling capability is not supported, parent folder must be provided.");
       }
 
-      DocumentData newDocument =
-         storage.createCopyOfDocument((DocumentData)source, (FolderData)folder, versioningState);
+      Document newDocument =
+         storage.createCopyOfDocument((Document)source, (Folder)folder, versioningState);
 
       if (properties != null)
-         newDocument.getProperties().setValues(properties);
+         newDocument.setProperties(properties);
 
       if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
          applyACL(newDocument, addACL, removeACL);
@@ -342,7 +342,7 @@ public abstract class BaseConnection implements Connection
       if (policies != null && policies.size() > 0)
          applyPolicies(newDocument, policies);
 
-      storage.saveObject(newDocument);
+      newDocument.save();
 
       return newDocument.getObjectId();
    }
@@ -373,9 +373,9 @@ public abstract class BaseConnection implements Connection
       if (folder.getBaseType() != BaseType.FOLDER)
          throw new InvalidArgumentException("Object " + folderId + " is not a Folder object.");
 
-      ObjectData newFolder = storage.createFolder((FolderData)folder, typeId);
+      ObjectData newFolder = storage.createFolder((Folder)folder, typeId);
 
-      newFolder.getProperties().setValues(properties);
+      newFolder.setProperties(properties);
 
       if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
          applyACL(newFolder, addACL, removeACL);
@@ -383,7 +383,7 @@ public abstract class BaseConnection implements Connection
       if (policies != null && policies.size() > 0)
          applyPolicies(newFolder, policies);
 
-      storage.saveObject(newFolder);
+      newFolder.save();
 
       return newFolder.getObjectId();
    }
@@ -419,9 +419,9 @@ public abstract class BaseConnection implements Connection
          throw new ConstraintException("Unfiling capability is not supported, parent folder must be provided.");
       }
 
-      ObjectData newPolicy = storage.createPolicy((FolderData)folder, typeId);
+      ObjectData newPolicy = storage.createPolicy((Folder)folder, typeId);
 
-      newPolicy.getProperties().setValues(properties);
+      newPolicy.setProperties(properties);
 
       if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
          applyACL(newPolicy, addACL, removeACL);
@@ -429,8 +429,8 @@ public abstract class BaseConnection implements Connection
       if (policies != null && policies.size() > 0)
          applyPolicies(newPolicy, policies);
 
-      storage.saveObject(newPolicy);
-
+      newPolicy.save();
+      
       return newPolicy.getObjectId();
    }
 
@@ -470,7 +470,7 @@ public abstract class BaseConnection implements Connection
       ObjectData newRelationship =
          storage.createRelationship(storage.getObject(sourceId), storage.getObject(targetId), typeId);
 
-      newRelationship.getProperties().setValues(properties);
+      newRelationship.setProperties(properties);
 
       if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
          applyACL(newRelationship, addACL, removeACL);
@@ -478,8 +478,8 @@ public abstract class BaseConnection implements Connection
       if (policies != null && policies.size() > 0)
          applyPolicies(newRelationship, policies);
 
-      storage.saveObject(newRelationship);
-
+      newRelationship.save();
+      
       return newRelationship.getObjectId();
    }
 
@@ -497,7 +497,7 @@ public abstract class BaseConnection implements Connection
       if (streamId != null)
          contentStream = object.getContentStream(streamId);
       else
-         contentStream = ((DocumentData)object).getContentStream();
+         contentStream = ((Document)object).getContentStream();
 
       if (contentStream == null)
          throw new ConstraintException("Object does not have content stream.");
@@ -534,7 +534,7 @@ public abstract class BaseConnection implements Connection
       if (folder.getBaseType() != BaseType.FOLDER)
          throw new ConstraintException("Failed delete tree. Object " + folderId + " is not a Folder.");
 
-      if (((FolderData)folder).isRoot())
+      if (((Folder)folder).isRoot())
          throw new ConstraintException("Root folder can't be removed.");
 
       if (unfileObject == null)
@@ -549,7 +549,7 @@ public abstract class BaseConnection implements Connection
       // TODO : Check unfiling capability if 'unfileObject' is other then 'DELETE'
 
       Collection<String> failedDelete =
-         storage.deleteTree((FolderData)folder, deleteAllVersions, unfileObject, continueOnFailure);
+         storage.deleteTree((Folder)folder, deleteAllVersions, unfileObject, continueOnFailure);
 
       return failedDelete;
    }
@@ -653,7 +653,7 @@ public abstract class BaseConnection implements Connection
       //         throw new InvalidArgumentException("Specified source folder " + sourceFolderId + " is not a parent of "
       //            + objectId);
 
-      ObjectData movedObject = storage.moveObject(object, (FolderData)target, (FolderData)source);
+      ObjectData movedObject = storage.moveObject(object, (Folder)target, (Folder)source);
 
       return movedObject.getObjectId();
    }
@@ -677,9 +677,9 @@ public abstract class BaseConnection implements Connection
       // Validate change token, object may be already updated.
       validateChangeToken(document, changeTokenHolder.getValue());
 
-      ((DocumentData)document).setContentStream(null);
+      ((Document)document).setContentStream(null);
 
-      storage.saveObject(document);
+      document.save();
 
       String changeToken = document.getChangeToken(); 
       changeTokenHolder.setValue(changeToken);
@@ -704,15 +704,15 @@ public abstract class BaseConnection implements Connection
       if (document.getBaseType() != BaseType.DOCUMENT)
          throw new InvalidArgumentException("Object " + documentId + " is not Document.");
 
-      if (!overwriteFlag && ((DocumentData)document).hasContent())
+      if (!overwriteFlag && ((Document)document).hasContent())
          throw new ContentAlreadyExistsException("Document already has content stream and 'overwriteFlag' is false.");
 
       // Validate change token, object may be already updated.
       validateChangeToken(document, changeTokenHolder.getValue());
 
-      ((DocumentData)document).setContentStream(null);
+      ((Document)document).setContentStream(null);
 
-      storage.saveObject(document);
+      document.save();
 
       String changeToken = document.getChangeToken(); 
       changeTokenHolder.setValue(changeToken);
@@ -740,10 +740,10 @@ public abstract class BaseConnection implements Connection
       // Validate change token, object may be already updated.
       validateChangeToken(object, changeTokenHolder.getValue());
 
-      object.getProperties().setValues(properties);
+      object.setProperties(properties);
 
-      storage.saveObject(object);
-
+      object.save();
+      
       String changeToken = object.getChangeToken(); 
       changeTokenHolder.setValue(changeToken);
 
@@ -801,7 +801,7 @@ public abstract class BaseConnection implements Connection
    {
       checkConnection();
 
-      Collection<DocumentData> versions = storage.getAllVersions(versionSeriesId);
+      Collection<Document> versions = storage.getAllVersions(versionSeriesId);
 
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
       List<CmisObject> cmisVersions = new ArrayList<CmisObject>();
@@ -829,7 +829,7 @@ public abstract class BaseConnection implements Connection
       // cancelCheckedOut may be invoked on any object in version series.
       // In other way 'cmis:versionSeriesCheckedOutId' may not reflect
       // current PWC id. 
-      ((DocumentData)document).cancelCheckout();
+      ((Document)document).cancelCheckout();
    }
 
    /**
@@ -846,14 +846,14 @@ public abstract class BaseConnection implements Connection
       if (pwc.getBaseType() != BaseType.DOCUMENT)
          throw new InvalidArgumentException("Object " + documentId + " is not a Document object.");
 
-      if (!((DocumentData)pwc).isPWC())
+      if (!((Document)pwc).isPWC())
          throw new VersioningException("Object " + documentId + " is not Private Working Copy.");
 
       if (properties != null)
-         pwc.getProperties().setValues(properties);
+         pwc.setProperties(properties);
 
       if (content != null)
-         ((DocumentData)pwc).setContentStream(content);
+         ((Document)pwc).setContentStream(content);
 
       if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
          applyACL(pwc, addACL, removeACL);
@@ -861,7 +861,7 @@ public abstract class BaseConnection implements Connection
       if (policies != null && policies.size() > 0)
          applyPolicies(pwc, policies);
 
-      DocumentData version = ((DocumentData)pwc).checkin(major, checkinComment);
+      Document version = ((Document)pwc).checkin(major, checkinComment);
 
       return version.getObjectId();
    }
@@ -879,7 +879,7 @@ public abstract class BaseConnection implements Connection
       if (document.getBaseType() != BaseType.DOCUMENT)
          throw new InvalidArgumentException("Object " + documentId + " is not a Document object.");
 
-      DocumentData pwc = ((DocumentData)document).checkout();
+      Document pwc = ((Document)document).checkout();
 
       return pwc.getObjectId();
    }
@@ -894,7 +894,7 @@ public abstract class BaseConnection implements Connection
    {
       checkConnection();
 
-      Collection<DocumentData> versions = storage.getAllVersions(versionSeriesId);
+      Collection<Document> versions = storage.getAllVersions(versionSeriesId);
 
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
       RenditionFilter parsedRenditionFilter = new RenditionFilter(renditionFilter);
@@ -910,14 +910,14 @@ public abstract class BaseConnection implements Connection
       // Storage#getAllVersions(versionSeriesId) return sorted by
       // 'cmis:creationDate' descending. Latest version is version with latest
       // 'cmis:lastModificationDate'.
-      List<DocumentData> v = new ArrayList<DocumentData>(versions);
+      List<Document> v = new ArrayList<Document>(versions);
       Collections.sort(v, CmisUtils.versionComparator);
 
       if (!major) // If not need major version that simply take first in list. 
          return getCmisObject(v.get(0), includeAllowableActions, includeRelationships, false, false, includeObjectInfo,
             parsedPropertyFilter, parsedRenditionFilter);
 
-      for (DocumentData document : v)
+      for (Document document : v)
       {
          if (document.isMajorVersion())
             return getCmisObject(document, includeAllowableActions, includeRelationships, false, false,
@@ -958,7 +958,7 @@ public abstract class BaseConnection implements Connection
          throw new InvalidArgumentException("Can't get children. Object " + folderId + " is not a Folder.");
 
       /* TODO : orderBy in some more usable form */
-      ItemsIterator<ObjectData> iterator = ((FolderData)folder).getChildren(orderBy);
+      ItemsIterator<ObjectData> iterator = ((Folder)folder).getChildren(orderBy);
       try
       {
          if (skipCount > 0)
@@ -1005,7 +1005,7 @@ public abstract class BaseConnection implements Connection
       if (folder.getBaseType() != BaseType.FOLDER)
          throw new InvalidArgumentException("Object " + folderId + " is not a Folder.");
 
-      if (((FolderData)folder).isRoot())
+      if (((Folder)folder).isRoot())
          throw new InvalidArgumentException("Can't get parent of root folder.");
 
       ObjectData parent = folder.getParent();
@@ -1037,7 +1037,7 @@ public abstract class BaseConnection implements Connection
          throw new ConstraintException("Can't get parents. Object " + objectId + " has type " + typeId
             + " that is not fileable");
 
-      Collection<FolderData> parents = object.getParents();
+      Collection<Folder> parents = object.getParents();
 
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
       RenditionFilter parsedRenditionFilter = new RenditionFilter(renditionFilter);
@@ -1101,7 +1101,7 @@ public abstract class BaseConnection implements Connection
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
       RenditionFilter parsedRenditionFilter = new RenditionFilter(renditionFilter);
 
-      for (ItemsIterator<ObjectData> children = ((FolderData)folder).getChildren(null); children.hasNext();)
+      for (ItemsIterator<ObjectData> children = ((Folder)folder).getChildren(null); children.hasNext();)
       {
          ObjectData child = children.next();
 
@@ -1199,12 +1199,17 @@ public abstract class BaseConnection implements Connection
          throw new InvalidArgumentException("skipCount parameter is negative.");
 
       if (direction == null)
-         direction = RelationshipDirection.SOURCE;
+         direction = RelationshipDirection.SOURCE; // Default
+      
+      TypeDefinition type = getTypeDefinition(typeId == null ? BaseType.RELATIONSHIP.value() : typeId);
+      
+      if (type.getBaseId() != BaseType.RELATIONSHIP) // If typeId provided but incorrect.
+         throw new InvalidArgumentException("Type " + typeId + " is not Relationship type.");
 
-      ObjectData objectData = storage.getObject(objectId);
+      ObjectData object = storage.getObject(objectId);
 
-      ItemsIterator<RelationshipData> iterator =
-         objectData.getRelationships(direction, typeId, includeSubRelationshipTypes);
+      ItemsIterator<Relationship> iterator =
+         object.getRelationships(direction, type, includeSubRelationshipTypes);
 
       try
       {
@@ -1450,7 +1455,7 @@ public abstract class BaseConnection implements Connection
    {
       CmisObjectImpl cmis = new CmisObjectImpl();
 
-      Map<String, Property<?>> properties = object.getProperties().getSubset(parsedPropertyFilter);
+      Map<String, Property<?>> properties = object.getSubset(parsedPropertyFilter);
       if (properties.size() != 0)
          cmis.getProperties().putAll(properties);
 
@@ -1476,9 +1481,9 @@ public abstract class BaseConnection implements Connection
          }
          if (direction != null)
          {
-            for (ItemsIterator<RelationshipData> iter = object.getRelationships(direction, null, true); iter.hasNext();)
+            for (ItemsIterator<Relationship> iter = object.getRelationships(direction, null, true); iter.hasNext();)
             {
-               RelationshipData next = iter.next();
+               Relationship next = iter.next();
                cmis.getRelationship().add(
                   getCmisObject(next, false, includeRelationships, false, false, includeObjectInfo, PropertyFilter.ALL,
                      RenditionFilter.NONE));
@@ -1487,7 +1492,7 @@ public abstract class BaseConnection implements Connection
       }
       if (includePolicyIds)
       {
-         for (Iterator<PolicyData> iter = object.getPolicies().iterator(); iter.hasNext();)
+         for (Iterator<Policy> iter = object.getPolicies().iterator(); iter.hasNext();)
             cmis.getPolicyIds().add(iter.next().getObjectId());
       }
 
@@ -1523,11 +1528,11 @@ public abstract class BaseConnection implements Connection
          objectInfo.setChangeToken(object.getChangeToken());
          if (baseType == BaseType.FOLDER)
          {
-            objectInfo.setParentId(((FolderData)object).isRoot() ? null : object.getParent().getObjectId());
+            objectInfo.setParentId(((Folder)object).isRoot() ? null : object.getParent().getObjectId());
          }
          else if (baseType == BaseType.DOCUMENT)
          {
-            DocumentData doc = (DocumentData)object;
+            Document doc = (Document)object;
             objectInfo.setLatestVersion(doc.isLatestVersion());
             objectInfo.setMajorVersion(doc.isMajorVersion());
             objectInfo.setLatestMajorVersion(doc.isLatestMajorVersion());
@@ -1539,7 +1544,7 @@ public abstract class BaseConnection implements Connection
          }
          else if (baseType == BaseType.RELATIONSHIP)
          {
-            RelationshipData rel = (RelationshipData)object;
+            Relationship rel = (Relationship)object;
             objectInfo.setSourceId(rel.getSourceId());
             objectInfo.setTargetId(rel.getTargetId());
          }
@@ -1581,7 +1586,7 @@ public abstract class BaseConnection implements Connection
          ObjectData policy = storage.getObject(policyID);
          if (policy.getBaseType() != BaseType.POLICY)
             throw new InvalidArgumentException("Object " + policyID + " is not a Policy object.");
-         object.applyPolicy((PolicyData)policy);
+         object.applyPolicy((Policy)policy);
       }
    }
 

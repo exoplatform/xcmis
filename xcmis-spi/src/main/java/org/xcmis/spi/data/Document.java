@@ -30,7 +30,7 @@ import org.xcmis.spi.VersioningException;
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */
-public interface DocumentData extends ObjectData
+public interface Document extends ObjectData
 {
    /**
     * Shortcut to 'cmis:versionLabel' property.
@@ -143,7 +143,7 @@ public interface DocumentData extends ObjectData
     * @throws StorageException if newly version of Document can't be saved in
     *         storage cause to its internal problem
     */
-   DocumentData checkin(boolean major, String checkinComment) throws ConstraintException, StorageException;
+   Document checkin(boolean major, String checkinComment) throws ConstraintException, StorageException;
 
    /**
     * Create PWC from this document. Properties and content (optionally) of this
@@ -159,7 +159,7 @@ public interface DocumentData extends ObjectData
     * @throws StorageException if newly created PWC was not saved in storage
     *         cause to storage internal problem
     */
-   DocumentData checkout() throws ConstraintException, VersioningException, StorageException;
+   Document checkout() throws ConstraintException, VersioningException, StorageException;
 
    /**
     * @return <code>true</code> if current Document is private working copy and

@@ -23,15 +23,21 @@ import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NotSupportedException;
-import org.xcmis.spi.Storage;
-import org.xcmis.spi.TypeDefinition;
 
 /**
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */
-public interface FolderData extends ObjectData
+public interface Folder extends ObjectData
 {
+
+   /**
+    * Get absolute path to folder. Path to root folder is '/'. This method is
+    * shortcut to property 'cmis:path'.
+    * 
+    * @return path to this folder
+    */
+   String getPath();
 
    /**
     * Get children of current folder.

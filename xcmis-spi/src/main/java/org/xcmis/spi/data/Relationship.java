@@ -23,7 +23,7 @@ package org.xcmis.spi.data;
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */
-public interface RelationshipData extends ObjectData
+public interface Relationship extends ObjectData
 {
 
    /**
