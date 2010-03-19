@@ -79,6 +79,15 @@ public class ScoredNodesImpl implements ScoredRow
    }
 
    /**
+    * @see java.lang.Object#toString()
+    */
+   @Override
+   public String toString()
+   {
+      return "Score:" + score + " nodes" + nodesMap;
+   }
+
+   /**
     * {@inheritDoc}
     */
    public String getNodeIdentifer(String selectorName)
