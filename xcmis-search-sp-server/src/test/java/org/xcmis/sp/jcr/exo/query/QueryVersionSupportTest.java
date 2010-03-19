@@ -84,7 +84,7 @@ public class QueryVersionSupportTest extends BaseQueryTest
       //            Entry ver = vs1.checkin(true, "comment");
 
       String statement =
-         "SELECT * FROM " + JcrCMIS.NT_FILE + " WHERE (exo:Commander = 'Frank F. Borman, II' )";
+         "SELECT * FROM " + JcrCMIS.CMIS_MIX_DOCUMENT + " WHERE (exo:Commander = 'Frank F. Borman, II' )";
 
       Query query = new Query(statement, true);
       ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
