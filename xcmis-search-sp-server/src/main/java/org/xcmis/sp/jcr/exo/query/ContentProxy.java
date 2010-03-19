@@ -26,6 +26,7 @@ import org.exoplatform.services.jcr.core.NamespaceAccessor;
 import org.exoplatform.services.jcr.core.nodetype.NodeTypeDataManager;
 import org.exoplatform.services.jcr.dataflow.ItemStateChangesLog;
 import org.exoplatform.services.jcr.dataflow.persistent.ItemsPersistenceListener;
+import org.exoplatform.services.jcr.datamodel.ItemData;
 import org.exoplatform.services.jcr.impl.dataflow.persistent.WorkspacePersistentDataManager;
 import org.picocontainer.Startable;
 import org.xcmis.search.content.command.InvocationContext;
@@ -35,10 +36,14 @@ import org.xcmis.search.content.command.read.GetPropertiesCommand;
 import org.xcmis.search.content.command.read.GetPropertyCommand;
 import org.xcmis.search.content.interceptors.ReadOnlyInterceptor;
 import org.xcmis.search.lucene.index.IndexException;
+import org.xcmis.search.result.ScoredRow;
 import org.xcmis.sp.jcr.exo.RepositoriesManagerImpl;
 import org.xcmis.sp.jcr.exo.RepositoryImpl;
 import org.xcmis.sp.jcr.exo.query.index.StartableJcrIndexingService;
 import org.xcmis.spi.RepositoriesManager;
+
+import java.util.Comparator;
+import java.util.HashMap;
 
 import javax.jcr.RepositoryException;
 
@@ -85,6 +90,13 @@ public class ContentProxy extends ReadOnlyInterceptor implements ItemsPersistenc
       //register listener of changes.
       workspacePersistentDataManager.addItemPersistenceListener(this);
 
+   }
+
+   public Comparator<ScoredRow> getDefaultSorter(final String selectorName)
+   {
+
+      return new DocumentOrderResultSorter(workspacePersistentDataManager, new HashMap<String, ItemData>(),
+         selectorName);
    }
 
    /**

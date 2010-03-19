@@ -19,7 +19,6 @@
 
 package org.xcmis.sp.jcr.exo.query;
 
-import org.apache.tools.ant.taskdefs.PathConvert;
 import org.exoplatform.services.jcr.core.nodetype.NodeTypeData;
 import org.exoplatform.services.jcr.core.nodetype.NodeTypeDataManager;
 import org.exoplatform.services.jcr.core.nodetype.PropertyDefinitionData;
@@ -27,7 +26,6 @@ import org.exoplatform.services.jcr.core.nodetype.PropertyDefinitionDatas;
 import org.exoplatform.services.jcr.datamodel.InternalQName;
 import org.exoplatform.services.jcr.datamodel.QPath;
 import org.exoplatform.services.jcr.datamodel.QPathEntry;
-import org.exoplatform.services.jcr.impl.core.JCRPath;
 import org.exoplatform.services.jcr.impl.core.LocationFactory;
 import org.xcmis.search.SearchServiceException;
 import org.xcmis.search.Visitors;
@@ -161,8 +159,13 @@ public class QueryHandlerImpl implements QueryHandler
          Query qom = queryParser.parseQuery(query.getStatement());
          List<ScoredRow> result = luceneSearchService.execute(qom, Collections.EMPTY_MAP);
          //qom.setSearchAllVersions(query.isSearchAllVersions());
+         Set<SelectorName> selectorsReferencedBy = Visitors.getSelectorsReferencedBy(qom);
+         if (qom.getOrderings().size() == 0)
+         {
+            Collections.sort(result, contenProxy.getDefaultSorter(selectorsReferencedBy.iterator().next().getName()));
+         }
 
-         return new QueryResultIterator(result, Visitors.getSelectorsReferencedBy(qom), qom);
+         return new QueryResultIterator(result, selectorsReferencedBy, qom);
       }
 
       catch (org.xcmis.search.InvalidQueryException e)
@@ -177,22 +180,24 @@ public class QueryHandlerImpl implements QueryHandler
       }
       return null;
    }
-   private class DoNothingNameConverter implements NameConverter<String>{
 
+   private class DoNothingNameConverter implements NameConverter<String>
+   {
 
       /**
        * @see org.xcmis.search.value.NameConverter#convertName(java.lang.Object)
        */
-      @Override
       public String convertName(String name)
       {
          return name;
       }
-      
+
    }
-   private  class JcrPathSplitter implements PathSplitter<String>{
+
+   private class JcrPathSplitter implements PathSplitter<String>
+   {
       private final LocationFactory locationFactory;
-      
+
       /**
        * @param locationFactory
        */
@@ -205,7 +210,6 @@ public class QueryHandlerImpl implements QueryHandler
       /**
        * @see org.xcmis.search.value.PathSplitter#splitPath(java.lang.String)
        */
-      @Override
       public String[] splitPath(String path)
       {
          String[] result = new String[0];
@@ -216,17 +220,18 @@ public class QueryHandlerImpl implements QueryHandler
             result = new String[pathEntries.length];
             for (int i = 0; i < pathEntries.length; i++)
             {
-               result[i]= locationFactory.createJCRName(pathEntries[i]).getAsString();
+               result[i] = locationFactory.createJCRName(pathEntries[i]).getAsString();
             }
          }
          catch (javax.jcr.RepositoryException e)
          {
-            
+
          }
          return result;
       }
-      
-   } 
+
+   }
+
    /**
     * 
     * ExtendedNodeTypeManager based schema
