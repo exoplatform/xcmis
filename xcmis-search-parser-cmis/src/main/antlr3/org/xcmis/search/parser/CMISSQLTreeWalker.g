@@ -835,7 +835,11 @@ inFolder returns [Constraint res]
 		
 		//strip quotes
 		String uuid = $STRING_LITERAL.getText();
-		uuid = uuid.substring(1, uuid.length()-1);
+		//uuidbasd path  3.4.4.1.2
+		StringBuilder builder = new StringBuilder();
+		builder.append('[');
+		builder.append(uuid.substring(1, uuid.length()-1));
+		builder.append(']');
 		
 		if(selName!=null){
 		  selName = getSelectorName(selName);
@@ -844,7 +848,7 @@ inFolder returns [Constraint res]
 		  if(selName == null)
 		    throw new TreeWalkerException("There is more than one table. Use selector or table name. IN_FOLDER(..");
 		}
-                res = new ChildNode(selName, uuid );
+                res = new ChildNode(selName, builder.toString());
 		}
   ;
 catch [RecognitionException e] {
@@ -865,7 +869,13 @@ inTree returns [Constraint res]
   {
 		//strip quotes
 		String uuid = $STRING_LITERAL.getText();
-		uuid = uuid.substring(1, uuid.length()-1);
+		
+		    //uuidbasd path  3.4.4.1.2
+    StringBuilder builder = new StringBuilder();
+    builder.append('[');
+    builder.append(uuid.substring(1, uuid.length()-1));
+    builder.append(']');
+		
 		
 		if(selName!=null){
 		  selName = getSelectorName(selName);
@@ -874,7 +884,7 @@ inTree returns [Constraint res]
 		  if(selName==null)
 		    throw new TreeWalkerException("There is more than one table. Use selector or table name. IN_TREE..");
 		}
-                res = new DescendantNode(selName, uuid);
+                res = new DescendantNode(selName, builder.toString());
 		}
   ;
 catch [RecognitionException e] {
