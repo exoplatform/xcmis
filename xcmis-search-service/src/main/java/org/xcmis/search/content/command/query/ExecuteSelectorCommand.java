@@ -38,7 +38,9 @@ import java.util.Map;
  */
 public class ExecuteSelectorCommand implements VisitableCommand
 {
-   private final SelectorName selector;
+   private final SelectorName name;
+
+   private final SelectorName alias;
 
    private final List<Constraint> constrains;
 
@@ -54,16 +56,16 @@ public class ExecuteSelectorCommand implements VisitableCommand
     * @param limit
     * @param orderings
     */
-   public ExecuteSelectorCommand(SelectorName selector, List<Constraint> constrains, Limit limit,
+   public ExecuteSelectorCommand(SelectorName name, SelectorName alias, List<Constraint> constrains, Limit limit,
       List<Ordering> orderings, Map<String, Object> bindVariablesValues)
    {
-      this.bindVariablesValues = bindVariablesValues;
-      Validate.notNull(selector, "The selector argument may not be null");
-      //Validate.notNull(constrain, "The constrain argument may not be null");
-      //Validate.notNull(limit, "The limit argument may not be null");
+      Validate.notNull(name, "The name argument may not be null");
+      Validate.notNull(alias, "The alias argument may not be null");
       Validate.notNull(orderings, "The orderings argument may not be null");
       Validate.notNull(bindVariablesValues, "The bindVariablesValues argument may not be null");
-      this.selector = selector;
+      this.alias = alias;
+      this.bindVariablesValues = bindVariablesValues;
+      this.name = name;
       this.constrains = constrains;
       this.limit = limit;
       this.orderings = orderings;
@@ -78,11 +80,19 @@ public class ExecuteSelectorCommand implements VisitableCommand
    }
 
    /**
-    * @return the selector
+    * @return the name
     */
    public SelectorName getSelector()
    {
-      return selector;
+      return name;
+   }
+
+   /**
+    * @return the name
+    */
+   public SelectorName getAlias()
+   {
+      return alias;
    }
 
    /**

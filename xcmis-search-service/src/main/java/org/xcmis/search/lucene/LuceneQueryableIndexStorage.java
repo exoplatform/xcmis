@@ -165,7 +165,7 @@ public class LuceneQueryableIndexStorage extends QueryableIndexStorage
                // get identifiers
                final Document doc = searcher.doc(scoreDoc.doc, new UUIDFieldSelector());
                final String id = doc.get(FieldNames.UUID);
-               resultNodes.add(new ScoredNodesImpl(command.getSelector().getName(), id, scoreDoc.score));
+               resultNodes.add(new ScoredNodesImpl(command.getAlias().getName(), id, scoreDoc.score));
             }
          }
       }

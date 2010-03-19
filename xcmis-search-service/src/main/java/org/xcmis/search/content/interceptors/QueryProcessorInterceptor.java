@@ -358,8 +358,8 @@ public class QueryProcessorInterceptor extends CommandInterceptor
          try
          {
             ExecuteSelectorCommand command =
-               new ExecuteSelectorCommand(selectorExecutionPlan.getName(), getConstraints(), getLimit(), getOrder(),
-                  context.getVariables());
+               new ExecuteSelectorCommand(selectorExecutionPlan.getName(), selectorExecutionPlan.getAlias(),
+                  getConstraints(), getLimit(), getOrder(), context.getVariables());
             return (List<ScoredRow>)getInterceptor().invokeNextInterceptor(ctx, command);
          }
          catch (Throwable e)
