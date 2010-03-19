@@ -18,6 +18,7 @@
  */
 package org.xcmis.search.lucene;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
@@ -26,6 +27,9 @@ import org.apache.lucene.search.HitCollector;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.Sort;
+import org.apache.lucene.search.SortField;
+import org.apache.lucene.search.TopFieldDocs;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.xcmis.search.VisitException;
 import org.xcmis.search.Visitors;
@@ -43,6 +47,16 @@ import org.xcmis.search.lucene.index.TransactionableIndexDataManager;
 import org.xcmis.search.lucene.search.UUIDFieldSelector;
 import org.xcmis.search.model.Limit;
 import org.xcmis.search.model.constraint.Constraint;
+import org.xcmis.search.model.operand.FullTextSearchScore;
+import org.xcmis.search.model.operand.Length;
+import org.xcmis.search.model.operand.LowerCase;
+import org.xcmis.search.model.operand.NodeDepth;
+import org.xcmis.search.model.operand.NodeLocalName;
+import org.xcmis.search.model.operand.NodeName;
+import org.xcmis.search.model.operand.PropertyValue;
+import org.xcmis.search.model.operand.UpperCase;
+import org.xcmis.search.model.ordering.Order;
+import org.xcmis.search.model.ordering.Ordering;
 import org.xcmis.search.result.ScoredNodesImpl;
 import org.xcmis.search.result.ScoredRow;
 import org.xcmis.search.value.NameConverter;
@@ -64,6 +78,12 @@ import java.util.Set;
  */
 public class LuceneQueryableIndexStorage extends QueryableIndexStorage
 {
+
+   /**
+    * The upper limit for the initial fetch size.
+    */
+   private static final int MAX_FETCH_SIZE = 32 * 1024;
+
    private final TransactionableIndexDataManager indexDataManager;
 
    /**
@@ -148,24 +168,16 @@ public class LuceneQueryableIndexStorage extends QueryableIndexStorage
 
             //query
             Limit limit = command.getLimit();
-            LimitedHitCollector hitCollector = new LimitedHitCollector(limit.getOffset(), limit.getRowLimit());
-            try
-            {
-               searcher.search(query, hitCollector);
-            }
-            catch (LimitedException e)
-            {
-               //ok limit of hits exceeded 
-            }
-            List<ScoreDoc> docs = hitCollector.getScoreDocs();
+            int hits = Math.min(MAX_FETCH_SIZE, limit.getOffset() + limit.getRowLimit());
+            TopFieldDocs topDocs = searcher.search(query, null, hits, getSort(command.getOrderings()));
 
             resultNodes = new LinkedList<ScoredRow>();
-            for (ScoreDoc scoreDoc : docs)
+            for (int i = limit.getOffset(); i < topDocs.scoreDocs.length; i++)
             {
                // get identifiers
-               final Document doc = searcher.doc(scoreDoc.doc, new UUIDFieldSelector());
+               final Document doc = searcher.doc(topDocs.scoreDocs[i].doc, new UUIDFieldSelector());
                final String id = doc.get(FieldNames.UUID);
-               resultNodes.add(new ScoredNodesImpl(command.getAlias().getName(), id, scoreDoc.score));
+               resultNodes.add(new ScoredNodesImpl(command.getAlias().getName(), id, topDocs.scoreDocs[i].score));
             }
          }
       }
@@ -194,6 +206,126 @@ public class LuceneQueryableIndexStorage extends QueryableIndexStorage
       return resultNodes;
    }
 
+   /**
+    * Return lucene sorter by list of orderings
+    * @param list
+    * @return
+    * @throws VisitException 
+    */
+   private Sort getSort(List<Ordering> list) throws VisitException
+   {
+      if (list.size() > 0)
+      {
+         SortField[] fields = new SortField[list.size()];
+         SortFieldVisitor sortVisitor = new SortFieldVisitor();
+         int i = 0;
+         for (Ordering ordering : list)
+         {
+            Visitors.visitAll(ordering, sortVisitor);
+            fields[i++] = sortVisitor.getSortField();
+         }
+         return new Sort(fields);
+
+      }
+      return new Sort();
+   }
+
+   private class SortFieldVisitor extends Visitors.AbstractModelVisitor
+   {
+
+      private Order order;
+
+      private SortField sortField;
+
+      public SortField getSortField()
+      {
+         return sortField;
+      }
+
+      /*
+       * @see org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search.model.ordering.Ordering)
+       */
+      @Override
+      public void visit(Ordering node) throws VisitException
+      {
+         order = node.getOrder();
+      }
+
+      /**
+       * @see org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search.model.operand.FullTextSearchScore)
+       */
+      @Override
+      public void visit(FullTextSearchScore node) throws VisitException
+      {
+         sortField = new SortField(null, SortField.SCORE, order == Order.DESCENDING);
+      }
+
+      /**
+       * @see org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search.model.operand.Length)
+       */
+      @Override
+      public void visit(Length node) throws VisitException
+      {
+         throw new NotImplementedException();
+      }
+
+      /**
+       * @see org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search.model.operand.LowerCase)
+       */
+      @Override
+      public void visit(LowerCase node) throws VisitException
+      {
+         throw new NotImplementedException();
+      }
+
+      /**
+       * @see org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search.model.operand.NodeDepth)
+       */
+      @Override
+      public void visit(NodeDepth depth) throws VisitException
+      {
+         throw new NotImplementedException();
+      }
+
+      /**
+       * @see org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search.model.operand.NodeLocalName)
+       */
+      @Override
+      public void visit(NodeLocalName node) throws VisitException
+      {
+         // TODO Auto-generated method stub
+         super.visit(node);
+      }
+
+      /**
+       * @see org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search.model.operand.NodeName)
+       */
+      @Override
+      public void visit(NodeName node) throws VisitException
+      {
+         throw new NotImplementedException();
+      }
+
+      /**
+       * @see org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search.model.operand.UpperCase)
+       */
+      @Override
+      public void visit(UpperCase node) throws VisitException
+      {
+         throw new NotImplementedException();
+      }
+
+      /**
+       * @see org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search.model.operand.PropertyValue)
+       */
+      @Override
+      public void visit(PropertyValue node) throws VisitException
+      {
+         sortField =
+            new SortField(FieldNames.createPropertyFieldName(node.getPropertyName()), order == Order.DESCENDING);
+      }
+   }
+
    public Query getConstrainQuery(Constraint constraint, Map<String, Object> bindVariablesValues) throws VisitException
    {
       LuceneQueryBuilder luceneQueryBuilder =
@@ -214,6 +346,7 @@ public class LuceneQueryableIndexStorage extends QueryableIndexStorage
     * Collect hits from  offset untill limit exceeded
     *
     */
+   @Deprecated
    private class LimitedHitCollector extends HitCollector
    {
       private final int limit;
