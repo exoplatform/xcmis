@@ -19,12 +19,11 @@
 
 package org.xcmis.restatom;
 
-import org.xcmis.core.EnumRelationshipDirection;
+import org.apache.abdera.model.Entry;
 import org.exoplatform.services.rest.impl.ContainerResponse;
 import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
-import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.spi.CMIS;
-import org.xcmis.spi.object.Entry;
+import org.xcmis.spi.RelationshipDirection;
 
 import java.io.ByteArrayInputStream;
 
@@ -105,7 +104,7 @@ public class RelationshipsCollectionTest extends BaseTest
       //          printBody(writer.getBody());
       assertEquals(201, resp.getStatus());
 
-      assertEquals(1, source.getRelationships(EnumRelationshipDirection.EITHER, true, repository
+      assertEquals(1, source.getRelationships(RelationshipDirection.EITHER, true, repository
          .getTypeDefinition("cmis:relationship")).size());
 
       DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();

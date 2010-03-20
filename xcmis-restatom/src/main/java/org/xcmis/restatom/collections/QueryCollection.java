@@ -81,10 +81,9 @@ public class QueryCollection extends CmisObjectCollection
       {
          Document<Element> doc = request.getDocument();
          QueryTypeElement queryElement = (QueryTypeElement)doc.getRoot();
-         return conn.query(getRepositoryId(request), queryElement.getStatement(),
-            queryElement.isSearchAllVersions(), queryElement.isIncludeAllowableActions(),
-            queryElement.getIncludeRelationships(), queryElement.getRenditionFilter(), queryElement.getPageSize(),
-            queryElement.getSkipCount()).getItems();
+         return conn.query(queryElement.getStatement(), queryElement.isSearchAllVersions(),
+            queryElement.isIncludeAllowableActions(), queryElement.getIncludeRelationships(), true,
+            queryElement.getRenditionFilter(), queryElement.getPageSize(), queryElement.getSkipCount()).getItems();
       }
       catch (ParseException pe)
       {

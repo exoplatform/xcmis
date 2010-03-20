@@ -28,11 +28,8 @@ import org.apache.abdera.protocol.server.TargetType;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
-import org.xcmis.restatom.abdera.CMISExtensionFactory;
 import org.xcmis.restatom.abdera.TypeDefinitionTypeElement;
 import org.xcmis.spi.InvalidArgumentException;
-import org.xcmis.spi.Repository;
-import org.xcmis.spi.RepositoryException;
 import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.TypeNotFoundException;
 
@@ -73,7 +70,7 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
    {
       try
       {
-         return conn.getTypeDefinition(getRepositoryId(request), typeId);
+         return conn.getTypeDefinition(typeId);
       }
       catch (RepositoryException re)
       {
@@ -162,10 +159,10 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
          TypeDefinitionTypeElement typeElement = entry.getFirstChild(AtomCMIS.TYPE);
          TypeDefinition type = typeElement.getTypeDefinition();
          String typeId = type.getId();
-         Repository repository = conn.getRepository(getRepositoryId(request));
-         repository.addType(type);
+         conn.getStorage().addType(type);
+         boolean includePropertyDefinition = false; // TODO sunman
          // Updated (formed) type definition.
-         type = repository.getTypeDefinition(typeId);
+         type = conn.getStorage().getTypeDefinition(typeId, includePropertyDefinition);
          entry = request.getAbdera().getFactory().newEntry();
          addEntryDetails(request, entry, request.getResolvedUri(), type);
       }
@@ -286,7 +283,7 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
    {
       try
       {
-         conn.getRepository(getRepositoryId(request)).removeType(typeId);
+         conn.getStorage().removeType(typeId);
       }
       catch (TypeNotFoundException tnfe)
       {

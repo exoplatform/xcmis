@@ -28,7 +28,9 @@ import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
+import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.ObjectNotFoundException;
+import org.xcmis.spi.object.CmisObject;
 
 import java.util.List;
 
@@ -75,9 +77,8 @@ public class FolderTreeCollection extends FolderDescentantsCollection
       {
          includeRelationships =
             request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS) == null
-               || request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS).length() == 0
-               ? IncludeRelationships.NONE : IncludeRelationships.fromValue(request
-                  .getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
+               || request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS).length() == 0 ? IncludeRelationships.NONE
+               : IncludeRelationships.fromValue(request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
       }
       catch (IllegalArgumentException iae)
       {
@@ -99,25 +100,25 @@ public class FolderTreeCollection extends FolderDescentantsCollection
       }
       try
       {
-         List<CmisObjectInFolderContainerType> tree =
-            conn.getFolderTree(getRepositoryId(request), getId(request), depth, includeAllowableActions,
-               includeRelationships, includePathSegments, propertyFilter, renditionFilter);
+         List<ItemsTree<CmisObject>> tree =
+            conn.getFolderTree(getId(request), depth, includeAllowableActions, includeRelationships,
+               includePathSegments, true, propertyFilter, renditionFilter);
          if (tree.size() > 0)
          {
             // add cmisra:numItems
             Element numItems = feed.addExtension(AtomCMIS.NUM_ITEMS);
             numItems.setText(Integer.toString(tree.size()));
 
-            for (CmisObjectInFolderContainerType oifContainer : tree)
+            for (ItemsTree<CmisObject> oifContainer : tree)
             {
                Entry e = feed.addEntry();
-               IRI feedIri = new IRI(getFeedIriForEntry(oifContainer.getObjectInFolder().getObject(), request));
-               addEntryDetails(request, e, feedIri, oifContainer.getObjectInFolder().getObject());
-               if (oifContainer.getObjectInFolder().getPathSegment() != null)
+               IRI feedIri = new IRI(getFeedIriForEntry(oifContainer.getContainer(), request));
+               addEntryDetails(request, e, feedIri, oifContainer.getContainer());
+               if (oifContainer.getContainer().getPathSegment() != null)
                {
                   // add cmisra:pathSegment
                   Element pathSegment = e.addExtension(AtomCMIS.PATH_SEGMENT);
-                  pathSegment.setText(oifContainer.getObjectInFolder().getPathSegment());
+                  pathSegment.setText(oifContainer.getContainer().getPathSegment());
                }
                if (oifContainer.getChildren().size() > 0)
                   addChildren(e, oifContainer.getChildren(), feedIri, request);

@@ -30,15 +30,6 @@ import org.apache.abdera.protocol.server.impl.AbstractWorkspaceManager;
 import org.apache.abdera.protocol.server.impl.RegexTargetResolver;
 import org.apache.abdera.protocol.server.impl.SimpleWorkspaceInfo;
 import org.apache.abdera.protocol.server.impl.TemplateTargetBuilder;
-import org.xcmis.core.AccessControlService;
-import org.xcmis.core.DiscoveryService;
-import org.xcmis.core.MultifilingService;
-import org.xcmis.core.NavigationService;
-import org.xcmis.core.ObjectService;
-import org.xcmis.core.PolicyService;
-import org.xcmis.core.RelationshipService;
-import org.xcmis.core.RepositoryService;
-import org.xcmis.core.VersioningService;
 import org.xcmis.restatom.collections.AllVersionsCollection;
 import org.xcmis.restatom.collections.CheckedOutCollection;
 import org.xcmis.restatom.collections.FolderChildrenCollection;
@@ -80,15 +71,7 @@ public class ProviderImpl extends AbstractProvider
     * @param multifilingService the multifiling service
     * @param versioningService the versioning service
     */
-   public ProviderImpl(RepositoryService repositoryService, //
-      ObjectService objectService, //
-      NavigationService navigationService, //
-      RelationshipService relationshipService, //
-      PolicyService policyService, //
-      AccessControlService aclService, //
-      DiscoveryService queryService, //
-      MultifilingService multifilingService, //
-      VersioningService versioningService)
+   public ProviderImpl()
    {
       targetBuilder = new TemplateTargetBuilder();
       targetBuilder.setTemplate(TargetType.ENTRY, "{target_base}/cmisatom/{repoid}/{atomdoctype}/{id}");

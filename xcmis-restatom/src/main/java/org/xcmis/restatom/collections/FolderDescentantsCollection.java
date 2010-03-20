@@ -30,6 +30,7 @@ import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
+import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.object.CmisObject;
 
@@ -79,8 +80,8 @@ public class FolderDescentantsCollection extends CmisObjectCollection
     * @param request request
     * @throws ResponseContextException if error occurs
     */
-   protected void addChildren(Entry entry, List<CmisObjectInFolderContainerType> children, IRI feedIri,
-      RequestContext request) throws ResponseContextException
+   protected void addChildren(Entry entry, List<ItemsTree<CmisObject>> children, IRI feedIri, RequestContext request)
+      throws ResponseContextException
    {
       Element childrenElement = entry.addExtension(AtomCMIS.CHILDREN);
 
@@ -105,15 +106,15 @@ public class FolderDescentantsCollection extends CmisObjectCollection
       // add cmisra:numItems
       Element numItems = request.getAbdera().getFactory().newElement(AtomCMIS.NUM_ITEMS, childrenElement);
       numItems.setText(Integer.toString(children.size()));
-      for (CmisObjectInFolderContainerType oifContainer : children)
+      for (ItemsTree<CmisObject> oifContainer : children)
       {
          Entry ch = request.getAbdera().getFactory().newEntry(childFeed);
-         addEntryDetails(request, ch, feedIri, oifContainer.getObjectInFolder().getObject());
-         if (oifContainer.getObjectInFolder().getPathSegment() != null)
+         addEntryDetails(request, ch, feedIri, oifContainer.getContainer());
+         if (oifContainer.getContainer().getPathSegment() != null)
          {
             // add cmisra:pathSegment
             Element pathSegment = ch.addExtension(AtomCMIS.PATH_SEGMENT);
-            pathSegment.setText(oifContainer.getObjectInFolder().getPathSegment());
+            pathSegment.setText(oifContainer.getContainer().getPathSegment());
          }
          if (oifContainer.getChildren().size() > 0)
             addChildren(ch, oifContainer.getChildren(), feedIri, request);
@@ -161,9 +162,9 @@ public class FolderDescentantsCollection extends CmisObjectCollection
       }
       try
       {
-         List<CmisObjectInFolderContainerType> descendants =
-            conn.getDescendants(getRepositoryId(request), getId(request), depth, includeAllowableActions,
-               includeRelationships, includePathSegments, propertyFilter, renditionFilter);
+         List<ItemsTree<CmisObject>> descendants =
+            conn.getDescendants(getId(request), depth, includeAllowableActions, includeRelationships,
+               includePathSegments, true, propertyFilter, renditionFilter);
 
          if (descendants.size() > 0)
          {
@@ -171,16 +172,16 @@ public class FolderDescentantsCollection extends CmisObjectCollection
             Element numItems = feed.addExtension(AtomCMIS.NUM_ITEMS);
             numItems.setText(Integer.toString(descendants.size()));
 
-            for (CmisObjectInFolderContainerType oifContainer : descendants)
+            for (ItemsTree<CmisObject> oifContainer : descendants)
             {
                Entry e = feed.addEntry();
-               IRI feedIri = new IRI(getFeedIriForEntry(oifContainer.getObjectInFolder().getObject(), request));
-               addEntryDetails(request, e, feedIri, oifContainer.getObjectInFolder().getObject());
-               if (oifContainer.getObjectInFolder().getPathSegment() != null)
+               IRI feedIri = new IRI(getFeedIriForEntry(oifContainer.getContainer(), request));
+               addEntryDetails(request, e, feedIri, oifContainer.getContainer());
+               if (oifContainer.getContainer().getPathSegment() != null)
                {
                   // add cmis:pathSegment
                   Element pathSegment = e.addExtension(AtomCMIS.PATH_SEGMENT);
-                  pathSegment.setText(oifContainer.getObjectInFolder().getPathSegment());
+                  pathSegment.setText(oifContainer.getContainer().getPathSegment());
                }
                if (oifContainer.getChildren().size() > 0)
                   addChildren(e, oifContainer.getChildren(), feedIri, request);
@@ -228,11 +229,11 @@ public class FolderDescentantsCollection extends CmisObjectCollection
          feed.addLink(folderTree, AtomCMIS.LINK_CMIS_FOLDERTREE, AtomCMIS.MEDIATYPE_ATOM_FEED, null, null, -1);
 
       String repositoryId = getRepositoryId(request);
-      if (!id.equals(conn.getRepositoryInfo(repositoryId).getRootFolderId()))
+      if (!id.equals(conn.getStorage().getRepositoryInfo().getRootFolderId()))
       {
          try
          {
-            CmisObject parent = conn.getFolderParent(repositoryId, id, null);
+            CmisObject parent = conn.getFolderParent(id, true, null);
             feed.addLink(getObjectLink(getId(parent), request), AtomCMIS.LINK_UP, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null,
                null, -1);
          }

@@ -32,6 +32,7 @@ import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.object.ObjectParent;
 
 import java.util.List;
 
@@ -107,13 +108,12 @@ public class ParentsCollection extends CmisObjectCollection
       {
          String objectId = getId(request);
          CmisObject object =
-            conn.getObject(repositoryId, objectId, false, IncludeRelationships.NONE, false, false,
-               CMIS.BASE_TYPE_ID, null);
+            conn.getObject(objectId, false, IncludeRelationships.NONE, false, false, true, CMIS.BASE_TYPE_ID, null);
 
          switch (getBaseObjectType(object))
          {
-            case CMIS_FOLDER :
-               CmisObject folderParent = conn.getFolderParent(repositoryId, objectId, propertyFilter);
+            case FOLDER :
+               CmisObject folderParent = conn.getFolderParent(objectId, true, propertyFilter);
                if (folderParent != null)
                {
                   // add cmisra:numItems
@@ -122,26 +122,26 @@ public class ParentsCollection extends CmisObjectCollection
                   Entry e = feed.addEntry();
                   IRI feedIri = new IRI(getFeedIriForEntry(folderParent, request));
                   addEntryDetails(request, e, feedIri, folderParent);
-                  CmisPropertyString name = (CmisPropertyString)getProperty(folderParent, CMIS.NAME);
-                  if (name != null && name.getValue().size() > 0)
+                  String name = object.getObjectInfo().getName();
+                  if (name != null)
                   {
                      // add cmisra:relativePathSegment
                      Element pathSegment = e.addExtension(AtomCMIS.RELATIVE_PATH_SEGMENT);
-                     pathSegment.setText(name.getValue().get(0));
+                     pathSegment.setText(name);
                   }
                }
                break;
             default :
-               List<CmisObjectParentsType> parents =
-                  conn.getObjectParents(repositoryId, objectId, includeAllowableActions,
-                     includeRelationships, includeRelativePathSegment, propertyFilter, renditionFilter);
+               List<ObjectParent> parents =
+                  conn.getObjectParents(objectId, includeAllowableActions, includeRelationships, true,
+                     includeRelativePathSegment, propertyFilter, renditionFilter);
                if (parents.size() > 0)
                {
                   // add cmisra:numItems
                   Element numItems = feed.addExtension(AtomCMIS.NUM_ITEMS);
                   numItems.setText(Integer.toString(parents.size()));
 
-                  for (CmisObjectParentsType parent : parents)
+                  for (ObjectParent parent : parents)
                   {
                      Entry e = feed.addEntry();
                      IRI feedIri = new IRI(getFeedIriForEntry(parent.getObject(), request));

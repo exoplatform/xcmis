@@ -20,55 +20,46 @@
 package org.xcmis.restatom.types;
 
 /**
+ * Enum for Return Version.
+ * 
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey Zavizionov</a>
- * @version $Id: CmisContentType.java 34360 2009-07-22 23:58:59Z sunman $
+ * @version $Id: EnumReturnVersion.java 34360 2009-07-22 23:58:59Z sunman $
  *
  */
-public class CmisContentType
-{
 
-   protected String mediatype;
+public enum EnumReturnVersion {
 
-   protected String base64;
+   THIS("this"), //
+   LATEST("latest"), //
+   LATESTMAJOR("latestmajor");
+   private final String value;
 
-   /**
-    * Gets the value of the mediatype property.
-    * 
-    * @return
-    */
-   public String getMediatype()
+   EnumReturnVersion(String v)
    {
-      return mediatype;
+      value = v;
    }
 
-   /**
-    * Sets the value of the mediatype property.
-    * 
-    * @param value
-    */
-   public void setMediatype(String value)
+   public String value()
    {
-      this.mediatype = value;
+      return value;
    }
 
-   /**
-    * Gets the value of the base64 property.
-    * 
-    * @return
-    */
-   public String getBase64()
+   public static EnumReturnVersion fromValue(String v)
    {
-      return base64;
+      for (EnumReturnVersion c : EnumReturnVersion.values())
+      {
+         if (c.value.equals(v))
+         {
+            return c;
+         }
+      }
+      throw new IllegalArgumentException(v);
    }
 
-   /**
-    * Sets the value of the base64 property.
-    * 
-    * @param value
-    */
-   public void setBase64(String value)
+   @Override
+   public String toString()
    {
-      this.base64 = value;
+      return value();
    }
 
 }

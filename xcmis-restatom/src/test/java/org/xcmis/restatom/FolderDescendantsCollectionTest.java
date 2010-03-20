@@ -87,7 +87,7 @@ public class FolderDescendantsCollectionTest extends BaseTest
       assertEquals(204, resp.getStatus());
       try
       {
-         objectService.getProperties(cmisRepositoryId, folder1, null);
+         conn.getProperties(folder1, null);
          fail("Folder tree should be removed.");
       }
       catch (ObjectNotFoundException onf)

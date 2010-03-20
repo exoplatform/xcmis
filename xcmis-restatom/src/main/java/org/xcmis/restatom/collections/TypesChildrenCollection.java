@@ -29,6 +29,8 @@ import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.ItemsList;
+import org.xcmis.spi.TypeDefinition;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -88,10 +90,8 @@ public class TypesChildrenCollection extends CmisTypeCollection
       try
       {
          String repositoryId = getRepositoryId(request);
-         CmisTypeDefinitionListType list =
-            conn.getTypeChildren(repositoryId, typeId, includePropertyDefinitions, maxItems, skipCount);
-         addPageLinks(typeId, feed, "types", maxItems, skipCount, list.getNumItems() == null ? -1 : list.getNumItems()
-            .intValue(), list.isHasMoreItems(), request);
+         ItemsList<TypeDefinition> list = conn.getTypeChildren(typeId, includePropertyDefinitions, maxItems, skipCount);
+         addPageLinks(typeId, feed, "types", maxItems, skipCount, list.getNumItems(), list.isHasMoreItems(), request);
 
          String down = getTypeDescendantsLink(typeId, request);
          feed.addLink(down, AtomCMIS.LINK_DOWN, AtomCMIS.MEDIATYPE_CMISTREE, null, null, -1);
@@ -101,7 +101,7 @@ public class TypesChildrenCollection extends CmisTypeCollection
             String typeLink = getObjectTypeLink(typeId, request);
             feed.addLink(typeLink, AtomCMIS.LINK_VIA, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null, null, -1);
 
-            CmisTypeDefinitionType type = conn.getTypeDefinition(repositoryId, typeId);
+            TypeDefinition type = conn.getTypeDefinition(typeId);
             String parentType = type.getParentId();
             if (parentType != null)
             {
@@ -109,7 +109,7 @@ public class TypesChildrenCollection extends CmisTypeCollection
                feed.addLink(parent, AtomCMIS.LINK_UP, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null, null, -1);
             }
          }
-         for (CmisTypeDefinitionType type : list.getTypes())
+         for (TypeDefinition type : list.getItems())
          {
             Entry e = feed.addEntry();
             IRI feedIri = new IRI(getFeedIriForEntry(type, request));
@@ -129,7 +129,7 @@ public class TypesChildrenCollection extends CmisTypeCollection
    /**
     * {@inheritDoc}
     */
-   public Iterable<CmisTypeDefinitionType> getEntries(RequestContext request) throws ResponseContextException
+   public Iterable<TypeDefinition> getEntries(RequestContext request) throws ResponseContextException
    {
       throw new UnsupportedOperationException("entries");
    }

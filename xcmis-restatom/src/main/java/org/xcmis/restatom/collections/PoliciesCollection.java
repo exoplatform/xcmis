@@ -37,6 +37,8 @@ import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.object.Property;
+import org.xcmis.spi.object.impl.IdProperty;
 
 import java.util.HashMap;
 import java.util.List;
@@ -96,7 +98,7 @@ public class PoliciesCollection extends CmisObjectCollection
       try
       {
          String objectId = getId(request);
-         List<CmisObject> list = conn.getAppliedPolicies(getRepositoryId(request), objectId, propertyFilter);
+         List<CmisObject> list = conn.getAppliedPolicies(objectId, true, propertyFilter);
          if (list.size() > 0)
          {
             // add cmisra:numItems
@@ -162,18 +164,18 @@ public class PoliciesCollection extends CmisObjectCollection
 
       String policyId = null;
 
-      for (CmisProperty p : object.getProperties().getProperty())
+      for (Property<?> p : object.getProperties().values())
       {
-         String pName = p.getPropertyDefinitionId();
-         if (pName.equals(EnumPropertiesBase.CMIS_OBJECT_ID.value()))
-            policyId = ((CmisPropertyId)p).getValue().get(0);
+         String pName = p.getId();
+         if (pName.equals(CMIS.OBJECT_ID))
+            policyId = ((IdProperty)p).getValues().get(0);
       }
       String repositoryId = getRepositoryId(request);
       try
       {
          // apply policy
          if (policyId != null)
-            conn.applyPolicy(repositoryId, policyId, objectId);
+            conn.applyPolicy(policyId, objectId);
       }
       catch (ConstraintException cve)
       {
@@ -200,8 +202,8 @@ public class PoliciesCollection extends CmisObjectCollection
       try
       {
          // updated object
-         addEntryDetails(request, entry, request.getResolvedUri(), (CmisObject)objectService.getObject(repositoryId,
-            policyId, true, IncludeRelationships.BOTH, true, true, null, null));
+         addEntryDetails(request, entry, request.getResolvedUri(), (CmisObject)conn.getObject(policyId, true,
+            IncludeRelationships.BOTH, true, true, true, null, null));
       }
       catch (ResponseContextException rce)
       {
@@ -248,16 +250,16 @@ public class PoliciesCollection extends CmisObjectCollection
 
       String policyId = null;
 
-      for (CmisProperty p : object.getProperties().getProperty())
+      for (Property<?> p : object.getProperties().values())
       {
-         String pName = p.getPropertyDefinitionId();
-         if (pName.equals(EnumPropertiesBase.CMIS_OBJECT_ID.value()))
-            policyId = ((CmisPropertyId)p).getValue().get(0);
+         String pName = p.getId();
+         if (pName.equals(CMIS.OBJECT_ID))
+            policyId = ((IdProperty)p).getValues().get(0);
       }
       try
       {
          if (policyId != null)
-            conn.removePolicy(getRepositoryId(request), policyId, objectId);
+            conn.removePolicy(policyId, objectId);
          ResponseContext response = new EmptyResponseContext(200);
          return response;
       }

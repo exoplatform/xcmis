@@ -19,18 +19,17 @@
 
 package org.xcmis.restatom;
 
+import org.apache.abdera.model.Entry;
 import org.apache.commons.codec.binary.Base64;
-import org.xcmis.core.EnumBaseObjectTypeIds;
 import org.exoplatform.services.rest.impl.ContainerResponse;
 import org.exoplatform.services.rest.impl.MultivaluedMapImpl;
 import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
 import org.w3c.dom.NodeList;
-import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.spi.BaseType;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.object.BaseContentStream;
-import org.xcmis.spi.object.ContentStream;
-import org.xcmis.spi.object.Entry;
+import org.xcmis.spi.data.BaseContentStream;
+import org.xcmis.spi.data.ContentStream;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -293,7 +292,7 @@ public class FolderChildrenCollectionTest extends BaseTest
    {
       Entry doc =
          repository.getObjectById(testFolderId).createChild(
-            repository.getTypeDefinition(EnumBaseObjectTypeIds.CMIS_DOCUMENT.value()), "doc1", null);
+            repository.getTypeDefinition(BaseType.DOCUMENT.value()), "doc1", null);
       ContentStream content = new BaseContentStream("to be or not to be".getBytes(), "file", "text/plain");
       doc.setContent(content);
       doc.save();

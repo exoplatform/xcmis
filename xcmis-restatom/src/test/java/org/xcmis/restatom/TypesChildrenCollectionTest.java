@@ -22,9 +22,11 @@ package org.xcmis.restatom;
 import org.exoplatform.services.rest.impl.ContainerResponse;
 import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
 import org.w3c.dom.NodeList;
+import org.xcmis.spi.BaseType;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ContentStreamAllowed;
 import org.xcmis.spi.PropertyDefinition;
+import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.impl.PropertyDefinitionImpl;
 
@@ -46,7 +48,7 @@ public class TypesChildrenCollectionTest extends BaseTest
       super.setUp();
       //cmis:article
       article = new CmisTypeDocumentDefinitionType();
-      article.setBaseId(EnumBaseObjectTypeIds.CMIS_DOCUMENT);
+      article.setBaseId(BaseType.DOCUMENT);
       article.setControllableACL(false);
       article.setControllablePolicy(false);
       article.setCreatable(true);
@@ -190,7 +192,7 @@ public class TypesChildrenCollectionTest extends BaseTest
       //      printBody(writer.getBody());
       assertEquals(201, resp.getStatus());
 
-      CmisTypeDefinitionType type = null;
+      TypeDefinition type = null;
       try
       {
          type = repository.getTypeDefinition("cmis:folder1");

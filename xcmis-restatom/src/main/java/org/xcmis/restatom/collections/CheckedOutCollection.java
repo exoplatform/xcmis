@@ -78,9 +78,8 @@ public class CheckedOutCollection extends CmisObjectCollection
       {
          includeRelationships =
             request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS) == null
-               || request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS).length() == 0
-               ? IncludeRelationships.NONE : IncludeRelationships.fromValue(request
-                  .getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
+               || request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS).length() == 0 ? IncludeRelationships.NONE
+               : IncludeRelationships.fromValue(request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
       }
       catch (IllegalArgumentException iae)
       {
@@ -118,9 +117,10 @@ public class CheckedOutCollection extends CmisObjectCollection
          // NOTE : Not use method getId(request) here. It may gives incorrect id.
          String folderId = request.getTarget().getParameter("objectid");
          ItemsList<CmisObject> list =
-            conn.getCheckedOutDocs(folderId, includeAllowableActions,
-               includeRelationships, true, propertyFilter, renditionFilter, orderBy, maxItems, skipCount);
-         addPageLinks(folderId, feed, "checkedout", maxItems, skipCount, list.getNumItems(), list.isHasMoreItems(), request);
+            conn.getCheckedOutDocs(folderId, includeAllowableActions, includeRelationships, true, propertyFilter,
+               renditionFilter, orderBy, maxItems, skipCount);
+         addPageLinks(folderId, feed, "checkedout", maxItems, skipCount, list.getNumItems(), list.isHasMoreItems(),
+            request);
          if (list.getItems().size() > 0)
          {
             if (list.getNumItems() != -1)
@@ -208,7 +208,7 @@ public class CheckedOutCollection extends CmisObjectCollection
       }
       try
       {
-         String pwcId = conn.checkout(getRepositoryId(request), id == null ? getId(request) : id);
+         String pwcId = conn.checkout(id == null ? getId(request) : id);
          Entry entry = request.getAbdera().getFactory().newEntry();
          try
          {

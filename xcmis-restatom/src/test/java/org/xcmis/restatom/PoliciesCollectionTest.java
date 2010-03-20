@@ -63,7 +63,7 @@ public class PoliciesCollectionTest extends BaseTest
 
    public void testGetAppliedPolicies() throws Exception
    {
-      policyService.applyPolicy(cmisRepositoryId, policyId, docId);
+      conn.applyPolicy( policyId, docId);
 
       String requestURI = "http://localhost:8080/rest" //
          + "/cmisatom/" //
@@ -138,7 +138,7 @@ public class PoliciesCollectionTest extends BaseTest
 
    public void testDeletePolicy() throws Exception
    {
-      policyService.applyPolicy(cmisRepositoryId, policyId, docId);
+      conn.applyPolicy( policyId, docId);
       String s =
          "<?xml version='1.0' encoding='UTF-8' standalone='yes'?>" //
             + "<atom:entry xmlns:app='http://www.w3.org/2007/app' " //
@@ -169,7 +169,7 @@ public class PoliciesCollectionTest extends BaseTest
       ContainerResponse resp = service("DELETE", requestURI, "http://localhost:8080/rest", null, s.getBytes(), writer);
 
       assertEquals(200, resp.getStatus());
-      List<CmisObjectType> res = policyService.getAppliedPolicies(cmisRepositoryId, docId, null);
+      List<CmisObjectType> res = policyService.getAppliedPolicies(docId, null);
       assertEquals(0, res.size()); // No policies 
    }
 }

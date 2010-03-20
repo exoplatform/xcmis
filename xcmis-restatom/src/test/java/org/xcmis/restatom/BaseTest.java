@@ -23,21 +23,8 @@ import junit.framework.TestCase;
 
 import org.apache.abdera.Abdera;
 import org.apache.abdera.factory.Factory;
+import org.apache.abdera.model.Entry;
 import org.exoplatform.container.StandaloneContainer;
-import org.xcmis.core.AccessControlService;
-import org.xcmis.core.CmisObjectType;
-import org.xcmis.core.CmisPropertiesType;
-import org.xcmis.core.CmisProperty;
-import org.xcmis.core.CmisPropertyId;
-import org.xcmis.core.CmisPropertyString;
-import org.xcmis.core.EnumBaseObjectTypeIds;
-import org.xcmis.core.EnumVersioningState;
-import org.xcmis.core.NavigationService;
-import org.xcmis.core.ObjectService;
-import org.xcmis.core.PolicyService;
-import org.xcmis.core.RelationshipService;
-import org.xcmis.core.RepositoryService;
-import org.xcmis.core.VersioningService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.ContainerResponseWriter;
@@ -53,15 +40,19 @@ import org.exoplatform.services.security.Identity;
 import org.exoplatform.services.test.mock.MockHttpServletRequest;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.abdera.CMISExtensionFactory;
+import org.xcmis.spi.BaseType;
 import org.xcmis.spi.CMIS;
-import org.xcmis.spi.Repository;
-import org.xcmis.spi.object.ContentStream;
-import org.xcmis.spi.object.Entry;
+import org.xcmis.spi.Connection;
+import org.xcmis.spi.Storage;
+import org.xcmis.spi.data.ContentStream;
+import org.xcmis.spi.object.Property;
+import org.xcmis.spi.object.impl.IdProperty;
+import org.xcmis.spi.object.impl.StringProperty;
 
 import java.io.ByteArrayInputStream;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -94,25 +85,13 @@ public abstract class BaseTest extends TestCase
 
    protected Factory factory;
 
-   public RepositoryService cmisRepositoryService;
-
-   public ObjectService objectService;
-
-   public NavigationService navigationService;
-
-   public RelationshipService relationshipService;
-
-   public VersioningService versioningService;
-
-   public AccessControlService aclService;
-
-   public PolicyService policyService;
-
    protected String testFolderId;
 
-   public Repository repository;
-
    protected XPath xp;
+
+   protected Connection conn;
+
+   protected Storage repository;
 
    public ContainerResponse service(String method, String requestURI, String baseURI,
       MultivaluedMap<String, String> headers, byte[] data) throws Exception
@@ -132,45 +111,23 @@ public abstract class BaseTest extends TestCase
       factory = abdera.getFactory();
       factory.registerExtension(new CMISExtensionFactory());
 
-      cmisRepositoryService =
-         (org.xcmis.core.RepositoryService)container
-            .getComponentInstanceOfType(org.xcmis.core.RepositoryService.class);
-      objectService =
-         (org.xcmis.core.ObjectService)container
-            .getComponentInstanceOfType(org.xcmis.core.ObjectService.class);
-      navigationService =
-         (org.xcmis.core.NavigationService)container
-            .getComponentInstanceOfType(org.xcmis.core.NavigationService.class);
-      relationshipService =
-         (org.xcmis.core.RelationshipService)container
-            .getComponentInstanceOfType(org.xcmis.core.RelationshipService.class);
-      versioningService =
-         (org.xcmis.core.VersioningService)container
-            .getComponentInstanceOfType(org.xcmis.core.VersioningService.class);
-      aclService =
-         (org.xcmis.core.AccessControlService)container
-            .getComponentInstanceOfType(org.xcmis.core.AccessControlService.class);
-      policyService =
-         (org.xcmis.core.PolicyService)container
-            .getComponentInstanceOfType(org.xcmis.core.PolicyService.class);
-
       ConversationState state = new ConversationState(new Identity("root"));
       ConversationState.setCurrent(state);
 
-      repository = cmisRepositoryService.getRepository(cmisRepositoryId);
-      rootFolderId = repository.getRepositoryInfo().getRootFolderId();
+      repository = conn.getStorage();
+      rootFolderId = conn.getStorage().getRepositoryInfo().getRootFolderId();
 
-      CmisPropertiesType props = new CmisPropertiesType();
-      CmisPropertyId propId = new CmisPropertyId();
-      propId.setPropertyDefinitionId(CMIS.OBJECT_TYPE_ID);
-      propId.getValue().add(EnumBaseObjectTypeIds.CMIS_FOLDER.value());
-      CmisPropertyString propName = new CmisPropertyString();
-      propName.setPropertyDefinitionId(CMIS.NAME);
-      propName.getValue().add(testFolderName);
-      props.getProperty().add(propId);
-      props.getProperty().add(propName);
+      Map<String, Property<?>> props = new HashMap<String, Property<?>>();
+      IdProperty propId = new IdProperty();
+      propId.setId(CMIS.OBJECT_TYPE_ID);
+      propId.getValues().add(BaseType.FOLDER.value());
+      StringProperty propName = new StringProperty();
+      propName.setId(CMIS.NAME);
+      propName.getValues().add(testFolderName);
+      props.put(propId.getId(), propId);
+      props.put(propName.getId(), propName);
 
-      testFolderId = getObjectId(objectService.createFolder(cmisRepositoryId, rootFolderId, props, null, null, null));
+      testFolderId = getObjectId(conn.createFolder(rootFolderId, props, null, null, null));
 
       xp = XPathFactory.newInstance().newXPath();
       xp.setNamespaceContext(new NamespaceResolver());
@@ -314,7 +271,7 @@ public abstract class BaseTest extends TestCase
 
    protected String getObjectId(CmisObjectType object)
    {
-      return ((CmisPropertyId)getProperty(object, CMIS.OBJECT_ID)).getValue().get(0);
+      return ((IdProperty)getProperty(object, CMIS.OBJECT_ID)).getValues().get(0);
    }
 
    protected CmisProperty getProperty(CmisObjectType object, String propertyName)
@@ -475,7 +432,7 @@ public abstract class BaseTest extends TestCase
       assertTrue(hasLink(AtomCMIS.LINK_SELF, xmlEntry));
       assertTrue(hasLink(AtomCMIS.LINK_DOWN, xmlEntry));
       // TODO : check links for not root types
-      
+
       org.w3c.dom.Node xmlType = getNode("cmisra:type", xmlEntry);
       assertTrue("Not found 'cmis:id' element", hasElementValue("cmis:id", xmlType));
       //    assertTrue("Not found 'cmis:displayName' element", hasElementValue("cmis:displayName", xmlDoc));
@@ -489,12 +446,13 @@ public abstract class BaseTest extends TestCase
          xmlType));
       assertTrue("Not found 'cmis:controllable' element", hasElementValue("cmis:controllable", xmlType));
       assertTrue("Not found 'cmis:controllablePolicy' element", hasElementValue("cmis:controllablePolicy", xmlType));
-      
+
       String baseId = getStringElement("cmis:baseId", xmlType);
       if (baseId.equals("cmis:document"))
       {
          assertTrue("Not found 'cmis:versionable' element", hasElementValue("cmis:versionable", xmlType));
-         assertTrue("Not found 'cmis:contentStreamAllowed' element", hasElementValue("cmis:contentStreamAllowed", xmlType));
+         assertTrue("Not found 'cmis:contentStreamAllowed' element", hasElementValue("cmis:contentStreamAllowed",
+            xmlType));
       }
       // TODO : property-definitions
    }

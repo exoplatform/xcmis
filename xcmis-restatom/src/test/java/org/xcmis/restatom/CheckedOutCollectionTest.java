@@ -64,11 +64,11 @@ public class CheckedOutCollectionTest extends BaseTest
    {
       Entry doc1 = createDocument(testFolderId, "doc1", null, null);
       String doc1Id = doc1.getObjectId();
-      String pwc1 = getObjectId(versioningService.checkout(cmisRepositoryId, doc1Id));
+      String pwc1 = getObjectId(conn.checkout(doc1Id));
 
       Entry doc2 = createDocument(testFolderId, "doc2", null, null);
       String doc2Id = doc2.getObjectId();
-      String pwc2 = getObjectId(versioningService.checkout(cmisRepositoryId, doc2Id));
+      String pwc2 = getObjectId(conn.checkout(doc2Id));
 
       String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/checkedout/";
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();

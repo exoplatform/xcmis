@@ -21,41 +21,10 @@ package org.xcmis.restatom.abdera;
 
 import junit.framework.TestCase;
 
-import org.xcmis.core.CmisChoiceBoolean;
-import org.xcmis.core.CmisChoiceDateTime;
-import org.xcmis.core.CmisChoiceDecimal;
-import org.xcmis.core.CmisChoiceId;
-import org.xcmis.core.CmisChoiceInteger;
-import org.xcmis.core.CmisChoiceString;
-import org.xcmis.core.CmisChoiceUri;
-import org.xcmis.core.CmisPropertyBoolean;
-import org.xcmis.core.CmisPropertyBooleanDefinitionType;
-import org.xcmis.core.CmisPropertyDateTime;
-import org.xcmis.core.CmisPropertyDateTimeDefinitionType;
-import org.xcmis.core.CmisPropertyDecimal;
-import org.xcmis.core.CmisPropertyDecimalDefinitionType;
-import org.xcmis.core.CmisPropertyDefinitionType;
-import org.xcmis.core.CmisPropertyId;
-import org.xcmis.core.CmisPropertyIdDefinitionType;
-import org.xcmis.core.CmisPropertyInteger;
-import org.xcmis.core.CmisPropertyIntegerDefinitionType;
-import org.xcmis.core.CmisPropertyString;
-import org.xcmis.core.CmisPropertyStringDefinitionType;
-import org.xcmis.core.CmisPropertyUri;
-import org.xcmis.core.CmisPropertyUriDefinitionType;
-import org.xcmis.core.EnumCardinality;
-import org.xcmis.core.EnumPropertyType;
-import org.xcmis.core.EnumUpdatability;
 import org.xcmis.restatom.AbderaFactory;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.NamespaceResolver;
-import org.xcmis.restatom.abdera.PropertyBooleanDefinitionTypeElement;
-import org.xcmis.restatom.abdera.PropertyDateTimeDefinitionTypeElement;
-import org.xcmis.restatom.abdera.PropertyDecimalDefinitionTypeElement;
-import org.xcmis.restatom.abdera.PropertyIdDefinitionTypeElement;
-import org.xcmis.restatom.abdera.PropertyIntegerDefinitionTypeElement;
-import org.xcmis.restatom.abdera.PropertyStringDefinitionTypeElement;
-import org.xcmis.restatom.abdera.PropertyUriDefinitionTypeElement;
+import org.xcmis.spi.object.impl.IdProperty;
 import org.xcmis.spi.utils.CmisUtils;
 
 import java.io.ByteArrayInputStream;
@@ -249,7 +218,7 @@ public class PropertyDefinitionElementTest extends TestCase
       def.getChoice().add(idc1);
       def.getChoice().add(idc2);
 
-      CmisPropertyId defaultValue = new CmisPropertyId();
+      IdProperty defaultValue = new IdProperty();
       defaultValue.getValue().add("id:1");
       def.setDefaultValue(defaultValue);
 

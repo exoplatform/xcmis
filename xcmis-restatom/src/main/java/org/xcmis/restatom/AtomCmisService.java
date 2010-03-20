@@ -20,6 +20,7 @@
 package org.xcmis.restatom;
 
 import org.apache.abdera.model.Document;
+import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.apache.abdera.model.Service;
 import org.apache.abdera.model.Workspace;
 import org.apache.abdera.protocol.server.CollectionAdapter;
@@ -34,27 +35,25 @@ import org.apache.abdera.protocol.server.impl.AbstractEntityCollectionAdapter;
 import org.apache.abdera.protocol.server.servlet.ServletRequestContext;
 import org.apache.commons.fileupload.FileItem;
 import org.exoplatform.services.rest.resource.ResourceContainer;
-import org.xcmis.core.AccessControlService;
-import org.xcmis.core.DiscoveryService;
-import org.xcmis.core.MultifilingService;
-import org.xcmis.core.NavigationService;
-import org.xcmis.core.ObjectService;
-import org.xcmis.core.PolicyService;
-import org.xcmis.core.RelationshipService;
-import org.xcmis.core.RepositoryService;
-import org.xcmis.core.VersioningService;
+import org.xcmis.restatom.abdera.AccessControlEntryTypeElement;
 import org.xcmis.restatom.abdera.AllowableActionsElement;
 import org.xcmis.restatom.abdera.RepositoryInfoTypeElement;
 import org.xcmis.restatom.abdera.UriTemplateTypeElement;
 import org.xcmis.restatom.types.CmisUriTemplateType;
+import org.xcmis.spi.AccessControlEntry;
+import org.xcmis.spi.AccessControlPropagation;
 import org.xcmis.spi.AllowableActions;
+import org.xcmis.spi.Connection;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.RepositoryInfo;
+import org.xcmis.spi.StorageProvider;
+import org.xcmis.spi.UnfileObject;
 import org.xcmis.spi.UpdateConflictException;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -94,13 +93,10 @@ public class AtomCmisService implements ResourceContainer
    protected ProviderImpl provider;
 
    /** The repository service. */
-   protected RepositoryService repositoryService;
+   protected StorageProvider storageProvider = null;
 
-   /** The object service. */
-   protected ObjectService objectService;
-
-   /** The acl service. */
-   protected AccessControlService aclService;
+   /** The connection service. */
+   protected Connection conn;
 
    /**
     * Instantiates a new atom cmis service.
@@ -115,17 +111,10 @@ public class AtomCmisService implements ResourceContainer
     * @param multifilingService the multifiling service
     * @param versioningService the versioning service
     */
-   public AtomCmisService(RepositoryService repositoryService, ObjectService objectService,
-      NavigationService navigationService, RelationshipService relationshipService, PolicyService policyService,
-      AccessControlService aclService, DiscoveryService queryService, MultifilingService multifilingService,
-      VersioningService versioningService)
+   public AtomCmisService()
    {
-      this.repositoryService = repositoryService;
-      this.objectService = objectService;
-      this.aclService = aclService;
-      provider =
-         new ProviderImpl(repositoryService, objectService, navigationService, relationshipService, policyService,
-            aclService, queryService, multifilingService, versioningService);
+      this.conn = null;
+      provider = new ProviderImpl();
       provider.init(AbderaFactory.getInstance(), new HashMap<String, String>());
    }
 
@@ -138,17 +127,22 @@ public class AtomCmisService implements ResourceContainer
       RequestContext request = initRequestContext(repositoryId, httpRequest);
       try
       {
-         Document<AccessControlListTypeElement> doc = request.getDocument();
-         AccessControlListTypeElement listEl = doc.getRoot();
-         CmisAccessControlListType list = listEl.getACL();
-         aclService.applyACL(repositoryId, objectId, list, new CmisAccessControlListType(),
-            EnumACLPropagation.REPOSITORYDETERMINED);
+         Document doc = request.getDocument();
+         List<AccessControlEntryTypeElement> listEl = doc.getRoot().getElements();
+         List<AccessControlEntry> listACE = new ArrayList<AccessControlEntry>();
+         for (AccessControlEntryTypeElement el : listEl)
+         {
+            listACE.add(el.getACE());
+         }
+         List<AccessControlEntry> removeACL = new ArrayList<AccessControlEntry>();
+         conn.applyACL(objectId, listACE, removeACL, AccessControlPropagation.REPOSITORYDETERMINED);
+
       }
       catch (IOException io)
       {
          throw new WebApplicationException(io, createErrorResponse(io, 500));
       }
-      catch (org.xcmis.spi.RepositoryException re)
+      catch (RepositoryException re)
       {
          throw new WebApplicationException(re, createErrorResponse(re, 500));
       }
@@ -191,7 +185,8 @@ public class AtomCmisService implements ResourceContainer
    @POST
    @Path("{repositoryId}/object/{folderId}")
    @Produces("application/atom+xml;type=entry")
-   public Response createChildObj(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
+   public Response createChildObj(@Context HttpServletRequest httpRequest,
+      @PathParam("repositoryId") String repositoryId)
    {
       // Found some clients those use direct object (folder) link for adding child.
       return createItem(repositoryId, httpRequest);
@@ -225,25 +220,24 @@ public class AtomCmisService implements ResourceContainer
 
    @DELETE
    @Path("{repositoryId}/foldertree/{folderId}")
-   public Response deleteFolderTree(@PathParam("repositoryId") String repositoryId, @PathParam("folderId") String folderId,
-      @QueryParam("unfileObject") String unfileNonfolderObjects,
+   public Response deleteFolderTree(@PathParam("repositoryId") String repositoryId,
+      @PathParam("folderId") String folderId, @QueryParam("unfileObject") String unfileNonfolderObjects,
       @DefaultValue("false") @QueryParam("continueOnFailure") boolean continueOnFailure)
    {
       return deleteDescendants(repositoryId, folderId, unfileNonfolderObjects, continueOnFailure);
    }
-   
+
    @DELETE
    @Path("{repositoryId}/descendants/{folderId}")
-   public Response deleteDescendants(@PathParam("repositoryId") String repositoryId, @PathParam("folderId") String folderId,
-      @QueryParam("unfileObject") String unfileNonfolderObjects,
+   public Response deleteDescendants(@PathParam("repositoryId") String repositoryId,
+      @PathParam("folderId") String folderId, @QueryParam("unfileObject") String unfileNonfolderObjects,
       @DefaultValue("false") @QueryParam("continueOnFailure") boolean continueOnFailure)
    {
-      EnumUnfileObject unfileObject;
+      UnfileObject unfileObject;
       try
       {
          unfileObject =
-            unfileNonfolderObjects == null ? EnumUnfileObject.DELETE : EnumUnfileObject
-               .fromValue(unfileNonfolderObjects);
+            unfileNonfolderObjects == null ? UnfileObject.DELETE : UnfileObject.fromValue(unfileNonfolderObjects);
       }
       catch (IllegalArgumentException e)
       {
@@ -252,7 +246,8 @@ public class AtomCmisService implements ResourceContainer
 
       try
       {
-         objectService.deleteTree(repositoryId, folderId, unfileObject, continueOnFailure);
+         Boolean deleteAllVersions = true; // TODO
+         conn.deleteTree(folderId, deleteAllVersions, unfileObject, continueOnFailure);
          return Response.noContent().build();
       }
       catch (RepositoryException re)
@@ -293,10 +288,15 @@ public class AtomCmisService implements ResourceContainer
    {
       try
       {
-         CmisAccessControlListType list = aclService.getACL(repositoryId, objectId, onlyBasicPermissions);
-         AccessControlListTypeElement el = AbderaFactory.getInstance().getFactory().newElement(AtomCMIS.ACCESS_CONTROL);
-         el.build(list);
-         return Response.ok(el).header(HttpHeaders.CACHE_CONTROL, "no-cache").build();
+         List<AccessControlEntry> list = conn.getACL(objectId, onlyBasicPermissions);
+         ExtensibleElementWrapper accessControlListTypeElement =
+            AbderaFactory.getInstance().getFactory().newElement(AtomCMIS.ACL);
+         for (AccessControlEntry accessControlEntry : list)
+         {
+            AccessControlEntryTypeElement ace = accessControlListTypeElement.addExtension(AtomCMIS.PERMISSION);
+            ace.build(accessControlEntry);
+         }
+         return Response.ok(accessControlListTypeElement).header(HttpHeaders.CACHE_CONTROL, "no-cache").build();
       }
       catch (RepositoryException re)
       {
@@ -316,7 +316,7 @@ public class AtomCmisService implements ResourceContainer
    {
       try
       {
-         AllowableActions result = objectService.getAllowableActions(repositoryId, objectId);
+         AllowableActions result = conn.getAllowableActions(objectId);
          AllowableActionsElement el = AbderaFactory.getInstance().getFactory().newElement(AtomCMIS.ALLOWABLE_ACTIONS);
          el.build(result);
          return Response.ok(el).header(HttpHeaders.CACHE_CONTROL, "no-cache").build();
@@ -626,7 +626,8 @@ public class AtomCmisService implements ResourceContainer
       RepositoryInfo repoInfo;
       try
       {
-         repoInfo = repositoryService.getRepositoryInfo(repositoryId);
+         conn = storageProvider.getConnection(repositoryId, null, null);
+         repoInfo = conn.getStorage().getRepositoryInfo();
       }
       catch (InvalidArgumentException iae)
       {

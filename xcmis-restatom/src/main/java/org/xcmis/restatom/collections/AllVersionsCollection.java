@@ -91,9 +91,7 @@ public class AllVersionsCollection extends CmisObjectCollection
 
       try
       {
-         List<CmisObject> list =
-            conn.getAllVersions(getRepositoryId(request), objectId, includeAllowableActions,
-               propertyFilter);
+         List<CmisObject> list = conn.getAllVersions(objectId, includeAllowableActions, true, propertyFilter);
          if (list.size() > 0)
          {
             // add cmisra:numItems

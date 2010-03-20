@@ -35,11 +35,7 @@ public class CmisUriTemplateType
 
    /**
     * Gets the value of the template property.
-    * 
     * @return
-    *     possible object is
-    *     {@link String }
-    *     
     */
    public String getTemplate()
    {
@@ -48,11 +44,7 @@ public class CmisUriTemplateType
 
    /**
     * Sets the value of the template property.
-    * 
     * @param value
-    *     allowed object is
-    *     {@link String }
-    *     
     */
    public void setTemplate(String value)
    {
@@ -61,11 +53,7 @@ public class CmisUriTemplateType
 
    /**
     * Gets the value of the type property.
-    * 
     * @return
-    *     possible object is
-    *     {@link String }
-    *     
     */
    public String getType()
    {
@@ -74,11 +62,7 @@ public class CmisUriTemplateType
 
    /**
     * Sets the value of the type property.
-    * 
     * @param value
-    *     allowed object is
-    *     {@link String }
-    *     
     */
    public void setType(String value)
    {
@@ -87,11 +71,7 @@ public class CmisUriTemplateType
 
    /**
     * Gets the value of the mediatype property.
-    * 
     * @return
-    *     possible object is
-    *     {@link String }
-    *     
     */
    public String getMediatype()
    {
@@ -100,11 +80,7 @@ public class CmisUriTemplateType
 
    /**
     * Sets the value of the mediatype property.
-    * 
     * @param value
-    *     allowed object is
-    *     {@link String }
-    *     
     */
    public void setMediatype(String value)
    {

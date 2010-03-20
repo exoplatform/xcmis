@@ -25,6 +25,8 @@ import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.spi.AccessControlEntry;
 import org.xcmis.spi.AllowableActions;
+import org.xcmis.spi.BaseType;
+import org.xcmis.spi.CMIS;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.PropertyType;
@@ -39,6 +41,7 @@ import org.xcmis.spi.object.impl.DecimalProperty;
 import org.xcmis.spi.object.impl.HtmlProperty;
 import org.xcmis.spi.object.impl.IdProperty;
 import org.xcmis.spi.object.impl.IntegerProperty;
+import org.xcmis.spi.object.impl.ObjectInfoImpl;
 import org.xcmis.spi.object.impl.StringProperty;
 import org.xcmis.spi.object.impl.UriProperty;
 
@@ -95,16 +98,24 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
    public CmisObject getObject()
    {
       CmisObjectImpl object = new CmisObjectImpl();
+
+      ObjectInfoImpl objectInfo = new ObjectInfoImpl();
+      object.setObjectInfo(objectInfo);
+
+      // PROPERTIES
       ExtensibleElementWrapper propertiesElement = getExtension(AtomCMIS.PROPERTIES);
       if (propertiesElement != null)
       {
          Map<String, Property<?>> properties = object.getProperties();
-         List<PropertyElement<?>> ll = propertiesElement.getElements();
-         for (PropertyElement<?> propertyElement : ll)
+         List<PropertyElement<?>> propertyElementList = propertiesElement.getElements();
+         for (PropertyElement<?> propertyElement : propertyElementList)
          {
-            properties.put(propertyElement.getProperty().getId(), propertyElement.getProperty());
+            Property<?> property = propertyElement.getProperty();
+            properties.put(propertyElement.getProperty().getId(), property);
+            storeProperty(objectInfo, property);
          }
       }
+
       // TODO
       //      object.getACL()
       //      object.getPolicyIds()
@@ -120,6 +131,57 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
       // Don't need this now. It is not clear from specification 
       // how to process (apply) policies.
       return object;
+   }
+
+   /**
+    * Store property as concrete field to the provided ObjectInfo.
+    * @param objectInfo
+    * @param property
+    */
+   private void storeProperty(ObjectInfoImpl objectInfo, Property<?> p)
+   {
+      String pId = p.getId();
+
+      if (CMIS.NAME.equals(pId))
+         objectInfo.setName(((StringProperty)p).getValues().get(0));
+      else if (CMIS.OBJECT_ID.equals(pId))
+         objectInfo.setId(((IdProperty)p).getValues().get(0));
+      else if (CMIS.BASE_TYPE_ID.equals(pId))
+         objectInfo.setBaseType(BaseType.fromValue((((IdProperty)p).getValues().get(0))));
+      else if (CMIS.OBJECT_TYPE_ID.equals(pId))
+         objectInfo.setTypeId(((IdProperty)p).getValues().get(0));
+      else if (CMIS.CREATED_BY.equals(pId))
+         objectInfo.setCreatedBy(((IdProperty)p).getValues().get(0));
+      else if (CMIS.CREATION_DATE.equals(pId))
+         objectInfo.setCreationDate(((DateTimeProperty)p).getValues().get(0));
+      else if (CMIS.LAST_MODIFIED_BY.equals(pId))
+         objectInfo.setLastModifiedBy(((StringProperty)p).getValues().get(0));
+      else if (CMIS.LAST_MODIFICATION_DATE.equals(pId))
+         objectInfo.setLastModificationDate(((DateTimeProperty)p).getValues().get(0));
+      else if (CMIS.CHANGE_TOKEN.equals(pId))
+         objectInfo.setChangeToken(((StringProperty)p).getValues().get(0));
+      else if (CMIS.PARENT_ID.equals(pId))
+         objectInfo.setParentId(((IdProperty)p).getValues().get(0));
+      else if (CMIS.IS_LATEST_VERSION.equals(pId))
+         objectInfo.setLatestVersion(((BooleanProperty)p).getValues().get(0));
+      else if (CMIS.IS_MAJOR_VERSION.equals(pId))
+         objectInfo.setMajorVersion(((BooleanProperty)p).getValues().get(0));
+      else if (CMIS.IS_LATEST_MAJOR_VERSION.equals(pId))
+         objectInfo.setLatestMajorVersion(((BooleanProperty)p).getValues().get(0));
+      else if (CMIS.VERSION_LABEL.equals(pId))
+         objectInfo.setVersionLabel(((StringProperty)p).getValues().get(0));
+      else if (CMIS.VERSION_SERIES_ID.equals(pId))
+         objectInfo.setVersionSeriesId(((IdProperty)p).getValues().get(0));
+      else if (CMIS.VERSION_SERIES_CHECKED_OUT_ID.equals(pId))
+         objectInfo.setVersionSeriesCheckedOutId(((StringProperty)p).getValues().get(0));
+      else if (CMIS.VERSION_SERIES_CHECKED_OUT_BY.equals(pId))
+         objectInfo.setVersionSeriesCheckedOutBy(((StringProperty)p).getValues().get(0));
+      else if (CMIS.CONTENT_STREAM_MIME_TYPE.equals(pId))
+         objectInfo.setContentStreamMimeType(((StringProperty)p).getValues().get(0));
+      else if (CMIS.SOURCE_ID.equals(pId))
+         objectInfo.setSourceId(((IdProperty)p).getValues().get(0));
+      else if (CMIS.TARGET_ID.equals(pId))
+         objectInfo.setTargetId(((IdProperty)p).getValues().get(0));
    }
 
    /**

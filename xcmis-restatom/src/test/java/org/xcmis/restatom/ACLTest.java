@@ -61,7 +61,7 @@ public class ACLTest extends BaseTest
       addACL.getPermission().add(entry1);
 
       // Apply via common service
-      aclService.applyACL(cmisRepositoryId, docId, addACL, null, EnumACLPropagation.REPOSITORYDETERMINED);
+      conn.applyACL(docId, addACL, null, ACLPropagation.REPOSITORYDETERMINED);
 
       String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/objacl/" + docId;
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
@@ -125,7 +125,7 @@ public class ACLTest extends BaseTest
       //            printBody(writer.getBody());
       assertEquals(201, resp.getStatus());
       
-      CmisAccessControlListType acl = aclService.getACL(cmisRepositoryId, docId, true);
+      CmisAccessControlListType acl = conn.getACL(docId, true);
       for(AccessControlEntry ace : acl.getPermission())
       {
          if ("Makis".equals(ace.getPrincipal().getPrincipalId()))
