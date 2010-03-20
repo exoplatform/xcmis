@@ -57,6 +57,7 @@ public interface Permission
          throw new IllegalArgumentException(value);
       }
 
+      @Override
       public String toString()
       {
          return value;
