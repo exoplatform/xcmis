@@ -52,7 +52,7 @@ public class DecimalProperty extends BaseProperty<BigDecimal>
    /**
     * {@inheritDoc}
     */
-   public PropertyType getType()
+   public final PropertyType getType()
    {
       return PropertyType.DECIMAL;
    }

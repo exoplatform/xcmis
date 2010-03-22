@@ -52,7 +52,7 @@ public class UriProperty extends BaseProperty<URI>
    /**
     * {@inheritDoc}
     */
-   public PropertyType getType()
+   public final PropertyType getType()
    {
       return PropertyType.URI;
    }

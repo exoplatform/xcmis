@@ -52,7 +52,7 @@ public class DateTimeProperty extends BaseProperty<Calendar>
    /**
     * {@inheritDoc}
     */
-   public PropertyType getType()
+   public final PropertyType getType()
    {
       return PropertyType.DATETIME;
    }

@@ -51,7 +51,7 @@ public class BooleanProperty extends BaseProperty<Boolean>
    /**
     * {@inheritDoc}
     */
-   public PropertyType getType()
+   public final PropertyType getType()
    {
       return PropertyType.BOOLEAN;
    }

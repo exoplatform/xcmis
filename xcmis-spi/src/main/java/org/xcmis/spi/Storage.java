@@ -341,21 +341,6 @@ public interface Storage extends TypeManager
    ItemsIterator<Rendition> getRenditions(ObjectData object);
 
    /**
-    * Save updated object.
-    * 
-    * @param object object to be saved
-    * @throws StorageException if changes can't be saved cause storage internal
-    *         errors
-    * @throws NameConstraintViolationException if updated name (property
-    *         'cmis:name') cause name conflict, e.g. object with the same name
-    *         already exists
-    * @throws UpdateConflictException if saved object is not current any more
-    */
-   @Deprecated
-   void saveObject(ObjectData object) throws StorageException, NameConstraintViolationException,
-      UpdateConflictException;
-
-   /**
     * Get description of storage and its capabilities.
     * 
     * @return storage description

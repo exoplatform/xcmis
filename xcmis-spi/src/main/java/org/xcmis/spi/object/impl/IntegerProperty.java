@@ -52,7 +52,7 @@ public class IntegerProperty extends BaseProperty<BigInteger>
    /**
     * {@inheritDoc}
     */
-   public PropertyType getType()
+   public final PropertyType getType()
    {
       return PropertyType.INTEGER;
    }

@@ -51,7 +51,7 @@ public class IdProperty extends BaseProperty<String>
    /**
     * {@inheritDoc}
     */
-   public PropertyType getType()
+   public final PropertyType getType()
    {
       return PropertyType.ID;
    }

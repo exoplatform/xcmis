@@ -33,9 +33,9 @@ public class AccessControlEntryImpl implements AccessControlEntry
 {
 
    private String principal;
-   
+
    private Set<String> permissions;
-   
+
    public AccessControlEntryImpl()
    {
    }
@@ -67,6 +67,11 @@ public class AccessControlEntryImpl implements AccessControlEntry
    public void setPrincipal(String principal)
    {
       this.principal = principal;
+   }
+
+   public String toString()
+   {
+      return "principal: " + principal + ", permissions: " + permissions;
    }
 
 }
