@@ -185,7 +185,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
 
             if (!cmisSystem.hasNode(JcrCMIS.CMIS_WORKING_COPIES))
             {
-               cmisSystem.addNode(JcrCMIS.CMIS_WORKING_COPIES);
+               cmisSystem.addNode(JcrCMIS.CMIS_WORKING_COPIES, JcrCMIS.NT_UNSTRUCTURED);
                if (LOG.isDebugEnabled())
                   LOG.debug("CMIS Working Copies storage " + JcrCMIS.CMIS_WORKING_COPIES + " created.");
             }

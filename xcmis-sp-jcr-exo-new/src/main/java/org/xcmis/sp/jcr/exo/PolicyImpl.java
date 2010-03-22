@@ -19,7 +19,6 @@
 
 package org.xcmis.sp.jcr.exo;
 
-import org.exoplatform.services.jcr.util.IdGenerator;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.NameConstraintViolationException;
@@ -104,13 +103,13 @@ public class PolicyImpl extends BaseObjectData implements Policy
    /**
     * {@inheritDoc}
     */
+   @Override
    public void save() throws StorageException, NameConstraintViolationException, UpdateConflictException
    {
-      try
+      if (isNew())
       {
-         if (isNew())
+         try
          {
-
             if (name == null)
             {
                Property<?> nameProperty = properties.get(CMIS.NAME);
@@ -166,42 +165,14 @@ public class PolicyImpl extends BaseObjectData implements Policy
 
             node = newPolicy;
          }
-         else
+         catch (RepositoryException re)
          {
-            Node parentNode = node.getParent();
-
-            // New name was set. Need rename Policy.
-            // See BaseObjectData.setName(String), BaseObjectData#setProperty(Node, Property<?>). 
-            if (name != null)
-            {
-               if (name.length() == 0)
-                  throw new NameConstraintViolationException("Name is empty.");
-
-               if (parentNode.hasNode(name))
-                  throw new NameConstraintViolationException("Object with name " + name + " already exists.");
-
-               String srcPath = node.getPath();
-               String destPath = srcPath.substring(0, srcPath.lastIndexOf('/') + 1) + name;
-
-               node.getSession().move(srcPath, destPath);
-
-               //               node.setProperty(CMIS.NAME, //
-               //                  name);
-            }
-
-            node.setProperty(CMIS.LAST_MODIFICATION_DATE,//
-               Calendar.getInstance());
-            node.setProperty(CMIS.LAST_MODIFIED_BY, //
-               node.getSession().getUserID());
-            node.setProperty(CMIS.CHANGE_TOKEN, //
-               IdGenerator.generate());
-
-            parentNode.save();
+            throw new StorageException("Unable create new policy. " + re.getMessage(), re);
          }
       }
-      catch (RepositoryException re)
+      else
       {
-         throw new StorageException("Unable create new policy. " + re.getMessage(), re);
+         super.save();
       }
    }
 

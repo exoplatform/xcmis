@@ -58,6 +58,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.jcr.Node;
+import javax.jcr.NodeIterator;
 import javax.jcr.Session;
 
 /**
@@ -112,6 +113,14 @@ public class StorageTest extends BaseTest
       Collection<Policy> policies = document.getPolicies();
       assertEquals(1, policies.size());
       assertEquals(policy.getObjectId(), policies.iterator().next().getObjectId());
+   }
+
+   public void testCheckOut() throws Exception
+   {
+      Document document = createDocument(rootFolder, "checkoutTest", "cmis:document", null, null);
+      document.checkout();
+      for (NodeIterator i = root.getNodes(); i.hasNext();)
+         System.out.println(">>>> "+i.nextNode().getName());
    }
 
    public void testChildren() throws Exception
@@ -246,8 +255,7 @@ public class StorageTest extends BaseTest
       properties.put(CMIS.NAME, new StringProperty(defName.getId(), defName.getQueryName(), defName.getLocalName(),
          defName.getDisplayName(), "createPolicyTest"));
 
-      PropertyDefinition<?> defPolicyText =
-         PropertyDefinitions.getPropertyDefinition("cmis:policy", CMIS.POLICY_TEXT);
+      PropertyDefinition<?> defPolicyText = PropertyDefinitions.getPropertyDefinition("cmis:policy", CMIS.POLICY_TEXT);
       properties.put(CMIS.POLICY_TEXT, new StringProperty(defPolicyText.getId(), defPolicyText.getQueryName(),
          defPolicyText.getLocalName(), defPolicyText.getDisplayName(), "simple policy"));
 
@@ -374,7 +382,7 @@ public class StorageTest extends BaseTest
       }
       document.removePolicy(policy);
       document.save();
-   
+
       // Should be able delete now.
       storage.deleteObject(policy, true);
    }
@@ -570,8 +578,7 @@ public class StorageTest extends BaseTest
       properties.put(CMIS.NAME, new StringProperty(defName.getId(), defName.getQueryName(), defName.getLocalName(),
          defName.getDisplayName(), name));
 
-      PropertyDefinition<?> defPolicyText =
-         PropertyDefinitions.getPropertyDefinition("cmis:policy", CMIS.POLICY_TEXT);
+      PropertyDefinition<?> defPolicyText = PropertyDefinitions.getPropertyDefinition("cmis:policy", CMIS.POLICY_TEXT);
       properties.put(CMIS.POLICY_TEXT, new StringProperty(defPolicyText.getId(), defPolicyText.getQueryName(),
          defPolicyText.getLocalName(), defPolicyText.getDisplayName(), policyText));
 

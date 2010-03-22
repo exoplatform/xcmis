@@ -27,6 +27,7 @@ import org.exoplatform.services.jcr.impl.core.value.DateValue;
 import org.exoplatform.services.jcr.impl.core.value.DoubleValue;
 import org.exoplatform.services.jcr.impl.core.value.LongValue;
 import org.exoplatform.services.jcr.impl.core.value.StringValue;
+import org.exoplatform.services.jcr.util.IdGenerator;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.spi.AccessControlEntry;
@@ -43,6 +44,7 @@ import org.xcmis.spi.RelationshipDirection;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.Updatability;
+import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.Permission.BasicPermissions;
 import org.xcmis.spi.data.Document;
 import org.xcmis.spi.data.Folder;
@@ -544,6 +546,56 @@ public abstract class BaseObjectData implements ObjectData
    public boolean isNew()
    {
       return node == null;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public void save() throws StorageException, NameConstraintViolationException, UpdateConflictException
+   {
+      if (isNew())
+      {
+         throw new UnsupportedOperationException("save");
+      }
+      else
+      {
+         try
+         {
+            Node parentNode = node.getParent();
+
+            // New name was set. Need rename Document.
+            // See setName(String), setProperty(Node, Property<?>). 
+            if (name != null)
+            {
+               if (name.length() == 0)
+                  throw new NameConstraintViolationException("Name is empty.");
+
+               if (parentNode.hasNode(name))
+                  throw new NameConstraintViolationException("Object with name " + name + " already exists.");
+
+               String srcPath = node.getPath();
+               String destPath = srcPath.substring(0, srcPath.lastIndexOf('/') + 1) + name;
+
+               node.getSession().move(srcPath, destPath);
+               //               node.setProperty(CMIS.NAME, //
+               //                  name);
+            }
+
+            node.setProperty(CMIS.LAST_MODIFICATION_DATE,//
+               Calendar.getInstance());
+            node.setProperty(CMIS.LAST_MODIFIED_BY, //
+               node.getSession().getUserID());
+            node.setProperty(CMIS.CHANGE_TOKEN, //
+               IdGenerator.generate());
+
+            parentNode.save();
+         }
+         catch (RepositoryException re)
+         {
+            throw new StorageException("Unable save object. " + re.getMessage(), re);
+         }
+
+      }
    }
 
    /**

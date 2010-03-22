@@ -20,7 +20,6 @@
 package org.xcmis.sp.jcr.exo;
 
 import org.exoplatform.services.jcr.core.ExtendedNode;
-import org.exoplatform.services.jcr.util.IdGenerator;
 import org.xcmis.sp.jcr.exo.rendition.RenditionContentStream;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.CmisRuntimeException;
@@ -87,8 +86,10 @@ public class DocumentImpl extends BaseObjectData implements Document
 
    public Document checkout() throws ConstraintException, VersioningException, StorageException
    {
-      // TODO Auto-generated method stub
-      return null;
+      // TODO
+      DocumentCopy copy = new DocumentCopy(this, getParent(), getName() + "_PWC", null);
+      copy.save();
+      return copy;
    }
 
    /**
@@ -259,11 +260,12 @@ public class DocumentImpl extends BaseObjectData implements Document
    /**
     * {@inheritDoc}
     */
+   @Override
    public void save() throws StorageException, NameConstraintViolationException, UpdateConflictException
    {
-      try
+      if (isNew())
       {
-         if (isNew())
+         try
          {
             if (name == null)
             {
@@ -355,42 +357,14 @@ public class DocumentImpl extends BaseObjectData implements Document
 
             node = doc;
          }
-         else
+         catch (RepositoryException re)
          {
-            Node parentNode = node.getParent();
-
-            // New name was set. Need rename Document.
-            // See BaseObjectData.setName(String), BaseObjectData#setProperty(Node, Property<?>). 
-            if (name != null)
-            {
-               if (name.length() == 0)
-                  throw new NameConstraintViolationException("Name is empty.");
-
-               if (parentNode.hasNode(name))
-                  throw new NameConstraintViolationException("Object with name " + name + " already exists.");
-
-               String srcPath = node.getPath();
-               String destPath = srcPath.substring(0, srcPath.lastIndexOf('/') + 1) + name;
-
-               node.getSession().move(srcPath, destPath);
-
-               //               node.setProperty(CMIS.NAME, //
-               //                  name);
-            }
-
-            node.setProperty(CMIS.LAST_MODIFICATION_DATE,//
-               Calendar.getInstance());
-            node.setProperty(CMIS.LAST_MODIFIED_BY, //
-               node.getSession().getUserID());
-            node.setProperty(CMIS.CHANGE_TOKEN, //
-               IdGenerator.generate());
-
-            parentNode.save();
+            throw new StorageException("Unable save Document. " + re.getMessage(), re);
          }
       }
-      catch (RepositoryException re)
+      else
       {
-         throw new StorageException("Unable save Document. " + re.getMessage(), re);
+         super.save();
       }
    }
 

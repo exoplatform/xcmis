@@ -19,7 +19,6 @@
 
 package org.xcmis.sp.jcr.exo;
 
-import org.exoplatform.services.jcr.util.IdGenerator;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.spi.CMIS;
@@ -182,11 +181,12 @@ public class FolderImpl extends BaseObjectData implements Folder
    /**
     * {@inheritDoc}
     */
+   @Override
    public void save() throws StorageException, NameConstraintViolationException, UpdateConflictException
    {
-      try
+      if (isNew())
       {
-         if (isNew())
+         try
          {
 
             if (name == null)
@@ -249,42 +249,14 @@ public class FolderImpl extends BaseObjectData implements Folder
 
             node = folder;
          }
-         else
+         catch (RepositoryException re)
          {
-            Node parentNode = node.getParent();
-
-            // New name was set. Need rename Folder.
-            // See BaseObjectData.setName(String), BaseObjectData#setProperty(Node, Property<?>). 
-            if (name != null)
-            {
-               if (name.length() == 0)
-                  throw new NameConstraintViolationException("Name is empty.");
-
-               if (parentNode.hasNode(name))
-                  throw new NameConstraintViolationException("Object with name " + name + " already exists.");
-
-               String srcPath = node.getPath();
-               String destPath = srcPath.substring(0, srcPath.lastIndexOf('/') + 1) + name;
-
-               node.getSession().move(srcPath, destPath);
-
-               //               node.setProperty(CMIS.NAME, //
-               //                  name);
-            }
-
-            node.setProperty(CMIS.LAST_MODIFICATION_DATE,//
-               Calendar.getInstance());
-            node.setProperty(CMIS.LAST_MODIFIED_BY, //
-               node.getSession().getUserID());
-            node.setProperty(CMIS.CHANGE_TOKEN, //
-               IdGenerator.generate());
-
-            parentNode.save();
+            throw new StorageException("Unable save Folder. " + re.getMessage(), re);
          }
       }
-      catch (RepositoryException re)
+      else
       {
-         throw new StorageException("Unable save Folder. " + re.getMessage(), re);
+         super.save();
       }
    }
 

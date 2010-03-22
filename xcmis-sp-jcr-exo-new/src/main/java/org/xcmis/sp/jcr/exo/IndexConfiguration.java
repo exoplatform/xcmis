@@ -24,6 +24,7 @@ package org.xcmis.sp.jcr.exo;
  * 
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id$
+ * @deprecated
  */
 public class IndexConfiguration
 {
