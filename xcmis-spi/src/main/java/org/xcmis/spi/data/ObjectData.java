@@ -253,10 +253,10 @@ public interface ObjectData
 
    /**
     * Set or update property. Changes may be updated immediately or after
-    * calling {@link ObjectData#save()}. This is implementation specific.
-    * <code>null</code> value for property minds the property will be in 'value
-    * not set' state. If property is required then {@link ConstraintException}
-    * will be thrown.
+    * calling {@link ObjectData#save()}. This is implementation specific. Empty
+    * list for property value {@link Property#getValues()} minds the property
+    * will be in 'value not set' state. If property is required then
+    * {@link ConstraintException} will be thrown.
     * 
     * @param property new property
     * @throws ConstraintException if value of the property violates the
@@ -271,9 +271,10 @@ public interface ObjectData
     * Set or add new properties. Properties will be merged with existed one and
     * not replace whole set of existed properties. Changes may be updated
     * immediately or after calling {@link ObjectData#save()}. This is
-    * implementation specific. <code>null</code> value for property minds the
-    * property will be in 'value not set' state. If property is required then
-    * {@link ConstraintException} will be thrown.
+    * implementation specific. Empty list for property value
+    * {@link Property#getValues()} minds the property will be in 'value not set'
+    * state. If property is required then {@link ConstraintException} will be
+    * thrown.
     * 
     * @param properties new set of properties
     * @throws ConstraintException if value of any of the properties violates the
