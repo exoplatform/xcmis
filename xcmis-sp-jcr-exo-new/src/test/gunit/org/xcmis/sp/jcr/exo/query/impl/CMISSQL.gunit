@@ -1,0 +1,133 @@
+gunit CMISSQL;
+
+@header{
+package org.xcmis.sp.jcr.exo.query.impl;
+}
+
+//Lexer tests
+
+NUMERIC_LITERAL:
+"0xFF" FAIL
+"hello" FAIL     
+"345" OK
+"5.6E-10" -> "5.6E-10"
+"+345" -> "+345"
+
+IDENTIFIER:
+"ID" OK
+"45id" OK
+"helo_4" -> "helo_4"
+"\"anytjin you want #$%\"" FAIL
+
+STRING_LITERAL:
+"' any string is possible \\\". : # $ \\% ^&*()\\_+=!~! ?|}[{]'" OK
+"' any Stri'ng '" FAIL
+"' any Stri\"ng '" FAIL
+"' any Stri\\ng '" FAIL
+"' any Stri\\\\ng '" OK
+"' any Stri%n_g '" OK
+"' any Stri\\%n\\_g '" OK
+"' any string" FAIL
+"\"strd\"" FAIL
+"' bla \\' bla'" OK
+
+TRUE:
+"TRUE" OK
+"true" OK
+"tRUe" OK
+
+FALSE:
+"false" OK
+"FALSE" OK
+"fALsE" OK  
+
+FULLTEXT_EXPRESSION:
+"\"\"" OK
+"\" hello OR - term \\\"pfrase is here \\\" \\- \\' \"" OK
+"\" \\% \"" FAIL
+
+
+// complete query tests
+query:
+
+"SELECT * FROM DOCUMENT WHERE SCORE()" FAIL
+
+"SELECT * FROM FOLDER ORDER BY SCORE() ASC" OK
+
+" * FROM DOCUMENT" FAIL
+
+"SELECT FROM DOCUMENT WHERE" FAIL
+
+"SELECT * FROM DOCUMENT" -> (QUERY (TABLE (TABLE_NAME DOCUMENT)) (COLUMNS *))
+
+"SELECT doc.* FROM DOCUMENT AS doc" 
+-> (QUERY (TABLE (TABLE_NAME DOCUMENT) (CORRELATION_NAME doc)) (COLUMNS (COLUMN (QUALIFIER doc) *)))
+
+"SELECT doc.prop1 AS col_name FROM DOCUMENT" 
+-> (QUERY (TABLE (TABLE_NAME DOCUMENT)) (COLUMNS (COLUMN (QUALIFIER doc) (PROPERTY_NAME prop1) (COLUMN_NAME col_name))))
+
+"SELECT * FROM (Document AS d LEFT OUTER JOIN DOC2 AS d2) JOIN FOLDER AS f LEFT  JOIN FOLDER2 AS f2 ON (f.prop=f2.prop)"
+->(QUERY (JOIN INNER (JOIN LEFT_OUTER (TABLE (TABLE_NAME Document) (CORRELATION_NAME d)) (TABLE (TABLE_NAME DOC2) (CORRELATION_NAME d2))) (JOIN LEFT_OUTER (TABLE (TABLE_NAME FOLDER) (CORRELATION_NAME f)) (TABLE (TABLE_NAME FOLDER2) (CORRELATION_NAME f2)) (JOINCONDITION (QUALIFIER f) (PROPERTY_NAME prop) (QUALIFIER f2) (PROPERTY_NAME prop)))) (COLUMNS *))
+"SELECT * FROM DOCUMENT AS d WHERE d.prop1 = '`1234567890-=~!@#$%^&*()_+[]{}\\\"|\\',<>./? test string' OR prop2 > 0.35e-48" 
+->(QUERY (TABLE (TABLE_NAME DOCUMENT) (CORRELATION_NAME d)) (COLUMNS *) (CONSTRAINT (OR (= (QUALIFIER d) (PROPERTY_NAME prop1) '`1234567890-=~!@#$%^&*()_+[]{}\"|\',<>./? test string') (> (PROPERTY_NAME prop2) 0.35e-48))))
+
+"SELECT SCORE() AS s, d.prop AS prop FROM document AS d ORDER BY s DESC, prop ASC"
+->"(QUERY (TABLE (TABLE_NAME document) (CORRELATION_NAME d)) (COLUMNS (COLUMN SCORE (COLUMN_NAME s)) (COLUMN (QUALIFIER d) (PROPERTY_NAME prop) (COLUMN_NAME prop))) (ORDERINGS (DESC (COLUMN_NAME s)) (ASC (COLUMN_NAME prop))))"
+
+// Constraints test
+
+constraint:
+
+"( prop1 != 3)" FAIL
+
+"prop1 LIKE 3" FAIL
+
+//"prop1 = 45)" FAIL
+
+"CONTAINS('string')" OK
+
+"CONTAINS(\"string)" FAIL
+
+"IN_FOLDER(prop)" FAIL
+
+"IN_TREE()" FAIL
+
+"n.prop >= 2" 
+-> (>= (QUALIFIER n) (PROPERTY_NAME prop) 2)
+
+"(prop1=1 OR (prop2>=2)) AND prop3>3 OR prop4<4 AND prop5 <= 5"
+-> (OR (AND (OR (= (PROPERTY_NAME prop1) 1) (>= (PROPERTY_NAME prop2) 2)) (> (PROPERTY_NAME prop3) 3)) (AND (< (PROPERTY_NAME prop4) 4) (<= (PROPERTY_NAME prop5) 5)))
+
+"(prop1=1 OR (prop2>=2) AND prop3>3)"
+-> (OR (= (PROPERTY_NAME prop1) 1) (AND (>= (PROPERTY_NAME prop2) 2) (> (PROPERTY_NAME prop3) 3)))
+
+"NOT (n.prop = 2)" -> (NOT (= (QUALIFIER n) (PROPERTY_NAME prop) 2))
+
+"'string' = ANY prop" -> (= ANY (PROPERTY_NAME prop) 'string')
+
+"ANY multiprop NOT IN ('str1','str2','str3')" 
+-> (IN ANY NOT (PROPERTY_NAME multiprop) 'str1' 'str2' 'str3')
+
+"prop LIKE 'str'" -> (LIKE (PROPERTY_NAME prop) 'str')
+
+"jcr:prop NOT LIKE 'str'" -> (NOT (LIKE (PROPERTY_NAME jcr:prop) 'str'))
+
+"prop IS NULL" -> (IS_NULL (PROPERTY_NAME prop))
+
+"prop IS NOT NULL" -> (IS_NOT_NULL (PROPERTY_NAME prop))
+
+"CONTAINS(DOCUMENT, \"string\")" -> (CONTAINS (QUALIFIER DOCUMENT) "string")
+
+"NOT CONTAINS(DOCUMENT, \"string\")" -> (NOT (CONTAINS (QUALIFIER DOCUMENT) "string"))
+
+"IN_FOLDER('uuid')" -> (IN_FOLDER 'uuid')
+
+"IN_TREE( 'uuid' )" -> (IN_TREE 'uuid')
+
+// Orderings
+orderings:
+
+"col1 ASC ,col2 DESC, col3 ASC" -> (ORDERINGS (ASC (COLUMN_NAME col1)) (DESC (COLUMN_NAME col2)) (ASC (COLUMN_NAME col3)))
+
+
+
