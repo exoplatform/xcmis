@@ -19,7 +19,6 @@
 package org.xcmis.search.model.constraint;
 
 import org.apache.commons.lang.Validate;
-import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.xcmis.search.QueryObjectModelVisitor;
 import org.xcmis.search.VisitException;
 import org.xcmis.search.Visitors;

@@ -24,7 +24,6 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.xcmis.search.QueryObjectModelVisitor;
 import org.xcmis.search.VisitException;
 import org.xcmis.search.Visitors;
-import org.xcmis.search.model.operand.StaticOperand;
 import org.xcmis.search.model.source.SelectorName;
 
 /**

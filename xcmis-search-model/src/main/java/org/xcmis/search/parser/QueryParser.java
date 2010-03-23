@@ -35,12 +35,10 @@ public interface QueryParser
    String getLanguage();
 
    /**
-    * Parse the supplied query from a string representation into a {@link QueryCommand}.
+    * Parse the supplied query from a string representation into a {@link Query}.
     * 
     * @param query the query in string form; may not be null
-    * @param typeSystem the type system used by the query; may not be null
     * @return the query command
-    * @throws ParsingException if there is an error parsing the supplied query
     * @throws InvalidQueryException if the supplied query can be parsed but is invalid
     */
    Query parseQuery(String statement) throws InvalidQueryException;
