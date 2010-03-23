@@ -27,6 +27,7 @@ import org.apache.commons.lang.Validate;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.NumberTools;
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
@@ -48,7 +49,6 @@ import org.xcmis.search.lucene.content.ErrorReporterImpl;
 import org.xcmis.search.lucene.index.ExtendedNumberTools;
 import org.xcmis.search.lucene.index.FieldNames;
 import org.xcmis.search.lucene.index.IndexException;
-import org.xcmis.search.lucene.index.StartableIndexingService;
 import org.xcmis.search.lucene.search.CaseInsensitiveRangeQuery;
 import org.xcmis.search.lucene.search.CaseInsensitiveRegexCapImpl;
 import org.xcmis.search.lucene.search.CaseInsensitiveTermQuery;
@@ -88,6 +88,8 @@ import org.xcmis.search.value.PathSplitter;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -105,7 +107,6 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
 {
    public static final char LIKE_ESCAPE_CHAR = '\\';
 
-
    public static final char LIKE_MATCH_ONE_CHAR = '_';
 
    public static final char LIKE_MATCH_ZERO_OR_MORE_CHAR = '%';
@@ -120,9 +121,10 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
 
    private final Pattern fullTextFieldNamePattern = Pattern.compile("^(.*:FULL|FULL):.*$");
 
-
-   private final StartableIndexingService indexDataManager;
-
+   /**
+    * Lucene index reader.
+    */
+   private IndexReader indexReader;
 
    /**
     * @param indexDataManager 
@@ -132,10 +134,12 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
     * @param tableResolver
     * @param documentMatcherFactory
     */
-   public LuceneQueryBuilder( StartableIndexingService indexDataManager, NameConverter nameConverter,
-      PathSplitter pathSplitter, Map<String, Object> bindVariablesValues)
+   public LuceneQueryBuilder(IndexReader indexReader, NameConverter nameConverter, PathSplitter pathSplitter,
+      Map<String, Object> bindVariablesValues)
    {
-      this.indexDataManager = indexDataManager;
+      Validate.notNull(indexReader, "The indexReader argument may not be null");
+
+      this.indexReader = indexReader;
       this.nameConverter = nameConverter;
       this.pathSplitter = pathSplitter;
       this.bindVariablesValues = bindVariablesValues;
@@ -276,7 +280,6 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
       // Push query from DynamicOperand to stack
       Visitors.visit(node.getOperand1(), this);
 
-
    }
 
    /**
@@ -370,7 +373,7 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
          Set<String> names;
          try
          {
-            names = indexDataManager.getFieldNames();
+            names = getFieldNames();
          }
          catch (IndexException e)
          {
@@ -1017,6 +1020,21 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
       // push dynamic query to stack;
       Visitors.visit(node.getOperand(), this);
 
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   private Set<String> getFieldNames() throws IndexException
+   {
+      final Set<String> fildsSet = new HashSet<String>();
+      @SuppressWarnings("unchecked")
+      final Collection fields = indexReader.getFieldNames(IndexReader.FieldOption.ALL);
+      for (final Object field : fields)
+      {
+         fildsSet.add((String)field);
+      }
+      return fildsSet;
    }
 
    /**
