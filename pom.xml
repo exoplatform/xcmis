@@ -63,6 +63,7 @@
       <module>xcmis-core</module>
       <module>xcmis-search-lucene</module>
       <module>xcmis-sp-jcr-exo</module>
+      <module>xcmis-sp-jcr-exo-new</module>
       <module>xcmis-wssoap</module>
       <module>xcmis-restatom</module>
       <module>xcmis-server-war</module>
@@ -143,6 +144,11 @@
          <dependency>
             <groupId>org.xcmis</groupId>
             <artifactId>xcmis-sp-jcr-exo</artifactId>
+            <version>${project.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>org.xcmis</groupId>
+            <artifactId>xcmis-sp-jcr-exo-new</artifactId>
             <version>${project.version}</version>
          </dependency>
          <dependency>
