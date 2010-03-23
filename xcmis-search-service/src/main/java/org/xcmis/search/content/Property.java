@@ -26,20 +26,20 @@ import java.io.InputStream;
 /**
  * Property of content.
  */
-public class Property
+public class Property<V>
 {
    private final PropertyType type;
 
    private final String name;
 
-   private final ContentValue value;
+   private final ContentValue<V> value;
 
    /**
     * @param type
     * @param name
     * @param value
     */
-   public Property(PropertyType type, String name, ContentValue value)
+   public Property(PropertyType type, String name, ContentValue<V> value)
    {
       super();
       this.type = type;
@@ -66,7 +66,7 @@ public class Property
    /**
     * @return the value
     */
-   public ContentValue getValue()
+   public ContentValue<V> getValue()
    {
       return value;
    }
