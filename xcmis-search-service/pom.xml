@@ -44,6 +44,12 @@
          <artifactId>exo.kernel.commons</artifactId>
          <version>2.2.0-CR1</version>
       </dependency>
+      <!-- Document reader service -->
+      <dependency>
+         <groupId>org.exoplatform.core</groupId>
+         <artifactId>exo.core.component.document</artifactId>
+         <version>2.3.0-CR1</version>
+      </dependency>      
       <dependency>
          <groupId>commons-lang</groupId>
          <artifactId>commons-lang</artifactId>
