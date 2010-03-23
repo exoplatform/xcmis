@@ -19,12 +19,18 @@
 package org.xcmis.search.content;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Interface of listener changes of content. 
  */
-public interface ContentObserver
+public interface ContentModificationListener
 {
-   void update(List<Object> changes);
-}
+   /**
+    * Notify listener about changes in content.
+    * @param changes - content changes.
+    * 
+    */
 
+   void update(List<ContentEntry> changes, Set<String> removedEntrys) throws IndexModificationException;
+}

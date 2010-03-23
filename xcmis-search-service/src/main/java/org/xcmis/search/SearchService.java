@@ -20,10 +20,12 @@ package org.xcmis.search;
 
 import org.apache.commons.lang.Validate;
 import org.xcmis.search.config.SearchServiceConfiguration;
+import org.xcmis.search.content.ContentEntry;
+import org.xcmis.search.content.ContentModificationListener;
+import org.xcmis.search.content.IndexModificationException;
 import org.xcmis.search.content.command.InvocationContext;
-import org.xcmis.search.content.command.index.ApplyChangesToTheIndexCommand;
+import org.xcmis.search.content.command.index.ModifyIndexCommand;
 import org.xcmis.search.content.command.query.ExecuteSelectorCommand;
-import org.xcmis.search.content.command.query.ParseQueryCommand;
 import org.xcmis.search.content.command.query.ProcessQueryCommand;
 import org.xcmis.search.content.interceptors.InterceptorChain;
 import org.xcmis.search.content.interceptors.QueryProcessorInterceptor;
@@ -35,13 +37,15 @@ import org.xcmis.search.result.ScoredRow;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Main entry point to the search service.
  * 
  */
-public abstract class SearchService implements Startable
+public abstract class SearchService implements Startable, ContentModificationListener
 {
+
    /**
     * Configuration of search service.
     */
@@ -69,8 +73,7 @@ public abstract class SearchService implements Startable
 
       interceptorChain.addBeforeInterceptor(new QueryProcessorInterceptor(new SimplePlaner(),
          new CriteriaBasedOptimizer()), QueryableIndexStorage.class);
-      // parse statements
-      addQueryParserInterceptor(interceptorChain);
+
    }
 
    /**
@@ -97,25 +100,25 @@ public abstract class SearchService implements Startable
    }
 
    /**
-    * Execute query of the given type
-    * 
-    * @param query
-    * @param type
-    * @return
-    * @throws InvalidQueryException
+    * @see org.xcmis.search.content.ContentModificationListener#update(java.util.List, java.util.Set)
     */
-   public Query parse(String query, String type) throws InvalidQueryException
+   public void update(List<ContentEntry> changes, Set<String> removedEntrys) throws IndexModificationException
    {
-      ParseQueryCommand submitStatementCommand = new ParseQueryCommand(query, type);
+      ModifyIndexCommand modifyIndexCommand = new ModifyIndexCommand(changes, removedEntrys);
 
       try
       {
-         return (Query)interceptorChain.invoke(getInvocationContext(), submitStatementCommand);
+         interceptorChain.invoke(getInvocationContext(), modifyIndexCommand);
+      }
+      catch (IndexModificationException e)
+      {
+         throw e;
       }
       catch (Throwable e)
       {
-         throw new InvalidQueryException(e.getLocalizedMessage(), e);
+         throw new IndexModificationException(e.getLocalizedMessage(), e);
       }
+
    }
 
    /**
@@ -152,7 +155,7 @@ public abstract class SearchService implements Startable
    }
 
    /**
-    * Add interceptors that handle {@link ApplyChangesToTheIndexCommand} and
+    * Add interceptors that handle {@link ModifyIndexCommand} and
     * {@link ExecuteSelectorCommand}
     * 
     * @param interceptorChain
@@ -160,12 +163,5 @@ public abstract class SearchService implements Startable
     */
    protected abstract void addQueryableIndexStorageInterceptor(InterceptorChain interceptorChain)
       throws SearchServiceException;
-
-   /**
-    * Add interceptors that handle {@link ParseQueryCommand}.
-    * 
-    * @param interceptorChain
-    */
-   protected abstract void addQueryParserInterceptor(InterceptorChain interceptorChain);
 
 }

@@ -1560,7 +1560,7 @@ public class QueryBuilder
        */
       public ReturnType asPath()
       {
-         return as(PropertyType.DATE);
+         return as(PropertyType.PATH);
       }
    }
 

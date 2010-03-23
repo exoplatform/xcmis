@@ -20,7 +20,6 @@ package org.xcmis.search.lucene.index;
 
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.search.IndexConstants;
 
 import java.io.BufferedOutputStream;
 import java.io.EOFException;
@@ -52,8 +51,6 @@ public class FileSystemTransactionLog implements TransactionLog
    private static final Log LOG = ExoLogger.getLogger(FileSystemTransactionLog.class);
 
    private static final int REMOVED_DOCUMENTS = 3;
-
-   private static final int UPDATED_DOCUMENTS = 2;
 
    private static final int UUID_SIZE = 32;
 
@@ -148,7 +145,7 @@ public class FileSystemTransactionLog implements TransactionLog
                throw new TransactionLogException(" TransactionLog file is corrupted. Unexpected end of file: "
                   + this.file.getAbsolutePath());
             }
-            final String uuid = new String(buf, IndexConstants.DEFAULT_ENCODING);
+            final String uuid = new String(buf);
             switch (type)
             {
                case ADDED_DOCUMENTS :
@@ -308,7 +305,7 @@ public class FileSystemTransactionLog implements TransactionLog
       for (final String key : keys)
       {
          out.write(flag);
-         out.write(key.getBytes(IndexConstants.DEFAULT_ENCODING));
+         out.write(key.getBytes());
       }
    }
 

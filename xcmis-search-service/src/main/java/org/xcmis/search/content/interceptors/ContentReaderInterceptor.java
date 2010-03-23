@@ -27,7 +27,7 @@ import org.xcmis.search.content.command.read.GetPropertyCommand;
 /**
  * Abstract class that interpret only read-only operation's.
  */
-public abstract class ReadOnlyInterceptor extends CommandInterceptor
+public abstract class ContentReaderInterceptor extends CommandInterceptor
 {
 
    /**

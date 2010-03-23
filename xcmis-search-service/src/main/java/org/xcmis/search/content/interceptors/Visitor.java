@@ -20,9 +20,8 @@ package org.xcmis.search.content.interceptors;
 
 import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.content.command.VisitableCommand;
-import org.xcmis.search.content.command.index.ApplyChangesToTheIndexCommand;
+import org.xcmis.search.content.command.index.ModifyIndexCommand;
 import org.xcmis.search.content.command.query.ExecuteSelectorCommand;
-import org.xcmis.search.content.command.query.ParseQueryCommand;
 import org.xcmis.search.content.command.query.ProcessQueryCommand;
 import org.xcmis.search.content.command.read.GetChildNodeCommand;
 import org.xcmis.search.content.command.read.GetChildNodesCommand;
@@ -47,8 +46,7 @@ public interface Visitor
     * @param putDocumentsToTheIndexCommand
     * @return
     */
-   Object visitApplyChangesToTheIndexCommand(InvocationContext ctx, ApplyChangesToTheIndexCommand command)
-      throws Throwable;
+   Object visitModifyIndexCommand(InvocationContext ctx, ModifyIndexCommand command) throws Throwable;
 
    /**
     * Visits a CommitCommand.
@@ -62,13 +60,6 @@ public interface Visitor
     *            in the event of problems.
     */
    Object visitCommitCommand(InvocationContext ctx, CommitCommand command) throws Throwable;
-
-   /**
-    * @param ctx
-    * @param executeQueryCommand
-    * @return
-    */
-   Object visitParseQueryCommand(InvocationContext ctx, ParseQueryCommand command) throws Throwable;
 
    /**
     * @param ctx

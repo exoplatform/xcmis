@@ -31,13 +31,16 @@ import org.xcmis.search.InvalidQueryException;
 import org.xcmis.search.SearchServiceException;
 import org.xcmis.search.config.IndexConfurationImpl;
 import org.xcmis.search.config.SearchServiceConfiguration;
+import org.xcmis.search.content.ContentIndexer;
 import org.xcmis.search.content.InMemorySchema;
 import org.xcmis.search.content.Schema;
 import org.xcmis.search.content.InMemorySchema.Builder;
 import org.xcmis.search.content.command.InvocationContext;
-import org.xcmis.search.content.interceptors.ReadOnlyInterceptor;
+import org.xcmis.search.content.interceptors.ContentReaderInterceptor;
 import org.xcmis.search.lucene.LuceneSearchService;
 import org.xcmis.search.lucene.content.SchemaTableResolver;
+import org.xcmis.search.lucene.index.IndexRecoverService;
+import org.xcmis.search.lucene.index.IndexRestoreService;
 import org.xcmis.search.model.Query;
 import org.xcmis.search.value.CastSystem;
 import org.xcmis.search.value.NameConverter;
@@ -99,10 +102,14 @@ public class SearchServiceTest
       //index configuration
       IndexConfurationImpl indexConfuration = new IndexConfurationImpl();
       indexConfuration.setIndexDir(tempDir.getAbsolutePath());
+      indexConfuration.setContentIndexer(mock(ContentIndexer.class));
+      indexConfuration.setIndexRecoverService(mock(IndexRecoverService.class));
+      indexConfuration.setIndexRestoreService(mock(IndexRestoreService.class));
+
       //search service configuration
       SearchServiceConfiguration configuration = new SearchServiceConfiguration();
       configuration.setIndexConfuguration(indexConfuration);
-      configuration.setContentReader(mock(ReadOnlyInterceptor.class));
+      configuration.setContentReader(mock(ContentReaderInterceptor.class));
       LuceneSearchService luceneSearchService = new LuceneSearchService(configuration);
 
       assertThat(luceneSearchService, notNullValue());
@@ -119,11 +126,14 @@ public class SearchServiceTest
       //index configuration
       IndexConfurationImpl indexConfuration = new IndexConfurationImpl();
       indexConfuration.setIndexDir(tempDir.getAbsolutePath());
+      indexConfuration.setContentIndexer(mock(ContentIndexer.class));
+      indexConfuration.setIndexRecoverService(mock(IndexRecoverService.class));
+      indexConfuration.setIndexRestoreService(mock(IndexRestoreService.class));
 
       //search service configuration
       SearchServiceConfiguration configuration = new SearchServiceConfiguration();
       configuration.setIndexConfuguration(indexConfuration);
-      configuration.setContentReader(mock(ReadOnlyInterceptor.class));
+      configuration.setContentReader(mock(ContentReaderInterceptor.class));
       configuration.setNameConverter(nameConverter);
       configuration.setTableResolver(tableResolver);
 
@@ -141,32 +151,4 @@ public class SearchServiceTest
       luceneSearchService.execute(query, new HashMap<String, Object>());
    }
 
-   @Test
-   public void testShouldBuildQueryWithThreeHasPropertyConstraint() throws SearchServiceException,
-      InvalidQueryException
-   {
-
-      //index configuration
-      IndexConfurationImpl indexConfuration = new IndexConfurationImpl();
-      indexConfuration.setIndexDir(tempDir.getAbsolutePath());
-
-      //search service configuration
-      SearchServiceConfiguration configuration = new SearchServiceConfiguration();
-      configuration.setIndexConfuguration(indexConfuration);
-      configuration.setContentReader(mock(ReadOnlyInterceptor.class));
-      LuceneSearchService luceneSearchService = new LuceneSearchService(configuration);
-
-      String strSql = "SELECT * FROM table AS nodes " + //
-         "WHERE ((nodes.col1 IS NOT NULL " + //
-         "AND nodes.col2 IS NOT NULL) " + //
-         "AND nodes.col3 IS NOT NULL)";
-
-      Query parsedQuery = luceneSearchService.parse(strSql, "SQL");
-
-      Query query =
-         builder.selectStar().from("table AS nodes").where().hasProperty("nodes", "col1").and().hasProperty("nodes",
-            "col2").and().hasProperty("nodes", "col3").end().query();
-      //TODO check condition
-      //assertThat(parsedQuery, is(query));
-   }
 }

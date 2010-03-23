@@ -18,19 +18,20 @@
  */
 package org.xcmis.search.content.command.index;
 
+import org.xcmis.search.content.ContentEntry;
 import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.content.command.VisitableCommand;
 import org.xcmis.search.content.interceptors.Visitor;
 
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 
 /**
- * Add and remove documents to the index storage.
+ * Add and remove documents from the index storage.
  */
-public class ApplyChangesToTheIndexCommand implements VisitableCommand
+public class ModifyIndexCommand implements VisitableCommand
 {
-   private final Map<String, Object> addedDocuments;
+   private final List<ContentEntry> addedDocuments;
 
    private final Set<String> deletedDocuments;
 
@@ -38,7 +39,7 @@ public class ApplyChangesToTheIndexCommand implements VisitableCommand
     * @param addedDocuments
     * @param deletedDocuments
     */
-   public ApplyChangesToTheIndexCommand(Map<String, Object> addedDocuments, Set<String> deletedDocuments)
+   public ModifyIndexCommand(List<ContentEntry> addedDocuments, Set<String> deletedDocuments)
    {
       super();
       this.addedDocuments = addedDocuments;
@@ -48,7 +49,7 @@ public class ApplyChangesToTheIndexCommand implements VisitableCommand
    /**
     * @return the addedDocuments
     */
-   public Map<String, Object> getAddedDocuments()
+   public List<ContentEntry> getAddedDocuments()
    {
       return addedDocuments;
    }
@@ -66,7 +67,7 @@ public class ApplyChangesToTheIndexCommand implements VisitableCommand
     */
    public Object acceptVisitor(InvocationContext ctx, Visitor visitor) throws Throwable
    {
-      return visitor.visitApplyChangesToTheIndexCommand(ctx, this);
+      return visitor.visitModifyIndexCommand(ctx, this);
    }
 
 }

@@ -21,8 +21,8 @@ package org.xcmis.search.lucene;
 import org.xcmis.search.SearchService;
 import org.xcmis.search.SearchServiceException;
 import org.xcmis.search.config.SearchServiceConfiguration;
+import org.xcmis.search.content.interceptors.ContentReaderInterceptor;
 import org.xcmis.search.content.interceptors.InterceptorChain;
-import org.xcmis.search.content.interceptors.ReadOnlyInterceptor;
 
 /**
  *  Basic implementation on Lucene storage.
@@ -46,17 +46,8 @@ public class LuceneSearchService extends SearchService
    protected void addQueryableIndexStorageInterceptor(InterceptorChain interceptorChain) throws SearchServiceException
    {
 
-      interceptorChain.addBeforeInterceptor(new LuceneQueryableIndexStorage(configuration), ReadOnlyInterceptor.class);
-
-   }
-
-   /**
-    * @see org.xcmis.search.SearchService#addQueryParserInterceptor(org.xcmis.search.content.interceptors.InterceptorChain)
-    */
-   @Override
-   protected void addQueryParserInterceptor(InterceptorChain interceptorChain)
-   {
-      // TODO Auto-generated method stub
+      interceptorChain.addBeforeInterceptor(new LuceneQueryableIndexStorage(configuration),
+         ContentReaderInterceptor.class);
 
    }
 

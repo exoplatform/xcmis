@@ -16,13 +16,52 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
+package org.xcmis.search.content;
 
-package org.xcmis.search.value;
+import org.xcmis.search.SearchServiceException;
 
 /**
- * The data types for property values.
+ * Exception that can occur during index modification.
  */
-public enum PropertyType {
+public class IndexModificationException extends SearchServiceException
+{
 
-   STRING, BINARY, LONG, DOUBLE, DATE, BOOLEAN, NAME, PATH;
+   /**
+    * 
+    */
+   private static final long serialVersionUID = 5437717624548665715L;
+
+   /**
+    * 
+    */
+   public IndexModificationException()
+   {
+      super();
+   }
+
+   /**
+    * @param message
+    * @param cause
+    */
+   public IndexModificationException(String message, Throwable cause)
+   {
+      super(message, cause);
+   }
+
+   /**
+    * @param message
+    */
+   public IndexModificationException(String message)
+   {
+      super(message);
+   }
+
+   /**
+    * @param cause
+    */
+   public IndexModificationException(Throwable cause)
+   {
+      super(cause);
+   }
+
 }

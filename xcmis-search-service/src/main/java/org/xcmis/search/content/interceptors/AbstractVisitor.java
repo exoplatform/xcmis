@@ -20,9 +20,8 @@ package org.xcmis.search.content.interceptors;
 
 import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.content.command.VisitableCommand;
-import org.xcmis.search.content.command.index.ApplyChangesToTheIndexCommand;
+import org.xcmis.search.content.command.index.ModifyIndexCommand;
 import org.xcmis.search.content.command.query.ExecuteSelectorCommand;
-import org.xcmis.search.content.command.query.ParseQueryCommand;
 import org.xcmis.search.content.command.query.ProcessQueryCommand;
 import org.xcmis.search.content.command.read.GetChildNodeCommand;
 import org.xcmis.search.content.command.read.GetChildNodesCommand;
@@ -33,20 +32,16 @@ import org.xcmis.search.content.command.tx.CommitCommand;
 import org.xcmis.search.content.command.tx.RollBackCommand;
 
 /**
- * @author <a href="mailto:Sergey.Kabashnyuk@exoplatform.org">Sergey
- *         Kabashnyuk</a>
- * @version $Id: exo-jboss-codetemplates.xml 34360 2009-07-22 23:58:59Z ksm $
  * 
  */
 public class AbstractVisitor implements Visitor
 {
 
    /**
-    * @see org.xcmis.search.content.interceptors.Visitor#visitApplyChangesToTheIndexCommand(org.xcmis.search.content.command.InvocationContext,
-    *      org.xcmis.search.content.command.index.ApplyChangesToTheIndexCommand)
+    * @see org.xcmis.search.content.interceptors.Visitor#visitModifyIndexCommand(org.xcmis.search.content.command.InvocationContext,
+    *      org.xcmis.search.content.command.index.ModifyIndexCommand)
     */
-   public Object visitApplyChangesToTheIndexCommand(InvocationContext ctx, ApplyChangesToTheIndexCommand command)
-      throws Throwable
+   public Object visitModifyIndexCommand(InvocationContext ctx, ModifyIndexCommand command) throws Throwable
    {
       return handleDefault(ctx, command);
    }
@@ -56,15 +51,6 @@ public class AbstractVisitor implements Visitor
     *      org.xcmis.search.content.command.tx.CommitCommand)
     */
    public Object visitCommitCommand(InvocationContext ctx, CommitCommand command) throws Throwable
-   {
-      return handleDefault(ctx, command);
-   }
-
-   /**
-    * @see org.xcmis.search.content.interceptors.Visitor#visitParseQueryCommand(org.xcmis.search.content.command.InvocationContext,
-    *      org.xcmis.search.content.command.query.ParseQueryCommand)
-    */
-   public Object visitParseQueryCommand(InvocationContext ctx, ParseQueryCommand command) throws Throwable
    {
       return handleDefault(ctx, command);
    }

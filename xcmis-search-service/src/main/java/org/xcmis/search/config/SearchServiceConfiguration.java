@@ -19,7 +19,7 @@
 package org.xcmis.search.config;
 
 import org.xcmis.search.content.command.InvocationContext;
-import org.xcmis.search.content.interceptors.ReadOnlyInterceptor;
+import org.xcmis.search.content.interceptors.ContentReaderInterceptor;
 import org.xcmis.search.lucene.content.VirtualTableResolver;
 import org.xcmis.search.value.NameConverter;
 import org.xcmis.search.value.PathSplitter;
@@ -33,7 +33,7 @@ public class SearchServiceConfiguration
     * Mandatory parameter for service. To be able to read content from base
     * storage.
     */
-   private ReadOnlyInterceptor contentReader;
+   private ContentReaderInterceptor contentReader;
 
    /**
     * Reselve selector names to lucene querys.
@@ -76,7 +76,7 @@ public class SearchServiceConfiguration
     */
    private InvocationContext defaultInvocationContext;
 
-   public ReadOnlyInterceptor getContentReader()
+   public ContentReaderInterceptor getContentReader()
    {
       return contentReader;
    }
@@ -116,7 +116,7 @@ public class SearchServiceConfiguration
    /**
     * @param contentReader the contentReader to set
     */
-   public void setContentReader(ReadOnlyInterceptor contentReader)
+   public void setContentReader(ContentReaderInterceptor contentReader)
    {
       this.contentReader = contentReader;
    }

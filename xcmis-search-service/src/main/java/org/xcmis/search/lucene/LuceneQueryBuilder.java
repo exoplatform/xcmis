@@ -44,11 +44,11 @@ import org.xcmis.search.VisitException;
 import org.xcmis.search.Visitors;
 import org.xcmis.search.antlr.FullTextLexer;
 import org.xcmis.search.antlr.FullTextParser;
-import org.xcmis.search.lucene.LuceneQueryableIndexStorage.FieldNameResolver;
 import org.xcmis.search.lucene.content.ErrorReporterImpl;
 import org.xcmis.search.lucene.index.ExtendedNumberTools;
 import org.xcmis.search.lucene.index.FieldNames;
 import org.xcmis.search.lucene.index.IndexException;
+import org.xcmis.search.lucene.index.StartableIndexingService;
 import org.xcmis.search.lucene.search.CaseInsensitiveRangeQuery;
 import org.xcmis.search.lucene.search.CaseInsensitiveRegexCapImpl;
 import org.xcmis.search.lucene.search.CaseInsensitiveTermQuery;
@@ -105,17 +105,10 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
 {
    public static final char LIKE_ESCAPE_CHAR = '\\';
 
-   // private final static Pattern MATCH_ONE_CHAR = Pattern.compile("^.$");
 
    public static final char LIKE_MATCH_ONE_CHAR = '_';
 
    public static final char LIKE_MATCH_ZERO_OR_MORE_CHAR = '%';
-
-   // private final ResultSorterFactory resultSorterFactory;
-
-   // private final VirtualTableResolver<Query> tableResolver;
-
-   // private final DocumentMatcherFactory documentMatcherFactory;
 
    private Stack<Object> queryBuilderStack;
 
@@ -127,26 +120,26 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
 
    private final Pattern fullTextFieldNamePattern = Pattern.compile("^(.*:FULL|FULL):.*$");
 
-   private final FieldNameResolver fieldNameResolver;
+
+   private final StartableIndexingService indexDataManager;
+
 
    /**
+    * @param indexDataManager 
     * @param indexingService
     * @param resultSorterFactory
     * @param namespaceMappings
     * @param tableResolver
     * @param documentMatcherFactory
     */
-   public LuceneQueryBuilder(FieldNameResolver fieldNameResolver, NameConverter nameConverter,
+   public LuceneQueryBuilder( StartableIndexingService indexDataManager, NameConverter nameConverter,
       PathSplitter pathSplitter, Map<String, Object> bindVariablesValues)
    {
-      this.fieldNameResolver = fieldNameResolver;
-      // this.resultSorterFactory = resultSorterFactory;
+      this.indexDataManager = indexDataManager;
       this.nameConverter = nameConverter;
       this.pathSplitter = pathSplitter;
-      // this.tableResolver = tableResolver;
       this.bindVariablesValues = bindVariablesValues;
       this.queryBuilderStack = new Stack<Object>();
-      // this.queryBuilderStack.add(new MatchAllDocsQuery());
    }
 
    /**
@@ -283,13 +276,6 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
       // Push query from DynamicOperand to stack
       Visitors.visit(node.getOperand1(), this);
 
-      // final BooleanQuery resultQuery = new BooleanQuery();
-      // // get query builded by Operand1.
-      // resultQuery.add((Query)queryBuilderStack.pop(), Occur.MUST);
-      // // combine with previous
-      // resultQuery.add((Query)queryBuilderStack.pop(), Occur.MUST);
-      // //
-      // queryBuilderStack.push(resultQuery);
 
    }
 
@@ -384,7 +370,7 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
          Set<String> names;
          try
          {
-            names = fieldNameResolver.getFieldNames();
+            names = indexDataManager.getFieldNames();
          }
          catch (IndexException e)
          {

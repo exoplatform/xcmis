@@ -19,7 +19,7 @@
 package org.xcmis.search.content.interceptors;
 
 import org.xcmis.search.content.command.InvocationContext;
-import org.xcmis.search.content.command.index.ApplyChangesToTheIndexCommand;
+import org.xcmis.search.content.command.index.ModifyIndexCommand;
 import org.xcmis.search.content.command.query.ExecuteSelectorCommand;
 
 /**
@@ -29,11 +29,11 @@ public abstract class QueryableIndexStorage extends CommandInterceptor
 {
 
    /**
-    * @see org.xcmis.search.content.interceptors.AbstractVisitor#visitApplyChangesToTheIndexCommand(org.xcmis.search.content.command.InvocationContext, org.xcmis.search.content.command.index.ApplyChangesToTheIndexCommand)
+    * @see org.xcmis.search.content.interceptors.AbstractVisitor#visitModifyIndexCommand(org.xcmis.search.content.command.InvocationContext, org.xcmis.search.content.command.index.ModifyIndexCommand)
     */
    @Override
-   public abstract Object visitApplyChangesToTheIndexCommand(InvocationContext ctx,
-      ApplyChangesToTheIndexCommand command) throws Throwable;
+   public abstract Object visitModifyIndexCommand(InvocationContext ctx,
+      ModifyIndexCommand command) throws Throwable;
 
    /**
     * @see org.xcmis.search.content.interceptors.AbstractVisitor#visitExecuteSelectorCommand(org.xcmis.search.content.command.InvocationContext, org.xcmis.search.content.command.query.ExecuteSelectorCommand)
