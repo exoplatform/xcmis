@@ -102,9 +102,9 @@ public abstract class SearchService implements Startable, ContentModificationLis
    /**
     * @see org.xcmis.search.content.ContentModificationListener#update(java.util.List, java.util.Set)
     */
-   public void update(List<ContentEntry> changes, Set<String> removedEntrys) throws IndexModificationException
+   public void update(List<ContentEntry> changes, Set<String> removedEntries) throws IndexModificationException
    {
-      ModifyIndexCommand modifyIndexCommand = new ModifyIndexCommand(changes, removedEntrys);
+      ModifyIndexCommand modifyIndexCommand = new ModifyIndexCommand(changes, removedEntries);
 
       try
       {

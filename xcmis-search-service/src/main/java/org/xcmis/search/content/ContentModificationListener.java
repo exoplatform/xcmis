@@ -32,5 +32,5 @@ public interface ContentModificationListener
     * 
     */
 
-   void update(List<ContentEntry> changes, Set<String> removedEntrys) throws IndexModificationException;
+   void update(List<ContentEntry> changes, Set<String> removedEntries) throws IndexModificationException;
 }
