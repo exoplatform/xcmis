@@ -19,7 +19,6 @@
 
 package org.xcmis.restatom;
 
-import org.apache.abdera.model.Entry;
 import org.exoplatform.services.rest.impl.ContainerResponse;
 import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
 import org.xcmis.spi.CMIS;
@@ -39,14 +38,15 @@ public class RelationshipsCollectionTest extends BaseTest
 
    public void testGetRelationships() throws Exception
    {
-      Entry source = createDocument(testFolderId, "doc1", null, null);
-      Entry target = createDocument(testFolderId, "doc2", null, null);
-      source.addRelationship("rel1", target, repository.getTypeDefinition("cmis:relationship"));
+      String sourceId = createDocument(testFolderId, "doc1", null, null);
+      String targetId = createDocument(testFolderId, "doc2", null, null);
+      conn.getStorage().createRelationship(conn.getStorage().getObject(sourceId),
+         conn.getStorage().getObject(targetId), null);
 
       String requestURI = "http://localhost:8080/rest" //
          + "/cmisatom/" + cmisRepositoryId //
          + "/relationships/" //
-         + source //
+         + sourceId //
          + "?includeAllowableActions=true";
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
       ContainerResponse resp = service("GET", requestURI, "http://localhost:8080/rest", null, null, writer);
@@ -74,8 +74,8 @@ public class RelationshipsCollectionTest extends BaseTest
 
    public void testCreateRelationship() throws Exception
    {
-      Entry source = createDocument(testFolderId, "doc1", null, null);
-      Entry target = createDocument(testFolderId, "doc2", null, null);
+      String sourceId = createDocument(testFolderId, "doc1", null, null);
+      String targetId = createDocument(testFolderId, "doc2", null, null);
       String s = "<?xml version='1.0' encoding='utf-8'?>" //
          + "<entry xmlns='http://www.w3.org/2005/Atom'" //
          + " xmlns:cmis='" + CMIS.CMIS_NS_URI + "'"//  
@@ -87,16 +87,16 @@ public class RelationshipsCollectionTest extends BaseTest
          + "<cmis:propertyId cmis:localName='cmis:objectTypeId' propertyDefinitionId='cmis:objectTypeId'>" //
          + "<cmis:value>" + "cmis:relationship" + "</cmis:value></cmis:propertyId>" //
          + "<cmis:propertyId cmis:localName='cmis:sourceId' propertyDefinitionId='cmis:sourceId'>" //
-         + "<cmis:value>" + source.getObjectId() + "</cmis:value></cmis:propertyId>" //
+         + "<cmis:value>" + sourceId + "</cmis:value></cmis:propertyId>" //
          + "<cmis:propertyId cmis:localName='cmis:targetId' propertyDefinitionId='cmis:targetId'>" //
-         + "<cmis:value>" + target.getObjectId() + "</cmis:value></cmis:propertyId>" //
+         + "<cmis:value>" + targetId + "</cmis:value></cmis:propertyId>" //
          + "</cmis:properties>" //
          + "</cmisra:object></entry>";
 
       String requestURI = "http://localhost:8080/rest/cmisatom/" //
          + cmisRepositoryId //
          + "/relationships/" //
-         + source.getObjectId();
+         + sourceId;
 
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
       ContainerResponse resp = service("POST", requestURI, "http://localhost:8080/rest", null, s.getBytes(), writer);
@@ -104,8 +104,8 @@ public class RelationshipsCollectionTest extends BaseTest
       //          printBody(writer.getBody());
       assertEquals(201, resp.getStatus());
 
-      assertEquals(1, source.getRelationships(RelationshipDirection.EITHER, true, repository
-         .getTypeDefinition("cmis:relationship")).size());
+      assertEquals(1, conn.getObjectRelationships(sourceId, RelationshipDirection.EITHER, null, true, false, true,
+         AtomCMIS.WILDCARD, -1, 0).getItems().size());
 
       DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
       f.setNamespaceAware(true);

@@ -26,6 +26,7 @@ import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
+import org.xcmis.spi.query.Query;
 
 import javax.xml.namespace.QName;
 
@@ -153,5 +154,22 @@ public class QueryTypeElement extends ExtensibleElementWrapper
          return el.getText();
       return null;
    }
+   
+   
+   public Query getQuery()
+   {
+      Query query = new Query(getText(AtomCMIS.STATEMENT), isSearchAllVersions());
+//      query.setStatement(getText(AtomCMIS.STATEMENT));
+//      query.setSearchAllVersions(isSearchAllVersions());
+//      query.setIncludeAllowableActions(isIncludeAllowableActions());
+//      query.setIncludeRelationships(getIncludeRelationships());
+//      query.setRenditionFilter(getRenditionFilter());
+//      query.setMaxItems(BigInteger.valueOf(getPageSize()));
+//      query.setSkipCount(BigInteger.valueOf(getSkipCount()));
+      return query;
+   }
+
+   
+   
 
 }

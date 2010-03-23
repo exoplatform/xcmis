@@ -32,6 +32,7 @@ import org.xcmis.restatom.AtomUtils;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.ObjectNotFoundException;
+import org.xcmis.spi.StorageException;
 import org.xcmis.spi.TypeDefinition;
 
 import java.util.Calendar;
@@ -117,7 +118,7 @@ public class TypesDescendantsCollection extends CmisTypeCollection
                addChildren(e, typeContainer.getChildren(), feedIri, request);
          }
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          throw new ResponseContextException(createErrorResponse(re, 500));
       }

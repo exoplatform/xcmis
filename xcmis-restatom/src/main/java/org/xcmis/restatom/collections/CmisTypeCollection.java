@@ -30,6 +30,7 @@ import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
 import org.xcmis.restatom.abdera.TypeDefinitionTypeElement;
 import org.xcmis.spi.InvalidArgumentException;
+import org.xcmis.spi.StorageException;
 import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.TypeNotFoundException;
 
@@ -72,7 +73,7 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
       {
          return conn.getTypeDefinition(typeId);
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          throw new ResponseContextException(createErrorResponse(re, 500));
       }
@@ -170,7 +171,7 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
       {
          return createErrorResponse(iae, 400);
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          return createErrorResponse(re, 500);
       }
@@ -293,7 +294,7 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
       {
          createErrorResponse(iae, 400);
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          createErrorResponse(re, 500);
       }

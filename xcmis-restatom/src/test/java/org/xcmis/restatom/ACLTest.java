@@ -19,11 +19,13 @@
 
 package org.xcmis.restatom;
 
-import org.apache.abdera.model.Entry;
 import org.exoplatform.services.rest.impl.ContainerResponse;
 import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
 import org.w3c.dom.NodeList;
 import org.xcmis.spi.AccessControlEntry;
+import org.xcmis.spi.AccessControlPropagation;
+import org.xcmis.spi.Permission.BasicPermissions;
+import org.xcmis.spi.impl.AccessControlEntryImpl;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
@@ -43,25 +45,22 @@ public class ACLTest extends BaseTest
 {
    public void testGetACL() throws Exception
    {
-      Entry doc = createDocument(testFolderId, "doc1", null, null);
-      String docId = doc.getObjectId();
-      CmisAccessControlListType addACL = new CmisAccessControlListType();
-      AccessControlEntry entry = new AccessControlEntry();
-      CmisAccessControlPrincipalType principal = new CmisAccessControlPrincipalType();
-      principal.setPrincipalId("Makis");
-      entry.setPrincipal(principal);
-      entry.getPermission().add(EnumBasicPermissions.CMIS_WRITE.value());
-      addACL.getPermission().add(entry);
-      AccessControlEntry entry1 = new AccessControlEntry();
-      CmisAccessControlPrincipalType principal1 = new CmisAccessControlPrincipalType();
-      principal1.setPrincipalId("root");
-      entry1.setPrincipal(principal1);
-      entry1.getPermission().add(EnumBasicPermissions.CMIS_READ.value());
-      entry1.getPermission().add(EnumBasicPermissions.CMIS_WRITE.value());
-      addACL.getPermission().add(entry1);
+      String docId = createDocument(testFolderId, "doc1", null, null);
+
+      List<AccessControlEntry> addACL = new ArrayList<AccessControlEntry>();
+      AccessControlEntryImpl entry1 = new AccessControlEntryImpl();
+      entry1.setPrincipal("Makis");
+      entry1.getPermissions().add(BasicPermissions.CMIS_WRITE.value());
+      
+      addACL.add(entry1);
+      AccessControlEntryImpl entry2 = new AccessControlEntryImpl();
+      entry2.setPrincipal("root");
+      entry2.getPermissions().add(BasicPermissions.CMIS_READ.value());
+      entry2.getPermissions().add(BasicPermissions.CMIS_WRITE.value());
+      addACL.add(entry2);
 
       // Apply via common service
-      conn.applyACL(docId, addACL, null, ACLPropagation.REPOSITORYDETERMINED);
+      conn.applyACL(docId, addACL, null, AccessControlPropagation.REPOSITORYDETERMINED);
 
       String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/objacl/" + docId;
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
@@ -94,8 +93,7 @@ public class ACLTest extends BaseTest
 
    public void testSetACL() throws Exception
    {
-      Entry doc = createDocument(testFolderId, "doc1", null, null);
-      String docId = doc.getObjectId();
+      String docId = createDocument(testFolderId, "doc1", null, null);
       String s = "<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>" //
          + "<cmis:acl xmlns:cmis='http://docs.oasis-open.org/ns/cmis/core/200908/'" //
          + " xmlns:cmism='http://docs.oasis-open.org/ns/cmis/messaging/200908/'" //
@@ -125,30 +123,30 @@ public class ACLTest extends BaseTest
       //            printBody(writer.getBody());
       assertEquals(201, resp.getStatus());
       
-      CmisAccessControlListType acl = conn.getACL(docId, true);
-      for(AccessControlEntry ace : acl.getPermission())
+      List<AccessControlEntry> acl = conn.getACL(docId, true);
+      for(AccessControlEntry ace : acl)
       {
-         if ("Makis".equals(ace.getPrincipal().getPrincipalId()))
+         if ("Makis".equals(ace.getPrincipal()))
          {
-            assertEquals(1, ace.getPermission().size());
-            assertEquals("cmis:read", ace.getPermission().get(0));
+            assertEquals(1, ace.getPermissions().size());
+            assertEquals("cmis:read", ace.getPermissions().iterator().next());
          }
-         else if ("root".equals(ace.getPrincipal().getPrincipalId()))
+         else if ("root".equals(ace.getPrincipal()))
          {
-            if (1 == ace.getPermission().size())
+            if (1 == ace.getPermissions().size())
             {
-               assertEquals("cmis:all", ace.getPermission().get(0));
+               assertEquals("cmis:all", ace.getPermissions().iterator().next());
             }
-            else if (2 == ace.getPermission().size())
+            else if (2 == ace.getPermissions().size())
             {
                List<String> expected = new ArrayList<String>();
                expected.add("cmis:read");
                expected.add("cmis:write");
-               assertEquals(true, ace.getPermission().containsAll(expected));
+               assertEquals(true, ace.getPermissions().containsAll(expected));
             }
             else
             {
-               fail("Unexpected permissions set: " + ace.getPermission());
+               fail("Unexpected permissions set: " + ace.getPermissions());
             }
          }
       }

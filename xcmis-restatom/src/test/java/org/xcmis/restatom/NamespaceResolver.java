@@ -19,8 +19,6 @@
 
 package org.xcmis.restatom;
 
-import org.xcmis.restatom.AtomCMIS;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;

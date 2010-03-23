@@ -36,6 +36,7 @@ import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
+import org.xcmis.spi.StorageException;
 import org.xcmis.spi.object.CmisObject;
 import org.xcmis.spi.object.Property;
 import org.xcmis.spi.object.impl.IdProperty;
@@ -123,7 +124,7 @@ public class PoliciesCollection extends CmisObjectCollection
             }
          }
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          throw new ResponseContextException(createErrorResponse(re, 500));
       }
@@ -189,7 +190,7 @@ public class PoliciesCollection extends CmisObjectCollection
       {
          return createErrorResponse(iae, 400);
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          return createErrorResponse(re, 500);
       }
@@ -217,7 +218,7 @@ public class PoliciesCollection extends CmisObjectCollection
       {
          return createErrorResponse(fae, 400);
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          return createErrorResponse(re, 500);
       }
@@ -275,7 +276,7 @@ public class PoliciesCollection extends CmisObjectCollection
       {
          return createErrorResponse(iae, 400);
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          return createErrorResponse(re, 500);
       }

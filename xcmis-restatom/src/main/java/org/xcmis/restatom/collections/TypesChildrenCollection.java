@@ -30,6 +30,7 @@ import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ItemsList;
+import org.xcmis.spi.StorageException;
 import org.xcmis.spi.TypeDefinition;
 
 import java.util.Calendar;
@@ -116,7 +117,7 @@ public class TypesChildrenCollection extends CmisTypeCollection
             addEntryDetails(request, e, feedIri, type);
          }
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          throw new ResponseContextException(createErrorResponse(re, 500));
       }

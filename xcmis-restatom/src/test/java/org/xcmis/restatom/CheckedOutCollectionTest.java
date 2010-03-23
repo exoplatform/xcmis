@@ -22,8 +22,6 @@ package org.xcmis.restatom;
 import org.exoplatform.services.rest.impl.ContainerResponse;
 import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
 import org.w3c.dom.NodeList;
-import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.object.Entry;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
@@ -40,10 +38,9 @@ public class CheckedOutCollectionTest extends BaseTest
 
    public void testCheckOut() throws Exception
    {
-      Entry doc = createDocument(testFolderId, "doc1", null, null);
-      String docId = doc.getObjectId();
-
-      assertNull("Should be no checkedout document.", doc.getCheckedOutId());
+      String docId = createDocument(testFolderId, "doc1", null, null);
+      
+      assertNull("Should be no checkedout document.", getCmisObject(docId).getObjectInfo().getVersionSeriesCheckedOutId());
       String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/checkedout/" + docId;
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
       ContainerResponse response = service("POST", requestURI, "http://localhost:8080/rest", null, null, writer);
@@ -57,18 +54,16 @@ public class CheckedOutCollectionTest extends BaseTest
 
       org.w3c.dom.Node entry = getNode("atom:entry", xmlDoc);
       validateObjectEntry(entry, "cmis:document");
-      assertNotNull("Object must be checkedout.", doc.getCheckedOutId());
+      assertNotNull("Object must be checkedout.", getCmisObject(docId).getObjectInfo().getVersionSeriesCheckedOutId());
    }
 
    public void testGetCheckedOut() throws Exception
    {
-      Entry doc1 = createDocument(testFolderId, "doc1", null, null);
-      String doc1Id = doc1.getObjectId();
-      String pwc1 = getObjectId(conn.checkout(doc1Id));
+      String doc1Id = createDocument(testFolderId, "doc1", null, null);
+      String pwc1 = conn.checkout(doc1Id);
 
-      Entry doc2 = createDocument(testFolderId, "doc2", null, null);
-      String doc2Id = doc2.getObjectId();
-      String pwc2 = getObjectId(conn.checkout(doc2Id));
+      String doc2Id = createDocument(testFolderId, "doc2", null, null);
+      String pwc2 = conn.checkout(doc2Id);
 
       String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/checkedout/";
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();

@@ -31,6 +31,7 @@ import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
+import org.xcmis.spi.StorageException;
 import org.xcmis.spi.object.CmisObject;
 import org.xcmis.spi.object.ObjectParent;
 
@@ -157,7 +158,7 @@ public class ParentsCollection extends CmisObjectCollection
                break;
          }
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          throw new ResponseContextException(createErrorResponse(re, 500));
       }

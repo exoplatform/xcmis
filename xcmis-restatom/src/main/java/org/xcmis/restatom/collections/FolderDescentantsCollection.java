@@ -32,6 +32,7 @@ import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.ObjectNotFoundException;
+import org.xcmis.spi.StorageException;
 import org.xcmis.spi.object.CmisObject;
 
 import java.util.List;
@@ -188,7 +189,7 @@ public class FolderDescentantsCollection extends CmisObjectCollection
             }
          }
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          throw new ResponseContextException(createErrorResponse(re, 500));
       }
@@ -237,7 +238,7 @@ public class FolderDescentantsCollection extends CmisObjectCollection
             feed.addLink(getObjectLink(getId(parent), request), AtomCMIS.LINK_UP, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null,
                null, -1);
          }
-         catch (RepositoryException re)
+         catch (StorageException re)
          {
             throw new ResponseContextException(createErrorResponse(re, 500));
          }

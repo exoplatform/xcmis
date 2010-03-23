@@ -21,8 +21,6 @@ package org.xcmis.restatom;
 
 import org.exoplatform.services.rest.impl.ContainerResponse;
 import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
-import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.object.Entry;
 
 import java.io.ByteArrayInputStream;
 
@@ -82,8 +80,7 @@ public class ParentsCollectionTest extends BaseTest
    
    public void testGetObjectParents() throws Exception
    {
-      Entry doc = createDocument(testFolderId, "doc1", null, null);
-      String docId = doc.getObjectId();
+      String docId = createDocument(testFolderId, "doc1", null, null);
 
       String requestURI = "http://localhost:8080/rest" //
          + "/cmisatom/" //

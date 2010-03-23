@@ -23,7 +23,6 @@ import junit.framework.TestCase;
 
 import org.apache.abdera.Abdera;
 import org.apache.abdera.factory.Factory;
-import org.apache.abdera.model.Entry;
 import org.exoplatform.container.StandaloneContainer;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
@@ -44,14 +43,19 @@ import org.xcmis.restatom.abdera.CMISExtensionFactory;
 import org.xcmis.spi.BaseType;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.Connection;
-import org.xcmis.spi.Storage;
+import org.xcmis.spi.ItemsList;
+import org.xcmis.spi.StorageProvider;
+import org.xcmis.spi.VersioningState;
 import org.xcmis.spi.data.ContentStream;
+import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.object.ObjectParent;
 import org.xcmis.spi.object.Property;
 import org.xcmis.spi.object.impl.IdProperty;
 import org.xcmis.spi.object.impl.StringProperty;
 
 import java.io.ByteArrayInputStream;
 import java.net.URI;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -89,9 +93,9 @@ public abstract class BaseTest extends TestCase
 
    protected XPath xp;
 
-   protected Connection conn;
+   protected StorageProvider storageProvider;
 
-   protected Storage repository;
+   protected Connection conn;
 
    public ContainerResponse service(String method, String requestURI, String baseURI,
       MultivaluedMap<String, String> headers, byte[] data) throws Exception
@@ -107,6 +111,10 @@ public abstract class BaseTest extends TestCase
       container = StandaloneContainer.getInstance();
       requestHandler = (RequestHandlerImpl)container.getComponentInstanceOfType(RequestHandlerImpl.class);
 
+      storageProvider = (StorageProvider)container.getComponentInstanceOfType(StorageProvider.class);
+
+      conn = storageProvider.getConnection(cmisRepositoryId, null);
+
       Abdera abdera = new Abdera();
       factory = abdera.getFactory();
       factory.registerExtension(new CMISExtensionFactory());
@@ -114,7 +122,6 @@ public abstract class BaseTest extends TestCase
       ConversationState state = new ConversationState(new Identity("root"));
       ConversationState.setCurrent(state);
 
-      repository = conn.getStorage();
       rootFolderId = conn.getStorage().getRepositoryInfo().getRootFolderId();
 
       Map<String, Property<?>> props = new HashMap<String, Property<?>>();
@@ -127,7 +134,7 @@ public abstract class BaseTest extends TestCase
       props.put(propId.getId(), propId);
       props.put(propName.getId(), propName);
 
-      testFolderId = getObjectId(conn.createFolder(rootFolderId, props, null, null, null));
+      testFolderId = conn.createFolder(rootFolderId, props, null, null, null);
 
       xp = XPathFactory.newInstance().newXPath();
       xp.setNamespaceContext(new NamespaceResolver());
@@ -139,11 +146,13 @@ public abstract class BaseTest extends TestCase
       container = null;
       requestHandler = null;
       factory = null;
-      for (Iterator<Entry> iter = repository.getCheckedOutDocuments(null); iter.hasNext();)
-         iter.next().delete();
+      for (Iterator<CmisObject> iter =
+         conn.getCheckedOutDocs(rootFolderId, false, null, true, null, null, null, -1, 0).getItems().iterator(); iter
+         .hasNext();)
+         conn.deleteObject(iter.next().getObjectInfo().getId(), null);
 
-      for (Iterator<Entry> iter = repository.getRootFolder().getChildren(); iter.hasNext();)
-         iter.next().delete();
+      for (Iterator<CmisObject> iter = getChildren(rootFolderId).getItems().iterator(); iter.hasNext();)
+         conn.deleteObject(iter.next().getObjectInfo().getId(), null);
    }
 
    protected void validateAllowableActions(org.w3c.dom.Node actions) throws XPathExpressionException
@@ -215,33 +224,67 @@ public abstract class BaseTest extends TestCase
       return Integer.parseInt(count);
    }
 
-   protected Entry createDocument(String parent, String name, EnumVersioningState versioningState, ContentStream content)
+   protected String createDocument(String parent, String name, VersioningState versioningState, ContentStream content)
       throws Exception
    {
-      Entry doc =
-         repository.getObjectById(parent).createChild(repository.getTypeDefinition("cmis:document"), name,
-            versioningState);
-      if (content != null)
-         doc.setContent(content);
-      doc.save();
-      return doc;
+      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+      // OBJECT_TYPE_ID
+      String typeId = CMIS.DOCUMENT;
+      IdProperty typeIdProperty = new IdProperty();
+      typeIdProperty.setId(CMIS.OBJECT_TYPE_ID);
+      typeIdProperty.getValues().add(typeId);
+      properties.put(typeIdProperty.getId(), typeIdProperty);
+      // NAME
+      StringProperty nameProperty = new StringProperty();
+      nameProperty.setId(CMIS.NAME);
+      nameProperty.getValues().add(name);
+      properties.put(nameProperty.getId(), nameProperty);
+      // Create Document
+      String objectId = conn.createDocument(parent, properties, content, null, null, null, versioningState);
+      return objectId;
    }
 
-   protected Entry createFolder(String parent, String name) throws Exception
+   protected String createFolder(String parent, String name) throws Exception
    {
-      Entry folder =
-         repository.getObjectById(parent).createChild(repository.getTypeDefinition("cmis:folder"), name, null);
-      folder.save();
-      return folder;
+      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+      // OBJECT_TYPE_ID
+      String typeId = CMIS.FOLDER;
+      IdProperty typeIdProperty = new IdProperty();
+      typeIdProperty.setId(CMIS.OBJECT_TYPE_ID);
+      typeIdProperty.getValues().add(typeId);
+      properties.put(typeIdProperty.getId(), typeIdProperty);
+      // NAME
+      StringProperty nameProperty = new StringProperty();
+      nameProperty.setId(CMIS.NAME);
+      nameProperty.getValues().add(name);
+      properties.put(nameProperty.getId(), nameProperty);
+      // Create Folder
+      String folderId = conn.createFolder(parent, properties, null, null, null);
+      return folderId;
    }
 
-   protected Entry createPolicy(String parent, String name, String policyText) throws Exception
+   protected String createPolicy(String parent, String name, String policyText) throws Exception
    {
-      Entry policy =
-         repository.getObjectById(parent).createChild(repository.getTypeDefinition("cmis:policy"), name, null);
-      policy.setString(CMIS.POLICY_TEXT, policyText);
-      policy.save();
-      return policy;
+      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+      // OBJECT_TYPE_ID
+      String typeId = CMIS.POLICY;
+      IdProperty typeIdProperty = new IdProperty();
+      typeIdProperty.setId(CMIS.OBJECT_TYPE_ID);
+      typeIdProperty.getValues().add(typeId);
+      properties.put(typeIdProperty.getId(), typeIdProperty);
+      // NAME
+      StringProperty nameProperty = new StringProperty();
+      nameProperty.setId(CMIS.NAME);
+      nameProperty.getValues().add(name);
+      properties.put(nameProperty.getId(), nameProperty);
+      // POLICY_TEXT
+      StringProperty policyTextProperty = new StringProperty();
+      policyTextProperty.setId(CMIS.POLICY_TEXT);
+      policyTextProperty.getValues().add(name);
+      properties.put(policyTextProperty.getId(), policyTextProperty);
+      // Create Folder
+      String policyId = conn.createPolicy(parent, properties, null, null, null);
+      return policyId;
    }
 
    protected String getAttributeValue(String statement, String attributeName, org.w3c.dom.Document xmlDoc)
@@ -269,17 +312,32 @@ public abstract class BaseTest extends TestCase
          + "']/cmis:value", xmlDoc);
    }
 
-   protected String getObjectId(CmisObjectType object)
+   protected String getObjectId(CmisObject object)
    {
-      return ((IdProperty)getProperty(object, CMIS.OBJECT_ID)).getValues().get(0);
+      return object.getObjectInfo().getId();
    }
 
-   protected CmisProperty getProperty(CmisObjectType object, String propertyName)
+   protected CmisObject getCmisObject(String objectId)
    {
-      CmisPropertiesType properties = object.getProperties();
+      return conn.getObject(objectId, false, null, false, false, true, CMIS.WILDCARD, null);
+   }
+
+   protected List<ObjectParent> getParents(String id)
+   {
+      return conn.getObjectParents(id, false, null, false, true, CMIS.WILDCARD, null);
+   }
+
+   protected ItemsList<CmisObject> getChildren(String folderId)
+   {
+      return conn.getChildren(folderId, false, null, false, true, CMIS.WILDCARD, null, null, -1, 0);
+   }
+
+   protected Property<?> getProperty(CmisObject object, String propertyName)
+   {
+      Collection<Property<?>> properties = object.getProperties().values();
       if (properties != null)
       {
-         for (CmisProperty prop : properties.getProperty())
+         for (Property<?> prop : properties)
          {
             if (prop.getDisplayName().equals(propertyName))
             {

@@ -26,9 +26,12 @@ import org.xcmis.spi.BaseType;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ContentStreamAllowed;
 import org.xcmis.spi.PropertyDefinition;
+import org.xcmis.spi.PropertyType;
 import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.TypeNotFoundException;
+import org.xcmis.spi.Updatability;
 import org.xcmis.spi.impl.PropertyDefinitionImpl;
+import org.xcmis.spi.impl.TypeDefinitionImpl;
 
 import java.io.ByteArrayInputStream;
 
@@ -41,13 +44,13 @@ import javax.xml.parsers.DocumentBuilderFactory;
 public class TypesChildrenCollectionTest extends BaseTest
 {
 
-   private CmisTypeDocumentDefinitionType article;
+   private TypeDefinitionImpl article;
 
    public void setUp() throws Exception
    {
       super.setUp();
       //cmis:article
-      article = new CmisTypeDocumentDefinitionType();
+      article = new TypeDefinitionImpl();
       article.setBaseId(BaseType.DOCUMENT);
       article.setControllableACL(false);
       article.setControllablePolicy(false);
@@ -65,16 +68,16 @@ public class TypesChildrenCollectionTest extends BaseTest
       article.setContentStreamAllowed(ContentStreamAllowed.ALLOWED);
       article.setVersionable(false);
 
-      PropertyDefinition pd = new PropertyDefinitionImpl<T>
-      pd.setCardinality(EnumCardinality.SINGLE);
-      pd.setUpdatability(EnumUpdatability.READWRITE);
+      PropertyDefinitionImpl<String> pd = new PropertyDefinitionImpl<String>();
+      pd.setMultivalued(false);
+      pd.setUpdatability(Updatability.READWRITE);
       pd.setDisplayName("cmis:hello");
       pd.setId("cmis:hello");
       pd.setInherited(false);
-      pd.setPropertyType(EnumPropertyType.STRING);
-      article.getPropertyDefinition().add(pd);
+      pd.setPropertyType(PropertyType.STRING);
+      article.getPropertyDefinitions().add(pd);
 
-      repository.addType(article);
+      conn.addType(article);
    }
 
    @Override
@@ -82,7 +85,7 @@ public class TypesChildrenCollectionTest extends BaseTest
    {
       try
       {
-         repository.removeType(article.getId());
+         conn.removeType(article.getId());
       }
       catch (TypeNotFoundException ignored)
       {
@@ -177,7 +180,7 @@ public class TypesChildrenCollectionTest extends BaseTest
 
       try
       {
-         repository.getTypeDefinition("cmis:folder1");
+         conn.getTypeDefinition("cmis:folder1");
          fail();
       }
       catch (TypeNotFoundException e)
@@ -195,14 +198,14 @@ public class TypesChildrenCollectionTest extends BaseTest
       TypeDefinition type = null;
       try
       {
-         type = repository.getTypeDefinition("cmis:folder1");
+         type = conn.getTypeDefinition("cmis:folder1");
       }
       catch (TypeNotFoundException e)
       {
          fail("Type 'cmis:folder1' must be added.");
       }
       boolean propDef = false;
-      for (CmisPropertyDefinitionType d : type.getPropertyDefinition())
+      for (PropertyDefinition<?> d : type.getPropertyDefinitions())
          if (d.getId().equals("cmis:newProperty"))
             propDef = true;
 

@@ -36,6 +36,7 @@ import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ObjectNotFoundException;
+import org.xcmis.spi.StorageException;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.object.CmisObject;
 
@@ -137,7 +138,7 @@ public class CheckedOutCollection extends CmisObjectCollection
             }
          }
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          throw new ResponseContextException(createErrorResponse(re, 500));
       }
@@ -225,7 +226,7 @@ public class CheckedOutCollection extends CmisObjectCollection
       {
          return createErrorResponse(cve, 409);
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          return createErrorResponse(re, 500);
       }
@@ -240,10 +241,6 @@ public class CheckedOutCollection extends CmisObjectCollection
       catch (InvalidArgumentException iae)
       {
          return createErrorResponse(iae, 400);
-      }
-      catch (ResponseContextException e)
-      {
-         return createErrorResponse(e);
       }
       catch (Throwable t)
       {

@@ -57,6 +57,7 @@ import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.Rendition;
 import org.xcmis.spi.RepositoryCapabilities;
+import org.xcmis.spi.StorageException;
 import org.xcmis.spi.StreamNotSupportedException;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.data.BaseContentStream;
@@ -129,7 +130,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          throw new ResponseContextException(createErrorResponse(cve, 409));
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          throw new ResponseContextException(createErrorResponse(re, 500));
       }
@@ -177,7 +178,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          return createErrorResponse(cve, 409);
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          return createErrorResponse(re, 500);
       }
@@ -216,7 +217,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          throw new ResponseContextException(createErrorResponse(cve, 409));
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          throw new ResponseContextException(createErrorResponse(re, 500));
       }
@@ -361,7 +362,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          // Is not document.
          return object;
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          throw new ResponseContextException(createErrorResponse(re, 500));
       }
@@ -433,7 +434,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          return createErrorResponse(cve, 409);
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          return createErrorResponse(re, 500);
       }
@@ -547,7 +548,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          return createErrorResponse(nce, 400);
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          return createErrorResponse(re, 500);
       }
@@ -604,7 +605,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          throw new ResponseContextException(createErrorResponse(cve, 409));
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          throw new ResponseContextException(createErrorResponse(re, 409));
       }
@@ -665,7 +666,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          return createErrorResponse(cve, 409);
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          return createErrorResponse(re, 409);
       }

@@ -30,6 +30,7 @@ import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomUtils;
 import org.xcmis.restatom.abdera.QueryTypeElement;
 import org.xcmis.spi.InvalidArgumentException;
+import org.xcmis.spi.StorageException;
 import org.xcmis.spi.object.CmisObject;
 
 import java.io.IOException;
@@ -93,7 +94,7 @@ public class QueryCollection extends CmisObjectCollection
       {
          throw new ResponseContextException(createErrorResponse(ioe, 500));
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          throw new ResponseContextException(createErrorResponse(re, 500));
       }

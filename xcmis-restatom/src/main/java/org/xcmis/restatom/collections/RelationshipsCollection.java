@@ -37,6 +37,7 @@ import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.RelationshipDirection;
+import org.xcmis.spi.StorageException;
 import org.xcmis.spi.object.CmisObject;
 import org.xcmis.spi.object.Property;
 import org.xcmis.spi.object.impl.IdProperty;
@@ -135,7 +136,7 @@ public class RelationshipsCollection extends CmisObjectCollection
       {
          return createErrorResponse(cve, 409);
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          return createErrorResponse(re, 500);
       }
@@ -246,7 +247,7 @@ public class RelationshipsCollection extends CmisObjectCollection
             }
          }
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          throw new ResponseContextException(createErrorResponse(re, 500));
       }

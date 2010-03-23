@@ -38,6 +38,7 @@ import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ObjectNotFoundException;
+import org.xcmis.spi.StorageException;
 import org.xcmis.spi.StreamNotSupportedException;
 import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.TypeNotFoundException;
@@ -149,7 +150,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
             }
          }
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          throw new ResponseContextException(createErrorResponse(re, 500));
       }
@@ -307,7 +308,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
       {
          return createErrorResponse(se, 400); // XXX in specification status is set as 403, correct ???
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          return createErrorResponse(re, 500);
       }
@@ -373,7 +374,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
             feed.addLink(getObjectLink(getId(parent), request), AtomCMIS.LINK_UP, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null,
                null, -1);
          }
-         catch (RepositoryException re)
+         catch (StorageException re)
          {
             throw new ResponseContextException(createErrorResponse(re, 500));
          }

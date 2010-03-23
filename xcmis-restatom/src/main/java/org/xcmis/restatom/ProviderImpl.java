@@ -61,15 +61,6 @@ public class ProviderImpl extends AbstractProvider
    /**
     * Instantiates a new provider impl.
     * 
-    * @param repositoryService the repository service
-    * @param objectService the object service
-    * @param navigationService the navigation service
-    * @param relationshipService the relationship service
-    * @param policyService the policy service
-    * @param aclService the acl service
-    * @param queryService the query service
-    * @param multifilingService the multifiling service
-    * @param versioningService the versioning service
     */
    public ProviderImpl()
    {

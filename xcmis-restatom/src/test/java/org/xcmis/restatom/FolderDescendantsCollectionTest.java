@@ -21,7 +21,7 @@ package org.xcmis.restatom;
 
 import org.exoplatform.services.rest.impl.ContainerResponse;
 import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
-import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ObjectNotFoundException;
 
 import java.io.ByteArrayInputStream;
@@ -45,13 +45,13 @@ public class FolderDescendantsCollectionTest extends BaseTest
 
    public void testDeleteTree() throws Exception
    {
-      String folder1 = createFolder(testFolderId, "folder1").getObjectId();
-      String folder2 = createFolder(folder1, "folder2").getObjectId();
-      String folder3 = createFolder(folder1, "folder3").getObjectId();
-      String folder4 = createFolder(folder1, "folder4").getObjectId();
-      String folder5 = createFolder(folder2, "folder5").getObjectId();
-      String folder6 = createFolder(folder2, "folder6").getObjectId();
-      String folder7 = createFolder(folder5, "folder7").getObjectId();
+      String folder1 = createFolder(testFolderId, "folder1");
+      String folder2 = createFolder(folder1, "folder2");
+      String folder3 = createFolder(folder1, "folder3");
+      String folder4 = createFolder(folder1, "folder4");
+      String folder5 = createFolder(folder2, "folder5");
+      String folder6 = createFolder(folder2, "folder6");
+      String folder7 = createFolder(folder5, "folder7");
 
       createDocument(folder3, "doc3", null, null);
       createDocument(folder5, "doc5", null, null);
@@ -87,7 +87,7 @@ public class FolderDescendantsCollectionTest extends BaseTest
       assertEquals(204, resp.getStatus());
       try
       {
-         conn.getProperties(folder1, null);
+         conn.getProperties(folder1, true, CMIS.WILDCARD);
          fail("Folder tree should be removed.");
       }
       catch (ObjectNotFoundException onf)
@@ -103,14 +103,14 @@ public class FolderDescendantsCollectionTest extends BaseTest
       for (int i = 0; i < 5; i++)
       {
          items.add(parent);
-         parent = createFolder(parent, "folder" + i).getObjectId();
+         parent = createFolder(parent, "folder" + i);
       }
 
       Map<String, List<String>> expected = new HashMap<String, List<String>>();
       expected.put(items.get(1), Arrays.asList(items.get(2)));
       expected.put(items.get(2), Arrays.asList(items.get(3)));
       expected.put(items.get(3), Arrays.asList(items.get(4)));
-      
+
       int depth = 4; // 4 level deep.
       String folderId = testFolderId;
       String requestURI = "http://localhost:8080/rest" //

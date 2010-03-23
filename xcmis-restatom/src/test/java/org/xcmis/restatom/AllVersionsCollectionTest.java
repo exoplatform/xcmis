@@ -22,10 +22,9 @@ package org.xcmis.restatom;
 import org.exoplatform.services.rest.impl.ContainerResponse;
 import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
 import org.w3c.dom.NodeList;
-import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.object.BaseContentStream;
-import org.xcmis.spi.object.ContentStream;
-import org.xcmis.spi.object.Entry;
+import org.xcmis.spi.data.BaseContentStream;
+import org.xcmis.spi.data.ContentStream;
+import org.xcmis.spi.object.CmisObject;
 
 import java.io.ByteArrayInputStream;
 
@@ -40,14 +39,15 @@ public class AllVersionsCollectionTest extends BaseTest
 
    public void testGetAllVersionsWithPWC() throws Exception
    {
-      Entry doc = createDocument(testFolderId, "doc1", null, null);
-      String docId = doc.getObjectId();
+      String docId = createDocument(testFolderId, "doc1", null, null);
       conn.checkout(docId);
 
-      String versionSeriesId = doc.getVersionSeriesId();
+      CmisObject doc = getCmisObject(docId);
+      String versionSeriesId = doc.getObjectInfo().getVersionSeriesId();
 
       // One source document and private working copy in version series.
-      String requestURI = "http://localhost:8080/rest" + "/cmisatom/" + cmisRepositoryId + "/versions/" + versionSeriesId;
+      String requestURI =
+         "http://localhost:8080/rest" + "/cmisatom/" + cmisRepositoryId + "/versions/" + versionSeriesId;
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
       ContainerResponse resp = service("GET", requestURI, "http://localhost:8080/rest", null, null, writer);
 
@@ -81,17 +81,18 @@ public class AllVersionsCollectionTest extends BaseTest
 
    public void testGetAllVersions() throws Exception
    {
-      Entry doc = createDocument(testFolderId, "doc1", null, null);
-      String docId = doc.getObjectId();
+      String docId = createDocument(testFolderId, "doc1", null, null);
       conn.checkout(docId);
 
-      String versionSeriesId = doc.getVersionSeriesId();
+      CmisObject doc = getCmisObject(docId);
+      String versionSeriesId = doc.getObjectInfo().getVersionSeriesId();
 
       ContentStream data = new BaseContentStream("test".getBytes("UTF-8"), "test", "text/plain");
       conn.checkin(docId, true, null, data, "checkin comment", null, null, null);
 
       // One source document and new version in version series.
-      String requestURI = "http://localhost:8080/rest" + "/cmisatom/" + cmisRepositoryId + "/versions/" + versionSeriesId;// + "?filter=*";
+      String requestURI =
+         "http://localhost:8080/rest" + "/cmisatom/" + cmisRepositoryId + "/versions/" + versionSeriesId;// + "?filter=*";
 
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
       ContainerResponse resp = service("GET", requestURI, "http://localhost:8080/rest", null, null, writer);

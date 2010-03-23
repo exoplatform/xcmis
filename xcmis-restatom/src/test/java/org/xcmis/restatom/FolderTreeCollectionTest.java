@@ -45,13 +45,13 @@ public class FolderTreeCollectionTest extends BaseTest
 
    public void testGetTree() throws Exception
    {
-      String folder1 = createFolder(testFolderId, "folder1").getObjectId();
-      String folder2 = createFolder(folder1, "folder2").getObjectId();
-      String folder3 = createFolder(folder1, "folder3").getObjectId();
-      String folder4 = createFolder(folder1, "folder4").getObjectId();
-      String folder5 = createFolder(folder2, "folder5").getObjectId();
-      String folder6 = createFolder(folder2, "folder6").getObjectId();
-      String folder7 = createFolder(folder5, "folder7").getObjectId();
+      String folder1 = createFolder(testFolderId, "folder1");
+      String folder2 = createFolder(folder1, "folder2");
+      String folder3 = createFolder(folder1, "folder3");
+      String folder4 = createFolder(folder1, "folder4");
+      String folder5 = createFolder(folder2, "folder5");
+      String folder6 = createFolder(folder2, "folder6");
+      String folder7 = createFolder(folder5, "folder7");
 
       createDocument(folder3, "doc3", null, null);
       createDocument(folder5, "doc5", null, null);

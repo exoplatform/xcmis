@@ -19,8 +19,6 @@
 
 package org.xcmis.restatom;
 
-import org.xcmis.restatom.AtomUtils;
-
 import junit.framework.TestCase;
 
 import java.util.Calendar;
