@@ -28,7 +28,6 @@ import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.TypeDefinition;
-import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.data.Folder;
 import org.xcmis.spi.data.ObjectData;
@@ -45,7 +44,7 @@ import javax.jcr.RepositoryException;
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-public class FolderImpl extends BaseObjectData implements Folder
+class FolderImpl extends BaseObjectData implements Folder
 {
 
    private static final Log LOG = ExoLogger.getLogger(FolderImpl.class);
@@ -181,82 +180,60 @@ public class FolderImpl extends BaseObjectData implements Folder
    /**
     * {@inheritDoc}
     */
-   @Override
-   public void save() throws StorageException, NameConstraintViolationException, UpdateConflictException
+   protected void create() throws StorageException, NameConstraintViolationException
    {
-      if (isNew())
+      try
       {
-         try
+         if (name == null || name.length() == 0)
+            throw new NameConstraintViolationException("Name for new folder must be provided.");
+
+         Node parentNode = ((FolderImpl)parent).getNode();
+
+         if (parentNode.hasNode(name))
+            throw new NameConstraintViolationException("Object with name " + name
+               + " already exists in specified folder.");
+
+         Node folder = parentNode.addNode(name, type.getLocalName());
+         if (!folder.isNodeType(JcrCMIS.CMIS_MIX_FOLDER)) // May be already inherited.
+            folder.addMixin(JcrCMIS.CMIS_MIX_FOLDER);
+
+         folder.setProperty(CMIS.OBJECT_TYPE_ID, //
+            type.getId());
+         folder.setProperty(CMIS.BASE_TYPE_ID, //
+            type.getBaseId().value());
+         folder.setProperty(CMIS.CREATED_BY, //
+            parentNode.getSession().getUserID());
+         folder.setProperty(CMIS.CREATION_DATE, //
+            Calendar.getInstance());
+         folder.setProperty(CMIS.LAST_MODIFIED_BY, //
+            parentNode.getSession().getUserID());
+         folder.setProperty(CMIS.LAST_MODIFICATION_DATE, //
+            Calendar.getInstance());
+
+         for (Property<?> property : properties.values())
+            setProperty(folder, property);
+
+         if (policies != null && policies.size() > 0)
          {
-
-            if (name == null)
-            {
-               Property<?> nameProperty = properties.get(CMIS.NAME);
-               if (nameProperty != null)
-                  name = (String)nameProperty.getValues().get(0);
-            }
-            if (name == null || name.length() == 0)
-               throw new NameConstraintViolationException("Name for new folder must be provided.");
-
-            Node parentNode = ((FolderImpl)parent).getNode();
-
-            if (parentNode.hasNode(name))
-               throw new NameConstraintViolationException("Object with name " + name
-                  + " already exists in specified folder.");
-
-            Node folder = parentNode.addNode(name, type.getLocalName());
-            if (!folder.isNodeType(JcrCMIS.CMIS_MIX_FOLDER)) // May be already inherited.
-               folder.addMixin(JcrCMIS.CMIS_MIX_FOLDER);
-
-            //            folder.setProperty(CMIS.OBJECT_ID, //
-            //               ((ExtendedNode)folder).getIdentifier());
-            //            folder.setProperty(CMIS.NAME, //
-            //               name);
-            folder.setProperty(CMIS.OBJECT_TYPE_ID, //
-               type.getId());
-            folder.setProperty(CMIS.BASE_TYPE_ID, //
-               type.getBaseId().value());
-            folder.setProperty(CMIS.CREATED_BY, //
-               parentNode.getSession().getUserID());
-            folder.setProperty(CMIS.CREATION_DATE, //
-               Calendar.getInstance());
-            folder.setProperty(CMIS.LAST_MODIFIED_BY, //
-               parentNode.getSession().getUserID());
-            folder.setProperty(CMIS.LAST_MODIFICATION_DATE, //
-               Calendar.getInstance());
-
-            //            folder.setProperty(CMIS.PARENT_ID, //
-            //               parent.getObjectId());
-
-            for (Property<?> property : properties.values())
-               setProperty(folder, property);
-
-            if (policies != null && policies.size() > 0)
-            {
-               for (Policy policy : policies)
-                  applyPolicy(folder, policy);
-            }
-
-            if (acl != null && acl.size() > 0)
-               setACL(folder, acl);
-
-            parentNode.save();
-
-            name = null;
-            policies = null;
-            acl = null;
-            properties.clear();
-
-            node = folder;
+            for (Policy policy : policies)
+               applyPolicy(folder, policy);
          }
-         catch (RepositoryException re)
-         {
-            throw new StorageException("Unable save Folder. " + re.getMessage(), re);
-         }
+
+         if (acl != null && acl.size() > 0)
+            setACL(folder, acl);
+
+         parentNode.save();
+
+         name = null;
+         policies = null;
+         acl = null;
+         properties.clear();
+
+         node = folder;
       }
-      else
+      catch (RepositoryException re)
       {
-         super.save();
+         throw new StorageException("Unable save Folder. " + re.getMessage(), re);
       }
    }
 

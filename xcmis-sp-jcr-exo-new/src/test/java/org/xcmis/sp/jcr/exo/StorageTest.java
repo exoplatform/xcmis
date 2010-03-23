@@ -207,7 +207,7 @@ public class StorageTest extends BaseTest
       assertEquals("text/plain", document.getContentStreamMimeType());
       assertEquals("createDocumentTest", document.getContentStream().getFileName());
    }
-
+   
    public void testCreateDocumentFromSource() throws Exception
    {
       ContentStream cs = new BaseContentStream("to be or not to be".getBytes(), null, "text/plain");

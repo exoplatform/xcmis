@@ -92,7 +92,7 @@ import javax.jcr.nodetype.NodeType;
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-public abstract class BaseObjectData implements ObjectData
+abstract class BaseObjectData implements ObjectData
 {
 
    private static final Log LOG = ExoLogger.getLogger(BaseObjectData.class);
@@ -123,6 +123,9 @@ public abstract class BaseObjectData implements ObjectData
     */
    protected Folder parent;
 
+   /**
+    * Back-end JCR node, it is <code>null</code> for newly created object.
+    */
    protected Node node;
 
    /**
@@ -137,8 +140,7 @@ public abstract class BaseObjectData implements ObjectData
     * {@link #save()}.
     * 
     * @param type type definition for new object
-    * @param parent parent folder may be <code>null</code> for not fileable
-    *        object
+    * @param parent parent folder
     * @param name name for new object. May be set also {@link #setName(String)}
     */
    public BaseObjectData(TypeDefinition type, Folder parent, String name)
@@ -349,7 +351,7 @@ public abstract class BaseObjectData implements ObjectData
     */
    public Folder getParent() throws ConstraintException
    {
-      if (isNew()) // parent should be specified for all newly created fileable objects. 
+      if (isNew())
          return parent;
 
       // If persisted.
@@ -357,8 +359,6 @@ public abstract class BaseObjectData implements ObjectData
       {
          if (node.getDepth() == 0)
             throw new ConstraintException("Unable get parent of root folder.");
-
-         // TODO : check is multi-filed. Must throw ConstraintException if is.
 
          Node parent = node.getParent();
          TypeDefinition parentType = JcrTypeHelper.getTypeDefinition(parent.getPrimaryNodeType(), true);
@@ -377,26 +377,18 @@ public abstract class BaseObjectData implements ObjectData
    public Collection<Folder> getParents()
    {
       if (isNew())
-      {
-         if (parent != null)
-            return Collections.singletonList(parent);
-         return Collections.emptyList(); // unfiled state
-      }
+         return Collections.singletonList(parent);
 
       try
       {
          if (node.getDepth() == 0)
             Collections.emptyList();
 
-         // TODO : check is unfiled. Must return empty list if is.
-
          Node parent = node.getParent();
          TypeDefinition parentType = JcrTypeHelper.getTypeDefinition(parent.getPrimaryNodeType(), true);
 
          List<Folder> parents = new ArrayList<Folder>(1);
          parents.add(new FolderImpl(parentType, parent));
-
-         // TODO : multi-filing
 
          return parents;
       }
@@ -555,7 +547,7 @@ public abstract class BaseObjectData implements ObjectData
    {
       if (isNew())
       {
-         throw new UnsupportedOperationException("save");
+         create();
       }
       else
       {
@@ -577,8 +569,6 @@ public abstract class BaseObjectData implements ObjectData
                String destPath = srcPath.substring(0, srcPath.lastIndexOf('/') + 1) + name;
 
                node.getSession().move(srcPath, destPath);
-               //               node.setProperty(CMIS.NAME, //
-               //                  name);
             }
 
             node.setProperty(CMIS.LAST_MODIFICATION_DATE,//
@@ -597,6 +587,8 @@ public abstract class BaseObjectData implements ObjectData
 
       }
    }
+
+   protected abstract void create() throws StorageException, NameConstraintViolationException;
 
    /**
     * {@inheritDoc}
@@ -712,16 +704,16 @@ public abstract class BaseObjectData implements ObjectData
          || (updatability == Updatability.WHENCHECKEDOUT && getBaseType() == BaseType.DOCUMENT && ((Document)this)
             .isPWC()))
       {
-         if (isNew())
+         if (property.getId().equals(CMIS.NAME))
          {
-            properties.put(property.getId(), property);
+            // Special property for JCR back-end.
+            name = (String)property.getValues().get(0);
          }
          else
          {
-            if (property.getId().equals(CMIS.NAME))
+            if (isNew())
             {
-               // Special property for JCR back-end.
-               name = (String)property.getValues().get(0);
+               properties.put(property.getId(), property);
             }
             else
             {

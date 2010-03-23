@@ -210,8 +210,8 @@ public class StorageImpl implements Storage
          throw new ConstraintException("Type " + source.getTypeId()
             + " is not in list of allowed child type for folder " + folder.getObjectId());
 
-      DocumentCopy copy = new DocumentCopy(source, folder, null, versioningState);
-      
+      DocumentCopy copy = new DocumentCopy(source, folder, source.getName(), versioningState);
+
       return copy;
    }
 
@@ -248,7 +248,7 @@ public class StorageImpl implements Storage
    public Folder createFolder(Folder folder, String typeId) throws ConstraintException
    {
       if (folder == null) // Exception should be raised before but re-check to avoid NPE.
-         throw new NotSupportedException("Parent folder must be provided.");
+         throw new ConstraintException("Parent folder must be provided.");
 
       if (folder.isNew())
          throw new CmisRuntimeException("Unable create child folder in newly created folder.");
@@ -310,9 +310,22 @@ public class StorageImpl implements Storage
       if (typeDefinition.getBaseId() != BaseType.RELATIONSHIP)
          throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Relationship.");
 
-      Relationship relationship = new RelationshipImpl(typeDefinition, source, target, null);
+      Relationship relationship = new RelationshipImpl(typeDefinition, source, target, null, getRelationshipStore());
 
       return relationship;
+   }
+
+   protected Node getRelationshipStore() throws CmisRuntimeException
+   {
+      try
+      {
+         Node relationshipStore = (Node)session.getItem("/" + JcrCMIS.CMIS_SYSTEM + "/" + JcrCMIS.CMIS_RELATIONSHIPS);
+         return relationshipStore;
+      }
+      catch (RepositoryException re)
+      {
+         throw new CmisRuntimeException("Unable get relationship store. " + re.getMessage(), re);
+      }
    }
 
    /**

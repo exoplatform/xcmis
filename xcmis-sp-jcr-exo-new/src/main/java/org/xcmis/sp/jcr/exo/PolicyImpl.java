@@ -24,7 +24,6 @@ import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.TypeDefinition;
-import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.data.Folder;
 import org.xcmis.spi.data.Policy;
@@ -40,7 +39,7 @@ import javax.jcr.RepositoryException;
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-public class PolicyImpl extends BaseObjectData implements Policy
+class PolicyImpl extends BaseObjectData implements Policy
 {
 
    public PolicyImpl(TypeDefinition type, Folder parent, String name)
@@ -103,76 +102,58 @@ public class PolicyImpl extends BaseObjectData implements Policy
    /**
     * {@inheritDoc}
     */
-   @Override
-   public void save() throws StorageException, NameConstraintViolationException, UpdateConflictException
+   protected void create() throws StorageException, NameConstraintViolationException
    {
-      if (isNew())
+      try
       {
-         try
+         if (name == null || name.length() == 0)
+            throw new NameConstraintViolationException("Name for new policy must be provided.");
+
+         Node parentNode = ((FolderImpl)parent).getNode();
+
+         if (parentNode.hasNode(name))
+            throw new NameConstraintViolationException("Object with name " + name
+               + " already exists in specified folder.");
+
+         Node newPolicy = parentNode.addNode(name, type.getLocalName());
+
+         newPolicy.setProperty(CMIS.OBJECT_TYPE_ID, //
+            type.getId());
+         newPolicy.setProperty(CMIS.BASE_TYPE_ID, //
+            type.getBaseId().value());
+         newPolicy.setProperty(CMIS.CREATED_BY, //
+            parentNode.getSession().getUserID());
+         newPolicy.setProperty(CMIS.CREATION_DATE, //
+            Calendar.getInstance());
+         newPolicy.setProperty(CMIS.LAST_MODIFIED_BY, //
+            parentNode.getSession().getUserID());
+         newPolicy.setProperty(CMIS.LAST_MODIFICATION_DATE, //
+            Calendar.getInstance());
+
+         for (Property<?> property : properties.values())
+            setProperty(newPolicy, property);
+
+         if (policies != null && policies.size() > 0)
          {
-            if (name == null)
-            {
-               Property<?> nameProperty = properties.get(CMIS.NAME);
-               if (nameProperty != null)
-                  name = (String)nameProperty.getValues().get(0);
-            }
-            if (name == null || name.length() == 0)
-               throw new NameConstraintViolationException("Name for new policy must be provided.");
-
-            Node parentNode = ((FolderImpl)parent).getNode();
-
-            if (parentNode.hasNode(name))
-               throw new NameConstraintViolationException("Object with name " + name
-                  + " already exists in specified folder.");
-
-            Node newPolicy = parentNode.addNode(name, type.getLocalName());
-
-            //            newPolicy.setProperty(CMIS.OBJECT_ID, //
-            //               ((ExtendedNode)newPolicy).getIdentifier());
-            //            newPolicy.setProperty(CMIS.NAME, //
-            //               name);
-            newPolicy.setProperty(CMIS.OBJECT_TYPE_ID, //
-               type.getId());
-            newPolicy.setProperty(CMIS.BASE_TYPE_ID, //
-               type.getBaseId().value());
-            newPolicy.setProperty(CMIS.CREATED_BY, //
-               parentNode.getSession().getUserID());
-            newPolicy.setProperty(CMIS.CREATION_DATE, //
-               Calendar.getInstance());
-            newPolicy.setProperty(CMIS.LAST_MODIFIED_BY, //
-               parentNode.getSession().getUserID());
-            newPolicy.setProperty(CMIS.LAST_MODIFICATION_DATE, //
-               Calendar.getInstance());
-
-            for (Property<?> property : properties.values())
-               setProperty(newPolicy, property);
-
-            if (policies != null && policies.size() > 0)
-            {
-               for (Policy policy : policies)
-                  applyPolicy(newPolicy, policy);
-            }
-
-            if (acl != null && acl.size() > 0)
-               setACL(newPolicy, acl);
-
-            parentNode.save();
-
-            name = null;
-            policies = null;
-            acl = null;
-            properties.clear();
-
-            node = newPolicy;
+            for (Policy policy : policies)
+               applyPolicy(newPolicy, policy);
          }
-         catch (RepositoryException re)
-         {
-            throw new StorageException("Unable create new policy. " + re.getMessage(), re);
-         }
+
+         if (acl != null && acl.size() > 0)
+            setACL(newPolicy, acl);
+
+         parentNode.save();
+
+         name = null;
+         policies = null;
+         acl = null;
+         properties.clear();
+
+         node = newPolicy;
       }
-      else
+      catch (RepositoryException re)
       {
-         super.save();
+         throw new StorageException("Unable create new policy. " + re.getMessage(), re);
       }
    }
 

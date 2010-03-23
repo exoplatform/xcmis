@@ -24,7 +24,6 @@ import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.TypeDefinition;
-import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.data.Folder;
 import org.xcmis.spi.data.ObjectData;
@@ -44,14 +43,14 @@ import javax.jcr.Session;
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-public class RelationshipImpl extends BaseObjectData implements Relationship
+class RelationshipImpl extends BaseObjectData implements Relationship
 {
-
-   private static final String RELATIONSHIPS = "/" + JcrCMIS.CMIS_SYSTEM + "/" + JcrCMIS.CMIS_RELATIONSHIPS;
 
    protected ObjectData source;
 
    protected ObjectData target;
+
+   private Node relationshipStore;
 
    /**
     * New unsaved instance of relationship.
@@ -62,11 +61,13 @@ public class RelationshipImpl extends BaseObjectData implements Relationship
     * @param name name
     * @see StorageImpl#createRelationship(ObjectData, ObjectData, String)
     */
-   public RelationshipImpl(TypeDefinition type, ObjectData source, ObjectData target, String name)
+   public RelationshipImpl(TypeDefinition type, ObjectData source, ObjectData target, String name,
+      Node relationshipStore)
    {
-      super(type, null, name);
+      super(type, (Folder)null, name);
       this.source = source;
       this.target = target;
+      this.relationshipStore = relationshipStore;
    }
 
    /**
@@ -125,85 +126,66 @@ public class RelationshipImpl extends BaseObjectData implements Relationship
    /**
     * {@inheritDoc}
     */
-   @Override
-   public void save() throws StorageException, NameConstraintViolationException, UpdateConflictException
+   protected void create() throws StorageException, NameConstraintViolationException
    {
-      if (isNew())
+      try
       {
-         try
+         if (name == null || name.length() == 0)
+            throw new NameConstraintViolationException("Name for new relationship must be provided.");
+
+         Session session = ((BaseObjectData)source).getNode().getSession();
+
+         String sourceId = source.getObjectId();
+         Node containerNode = relationshipStore.hasNode(sourceId) //
+            ? relationshipStore.getNode(sourceId) //
+            : relationshipStore.addNode(sourceId, JcrCMIS.NT_UNSTRUCTURED);
+
+         if (containerNode.hasNode(name))
+            throw new NameConstraintViolationException("Object with name " + name + " already exists.");
+
+         Node relationship = containerNode.addNode(name, type.getLocalName());
+
+         relationship.setProperty(CMIS.OBJECT_TYPE_ID, //
+            type.getId());
+         relationship.setProperty(CMIS.BASE_TYPE_ID, //
+            type.getBaseId().value());
+         relationship.setProperty(CMIS.CREATED_BY, //
+            session.getUserID());
+         relationship.setProperty(CMIS.CREATION_DATE, //
+            Calendar.getInstance());
+         relationship.setProperty(CMIS.LAST_MODIFIED_BY, //
+            session.getUserID());
+         relationship.setProperty(CMIS.LAST_MODIFICATION_DATE, //
+            Calendar.getInstance());
+         relationship.setProperty(CMIS.SOURCE_ID, //
+            ((BaseObjectData)source).getNode());
+         relationship.setProperty(CMIS.TARGET_ID, //
+            ((BaseObjectData)target).getNode());
+
+         for (Property<?> property : properties.values())
+            setProperty(relationship, property);
+
+         if (policies != null && policies.size() > 0)
          {
-            if (name == null)
-            {
-               Property<?> nameProperty = properties.get(CMIS.NAME);
-               if (nameProperty != null)
-                  name = (String)nameProperty.getValues().get(0);
-            }
-            if (name == null || name.length() == 0)
-               throw new NameConstraintViolationException("Name for new relationship must be provided.");
-
-            Session session = ((BaseObjectData)source).getNode().getSession();
-            Node relationships = (Node)session.getItem(RELATIONSHIPS);
-
-            String sourceId = source.getObjectId();
-            Node containerNode = relationships.hasNode(sourceId) //
-               ? relationships.getNode(sourceId) //
-               : relationships.addNode(sourceId, JcrCMIS.NT_UNSTRUCTURED);
-
-            if (containerNode.hasNode(name))
-               throw new NameConstraintViolationException("Object with name " + name + " already exists.");
-
-            Node relationship = containerNode.addNode(name, type.getLocalName());
-
-            //            relationshipNode.setProperty(CMIS.OBJECT_ID, //
-            //               ((ExtendedNode)relationshipNode).getIdentifier());
-            //            relationshipNode.setProperty(CMIS.NAME, //
-            //               name);
-            relationship.setProperty(CMIS.OBJECT_TYPE_ID, //
-               type.getId());
-            relationship.setProperty(CMIS.BASE_TYPE_ID, //
-               type.getBaseId().value());
-            relationship.setProperty(CMIS.CREATED_BY, //
-               session.getUserID());
-            relationship.setProperty(CMIS.CREATION_DATE, //
-               Calendar.getInstance());
-            relationship.setProperty(CMIS.LAST_MODIFIED_BY, //
-               session.getUserID());
-            relationship.setProperty(CMIS.LAST_MODIFICATION_DATE, //
-               Calendar.getInstance());
-            relationship.setProperty(CMIS.SOURCE_ID, //
-               ((BaseObjectData)source).getNode());
-            relationship.setProperty(CMIS.TARGET_ID, //
-               ((BaseObjectData)target).getNode());
-
-            for (Property<?> property : properties.values())
-               setProperty(relationship, property);
-
-            if (policies != null && policies.size() > 0)
-            {
-               for (Policy policy : policies)
-                  applyPolicy(relationship, policy);
-            }
-
-            if (acl != null && acl.size() > 0)
-               setACL(relationship, acl);
-
-            relationships.save();
-
-            name = null;
-            policies = null;
-            acl = null;
-            properties.clear();
-
-            node = relationship;
+            for (Policy policy : policies)
+               applyPolicy(relationship, policy);
          }
-         catch (RepositoryException re)
-         {
-            throw new StorageException("Unable create new relationship. " + re.getMessage(), re);
-         }
+
+         if (acl != null && acl.size() > 0)
+            setACL(relationship, acl);
+
+         relationshipStore.save();
+
+         name = null;
+         policies = null;
+         acl = null;
+         properties.clear();
+
+         node = relationship;
       }
-      else
+      catch (RepositoryException re)
       {
-         super.save();
+         throw new StorageException("Unable create new relationship. " + re.getMessage(), re);
       }
    }
 }
