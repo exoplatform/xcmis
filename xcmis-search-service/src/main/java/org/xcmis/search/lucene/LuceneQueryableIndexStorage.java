@@ -33,6 +33,7 @@ import org.xcmis.search.VisitException;
 import org.xcmis.search.Visitors;
 import org.xcmis.search.config.IndexConfigurationException;
 import org.xcmis.search.config.SearchServiceConfiguration;
+import org.xcmis.search.content.ContentEntry;
 import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.content.command.index.ModifyIndexCommand;
 import org.xcmis.search.content.command.query.ExecuteSelectorCommand;
@@ -41,6 +42,7 @@ import org.xcmis.search.lucene.content.VirtualTableResolver;
 import org.xcmis.search.lucene.index.FieldNames;
 import org.xcmis.search.lucene.index.IndexException;
 import org.xcmis.search.lucene.index.LuceneIndexTransaction;
+import org.xcmis.search.lucene.index.NodeIndexer;
 import org.xcmis.search.lucene.index.StartableIndexingService;
 import org.xcmis.search.lucene.search.UUIDFieldSelector;
 import org.xcmis.search.model.Limit;
@@ -62,6 +64,7 @@ import org.xcmis.search.value.PathSplitter;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -196,6 +199,11 @@ public class LuceneQueryableIndexStorage extends QueryableIndexStorage
    private final VirtualTableResolver tableResolver;
 
    /**
+    * Node indexer.
+    */
+   private NodeIndexer nodeIndexer;
+
+   /**
     * @param indexConfuguration
     * @throws IndexException
     * @throws IndexConfigurationException
@@ -204,8 +212,8 @@ public class LuceneQueryableIndexStorage extends QueryableIndexStorage
    public LuceneQueryableIndexStorage(SearchServiceConfiguration serviceConfuguration) throws IndexException
    {
       super();
-      this.indexDataManager = new StartableIndexingService(serviceConfuguration);
-
+      this.indexDataManager = new StartableIndexingService(serviceConfuguration.getIndexConfuguration());
+      this.nodeIndexer = new NodeIndexer(serviceConfuguration.getIndexConfuguration().getDocumentReaderService());
       this.tableResolver = serviceConfuguration.getTableResolver();
       this.nameConverter = serviceConfuguration.getNameConverter();
       this.pathSplitter = serviceConfuguration.getPathSplitter();
@@ -227,8 +235,15 @@ public class LuceneQueryableIndexStorage extends QueryableIndexStorage
    @Override
    public Object visitModifyIndexCommand(InvocationContext ctx, ModifyIndexCommand command) throws Throwable
    {
+      Map<String, Document> addedDocuments = new HashMap<String, Document>();
+      //indexing content
+      for (ContentEntry entry : command.getAddedDocuments())
+      {
+         addedDocuments.put(entry.getIdentifier(), nodeIndexer.createDocument(entry));
+      }
+
       LuceneIndexTransaction indexTransaction =
-         new LuceneIndexTransaction(((Map)command.getAddedDocuments()), command.getDeletedDocuments());
+         new LuceneIndexTransaction(addedDocuments, command.getDeletedDocuments());
 
       return indexDataManager.save(indexTransaction);
    }

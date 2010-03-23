@@ -18,8 +18,7 @@
  */
 package org.xcmis.search.config;
 
-import org.apache.lucene.document.Document;
-import org.xcmis.search.content.ContentIndexer;
+import org.exoplatform.services.document.DocumentReaderService;
 import org.xcmis.search.lucene.index.IndexRecoverService;
 import org.xcmis.search.lucene.index.IndexRestoreService;
 
@@ -33,8 +32,8 @@ public interface IndexConfuguration
    String getIndexDir();
 
    IndexRecoverService getIndexRecoverService();
-   
-   ContentIndexer<Document> getContentIndexer();
+
+   DocumentReaderService getDocumentReaderService();
 
    IndexRestoreService getIndexRestoreService();
 

@@ -30,7 +30,7 @@ import org.apache.lucene.store.LockObtainFailedException;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.search.config.IndexConfigurationException;
-import org.xcmis.search.config.SearchServiceConfiguration;
+import org.xcmis.search.config.IndexConfuguration;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -54,10 +54,9 @@ public class LuceneIndexingService extends TransactionableIndexDataManager
     * @throws IndexConfigurationException
     * @throws IndexException
     */
-   public LuceneIndexingService(SearchServiceConfiguration configuration) throws IndexConfigurationException,
-      IndexException
+   public LuceneIndexingService(IndexConfuguration configuration) throws IndexConfigurationException, IndexException
    {
-      super(configuration.getIndexConfuguration());
+      super(configuration);
 
    }
 

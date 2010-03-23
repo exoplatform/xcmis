@@ -23,7 +23,7 @@ import org.apache.lucene.document.Document;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.search.config.IndexConfigurationException;
-import org.xcmis.search.config.SearchServiceConfiguration;
+import org.xcmis.search.config.IndexConfuguration;
 
 import java.io.File;
 import java.io.IOException;
@@ -65,12 +65,11 @@ public class StartableIndexingService extends LuceneIndexingService
     * @throws IndexConfigurationException
     * @throws IndexException
     */
-   public StartableIndexingService(SearchServiceConfiguration configuration) throws IndexConfigurationException,
-      IndexException
+   public StartableIndexingService(IndexConfuguration configuration) throws IndexConfigurationException, IndexException
    {
       super(configuration);
-      this.indexRestoreService = configuration.getIndexConfuguration().getIndexRestoreService();
-      this.indexDir = new File(configuration.getIndexConfuguration().getIndexDir());
+      this.indexRestoreService = configuration.getIndexRestoreService();
+      this.indexDir = new File(configuration.getIndexDir());
       if (!indexDir.exists() && !indexDir.mkdirs())
       {
          throw new IndexException("Fail to create index directory : " + indexDir.getAbsolutePath());

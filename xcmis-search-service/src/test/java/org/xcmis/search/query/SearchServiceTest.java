@@ -24,6 +24,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
 import org.apache.commons.io.FileUtils;
+import org.exoplatform.services.document.DocumentReaderService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,7 +32,6 @@ import org.xcmis.search.InvalidQueryException;
 import org.xcmis.search.SearchServiceException;
 import org.xcmis.search.config.IndexConfurationImpl;
 import org.xcmis.search.config.SearchServiceConfiguration;
-import org.xcmis.search.content.ContentIndexer;
 import org.xcmis.search.content.InMemorySchema;
 import org.xcmis.search.content.Schema;
 import org.xcmis.search.content.InMemorySchema.Builder;
@@ -102,7 +102,7 @@ public class SearchServiceTest
       //index configuration
       IndexConfurationImpl indexConfuration = new IndexConfurationImpl();
       indexConfuration.setIndexDir(tempDir.getAbsolutePath());
-      indexConfuration.setContentIndexer(mock(ContentIndexer.class));
+      indexConfuration.setDocumentReaderService(mock(DocumentReaderService.class));
       indexConfuration.setIndexRecoverService(mock(IndexRecoverService.class));
       indexConfuration.setIndexRestoreService(mock(IndexRestoreService.class));
 
@@ -126,7 +126,7 @@ public class SearchServiceTest
       //index configuration
       IndexConfurationImpl indexConfuration = new IndexConfurationImpl();
       indexConfuration.setIndexDir(tempDir.getAbsolutePath());
-      indexConfuration.setContentIndexer(mock(ContentIndexer.class));
+      indexConfuration.setDocumentReaderService(mock(DocumentReaderService.class));
       indexConfuration.setIndexRecoverService(mock(IndexRecoverService.class));
       indexConfuration.setIndexRestoreService(mock(IndexRestoreService.class));
 
@@ -150,5 +150,4 @@ public class SearchServiceTest
 
       luceneSearchService.execute(query, new HashMap<String, Object>());
    }
-
 }

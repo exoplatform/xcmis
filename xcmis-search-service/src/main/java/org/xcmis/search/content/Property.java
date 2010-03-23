@@ -22,6 +22,7 @@ import org.apache.commons.lang.Validate;
 import org.xcmis.search.value.PropertyType;
 
 import java.io.InputStream;
+import java.util.Collection;
 
 /**
  * Property of content.
@@ -32,14 +33,14 @@ public class Property<V>
 
    private final String name;
 
-   private final ContentValue<V> value;
+   private final Collection<ContentValue<V>> value;
 
    /**
     * @param type
     * @param name
     * @param value
     */
-   public Property(PropertyType type, String name, ContentValue<V> value)
+   public Property(PropertyType type, String name, Collection<ContentValue<V>> value)
    {
       super();
       this.type = type;
@@ -66,7 +67,7 @@ public class Property<V>
    /**
     * @return the value
     */
-   public ContentValue<V> getValue()
+   public Collection<ContentValue<V>> getValue()
    {
       return value;
    }

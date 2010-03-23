@@ -38,12 +38,12 @@ public class ContentEntry
    /**
     * An array of parent entry identifiers
     */
-   private final String[] parentIdentifers;
+   private final String[] parentIdentifiers;
 
    /**
     *  Entry identifier.
     */
-   private final String identifer;
+   private final String identifier;
 
    /**
     * An array of entry properties
@@ -53,21 +53,21 @@ public class ContentEntry
    /**
     * @param name
     * @param tableNames
-    * @param identifer
-    * @param parentIdentifers
+    * @param identifier
+    * @param parentIdentifiers
     * @param properties
     */
-   public ContentEntry(String name, String[] tableNames, String identifer, String[] parentIdentifers,
+   public ContentEntry(String name, String[] tableNames, String identifer, String[] parentIdentifiers,
       Property[] properties)
    {
       Validate.notNull(name, "The value argument may not be null");
       Validate.notEmpty(tableNames, "The tableNames may not be empty");
-      Validate.notNull(identifer, "The identifer argument may not be null");
-      Validate.notEmpty(parentIdentifers, "The parentIdentifers may not be empty");
+      Validate.notNull(identifer, "The identifier argument may not be null");
+      Validate.notEmpty(parentIdentifiers, "The parentIdentifiers may not be empty");
       this.name = name;
       this.tableNames = tableNames;
-      this.identifer = identifer;
-      this.parentIdentifers = parentIdentifers;
+      this.identifier = identifer;
+      this.parentIdentifiers = parentIdentifiers;
       this.properties = properties;
    }
 
@@ -88,19 +88,19 @@ public class ContentEntry
    }
 
    /**
-    * @return the parentIdentifers
+    * @return the parentIdentifiers
     */
-   public String[] getParentIdentifers()
+   public String[] getParentIdentifiers()
    {
-      return parentIdentifers;
+      return parentIdentifiers;
    }
 
    /**
-    * @return the identifer
+    * @return the identifier
     */
-   public String getIdentifer()
+   public String getIdentifier()
    {
-      return identifer;
+      return identifier;
    }
 
    /**

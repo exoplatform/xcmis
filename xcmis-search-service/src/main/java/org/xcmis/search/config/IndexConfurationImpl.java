@@ -18,8 +18,7 @@
  */
 package org.xcmis.search.config;
 
-import org.apache.lucene.document.Document;
-import org.xcmis.search.content.ContentIndexer;
+import org.exoplatform.services.document.DocumentReaderService;
 import org.xcmis.search.lucene.index.IndexRecoverService;
 import org.xcmis.search.lucene.index.IndexRestoreService;
 
@@ -30,7 +29,7 @@ import org.xcmis.search.lucene.index.IndexRestoreService;
  */
 public class IndexConfurationImpl implements IndexConfuguration
 {
-   private ContentIndexer<Document> contentIndexer;
+   private DocumentReaderService documentReaderService;
 
    private String indexDir;
 
@@ -39,11 +38,19 @@ public class IndexConfurationImpl implements IndexConfuguration
    private IndexRestoreService indexRestoreService;
 
    /**
-    * @see org.xcmis.search.config.IndexConfuguration#getContentIndexer()
+    * @return the documentReaderService
     */
-   public ContentIndexer<Document> getContentIndexer()
+   public DocumentReaderService getDocumentReaderService()
    {
-      return contentIndexer;
+      return documentReaderService;
+   }
+
+   /**
+    * @param documentReaderService the documentReaderService to set
+    */
+   public void setDocumentReaderService(DocumentReaderService documentReaderService)
+   {
+      this.documentReaderService = documentReaderService;
    }
 
    /**
@@ -68,14 +75,6 @@ public class IndexConfurationImpl implements IndexConfuguration
    public IndexRestoreService getIndexRestoreService()
    {
       return indexRestoreService;
-   }
-
-   /**
-    * @param contentIndexer the contentIndexer to set
-    */
-   public void setContentIndexer(ContentIndexer<Document> contentIndexer)
-   {
-      this.contentIndexer = contentIndexer;
    }
 
    /**
