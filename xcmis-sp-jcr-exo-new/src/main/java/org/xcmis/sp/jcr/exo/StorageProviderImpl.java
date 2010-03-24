@@ -173,7 +173,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
 
          
          if (renditionManager == null)
-            renditionManager  =  new RenditionManagerImpl(renditionProviders, session);
+            renditionManager  =  new RenditionManagerImpl(renditionProviders);
          
          Storage storage = new StorageImpl(session, indexListenerFactory.getIndexListener(id), configuration,renditionManager);
          return new JcrConnection(storage);

@@ -56,6 +56,7 @@ import org.xcmis.spi.data.Folder;
 import org.xcmis.spi.data.ObjectData;
 import org.xcmis.spi.data.Policy;
 import org.xcmis.spi.data.Relationship;
+import org.xcmis.spi.object.RendititonManager;
 import org.xcmis.spi.impl.AllowableActionsImpl;
 import org.xcmis.spi.impl.BaseItemsIterator;
 import org.xcmis.spi.impl.CmisVisitor;
@@ -98,7 +99,7 @@ public class StorageImpl implements Storage
    private final StorageConfiguration configuration;
    
    /** The rendition manager. */
-   private RenditionManagerImpl renditionManager;
+   private RenditionManager renditionManager;
 
    
 
@@ -606,7 +607,7 @@ public class StorageImpl implements Storage
          TypeDefinition type = JcrTypeHelper.getTypeDefinition(node.getPrimaryNodeType(), true);
 
          if (type.getBaseId() == BaseType.DOCUMENT)
-            return new DocumentImpl(type, node);
+            return new DocumentImpl(type, node, renditionManager);
          else if (type.getBaseId() == BaseType.FOLDER)
             return new FolderImpl(type, node);
          else if (type.getBaseId() == BaseType.POLICY)
@@ -643,7 +644,7 @@ public class StorageImpl implements Storage
          TypeDefinition type = JcrTypeHelper.getTypeDefinition(node.getPrimaryNodeType(), true);
 
          if (type.getBaseId() == BaseType.DOCUMENT)
-            return new DocumentImpl(type, node);
+            return new DocumentImpl(type, node, renditionManager);
          else if (type.getBaseId() == BaseType.FOLDER)
             return new FolderImpl(type, node);
          else if (type.getBaseId() == BaseType.POLICY)
@@ -670,14 +671,6 @@ public class StorageImpl implements Storage
          return renditionManager.getRenditions(object);
       else
          return null;
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public RenditionManagerImpl getRenditionManager()
-   {
-      return renditionManager;
    }
    
    /**

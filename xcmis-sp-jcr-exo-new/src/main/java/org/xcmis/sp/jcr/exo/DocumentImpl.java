@@ -35,6 +35,7 @@ import org.xcmis.spi.data.Document;
 import org.xcmis.spi.data.Folder;
 import org.xcmis.spi.data.Policy;
 import org.xcmis.spi.object.Property;
+import org.xcmis.spi.object.RenditionManager;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -59,6 +60,8 @@ class DocumentImpl extends BaseObjectData implements Document
    private ContentStream content;
 
    protected final VersioningState versioningState;
+   
+   private RenditionManager renditionManager;
 
    public DocumentImpl(TypeDefinition type, Folder parent, Session session, VersioningState versioningState)
    {
@@ -72,6 +75,14 @@ class DocumentImpl extends BaseObjectData implements Document
       versioningState = null; // no sense for not newly created Document
    }
 
+   public DocumentImpl(TypeDefinition type, Node node, RenditionManager manager)
+   {
+      super(type, node);
+      versioningState = null; // no sense for not newly created Document
+      this.renditionManager = manager;
+   }
+
+   
    public void cancelCheckout() throws StorageException
    {
       // TODO Auto-generated method stub
@@ -132,28 +143,25 @@ class DocumentImpl extends BaseObjectData implements Document
       if (streamId == null || streamId.equals(getString(CMIS.CONTENT_STREAM_ID)))
          return getContentStream();
 
-      try
-      {
          Node rendition = null;
          try
          {
             rendition = node.getNode(streamId);
+            javax.jcr.Property renditionContent = rendition.getProperty(JcrCMIS.CMIS_RENDITION_STREAM);
+
+            return new RenditionContentStream(renditionContent.getStream(), renditionContent.getLength(), null,
+               rendition.getProperty(JcrCMIS.CMIS_RENDITION_MIME_TYPE).getString(), rendition.getProperty(
+                  JcrCMIS.CMIS_RENDITION_KIND).getString());
          }
          catch (PathNotFoundException pnfe)
          {
-            return null;
+            try {   
+            return  renditionManager.getStream(this, streamId);
+            } catch (Exception e){
+               throw new CmisRuntimeException("Unable get rendition stream. " + e.getMessage(), e);
+            }
          }
-
-         javax.jcr.Property renditionContent = rendition.getProperty(JcrCMIS.CMIS_RENDITION_STREAM);
-
-         return new RenditionContentStream(renditionContent.getStream(), renditionContent.getLength(), null, rendition
-            .getProperty(JcrCMIS.CMIS_RENDITION_MIME_TYPE).getString(), rendition.getProperty(
-            JcrCMIS.CMIS_RENDITION_KIND).getString());
-      }
-      catch (RepositoryException re)
-      {
-         throw new CmisRuntimeException("Unable get content stream " + streamId + ". " + re.getMessage(), re);
-      }
+         return null;
    }
 
    /**

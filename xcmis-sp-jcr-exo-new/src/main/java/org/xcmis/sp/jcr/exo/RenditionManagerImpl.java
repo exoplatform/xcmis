@@ -50,20 +50,16 @@ public class RenditionManagerImpl implements RenditionManager
 {
 
    /** The streams map. */
-   private Map<String, ContentStream> streamsMap;
 
    private final Map<MimeType, RenditionProvider> renditionProviders;
 
-   private Session session;
 
    /** Logger. */
    private static final Log LOG = ExoLogger.getLogger(RenditionManagerImpl.class);
 
-   public RenditionManagerImpl(Map<MimeType, RenditionProvider> renditionProviders, Session session)
+   public RenditionManagerImpl(Map<MimeType, RenditionProvider> renditionProviders)
    {
       this.renditionProviders = renditionProviders;
-      this.streamsMap = new HashMap<String, ContentStream>();
-      this.session = session;
    }
 
    /**
@@ -78,42 +74,13 @@ public class RenditionManagerImpl implements RenditionManager
          {
             return it;
          }
-         else if (streamsMap.containsKey(obj.getObjectId()))
-         {
-            String id = obj.getObjectId();
-            RenditionContentStream renditionContentStream = getStream(id);
-            RenditionImpl rendition = new RenditionImpl();
-            rendition.setStreamId(id);
-            rendition.setKind(renditionContentStream.getKind());
-            rendition.setMimeType(renditionContentStream.getMediaType());
-            rendition.setLength(renditionContentStream.length());
-            rendition.setHeight(Long.valueOf(renditionContentStream.getHeight()).intValue());
-            rendition.setWidth(Long.valueOf(renditionContentStream.getWidth()).intValue());
-            return new RenditionIterator(rendition);
-         }
          else
          {
             MimeType contentType = MimeType.fromString(((DocumentImpl)obj).getContentStreamMimeType());
-            for (Map.Entry<MimeType, RenditionProvider> e : renditionProviders.entrySet())
-            {
-               if (e.getKey().match(contentType))
-               {
-                  RenditionProvider renditionProvider = e.getValue();
-                  RenditionContentStream renditionContentStream =
-                     renditionProvider.getRenditionStream(obj.getContentStream(null));
-                  //String id = IdGenerator.generate();
-                  String id = obj.getObjectId();
-                  streamsMap.put(id, renditionContentStream);
-                  RenditionImpl rendition = new RenditionImpl();
-                  rendition.setStreamId(id);
-                  rendition.setKind(renditionContentStream.getKind());
-                  rendition.setMimeType(renditionContentStream.getMediaType());
-                  rendition.setLength(renditionContentStream.length());
-                  rendition.setHeight(Long.valueOf(renditionContentStream.getHeight()).intValue());
-                  rendition.setWidth(Long.valueOf(renditionContentStream.getWidth()).intValue());
-                  return new RenditionIterator(rendition);
-               }
-            }
+            RenditionImpl rendition = new RenditionImpl();
+            rendition.setStreamId(contentType.toString());
+            rendition.setKind("cmis:thumbnail");
+            return new RenditionIterator(rendition);
          }
       }
       catch (javax.jcr.RepositoryException re)
@@ -132,80 +99,21 @@ public class RenditionManagerImpl implements RenditionManager
    /**
     * {@inheritDoc}
     */
-   public ItemsIterator<Rendition> getRenditions(String objectId) throws ObjectNotFoundException, StorageException
+   public RenditionContentStream getStream(ObjectData obj, String streamId)
    {
-      return getRenditions(getObjectById(objectId));
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public RenditionContentStream getStream(String streamId)
-   {
-      RenditionContentStream str = (RenditionContentStream)streamsMap.get(streamId);
-      return str;
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public void removeRenditions(ObjectData obj) throws StorageException
-   {
-      try
+      for (Map.Entry<MimeType, RenditionProvider> e : renditionProviders.entrySet())
       {
-         int count = 0;
-         for (NodeIterator iter = ((BaseObjectData)obj).getNode().getNodes(); iter.hasNext();)
+         if (e.getKey().match(MimeType.fromString(streamId)))
          {
-            Node item = iter.nextNode();
-            if (item.isNodeType(JcrCMIS.CMIS_NT_RENDITION))
-            {
-               item.remove();
-               count++;
+            RenditionProvider renditionProvider = e.getValue();
+            if (!renditionProvider.canStoreRendition()) {
+            RenditionContentStream renditionContentStream =
+               renditionProvider.getRenditionStream(obj.getContentStream(null));
+            return renditionContentStream;
+            } else {
+               return null;
             }
          }
-         if (count > 0)
-            ((BaseObjectData)obj).getNode().save();
-         else
-            streamsMap.remove(obj.getObjectId());
-      }
-      catch (javax.jcr.RepositoryException re)
-      {
-         String msg = "Unable to remove renditions for object " + obj.getObjectId() + ". " + re.getMessage();
-         throw new StorageException(msg, re);
       }
    }
-
-   /**
-    * {@inheritDoc}
-    */
-   public void removeRenditions(String objectId) throws ObjectNotFoundException, StorageException
-   {
-      removeRenditions(getObjectById(objectId));
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   private ObjectData getObjectById(String objectId) throws ObjectNotFoundException, StorageException
-   {
-      Node node;
-      try
-      {
-         node = ((ExtendedSession)session).getNodeByIdentifier(objectId);
-         TypeDefinition type = JcrTypeHelper.getTypeDefinition(node.getPrimaryNodeType(), true);
-         if (type.getBaseId() == BaseType.DOCUMENT)
-            return new DocumentImpl(type, node);
-      }
-      catch (ItemNotFoundException nfe)
-      {
-         throw new ObjectNotFoundException("Object " + objectId + " does not exists.");
-      }
-      catch (RepositoryException re)
-      {
-         throw new CmisRuntimeException(re.getMessage(), re);
-      }
-      // If not a document
-      throw new CmisRuntimeException("Invalid object type.");
-   }
-
 }
