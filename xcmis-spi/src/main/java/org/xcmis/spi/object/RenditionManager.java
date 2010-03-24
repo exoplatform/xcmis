@@ -20,8 +20,6 @@
 package org.xcmis.spi.object;
 
 import org.xcmis.spi.Rendition;
-import org.xcmis.spi.InvalidArgumentException;
-import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.data.ObjectData;
@@ -47,44 +45,12 @@ public interface RenditionManager
    ItemsIterator<Rendition> getRenditions(ObjectData obj) throws StorageException;
 
    /**
-    * Get all renditions of object with specified id.
-    * 
-    * @param objectId object id 
-    * @return set of object renditions. If object has not renditions then empty
-    *            iterator will be returned.
-    * @throws ObjectNotFoundException if object with specified <code>objectId</code>
-    *            does not exist
-    * @throws StorageException if any other CMIS repository error occurs
-    */
-   ItemsIterator<Rendition> getRenditions(String objectId) throws ObjectNotFoundException, StorageException;
-
-   /**
     * Get rendition stream for objects with specified id.
     * 
     * @param streamId object id 
+    * @param ObjectData object id 
     * @return Renditions content stream
     * 
     */
-    ContentStream getStream(String streamId);
-
-   /**
-    * Remove rendition for specified CMISEntry <code>entry</code>.
-    * Changes will be saved in repository immediately.
-    * 
-    * @param entry CMISEntry
-    * @throws StorageException if any other CMIS repository error occurs
-    */
-   void removeRenditions(ObjectData obj) throws StorageException;
-
-   /**
-    * Remove rendition for object with specified id <code>objectId</code>.
-    * Changes will be saved in repository immediately.
-    * 
-    * @param objectId object id
-    * @throws ObjectNotFoundException if object with specified <code>objectId</code>
-    *            does not exist
-    * @throws StorageException if any other CMIS repository error occurs
-    */
-   void removeRenditions(String objectId) throws ObjectNotFoundException, StorageException;
-
+    ContentStream getStream(ObjectData obj, String streamId);
 }

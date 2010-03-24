@@ -361,14 +361,6 @@ public interface Storage extends TypeManager
    ItemsIterator<Rendition> getRenditions(ObjectData object);
 
    /**
-    * Get renditions manager.
-    * 
-    * @return Renditions manager. 
-    * 
-    */
-   RenditionManager getRenditionManager();
-
-   /**
     * Get description of storage and its capabilities.
     * 
     * @return storage description
