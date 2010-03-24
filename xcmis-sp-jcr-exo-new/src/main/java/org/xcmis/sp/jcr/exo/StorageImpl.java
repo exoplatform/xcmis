@@ -113,6 +113,7 @@ public class StorageImpl implements Storage
    public StorageImpl(Session session, IndexListener indexListener, StorageConfiguration configuration, RenditionManager renditionManager)
    {
       this.session = session;
+      this.indexListener = indexListener;
       this.configuration = configuration;
       this.renditionManager = renditionManager;
    }
