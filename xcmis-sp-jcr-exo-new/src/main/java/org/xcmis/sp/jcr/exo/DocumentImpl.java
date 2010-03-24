@@ -45,6 +45,7 @@ import javax.jcr.Node;
 import javax.jcr.PathNotFoundException;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.jcr.ValueFormatException;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
@@ -161,7 +162,11 @@ class DocumentImpl extends BaseObjectData implements Document
                throw new CmisRuntimeException("Unable get rendition stream. " + e.getMessage(), e);
             }
          }
-         return null;
+         catch (RepositoryException re)
+         {
+            throw new CmisRuntimeException("Unable get rendition stream. " + re.getMessage(), re);
+         }
+
    }
 
    /**

@@ -495,8 +495,6 @@ public class StorageImpl implements Storage
          // versionable node, so have not common behavior.
          if (object.getTypeDefinition().isVersionable() && !deleteAllVersions)
             throw new CmisRuntimeException("Unable delete only specified version.");
-         if (renditionManager != null)
-           renditionManager.removeRenditions(object); 
       }
       else if (object.getBaseType() == BaseType.FOLDER)
       {

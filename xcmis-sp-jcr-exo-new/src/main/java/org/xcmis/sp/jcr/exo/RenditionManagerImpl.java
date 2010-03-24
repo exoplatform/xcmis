@@ -53,7 +53,6 @@ public class RenditionManagerImpl implements RenditionManager
 
    private final Map<MimeType, RenditionProvider> renditionProviders;
 
-
    /** Logger. */
    private static final Log LOG = ExoLogger.getLogger(RenditionManagerImpl.class);
 
@@ -88,12 +87,6 @@ public class RenditionManagerImpl implements RenditionManager
          String msg = "Unable get renditions for object " + obj.getObjectId() + " Unexpected error " + re.getMessage();
          throw new StorageException(msg, re);
       }
-      catch (IOException e)
-      {
-         String msg = "Unable get renditions for object " + obj.getObjectId() + " Unexpected error " + e.getMessage();
-         throw new StorageException(msg, e);
-      }
-      return null;
    }
 
    /**
@@ -106,14 +99,24 @@ public class RenditionManagerImpl implements RenditionManager
          if (e.getKey().match(MimeType.fromString(streamId)))
          {
             RenditionProvider renditionProvider = e.getValue();
-            if (!renditionProvider.canStoreRendition()) {
-            RenditionContentStream renditionContentStream =
-               renditionProvider.getRenditionStream(obj.getContentStream(null));
-            return renditionContentStream;
-            } else {
-               return null;
+            RenditionContentStream renditionContentStream = null;
+            if (!renditionProvider.canStoreRendition())
+            {
+               try
+               {
+                  renditionContentStream =
+                     renditionProvider.getRenditionStream(obj.getContentStream(null));
+               }
+               catch (IOException ioe)
+               {
+                  String msg =
+                     "Unable get renditions for object " + obj.getObjectId() + " Unexpected error " + ioe.getMessage();
+                  throw new StorageException(msg, ioe);
+               }
+               return renditionContentStream;
             }
          }
       }
+      return null;
    }
 }
