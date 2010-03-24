@@ -70,8 +70,8 @@ public interface Storage extends TypeManager
     * document created in unfiling state. If unfiling is not supported
     * {@link ConstraintException} should be thrown. It is not persisted instance
     * and has not ID (method {@link ObjectData#getObjectId()} returns
-    * <code>null</code>). To save this document method
-    * {@link ObjectData#save()} must be used.
+    * <code>null</code>). To save this document method {@link ObjectData#save()}
+    * must be used.
     * 
     * @param folder parent folder or <code>null</code> if document should be
     *        created in unfiling state
@@ -97,8 +97,7 @@ public interface Storage extends TypeManager
     *         </ul>
     * @see VersioningState
     */
-   Document createDocument(Folder folder, String typeId, VersioningState versioningState)
-      throws ConstraintException;
+   Document createDocument(Folder folder, String typeId, VersioningState versioningState) throws ConstraintException;
 
    /**
     * Create new document as copy of the given <code>source</code> document and
@@ -141,8 +140,7 @@ public interface Storage extends TypeManager
     * Create new instance of folder with type <code>typeId</code> using
     * <code>folder</code> as parent. It is not persisted instance and has not ID
     * (method {@link ObjectData#getObjectId()} returns <code>null</code>). To
-    * save this folder method {@link ObjectData#save()} must be
-    * used.
+    * save this folder method {@link ObjectData#save()} must be used.
     * 
     * @param folder parent folder
     * @param typeId type id
@@ -164,8 +162,7 @@ public interface Storage extends TypeManager
     * <code>folder</code> as parent. If <code>folder == null</code> then policy
     * created in unfiling state. It is not persisted instance and has not ID
     * (method {@link ObjectData#getObjectId()} returns <code>null</code>). To
-    * save this policy method {@link ObjectData#save()} must be
-    * used.
+    * save this policy method {@link ObjectData#save()} must be used.
     * 
     * @param folder parent folder
     * @param typeId type id
@@ -225,7 +222,7 @@ public interface Storage extends TypeManager
     *         cause to storage internal problem
     */
    void deleteObject(ObjectData object, boolean deleteAllVersions) throws ConstraintException, UpdateConflictException,
-       StorageException;
+      StorageException;
 
    /**
     * Delete the specified folder object and all of its child- and
@@ -256,6 +253,28 @@ public interface Storage extends TypeManager
     */
    Collection<String> deleteTree(Folder folder, boolean deleteAllVersions, UnfileObject unfileObject,
       boolean continueOnFailure) throws UpdateConflictException;
+
+   /**
+    * Remove non-folder fileable object from all folder where in which it is
+    * currently filed. This method never remove object itself.
+    * 
+    * @param object object
+    */
+   void unfileObject(ObjectData object);
+
+   /**
+    * Save updated object or newly created object.
+    * 
+    * @param object object to be saved
+    * @throws StorageException if changes can't be saved cause storage internal
+    *         errors
+    * @throws NameConstraintViolationException if updated name (property
+    *         'cmis:name') cause name conflict, e.g. object with the same name
+    *         already exists
+    * @throws UpdateConflictException if saved object is not current any more
+    */
+   String saveObject(ObjectData object) throws StorageException, NameConstraintViolationException,
+      UpdateConflictException;
 
    /**
     * Gets content changes.

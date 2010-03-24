@@ -146,11 +146,7 @@ public abstract class BaseConnection implements Connection
       }
       else
       {
-         // If folder id is not specified the remove object from all folders.
-         Collection<Folder> parents = object.getParents();
-
-         for (Folder folder : parents)
-            folder.removeObject(object);
+         storage.unfileObject(object);
       }
    }
 
@@ -171,7 +167,8 @@ public abstract class BaseConnection implements Connection
       ObjectData object = storage.getObject(objectId);
       applyACL(object, addACL, removeACL);
 
-      object.save();
+      //      object.save();
+      storage.saveObject(object);
    }
 
    /**
@@ -205,7 +202,8 @@ public abstract class BaseConnection implements Connection
       if (policy.getBaseType() != BaseType.POLICY)
          throw new InvalidArgumentException("Object " + policy.getObjectId() + " is not a Policy object.");
       object.applyPolicy((Policy)policy);
-      object.save();
+      //      object.save();
+      storage.saveObject(object);
    }
 
    /**
@@ -246,7 +244,8 @@ public abstract class BaseConnection implements Connection
 
       object.removePolicy((Policy)policyData);
 
-      object.save();
+      //      object.save();
+      storage.saveObject(object);
    }
 
    // ------- Object Services --------
@@ -298,7 +297,8 @@ public abstract class BaseConnection implements Connection
       if (policies != null && policies.size() > 0)
          applyPolicies(newDocument, policies);
 
-      newDocument.save();
+      //      newDocument.save();
+      storage.saveObject(newDocument);
 
       return newDocument.getObjectId();
    }
@@ -330,8 +330,7 @@ public abstract class BaseConnection implements Connection
          throw new ConstraintException("Unfiling capability is not supported, parent folder must be provided.");
       }
 
-      Document newDocument =
-         storage.createCopyOfDocument((Document)source, (Folder)folder, versioningState);
+      Document newDocument = storage.createCopyOfDocument((Document)source, (Folder)folder, versioningState);
 
       if (properties != null)
          newDocument.setProperties(properties);
@@ -342,7 +341,8 @@ public abstract class BaseConnection implements Connection
       if (policies != null && policies.size() > 0)
          applyPolicies(newDocument, policies);
 
-      newDocument.save();
+      //      newDocument.save();
+      storage.saveObject(newDocument);
 
       return newDocument.getObjectId();
    }
@@ -383,7 +383,8 @@ public abstract class BaseConnection implements Connection
       if (policies != null && policies.size() > 0)
          applyPolicies(newFolder, policies);
 
-      newFolder.save();
+      //      newFolder.save();
+      storage.saveObject(newFolder);
 
       return newFolder.getObjectId();
    }
@@ -429,8 +430,9 @@ public abstract class BaseConnection implements Connection
       if (policies != null && policies.size() > 0)
          applyPolicies(newPolicy, policies);
 
-      newPolicy.save();
-      
+      //      newPolicy.save();
+      storage.saveObject(newPolicy);
+
       return newPolicy.getObjectId();
    }
 
@@ -478,8 +480,9 @@ public abstract class BaseConnection implements Connection
       if (policies != null && policies.size() > 0)
          applyPolicies(newRelationship, policies);
 
-      newRelationship.save();
-      
+      //      newRelationship.save();
+      storage.saveObject(newRelationship);
+
       return newRelationship.getObjectId();
    }
 
@@ -679,9 +682,10 @@ public abstract class BaseConnection implements Connection
 
       ((Document)document).setContentStream(null);
 
-      document.save();
+      //      document.save();
+      storage.saveObject(document);
 
-      String changeToken = document.getChangeToken(); 
+      String changeToken = document.getChangeToken();
       changeTokenHolder.setValue(changeToken);
 
       return document.getObjectId();
@@ -712,9 +716,10 @@ public abstract class BaseConnection implements Connection
 
       ((Document)document).setContentStream(null);
 
-      document.save();
+      //      document.save();
+      storage.saveObject(document);
 
-      String changeToken = document.getChangeToken(); 
+      String changeToken = document.getChangeToken();
       changeTokenHolder.setValue(changeToken);
 
       return document.getObjectId();
@@ -742,9 +747,10 @@ public abstract class BaseConnection implements Connection
 
       object.setProperties(properties);
 
-      object.save();
-      
-      String changeToken = object.getChangeToken(); 
+      //      object.save();
+      storage.saveObject(object);
+
+      String changeToken = object.getChangeToken();
       changeTokenHolder.setValue(changeToken);
 
       return object.getObjectId();
@@ -1200,16 +1206,15 @@ public abstract class BaseConnection implements Connection
 
       if (direction == null)
          direction = RelationshipDirection.SOURCE; // Default
-      
+
       TypeDefinition type = getTypeDefinition(typeId == null ? BaseType.RELATIONSHIP.value() : typeId);
-      
+
       if (type.getBaseId() != BaseType.RELATIONSHIP) // If typeId provided but incorrect.
          throw new InvalidArgumentException("Type " + typeId + " is not Relationship type.");
 
       ObjectData object = storage.getObject(objectId);
 
-      ItemsIterator<Relationship> iterator =
-         object.getRelationships(direction, type, includeSubRelationshipTypes);
+      ItemsIterator<Relationship> iterator = object.getRelationships(direction, type, includeSubRelationshipTypes);
 
       try
       {
@@ -1548,7 +1553,7 @@ public abstract class BaseConnection implements Connection
             objectInfo.setSourceId(rel.getSourceId());
             objectInfo.setTargetId(rel.getTargetId());
          }
-         
+
          cmis.setObjectInfo(objectInfo);
       }
       return cmis;

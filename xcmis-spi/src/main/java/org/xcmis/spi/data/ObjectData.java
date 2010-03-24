@@ -28,9 +28,7 @@ import org.xcmis.spi.NotSupportedException;
 import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.RelationshipDirection;
 import org.xcmis.spi.Storage;
-import org.xcmis.spi.StorageException;
 import org.xcmis.spi.TypeDefinition;
-import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.Permission.BasicPermissions;
 import org.xcmis.spi.impl.CmisVisitor;
 import org.xcmis.spi.object.Property;
@@ -298,16 +296,16 @@ public interface ObjectData
     */
    ContentStream getContentStream(String streamId);
 
-   /**
-    * Save updated object or newly created object..
-    * 
-    * @throws StorageException if changes can't be saved cause storage internal
-    *         errors
-    * @throws NameConstraintViolationException if updated name (property
-    *         'cmis:name') cause name conflict, e.g. object with the same name
-    *         already exists
-    * @throws UpdateConflictException if saved object is not current any more
-    */
-   void save() throws StorageException, NameConstraintViolationException, UpdateConflictException;
+   //   /**
+   //    * Save updated object or newly created object.
+   //    * 
+   //    * @throws StorageException if changes can't be saved cause storage internal
+   //    *         errors
+   //    * @throws NameConstraintViolationException if updated name (property
+   //    *         'cmis:name') cause name conflict, e.g. object with the same name
+   //    *         already exists
+   //    * @throws UpdateConflictException if saved object is not current any more
+   //    */
+   //   void save() throws StorageException, NameConstraintViolationException, UpdateConflictException;
 
 }
