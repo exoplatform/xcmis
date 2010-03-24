@@ -56,7 +56,7 @@ import org.xcmis.spi.data.Folder;
 import org.xcmis.spi.data.ObjectData;
 import org.xcmis.spi.data.Policy;
 import org.xcmis.spi.data.Relationship;
-import org.xcmis.spi.object.RendititonManager;
+import org.xcmis.spi.object.RenditionManager;
 import org.xcmis.spi.impl.AllowableActionsImpl;
 import org.xcmis.spi.impl.BaseItemsIterator;
 import org.xcmis.spi.impl.CmisVisitor;
