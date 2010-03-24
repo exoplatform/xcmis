@@ -590,12 +590,14 @@ public class ObjectServiceImpl extends CmisObjectProducer implements ObjectServi
       Repository repository = repositoryService.getRepository(repositoryId);
       Entry doc = repository.getObjectById(documentId);
       ContentStream content = doc.getContent(streamId);
-      /*      if (content == null)
-            {
-               String msg = "Document has not content.";
-               throw new ConstraintException(msg);
-            }
-      */
+      if (content == null)
+      {
+         RenditionManager renditionManager = repository.getRenditionManager();
+         ContentStream stream = renditionManager.getStream(streamId);
+         if (stream == null)
+            throw new ConstraintException("Content stream not found");
+         return stream;
+      }
       return content;
    }
 
