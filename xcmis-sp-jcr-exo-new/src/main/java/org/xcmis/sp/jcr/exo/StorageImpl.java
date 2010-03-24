@@ -100,6 +100,8 @@ public class StorageImpl implements Storage
    /** The rendition manager. */
    private RenditionManager renditionManager;
 
+   
+
    private final IndexListener indexListener;
 
    public StorageImpl(Session session, IndexListener indexListener, StorageConfiguration configuration)
@@ -670,6 +672,14 @@ public class StorageImpl implements Storage
          return null;
    }
 
+   /**
+    * {@inheritDoc}
+    */
+   public RenditionManager getRenditionManager()
+   {
+      return renditionManager;
+   }
+   
    /**
     * {@inheritDoc}
     */
