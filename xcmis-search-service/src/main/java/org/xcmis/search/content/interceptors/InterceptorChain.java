@@ -20,6 +20,7 @@ package org.xcmis.search.content.interceptors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.xcmis.search.Startable;
 import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.content.command.VisitableCommand;
 
@@ -31,7 +32,7 @@ import java.util.List;
 /**
  * Knows how to build and manage an chain of interceptors. Also in charge with invoking methods on the chain.
  */
-public class InterceptorChain
+public class InterceptorChain implements Startable
 {
    /**
     * reference to the first interceptor in the chain
@@ -347,6 +348,28 @@ public class InterceptorChain
          it = it.getNext();
       }
       return false;
+   }
+
+   /**
+    * @see org.xcmis.search.Startable#start()
+    */
+   public void start()
+   {
+      for (CommandInterceptor interceptor : asList())
+      {
+         interceptor.start();
+      }
+   }
+
+   /**
+    * @see org.xcmis.search.Startable#stop()
+    */
+   public void stop()
+   {
+      for (CommandInterceptor interceptor : asList())
+      {
+         interceptor.stop();
+      }
    }
 
 }

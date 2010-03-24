@@ -25,11 +25,8 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.NumberTools;
 import org.apache.lucene.document.Field.Index;
 import org.apache.lucene.document.Field.Store;
-import org.apache.poi.util.LongField;
-import org.exoplatform.services.document.DocumentReadException;
-import org.exoplatform.services.document.DocumentReader;
-import org.exoplatform.services.document.DocumentReaderService;
-import org.exoplatform.services.document.HandlerNotFoundException;
+import org.apache.tika.Tika;
+import org.apache.tika.metadata.Metadata;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.search.content.ContentEntry;
@@ -50,12 +47,12 @@ public class NodeIndexer
    /**
     * Content extractor.
     */
-   private final DocumentReaderService extractor;
+   private final Tika extractor;
 
    /**
     * @param extractor
     */
-   public NodeIndexer(DocumentReaderService extractor)
+   public NodeIndexer(Tika extractor)
    {
       super();
       this.extractor = extractor;
@@ -96,6 +93,13 @@ public class NodeIndexer
                Field.Index.NOT_ANALYZED_NO_NORMS, Field.TermVector.NO));
          }
       }
+      //table names
+      for (int i = 0; i < contentEntry.getTableNames().length; i++)
+      {
+         doc.add(new Field(FieldNames.TABLE_NAME, contentEntry.getTableNames()[i], Field.Store.YES,
+            Field.Index.NOT_ANALYZED_NO_NORMS, Field.TermVector.NO));
+      }
+
       for (int i = 0; i < contentEntry.getProperties().length; i++)
       {
          Property property = contentEntry.getProperties()[i];
@@ -160,69 +164,43 @@ public class NodeIndexer
       }
    }
 
+   /**
+    * Extract content of binary value.
+    * @param doc
+    * @param propName
+    * @param data
+    */
    private void addBinaryProperty(final Document doc, String propName, BinaryValue data)
    {
-      try
+      if (data.getMimeType() != null)
       {
-         final DocumentReader dreader = extractor.getDocumentReader(data.getMimeType());
-         // ok, have a reader
-         // if the prop obtainer from cache it will contains a values,
-         // otherwise read prop with values from DM
-         if (data == null)
+         Metadata metadata = new Metadata();
+         metadata.set(Metadata.CONTENT_TYPE, data.getMimeType());
+         if (data.getEncoding() != null)
          {
-            LOG.warn("null value found at property " + propName);
+            metadata.set(Metadata.CONTENT_ENCODING, data.getEncoding());
          }
-         final InputStream is = data.getValue();
-         String content = "";
-
+         InputStream stream = data.getValue();
          try
          {
-            if (data.getEncoding() != null)
+            try
             {
-               content = dreader.getContentAsText(is, data.getEncoding());
-            }
-            else
-            {
-               content = dreader.getContentAsText(is);
-            }
-            final Field f =
-               new Field(FieldNames.createFullTextFieldName(propName), content, Field.Store.NO, Field.Index.ANALYZED,
-                  Field.TermVector.NO);
-            doc.add(f);
-         }
-         finally
-         {
-            if (is != null)
-            {
-               is.close();
-            }
-         }
-      }
-      catch (final HandlerNotFoundException e)
-      {
-         // no handler - no index
-         if (LOG.isDebugEnabled())
-         {
-            LOG.warn("This content is not readable " + e);
-         }
-      }
-      catch (IOException e)
-      {
-         // no data - no index
-         if (LOG.isDebugEnabled())
-         {
-            LOG.warn("Binary value indexer IO error " + e, e);
-         }
-      }
-      catch (DocumentReadException e)
-      {
-         // no data - no index
-         if (LOG.isDebugEnabled())
-         {
-            LOG.warn("Binary value indexer IO error " + e, e);
-         }
-      }
+               doc.add(new Field(FieldNames.createFullTextFieldName(propName), extractor.parse(stream, metadata)));
 
+            }
+            finally
+            {
+               stream.close();
+            }
+         }
+         catch (IOException e)
+         {
+            if (LOG.isDebugEnabled())
+            {
+               LOG.warn("Binary value indexer IO error " + e, e);
+            }
+         }
+      }
    }
 
    /**
@@ -278,8 +256,8 @@ public class NodeIndexer
    {
 
       final Field field =
-         new Field(FieldNames.createPropertyFieldName(fieldName), internalValue, Field.Store.YES,
-            Field.Index.NOT_ANALYZED_NO_NORMS, Field.TermVector.NO);
+         new Field(FieldNames.createPropertyFieldName(fieldName), internalValue, store ? Field.Store.YES
+            : Field.Store.NO, Field.Index.NOT_ANALYZED_NO_NORMS, Field.TermVector.NO);
       return field;
    }
 
@@ -315,7 +293,7 @@ public class NodeIndexer
 
    /**
     * Adds the long value to the document as the named field. The long value is
-    * converted to an indexable string value using the {@link LongField} class.
+    * converted to an indexable string value using the {@link NumberTools} class.
     * 
     * @param doc The document to which to add the field
     * @param fieldName The name of the field to add

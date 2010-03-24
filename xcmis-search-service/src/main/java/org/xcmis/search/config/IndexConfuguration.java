@@ -18,7 +18,7 @@
  */
 package org.xcmis.search.config;
 
-import org.exoplatform.services.document.DocumentReaderService;
+import org.apache.tika.config.TikaConfig;
 import org.xcmis.search.lucene.index.IndexRecoverService;
 import org.xcmis.search.lucene.index.IndexRestoreService;
 
@@ -33,7 +33,7 @@ public interface IndexConfuguration
 
    IndexRecoverService getIndexRecoverService();
 
-   DocumentReaderService getDocumentReaderService();
+   TikaConfig getTikaConfig();
 
    IndexRestoreService getIndexRestoreService();
 

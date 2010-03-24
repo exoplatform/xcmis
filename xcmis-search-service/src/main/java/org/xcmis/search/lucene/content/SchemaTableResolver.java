@@ -43,12 +43,6 @@ public class SchemaTableResolver implements VirtualTableResolver<Query>
 
    private final Schema schema;
 
-   /** The mixin types field. */
-   private final String mixinTypesField = "jcr:mixinTypes";
-
-   /** The primary type field. */
-   private final String primaryTypeField = "jcr:primaryType";
-
    /**
     * @param nameConverter
     * @param schema
@@ -68,39 +62,15 @@ public class SchemaTableResolver implements VirtualTableResolver<Query>
       final List<Term> terms = new ArrayList<Term>();
       Query query = null;
 
-      final String nodeTypeStringName = nameConverter.convertName(tableName);
+      terms.add(new Term(FieldNames.TABLE_NAME, nameConverter.convertName(tableName)));
 
-      if (isMixin(tableName))
-      {
-         // search for nodes where jcr:mixinTypes is set to this mixin
-         final Term t = new Term(FieldNames.createPropertyFieldName(mixinTypesField), nodeTypeStringName);
-         terms.add(t);
-      }
-      else
-      {
-         // search for nodes where jcr:primaryType is set to this type
-         final Term t = new Term(FieldNames.createPropertyFieldName(primaryTypeField), nodeTypeStringName);
-         terms.add(t);
-      }
       if (includeInheritedTables)
       {
          // now search for all node types that are derived from base
          final Set<String> allTypes = getSubTypes(tableName);
          for (final String descendantNt : allTypes)
          {
-            final String ntName = nameConverter.convertName(descendantNt);
-            Term t;
-            if (isMixin(descendantNt))
-            {
-               // search on jcr:mixinTypes
-               t = new Term(FieldNames.createPropertyFieldName(mixinTypesField), ntName);
-            }
-            else
-            {
-               // search on jcr:primaryType
-               t = new Term(FieldNames.createPropertyFieldName(primaryTypeField), ntName);
-            }
-            terms.add(t);
+            terms.add(new Term(FieldNames.TABLE_NAME, nameConverter.convertName(descendantNt)));
          }
       }
 

@@ -29,6 +29,10 @@ import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TopFieldDocs;
 import org.apache.lucene.search.BooleanClause.Occur;
+import org.apache.tika.Tika;
+import org.apache.tika.config.TikaConfig;
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
 import org.xcmis.search.VisitException;
 import org.xcmis.search.Visitors;
 import org.xcmis.search.config.IndexConfigurationException;
@@ -75,6 +79,12 @@ import java.util.Map;
  */
 public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndexStorage
 {
+
+   /**
+    * Class logger.
+    */
+   private static final Log LOG = ExoLogger.getLogger(AbstractLuceneQueryableIndexStorage.class);
+
    private class SortFieldVisitor extends Visitors.AbstractModelVisitor
    {
 
@@ -207,10 +217,12 @@ public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndex
    public AbstractLuceneQueryableIndexStorage(SearchServiceConfiguration serviceConfuguration) throws IndexException
    {
       super();
-      this.nodeIndexer = new NodeIndexer(serviceConfuguration.getIndexConfuguration().getDocumentReaderService());
+
       this.tableResolver = serviceConfuguration.getTableResolver();
       this.nameConverter = serviceConfuguration.getNameConverter();
       this.pathSplitter = serviceConfuguration.getPathSplitter();
+      TikaConfig tikaConfig = serviceConfuguration.getIndexConfuguration().getTikaConfig();
+      this.nodeIndexer = new NodeIndexer(tikaConfig == null ? new Tika() : new Tika(tikaConfig));
 
    }
 

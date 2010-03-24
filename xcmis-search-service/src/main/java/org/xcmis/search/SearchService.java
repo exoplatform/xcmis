@@ -143,7 +143,7 @@ public abstract class SearchService implements Startable, ContentModificationLis
 
    public void start()
    {
-
+      interceptorChain.start();
    }
 
    /**
@@ -151,7 +151,7 @@ public abstract class SearchService implements Startable, ContentModificationLis
     */
    public void stop()
    {
-
+      interceptorChain.stop();
    }
 
    /**

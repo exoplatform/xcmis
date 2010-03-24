@@ -24,7 +24,6 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
 import org.apache.commons.io.FileUtils;
-import org.exoplatform.services.document.DocumentReaderService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,9 +31,12 @@ import org.xcmis.search.InvalidQueryException;
 import org.xcmis.search.SearchServiceException;
 import org.xcmis.search.config.IndexConfurationImpl;
 import org.xcmis.search.config.SearchServiceConfiguration;
+import org.xcmis.search.content.ContentEntry;
 import org.xcmis.search.content.InMemorySchema;
+import org.xcmis.search.content.Property;
 import org.xcmis.search.content.Schema;
 import org.xcmis.search.content.InMemorySchema.Builder;
+import org.xcmis.search.content.Property.BinaryValue;
 import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.content.interceptors.ContentReaderInterceptor;
 import org.xcmis.search.lucene.LuceneSearchService;
@@ -42,12 +44,20 @@ import org.xcmis.search.lucene.content.SchemaTableResolver;
 import org.xcmis.search.lucene.index.IndexRecoverService;
 import org.xcmis.search.lucene.index.IndexRestoreService;
 import org.xcmis.search.model.Query;
+import org.xcmis.search.result.ScoredRow;
 import org.xcmis.search.value.CastSystem;
 import org.xcmis.search.value.NameConverter;
+import org.xcmis.search.value.PropertyType;
 import org.xcmis.search.value.ToStringNameConverter;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Test for search service.
@@ -102,7 +112,6 @@ public class SearchServiceTest
       //index configuration
       IndexConfurationImpl indexConfuration = new IndexConfurationImpl();
       indexConfuration.setIndexDir(tempDir.getAbsolutePath());
-      indexConfuration.setDocumentReaderService(mock(DocumentReaderService.class));
       indexConfuration.setIndexRecoverService(mock(IndexRecoverService.class));
       indexConfuration.setIndexRestoreService(mock(IndexRestoreService.class));
 
@@ -126,7 +135,6 @@ public class SearchServiceTest
       //index configuration
       IndexConfurationImpl indexConfuration = new IndexConfurationImpl();
       indexConfuration.setIndexDir(tempDir.getAbsolutePath());
-      indexConfuration.setDocumentReaderService(mock(DocumentReaderService.class));
       indexConfuration.setIndexRecoverService(mock(IndexRecoverService.class));
       indexConfuration.setIndexRestoreService(mock(IndexRestoreService.class));
 
@@ -149,5 +157,56 @@ public class SearchServiceTest
       luceneSearchService.setInvocationContext(invocationContext);
 
       luceneSearchService.execute(query, new HashMap<String, Object>());
+   }
+
+   @Test
+   public void testShouldIndexBinaryDocument() throws SearchServiceException, InvalidQueryException
+   {
+      //value
+      NameConverter<String> nameConverter = new ToStringNameConverter();
+      SchemaTableResolver tableResolver = new SchemaTableResolver(nameConverter, schema);
+
+      //index configuration
+      IndexConfurationImpl indexConfuration = new IndexConfurationImpl();
+      indexConfuration.setIndexDir(tempDir.getAbsolutePath());
+      indexConfuration.setIndexRecoverService(mock(IndexRecoverService.class));
+      indexConfuration.setIndexRestoreService(mock(IndexRestoreService.class));
+
+      //search service configuration
+      SearchServiceConfiguration configuration = new SearchServiceConfiguration();
+      configuration.setIndexConfuguration(indexConfuration);
+      configuration.setContentReader(mock(ContentReaderInterceptor.class));
+      configuration.setNameConverter(nameConverter);
+      configuration.setTableResolver(tableResolver);
+
+      LuceneSearchService luceneSearchService = new LuceneSearchService(configuration);
+      luceneSearchService.start();
+
+      byte[] bytes =
+         ("Apollo 7 (October 11-22, 1968) was the first manned mission "
+            + "in the Apollo program to be launched. It was an eleven-day "
+            + "Earth-orbital mission, the first manned launch of the "
+            + "Saturn IB launch vehicle, and the first three-person " + "American space mission").getBytes();
+
+      Collection<BinaryValue> values = new ArrayList<BinaryValue>();
+      values.add(new BinaryValue(new ByteArrayInputStream(bytes), "plain/text", null, bytes.length));
+
+      Property[] props = new Property[]{new Property(PropertyType.BINARY, "content", values)};
+      List<ContentEntry> entys = new ArrayList<ContentEntry>();
+      entys.add(new ContentEntry("doc", new String[]{"someTable"}, UUID.randomUUID().toString(), new String[]{UUID
+         .randomUUID().toString()}, props));
+
+      luceneSearchService.update(entys, new HashSet<String>());
+
+      InvocationContext invocationContext = new InvocationContext();
+      invocationContext.setSchema(schema);
+
+      invocationContext.setTableResolver(tableResolver);
+      invocationContext.setNameConverter(nameConverter);
+      luceneSearchService.setInvocationContext(invocationContext);
+
+      Query query = builder.selectStar().from("someTable AS someTable").query();
+      List<ScoredRow> result = luceneSearchService.execute(query, new HashMap());
+      assertThat(result.size(), is(1));
    }
 }

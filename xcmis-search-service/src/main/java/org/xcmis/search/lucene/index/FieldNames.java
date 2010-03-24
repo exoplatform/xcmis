@@ -38,6 +38,11 @@ public class FieldNames
    public static final String FULLTEXT = "_:FULLTEXT".intern();
 
    /**
+    * Prefix for table tame field.
+    */
+   public static final String TABLE_NAME = "TABLE_NAME:".intern();
+
+   /**
     * Prefix for all field names that are fulltext indexed by property name.
     */
    public static final String FULLTEXT_PREFIX = "FULL:";

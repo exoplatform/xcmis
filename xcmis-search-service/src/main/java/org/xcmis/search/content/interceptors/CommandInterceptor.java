@@ -18,6 +18,7 @@
  */
 package org.xcmis.search.content.interceptors;
 
+import org.xcmis.search.Startable;
 import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.content.command.VisitableCommand;
 
@@ -39,7 +40,7 @@ import org.xcmis.search.content.command.VisitableCommand;
  * needed.
  * <p/>
  */
-public class CommandInterceptor extends AbstractVisitor
+public class CommandInterceptor extends AbstractVisitor implements Startable
 {
    private CommandInterceptor next;
 
@@ -111,5 +112,21 @@ public class CommandInterceptor extends AbstractVisitor
    protected Object handleDefault(InvocationContext ctx, VisitableCommand command) throws Throwable
    {
       return invokeNextInterceptor(ctx, command);
+   }
+
+   /**
+    * @see org.xcmis.search.Startable#start()
+    */
+   public void start()
+   {
+
+   }
+
+   /**
+    * @see org.xcmis.search.Startable#stop()
+    */
+   public void stop()
+   {
+
    }
 }

@@ -18,7 +18,7 @@
  */
 package org.xcmis.search.config;
 
-import org.exoplatform.services.document.DocumentReaderService;
+import org.apache.tika.config.TikaConfig;
 import org.xcmis.search.lucene.index.IndexRecoverService;
 import org.xcmis.search.lucene.index.IndexRestoreService;
 
@@ -29,29 +29,16 @@ import org.xcmis.search.lucene.index.IndexRestoreService;
  */
 public class IndexConfurationImpl implements IndexConfuguration
 {
-   private DocumentReaderService documentReaderService;
+   /**
+    * Configuration of tika service
+    */
+   private TikaConfig tikaConfig;
 
    private String indexDir;
 
    private IndexRecoverService indexRecoverService;
 
    private IndexRestoreService indexRestoreService;
-
-   /**
-    * @return the documentReaderService
-    */
-   public DocumentReaderService getDocumentReaderService()
-   {
-      return documentReaderService;
-   }
-
-   /**
-    * @param documentReaderService the documentReaderService to set
-    */
-   public void setDocumentReaderService(DocumentReaderService documentReaderService)
-   {
-      this.documentReaderService = documentReaderService;
-   }
 
    /**
     * {@inheritDoc}
@@ -78,6 +65,14 @@ public class IndexConfurationImpl implements IndexConfuguration
    }
 
    /**
+    * @return the tikaConfig
+    */
+   public TikaConfig getTikaConfig()
+   {
+      return tikaConfig;
+   }
+
+   /**
     * @param indexDir
     *           the indexDir to set
     */
@@ -101,6 +96,14 @@ public class IndexConfurationImpl implements IndexConfuguration
    public void setIndexRestoreService(IndexRestoreService indexRestoreService)
    {
       this.indexRestoreService = indexRestoreService;
+   }
+
+   /**
+    * @param tikaConfig the tikaConfig to set
+    */
+   public void setTikaConfig(TikaConfig tikaConfig)
+   {
+      this.tikaConfig = tikaConfig;
    }
 
 }

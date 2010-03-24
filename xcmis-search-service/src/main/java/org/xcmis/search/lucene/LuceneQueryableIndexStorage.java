@@ -19,6 +19,8 @@
 package org.xcmis.search.lucene;
 
 import org.apache.lucene.index.IndexReader;
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
 import org.xcmis.search.config.IndexConfigurationException;
 import org.xcmis.search.config.SearchServiceConfiguration;
 import org.xcmis.search.content.interceptors.QueryableIndexStorage;
@@ -33,6 +35,10 @@ import org.xcmis.search.lucene.index.StartableIndexingService;
  */
 public class LuceneQueryableIndexStorage extends AbstractLuceneQueryableIndexStorage
 {
+   /**
+    * Class logger.
+    */
+   private static final Log LOG = ExoLogger.getLogger(LuceneQueryableIndexStorage.class);
 
    private final StartableIndexingService indexDataManager;
 
@@ -61,8 +67,30 @@ public class LuceneQueryableIndexStorage extends AbstractLuceneQueryableIndexSto
       }
       catch (IndexException e)
       {
+         e.printStackTrace();
+         LOG.error(e.getLocalizedMessage(), e);
       }
       return null;
+   }
+
+   /**
+    * @see org.xcmis.search.content.interceptors.CommandInterceptor#start()
+    */
+   @Override
+   public void start()
+   {
+      super.start();
+      this.indexDataManager.start();
+   }
+
+   /**
+    * @see org.xcmis.search.content.interceptors.CommandInterceptor#stop()
+    */
+   @Override
+   public void stop()
+   {
+      super.stop();
+      this.indexDataManager.stop();
    }
 
    /**
