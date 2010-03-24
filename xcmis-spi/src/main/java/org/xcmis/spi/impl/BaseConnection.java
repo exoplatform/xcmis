@@ -1328,13 +1328,13 @@ public abstract class BaseConnection implements Connection
       for (ItemsIterator<TypeDefinition> children = storage.getTypeChildren(typeId, includePropertyDefinition); children
          .hasNext();)
       {
-         TypeDefinition container = children.next();
+         TypeDefinition childType = children.next();
 
          List<ItemsTree<TypeDefinition>> subTree = (typeId != null && depth > 1) // 
-            ? getTypeDescendants(container.getId(), depth - 1, includePropertyDefinition) //
+            ? getTypeDescendants(childType.getId(), depth - 1, includePropertyDefinition) //
             : null;
 
-         tree.add(new ItemsTreeImpl<TypeDefinition>(container, subTree));
+         tree.add(new ItemsTreeImpl<TypeDefinition>(childType, subTree));
       }
 
       return tree;
