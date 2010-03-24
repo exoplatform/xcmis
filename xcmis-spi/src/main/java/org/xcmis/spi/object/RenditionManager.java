@@ -19,7 +19,7 @@
 
 package org.xcmis.spi.object;
 
-import org.xcmis.core.CmisRenditionType;
+import org.xcmis.spi.Rendition;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
@@ -44,7 +44,7 @@ public interface RenditionManager
     *            iterator will be returned.
     * @throws StorageException if any other CMIS repository error occurs
     */
-   ItemsIterator<CmisRenditionType> getRenditions(ObjectData obj) throws StorageException;
+   ItemsIterator<Rendition> getRenditions(ObjectData obj) throws StorageException;
 
    /**
     * Get all renditions of object with specified id.
@@ -56,7 +56,7 @@ public interface RenditionManager
     *            does not exist
     * @throws StorageException if any other CMIS repository error occurs
     */
-   ItemsIterator<CmisRenditionType> getRenditions(String objectId) throws ObjectNotFoundException, StorageException;
+   ItemsIterator<Rendition> getRenditions(String objectId) throws ObjectNotFoundException, StorageException;
 
    /**
     * Get rendition stream for objects with specified id.
