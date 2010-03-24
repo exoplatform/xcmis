@@ -96,6 +96,9 @@ public class StorageImpl implements Storage
    protected final Session session;
 
    private final StorageConfiguration configuration;
+   
+   /** The rendition manager. */
+   private RenditionManager renditionManager;
 
    private final IndexListener indexListener;
 
@@ -106,6 +109,14 @@ public class StorageImpl implements Storage
       this.configuration = configuration;
    }
 
+   
+   public StorageImpl(Session session, IndexListener indexListener, StorageConfiguration configuration, RenditionManager renditionManager)
+   {
+      this.session = session;
+      this.configuration = configuration;
+      this.renditionManager = renditionManager;
+   }
+   
    /**
     * {@inheritDoc}
     */
@@ -480,6 +491,8 @@ public class StorageImpl implements Storage
          // versionable node, so have not common behavior.
          if (object.getTypeDefinition().isVersionable() && !deleteAllVersions)
             throw new CmisRuntimeException("Unable delete only specified version.");
+         if (renditionManager != null)
+           renditionManager.removeRenditions(object); 
       }
       else if (object.getBaseType() == BaseType.FOLDER)
       {
@@ -650,8 +663,10 @@ public class StorageImpl implements Storage
 
    public ItemsIterator<Rendition> getRenditions(ObjectData object)
    {
-      // TODO Auto-generated method stub
-      return null;
+      if (renditionManager != null)
+         return renditionManager.getRenditions(object);
+      else
+         return null;
    }
 
    /**
