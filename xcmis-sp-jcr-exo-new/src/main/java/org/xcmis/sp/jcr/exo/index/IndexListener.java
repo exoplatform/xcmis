@@ -17,49 +17,45 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.xcmis.sp.jcr.exo;
+package org.xcmis.sp.jcr.exo.index;
 
-import org.xcmis.spi.ConstraintException;
-import org.xcmis.spi.TypeDefinition;
-import org.xcmis.spi.VersioningState;
-import org.xcmis.spi.data.Folder;
-
-import java.util.Collection;
-import java.util.Collections;
-
-import javax.jcr.Node;
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
+import org.xcmis.spi.EventJournal;
+import org.xcmis.spi.data.ObjectData;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-class UnfiledDocument extends DocumentImpl
+public class IndexListener implements EventJournal
 {
 
-   protected final Node unfiledStore;
+   private static final Log LOG = ExoLogger.getLogger(IndexListener.class);
 
-   public UnfiledDocument(TypeDefinition type, Node unfiledStore, String name, VersioningState versioningState)
+   public IndexListener(String storage)
    {
-      super(type, null, name, versioningState);
-      this.unfiledStore = unfiledStore;
    }
 
-   /**
-    * {@inheritDoc}
-    */
-   @Override
-   public Folder getParent() throws ConstraintException
+   public void created(ObjectData object)
    {
-      return null;
+      LOG.info("created " + object.getObjectId());
+
+      // TODO Auto-generated method stub
    }
 
-   /**
-    * {@inheritDoc}
-    */
-   @Override
-   public Collection<Folder> getParents()
+   public void removed(String id)
    {
-      return Collections.emptyList();
+      LOG.info("removed " + id);
+
+      // TODO Auto-generated method stub
+   }
+
+   public void updated(ObjectData object)
+   {
+      LOG.info("updated " + object.getObjectId());
+
+      // TODO Auto-generated method stub
    }
 
 }

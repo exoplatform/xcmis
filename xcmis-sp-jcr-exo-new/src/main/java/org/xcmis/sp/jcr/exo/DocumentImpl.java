@@ -43,6 +43,7 @@ import java.util.Calendar;
 import javax.jcr.Node;
 import javax.jcr.PathNotFoundException;
 import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
@@ -59,9 +60,9 @@ class DocumentImpl extends BaseObjectData implements Document
 
    protected final VersioningState versioningState;
 
-   public DocumentImpl(TypeDefinition type, Folder parent, String name, VersioningState versioningState)
+   public DocumentImpl(TypeDefinition type, Folder parent, Session session, VersioningState versioningState)
    {
-      super(type, parent, name);
+      super(type, parent, session);
       this.versioningState = versioningState;
    }
 
@@ -86,9 +87,10 @@ class DocumentImpl extends BaseObjectData implements Document
    public Document checkout() throws ConstraintException, VersioningException, StorageException
    {
       // TODO
-      DocumentCopy copy = new DocumentCopy(this, getParent(), getName() + "_PWC", null);
-      copy.save();
-      return copy;
+      //      DocumentCopy copy = new DocumentCopy(this, getParent(), getName() + "_PWC", null);
+      //      copy.save();
+      //      return copy;
+      return null;
    }
 
    /**
@@ -269,7 +271,7 @@ class DocumentImpl extends BaseObjectData implements Document
          if (name == null || name.length() == 0)
             throw new NameConstraintViolationException("Name for new document must be provided.");
 
-         Node parentNode = ((FolderImpl)parent).getNode();
+         Node parentNode = parent.getNode();
 
          if (parentNode.hasNode(name))
             throw new NameConstraintViolationException("Object with name " + name

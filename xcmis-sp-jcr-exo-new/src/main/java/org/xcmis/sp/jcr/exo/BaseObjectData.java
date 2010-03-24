@@ -84,6 +84,7 @@ import javax.jcr.Node;
 import javax.jcr.PathNotFoundException;
 import javax.jcr.PropertyIterator;
 import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 import javax.jcr.Value;
 import javax.jcr.ValueFormatException;
 import javax.jcr.nodetype.NodeType;
@@ -119,9 +120,9 @@ abstract class BaseObjectData implements ObjectData
    protected List<AccessControlEntry> acl;
 
    /**
-    * Parent folder for newly created fileable objects.
+    * Parent folder id for newly created fileable objects.
     */
-   protected Folder parent;
+   protected FolderImpl parent;
 
    /**
     * Back-end JCR node, it is <code>null</code> for newly created object.
@@ -136,19 +137,24 @@ abstract class BaseObjectData implements ObjectData
    protected String name;
 
    /**
+    * JCR session.
+    */
+   protected Session session;
+
+   /**
     * Create new unsaved instance of CMIS object. This object should be saved,
     * {@link #save()}.
     * 
     * @param type type definition for new object
     * @param parent parent folder
-    * @param name name for new object. May be set also {@link #setName(String)}
+    * @param session JCR session
     */
-   public BaseObjectData(TypeDefinition type, Folder parent, String name)
+   public BaseObjectData(TypeDefinition type, Folder parent, Session session)
    {
       this.type = type;
-      this.parent = parent;
+      this.parent = (FolderImpl)parent;
+      this.session = session;
       this.node = null;
-      this.name = name;
    }
 
    /**
@@ -323,11 +329,6 @@ abstract class BaseObjectData implements ObjectData
       }
    }
 
-   public Node getNode()
-   {
-      return node;
-   }
-
    /**
     * {@inheritDoc}
     */
@@ -354,16 +355,14 @@ abstract class BaseObjectData implements ObjectData
       if (isNew())
          return parent;
 
-      // If persisted.
       try
       {
          if (node.getDepth() == 0)
             throw new ConstraintException("Unable get parent of root folder.");
 
-         Node parent = node.getParent();
-         TypeDefinition parentType = JcrTypeHelper.getTypeDefinition(parent.getPrimaryNodeType(), true);
-
-         return new FolderImpl(parentType, parent);
+         Node parentNode = node.getParent();
+         TypeDefinition parentType = JcrTypeHelper.getTypeDefinition(parentNode.getPrimaryNodeType(), true);
+         return new FolderImpl(parentType, parentNode);
       }
       catch (RepositoryException re)
       {
@@ -377,19 +376,34 @@ abstract class BaseObjectData implements ObjectData
    public Collection<Folder> getParents()
    {
       if (isNew())
-         return Collections.singletonList(parent);
+      {
+         Folder parent = getParent();
+         if (parent != null)
+            return Collections.singletonList(parent);
+         return Collections.emptyList();
+      }
 
       try
       {
          if (node.getDepth() == 0)
             Collections.emptyList();
 
-         Node parent = node.getParent();
-         TypeDefinition parentType = JcrTypeHelper.getTypeDefinition(parent.getPrimaryNodeType(), true);
+         Set<Folder> parents = new HashSet<Folder>();
+         for (PropertyIterator iterator = node.getReferences(); iterator.hasNext();)
+         {
+            Node link = iterator.nextProperty().getParent();
+            if (link.isNodeType("nt:linkedFile"))
+            {
+               Node parent = link.getParent();
+               parents.add(new FolderImpl(JcrTypeHelper.getTypeDefinition(parent.getPrimaryNodeType(), true), parent));
+            }
+         }
 
-         List<Folder> parents = new ArrayList<Folder>(1);
-         parents.add(new FolderImpl(parentType, parent));
-
+         if (parents.size() == 0)
+         {
+            Node parent = node.getParent();
+            parents.add(new FolderImpl(JcrTypeHelper.getTypeDefinition(parent.getPrimaryNodeType(), true), parent));
+         }
          return parents;
       }
       catch (RepositoryException re)
@@ -484,10 +498,8 @@ abstract class BaseObjectData implements ObjectData
                   RelationshipImpl relationship =
                      new RelationshipImpl(JcrTypeHelper.getTypeDefinition(nodeType, true), relNode);
                   boolean added = cache.add(relationship);
-                  //                  if (LOG.isDebugEnabled() && added)
-                  //                     LOG.debug("Add relationship " + relationship.getName());
-                  if (added)
-                     LOG.info(">>> Add relationship " + relationship.getName());
+                  if (LOG.isDebugEnabled() && added)
+                     LOG.debug("Add relationship " + relationship.getName());
                }
             }
          }
@@ -543,6 +555,32 @@ abstract class BaseObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
+   public void removePolicy(Policy policy) throws ConstraintException
+   {
+      if (!type.isControllablePolicy())
+         throw new ConstraintException("Type " + type.getId() + " is not controlable by Policy.");
+
+      if (isNew())
+      {
+         // If not saved yet simply remove from temporary storage
+         policies.remove(policy);
+      }
+      else
+      {
+         try
+         {
+            node.setProperty(policy.getObjectId(), (Node)null);
+         }
+         catch (javax.jcr.RepositoryException re)
+         {
+            throw new CmisRuntimeException("Unable remove policy. " + re.getMessage(), re);
+         }
+      }
+   }
+
+   /**
+    * {@inheritDoc}
+    */
    public void save() throws StorageException, NameConstraintViolationException, UpdateConflictException
    {
       if (isNew())
@@ -585,34 +623,6 @@ abstract class BaseObjectData implements ObjectData
             throw new StorageException("Unable save object. " + re.getMessage(), re);
          }
 
-      }
-   }
-
-   protected abstract void create() throws StorageException, NameConstraintViolationException;
-
-   /**
-    * {@inheritDoc}
-    */
-   public void removePolicy(Policy policy) throws ConstraintException
-   {
-      if (!type.isControllablePolicy())
-         throw new ConstraintException("Type " + type.getId() + " is not controlable by Policy.");
-
-      if (isNew())
-      {
-         // If not saved yet simply remove from temporary storage
-         policies.remove(policy);
-      }
-      else
-      {
-         try
-         {
-            node.setProperty(policy.getObjectId(), (Node)null);
-         }
-         catch (javax.jcr.RepositoryException re)
-         {
-            throw new CmisRuntimeException("Unable remove policy. " + re.getMessage(), re);
-         }
       }
    }
 
@@ -1024,6 +1034,8 @@ abstract class BaseObjectData implements ObjectData
          data.setProperty(policyId, ((PolicyImpl)policy).getNode());
    }
 
+   protected abstract void create() throws StorageException, NameConstraintViolationException;
+
    protected Boolean getBoolean(String id)
    {
       if (isNew())
@@ -1412,6 +1424,11 @@ abstract class BaseObjectData implements ObjectData
          throw new CmisRuntimeException("Failed set or update property " + property.getId() + ". " + re.getMessage(),
             re);
       }
+   }
+
+   Node getNode()
+   {
+      return node;
    }
 
 }

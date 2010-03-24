@@ -50,8 +50,6 @@ class RelationshipImpl extends BaseObjectData implements Relationship
 
    protected ObjectData target;
 
-   private Node relationshipStore;
-
    /**
     * New unsaved instance of relationship.
     * 
@@ -61,13 +59,11 @@ class RelationshipImpl extends BaseObjectData implements Relationship
     * @param name name
     * @see StorageImpl#createRelationship(ObjectData, ObjectData, String)
     */
-   public RelationshipImpl(TypeDefinition type, ObjectData source, ObjectData target, String name,
-      Node relationshipStore)
+   public RelationshipImpl(TypeDefinition type, ObjectData source, ObjectData target, Session session)
    {
-      super(type, (Folder)null, name);
+      super(type, null, session);
       this.source = source;
       this.target = target;
-      this.relationshipStore = relationshipStore;
    }
 
    /**
@@ -133,9 +129,10 @@ class RelationshipImpl extends BaseObjectData implements Relationship
          if (name == null || name.length() == 0)
             throw new NameConstraintViolationException("Name for new relationship must be provided.");
 
-         Session session = ((BaseObjectData)source).getNode().getSession();
-
          String sourceId = source.getObjectId();
+
+         Node relationshipStore = (Node)session.getItem("/" + JcrCMIS.CMIS_SYSTEM + "/" + JcrCMIS.CMIS_RELATIONSHIPS);
+
          Node containerNode = relationshipStore.hasNode(sourceId) //
             ? relationshipStore.getNode(sourceId) //
             : relationshipStore.addNode(sourceId, JcrCMIS.NT_UNSTRUCTURED);

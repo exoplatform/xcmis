@@ -23,12 +23,14 @@ import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.container.xml.ObjectParameter;
 import org.exoplatform.services.jcr.RepositoryService;
 import org.exoplatform.services.jcr.config.RepositoryConfigurationException;
+import org.exoplatform.services.jcr.core.CredentialsImpl;
 import org.exoplatform.services.jcr.core.ManageableRepository;
 import org.exoplatform.services.jcr.ext.common.SessionProvider;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.security.ConversationState;
 import org.picocontainer.Startable;
+import org.xcmis.sp.jcr.exo.index.IndexListenerFactory;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.InvalidArgumentException;
@@ -42,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.jcr.Credentials;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -87,9 +90,13 @@ public class StorageProviderImpl implements StorageProvider, Startable
 
    private final Map<String, StorageConfiguration> storages = new HashMap<String, StorageConfiguration>();
 
-   public StorageProviderImpl(RepositoryService repositoryService, InitParams initParams)
+   private final IndexListenerFactory indexListenerFactory;
+
+   public StorageProviderImpl(RepositoryService repositoryService, IndexListenerFactory indexListenerFactory,
+      InitParams initParams)
    {
       this.repositoryService = repositoryService;
+      this.indexListenerFactory = indexListenerFactory;
 
       if (initParams != null)
       {
@@ -115,10 +122,10 @@ public class StorageProviderImpl implements StorageProvider, Startable
    public Connection getConnection(String id, ConversationState conversation)
    {
       StorageConfiguration configuration = storages.get(id);
-      
+
       if (configuration == null)
          throw new InvalidArgumentException("CMIS repository " + id + " does not exists.");
-      
+
       String repositoryId = configuration.getRepository();
       String ws = configuration.getWorkspace();
 
@@ -126,7 +133,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
       {
          ManageableRepository repository = repositoryService.getRepository(repositoryId);
          Session session = repository.login(ws);
-         Storage storage = new StorageImpl(session, configuration);
+         Storage storage = new StorageImpl(session, indexListenerFactory.getIndexListener(id), configuration);
          return new JcrConnection(storage);
       }
       catch (RepositoryException re)
@@ -142,8 +149,30 @@ public class StorageProviderImpl implements StorageProvider, Startable
    public Connection getConnection(String id, String user, String password) throws LoginException,
       InvalidArgumentException
    {
-      // TODO Auto-generated method stub
-      return null;
+      StorageConfiguration configuration = storages.get(id);
+
+      if (configuration == null)
+         throw new InvalidArgumentException("CMIS repository " + id + " does not exists.");
+
+      String repositoryId = configuration.getRepository();
+      String ws = configuration.getWorkspace();
+
+      try
+      {
+         ManageableRepository repository = repositoryService.getRepository(repositoryId);
+         Credentials credentials = new CredentialsImpl(user, password.toCharArray());
+         Session session = repository.login(credentials, ws);
+         Storage storage = new StorageImpl(session, indexListenerFactory.getIndexListener(id), configuration);
+         return new JcrConnection(storage);
+      }
+      catch (RepositoryException re)
+      {
+         throw new CmisRuntimeException("Unable get CMIS repository " + id + ". " + re.getMessage(), re);
+      }
+      catch (RepositoryConfigurationException rce)
+      {
+         throw new CmisRuntimeException("Unable get CMIS repository " + id + ". " + rce.getMessage(), rce);
+      }
    }
 
    /**
@@ -181,6 +210,12 @@ public class StorageProviderImpl implements StorageProvider, Startable
                cmisSystem.addNode(JcrCMIS.CMIS_RELATIONSHIPS, JcrCMIS.NT_UNSTRUCTURED);
                if (LOG.isDebugEnabled())
                   LOG.debug("CMIS relationships storage " + JcrCMIS.CMIS_RELATIONSHIPS + " created.");
+            }
+
+            // TODO
+            if (!cmisSystem.hasNode("xcmis:unfiled"))
+            {
+               cmisSystem.addNode("xcmis:unfiled", JcrCMIS.NT_UNSTRUCTURED);
             }
 
             if (!cmisSystem.hasNode(JcrCMIS.CMIS_WORKING_COPIES))
@@ -239,10 +274,9 @@ public class StorageProviderImpl implements StorageProvider, Startable
    {
    }
 
-   
    public StorageConfiguration getStorageConfiguration(String id)
    {
       return storages.get(id);
    }
-   
+
 }

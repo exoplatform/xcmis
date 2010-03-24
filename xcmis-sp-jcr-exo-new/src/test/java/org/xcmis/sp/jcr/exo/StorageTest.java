@@ -23,11 +23,6 @@ import org.exoplatform.services.jcr.access.AccessControlList;
 import org.exoplatform.services.jcr.access.PermissionType;
 import org.exoplatform.services.jcr.core.CredentialsImpl;
 import org.exoplatform.services.jcr.core.ExtendedNode;
-import org.xcmis.sp.jcr.exo.BaseTest;
-import org.xcmis.sp.jcr.exo.FolderImpl;
-import org.xcmis.sp.jcr.exo.PropertyDefinitions;
-import org.xcmis.sp.jcr.exo.StorageImpl;
-import org.xcmis.sp.jcr.exo.StorageProviderImpl;
 import org.xcmis.spi.AccessControlEntry;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ConstraintException;
@@ -58,7 +53,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.jcr.Node;
-import javax.jcr.NodeIterator;
 import javax.jcr.Session;
 
 /**
@@ -75,8 +69,7 @@ public class StorageTest extends BaseTest
    public void setUp() throws Exception
    {
       super.setUp();
-      storage =
-         new StorageImpl(session, ((StorageProviderImpl)storageProvider).getStorageConfiguration(cmisRepositoryId));
+      storage = storageProvider.getConnection(cmisRepositoryId, null).getStorage();
       rootFolder = new FolderImpl(storage.getTypeDefinition("cmis:folder", true), root);
    }
 
@@ -86,7 +79,8 @@ public class StorageTest extends BaseTest
       AccessControlEntry ace =
          new AccessControlEntryImpl("root", new HashSet<String>(Arrays.asList("cmis:read", "cmis:write")));
       document.setACL(Arrays.asList(ace));
-      document.save();
+      storage.saveObject(document);
+      //      document.save();
 
       Node documentNode = (Node)session.getItem("/applyACLTestDocument");
       AccessControlList acl = ((ExtendedNode)documentNode).getACL();
@@ -105,7 +99,8 @@ public class StorageTest extends BaseTest
       Document document = createDocument(rootFolder, "applyPolicyTestDocument", "cmis:document", null, null);
       Policy policy = createPolicy(rootFolder, "applyPolicyTestPolicy01", "test apply policy", "cmis:policy");
       document.applyPolicy(policy);
-      document.save();
+      storage.saveObject(document);
+      //document.save();
 
       Node documentNode = (Node)session.getItem("/applyPolicyTestDocument");
       assertTrue(documentNode.hasProperty(policy.getObjectId()));
@@ -117,10 +112,10 @@ public class StorageTest extends BaseTest
 
    public void testCheckOut() throws Exception
    {
-      Document document = createDocument(rootFolder, "checkoutTest", "cmis:document", null, null);
-      document.checkout();
-      for (NodeIterator i = root.getNodes(); i.hasNext();)
-         System.out.println(">>>> "+i.nextNode().getName());
+      //      Document document = createDocument(rootFolder, "checkoutTest", "cmis:document", null, null);
+      //      document.checkout();
+      //      for (NodeIterator i = root.getNodes(); i.hasNext();)
+      //         System.out.println(">>>> "+i.nextNode().getName());
    }
 
    public void testChildren() throws Exception
@@ -131,7 +126,8 @@ public class StorageTest extends BaseTest
       for (int i = 1; i <= 20; i++)
       {
          Document document = createDocument(folder, name + i, "cmis:document", null, null);
-         document.save();
+         storage.saveObject(document);
+         //document.save();
          source.add(document.getObjectId());
       }
       // Check children viewing with paging. It should be close to real usage.
@@ -176,7 +172,8 @@ public class StorageTest extends BaseTest
       AccessControlEntry ace =
          new AccessControlEntryImpl("root", new HashSet<String>(Arrays.asList("cmis:read", "cmis:write")));
       document.setACL(Arrays.asList(ace));
-      document.save();
+      storage.saveObject(document);
+      //document.save();
 
       assertTrue(session.itemExists("/createDocumentTest"));
       Node documentNode = (Node)session.getItem("/createDocumentTest");
@@ -207,7 +204,7 @@ public class StorageTest extends BaseTest
       assertEquals("text/plain", document.getContentStreamMimeType());
       assertEquals("createDocumentTest", document.getContentStream().getFileName());
    }
-   
+
    public void testCreateDocumentFromSource() throws Exception
    {
       ContentStream cs = new BaseContentStream("to be or not to be".getBytes(), null, "text/plain");
@@ -215,7 +212,8 @@ public class StorageTest extends BaseTest
 
       Document documentCopy = storage.createCopyOfDocument(document, rootFolder, VersioningState.MINOR);
       documentCopy.setName("createDocumentSourceCopy");
-      documentCopy.save();
+      storage.saveObject(documentCopy);
+      //      documentCopy.save();
 
       // Check is node and content copied.
       assertTrue(session.itemExists("/createDocumentSourceCopy"));
@@ -240,7 +238,8 @@ public class StorageTest extends BaseTest
 
       Folder newFolder = storage.createFolder(rootFolder, "cmis:folder");
       newFolder.setProperties(properties);
-      newFolder.save();
+      storage.saveObject(newFolder);
+      //      newFolder.save();
 
       assertTrue(session.itemExists("/createFolderTest"));
       Node folderNode = (Node)session.getItem("/createFolderTest");
@@ -261,7 +260,8 @@ public class StorageTest extends BaseTest
 
       ObjectData policy = storage.createPolicy(rootFolder, "cmis:policy");
       policy.setProperties(properties);
-      policy.save();
+      storage.saveObject(policy);
+      //      policy.save();
 
       assertTrue(session.itemExists("/createPolicyTest"));
       Node policyNode = (Node)session.getItem("/createPolicyTest");
@@ -282,7 +282,8 @@ public class StorageTest extends BaseTest
 
       Relationship relationship = storage.createRelationship(sourceDoc, targetDoc, "cmis:relationship");
       relationship.setProperties(properties);
-      relationship.save();
+      storage.saveObject(relationship);
+      //      relationship.save();
 
       assertTrue(root
          .hasNode("xcmis:system/xcmis:relationships/" + sourceDoc.getObjectId() + "/createRelationshipTest"));
@@ -303,7 +304,8 @@ public class StorageTest extends BaseTest
       assertEquals("text/plain", documentNode.getProperty("jcr:content/jcr:mimeType").getString());
 
       document.setContentStream(null);
-      document.save();
+      storage.saveObject(document);
+      //document.save();
 
       documentNode = (Node)session.getItem("/removeContentTest");
       assertEquals("", documentNode.getProperty("jcr:content/jcr:data").getString());
@@ -351,7 +353,8 @@ public class StorageTest extends BaseTest
 
       Relationship relationship = storage.createRelationship(sourceDoc, targetDoc, "cmis:relationship");
       relationship.setName("relationship01");
-      relationship.save();
+      storage.saveObject(relationship);
+      //      relationship.save();
 
       try
       {
@@ -370,7 +373,8 @@ public class StorageTest extends BaseTest
       Document document = createDocument(rootFolder, "applyPolicyTestDocument", "cmis:document", null, null);
       Policy policy = createPolicy(rootFolder, "applyPolicyTestPolicy01", "test apply policy", "cmis:policy");
       document.applyPolicy(policy);
-      document.save();
+      storage.saveObject(document);
+      //document.save();
 
       try
       {
@@ -381,7 +385,8 @@ public class StorageTest extends BaseTest
          // OK. Applied policy may not be deleted.
       }
       document.removePolicy(policy);
-      document.save();
+      storage.saveObject(document);
+      //document.save();
 
       // Should be able delete now.
       storage.deleteObject(policy, true);
@@ -452,9 +457,7 @@ public class StorageTest extends BaseTest
       expectedFailedDelete.add(doc3.getObjectId());
 
       // Get storage for user 'exo'
-      CredentialsImpl exocredentials = new CredentialsImpl("exo", "exo".toCharArray());
-      Session exosession = repository.login(exocredentials, wsName);
-      Storage _storage = new StorageImpl(exosession, null);
+      Storage _storage = storageProvider.getConnection(cmisRepositoryId, "exo", "exo").getStorage();
       Folder _folder2 = (Folder)_storage.getObject(folder2Id);
       Collection<String> failedDelete = _storage.deleteTree(_folder2, true, UnfileObject.DELETE, true);
 
@@ -514,7 +517,8 @@ public class StorageTest extends BaseTest
       ContentStream cs = new BaseContentStream("to be or not to be".getBytes(), null, "text/plain");
       Document document = createDocument(rootFolder, "renameDocumentTest", "cmis:document", cs, null);
       document.setName("renameDocumentTest01");
-      document.save();
+      storage.saveObject(document);
+      //document.save();
 
       assertTrue(session.itemExists("/renameDocumentTest01"));
 
@@ -527,7 +531,8 @@ public class StorageTest extends BaseTest
       Folder folder = createFolder(rootFolder, "renameFolderTest", "cmis:folder");
       createDocument(folder, "child1", "cmis:document", null, null);
       folder.setName("renameFolderTest01");
-      folder.save();
+      storage.saveObject(folder);
+      //      folder.save();
 
       assertTrue(session.itemExists("/renameFolderTest01"));
       assertTrue(session.itemExists("/renameFolderTest01/child1"));
@@ -544,7 +549,8 @@ public class StorageTest extends BaseTest
 
       ContentStream cs = new BaseContentStream("to be or not to be".getBytes(), null, "text/plain");
       document.setContentStream(cs);
-      document.save();
+      storage.saveObject(document);
+      //document.save();
 
       documentNode = (Node)session.getItem("/setContentTest");
       assertEquals("to be or not to be", documentNode.getProperty("jcr:content/jcr:data").getString());
@@ -558,7 +564,8 @@ public class StorageTest extends BaseTest
          storage.createDocument(folder, typeId, versioningState == null ? VersioningState.MAJOR : versioningState);
       document.setName(name);
       document.setContentStream(content);
-      document.save();
+      storage.saveObject(document);
+      //document.save();
       return document;
    }
 
@@ -566,7 +573,8 @@ public class StorageTest extends BaseTest
    {
       Folder newFolder = storage.createFolder(folder, typeId);
       newFolder.setName(name);
-      newFolder.save();
+      storage.saveObject(newFolder);
+      //      newFolder.save();
       return newFolder;
    }
 
@@ -584,9 +592,30 @@ public class StorageTest extends BaseTest
 
       Policy policy = storage.createPolicy(folder, typeId);
       policy.setProperties(properties);
-      policy.save();
+      storage.saveObject(policy);
+      //      policy.save();
 
       return policy;
    }
 
+   /*   public void testMultifiling() throws Exception
+      {
+         Document document = createDocument(rootFolder, "multifilingTestDocument", "cmis:document", null, null);
+         Folder folder1 = createFolder(rootFolder, "multifilingTestFolder1", "cmis:folder");
+         Folder folder2 = createFolder(rootFolder, "multifilingTestFolder2", "cmis:folder");
+         Folder folder3 = createFolder(rootFolder, "multifilingTestFolder3", "cmis:folder");
+         Folder folder4 = createFolder(rootFolder, "multifilingTestFolder4", "cmis:folder");
+         folder1.addObject(document);
+         folder2.addObject(document);
+         folder3.addObject(document);
+         folder4.addObject(document);
+         Collection<Folder> parents = document.getParents();
+         for (Folder f : parents)
+            System.out.println(f.getPath());
+         folder4.removeObject(document);
+         parents = document.getParents();
+         for (Folder f : parents)
+            System.out.println(f.getPath());
+      }
+   */
 }

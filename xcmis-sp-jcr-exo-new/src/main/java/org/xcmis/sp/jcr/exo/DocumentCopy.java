@@ -36,6 +36,7 @@ import java.util.Calendar;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 
 /**
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
@@ -46,9 +47,9 @@ class DocumentCopy extends DocumentImpl
 
    private final Document source;
 
-   public DocumentCopy(Document source, Folder parent, String name, VersioningState versioningState)
+   public DocumentCopy(Document source, Folder parent, Session session, VersioningState versioningState)
    {
-      super(source.getTypeDefinition(), parent, name, versioningState);
+      super(source.getTypeDefinition(), parent, session, versioningState);
       this.source = source;
    }
 
@@ -69,7 +70,7 @@ class DocumentCopy extends DocumentImpl
          if (name == null || name.length() == 0)
             throw new NameConstraintViolationException("Name for new document must be provided.");
 
-         Node parentNode = ((FolderImpl)parent).getNode();
+         Node parentNode = parent.getNode();
 
          if (parentNode.hasNode(name))
             throw new NameConstraintViolationException("Object with name " + name

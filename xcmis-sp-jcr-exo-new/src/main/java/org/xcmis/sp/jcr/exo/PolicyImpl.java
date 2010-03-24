@@ -34,6 +34,7 @@ import java.util.Calendar;
 import javax.jcr.Node;
 import javax.jcr.PropertyIterator;
 import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
@@ -42,9 +43,9 @@ import javax.jcr.RepositoryException;
 class PolicyImpl extends BaseObjectData implements Policy
 {
 
-   public PolicyImpl(TypeDefinition type, Folder parent, String name)
+   public PolicyImpl(TypeDefinition type, Folder parent, Session session)
    {
-      super(type, parent, name);
+      super(type, parent, session);
    }
 
    public PolicyImpl(TypeDefinition type, Node node)

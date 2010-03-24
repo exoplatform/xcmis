@@ -39,6 +39,7 @@ import java.util.Calendar;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
@@ -49,9 +50,9 @@ class FolderImpl extends BaseObjectData implements Folder
 
    private static final Log LOG = ExoLogger.getLogger(FolderImpl.class);
 
-   public FolderImpl(TypeDefinition type, Folder parent, String name)
+   public FolderImpl(TypeDefinition type, Folder parent, Session session)
    {
-      super(type, parent, name);
+      super(type, parent, session);
    }
 
    public FolderImpl(TypeDefinition type, Node node)
@@ -61,11 +62,50 @@ class FolderImpl extends BaseObjectData implements Folder
 
    public void addObject(ObjectData object) throws ConstraintException
    {
-      if (isNew())
-         throw new UnsupportedOperationException("addObject");
+      throw new UnsupportedOperationException("addObject");
+      /*      if (isNew())
+               throw new UnsupportedOperationException("addObject");
 
-      // TODO Auto-generated method stub
+            if (object.getBaseType() == BaseType.DOCUMENT)
+            {
+               try
+               {
+                  Node o = ((BaseObjectData)object).getNode();
+                  Session session = node.getSession();
+                  if (!o.isNodeType("xcmis:sharedObject"))
+                  {
+                     Node unfiled = (Node)session.getItem("/xcmis:system/xcmis:unfiled");
+                     // TODO : node-type
+                     Node wrapper = unfiled.addNode(IdGenerator.generate(), JcrCMIS.NT_UNSTRUCTURED);
+                     String destPath = wrapper.getPath() + "/" + o.getName();
+                     session.move(o.getPath(), destPath);
+                     o = (Node)session.getItem(destPath);
+                     o.addMixin("xcmis:sharedObject");
+                  }
 
+                  if (!o.hasProperty("xcmis:parents"))
+                  {
+                     o.setProperty("xcmis:parents", new String[]{((ExtendedNode)getNode()).getIdentifier()},
+                        javax.jcr.PropertyType.REFERENCE);
+                  }
+                  else
+                  {
+                     Value[] parents = o.getProperty("xcmis:parents").getValues();
+                     Value[] newParents = Arrays.copyOf(parents, parents.length + 1, parents.getClass());
+                     o.setProperty("xcmis:parents", newParents);
+                  }
+                  Node link = node.addNode(object.getName(), "nt:linkedFile");
+                  link.setProperty("jcr:content", o);
+
+                  session.save();
+               }
+               catch (RepositoryException re)
+               {
+                  re.printStackTrace();
+                  throw new CmisRuntimeException("Unable add object to current folder. " + re.getMessage(), re);
+               }
+            }
+      */
    }
 
    /**
@@ -170,11 +210,33 @@ class FolderImpl extends BaseObjectData implements Folder
 
    public void removeObject(ObjectData object)
    {
-      if (isNew())
-         throw new UnsupportedOperationException("removeObject");
+      throw new UnsupportedOperationException("removeObject");
+      /*      if (isNew())
+               throw new UnsupportedOperationException("removeObject");
 
-      // TODO Auto-generated method stub
-
+            try
+            {
+               Node o = node.getNode(object.getName());
+               if (o.isNodeType("nt:linkedFile"))
+               {
+                  o.remove();
+               }
+               else
+               {
+                  // TODO : unfile
+                  throw new UnsupportedOperationException();
+               }
+               node.save();
+            }
+            catch (PathNotFoundException pe)
+            {
+               throw new InvalidArgumentException("Object " + object.getObjectId() + " is not filed in current folder");
+            }
+            catch (RepositoryException re)
+            {
+               throw new CmisRuntimeException("Unable remove object from current folder. " + re.getMessage(), re);
+            }
+      */
    }
 
    /**
@@ -187,7 +249,7 @@ class FolderImpl extends BaseObjectData implements Folder
          if (name == null || name.length() == 0)
             throw new NameConstraintViolationException("Name for new folder must be provided.");
 
-         Node parentNode = ((FolderImpl)parent).getNode();
+         Node parentNode = parent.getNode();
 
          if (parentNode.hasNode(name))
             throw new NameConstraintViolationException("Object with name " + name
