@@ -29,8 +29,10 @@ import org.apache.abdera.protocol.server.ResponseContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomUtils;
 import org.xcmis.restatom.abdera.QueryTypeElement;
+import org.xcmis.spi.Connection;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.StorageException;
+import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.object.CmisObject;
 
 import java.io.IOException;
@@ -45,10 +47,11 @@ public class QueryCollection extends CmisObjectCollection
 
    /**
     * Instantiates a new query collection.
+    * @param storageProvider TODO
     */
-   public QueryCollection()
+   public QueryCollection(StorageProvider storageProvider)
    {
-      super();
+      super(storageProvider);
       setHref("/query");
    }
 
@@ -78,8 +81,10 @@ public class QueryCollection extends CmisObjectCollection
     */
    public Iterable<CmisObject> getEntries(RequestContext request) throws ResponseContextException
    {
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
          Document<Element> doc = request.getDocument();
          QueryTypeElement queryElement = (QueryTypeElement)doc.getRoot();
          return conn.query(queryElement.getStatement(), queryElement.isSearchAllVersions(),
@@ -105,6 +110,11 @@ public class QueryCollection extends CmisObjectCollection
       catch (Throwable t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
+      }
+      finally
+      {
+         if (conn != null)
+            conn.close();
       }
    }
 

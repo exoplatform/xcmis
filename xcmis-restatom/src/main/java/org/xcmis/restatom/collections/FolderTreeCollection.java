@@ -26,11 +26,13 @@ import org.apache.abdera.model.Feed;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.spi.Connection;
 import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
+import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.object.CmisObject;
 
 import java.util.List;
@@ -44,10 +46,11 @@ public class FolderTreeCollection extends FolderDescentantsCollection
 
    /**
     * Instantiates a new folder tree collection.
+    * @param storageProvider TODO
     */
-   public FolderTreeCollection()
+   public FolderTreeCollection(StorageProvider storageProvider)
    {
-      super();
+      super(storageProvider);
       setHref("/foldertree");
    }
 
@@ -99,8 +102,10 @@ public class FolderTreeCollection extends FolderDescentantsCollection
          String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_DEPTH);
          throw new ResponseContextException(msg, 400);
       }
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
          List<ItemsTree<CmisObject>> tree =
             conn.getFolderTree(getId(request), depth, includeAllowableActions, includeRelationships,
                includePathSegments, true, propertyFilter, renditionFilter);
@@ -141,6 +146,11 @@ public class FolderTreeCollection extends FolderDescentantsCollection
       catch (Throwable t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
+      }
+      finally
+      {
+         if (conn != null)
+            conn.close();
       }
    }
 

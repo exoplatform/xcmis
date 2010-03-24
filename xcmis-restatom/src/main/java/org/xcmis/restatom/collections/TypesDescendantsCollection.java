@@ -29,10 +29,12 @@ import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
+import org.xcmis.spi.Connection;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
+import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.TypeDefinition;
 
 import java.util.Calendar;
@@ -46,12 +48,12 @@ public class TypesDescendantsCollection extends CmisTypeCollection
 {
    /**
     * Instantiates a new types descendants collection.
-    * 
+    * @param storageProvider TODO
     * @param repositoryService the repository service
     */
-   public TypesDescendantsCollection()
+   public TypesDescendantsCollection(StorageProvider storageProvider)
    {
-      super();
+      super(storageProvider);
       setHref("/typedescendants");
    }
 
@@ -87,9 +89,10 @@ public class TypesDescendantsCollection extends CmisTypeCollection
          String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_DEPTH);
          throw new ResponseContextException(msg, 400);
       }
+      Connection conn = null;
       try
       {
-         String repositoryId = getRepositoryId(request);
+         conn = getConnection(request);
          List<ItemsTree<TypeDefinition>> descendants =
             conn.getTypeDescendants(typeId, depth, includePropertyDefinitions);
 
@@ -134,6 +137,11 @@ public class TypesDescendantsCollection extends CmisTypeCollection
       {
          t.printStackTrace();
          throw new ResponseContextException(createErrorResponse(t, 500));
+      }
+      finally
+      {
+         if (conn != null)
+            conn.close();
       }
 
    }

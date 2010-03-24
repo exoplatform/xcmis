@@ -27,11 +27,13 @@ import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.Connection;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
+import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.object.CmisObject;
 import org.xcmis.spi.object.ObjectParent;
 
@@ -46,11 +48,12 @@ public class ParentsCollection extends CmisObjectCollection
 
    /**
     * Instantiates a new parents collection.
+    * @param storageProvider TODO
     * 
     */
-   public ParentsCollection()
+   public ParentsCollection(StorageProvider storageProvider)
    {
-      super();
+      super(storageProvider);
       setHref("/parents");
    }
 
@@ -104,9 +107,10 @@ public class ParentsCollection extends CmisObjectCollection
          throw new ResponseContextException(msg, 400);
       }
 
-      String repositoryId = getRepositoryId(request);
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
          String objectId = getId(request);
          CmisObject object =
             conn.getObject(objectId, false, IncludeRelationships.NONE, false, false, true, CMIS.BASE_TYPE_ID, null);
@@ -177,6 +181,11 @@ public class ParentsCollection extends CmisObjectCollection
       catch (Throwable t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
+      }
+      finally
+      {
+         if (conn != null)
+            conn.close();
       }
    }
 

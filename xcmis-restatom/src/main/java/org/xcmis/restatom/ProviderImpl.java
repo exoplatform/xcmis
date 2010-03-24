@@ -41,6 +41,7 @@ import org.xcmis.restatom.collections.QueryCollection;
 import org.xcmis.restatom.collections.RelationshipsCollection;
 import org.xcmis.restatom.collections.TypesChildrenCollection;
 import org.xcmis.restatom.collections.TypesDescendantsCollection;
+import org.xcmis.spi.StorageProvider;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
@@ -60,9 +61,10 @@ public class ProviderImpl extends AbstractProvider
 
    /**
     * Instantiates a new provider impl.
+    * @param storageProvider TODO
     * 
     */
-   public ProviderImpl()
+   public ProviderImpl(StorageProvider storageProvider)
    {
       targetBuilder = new TemplateTargetBuilder();
       targetBuilder.setTemplate(TargetType.ENTRY, "{target_base}/cmisatom/{repoid}/{atomdoctype}/{id}");
@@ -155,17 +157,17 @@ public class ProviderImpl extends AbstractProvider
          "streamid");
 
       SimpleWorkspaceInfo wInfo = new SimpleWorkspaceInfo();
-      wInfo.addCollection(new FolderChildrenCollection());
-      wInfo.addCollection(new ParentsCollection());
-      wInfo.addCollection(new RelationshipsCollection());
-      wInfo.addCollection(new FolderDescentantsCollection());
-      wInfo.addCollection(new FolderTreeCollection());
-      wInfo.addCollection(new TypesChildrenCollection());
-      wInfo.addCollection(new TypesDescendantsCollection());
-      wInfo.addCollection(new CheckedOutCollection());
-      wInfo.addCollection(new AllVersionsCollection());
-      wInfo.addCollection(new QueryCollection());
-      wInfo.addCollection(new PoliciesCollection());
+      wInfo.addCollection(new FolderChildrenCollection(storageProvider));
+      wInfo.addCollection(new ParentsCollection(storageProvider));
+      wInfo.addCollection(new RelationshipsCollection(storageProvider));
+      wInfo.addCollection(new FolderDescentantsCollection(storageProvider));
+      wInfo.addCollection(new FolderTreeCollection(storageProvider));
+      wInfo.addCollection(new TypesChildrenCollection(storageProvider));
+      wInfo.addCollection(new TypesDescendantsCollection(storageProvider));
+      wInfo.addCollection(new CheckedOutCollection(storageProvider));
+      wInfo.addCollection(new AllVersionsCollection(storageProvider));
+      wInfo.addCollection(new QueryCollection(storageProvider));
+      wInfo.addCollection(new PoliciesCollection(storageProvider));
       // The other described patterns according collections by WorkspaceManagerImpl#getCollectionAdapter 
       manager = new WorkspaceManagerImpl();
       manager.addWorkspace(wInfo);

@@ -64,10 +64,10 @@ public abstract class PropertyElement<T extends BaseProperty<?>> extends Extensi
    {
       if (property != null)
       {
-         setAttributeValue(AtomCMIS.PROPERTY_DEFINITION_ID, property.getId());
-         setAttributeValue(AtomCMIS.LOCAL_NAME, property.getLocalName());
-         setAttributeValue(AtomCMIS.DISPLAY_NAME, property.getDisplayName());
-         setAttributeValue(AtomCMIS.QUERY_NAME, property.getQueryName());
+         setAttributeValue(AtomCMIS.PROPERTY_DEFINITION_ID.getLocalPart(), property.getId());
+         setAttributeValue(AtomCMIS.LOCAL_NAME.getLocalPart(), property.getLocalName());
+         setAttributeValue(AtomCMIS.DISPLAY_NAME.getLocalPart(), property.getDisplayName());
+         setAttributeValue(AtomCMIS.QUERY_NAME.getLocalPart(), property.getQueryName());
       }
    }
 
@@ -85,10 +85,10 @@ public abstract class PropertyElement<T extends BaseProperty<?>> extends Extensi
     */
    protected void processPropertyElement(T obj)
    {
-      obj.setId(getAttributeValue(AtomCMIS.PROPERTY_DEFINITION_ID));
-      obj.setLocalName(getAttributeValue(AtomCMIS.LOCAL_NAME));
-      obj.setDisplayName(getAttributeValue(AtomCMIS.DISPLAY_NAME));
-      obj.setQueryName(getAttributeValue(AtomCMIS.QUERY_NAME));
+      obj.setId(getAttributeValue(AtomCMIS.PROPERTY_DEFINITION_ID.getLocalPart()));
+      obj.setLocalName(getAttributeValue(AtomCMIS.LOCAL_NAME.getLocalPart()));
+      obj.setDisplayName(getAttributeValue(AtomCMIS.DISPLAY_NAME.getLocalPart()));
+      obj.setQueryName(getAttributeValue(AtomCMIS.QUERY_NAME.getLocalPart()));
    }
 
 }

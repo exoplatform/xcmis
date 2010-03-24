@@ -29,8 +29,10 @@ import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
 import org.xcmis.restatom.abdera.TypeDefinitionTypeElement;
+import org.xcmis.spi.Connection;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.StorageException;
+import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.TypeNotFoundException;
 
@@ -48,12 +50,12 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
 
    /**
     * Instantiates a new cmis type collection.
-    * 
+    * @param storageProvider TODO
     * @param repositoryService the repository service
     */
-   public CmisTypeCollection()
+   public CmisTypeCollection(StorageProvider storageProvider)
    {
-      super();
+      super(storageProvider);
    }
 
    /**
@@ -69,8 +71,10 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
     */
    public TypeDefinition getEntry(String typeId, RequestContext request) throws ResponseContextException
    {
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
          return conn.getTypeDefinition(typeId);
       }
       catch (StorageException re)
@@ -84,6 +88,11 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
       catch (Throwable t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
+      }
+      finally
+      {
+         if (conn != null)
+            conn.close();
       }
    }
 
@@ -155,8 +164,10 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
          return rce.getResponseContext();
       }
 
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
          TypeDefinitionTypeElement typeElement = entry.getFirstChild(AtomCMIS.TYPE);
          TypeDefinition type = typeElement.getTypeDefinition();
          String typeId = type.getId();
@@ -178,6 +189,11 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
       catch (ResponseContextException rce)
       {
          return rce.getResponseContext();
+      }
+      finally
+      {
+         if (conn != null)
+            conn.close();
       }
 
       Map<String, String> params = new HashMap<String, String>();
@@ -282,8 +298,10 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
    @Override
    public void deleteEntry(String typeId, RequestContext request) throws ResponseContextException
    {
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
          conn.getStorage().removeType(typeId);
       }
       catch (TypeNotFoundException tnfe)
@@ -297,6 +315,11 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
       catch (StorageException re)
       {
          createErrorResponse(re, 500);
+      }
+      finally
+      {
+         if (conn != null)
+            conn.close();
       }
    }
 

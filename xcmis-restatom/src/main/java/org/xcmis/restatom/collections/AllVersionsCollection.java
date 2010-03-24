@@ -27,10 +27,12 @@ import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.Connection;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
+import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.object.CmisObject;
 
 import java.util.List;
@@ -47,10 +49,11 @@ public class AllVersionsCollection extends CmisObjectCollection
 
    /**
     * Instantiates a new all versions collection.
+    * @param storageProvider TODO
     */
-   public AllVersionsCollection()
+   public AllVersionsCollection(StorageProvider storageProvider)
    {
-      super();
+      super(storageProvider);
       setHref("/versions");
    }
 
@@ -89,10 +92,13 @@ public class AllVersionsCollection extends CmisObjectCollection
          String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_SKIP_COUNT);
          throw new ResponseContextException(msg, 400);
       }
-
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
+
          List<CmisObject> list = conn.getAllVersions(objectId, includeAllowableActions, true, propertyFilter);
+
          if (list.size() > 0)
          {
             // add cmisra:numItems
@@ -136,6 +142,12 @@ public class AllVersionsCollection extends CmisObjectCollection
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
       }
+      finally
+      {
+         if (conn != null)
+            conn.close();
+      }
+
    }
 
    /**

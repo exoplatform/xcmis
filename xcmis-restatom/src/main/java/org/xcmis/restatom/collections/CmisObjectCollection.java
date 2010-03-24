@@ -47,6 +47,7 @@ import org.xcmis.spi.AccessControlEntry;
 import org.xcmis.spi.BaseType;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ChangeTokenHolder;
+import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentAlreadyExistsException;
 import org.xcmis.spi.FilterNotValidException;
@@ -58,6 +59,7 @@ import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.Rendition;
 import org.xcmis.spi.RepositoryCapabilities;
 import org.xcmis.spi.StorageException;
+import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.StreamNotSupportedException;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.data.BaseContentStream;
@@ -100,10 +102,11 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Instantiates a new cmis object collection.
+    * @param storageProvider TODO
     */
-   public CmisObjectCollection()
+   public CmisObjectCollection(StorageProvider storageProvider)
    {
-      super();
+      super(storageProvider);
    }
 
    /**
@@ -112,8 +115,10 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    @Override
    public void deleteEntry(String objectId, RequestContext request) throws ResponseContextException
    {
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
          /*
          CmisObject doc =
             conn.getObjectById(objectId, false, IncludeRelationships.NONE,
@@ -150,6 +155,11 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
       }
+      finally
+      {
+         if (conn != null)
+            conn.close();
+      }
    }
 
    /**
@@ -158,8 +168,10 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    @Override
    public ResponseContext deleteMedia(RequestContext request)
    {
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
          ChangeTokenHolder changeTokenHolder = new ChangeTokenHolder();
          changeTokenHolder.setValue(request.getHeader(HttpHeaders.IF_MATCH));
          // TODO : Is it correct to use 'If-Match' header ?
@@ -198,6 +210,11 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          return createErrorResponse(t, 500);
       }
+      finally
+      {
+         if (conn != null)
+            conn.close();
+      }
    }
 
    /**
@@ -206,8 +223,10 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    @Override
    public void deleteMedia(String documentId, RequestContext request) throws ResponseContextException
    {
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
          ChangeTokenHolder changeTokenHolder = new ChangeTokenHolder();
          changeTokenHolder.setValue(request.getHeader(HttpHeaders.IF_MATCH));
          conn.deleteContentStream(documentId, //
@@ -236,6 +255,11 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       catch (Throwable t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
+      }
+      finally
+      {
+         if (conn != null)
+            conn.close();
       }
    }
 
@@ -307,8 +331,10 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS);
          throw new ResponseContextException(createErrorResponse(msg, 400));
       }
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
          CmisObject object;
          if (id.charAt(0) != '/')
             // Get by id. 
@@ -382,6 +408,11 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
       }
+      finally
+      {
+         if (conn != null)
+            conn.close();
+      }
    }
 
    /**
@@ -406,8 +437,10 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    @Override
    public ResponseContext getMedia(RequestContext request)
    {
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
          // TODO : resolve (optional) offset, length 
          ContentStream content = conn.getContentStream(//
             //
@@ -441,6 +474,11 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       catch (Throwable t)
       {
          return createErrorResponse(t, 500);
+      }
+      finally
+      {
+         if (conn != null)
+            conn.close();
       }
    }
 
@@ -493,8 +531,10 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          return rce.getResponseContext();
       }
 
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
          ObjectTypeElement objectElement = entry.getFirstChild(AtomCMIS.OBJECT);
          CmisObject object = objectElement != null ? object = objectElement.getObject() : new CmisObjectImpl();
          updatePropertiesFromEntry(object, entry);
@@ -568,6 +608,11 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          return createErrorResponse(t, 500);
       }
+      finally
+      {
+         if (conn != null)
+            conn.close();
+      }
    }
 
    /**
@@ -585,8 +630,10 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    public void putMedia(CmisObject entryObj, MimeType contentType, String slug, InputStream inputStream,
       RequestContext request) throws ResponseContextException
    {
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
          ContentStream content = new BaseContentStream(inputStream, null, contentType.getBaseType());
          // TODO : is correct ?
          ChangeTokenHolder changeTokenHolder = new ChangeTokenHolder();
@@ -626,6 +673,11 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
       }
+      finally
+      {
+         if (conn != null)
+            conn.close();
+      }
    }
 
    /**
@@ -634,8 +686,10 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    @Override
    public ResponseContext putMedia(RequestContext request)
    {
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
          ContentStream content = new BaseContentStream(request.getInputStream(), //
             null, //
             request.getContentType() == null ? "application/octet-stream" : request.getContentType().getBaseType());
@@ -686,6 +740,11 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       catch (Throwable t)
       {
          return createErrorResponse(t, 500);
+      }
+      finally
+      {
+         if (conn != null)
+            conn.close();
       }
    }
 
@@ -1207,15 +1266,25 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
     */
    protected String getDescendantsLink(String id, RequestContext request)
    {
-      RepositoryCapabilities capabilities = conn.getStorage().getRepositoryInfo().getCapabilities();
-      if (capabilities.isCapabilityGetFolderTree())
+      Connection conn = null;
+      try
       {
-         Map<String, String> params = new HashMap<String, String>();
-         params.put("repoid", getRepositoryId(request));
-         params.put("atomdoctype", "descendants");
-         params.put("id", id);
-         String children = request.absoluteUrlFor("feed", params);
-         return children;
+         conn = getConnection(request);
+         RepositoryCapabilities capabilities = conn.getStorage().getRepositoryInfo().getCapabilities();
+         if (capabilities.isCapabilityGetFolderTree())
+         {
+            Map<String, String> params = new HashMap<String, String>();
+            params.put("repoid", getRepositoryId(request));
+            params.put("atomdoctype", "descendants");
+            params.put("id", id);
+            String children = request.absoluteUrlFor("feed", params);
+            return children;
+         }
+      }
+      finally
+      {
+         if (conn != null)
+            conn.close();
       }
       return null;
    }
@@ -1232,15 +1301,25 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
     */
    protected String getFolderTreeLink(String id, RequestContext request)
    {
-      RepositoryCapabilities capabilities = conn.getStorage().getRepositoryInfo().getCapabilities();
-      if (capabilities.isCapabilityGetFolderTree())
+      Connection conn = null;
+      try
       {
-         Map<String, String> params = new HashMap<String, String>();
-         params.put("repoid", getRepositoryId(request));
-         params.put("atomdoctype", "foldertree");
-         params.put("id", id);
-         String children = request.absoluteUrlFor("feed", params);
-         return children;
+         conn = getConnection(request);
+         RepositoryCapabilities capabilities = conn.getStorage().getRepositoryInfo().getCapabilities();
+         if (capabilities.isCapabilityGetFolderTree())
+         {
+            Map<String, String> params = new HashMap<String, String>();
+            params.put("repoid", getRepositoryId(request));
+            params.put("atomdoctype", "foldertree");
+            params.put("id", id);
+            String children = request.absoluteUrlFor("feed", params);
+            return children;
+         }
+      }
+      finally
+      {
+         if (conn != null)
+            conn.close();
       }
       return null;
    }

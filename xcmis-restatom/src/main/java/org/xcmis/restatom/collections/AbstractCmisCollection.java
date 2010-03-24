@@ -38,6 +38,7 @@ import org.exoplatform.services.log.Log;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.ProviderImpl;
 import org.xcmis.spi.Connection;
+import org.xcmis.spi.StorageProvider;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -54,14 +55,17 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
 
    /** The logger. */
    private static final Log LOG = ExoLogger.getLogger(AbstractCmisCollection.class);
-   
-   protected Connection conn = null;
+
+   /** The Storage provider */
+   protected StorageProvider storageProvider;
 
    /**
     * Instantiates a new abstract cmis collection.
+    * @param storageProvider TODO
     */
-   public AbstractCmisCollection()
+   public AbstractCmisCollection(StorageProvider storageProvider)
    {
+      this.storageProvider = storageProvider;
    }
 
    /**
@@ -265,7 +269,7 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
     * Create link to AtomPub Service Document contains the set of repositories
     * that are available.
     * 
-    * @param request request context
+    * @param request the request context
     * @return link to AtomPub Service Document
     */
    protected String getServiceLink(RequestContext request)
@@ -274,6 +278,17 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
       p.put("repoid", getRepositoryId(request));
       String service = request.absoluteUrlFor(TargetType.SERVICE, p);
       return service;
+   }
+
+   /**
+    * To 
+    * 
+    * @param request the request context
+    * @return the Connection to CMIS storage
+    */
+   protected Connection getConnection(RequestContext request)
+   {
+      return storageProvider.getConnection(getRepositoryId(request), null);
    }
 
 }

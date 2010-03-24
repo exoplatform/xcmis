@@ -27,12 +27,14 @@ import org.apache.abdera.model.Link;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.spi.Connection;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
+import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.object.CmisObject;
 
 import java.util.List;
@@ -47,10 +49,11 @@ public class FolderDescentantsCollection extends CmisObjectCollection
 
    /**
     * Instantiates a new folder descentants collection.
+    * @param storageProvider TODO
     */
-   public FolderDescentantsCollection()
+   public FolderDescentantsCollection(StorageProvider storageProvider)
    {
-      super();
+      super(storageProvider);
       setHref("/descendants");
    }
 
@@ -161,8 +164,10 @@ public class FolderDescentantsCollection extends CmisObjectCollection
          String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_DEPTH);
          throw new ResponseContextException(msg, 400);
       }
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
          List<ItemsTree<CmisObject>> descendants =
             conn.getDescendants(getId(request), depth, includeAllowableActions, includeRelationships,
                includePathSegments, true, propertyFilter, renditionFilter);
@@ -209,6 +214,11 @@ public class FolderDescentantsCollection extends CmisObjectCollection
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
       }
+      finally
+      {
+         if (conn != null)
+            conn.close();
+      }
    }
 
    /**
@@ -229,35 +239,44 @@ public class FolderDescentantsCollection extends CmisObjectCollection
       if (folderTree != null)
          feed.addLink(folderTree, AtomCMIS.LINK_CMIS_FOLDERTREE, AtomCMIS.MEDIATYPE_ATOM_FEED, null, null, -1);
 
-      String repositoryId = getRepositoryId(request);
-      if (!id.equals(conn.getStorage().getRepositoryInfo().getRootFolderId()))
+      Connection conn = null;
+      try
       {
-         try
+         conn = getConnection(request);
+         if (!id.equals(conn.getStorage().getRepositoryInfo().getRootFolderId()))
          {
-            CmisObject parent = conn.getFolderParent(id, true, null);
-            feed.addLink(getObjectLink(getId(parent), request), AtomCMIS.LINK_UP, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null,
-               null, -1);
+            try
+            {
+               CmisObject parent = conn.getFolderParent(id, true, null);
+               feed.addLink(getObjectLink(getId(parent), request), AtomCMIS.LINK_UP, AtomCMIS.MEDIATYPE_ATOM_ENTRY,
+                  null, null, -1);
+            }
+            catch (StorageException re)
+            {
+               throw new ResponseContextException(createErrorResponse(re, 500));
+            }
+            catch (FilterNotValidException fe)
+            {
+               throw new ResponseContextException(createErrorResponse(fe, 400));
+            }
+            catch (ObjectNotFoundException onfe)
+            {
+               throw new ResponseContextException(createErrorResponse(onfe, 404));
+            }
+            catch (InvalidArgumentException iae)
+            {
+               throw new ResponseContextException(createErrorResponse(iae, 400));
+            }
+            catch (Throwable t)
+            {
+               throw new ResponseContextException(createErrorResponse(t, 500));
+            }
          }
-         catch (StorageException re)
-         {
-            throw new ResponseContextException(createErrorResponse(re, 500));
-         }
-         catch (FilterNotValidException fe)
-         {
-            throw new ResponseContextException(createErrorResponse(fe, 400));
-         }
-         catch (ObjectNotFoundException onfe)
-         {
-            throw new ResponseContextException(createErrorResponse(onfe, 404));
-         }
-         catch (InvalidArgumentException iae)
-         {
-            throw new ResponseContextException(createErrorResponse(iae, 400));
-         }
-         catch (Throwable t)
-         {
-            throw new ResponseContextException(createErrorResponse(t, 500));
-         }
+      }
+      finally
+      {
+         if (conn != null)
+            conn.close();
       }
       return feed;
    }

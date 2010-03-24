@@ -146,13 +146,75 @@ public abstract class BaseTest extends TestCase
       container = null;
       requestHandler = null;
       factory = null;
-      for (Iterator<CmisObject> iter =
-         conn.getCheckedOutDocs(rootFolderId, false, null, true, null, null, null, -1, 0).getItems().iterator(); iter
-         .hasNext();)
-         conn.deleteObject(iter.next().getObjectInfo().getId(), null);
 
-      for (Iterator<CmisObject> iter = getChildren(rootFolderId).getItems().iterator(); iter.hasNext();)
-         conn.deleteObject(iter.next().getObjectInfo().getId(), null);
+      // TODO to remove this "if" statement when it was fixed for JCR storage
+      try
+      {
+         if (conn.getCheckedOutDocs(rootFolderId, false, null, true, null, null, null, -1, 0) != null)
+         {
+            for (Iterator<CmisObject> iter =
+               conn.getCheckedOutDocs(rootFolderId, false, null, true, null, null, null, -1, 0).getItems().iterator(); iter
+               .hasNext();)
+            {
+               conn.deleteObject(iter.next().getObjectInfo().getId(), null);
+            }
+         }
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+
+      try
+      {
+         for (Iterator<CmisObject> iter = getChildren(rootFolderId).getItems().iterator(); iter.hasNext();)
+         {
+            CmisObject obj = iter.next();
+            deleteObject(obj);
+         }
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+
+      try
+      {
+         conn.deleteObject(testFolderId, null);
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+   }
+
+   private void deleteObject(CmisObject obj)
+   {
+      String objId = obj.getObjectInfo().getId();
+      try
+      {
+         if (obj.getObjectInfo().getBaseType().value().equals(BaseType.FOLDER.value()))
+         {
+            for (Iterator<CmisObject> iter = getChildren(objId).getItems().iterator(); iter.hasNext();)
+            {
+               CmisObject obj2 = iter.next();
+               deleteObject(obj2);
+            }
+         }
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+      try
+      {
+         conn.deleteObject(objId, null);
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+
    }
 
    protected void validateAllowableActions(org.w3c.dom.Node actions) throws XPathExpressionException

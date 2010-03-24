@@ -203,7 +203,7 @@ public class FolderChildrenCollectionTest extends BaseTest
    public void testGetChildren() throws Exception
    {
       String doc1 = createDocument(testFolderId, "doc1", null, null);
-      String doc2 = createDocument(testFolderId, "doc1", null, null);
+      String doc2 = createDocument(testFolderId, "doc2", null, null);
 
       String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/children/" + testFolderId;
 

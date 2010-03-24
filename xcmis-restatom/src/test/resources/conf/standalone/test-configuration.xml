@@ -32,7 +32,73 @@
    </component>
 
 
-  <!-- Storage Provider -->
+   <!-- JCR components -->
+   <component>
+      <key>org.exoplatform.services.jcr.RepositoryService</key>
+      <type>org.exoplatform.services.jcr.impl.RepositoryServiceImpl</type>
+      <component-plugins>
+         <!--         <component-plugin>-->
+         <!--            <name>add.namespaces</name>-->
+         <!--            <set-method>addPlugin</set-method>-->
+         <!--            <type>org.exoplatform.services.jcr.impl.AddNamespacesPlugin</type>-->
+         <!--            <init-params>-->
+         <!--               <properties-param>-->
+         <!--                  <name>namespaces</name>-->
+         <!--                  <property name="dc" value="http://purl.org/dc/elements/1.1/" />-->
+         <!--                  <property name="cmis" value="http://www.exoplatform.com/jcr/cmis/1.0" />-->
+         <!--               </properties-param>-->
+         <!--            </init-params>-->
+         <!--         </component-plugin>-->
+         <!--         <component-plugin>-->
+         <!--            <name>add.nodeType</name>-->
+         <!--            <set-method>addPlugin</set-method>-->
+         <!--            <type>org.exoplatform.services.jcr.impl.AddNodeTypePlugin</type>-->
+         <!--            <init-params>-->
+         <!--               <values-param>-->
+         <!--                  <name>autoCreatedInNewRepository</name>-->
+         <!--                  <description>Node types configuration file</description>-->
+         <!--                  <value>jar:/conf/cmis-nodetypes-config.xml</value>-->
+         <!--               </values-param>-->
+         <!--            </init-params>-->
+         <!--         </component-plugin>-->
+         <component-plugin>
+            <name>register.listener</name>
+            <set-method>addPlugin</set-method>
+            <type>org.exoplatform.services.jcr.impl.RepositoryChangesListenerRegisterPlugin</type>
+            <init-params>
+               <value-param>
+                  <name>repository-name</name>
+                  <value>db1</value>
+               </value-param>
+               <value-param>
+                  <name>workspaces</name>
+                  <value>ws1</value>
+               </value-param>
+               <value-param>
+                  <name>component-class-name</name>
+                  <value>org.xcmis.sp.jcr.exo.query.index.StartableJcrIndexingService</value>
+               </value-param>
+            </init-params>
+         </component-plugin>
+      </component-plugins>
+   </component>
+   <component>
+      <key>org.exoplatform.services.jcr.config.RepositoryServiceConfiguration</key>
+      <type>org.exoplatform.services.jcr.impl.config.RepositoryServiceConfigurationImpl</type>
+      <init-params>
+         <value-param>
+            <name>conf-path</name>
+            <description>JCR configuration file</description>
+            <value>jar:/conf/standalone/test-jcr-cmis-config.xml</value>
+         </value-param>
+      </init-params>
+   </component>
+
+   <component>
+      <type>org.xcmis.sp.jcr.exo.index.IndexListenerFactory</type>
+   </component>
+
+   <!-- Storage Provider -->
    <component>
       <type>org.xcmis.sp.jcr.exo.StorageProviderImpl</type>
       <init-params>
@@ -79,72 +145,11 @@
          </object-param>
       </init-params>
    </component>
-   
-   <!-- JCR components -->
-   <component>
-      <key>org.exoplatform.services.jcr.RepositoryService</key>
-      <type>org.exoplatform.services.jcr.impl.RepositoryServiceImpl</type>
-      <component-plugins>
-         <component-plugin>
-            <name>add.namespaces</name>
-            <set-method>addPlugin</set-method>
-            <type>org.exoplatform.services.jcr.impl.AddNamespacesPlugin</type>
-            <init-params>
-               <properties-param>
-                  <name>namespaces</name>
-                  <property name="dc" value="http://purl.org/dc/elements/1.1/" />
-                  <property name="cmis" value="http://www.exoplatform.com/jcr/cmis/1.0" />
-               </properties-param>
-            </init-params>
-         </component-plugin>
-         <component-plugin>
-            <name>add.nodeType</name>
-            <set-method>addPlugin</set-method>
-            <type>org.exoplatform.services.jcr.impl.AddNodeTypePlugin</type>
-            <init-params>
-               <values-param>
-                  <name>autoCreatedInNewRepository</name>
-                  <description>Node types configuration file</description>
-                  <value>jar:/conf/cmis-nodetypes-config.xml</value>
-                  <value>jar:/conf/test/test-cmis-nodetypes-config.xml</value>
-               </values-param>
-            </init-params>
-         </component-plugin>
-         <component-plugin>
-            <name>register.listener</name>
-            <set-method>addPlugin</set-method>
-            <type>org.exoplatform.services.jcr.impl.RepositoryChangesListenerRegisterPlugin</type>
-            <init-params>
-               <value-param>
-                  <name>repository-name</name>
-                  <value>db1</value>
-               </value-param>
-               <value-param>
-                  <name>workspaces</name>
-                  <value>ws1</value>
-               </value-param>
-               <value-param>
-                  <name>component-class-name</name>
-                  <value>org.xcmis.sp.jcr.exo.query.index.StartableJcrIndexingService</value>
-               </value-param>
-            </init-params>
-         </component-plugin>
-      </component-plugins>
-   </component>
-   <component>
-      <key>org.exoplatform.services.jcr.config.RepositoryServiceConfiguration</key>
-      <type>org.exoplatform.services.jcr.impl.config.RepositoryServiceConfigurationImpl</type>
-      <init-params>
-         <value-param>
-            <name>conf-path</name>
-            <description>JCR configuration file</description>
-            <value>jar:/conf/standalone/test-jcr-cmis-config.xml</value>
-         </value-param>
-      </init-params>
-   </component>
+
    <component>
       <type>org.exoplatform.services.jcr.ext.app.ThreadLocalSessionProviderService</type>
    </component>
+
    <component>
       <type>org.exoplatform.services.jcr.ext.registry.RegistryService</type>
       <init-params>
@@ -155,18 +160,15 @@
       </init-params>
    </component>
 
- 
- 
- 
- 
    <component>
       <type>org.exoplatform.services.organization.impl.mock.DummyOrganizationService</type>
    </component>
+
    <component>
       <key>org.exoplatform.services.security.Authenticator</key>
       <type>org.exoplatform.services.organization.auth.OrganizationAuthenticatorImpl</type>
    </component>
-   
+
    <!-- REST ATOM -->
    <component>
       <type>org.xcmis.restatom.CmisRestApplication</type>
@@ -183,6 +185,8 @@
    <component>
       <type>org.exoplatform.services.rest.impl.provider.JAXBContextResolver</type>
    </component>
+
+
    <external-component-plugins>
       <target-component>org.exoplatform.services.rest.impl.provider.JAXBContextResolver</target-component>
       <component-plugin>
@@ -197,10 +201,10 @@
          </init-params>
       </component-plugin>
    </external-component-plugins>
-   
-   
+
+
    <!-- JCR conf -->
-      <external-component-plugins>
+   <external-component-plugins>
       <target-component>org.exoplatform.services.naming.InitialContextInitializer</target-component>
       <component-plugin>
          <name>bind.datasource</name>
@@ -257,5 +261,5 @@
          </init-params>
       </component-plugin>
    </external-component-plugins>
-   
+
 </configuration>

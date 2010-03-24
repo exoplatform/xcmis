@@ -29,8 +29,10 @@ import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.Connection;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.StorageException;
+import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.TypeDefinition;
 
 import java.util.Calendar;
@@ -48,9 +50,11 @@ public class TypesChildrenCollection extends CmisTypeCollection
 
    /**
     * Instantiates a new types children collection.
+    * @param storageProvider TODO
     */
-   public TypesChildrenCollection()
+   public TypesChildrenCollection(StorageProvider storageProvider)
    {
+      super(storageProvider);
       setHref("/types");
    }
 
@@ -88,9 +92,10 @@ public class TypesChildrenCollection extends CmisTypeCollection
          String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_SKIP_COUNT);
          throw new ResponseContextException(msg, 400);
       }
+      Connection conn = null;
       try
       {
-         String repositoryId = getRepositoryId(request);
+         conn = getConnection(request);
          ItemsList<TypeDefinition> list = conn.getTypeChildren(typeId, includePropertyDefinitions, maxItems, skipCount);
          addPageLinks(typeId, feed, "types", maxItems, skipCount, list.getNumItems(), list.isHasMoreItems(), request);
 
@@ -124,6 +129,11 @@ public class TypesChildrenCollection extends CmisTypeCollection
       catch (Throwable t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
+      }
+      finally
+      {
+         if (conn != null)
+            conn.close();
       }
    }
 

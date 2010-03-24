@@ -31,6 +31,7 @@ import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.abdera.ObjectTypeElement;
 import org.xcmis.spi.AccessControlEntry;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
@@ -38,6 +39,7 @@ import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.RelationshipDirection;
 import org.xcmis.spi.StorageException;
+import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.object.CmisObject;
 import org.xcmis.spi.object.Property;
 import org.xcmis.spi.object.impl.IdProperty;
@@ -56,10 +58,11 @@ public class RelationshipsCollection extends CmisObjectCollection
 
    /**
     * Instantiates a new relationships collection.
+    * @param storageProvider TODO
     */
-   public RelationshipsCollection()
+   public RelationshipsCollection(StorageProvider storageProvider)
    {
-      super();
+      super(storageProvider);
       setHref("/relationships");
    }
 
@@ -128,9 +131,13 @@ public class RelationshipsCollection extends CmisObjectCollection
       List<String> policies = null;
 
       String relationshipId;
+      CmisObject relationship;
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
          relationshipId = conn.createRelationship(properties, addACL, removeACL, policies);
+         relationship = conn.getProperties(relationshipId, true, CMIS.WILDCARD);
       }
       catch (ConstraintException cve)
       {
@@ -152,8 +159,13 @@ public class RelationshipsCollection extends CmisObjectCollection
       {
          return createErrorResponse(t, 500);
       }
+      finally
+      {
+         if (conn != null)
+            conn.close();
+      }
 
-      CmisObject relationship = conn.getProperties(relationshipId, true, CMIS.WILDCARD);
+      
 
       entry = request.getAbdera().getFactory().newEntry();
       try
@@ -224,8 +236,10 @@ public class RelationshipsCollection extends CmisObjectCollection
          String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_RELATIONSHIP_DIRECTION);
          throw new ResponseContextException(msg, 400);
       }
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
          ItemsList<CmisObject> list =
             conn.getObjectRelationships(objectId, direction, typeId, includeSubRelationship, includeAllowableActions,
                true, propertyFilter, maxItems, skipCount);
@@ -266,6 +280,11 @@ public class RelationshipsCollection extends CmisObjectCollection
       catch (Throwable t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
+      }
+      finally
+      {
+         if (conn != null)
+            conn.close();
       }
    }
 

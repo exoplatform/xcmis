@@ -34,6 +34,8 @@ import org.xcmis.spi.impl.PropertyDefinitionImpl;
 import org.xcmis.spi.impl.TypeDefinitionImpl;
 
 import java.io.ByteArrayInputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -75,9 +77,12 @@ public class TypesChildrenCollectionTest extends BaseTest
       pd.setId("cmis:hello");
       pd.setInherited(false);
       pd.setPropertyType(PropertyType.STRING);
-      article.getPropertyDefinitions().add(pd);
+      Map<String, PropertyDefinition<?>> mapPD = new HashMap<String, PropertyDefinition<?>>();
+      mapPD.put(pd.getId(), pd);
+      article.setPropertyDefinitions(mapPD);
 
       conn.addType(article);
+
    }
 
    @Override
@@ -89,6 +94,11 @@ public class TypesChildrenCollectionTest extends BaseTest
       }
       catch (TypeNotFoundException ignored)
       {
+         ignored.printStackTrace();
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
       }
       super.tearDown();
    }

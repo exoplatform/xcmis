@@ -31,12 +31,14 @@ import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.abdera.ObjectTypeElement;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
+import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.object.CmisObject;
 import org.xcmis.spi.object.Property;
 import org.xcmis.spi.object.impl.IdProperty;
@@ -55,10 +57,11 @@ public class PoliciesCollection extends CmisObjectCollection
 
    /**
     * Instantiates a new policies collection.
+    * @param storageProvider TODO
     */
-   public PoliciesCollection()
+   public PoliciesCollection(StorageProvider storageProvider)
    {
-      super();
+      super(storageProvider);
       setHref("/policies");
    }
 
@@ -96,8 +99,10 @@ public class PoliciesCollection extends CmisObjectCollection
          throw new ResponseContextException(msg, 400);
       }
 
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
          String objectId = getId(request);
          List<CmisObject> list = conn.getAppliedPolicies(objectId, true, propertyFilter);
          if (list.size() > 0)
@@ -140,6 +145,11 @@ public class PoliciesCollection extends CmisObjectCollection
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
       }
+      finally
+      {
+         if (conn != null)
+            conn.close();
+      }
    }
 
    /**
@@ -171,9 +181,11 @@ public class PoliciesCollection extends CmisObjectCollection
          if (pName.equals(CMIS.OBJECT_ID))
             policyId = ((IdProperty)p).getValues().get(0);
       }
-      String repositoryId = getRepositoryId(request);
+      
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
          // apply policy
          if (policyId != null)
             conn.applyPolicy(policyId, objectId);
@@ -197,6 +209,11 @@ public class PoliciesCollection extends CmisObjectCollection
       catch (Throwable t)
       {
          return createErrorResponse(t, 500);
+      }
+      finally
+      {
+         if (conn != null)
+            conn.close();
       }
 
       entry = request.getAbdera().getFactory().newEntry();
@@ -257,8 +274,10 @@ public class PoliciesCollection extends CmisObjectCollection
          if (pName.equals(CMIS.OBJECT_ID))
             policyId = ((IdProperty)p).getValues().get(0);
       }
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
          if (policyId != null)
             conn.removePolicy(policyId, objectId);
          ResponseContext response = new EmptyResponseContext(200);
@@ -283,6 +302,11 @@ public class PoliciesCollection extends CmisObjectCollection
       catch (Throwable t)
       {
          return createErrorResponse(t, 500);
+      }
+      finally
+      {
+         if (conn != null)
+            conn.close();
       }
    }
 

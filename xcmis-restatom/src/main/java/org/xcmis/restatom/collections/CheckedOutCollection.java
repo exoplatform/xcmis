@@ -30,6 +30,7 @@ import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.IncludeRelationships;
@@ -37,6 +38,7 @@ import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
+import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.object.CmisObject;
 
@@ -53,11 +55,12 @@ public class CheckedOutCollection extends CmisObjectCollection
 
    /**
     * Instantiates a new checked out collection.
+    * @param storageProvider TODO
     * 
     */
-   public CheckedOutCollection()
+   public CheckedOutCollection(StorageProvider storageProvider)
    {
-      super();
+      super(storageProvider);
       setHref("/checkedout");
    }
 
@@ -113,8 +116,10 @@ public class CheckedOutCollection extends CmisObjectCollection
          String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_SKIP_COUNT);
          throw new ResponseContextException(msg, 400);
       }
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
          // NOTE : Not use method getId(request) here. It may gives incorrect id.
          String folderId = request.getTarget().getParameter("objectid");
          ItemsList<CmisObject> list =
@@ -157,6 +162,11 @@ public class CheckedOutCollection extends CmisObjectCollection
       catch (Throwable t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
+      }
+      finally
+      {
+         if (conn != null)
+            conn.close();
       }
    }
 
@@ -207,8 +217,10 @@ public class CheckedOutCollection extends CmisObjectCollection
       {
          // support when id sent directly 
       }
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
          String pwcId = conn.checkout(id == null ? getId(request) : id);
          Entry entry = request.getAbdera().getFactory().newEntry();
          try
@@ -245,6 +257,11 @@ public class CheckedOutCollection extends CmisObjectCollection
       catch (Throwable t)
       {
          return createErrorResponse(t, 500);
+      }
+      finally
+      {
+         if (conn != null)
+            conn.close();
       }
    }
 

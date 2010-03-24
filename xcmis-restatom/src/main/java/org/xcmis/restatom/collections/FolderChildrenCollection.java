@@ -32,6 +32,7 @@ import org.xcmis.restatom.abdera.ObjectTypeElement;
 import org.xcmis.spi.AccessControlEntry;
 import org.xcmis.spi.BaseType;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.IncludeRelationships;
@@ -39,6 +40,7 @@ import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
+import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.StreamNotSupportedException;
 import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.TypeNotFoundException;
@@ -65,10 +67,11 @@ public class FolderChildrenCollection extends CmisObjectCollection
 
    /**
     * Instantiates a new folder children collection.
+    * @param storageProvider TODO
     */
-   public FolderChildrenCollection()
+   public FolderChildrenCollection(StorageProvider storageProvider)
    {
-      super();
+      super(storageProvider);
       setHref("/children");
    }
 
@@ -125,8 +128,10 @@ public class FolderChildrenCollection extends CmisObjectCollection
       String propertyFilter = null;
       String renditionFilter = request.getParameter(AtomCMIS.PARAM_RENDITION_FILTER);
       String orderBy = request.getParameter(AtomCMIS.PARAM_ORDER_BY);
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
          String objectId = getId(request);
          ItemsList<CmisObject> list =
             conn.getChildren(objectId, includeAllowableActions, includeRelationships, includePathSegments, true,
@@ -170,6 +175,11 @@ public class FolderChildrenCollection extends CmisObjectCollection
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
       }
+      finally
+      {
+         if (conn != null)
+            conn.close();
+      }
    }
 
    /**
@@ -209,9 +219,13 @@ public class FolderChildrenCollection extends CmisObjectCollection
          {
             String pName = p.getId();
             if (CMIS.OBJECT_TYPE_ID.equals(pName))
+            {
                typeId = ((IdProperty)p).getValues().get(0);
+            }
             else if (CMIS.OBJECT_ID.equals(pName))
+            {
                id = ((IdProperty)p).getValues().get(0);
+            }
          }
       }
       else
@@ -223,8 +237,10 @@ public class FolderChildrenCollection extends CmisObjectCollection
          object.getProperties().put(idProperty.getId(), idProperty);
       }
 
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
          String objectId = null;
          if (id != null)
          {
@@ -316,6 +332,11 @@ public class FolderChildrenCollection extends CmisObjectCollection
       {
          return createErrorResponse(t, 500);
       }
+      finally
+      {
+         if (conn != null)
+            conn.close();
+      }
 
       entry = request.getAbdera().getFactory().newEntry();
       try
@@ -352,7 +373,6 @@ public class FolderChildrenCollection extends CmisObjectCollection
       String id = getId(request);
 
       // Children link.
-      String repositoryId = getRepositoryId(request);
       feed.addLink(getChildrenLink(id, request), AtomCMIS.LINK_DOWN, AtomCMIS.MEDIATYPE_ATOM_FEED, null, null, -1);
 
       // Descendants link.
@@ -366,34 +386,44 @@ public class FolderChildrenCollection extends CmisObjectCollection
          feed.addLink(folderTree, AtomCMIS.LINK_CMIS_FOLDERTREE, AtomCMIS.MEDIATYPE_ATOM_FEED, null, null, -1);
 
       // Parent link for not root folder.
-      if (!id.equals(conn.getStorage().getRepositoryInfo().getRootFolderId()))
+      Connection conn = null;
+      try
       {
-         try
+         conn = getConnection(request);
+         if (!id.equals(conn.getStorage().getRepositoryInfo().getRootFolderId()))
          {
-            CmisObject parent = conn.getFolderParent(id, true, null);
-            feed.addLink(getObjectLink(getId(parent), request), AtomCMIS.LINK_UP, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null,
-               null, -1);
+            try
+            {
+               CmisObject parent = conn.getFolderParent(id, true, null);
+               feed.addLink(getObjectLink(getId(parent), request), AtomCMIS.LINK_UP, AtomCMIS.MEDIATYPE_ATOM_ENTRY,
+                  null, null, -1);
+            }
+            catch (StorageException re)
+            {
+               throw new ResponseContextException(createErrorResponse(re, 500));
+            }
+            catch (FilterNotValidException fe)
+            {
+               throw new ResponseContextException(createErrorResponse(fe, 400));
+            }
+            catch (ObjectNotFoundException onfe)
+            {
+               throw new ResponseContextException(createErrorResponse(onfe, 404));
+            }
+            catch (InvalidArgumentException iae)
+            {
+               throw new ResponseContextException(createErrorResponse(iae, 400));
+            }
+            catch (Throwable t)
+            {
+               throw new ResponseContextException(createErrorResponse(t, 500));
+            }
          }
-         catch (StorageException re)
-         {
-            throw new ResponseContextException(createErrorResponse(re, 500));
-         }
-         catch (FilterNotValidException fe)
-         {
-            throw new ResponseContextException(createErrorResponse(fe, 400));
-         }
-         catch (ObjectNotFoundException onfe)
-         {
-            throw new ResponseContextException(createErrorResponse(onfe, 404));
-         }
-         catch (InvalidArgumentException iae)
-         {
-            throw new ResponseContextException(createErrorResponse(iae, 400));
-         }
-         catch (Throwable t)
-         {
-            throw new ResponseContextException(createErrorResponse(t, 500));
-         }
+      }
+      finally
+      {
+         if (conn != null)
+            conn.close();
       }
       return feed;
    }
