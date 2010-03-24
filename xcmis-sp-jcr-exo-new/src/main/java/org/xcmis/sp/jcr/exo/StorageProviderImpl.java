@@ -102,7 +102,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
 
    private final RepositoryService repositoryService;
    
-   private RenditionManager renditionManager;
+   private RenditionManagerImpl renditionManager;
 
    private final Map<String, StorageConfiguration> storages = new HashMap<String, StorageConfiguration>();
    
@@ -173,7 +173,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
 
          
          if (renditionManager == null)
-            renditionManager  =  new RenditionManager(renditionProviders, session);
+            renditionManager  =  new RenditionManagerImpl(renditionProviders, session);
          
          Storage storage = new StorageImpl(session, indexListenerFactory.getIndexListener(id), configuration,renditionManager);
          return new JcrConnection(storage);

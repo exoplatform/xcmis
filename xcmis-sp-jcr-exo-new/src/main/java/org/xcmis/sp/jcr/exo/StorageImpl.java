@@ -98,7 +98,7 @@ public class StorageImpl implements Storage
    private final StorageConfiguration configuration;
    
    /** The rendition manager. */
-   private RenditionManager renditionManager;
+   private RenditionManagerImpl renditionManager;
 
    
 
@@ -112,7 +112,7 @@ public class StorageImpl implements Storage
    }
 
    
-   public StorageImpl(Session session, IndexListener indexListener, StorageConfiguration configuration, RenditionManager renditionManager)
+   public StorageImpl(Session session, IndexListener indexListener, StorageConfiguration configuration, RenditionManagerImpl renditionManager)
    {
       this.session = session;
       this.indexListener = indexListener;
@@ -675,7 +675,7 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public RenditionManager getRenditionManager()
+   public RenditionManagerImpl getRenditionManager()
    {
       return renditionManager;
    }
