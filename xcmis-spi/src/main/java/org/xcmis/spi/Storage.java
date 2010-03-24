@@ -24,6 +24,7 @@ import org.xcmis.spi.data.Folder;
 import org.xcmis.spi.data.ObjectData;
 import org.xcmis.spi.data.Policy;
 import org.xcmis.spi.data.Relationship;
+import org.xcmis.spi.object.RenditionManager;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 
