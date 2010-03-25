@@ -35,6 +35,7 @@ import org.xcmis.search.query.optimize.CriteriaBasedOptimizer;
 import org.xcmis.search.query.plan.SimplePlaner;
 import org.xcmis.search.result.ScoredRow;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -77,7 +78,7 @@ public abstract class SearchService implements Startable, ContentModificationLis
    }
 
    /**
-    * Execute query of the given type
+    * Execute query
     * 
     * @param query
     * @param type
@@ -97,6 +98,18 @@ public abstract class SearchService implements Startable, ContentModificationLis
       {
          throw new InvalidQueryException(e.getLocalizedMessage(), e);
       }
+   }
+
+   /**
+    * Execute query
+    * @param query
+    * @return
+    * @throws InvalidQueryException
+    */
+   @SuppressWarnings("unchecked")
+   public List<ScoredRow> execute(Query query) throws InvalidQueryException
+   {
+      return execute(query, Collections.EMPTY_MAP);
    }
 
    /**
