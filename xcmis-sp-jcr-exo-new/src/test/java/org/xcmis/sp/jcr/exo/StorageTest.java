@@ -21,7 +21,6 @@ package org.xcmis.sp.jcr.exo;
 
 import org.exoplatform.services.jcr.access.AccessControlList;
 import org.exoplatform.services.jcr.access.PermissionType;
-import org.exoplatform.services.jcr.core.CredentialsImpl;
 import org.exoplatform.services.jcr.core.ExtendedNode;
 import org.xcmis.spi.AccessControlEntry;
 import org.xcmis.spi.CMIS;
@@ -53,7 +52,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.jcr.Node;
-import javax.jcr.Session;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
@@ -149,7 +147,9 @@ public class StorageTest extends BaseTest
          for (String s : source)
          {
             if (sb.length() > 0)
+            {
                sb.append(',');
+            }
             sb.append(s);
          }
          fail("Object(s) " + sb.toString() + " were not found in children list.");
@@ -464,7 +464,9 @@ public class StorageTest extends BaseTest
       assertNotNull(failedDelete);
       assertEquals(expectedFailedDelete.size(), failedDelete.size());
       for (String id : failedDelete)
+      {
          assertTrue("Object " + id + " must be in 'failed delete list'.", expectedFailedDelete.contains(id));
+      }
    }
 
    public void testGetTypeChildren()

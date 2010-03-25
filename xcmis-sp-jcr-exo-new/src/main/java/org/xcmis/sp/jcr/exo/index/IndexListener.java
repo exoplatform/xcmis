@@ -21,7 +21,9 @@ package org.xcmis.sp.jcr.exo.index;
 
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.xcmis.search.SearchService;
 import org.xcmis.spi.EventJournal;
+import org.xcmis.spi.Storage;
 import org.xcmis.spi.data.ObjectData;
 
 /**
@@ -33,8 +35,21 @@ public class IndexListener implements EventJournal
 
    private static final Log LOG = ExoLogger.getLogger(IndexListener.class);
 
-   public IndexListener(String storage)
+   /**
+    * Index storage.
+    */
+   private final SearchService searchService;
+
+   /**
+    * Content storage
+    */
+   private final Storage storage;
+
+   public IndexListener(Storage storage, SearchService searchService)
    {
+      this.storage = storage;
+      this.searchService = searchService;
+
    }
 
    public void created(ObjectData object)

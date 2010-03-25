@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 eXo Platform SAS.
  *
  * This is free software; you can redistribute it and/or modify it
@@ -16,20 +16,37 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-
 package org.xcmis.sp.jcr.exo.index;
 
-/**
- * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
- * @version $Id$
- */
-public class IndexListenerFactory
-{
+import org.apache.lucene.document.Document;
+import org.xcmis.search.lucene.index.IndexDataKeeper;
+import org.xcmis.search.lucene.index.IndexRestoreService;
+import org.xcmis.spi.Storage;
 
-   // TODO : configuration instead id ???
-   public IndexListener getIndexListener(String storage)
+/**
+ * @author <a href="mailto:Sergey.Kabashnyuk@exoplatform.org">Sergey Kabashnyuk</a>
+ * @version $Id: exo-jboss-codetemplates.xml 34360 2009-07-22 23:58:59Z ksm $
+ *
+ */
+public class CmisRestoreService implements IndexRestoreService
+{
+   private final Storage storage;
+
+   /**
+    * @param storage
+    */
+   public CmisRestoreService(Storage storage)
    {
-      return null;
+      super();
+      this.storage = storage;
+   }
+
+   /**
+    * @see org.xcmis.search.lucene.index.IndexRestoreService#restoreIndex(org.xcmis.search.lucene.index.IndexDataKeeper)
+    */
+   public void restoreIndex(IndexDataKeeper<Document> indexDataKeeper)
+   {
+
    }
 
 }

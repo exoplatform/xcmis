@@ -56,10 +56,10 @@ import org.xcmis.spi.data.Folder;
 import org.xcmis.spi.data.ObjectData;
 import org.xcmis.spi.data.Policy;
 import org.xcmis.spi.data.Relationship;
-import org.xcmis.spi.object.RenditionManager;
 import org.xcmis.spi.impl.AllowableActionsImpl;
 import org.xcmis.spi.impl.BaseItemsIterator;
 import org.xcmis.spi.impl.CmisVisitor;
+import org.xcmis.spi.object.RenditionManager;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 
@@ -97,30 +97,41 @@ public class StorageImpl implements Storage
    protected final Session session;
 
    private final StorageConfiguration configuration;
-   
+
    /** The rendition manager. */
    private RenditionManager renditionManager;
 
-   
+   private IndexListener indexListener;
 
-   private final IndexListener indexListener;
-
-   public StorageImpl(Session session, IndexListener indexListener, StorageConfiguration configuration)
+   public StorageImpl(Session session, StorageConfiguration configuration)
    {
       this.session = session;
-      this.indexListener = indexListener;
       this.configuration = configuration;
    }
 
-   
-   public StorageImpl(Session session, IndexListener indexListener, StorageConfiguration configuration, RenditionManagerImpl renditionManager)
+   public StorageImpl(Session session, StorageConfiguration configuration, RenditionManagerImpl renditionManager)
    {
       this.session = session;
-      this.indexListener = indexListener;
       this.configuration = configuration;
       this.renditionManager = renditionManager;
    }
-   
+
+   /**
+    * @return the indexListener
+    */
+   public IndexListener getIndexListener()
+   {
+      return indexListener;
+   }
+
+   /**
+    * @param indexListener the indexListener to set
+    */
+   public void setIndexListener(IndexListener indexListener)
+   {
+      this.indexListener = indexListener;
+   }
+
    /**
     * {@inheritDoc}
     */
@@ -145,9 +156,13 @@ public class StorageImpl implements Storage
          List<String> declaredSupertypeNames = new ArrayList<String>();
          declaredSupertypeNames.add(JcrTypeHelper.getNodeTypeName(parentId));
          if (parentType.getBaseId() == BaseType.DOCUMENT)
+         {
             declaredSupertypeNames.add(JcrCMIS.CMIS_MIX_DOCUMENT);
+         }
          else if (parentType.getBaseId() == BaseType.FOLDER)
+         {
             declaredSupertypeNames.add(JcrCMIS.CMIS_MIX_FOLDER);
+         }
 
          nodeTypeValue.setDeclaredSupertypeNames(declaredSupertypeNames);
          nodeTypeValue.setMixin(false);
@@ -187,7 +202,9 @@ public class StorageImpl implements Storage
                      {
                         defaultValues = new ArrayList<String>(booleans.length);
                         for (Boolean v : booleans)
+                        {
                            defaultValues.add(v.toString());
+                        }
                      }
                      break;
 
@@ -198,7 +215,9 @@ public class StorageImpl implements Storage
                      {
                         defaultValues = new ArrayList<String>(dates.length);
                         for (Calendar v : dates)
+                        {
                            defaultValues.add(createJcrDate(v));
+                        }
                      }
                      break;
 
@@ -209,7 +228,9 @@ public class StorageImpl implements Storage
                      {
                         defaultValues = new ArrayList<String>(decimals.length);
                         for (BigDecimal v : decimals)
+                        {
                            defaultValues.add(Double.toString(v.doubleValue()));
+                        }
                      }
                      break;
 
@@ -220,7 +241,9 @@ public class StorageImpl implements Storage
                      {
                         defaultValues = new ArrayList<String>(ints.length);
                         for (BigInteger v : ints)
+                        {
                            defaultValues.add(Long.toString(v.longValue()));
+                        }
                      }
                      break;
 
@@ -236,7 +259,9 @@ public class StorageImpl implements Storage
                      {
                         defaultValues = new ArrayList<String>(str.length);
                         for (String v : str)
+                        {
                            defaultValues.add(v);
+                        }
                      }
                      break;
                }
@@ -361,21 +386,31 @@ public class StorageImpl implements Storage
       throws ConstraintException, StorageException
    {
       // TODO : remove when implement unfiling feature.
-      if (folder == null) // Exception should be raised before but re-check to avoid NPE.
+      if (folder == null)
+      {
          throw new NotSupportedException("Unfiling capability is not supported.");
+      }
 
       if (folder.isNew())
+      {
          throw new CmisRuntimeException("Unable create document in newly created folder.");
+      }
 
       if (source.isNew())
+      {
          throw new CmisRuntimeException("Unable use newly created document as source.");
+      }
 
       if (source.getBaseType() != BaseType.DOCUMENT)
+      {
          throw new ConstraintException("Source object has type whose base type is not Document.");
+      }
 
       if (!folder.isAllowedChildType(source.getTypeId()))
+      {
          throw new ConstraintException("Type " + source.getTypeId()
             + " is not in list of allowed child type for folder " + folder.getObjectId());
+      }
 
       DocumentCopy copy = new DocumentCopy(source, folder, session, versioningState);
 
@@ -389,20 +424,28 @@ public class StorageImpl implements Storage
       throws ConstraintException
    {
       // TODO : remove when implement unfiling feature.
-      if (folder == null) // Exception should be raised before but re-check to avoid NPE.
+      if (folder == null)
+      {
          throw new NotSupportedException("Unfiling capability is not supported.");
+      }
 
       if (folder.isNew())
+      {
          throw new CmisRuntimeException("Unable create document in newly created folder.");
+      }
 
       if (!folder.isAllowedChildType(typeId))
+      {
          throw new ConstraintException("Type " + typeId + " is not in list of allowed child type for folder "
             + folder.getObjectId());
+      }
 
       TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
 
       if (typeDefinition.getBaseId() != BaseType.DOCUMENT)
+      {
          throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Document.");
+      }
 
       Document document = new DocumentImpl(typeDefinition, folder, session, versioningState);
 
@@ -414,20 +457,28 @@ public class StorageImpl implements Storage
     */
    public Folder createFolder(Folder folder, String typeId) throws ConstraintException
    {
-      if (folder == null) // Exception should be raised before but re-check to avoid NPE.
+      if (folder == null)
+      {
          throw new ConstraintException("Parent folder must be provided.");
+      }
 
       if (folder.isNew())
+      {
          throw new CmisRuntimeException("Unable create child folder in newly created folder.");
+      }
 
       if (!folder.isAllowedChildType(typeId))
+      {
          throw new ConstraintException("Type " + typeId + " is not in list of allowed child type for folder "
             + folder.getObjectId());
+      }
 
       TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
 
       if (typeDefinition.getBaseId() != BaseType.FOLDER)
+      {
          throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Folder.");
+      }
 
       Folder newFolder = new FolderImpl(typeDefinition, folder, session);
 
@@ -440,20 +491,28 @@ public class StorageImpl implements Storage
    public Policy createPolicy(Folder folder, String typeId) throws ConstraintException
    {
       // TODO : remove when implement unfiling feature.
-      if (folder == null) // Exception should be raised before but re-check to avoid NPE.
+      if (folder == null)
+      {
          throw new NotSupportedException("Unfiling capability is not supported.");
+      }
 
       if (folder.isNew())
+      {
          throw new CmisRuntimeException("Unable create policy in newly created folder.");
+      }
 
       if (!folder.isAllowedChildType(typeId))
+      {
          throw new ConstraintException("Type " + typeId + " is not in list of allowed child type for folder "
             + folder.getObjectId());
+      }
 
       TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
 
       if (typeDefinition.getBaseId() != BaseType.POLICY)
+      {
          throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Policy.");
+      }
 
       Policy policy = new PolicyImpl(typeDefinition, folder, session);
 
@@ -467,15 +526,21 @@ public class StorageImpl implements Storage
       throws ConstraintException
    {
       if (source.isNew())
+      {
          throw new CmisRuntimeException("Unable use newly created object as relationship source.");
+      }
 
       if (target.isNew())
+      {
          throw new CmisRuntimeException("Unable use newly created object as relationship target.");
+      }
 
       TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
 
       if (typeDefinition.getBaseId() != BaseType.RELATIONSHIP)
+      {
          throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Relationship.");
+      }
 
       Relationship relationship = new RelationshipImpl(typeDefinition, source, target, session);
 
@@ -494,23 +559,31 @@ public class StorageImpl implements Storage
          // Any way at the moment we are not able remove 'base version' of
          // versionable node, so have not common behavior.
          if (object.getTypeDefinition().isVersionable() && !deleteAllVersions)
+         {
             throw new CmisRuntimeException("Unable delete only specified version.");
+         }
       }
       else if (object.getBaseType() == BaseType.FOLDER)
       {
          if (((Folder)object).isRoot())
+         {
             throw new ConstraintException("Root folder can't be removed.");
+         }
 
          if (((Folder)object).hasChildren())
+         {
             throw new ConstraintException("Failed delete object. Object " + object
                + " is Folder and contains one or more objects.");
+         }
       }
 
       String objectId = object.getObjectId();
-      
+
       ((BaseObjectData)object).delete();
-      
-      indexListener.removed(objectId);
+      if (indexListener != null)
+      {
+         indexListener.removed(objectId);
+      }
    }
 
    /**
@@ -521,8 +594,10 @@ public class StorageImpl implements Storage
    {
       final List<String> failedToDelete = new ArrayList<String>();
 
-      if (!deleteAllVersions) // Throw exception to avoid unexpected removing data.
+      if (!deleteAllVersions)
+      {
          throw new CmisRuntimeException("Unable delete only specified version.");
+      }
 
       boolean successful = false;
       String folderId = folder.getObjectId();
@@ -537,7 +612,9 @@ public class StorageImpl implements Storage
          // All or nothing should be removed in this implementation,
          // so return list of all object's IDs in this tree.
          if (LOG.isDebugEnabled())
+         {
             LOG.warn(e.getMessage(), e);
+         }
 
          try
          {
@@ -555,14 +632,18 @@ public class StorageImpl implements Storage
                if (object.getBaseType() == BaseType.FOLDER)
                {
                   for (ItemsIterator<ObjectData> children = ((Folder)object).getChildren(null); children.hasNext();)
+                  {
                      children.next().accept(this);
+                  }
                }
                failedToDelete.add(object.getObjectId());
             }
          });
       }
       if (successful)
+      {
          indexListener.removed(folderId);
+      }
       return failedToDelete;
    }
 
@@ -605,13 +686,21 @@ public class StorageImpl implements Storage
          TypeDefinition type = JcrTypeHelper.getTypeDefinition(node.getPrimaryNodeType(), true);
 
          if (type.getBaseId() == BaseType.DOCUMENT)
+         {
             return new DocumentImpl(type, node, renditionManager);
+         }
          else if (type.getBaseId() == BaseType.FOLDER)
+         {
             return new FolderImpl(type, node);
+         }
          else if (type.getBaseId() == BaseType.POLICY)
+         {
             return new PolicyImpl(type, node);
+         }
          else if (type.getBaseId() == BaseType.RELATIONSHIP)
+         {
             return new RelationshipImpl(type, node);
+         }
 
          // Must never happen.
          throw new CmisRuntimeException("Unknown base type. ");
@@ -635,20 +724,30 @@ public class StorageImpl implements Storage
       {
          Item item = session.getItem(path);
          if (!item.isNode())
+         {
             throw new ObjectNotFoundException("Object " + path + " does not exists.");
+         }
 
          Node node = (Node)item;
 
          TypeDefinition type = JcrTypeHelper.getTypeDefinition(node.getPrimaryNodeType(), true);
 
          if (type.getBaseId() == BaseType.DOCUMENT)
+         {
             return new DocumentImpl(type, node, renditionManager);
+         }
          else if (type.getBaseId() == BaseType.FOLDER)
+         {
             return new FolderImpl(type, node);
+         }
          else if (type.getBaseId() == BaseType.POLICY)
+         {
             return new PolicyImpl(type, node);
+         }
          else if (type.getBaseId() == BaseType.RELATIONSHIP)
+         {
             return new RelationshipImpl(type, node);
+         }
 
          // Must never happen.
          throw new CmisRuntimeException("Unknown base type. ");
@@ -666,11 +765,15 @@ public class StorageImpl implements Storage
    public ItemsIterator<Rendition> getRenditions(ObjectData object)
    {
       if (renditionManager != null)
+      {
          return renditionManager.getRenditions(object);
+      }
       else
+      {
          return null;
+      }
    }
-   
+
    /**
     * {@inheritDoc}
     */
@@ -691,7 +794,9 @@ public class StorageImpl implements Storage
          if (typeId == null)
          {
             for (String t : new String[]{"cmis:document", "cmis:folder", "cmis:policy", "cmis:relationship"})
+            {
                types.add(getTypeDefinition(t, includePropertyDefinitions));
+            }
          }
          else
          {
@@ -702,7 +807,9 @@ public class StorageImpl implements Storage
                NodeType nt = iter.nextNodeType();
                // Get only direct children of specified type.
                if (nt.isNodeType(nodeTypeName) && getTypeLevelHierarchy(nt, nodeTypeName) == 1)
+               {
                   types.add(JcrTypeHelper.getTypeDefinition(nt, includePropertyDefinitions));
+               }
             }
          }
          return new BaseItemsIterator<TypeDefinition>(types);
@@ -744,7 +851,9 @@ public class StorageImpl implements Storage
       try
       {
          if (LOG.isDebugEnabled())
+         {
             LOG.debug("Move object " + object + " to " + target + " from " + source);
+         }
 
          String objectPath = ((BaseObjectData)object).getNode().getPath();
          String destinationPath = ((BaseObjectData)target).getNode().getPath();
@@ -752,7 +861,9 @@ public class StorageImpl implements Storage
          session.getWorkspace().move(objectPath, destinationPath);
 
          if (LOG.isDebugEnabled())
+         {
             LOG.debug("Object moved in " + destinationPath);
+         }
 
          return getObjectByPath(destinationPath);
       }
@@ -768,8 +879,7 @@ public class StorageImpl implements Storage
 
    public ItemsIterator<Result> query(Query query) throws InvalidArgumentException
    {
-      // TODO Auto-generated method stub
-      return null;
+      throw new UnsupportedOperationException();
    }
 
    /**
@@ -779,14 +889,20 @@ public class StorageImpl implements Storage
       UpdateConflictException
    {
       boolean isNew = object.isNew();
-      
+
       ((BaseObjectData)object).save();
-      
-      if (isNew)
-         indexListener.created(object);
-      else
-         indexListener.updated(object);
-      
+      if (indexListener != null)
+      {
+         if (isNew)
+         {
+            indexListener.created(object);
+         }
+         else
+         {
+            indexListener.updated(object);
+         }
+      }
+
       return object.getObjectId();
    }
 
@@ -828,7 +944,9 @@ public class StorageImpl implements Storage
       for (NodeType sup : discovered.getSupertypes())
       {
          if (sup.isNodeType(match))
+         {
             level++;
+         }
       }
       return level;
    }

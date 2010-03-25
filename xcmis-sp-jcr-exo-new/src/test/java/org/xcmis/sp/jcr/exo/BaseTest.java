@@ -72,13 +72,16 @@ public abstract class BaseTest extends TestCase
 
    public void setUp() throws Exception
    {
+
       String containerConf = getClass().getResource("/conf/standalone/test-configuration.xml").toString();
       String loginConf = Thread.currentThread().getContextClassLoader().getResource("login.conf").toString();
       StandaloneContainer.addConfigurationURL(containerConf);
       container = StandaloneContainer.getInstance();
 
       if (System.getProperty("java.security.auth.login.config") == null)
+      {
          System.setProperty("java.security.auth.login.config", loginConf);
+      }
 
       credentials = new CredentialsImpl("root", "exo".toCharArray());
 
@@ -111,6 +114,7 @@ public abstract class BaseTest extends TestCase
          });
          shoutDown = true;
       }
+
    }
 
    protected void tearDown() throws Exception
