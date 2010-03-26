@@ -31,19 +31,19 @@ import javax.jcr.RepositoryException;
  * @version $Id: exo-jboss-codetemplates.xml 34360 2009-07-22 23:58:59Z ksm $
  *
  */
-public class JcrPathSpliter implements PathSplitter<String>
+public class JcrPathSplitter implements PathSplitter<String>
 {
    /**
     * Class loger.
     */
-   protected static Log log = ExoLogger.getLogger(JcrPathSpliter.class);
+   protected static Log log = ExoLogger.getLogger(JcrPathSplitter.class);
 
    private final LocationFactory locationFactory;
 
    /**
     * 
     */
-   public JcrPathSpliter(LocationFactory locationFactory)
+   public JcrPathSplitter(LocationFactory locationFactory)
    {
       this.locationFactory = locationFactory;
    }

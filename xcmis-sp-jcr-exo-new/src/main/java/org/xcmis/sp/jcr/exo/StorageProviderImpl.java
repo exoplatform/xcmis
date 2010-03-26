@@ -45,7 +45,7 @@ import org.xcmis.sp.jcr.exo.index.CmisRestoreService;
 import org.xcmis.sp.jcr.exo.index.CmisSchema;
 import org.xcmis.sp.jcr.exo.index.IndexListener;
 import org.xcmis.sp.jcr.exo.index.IndexListenerFactory;
-import org.xcmis.sp.jcr.exo.index.JcrPathSpliter;
+import org.xcmis.sp.jcr.exo.index.JcrPathSplitter;
 import org.xcmis.sp.jcr.exo.rendition.ImageRenditionProvider;
 import org.xcmis.sp.jcr.exo.rendition.PDFDocumentRenditionProvider;
 import org.xcmis.sp.jcr.exo.rendition.RenditionProvider;
@@ -374,7 +374,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
             invocationContext.setNameConverter(new ToStringNameConverter());
             CmisSchema schema = new CmisSchema(storage);
             invocationContext.setSchema(schema);
-            invocationContext.setPathSplitter(new JcrPathSpliter(((SessionImpl)session).getLocationFactory()));
+            invocationContext.setPathSplitter(new JcrPathSplitter(((SessionImpl)session).getLocationFactory()));
             invocationContext.setTableResolver(new SchemaTableResolver(new ToStringNameConverter(), schema));
 
             SearchServiceConfiguration configuration = new SearchServiceConfiguration();
