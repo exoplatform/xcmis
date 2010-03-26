@@ -21,6 +21,8 @@ package org.xcmis.sp.jcr.exo.query;
 
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.UnfileObject;
+import org.xcmis.spi.data.BaseContentStream;
+import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.data.Document;
 import org.xcmis.spi.data.Folder;
 import org.xcmis.spi.object.impl.StringProperty;
@@ -58,6 +60,8 @@ public class QueryUsecasesTest extends BaseQueryTest
    {
       super.setUp();
       testRoot = createFolder(rootFolder, "QueryUsecasesTest", "cmis:folder");
+      // create data
+
    }
 
    /**
@@ -66,6 +70,7 @@ public class QueryUsecasesTest extends BaseQueryTest
    @Override
    protected void tearDown() throws Exception
    {
+
       storage.deleteTree(testRoot, true, UnfileObject.DELETE, true);
       super.tearDown();
 
@@ -74,11 +79,7 @@ public class QueryUsecasesTest extends BaseQueryTest
    /**
     * Simple test.
     * <p>
-    * Initial data:
-    * <ul>
-    * <li>document1: <b>Title</b> - node1
-    * <li>document2: <b>Title</b> - node2
-    * </ul>
+    * All documents from Apollo program
     * <p>
     * Query : Select all CMIS_DOCUMENTS.
     * <p>
@@ -88,14 +89,15 @@ public class QueryUsecasesTest extends BaseQueryTest
     */
    public void testSimpleQuery() throws Exception
    {
-      Document document1 = createDocument(testRoot, "node1", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
-      Document document2 =
-         createDocument(testRoot, "node2", NASA_DOCUMENT, "hello world second".getBytes(), "text/plain");
-
+      List<Document> appolloContent = createApolloContent(testRoot);
       String statement = "SELECT * FROM " + NASA_DOCUMENT;
       Query query = new Query(statement, true);
       ItemsIterator<Result> result = storage.query(query);
-      checkResult(result, new Document[]{document1, document2});
+      checkResult(result, new Document[]{appolloContent.get(1), appolloContent.get(2), appolloContent.get(0)});
+      for (Document doc : appolloContent)
+      {
+         storage.deleteObject(doc, true);
+      }
    }
 
    /**
@@ -120,9 +122,8 @@ public class QueryUsecasesTest extends BaseQueryTest
     */
    public void testAndOrConstraint() throws Exception
    {
-      // create data
-      List<Document> appolloContent = createApolloContent(testRoot);
 
+      List<Document> appolloContent = createApolloContent(testRoot);
       StringBuffer sql = new StringBuffer();
       sql.append("SELECT * ");
       sql.append("FROM ");
@@ -137,6 +138,10 @@ public class QueryUsecasesTest extends BaseQueryTest
       ItemsIterator<Result> result = storage.query(query);
       // check results
       checkResult(result, new Document[]{appolloContent.get(1), appolloContent.get(2)});
+      for (Document doc : appolloContent)
+      {
+         storage.deleteObject(doc, true);
+      }
    }
 
    /**
@@ -191,6 +196,7 @@ public class QueryUsecasesTest extends BaseQueryTest
 
       return result;
    }
+
    //
    //   /**
    //    * Constraints with multi-valued properties is not supported.
@@ -205,191 +211,200 @@ public class QueryUsecasesTest extends BaseQueryTest
    //      String name2 = "fileCS3.doc";
    //      String contentType = "text/plain";
    //
-   //      EntryImpl folder = createFolder(root, "CASETest");
+   //      Document folder = createFolder(root, "CASETest");
    //
-   //      EntryImpl doc1 = createDocument(folder.getObjectId(), name, new byte[0], contentType);
+   //      Document doc1 = createDocument(folder.getObjectId(), name, new byte[0], contentType);
    //      doc1.setDecimals("multivalueLong", new BigDecimal[]{new BigDecimal(3), new BigDecimal(5), new BigDecimal(10)});
    //      doc1.setStrings("multivalueString", new String[]{"bla-bla"});
    //      doc1.save();
    //
-   //      EntryImpl doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
+   //      Document doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
    //      doc2.setDecimals("multivalueLong", new BigDecimal[]{new BigDecimal(15), new BigDecimal(10)});
    //      doc2.setStrings("multivalueString", new String[]{"bla-bla"});
    //      doc2.save();
    //
    //      String statement =
-   //         "SELECT * FROM " + EnumBaseObjectTypeIds.CMIS_DOCUMENT.value() + " WHERE ANY multivalueLong IN ( 3 , 5, 6 ) ";
+   //         "SELECT * FROM " + NASA_DOCUMENT + " WHERE ANY multivalueLong IN ( 3 , 5, 6 ) ";
    //
    //      Query query = new Query(statement, true);
    //
-   //      ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
+   //      ItemsIterator<Result> result = storage.query(query);
    //
    //      // check results
-   //      checkResult(result, new Entry[]{doc1});
+   //      checkResult(result, new Document[]{doc1});
    //   }
    //
-   //   /**
-   //    * Test fulltext constraint.
-   //    * <p>
-   //    * Initial data:
-   //    * <p>
-   //    * see createApolloContent()
-   //    * <p>
-   //    * Query : Select all documents where data contains "moon" word.
-   //    * <p>
-   //    * Expected result: document1 and document2
-   //    * 
-   //    * @throws Exception if an unexpected error occurs
-   //    */
-   //   public void testFulltextConstraint() throws Exception
-   //   {
-   //      EntryImpl folder = createFolder(root, "testFulltextConstraint");
-   //
-   //      List<EntryImpl> appolloContent = createApolloContent(folder);
-   //
-   //      String statement1 = "SELECT * FROM " + EnumBaseObjectTypeIds.CMIS_DOCUMENT.value() + " WHERE CONTAINS(\"moon\")";
-   //      Query query = new Query(statement1, true);
-   //      ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
-   //
-   //      assertEquals(2, result.size());
-   //      checkResult(result, new Entry[]{appolloContent.get(1), appolloContent.get(2)});
-   //
-   //      String statement2 = "SELECT * FROM " + EnumBaseObjectTypeIds.CMIS_DOCUMENT.value() + " WHERE CONTAINS(\"Moon\")";
-   //      query = new Query(statement2, true);
-   //      ItemsIterator<Result> result2 = cmisRepository.getQueryHandler().handleQuery(query);
-   //
-   //      assertEquals(2, result2.size());
-   //      checkResult(result2, new Entry[]{appolloContent.get(1), appolloContent.get(2)});
-   //   }
-   //
-   //   /**
-   //    * Test fulltext constraint.
-   //    * <p>
-   //    * Initial data:
-   //    * <p>
-   //    * see createApolloContent()
-   //    * <p>
-   //    * Query : Select all documents where data contains "moon" word.
-   //    * <p>
-   //    * Expected result: document1 and document2
-   //    * 
-   //    * @throws Exception if an unexpected error occurs
-   //    */
-   //   public void testUpdateFulltextConstraint() throws Exception
-   //   {
-   //      EntryImpl folder = createFolder(root, "testFulltextConstraint");
-   //
-   //      EntryImpl doc3 =
-   //         createDocument(folder.getObjectId(), "Apollo 13", ("Apollo 13 was the third "
-   //            + "manned mission by NASA intended to land on the Moon, but a mid-mission technical "
-   //            + "malfunction forced the lunar landing to be aborted. ").getBytes(), CONTENT_TYPE);
-   //      doc3.setString(PROPERTY_COMMANDER, "James A. Lovell, Jr.");
-   //      doc3.setString(PROPERTY_BOOSTER, "Saturn V");
-   //      doc3.save();
-   //
-   //      String statement1 = "SELECT * FROM " + EnumBaseObjectTypeIds.CMIS_DOCUMENT.value() + " WHERE CONTAINS(\"moon\")";
-   //      Query query = new Query(statement1, true);
-   //      ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
-   //
-   //      assertEquals(1, result.size());
-   //      checkResult(result, new Entry[]{doc3});
-   //
-   //      //replace content
-   //      ContentStream cs = new BaseContentStream("Sun".getBytes(), "test", CONTENT_TYPE);
-   //      doc3.setContent(cs);
-   //
-   //      doc3.save();
-   //
-   //      //check old one
-   //      result = cmisRepository.getQueryHandler().handleQuery(query);
-   //      assertEquals(0, result.size());
-   //      //check new  content
-   //      String statement2 = "SELECT * FROM " + EnumBaseObjectTypeIds.CMIS_DOCUMENT.value() + " WHERE CONTAINS(\"Sun\")";
-   //      query = new Query(statement2, true);
-   //      result = cmisRepository.getQueryHandler().handleQuery(query);
-   //
-   //      assertEquals(1, result.size());
-   //      checkResult(result, new Entry[]{doc3});
-   //
-   //   }
-   //
-   //   /**
-   //    * Test 'IN' constraint.
-   //    * <p>
-   //    * Initial data:
-   //    * <ul>
-   //    * <li>document1: <b>Title</b> - node1 <b>name</b> - supervisor
-   //    * <li>document2: <b>Title</b> - node2 <b>name</b> - anyname
-   //    * </ul>
-   //    * <p>
-   //    * Query : Select all documents where name is in set {'admin' , 'supervisor' ,
-   //    * 'Vasya' }.
-   //    * <p>
-   //    * Expected result: document2 and document3
-   //    * 
-   //    * @throws Exception if an unexpected error occurs
-   //    */
-   //   public void testINConstraint() throws Exception
-   //   {
-   //
-   //      EntryImpl document1 = createDocument(root, "node1", "hello world".getBytes(), "text/plain");
-   //      document1.setString("employee", "supervisor");
-   //      document1.save();
-   //
-   //      EntryImpl document2 = createDocument(root, "node2", "hello world".getBytes(), "text/plain");
-   //      document2.setString("employee", "anyname");
-   //      document2.save();
-   //
-   //      String statement =
-   //         "SELECT * FROM " + EnumBaseObjectTypeIds.CMIS_DOCUMENT.value()
-   //            + " WHERE employee IN ('admin', 'supervisor', 'Vasya')";
-   //
-   //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
-   //      assertEquals(1, result.size());
-   //      checkResult(result, new Entry[]{document1});
-   //   }
-   //
-   //   /**
-   //    * Test IN_FOLDER constraint.
-   //    * <p>
-   //    * Initial data:
-   //    * <ul>
-   //    * <li>folder1:
-   //    * <li>doc1: <b>Title</b> - node1
-   //    * <li>folder2
-   //    * <li>doc2: <b>Title</b> - node2
-   //    * </ul>
-   //    * <p>
-   //    * Query : Select all documents that are in folder1.
-   //    * <p>
-   //    * Expected result: doc1
-   //    * 
-   //    * @throws Exception if an unexpected error occurs
-   //    */
-   //   public void testDocumentInFolderConstrain() throws Exception
-   //   {
-   //      // create data
-   //      EntryImpl folder1 = this.createFolder(root, "folder1");
-   //      EntryImpl doc1 = createDocument(folder1.getObjectId(), "node1", "hello world".getBytes(), "text/plain");
-   //
-   //      EntryImpl folder2 = this.createFolder(root, "folder2");
-   //      EntryImpl doc2 = createDocument(folder2.getObjectId(), "node2", "hello world".getBytes(), "text/plain");
-   //
-   //      EntryImpl folder3 = this.createFolder(folder1.getObjectId(), "folder2");
-   //      EntryImpl doc3 = createDocument(folder3.getObjectId(), "node3", "hello world".getBytes(), "text/plain");
-   //
-   //      String statement =
-   //         "SELECT * FROM " + EnumBaseObjectTypeIds.CMIS_DOCUMENT.value() + " WHERE IN_FOLDER( '" + folder1.getObjectId()
-   //            + "')";
-   //
-   //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
-   //
-   //      // check results
-   //      checkResult(result, new Entry[]{doc1});
-   //
-   //   }
+   /**
+    * Test fulltext constraint.
+    * <p>
+    * Initial data:
+    * <p>
+    * see createApolloContent()
+    * <p>
+    * Query : Select all documents where data contains "moon" word.
+    * <p>
+    * Expected result: document1 and document2
+    * 
+    * @throws Exception if an unexpected error occurs
+    */
+   public void testFulltextConstraint() throws Exception
+   {
+
+      List<Document> appolloContent = createApolloContent(testRoot);
+
+      String statement1 = "SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"moon\")";
+      Query query = new Query(statement1, true);
+      ItemsIterator<Result> result = storage.query(query);
+
+      assertEquals(2, result.size());
+      checkResult(result, new Document[]{appolloContent.get(1), appolloContent.get(2)});
+
+      String statement2 = "SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"Moon\")";
+      query = new Query(statement2, true);
+      ItemsIterator<Result> result2 = storage.query(query);
+
+      assertEquals(2, result2.size());
+      checkResult(result2, new Document[]{appolloContent.get(1), appolloContent.get(2)});
+
+      for (Document doc : appolloContent)
+      {
+         storage.deleteObject(doc, true);
+      }
+   }
+
+   /**
+    * Test fulltext constraint.
+    * <p>
+    * Initial data:
+    * <p>
+    * see createApolloContent()
+    * <p>
+    * Query : Select all documents where data contains "moon" word.
+    * <p>
+    * Expected result: document1 and document2
+    * 
+    * @throws Exception if an unexpected error occurs
+    */
+   public void testUpdateFulltextConstraint() throws Exception
+   {
+
+      Document doc3 =
+         createDocument(testRoot, "Apollo 13", NASA_DOCUMENT, ("Apollo 13 was the third "
+            + "manned mission by NASA intended to land on the Moon, but a mid-mission technical "
+            + "malfunction forced the lunar landing to be aborted. ").getBytes(), CONTENT_TYPE);
+      doc3.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+         PROPERTY_COMMANDER, "James A. Lovell, Jr."));
+      doc3.setProperty(new StringProperty(PROPERTY_BOOSTER, PROPERTY_BOOSTER, PROPERTY_BOOSTER, PROPERTY_BOOSTER,
+         "Saturn V"));
+      storage.saveObject(doc3);
+
+      String statement1 = "SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"moon\")";
+      Query query = new Query(statement1, true);
+      ItemsIterator<Result> result = storage.query(query);
+
+      assertEquals(1, result.size());
+      checkResult(result, new Document[]{doc3});
+
+      //replace content
+      ContentStream cs = new BaseContentStream("Sun".getBytes(), "test", CONTENT_TYPE);
+      doc3.setContentStream(cs);
+
+      storage.saveObject(doc3);
+
+      //check old one
+      result = storage.query(query);
+      assertEquals(0, result.size());
+      //check new  content
+      String statement2 = "SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"Sun\")";
+      query = new Query(statement2, true);
+      result = storage.query(query);
+
+      assertEquals(1, result.size());
+      checkResult(result, new Document[]{doc3});
+
+      storage.deleteObject(doc3, true);
+
+   }
+
+   /**
+    * Test 'IN' constraint.
+    * <p>
+    * Initial data:
+    * <ul>
+    * <li>document1: <b>Title</b> - node1 <b>name</b> - supervisor
+    * <li>document2: <b>Title</b> - node2 <b>name</b> - anyname
+    * </ul>
+    * <p>
+    * Query : Select all documents where name is in set {'admin' , 'supervisor' ,
+    * 'Vasya' }.
+    * <p>
+    * Expected result: document2 and document3
+    * 
+    * @throws Exception if an unexpected error occurs
+    */
+   public void testINConstraint() throws Exception
+   {
+
+      List<Document> appolloContent = createApolloContent(testRoot);
+
+      String statement =
+         "SELECT * FROM " + NASA_DOCUMENT + " WHERE " + PROPERTY_COMMANDER
+            + " IN ('Virgil I. Grissom', 'Frank F. Borman, II', 'Charles Conrad, Jr.')";
+
+      Query query = new Query(statement, true);
+      ItemsIterator<Result> result = storage.query(query);
+      assertEquals(1, result.size());
+      checkResult(result, new Document[]{appolloContent.get(1)});
+      for (Document doc : appolloContent)
+      {
+         storage.deleteObject(doc, true);
+      }
+   }
+
+   /**
+    * Test IN_FOLDER constraint.
+    * <p>
+    * Initial data:
+    * <ul>
+    * <li>folder1:
+    * <li>doc1: <b>Title</b> - node1
+    * <li>folder2
+    * <li>doc2: <b>Title</b> - node2
+    * </ul>
+    * <p>
+    * Query : Select all documents that are in folder1.
+    * <p>
+    * Expected result: doc1
+    * 
+    * @throws Exception if an unexpected error occurs
+    */
+   public void testDocumentInFolderConstrain() throws Exception
+   {
+      // create data
+      Folder testRoot1 = createFolder(rootFolder, "testDocumentInFolderConstrain1", "cmis:folder");
+      Folder testRoot2 = createFolder(rootFolder, "testDocumentInFolderConstrain2", "cmis:folder");
+
+      List<Document> appolloContent = createApolloContent(testRoot1);
+      List<Document> appolloContent2 = createApolloContent(testRoot2);
+
+      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE IN_FOLDER( '" + testRoot2.getObjectId() + "')";
+
+      Query query = new Query(statement, true);
+      ItemsIterator<Result> result = storage.query(query);
+
+      // check results
+      checkResult(result, new Document[]{appolloContent2.get(1), appolloContent2.get(2), appolloContent2.get(0)});
+
+      for (Document doc : appolloContent)
+      {
+         storage.deleteObject(doc, true);
+      }
+      for (Document doc : appolloContent2)
+      {
+         storage.deleteObject(doc, true);
+      }
+
+   }
    //
    //   /**
    //    * Test IN_FOLDER constraint.
@@ -417,24 +432,24 @@ public class QueryUsecasesTest extends BaseQueryTest
    //   public void testFolderInFolderConstrain() throws Exception
    //   {
    //      // create data
-   //      EntryImpl folder1 = this.createFolder(root, "folder1");
-   //      EntryImpl doc1 = createDocument(folder1.getObjectId(), "node1", "hello world".getBytes(), "text/plain");
+   //      Document folder1 = this.createFolder(root, "folder1");
+   //      Document doc1 = createDocument(folder1.getObjectId(), "node1", "hello world".getBytes(), "text/plain");
    //
-   //      EntryImpl folder2 = this.createFolder(root, "folder2");
-   //      EntryImpl doc2 = createDocument(folder2.getObjectId(), "node2", "hello world".getBytes(), "text/plain");
+   //      Document folder2 = this.createFolder(root, "folder2");
+   //      Document doc2 = createDocument(folder2.getObjectId(), "node2", "hello world".getBytes(), "text/plain");
    //
-   //      EntryImpl folder3 = this.createFolder(folder1.getObjectId(), "folder3");
-   //      EntryImpl doc3 = createDocument(folder3.getObjectId(), "node3", "hello world".getBytes(), "text/plain");
+   //      Document folder3 = this.createFolder(folder1.getObjectId(), "folder3");
+   //      Document doc3 = createDocument(folder3.getObjectId(), "node3", "hello world".getBytes(), "text/plain");
    //
-   //      EntryImpl folder4 = this.createFolder(folder3.getObjectId(), "folder4");
+   //      Document folder4 = this.createFolder(folder3.getObjectId(), "folder4");
    //
    //      String statement = "SELECT * FROM " + JcrCMIS.NT_FOLDER + " WHERE IN_FOLDER( '" + folder1.getObjectId() + "')";
    //
    //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
+   //      ItemsIterator<Result> result = storage.query(query);
    //
    //      // check results
-   //      checkResult(result, new Entry[]{folder3});
+   //      checkResult(result, new Document[]{folder3});
    //
    //   }
    //
@@ -460,24 +475,24 @@ public class QueryUsecasesTest extends BaseQueryTest
    //   public void _testJoinWithCondition() throws Exception
    //   {
    //      // create data
-   //      EntryImpl folder1 = this.createFolder(root, "folder1");
+   //      Document folder1 = this.createFolder(root, "folder1");
    //      folder1.setString("folderName", "folderOne");
    //
-   //      EntryImpl doc1 = createDocument(folder1.getObjectId(), "node1", "hello world".getBytes(), "text/plain");
+   //      Document doc1 = createDocument(folder1.getObjectId(), "node1", "hello world".getBytes(), "text/plain");
    //      doc1.setString("parentFolderName", "folderOne");
    //
-   //      EntryImpl folder2 = this.createFolder(root, "folder2");
+   //      Document folder2 = this.createFolder(root, "folder2");
    //      folder2.setString("folderName", "folderTwo");
    //
-   //      EntryImpl doc2 = createDocument(folder2.getObjectId(), "node1", "hello world".getBytes(), "text/plain");
+   //      Document doc2 = createDocument(folder2.getObjectId(), "node1", "hello world".getBytes(), "text/plain");
    //      doc2.setString("parentFolderName", "folderThree");
    //
    //      String statement =
-   //         "SELECT doc.* FROM " + EnumBaseObjectTypeIds.CMIS_DOCUMENT.value() + " AS doc LEFT JOIN " + JcrCMIS.NT_FOLDER
+   //         "SELECT doc.* FROM " + NASA_DOCUMENT + " AS doc LEFT JOIN " + JcrCMIS.NT_FOLDER
    //            + " AS folder ON (doc.parentFolderName = folder.folderName)";
    //
    //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
+   //      ItemsIterator<Result> result = storage.query(query);
    //
    //      assertEquals(1, result.size());
    //      // TODO check results - must doc1 and folder1
@@ -501,25 +516,24 @@ public class QueryUsecasesTest extends BaseQueryTest
    //    */
    //   public void testLIKEConstraint() throws Exception
    //   {
-   //      EntryImpl doc1 = createDocument(root, "node1", "hello world".getBytes(), "text/plain");
+   //      Document doc1 = createDocument(root, "node1", "hello world".getBytes(), "text/plain");
    //      doc1.setString("prop", "administrator");
    //
-   //      EntryImpl doc2 = createDocument(root, "node2", "hello world".getBytes(), "text/plain");
+   //      Document doc2 = createDocument(root, "node2", "hello world".getBytes(), "text/plain");
    //      doc2.setString("prop", "admin");
    //
-   //      EntryImpl doc3 = createDocument(root, "node3", "hello world".getBytes(), "text/plain");
+   //      Document doc3 = createDocument(root, "node3", "hello world".getBytes(), "text/plain");
    //      doc3.setString("prop", "radmin");
    //
-   //      String statement =
-   //         "SELECT * FROM " + EnumBaseObjectTypeIds.CMIS_DOCUMENT.value() + " AS doc WHERE prop LIKE 'ad%'";
+   //      String statement = "SELECT * FROM " + NASA_DOCUMENT + " AS doc WHERE prop LIKE 'ad%'";
    //
    //      Query query = new Query(statement, true);
    //
-   //      ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
+   //      ItemsIterator<Result> result = storage.query(query);
    //
    //      // check results
    //      assertEquals(2, result.size());
-   //      checkResult(result, new Entry[]{doc1, doc2});
+   //      checkResult(result, new Document[]{doc1, doc2});
    //   }
    //
    //   /**
@@ -540,24 +554,23 @@ public class QueryUsecasesTest extends BaseQueryTest
    //    */
    //   public void testLIKEConstraintEscapeSymbols() throws Exception
    //   {
-   //      EntryImpl doc1 = createDocument(root, "node1", "hello world".getBytes(), "text/plain");
+   //      Document doc1 = createDocument(root, "node1", "hello world".getBytes(), "text/plain");
    //      doc1.setString("prop", "ad%min master");
    //
-   //      EntryImpl doc2 = createDocument(root, "node2", "hello world".getBytes(), "text/plain");
+   //      Document doc2 = createDocument(root, "node2", "hello world".getBytes(), "text/plain");
    //      doc2.setString("prop", "admin operator");
    //
-   //      EntryImpl doc3 = createDocument(root, "node3", "hello world".getBytes(), "text/plain");
+   //      Document doc3 = createDocument(root, "node3", "hello world".getBytes(), "text/plain");
    //      doc3.setString("prop", "radmin");
    //
-   //      String statement =
-   //         "SELECT * FROM " + EnumBaseObjectTypeIds.CMIS_DOCUMENT.value() + " AS doc WHERE prop LIKE 'ad\\%min%'";
+   //      String statement = "SELECT * FROM " + NASA_DOCUMENT + " AS doc WHERE prop LIKE 'ad\\%min%'";
    //
    //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
+   //      ItemsIterator<Result> result = storage.query(query);
    //
    //      // check results
    //      assertEquals(1, result.size());
-   //      checkResult(result, new Entry[]{doc1});
+   //      checkResult(result, new Document[]{doc1});
    //   }
    //
    //   /**
@@ -578,20 +591,19 @@ public class QueryUsecasesTest extends BaseQueryTest
    //   public void testNOTConstraint() throws Exception
    //   {
    //
-   //      EntryImpl folder1 = createFolder(root, "folfer1");
+   //      Document folder1 = createFolder(root, "folfer1");
    //
-   //      EntryImpl doc1 = createDocument(folder1.getObjectId(), "node1", "hello world".getBytes(), "text/plain");
+   //      Document doc1 = createDocument(folder1.getObjectId(), "node1", "hello world".getBytes(), "text/plain");
    //
-   //      EntryImpl folder2 = createFolder(root, "folder2");
-   //      EntryImpl doc2 = createDocument(folder2.getObjectId(), "node2", "hello".getBytes(), "text/plain");
+   //      Document folder2 = createFolder(root, "folder2");
+   //      Document doc2 = createDocument(folder2.getObjectId(), "node2", "hello".getBytes(), "text/plain");
    //
-   //      String statement =
-   //         "SELECT * FROM " + EnumBaseObjectTypeIds.CMIS_DOCUMENT.value() + " WHERE NOT CONTAINS(\"world\")";
+   //      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE NOT CONTAINS(\"world\")";
    //
    //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
+   //      ItemsIterator<Result> result = storage.query(query);
    //
-   //      checkResult(result, new Entry[]{doc2});
+   //      checkResult(result, new Document[]{doc2});
    //   }
    //
    //   /**
@@ -617,20 +629,20 @@ public class QueryUsecasesTest extends BaseQueryTest
    //      String name2 = "fileCS3.doc";
    //      String contentType = "text/plain";
    //
-   //      EntryImpl folder = this.createFolder(root, "CASETest");
+   //      Document folder = this.createFolder(root, "CASETest");
    //
-   //      EntryImpl doc1 = createDocument(folder.getObjectId(), name, new byte[0], contentType);
+   //      Document doc1 = createDocument(folder.getObjectId(), name, new byte[0], contentType);
    //      doc1.setDecimal("long", new BigDecimal(3));
    //
-   //      EntryImpl doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
+   //      Document doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
    //      doc2.setDecimal("long", new BigDecimal(15));
    //
-   //      String statement = "SELECT * FROM " + EnumBaseObjectTypeIds.CMIS_DOCUMENT.value() + " WHERE long NOT IN (15, 20)";
+   //      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE long NOT IN (15, 20)";
    //
    //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
+   //      ItemsIterator<Result> result = storage.query(query);
    //
-   //      checkResult(result, new Entry[]{doc1});
+   //      checkResult(result, new Document[]{doc1});
    //   }
    //
    //   /**
@@ -657,21 +669,20 @@ public class QueryUsecasesTest extends BaseQueryTest
    //      String name2 = "fileCS3.doc";
    //      String contentType = "text/plain";
    //
-   //      EntryImpl folder = createFolder(root, "CASETest");
+   //      Document folder = createFolder(root, "CASETest");
    //
-   //      EntryImpl doc1 = createDocument(folder.getObjectId(), name, new byte[0], contentType);
+   //      Document doc1 = createDocument(folder.getObjectId(), name, new byte[0], contentType);
    //      doc1.setDecimal("long", new BigDecimal(3));
    //
-   //      EntryImpl doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
+   //      Document doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
    //      doc2.setDecimal("long", new BigDecimal(15));
    //
-   //      String statement =
-   //         "SELECT * FROM " + EnumBaseObjectTypeIds.CMIS_DOCUMENT.value() + " WHERE NOT (long NOT IN (15, 20))";
+   //      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE NOT (long NOT IN (15, 20))";
    //
    //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
+   //      ItemsIterator<Result> result = storage.query(query);
    //
-   //      checkResult(result, new Entry[]{doc2});
+   //      checkResult(result, new Document[]{doc2});
    //   }
    //
    //   /**
@@ -692,8 +703,8 @@ public class QueryUsecasesTest extends BaseQueryTest
    //   public void testOrderByFieldDesc() throws Exception
    //   {
    //
-   //      EntryImpl folder = createFolder(root, "testColumn");
-   //      List<EntryImpl> appolloContent = createApolloContent(folder);
+   //      Document folder = createFolder(root, "testColumn");
+   //      List<Document> appolloContent = createApolloContent(folder);
    //
    //      StringBuffer sql = new StringBuffer();
    //      sql.append("SELECT  ");
@@ -701,7 +712,7 @@ public class QueryUsecasesTest extends BaseQueryTest
    //      sql.append(CMIS.OBJECT_ID + " , ");
    //      sql.append(CMIS.LAST_MODIFICATION_DATE);
    //      sql.append(" FROM ");
-   //      sql.append(EnumBaseObjectTypeIds.CMIS_DOCUMENT.value());
+   //      sql.append(NASA_DOCUMENT);
    //      sql.append(" ORDER BY ");
    //      sql.append(PROPERTY_COMMANDER);
    //      sql.append(" DESC");
@@ -709,12 +720,12 @@ public class QueryUsecasesTest extends BaseQueryTest
    //      String statement = sql.toString();
    //
    //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
+   //      ItemsIterator<Result> result = storage.query(query);
    //      // Walter M. Schirra (0)
    //      // James A. Lovell, Jr. (2)
    //      // Frank F. Borman, II (1)
    //
-   //      checkResultOrder(result, new Entry[]{appolloContent.get(0), appolloContent.get(2), appolloContent.get(1)});
+   //      checkResultOrder(result, new Document[]{appolloContent.get(0), appolloContent.get(2), appolloContent.get(1)});
    //   }
    //
    //   /**
@@ -732,8 +743,8 @@ public class QueryUsecasesTest extends BaseQueryTest
    //   public void testOrderByFieldAsk() throws Exception
    //   {
    //
-   //      EntryImpl folder = createFolder(root, "testColumn");
-   //      List<EntryImpl> appolloContent = createApolloContent(folder);
+   //      Document folder = createFolder(root, "testColumn");
+   //      List<Document> appolloContent = createApolloContent(folder);
    //
    //      StringBuffer sql = new StringBuffer();
    //      sql.append("SELECT ");
@@ -741,19 +752,19 @@ public class QueryUsecasesTest extends BaseQueryTest
    //      sql.append(CMIS.OBJECT_ID + ", ");
    //      sql.append(CMIS.LAST_MODIFICATION_DATE);
    //      sql.append(" FROM ");
-   //      sql.append(EnumBaseObjectTypeIds.CMIS_DOCUMENT.value());
+   //      sql.append(NASA_DOCUMENT);
    //      sql.append(" ORDER BY ");
    //      sql.append(PROPERTY_COMMANDER);
    //
    //      String statement = sql.toString();
    //
    //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
+   //      ItemsIterator<Result> result = storage.query(query);
    //      // Frank F. Borman, II (1)
    //      // James A. Lovell, Jr. (2)
    //      // Walter M. Schirra (0)
    //
-   //      checkResultOrder(result, new Entry[]{appolloContent.get(1), appolloContent.get(2), appolloContent.get(0)});
+   //      checkResultOrder(result, new Document[]{appolloContent.get(1), appolloContent.get(2), appolloContent.get(0)});
    //   }
    //
    //   /**
@@ -771,8 +782,8 @@ public class QueryUsecasesTest extends BaseQueryTest
    //   public void testOrderByDefault() throws Exception
    //   {
    //
-   //      EntryImpl folder = createFolder(root, "testColumn");
-   //      List<EntryImpl> appolloContent = createApolloContent(folder);
+   //      Document folder = createFolder(root, "testColumn");
+   //      List<Document> appolloContent = createApolloContent(folder);
    //
    //      StringBuffer sql = new StringBuffer();
    //      sql.append("SELECT ");
@@ -780,16 +791,16 @@ public class QueryUsecasesTest extends BaseQueryTest
    //      sql.append(CMIS.OBJECT_ID + ", ");
    //      sql.append(CMIS.LAST_MODIFICATION_DATE);
    //      sql.append(" FROM ");
-   //      sql.append(EnumBaseObjectTypeIds.CMIS_DOCUMENT.value());
+   //      sql.append(NASA_DOCUMENT);
    //
    //      String statement = sql.toString();
    //
    //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
+   //      ItemsIterator<Result> result = storage.query(query);
    //      // Apollo 13 (2)
    //      // Apollo 7 (0)
    //      // Apollo 8 (1)
-   //      checkResultOrder(result, new Entry[]{appolloContent.get(2), appolloContent.get(0), appolloContent.get(1)});
+   //      checkResultOrder(result, new Document[]{appolloContent.get(2), appolloContent.get(0), appolloContent.get(1)});
    //   }
    //
    //   /**
@@ -807,8 +818,8 @@ public class QueryUsecasesTest extends BaseQueryTest
    //   public void testOrderByScore() throws Exception
    //   {
    //
-   //      EntryImpl folder = createFolder(root, "testColumn");
-   //      List<EntryImpl> appolloContent = createApolloContent(folder);
+   //      Document folder = createFolder(root, "testColumn");
+   //      List<Document> appolloContent = createApolloContent(folder);
    //
    //      StringBuffer sql = new StringBuffer();
    //      sql.append("SELECT ");
@@ -817,17 +828,17 @@ public class QueryUsecasesTest extends BaseQueryTest
    //      sql.append(CMIS.OBJECT_ID + ", ");
    //      sql.append(CMIS.LAST_MODIFICATION_DATE);
    //      sql.append(" FROM ");
-   //      sql.append(EnumBaseObjectTypeIds.CMIS_DOCUMENT.value());
+   //      sql.append(NASA_DOCUMENT);
    //      sql.append(" WHERE CONTAINS(\"moon\") ");
    //      sql.append(" ORDER BY SCORE() ");
    //
    //      String statement = sql.toString();
    //
    //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
+   //      ItemsIterator<Result> result = storage.query(query);
    //      // Apollo 13 (2)
    //      // Apollo 8 (1)
-   //      checkResultOrder(result, new Entry[]{appolloContent.get(2), appolloContent.get(1)});
+   //      checkResultOrder(result, new Document[]{appolloContent.get(2), appolloContent.get(1)});
    //   }
    //
    //   /**
@@ -847,18 +858,18 @@ public class QueryUsecasesTest extends BaseQueryTest
    //    */
    //   public void testPropertyExistence() throws Exception
    //   {
-   //      EntryImpl folder1 = createFolder(root, "CASETest");
+   //      Document folder1 = createFolder(root, "CASETest");
    //
-   //      EntryImpl doc1 = createDocument(folder1.getObjectId(), "node1", "hello world".getBytes(), "text/plain");
+   //      Document doc1 = createDocument(folder1.getObjectId(), "node1", "hello world".getBytes(), "text/plain");
    //      doc1.setString("prop", "test string");
    //
-   //      EntryImpl doc2 = createDocument(folder1.getObjectId(), "node2", "hello".getBytes(), "text/plain");
+   //      Document doc2 = createDocument(folder1.getObjectId(), "node2", "hello".getBytes(), "text/plain");
    //
-   //      String statement = "SELECT * FROM " + EnumBaseObjectTypeIds.CMIS_DOCUMENT.value() + " WHERE prop IS NOT NULL";
+   //      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE prop IS NOT NULL";
    //      Query query = new Query(statement, true);
    //
-   //      ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
-   //      checkResult(result, new Entry[]{doc1});
+   //      ItemsIterator<Result> result = storage.query(query);
+   //      checkResult(result, new Document[]{doc1});
    //   }
    //
    //   /**
@@ -879,18 +890,18 @@ public class QueryUsecasesTest extends BaseQueryTest
    //    */
    //   public void testScoreAsColumn() throws Exception
    //   {
-   //      EntryImpl folder1 = createFolder(root, "CASETest");
+   //      Document folder1 = createFolder(root, "CASETest");
    //
-   //      EntryImpl doc1 = createDocument(folder1.getObjectId(), "node1", "hello world".getBytes(), "text/plain");
+   //      Document doc1 = createDocument(folder1.getObjectId(), "node1", "hello world".getBytes(), "text/plain");
    //
-   //      EntryImpl doc2 = createDocument(folder1.getObjectId(), "node2", "hello".getBytes(), "text/plain");
+   //      Document doc2 = createDocument(folder1.getObjectId(), "node2", "hello".getBytes(), "text/plain");
    //
    //      String statement =
-   //         "SELECT SCORE() AS scoreCol , " + CMIS.NAME + " AS id FROM " + EnumBaseObjectTypeIds.CMIS_DOCUMENT.value()
+   //         "SELECT SCORE() AS scoreCol , " + CMIS.NAME + " AS id FROM " + NASA_DOCUMENT
    //            + " WHERE CONTAINS(\"hello OR world\") ORDER BY SCORE()";
    //
    //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
+   //      ItemsIterator<Result> result = storage.query(query);
    //
    //      // check result
    //      while (result.hasNext())
@@ -923,22 +934,20 @@ public class QueryUsecasesTest extends BaseQueryTest
    //   public void testTreeConstrain() throws Exception
    //   {
    //      // create data
-   //      EntryImpl folder1 = createFolder(root, "folder1");
+   //      Document folder1 = createFolder(root, "folder1");
    //
-   //      EntryImpl doc1 = createDocument(folder1.getObjectId(), "node1", "hello world".getBytes(), "text/plain");
+   //      Document doc1 = createDocument(folder1.getObjectId(), "node1", "hello world".getBytes(), "text/plain");
    //
-   //      EntryImpl subfolder1 = createFolder(folder1.getObjectId(), "folder2");
+   //      Document subfolder1 = createFolder(folder1.getObjectId(), "folder2");
    //
-   //      EntryImpl doc2 = createDocument(subfolder1.getObjectId(), "node1", "hello world".getBytes(), "text/plain");
+   //      Document doc2 = createDocument(subfolder1.getObjectId(), "node1", "hello world".getBytes(), "text/plain");
    //
-   //      String statement =
-   //         "SELECT * FROM " + EnumBaseObjectTypeIds.CMIS_DOCUMENT.value() + " WHERE IN_TREE('" + folder1.getObjectId()
-   //            + "')";
+   //      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE IN_TREE('" + folder1.getObjectId() + "')";
    //
    //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
+   //      ItemsIterator<Result> result = storage.query(query);
    //
-   //      checkResult(result, new EntryImpl[]{doc1, doc2});
+   //      checkResult(result, new Document[]{doc1, doc2});
    //   }
    //
    //   /**
@@ -963,22 +972,22 @@ public class QueryUsecasesTest extends BaseQueryTest
    //      String name2 = "fileCS3.doc";
    //      String contentType = "text/plain";
    //
-   //      EntryImpl folder = createFolder(root, "NotEqualDecimal");
+   //      Document folder = createFolder(root, "NotEqualDecimal");
    //
-   //      EntryImpl doc1 = createDocument(folder.getObjectId(), name, new byte[0], contentType);
+   //      Document doc1 = createDocument(folder.getObjectId(), name, new byte[0], contentType);
    //      doc1.setDecimal("long", new BigDecimal(3));
    //      doc1.save();
    //
-   //      EntryImpl doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
+   //      Document doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
    //      doc2.setDecimal("long", new BigDecimal(15));
    //      doc2.save();
    //
-   //      String statement = "SELECT * FROM " + EnumBaseObjectTypeIds.CMIS_DOCUMENT.value() + " WHERE long <> 3";
+   //      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE long <> 3";
    //
    //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
+   //      ItemsIterator<Result> result = storage.query(query);
    //
-   //      checkResult(result, new Entry[]{doc2});
+   //      checkResult(result, new Document[]{doc2});
    //   }
    //
    //   /**
@@ -1003,22 +1012,22 @@ public class QueryUsecasesTest extends BaseQueryTest
    //      String name2 = "fileCS3.doc";
    //      String contentType = "text/plain";
    //
-   //      EntryImpl folder = this.createFolder(root, "CASETest");
+   //      Document folder = this.createFolder(root, "CASETest");
    //
-   //      EntryImpl doc1 = createDocument(folder.getObjectId(), name, new byte[0], contentType);
+   //      Document doc1 = createDocument(folder.getObjectId(), name, new byte[0], contentType);
    //      doc1.setDecimal("long", new BigDecimal(3));
    //      doc1.save();
    //
-   //      EntryImpl doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
+   //      Document doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
    //      doc2.setDecimal("long", new BigDecimal(15));
    //      doc2.save();
    //
-   //      String statement = "SELECT * FROM " + EnumBaseObjectTypeIds.CMIS_DOCUMENT.value() + " WHERE long > 5";
+   //      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE long > 5";
    //
    //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
+   //      ItemsIterator<Result> result = storage.query(query);
    //
-   //      checkResult(result, new Entry[]{doc2});
+   //      checkResult(result, new Document[]{doc2});
    //   }
    //
    //   /**
@@ -1044,21 +1053,20 @@ public class QueryUsecasesTest extends BaseQueryTest
    //      String name2 = "fileCS3.doc";
    //      String contentType = "text/plain";
    //
-   //      EntryImpl folder = createFolder(root, "CASETest");
+   //      Document folder = createFolder(root, "CASETest");
    //
-   //      EntryImpl doc1 = createDocument(folder.getObjectId(), name, new byte[0], contentType);
+   //      Document doc1 = createDocument(folder.getObjectId(), name, new byte[0], contentType);
    //      doc1.setString("strprop", "test word first");
    //
-   //      EntryImpl doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
+   //      Document doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
    //      doc2.setString("strprop", "test word second");
    //
-   //      String statement =
-   //         "SELECT * FROM " + EnumBaseObjectTypeIds.CMIS_DOCUMENT.value() + " WHERE strprop <> 'test word second'";
+   //      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE strprop <> 'test word second'";
    //
    //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
+   //      ItemsIterator<Result> result = storage.query(query);
    //
-   //      checkResult(result, new Entry[]{doc1});
+   //      checkResult(result, new Document[]{doc1});
    //   }
    //
    //   /**
@@ -1083,22 +1091,22 @@ public class QueryUsecasesTest extends BaseQueryTest
    //      String name2 = "fileSecond";
    //      String contentType = "text/plain";
    //
-   //      EntryImpl folder = createFolder(root, "SimpleFullTextTest");
+   //      Document folder = createFolder(root, "SimpleFullTextTest");
    //
-   //      EntryImpl doc1 = createDocument(folder.getObjectId(), name1, new byte[0], contentType);
+   //      Document doc1 = createDocument(folder.getObjectId(), name1, new byte[0], contentType);
    //      doc1.setString("strprop", "There must be test word");
    //      doc1.save();
    //
-   //      EntryImpl doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
+   //      Document doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
    //      doc2.setString("strprop", " Test word is not here");
    //      doc2.save();
    //
-   //      String statement = "SELECT * FROM " + EnumBaseObjectTypeIds.CMIS_DOCUMENT.value() + " WHERE CONTAINS(\"here\")";
+   //      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"here\")";
    //
    //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
+   //      ItemsIterator<Result> result = storage.query(query);
    //
-   //      checkResult(result, new Entry[]{doc2});
+   //      checkResult(result, new Document[]{doc2});
    //   }
    //
    //   /**
@@ -1127,25 +1135,24 @@ public class QueryUsecasesTest extends BaseQueryTest
    //      String name3 = "fileCS3.doc";
    //      String contentType = "text/plain";
    //
-   //      EntryImpl folder = createFolder(root, "CASETest");
+   //      Document folder = createFolder(root, "CASETest");
    //
-   //      EntryImpl doc1 = createDocument(folder.getObjectId(), name1, new byte[0], contentType);
+   //      Document doc1 = createDocument(folder.getObjectId(), name1, new byte[0], contentType);
    //      doc1.setString("strprop", "There must be test word");
    //
-   //      EntryImpl doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
+   //      Document doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
    //      doc2.setString("strprop", " Test word is not here. Another check-word.");
    //
-   //      EntryImpl doc3 = createDocument(folder.getObjectId(), name3, new byte[0], contentType);
+   //      Document doc3 = createDocument(folder.getObjectId(), name3, new byte[0], contentType);
    //      doc3.setString("strprop", "There must be check-word.");
    //
    //      String statement =
-   //         "SELECT * FROM " + EnumBaseObjectTypeIds.CMIS_DOCUMENT.value()
-   //            + " WHERE CONTAINS(\"\\\"There must\\\" -\\\"check\\-word\\\"\")";
+   //         "SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"\\\"There must\\\" -\\\"check\\-word\\\"\")";
    //
    //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
+   //      ItemsIterator<Result> result = storage.query(query);
    //
-   //      checkResult(result, new Entry[]{doc1});
+   //      checkResult(result, new Document[]{doc1});
    //   }
    //
    //   /**
@@ -1158,23 +1165,22 @@ public class QueryUsecasesTest extends BaseQueryTest
    //      String name2 = "fileCS3.doc";
    //      String contentType = "text/plain";
    //
-   //      EntryImpl folder = createFolder(root, "NotContains");
+   //      Document folder = createFolder(root, "NotContains");
    //
-   //      EntryImpl doc1 = createDocument(folder.getObjectId(), name, new byte[0], contentType);
+   //      Document doc1 = createDocument(folder.getObjectId(), name, new byte[0], contentType);
    //      doc1.setString("strprop", "There must be test word");
    //      doc1.save();
    //
-   //      EntryImpl doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
+   //      Document doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
    //      doc2.setString("strprop", " Test word is not here");
    //      doc2.save();
    //
-   //      String statement =
-   //         "SELECT * FROM " + EnumBaseObjectTypeIds.CMIS_DOCUMENT.value() + " WHERE NOT CONTAINS(\"here\")";
+   //      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE NOT CONTAINS(\"here\")";
    //
    //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
+   //      ItemsIterator<Result> result = storage.query(query);
    //
-   //      checkResult(result, new Entry[]{doc1});
+   //      checkResult(result, new Document[]{doc1});
    //   }
    //
    //   /**
@@ -1199,22 +1205,22 @@ public class QueryUsecasesTest extends BaseQueryTest
    //      String name2 = "fileCS3.doc";
    //      String contentType = "text/plain";
    //
-   //      EntryImpl folder = this.createFolder(root, "CASETest");
+   //      Document folder = this.createFolder(root, "CASETest");
    //
-   //      EntryImpl doc1 = createDocument(folder.getObjectId(), name, new byte[0], contentType);
+   //      Document doc1 = createDocument(folder.getObjectId(), name, new byte[0], contentType);
    //      doc1.setBoolean("boolprop", true);
    //      doc1.save();
    //
-   //      EntryImpl doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
+   //      Document doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
    //      doc2.setBoolean("boolprop", false);
    //      doc2.save();
    //
-   //      String statement = "SELECT * FROM " + EnumBaseObjectTypeIds.CMIS_DOCUMENT.value() + " WHERE (boolprop = FALSE )";
+   //      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE (boolprop = FALSE )";
    //
    //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
+   //      ItemsIterator<Result> result = storage.query(query);
    //
-   //      checkResult(result, new Entry[]{doc2});
+   //      checkResult(result, new Document[]{doc2});
    //   }
    //
    //   /**
@@ -1239,20 +1245,20 @@ public class QueryUsecasesTest extends BaseQueryTest
    //      String name2 = "fileCS3.doc";
    //      String contentType = "text/plain";
    //
-   //      EntryImpl folder = createFolder(root, "CASETest");
+   //      Document folder = createFolder(root, "CASETest");
    //
-   //      EntryImpl doc1 = createDocument(folder.getObjectId(), name, new byte[0], contentType);
+   //      Document doc1 = createDocument(folder.getObjectId(), name, new byte[0], contentType);
    //
-   //      EntryImpl doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
+   //      Document doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
    //
    //      String statement =
-   //         "SELECT * FROM " + EnumBaseObjectTypeIds.CMIS_DOCUMENT.value()
+   //         "SELECT * FROM " + NASA_DOCUMENT
    //            + " WHERE ( cmis:lastModificationDate >= TIMESTAMP '2007-01-01T00:00:00.000Z' )";
    //
    //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
+   //      ItemsIterator<Result> result = storage.query(query);
    //
-   //      checkResult(result, new Entry[]{doc1, doc2});
+   //      checkResult(result, new Document[]{doc1, doc2});
    //   }
 
 }
