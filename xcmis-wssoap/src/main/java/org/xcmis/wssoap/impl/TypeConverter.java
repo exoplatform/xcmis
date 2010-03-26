@@ -46,6 +46,7 @@ import org.xcmis.core.CmisProperty;
 import org.xcmis.core.CmisPropertyBoolean;
 import org.xcmis.core.CmisPropertyDateTime;
 import org.xcmis.core.CmisPropertyDecimal;
+import org.xcmis.core.CmisPropertyDefinitionType;
 import org.xcmis.core.CmisPropertyHtml;
 import org.xcmis.core.CmisPropertyId;
 import org.xcmis.core.CmisPropertyInteger;
@@ -77,12 +78,16 @@ import org.xcmis.spi.AllowableActions;
 import org.xcmis.spi.BaseType;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ItemsTree;
+import org.xcmis.spi.PropertyDefinition;
+import org.xcmis.spi.PropertyType;
 import org.xcmis.spi.RepositoryCapabilities;
 import org.xcmis.spi.RepositoryInfo;
 import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.Rendition;
+import org.xcmis.spi.Updatability;
 import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.impl.AccessControlEntryImpl;
+import org.xcmis.spi.impl.PropertyDefinitionImpl;
 import org.xcmis.spi.impl.RenditionImpl;
 import org.xcmis.spi.impl.TypeDefinitionImpl;
 import org.xcmis.spi.object.ChangeInfo;
@@ -433,8 +438,23 @@ public class TypeConverter
       result.setParentId(source.getParentId());
       result.setQueryable(source.isQueryable());
       result.setQueryName(source.getQueryName());
+      result.getPropertyDefinitions().addAll(getPropertyDefinitionList(source.getPropertyDefinition()));
       return result;
    }
+   
+   
+   public static List<PropertyDefinition<?>> getPropertyDefinitionList(List<CmisPropertyDefinitionType> source) {
+      
+      List<PropertyDefinition<?>> result = new ArrayList<PropertyDefinition<?>>();
+      for (CmisPropertyDefinitionType one: source) {
+        result.add(new PropertyDefinitionImpl(one.getId(), one.getQueryName(),one.getLocalName(), 
+           one.getLocalNamespace(),one.getDisplayName(), one.getDescription(),PropertyType.fromValue(one.getPropertyType().value()), 
+           Updatability.fromValue(one.getUpdatability().value()), one.isInherited(), one.isRequired(), one.isQueryable(), one.isOrderable(), one.isOpenChoice(), false, null, null));
+        
+      }
+      return result;
+   }
+   
    
    public static CmisRepositoryCapabilitiesType getCmisRepositoryCapabilitiesType(RepositoryCapabilities source)
    {

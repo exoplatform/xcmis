@@ -28,6 +28,7 @@ import org.xcmis.core.EnumBaseObjectTypeIds;
 import org.xcmis.core.EnumCardinality;
 import org.xcmis.core.EnumContentStreamAllowed;
 import org.xcmis.core.EnumPropertyType;
+import org.xcmis.core.EnumUpdatability;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.messaging.CmisRepositoryEntryType;
 import org.xcmis.messaging.CmisTypeContainer;
@@ -87,6 +88,7 @@ public class RepositoryServiceTest extends BaseTest
       pd.setId("cmis:hello");
       pd.setInherited(false);
       pd.setPropertyType(EnumPropertyType.STRING);
+      pd.setUpdatability(EnumUpdatability.READWRITE);
       article.getPropertyDefinition().add(pd);
       
       conn.addType(TypeConverter.getTypeDefinition(article));
