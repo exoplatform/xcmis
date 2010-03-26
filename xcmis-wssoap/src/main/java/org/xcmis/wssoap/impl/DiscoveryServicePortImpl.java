@@ -21,8 +21,6 @@ package org.xcmis.wssoap.impl;
 
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.core.DiscoveryService;
-import org.xcmis.core.EnumIncludeRelationships;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.messaging.CmisObjectListType;
 import org.xcmis.messaging.Query;
@@ -30,7 +28,10 @@ import org.xcmis.messaging.QueryResponse;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.DiscoveryServicePort;
 import org.xcmis.spi.CMIS;
-
+import org.xcmis.spi.ChangeLogTokenHolder;
+import org.xcmis.spi.Connection;
+import org.xcmis.spi.IncludeRelationships;
+import org.xcmis.spi.StorageProvider;
 
 /**
  * @author <a href="mailto:max.shaposhnik@exoplatform.com">Max Shaposhnik</a>
@@ -49,17 +50,17 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
    /** Logger. */
    private static final Log LOG = ExoLogger.getLogger(DiscoveryServicePortImpl.class);
 
-   /** Discovery service. */
-   private DiscoveryService discoveryService;
+   /** StorageProvider. */
+   private StorageProvider storageProvider;
 
    /**
     * Constructs instance of <code>DiscoveryServicePortImpl</code> .
     * 
-    * @param discoveryService QueryService
+    * @param storageProvider StorageProvider
     */
-   public DiscoveryServicePortImpl(DiscoveryService discoveryService)
+   public DiscoveryServicePortImpl(StorageProvider storageProvider)
    {
-      this.discoveryService = discoveryService;
+      this.storageProvider = storageProvider;
    }
 
    /**
@@ -69,9 +70,11 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
    {
       if (LOG.isDebugEnabled())
          LOG.debug("Executing operation query");
+      Connection conn = null;
       try
       {
          String repositoryId = parameters.getRepositoryId();
+         conn = storageProvider.getConnection(repositoryId, null);
          String statement = parameters.getStatement();
          boolean allVersions =
             parameters.getSearchAllVersions() == null || parameters.getSearchAllVersions().isNil() ? false : parameters
@@ -79,9 +82,10 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
          boolean includeAllowableActions =
             parameters.getIncludeAllowableActions() == null || parameters.getIncludeAllowableActions().isNil() ? false
                : parameters.getIncludeAllowableActions().getValue();
-         EnumIncludeRelationships includeRelationships =
+         IncludeRelationships includeRelationships =
             parameters.getIncludeRelationships() == null || parameters.getIncludeRelationships().isNil()
-               ? EnumIncludeRelationships.NONE : parameters.getIncludeRelationships().getValue();
+               ? IncludeRelationships.NONE : IncludeRelationships.fromValue(parameters.getIncludeRelationships()
+                  .getValue().value());
          String renditionFilter =
             parameters.getRenditionFilter() == null || parameters.getRenditionFilter().isNil() ? null : parameters
                .getRenditionFilter().getValue();
@@ -94,9 +98,8 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
 
          QueryResponse response = new QueryResponse();
          CmisObjectListType result =
-            discoveryService.query(repositoryId, statement, allVersions, includeAllowableActions, includeRelationships,
-               renditionFilter, maxItems, skipCount);
-
+            TypeConverter.getCmisObjectListType(conn.query(statement, allVersions, includeAllowableActions,
+               includeRelationships, true, renditionFilter, maxItems, skipCount));
          response.setObjects(result);
          return response;
       }
@@ -122,15 +125,18 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
    {
       if (LOG.isDebugEnabled())
          LOG.debug("Executing operation getContentChanges");
+      Connection conn = null;
       try
       {
-         objects.value = discoveryService.getContentChanges(repositoryId, //
-            changeLogToken == null ? null : changeLogToken.value, //
-            includeProperties == null ? false : includeProperties, //
-            propertyFilter, //
-            includePolicyIds == null ? false : includePolicyIds, //
-            includeACL == null ? false : includeACL, //
-            maxItems == null ? CMIS.MAX_ITEMS : maxItems.intValue());
+         conn = storageProvider.getConnection(repositoryId, null);
+         objects.value =
+            TypeConverter.getCmisObjectListType(conn.getContentChanges(changeLogToken == null ? null
+               : new ChangeLogTokenHolder(), //
+               includeProperties == null ? false : includeProperties, //
+               propertyFilter, //
+               includePolicyIds == null ? false : includePolicyIds, //
+               includeACL == null ? false : includeACL, //
+               true, maxItems == null ? CMIS.MAX_ITEMS : maxItems.intValue()));
       }
       catch (Exception e)
       {

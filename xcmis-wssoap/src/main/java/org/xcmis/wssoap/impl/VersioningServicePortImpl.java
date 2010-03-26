@@ -25,14 +25,17 @@ import org.xcmis.core.CmisAccessControlListType;
 import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.CmisPropertiesType;
 import org.xcmis.core.EnumIncludeRelationships;
-import org.xcmis.core.VersioningService;
 import org.xcmis.messaging.CmisContentStreamType;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.VersioningServicePort;
+import org.xcmis.spi.Connection;
+import org.xcmis.spi.IncludeRelationships;
+import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.data.BaseContentStream;
-import org.xcmis.spi.utils.CmisUtils;
+import org.xcmis.spi.object.CmisObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -52,17 +55,17 @@ public class VersioningServicePortImpl implements VersioningServicePort
    /** Logger. */
    private static final Log LOG = ExoLogger.getLogger(VersioningServicePortImpl.class);
 
-   /** Versioning service. */   
-   private VersioningService versioningService;
+   /** StorageProvider. */
+   private StorageProvider storageProvider;
 
    /**
     * Constructs instance of <code>VersioningServicePortImpl</code> .
     * 
-    * @param versioningService VersioningService
+    * @param storageProvider StorageProvider
     */
-   public VersioningServicePortImpl(VersioningService versioningService)
+   public VersioningServicePortImpl(StorageProvider storageProvider)
    {
-      this.versioningService = versioningService;
+      this.storageProvider = storageProvider;
    }
 
    /**
@@ -73,9 +76,11 @@ public class VersioningServicePortImpl implements VersioningServicePort
    {
       if (LOG.isDebugEnabled())
          LOG.debug("Executing operation cancelCheckOut");
+      Connection conn = null;
       try
       {
-         versioningService.cancelCheckout(repositoryId, documentId);
+         conn = storageProvider.getConnection(repositoryId, null);
+         conn.cancelCheckout(documentId);
          return new CmisExtensionType();
       }
       catch (Exception e)
@@ -101,25 +106,25 @@ public class VersioningServicePortImpl implements VersioningServicePort
    {
       if (LOG.isDebugEnabled())
          LOG.debug("Executing operation checkIn");
+      Connection conn = null;
       BaseContentStream cs = null;
       try
       {
+         conn = storageProvider.getConnection(repositoryId, null);
          if (contentStream != null)
             cs =
                new BaseContentStream(contentStream.getStream().getInputStream(), contentStream.getFilename(),
                   contentStream.getMimeType());
-         CmisObjectType res = versioningService.checkin(repositoryId, //
-            documentId.value, //
+         String res = conn.checkin(documentId.value, //
             major == null ? true : major, // major as default
-            properties, //
+            TypeConverter.getPropertyMap(properties), //
             cs, //
             checkinComment, //
-            addACEs, //
-            removeACEs, //
+            TypeConverter.getCmisListAccessControlEntry(addACEs), //
+            TypeConverter.getCmisListAccessControlEntry(removeACEs), //
             policies);
-         documentId.value = CmisUtils.getObjectId(res);
+         documentId.value = res;
          CmisExtensionType ext = new CmisExtensionType();
-         ext.getAny().addAll(res.getAny());
          extension.value = ext;
       }
       catch (Exception e)
@@ -138,12 +143,13 @@ public class VersioningServicePortImpl implements VersioningServicePort
    {
       if (LOG.isDebugEnabled())
          LOG.debug("Executing operation checkOut");
+      Connection conn = null;
       try
       {
-         CmisObjectType res = versioningService.checkout(repositoryId, documentId.value);
-         documentId.value = CmisUtils.getObjectId(res);
+         conn = storageProvider.getConnection(repositoryId, null);
+         String res = conn.checkout(documentId.value);
+         documentId.value = res;
          CmisExtensionType ext = new CmisExtensionType();
-         ext.getAny().addAll(res.getAny());
          extension.value = ext;
          contentCopied.value = true;
       }
@@ -162,18 +168,25 @@ public class VersioningServicePortImpl implements VersioningServicePort
    {
       if (LOG.isDebugEnabled())
          LOG.debug("Executing operation getAllVersions");
+      Connection conn = null;
+      List<CmisObjectType> res = new ArrayList<CmisObjectType>();
       try
       {
-         return versioningService.getAllVersions(repositoryId, //
-            versionSeriesId, //
+         conn = storageProvider.getConnection(repositoryId, null);
+         List<CmisObject> list = conn.getAllVersions(versionSeriesId, //
             includeAllowableActions == null ? false : includeAllowableActions, //
-            propertyFilter);
+            true, propertyFilter);
+         for (CmisObject one : list)
+         {
+            res.add(TypeConverter.getCmisObjectType(one));
+         }
       }
       catch (Exception e)
       {
          LOG.error("Get all versions error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
       }
+      return res;
    }
 
    /**
@@ -189,17 +202,19 @@ public class VersioningServicePortImpl implements VersioningServicePort
       Boolean includeACL, //
       CmisExtensionType extension) throws CmisException
    {
+      Connection conn = null;
       try
       {
-         return versioningService.getObjectOfLatestVersion(repositoryId, //
-            versionSeriesId, //
+         conn = storageProvider.getConnection(repositoryId, null);
+         return TypeConverter.getCmisObjectType(conn.getObjectOfLatestVersion(versionSeriesId, //
             major == null ? false : major, //
             includeAllowableActions == null ? false : includeAllowableActions, //
-            includeRelationships == null ? EnumIncludeRelationships.NONE : includeRelationships, //
+            includeRelationships == null ? IncludeRelationships.NONE : IncludeRelationships
+               .fromValue(includeRelationships.value()), //
             includePolicyIds == null ? false : includePolicyIds, //
             includeACL == null ? false : includeACL, //
-            propertyFilter, //
-            renditionFilter);
+            true, propertyFilter, //
+            renditionFilter));
       }
       catch (Exception e)
       {
@@ -216,12 +231,13 @@ public class VersioningServicePortImpl implements VersioningServicePort
    {
       if (LOG.isDebugEnabled())
          LOG.debug("Executing operation getPropertiesOfLatestVersion");
+      Connection conn = null;
       try
       {
-         return versioningService.getPropertiesOfLatestVersion(repositoryId, //
-            objectId, //
+         conn = storageProvider.getConnection(repositoryId, null);
+         return TypeConverter.getCmisPropertiesType(conn.getPropertiesOfLatestVersion(objectId, //
             major == null ? false : major, //
-            filter);
+            true, filter));
       }
       catch (Exception e)
       {

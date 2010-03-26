@@ -24,15 +24,7 @@ import org.apache.cxf.interceptor.LoggingInInterceptor;
 import org.apache.cxf.interceptor.LoggingOutInterceptor;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.core.AccessControlService;
-import org.xcmis.core.DiscoveryService;
-import org.xcmis.core.MultifilingService;
-import org.xcmis.core.NavigationService;
-import org.xcmis.core.ObjectService;
-import org.xcmis.core.PolicyService;
-import org.xcmis.core.RelationshipService;
-import org.xcmis.core.RepositoryService;
-import org.xcmis.core.VersioningService;
+import org.xcmis.spi.StorageProvider;
 import org.xcmis.wssoap.impl.ACLServicePortImpl;
 import org.xcmis.wssoap.impl.DiscoveryServicePortImpl;
 import org.xcmis.wssoap.impl.MultiFilingServicePortImpl;
@@ -62,43 +54,18 @@ public class WebServiceLoader
     */
    private static final Log LOG = ExoLogger.getLogger(WebServiceLoader.class);
 
-   private final AccessControlService aclService;
 
-   private final DiscoveryService queryService;
-
-   private final MultifilingService multifilingService;
-
-   private final NavigationService navigationService;
-
-   private final ObjectService objectService;
-
-   private final PolicyService policyService;
-
-   private final RelationshipService relationshipService;
-
-   private final RepositoryService repositoryService;
-
-   private final VersioningService versioningService;
+   
+   private StorageProvider storageProvider;
 
    /**
     * Constructs instance of WebServiceLoader.
     * 
     * @param containerContext the ExoContainer context.
     */
-   public WebServiceLoader(AccessControlService aclService, DiscoveryService queryService,
-      MultifilingService multifilingService, NavigationService navigationService, ObjectService objectService,
-      PolicyService policyService, RelationshipService relationshipService, RepositoryService repositoryService,
-      VersioningService versioningService)
+   public WebServiceLoader(StorageProvider storageProvider)
    {
-      this.aclService = aclService;
-      this.queryService = queryService;
-      this.multifilingService = multifilingService;
-      this.navigationService = navigationService;
-      this.objectService = objectService;
-      this.policyService = policyService;
-      this.relationshipService = relationshipService;
-      this.repositoryService = repositoryService;
-      this.versioningService = versioningService;
+      this.storageProvider = storageProvider;
    }
 
    /**
@@ -118,15 +85,15 @@ public class WebServiceLoader
    public void init(String baseURL)
    {
       List<Object> services = new ArrayList<Object>();
-      services.add(new ACLServicePortImpl(aclService));
-      services.add(new DiscoveryServicePortImpl(queryService));
-      services.add(new MultiFilingServicePortImpl(multifilingService));
-      services.add(new NavigationServicePortImpl(navigationService));
-      services.add(new ObjectServicePortImpl(objectService));
-      services.add(new PolicyServicePortImpl(policyService));
-      services.add(new RelationshipServicePortImpl(relationshipService));
-      services.add(new RepositoryServicePortImpl(repositoryService));
-      services.add(new VersioningServicePortImpl(versioningService));
+      services.add(new ACLServicePortImpl(storageProvider));
+      services.add(new DiscoveryServicePortImpl(storageProvider));
+      services.add(new MultiFilingServicePortImpl(storageProvider));
+      services.add(new NavigationServicePortImpl(storageProvider));
+      services.add(new ObjectServicePortImpl(storageProvider));
+      services.add(new PolicyServicePortImpl(storageProvider));
+      services.add(new RelationshipServicePortImpl(storageProvider));
+      services.add(new RepositoryServicePortImpl(storageProvider));
+      services.add(new VersioningServicePortImpl(storageProvider));
 
       for (Object implementor : services)
       {

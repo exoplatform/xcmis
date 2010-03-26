@@ -22,11 +22,11 @@ package org.xcmis.wssoap.impl;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.core.CmisObjectType;
-import org.xcmis.core.PolicyService;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.PolicyServicePort;
-
+import org.xcmis.spi.Connection;
+import org.xcmis.spi.StorageProvider;
 
 /**
  * @author <a href="mailto:max.shaposhnik@exoplatform.com">Max Shaposhnik</a>
@@ -45,17 +45,17 @@ public class PolicyServicePortImpl implements PolicyServicePort
    /** Logger. */
    private static final Log LOG = ExoLogger.getLogger(PolicyServicePortImpl.class);
 
-   /** Policy service. */
-   private PolicyService policyService;
+   /** StorageProvider . */
+   private StorageProvider storageProvider;
 
    /**
     * Constructs instance of <code>PolicyServicePortImpl</code> .
     * 
     * @param policyService PolicyService
     */
-   public PolicyServicePortImpl(PolicyService policyService)
+   public PolicyServicePortImpl(StorageProvider storageProvider)
    {
-      this.policyService = policyService;
+      this.storageProvider = storageProvider;
    }
 
    /**
@@ -66,9 +66,11 @@ public class PolicyServicePortImpl implements PolicyServicePort
    {
       if (LOG.isDebugEnabled())
          LOG.debug("Executing operation applyPolicy");
+      Connection conn = null;
       try
       {
-         policyService.applyPolicy(repositoryId, policyId, objectId);
+         conn = storageProvider.getConnection(repositoryId, null);
+         conn.applyPolicy(policyId, objectId);
       }
       catch (Exception e)
       {
@@ -86,9 +88,11 @@ public class PolicyServicePortImpl implements PolicyServicePort
    {
       if (LOG.isDebugEnabled())
          LOG.debug("Executing operation getAppliedPolicies");
+      Connection conn = null;
       try
       {
-         return policyService.getAppliedPolicies(repositoryId, objectId, propertyFilter);
+         conn = storageProvider.getConnection(repositoryId, null);
+         return TypeConverter.getListCmisObjectType(conn.getAppliedPolicies(objectId, true, propertyFilter));
       }
       catch (Exception e)
       {
@@ -105,9 +109,11 @@ public class PolicyServicePortImpl implements PolicyServicePort
    {
       if (LOG.isDebugEnabled())
          LOG.debug("Executing operation removePolicy");
+      Connection conn = null;
       try
       {
-         policyService.removePolicy(repositoryId, policyId, objectId);
+         conn = storageProvider.getConnection(repositoryId, null);
+         conn.removePolicy(policyId, objectId);
       }
       catch (Exception e)
       {

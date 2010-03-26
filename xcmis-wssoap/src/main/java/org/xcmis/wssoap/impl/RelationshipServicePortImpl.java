@@ -22,12 +22,14 @@ package org.xcmis.wssoap.impl;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.core.EnumRelationshipDirection;
-import org.xcmis.core.RelationshipService;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.messaging.CmisObjectListType;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.RelationshipServicePort;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.Connection;
+import org.xcmis.spi.RelationshipDirection;
+import org.xcmis.spi.StorageProvider;
 
 import java.math.BigInteger;
 
@@ -48,17 +50,17 @@ public class RelationshipServicePortImpl implements RelationshipServicePort
    /** Logger. */
    private static final Log LOG = ExoLogger.getLogger(RelationshipServicePortImpl.class);
 
-   /** Relationship service. */
-   private RelationshipService relationshipService;
+   /** StorageProvider. */
+   private StorageProvider storageProvider;
 
    /**
     * Constructs instance of <code>RelationshipServicePortImpl</code> .
     * 
     * @param relationshipService RelationshipService
     */
-   public RelationshipServicePortImpl(RelationshipService relationshipService)
+   public RelationshipServicePortImpl(StorageProvider storageProvider)
    {
-      this.relationshipService = relationshipService;
+      this.storageProvider = storageProvider;
    }
 
    /**
@@ -77,26 +79,27 @@ public class RelationshipServicePortImpl implements RelationshipServicePort
    {
       if (LOG.isDebugEnabled())
          LOG.debug("Executing operation getRelationships");
+      Connection conn = null;
 
-      CmisObjectListType ret = new CmisObjectListType();
       try
       {
-         ret.getObjects().addAll(relationshipService.getObjectRelationships(repositoryId, //
+         conn = storageProvider.getConnection(repositoryId, null);
+         return TypeConverter.getCmisObjectListType(conn.getObjectRelationships(
             objectId, //
-            relationshipDirection == null ? EnumRelationshipDirection.SOURCE : relationshipDirection, //
+            relationshipDirection == null ? RelationshipDirection.SOURCE : RelationshipDirection
+               .fromValue(relationshipDirection.value()), //
             typeId, //
             includeSubRelationshipTypes == null ? false : includeSubRelationshipTypes, //
             includeAllowableActions == null ? false : includeAllowableActions, //
-            propertyFilter, //
+            true, propertyFilter, //
             maxItems == null ? CMIS.MAX_ITEMS : maxItems.intValue(), //
             skipCount == null ? 0 : skipCount.intValue() //
-         ).getItems());
+            ).getItems());
       }
       catch (Exception e)
       {
          LOG.error("Get relationships error : " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
       }
-      return ret;
    }
 }

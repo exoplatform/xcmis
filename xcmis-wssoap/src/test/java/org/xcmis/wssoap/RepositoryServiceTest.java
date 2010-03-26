@@ -33,6 +33,7 @@ import org.xcmis.messaging.CmisRepositoryEntryType;
 import org.xcmis.messaging.CmisTypeContainer;
 import org.xcmis.soap.RepositoryServicePort;
 import org.xcmis.wssoap.impl.RepositoryServicePortImpl;
+import org.xcmis.wssoap.impl.TypeConverter;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -57,7 +58,7 @@ public class RepositoryServiceTest extends BaseTest
    {
       super.setUp();
       server =
-         complexDeployService(SERVICE_ADDRESS, new RepositoryServicePortImpl(cmisRepositoryService), null, null, true);
+         complexDeployService(SERVICE_ADDRESS, new RepositoryServicePortImpl(storageProvider), null, null, true);
       port = getRepositoryService(SERVICE_ADDRESS);
       assertNotNull(server);
       assertNotNull(port);
@@ -88,7 +89,7 @@ public class RepositoryServiceTest extends BaseTest
       pd.setPropertyType(EnumPropertyType.STRING);
       article.getPropertyDefinition().add(pd);
       
-      repository.addType(article);
+      conn.addType(TypeConverter.getTypeDefinition(article));
    }
 
    public void testGetRepositories() throws Exception
@@ -132,7 +133,7 @@ public class RepositoryServiceTest extends BaseTest
 
    protected void tearDown() throws Exception
    {
-      repository.removeType(article.getId());
+      conn.removeType(article.getId());
       server.stop();
       super.tearDown();
    }

@@ -21,10 +21,11 @@ package org.xcmis.wssoap.impl;
 
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.core.MultifilingService;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.MultiFilingServicePort;
+import org.xcmis.spi.Connection;
+import org.xcmis.spi.StorageProvider;
 
 
 /**
@@ -44,17 +45,17 @@ public class MultiFilingServicePortImpl implements MultiFilingServicePort
    /** Logger. */
    private static final Log LOG = ExoLogger.getLogger(MultiFilingServicePortImpl.class);
 
-   /** Multifiling service. */
-   private MultifilingService multiService;
+   /** StorageProvider . */
+   private StorageProvider storageProvider;
 
    /**
     * Constructs instance of <code>MultiFilingServicePortImpl</code> .
     * 
-    * @param multiService MultifilingService
+    * @param storageProvider StorageProvider
     */
-   public MultiFilingServicePortImpl(MultifilingService multiService)
+   public MultiFilingServicePortImpl(StorageProvider storageProvider)
    {
-      this.multiService = multiService;
+      this.storageProvider = storageProvider;
    }
 
    /**
@@ -65,9 +66,11 @@ public class MultiFilingServicePortImpl implements MultiFilingServicePort
    {
       if (LOG.isDebugEnabled())
          LOG.debug("Executing operation addObjectToFolder");
+      Connection conn = null;
       try
       {
-         multiService.addObjectToFolder(repositoryId, objectId, folderId, allVersions);
+         conn = storageProvider.getConnection(repositoryId, null);
+         conn.addObjectToFolder(objectId, folderId, allVersions);
       }
       catch (Exception e)
       {
@@ -83,11 +86,13 @@ public class MultiFilingServicePortImpl implements MultiFilingServicePort
    public CmisExtensionType removeObjectFromFolder(String repositoryId, String objectId, String folderId,
       CmisExtensionType extension) throws CmisException
    {
+      if (LOG.isDebugEnabled())
+         LOG.debug("Executing operation removeObjectFromFolder");
+      Connection conn = null;
       try
       {
-         if (LOG.isDebugEnabled())
-            LOG.debug("Executing operation removeObjectFromFolder");
-         multiService.removeObjectFromFolder(repositoryId, objectId, folderId);
+         conn = storageProvider.getConnection(repositoryId, null);
+         conn.removeObjectFromFolder(objectId, folderId);
       }
       catch (Exception e)
       {

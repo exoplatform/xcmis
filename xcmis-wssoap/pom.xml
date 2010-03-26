@@ -18,6 +18,13 @@
          <artifactId>xcmis-sp-inmemory</artifactId>
          <scope>test</scope>
       </dependency>
+
+      <dependency>
+         <groupId>org.xcmis</groupId>
+         <artifactId>xcmis-sp-jcr-exo-new</artifactId>
+         <scope>test</scope>
+      </dependency>
+
       <!-- CXF dependencies -->
       <dependency>
          <groupId>org.apache.cxf</groupId>

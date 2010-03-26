@@ -51,7 +51,7 @@ public class NavigationServiceTest extends BaseTest
    {
       super.setUp();
       server =
-         complexDeployService(SERVICE_ADDRESS, new NavigationServicePortImpl(navigationService), null, null, true);
+         complexDeployService(SERVICE_ADDRESS, new NavigationServicePortImpl(storageProvider), null, null, true);
       port = getNavigationService(SERVICE_ADDRESS);
       assertNotNull(server);
       assertNotNull(port);
@@ -75,7 +75,7 @@ public class NavigationServiceTest extends BaseTest
          null // Extension
          );
       assertNotNull(children);
-      assertEquals(3, children.getItems().size());
+      assertEquals(3, children.getNumItems());
    }
 
    public void testGetFolderParent() throws Exception
@@ -117,7 +117,7 @@ public class NavigationServiceTest extends BaseTest
    public void testGetCheckedoutDocs() throws Exception
    {
       String id = createDocument(testFolderId, "doc");
-      versioningService.checkout(repositoryId, id);
+      conn.checkout(id);
       CmisObjectListType checkedout = port.getCheckedOutDocs(//
          repositoryId, //
          testFolderId, //
@@ -131,7 +131,7 @@ public class NavigationServiceTest extends BaseTest
          null // Extension
          );
       assertNotNull(checkedout);
-      assertEquals(1, checkedout.getItems().size());
+      assertEquals(1, checkedout.getNumItems());
    }
 
    public void testGetFolderTree() throws Exception

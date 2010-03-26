@@ -48,7 +48,7 @@ public class RelationshipServiceTest extends BaseTest
    {
       super.setUp();
       server =
-         complexDeployService(SERVICE_ADDRESS, new RelationshipServicePortImpl(relationshipService), null, null, true);
+         complexDeployService(SERVICE_ADDRESS, new RelationshipServicePortImpl(storageProvider), null, null, true);
       port = getRelationshipService(SERVICE_ADDRESS);
       assertNotNull(server);
       assertNotNull(port);
@@ -72,8 +72,8 @@ public class RelationshipServiceTest extends BaseTest
          null, // Skip count
          new CmisExtensionType() // Extension
          );
-      assertEquals(1, resp.getItems().size());
-      assertEquals(relationship1, getObjectId(resp.getItems().get(0)));
+      assertEquals(1, resp.getObjects().size());
+      assertEquals(relationship1, getObjectId(resp.getObjects().get(0)));
       resp = port.getObjectRelationships(//
          repositoryId, //
          source, //
@@ -86,10 +86,10 @@ public class RelationshipServiceTest extends BaseTest
          null, // Skip count
          new CmisExtensionType() // Extension
          );
-      assertEquals(2, resp.getItems().size());
+      assertEquals(2, resp.getObjects().size());
       List<String> ids = new ArrayList<String>(2);
-      ids.add(getObjectId(resp.getItems().get(0)));
-      ids.add(getObjectId(resp.getItems().get(1)));
+      ids.add(getObjectId(resp.getObjects().get(0)));
+      ids.add(getObjectId(resp.getObjects().get(1)));
       assertTrue(ids.contains(relationship1));
       assertTrue(ids.contains(relationship2));
    }
