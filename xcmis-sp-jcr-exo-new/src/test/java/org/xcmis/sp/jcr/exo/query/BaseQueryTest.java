@@ -134,7 +134,7 @@ public abstract class BaseQueryTest extends BaseTest
       checkResults(expectedPaths, resultPaths);
    }
 
-   protected void checkResult(ItemsIterator<Result> result, Document[] nodes)
+   protected void checkResult(ItemsIterator<Result> result, ObjectData[] nodes)
    {
       // collect rows
       Set<String> expectedPaths = new HashSet<String>();
@@ -143,7 +143,7 @@ public abstract class BaseQueryTest extends BaseTest
          LOG.debug("expected:");
       }
 
-      for (Document node : nodes)
+      for (ObjectData node : nodes)
       {
          expectedPaths.add(node.getObjectId());
          if (LOG.isDebugEnabled())
@@ -171,7 +171,7 @@ public abstract class BaseQueryTest extends BaseTest
       checkResults(expectedPaths, resultPaths);
    }
 
-   protected void checkResultOrder(ItemsIterator<Result> result, Document[] nodes)
+   protected void checkResultOrder(ItemsIterator<Result> result, ObjectData[] nodes)
    {
       // collect rows
       String expectedPaths = "";
@@ -180,7 +180,7 @@ public abstract class BaseQueryTest extends BaseTest
          LOG.debug("expected:");
       }
 
-      for (Document node : nodes)
+      for (ObjectData node : nodes)
       {
          expectedPaths += node.getObjectId();
          if (LOG.isDebugEnabled())

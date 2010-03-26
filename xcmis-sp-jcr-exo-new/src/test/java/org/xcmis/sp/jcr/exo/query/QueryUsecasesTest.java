@@ -405,53 +405,63 @@ public class QueryUsecasesTest extends BaseQueryTest
       }
 
    }
-   //
-   //   /**
-   //    * Test IN_FOLDER constraint.
-   //    * <p>
-   //    * Initial data:
-   //    * <p>
-   //    * folder1:
-   //    * <p>
-   //    * -doc1: <b>Title</b> - node1
-   //    * <p>
-   //    * folder2:
-   //    * <p>
-   //    * -doc2: <b>Title</b> - node2
-   //    * <p>
-   //    * -folder3:
-   //    * <p>
-   //    * --folder4 </ul>
-   //    * <p>
-   //    * Query : Select all folders that are in folder1.
-   //    * <p>
-   //    * Expected result: folder3
-   //    * 
-   //    * @throws Exception if an unexpected error occurs
-   //    */
-   //   public void testFolderInFolderConstrain() throws Exception
-   //   {
-   //      // create data
-   //      Document folder1 = this.createFolder(root, "folder1");
-   //      Document doc1 = createDocument(folder1.getObjectId(), "node1", "hello world".getBytes(), "text/plain");
-   //
-   //      Document folder2 = this.createFolder(root, "folder2");
-   //      Document doc2 = createDocument(folder2.getObjectId(), "node2", "hello world".getBytes(), "text/plain");
-   //
-   //      Document folder3 = this.createFolder(folder1.getObjectId(), "folder3");
-   //      Document doc3 = createDocument(folder3.getObjectId(), "node3", "hello world".getBytes(), "text/plain");
-   //
-   //      Document folder4 = this.createFolder(folder3.getObjectId(), "folder4");
-   //
-   //      String statement = "SELECT * FROM " + JcrCMIS.NT_FOLDER + " WHERE IN_FOLDER( '" + folder1.getObjectId() + "')";
-   //
-   //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = storage.query(query);
-   //
-   //      // check results
-   //      checkResult(result, new Document[]{folder3});
-   //
-   //   }
+
+   /**
+    * Test IN_FOLDER constraint.
+    * <p>
+    * Initial data:
+    * <p>
+    * folder1:
+    * <p>
+    * -doc1: <b>Title</b> - node1
+    * <p>
+    * folder2:
+    * <p>
+    * -doc2: <b>Title</b> - node2
+    * <p>
+    * -folder3:
+    * <p>
+    * --folder4 </ul>
+    * <p>
+    * Query : Select all folders that are in folder1.
+    * <p>
+    * Expected result: folder3
+    * 
+    * @throws Exception if an unexpected error occurs
+    */
+   public void testFolderInFolderConstrain() throws Exception
+   {
+      // create data
+      Folder folder1 = createFolder(testRoot, "folder1", "cmis:folder");
+      storage.saveObject(folder1);
+
+      Document doc1 = createDocument(folder1, "node1", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
+      storage.saveObject(doc1);
+
+      Folder folder2 = createFolder(testRoot, "folder2", "cmis:folder");
+      storage.saveObject(folder2);
+
+      Document doc2 = createDocument(folder2, "node2", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
+      storage.saveObject(doc2);
+
+      Folder folder3 = createFolder(folder1, "folder3", "cmis:folder");
+      storage.saveObject(folder3);
+
+      Document doc3 = createDocument(folder3, "node3", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
+      storage.saveObject(doc3);
+
+      Folder folder4 = createFolder(folder3, "folder4", "cmis:folder");
+      storage.saveObject(folder4);
+
+      String statement = "SELECT * FROM cmis:folder  WHERE IN_FOLDER( '" + folder1.getObjectId() + "')";
+
+      Query query = new Query(statement, true);
+      ItemsIterator<Result> result = storage.query(query);
+
+      // check results
+      checkResult(result, new Folder[]{folder3});
+
+   }
    //
    //   /**
    //    * Test JOIN with condition constraint.
