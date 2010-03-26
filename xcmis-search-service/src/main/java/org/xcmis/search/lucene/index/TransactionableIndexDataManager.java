@@ -22,7 +22,7 @@ import org.apache.lucene.document.Document;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.search.config.IndexConfigurationException;
-import org.xcmis.search.config.IndexConfuguration;
+import org.xcmis.search.config.IndexConfiguration;
 
 import java.io.File;
 import java.util.HashSet;
@@ -49,7 +49,7 @@ public class TransactionableIndexDataManager extends CacheableIndexDataManager
 
    private final FSIndexTransactionService transactionService;
 
-   public TransactionableIndexDataManager(final IndexConfuguration indexConfuguration) throws IndexException,
+   public TransactionableIndexDataManager(final IndexConfiguration indexConfuguration) throws IndexException,
       IndexConfigurationException
    {
       super(indexConfuguration);

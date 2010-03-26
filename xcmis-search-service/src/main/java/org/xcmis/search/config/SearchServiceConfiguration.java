@@ -53,7 +53,7 @@ public class SearchServiceConfiguration
    /**
     * Index configuration.
     */
-   private IndexConfuguration indexConfuguration;
+   private IndexConfiguration indexConfiguration;
 
    /**
     * @return the defaultInvocationContext
@@ -82,11 +82,11 @@ public class SearchServiceConfiguration
    }
 
    /**
-    * @return the indexConfuguration
+    * @return the indexConfiguration
     */
-   public IndexConfuguration getIndexConfuguration()
+   public IndexConfiguration getIndexConfuguration()
    {
-      return indexConfuguration;
+      return indexConfiguration;
    }
 
    /**
@@ -122,11 +122,11 @@ public class SearchServiceConfiguration
    }
 
    /**
-    * @param indexConfuguration the indexConfuguration to set
+    * @param indexConfiguration the indexConfiguration to set
     */
-   public void setIndexConfuguration(IndexConfuguration indexConfuguration)
+   public void setIndexConfiguration(IndexConfiguration indexConfiguration)
    {
-      this.indexConfuguration = indexConfuguration;
+      this.indexConfiguration = indexConfiguration;
    }
 
    /**

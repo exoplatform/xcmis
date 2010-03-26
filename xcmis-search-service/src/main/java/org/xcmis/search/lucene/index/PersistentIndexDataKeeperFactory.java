@@ -27,7 +27,7 @@ import org.apache.lucene.store.FSDirectory;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.search.config.IndexConfigurationException;
-import org.xcmis.search.config.IndexConfuguration;
+import org.xcmis.search.config.IndexConfiguration;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,13 +53,13 @@ public class PersistentIndexDataKeeperFactory extends LuceneIndexDataKeeperFacto
 
    private final IndexInfo indexNames;
 
-   private final IndexConfuguration indexConfuguration;
+   private final IndexConfiguration indexConfuguration;
 
    /**
     * @throws IndexException
     * @throws IndexConfigurationException
     */
-   public PersistentIndexDataKeeperFactory(final IndexConfuguration indexConfuguration) throws IndexException,
+   public PersistentIndexDataKeeperFactory(final IndexConfiguration indexConfuguration) throws IndexException,
       IndexConfigurationException
    {
       super();

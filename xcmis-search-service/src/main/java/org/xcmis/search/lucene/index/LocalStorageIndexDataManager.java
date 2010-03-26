@@ -31,7 +31,7 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.search.Startable;
 import org.xcmis.search.config.IndexConfigurationException;
-import org.xcmis.search.config.IndexConfuguration;
+import org.xcmis.search.config.IndexConfiguration;
 import org.xcmis.search.lucene.index.merge.IndexAggregator;
 
 import java.io.IOException;
@@ -63,14 +63,14 @@ public class LocalStorageIndexDataManager implements LuceneIndexDataManager, Ind
     */
    private final Log log = ExoLogger.getLogger(LocalStorageIndexDataManager.class);
 
-   private final IndexConfuguration indexConfuguration;
+   private final IndexConfiguration indexConfuguration;
 
    /**
     * @throws IndexConfigurationException
     * @throws IndexException
     * @throws IndexConfigurationException
     */
-   public LocalStorageIndexDataManager(final IndexConfuguration indexConfuguration) throws IndexException,
+   public LocalStorageIndexDataManager(final IndexConfiguration indexConfuguration) throws IndexException,
       IndexConfigurationException
    {
       super();

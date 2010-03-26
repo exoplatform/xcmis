@@ -27,7 +27,7 @@ import org.xcmis.search.lucene.index.IndexRestoreService;
  * @version $Id: exo-jboss-codetemplates.xml 34027 2009-07-15 23:26:43Z
  *          aheritier $
  */
-public interface IndexConfuguration
+public interface IndexConfiguration
 {
    String getIndexDir();
 

@@ -22,7 +22,7 @@ import org.apache.lucene.document.Document;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.search.config.IndexConfigurationException;
-import org.xcmis.search.config.IndexConfuguration;
+import org.xcmis.search.config.IndexConfiguration;
 
 /**
  * Created by The eXo Platform SAS.
@@ -37,7 +37,7 @@ public class LocalIndexDataManagerProxy extends LocalStorageIndexDataManager
     */
    private final Log log = ExoLogger.getLogger(LocalIndexDataManagerProxy.class);
 
-   public LocalIndexDataManagerProxy(final IndexConfuguration indexConfuguration) throws IndexException,
+   public LocalIndexDataManagerProxy(final IndexConfiguration indexConfuguration) throws IndexException,
       IndexConfigurationException
    {
       super(indexConfuguration);

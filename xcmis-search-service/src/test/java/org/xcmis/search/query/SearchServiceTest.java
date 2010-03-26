@@ -29,7 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xcmis.search.InvalidQueryException;
 import org.xcmis.search.SearchServiceException;
-import org.xcmis.search.config.IndexConfurationImpl;
+import org.xcmis.search.config.IndexConfigurationImpl;
 import org.xcmis.search.config.SearchServiceConfiguration;
 import org.xcmis.search.content.ContentEntry;
 import org.xcmis.search.content.InMemorySchema;
@@ -110,14 +110,14 @@ public class SearchServiceTest
    public void testShouldCreateSearchServie() throws SearchServiceException
    {
       //index configuration
-      IndexConfurationImpl indexConfuration = new IndexConfurationImpl();
+      IndexConfigurationImpl indexConfuration = new IndexConfigurationImpl();
       indexConfuration.setIndexDir(tempDir.getAbsolutePath());
       indexConfuration.setIndexRecoverService(mock(IndexRecoverService.class));
       indexConfuration.setIndexRestoreService(mock(IndexRestoreService.class));
 
       //search service configuration
       SearchServiceConfiguration configuration = new SearchServiceConfiguration();
-      configuration.setIndexConfuguration(indexConfuration);
+      configuration.setIndexConfiguration(indexConfuration);
       configuration.setContentReader(mock(ContentReaderInterceptor.class));
       LuceneSearchService luceneSearchService = new LuceneSearchService(configuration);
 
@@ -133,14 +133,14 @@ public class SearchServiceTest
       SchemaTableResolver tableResolver = new SchemaTableResolver(nameConverter, schema);
 
       //index configuration
-      IndexConfurationImpl indexConfuration = new IndexConfurationImpl();
+      IndexConfigurationImpl indexConfuration = new IndexConfigurationImpl();
       indexConfuration.setIndexDir(tempDir.getAbsolutePath());
       indexConfuration.setIndexRecoverService(mock(IndexRecoverService.class));
       indexConfuration.setIndexRestoreService(mock(IndexRestoreService.class));
 
       //search service configuration
       SearchServiceConfiguration configuration = new SearchServiceConfiguration();
-      configuration.setIndexConfuguration(indexConfuration);
+      configuration.setIndexConfiguration(indexConfuration);
       configuration.setContentReader(mock(ContentReaderInterceptor.class));
       configuration.setNameConverter(nameConverter);
       configuration.setTableResolver(tableResolver);
@@ -167,14 +167,14 @@ public class SearchServiceTest
       SchemaTableResolver tableResolver = new SchemaTableResolver(nameConverter, schema);
 
       //index configuration
-      IndexConfurationImpl indexConfuration = new IndexConfurationImpl();
+      IndexConfigurationImpl indexConfuration = new IndexConfigurationImpl();
       indexConfuration.setIndexDir(tempDir.getAbsolutePath());
       indexConfuration.setIndexRecoverService(mock(IndexRecoverService.class));
       indexConfuration.setIndexRestoreService(mock(IndexRestoreService.class));
 
       //search service configuration
       SearchServiceConfiguration configuration = new SearchServiceConfiguration();
-      configuration.setIndexConfuguration(indexConfuration);
+      configuration.setIndexConfiguration(indexConfuration);
       configuration.setContentReader(mock(ContentReaderInterceptor.class));
       configuration.setNameConverter(nameConverter);
       configuration.setTableResolver(tableResolver);
