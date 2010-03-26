@@ -45,7 +45,6 @@ import javax.jcr.Node;
 import javax.jcr.PathNotFoundException;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import javax.jcr.ValueFormatException;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
@@ -61,7 +60,7 @@ class DocumentImpl extends BaseObjectData implements Document
    private ContentStream content;
 
    protected final VersioningState versioningState;
-   
+
    private RenditionManager renditionManager;
 
    public DocumentImpl(TypeDefinition type, Folder parent, Session session, VersioningState versioningState)
@@ -83,7 +82,6 @@ class DocumentImpl extends BaseObjectData implements Document
       this.renditionManager = manager;
    }
 
-   
    public void cancelCheckout() throws StorageException
    {
       // TODO Auto-generated method stub
@@ -111,7 +109,9 @@ class DocumentImpl extends BaseObjectData implements Document
    public ContentStream getContentStream()
    {
       if (isNew())
+      {
          throw new UnsupportedOperationException("getContentStream");
+      }
 
       try
       {
@@ -121,9 +121,12 @@ class DocumentImpl extends BaseObjectData implements Document
          long contentLength = contentNode.getProperty(JcrCMIS.JCR_DATA).getLength();
 
          if (contentLength == 0)
+         {
             return null;
+         }
 
          return new BaseContentStream(contentNode.getProperty(JcrCMIS.JCR_DATA).getStream(), //
+            contentLength,//
             getName(), //
             contentNode.getProperty(JcrCMIS.JCR_MIMETYPE).getString());
       }
@@ -139,33 +142,40 @@ class DocumentImpl extends BaseObjectData implements Document
    public ContentStream getContentStream(String streamId)
    {
       if (isNew())
+      {
          throw new UnsupportedOperationException("getContentStream");
+      }
 
       if (streamId == null || streamId.equals(getString(CMIS.CONTENT_STREAM_ID)))
+      {
          return getContentStream();
+      }
 
-         Node rendition = null;
+      Node rendition = null;
+      try
+      {
+         rendition = node.getNode(streamId);
+         javax.jcr.Property renditionContent = rendition.getProperty(JcrCMIS.CMIS_RENDITION_STREAM);
+
+         return new RenditionContentStream(renditionContent.getStream(), renditionContent.getLength(), null, rendition
+            .getProperty(JcrCMIS.CMIS_RENDITION_MIME_TYPE).getString(), rendition.getProperty(
+            JcrCMIS.CMIS_RENDITION_KIND).getString());
+      }
+      catch (PathNotFoundException pnfe)
+      {
          try
          {
-            rendition = node.getNode(streamId);
-            javax.jcr.Property renditionContent = rendition.getProperty(JcrCMIS.CMIS_RENDITION_STREAM);
-
-            return new RenditionContentStream(renditionContent.getStream(), renditionContent.getLength(), null,
-               rendition.getProperty(JcrCMIS.CMIS_RENDITION_MIME_TYPE).getString(), rendition.getProperty(
-                  JcrCMIS.CMIS_RENDITION_KIND).getString());
+            return renditionManager.getStream(this, streamId);
          }
-         catch (PathNotFoundException pnfe)
+         catch (Exception e)
          {
-            try {   
-            return  renditionManager.getStream(this, streamId);
-            } catch (Exception e){
-               throw new CmisRuntimeException("Unable get rendition stream. " + e.getMessage(), e);
-            }
+            throw new CmisRuntimeException("Unable get rendition stream. " + e.getMessage(), e);
          }
-         catch (RepositoryException re)
-         {
-            throw new CmisRuntimeException("Unable get rendition stream. " + re.getMessage(), re);
-         }
+      }
+      catch (RepositoryException re)
+      {
+         throw new CmisRuntimeException("Unable get rendition stream. " + re.getMessage(), re);
+      }
 
    }
 
@@ -215,7 +225,9 @@ class DocumentImpl extends BaseObjectData implements Document
    public boolean hasContent()
    {
       if (isNew())
+      {
          return false;
+      }
 
       try
       {
@@ -279,23 +291,33 @@ class DocumentImpl extends BaseObjectData implements Document
       try
       {
          if (name == null && content != null)
+         {
             name = content.getFileName();
+         }
 
          if (name == null || name.length() == 0)
+         {
             throw new NameConstraintViolationException("Name for new document must be provided.");
+         }
 
          Node parentNode = parent.getNode();
 
          if (parentNode.hasNode(name))
+         {
             throw new NameConstraintViolationException("Object with name " + name
                + " already exists in specified folder.");
+         }
 
          Node doc = parentNode.addNode(name, type.getLocalName());
 
-         if (!doc.isNodeType(JcrCMIS.CMIS_MIX_DOCUMENT)) // May be already inherited.
+         if (!doc.isNodeType(JcrCMIS.CMIS_MIX_DOCUMENT))
+         {
             doc.addMixin(JcrCMIS.CMIS_MIX_DOCUMENT);
-         if (doc.canAddMixin(JcrCMIS.MIX_VERSIONABLE)) // Document type is versionable.
+         }
+         if (doc.canAddMixin(JcrCMIS.MIX_VERSIONABLE))
+         {
             doc.addMixin(JcrCMIS.MIX_VERSIONABLE);
+         }
 
          doc.setProperty(CMIS.OBJECT_TYPE_ID, //
             type.getId());
@@ -328,7 +350,9 @@ class DocumentImpl extends BaseObjectData implements Document
          }
 
          for (Property<?> property : properties.values())
+         {
             setProperty(doc, property);
+         }
 
          try
          {
@@ -342,11 +366,15 @@ class DocumentImpl extends BaseObjectData implements Document
          if (policies != null && policies.size() > 0)
          {
             for (Policy policy : policies)
+            {
                applyPolicy(doc, policy);
+            }
          }
 
          if (acl != null && acl.size() > 0)
+         {
             setACL(doc, acl);
+         }
 
          parentNode.save();
 

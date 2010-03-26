@@ -26,6 +26,7 @@ import org.exoplatform.services.jcr.config.RepositoryConfigurationException;
 import org.exoplatform.services.jcr.core.CredentialsImpl;
 import org.exoplatform.services.jcr.core.ManageableRepository;
 import org.exoplatform.services.jcr.ext.common.SessionProvider;
+import org.exoplatform.services.jcr.impl.core.SessionImpl;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.security.ConversationState;
@@ -34,13 +35,17 @@ import org.xcmis.search.SearchService;
 import org.xcmis.search.SearchServiceException;
 import org.xcmis.search.config.IndexConfurationImpl;
 import org.xcmis.search.config.SearchServiceConfiguration;
+import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.lucene.LuceneSearchService;
+import org.xcmis.search.lucene.content.SchemaTableResolver;
 import org.xcmis.search.value.ToStringNameConverter;
 import org.xcmis.sp.jcr.exo.index.CmisContentReader;
 import org.xcmis.sp.jcr.exo.index.CmisRecoverService;
 import org.xcmis.sp.jcr.exo.index.CmisRestoreService;
+import org.xcmis.sp.jcr.exo.index.CmisSchema;
 import org.xcmis.sp.jcr.exo.index.IndexListener;
 import org.xcmis.sp.jcr.exo.index.IndexListenerFactory;
+import org.xcmis.sp.jcr.exo.index.JcrPathSpliter;
 import org.xcmis.sp.jcr.exo.rendition.ImageRenditionProvider;
 import org.xcmis.sp.jcr.exo.rendition.PDFDocumentRenditionProvider;
 import org.xcmis.sp.jcr.exo.rendition.RenditionProvider;
@@ -361,15 +366,22 @@ public class StorageProviderImpl implements StorageProvider, Startable
             StorageImpl storage = new StorageImpl(session, cmisRepositoryConfiguration);
             IndexConfurationImpl indexConfiguration = new IndexConfurationImpl();
             //TODO real config
-            indexConfiguration.setIndexDir("/tmp/index");
+            indexConfiguration.setIndexDir("target/temp/index");
             indexConfiguration.setIndexRecoverService(new CmisRecoverService(storage));
             indexConfiguration.setIndexRestoreService(new CmisRestoreService(storage));
+            //default invocation context
+            InvocationContext invocationContext = new InvocationContext();
+            invocationContext.setNameConverter(new ToStringNameConverter());
+            CmisSchema schema = new CmisSchema(storage);
+            invocationContext.setSchema(schema);
+            invocationContext.setPathSplitter(new JcrPathSpliter(((SessionImpl)session).getLocationFactory()));
+            invocationContext.setTableResolver(new SchemaTableResolver(new ToStringNameConverter(), schema));
 
             SearchServiceConfiguration configuration = new SearchServiceConfiguration();
             configuration.setIndexConfuguration(indexConfiguration);
             configuration.setContentReader(new CmisContentReader(storage));
-
             configuration.setNameConverter(new ToStringNameConverter());
+            configuration.setDefaultInvocationContext(invocationContext);
 
             LuceneSearchService searchService = new LuceneSearchService(configuration);
             searchService.start();
