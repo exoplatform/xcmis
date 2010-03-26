@@ -34,6 +34,8 @@ import org.xcmis.spi.impl.TypeDefinitionImpl;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import javax.jcr.nodetype.NodeType;
@@ -60,15 +62,25 @@ public class JcrTypeHelper
       throws NotSupportedNodeTypeException
    {
       if (nt.isNodeType(JcrCMIS.NT_FILE))
+      {
          return getDocumentDefinition(nt, includePropertyDefinition);
+      }
       else if (nt.isNodeType(JcrCMIS.NT_FOLDER) || nt.isNodeType(JcrCMIS.NT_UNSTRUCTURED))
+      {
          return getFolderDefinition(nt, includePropertyDefinition);
+      }
       else if (nt.isNodeType(JcrCMIS.CMIS_NT_RELATIONSHIP))
+      {
          return getRelationshipDefinition(nt, includePropertyDefinition);
+      }
       else if (nt.isNodeType(JcrCMIS.CMIS_NT_POLICY))
+      {
          return getPolicyDefinition(nt, includePropertyDefinition);
+      }
       else
+      {
          throw new NotSupportedNodeTypeException("Type " + nt.getName() + " is unsupported for xCMIS.");
+      }
    }
 
    /**
@@ -80,9 +92,13 @@ public class JcrTypeHelper
    public static String getCmisTypeId(String ntName)
    {
       if (ntName.equals(JcrCMIS.NT_FILE))
+      {
          return BaseType.DOCUMENT.value();
+      }
       if (ntName.equals(JcrCMIS.NT_FOLDER) || ntName.equals(JcrCMIS.NT_UNSTRUCTURED))
+      {
          return BaseType.FOLDER.value();
+      }
       return ntName;
    }
 
@@ -95,9 +111,13 @@ public class JcrTypeHelper
    public static String getNodeTypeName(String typeId)
    {
       if (typeId.equals(BaseType.DOCUMENT.value()))
+      {
          return JcrCMIS.NT_FILE;
+      }
       if (typeId.equals(BaseType.FOLDER.value()))
+      {
          return JcrCMIS.NT_FOLDER;
+      }
       return typeId;
    }
 
@@ -149,7 +169,9 @@ public class JcrTypeHelper
       def.setQueryName(typeId);
       def.setVersionable(true);
       if (includePropertyDefinition)
+      {
          addPropertyDefinitions(def, nt);
+      }
       return def;
    }
 
@@ -199,7 +221,9 @@ public class JcrTypeHelper
       def.setQueryable(true);
       def.setQueryName(typeId);
       if (includePropertyDefinition)
+      {
          addPropertyDefinitions(def, nt);
+      }
       return def;
    }
 
@@ -249,7 +273,9 @@ public class JcrTypeHelper
       def.setQueryable(false);
       def.setQueryName(typeId);
       if (includePropertyDefinition)
+      {
          addPropertyDefinitions(def, nt);
+      }
       return def;
    }
 
@@ -299,7 +325,9 @@ public class JcrTypeHelper
       def.setQueryable(false);
       def.setQueryName(typeId);
       if (includePropertyDefinition)
+      {
          addPropertyDefinitions(def, nt);
+      }
       return def;
    }
 
@@ -314,9 +342,11 @@ public class JcrTypeHelper
       // Known described in spec. property definitions
       //      for (PropertyDefinition<?> propDef : PropertyDefinitionsMap.getAll(typeDefinition.getBaseId().value()))
       //         typeDefinition.getPropertyDefinitions().add(propDef);
-         ((TypeDefinitionImpl)typeDefinition).setPropertyDefinitions(PropertyDefinitions._getAll(typeDefinition.getBaseId().value()));
+      ((TypeDefinitionImpl)typeDefinition).setPropertyDefinitions(PropertyDefinitions._getAll(typeDefinition
+         .getBaseId().value()));
 
       Set<String> knownIds = PropertyDefinitions.getPropertyIds(typeDefinition.getBaseId().value());
+      Map<String, PropertyDefinition<?>> pd = new HashMap<String, PropertyDefinition<?>>();
       for (javax.jcr.nodetype.PropertyDefinition jcrPropertyDef : nt.getPropertyDefinitions())
       {
          String pdName = jcrPropertyDef.getName();
@@ -398,11 +428,11 @@ public class JcrTypeHelper
                      break;
 
                }
-
-               typeDefinition.getPropertyDefinitions().add(cmisPropDef);
+               pd.put(cmisPropDef.getId(), cmisPropDef);
             }
          }
       }
+      ((TypeDefinitionImpl)typeDefinition).setPropertyDefinitions(pd);
    }
 
 }

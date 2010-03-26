@@ -58,25 +58,6 @@
 					</values-param>
 				</init-params>
 			</component-plugin>
-			<component-plugin>
-				<name>register.listener</name>
-				<set-method>addPlugin</set-method>
-				<type>org.exoplatform.services.jcr.impl.RepositoryChangesListenerRegisterPlugin</type>
-				<init-params>
-					<value-param>
-						<name>repository-name</name>
-						<value>db1</value>
-					</value-param>
-					<value-param>
-						<name>workspaces</name>
-						<value>ws1</value>
-					</value-param>
-					<value-param>
-						<name>component-class-name</name>
-						<value>org.xcmis.sp.jcr.exo.query.index.StartableJcrIndexingService</value>
-					</value-param>
-				</init-params>
-			</component-plugin>
 		</component-plugins>
 	</component>
 
@@ -90,10 +71,6 @@
 				<value>jar:/conf/standalone/test-jcr-cmis-config.xml</value>
 			</value-param>
 		</init-params>
-	</component>
-
-	<component>
-		<type>org.xcmis.sp.jcr.exo.index.IndexListenerFactory</type>
 	</component>
 
 	<component>
@@ -116,8 +93,8 @@
 										<string>ws1</string>
 									</field>
 									<field name="indexConfiguration">
-										<object type="org.xcmis.sp.jcr.exo.IndexConfiguration">
-											<field name="indexPath">
+										<object type="org.xcmis.search.config.IndexConfigurationImpl">
+											<field name="indexDir">
 												<string>target/temp/index/db1/ws1</string>
 											</field>
 										</object>

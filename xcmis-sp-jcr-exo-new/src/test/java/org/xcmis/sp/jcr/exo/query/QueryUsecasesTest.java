@@ -20,9 +20,15 @@
 package org.xcmis.sp.jcr.exo.query;
 
 import org.xcmis.spi.ItemsIterator;
+import org.xcmis.spi.UnfileObject;
 import org.xcmis.spi.data.Document;
+import org.xcmis.spi.data.Folder;
+import org.xcmis.spi.object.impl.StringProperty;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by The eXo Platform SAS. <br/>
@@ -36,9 +42,34 @@ public class QueryUsecasesTest extends BaseQueryTest
 
    private final static String CONTENT_TYPE = "text/plain";
 
-   private final static String PROPERTY_BOOSTER = "exo:Booster";
+   private final static String NASA_DOCUMENT = "cmis:nasa-document";
 
-   private final static String PROPERTY_COMMANDER = "exo:Commander";
+   private final static String PROPERTY_BOOSTER = "cmis:Booster";
+
+   private final static String PROPERTY_COMMANDER = "cmis:Commander";
+
+   private Folder testRoot;
+
+   /**
+    * @see org.xcmis.sp.jcr.exo.query.BaseQueryTest#setUp()
+    */
+   @Override
+   public void setUp() throws Exception
+   {
+      super.setUp();
+      testRoot = createFolder(rootFolder, "QueryUsecasesTest", "cmis:folder");
+   }
+
+   /**
+    * @see org.xcmis.sp.jcr.exo.BaseTest#tearDown()
+    */
+   @Override
+   protected void tearDown() throws Exception
+   {
+      storage.deleteTree(testRoot, true, UnfileObject.DELETE, true);
+      super.tearDown();
+
+   }
 
    /**
     * Simple test.
@@ -57,102 +88,109 @@ public class QueryUsecasesTest extends BaseQueryTest
     */
    public void testSimpleQuery() throws Exception
    {
-      Document document1 = createDocument(rootFolder, "node1", "cmis:document", "hello world".getBytes(), "text/plain");
+      Document document1 = createDocument(testRoot, "node1", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
       Document document2 =
-         createDocument(rootFolder, "node2", "cmis:document", "hello world second".getBytes(), "text/plain");
+         createDocument(testRoot, "node2", NASA_DOCUMENT, "hello world second".getBytes(), "text/plain");
 
-      String statement = "SELECT * FROM " + document1.getTypeDefinition().getQueryName();
+      String statement = "SELECT * FROM " + NASA_DOCUMENT;
       Query query = new Query(statement, true);
       ItemsIterator<Result> result = storage.query(query);
       checkResult(result, new Document[]{document1, document2});
    }
-   //
-   //   /**
-   //    * Test query with one 'and' two or' constraints.
-   //    * <p>
-   //    * Initial data:
-   //    * <ul>
-   //    * <li>document1: <b>Title</b> - Apollo 7 <b>exo:Booster</b> - Saturn 1B
-   //    * <b>exo:Commander</b> - Walter M. Schirra</li>
-   //    * <li>document2: <b>Title</b> - Apollo 8 <b>exo:Booster</b> - Saturn V
-   //    * <b>exo:Commander</b> - Frank F. Borman, II</li>
-   //    * <li>document3: <b>Title</b> - Apollo 13<b> exo:Booster</b> - Saturn V
-   //    * <b>exo:Commander</b> - James A. Lovell, Jr.</li>
-   //    * </ul>
-   //    * <p>
-   //    * Query : Select all documents where exo:Booster is 'Saturn V' and
-   //    * exo:Commander is Frank F. Borman, II or James A. Lovell, Jr.
-   //    * <p>
-   //    * Expected result: document2 and document3
-   //    * 
-   //    * @throws Exception if an unexpected error occurs
-   //    */
-   //   public void testAndOrConstraint() throws Exception
-   //   {
-   //      // create data
-   //      EntryImpl folder = createFolder(root, "testAndOrConstraint");
-   //      List<EntryImpl> appolloContent = createApolloContent(folder);
-   //
-   //      StringBuffer sql = new StringBuffer();
-   //      sql.append("SELECT * ");
-   //      sql.append("FROM ");
-   //      sql.append(EnumBaseObjectTypeIds.CMIS_DOCUMENT.value());
-   //      sql.append(" WHERE ");
-   //      sql.append(PROPERTY_BOOSTER + " = " + "'Saturn V'");
-   //      sql.append(" AND ( " + PROPERTY_COMMANDER + " = 'Frank F. Borman, II' ");
-   //      sql.append("       OR " + PROPERTY_COMMANDER + " = 'James A. Lovell, Jr.' )");
-   //
-   //      Query query = new Query(sql.toString(), true);
-   //
-   //      ItemsIterator<Result> result = cmisRepository.getQueryHandler().handleQuery(query);
-   //      // check results
-   //      checkResult(result, new Entry[]{appolloContent.get(1), appolloContent.get(2)});
-   //   }
-   //
-   //   /**
-   //    * Create content for Apollo program.
-   //    * 
-   //    * @param folder
-   //    * @return
-   //    * @throws Exception
-   //    */
-   //   private List<EntryImpl> createApolloContent(EntryImpl folder) throws Exception
-   //   {
-   //      List<EntryImpl> result = new ArrayList<EntryImpl>();
-   //      EntryImpl doc1 =
-   //         createDocument(folder.getObjectId(), "Apollo 7",
-   //            ("Apollo 7 (October 11-22, 1968) was the first manned mission "
-   //               + "in the Apollo program to be launched. It was an eleven-day "
-   //               + "Earth-orbital mission, the first manned launch of the "
-   //               + "Saturn IB launch vehicle, and the first three-person " + "American space mission").getBytes(),
-   //            CONTENT_TYPE);
-   //      doc1.setString(PROPERTY_COMMANDER, "Walter M. Schirra");
-   //      doc1.setString(PROPERTY_BOOSTER, "Saturn 1B");
-   //      doc1.save();
-   //      result.add(doc1);
-   //
-   //      EntryImpl doc2 =
-   //         createDocument(folder.getObjectId(), "Apollo 8", ("Apollo 8 was the first "
-   //            + "manned space voyage to achieve a velocity sufficient to allow escape from the "
-   //            + "gravitational field of planet Earth; the first to escape from the gravitational "
-   //            + "field of another celestial body; and the first manned voyage to return to planet Earth "
-   //            + "from another celestial body - Earth's Moon").getBytes(), CONTENT_TYPE);
-   //      doc2.setString(PROPERTY_COMMANDER, "Frank F. Borman, II");
-   //      doc2.setString(PROPERTY_BOOSTER, "Saturn V");
-   //      doc2.save();
-   //      result.add(doc2);
-   //
-   //      EntryImpl doc3 =
-   //         createDocument(folder.getObjectId(), "Apollo 13", ("Apollo 13 was the third "
-   //            + "manned mission by NASA intended to land on the Moon, but a mid-mission technical "
-   //            + "malfunction forced the lunar landing to be aborted. ").getBytes(), CONTENT_TYPE);
-   //      doc3.setString(PROPERTY_COMMANDER, "James A. Lovell, Jr.");
-   //      doc3.setString(PROPERTY_BOOSTER, "Saturn V");
-   //      doc3.save();
-   //      result.add(doc3);
-   //
-   //      return result;
-   //   }
+
+   /**
+    * Test query with one 'and' two or' constraints.
+    * <p>
+    * Initial data:
+    * <ul>
+    * <li>document1: <b>Title</b> - Apollo 7 <b>exo:Booster</b> - Saturn 1B
+    * <b>exo:Commander</b> - Walter M. Schirra</li>
+    * <li>document2: <b>Title</b> - Apollo 8 <b>exo:Booster</b> - Saturn V
+    * <b>exo:Commander</b> - Frank F. Borman, II</li>
+    * <li>document3: <b>Title</b> - Apollo 13<b> exo:Booster</b> - Saturn V
+    * <b>exo:Commander</b> - James A. Lovell, Jr.</li>
+    * </ul>
+    * <p>
+    * Query : Select all documents where exo:Booster is 'Saturn V' and
+    * exo:Commander is Frank F. Borman, II or James A. Lovell, Jr.
+    * <p>
+    * Expected result: document2 and document3
+    * 
+    * @throws Exception if an unexpected error occurs
+    */
+   public void testAndOrConstraint() throws Exception
+   {
+      // create data
+      List<Document> appolloContent = createApolloContent(testRoot);
+
+      StringBuffer sql = new StringBuffer();
+      sql.append("SELECT * ");
+      sql.append("FROM ");
+      sql.append(NASA_DOCUMENT);
+      sql.append(" WHERE ");
+      sql.append(PROPERTY_BOOSTER + " = " + "'Saturn V'");
+      sql.append(" AND ( " + PROPERTY_COMMANDER + " = 'Frank F. Borman, II' ");
+      sql.append("       OR " + PROPERTY_COMMANDER + " = 'James A. Lovell, Jr.' )");
+
+      Query query = new Query(sql.toString(), true);
+
+      ItemsIterator<Result> result = storage.query(query);
+      // check results
+      checkResult(result, new Document[]{appolloContent.get(1), appolloContent.get(2)});
+   }
+
+   /**
+    * Create content for Apollo program.
+    * 
+    * @param folder
+    * @return
+    * @throws Exception
+    */
+   private List<Document> createApolloContent(Folder folder) throws Exception
+   {
+      List<Document> result = new ArrayList<Document>();
+      Document doc1 =
+         createDocument(folder, "Apollo 7", NASA_DOCUMENT,
+            ("Apollo 7 (October 11-22, 1968) was the first manned mission "
+               + "in the Apollo program to be launched. It was an eleven-day "
+               + "Earth-orbital mission, the first manned launch of the "
+               + "Saturn IB launch vehicle, and the first three-person " + "American space mission").getBytes(),
+            CONTENT_TYPE);
+      doc1.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+         PROPERTY_COMMANDER, "Walter M. Schirra"));
+      doc1.setProperty(new StringProperty(PROPERTY_BOOSTER, PROPERTY_BOOSTER, PROPERTY_BOOSTER, PROPERTY_BOOSTER,
+         "Saturn 1B"));
+      storage.saveObject(doc1);
+      //doc1.save();
+      result.add(doc1);
+
+      Document doc2 =
+         createDocument(folder, "Apollo 8", NASA_DOCUMENT, ("Apollo 8 was the first "
+            + "manned space voyage to achieve a velocity sufficient to allow escape from the "
+            + "gravitational field of planet Earth; the first to escape from the gravitational "
+            + "field of another celestial body; and the first manned voyage to return to planet Earth "
+            + "from another celestial body - Earth's Moon").getBytes(), CONTENT_TYPE);
+      doc2.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+         PROPERTY_COMMANDER, "Frank F. Borman, II"));
+      doc2.setProperty(new StringProperty(PROPERTY_BOOSTER, PROPERTY_BOOSTER, PROPERTY_BOOSTER, PROPERTY_BOOSTER,
+         "Saturn V"));
+      storage.saveObject(doc2);
+      result.add(doc2);
+
+      Document doc3 =
+         createDocument(folder, "Apollo 13", NASA_DOCUMENT, ("Apollo 13 was the third "
+            + "manned mission by NASA intended to land on the Moon, but a mid-mission technical "
+            + "malfunction forced the lunar landing to be aborted. ").getBytes(), CONTENT_TYPE);
+
+      doc3.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+         PROPERTY_COMMANDER, "James A. Lovell, Jr."));
+      doc3.setProperty(new StringProperty(PROPERTY_BOOSTER, PROPERTY_BOOSTER, PROPERTY_BOOSTER, PROPERTY_BOOSTER,
+         "Saturn V"));
+      storage.saveObject(doc3);
+      result.add(doc3);
+
+      return result;
+   }
    //
    //   /**
    //    * Constraints with multi-valued properties is not supported.

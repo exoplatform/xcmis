@@ -37,12 +37,26 @@
     <supertypes>
       <supertype>cmis:article-animals</supertype>
     </supertypes>
-  </nodeType>
+  </nodeType> 
 
   <nodeType name="cmis:football-DynamoK" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
     <supertypes>
       <supertype>cmis:sport-football</supertype>
     </supertypes>
+  </nodeType>
+  
+  <nodeType name="cmis:nasa-document" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
+    <supertypes>
+      <supertype>nt:file</supertype>
+    </supertypes>
+        <propertyDefinitions>
+      <propertyDefinition name="cmis:Booster" requiredType="String" autoCreated="false"
+        mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
+      </propertyDefinition>
+      <propertyDefinition name="cmis:Commander" requiredType="String" autoCreated="false"
+        mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
+      </propertyDefinition>
+    </propertyDefinitions>
   </nodeType>
   
 </nodeTypes>

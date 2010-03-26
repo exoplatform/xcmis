@@ -19,6 +19,8 @@
 
 package org.xcmis.sp.jcr.exo;
 
+import org.xcmis.search.config.IndexConfiguration;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -74,7 +76,9 @@ public class StorageConfiguration
    public Map<String, Object> getProperties()
    {
       if (properties == null)
+      {
          properties = new HashMap<String, Object>();
+      }
       return properties;
    }
 

@@ -77,7 +77,6 @@ public class IndexListener implements EventJournal
 
    public void created(ObjectData object)
    {
-      LOG.info("created " + object.getObjectId());
       List<ContentEntry> contentEntries = new ArrayList<ContentEntry>(1);
       try
       {

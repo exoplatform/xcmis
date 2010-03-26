@@ -33,7 +33,7 @@ import org.exoplatform.services.security.ConversationState;
 import org.picocontainer.Startable;
 import org.xcmis.search.SearchService;
 import org.xcmis.search.SearchServiceException;
-import org.xcmis.search.config.IndexConfurationImpl;
+import org.xcmis.search.config.IndexConfigurationImpl;
 import org.xcmis.search.config.SearchServiceConfiguration;
 import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.lucene.LuceneSearchService;
@@ -44,7 +44,6 @@ import org.xcmis.sp.jcr.exo.index.CmisRecoverService;
 import org.xcmis.sp.jcr.exo.index.CmisRestoreService;
 import org.xcmis.sp.jcr.exo.index.CmisSchema;
 import org.xcmis.sp.jcr.exo.index.IndexListener;
-import org.xcmis.sp.jcr.exo.index.IndexListenerFactory;
 import org.xcmis.sp.jcr.exo.index.JcrPathSplitter;
 import org.xcmis.sp.jcr.exo.rendition.ImageRenditionProvider;
 import org.xcmis.sp.jcr.exo.rendition.PDFDocumentRenditionProvider;
@@ -149,13 +148,9 @@ public class StorageProviderImpl implements StorageProvider, Startable
          }
       });
 
-   private final IndexListenerFactory indexListenerFactory;
-
-   public StorageProviderImpl(RepositoryService repositoryService, IndexListenerFactory indexListenerFactory,
-      InitParams initParams)
+   public StorageProviderImpl(RepositoryService repositoryService, InitParams initParams)
    {
       this.repositoryService = repositoryService;
-      this.indexListenerFactory = indexListenerFactory;
 
       if (initParams != null)
       {
@@ -364,9 +359,10 @@ public class StorageProviderImpl implements StorageProvider, Startable
             }
             //prepare search service
             StorageImpl storage = new StorageImpl(session, cmisRepositoryConfiguration);
-            IndexConfurationImpl indexConfiguration = new IndexConfurationImpl();
+            IndexConfigurationImpl indexConfiguration =
+               (IndexConfigurationImpl)cmisRepositoryConfiguration.getIndexConfiguration();
             //TODO real config
-            indexConfiguration.setIndexDir("target/temp/index");
+            //indexConfiguration.setIndexDir("target/temp/index");
             indexConfiguration.setIndexRecoverService(new CmisRecoverService(storage));
             indexConfiguration.setIndexRestoreService(new CmisRestoreService(storage));
             //default invocation context
@@ -378,7 +374,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
             invocationContext.setTableResolver(new SchemaTableResolver(new ToStringNameConverter(), schema));
 
             SearchServiceConfiguration configuration = new SearchServiceConfiguration();
-            configuration.setIndexConfuguration(indexConfiguration);
+            configuration.setIndexConfiguration(indexConfiguration);
             configuration.setContentReader(new CmisContentReader(storage));
             configuration.setNameConverter(new ToStringNameConverter());
             configuration.setDefaultInvocationContext(invocationContext);

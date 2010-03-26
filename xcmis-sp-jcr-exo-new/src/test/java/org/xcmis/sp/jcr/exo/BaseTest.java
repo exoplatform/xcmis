@@ -21,6 +21,7 @@ package org.xcmis.sp.jcr.exo;
 
 import junit.framework.TestCase;
 
+import org.apache.commons.io.FileUtils;
 import org.exoplatform.container.StandaloneContainer;
 import org.exoplatform.services.jcr.RepositoryService;
 import org.exoplatform.services.jcr.core.CredentialsImpl;
@@ -33,6 +34,10 @@ import org.exoplatform.services.log.Log;
 import org.exoplatform.services.security.ConversationState;
 import org.exoplatform.services.security.Identity;
 import org.xcmis.spi.StorageProvider;
+import org.xcmis.spi.data.Document;
+import org.xcmis.spi.object.impl.StringProperty;
+
+import java.io.File;
 
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
@@ -72,7 +77,10 @@ public abstract class BaseTest extends TestCase
 
    public void setUp() throws Exception
    {
-
+      if (!shoutDown)
+      {
+         FileUtils.deleteQuietly(new File("target/temp"));
+      }
       String containerConf = getClass().getResource("/conf/standalone/test-configuration.xml").toString();
       String loginConf = Thread.currentThread().getContextClassLoader().getResource("login.conf").toString();
       StandaloneContainer.addConfigurationURL(containerConf);
@@ -114,11 +122,11 @@ public abstract class BaseTest extends TestCase
          });
          shoutDown = true;
       }
-
    }
 
    protected void tearDown() throws Exception
    {
+
       try
       {
          session.refresh(false);
@@ -165,4 +173,10 @@ public abstract class BaseTest extends TestCase
       super.tearDown();
    }
 
+   @SuppressWarnings("unchecked")
+   protected void setProperty(Document doc, String propertyName, String propertyValue)
+   {
+      ((BaseObjectData)doc).setProperty(((BaseObjectData)doc).node, new StringProperty(propertyName, propertyName,
+         propertyName, propertyName, propertyValue));
+   }
 }

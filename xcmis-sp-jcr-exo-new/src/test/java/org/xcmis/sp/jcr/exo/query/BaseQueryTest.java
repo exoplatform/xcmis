@@ -159,7 +159,8 @@ public abstract class BaseQueryTest extends BaseTest
       }
       while (result.hasNext())
       {
-         String id = result.next().getObjectId();
+         Result next = result.next();
+         String id = next.getObjectId();
          resultPaths.add(id);
          if (LOG.isDebugEnabled())
          {
