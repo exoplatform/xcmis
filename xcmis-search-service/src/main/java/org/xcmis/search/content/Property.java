@@ -114,6 +114,15 @@ public class Property<V>
          this.value = value;
       }
 
+      /**
+       * @param value
+       */
+      public SimpleValue(V value)
+      {
+         super(value.toString().length());
+         this.value = value;
+      }
+
       private final V value;
 
       /**

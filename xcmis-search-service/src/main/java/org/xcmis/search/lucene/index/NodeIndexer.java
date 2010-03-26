@@ -134,21 +134,26 @@ public class NodeIndexer
                addBinaryProperty(doc, propName, ((BinaryValue)value));
                break;
             case BOOLEAN :
-               addBooleanValue(doc, propName, ((ContentValue<Boolean>)value).getValue());
+               //property marked as boolean so it should be possible to convert it to boolean
+               addBooleanValue(doc, propName, Boolean.parseBoolean(value.getValue().toString()));
                break;
             case NAME :
             case PATH :
             case STRING :
-               this.addStringValue(doc, propName, ((ContentValue<String>)value).getValue(), true);
+               //property marked as string so it should be possible to convert it to string
+               this.addStringValue(doc, propName, value.getValue().toString(), true);
                break;
             case LONG :
-               addLongValue(doc, propName, ((ContentValue<Long>)value).getValue());
+               //property marked as long so it should be possible to convert it to long
+               addLongValue(doc, propName, Long.parseLong(value.getValue().toString()));
                break;
             case DOUBLE :
-               addDoubleValue(doc, propName, ((ContentValue<Double>)value).getValue());
+               //property marked as long so it should be possible to convert it to double
+               addDoubleValue(doc, propName, Double.parseDouble(value.getValue().toString()));
                break;
             case DATE :
-               addCalendarValue(doc, propName, ((ContentValue<Calendar>)value).getValue());
+               //value should be calendar
+               addCalendarValue(doc, propName, (Calendar)value.getValue());
                break;
 
             default :
