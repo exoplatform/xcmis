@@ -174,7 +174,7 @@ public class InmemoryConnection extends BaseConnection
 
    public CmisObjectType checkin(String documentId, boolean major, CmisPropertiesType properties,
       ContentStream content, String checkinComment, CmisAccessControlListType addACL,
-      CmisAccessControlListType removeACL, List<String> policies) throws ConstraintException, UpdateConflictException,
+      CmisAccessControlListType removeACL, Collection<String> policies) throws ConstraintException, UpdateConflictException,
       StreamNotSupportedException, IOException, StorageException
    {
       CmisObjectIdentifier pwc = getObject(documentId);
@@ -726,7 +726,7 @@ public class InmemoryConnection extends BaseConnection
 
    protected CmisObjectIdentifier createDocument(CmisObjectIdentifier folder, CmisTypeDefinitionType typeDefinition,
       CmisPropertiesType properties, ContentStream content, CmisAccessControlListType addAcl,
-      CmisAccessControlListType removeAcl, List<String> policies, EnumVersioningState versioningState)
+      CmisAccessControlListType removeAcl, Collection<String> policies, EnumVersioningState versioningState)
       throws StorageException, NameConstraintViolationException, CmisRuntimeException
    {
       String name = getName(properties);
@@ -820,7 +820,7 @@ public class InmemoryConnection extends BaseConnection
 
    protected CmisObjectIdentifier createDocumentFromSource(CmisObjectIdentifier source, CmisObjectIdentifier folder,
       CmisPropertiesType properties, CmisAccessControlListType addAcl, CmisAccessControlListType removeAcl,
-      List<String> policies, EnumVersioningState versioningState) throws StorageException,
+      Collection<String> policies, EnumVersioningState versioningState) throws StorageException,
       NameConstraintViolationException, CmisRuntimeException
    {
       String name = getName(properties);
@@ -913,7 +913,7 @@ public class InmemoryConnection extends BaseConnection
 
    protected CmisObjectIdentifier createFolder(CmisObjectIdentifier folder, CmisTypeDefinitionType typeDefinition,
       CmisPropertiesType properties, CmisAccessControlListType addAcl, CmisAccessControlListType removeAcl,
-      List<String> policies) throws StorageException, NameConstraintViolationException, CmisRuntimeException
+      Collection<String> policies) throws StorageException, NameConstraintViolationException, CmisRuntimeException
    {
       String name = getName(properties);
       if (name == null)
@@ -969,7 +969,7 @@ public class InmemoryConnection extends BaseConnection
 
    protected CmisObjectIdentifier createPolicy(CmisObjectIdentifier folder, CmisTypeDefinitionType typeDefinition,
       CmisPropertiesType properties, CmisAccessControlListType addAcl, CmisAccessControlListType removeAcl,
-      List<String> policies) throws StorageException, NameConstraintViolationException, CmisRuntimeException
+      Collection<String> policies) throws StorageException, NameConstraintViolationException, CmisRuntimeException
    {
       String name = getName(properties);
       if (name == null)
@@ -1038,7 +1038,7 @@ public class InmemoryConnection extends BaseConnection
 
    protected CmisObjectIdentifier createRelationship(CmisTypeDefinitionType typeDefinition,
       CmisObjectIdentifier source, CmisObjectIdentifier target, CmisPropertiesType properties,
-      CmisAccessControlListType addAcl, CmisAccessControlListType removeAcl, List<String> policies)
+      CmisAccessControlListType addAcl, CmisAccessControlListType removeAcl, Collection<String> policies)
       throws StorageException, NameConstraintViolationException, CmisRuntimeException
    {
       String name = getName(properties);
