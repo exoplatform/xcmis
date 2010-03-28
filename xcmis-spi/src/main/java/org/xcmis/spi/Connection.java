@@ -628,7 +628,7 @@ public interface Connection
     *         to storage internal problem
     */
    String createDocument(String folderId, Map<String, Property<?>> properties, ContentStream content,
-      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, List<String> policies,
+      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<String> policies,
       VersioningState versioningState) throws ObjectNotFoundException, ConstraintException, InvalidArgumentException,
       StreamNotSupportedException, NameConstraintViolationException, IOException, StorageException;
 
@@ -688,7 +688,7 @@ public interface Connection
     *         to storage internal problem
     */
    String createDocumentFromSource(String sourceId, String folderId, Map<String, Property<?>> propertiesa,
-      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, List<String> policies,
+      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<String> policies,
       VersioningState versioningState) throws ObjectNotFoundException, ConstraintException, InvalidArgumentException,
       NameConstraintViolationException, StorageException;
 
@@ -738,7 +738,7 @@ public interface Connection
     *         storage internal problem
     */
    String createFolder(String folderId, Map<String, Property<?>> properties, List<AccessControlEntry> addACL,
-      List<AccessControlEntry> removeACL, List<String> policies) throws ObjectNotFoundException, ConstraintException,
+      List<AccessControlEntry> removeACL, Collection<String> policies) throws ObjectNotFoundException, ConstraintException,
       InvalidArgumentException, NameConstraintViolationException, StorageException;
 
    /**
@@ -788,7 +788,7 @@ public interface Connection
     *         storage internal problem
     */
    String createPolicy(String folderId, Map<String, Property<?>> properties, List<AccessControlEntry> addACL,
-      List<AccessControlEntry> removeACL, List<String> policies) throws ObjectNotFoundException, ConstraintException,
+      List<AccessControlEntry> removeACL, Collection<String> policies) throws ObjectNotFoundException, ConstraintException,
       InvalidArgumentException, NameConstraintViolationException, StorageException;
 
    /**
@@ -834,7 +834,7 @@ public interface Connection
     *         cause to storage internal problem
     */
    String createRelationship(Map<String, Property<?>> properties, List<AccessControlEntry> addACL,
-      List<AccessControlEntry> removeACL, List<String> policies) throws ObjectNotFoundException, ConstraintException,
+      List<AccessControlEntry> removeACL, Collection<String> policies) throws ObjectNotFoundException, ConstraintException,
       NameConstraintViolationException, StorageException;
 
    /**
@@ -1370,7 +1370,7 @@ public interface Connection
     *         storage cause to its internal problem
     */
    String checkin(String documentId, boolean major, Map<String, Property<?>> properties, ContentStream content,
-      String checkinComment, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, List<String> policies)
+      String checkinComment, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<String> policies)
       throws ConstraintException, UpdateConflictException, StreamNotSupportedException, IOException;
 
    /**

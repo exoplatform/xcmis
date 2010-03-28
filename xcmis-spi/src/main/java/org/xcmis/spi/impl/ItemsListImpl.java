@@ -60,7 +60,9 @@ public class ItemsListImpl<T> implements ItemsList<T>
    public List<T> getItems()
    {
       if (list == null)
+      {
          list = new ArrayList<T>();
+      }
       return list;
    }
 
@@ -74,6 +76,7 @@ public class ItemsListImpl<T> implements ItemsList<T>
 
    public void setNumItems(int numItems)
    {
+      System.out.println(">>> alexey: ItemsListImpl.setNumItems numItems = " + numItems);
       this.numItems = numItems;
    }
 

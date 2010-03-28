@@ -28,6 +28,7 @@ import org.xcmis.spi.Updatability;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -221,6 +222,10 @@ public class PropertyDefinitionImpl<T> implements PropertyDefinition<T>
     */
    public List<Choice<T>> getChoices()
    {
+      if (choices == null)
+      {
+         choices = new ArrayList<Choice<T>>();
+      }
       return choices;
    }
 
