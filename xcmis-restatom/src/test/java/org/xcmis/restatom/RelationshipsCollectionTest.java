@@ -40,8 +40,9 @@ public class RelationshipsCollectionTest extends BaseTest
    {
       String sourceId = createDocument(testFolderId, "doc1", null, null);
       String targetId = createDocument(testFolderId, "doc2", null, null);
-      conn.getStorage().createRelationship(conn.getStorage().getObject(sourceId),
-         conn.getStorage().getObject(targetId), null);
+      conn.getStorage()
+         .createRelationship(conn.getStorage().getObject(sourceId), conn.getStorage().getObject(targetId),
+            conn.getStorage().getTypeDefinition("cmis:relationship", false).getId());
 
       String requestURI = "http://localhost:8080/rest" //
          + "/cmisatom/" + cmisRepositoryId //

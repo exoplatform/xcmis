@@ -186,6 +186,7 @@ public abstract class BaseTest extends TestCase
       {
          e.printStackTrace();
       }
+
    }
 
    private void deleteObject(CmisObject obj)
@@ -260,7 +261,9 @@ public abstract class BaseTest extends TestCase
       if (childrenNode == null)
       {
          if (expected.get(id) == null || expected.get(id).size() == 0)
+         {
             return;
+         }
          // If tag 'cmisra:children' not found but Map contains List<String> for current id.
          fail("Expected children " + expected.get(id) + " not found for object " + id);
       }
@@ -268,14 +271,18 @@ public abstract class BaseTest extends TestCase
       org.w3c.dom.NodeList entries = getNodeSet("atom:entry", childrenNode);
       int length = entries.getLength();
       if (length < expectedChildren.size())
+      {
          fail("Expected children " + expectedChildren + " not found for object " + id);
+      }
       for (int i = 0; i < length; i++)
       {
          org.w3c.dom.Node child = entries.item(i);
          String childId =
             getNodeValueWithNodeProperty("cmisra:object/cmis:properties", "cmis:propertyId", "cmis:objectId", child);
          if (expectedChildren == null || expectedChildren.size() == 0 || !expectedChildren.contains(childId))
+         {
             fail("Unexpected child " + childId + " found for object " + id);
+         }
          checkTree(child, expected);
       }
    }
@@ -446,11 +453,15 @@ public abstract class BaseTest extends TestCase
    {
 
       if (headers == null)
+      {
          headers = new MultivaluedMapImpl();
+      }
 
       ByteArrayInputStream in = null;
       if (data != null)
+      {
          in = new ByteArrayInputStream(data);
+      }
 
       EnvironmentContext envctx = new EnvironmentContext();
       MockHttpServletRequest httpRequest =
@@ -486,7 +497,9 @@ public abstract class BaseTest extends TestCase
          };
 
       for (String el : expected)
+      {
          assertTrue("Not found xml element " + el, hasElementValue(el, xmlEntry));
+      }
    }
 
    protected void validateFeedCommons(org.w3c.dom.Node xmlFeed) throws XPathExpressionException
@@ -498,7 +511,9 @@ public abstract class BaseTest extends TestCase
             "atom:title" //
          };
       for (String el : expected)
+      {
          assertTrue("Not found xml element " + el, hasElementValue(el, xmlFeed));
+      }
    }
 
    protected void validateObjectEntry(org.w3c.dom.Node xmlEntry, String objectType) throws XPathExpressionException

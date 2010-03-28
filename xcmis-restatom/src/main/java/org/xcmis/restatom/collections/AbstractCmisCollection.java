@@ -158,9 +158,13 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
             int pages = (total - skipCount) / maxItems;
             int rem = (total - skipCount) % maxItems;
             if (rem == 0)
+            {
                skipCount = total - maxItems;
+            }
             else if (pages != 0)
+            {
                skipCount = skipCount + pages * maxItems;
+            }
             params.put(AtomCMIS.PARAM_SKIP_COUNT, Integer.toString(skipCount));
             params.put(AtomCMIS.PARAM_MAX_ITEMS, Integer.toString(maxItems));
             feed.addLink(request.absoluteUrlFor("feed", params), AtomCMIS.LINK_LAST, AtomCMIS.MEDIATYPE_ATOM_FEED,
@@ -281,7 +285,7 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
    }
 
    /**
-    * To 
+    * To get Connection for provided repository Id within request.
     * 
     * @param request the request context
     * @return the Connection to CMIS storage
@@ -289,6 +293,45 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
    protected Connection getConnection(RequestContext request)
    {
       return storageProvider.getConnection(getRepositoryId(request), null);
+   }
+
+   protected Boolean getBooleanParameter(RequestContext request, String name)
+   {
+      Boolean result;
+
+      String param = request.getParameter(name);
+      if (param == null || param.length() == 0)
+      {
+         result = null;
+      }
+      else
+      {
+         result = Boolean.parseBoolean(param);
+      }
+      return result;
+   }
+
+   protected Integer getIntegerParameter(RequestContext request, String name) throws ResponseContextException
+   {
+      Integer result;
+      String param = request.getParameter(name);
+      if (param == null || param.length() == 0)
+      {
+         result = null;
+      }
+      else
+      {
+         try
+         {
+            result = new Integer(param);
+         }
+         catch (NumberFormatException nfe)
+         {
+            String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_MAX_ITEMS);
+            throw new ResponseContextException(msg, 400);
+         }
+      }
+      return result;
    }
 
 }

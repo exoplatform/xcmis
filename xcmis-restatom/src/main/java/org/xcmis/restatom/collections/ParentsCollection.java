@@ -185,7 +185,9 @@ public class ParentsCollection extends CmisObjectCollection
       finally
       {
          if (conn != null)
+         {
             conn.close();
+         }
       }
    }
 

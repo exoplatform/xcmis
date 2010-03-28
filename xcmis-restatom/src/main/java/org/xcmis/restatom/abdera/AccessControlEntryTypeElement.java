@@ -22,6 +22,7 @@ package org.xcmis.restatom.abdera;
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
+import org.apache.abdera.parser.stax.FOMExtensibleElement;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.spi.AccessControlEntry;
 import org.xcmis.spi.impl.AccessControlEntryImpl;
@@ -74,7 +75,7 @@ public class AccessControlEntryTypeElement extends ExtensibleElementWrapper
       if (accessControlEntry.getPrincipal() != null)
       {
          String principal = accessControlEntry.getPrincipal();
-         ExtensibleElementWrapper principalElement = permissionElement.addExtension(AtomCMIS.PRINCIPAL);
+         FOMExtensibleElement principalElement = permissionElement.addExtension(AtomCMIS.PRINCIPAL);
          principalElement.addSimpleExtension(AtomCMIS.PRINCIPAL_ID, principal);
       }
 
@@ -103,7 +104,7 @@ public class AccessControlEntryTypeElement extends ExtensibleElementWrapper
       AccessControlEntryImpl accessControlEntry = new AccessControlEntryImpl();
 
       // PRINCIPAL
-      ExtensibleElementWrapper principalElement = getExtension(AtomCMIS.PRINCIPAL);
+      FOMExtensibleElement principalElement = getExtension(AtomCMIS.PRINCIPAL);
       if (principalElement != null)
       {
          String principalId = principalElement.getSimpleExtension(AtomCMIS.PRINCIPAL_ID);

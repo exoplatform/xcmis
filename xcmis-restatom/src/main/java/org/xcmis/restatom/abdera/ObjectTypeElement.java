@@ -22,6 +22,7 @@ package org.xcmis.restatom.abdera;
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
+import org.apache.abdera.parser.stax.FOMExtensibleElement;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.spi.AccessControlEntry;
 import org.xcmis.spi.AllowableActions;
@@ -103,7 +104,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
       object.setObjectInfo(objectInfo);
 
       // PROPERTIES
-      ExtensibleElementWrapper propertiesElement = getExtension(AtomCMIS.PROPERTIES);
+      FOMExtensibleElement propertiesElement = getExtension(AtomCMIS.PROPERTIES);
       if (propertiesElement != null)
       {
          Map<String, Property<?>> properties = object.getProperties();
@@ -204,7 +205,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
          Map<String, Property<?>> properties = objectType.getProperties();
          if (properties != null && !properties.isEmpty())
          {
-            ExtensibleElementWrapper propertiesElement = addExtension(AtomCMIS.PROPERTIES);
+            FOMExtensibleElement propertiesElement = addExtension(AtomCMIS.PROPERTIES);
             Set<String> keys = properties.keySet();
             for (String key : keys)
             {

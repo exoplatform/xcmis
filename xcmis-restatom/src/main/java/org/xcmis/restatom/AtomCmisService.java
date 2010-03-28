@@ -20,9 +20,9 @@
 package org.xcmis.restatom;
 
 import org.apache.abdera.model.Document;
-import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.apache.abdera.model.Service;
 import org.apache.abdera.model.Workspace;
+import org.apache.abdera.parser.stax.FOMExtensibleElement;
 import org.apache.abdera.protocol.server.CollectionAdapter;
 import org.apache.abdera.protocol.server.CollectionInfo;
 import org.apache.abdera.protocol.server.RequestContext;
@@ -293,7 +293,7 @@ public class AtomCmisService implements ResourceContainer
       {
          conn = storageProvider.getConnection(repositoryId, null);
          List<AccessControlEntry> list = conn.getACL(objectId, onlyBasicPermissions);
-         ExtensibleElementWrapper accessControlListTypeElement =
+         FOMExtensibleElement accessControlListTypeElement =
             AbderaFactory.getInstance().getFactory().newElement(AtomCMIS.ACL);
          for (AccessControlEntry accessControlEntry : list)
          {
@@ -583,7 +583,9 @@ public class AtomCmisService implements ResourceContainer
                // wont to use passed by browser. But if parameter does
                // not exists then try to get media type passed by browser.
                if (contentType == null)
+               {
                   contentType = file.getContentType();
+               }
 
                RequestContext request = initRequestContext(repositoryId, httpRequest);
                ((AbstractEntityCollectionAdapter)getCollection(request)).putMedia(null, new javax.activation.MimeType(
@@ -627,9 +629,11 @@ public class AtomCmisService implements ResourceContainer
       for (String headerName : abderaResponse.getHeaderNames())
       {
          for (Object v : abderaResponse.getHeaders(headerName))
+         {
             // TODO : need avoid direct casting to String.
             // For now just be sure not get errors if RESTful framework.
             responseBuilder.header(headerName, v.toString());
+         }
       }
    }
 
@@ -780,10 +784,8 @@ public class AtomCmisService implements ResourceContainer
 
    protected Collection<CollectionInfo> getCollectionsInfo(RequestContext request)
    {
-      Collection<WorkspaceInfo> workspaces =
-         ((ProviderImpl)provider).getWorkspaceManager(request).getWorkspaces(request);
-      Collection<CollectionInfo> collections =
-         (Collection<CollectionInfo>)workspaces.iterator().next().getCollections(request);
+      Collection<WorkspaceInfo> workspaces = (provider).getWorkspaceManager(request).getWorkspaces(request);
+      Collection<CollectionInfo> collections = workspaces.iterator().next().getCollections(request);
       return collections;
    }
 

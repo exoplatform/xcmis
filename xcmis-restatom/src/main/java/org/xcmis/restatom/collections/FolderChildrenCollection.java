@@ -178,7 +178,9 @@ public class FolderChildrenCollection extends CmisObjectCollection
       finally
       {
          if (conn != null)
+         {
             conn.close();
+         }
       }
    }
 
@@ -206,6 +208,8 @@ public class FolderChildrenCollection extends CmisObjectCollection
          return rce.getResponseContext();
       }
 
+      String sourceFolderId = request.getParameter(AtomCMIS.PARAM_SOURCE_FOLDER_ID);
+
       String typeId = null;
       String id = null;
 
@@ -226,6 +230,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
             {
                id = ((IdProperty)p).getValues().get(0);
             }
+
          }
       }
       else
@@ -242,10 +247,18 @@ public class FolderChildrenCollection extends CmisObjectCollection
       {
          conn = getConnection(request);
          String objectId = null;
+         String targetFolderId = getId(request);
          if (id != null)
          {
-            // move object
-            objectId = conn.moveObject(id, getId(request), null);
+            if (sourceFolderId != null)
+            {
+               conn.addObjectToFolder(id, targetFolderId, false);
+            }
+            else
+            {
+               // move object
+               objectId = conn.moveObject(id, targetFolderId, sourceFolderId);
+            }
          }
          else
          {
@@ -255,7 +268,9 @@ public class FolderChildrenCollection extends CmisObjectCollection
             List<AccessControlEntry> removeACL = null;
             List<String> policies = null;
             if (object.getPolicyIds() != null && object.getPolicyIds().size() > 0)
+            {
                policies = (List<String>)object.getPolicyIds();
+            }
 
             TypeDefinition type = null;
             type = conn.getTypeDefinition(typeId);
@@ -335,7 +350,9 @@ public class FolderChildrenCollection extends CmisObjectCollection
       finally
       {
          if (conn != null)
+         {
             conn.close();
+         }
       }
 
       entry = request.getAbdera().getFactory().newEntry();
@@ -378,12 +395,16 @@ public class FolderChildrenCollection extends CmisObjectCollection
       // Descendants link.
       String descendants = getDescendantsLink(id, request);
       if (descendants != null)
+      {
          feed.addLink(descendants, AtomCMIS.LINK_DOWN, AtomCMIS.MEDIATYPE_CMISTREE, null, null, -1);
+      }
 
       // Folder tree link.
       String folderTree = getFolderTreeLink(id, request);
       if (folderTree != null)
+      {
          feed.addLink(folderTree, AtomCMIS.LINK_CMIS_FOLDERTREE, AtomCMIS.MEDIATYPE_ATOM_FEED, null, null, -1);
+      }
 
       // Parent link for not root folder.
       Connection conn = null;
@@ -423,7 +444,9 @@ public class FolderChildrenCollection extends CmisObjectCollection
       finally
       {
          if (conn != null)
+         {
             conn.close();
+         }
       }
       return feed;
    }

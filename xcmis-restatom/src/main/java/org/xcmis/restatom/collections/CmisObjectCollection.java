@@ -78,6 +78,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.activation.MimeType;
 import javax.activation.MimeTypeParseException;
@@ -540,7 +541,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          updatePropertiesFromEntry(object, entry);
 
          Map<String, Property<?>> properties = object.getProperties();
-         List<String> policyIds = (List<String>)object.getPolicyIds();
+         Set<String> policyIds = (Set<String>)object.getPolicyIds();
          List<AccessControlEntry> acl = object.getACL();
          ContentStream contentStream = getContentStream(entry, request);
 

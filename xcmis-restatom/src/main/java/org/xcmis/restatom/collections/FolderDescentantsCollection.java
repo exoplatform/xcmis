@@ -120,8 +120,10 @@ public class FolderDescentantsCollection extends CmisObjectCollection
             Element pathSegment = ch.addExtension(AtomCMIS.PATH_SEGMENT);
             pathSegment.setText(oifContainer.getContainer().getPathSegment());
          }
-         if (oifContainer.getChildren().size() > 0)
+         if (oifContainer.getChildren() != null && oifContainer.getChildren().size() > 0)
+         {
             addChildren(ch, oifContainer.getChildren(), feedIri, request);
+         }
       }
    }
 
