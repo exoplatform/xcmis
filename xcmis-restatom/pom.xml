@@ -10,10 +10,10 @@
    <name>xCMIS :: REST :: Atom</name>
 
    <dependencies>
-      <dependency>
-         <groupId>org.xcmis</groupId>
-         <artifactId>xcmis-core</artifactId>
-      </dependency>
+<!--      <dependency>-->
+<!--         <groupId>org.xcmis</groupId>-->
+<!--         <artifactId>xcmis-core</artifactId>-->
+<!--      </dependency>-->
       
 <!--      <dependency>-->
 <!--         <groupId>org.xcmis</groupId>-->
