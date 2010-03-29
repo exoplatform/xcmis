@@ -94,9 +94,9 @@
       </init-params>
    </component>
 
-   <component>
-      <type>org.xcmis.sp.jcr.exo.index.IndexListenerFactory</type>
-   </component>
+   <!--   <component>-->
+   <!--      <type>org.xcmis.sp.jcr.exo.index.IndexListenerFactory</type>-->
+   <!--   </component>-->
 
    <!-- Storage Provider -->
    <component>
@@ -119,8 +119,8 @@
                               <string>ws1</string>
                            </field>
                            <field name="indexConfiguration">
-                              <object type="org.xcmis.sp.jcr.exo.IndexConfiguration">
-                                 <field name="indexPath">
+                              <object type="org.xcmis.search.config.IndexConfigurationImpl">
+                                 <field name="indexDir">
                                     <string>target/temp/index/db1/ws1</string>
                                  </field>
                               </object>
@@ -145,6 +145,7 @@
          </object-param>
       </init-params>
    </component>
+
 
    <component>
       <type>org.exoplatform.services.jcr.ext.app.ThreadLocalSessionProviderService</type>
