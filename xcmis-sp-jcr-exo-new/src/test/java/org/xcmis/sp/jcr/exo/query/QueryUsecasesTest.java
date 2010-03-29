@@ -736,36 +736,42 @@ public class QueryUsecasesTest extends BaseQueryTest
    //      checkResultOrder(result, new Document[]{appolloContent.get(2), appolloContent.get(1)});
    //   }
    //
-   //   /**
-   //    * Test property existence constraint (IS [NOT] NULL) .
-   //    * <p>
-   //    * Initial data:
-   //    * <ul>
-   //    * <li>doc1: <b>Title</b> - node1 <b>prop</b> - test string
-   //    * <li>doc2: <b>Title</b> - node2
-   //    * </ul>
-   //    * <p>
-   //    * Query : Select all documents that has "prop" property (IS NOT NULL).
-   //    * <p>
-   //    * Expected result: doc1
-   //    * 
-   //    * @throws Exception if an unexpected error occurs
-   //    */
-   //   public void testPropertyExistence() throws Exception
-   //   {
-   //      Document folder1 = createFolder(root, "CASETest");
-   //
-   //      Document doc1 = createDocument(folder1.getObjectId(), "node1", "hello world".getBytes(), "text/plain");
-   //      doc1.setString("prop", "test string");
-   //
-   //      Document doc2 = createDocument(folder1.getObjectId(), "node2", "hello".getBytes(), "text/plain");
-   //
-   //      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE prop IS NOT NULL";
-   //      Query query = new Query(statement, true);
-   //
-   //      ItemsIterator<Result> result = storage.query(query);
-   //      checkResult(result, new Document[]{doc1});
-   //   }
+   /**
+    * Test property existence constraint (IS [NOT] NULL) .
+    * <p>
+    * Initial data:
+    * <ul>
+    * <li>doc1: <b>Title</b> - node1 <b>prop</b> - test string
+    * <li>doc2: <b>Title</b> - node2
+    * </ul>
+    * <p>
+    * Query : Select all documents that has "prop" property (IS NOT NULL).
+    * <p>
+    * Expected result: doc1
+    * 
+    * @throws Exception if an unexpected error occurs
+    */
+   public void testPropertyExistence() throws Exception
+   {
+      // Document folder1 = createFolder(root, "CASETest");
+
+      Document doc1 = createDocument(testRoot, "node1", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
+      doc1.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+         PROPERTY_COMMANDER, "James A. Lovell, Jr."));
+      storage.saveObject(doc1);
+      Document doc2 = createDocument(testRoot, "node2", NASA_DOCUMENT, "hello".getBytes(), "text/plain");
+      storage.saveObject(doc2);
+
+      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE " + PROPERTY_COMMANDER + " IS NOT NULL";
+      Query query = new Query(statement, true);
+
+      ItemsIterator<Result> result = storage.query(query);
+      checkResult(result, new Document[]{doc1});
+
+      storage.deleteObject(doc1, true);
+      storage.deleteObject(doc2, true);
+   }
+
    //
    //   /**
    //    * Test SCORE as column.
