@@ -1161,7 +1161,6 @@ public abstract class BaseConnection implements Connection
 
       // Indicate that we have some more results.
       cmisChildren.setHasMoreItems(iterator.hasNext());
-      System.out.println(">>> alexey: BaseConnection.getChildren iterator.size() = " + iterator.size());
       cmisChildren.setNumItems(iterator.size()); // ItemsIterator gives -1 if total number is unknown.
 
       return cmisChildren;
