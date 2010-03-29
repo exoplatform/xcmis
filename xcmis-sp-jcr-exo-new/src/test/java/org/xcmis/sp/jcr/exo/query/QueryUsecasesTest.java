@@ -75,42 +75,6 @@ public class QueryUsecasesTest extends BaseQueryTest
    }
 
    /**
-    * @see org.xcmis.sp.jcr.exo.BaseTest#tearDown()
-    */
-   @Override
-   protected void tearDown() throws Exception
-   {
-
-      storage.deleteTree(testRoot, true, UnfileObject.DELETE, true);
-      super.tearDown();
-
-   }
-
-   /**
-    * Simple test.
-    * <p>
-    * All documents from Apollo program
-    * <p>
-    * Query : Select all CMIS_DOCUMENTS.
-    * <p>
-    * Expected result: document1 and document1
-    * 
-    * @throws Exception if an unexpected error occurs
-    */
-   public void testSimpleQuery() throws Exception
-   {
-      List<Document> appolloContent = createNasaContent(testRoot);
-      String statement = "SELECT * FROM " + NASA_DOCUMENT;
-      Query query = new Query(statement, true);
-      ItemsIterator<Result> result = storage.query(query);
-      checkResult(result, appolloContent.toArray(new Document[appolloContent.size()]));
-      for (Document doc : appolloContent)
-      {
-         storage.deleteObject(doc, true);
-      }
-   }
-
-   /**
     * Test query with one 'and' two or' constraints.
     * <p>
     * Initial data:
@@ -155,64 +119,118 @@ public class QueryUsecasesTest extends BaseQueryTest
    }
 
    /**
-    * Create content for Apollo program.
+    * Test IN_FOLDER constraint.
+    * <p>
+    * Initial data:
+    * <ul>
+    * <li>folder1:
+    * <li>doc1: <b>Title</b> - node1
+    * <li>folder2
+    * <li>doc2: <b>Title</b> - node2
+    * </ul>
+    * <p>
+    * Query : Select all documents that are in folder1.
+    * <p>
+    * Expected result: doc1
     * 
-    * @param folder
-    * @return
-    * @throws Exception
+    * @throws Exception if an unexpected error occurs
     */
-   private List<Document> createNasaContent(Folder folder) throws Exception
+   public void testDocumentInFolderConstrain() throws Exception
    {
-      List<Document> result = new ArrayList<Document>();
-      result.add(createAppoloMission(folder, "Apollo 7", "Walter M. Schirra", "Donn F. Eisele", "R. Walter Cunningham",
-         "Saturn 1B", 581.844, 0, "Apollo 7 (October 11-22, 1968) was the first manned mission "
-            + "in the Apollo program to be launched. It was an eleven-day "
-            + "Earth-orbital mission, the first manned launch of the "
-            + "Saturn IB launch vehicle, and the first three-person " + "American space mission"));
+      // create data
+      Folder testRoot1 = createFolder(rootFolder, "testDocumentInFolderConstrain1", "cmis:folder");
+      Folder testRoot2 = createFolder(rootFolder, "testDocumentInFolderConstrain2", "cmis:folder");
 
-      result.add(createAppoloMission(folder, "Apollo 8", "Frank F. Borman, II", "James A. Lovell, Jr",
-         "William A. Anders", "Saturn V", 3038.500, 0, "Apollo 8 was the first "
-            + "manned space voyage to achieve a velocity sufficient to allow escape from the "
-            + "gravitational field of planet Earth; the first to escape from the gravitational "
-            + "field of another celestial body; and the first manned voyage to return to planet Earth "
-            + "from another celestial body - Earth's Moon"));
+      List<Document> appolloContent = createNasaContent(testRoot1);
+      List<Document> appolloContent2 = createNasaContent(testRoot2);
 
-      result.add(createAppoloMission(folder, "Apollo 13", "James A. Lovell, Jr.", "John L. Swigert",
-         "Fred W. Haise, Jr.", "Saturn V", 3038.500, 0, "Apollo 13 was the third "
-            + "manned mission by NASA intended to land on the Moon, but a mid-mission technical "
-            + "malfunction forced the lunar landing to be aborted. "));
+      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE IN_FOLDER( '" + testRoot2.getObjectId() + "')";
 
-      result.add(createAppoloMission(folder, "Apollo 17", "Eugene A. Cernan", "Ronald E. Evans", "Harrison H. Schmitt",
-         "Saturn V", 3038.500, 111, "Apollo 17 was the eleventh manned space "
-            + "mission in the NASA Apollo program. It was the first night launch of a U.S. human "
-            + "spaceflight and the sixth and final lunar landing mission of the Apollo program."));
-      for (Document document : result)
+      Query query = new Query(statement, true);
+      ItemsIterator<Result> result = storage.query(query);
+
+      // check results
+      checkResult(result, appolloContent2.toArray(new Document[appolloContent2.size()]));
+      for (Document doc : appolloContent)
       {
-         storage.saveObject(document);
+         storage.deleteObject(doc, true);
       }
-      return result;
+      for (Document doc : appolloContent2)
+      {
+         storage.deleteObject(doc, true);
+      }
+      storage.deleteObject(testRoot1, true);
+      storage.deleteObject(testRoot2, true);
+
    }
 
-   protected Document createAppoloMission(Folder parentFolder, String missionName, String commander,
-      String commandModulePilot, String lunarModulePilot, String boosterName, double boosterMass, long sampleReturned,
-      String objectives) throws Exception
+   /**
+    * Test IN_FOLDER constraint.
+    * <p>
+    * Initial data:
+    * <p>
+    * folder1:
+    * <p>
+    * -doc1: <b>Title</b> - node1
+    * <p>
+    * folder2:
+    * <p>
+    * -doc2: <b>Title</b> - node2
+    * <p>
+    * -folder3:
+    * <p>
+    * --folder4 </ul>
+    * <p>
+    * Query : Select all folders that are in folder1.
+    * <p>
+    * Expected result: folder3
+    * 
+    * @throws Exception if an unexpected error occurs
+    */
+   public void testFolderInFolderConstrain() throws Exception
    {
+      // create data
+      Folder folder1 = createFolder(testRoot, "folder1", "cmis:folder");
+      storage.saveObject(folder1);
 
-      Document doc = createDocument(parentFolder, missionName, NASA_DOCUMENT, objectives.getBytes(), CONTENT_TYPE);
-      doc.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
-         PROPERTY_COMMANDER, commander));
-      doc.setProperty(new StringProperty(PROPERTY_COMMAND_MODULE_PILOT, PROPERTY_COMMAND_MODULE_PILOT,
-         PROPERTY_COMMAND_MODULE_PILOT, PROPERTY_COMMAND_MODULE_PILOT, commandModulePilot));
-      doc.setProperty(new StringProperty(PROPERTY_LUNAR_MODULE_PILOT, PROPERTY_LUNAR_MODULE_PILOT,
-         PROPERTY_LUNAR_MODULE_PILOT, PROPERTY_LUNAR_MODULE_PILOT, lunarModulePilot));
-      doc.setProperty(new StringProperty(PROPERTY_BOOSTER, PROPERTY_BOOSTER, PROPERTY_BOOSTER, PROPERTY_BOOSTER,
-         boosterName));
+      Document doc1 = createDocument(folder1, "node1", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
+      storage.saveObject(doc1);
 
-      doc.setProperty(new DecimalProperty(PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS,
-         PROPERTY_BOOSTER_MASS, new BigDecimal(boosterMass)));
-      doc.setProperty(new DecimalProperty(PROPERTY_SAMPLE_RETURNED, PROPERTY_SAMPLE_RETURNED, PROPERTY_SAMPLE_RETURNED,
-         PROPERTY_SAMPLE_RETURNED, new BigDecimal(sampleReturned)));
-      return doc;
+      Folder folder2 = createFolder(testRoot, "folder2", "cmis:folder");
+      storage.saveObject(folder2);
+
+      Document doc2 = createDocument(folder2, "node2", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
+      storage.saveObject(doc2);
+
+      Folder folder3 = createFolder(folder1, "folder3", "cmis:folder");
+      storage.saveObject(folder3);
+
+      Document doc3 = createDocument(folder3, "node3", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
+      storage.saveObject(doc3);
+
+      Folder folder4 = createFolder(folder3, "folder4", "cmis:folder");
+      storage.saveObject(folder4);
+
+      String statement = "SELECT * FROM cmis:folder  WHERE IN_FOLDER( '" + folder1.getObjectId() + "')";
+
+      Query query = new Query(statement, true);
+      ItemsIterator<Result> result = storage.query(query);
+
+      // check results
+      checkResult(result, new Folder[]{folder3});
+
+      storage.deleteObject(folder4, true);
+
+      storage.deleteObject(doc3, true);
+
+      storage.deleteObject(folder3, true);
+
+      storage.deleteObject(doc2, true);
+      storage.deleteObject(folder2, true);
+
+      storage.deleteObject(doc1, true);
+      storage.deleteObject(folder1, true);
+
    }
 
    //
@@ -291,60 +309,6 @@ public class QueryUsecasesTest extends BaseQueryTest
    }
 
    /**
-    * Test fulltext constraint.
-    * <p>
-    * Initial data:
-    * <p>
-    * see createApolloContent()
-    * <p>
-    * Query : Select all documents where data contains "moon" word.
-    * <p>
-    * Expected result: document1 and document2
-    * 
-    * @throws Exception if an unexpected error occurs
-    */
-   public void testUpdateFulltextConstraint() throws Exception
-   {
-
-      Document doc3 =
-         createDocument(testRoot, "Apollo 13", NASA_DOCUMENT, ("Apollo 13 was the third "
-            + "manned mission by NASA intended to land on the Moon, but a mid-mission technical "
-            + "malfunction forced the lunar landing to be aborted. ").getBytes(), CONTENT_TYPE);
-      doc3.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
-         PROPERTY_COMMANDER, "James A. Lovell, Jr."));
-      doc3.setProperty(new StringProperty(PROPERTY_BOOSTER, PROPERTY_BOOSTER, PROPERTY_BOOSTER, PROPERTY_BOOSTER,
-         "Saturn V"));
-      storage.saveObject(doc3);
-
-      String statement1 = "SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"moon\")";
-      Query query = new Query(statement1, true);
-      ItemsIterator<Result> result = storage.query(query);
-
-      assertEquals(1, result.size());
-      checkResult(result, new Document[]{doc3});
-
-      //replace content
-      ContentStream cs = new BaseContentStream("Sun".getBytes(), "test", CONTENT_TYPE);
-      doc3.setContentStream(cs);
-
-      storage.saveObject(doc3);
-
-      //check old one
-      result = storage.query(query);
-      assertEquals(0, result.size());
-      //check new  content
-      String statement2 = "SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"Sun\")";
-      query = new Query(statement2, true);
-      result = storage.query(query);
-
-      assertEquals(1, result.size());
-      checkResult(result, new Document[]{doc3});
-
-      storage.deleteObject(doc3, true);
-
-   }
-
-   /**
     * Test 'IN' constraint.
     * <p>
     * Initial data:
@@ -377,107 +341,6 @@ public class QueryUsecasesTest extends BaseQueryTest
       {
          storage.deleteObject(doc, true);
       }
-   }
-
-   /**
-    * Test IN_FOLDER constraint.
-    * <p>
-    * Initial data:
-    * <ul>
-    * <li>folder1:
-    * <li>doc1: <b>Title</b> - node1
-    * <li>folder2
-    * <li>doc2: <b>Title</b> - node2
-    * </ul>
-    * <p>
-    * Query : Select all documents that are in folder1.
-    * <p>
-    * Expected result: doc1
-    * 
-    * @throws Exception if an unexpected error occurs
-    */
-   public void testDocumentInFolderConstrain() throws Exception
-   {
-      // create data
-      Folder testRoot1 = createFolder(rootFolder, "testDocumentInFolderConstrain1", "cmis:folder");
-      Folder testRoot2 = createFolder(rootFolder, "testDocumentInFolderConstrain2", "cmis:folder");
-
-      List<Document> appolloContent = createNasaContent(testRoot1);
-      List<Document> appolloContent2 = createNasaContent(testRoot2);
-
-      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE IN_FOLDER( '" + testRoot2.getObjectId() + "')";
-
-      Query query = new Query(statement, true);
-      ItemsIterator<Result> result = storage.query(query);
-
-      // check results
-      checkResult(result, appolloContent2.toArray(new Document[appolloContent2.size()]));
-      for (Document doc : appolloContent)
-      {
-         storage.deleteObject(doc, true);
-      }
-      for (Document doc : appolloContent2)
-      {
-         storage.deleteObject(doc, true);
-      }
-
-   }
-
-   /**
-    * Test IN_FOLDER constraint.
-    * <p>
-    * Initial data:
-    * <p>
-    * folder1:
-    * <p>
-    * -doc1: <b>Title</b> - node1
-    * <p>
-    * folder2:
-    * <p>
-    * -doc2: <b>Title</b> - node2
-    * <p>
-    * -folder3:
-    * <p>
-    * --folder4 </ul>
-    * <p>
-    * Query : Select all folders that are in folder1.
-    * <p>
-    * Expected result: folder3
-    * 
-    * @throws Exception if an unexpected error occurs
-    */
-   public void testFolderInFolderConstrain() throws Exception
-   {
-      // create data
-      Folder folder1 = createFolder(testRoot, "folder1", "cmis:folder");
-      storage.saveObject(folder1);
-
-      Document doc1 = createDocument(folder1, "node1", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
-      storage.saveObject(doc1);
-
-      Folder folder2 = createFolder(testRoot, "folder2", "cmis:folder");
-      storage.saveObject(folder2);
-
-      Document doc2 = createDocument(folder2, "node2", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
-      storage.saveObject(doc2);
-
-      Folder folder3 = createFolder(folder1, "folder3", "cmis:folder");
-      storage.saveObject(folder3);
-
-      Document doc3 = createDocument(folder3, "node3", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
-      storage.saveObject(doc3);
-
-      Folder folder4 = createFolder(folder3, "folder4", "cmis:folder");
-      storage.saveObject(folder4);
-
-      String statement = "SELECT * FROM cmis:folder  WHERE IN_FOLDER( '" + folder1.getObjectId() + "')";
-
-      Query query = new Query(statement, true);
-      ItemsIterator<Result> result = storage.query(query);
-
-      // check results
-      checkResult(result, new Folder[]{folder3});
-
    }
 
    //
@@ -544,35 +407,22 @@ public class QueryUsecasesTest extends BaseQueryTest
     */
    public void testLIKEConstraint() throws Exception
    {
-      Document doc1 = createDocument(testRoot, "node1", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
-      doc1.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
-         PROPERTY_COMMANDER, "administrator"));
+      List<Document> appolloContent = createNasaContent(testRoot);
 
-      Document doc2 = createDocument(testRoot, "node2", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
-      doc2.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
-         PROPERTY_COMMANDER, "admin"));
-
-      Document doc3 = createDocument(testRoot, "node3", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
-      doc3.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
-         PROPERTY_COMMANDER, "radmin"));
-
-      storage.saveObject(doc1);
-      storage.saveObject(doc2);
-      storage.saveObject(doc3);
-
-      String statement = "SELECT * FROM " + NASA_DOCUMENT + " AS doc WHERE " + PROPERTY_COMMANDER + " LIKE 'ad%'";
+      String statement = "SELECT * FROM " + NASA_DOCUMENT + " AS doc WHERE " + PROPERTY_COMMANDER + " LIKE 'James%'";
 
       Query query = new Query(statement, true);
 
       ItemsIterator<Result> result = storage.query(query);
 
       // check results
-      assertEquals(2, result.size());
-      checkResult(result, new Document[]{doc1, doc2});
+      assertEquals(1, result.size());
+      checkResult(result, new Document[]{appolloContent.get(2)});
 
-      storage.deleteObject(doc1, true);
-      storage.deleteObject(doc2, true);
-      storage.deleteObject(doc3, true);
+      for (Document doc : appolloContent)
+      {
+         storage.deleteObject(doc, true);
+      }
    }
 
    /**
@@ -693,46 +543,42 @@ public class QueryUsecasesTest extends BaseQueryTest
          storage.deleteObject(doc, true);
       }
    }
-   //
-   //   /**
-   //    * Test NOT NOT (not counteraction).
-   //    * <p>
-   //    * Initial data:
-   //    * <ul>
-   //    * <li>doc1: <b>Title</b> - node1 <b>long</b> - 3
-   //    * <li>doc2: <b>Title</b> - node2 <b>long</b> - 15
-   //    * </ul>
-   //    * <p>
-   //    * Query : Select all documents where long property in set {15 , 20} (NOT NOT
-   //    * IN).
-   //    * <p>
-   //    * Expected result: doc2
-   //    * 
-   //    * @throws Exception if an unexpected error occurs
-   //    */
-   //   public void testNotNotINConstraint() throws Exception
-   //   {
-   //
-   //      // create data
-   //      String name = "fileCS2.doc";
-   //      String name2 = "fileCS3.doc";
-   //      String contentType = "text/plain";
-   //
-   //      Document folder = createFolder(root, "CASETest");
-   //
-   //      Document doc1 = createDocument(folder.getObjectId(), name, new byte[0], contentType);
-   //      doc1.setDecimal("long", new BigDecimal(3));
-   //
-   //      Document doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
-   //      doc2.setDecimal("long", new BigDecimal(15));
-   //
-   //      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE NOT (long NOT IN (15, 20))";
-   //
-   //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = storage.query(query);
-   //
-   //      checkResult(result, new Document[]{doc2});
-   //   }
+
+   /**
+    * Test NOT NOT (not counteraction).
+    * <p>
+    * Initial data:
+    * <ul>
+    * <li>doc1: <b>Title</b> - node1 <b>long</b> - 3
+    * <li>doc2: <b>Title</b> - node2 <b>long</b> - 15
+    * </ul>
+    * <p>
+    * Query : Select all documents where long property in set {15 , 20} (NOT NOT
+    * IN).
+    * <p>
+    * Expected result: doc2
+    * 
+    * @throws Exception if an unexpected error occurs
+    */
+   public void testNotNotINConstraint() throws Exception
+   {
+
+      List<Document> appolloContent = createNasaContent(testRoot);
+
+      String statement =
+         "SELECT * FROM " + NASA_DOCUMENT + " WHERE  NOT (" + PROPERTY_COMMANDER + " NOT IN ('James A. Lovell, Jr.'))";
+
+      Query query = new Query(statement, true);
+      ItemsIterator<Result> result = storage.query(query);
+
+      checkResult(result, new Document[]{appolloContent.get(2)});
+
+      for (Document doc : appolloContent)
+      {
+         storage.deleteObject(doc, true);
+      }
+   }
+
    //
    //   /**
    //    * Test Order By desc.
@@ -1309,5 +1155,156 @@ public class QueryUsecasesTest extends BaseQueryTest
    //
    //      checkResult(result, new Document[]{doc1, doc2});
    //   }
+
+   /**
+    * Simple test.
+    * <p>
+    * All documents from Apollo program
+    * <p>
+    * Query : Select all CMIS_DOCUMENTS.
+    * <p>
+    * Expected result: document1 and document1
+    * 
+    * @throws Exception if an unexpected error occurs
+    */
+   public void testSimpleQuery() throws Exception
+   {
+      List<Document> appolloContent = createNasaContent(testRoot);
+      String statement = "SELECT * FROM " + NASA_DOCUMENT;
+      Query query = new Query(statement, true);
+      ItemsIterator<Result> result = storage.query(query);
+      checkResult(result, appolloContent.toArray(new Document[appolloContent.size()]));
+      for (Document doc : appolloContent)
+      {
+         storage.deleteObject(doc, true);
+      }
+   }
+
+   /**
+    * Test fulltext constraint.
+    * <p>
+    * Initial data:
+    * <p>
+    * see createApolloContent()
+    * <p>
+    * Query : Select all documents where data contains "moon" word.
+    * <p>
+    * Expected result: document1 and document2
+    * 
+    * @throws Exception if an unexpected error occurs
+    */
+   public void testUpdateFulltextConstraint() throws Exception
+   {
+
+      Document doc3 =
+         createDocument(testRoot, "Apollo 13", NASA_DOCUMENT, ("Apollo 13 was the third "
+            + "manned mission by NASA intended to land on the Moon, but a mid-mission technical "
+            + "malfunction forced the lunar landing to be aborted. ").getBytes(), CONTENT_TYPE);
+      doc3.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+         PROPERTY_COMMANDER, "James A. Lovell, Jr."));
+      doc3.setProperty(new StringProperty(PROPERTY_BOOSTER, PROPERTY_BOOSTER, PROPERTY_BOOSTER, PROPERTY_BOOSTER,
+         "Saturn V"));
+      storage.saveObject(doc3);
+
+      String statement1 = "SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"moon\")";
+      Query query = new Query(statement1, true);
+      ItemsIterator<Result> result = storage.query(query);
+
+      assertEquals(1, result.size());
+      checkResult(result, new Document[]{doc3});
+
+      //replace content
+      ContentStream cs = new BaseContentStream("Sun".getBytes(), "test", CONTENT_TYPE);
+      doc3.setContentStream(cs);
+
+      storage.saveObject(doc3);
+
+      //check old one
+      result = storage.query(query);
+      assertEquals(0, result.size());
+      //check new  content
+      String statement2 = "SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"Sun\")";
+      query = new Query(statement2, true);
+      result = storage.query(query);
+
+      assertEquals(1, result.size());
+      checkResult(result, new Document[]{doc3});
+
+      storage.deleteObject(doc3, true);
+
+   }
+
+   protected Document createAppoloMission(Folder parentFolder, String missionName, String commander,
+      String commandModulePilot, String lunarModulePilot, String boosterName, double boosterMass, long sampleReturned,
+      String objectives) throws Exception
+   {
+
+      Document doc = createDocument(parentFolder, missionName, NASA_DOCUMENT, objectives.getBytes(), CONTENT_TYPE);
+      doc.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+         PROPERTY_COMMANDER, commander));
+      doc.setProperty(new StringProperty(PROPERTY_COMMAND_MODULE_PILOT, PROPERTY_COMMAND_MODULE_PILOT,
+         PROPERTY_COMMAND_MODULE_PILOT, PROPERTY_COMMAND_MODULE_PILOT, commandModulePilot));
+      doc.setProperty(new StringProperty(PROPERTY_LUNAR_MODULE_PILOT, PROPERTY_LUNAR_MODULE_PILOT,
+         PROPERTY_LUNAR_MODULE_PILOT, PROPERTY_LUNAR_MODULE_PILOT, lunarModulePilot));
+      doc.setProperty(new StringProperty(PROPERTY_BOOSTER, PROPERTY_BOOSTER, PROPERTY_BOOSTER, PROPERTY_BOOSTER,
+         boosterName));
+
+      doc.setProperty(new DecimalProperty(PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS,
+         PROPERTY_BOOSTER_MASS, new BigDecimal(boosterMass)));
+      doc.setProperty(new DecimalProperty(PROPERTY_SAMPLE_RETURNED, PROPERTY_SAMPLE_RETURNED, PROPERTY_SAMPLE_RETURNED,
+         PROPERTY_SAMPLE_RETURNED, new BigDecimal(sampleReturned)));
+      return doc;
+   }
+
+   /**
+    * @see org.xcmis.sp.jcr.exo.BaseTest#tearDown()
+    */
+   @Override
+   protected void tearDown() throws Exception
+   {
+
+      storage.deleteTree(testRoot, true, UnfileObject.DELETE, true);
+      super.tearDown();
+
+   }
+
+   /**
+    * Create content for Apollo program.
+    * 
+    * @param folder
+    * @return
+    * @throws Exception
+    */
+   private List<Document> createNasaContent(Folder folder) throws Exception
+   {
+      List<Document> result = new ArrayList<Document>();
+      result.add(createAppoloMission(folder, "Apollo 7", "Walter M. Schirra", "Donn F. Eisele", "R. Walter Cunningham",
+         "Saturn 1B", 581.844, 0, "Apollo 7 (October 11-22, 1968) was the first manned mission "
+            + "in the Apollo program to be launched. It was an eleven-day "
+            + "Earth-orbital mission, the first manned launch of the "
+            + "Saturn IB launch vehicle, and the first three-person " + "American space mission"));
+
+      result.add(createAppoloMission(folder, "Apollo 8", "Frank F. Borman, II", "James A. Lovell, Jr",
+         "William A. Anders", "Saturn V", 3038.500, 0, "Apollo 8 was the first "
+            + "manned space voyage to achieve a velocity sufficient to allow escape from the "
+            + "gravitational field of planet Earth; the first to escape from the gravitational "
+            + "field of another celestial body; and the first manned voyage to return to planet Earth "
+            + "from another celestial body - Earth's Moon"));
+
+      result.add(createAppoloMission(folder, "Apollo 13", "James A. Lovell, Jr.", "John L. Swigert",
+         "Fred W. Haise, Jr.", "Saturn V", 3038.500, 0, "Apollo 13 was the third "
+            + "manned mission by NASA intended to land on the Moon, but a mid-mission technical "
+            + "malfunction forced the lunar landing to be aborted. "));
+
+      result.add(createAppoloMission(folder, "Apollo 17", "Eugene A. Cernan", "Ronald E. Evans", "Harrison H. Schmitt",
+         "Saturn V", 3038.500, 111, "Apollo 17 was the eleventh manned space "
+            + "mission in the NASA Apollo program. It was the first night launch of a U.S. human "
+            + "spaceflight and the sixth and final lunar landing mission of the Apollo program."));
+      for (Document document : result)
+      {
+         storage.saveObject(document);
+      }
+      return result;
+   }
 
 }

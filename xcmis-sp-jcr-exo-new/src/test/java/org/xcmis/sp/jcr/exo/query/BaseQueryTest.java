@@ -197,10 +197,8 @@ public abstract class BaseQueryTest extends BaseTest
          Result next = result.next();
          String id = next.getObjectId();
          resultPaths.add(id);
-         if (LOG.isDebugEnabled())
-         {
-            LOG.debug(id);
-         }
+         ObjectData object = storage.getObject(id);
+         LOG.debug("id:=" + id + " path:=" + object.getParent().getPath() + "/" + object.getName());
       }
 
       checkResults(expectedPaths, resultPaths);

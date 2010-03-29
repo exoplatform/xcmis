@@ -45,15 +45,28 @@
     </supertypes>
   </nodeType>
   
-  <nodeType name="cmis:nasa-document" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
+  <nodeType name="cmis:nasa-mission" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
     <supertypes>
       <supertype>nt:file</supertype>
     </supertypes>
         <propertyDefinitions>
-      <propertyDefinition name="cmis:Booster" requiredType="String" autoCreated="false"
+      <propertyDefinition name="cmis:booster-name" requiredType="String" autoCreated="false"
         mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
       </propertyDefinition>
-      <propertyDefinition name="cmis:Commander" requiredType="String" autoCreated="false"
+      
+      <propertyDefinition name="cmis:commander" requiredType="String" autoCreated="false"
+        mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
+        </propertyDefinition>
+      <propertyDefinition name="cmis:command-module-pilot" requiredType="String" autoCreated="false"
+        mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
+      </propertyDefinition>
+      <propertyDefinition name="cmis:lunar-module-pilot" requiredType="String" autoCreated="false"
+        mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
+      </propertyDefinition>
+      <propertyDefinition name="cmis:booster-mass" requiredType="Double" autoCreated="false"
+        mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
+      </propertyDefinition>
+      <propertyDefinition name="cmis:sample-returned" requiredType="Double" autoCreated="false"
         mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
       </propertyDefinition>
     </propertyDefinitions>
