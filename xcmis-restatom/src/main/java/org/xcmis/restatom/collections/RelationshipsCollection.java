@@ -112,19 +112,31 @@ public class RelationshipsCollection extends CmisObjectCollection
       {
          String pId = p.getId();
          if (CMIS.OBJECT_TYPE_ID.equals(pId))
+         {
             typeId = ((IdProperty)p).getValues().get(0);
+         }
          else if (CMIS.SOURCE_ID.equals(pId))
+         {
             sourceId = ((IdProperty)p).getValues().get(0);
+         }
          else if (CMIS.TARGET_ID.equals(pId))
+         {
             targetId = ((IdProperty)p).getValues().get(0);
+         }
       }
 
       if (typeId == null)
+      {
          return createErrorResponse("ObjectTypeId is not specified.", 400);
+      }
       if (sourceId == null)
+      {
          return createErrorResponse("Source id is not specified.", 400);
+      }
       if (targetId == null)
+      {
          return createErrorResponse("Traget id is not specified.", 400);
+      }
 
       List<AccessControlEntry> addACL = null;
       List<AccessControlEntry> removeACL = null;
@@ -162,10 +174,10 @@ public class RelationshipsCollection extends CmisObjectCollection
       finally
       {
          if (conn != null)
+         {
             conn.close();
+         }
       }
-
-      
 
       entry = request.getAbdera().getFactory().newEntry();
       try
@@ -193,36 +205,10 @@ public class RelationshipsCollection extends CmisObjectCollection
       // Filter will be applied during build final Atom Document.
       //      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
       String propertyFilter = null;
-      boolean includeSubRelationship =
-         Boolean.parseBoolean(request.getParameter(AtomCMIS.PARAM_INCLUDE_SUB_RELATIONSHIP_TYPES));
-      boolean includeAllowableActions =
-         Boolean.parseBoolean(request.getParameter(AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS));
-      int maxItems;
-      try
-      {
-         maxItems =
-            request.getParameter(AtomCMIS.PARAM_MAX_ITEMS) == null
-               || request.getParameter(AtomCMIS.PARAM_MAX_ITEMS).length() == 0 ? CMIS.MAX_ITEMS : Integer
-               .parseInt(request.getParameter(AtomCMIS.PARAM_MAX_ITEMS));
-      }
-      catch (NumberFormatException nfe)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_MAX_ITEMS);
-         throw new ResponseContextException(msg, 400);
-      }
-      int skipCount;
-      try
-      {
-         skipCount =
-            request.getParameter(AtomCMIS.PARAM_SKIP_COUNT) == null
-               || request.getParameter(AtomCMIS.PARAM_SKIP_COUNT).length() == 0 ? 0 : Integer.parseInt(request
-               .getParameter(AtomCMIS.PARAM_SKIP_COUNT));
-      }
-      catch (NumberFormatException nfe)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_SKIP_COUNT);
-         throw new ResponseContextException(msg, 400);
-      }
+      boolean includeSubRelationship = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_SUB_RELATIONSHIP_TYPES);
+      boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS);
+      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS);
+      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT);
       RelationshipDirection direction;
       try
       {
@@ -284,7 +270,9 @@ public class RelationshipsCollection extends CmisObjectCollection
       finally
       {
          if (conn != null)
+         {
             conn.close();
+         }
       }
    }
 

@@ -102,7 +102,9 @@ public class FolderDescentantsCollection extends CmisObjectCollection
          entry.getLinks(AtomCMIS.LINK_SERVICE, AtomCMIS.LINK_SELF, AtomCMIS.LINK_DOWN, AtomCMIS.LINK_CMIS_FOLDERTREE,
             AtomCMIS.LINK_UP);
       for (Link l : links)
+      {
          childFeed.addLink((Link)l.clone());
+      }
 
       childFeed.addLink(getObjectLink(entryId, request), AtomCMIS.LINK_VIA, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null, null,
          -1);
@@ -132,9 +134,8 @@ public class FolderDescentantsCollection extends CmisObjectCollection
     */
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
-      boolean includeAllowableActions =
-         Boolean.parseBoolean(request.getParameter(AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS));
-      boolean includePathSegments = Boolean.parseBoolean(request.getParameter(AtomCMIS.PARAM_INCLUDE_PATH_SEGMENT));
+      boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS);
+      boolean includePathSegments = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PATH_SEGMENT);
       // XXX At the moment get all properties from back-end. We need some of them for build correct feed.
       // Filter will be applied during build final Atom Document.
       //      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
@@ -153,19 +154,7 @@ public class FolderDescentantsCollection extends CmisObjectCollection
          String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS);
          throw new ResponseContextException(msg, 400);
       }
-      int depth;
-      try
-      {
-         depth =
-            request.getParameter(AtomCMIS.PARAM_DEPTH) == null
-               || request.getParameter(AtomCMIS.PARAM_DEPTH).length() == 0 ? 1 : Integer.parseInt(request
-               .getParameter(AtomCMIS.PARAM_DEPTH));
-      }
-      catch (NumberFormatException nfe)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_DEPTH);
-         throw new ResponseContextException(msg, 400);
-      }
+      int depth = getIntegerParameter(request, AtomCMIS.PARAM_DEPTH);
       Connection conn = null;
       try
       {
@@ -192,7 +181,9 @@ public class FolderDescentantsCollection extends CmisObjectCollection
                   pathSegment.setText(oifContainer.getContainer().getPathSegment());
                }
                if (oifContainer.getChildren().size() > 0)
+               {
                   addChildren(e, oifContainer.getChildren(), feedIri, request);
+               }
             }
          }
       }
@@ -219,7 +210,9 @@ public class FolderDescentantsCollection extends CmisObjectCollection
       finally
       {
          if (conn != null)
+         {
             conn.close();
+         }
       }
    }
 
@@ -235,11 +228,15 @@ public class FolderDescentantsCollection extends CmisObjectCollection
       feed.addLink(getChildrenLink(id, request), AtomCMIS.LINK_DOWN, AtomCMIS.MEDIATYPE_ATOM_FEED, null, null, -1);
       String descendants = getDescendantsLink(id, request);
       if (descendants != null)
+      {
          feed.addLink(descendants, AtomCMIS.LINK_DOWN, AtomCMIS.MEDIATYPE_CMISTREE, null, null, -1);
+      }
 
       String folderTree = getFolderTreeLink(id, request);
       if (folderTree != null)
+      {
          feed.addLink(folderTree, AtomCMIS.LINK_CMIS_FOLDERTREE, AtomCMIS.MEDIATYPE_ATOM_FEED, null, null, -1);
+      }
 
       Connection conn = null;
       try
@@ -278,7 +275,9 @@ public class FolderDescentantsCollection extends CmisObjectCollection
       finally
       {
          if (conn != null)
+         {
             conn.close();
+         }
       }
       return feed;
    }

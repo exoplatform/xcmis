@@ -68,9 +68,8 @@ public class FolderTreeCollection extends FolderDescentantsCollection
    @Override
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
-      boolean includeAllowableActions =
-         Boolean.parseBoolean(request.getParameter(AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS));
-      boolean includePathSegments = Boolean.parseBoolean(request.getParameter(AtomCMIS.PARAM_INCLUDE_PATH_SEGMENT));
+      boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS);
+      boolean includePathSegments = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PATH_SEGMENT);
       // XXX At the moment get all properties from back-end. We need some of them for build correct feed.
       // Filter will be applied during build final Atom Document.
       //      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
@@ -89,19 +88,7 @@ public class FolderTreeCollection extends FolderDescentantsCollection
          String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS);
          throw new ResponseContextException(msg, 400);
       }
-      int depth;
-      try
-      {
-         depth =
-            request.getParameter(AtomCMIS.PARAM_DEPTH) == null
-               || request.getParameter(AtomCMIS.PARAM_DEPTH).length() == 0 ? 1 : Integer.parseInt(request
-               .getParameter(AtomCMIS.PARAM_DEPTH));
-      }
-      catch (NumberFormatException nfe)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_DEPTH);
-         throw new ResponseContextException(msg, 400);
-      }
+      int depth = getIntegerParameter(request, AtomCMIS.PARAM_DEPTH);
       Connection conn = null;
       try
       {
@@ -127,7 +114,9 @@ public class FolderTreeCollection extends FolderDescentantsCollection
                   pathSegment.setText(oifContainer.getContainer().getPathSegment());
                }
                if (oifContainer.getChildren().size() > 0)
+               {
                   addChildren(e, oifContainer.getChildren(), feedIri, request);
+               }
             }
          }
       }
@@ -150,7 +139,9 @@ public class FolderTreeCollection extends FolderDescentantsCollection
       finally
       {
          if (conn != null)
+         {
             conn.close();
+         }
       }
    }
 

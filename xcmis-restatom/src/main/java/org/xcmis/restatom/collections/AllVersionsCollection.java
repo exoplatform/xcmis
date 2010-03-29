@@ -26,7 +26,6 @@ import org.apache.abdera.model.Feed;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.CMIS;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
@@ -64,34 +63,9 @@ public class AllVersionsCollection extends CmisObjectCollection
    {
       String objectId = getId(request);
       String propertyFilter = null;
-      boolean includeAllowableActions =
-         Boolean.parseBoolean(request.getParameter(AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS));
-      int maxItems;
-      try
-      {
-         maxItems =
-            request.getParameter(AtomCMIS.PARAM_MAX_ITEMS) == null
-               || request.getParameter(AtomCMIS.PARAM_MAX_ITEMS).length() == 0 ? CMIS.MAX_ITEMS : Integer
-               .parseInt(request.getParameter(AtomCMIS.PARAM_MAX_ITEMS));
-      }
-      catch (NumberFormatException nfe)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_MAX_ITEMS);
-         throw new ResponseContextException(msg, 400);
-      }
-      int skipCount;
-      try
-      {
-         skipCount =
-            request.getParameter(AtomCMIS.PARAM_SKIP_COUNT) == null
-               || request.getParameter(AtomCMIS.PARAM_SKIP_COUNT).length() == 0 ? 0 : Integer.parseInt(request
-               .getParameter(AtomCMIS.PARAM_SKIP_COUNT));
-      }
-      catch (NumberFormatException nfe)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_SKIP_COUNT);
-         throw new ResponseContextException(msg, 400);
-      }
+      boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS);
+      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS);
+      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT);
       Connection conn = null;
       try
       {
@@ -145,7 +119,9 @@ public class AllVersionsCollection extends CmisObjectCollection
       finally
       {
          if (conn != null)
+         {
             conn.close();
+         }
       }
 
    }

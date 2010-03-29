@@ -74,21 +74,8 @@ public class TypesDescendantsCollection extends CmisTypeCollection
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
       String typeId = request.getTarget().getParameter(AtomCMIS.PARAM_TYPE_ID);
-      boolean includePropertyDefinitions =
-         Boolean.parseBoolean(request.getParameter(AtomCMIS.PARAM_INCLUDE_PROPERTY_DEFINITIONS));
-      int depth;
-      try
-      {
-         depth =
-            request.getParameter(AtomCMIS.PARAM_DEPTH) == null
-               || request.getParameter(AtomCMIS.PARAM_DEPTH).length() == 0 ? 1 : Integer.parseInt(request
-               .getParameter(AtomCMIS.PARAM_DEPTH));
-      }
-      catch (NumberFormatException e)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_DEPTH);
-         throw new ResponseContextException(msg, 400);
-      }
+      boolean includePropertyDefinitions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PROPERTY_DEFINITIONS);
+      int depth = getIntegerParameter(request, AtomCMIS.PARAM_DEPTH);
       Connection conn = null;
       try
       {
@@ -118,7 +105,9 @@ public class TypesDescendantsCollection extends CmisTypeCollection
             IRI feedIri = new IRI(getFeedIriForEntry(typeContainer.getContainer(), request));
             addEntryDetails(request, e, feedIri, typeContainer.getContainer());
             if (typeContainer.getChildren().size() > 0)
+            {
                addChildren(e, typeContainer.getChildren(), feedIri, request);
+            }
          }
       }
       catch (StorageException re)
@@ -141,7 +130,9 @@ public class TypesDescendantsCollection extends CmisTypeCollection
       finally
       {
          if (conn != null)
+         {
             conn.close();
+         }
       }
 
    }
@@ -173,7 +164,9 @@ public class TypesDescendantsCollection extends CmisTypeCollection
          entry.getLinks(AtomCMIS.LINK_SERVICE, AtomCMIS.LINK_SELF, AtomCMIS.LINK_DOWN,
             AtomCMIS.LINK_CMIS_TYPEDESCENDANTS, AtomCMIS.LINK_UP);
       for (Link l : links)
+      {
          childFeed.addLink((Link)l.clone());
+      }
 
       childFeed.addLink(getObjectTypeLink(entryId, request), AtomCMIS.LINK_VIA, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null,
          null, -1);
@@ -187,7 +180,9 @@ public class TypesDescendantsCollection extends CmisTypeCollection
          Entry ch = entry.getFactory().newEntry(childrenElement);
          addEntryDetails(request, ch, feedIri, (TypeDefinition)typeContainer.getContainer());
          if (typeContainer.getChildren().size() > 0)
+         {
             addChildren(ch, typeContainer.getChildren(), feedIri, request);
+         }
       }
    }
 

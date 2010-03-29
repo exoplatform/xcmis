@@ -313,13 +313,9 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
 
    protected Integer getIntegerParameter(RequestContext request, String name) throws ResponseContextException
    {
-      Integer result;
+      Integer result = null;
       String param = request.getParameter(name);
-      if (param == null || param.length() == 0)
-      {
-         result = null;
-      }
-      else
+      if (param != null && param.length() > 0)
       {
          try
          {
@@ -327,7 +323,7 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
          }
          catch (NumberFormatException nfe)
          {
-            String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_MAX_ITEMS);
+            String msg = "Invalid parameter for name '" + name + "' with value: '" + name + "'";
             throw new ResponseContextException(msg, 400);
          }
       }

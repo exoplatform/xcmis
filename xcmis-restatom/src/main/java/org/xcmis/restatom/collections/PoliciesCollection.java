@@ -72,32 +72,8 @@ public class PoliciesCollection extends CmisObjectCollection
    {
       String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
 
-      int maxItems;
-      try
-      {
-         maxItems =
-            request.getParameter(AtomCMIS.PARAM_MAX_ITEMS) == null
-               || request.getParameter(AtomCMIS.PARAM_MAX_ITEMS).length() == 0 ? CMIS.MAX_ITEMS : Integer
-               .parseInt(request.getParameter(AtomCMIS.PARAM_MAX_ITEMS));
-      }
-      catch (NumberFormatException nfe)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_MAX_ITEMS);
-         throw new ResponseContextException(msg, 400);
-      }
-      int skipCount;
-      try
-      {
-         skipCount =
-            request.getParameter(AtomCMIS.PARAM_SKIP_COUNT) == null
-               || request.getParameter(AtomCMIS.PARAM_SKIP_COUNT).length() == 0 ? 0 : Integer.parseInt(request
-               .getParameter(AtomCMIS.PARAM_SKIP_COUNT));
-      }
-      catch (NumberFormatException nfe)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_SKIP_COUNT);
-         throw new ResponseContextException(msg, 400);
-      }
+      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS);
+      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT);
 
       Connection conn = null;
       try
@@ -148,7 +124,9 @@ public class PoliciesCollection extends CmisObjectCollection
       finally
       {
          if (conn != null)
+         {
             conn.close();
+         }
       }
    }
 
@@ -179,16 +157,20 @@ public class PoliciesCollection extends CmisObjectCollection
       {
          String pName = p.getId();
          if (pName.equals(CMIS.OBJECT_ID))
+         {
             policyId = ((IdProperty)p).getValues().get(0);
+         }
       }
-      
+
       Connection conn = null;
       try
       {
          conn = getConnection(request);
          // apply policy
          if (policyId != null)
+         {
             conn.applyPolicy(policyId, objectId);
+         }
       }
       catch (ConstraintException cve)
       {
@@ -213,14 +195,16 @@ public class PoliciesCollection extends CmisObjectCollection
       finally
       {
          if (conn != null)
+         {
             conn.close();
+         }
       }
 
       entry = request.getAbdera().getFactory().newEntry();
       try
       {
          // updated object
-         addEntryDetails(request, entry, request.getResolvedUri(), (CmisObject)conn.getObject(policyId, true,
+         addEntryDetails(request, entry, request.getResolvedUri(), conn.getObject(policyId, true,
             IncludeRelationships.BOTH, true, true, true, null, null));
       }
       catch (ResponseContextException rce)
@@ -272,14 +256,18 @@ public class PoliciesCollection extends CmisObjectCollection
       {
          String pName = p.getId();
          if (pName.equals(CMIS.OBJECT_ID))
+         {
             policyId = ((IdProperty)p).getValues().get(0);
+         }
       }
       Connection conn = null;
       try
       {
          conn = getConnection(request);
          if (policyId != null)
+         {
             conn.removePolicy(policyId, objectId);
+         }
          ResponseContext response = new EmptyResponseContext(200);
          return response;
       }
@@ -306,7 +294,9 @@ public class PoliciesCollection extends CmisObjectCollection
       finally
       {
          if (conn != null)
+         {
             conn.close();
+         }
       }
    }
 

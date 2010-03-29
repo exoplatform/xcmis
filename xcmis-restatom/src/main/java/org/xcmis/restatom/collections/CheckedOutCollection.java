@@ -29,7 +29,6 @@ import org.apache.abdera.protocol.server.ResponseContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
-import org.xcmis.spi.CMIS;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FilterNotValidException;
@@ -69,8 +68,7 @@ public class CheckedOutCollection extends CmisObjectCollection
     */
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
-      boolean includeAllowableActions =
-         Boolean.parseBoolean(request.getParameter(AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS));
+      boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS);
       String orderBy = request.getParameter(AtomCMIS.PARAM_ORDER_BY);
       // XXX At the moment get all properties from back-end. We need some of them for build correct feed.
       // Filter will be applied during build final Atom Document.
@@ -90,32 +88,8 @@ public class CheckedOutCollection extends CmisObjectCollection
          String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS);
          throw new ResponseContextException(msg, 400);
       }
-      int maxItems;
-      try
-      {
-         maxItems =
-            request.getParameter(AtomCMIS.PARAM_MAX_ITEMS) == null
-               || request.getParameter(AtomCMIS.PARAM_MAX_ITEMS).length() == 0 ? CMIS.MAX_ITEMS : Integer
-               .parseInt(request.getParameter(AtomCMIS.PARAM_MAX_ITEMS));
-      }
-      catch (NumberFormatException nfe)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_MAX_ITEMS);
-         throw new ResponseContextException(msg, 400);
-      }
-      int skipCount;
-      try
-      {
-         skipCount =
-            request.getParameter(AtomCMIS.PARAM_SKIP_COUNT) == null
-               || request.getParameter(AtomCMIS.PARAM_SKIP_COUNT).length() == 0 ? 0 : Integer.parseInt(request
-               .getParameter(AtomCMIS.PARAM_SKIP_COUNT));
-      }
-      catch (NumberFormatException nfe)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_SKIP_COUNT);
-         throw new ResponseContextException(msg, 400);
-      }
+      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS);
+      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT);
       Connection conn = null;
       try
       {
@@ -166,7 +140,9 @@ public class CheckedOutCollection extends CmisObjectCollection
       finally
       {
          if (conn != null)
+         {
             conn.close();
+         }
       }
    }
 
@@ -189,7 +165,9 @@ public class CheckedOutCollection extends CmisObjectCollection
       // for Abdera.
       String id = super.getId(request);
       if (id != null)
+      {
          return id;
+      }
       // Need this for getCheckedOutDocuments when folderId is not specified.
       return "cmis:checkedout:" + getRepositoryId(request);
    }
@@ -261,7 +239,9 @@ public class CheckedOutCollection extends CmisObjectCollection
       finally
       {
          if (conn != null)
+         {
             conn.close();
+         }
       }
    }
 

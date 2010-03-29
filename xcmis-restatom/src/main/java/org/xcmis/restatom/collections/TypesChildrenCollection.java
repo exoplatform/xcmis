@@ -28,7 +28,6 @@ import org.apache.abdera.protocol.server.TargetType;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
-import org.xcmis.spi.CMIS;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.StorageException;
@@ -64,34 +63,9 @@ public class TypesChildrenCollection extends CmisTypeCollection
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
       String typeId = request.getTarget().getParameter(AtomCMIS.PARAM_TYPE_ID);
-      boolean includePropertyDefinitions =
-         Boolean.parseBoolean(request.getParameter(AtomCMIS.PARAM_INCLUDE_PROPERTY_DEFINITIONS));
-      int maxItems;
-      try
-      {
-         maxItems =
-            request.getParameter(AtomCMIS.PARAM_MAX_ITEMS) == null
-               || request.getParameter(AtomCMIS.PARAM_MAX_ITEMS).length() == 0 ? CMIS.MAX_ITEMS : Integer
-               .parseInt(request.getParameter(AtomCMIS.PARAM_MAX_ITEMS));
-      }
-      catch (NumberFormatException nfe)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_MAX_ITEMS);
-         throw new ResponseContextException(msg, 400);
-      }
-      int skipCount;
-      try
-      {
-         skipCount =
-            request.getParameter(AtomCMIS.PARAM_SKIP_COUNT) == null
-               || request.getParameter(AtomCMIS.PARAM_SKIP_COUNT).length() == 0 ? 0 : Integer.parseInt(request
-               .getParameter(AtomCMIS.PARAM_SKIP_COUNT));
-      }
-      catch (NumberFormatException nfe)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_SKIP_COUNT);
-         throw new ResponseContextException(msg, 400);
-      }
+      boolean includePropertyDefinitions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PROPERTY_DEFINITIONS);
+      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS);
+      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT);
       Connection conn = null;
       try
       {
@@ -133,7 +107,9 @@ public class TypesChildrenCollection extends CmisTypeCollection
       finally
       {
          if (conn != null)
+         {
             conn.close();
+         }
       }
    }
 
