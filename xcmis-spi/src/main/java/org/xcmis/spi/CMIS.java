@@ -121,4 +121,8 @@ public interface CMIS
 
    String ALLOWED_CHILD_OBJECT_TYPE_IDS = "cmis:allowedChildObjectTypeIds";
 
+   Integer SKIP_COUNT = Integer.valueOf(0);
+
+   Integer DEPTH = Integer.valueOf(1);
+
 }

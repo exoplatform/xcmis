@@ -836,7 +836,7 @@ public abstract class BaseConnection implements Connection
       // Validate change token, object may be already updated.
       validateChangeToken(document, changeTokenHolder.getValue());
 
-      ((Document)document).setContentStream(null);
+      ((Document)document).setContentStream(content);
 
       //      document.save();
       storage.saveObject(document);
