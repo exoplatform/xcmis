@@ -342,11 +342,12 @@ public class JcrTypeHelper
       // Known described in spec. property definitions
       //      for (PropertyDefinition<?> propDef : PropertyDefinitionsMap.getAll(typeDefinition.getBaseId().value()))
       //         typeDefinition.getPropertyDefinitions().add(propDef);
-      ((TypeDefinitionImpl)typeDefinition).setPropertyDefinitions(PropertyDefinitions._getAll(typeDefinition
-         .getBaseId().value()));
+
+      Map<String, PropertyDefinition<?>> pd =
+         new HashMap<String, PropertyDefinition<?>>(PropertyDefinitions._getAll(typeDefinition.getBaseId().value()));
 
       Set<String> knownIds = PropertyDefinitions.getPropertyIds(typeDefinition.getBaseId().value());
-      Map<String, PropertyDefinition<?>> pd = new HashMap<String, PropertyDefinition<?>>();
+
       for (javax.jcr.nodetype.PropertyDefinition jcrPropertyDef : nt.getPropertyDefinitions())
       {
          String pdName = jcrPropertyDef.getName();
