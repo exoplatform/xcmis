@@ -6,16 +6,12 @@
 			<supertype>exo:owneable</supertype>
 		</supertypes>
 		<propertyDefinitions>
-			<propertyDefinition name="cmis:name" requiredType="String" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
+			<propertyDefinition name="cmis:name" requiredType="String" autoCreated="false" mandatory="false" onParentVersion="IGNORE" protected="false" multiple="false">
 			</propertyDefinition>
-			<!-- TODO : onParentVersion is IGNORE to avoid duplicate object IDs via JCR versioning.
-         Need have this property protected and not changeable via JCR API -->
 			<propertyDefinition name="cmis:objectId" requiredType="String" autoCreated="false" mandatory="false" onParentVersion="IGNORE" protected="false" multiple="false">
 			</propertyDefinition>
-			<!-- TODO : Need have this property protected and not changeable via JCR API -->
 			<propertyDefinition name="cmis:objectTypeId" requiredType="String" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
 			</propertyDefinition>
-			<!-- TODO : Need have this property protected and not changeable via JCR API -->
 			<propertyDefinition name="cmis:baseTypeId" requiredType="String" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
 			</propertyDefinition>
 			<propertyDefinition name="cmis:createdBy" requiredType="String" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
@@ -53,7 +49,6 @@
 			</propertyDefinition>
 			<propertyDefinition name="cmis:contentStreamId" requiredType="String" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
 			</propertyDefinition>
-			<!-- TODO : Need have this property protected and not changeable via JCR API -->
 			<propertyDefinition name="cmis:versionSeriesId" requiredType="String" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
 			</propertyDefinition>
 			<propertyDefinition name="cmis:isLatestVersion" requiredType="Boolean" autoCreated="true" mandatory="false" onParentVersion="INITIALIZE" protected="false" multiple="false">
@@ -83,17 +78,10 @@
 		<childNodeDefinitions>
 			<childNodeDefinition name="*" defaultPrimaryType="" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" sameNameSiblings="false">
 				<requiredPrimaryTypes>
-					<requiredPrimaryType>cmis:rendition</requiredPrimaryType>
+					<requiredPrimaryType>xcmis:rendition</requiredPrimaryType>
 				</requiredPrimaryTypes>
 			</childNodeDefinition>
 		</childNodeDefinitions>
-	</nodeType>
-
-	<nodeType name="cmis:pwc" isMixin="true" hasOrderableChildNodes="false" primaryItemName="">
-		<propertyDefinitions>
-			<propertyDefinition name="xcmis:latestVersion" requiredType="Reference" autoCreated="false" mandatory="true" onParentVersion="COPY" protected="false" multiple="false">
-			</propertyDefinition>
-		</propertyDefinitions>
 	</nodeType>
 
 	<nodeType name="cmis:folder" isMixin="true" hasOrderableChildNodes="false" primaryItemName="">
@@ -105,7 +93,7 @@
 			</propertyDefinition>
 			<propertyDefinition name="cmis:allowedChildObjectTypeIds" requiredType="String" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" multiple="true">
 			</propertyDefinition>
-			<propertyDefinition name="cmis:path" requiredType="String" autoCreated="false" mandatory="false" onParentVersion="IGNORE" protected="false" multiple="false">
+			<propertyDefinition name="cmis:path" requiredType="String" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
 			</propertyDefinition>
 		</propertyDefinitions>
 		<childNodeDefinitions>
@@ -115,19 +103,6 @@
 				</requiredPrimaryTypes>
 			</childNodeDefinition>
 		</childNodeDefinitions>
-	</nodeType>
-
-	<nodeType name="cmis:relationship" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
-		<supertypes>
-			<supertype>nt:hierarchyNode</supertype>
-			<supertype>cmis:object</supertype>
-		</supertypes>
-		<propertyDefinitions>
-			<propertyDefinition name="cmis:targetId" requiredType="Reference" autoCreated="false" mandatory="true" onParentVersion="COPY" protected="false" multiple="false">
-			</propertyDefinition>
-			<propertyDefinition name="cmis:sourceId" requiredType="Reference" autoCreated="false" mandatory="true" onParentVersion="COPY" protected="false" multiple="false">
-			</propertyDefinition>
-		</propertyDefinitions>
 	</nodeType>
 
 	<nodeType name="cmis:policy" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
@@ -141,7 +116,22 @@
 		</propertyDefinitions>
 	</nodeType>
 
-	<nodeType name="cmis:rendition" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
+   <nodeType name="cmis:relationship" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
+      <supertypes>
+         <supertype>nt:hierarchyNode</supertype>
+         <supertype>cmis:object</supertype>
+      </supertypes>
+      <propertyDefinitions>
+         <propertyDefinition name="cmis:targetId" requiredType="Reference" autoCreated="false" mandatory="true" onParentVersion="COPY" protected="false" multiple="false">
+         </propertyDefinition>
+         <propertyDefinition name="cmis:sourceId" requiredType="Reference" autoCreated="false" mandatory="true" onParentVersion="COPY" protected="false" multiple="false">
+         </propertyDefinition>
+      </propertyDefinitions>
+   </nodeType>
+
+   <!--  ======================  -->
+
+	<nodeType name="xcmis:rendition" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
 		<supertypes>
 			<supertype>nt:base</supertype>
 		</supertypes>
@@ -164,24 +154,82 @@
 		</propertyDefinitions>
 	</nodeType>
 
+   <nodeType name="xcmis:relationships" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
+      <supertypes>
+         <supertype>nt:base</supertype>
+      </supertypes>
+      <childNodeDefinitions>
+         <childNodeDefinition name="*" defaultPrimaryType="" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" sameNameSiblings="false">
+            <requiredPrimaryTypes>
+               <requiredPrimaryType>cmis:relationship</requiredPrimaryType>
+            </requiredPrimaryTypes>
+         </childNodeDefinition>
+      </childNodeDefinitions>
+   </nodeType>
+
+   <nodeType name="xcmis:policies" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
+      <supertypes>
+         <supertype>nt:base</supertype>
+      </supertypes>
+      <childNodeDefinitions>
+         <childNodeDefinition name="*" defaultPrimaryType="" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" sameNameSiblings="false">
+            <requiredPrimaryTypes>
+               <requiredPrimaryType>cmis:policy</requiredPrimaryType>
+            </requiredPrimaryTypes>
+         </childNodeDefinition>
+      </childNodeDefinitions>
+   </nodeType>
+
+   <nodeType name="xcmis:workingCopy" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
+      <supertypes>
+         <supertype>nt:base</supertype>
+      </supertypes>
+      <childNodeDefinitions>
+         <childNodeDefinition name="*" defaultPrimaryType="" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" sameNameSiblings="false">
+            <requiredPrimaryTypes>
+               <requiredPrimaryType>nt:file</requiredPrimaryType>
+            </requiredPrimaryTypes>
+         </childNodeDefinition>
+      </childNodeDefinitions>
+   </nodeType>
+
 	<nodeType name="xcmis:workingCopies" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
 		<supertypes>
 			<supertype>nt:base</supertype>
 		</supertypes>
 		<childNodeDefinitions>
-			<childNodeDefinition name="*" defaultPrimaryType="" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" sameNameSiblings="true">
+			<childNodeDefinition name="*" defaultPrimaryType="" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" sameNameSiblings="false">
 				<requiredPrimaryTypes>
-					<requiredPrimaryType>nt:file</requiredPrimaryType>
+					<requiredPrimaryType>xcmis:workingCopy</requiredPrimaryType>
 				</requiredPrimaryTypes>
 			</childNodeDefinition>
 		</childNodeDefinitions>
 	</nodeType>
 
-	<nodeType name="xcmis:sharedObject" isMixin="true" hasOrderableChildNodes="false" primaryItemName="">
-		<propertyDefinitions>
-			<propertyDefinition name="xcmis:parents" requiredType="Reference" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" multiple="true">
-			</propertyDefinition>
-		</propertyDefinitions>
+   <nodeType name="xcmis:unfiled" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
+      <supertypes>
+         <supertype>nt:base</supertype>
+      </supertypes>
+      <childNodeDefinitions>
+         <childNodeDefinition name="*" defaultPrimaryType="" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" sameNameSiblings="false">
+            <requiredPrimaryTypes>
+               <requiredPrimaryType>xcmis:unfiledObject</requiredPrimaryType>
+            </requiredPrimaryTypes>
+         </childNodeDefinition>
+      </childNodeDefinitions>
+   </nodeType>
+
+	<nodeType name="xcmis:unfiledObject" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
+      <supertypes>
+         <supertype>nt:base</supertype>
+      </supertypes>
+      <childNodeDefinitions>
+         <childNodeDefinition name="*" defaultPrimaryType="" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" sameNameSiblings="false">
+            <requiredPrimaryTypes>
+               <requiredPrimaryType>nt:file</requiredPrimaryType>
+            </requiredPrimaryTypes>
+         </childNodeDefinition>
+      </childNodeDefinitions>
 	</nodeType>
 
 	<nodeType name="xcmis:system" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
@@ -189,11 +237,12 @@
 			<supertype>nt:base</supertype>
 		</supertypes>
 		<childNodeDefinitions>
-			<childNodeDefinition name="*" defaultPrimaryType="nt:unstructured" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" sameNameSiblings="false">
+			<childNodeDefinition name="*" defaultPrimaryType="" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" sameNameSiblings="false">
 				<requiredPrimaryTypes>
 					<requiredPrimaryType>nt:base</requiredPrimaryType>
 				</requiredPrimaryTypes>
 			</childNodeDefinition>
 		</childNodeDefinitions>
 	</nodeType>
+	
 </nodeTypes>

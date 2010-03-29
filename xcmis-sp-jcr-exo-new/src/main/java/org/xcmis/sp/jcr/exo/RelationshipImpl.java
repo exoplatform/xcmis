@@ -52,7 +52,7 @@ class RelationshipImpl extends BaseObjectData implements Relationship
 
    /**
     * New unsaved instance of relationship.
-    * 
+    *
     * @param type type definition
     * @param source source of relationship
     * @param target target of relationship
@@ -68,7 +68,7 @@ class RelationshipImpl extends BaseObjectData implements Relationship
 
    /**
     * Create already saved instance of relationship.
-    * 
+    *
     * @param type type definition
     * @param node back-end JCR node
     * @see StorageImpl#getObject(String)
@@ -79,17 +79,27 @@ class RelationshipImpl extends BaseObjectData implements Relationship
       super(type, node);
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public String getSourceId()
    {
       if (isNew())
+      {
          return source.getObjectId();
+      }
       return getString(CMIS.SOURCE_ID);
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public String getTargetId()
    {
       if (isNew())
+      {
          return target.getObjectId();
+      }
       return getString(CMIS.TARGET_ID);
    }
 
@@ -127,20 +137,19 @@ class RelationshipImpl extends BaseObjectData implements Relationship
       try
       {
          if (name == null || name.length() == 0)
+         {
             throw new NameConstraintViolationException("Name for new relationship must be provided.");
+         }
 
-         String sourceId = source.getObjectId();
+         Node relationships =
+            (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_RELATIONSHIPS);
 
-         Node relationshipStore = (Node)session.getItem("/" + JcrCMIS.CMIS_SYSTEM + "/" + JcrCMIS.CMIS_RELATIONSHIPS);
+         if (relationships.hasNode(name))
+         {
+            throw new NameConstraintViolationException("Relationship with name " + name + " already exists.");
+         }
 
-         Node containerNode = relationshipStore.hasNode(sourceId) //
-            ? relationshipStore.getNode(sourceId) //
-            : relationshipStore.addNode(sourceId, JcrCMIS.NT_UNSTRUCTURED);
-
-         if (containerNode.hasNode(name))
-            throw new NameConstraintViolationException("Object with name " + name + " already exists.");
-
-         Node relationship = containerNode.addNode(name, type.getLocalName());
+         Node relationship = relationships.addNode(name, type.getLocalName());
 
          relationship.setProperty(CMIS.OBJECT_TYPE_ID, //
             type.getId());
@@ -160,18 +169,24 @@ class RelationshipImpl extends BaseObjectData implements Relationship
             ((BaseObjectData)target).getNode());
 
          for (Property<?> property : properties.values())
+         {
             setProperty(relationship, property);
+         }
 
          if (policies != null && policies.size() > 0)
          {
             for (Policy policy : policies)
+            {
                applyPolicy(relationship, policy);
+            }
          }
 
          if (acl != null && acl.size() > 0)
+         {
             setACL(relationship, acl);
+         }
 
-         relationshipStore.save();
+         relationships.save();
 
          name = null;
          policies = null;

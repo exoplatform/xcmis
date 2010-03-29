@@ -48,7 +48,7 @@ import java.util.List;
 /**
  * JCR implementation of {@link RepositoryInfo}. Assumes all CMIS repositories
  * have the same capabilities, permissions, etc.
- * 
+ *
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
@@ -63,7 +63,7 @@ public class RepositoryInfoImpl implements RepositoryInfo, RepositoryCapabilitie
    {
       List<PermissionMapping> pm = new ArrayList<PermissionMapping>(34);
 
-      pm.add(createMapping(PermissionMapping.CAN_GET_DESCENDENTS_FOLDER, // 
+      pm.add(createMapping(PermissionMapping.CAN_GET_DESCENDENTS_FOLDER, //
          BasicPermissions.CMIS_READ.value()));
 
       pm.add(createMapping(PermissionMapping.CAN_GET_CHILDREN_FOLDER, //
@@ -144,13 +144,13 @@ public class RepositoryInfoImpl implements RepositoryInfo, RepositoryCapabilitie
       pm.add(createMapping(PermissionMapping.CAN_GET_OBJECT_RELATIONSHIPS_OBJECT, //
          BasicPermissions.CMIS_READ.value()));
 
-      pm.add(createMapping(PermissionMapping.CAN_ADD_POLICY_OBJECT, // 
+      pm.add(createMapping(PermissionMapping.CAN_ADD_POLICY_OBJECT, //
          BasicPermissions.CMIS_WRITE.value()));
 
       pm.add(createMapping(PermissionMapping.CAN_ADD_POLICY_POLICY, //
          BasicPermissions.CMIS_READ.value()));
 
-      pm.add(createMapping(PermissionMapping.CAN_REMOVE_POLICY_OBJECT, // 
+      pm.add(createMapping(PermissionMapping.CAN_REMOVE_POLICY_OBJECT, //
          BasicPermissions.CMIS_WRITE.value()));
 
       pm.add(createMapping(PermissionMapping.CAN_REMOVE_POLICY_POLICY, //
@@ -169,7 +169,9 @@ public class RepositoryInfoImpl implements RepositoryInfo, RepositoryCapabilitie
 
       List<Permission> p = new ArrayList<Permission>(4);
       for (BasicPermissions b : BasicPermissions.values())
+      {
          p.add(new PermissionImpl(b.value(), ""));
+      }
 
       PERMISSIONS = Collections.unmodifiableList(p);
    }

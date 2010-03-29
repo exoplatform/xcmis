@@ -19,6 +19,7 @@
 
 package org.xcmis.sp.jcr.exo;
 
+import org.exoplatform.services.jcr.impl.core.NodeImpl;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.spi.BaseType;
@@ -35,9 +36,10 @@ import javax.jcr.NodeIterator;
 
 /**
  * Iterator over JCR NodeIterator. Iterator skips nodes unsupported by CMIS.
- * 
+ *
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: FolderChildrenIterator.java 426 2010-03-22 11:50:27Z andrew00x
+ *          $
  */
 class FolderChildrenIterator implements ItemsIterator<ObjectData>
 {
@@ -82,7 +84,9 @@ class FolderChildrenIterator implements ItemsIterator<ObjectData>
    public ObjectData next()
    {
       if (next == null)
+      {
          throw new NoSuchElementException();
+      }
       ObjectData n = next;
       fetchNext();
       return n;
@@ -113,7 +117,9 @@ class FolderChildrenIterator implements ItemsIterator<ObjectData>
       {
          fetchNext();
          if (next == null)
+         {
             throw new NoSuchElementException();
+         }
       }
    }
 
@@ -129,16 +135,30 @@ class FolderChildrenIterator implements ItemsIterator<ObjectData>
          try
          {
             if (skipItems.contains(node.getName()))
+            {
                continue;
+            }
+
+            if (!((NodeImpl)node).isValid())
+            {
+               continue; // TODO temporary
+            }
+
+            if (node.isNodeType("nt:linkedFile"))
+            {
+               node = node.getProperty("jcr:content").getNode();
+            }
 
             TypeDefinition type = JcrTypeHelper.getTypeDefinition(node.getPrimaryNodeType(), true);
 
             if (type.getBaseId() == BaseType.DOCUMENT)
+            {
                next = new DocumentImpl(type, node);
+            }
             else if (type.getBaseId() == BaseType.FOLDER)
+            {
                next = new FolderImpl(type, node);
-            else if (type.getBaseId() == BaseType.POLICY)
-               next = new PolicyImpl(type, node);
+            }
 
          }
          catch (NotSupportedNodeTypeException iae)

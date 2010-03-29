@@ -27,7 +27,6 @@ import org.xcmis.spi.PropertyType;
 import org.xcmis.spi.Updatability;
 import org.xcmis.spi.impl.PropertyDefinitionImpl;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +35,7 @@ import java.util.Set;
 
 /**
  * Mapping for known CMIS object properties.
- * 
+ *
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id$
  */
@@ -103,7 +102,8 @@ public final class PropertyDefinitions
 
             add(objectType.value(), createPropertyDefinition(CMIS.IS_MAJOR_VERSION, PropertyType.BOOLEAN,
                CMIS.IS_MAJOR_VERSION, CMIS.IS_MAJOR_VERSION, null, CMIS.IS_MAJOR_VERSION, false, false, false, false,
-               false, Updatability.WHENCHECKEDOUT, "TRUE if object represents major version of object.", null, null, null));
+               false, Updatability.WHENCHECKEDOUT, "TRUE if object represents major version of object.", null, null,
+               null));
 
             add(objectType.value(), createPropertyDefinition(CMIS.IS_LATEST_MAJOR_VERSION, PropertyType.BOOLEAN,
                CMIS.IS_LATEST_MAJOR_VERSION, CMIS.IS_LATEST_MAJOR_VERSION, null, CMIS.IS_LATEST_MAJOR_VERSION, false,
@@ -189,37 +189,39 @@ public final class PropertyDefinitions
       }
    }
 
-   /**
-    * Get all property definitions for <code>objectTypeId</code>.
-    * 
-    * @param objectTypeId object type id
-    * @return set of object property definitions
-    */
-   public static Collection<PropertyDefinition<?>> getAll(String objectTypeId)
-   {
-      Map<String, PropertyDefinition<?>> defs = all.get(objectTypeId);
-      if (defs == null)
-         return Collections.emptyList();
-      return Collections.unmodifiableCollection(defs.values());
-   }
+   //   /**
+   //    * Get all property definitions for <code>objectTypeId</code>.
+   //    *
+   //    * @param objectTypeId object type id
+   //    * @return set of object property definitions
+   //    */
+   //   public static Collection<PropertyDefinition<?>> getAll(String objectTypeId)
+   //   {
+   //      Map<String, PropertyDefinition<?>> defs = all.get(objectTypeId);
+   //      if (defs == null)
+   //         return Collections.emptyList();
+   //      return Collections.unmodifiableCollection(defs.values());
+   //   }
 
    /**
     * Get all property definitions for <code>objectTypeId</code>.
-    * 
+    *
     * @param objectTypeId object type id
     * @return set of object property definitions
     */
-   public static Map<String, PropertyDefinition<?>> _getAll(String objectTypeId)
+   public static Map<String, PropertyDefinition<?>> getAll(String objectTypeId)
    {
       Map<String, PropertyDefinition<?>> defs = all.get(objectTypeId);
       if (defs == null)
+      {
          return Collections.emptyMap();
+      }
       return Collections.unmodifiableMap(defs);
    }
 
    /**
     * Get all property IDs supported for <code>objectTypeId</code>.
-    * 
+    *
     * @param objectTypeId object type id
     * @return set of object property definition IDs.
     */
@@ -227,14 +229,16 @@ public final class PropertyDefinitions
    {
       Map<String, PropertyDefinition<?>> defs = all.get(objectTypeId);
       if (defs == null)
+      {
          return Collections.emptySet();
+      }
       return Collections.unmodifiableSet(defs.keySet());
    }
 
    /**
     * Get one property definition with <code>propDefId</code> for
     * <code>objectTypeId</code>.
-    * 
+    *
     * @param objectTypeId object type id
     * @param propDefId property definition id
     * @return property definition or null
@@ -243,12 +247,14 @@ public final class PropertyDefinitions
    {
       Map<String, PropertyDefinition<?>> defs = all.get(objectTypeId);
       if (defs == null)
+      {
          return null;
+      }
       return defs.get(propDefId);
    }
 
-   /////// 
-   
+   ///////
+
    private static void add(String typeId, PropertyDefinition<?> propDef)
    {
       Map<String, PropertyDefinition<?>> defs = all.get(typeId);

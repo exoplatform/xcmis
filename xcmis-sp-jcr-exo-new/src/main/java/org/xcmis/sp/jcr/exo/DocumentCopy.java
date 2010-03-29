@@ -68,13 +68,17 @@ class DocumentCopy extends DocumentImpl
          }
 
          if (name == null || name.length() == 0)
-            throw new NameConstraintViolationException("Name for new document must be provided.");
+         {
+            name = source.getName();
+         }
 
          Node parentNode = parent.getNode();
 
          if (parentNode.hasNode(name))
+         {
             throw new NameConstraintViolationException("Object with name " + name
                + " already exists in specified folder.");
+         }
 
          Node doc = parentNode.addNode(name, type.getLocalName());
 
@@ -88,15 +92,15 @@ class DocumentCopy extends DocumentImpl
          doc.setProperty(CMIS.BASE_TYPE_ID, //
             type.getBaseId().value());
          doc.setProperty(CMIS.CREATED_BY, //
-            parentNode.getSession().getUserID());
+            session.getUserID());
          doc.setProperty(CMIS.CREATION_DATE, //
             Calendar.getInstance());
          doc.setProperty(CMIS.LAST_MODIFIED_BY, //
-            parentNode.getSession().getUserID());
+            session.getUserID());
          doc.setProperty(CMIS.LAST_MODIFICATION_DATE, //
             Calendar.getInstance());
          doc.setProperty(CMIS.VERSION_SERIES_ID, //  
-            doc.getProperty("jcr:versionHistory").getString());
+            doc.getProperty(JcrCMIS.JCR_VERSION_HISTORY).getString());
          doc.setProperty(CMIS.IS_LATEST_VERSION, //
             true);
          doc.setProperty(CMIS.IS_MAJOR_VERSION, //
@@ -110,13 +114,15 @@ class DocumentCopy extends DocumentImpl
             doc.setProperty(CMIS.VERSION_SERIES_CHECKED_OUT_ID, //
                ((ExtendedNode)doc).getIdentifier());
             doc.setProperty(CMIS.VERSION_SERIES_CHECKED_OUT_BY, //
-               parentNode.getSession().getUserID());
+               session.getUserID());
          }
 
          // TODO : copy the other properties from source.
 
          for (Property<?> property : properties.values())
+         {
             setProperty(doc, property);
+         }
 
          try
          {
@@ -137,7 +143,7 @@ class DocumentCopy extends DocumentImpl
          if (acl != null && acl.size() > 0)
             setACL(doc, acl);
 
-         parentNode.save();
+         session.save();
 
          name = null;
          policies = null;

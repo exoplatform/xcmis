@@ -208,6 +208,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
          IndexListener indexListener = new IndexListener(storage, searchService);
          //TODO make this method public
          ((StorageImpl)storage).setIndexListener(indexListener);
+
          return new JcrConnection(storage);
 
       }
@@ -265,9 +266,9 @@ public class StorageProviderImpl implements StorageProvider, Startable
    }
 
    /**
-    * 
-    * @return instance of {@link SearchService}}
-    * @throws SearchServiceException 
+    *
+    * @return instance of {@link SearchService}
+    * @throws SearchServiceException
     */
    private SearchService getSearchService(String id) throws SearchServiceException
    {
@@ -301,37 +302,54 @@ public class StorageProviderImpl implements StorageProvider, Startable
 
             Node root = session.getRootNode();
 
-            Node cmisSystem = root.hasNode(JcrCMIS.CMIS_SYSTEM) //
-               ? root.getNode(JcrCMIS.CMIS_SYSTEM) //
-               : root.addNode(JcrCMIS.CMIS_SYSTEM, JcrCMIS.CMIS_SYSTEM_NODETYPE);
+            Node xCmisSystem = session.itemExists(StorageImpl.XCMIS_SYSTEM_PATH) //
+               ? (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH) //
+               : root.addNode(StorageImpl.XCMIS_SYSTEM_PATH.substring(1), "xcmis:system");
 
-            if (!cmisSystem.hasNode(JcrCMIS.CMIS_RELATIONSHIPS))
+            if (!xCmisSystem.hasNode(StorageImpl.XCMIS_UNFILED))
             {
-               cmisSystem.addNode(JcrCMIS.CMIS_RELATIONSHIPS, JcrCMIS.NT_UNSTRUCTURED);
+               xCmisSystem.addNode(StorageImpl.XCMIS_UNFILED, "xcmis:unfiled");
                if (LOG.isDebugEnabled())
                {
-                  LOG.debug("CMIS relationships storage " + JcrCMIS.CMIS_RELATIONSHIPS + " created.");
+                  LOG.debug("CMIS unfiled storage " + StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_UNFILED
+                     + " created.");
                }
             }
 
-            // TODO
-            if (!cmisSystem.hasNode("xcmis:unfiled"))
+            if (!xCmisSystem.hasNode(StorageImpl.XCMIS_WORKING_COPIES))
             {
-               cmisSystem.addNode("xcmis:unfiled", JcrCMIS.NT_UNSTRUCTURED);
-            }
-
-            if (!cmisSystem.hasNode(JcrCMIS.CMIS_WORKING_COPIES))
-            {
-               cmisSystem.addNode(JcrCMIS.CMIS_WORKING_COPIES, JcrCMIS.NT_UNSTRUCTURED);
+               xCmisSystem.addNode(StorageImpl.XCMIS_WORKING_COPIES, "xcmis:workingCopies");
                if (LOG.isDebugEnabled())
                {
-                  LOG.debug("CMIS Working Copies storage " + JcrCMIS.CMIS_WORKING_COPIES + " created.");
+                  LOG.debug("CMIS Working Copies store " + StorageImpl.XCMIS_SYSTEM_PATH + "/"
+                     + StorageImpl.XCMIS_WORKING_COPIES + " created.");
+               }
+            }
+
+            if (!xCmisSystem.hasNode(StorageImpl.XCMIS_RELATIONSHIPS))
+            {
+               xCmisSystem.addNode(StorageImpl.XCMIS_RELATIONSHIPS, "xcmis:relationships");
+               if (LOG.isDebugEnabled())
+               {
+                  LOG.debug("CMIS relationship store " + StorageImpl.XCMIS_SYSTEM_PATH + "/"
+                     + StorageImpl.XCMIS_RELATIONSHIPS + " created.");
+               }
+            }
+
+            if (!xCmisSystem.hasNode(StorageImpl.XCMIS_POLICIES))
+            {
+               xCmisSystem.addNode(StorageImpl.XCMIS_POLICIES, "xcmis:policies");
+               if (LOG.isDebugEnabled())
+               {
+                  LOG.debug("CMIS policies store " + StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_POLICIES
+                     + " created.");
                }
             }
 
             session.save();
 
             Workspace workspace = session.getWorkspace();
+
             try
             {
                EventListenerIterator it = workspace.getObservationManager().getRegisteredEventListeners();
@@ -423,7 +441,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
 
    /**
     * Add the rendition provider.
-    * 
+    *
     * @param renditionProvider rendition provider to be added
     */
    private void addRenditionProvider(RenditionProvider renditionProvider)

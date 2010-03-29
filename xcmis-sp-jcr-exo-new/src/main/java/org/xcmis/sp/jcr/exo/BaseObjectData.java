@@ -102,6 +102,11 @@ abstract class BaseObjectData implements ObjectData
    protected final TypeDefinition type;
 
    /**
+    * JCR session.
+    */
+   protected final Session session;
+
+   /**
     * Temporary storage for object properties. For newly create object all
     * properties will be stored here before calling {@link #save()}.
     */
@@ -137,14 +142,9 @@ abstract class BaseObjectData implements ObjectData
    protected String name;
 
    /**
-    * JCR session.
-    */
-   protected Session session;
-
-   /**
     * Create new unsaved instance of CMIS object. This object should be saved,
     * {@link #save()}.
-    * 
+    *
     * @param type type definition for new object
     * @param parent parent folder
     * @param session JCR session
@@ -159,7 +159,7 @@ abstract class BaseObjectData implements ObjectData
 
    /**
     * Create new instance of persisted CMIS object.
-    * 
+    *
     * @param type object's type
     * @param node back-end JCR node
     */
@@ -167,6 +167,14 @@ abstract class BaseObjectData implements ObjectData
    {
       this.type = type;
       this.node = node;
+      try
+      {
+         this.session = node.getSession();
+      }
+      catch (RepositoryException re)
+      {
+         throw new CmisRuntimeException("Unexpected error. " + re.getMessage(), re);
+      }
    }
 
    /**
@@ -210,30 +218,10 @@ abstract class BaseObjectData implements ObjectData
          {
             applyPolicy(node, policy);
          }
-         catch (javax.jcr.RepositoryException re)
+         catch (RepositoryException re)
          {
             throw new CmisRuntimeException("Unable to apply policy. " + re.getMessage(), re);
          }
-      }
-   }
-
-   public void delete() throws StorageException
-   {
-      try
-      {
-         Node parent = node.getParent();
-         node.remove();
-         parent.save();
-      }
-      catch (javax.jcr.ReferentialIntegrityException rie)
-      {
-         throw new ConstraintException("Object can't be deleted cause to storage referential integrity. "
-            + "Probably this object is source or target at least one Relationship. "
-            + "Those Relationship should be delted before.");
-      }
-      catch (RepositoryException re)
-      {
-         throw new StorageException("Unable delete object. " + re.getMessage(), re);
       }
    }
 
@@ -390,9 +378,19 @@ abstract class BaseObjectData implements ObjectData
             throw new ConstraintException("Unable get parent of root folder.");
          }
 
-         Node parentNode = node.getParent();
-         TypeDefinition parentType = JcrTypeHelper.getTypeDefinition(parentNode.getPrimaryNodeType(), true);
-         return new FolderImpl(parentType, parentNode);
+         Collection<Folder> parents = getParents();
+         if (parents.size() > 1)
+         {
+            throw new ConstraintException("Object has more then one parent.");
+         }
+         else if (parents.size() == 0)
+         {
+            return null;
+         }
+         else
+         {
+            return parents.iterator().next();
+         }
       }
       catch (RepositoryException re)
       {
@@ -407,11 +405,13 @@ abstract class BaseObjectData implements ObjectData
    {
       if (isNew())
       {
-         Folder parent = getParent();
          if (parent != null)
          {
-            return Collections.singletonList(parent);
+            List<Folder> parents = new ArrayList<Folder>(1);
+            parents.add(parent);
+            return parents;
          }
+
          return Collections.emptyList();
       }
 
@@ -419,7 +419,7 @@ abstract class BaseObjectData implements ObjectData
       {
          if (node.getDepth() == 0)
          {
-            Collections.emptyList();
+            return Collections.emptyList();
          }
 
          Set<Folder> parents = new HashSet<Folder>();
@@ -432,8 +432,7 @@ abstract class BaseObjectData implements ObjectData
                parents.add(new FolderImpl(JcrTypeHelper.getTypeDefinition(parent.getPrimaryNodeType(), true), parent));
             }
          }
-
-         if (parents.size() == 0)
+         if (!node.getParent().isNodeType("xcmis:unfiledObject"))
          {
             Node parent = node.getParent();
             parents.add(new FolderImpl(JcrTypeHelper.getTypeDefinition(parent.getPrimaryNodeType(), true), parent));
@@ -631,58 +630,6 @@ abstract class BaseObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
-   public void save() throws StorageException, NameConstraintViolationException, UpdateConflictException
-   {
-      if (isNew())
-      {
-         create();
-      }
-      else
-      {
-         try
-         {
-            Node parentNode = node.getParent();
-
-            // New name was set. Need rename Document.
-            // See setName(String), setProperty(Node, Property<?>). 
-            if (name != null)
-            {
-               if (name.length() == 0)
-               {
-                  throw new NameConstraintViolationException("Name is empty.");
-               }
-
-               if (parentNode.hasNode(name))
-               {
-                  throw new NameConstraintViolationException("Object with name " + name + " already exists.");
-               }
-
-               String srcPath = node.getPath();
-               String destPath = srcPath.substring(0, srcPath.lastIndexOf('/') + 1) + name;
-
-               node.getSession().move(srcPath, destPath);
-            }
-
-            node.setProperty(CMIS.LAST_MODIFICATION_DATE,//
-               Calendar.getInstance());
-            node.setProperty(CMIS.LAST_MODIFIED_BY, //
-               node.getSession().getUserID());
-            node.setProperty(CMIS.CHANGE_TOKEN, //
-               IdGenerator.generate());
-
-            parentNode.save();
-         }
-         catch (RepositoryException re)
-         {
-            throw new StorageException("Unable save object. " + re.getMessage(), re);
-         }
-
-      }
-   }
-
-   /**
-    * {@inheritDoc}
-    */
    public void setACL(List<AccessControlEntry> aces) throws ConstraintException
    {
       if (!type.isControllableACL())
@@ -797,7 +744,15 @@ abstract class BaseObjectData implements ObjectData
             }
             else
             {
-               setProperty(node, property);
+               try
+               {
+                  setProperty(node, property);
+               }
+               catch (RepositoryException re)
+               {
+                  throw new CmisRuntimeException("Failed set or update property " + property.getId() + ". "
+                     + re.getMessage(), re);
+               }
             }
          }
       }
@@ -806,14 +761,14 @@ abstract class BaseObjectData implements ObjectData
          // Some clients may send all properties even need update only one.
          if (LOG.isDebugEnabled())
          {
-            LOG.debug("Property " + property.getId() + " not updatable at the moment.");
+            LOG.debug("Property " + property.getId() + " is not updatable.");
          }
       }
    }
 
    /**
     * Create permission map which can be passed to JCR node.
-    * 
+    *
     * @param source source ACL
     * @return permission map
     * @throws ConstraintException if at least permission is unknown
@@ -1002,7 +957,7 @@ abstract class BaseObjectData implements ObjectData
             cmisACE.setPrincipal(principal);
 
             Set<String> values = cache.get(principal);
-            // Represent JCR ACEs as CMIS ACEs. 
+            // Represent JCR ACEs as CMIS ACEs.
             if (values.size() == PermissionType.ALL.length)
             {
                cmisACE.getPermissions().add(BasicPermissions.CMIS_ALL.value());
@@ -1113,10 +1068,10 @@ abstract class BaseObjectData implements ObjectData
                   }
                }
 
-               // TODO : need more virtual properties ?? 
+               // TODO : need more virtual properties ??
 
                // Property is valid but not set in back-end.
-               // Return property in 'value not set' state. 
+               // Return property in 'value not set' state.
                return createProperty(definition, new Value[0]);
             }
          }
@@ -1136,7 +1091,16 @@ abstract class BaseObjectData implements ObjectData
       }
    }
 
+   /**
+    * Persist current newly created object.
+    *
+    * @throws StorageException if any storage error occurs
+    * @throws NameConstraintViolationException if object name is not allowed for
+    *         parent folder
+    */
    protected abstract void create() throws StorageException, NameConstraintViolationException;
+
+   // ------- helpers
 
    protected Boolean getBoolean(String id)
    {
@@ -1406,7 +1370,7 @@ abstract class BaseObjectData implements ObjectData
    }
 
    @SuppressWarnings("unchecked")
-   protected void setProperty(Node data, Property<?> property)
+   protected void setProperty(Node data, Property<?> property) throws RepositoryException
    {
       // Type and value should be already checked.
       // 1. Allowed property for this type.
@@ -1511,10 +1475,10 @@ abstract class BaseObjectData implements ObjectData
          /*
           * TODO : need to use different type, 'name' should be acceptable.
           * ID (at least) must not be mixed with STRING and other it is
-          * important property type. 
+          * important property type.
           */
          else if (property.getType() == PropertyType.HTML //
-            || property.getType() == PropertyType.ID //  
+            || property.getType() == PropertyType.ID //
             || property.getType() == PropertyType.STRING)
          {
             List<String> text = (List<String>)property.getValues();
@@ -1567,16 +1531,131 @@ abstract class BaseObjectData implements ObjectData
          throw new CmisRuntimeException("Failed set or update property " + property.getId() + ". " + io.getMessage(),
             io);
       }
+   }
+
+   // -----------------
+
+   void delete() throws StorageException
+   {
+      if (isNew())
+      {
+         // Not need to do anything.
+         return;
+      }
+
+      try
+      {
+         node.remove();
+         session.save();
+      }
+      catch (javax.jcr.ReferentialIntegrityException rie)
+      {
+         // TODO !!! check is really ONLY relationships is in references.
+         // Should raise StorageException if is not relationship reference.
+         throw new ConstraintException("Object can't be deleted cause to storage referential integrity. "
+            + "Probably this object is source or target at least one Relationship. "
+            + "Those Relationship should be delted before.");
+      }
       catch (RepositoryException re)
       {
-         throw new CmisRuntimeException("Failed set or update property " + property.getId() + ". " + re.getMessage(),
-            re);
+         throw new StorageException("Unable delete object. " + re.getMessage(), re);
       }
    }
 
    Node getNode()
    {
       return node;
+   }
+
+   void save() throws StorageException, NameConstraintViolationException, UpdateConflictException
+   {
+      if (isNew())
+      {
+         create();
+      }
+      else
+      {
+         try
+         {
+            Node parentNode = node.getParent();
+            // New name was set. Need rename Document.
+            // See setName(String), setProperty(Node, Property<?>).
+            if (name != null)
+            {
+               if (name.length() == 0)
+               {
+                  throw new NameConstraintViolationException("Name is empty.");
+               }
+
+               if (parentNode.hasNode(name))
+               {
+                  throw new NameConstraintViolationException("Object with name " + name + " already exists.");
+               }
+
+               String srcPath = node.getPath();
+               String destPath = srcPath.substring(0, srcPath.lastIndexOf('/') + 1) + name;
+
+               session.move(srcPath, destPath);
+
+               node = (Node)session.getItem(destPath);
+            }
+
+            node.setProperty(CMIS.LAST_MODIFICATION_DATE,//
+               Calendar.getInstance());
+            node.setProperty(CMIS.LAST_MODIFIED_BY, //
+               node.getSession().getUserID());
+            node.setProperty(CMIS.CHANGE_TOKEN, //
+               IdGenerator.generate());
+
+            session.save();
+         }
+         catch (RepositoryException re)
+         {
+            throw new StorageException("Unable save object. " + re.getMessage(), re);
+         }
+      }
+   }
+
+   void unfile()
+   {
+      if (isNew())
+      {
+         throw new UnsupportedOperationException("Not supported for newly created objects.");
+      }
+
+      try
+      {
+         if (node.getParent().isNodeType("xcmis:unfiledObject"))
+         {
+            // Object is already in unfiled store.
+            return;
+         }
+
+         // Remove all links.
+         for (PropertyIterator iterator = node.getReferences(); iterator.hasNext();)
+         {
+            Node link = iterator.nextProperty().getParent();
+
+            if (link.isNodeType("nt:linkedFile"))
+            {
+               link.remove();
+            }
+         }
+
+         Node unfiledStore =
+            (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_UNFILED);
+         Node unfiled = unfiledStore.addNode(getObjectId(), "xcmis:unfiledObject");
+
+         String destPath = unfiled.getPath() + "/" + node.getName();
+
+         session.move(node.getPath(), destPath);
+
+         session.save();
+      }
+      catch (RepositoryException re)
+      {
+         throw new CmisRuntimeException("Unexpected error. " + re.getMessage(), re);
+      }
    }
 
 }

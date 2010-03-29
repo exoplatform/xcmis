@@ -44,12 +44,12 @@ import javax.jcr.nodetype.NodeType;
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-public class JcrTypeHelper
+class JcrTypeHelper
 {
 
    /**
     * Get object type definition.
-    * 
+    *
     * @param nt JCR back-end node
     * @param includePropertyDefinition true if need include property definition
     *        false otherwise
@@ -85,7 +85,7 @@ public class JcrTypeHelper
 
    /**
     * Get CMIS object type id by the JCR node type name.
-    * 
+    *
     * @param ntName the JCR node type name
     * @return CMIS object type id
     */
@@ -104,7 +104,7 @@ public class JcrTypeHelper
 
    /**
     * Get JCR node type name by the CMIS object type id.
-    * 
+    *
     * @param typeId the CMIS base object type id
     * @return JCR string node type
     */
@@ -123,7 +123,7 @@ public class JcrTypeHelper
 
    /**
     * Document type definition.
-    * 
+    *
     * @param nt node type
     * @param includePropertyDefinition true if need include property definition
     *        false otherwise
@@ -177,7 +177,7 @@ public class JcrTypeHelper
 
    /**
     * Folder type definition.
-    * 
+    *
     * @param nt node type
     * @param includePropertyDefinition true if need include property definition
     *        false otherwise
@@ -229,7 +229,7 @@ public class JcrTypeHelper
 
    /**
     * Get policy type definition.
-    * 
+    *
     * @param nt node type
     * @param includePropertyDefinition true if need include property definition
     *        false otherwise
@@ -246,7 +246,7 @@ public class JcrTypeHelper
       def.setCreatable(true);
       def.setDescription("Cmis Policy Type");
       def.setDisplayName(typeId);
-      def.setFileable(true);
+      def.setFileable(false);
       def.setFulltextIndexed(false);
       def.setId(typeId);
       def.setIncludedInSupertypeQuery(true);
@@ -281,7 +281,7 @@ public class JcrTypeHelper
 
    /**
     * Get relationship type definition.
-    * 
+    *
     * @param nt node type
     * @param includePropertyDefinition true if need include property definition
     *        false otherwise
@@ -333,7 +333,7 @@ public class JcrTypeHelper
 
    /**
     * Add property definitions.
-    * 
+    *
     * @param typeDefinition the object type definition
     * @param nt the JCR node type.
     */
@@ -344,7 +344,7 @@ public class JcrTypeHelper
       //         typeDefinition.getPropertyDefinitions().add(propDef);
 
       Map<String, PropertyDefinition<?>> pd =
-         new HashMap<String, PropertyDefinition<?>>(PropertyDefinitions._getAll(typeDefinition.getBaseId().value()));
+         new HashMap<String, PropertyDefinition<?>>(PropertyDefinitions.getAll(typeDefinition.getBaseId().value()));
 
       Set<String> knownIds = PropertyDefinitions.getPropertyIds(typeDefinition.getBaseId().value());
 

@@ -19,6 +19,7 @@
 
 package org.xcmis.sp.jcr.exo;
 
+import org.exoplatform.services.jcr.core.ExtendedNode;
 import org.exoplatform.services.jcr.core.ExtendedSession;
 import org.exoplatform.services.jcr.core.nodetype.ExtendedNodeTypeManager;
 import org.exoplatform.services.jcr.core.nodetype.NodeTypeValue;
@@ -58,7 +59,6 @@ import org.xcmis.spi.data.Policy;
 import org.xcmis.spi.data.Relationship;
 import org.xcmis.spi.impl.AllowableActionsImpl;
 import org.xcmis.spi.impl.BaseItemsIterator;
-import org.xcmis.spi.impl.CmisVisitor;
 import org.xcmis.spi.object.RenditionManager;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
@@ -68,12 +68,17 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.jcr.Item;
 import javax.jcr.ItemExistsException;
 import javax.jcr.ItemNotFoundException;
+import javax.jcr.ItemVisitor;
 import javax.jcr.Node;
+import javax.jcr.NodeIterator;
+import javax.jcr.PropertyIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.nodetype.NoSuchNodeTypeException;
@@ -89,6 +94,16 @@ public class StorageImpl implements Storage
 {
 
    private static final Log LOG = ExoLogger.getLogger(StorageImpl.class);
+
+   public static final String XCMIS_SYSTEM_PATH = "/xcmis:system";
+
+   public static final String XCMIS_UNFILED = "xcmis:unfileStore";
+
+   public static final String XCMIS_WORKING_COPIES = "xcmis:workingCopyStore";
+
+   public static final String XCMIS_RELATIONSHIPS = "xcmis:relationshipStore";
+
+   public static final String XCMIS_POLICIES = "xcmis:policiesStore";
 
    static String latestLabel = "latest";
 
@@ -130,6 +145,15 @@ public class StorageImpl implements Storage
    public void setIndexListener(IndexListener indexListener)
    {
       this.indexListener = indexListener;
+   }
+
+   public StorageImpl(Session session, IndexListener indexListener, StorageConfiguration configuration,
+      RenditionManagerImpl renditionManager)
+   {
+      this.session = session;
+      this.indexListener = indexListener;
+      this.configuration = configuration;
+      this.renditionManager = renditionManager;
    }
 
    /**
@@ -423,21 +447,17 @@ public class StorageImpl implements Storage
    public Document createDocument(Folder folder, String typeId, VersioningState versioningState)
       throws ConstraintException
    {
-      // TODO : remove when implement unfiling feature.
-      if (folder == null)
+      if (folder != null)
       {
-         throw new NotSupportedException("Unfiling capability is not supported.");
-      }
-
-      if (folder.isNew())
-      {
-         throw new CmisRuntimeException("Unable create document in newly created folder.");
-      }
-
-      if (!folder.isAllowedChildType(typeId))
-      {
-         throw new ConstraintException("Type " + typeId + " is not in list of allowed child type for folder "
-            + folder.getObjectId());
+         if (folder.isNew())
+         {
+            throw new CmisRuntimeException("Unable create document in newly created folder.");
+         }
+         if (!folder.isAllowedChildType(typeId))
+         {
+            throw new ConstraintException("Type " + typeId + " is not in list of allowed child type for folder "
+               + folder.getObjectId());
+         }
       }
 
       TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
@@ -490,23 +510,6 @@ public class StorageImpl implements Storage
     */
    public Policy createPolicy(Folder folder, String typeId) throws ConstraintException
    {
-      // TODO : remove when implement unfiling feature.
-      if (folder == null)
-      {
-         throw new NotSupportedException("Unfiling capability is not supported.");
-      }
-
-      if (folder.isNew())
-      {
-         throw new CmisRuntimeException("Unable create policy in newly created folder.");
-      }
-
-      if (!folder.isAllowedChildType(typeId))
-      {
-         throw new ConstraintException("Type " + typeId + " is not in list of allowed child type for folder "
-            + folder.getObjectId());
-      }
-
       TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
 
       if (typeDefinition.getBaseId() != BaseType.POLICY)
@@ -514,7 +517,9 @@ public class StorageImpl implements Storage
          throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Policy.");
       }
 
-      Policy policy = new PolicyImpl(typeDefinition, folder, session);
+      // TODO : need raise exception if parent folder is provided ??
+      // Do not use parent folder, policy is not fileable.
+      Policy policy = new PolicyImpl(typeDefinition, null, session);
 
       return policy;
    }
@@ -555,7 +560,7 @@ public class StorageImpl implements Storage
    {
       if (object.getBaseType() == BaseType.DOCUMENT)
       {
-         // Throw exception to avoid unexpected removing data. 
+         // Throw exception to avoid unexpected removing data.
          // Any way at the moment we are not able remove 'base version' of
          // versionable node, so have not common behavior.
          if (object.getTypeDefinition().isVersionable() && !deleteAllVersions)
@@ -563,23 +568,11 @@ public class StorageImpl implements Storage
             throw new CmisRuntimeException("Unable delete only specified version.");
          }
       }
-      else if (object.getBaseType() == BaseType.FOLDER)
-      {
-         if (((Folder)object).isRoot())
-         {
-            throw new ConstraintException("Root folder can't be removed.");
-         }
-
-         if (((Folder)object).hasChildren())
-         {
-            throw new ConstraintException("Failed delete object. Object " + object
-               + " is Folder and contains one or more objects.");
-         }
-      }
 
       String objectId = object.getObjectId();
 
       ((BaseObjectData)object).delete();
+
       if (indexListener != null)
       {
          indexListener.removed(objectId);
@@ -592,58 +585,87 @@ public class StorageImpl implements Storage
    public Collection<String> deleteTree(Folder folder, boolean deleteAllVersions, UnfileObject unfileObject,
       boolean continueOnFailure) throws UpdateConflictException
    {
-      final List<String> failedToDelete = new ArrayList<String>();
-
       if (!deleteAllVersions)
       {
+         // Throw exception to avoid unexpected removing data.
+         // Any way at the moment we are not able remove 'base version' of
+         // versionable node, so have not common behavior.
          throw new CmisRuntimeException("Unable delete only specified version.");
       }
 
-      boolean successful = false;
-      String folderId = folder.getObjectId();
+      final List<String> failedToDelete = new ArrayList<String>();
+      DeleteTreeVisitor v = new DeleteTreeVisitor(folder.getPath(), unfileObject);
+
       try
       {
-         ((BaseObjectData)folder).delete();
-         successful = true;
-      }
-      catch (/*StorageException*/Exception e)
-      {
-         // Objects in the folder tree that were not deleted.
-         // All or nothing should be removed in this implementation,
-         // so return list of all object's IDs in this tree.
+         v.visit(((FolderImpl)folder).getNode());
+
          if (LOG.isDebugEnabled())
          {
-            LOG.warn(e.getMessage(), e);
+            LOG.debug("<DELETE LINKS>");
+         }
+         for (String id : v.getDeleteLinks())
+         {
+            if (LOG.isDebugEnabled())
+            {
+               LOG.debug("Delete link " + id);
+            }
+            ((ExtendedSession)session).getNodeByIdentifier(id).remove();
          }
 
-         try
+         if (LOG.isDebugEnabled())
          {
-            // Discard all changes in session.
-            session.refresh(false);
+            LOG.debug("<MOVE>");
          }
-         catch (RepositoryException re)
+         for (Map.Entry<String, String> e : v.getMoveMapping().entrySet())
          {
-            throw new CmisRuntimeException(re.getMessage(), re);
-         }
-         folder.accept(new CmisVisitor()
-         {
-            public void visit(ObjectData object)
+            String scrPath = e.getKey();
+            String destPath = e.getValue();
+
+            if (destPath == null)
             {
-               if (object.getBaseType() == BaseType.FOLDER)
-               {
-                  for (ItemsIterator<ObjectData> children = ((Folder)object).getChildren(null); children.hasNext();)
-                  {
-                     children.next().accept(this);
-                  }
-               }
-               failedToDelete.add(object.getObjectId());
+               // No found links outside of current tree, then will move node in
+               // special store for unfiled objects.
+               ExtendedNode unfiledStore = (ExtendedNode)session.getItem(XCMIS_SYSTEM_PATH + "/" + XCMIS_UNFILED);
+               ExtendedNode src = (ExtendedNode)session.getItem(scrPath);
+               Node unfiled = unfiledStore.addNode(src.getIdentifier(), "xcmis:unfiledObject");
+               destPath = unfiled.getPath() + "/" + src.getName();
             }
-         });
+            else
+            {
+               // Remove link, it will be replaced by real node.
+               session.getItem(destPath).remove();
+            }
+
+            if (LOG.isDebugEnabled())
+            {
+               LOG.debug("Move " + scrPath + " to " + destPath);
+            }
+            session.move(scrPath, destPath);
+         }
+
+         if (LOG.isDebugEnabled())
+         {
+            LOG.debug("<DELETE OBJECTS>");
+         }
+         for (String e : v.getDeleteObjects())
+         {
+            if (LOG.isDebugEnabled())
+            {
+               LOG.debug("Delete: " + e);
+            }
+            ((ExtendedSession)session).getNodeByIdentifier(e).remove();
+         }
+
+         session.save();
       }
-      if (successful)
+      catch (RepositoryException re)
       {
-         indexListener.removed(folderId);
+         // TODO : provide list of node deleted resources resources.
+         // If fact plain list of all items in current tree.
+         throw new CmisRuntimeException(re.getMessage(), re);
       }
+      // TODO : index listener
       return failedToDelete;
    }
 
@@ -891,6 +913,7 @@ public class StorageImpl implements Storage
       boolean isNew = object.isNew();
 
       ((BaseObjectData)object).save();
+
       if (indexListener != null)
       {
          if (isNew)
@@ -924,15 +947,17 @@ public class StorageImpl implements Storage
       }
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public void unfileObject(ObjectData object)
    {
-      // TODO Auto-generated method stub
-
+      ((BaseObjectData)object).unfile();
    }
 
    /**
     * Get the level of hierarchy.
-    * 
+    *
     * @param discovered the node type
     * @param match the name of the node type
     * @return hierarchical level for node type
@@ -953,11 +978,11 @@ public class StorageImpl implements Storage
 
    /**
     * Create String representation of date in format required by JCR.
-    * 
+    *
     * @param c Calendar
     * @return formated string date
     */
-   // TODO : Add in common utils ?? 
+   // TODO : Add in common utils ??
    protected String createJcrDate(Calendar c)
    {
       return String.format("%04d-%02d-%02dT%02d:%02d:%02d.%03dZ", c.get(Calendar.YEAR), c.get(Calendar.MONTH) + 1, c
@@ -969,6 +994,126 @@ public class StorageImpl implements Storage
    {
       NodeType nt = session.getWorkspace().getNodeTypeManager().getNodeType(name);
       return nt;
+   }
+
+   private static class DeleteTreeVisitor implements ItemVisitor
+   {
+
+      private final String treePath;
+
+      private final UnfileObject unfileObject;
+
+      private List<String> deleteObjects = new ArrayList<String>();
+
+      private List<String> deleteLinks = new ArrayList<String>();
+
+      private Map<String, String> moveMapping = new HashMap<String, String>();
+
+      public DeleteTreeVisitor(String path, UnfileObject unfileObject)
+      {
+         this.treePath = path;
+         this.unfileObject = unfileObject;
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public void visit(javax.jcr.Property property) throws RepositoryException
+      {
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public void visit(Node node) throws RepositoryException
+      {
+         NodeType nt = node.getPrimaryNodeType();
+         String uuid = ((ExtendedNode)node).getIdentifier();
+         String path = node.getPath();
+
+         if (nt.isNodeType(JcrCMIS.NT_FOLDER) || nt.isNodeType(JcrCMIS.NT_UNSTRUCTURED))
+         {
+            for (NodeIterator children = node.getNodes(); children.hasNext();)
+            {
+               children.nextNode().accept(this);
+            }
+            deleteObjects.add(uuid);
+         }
+
+         if (nt.isNodeType("nt:linkedFile"))
+         {
+            // Met link in tree. Simply remove all links in current tree.
+            if (!deleteLinks.contains(uuid))
+            {
+               deleteLinks.add(uuid);
+            }
+
+            // Check target of link only if need delete all fileable objects.
+            if (unfileObject == UnfileObject.DELETE)
+            {
+               Node doc = node.getProperty("jcr:content").getNode();
+               String targetPath = doc.getPath();
+               String targetUuid = ((ExtendedNode)doc).getIdentifier();
+               if (!targetPath.startsWith(treePath) && !deleteObjects.contains(targetUuid))
+               {
+                  deleteObjects.add(targetUuid);
+               }
+               // Otherwise will met target of link in tree.
+            }
+         }
+         else if (nt.isNodeType(JcrCMIS.NT_FILE))
+         {
+            String moveTo = null;
+
+            // Check all link to current node.
+            // Need to find at least one that is not in deleted tree. It can be
+            // used as destination for unfiling document which has parent-folders
+            // outside of the current folder tree. If no link out of current tree then
+            // document will be moved to special store for unfiled objects.
+            for (PropertyIterator references = node.getReferences(); references.hasNext();)
+            {
+               Node link = references.nextProperty().getParent();
+
+               String linkPath = link.getPath();
+               String linkUuid = ((ExtendedNode)link).getIdentifier();
+
+               if ((unfileObject == UnfileObject.DELETE || linkPath.startsWith(treePath))
+                  && !deleteLinks.contains(linkUuid))
+               {
+                  deleteLinks.add(linkUuid);
+               }
+               else if (!linkPath.startsWith(treePath) && moveTo == null)
+               {
+                  moveTo = linkPath;
+               }
+            }
+
+            if ((unfileObject == UnfileObject.UNFILE || (unfileObject == UnfileObject.DELETESINGLEFILED && moveTo != null)))
+            {
+               moveMapping.put(path, moveTo);
+            }
+            else if (!deleteObjects.contains(uuid))
+            {
+               deleteObjects.add(uuid);
+            }
+         }
+      }
+
+      public List<String> getDeleteObjects()
+      {
+         return deleteObjects;
+      }
+
+      public List<String> getDeleteLinks()
+      {
+         return deleteLinks;
+      }
+
+      public Map<String, String> getMoveMapping()
+      {
+         return moveMapping;
+      }
+
    }
 
 }

@@ -20,6 +20,7 @@
 package org.xcmis.sp.jcr.exo;
 
 import org.exoplatform.services.jcr.core.ExtendedNode;
+import org.exoplatform.services.jcr.util.IdGenerator;
 import org.xcmis.sp.jcr.exo.rendition.RenditionContentStream;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.CmisRuntimeException;
@@ -43,6 +44,7 @@ import java.util.Calendar;
 
 import javax.jcr.Node;
 import javax.jcr.PathNotFoundException;
+import javax.jcr.PropertyIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
@@ -126,8 +128,7 @@ class DocumentImpl extends BaseObjectData implements Document
          }
 
          return new BaseContentStream(contentNode.getProperty(JcrCMIS.JCR_DATA).getStream(), //
-            contentLength,//
-            getName(), //
+            contentLength, getName(), //
             contentNode.getProperty(JcrCMIS.JCR_MIMETYPE).getString());
       }
       catch (RepositoryException re)
@@ -286,6 +287,7 @@ class DocumentImpl extends BaseObjectData implements Document
    /**
     * {@inheritDoc}
     */
+   @Override
    protected void create() throws StorageException, NameConstraintViolationException
    {
       try
@@ -300,15 +302,26 @@ class DocumentImpl extends BaseObjectData implements Document
             throw new NameConstraintViolationException("Name for new document must be provided.");
          }
 
-         Node parentNode = parent.getNode();
-
-         if (parentNode.hasNode(name))
+         Node doc = null;
+         if (parent != null)
          {
-            throw new NameConstraintViolationException("Object with name " + name
-               + " already exists in specified folder.");
-         }
+            Node parentNode = parent.getNode();
 
-         Node doc = parentNode.addNode(name, type.getLocalName());
+            if (parentNode.hasNode(name))
+            {
+               throw new NameConstraintViolationException("Object with name " + name
+                  + " already exists in specified folder.");
+            }
+
+            doc = parentNode.addNode(name, type.getLocalName());
+         }
+         else
+         {
+            Node unfiledStore = (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_UNFILED);
+            // wrapper around Document node with unique name.
+            Node unfiled = unfiledStore.addNode(IdGenerator.generate(), "xcmis:unfiledObject");
+            doc = unfiled.addNode(name, type.getLocalName());
+         }
 
          if (!doc.isNodeType(JcrCMIS.CMIS_MIX_DOCUMENT))
          {
@@ -324,15 +337,15 @@ class DocumentImpl extends BaseObjectData implements Document
          doc.setProperty(CMIS.BASE_TYPE_ID, //
             type.getBaseId().value());
          doc.setProperty(CMIS.CREATED_BY, //
-            parentNode.getSession().getUserID());
+            session.getUserID());
          doc.setProperty(CMIS.CREATION_DATE, //
             Calendar.getInstance());
          doc.setProperty(CMIS.LAST_MODIFIED_BY, //
-            parentNode.getSession().getUserID());
+            session.getUserID());
          doc.setProperty(CMIS.LAST_MODIFICATION_DATE, //
             Calendar.getInstance());
-         doc.setProperty(CMIS.VERSION_SERIES_ID, //  
-            doc.getProperty("jcr:versionHistory").getString());
+         doc.setProperty(CMIS.VERSION_SERIES_ID, //
+            doc.getProperty(JcrCMIS.JCR_VERSION_HISTORY).getString());
          doc.setProperty(CMIS.IS_LATEST_VERSION, //
             true);
          doc.setProperty(CMIS.IS_MAJOR_VERSION, //
@@ -346,7 +359,7 @@ class DocumentImpl extends BaseObjectData implements Document
             doc.setProperty(CMIS.VERSION_SERIES_CHECKED_OUT_ID, //
                ((ExtendedNode)doc).getIdentifier());
             doc.setProperty(CMIS.VERSION_SERIES_CHECKED_OUT_BY, //
-               parentNode.getSession().getUserID());
+               session.getUserID());
          }
 
          for (Property<?> property : properties.values())
@@ -376,7 +389,7 @@ class DocumentImpl extends BaseObjectData implements Document
             setACL(doc, acl);
          }
 
-         parentNode.save();
+         session.save();
 
          name = null;
          policies = null;
@@ -420,7 +433,7 @@ class DocumentImpl extends BaseObjectData implements Document
 
    /**
     * Set new or remove (if <code>content == null</code>) content stream.
-    * 
+    *
     * @param data node to which content stream should be set
     * @param content content
     * @throws RepositoryException if any JCR repository error occurs
@@ -428,18 +441,16 @@ class DocumentImpl extends BaseObjectData implements Document
     */
    protected void setContentStream(Node data, ContentStream content) throws RepositoryException, IOException
    {
-      long contentLength = 0;
       // jcr:content
       Node contentNode =
          data.hasNode(JcrCMIS.JCR_CONTENT) ? data.getNode(JcrCMIS.JCR_CONTENT) : data.addNode(JcrCMIS.JCR_CONTENT,
             JcrCMIS.NT_RESOURCE);
 
-      // Assumes if there is no content then no mime-type, if any unknown
-      // content then should be 'application/octet-stream'
-      contentNode.setProperty(JcrCMIS.JCR_MIMETYPE, content == null ? "" : content.getMediaType());
+      contentNode.setProperty(JcrCMIS.JCR_MIMETYPE, //
+         content == null ? "" : content.getMediaType());
 
       // Re-count content length
-      contentLength = contentNode.setProperty(JcrCMIS.JCR_DATA, //
+      long contentLength = contentNode.setProperty(JcrCMIS.JCR_DATA, //
          content == null ? new ByteArrayInputStream(new byte[0]) : content.getStream()).getLength();
 
       contentNode.setProperty(JcrCMIS.JCR_LAST_MODIFIED, //
@@ -456,9 +467,34 @@ class DocumentImpl extends BaseObjectData implements Document
          contentLength);
       data.setProperty(CMIS.CONTENT_STREAM_MIME_TYPE, //
          content == null ? null : content.getMediaType());
-      // Do not provide file name if there is no content.
-      //      data.setProperty(CMIS.CONTENT_STREAM_FILE_NAME, //
-      //         content == null ? null : getName());
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   @Override
+   void delete() throws StorageException
+   {
+      try
+      {
+         // Check is Document node has any references.
+         // It minds Document is multfiled, need remove all links first.
+         for (PropertyIterator references = node.getReferences(); references.hasNext();)
+         {
+            Node next = references.nextProperty().getParent();
+            if (next.isNodeType("nt:linkedFile"))
+            {
+               next.remove();
+            }
+         }
+      }
+      catch (RepositoryException re)
+      {
+         throw new StorageException("Unable delete object. " + re.getMessage(), re);
+      }
+
+      // Common delete.
+      super.delete();
    }
 
 }

@@ -56,7 +56,8 @@ class PolicyImpl extends BaseObjectData implements Policy
    /**
     * {@inheritDoc}
     */
-   public void delete() throws StorageException
+   @Override
+   void delete() throws StorageException
    {
       try
       {
@@ -108,42 +109,51 @@ class PolicyImpl extends BaseObjectData implements Policy
       try
       {
          if (name == null || name.length() == 0)
+         {
             throw new NameConstraintViolationException("Name for new policy must be provided.");
+         }
 
-         Node parentNode = ((FolderImpl)parent).getNode();
+         Node policiesStore = (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_POLICIES);
 
-         if (parentNode.hasNode(name))
-            throw new NameConstraintViolationException("Object with name " + name
-               + " already exists in specified folder.");
+         if (policiesStore.hasNode(name))
+         {
+            throw new NameConstraintViolationException("Policy with name " + name + " already exists.");
+         }
 
-         Node newPolicy = parentNode.addNode(name, type.getLocalName());
+         Node newPolicy = policiesStore.addNode(name, type.getLocalName());
 
          newPolicy.setProperty(CMIS.OBJECT_TYPE_ID, //
             type.getId());
          newPolicy.setProperty(CMIS.BASE_TYPE_ID, //
             type.getBaseId().value());
          newPolicy.setProperty(CMIS.CREATED_BY, //
-            parentNode.getSession().getUserID());
+            session.getUserID());
          newPolicy.setProperty(CMIS.CREATION_DATE, //
             Calendar.getInstance());
          newPolicy.setProperty(CMIS.LAST_MODIFIED_BY, //
-            parentNode.getSession().getUserID());
+            session.getUserID());
          newPolicy.setProperty(CMIS.LAST_MODIFICATION_DATE, //
             Calendar.getInstance());
 
          for (Property<?> property : properties.values())
+         {
             setProperty(newPolicy, property);
+         }
 
          if (policies != null && policies.size() > 0)
          {
             for (Policy policy : policies)
+            {
                applyPolicy(newPolicy, policy);
+            }
          }
 
          if (acl != null && acl.size() > 0)
+         {
             setACL(newPolicy, acl);
+         }
 
-         parentNode.save();
+         session.save();
 
          name = null;
          policies = null;

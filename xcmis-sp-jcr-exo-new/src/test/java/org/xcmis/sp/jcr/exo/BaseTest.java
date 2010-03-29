@@ -41,6 +41,7 @@ import java.io.File;
 
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
+import javax.jcr.RepositoryException;
 
 public abstract class BaseTest extends TestCase
 {
@@ -75,6 +76,7 @@ public abstract class BaseTest extends TestCase
 
    private volatile static boolean shoutDown;
 
+   @Override
    public void setUp() throws Exception
    {
       if (!shoutDown)
@@ -107,12 +109,17 @@ public abstract class BaseTest extends TestCase
          (ThreadLocalSessionProviderService)container
             .getComponentInstanceOfType(ThreadLocalSessionProviderService.class);
       assertNotNull(sessionProviderService);
-      sessionProviderService.setSessionProvider(null, new SessionProvider(new ConversationState(new Identity("root"))));
+
+      ConversationState cs = new ConversationState(new Identity("root"));
+      ConversationState.setCurrent(cs);
+
+      sessionProviderService.setSessionProvider(null, new SessionProvider(cs));
 
       if (!shoutDown)
       {
          Runtime.getRuntime().addShutdownHook(new Thread()
          {
+            @Override
             public void run()
             {
                // database.close();
@@ -124,6 +131,7 @@ public abstract class BaseTest extends TestCase
       }
    }
 
+   @Override
    protected void tearDown() throws Exception
    {
 
@@ -132,18 +140,27 @@ public abstract class BaseTest extends TestCase
          session.refresh(false);
          Node rootNode = session.getRootNode();
          for (NodeIterator relationships =
-            rootNode.getNode(JcrCMIS.CMIS_SYSTEM + "/" + JcrCMIS.CMIS_RELATIONSHIPS).getNodes(); relationships
-            .hasNext();)
+            rootNode.getNode(StorageImpl.XCMIS_SYSTEM_PATH.substring(1) + "/" + StorageImpl.XCMIS_RELATIONSHIPS)
+               .getNodes(); relationships.hasNext();)
          {
             relationships.nextNode().remove();
          }
          session.save();
-         for (NodeIterator wc = rootNode.getNode(JcrCMIS.CMIS_SYSTEM + "/" + JcrCMIS.CMIS_WORKING_COPIES).getNodes(); wc
-            .hasNext();)
+         for (NodeIterator wc =
+            rootNode.getNode(StorageImpl.XCMIS_SYSTEM_PATH.substring(1) + "/" + StorageImpl.XCMIS_WORKING_COPIES)
+               .getNodes(); wc.hasNext();)
          {
             wc.nextNode().remove();
          }
+         for (NodeIterator unfiled =
+            rootNode.getNode(StorageImpl.XCMIS_SYSTEM_PATH.substring(1) + "/" + StorageImpl.XCMIS_UNFILED).getNodes(); unfiled
+            .hasNext();)
+         {
+            unfiled.nextNode().remove();
+         }
+
          session.save();
+
          if (rootNode.hasNodes())
          {
             // clean test root
@@ -153,7 +170,7 @@ public abstract class BaseTest extends TestCase
                if (!node.getPath().startsWith("/jcr:system") //
                   && !node.getPath().startsWith("/exo:audit") //
                   && !node.getPath().startsWith("/exo:organization") //
-                  && !node.getPath().equals("/" + JcrCMIS.CMIS_SYSTEM))
+                  && !node.getPath().equals(StorageImpl.XCMIS_SYSTEM_PATH))
                {
                   node.remove();
                }
@@ -173,10 +190,10 @@ public abstract class BaseTest extends TestCase
       super.tearDown();
    }
 
-   @SuppressWarnings("unchecked")
-   protected void setProperty(Document doc, String propertyName, String propertyValue)
+   protected void setProperty(Document doc, String propertyName, String propertyValue) throws RepositoryException
    {
       ((BaseObjectData)doc).setProperty(((BaseObjectData)doc).node, new StringProperty(propertyName, propertyName,
          propertyName, propertyName, propertyValue));
    }
+
 }
