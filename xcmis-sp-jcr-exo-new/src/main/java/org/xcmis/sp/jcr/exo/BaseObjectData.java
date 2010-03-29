@@ -175,7 +175,9 @@ abstract class BaseObjectData implements ObjectData
    public void accept(CmisVisitor visitor)
    {
       if (isNew())
+      {
          throw new UnsupportedOperationException("accept");
+      }
       visitor.visit(this);
    }
 
@@ -185,15 +187,21 @@ abstract class BaseObjectData implements ObjectData
    public void applyPolicy(Policy policy) throws ConstraintException
    {
       if (!type.isControllablePolicy())
+      {
          throw new ConstraintException("Type " + type.getId() + " is not controlable by Policy.");
+      }
 
       if (policy.isNew())
+      {
          throw new CmisRuntimeException("Unable apply newly created policy.");
+      }
 
       if (isNew())
       {
          if (policies == null)
+         {
             policies = new HashSet<Policy>();
+         }
          policies.add(policy);
       }
       else
@@ -235,12 +243,16 @@ abstract class BaseObjectData implements ObjectData
    public List<AccessControlEntry> getACL(boolean onlyBasicPermissions)
    {
       if (!type.isControllableACL())
+      {
          return Collections.emptyList();
+      }
 
       if (isNew())
       {
          if (acl == null)
+         {
             return Collections.emptyList();
+         }
          return Collections.unmodifiableList(acl);
       }
       try
@@ -267,7 +279,9 @@ abstract class BaseObjectData implements ObjectData
    public String getChangeToken()
    {
       if (isNew())
+      {
          return null;
+      }
       return getString(CMIS.CHANGE_TOKEN);
    }
 
@@ -277,7 +291,9 @@ abstract class BaseObjectData implements ObjectData
    public String getCreatedBy()
    {
       if (isNew())
+      {
          return null;
+      }
       return getString(CMIS.CREATED_BY);
    }
 
@@ -287,7 +303,9 @@ abstract class BaseObjectData implements ObjectData
    public Calendar getCreationDate()
    {
       if (isNew())
+      {
          return null;
+      }
       return getDate(CMIS.CREATION_DATE);
    }
 
@@ -297,7 +315,9 @@ abstract class BaseObjectData implements ObjectData
    public Calendar getLastModificationDate()
    {
       if (isNew())
+      {
          return null;
+      }
       return getDate(CMIS.LAST_MODIFICATION_DATE);
    }
 
@@ -307,7 +327,9 @@ abstract class BaseObjectData implements ObjectData
    public String getLastModifiedBy()
    {
       if (isNew())
+      {
          return null;
+      }
       return getString(CMIS.LAST_MODIFIED_BY);
    }
 
@@ -317,7 +339,9 @@ abstract class BaseObjectData implements ObjectData
    public String getName()
    {
       if (isNew() || name != null)
+      {
          return name;
+      }
 
       try
       {
@@ -335,7 +359,9 @@ abstract class BaseObjectData implements ObjectData
    public String getObjectId()
    {
       if (isNew())
+      {
          return null;
+      }
 
       try
       {
@@ -353,12 +379,16 @@ abstract class BaseObjectData implements ObjectData
    public Folder getParent() throws ConstraintException
    {
       if (isNew())
+      {
          return parent;
+      }
 
       try
       {
          if (node.getDepth() == 0)
+         {
             throw new ConstraintException("Unable get parent of root folder.");
+         }
 
          Node parentNode = node.getParent();
          TypeDefinition parentType = JcrTypeHelper.getTypeDefinition(parentNode.getPrimaryNodeType(), true);
@@ -379,14 +409,18 @@ abstract class BaseObjectData implements ObjectData
       {
          Folder parent = getParent();
          if (parent != null)
+         {
             return Collections.singletonList(parent);
+         }
          return Collections.emptyList();
       }
 
       try
       {
          if (node.getDepth() == 0)
+         {
             Collections.emptyList();
+         }
 
          Set<Folder> parents = new HashSet<Folder>();
          for (PropertyIterator iterator = node.getReferences(); iterator.hasNext();)
@@ -418,12 +452,16 @@ abstract class BaseObjectData implements ObjectData
    public Collection<Policy> getPolicies()
    {
       if (!type.isControllablePolicy())
+      {
          return Collections.emptyList();
+      }
 
       if (isNew())
       {
          if (policies == null)
+         {
             return Collections.emptySet();
+         }
          return Collections.unmodifiableSet(policies);
       }
 
@@ -445,7 +483,9 @@ abstract class BaseObjectData implements ObjectData
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
 
       for (PropertyDefinition<?> def : type.getPropertyDefinitions())
+      {
          properties.put(def.getId(), getProperty(def));
+      }
 
       return properties;
    }
@@ -457,7 +497,9 @@ abstract class BaseObjectData implements ObjectData
    {
       PropertyDefinition<?> def = type.getPropertyDefinition(id);
       if (def == null)
+      {
          return null; // TODO : need to throw exception ??
+      }
 
       return getProperty(def);
    }
@@ -468,8 +510,10 @@ abstract class BaseObjectData implements ObjectData
    public ItemsIterator<Relationship> getRelationships(RelationshipDirection direction, TypeDefinition type,
       boolean includeSubRelationshipTypes)
    {
-      if (isNew()) // No relationships for newly created object.
+      if (isNew())
+      {
          return CmisUtils.emptyItemsIterator();
+      }
 
       try
       {
@@ -499,7 +543,9 @@ abstract class BaseObjectData implements ObjectData
                      new RelationshipImpl(JcrTypeHelper.getTypeDefinition(nodeType, true), relNode);
                   boolean added = cache.add(relationship);
                   if (LOG.isDebugEnabled() && added)
+                  {
                      LOG.debug("Add relationship " + relationship.getName());
+                  }
                }
             }
          }
@@ -521,7 +567,9 @@ abstract class BaseObjectData implements ObjectData
       {
          String queryName = def.getQueryName();
          if (!filter.accept(queryName))
+         {
             continue;
+         }
          String id = def.getId();
          properties.put(id, getProperty(def));
       }
@@ -558,7 +606,9 @@ abstract class BaseObjectData implements ObjectData
    public void removePolicy(Policy policy) throws ConstraintException
    {
       if (!type.isControllablePolicy())
+      {
          throw new ConstraintException("Type " + type.getId() + " is not controlable by Policy.");
+      }
 
       if (isNew())
       {
@@ -598,10 +648,14 @@ abstract class BaseObjectData implements ObjectData
             if (name != null)
             {
                if (name.length() == 0)
+               {
                   throw new NameConstraintViolationException("Name is empty.");
+               }
 
                if (parentNode.hasNode(name))
+               {
                   throw new NameConstraintViolationException("Object with name " + name + " already exists.");
+               }
 
                String srcPath = node.getPath();
                String destPath = srcPath.substring(0, srcPath.lastIndexOf('/') + 1) + name;
@@ -632,17 +686,23 @@ abstract class BaseObjectData implements ObjectData
    public void setACL(List<AccessControlEntry> aces) throws ConstraintException
    {
       if (!type.isControllableACL())
+      {
          throw new ConstraintException("Type " + type.getId() + " is not controlable by ACL.");
+      }
 
       if (isNew())
       {
          if (this.acl != null)
+         {
             this.acl.clear(); // Not merged, just replaced.
+         }
 
          if (aces != null && aces.size() > 0)
          {
             if (this.acl == null)
+            {
                this.acl = new ArrayList<AccessControlEntry>();
+            }
             this.acl.addAll(aces);
          }
       }
@@ -688,22 +748,32 @@ abstract class BaseObjectData implements ObjectData
       PropertyDefinition<?> definition = type.getPropertyDefinition(property.getId());
 
       if (definition == null)
+      {
          throw new ConstraintException("Property " + property.getId() + " is not in property definitions list of type "
             + type.getId());
+      }
 
       if (property.getType() != definition.getPropertyType())
+      {
          throw new ConstraintException("Property type is not match.");
+      }
 
       if (!definition.isMultivalued() && property.getValues().size() > 1)
+      {
          throw new ConstraintException("Property " + property.getId() + " is not multi-valued.");
+      }
 
       if (definition.isRequired() && property.getValues().size() == 0)
+      {
          throw new ConstraintException("Required property " + property.getId() + " can't be removed.");
+      }
 
       for (Object v : property.getValues())
       {
          if (v == null)
+         {
             throw new ConstraintException("Null value not allowed. List must not contains null items.");
+         }
       }
 
       // TODO : validate min/max/length etc.
@@ -735,7 +805,9 @@ abstract class BaseObjectData implements ObjectData
       {
          // Some clients may send all properties even need update only one.
          if (LOG.isDebugEnabled())
+         {
             LOG.debug("Property " + property.getId() + " not updatable at the moment.");
+         }
       }
    }
 
@@ -788,7 +860,9 @@ abstract class BaseObjectData implements ObjectData
       Map<String, String[]> aces = new HashMap<String, String[]>();
 
       for (Map.Entry<String, Set<String>> e : cache.entrySet())
+      {
          aces.put(e.getKey(), e.getValue().toArray(new String[e.getValue().size()]));
+      }
 
       return aces;
    }
@@ -800,7 +874,9 @@ abstract class BaseObjectData implements ObjectData
          List<Boolean> v = new ArrayList<Boolean>(values.length);
 
          for (int i = 0; i < values.length; i++)
+         {
             v.add(values[i].getBoolean());
+         }
 
          return new BooleanProperty(def.getId(), def.getQueryName(), def.getLocalName(), def.getDisplayName(), v);
       }
@@ -809,7 +885,9 @@ abstract class BaseObjectData implements ObjectData
          List<Calendar> v = new ArrayList<Calendar>(values.length);
 
          for (int i = 0; i < values.length; i++)
+         {
             v.add(values[i].getDate());
+         }
 
          return new DateTimeProperty(def.getId(), def.getQueryName(), def.getLocalName(), def.getDisplayName(), v);
       }
@@ -818,7 +896,9 @@ abstract class BaseObjectData implements ObjectData
          List<BigDecimal> v = new ArrayList<BigDecimal>(values.length);
 
          for (int i = 0; i < values.length; i++)
+         {
             v.add(BigDecimal.valueOf(values[i].getDouble()));
+         }
 
          return new DecimalProperty(def.getId(), def.getQueryName(), def.getLocalName(), def.getDisplayName(), v);
       }
@@ -827,7 +907,9 @@ abstract class BaseObjectData implements ObjectData
          List<String> v = new ArrayList<String>(values.length);
 
          for (int i = 0; i < values.length; i++)
+         {
             v.add(values[i].getString());
+         }
 
          return new HtmlProperty(def.getId(), def.getQueryName(), def.getLocalName(), def.getDisplayName(), v);
       }
@@ -836,7 +918,9 @@ abstract class BaseObjectData implements ObjectData
          List<String> v = new ArrayList<String>(values.length);
 
          for (int i = 0; i < values.length; i++)
+         {
             v.add(values[i].getString());
+         }
 
          return new IdProperty(def.getId(), def.getQueryName(), def.getLocalName(), def.getDisplayName(), v);
       }
@@ -845,7 +929,9 @@ abstract class BaseObjectData implements ObjectData
          List<BigInteger> v = new ArrayList<BigInteger>(values.length);
 
          for (int i = 0; i < values.length; i++)
+         {
             v.add(BigInteger.valueOf(values[i].getLong()));
+         }
 
          return new IntegerProperty(def.getId(), def.getQueryName(), def.getLocalName(), def.getDisplayName(), v);
       }
@@ -854,7 +940,9 @@ abstract class BaseObjectData implements ObjectData
          List<String> v = new ArrayList<String>(values.length);
 
          for (int i = 0; i < values.length; i++)
+         {
             v.add(values[i].getString());
+         }
 
          return new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def.getDisplayName(), v);
       }
@@ -916,11 +1004,17 @@ abstract class BaseObjectData implements ObjectData
             Set<String> values = cache.get(principal);
             // Represent JCR ACEs as CMIS ACEs. 
             if (values.size() == PermissionType.ALL.length)
+            {
                cmisACE.getPermissions().add(BasicPermissions.CMIS_ALL.value());
+            }
             else if (values.contains(PermissionType.READ) && values.contains(PermissionType.ADD_NODE))
+            {
                cmisACE.getPermissions().add(BasicPermissions.CMIS_READ.value());
+            }
             else if (values.contains(PermissionType.SET_PROPERTY) && values.contains(PermissionType.REMOVE))
+            {
                cmisACE.getPermissions().add(BasicPermissions.CMIS_WRITE.value());
+            }
 
             cmisACL.add(cmisACE);
          }
@@ -950,7 +1044,9 @@ abstract class BaseObjectData implements ObjectData
                      policies.add(new PolicyImpl(JcrTypeHelper.getTypeDefinition(pol.getPrimaryNodeType(), true), pol));
 
                   if (LOG.isDebugEnabled() && added)
+                  {
                      LOG.debug("Add policy " + prop.getName());
+                  }
                }
             }
             catch (ValueFormatException ignored)
@@ -984,7 +1080,9 @@ abstract class BaseObjectData implements ObjectData
             catch (PathNotFoundException pnf)
             {
                if (LOG.isDebugEnabled())
+               {
                   LOG.debug("Property " + definition.getId() + " is not set.");
+               }
 
                if (definition.getId().equals(CMIS.OBJECT_ID))
                {
@@ -1001,7 +1099,7 @@ abstract class BaseObjectData implements ObjectData
                   return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
                      definition.getDisplayName(), node.getPath());
                }
-               else if (definition.getId().equals(CMIS.PARENT_ID))
+               else if (definition.getId().equals(CMIS.PARENT_ID) && node.getDepth() != 0)
                {
                   return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
                      definition.getDisplayName(), ((ExtendedNode)node.getParent()).getIdentifier());
@@ -1009,8 +1107,10 @@ abstract class BaseObjectData implements ObjectData
                else if (definition.getId().equals(CMIS.CONTENT_STREAM_FILE_NAME))
                {
                   if (((Document)this).hasContent())
+                  {
                      return new StringProperty(definition.getId(), definition.getQueryName(),
                         definition.getLocalName(), definition.getDisplayName(), getName());
+                  }
                }
 
                // TODO : need more virtual properties ?? 
@@ -1031,7 +1131,9 @@ abstract class BaseObjectData implements ObjectData
    {
       String policyId = policy.getObjectId();
       if (!data.hasProperty(policyId))
+      {
          data.setProperty(policyId, ((PolicyImpl)policy).getNode());
+      }
    }
 
    protected abstract void create() throws StorageException, NameConstraintViolationException;
@@ -1039,7 +1141,9 @@ abstract class BaseObjectData implements ObjectData
    protected Boolean getBoolean(String id)
    {
       if (isNew())
+      {
          throw new UnsupportedOperationException();
+      }
 
       try
       {
@@ -1059,14 +1163,18 @@ abstract class BaseObjectData implements ObjectData
    protected Boolean[] getBooleans(String id)
    {
       if (isNew())
+      {
          throw new UnsupportedOperationException();
+      }
 
       try
       {
          Value[] values = node.getProperty(id).getValues();
          Boolean[] res = new Boolean[values.length];
          for (int i = 0; i < values.length; i++)
+         {
             res[i] = values[i].getBoolean();
+         }
          return res;
       }
       catch (PathNotFoundException pe)
@@ -1083,7 +1191,9 @@ abstract class BaseObjectData implements ObjectData
    protected Calendar getDate(String id)
    {
       if (isNew())
+      {
          throw new UnsupportedOperationException();
+      }
 
       try
       {
@@ -1103,14 +1213,18 @@ abstract class BaseObjectData implements ObjectData
    protected Calendar[] getDates(String id)
    {
       if (isNew())
+      {
          throw new UnsupportedOperationException();
+      }
 
       try
       {
          Value[] values = node.getProperty(id).getValues();
          Calendar[] res = new Calendar[values.length];
          for (int i = 0; i < values.length; i++)
+         {
             res[i] = values[i].getDate();
+         }
          return res;
       }
       catch (PathNotFoundException pe)
@@ -1127,7 +1241,9 @@ abstract class BaseObjectData implements ObjectData
    protected Double getDouble(String id)
    {
       if (isNew())
+      {
          throw new UnsupportedOperationException();
+      }
 
       try
       {
@@ -1147,14 +1263,18 @@ abstract class BaseObjectData implements ObjectData
    protected Double[] getDoubles(String id)
    {
       if (isNew())
+      {
          throw new UnsupportedOperationException();
+      }
 
       try
       {
          Value[] values = node.getProperty(id).getValues();
          Double[] res = new Double[values.length];
          for (int i = 0; i < values.length; i++)
+         {
             res[i] = values[i].getDouble();
+         }
          return res;
       }
       catch (PathNotFoundException pe)
@@ -1171,7 +1291,9 @@ abstract class BaseObjectData implements ObjectData
    protected Long getLong(String id)
    {
       if (isNew())
+      {
          throw new UnsupportedOperationException();
+      }
 
       try
       {
@@ -1191,14 +1313,18 @@ abstract class BaseObjectData implements ObjectData
    protected Long[] getLongs(String id)
    {
       if (isNew())
+      {
          throw new UnsupportedOperationException();
+      }
 
       try
       {
          Value[] values = node.getProperty(id).getValues();
          Long[] res = new Long[values.length];
          for (int i = 0; i < values.length; i++)
+         {
             res[i] = values[i].getLong();
+         }
          return res;
       }
       catch (PathNotFoundException pe)
@@ -1215,7 +1341,9 @@ abstract class BaseObjectData implements ObjectData
    protected String getString(String id)
    {
       if (isNew())
+      {
          throw new UnsupportedOperationException();
+      }
 
       try
       {
@@ -1235,14 +1363,18 @@ abstract class BaseObjectData implements ObjectData
    protected String[] getStrings(String id)
    {
       if (isNew())
+      {
          throw new UnsupportedOperationException();
+      }
 
       try
       {
          Value[] values = node.getProperty(id).getValues();
          String[] res = new String[values.length];
          for (int i = 0; i < values.length; i++)
+         {
             res[i] = values[i].getString();
+         }
          return res;
       }
       catch (PathNotFoundException pe)
@@ -1259,14 +1391,18 @@ abstract class BaseObjectData implements ObjectData
    protected void setACL(Node data, List<AccessControlEntry> aces) throws RepositoryException
    {
       if (!data.isNodeType(JcrCMIS.EXO_PRIVILEGABLE))
+      {
          data.addMixin(JcrCMIS.EXO_PRIVILEGABLE);
+      }
 
       ExtendedNode extNode = (ExtendedNode)data;
 
       // Not merge ACL overwrite it.
       extNode.clearACL();
       if (aces != null && aces.size() > 0)
+      {
          extNode.setPermissions(createPermissionMap(aces));
+      }
    }
 
    @SuppressWarnings("unchecked")
@@ -1296,7 +1432,9 @@ abstract class BaseObjectData implements ObjectData
                Value[] jcrValue = new Value[property.getValues().size()];
 
                for (int i = 0; i < jcrValue.length; i++)
+               {
                   jcrValue[i] = new BooleanValue(booleans.get(i));
+               }
 
                data.setProperty(property.getLocalName(), jcrValue);
             }
@@ -1317,7 +1455,9 @@ abstract class BaseObjectData implements ObjectData
                Value[] jcrValue = new Value[property.getValues().size()];
 
                for (int i = 0; i < jcrValue.length; i++)
+               {
                   jcrValue[i] = new DateValue(datetime.get(i));
+               }
 
                data.setProperty(property.getLocalName(), jcrValue);
             }
@@ -1338,7 +1478,9 @@ abstract class BaseObjectData implements ObjectData
                Value[] jcrValue = new Value[property.getValues().size()];
 
                for (int i = 0; i < jcrValue.length; i++)
+               {
                   jcrValue[i] = new DoubleValue(doubles.get(i).doubleValue());
+               }
 
                data.setProperty(property.getLocalName(), jcrValue);
             }
@@ -1359,7 +1501,9 @@ abstract class BaseObjectData implements ObjectData
                Value[] jcrValue = new Value[property.getValues().size()];
 
                for (int i = 0; i < jcrValue.length; i++)
+               {
                   jcrValue[i] = new LongValue(integers.get(i).longValue());
+               }
 
                data.setProperty(property.getLocalName(), jcrValue);
             }
@@ -1387,7 +1531,9 @@ abstract class BaseObjectData implements ObjectData
                Value[] jcrValue = new Value[property.getValues().size()];
 
                for (int i = 0; i < jcrValue.length; i++)
+               {
                   jcrValue[i] = new StringValue(text.get(i));
+               }
 
                data.setProperty(property.getLocalName(), jcrValue);
             }
@@ -1408,7 +1554,9 @@ abstract class BaseObjectData implements ObjectData
                Value[] jcrValue = new Value[property.getValues().size()];
 
                for (int i = 0; i < jcrValue.length; i++)
+               {
                   jcrValue[i] = new StringValue(uris.get(i).toString());
+               }
 
                data.setProperty(property.getLocalName(), jcrValue);
             }
