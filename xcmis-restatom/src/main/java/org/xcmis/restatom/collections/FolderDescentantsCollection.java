@@ -27,6 +27,7 @@ import org.apache.abdera.model.Link;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.spi.CMIS;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.IncludeRelationships;
@@ -134,8 +135,8 @@ public class FolderDescentantsCollection extends CmisObjectCollection
     */
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
-      boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS);
-      boolean includePathSegments = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PATH_SEGMENT);
+      boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
+      boolean includePathSegments = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PATH_SEGMENT, false);
       // XXX At the moment get all properties from back-end. We need some of them for build correct feed.
       // Filter will be applied during build final Atom Document.
       //      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
@@ -154,7 +155,7 @@ public class FolderDescentantsCollection extends CmisObjectCollection
          String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS);
          throw new ResponseContextException(msg, 400);
       }
-      int depth = getIntegerParameter(request, AtomCMIS.PARAM_DEPTH);
+      int depth = getIntegerParameter(request, AtomCMIS.PARAM_DEPTH, CMIS.DEPTH);
       Connection conn = null;
       try
       {

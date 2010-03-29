@@ -51,7 +51,7 @@ public class ACLTest extends BaseTest
       AccessControlEntryImpl entry1 = new AccessControlEntryImpl();
       entry1.setPrincipal("Makis");
       entry1.getPermissions().add(BasicPermissions.CMIS_WRITE.value());
-      
+
       addACL.add(entry1);
       AccessControlEntryImpl entry2 = new AccessControlEntryImpl();
       entry2.setPrincipal("root");
@@ -82,7 +82,9 @@ public class ACLTest extends BaseTest
       for (int i = 0; i < aclLength; i++)
       {
          org.w3c.dom.Node ace = acl.item(i);
+         assertNotNull(ace);
          org.w3c.dom.Node p = getNode("cmis:principal", ace);
+         assertNotNull(p);
          String pId = getStringElement("cmis:principalId", p);
          l.add(pId);
          assertTrue("not found any permissions for " + pId, hasElementValue("cmis:permission", ace));
@@ -122,9 +124,9 @@ public class ACLTest extends BaseTest
       ContainerResponse resp = service("PUT", requestURI, "http://localhost:8080/rest", null, s.getBytes(), writer);
       //            printBody(writer.getBody());
       assertEquals(201, resp.getStatus());
-      
+
       List<AccessControlEntry> acl = conn.getACL(docId, true);
-      for(AccessControlEntry ace : acl)
+      for (AccessControlEntry ace : acl)
       {
          if ("Makis".equals(ace.getPrincipal()))
          {

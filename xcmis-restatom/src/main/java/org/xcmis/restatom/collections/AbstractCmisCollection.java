@@ -295,25 +295,25 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
       return storageProvider.getConnection(getRepositoryId(request), null);
    }
 
-   protected Boolean getBooleanParameter(RequestContext request, String name)
+   protected boolean getBooleanParameter(RequestContext request, String name, boolean defaultValue)
    {
       Boolean result;
-
       String param = request.getParameter(name);
-      if (param == null || param.length() == 0)
+      if (param != null && param.length() > 0)
       {
-         result = null;
+         result = Boolean.parseBoolean(param);
       }
       else
       {
-         result = Boolean.parseBoolean(param);
+         result = defaultValue;
       }
       return result;
    }
 
-   protected Integer getIntegerParameter(RequestContext request, String name) throws ResponseContextException
+   protected Integer getIntegerParameter(RequestContext request, String name, Integer defaultValue)
+      throws ResponseContextException
    {
-      Integer result = null;
+      Integer result;
       String param = request.getParameter(name);
       if (param != null && param.length() > 0)
       {
@@ -326,6 +326,10 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
             String msg = "Invalid parameter for name '" + name + "' with value: '" + name + "'";
             throw new ResponseContextException(msg, 400);
          }
+      }
+      else
+      {
+         result = defaultValue;
       }
       return result;
    }

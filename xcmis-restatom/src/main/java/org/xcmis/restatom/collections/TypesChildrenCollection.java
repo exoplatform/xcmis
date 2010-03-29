@@ -28,6 +28,7 @@ import org.apache.abdera.protocol.server.TargetType;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
+import org.xcmis.spi.CMIS;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.StorageException;
@@ -63,9 +64,9 @@ public class TypesChildrenCollection extends CmisTypeCollection
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
       String typeId = request.getTarget().getParameter(AtomCMIS.PARAM_TYPE_ID);
-      boolean includePropertyDefinitions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PROPERTY_DEFINITIONS);
-      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS);
-      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT);
+      boolean includePropertyDefinitions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PROPERTY_DEFINITIONS, false);
+      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CMIS.MAX_ITEMS);
+      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CMIS.SKIP_COUNT);
       Connection conn = null;
       try
       {

@@ -205,10 +205,10 @@ public class RelationshipsCollection extends CmisObjectCollection
       // Filter will be applied during build final Atom Document.
       //      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
       String propertyFilter = null;
-      boolean includeSubRelationship = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_SUB_RELATIONSHIP_TYPES);
-      boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS);
-      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS);
-      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT);
+      boolean includeSubRelationship = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_SUB_RELATIONSHIP_TYPES, false);
+      boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
+      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CMIS.MAX_ITEMS);
+      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CMIS.SKIP_COUNT);
       RelationshipDirection direction;
       try
       {

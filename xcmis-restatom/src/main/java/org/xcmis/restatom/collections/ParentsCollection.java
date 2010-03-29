@@ -84,8 +84,8 @@ public class ParentsCollection extends CmisObjectCollection
    @Override
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
-      boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS);
-      boolean includeRelativePathSegment = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_RELATIVE_PATH_SEGMENT);
+      boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
+      boolean includeRelativePathSegment = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_RELATIVE_PATH_SEGMENT, false);
       // XXX At the moment get all properties from back-end. We need some of them for build correct feed.
       // Filter will be applied during build final Atom Document.
       //      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);

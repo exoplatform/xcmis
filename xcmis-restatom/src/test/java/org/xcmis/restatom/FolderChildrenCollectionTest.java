@@ -333,7 +333,8 @@ public class FolderChildrenCollectionTest extends BaseTest
    public void testGetObjectByPath() throws Exception
    {
       String docId = createDocument(testFolderId, "doc1", null, null);
-      String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/objectbypath/testRoot/doc1";
+      String requestURI =
+         "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/objectbypath/" + testFolderName + "/doc1";
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
 
       ContainerResponse resp = service("GET", requestURI, "http://localhost:8080/rest", null, null, writer);
@@ -391,7 +392,6 @@ public class FolderChildrenCollectionTest extends BaseTest
    {
       ContentStream content = new BaseContentStream("to be or not to be".getBytes(), "file", "text/plain");
       String docId = createDocument(testFolderId, "doc1", null, content);
-      ContentStream docStream = conn.getContentStream(docId, null, -1, -1);
 
       String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/file/" + docId;
       MultivaluedMap<String, String> headers = new MultivaluedMapImpl();
@@ -399,6 +399,7 @@ public class FolderChildrenCollectionTest extends BaseTest
       ContainerResponse resp = service("PUT", requestURI, "http://localhost:8080/rest", headers, "to be".getBytes());
       assertEquals(201, resp.getStatus());
       byte[] b = new byte[128];
+      ContentStream docStream = conn.getContentStream(docId, null, -1, -1);
       int r = docStream.getStream().read(b);
       assertEquals("to be", new String(b, 0, r));
    }

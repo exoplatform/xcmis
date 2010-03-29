@@ -130,7 +130,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          else
             conn.deleteObject(objectId, true);
          */
-         conn.deleteObject(objectId, true);
+         conn.deleteObject(objectId, null);
       }
       catch (ConstraintException cve)
       {
@@ -324,13 +324,13 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
     */
    public CmisObject getEntry(String id, RequestContext request) throws ResponseContextException
    {
-      boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS);
+      boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
       // XXX At the moment get all properties from back-end. We need some of them for build correct feed.
       // Filter will be applied during build final Atom Document.
       //      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
       String propertyFilter = null;
-      boolean includePolicies = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_POLICY_IDS);
-      boolean includeACL = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ACL);
+      boolean includePolicies = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_POLICY_IDS, false);
+      boolean includeACL = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ACL, false);
       String renditionFilter = request.getParameter(AtomCMIS.PARAM_RENDITION_FILTER);
       IncludeRelationships includeRelationships;
       try
@@ -574,11 +574,11 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          List<AccessControlEntry> acl = object.getACL();
          ContentStream contentStream = getContentStream(entry, request);
 
-         boolean checkin = getBooleanParameter(request, AtomCMIS.PARAM_CHECKIN);
+         boolean checkin = getBooleanParameter(request, AtomCMIS.PARAM_CHECKIN, false);
          String updatedId = null;
          if (checkin)
          {
-            boolean major = getBooleanParameter(request, AtomCMIS.PARAM_MAJOR);
+            boolean major = getBooleanParameter(request, AtomCMIS.PARAM_MAJOR, false);
             String checkinComment = request.getParameter(AtomCMIS.PARAM_CHECKIN_COMMENT);
             // TODO : ACEs for removing. Not clear from specification how to
             // pass (obtain) ACEs for adding and removing from one object.
@@ -672,7 +672,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          // TODO : is correct ?
          ChangeTokenHolder changeTokenHolder = new ChangeTokenHolder();
          changeTokenHolder.setValue(request.getHeader(HttpHeaders.IF_MATCH));
-         boolean overwriteFlag = getBooleanParameter(request, AtomCMIS.PARAM_OVERWRITE_FLAG);
+         boolean overwriteFlag = getBooleanParameter(request, AtomCMIS.PARAM_OVERWRITE_FLAG, false);
          conn.setContentStream(getId(request), content, changeTokenHolder, overwriteFlag);
       }
       catch (IOException ioe)

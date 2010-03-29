@@ -69,13 +69,11 @@ public class AccessControlEntryTypeElement extends ExtensibleElementWrapper
       declareNS(org.apache.abdera.util.Constants.ATOM_NS, "atom");
       declareNS(org.apache.abdera.util.Constants.APP_NS, "app");
 
-      ExtensibleElementWrapper permissionElement = addExtension(AtomCMIS.PERMISSION);
-
       // PRINCIPAL
       if (accessControlEntry.getPrincipal() != null)
       {
          String principal = accessControlEntry.getPrincipal();
-         FOMExtensibleElement principalElement = permissionElement.addExtension(AtomCMIS.PRINCIPAL);
+         FOMExtensibleElement principalElement = addExtension(AtomCMIS.PRINCIPAL);
          principalElement.addSimpleExtension(AtomCMIS.PRINCIPAL_ID, principal);
       }
 
@@ -84,7 +82,7 @@ public class AccessControlEntryTypeElement extends ExtensibleElementWrapper
       {
          for (String one : accessControlEntry.getPermissions())
          {
-            permissionElement.addSimpleExtension(AtomCMIS.PERMISSION, one);
+            addSimpleExtension(AtomCMIS.PERMISSION, one);
          }
       }
 
@@ -121,7 +119,9 @@ public class AccessControlEntryTypeElement extends ExtensibleElementWrapper
          for (ExtensibleElementWrapper permissionElement : permissionElements)
          {
             if (permissionElement.getText() != null)
+            {
                accessControlEntry.getPermissions().add(permissionElement.getText());
+            }
          }
       }
 

@@ -72,8 +72,8 @@ public class PoliciesCollection extends CmisObjectCollection
    {
       String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
 
-      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS);
-      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT);
+      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CMIS.MAX_ITEMS);
+      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CMIS.SKIP_COUNT);
 
       Connection conn = null;
       try

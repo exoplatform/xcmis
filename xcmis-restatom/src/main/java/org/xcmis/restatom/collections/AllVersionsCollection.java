@@ -26,6 +26,7 @@ import org.apache.abdera.model.Feed;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.spi.CMIS;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
@@ -63,9 +64,9 @@ public class AllVersionsCollection extends CmisObjectCollection
    {
       String objectId = getId(request);
       String propertyFilter = null;
-      boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS);
-      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS);
-      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT);
+      boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
+      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CMIS.MAX_ITEMS);
+      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CMIS.SKIP_COUNT);
       Connection conn = null;
       try
       {

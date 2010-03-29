@@ -113,14 +113,14 @@ public abstract class BaseTest extends TestCase
 
       storageProvider = (StorageProvider)container.getComponentInstanceOfType(StorageProvider.class);
 
-      conn = storageProvider.getConnection(cmisRepositoryId, null);
-
       Abdera abdera = new Abdera();
       factory = abdera.getFactory();
       factory.registerExtension(new CMISExtensionFactory());
 
       ConversationState state = new ConversationState(new Identity("root"));
       ConversationState.setCurrent(state);
+
+      conn = storageProvider.getConnection(cmisRepositoryId, state);
 
       rootFolderId = conn.getStorage().getRepositoryInfo().getRootFolderId();
 
@@ -142,7 +142,6 @@ public abstract class BaseTest extends TestCase
 
    public void tearDown() throws Exception
    {
-      super.tearDown();
       container = null;
       requestHandler = null;
       factory = null;
@@ -156,15 +155,16 @@ public abstract class BaseTest extends TestCase
                conn.getCheckedOutDocs(rootFolderId, false, null, true, null, null, null, -1, 0).getItems().iterator(); iter
                .hasNext();)
             {
-               conn.deleteObject(iter.next().getObjectInfo().getId(), null);
+               CmisObject cmisObj = iter.next();
+               conn.deleteObject(cmisObj.getObjectInfo().getId(), null);
             }
          }
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+         //e.printStackTrace();
       }
-
+      /////////////////////////////////////////////////////////////////////////////////
       try
       {
          for (Iterator<CmisObject> iter = getChildren(rootFolderId).getItems().iterator(); iter.hasNext();)
@@ -175,18 +175,19 @@ public abstract class BaseTest extends TestCase
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+         //e.printStackTrace();
       }
-
+      ///////////////////////////////////////////////////////////////////////////////
       try
       {
-         conn.deleteObject(testFolderId, null);
+         conn.deleteObject(testFolderId, true);
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+         //e.printStackTrace();
       }
-
+      /////////////////////////////////////////////////////////////////////////////////
+      super.tearDown();
    }
 
    private void deleteObject(CmisObject obj)
@@ -289,6 +290,7 @@ public abstract class BaseTest extends TestCase
 
    protected int countElements(String expression, org.w3c.dom.Node xmlDoc) throws XPathExpressionException
    {
+      assertNotNull(xmlDoc);
       String count = (String)xp.evaluate("count(" + expression + ")", xmlDoc, XPathConstants.STRING);
       return Integer.parseInt(count);
    }
@@ -359,6 +361,7 @@ public abstract class BaseTest extends TestCase
    protected String getAttributeValue(String statement, String attributeName, org.w3c.dom.Document xmlDoc)
       throws XPathExpressionException
    {
+      assertNotNull(xmlDoc);
       org.w3c.dom.Node node = (org.w3c.dom.Node)xp.evaluate(statement, xmlDoc, XPathConstants.NODE);
       String attr = node.getAttributes().getNamedItem(attributeName).getNodeValue();
       return attr;
@@ -366,11 +369,13 @@ public abstract class BaseTest extends TestCase
 
    protected org.w3c.dom.Node getNode(String expression, Node node) throws XPathExpressionException
    {
+      assertNotNull(node);
       return (org.w3c.dom.Node)xp.evaluate(expression, node, XPathConstants.NODE);
    }
 
    protected NodeList getNodeSet(String expression, org.w3c.dom.Node xmlDoc) throws XPathExpressionException
    {
+      assertNotNull(xmlDoc);
       return (NodeList)xp.evaluate(expression, xmlDoc, XPathConstants.NODESET);
    }
 
@@ -419,11 +424,13 @@ public abstract class BaseTest extends TestCase
 
    protected String getStringElement(String expression, org.w3c.dom.Node xmlNode) throws XPathExpressionException
    {
+      assertNotNull(xmlNode);
       return (String)xp.evaluate(expression, xmlNode, XPathConstants.STRING);
    }
 
    protected boolean hasElementValue(String expression, org.w3c.dom.Node xmlElement) throws XPathExpressionException
    {
+      assertNotNull(xmlElement);
       String s = (String)xp.evaluate(expression, xmlElement, XPathConstants.STRING);
       return s != null && s.length() > 0;
 
@@ -437,6 +444,7 @@ public abstract class BaseTest extends TestCase
    protected boolean hasNodeWithProperty(String statement, String propertyName, String propertyValue,
       org.w3c.dom.Node xmlElement) throws XPathExpressionException
    {
+      assertNotNull(xmlElement);
       org.w3c.dom.Node nodeProperty =
          (org.w3c.dom.Node)xp.evaluate(statement + "[@" + propertyName + "='" + propertyValue + "']", xmlElement,
             XPathConstants.NODE);

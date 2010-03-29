@@ -81,6 +81,9 @@ public class PropertyDefinitionElementTest extends TestCase
       DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
       f.setNamespaceAware(true);
       org.w3c.dom.Document xmlDoc = f.newDocumentBuilder().parse(new ByteArrayInputStream(out.toByteArray()));
+
+      assertNotNull(xmlDoc);
+
       XPath xp = XPathFactory.newInstance().newXPath();
       xp.setNamespaceContext(new NamespaceResolver());
 
@@ -132,6 +135,9 @@ public class PropertyDefinitionElementTest extends TestCase
       DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
       f.setNamespaceAware(true);
       org.w3c.dom.Document xmlDoc = f.newDocumentBuilder().parse(new ByteArrayInputStream(out.toByteArray()));
+
+      assertNotNull(xmlDoc);
+
       XPath xp = XPathFactory.newInstance().newXPath();
       xp.setNamespaceContext(new NamespaceResolver());
 
@@ -182,6 +188,9 @@ public class PropertyDefinitionElementTest extends TestCase
       DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
       f.setNamespaceAware(true);
       org.w3c.dom.Document xmlDoc = f.newDocumentBuilder().parse(new ByteArrayInputStream(out.toByteArray()));
+
+      assertNotNull(xmlDoc);
+
       XPath xp = XPathFactory.newInstance().newXPath();
       xp.setNamespaceContext(new NamespaceResolver());
 
@@ -232,6 +241,9 @@ public class PropertyDefinitionElementTest extends TestCase
       DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
       f.setNamespaceAware(true);
       org.w3c.dom.Document xmlDoc = f.newDocumentBuilder().parse(new ByteArrayInputStream(out.toByteArray()));
+
+      assertNotNull(xmlDoc);
+
       XPath xp = XPathFactory.newInstance().newXPath();
       xp.setNamespaceContext(new NamespaceResolver());
 
@@ -285,6 +297,9 @@ public class PropertyDefinitionElementTest extends TestCase
       DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
       f.setNamespaceAware(true);
       org.w3c.dom.Document xmlDoc = f.newDocumentBuilder().parse(new ByteArrayInputStream(out.toByteArray()));
+
+      assertNotNull(xmlDoc);
+
       XPath xp = XPathFactory.newInstance().newXPath();
       xp.setNamespaceContext(new NamespaceResolver());
 
@@ -339,6 +354,9 @@ public class PropertyDefinitionElementTest extends TestCase
       DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
       f.setNamespaceAware(true);
       org.w3c.dom.Document xmlDoc = f.newDocumentBuilder().parse(new ByteArrayInputStream(out.toByteArray()));
+
+      assertNotNull(xmlDoc);
+
       XPath xp = XPathFactory.newInstance().newXPath();
       xp.setNamespaceContext(new NamespaceResolver());
 
@@ -391,6 +409,9 @@ public class PropertyDefinitionElementTest extends TestCase
       DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
       f.setNamespaceAware(true);
       org.w3c.dom.Document xmlDoc = f.newDocumentBuilder().parse(new ByteArrayInputStream(out.toByteArray()));
+
+      assertNotNull(xmlDoc);
+
       XPath xp = XPathFactory.newInstance().newXPath();
       xp.setNamespaceContext(new NamespaceResolver());
 
@@ -428,6 +449,7 @@ public class PropertyDefinitionElementTest extends TestCase
 
    private void checkCommonAttributes(XPath xp, org.w3c.dom.Document xmlDoc, String baseElement) throws Exception
    {
+      assertNotNull(xmlDoc);
       String r = (String)xp.evaluate("/" + baseElement + "/cmis:name", xmlDoc, XPathConstants.STRING);
       r = (String)xp.evaluate(baseElement + "/cmis:cardinality", xmlDoc, XPathConstants.STRING);
       assertEquals("single", r);

@@ -80,7 +80,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
     */
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
-      boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS);
+      boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
       IncludeRelationships includeRelationships;
       try
       {
@@ -94,9 +94,9 @@ public class FolderChildrenCollection extends CmisObjectCollection
          String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS);
          throw new ResponseContextException(msg, 400);
       }
-      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS);
-      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT);
-      boolean includePathSegments = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PATH_SEGMENT);
+      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CMIS.MAX_ITEMS);
+      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CMIS.SKIP_COUNT);
+      boolean includePathSegments = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PATH_SEGMENT, false);
       // XXX At the moment get all properties from back-end. We need some of them for build correct feed.
       // Filter will be applied during build final Atom Document.
       //      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
@@ -225,7 +225,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
          String targetFolderId = getId(request);
          if (id != null)
          {
-            if (sourceFolderId != null)
+            if (sourceFolderId == null)
             {
                conn.addObjectToFolder(id, targetFolderId, false);
             }
