@@ -30,6 +30,8 @@ import org.xcmis.spi.data.Policy;
 import org.xcmis.spi.object.Property;
 
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
 
 import javax.jcr.Node;
 import javax.jcr.PropertyIterator;
@@ -96,6 +98,24 @@ class PolicyImpl extends BaseObjectData implements Policy
    /**
     * {@inheritDoc}
     */
+   @Override
+   public Folder getParent() throws ConstraintException
+   {
+      return null;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   @Override
+   public Collection<Folder> getParents()
+   {
+      return Collections.emptyList();
+   }
+
+   /**
+    * {@inheritDoc}
+    */
    public String getPolicyText()
    {
       return getString(CMIS.POLICY_TEXT);
@@ -104,6 +124,7 @@ class PolicyImpl extends BaseObjectData implements Policy
    /**
     * {@inheritDoc}
     */
+   @Override
    protected void create() throws StorageException, NameConstraintViolationException
    {
       try
