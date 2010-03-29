@@ -215,7 +215,7 @@ public abstract class BaseQueryTest extends BaseTest
 
       for (ObjectData node : nodes)
       {
-         expectedPaths += node.getObjectId();
+         expectedPaths += ":" + node.getObjectId();
          if (LOG.isDebugEnabled())
          {
             LOG.debug(node.getObjectId());
@@ -230,7 +230,7 @@ public abstract class BaseQueryTest extends BaseTest
       while (result.hasNext())
       {
          String id = result.next().getObjectId();
-         resultPaths += id;
+         resultPaths += ":" + id;
          if (LOG.isDebugEnabled())
          {
             LOG.debug(id);

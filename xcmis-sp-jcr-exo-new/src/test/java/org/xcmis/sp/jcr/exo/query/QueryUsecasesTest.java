@@ -19,6 +19,7 @@
 
 package org.xcmis.sp.jcr.exo.query;
 
+import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.UnfileObject;
 import org.xcmis.spi.data.BaseContentStream;
@@ -579,49 +580,54 @@ public class QueryUsecasesTest extends BaseQueryTest
       }
    }
 
-   //
-   //   /**
-   //    * Test Order By desc.
-   //    * <p>
-   //    * Initial data:
-   //    * <ul>
-   //    * <li>doc1: <b>Title</b> - node1 <b>long</b> - 3
-   //    * <li>doc2: <b>Title</b> - node2 <b>long</b> - 15
-   //    * </ul>
-   //    * <p>
-   //    * Query : Order by exo:Commander property value
-   //    * <p>
-   //    * Expected result: doc2
-   //    * 
-   //    * @throws Exception if an unexpected error occurs
-   //    */
-   //   public void testOrderByFieldDesc() throws Exception
-   //   {
-   //
-   //      Document folder = createFolder(root, "testColumn");
-   //      List<Document> appolloContent = createApolloContent(folder);
-   //
-   //      StringBuffer sql = new StringBuffer();
-   //      sql.append("SELECT  ");
-   //      sql.append(CMIS.LAST_MODIFIED_BY + " , ");
-   //      sql.append(CMIS.OBJECT_ID + " , ");
-   //      sql.append(CMIS.LAST_MODIFICATION_DATE);
-   //      sql.append(" FROM ");
-   //      sql.append(NASA_DOCUMENT);
-   //      sql.append(" ORDER BY ");
-   //      sql.append(PROPERTY_COMMANDER);
-   //      sql.append(" DESC");
-   //
-   //      String statement = sql.toString();
-   //
-   //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = storage.query(query);
-   //      // Walter M. Schirra (0)
-   //      // James A. Lovell, Jr. (2)
-   //      // Frank F. Borman, II (1)
-   //
-   //      checkResultOrder(result, new Document[]{appolloContent.get(0), appolloContent.get(2), appolloContent.get(1)});
-   //   }
+   /**
+    * Test Order By desc.
+    * <p>
+    * Initial data:
+    * <ul>
+    * <li>doc1: <b>Title</b> - node1 <b>long</b> - 3
+    * <li>doc2: <b>Title</b> - node2 <b>long</b> - 15
+    * </ul>
+    * <p>
+    * Query : Order by exo:Commander property value
+    * <p>
+    * Expected result: doc2
+    * 
+    * @throws Exception if an unexpected error occurs
+    */
+   public void testOrderByFieldDesc() throws Exception
+   {
+
+      List<Document> appolloContent = createNasaContent(testRoot);
+
+      StringBuffer sql = new StringBuffer();
+      sql.append("SELECT  ");
+      sql.append(CMIS.LAST_MODIFIED_BY + " , ");
+      sql.append(CMIS.OBJECT_ID + " , ");
+      sql.append(CMIS.LAST_MODIFICATION_DATE);
+      sql.append(" FROM ");
+      sql.append(NASA_DOCUMENT);
+      sql.append(" ORDER BY ");
+      sql.append(PROPERTY_COMMANDER);
+      sql.append(" DESC");
+
+      String statement = sql.toString();
+
+      Query query = new Query(statement, true);
+      ItemsIterator<Result> result = storage.query(query);
+      // Walter M. Schirra (0)
+      // James A. Lovell, Jr. (2)
+      // Frank F. Borman, II (1)
+      //Eugene A. Cernan  (3)
+      checkResultOrder(result, new Document[]{appolloContent.get(0), appolloContent.get(2), appolloContent.get(1),
+         appolloContent.get(3)});
+
+      for (Document doc : appolloContent)
+      {
+         storage.deleteObject(doc, true);
+      }
+   }
+
    //
    //   /**
    //    * Test ORDER BY ASC.
