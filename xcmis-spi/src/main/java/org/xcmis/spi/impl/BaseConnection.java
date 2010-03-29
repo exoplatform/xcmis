@@ -970,7 +970,7 @@ public abstract class BaseConnection implements Connection
       }
       // cancelCheckedOut may be invoked on any object in version series.
       // In other way 'cmis:versionSeriesCheckedOutId' may not reflect
-      // current PWC id. 
+      // current PWC id.
       ((Document)document).cancelCheckout();
    }
 
@@ -1250,6 +1250,14 @@ public abstract class BaseConnection implements Connection
       String propertyFilter, String renditionFilter) throws ObjectNotFoundException, InvalidArgumentException,
       FilterNotValidException
    {
+      if (depth != -1 && !(depth >= 1))
+      {
+         throw new InvalidArgumentException("Invalid depth parameter. Must be 1 or greater then 1 or -1 but " + depth
+            + " specified.");
+      }
+
+      checkConnection();
+
       return getTree(folderId, depth, null, includeAllowableActions, includeRelationships, includePathSegments,
          includeObjectInfo, propertyFilter, renditionFilter);
    }
@@ -1262,6 +1270,14 @@ public abstract class BaseConnection implements Connection
       String propertyFilter, String renditionFilter) throws ObjectNotFoundException, InvalidArgumentException,
       FilterNotValidException
    {
+      if (depth != -1 && !(depth >= 1))
+      {
+         throw new InvalidArgumentException("Invalid depth parameter. Must be 1 or greater then 1 or -1 but " + depth
+            + " specified.");
+      }
+
+      checkConnection();
+
       return getTree(folderId, depth, BaseType.FOLDER, includeAllowableActions, includeRelationships,
          includePathSegments, includeObjectInfo, propertyFilter, renditionFilter);
    }
@@ -1271,8 +1287,6 @@ public abstract class BaseConnection implements Connection
       boolean includeObjectInfo, String propertyFilter, String renditionFilter) throws ObjectNotFoundException,
       InvalidArgumentException, FilterNotValidException
    {
-      checkConnection();
-
       ObjectData folder = storage.getObject(folderId);
 
       if (folder.getBaseType() != BaseType.FOLDER)
@@ -1298,9 +1312,9 @@ public abstract class BaseConnection implements Connection
                parsedPropertyFilter, parsedRenditionFilter);
 
          List<ItemsTree<CmisObject>> subTree =
-            (child.getBaseType() == BaseType.FOLDER && depth > 1) // 
-               ? getTree(child.getObjectId(), depth - 1, typeFilter, includeAllowableActions, includeRelationships,
-                  includePathSegments, includeObjectInfo, propertyFilter, renditionFilter) //
+            (child.getBaseType() == BaseType.FOLDER && (depth > 1 || depth == -1)) //
+               ? getTree(child.getObjectId(), depth != -1 ? depth - 1 : depth, typeFilter, includeAllowableActions,
+                  includeRelationships, includePathSegments, includeObjectInfo, propertyFilter, renditionFilter) //
                : null;
 
          tree.add(new ItemsTreeImpl<CmisObject>(container, subTree));
@@ -1520,8 +1534,20 @@ public abstract class BaseConnection implements Connection
    public List<ItemsTree<TypeDefinition>> getTypeDescendants(String typeId, int depth, boolean includePropertyDefinition)
       throws TypeNotFoundException
    {
+      if (depth != -1 && !(depth >= 1))
+      {
+         throw new InvalidArgumentException("Invalid depth parameter. Must be 1 or greater then 1 or -1 but " + depth
+            + " specified.");
+      }
+
       checkConnection();
 
+      return getTypeTree(typeId, depth, includePropertyDefinition);
+   }
+
+   protected List<ItemsTree<TypeDefinition>> getTypeTree(String typeId, int depth, boolean includePropertyDefinition)
+      throws TypeNotFoundException
+   {
       List<ItemsTree<TypeDefinition>> tree = new ArrayList<ItemsTree<TypeDefinition>>();
 
       for (ItemsIterator<TypeDefinition> children = storage.getTypeChildren(typeId, includePropertyDefinition); children
@@ -1529,8 +1555,8 @@ public abstract class BaseConnection implements Connection
       {
          TypeDefinition childType = children.next();
 
-         List<ItemsTree<TypeDefinition>> subTree = (typeId != null && depth > 1) // 
-            ? getTypeDescendants(childType.getId(), depth - 1, includePropertyDefinition) //
+         List<ItemsTree<TypeDefinition>> subTree = (depth > 1 || depth == -1) //
+            ? getTypeDescendants(childType.getId(), depth != -1 ? depth - 1 : depth, includePropertyDefinition) //
             : null;
 
          tree.add(new ItemsTreeImpl<TypeDefinition>(childType, subTree));
@@ -1779,7 +1805,7 @@ public abstract class BaseConnection implements Connection
    /**
     * Check is connection may be used at the moment, e.g. it may be already
     * closed.
-    * 
+    *
     * @throws IllegalStateException if connection may not be used any more
     */
    protected abstract void checkConnection() throws IllegalStateException;
@@ -1787,7 +1813,7 @@ public abstract class BaseConnection implements Connection
    /**
     * Validate change token provided by caller with current change token of
     * object.
-    * 
+    *
     * @param object object
     * @param changeToken change token from 'client'
     * @throws UpdateConflictException if specified change token does not match
@@ -1818,7 +1844,7 @@ public abstract class BaseConnection implements Connection
 
    /**
     * Apply ACLs to specified object.
-    * 
+    *
     * @param object object
     * @param addACL ACL to be added
     * @param removeACL ACL to be removed
