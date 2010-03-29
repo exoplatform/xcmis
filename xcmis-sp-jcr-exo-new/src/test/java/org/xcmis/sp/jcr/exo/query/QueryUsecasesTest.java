@@ -462,6 +462,7 @@ public class QueryUsecasesTest extends BaseQueryTest
       checkResult(result, new Folder[]{folder3});
 
    }
+
    //
    //   /**
    //    * Test JOIN with condition constraint.
@@ -508,80 +509,104 @@ public class QueryUsecasesTest extends BaseQueryTest
    //      // TODO check results - must doc1 and folder1
    //   }
    //
-   //   /**
-   //    * Test LIKE constraint.
-   //    * <p>
-   //    * Initial data:
-   //    * <ul>
-   //    * <li>doc1: <b>Title</b> - node1 <b>prop</b> - administrator
-   //    * <li>doc2: <b>Title</b> - node2 <b>prop</b> - admin
-   //    * <li>doc3: <b>Title</b> - node2 <b>prop</b> - radmin
-   //    * </ul>
-   //    * <p>
-   //    * Query : Select all documents where prop begins with "ad".
-   //    * <p>
-   //    * Expected result: doc1, doc2
-   //    * 
-   //    * @throws Exception if an unexpected error occurs
-   //    */
-   //   public void testLIKEConstraint() throws Exception
-   //   {
-   //      Document doc1 = createDocument(root, "node1", "hello world".getBytes(), "text/plain");
-   //      doc1.setString("prop", "administrator");
-   //
-   //      Document doc2 = createDocument(root, "node2", "hello world".getBytes(), "text/plain");
-   //      doc2.setString("prop", "admin");
-   //
-   //      Document doc3 = createDocument(root, "node3", "hello world".getBytes(), "text/plain");
-   //      doc3.setString("prop", "radmin");
-   //
-   //      String statement = "SELECT * FROM " + NASA_DOCUMENT + " AS doc WHERE prop LIKE 'ad%'";
-   //
-   //      Query query = new Query(statement, true);
-   //
-   //      ItemsIterator<Result> result = storage.query(query);
-   //
-   //      // check results
-   //      assertEquals(2, result.size());
-   //      checkResult(result, new Document[]{doc1, doc2});
-   //   }
-   //
-   //   /**
-   //    * Test LIKE constraint with escape symbols.
-   //    * <p>
-   //    * Initial data:
-   //    * <ul>
-   //    * <li>doc1: <b>Title</b> - node1 <b>prop</b> - ad%min master
-   //    * <li>doc2: <b>Title</b> - node2 <b>prop</b> - admin operator
-   //    * <li>doc3: <b>Title</b> - node2 <b>prop</b> - radmin
-   //    * </ul>
-   //    * <p>
-   //    * Query : Select all documents where prop like 'ad\\%min%'.
-   //    * <p>
-   //    * Expected result: doc1
-   //    * 
-   //    * @throws Exception if an unexpected error occurs
-   //    */
-   //   public void testLIKEConstraintEscapeSymbols() throws Exception
-   //   {
-   //      Document doc1 = createDocument(root, "node1", "hello world".getBytes(), "text/plain");
-   //      doc1.setString("prop", "ad%min master");
-   //
-   //      Document doc2 = createDocument(root, "node2", "hello world".getBytes(), "text/plain");
-   //      doc2.setString("prop", "admin operator");
-   //
-   //      Document doc3 = createDocument(root, "node3", "hello world".getBytes(), "text/plain");
-   //      doc3.setString("prop", "radmin");
-   //
-   //      String statement = "SELECT * FROM " + NASA_DOCUMENT + " AS doc WHERE prop LIKE 'ad\\%min%'";
-   //
-   //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = storage.query(query);
-   //
-   //      // check results
-   //      assertEquals(1, result.size());
-   //      checkResult(result, new Document[]{doc1});
-   //   }
+   /**
+    * Test LIKE constraint.
+    * <p>
+    * Initial data:
+    * <ul>
+    * <li>doc1: <b>Title</b> - node1 <b>prop</b> - administrator
+    * <li>doc2: <b>Title</b> - node2 <b>prop</b> - admin
+    * <li>doc3: <b>Title</b> - node2 <b>prop</b> - radmin
+    * </ul>
+    * <p>
+    * Query : Select all documents where prop begins with "ad".
+    * <p>
+    * Expected result: doc1, doc2
+    * 
+    * @throws Exception if an unexpected error occurs
+    */
+   public void testLIKEConstraint() throws Exception
+   {
+      Document doc1 = createDocument(testRoot, "node1", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
+      doc1.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+         PROPERTY_COMMANDER, "administrator"));
+
+      Document doc2 = createDocument(testRoot, "node2", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
+      doc2.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+         PROPERTY_COMMANDER, "admin"));
+
+      Document doc3 = createDocument(testRoot, "node3", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
+      doc3.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+         PROPERTY_COMMANDER, "radmin"));
+
+      storage.saveObject(doc1);
+      storage.saveObject(doc2);
+      storage.saveObject(doc3);
+
+      String statement = "SELECT * FROM " + NASA_DOCUMENT + " AS doc WHERE " + PROPERTY_COMMANDER + " LIKE 'ad%'";
+
+      Query query = new Query(statement, true);
+
+      ItemsIterator<Result> result = storage.query(query);
+
+      // check results
+      assertEquals(2, result.size());
+      checkResult(result, new Document[]{doc1, doc2});
+
+      storage.deleteObject(doc1, true);
+      storage.deleteObject(doc2, true);
+      storage.deleteObject(doc3, true);
+   }
+
+   /**
+    * Test LIKE constraint with escape symbols.
+    * <p>
+    * Initial data:
+    * <ul>
+    * <li>doc1: <b>Title</b> - node1 <b>prop</b> - ad%min master
+    * <li>doc2: <b>Title</b> - node2 <b>prop</b> - admin operator
+    * <li>doc3: <b>Title</b> - node2 <b>prop</b> - radmin
+    * </ul>
+    * <p>
+    * Query : Select all documents where prop like 'ad\\%min%'.
+    * <p>
+    * Expected result: doc1
+    * 
+    * @throws Exception if an unexpected error occurs
+    */
+   public void testLIKEConstraintEscapeSymbols() throws Exception
+   {
+
+      Document doc1 = createDocument(testRoot, "node1", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
+      doc1.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+         PROPERTY_COMMANDER, "ad%min master"));
+
+      Document doc2 = createDocument(testRoot, "node2", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
+      doc2.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+         PROPERTY_COMMANDER, "admin operator"));
+
+      Document doc3 = createDocument(testRoot, "node3", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
+      doc3.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+         PROPERTY_COMMANDER, "radmin"));
+
+      storage.saveObject(doc1);
+      storage.saveObject(doc2);
+      storage.saveObject(doc3);
+
+      String statement =
+         "SELECT * FROM " + NASA_DOCUMENT + " AS doc WHERE  " + PROPERTY_COMMANDER + " LIKE 'ad\\%min%'";
+
+      Query query = new Query(statement, true);
+      ItemsIterator<Result> result = storage.query(query);
+
+      // check results
+      assertEquals(1, result.size());
+      checkResult(result, new Document[]{doc1});
+
+      storage.deleteObject(doc1, true);
+      storage.deleteObject(doc2, true);
+      storage.deleteObject(doc3, true);
+   }
    //
    //   /**
    //    * Test NOT constraint.
