@@ -34,6 +34,7 @@ import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.soap.ObjectServicePort;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ChangeTokenHolder;
+import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.data.BaseContentStream;
@@ -254,8 +255,13 @@ public class ObjectServiceTest extends BaseTest
       // delete content
       port.deleteContentStream(repositoryId, hId, new Holder<String>(null), new Holder<CmisExtensionType>(
          new CmisExtensionType()));
+      try {
       cs = conn.getContentStream(hId.value, null, 0, -1);
-      assertNull(cs);
+      fail();
+      } catch (ConstraintException ex){
+         
+      }
+      
    }
 
    public void testDeleteObject() throws Exception
