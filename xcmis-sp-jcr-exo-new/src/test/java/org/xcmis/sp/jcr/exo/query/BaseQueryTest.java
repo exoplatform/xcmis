@@ -66,7 +66,42 @@ public abstract class BaseQueryTest extends BaseTest
    }
 
    protected Document createDocument(Folder folder, String name, String typeId, ContentStream content,
-      VersioningState versioningState) throws Exception
+      VersioningState versioningState) throws Exception//   /**
+   //    * Test NOT IN constraint.
+   //    * <p>
+   //    * Initial data:
+   //    * <ul>
+   //    * <li>doc1: <b>Title</b> - node1 <b>long</b> - 3
+   //    * <li>doc2: <b>Title</b> - node2 <b>long</b> - 15
+   //    * </ul>
+   //    * <p>
+   //    * Query : Select all documents where long property not in set {15 , 20}.
+   //    * <p>
+   //    * Expected result: doc1
+   //    * 
+   //    * @throws Exception if an unexpected error occurs
+   //    */
+   //   public void testNotINConstraint() throws Exception
+   //   {
+   //
+   //      // create data
+   //      String name = "fileCS2.doc";
+   //      String name2 = "fileCS3.doc";
+   //      String contentType = "text/plain";
+   //
+   //      Document doc1 = createDocument(testRoot, name, new byte[0], contentType);
+   //      doc1.setDecimal("long", new BigDecimal(3));
+   //
+   //      Document doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
+   //      doc2.setDecimal("long", new BigDecimal(15));
+   //
+   //      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE long NOT IN (15, 20)";
+   //
+   //      Query query = new Query(statement, true);
+   //      ItemsIterator<Result> result = storage.query(query);
+   //
+   //      checkResult(result, new Document[]{doc1});
+   //   }
    {
       Document document =
          storage.createDocument(folder, typeId, versioningState == null ? VersioningState.MAJOR : versioningState);
