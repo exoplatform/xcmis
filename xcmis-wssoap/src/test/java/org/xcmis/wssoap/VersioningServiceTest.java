@@ -52,8 +52,7 @@ public class VersioningServiceTest extends BaseTest
    public void setUp() throws Exception
    {
       super.setUp();
-      server =
-         complexDeployService(SERVICE_ADDRESS, new VersioningServicePortImpl(storageProvider), null, null, true);
+      server = complexDeployService(SERVICE_ADDRESS, new VersioningServicePortImpl(storageProvider), null, null, true);
       port = getVersioningService(SERVICE_ADDRESS);
       assertNotNull(server);
       assertNotNull(port);
@@ -64,14 +63,13 @@ public class VersioningServiceTest extends BaseTest
       String id = createDocument(testFolderId, "doc1");
       Holder<String> idHolder = new Holder<String>(id);
       Holder<Boolean> contentCopiedHolder = new Holder<Boolean>();
-      port.checkOut(repositoryId, idHolder, new Holder<CmisExtensionType>(new CmisExtensionType()),
-         contentCopiedHolder);
+      port
+         .checkOut(repositoryId, idHolder, new Holder<CmisExtensionType>(new CmisExtensionType()), contentCopiedHolder);
       CmisObjectListType checkedout = TypeConverter.getCmisObjectListType(conn.getCheckedOutDocs(//
          testFolderId, //
          false, // Allowable actions
          IncludeRelationships.NONE, //
-         false,
-         null, // Property filter
+         false, null, // Property filter
          null, // Rendition filter
          null, // Order by
          10, // Max items
@@ -83,13 +81,12 @@ public class VersioningServiceTest extends BaseTest
    public void testCancelCheckOut() throws Exception
    {
       String id = createDocument(testFolderId, "doc1");
-      String pwcId  = conn.checkout(id);
+      String pwcId = conn.checkout(id);
       CmisObjectListType checkedout = TypeConverter.getCmisObjectListType(conn.getCheckedOutDocs(//
          testFolderId, //
          false, // Allowable actions
          IncludeRelationships.NONE, //
-         false,
-         null, // Property filter
+         false, null, // Property filter
          null, // Rendition filter
          null, // Order by
          10, // Max items
@@ -102,8 +99,7 @@ public class VersioningServiceTest extends BaseTest
          testFolderId, //
          false, // Allowable actions
          IncludeRelationships.NONE, //
-         false,
-         null, // Property filter
+         false, null, // Property filter
          null, // Rendition filter
          null, // Order by
          10, // Max items
@@ -117,11 +113,13 @@ public class VersioningServiceTest extends BaseTest
       String id = createDocument(testFolderId, "doc1");
       String pwcId = conn.checkout(id);
       Holder<String> pwcHolder = new Holder<String>(pwcId);
-      CmisObjectType pwc = TypeConverter.getCmisObjectType(conn.getObject(pwcId,false,IncludeRelationships.NONE, false, false,false,null,null));
+      CmisObjectType pwc =
+         TypeConverter.getCmisObjectType(conn.getObject(pwcId, false, IncludeRelationships.NONE, false, false, false,
+            null, null));
       CmisPropertyId versionSeriesIdProp = (CmisPropertyId)getProperty(pwc, CMIS.VERSION_SERIES_ID);
       String versionSeriesId = versionSeriesIdProp.getValue().get(0);
       List<CmisObjectType> allVersions =
-       TypeConverter.getListCmisObjectType(conn.getAllVersions(versionSeriesId, false, false, null));
+         TypeConverter.getListCmisObjectType(conn.getAllVersions(versionSeriesId, false, false, null));
       //      assertEquals(1, allVersions.size());
       assertEquals(2, allVersions.size());
       port.checkIn(//
@@ -154,7 +152,9 @@ public class VersioningServiceTest extends BaseTest
          null, // Remove ACL
          null // Policies
          );
-      CmisObjectType pwc = TypeConverter.getCmisObjectType(conn.getObject(pwcId,false,IncludeRelationships.NONE, false, false,false,null,null));
+      CmisObjectType pwc =
+         TypeConverter.getCmisObjectType(conn.getObject(pwcId, false, IncludeRelationships.NONE, false, false, false,
+            null, null));
       CmisPropertyId versionSeriesIdProp = (CmisPropertyId)getProperty(pwc, CMIS.VERSION_SERIES_ID);
       String versionSeriesId = versionSeriesIdProp.getValue().get(0);
       List<CmisObjectType> allVersions = port.getAllVersions(repositoryId, versionSeriesId, null, false, null);
@@ -178,7 +178,9 @@ public class VersioningServiceTest extends BaseTest
          null, // Remove ACL
          null // Policies
          );
-      CmisObjectType pwc = TypeConverter.getCmisObjectType(conn.getObject(pwcId,false,IncludeRelationships.NONE, false, false,false,null,null));
+      CmisObjectType pwc =
+         TypeConverter.getCmisObjectType(conn.getObject(pwcId, false, IncludeRelationships.NONE, false, false, false,
+            null, null));
       CmisPropertyId versionSeriesIdProp = (CmisPropertyId)getProperty(pwc, CMIS.VERSION_SERIES_ID);
       String versionSeriesId = versionSeriesIdProp.getValue().get(0);
 

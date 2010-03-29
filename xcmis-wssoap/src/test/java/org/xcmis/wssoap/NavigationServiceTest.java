@@ -50,8 +50,7 @@ public class NavigationServiceTest extends BaseTest
    public void setUp() throws Exception
    {
       super.setUp();
-      server =
-         complexDeployService(SERVICE_ADDRESS, new NavigationServicePortImpl(storageProvider), null, null, true);
+      server = complexDeployService(SERVICE_ADDRESS, new NavigationServicePortImpl(storageProvider), null, null, true);
       port = getNavigationService(SERVICE_ADDRESS);
       assertNotNull(server);
       assertNotNull(port);
@@ -85,17 +84,17 @@ public class NavigationServiceTest extends BaseTest
       assertEquals(testFolderId, getObjectId(parent));
    }
 
-//   public void testGetDescendants() throws Exception
-//   {
-//      String id = testFolderId;
-//      for (int i = 0; i < 5; i++)
-//         id = createFolder(id, "folder" + i);
-//
-//      List<CmisObjectInFolderContainerType> resp2 =
-//         port.getDescendants(repositoryId, testFolderId, BigInteger.valueOf(3), null, false,
-//            EnumIncludeRelationships.NONE, null, false, new CmisExtensionType());
-//      assertNotNull(resp2);
-//   }
+   //   public void testGetDescendants() throws Exception
+   //   {
+   //      String id = testFolderId;
+   //      for (int i = 0; i < 5; i++)
+   //         id = createFolder(id, "folder" + i);
+   //
+   //      List<CmisObjectInFolderContainerType> resp2 =
+   //         port.getDescendants(repositoryId, testFolderId, BigInteger.valueOf(3), null, false,
+   //            EnumIncludeRelationships.NONE, null, false, new CmisExtensionType());
+   //      assertNotNull(resp2);
+   //   }
 
    public void testGetObjectParents() throws Exception
    {

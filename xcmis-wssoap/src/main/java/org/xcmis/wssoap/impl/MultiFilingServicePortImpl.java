@@ -27,7 +27,6 @@ import org.xcmis.soap.MultiFilingServicePort;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.StorageProvider;
 
-
 /**
  * @author <a href="mailto:max.shaposhnik@exoplatform.com">Max Shaposhnik</a>
  * @version $Id: MultiFilingServicePortImpl.java 2 2010-02-04 17:21:49Z andrew00x $

@@ -71,7 +71,7 @@ public class PolicyServiceTest extends BaseTest
       List<CmisObjectType> policies = TypeConverter.getListCmisObjectType(conn.getAppliedPolicies(docId, false, null));
       assertEquals(1, policies.size());
       port.removePolicy(repositoryId, policyId, docId, new CmisExtensionType());
-      policies = TypeConverter.getListCmisObjectType(conn.getAppliedPolicies(docId, false,null));
+      policies = TypeConverter.getListCmisObjectType(conn.getAppliedPolicies(docId, false, null));
       assertEquals(0, policies.size());
    }
 

@@ -72,7 +72,6 @@ import org.xcmis.messaging.CmisRepositoryEntryType;
 import org.xcmis.messaging.CmisObjectParentsType;
 import org.xcmis.messaging.CmisTypeContainer;
 import org.xcmis.messaging.CmisTypeDefinitionListType;
-import org.xcmis.messaging.GetObject;
 import org.xcmis.spi.ACLCapability;
 import org.xcmis.spi.AccessControlEntry;
 import org.xcmis.spi.AllowableActions;
@@ -268,9 +267,9 @@ public class TypeConverter
       result.setProperties(props);
       result.setAcl(getCmisAccessControlListType(object.getACL()));
       if (object.getAllowableActions() != null)
-        result.setAllowableActions(getAllowableActionsType(object.getAllowableActions()));
+         result.setAllowableActions(getAllowableActionsType(object.getAllowableActions()));
       if (object.getChangeInfo() != null)
-        result.setChangeEventInfo(getChangeEventType(object.getChangeInfo()));
+         result.setChangeEventInfo(getChangeEventType(object.getChangeInfo()));
       result.setExactACL(object.isExactACL());
       result.setPolicyIds(getCmisListOfIdsType(object.getPolicyIds()));
       return result;
@@ -336,7 +335,8 @@ public class TypeConverter
    public static CmisObjectInFolderListType getCmisObjectInFolderListType(ItemsList<?> source)
    {
       CmisObjectInFolderListType result = new CmisObjectInFolderListType();
-      for (Object one: source.getItems()){
+      for (Object one : source.getItems())
+      {
          if (one instanceof CmisObject)
             result.getObjects().add(getCmisObjectInFolderType((CmisObject)one));
       }
@@ -353,33 +353,38 @@ public class TypeConverter
       return result;
    }
 
-         public static List<CmisTypeContainer> getCmisTypeContainer(List<ItemsTree<TypeDefinition>> source)
-         {
-            List <CmisTypeContainer> result = new ArrayList <CmisTypeContainer>();
-            for (ItemsTree<TypeDefinition> one : source) {
-               CmisTypeContainer containerType = new CmisTypeContainer();
-               CmisTypeDefinitionType type = getCmisTypeDefinitionType((TypeDefinition)one.getContainer());
-               containerType.setType(type);
-               while (one.getChildren() != null){
-                  containerType.getChildren().addAll(getCmisTypeContainer(one.getChildren()));
-               }
-               result.add(containerType);
-            }
-            return result;
-         }
-
-   public static List<CmisObjectInFolderContainerType> getCmisObjectInFolderContainerType (List<ItemsTree<CmisObject>> source)
+   public static List<CmisTypeContainer> getCmisTypeContainer(List<ItemsTree<TypeDefinition>> source)
    {
-     List<CmisObjectInFolderContainerType>  result = new ArrayList <CmisObjectInFolderContainerType>();
-     for (ItemsTree<CmisObject> one : source) {
-        CmisObjectInFolderContainerType containerType = new CmisObjectInFolderContainerType();
-        CmisObjectInFolderType type = getCmisObjectInFolderType(one.getContainer());
-        containerType.setObjectInFolder(type);
-        while (one.getChildren() != null){
-           containerType.getChildren().addAll(getCmisObjectInFolderContainerType(one.getChildren()));
-        }
-        result.add(containerType);
-     }
+      List<CmisTypeContainer> result = new ArrayList<CmisTypeContainer>();
+      for (ItemsTree<TypeDefinition> one : source)
+      {
+         CmisTypeContainer containerType = new CmisTypeContainer();
+         CmisTypeDefinitionType type = getCmisTypeDefinitionType((TypeDefinition)one.getContainer());
+         containerType.setType(type);
+         while (!one.getChildren().isEmpty())
+         {
+            containerType.getChildren().addAll(getCmisTypeContainer(one.getChildren()));
+         }
+         result.add(containerType);
+      }
+      return result;
+   }
+
+   public static List<CmisObjectInFolderContainerType> getCmisObjectInFolderContainerType(
+      List<ItemsTree<CmisObject>> source)
+   {
+      List<CmisObjectInFolderContainerType> result = new ArrayList<CmisObjectInFolderContainerType>();
+      for (ItemsTree<CmisObject> one : source)
+      {
+         CmisObjectInFolderContainerType containerType = new CmisObjectInFolderContainerType();
+         CmisObjectInFolderType type = getCmisObjectInFolderType(one.getContainer());
+         containerType.setObjectInFolder(type);
+         while (!one.getChildren().isEmpty())
+         {
+            containerType.getChildren().addAll(getCmisObjectInFolderContainerType(one.getChildren()));
+         }
+         result.add(containerType);
+      }
       return result;
    }
 
@@ -431,57 +436,32 @@ public class TypeConverter
 
    public static TypeDefinition getTypeDefinition(CmisTypeDefinitionType source)
    {
-      TypeDefinitionImpl result = new TypeDefinitionImpl(
-         source.getId(),
-         BaseType.fromValue(source.getBaseId().value()),
-         source.getQueryName(),
-         source.getLocalName(),
-         source.getLocalNamespace(),
-         source.getParentId(),
-         source.getDisplayName(),
-         source.getDescription(),
-         source.isCreatable(),
-         source.isFileable(),
-         source.isQueryable(),
-         source.isFulltextIndexed(),
-         source.isIncludedInSupertypeQuery(),
-         source.isControllablePolicy(),
-         source.isControllableACL(),
-         false,
-         null,
-         null,
-         ContentStreamAllowed.ALLOWED,
-         getPropertyDefinitionMap(source.getPropertyDefinition())
-      );
-   
+      TypeDefinitionImpl result =
+         new TypeDefinitionImpl(source.getId(), BaseType.fromValue(source.getBaseId().value()), source.getQueryName(),
+            source.getLocalName(), source.getLocalNamespace(), source.getParentId(), source.getDisplayName(), source
+               .getDescription(), source.isCreatable(), source.isFileable(), source.isQueryable(), source
+               .isFulltextIndexed(), source.isIncludedInSupertypeQuery(), source.isControllablePolicy(), source
+               .isControllableACL(), false, null, null, ContentStreamAllowed.ALLOWED, getPropertyDefinitionMap(source
+               .getPropertyDefinition()));
+
       return result;
    }
-   
-   
-   public static Map<String, PropertyDefinition<?>> getPropertyDefinitionMap(List<CmisPropertyDefinitionType> source) {
-      
-      Map<String,PropertyDefinition<?>> result = new HashMap<String,PropertyDefinition<?>>();
-      for (CmisPropertyDefinitionType one: source) {
-        result.put(one.getId(), new PropertyDefinitionImpl(one.getId(), 
-           one.getQueryName(),
-           one.getLocalName(), 
-           one.getLocalNamespace(),
-           one.getDisplayName(), 
-           one.getDescription(),
-           PropertyType.fromValue(one.getPropertyType().value()), 
-           Updatability.fromValue(one.getUpdatability().value()), 
-           one.isInherited(), 
-           one.isRequired(), 
-           one.isQueryable(), 
-           one.isOrderable(), 
-           one.isOpenChoice(), 
-           false, null, null));
-        
+
+   public static Map<String, PropertyDefinition<?>> getPropertyDefinitionMap(List<CmisPropertyDefinitionType> source)
+   {
+
+      Map<String, PropertyDefinition<?>> result = new HashMap<String, PropertyDefinition<?>>();
+      for (CmisPropertyDefinitionType one : source)
+      {
+         result.put(one.getId(), new PropertyDefinitionImpl(one.getId(), one.getQueryName(), one.getLocalName(), one
+            .getLocalNamespace(), one.getDisplayName(), one.getDescription(), PropertyType.fromValue(one
+            .getPropertyType().value()), Updatability.fromValue(one.getUpdatability().value()), one.isInherited(), one
+            .isRequired(), one.isQueryable(), one.isOrderable(), one.isOpenChoice(), false, null, null));
+
       }
       return result;
    }
-   
-   
+
    public static CmisRepositoryCapabilitiesType getCmisRepositoryCapabilitiesType(RepositoryCapabilities source)
    {
       CmisRepositoryCapabilitiesType result = new CmisRepositoryCapabilitiesType();
@@ -550,38 +530,47 @@ public class TypeConverter
    public static CmisProperty getCmisProperty(Property<?> source)
    {
       CmisProperty result = null;
-      if (source instanceof BooleanProperty){
-          result = new CmisPropertyBoolean();
-          ((CmisPropertyBoolean)result).getValue().addAll((Collection<? extends Boolean>)(source.getValues()));
+      if (source instanceof BooleanProperty)
+      {
+         result = new CmisPropertyBoolean();
+         ((CmisPropertyBoolean)result).getValue().addAll((Collection<? extends Boolean>)(source.getValues()));
       }
-      else if (source instanceof DateTimeProperty){
+      else if (source instanceof DateTimeProperty)
+      {
          result = new CmisPropertyDateTime();
-         ((CmisPropertyDateTime)result).getValue().addAll((Collection<? extends XMLGregorianCalendar>)(source.getValues()));
+         ((CmisPropertyDateTime)result).getValue().addAll(
+            (Collection<? extends XMLGregorianCalendar>)(source.getValues()));
       }
-       else if (source instanceof DecimalProperty){
-          result = new CmisPropertyDecimal();
-          ((CmisPropertyDecimal)result).getValue().addAll((Collection<? extends BigDecimal>)(source.getValues()));
-       }
-       else if (source instanceof HtmlProperty){
-          result = new CmisPropertyHtml();
-          ((CmisPropertyHtml)result).getValue().addAll((Collection<? extends String>)(source.getValues()));
-       }
-       else if (source instanceof IdProperty){
-          result = new CmisPropertyId();
-          ((CmisPropertyId)result).getValue().addAll((Collection<? extends String>)(source.getValues()));
-       }
-       else if (source instanceof IntegerProperty){
-          result = new CmisPropertyInteger();
-          ((CmisPropertyInteger)result).getValue().addAll((Collection<? extends BigInteger>)(source.getValues()));
-       }
-       else if (source instanceof StringProperty){
-          result = new CmisPropertyString();
-          ((CmisPropertyString)result).getValue().addAll((Collection<? extends String>)(source.getValues()));
-       }
-       else if (source instanceof UriProperty){
-          result = new CmisPropertyUri();
-          ((CmisPropertyUri)result).getValue().addAll((Collection<? extends String>)(source.getValues()));
-       }
+      else if (source instanceof DecimalProperty)
+      {
+         result = new CmisPropertyDecimal();
+         ((CmisPropertyDecimal)result).getValue().addAll((Collection<? extends BigDecimal>)(source.getValues()));
+      }
+      else if (source instanceof HtmlProperty)
+      {
+         result = new CmisPropertyHtml();
+         ((CmisPropertyHtml)result).getValue().addAll((Collection<? extends String>)(source.getValues()));
+      }
+      else if (source instanceof IdProperty)
+      {
+         result = new CmisPropertyId();
+         ((CmisPropertyId)result).getValue().addAll((Collection<? extends String>)(source.getValues()));
+      }
+      else if (source instanceof IntegerProperty)
+      {
+         result = new CmisPropertyInteger();
+         ((CmisPropertyInteger)result).getValue().addAll((Collection<? extends BigInteger>)(source.getValues()));
+      }
+      else if (source instanceof StringProperty)
+      {
+         result = new CmisPropertyString();
+         ((CmisPropertyString)result).getValue().addAll((Collection<? extends String>)(source.getValues()));
+      }
+      else if (source instanceof UriProperty)
+      {
+         result = new CmisPropertyUri();
+         ((CmisPropertyUri)result).getValue().addAll((Collection<? extends String>)(source.getValues()));
+      }
       result.setDisplayName(source.getDisplayName());
       result.setLocalName(source.getLocalName());
       result.setPropertyDefinitionId(source.getId());

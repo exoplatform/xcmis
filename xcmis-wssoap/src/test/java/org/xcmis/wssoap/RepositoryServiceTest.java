@@ -58,8 +58,7 @@ public class RepositoryServiceTest extends BaseTest
    public void setUp() throws Exception
    {
       super.setUp();
-      server =
-         complexDeployService(SERVICE_ADDRESS, new RepositoryServicePortImpl(storageProvider), null, null, true);
+      server = complexDeployService(SERVICE_ADDRESS, new RepositoryServicePortImpl(storageProvider), null, null, true);
       port = getRepositoryService(SERVICE_ADDRESS);
       assertNotNull(server);
       assertNotNull(port);
@@ -90,7 +89,7 @@ public class RepositoryServiceTest extends BaseTest
       pd.setPropertyType(EnumPropertyType.STRING);
       pd.setUpdatability(EnumUpdatability.READWRITE);
       article.getPropertyDefinition().add(pd);
-      
+
       conn.addType(TypeConverter.getTypeDefinition(article));
    }
 
@@ -108,16 +107,14 @@ public class RepositoryServiceTest extends BaseTest
 
    public void testGetTypeDefinition() throws Exception
    {
-      CmisTypeDefinitionType docType =
-         port.getTypeDefinition(repositoryId, "cmis:document", new CmisExtensionType());
+      CmisTypeDefinitionType docType = port.getTypeDefinition(repositoryId, "cmis:document", new CmisExtensionType());
       assertNotNull(docType);
    }
 
    public void testGetTypeDescendants() throws Exception
    {
       List<CmisTypeContainer> typeDescendants =
-         port.getTypeDescendants(repositoryId, "cmis:document", BigInteger.valueOf(1), true,
-            new CmisExtensionType());
+         port.getTypeDescendants(repositoryId, "cmis:document", BigInteger.valueOf(1), true, new CmisExtensionType());
       assertEquals(1, typeDescendants.size());
       CmisTypeContainer level1 = typeDescendants.get(0);
       assertEquals("cmis:article", level1.getType().getId());
