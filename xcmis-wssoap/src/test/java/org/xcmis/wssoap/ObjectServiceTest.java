@@ -33,6 +33,7 @@ import org.xcmis.messaging.CmisContentStreamType;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.soap.ObjectServicePort;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.ChangeTokenHolder;
 import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.data.BaseContentStream;
@@ -185,6 +186,7 @@ public class ObjectServiceTest extends BaseTest
       {
          fail("Relationship not found.");
       }
+      conn.deleteObject(created.value, true);
    }
 
    public void testCreatePolicy() throws Exception
@@ -192,15 +194,23 @@ public class ObjectServiceTest extends BaseTest
       // typeId
       CmisPropertyId propTypeId = new CmisPropertyId();
       propTypeId.setPropertyDefinitionId(CMIS.OBJECT_TYPE_ID);
+      propTypeId.setLocalName(CMIS.OBJECT_TYPE_ID);
       propTypeId.getValue().add(EnumBaseObjectTypeIds.CMIS_POLICY.value());
       // name
       CmisPropertyString propName = new CmisPropertyString();
       propName.setPropertyDefinitionId(CMIS.NAME);
+      propName.setLocalName(CMIS.NAME);
       propName.getValue().add("policy1");
+      
+      CmisPropertyString propText = new CmisPropertyString();
+      propText.setPropertyDefinitionId(CMIS.POLICY_TEXT);
+      propText.setLocalName(CMIS.POLICY_TEXT);
+      propText.getValue().add("policy1");
 
       CmisPropertiesType props = new CmisPropertiesType();
       props.getProperty().add(propTypeId);
       props.getProperty().add(propName);
+      props.getProperty().add(propText);
 
       javax.xml.ws.Holder<String> created = new javax.xml.ws.Holder<String>();
       port.createPolicy(//
@@ -231,12 +241,12 @@ public class ObjectServiceTest extends BaseTest
       String updated = conn.setContentStream(//
          docId, //
          stream, //
-         null, // change token
+         new ChangeTokenHolder(), // change token
          true // overwrite
          );
       Holder<String> hId = new Holder<String>(updated);
 
-      ContentStream cs = conn.getContentStream(hId.value, null, 0, -1);
+      ContentStream cs = conn.getContentStream(updated, null, 0, -1);
       byte b[] = new byte[1024];
       int rd = cs.getStream().read(b);
       assertEquals(content, new String(b, 0, rd));
@@ -337,9 +347,7 @@ public class ObjectServiceTest extends BaseTest
    public void testSetContentStream() throws Exception
    {
       String docId = createDocument(testFolderId, "doc1");
-      ContentStream cs = conn.getContentStream(docId, null, 0, -1);
-      assertNull(cs); // no content
-
+      
       String content = "hello";
       Holder<String> hId = new Holder<String>(docId);
       CmisContentStreamType contentStreamType = new CmisContentStreamType();
@@ -355,7 +363,7 @@ public class ObjectServiceTest extends BaseTest
          new Holder<CmisExtensionType>() // Extension
          );
 
-      cs = conn.getContentStream(hId.value, null, 0, -1);
+      ContentStream cs = conn.getContentStream(hId.value, null, 0, -1);
       byte[] b = new byte[128];
       int rd = cs.getStream().read(b);
       assertEquals(content, new String(b, 0, rd));

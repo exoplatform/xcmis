@@ -35,7 +35,6 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.security.ConversationState;
 import org.exoplatform.services.security.Identity;
-import org.xcmis.core.AccessControlService;
 import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.CmisPropertiesType;
 import org.xcmis.core.CmisProperty;
@@ -43,22 +42,12 @@ import org.xcmis.core.CmisPropertyId;
 import org.xcmis.core.CmisPropertyString;
 import org.xcmis.core.EnumBaseObjectTypeIds;
 import org.xcmis.core.EnumPropertiesRelationship;
-import org.xcmis.core.EnumVersioningState;
-import org.xcmis.core.NavigationService;
-import org.xcmis.core.ObjectService;
-import org.xcmis.core.PolicyService;
-import org.xcmis.core.RelationshipService;
-import org.xcmis.core.RepositoryService;
-import org.xcmis.core.VersioningService;
 import org.xcmis.spi.BaseType;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.StorageProvider;
-import org.xcmis.spi.UnfileObject;
 import org.xcmis.spi.VersioningState;
-import org.xcmis.spi.data.Folder;
-import org.xcmis.spi.data.ObjectData;
 import org.xcmis.spi.object.CmisObject;
 import org.xcmis.wssoap.impl.TypeConverter;
 
@@ -73,13 +62,13 @@ public abstract class BaseTest extends TestCase
    protected String repositoryId = "cmis1";
 
    protected StandaloneContainer container;
-   
+
    protected StorageProvider storageProvider;
-   
+
    protected Connection conn;
-   
+
    protected String rootFolderId;
-   
+
    protected String testFolderId;
 
    public void setUp() throws Exception
@@ -88,31 +77,24 @@ public abstract class BaseTest extends TestCase
       StandaloneContainer.addConfigurationURL(containerConf);
       container = StandaloneContainer.getInstance();
 
-      
       ConversationState state = new ConversationState(new Identity("root"));
       ConversationState.setCurrent(state);
-
-//      cmisRepositoryService = (RepositoryService)container.getComponentInstanceOfType(RepositoryService.class);
-//      objectService = (ObjectService)container.getComponentInstanceOfType(ObjectService.class);
-//      navigationService = (NavigationService)container.getComponentInstanceOfType(NavigationService.class);
-//      relationshipService = (RelationshipService)container.getComponentInstanceOfType(RelationshipService.class);
-//      versioningService = (VersioningService)container.getComponentInstanceOfType(VersioningService.class);
-//      policyService = (PolicyService)container.getComponentInstanceOfType(PolicyService.class);
-//      aclService = (AccessControlService)container.getComponentInstanceOfType(AccessControlService.class);
-
-      //repository = cmisRepositoryService.getRepository(repositoryId);
-      
-      
-
 
       storageProvider = (StorageProvider)container.getComponentInstanceOfType(StorageProvider.class);
 
       conn = storageProvider.getConnection(repositoryId, null);
-      
+
       rootFolderId = conn.getStorage().getRepositoryInfo().getRootFolderId();
-      testFolderId = createFolder(rootFolderId, "testFolder");
-     
-      
+      try
+      {
+         testFolderId = createFolder(rootFolderId, "testFolder");
+      }
+      catch (Exception e)
+      {
+         clearRoot();
+         testFolderId = createFolder(rootFolderId, "testFolder");
+      }
+
    }
 
    /**
@@ -183,9 +165,8 @@ public abstract class BaseTest extends TestCase
 
       props.getProperty().add(propTypeId);
       props.getProperty().add(propName);
-      return 
-         conn.createDocument(parentId, TypeConverter.getPropertyMap(props), null, null, null,
-            null,VersioningState.MAJOR);
+      return conn.createDocument(parentId, TypeConverter.getPropertyMap(props), null, null, null, null,
+         VersioningState.MAJOR);
    }
 
    protected String createFolder(String parentId, String name) throws Exception
@@ -202,8 +183,8 @@ public abstract class BaseTest extends TestCase
 
       props.getProperty().add(propTypeId);
       props.getProperty().add(propName);
-      return   conn.createFolder( parentId, TypeConverter.getPropertyMap(props), null, null, null);
-      
+      return conn.createFolder(parentId, TypeConverter.getPropertyMap(props), null, null, null);
+
    }
 
    protected String createPolicy(String parentId, String name, String policyText) throws Exception
@@ -212,14 +193,17 @@ public abstract class BaseTest extends TestCase
       // typeId
       CmisPropertyId propTypeId = new CmisPropertyId();
       propTypeId.setPropertyDefinitionId(CMIS.OBJECT_TYPE_ID);
+      propTypeId.setLocalName(CMIS.OBJECT_TYPE_ID);
       propTypeId.getValue().add(EnumBaseObjectTypeIds.CMIS_POLICY.value());
       // name
       CmisPropertyString propName = new CmisPropertyString();
       propName.setPropertyDefinitionId(CMIS.NAME);
+      propName.setLocalName(CMIS.NAME);
       propName.getValue().add(name);
       // text
       CmisPropertyString propText = new CmisPropertyString();
       propText.setPropertyDefinitionId(CMIS.POLICY_TEXT);
+      propText.setLocalName(CMIS.POLICY_TEXT);
       propText.getValue().add(name);
 
       props.getProperty().add(propTypeId);
@@ -272,7 +256,6 @@ public abstract class BaseTest extends TestCase
       return null;
    }
 
-   
    private void deleteObject(CmisObject obj)
    {
       String objId = obj.getObjectInfo().getId();
@@ -302,41 +285,40 @@ public abstract class BaseTest extends TestCase
 
    }
 
-   
    protected ItemsList<CmisObject> getChildren(String folderId)
    {
       return conn.getChildren(folderId, false, null, false, true, CMIS.WILDCARD, null, null, -1, 0);
    }
 
-
-   
    protected void tearDown() throws Exception
    {
-      
-//      for (Iterator<Entry> iter = conn.getCheckedOutDocs(testFolderId); iter.hasNext();)
-//         iter.next().delete();
-      
-      conn.close();
-      super.tearDown();
-      
-   // TODO to remove this "if" statement when it was fixed for JCR storage
-      try
-      {
-         if (conn.getCheckedOutDocs(rootFolderId, false, null, true, null, null, null, -1, 0) != null)
-         {
-            for (Iterator<CmisObject> iter =
-               conn.getCheckedOutDocs(rootFolderId, false, null, true, null, null, null, -1, 0).getItems().iterator(); iter
-               .hasNext();)
-            {
-               conn.deleteObject(iter.next().getObjectInfo().getId(), null);
-            }
-         }
-      }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-      }
 
+      // TODO to remove this "if" statement when it was fixed for JCR storage
+      //      try
+      //      {
+      //         if (conn.getCheckedOutDocs(rootFolderId, false, IncludeRelationships.NONE, true, null, null, null, -1, 0) != null)
+      //         {
+      //            for (Iterator<CmisObject> iter =
+      //               conn.getCheckedOutDocs(rootFolderId, false, IncludeRelationships.NONE, true, null, null, null, -1, 0).getItems().iterator(); iter
+      //               .hasNext();)
+      //            {
+      //               conn.deleteObject(iter.next().getObjectInfo().getId(), null);
+      //            }
+      //         }
+      //      }
+      //      catch (Exception e)
+      //      {
+      //         e.printStackTrace();
+      //      }
+
+      clearRoot();
+
+      super.tearDown();
+      conn.close();
+   }
+
+   private void clearRoot()
+   {
       try
       {
          for (Iterator<CmisObject> iter = getChildren(rootFolderId).getItems().iterator(); iter.hasNext();)
@@ -345,20 +327,9 @@ public abstract class BaseTest extends TestCase
             deleteObject(obj);
          }
       }
-      catch (Exception e)
+      catch (Exception ex)
       {
-         e.printStackTrace();
+         ex.printStackTrace();
       }
-
-      try
-      {
-         conn.deleteObject(testFolderId, null);
-      }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-      }
-
    }
-
 }

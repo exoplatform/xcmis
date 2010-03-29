@@ -70,11 +70,11 @@ public class ACLServiceTest extends BaseTest
       CmisAccessControlListType addACL = new CmisAccessControlListType();
       CmisAccessControlListType removeACL = new CmisAccessControlListType();
 
-      CmisAccessControlEntryType entry1 = new CmisAccessControlEntryType();
-      CmisAccessControlPrincipalType principal1 = new CmisAccessControlPrincipalType();
-      principal1.setPrincipalId("Makis");
-      entry1.setPrincipal(principal1);
-      entry1.getPermission().add(EnumBasicPermissions.CMIS_WRITE.value());
+//      CmisAccessControlEntryType entry1 = new CmisAccessControlEntryType();
+//      CmisAccessControlPrincipalType principal1 = new CmisAccessControlPrincipalType();
+//      principal1.setPrincipalId("Makis");
+//      entry1.setPrincipal(principal1);
+//      entry1.getPermission().add(EnumBasicPermissions.CMIS_WRITE.value());
 
       CmisAccessControlEntryType entry2 = new CmisAccessControlEntryType();
       CmisAccessControlPrincipalType principal2 = new CmisAccessControlPrincipalType();
@@ -83,7 +83,7 @@ public class ACLServiceTest extends BaseTest
       entry2.getPermission().add(EnumBasicPermissions.CMIS_READ.value());
       entry2.getPermission().add(EnumBasicPermissions.CMIS_WRITE.value());
 
-      addACL.getPermission().add(entry1);
+      //addACL.getPermission().add(entry1);
       addACL.getPermission().add(entry2);
 
       port.applyACL(repositoryId, //
@@ -97,12 +97,13 @@ public class ACLServiceTest extends BaseTest
       assertNotNull(acl.getPermission());
       for (CmisAccessControlEntryType ace : acl.getPermission())
       {
-         if ("Makis".equals(ace.getPrincipal().getPrincipalId()))
-         {
-            assertEquals(1, ace.getPermission().size());
-            assertEquals(EnumBasicPermissions.CMIS_WRITE.value(), ace.getPermission().get(0));
-         }
-         else if ("root".equals(ace.getPrincipal().getPrincipalId()))
+//         if ("Makis".equals(ace.getPrincipal().getPrincipalId()))
+//         {
+//            assertEquals(1, ace.getPermission().size());
+//            assertEquals(EnumBasicPermissions.CMIS_WRITE.value(), ace.getPermission().get(0));
+//         }
+//         else 
+         if ("root".equals(ace.getPrincipal().getPrincipalId()))
          {
             if (1 == ace.getPermission().size())
             {

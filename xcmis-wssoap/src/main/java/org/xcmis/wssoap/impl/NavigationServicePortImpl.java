@@ -142,6 +142,7 @@ public class NavigationServicePortImpl implements NavigationServicePort
       }
       catch (Exception e)
       {
+         e.printStackTrace();
          LOG.error("Get children error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
       }
@@ -177,6 +178,7 @@ public class NavigationServicePortImpl implements NavigationServicePort
       }
       catch (Exception e)
       {
+         e.printStackTrace();
          LOG.error("Get descendants error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
       }

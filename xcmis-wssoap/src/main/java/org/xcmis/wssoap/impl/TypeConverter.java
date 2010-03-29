@@ -19,6 +19,7 @@
 package org.xcmis.wssoap.impl;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -76,6 +77,7 @@ import org.xcmis.spi.ACLCapability;
 import org.xcmis.spi.AccessControlEntry;
 import org.xcmis.spi.AllowableActions;
 import org.xcmis.spi.BaseType;
+import org.xcmis.spi.ContentStreamAllowed;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.PropertyDefinition;
@@ -185,9 +187,12 @@ public class TypeConverter
    public static List<AccessControlEntry> getCmisListAccessControlEntry(CmisAccessControlListType source)
    {
       List<AccessControlEntry> result = new ArrayList<AccessControlEntry>();
-      for (CmisAccessControlEntryType one : source.getPermission())
+      if (source != null && source.getPermission().size() > 0)
       {
-         result.add(getAccessControlEntry(one));
+         for (CmisAccessControlEntryType one : source.getPermission())
+         {
+            result.add(getAccessControlEntry(one));
+         }
       }
       return result;
    }
@@ -262,8 +267,10 @@ public class TypeConverter
       }
       result.setProperties(props);
       result.setAcl(getCmisAccessControlListType(object.getACL()));
-      result.setAllowableActions(getAllowableActionsType(object.getAllowableActions()));
-      result.setChangeEventInfo(getChangeEventType(object.getChangeInfo()));
+      if (object.getAllowableActions() != null)
+        result.setAllowableActions(getAllowableActionsType(object.getAllowableActions()));
+      if (object.getChangeInfo() != null)
+        result.setChangeEventInfo(getChangeEventType(object.getChangeInfo()));
       result.setExactACL(object.isExactACL());
       result.setPolicyIds(getCmisListOfIdsType(object.getPolicyIds()));
       return result;
@@ -326,11 +333,13 @@ public class TypeConverter
       return result;
    }
 
-   @SuppressWarnings("unchecked")
    public static CmisObjectInFolderListType getCmisObjectInFolderListType(ItemsList<?> source)
    {
       CmisObjectInFolderListType result = new CmisObjectInFolderListType();
-      result.getObjects().addAll((List<CmisObjectInFolderType>)source.getItems()); //TODO: right ?
+      for (Object one: source.getItems()){
+         if (one instanceof CmisObject)
+            result.getObjects().add(getCmisObjectInFolderType((CmisObject)one));
+      }
       result.setHasMoreItems(source.isHasMoreItems());
       result.setNumItems(BigInteger.valueOf(source.getNumItems()));
       return result;
@@ -422,34 +431,51 @@ public class TypeConverter
 
    public static TypeDefinition getTypeDefinition(CmisTypeDefinitionType source)
    {
-      TypeDefinitionImpl result = new TypeDefinitionImpl();
-      result.setBaseId(BaseType.fromValue(source.getBaseId().value()));
-      result.setControllableACL(source.isControllableACL());
-      result.setControllablePolicy(source.isControllablePolicy());
-      result.setCreatable(source.isCreatable());
-      result.setDescription(source.getDescription());
-      result.setDisplayName(source.getDisplayName());
-      result.setFileable(source.isFileable());
-      result.setFulltextIndexed(source.isFulltextIndexed());
-      result.setId(source.getId());
-      result.setIncludedInSupertypeQuery(source.isIncludedInSupertypeQuery());
-      result.setLocalName(source.getLocalName());
-      result.setLocalNamespace(source.getLocalNamespace());
-      result.setParentId(source.getParentId());
-      result.setQueryable(source.isQueryable());
-      result.setQueryName(source.getQueryName());
-      result.getPropertyDefinitions().addAll(getPropertyDefinitionList(source.getPropertyDefinition()));
+      TypeDefinitionImpl result = new TypeDefinitionImpl(
+         source.getId(),
+         BaseType.fromValue(source.getBaseId().value()),
+         source.getQueryName(),
+         source.getLocalName(),
+         source.getLocalNamespace(),
+         source.getParentId(),
+         source.getDisplayName(),
+         source.getDescription(),
+         source.isCreatable(),
+         source.isFileable(),
+         source.isQueryable(),
+         source.isFulltextIndexed(),
+         source.isIncludedInSupertypeQuery(),
+         source.isControllablePolicy(),
+         source.isControllableACL(),
+         false,
+         null,
+         null,
+         ContentStreamAllowed.ALLOWED,
+         getPropertyDefinitionMap(source.getPropertyDefinition())
+      );
+   
       return result;
    }
    
    
-   public static List<PropertyDefinition<?>> getPropertyDefinitionList(List<CmisPropertyDefinitionType> source) {
+   public static Map<String, PropertyDefinition<?>> getPropertyDefinitionMap(List<CmisPropertyDefinitionType> source) {
       
-      List<PropertyDefinition<?>> result = new ArrayList<PropertyDefinition<?>>();
+      Map<String,PropertyDefinition<?>> result = new HashMap<String,PropertyDefinition<?>>();
       for (CmisPropertyDefinitionType one: source) {
-        result.add(new PropertyDefinitionImpl(one.getId(), one.getQueryName(),one.getLocalName(), 
-           one.getLocalNamespace(),one.getDisplayName(), one.getDescription(),PropertyType.fromValue(one.getPropertyType().value()), 
-           Updatability.fromValue(one.getUpdatability().value()), one.isInherited(), one.isRequired(), one.isQueryable(), one.isOrderable(), one.isOpenChoice(), false, null, null));
+        result.put(one.getId(), new PropertyDefinitionImpl(one.getId(), 
+           one.getQueryName(),
+           one.getLocalName(), 
+           one.getLocalNamespace(),
+           one.getDisplayName(), 
+           one.getDescription(),
+           PropertyType.fromValue(one.getPropertyType().value()), 
+           Updatability.fromValue(one.getUpdatability().value()), 
+           one.isInherited(), 
+           one.isRequired(), 
+           one.isQueryable(), 
+           one.isOrderable(), 
+           one.isOpenChoice(), 
+           false, null, null));
         
       }
       return result;
@@ -520,9 +546,42 @@ public class TypeConverter
       return result;
    }
 
+   @SuppressWarnings("unchecked")
    public static CmisProperty getCmisProperty(Property<?> source)
    {
-      CmisProperty result = new CmisProperty();
+      CmisProperty result = null;
+      if (source instanceof BooleanProperty){
+          result = new CmisPropertyBoolean();
+          ((CmisPropertyBoolean)result).getValue().addAll((Collection<? extends Boolean>)(source.getValues()));
+      }
+      else if (source instanceof DateTimeProperty){
+         result = new CmisPropertyDateTime();
+         ((CmisPropertyDateTime)result).getValue().addAll((Collection<? extends XMLGregorianCalendar>)(source.getValues()));
+      }
+       else if (source instanceof DecimalProperty){
+          result = new CmisPropertyDecimal();
+          ((CmisPropertyDecimal)result).getValue().addAll((Collection<? extends BigDecimal>)(source.getValues()));
+       }
+       else if (source instanceof HtmlProperty){
+          result = new CmisPropertyHtml();
+          ((CmisPropertyHtml)result).getValue().addAll((Collection<? extends String>)(source.getValues()));
+       }
+       else if (source instanceof IdProperty){
+          result = new CmisPropertyId();
+          ((CmisPropertyId)result).getValue().addAll((Collection<? extends String>)(source.getValues()));
+       }
+       else if (source instanceof IntegerProperty){
+          result = new CmisPropertyInteger();
+          ((CmisPropertyInteger)result).getValue().addAll((Collection<? extends BigInteger>)(source.getValues()));
+       }
+       else if (source instanceof StringProperty){
+          result = new CmisPropertyString();
+          ((CmisPropertyString)result).getValue().addAll((Collection<? extends String>)(source.getValues()));
+       }
+       else if (source instanceof UriProperty){
+          result = new CmisPropertyUri();
+          ((CmisPropertyUri)result).getValue().addAll((Collection<? extends String>)(source.getValues()));
+       }
       result.setDisplayName(source.getDisplayName());
       result.setLocalName(source.getLocalName());
       result.setPropertyDefinitionId(source.getId());

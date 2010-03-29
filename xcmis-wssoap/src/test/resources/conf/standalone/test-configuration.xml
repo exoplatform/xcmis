@@ -117,13 +117,13 @@
                            <field name="workspace">
                               <string>ws1</string>
                            </field>
-                           <field name="indexConfiguration">
-                              <object type="org.xcmis.sp.jcr.exo.IndexConfiguration">
-                                 <field name="indexPath">
-                                    <string>target/temp/index/db1/ws1</string>
-                                 </field>
-                              </object>
-                           </field>
+                            <field name="indexConfiguration">
+				<object type="org.xcmis.search.config.IndexConfigurationImpl">
+			 	<field name="indexDir">
+				<string>target/temp/index/db1/ws1</string>
+			        </field>
+				</object>
+				</field>
                            <field name="properties">
                               <map type="java.util.HashMap">
                                  <entry>
