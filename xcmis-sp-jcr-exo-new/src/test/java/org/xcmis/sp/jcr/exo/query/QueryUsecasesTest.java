@@ -884,45 +884,50 @@ public class QueryUsecasesTest extends BaseQueryTest
       checkResult(result, new Document[]{doc2});
    }
 
-   //
-   //   /**
-   //    * Test not equal comparison (<>) string.
-   //    * <p>
-   //    * Initial data:
-   //    * <ul>
-   //    * <li>doc1: <b>Title</b> - node1 <b>strprop</b> - test word first
-   //    * <li>doc2: <b>Title</b> - node2 <b>strprop</b> - test word second
-   //    * </ul>
-   //    * <p>
-   //    * Query : Select all documents property strprop not equal to
-   //    * "test word second".
-   //    * <p>
-   //    * Expected result: doc1.
-   //    * 
-   //    * @throws Exception if an unexpected error occurs
-   //    */
-   //   public void testNotEqualString() throws Exception
-   //   {
-   //      // create data
-   //      String name = "fileCS2.doc";
-   //      String name2 = "fileCS3.doc";
-   //      String contentType = "text/plain";
-   //
-   //      Document folder = createFolder(root, "CASETest");
-   //
-   //      Document doc1 = createDocument(folder.getObjectId(), name, new byte[0], contentType);
-   //      doc1.setString("strprop", "test word first");
-   //
-   //      Document doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
-   //      doc2.setString("strprop", "test word second");
-   //
-   //      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE strprop <> 'test word second'";
-   //
-   //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = storage.query(query);
-   //
-   //      checkResult(result, new Document[]{doc1});
-   //   }
+   /**
+    * Test not equal comparison (<>) string.
+    * <p>
+    * Initial data:
+    * <ul>
+    * <li>doc1: <b>Title</b> - node1 <b>strprop</b> - test word first
+    * <li>doc2: <b>Title</b> - node2 <b>strprop</b> - test word second
+    * </ul>
+    * <p>
+    * Query : Select all documents property strprop not equal to
+    * "test word second".
+    * <p>
+    * Expected result: doc1.
+    * 
+    * @throws Exception if an unexpected error occurs
+    */
+   public void testNotEqualString() throws Exception
+   {
+      // create data
+      String name = "fileCS2.doc";
+      String name2 = "fileCS3.doc";
+      String contentType = "text/plain";
+
+      Folder folder = createFolder(testRoot, "CASETest", "cmis:folder");
+      storage.saveObject(folder);
+
+      Document doc1 = createDocument(folder, name, NASA_DOCUMENT, new byte[0], contentType);
+      doc1.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+         PROPERTY_COMMANDER, "test word first"));
+      storage.saveObject(doc1);
+
+      Document doc2 = createDocument(folder, name2, NASA_DOCUMENT, new byte[0], contentType);
+      doc2.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+         PROPERTY_COMMANDER, "test word second"));
+      storage.saveObject(doc2);
+
+      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE " + PROPERTY_COMMANDER + " <> 'test word second'";
+
+      Query query = new Query(statement, true);
+      ItemsIterator<Result> result = storage.query(query);
+
+      checkResult(result, new Document[]{doc1});
+   }
+
    //
    //   /**
    //    * Test fulltext search from jcr:content.
