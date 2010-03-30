@@ -23,6 +23,7 @@ import org.exoplatform.commons.utils.ISO8601;
 import org.xcmis.search.model.Limit;
 import org.xcmis.search.model.Query;
 import org.xcmis.search.model.column.Column;
+import org.xcmis.search.model.column.Column.ScoreFunction;
 import org.xcmis.search.model.constraint.And;
 import org.xcmis.search.model.constraint.ChildNode;
 import org.xcmis.search.model.constraint.Comparison;
@@ -482,7 +483,7 @@ columnFunction returns [Column res]
   {	SelectorName sname = getDefaultSelectorName();
 		if(sname == null)
 		  throw new TreeWalkerException("There is more than one table. Use selector or table name. Column SCORE()");
-		res = new Column(sname, columnName, columnName);  
+		res = new Column(new ScoreFunction(), columnName);  
 	}
 
   //	|	^(UPPER qualifier? propertyName)
