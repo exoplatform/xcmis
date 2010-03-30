@@ -1,0 +1,95 @@
+/**
+ *  Copyright (C) 2010 eXo Platform SAS.
+ *
+ *  This is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License as
+ *  published by the Free Software Foundation; either version 2.1 of
+ *  the License, or (at your option) any later version.
+ *
+ *  This software is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this software; if not, write to the Free
+ *  Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ *  02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ */
+
+package org.xcmis.gwtframework.client.services.relationship;
+
+import org.xcmis.gwtframework.client.CmisArguments;
+import org.xcmis.gwtframework.client.model.EnumRelationshipDirection;
+import org.xcmis.gwtframework.client.model.restatom.EntryCollection;
+import org.xcmis.gwtframework.client.services.relationship.event.RelationshipsReceivedEvent;
+import org.xcmis.gwtframework.client.unmarshallers.EntryCollectionUnmarshaller;
+import org.xcmis.gwtframework.client.util.AsyncRequest;
+import org.xcmis.gwtframework.client.util.AsyncRequestCallback;
+
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.http.client.RequestBuilder;
+
+/**
+ * Created by The eXo Platform SAS.
+ *	
+ * @author <a href="mailto:zhulevaanna@gmail.com">Ann Zhuleva</a>
+ * @version $Id:   ${date} ${time}
+ *
+ */
+public class RelationshipServicesImpl extends RelationshipServices
+{
+   /**
+    * Event bus.
+    */
+   private HandlerManager eventBus;
+
+   /**
+    * @param eventBus eventBus
+    */
+   public RelationshipServicesImpl(HandlerManager eventBus)
+   {
+      this.eventBus = eventBus;
+   }
+   
+   /**
+    * @see org.xcmis.gwtframework.client.services.relationship
+    *    .RelationshipServices#getObjectRelationships(java.lang.String, boolean, 
+    *    org.xcmis.gwtframework.client.model.EnumRelationshipDirection, java.lang.String, 
+    *    int, int, java.lang.String, boolean)
+    *    
+    * @param url url
+    * @param includeSubRelationshipTypes include sub relationship types
+    * @param relationshipDirection relationship direction
+    * @param typeId type id
+    * @param maxItems max items
+    * @param skipCount skip count
+    * @param filter filter
+    * @param includeAllowableActions include allowable actions
+    */
+   @Override
+   public void getObjectRelationships(String url, boolean includeSubRelationshipTypes,
+      EnumRelationshipDirection relationshipDirection, String typeId, int maxItems, 
+      int skipCount, String filter, boolean includeAllowableActions)
+   {
+      EntryCollection relationships = new EntryCollection();
+      RelationshipsReceivedEvent event = 
+         new RelationshipsReceivedEvent(relationships, relationshipDirection);
+      EntryCollectionUnmarshaller unmarshaller = new EntryCollectionUnmarshaller(relationships);
+
+      String params = "";
+      params += (maxItems < 0) ? "" : CmisArguments.MAX_ITEMS + "=" + maxItems + "&";
+      params += (skipCount < 0) ? "" : CmisArguments.SKIP_COUNT + "=" + skipCount + "&";
+      params += (filter == null || filter.length() <= 0) ? "" : CmisArguments.FILTER + "=" 
+             + filter + "&";
+      params += CmisArguments.INCLUDE_ALLOWABLE_ACTIONS + "=" + includeAllowableActions + "&";
+      params += CmisArguments.INCLUDE_SUB_RELATIONSHIP_TYPES + "=" + includeSubRelationshipTypes;
+      params += (skipCount < 0) ? "" : CmisArguments.SKIP_COUNT + "=" + skipCount;
+      params +=
+         (relationshipDirection == null) ? "" : CmisArguments.RELATIONSHIP_DIRECTION + "="
+            + relationshipDirection.value();
+
+      AsyncRequestCallback callback = new AsyncRequestCallback(eventBus, unmarshaller, event);
+      AsyncRequest.build(RequestBuilder.GET, url + "?" + params).send(callback);
+   }
+}
