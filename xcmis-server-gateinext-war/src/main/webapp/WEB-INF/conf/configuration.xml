@@ -1,0 +1,122 @@
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.exoplaform.org/xml/ns/kernel_1_1.xsd
+http://www.exoplaform.org/xml/ns/kernel_1_1.xsd" xmlns="http://www.exoplaform.org/xml/ns/kernel_1_1.xsd">
+   <component>
+      <type>org.xcmis.sp.jcr.exo.RepositoriesManagerImpl</type>
+      <init-params>
+         <object-param>
+            <name>configs</name>
+            <object type="org.xcmis.sp.jcr.exo.RepositoriesManagerImpl$ServiceConfig">
+               <field name="configs">
+                  <collection type="java.util.ArrayList">
+                     <value>
+                        <object type="org.xcmis.sp.jcr.exo.CMISRepositoryConfiguration">
+                           <field name="id">
+                              <!-- ID of CMIS repository -->
+                              <string>cmis1</string>
+                           </field>
+                           <field name="repository">
+                              <string>repository</string>
+                           </field>
+                           <field name="workspace">
+                              <string>cmis</string>
+                           </field>
+                           <field name="indexConfiguration">
+                              <object type="org.xcmis.sp.jcr.exo.IndexConfiguration">
+                                 <field name="indexPath">
+                                    <string>../temp/cmis-index/repository/cmis</string>
+                                 </field>
+                              </object>
+                           </field>
+                           <field name="properties">
+                              <map type="java.util.HashMap">
+                                 <entry>
+                                    <key>
+                                       <string>exo.cmis.changetoken.feature</string>
+                                    </key>
+                                    <value>
+                                       <!-- Enable/Disable change token feature. -->
+                                       <boolean>false</boolean>
+                                    </value>
+                                 </entry>
+                              </map>
+                           </field>
+                        </object>
+                     </value>
+                  </collection>
+               </field>
+            </object>
+         </object-param>
+      </init-params>
+   </component>
+
+   <external-component-plugins>
+      <target-component>org.exoplatform.services.jcr.RepositoryService</target-component>
+      <component-plugin>
+         <name>register.listener</name>
+         <set-method>addPlugin</set-method>
+         <type>org.exoplatform.services.jcr.impl.RepositoryChangesListenerRegisterPlugin</type>
+         <init-params>
+            <value-param>
+               <name>repository-name</name>
+               <value>repository</value>
+            </value-param>
+            <value-param>
+               <name>workspaces</name>
+               <value>cmis</value>
+            </value-param>
+            <value-param>
+               <name>component-class-name</name>
+               <value>org.xcmis.sp.jcr.exo.query.index.StartableJcrIndexingService</value>
+            </value-param>
+         </init-params>
+      </component-plugin>
+   </external-component-plugins>
+
+   <external-component-plugins>
+      <target-component>org.exoplatform.services.naming.InitialContextInitializer</target-component>
+      <component-plugin>
+         <name>bind.datasource</name>
+         <set-method>addPlugin</set-method>
+         <type>org.exoplatform.services.naming.BindReferencePlugin</type>
+         <init-params>
+            <value-param>
+               <name>bind-name</name>
+               <value>jdbcexo</value>
+            </value-param>
+            <value-param>
+               <name>class-name</name>
+               <value>javax.sql.DataSource</value>
+            </value-param>
+            <value-param>
+               <name>factory</name>
+               <value>org.apache.commons.dbcp.BasicDataSourceFactory</value>
+            </value-param>
+            <properties-param>
+               <name>ref-addresses</name>
+               <description>ref-addresses</description>
+               <property name="driverClassName" value="org.hsqldb.jdbcDriver" />
+               <property name="url" value="jdbc:hsqldb:file:../temp/data/exodb" />
+               <property name="username" value="sa" />
+               <property name="password" value="" />
+            </properties-param>
+         </init-params>
+      </component-plugin>
+   </external-component-plugins>
+
+   <external-component-plugins>
+      <target-component>org.exoplatform.services.jcr.config.RepositoryServiceConfiguration</target-component>
+      <component-plugin>
+         <name>Sample RepositoryServiceConfiguration Plugin</name>
+         <set-method>addConfig</set-method>
+         <type>org.exoplatform.services.jcr.impl.config.RepositoryServiceConfigurationPlugin</type>
+         <init-params>
+            <value-param>
+               <name>conf-path</name>
+               <description>JCR configuration file</description>
+               <value>war:/conf/jcr-cmis-config-ext.xml</value>
+            </value-param>
+         </init-params>
+      </component-plugin>
+   </external-component-plugins>
+
+</configuration>
