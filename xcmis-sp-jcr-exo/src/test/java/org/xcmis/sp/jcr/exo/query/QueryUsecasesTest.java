@@ -969,52 +969,59 @@ public class QueryUsecasesTest extends BaseQueryTest
       checkResult(result, new Document[]{doc2});
    }
 
-   //
-   //   /**
-   //    * Test complex fulltext query.
-   //    * <p>
-   //    * Initial data:
-   //    * <ul>
-   //    * <li>doc1: <b>Title</b> - node1 <b>strprop</b> - "There must be test word"
-   //    * <li>doc2: <b>Title</b> - node2 <b>strprop</b> -
-   //    * " Test word is not here. Another check-word."
-   //    * <li>doc3: <b>Title</b> - node3 <b>strprop</b> - "There must be check-word."
-   //    * </ul>
-   //    * <p>
-   //    * Query : Select all documents that contains "There must" phrase and do not
-   //    * contain "check-word" word.
-   //    * <p>
-   //    * Expected result: doc1.
-   //    * 
-   //    * @throws Exception if an unexpected error occurs
-   //    */
-   //   public void testExtendedFulltext() throws Exception
-   //   {
-   //      // create data
-   //      String name1 = "fileCS1.doc";
-   //      String name2 = "fileCS2.doc";
-   //      String name3 = "fileCS3.doc";
-   //      String contentType = "text/plain";
-   //
-   //      Document folder = createFolder(root, "CASETest");
-   //
-   //      Document doc1 = createDocument(folder.getObjectId(), name1, new byte[0], contentType);
-   //      doc1.setString("strprop", "There must be test word");
-   //
-   //      Document doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
-   //      doc2.setString("strprop", " Test word is not here. Another check-word.");
-   //
-   //      Document doc3 = createDocument(folder.getObjectId(), name3, new byte[0], contentType);
-   //      doc3.setString("strprop", "There must be check-word.");
-   //
-   //      String statement =
-   //         "SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"\\\"There must\\\" -\\\"check\\-word\\\"\")";
-   //
-   //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = storage.query(query);
-   //
-   //      checkResult(result, new Document[]{doc1});
-   //   }
+   /**
+    * Test complex fulltext query.
+    * <p>
+    * Initial data:
+    * <ul>
+    * <li>doc1: <b>Title</b> - node1 <b>strprop</b> - "There must be test word"
+    * <li>doc2: <b>Title</b> - node2 <b>strprop</b> -
+    * " Test word is not here. Another check-word."
+    * <li>doc3: <b>Title</b> - node3 <b>strprop</b> - "There must be check-word."
+    * </ul>
+    * <p>
+    * Query : Select all documents that contains "There must" phrase and do not
+    * contain "check-word" word.
+    * <p>
+    * Expected result: doc1.
+    * 
+    * @throws Exception if an unexpected error occurs
+    */
+   public void testExtendedFulltext() throws Exception
+   {
+      // create data
+      String name1 = "fileCS1.doc";
+      String name2 = "fileCS2.doc";
+      String name3 = "fileCS3.doc";
+      String contentType = "text/plain";
+
+      Folder folder = createFolder(testRoot, "CASETest", "cmis:folder");
+      storage.saveObject(folder);
+
+      Document doc1 = createDocument(folder, name1, NASA_DOCUMENT, new byte[0], contentType);
+      doc1.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+         PROPERTY_COMMANDER, "There must be test word"));
+      storage.saveObject(doc1);
+
+      Document doc2 = createDocument(folder, name2, NASA_DOCUMENT, new byte[0], contentType);
+      doc2.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+         PROPERTY_COMMANDER, "Test word is not here. Another check-word."));
+      storage.saveObject(doc2);
+
+      Document doc3 = createDocument(folder, name3, NASA_DOCUMENT, new byte[0], contentType);
+      doc2.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+         PROPERTY_COMMANDER, "There must be check-word."));
+      storage.saveObject(doc2);
+
+      String statement =
+         "SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"\\\"There must\\\" -\\\"check\\-word\\\"\")";
+
+      Query query = new Query(statement, true);
+      ItemsIterator<Result> result = storage.query(query);
+
+      checkResult(result, new Document[]{doc1});
+   }
+
    //
    //   /**
    //    * Same as testNOTConstraint.
