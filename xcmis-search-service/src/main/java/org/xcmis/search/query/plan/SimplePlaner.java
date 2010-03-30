@@ -291,25 +291,28 @@ public class SimplePlaner implements QueryExecutionPlaner
          // Add the selector used by each column ...
          for (Column column : columns)
          {
-            SelectorName tableName = column.getSelectorName();
-            // Add the selector that is being used ...
-            projectPlan.addSelector(tableName);
-            // Verify that each column is available in the appropriate source ...
-            Table table = selectors.get(tableName);
-            if (table == null)
+            if (!column.isFunction())
             {
-               context.getExecutionExceptions().addException(
-                  new TableDoesntExistException("Table " + tableName + " doesnt exist"));
-            }
-            else
-            {
-               // Make sure that the column is in the table ...
-               String columnName = column.getPropertyName();
-               String name = columnName;
-               if (table.getColumn(name) == null)
+               SelectorName tableName = column.getSelectorName();
+               // Add the selector that is being used ...
+               projectPlan.addSelector(tableName);
+               // Verify that each column is available in the appropriate source ...
+               Table table = selectors.get(tableName);
+               if (table == null)
                {
                   context.getExecutionExceptions().addException(
-                     new ColumnDoesNotExistOnTable("Column  " + name + " on " + tableName + " doesnt exist"));
+                     new TableDoesntExistException("Table " + tableName + " doesnt exist"));
+               }
+               else
+               {
+                  // Make sure that the column is in the table ...
+                  String columnName = column.getPropertyName();
+                  String name = columnName;
+                  if (table.getColumn(name) == null)
+                  {
+                     context.getExecutionExceptions().addException(
+                        new ColumnDoesNotExistOnTable("Column  " + name + " on " + tableName + " doesnt exist"));
+                  }
                }
             }
          }

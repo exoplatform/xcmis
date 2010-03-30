@@ -167,8 +167,11 @@ public class Validator extends AbstractModelVisitor
    @Override
    public void visit(Column node) throws VisitException
    {
-      //column should exist's
-      checkTableAndColumnExistance(node.getSelectorName(), node.getPropertyName(), true);
+      if (!node.isFunction())
+      {
+         //column should exist's
+         checkTableAndColumnExistance(node.getSelectorName(), node.getPropertyName(), true);
+      }
    }
 
    /**
@@ -347,14 +350,17 @@ public class Validator extends AbstractModelVisitor
       this.columnsByAlias.clear();
       for (Column column : node.getColumns())
       {
-         // Find the schemata column ...
-         Table table = checkSelectorExistance(column.getSelectorName());
-         if (table != null)
+         if (!column.isFunction())
          {
-            Schema.Column tableColumn = table.getColumn(column.getPropertyName());
-            if (tableColumn != null)
+            // Find the schemata column ...
+            Table table = checkSelectorExistance(column.getSelectorName());
+            if (table != null)
             {
-               this.columnsByAlias.put(column.getColumnName(), tableColumn);
+               Schema.Column tableColumn = table.getColumn(column.getPropertyName());
+               if (tableColumn != null)
+               {
+                  this.columnsByAlias.put(column.getColumnName(), tableColumn);
+               }
             }
          }
       }
