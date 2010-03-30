@@ -29,7 +29,6 @@ import org.xcmis.search.content.Property.BinaryValue;
 import org.xcmis.search.content.Property.ContentValue;
 import org.xcmis.search.content.Property.SimpleValue;
 import org.xcmis.search.value.PropertyType;
-import org.xcmis.spi.EventJournal;
 import org.xcmis.spi.Storage;
 import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.data.Document;
@@ -51,7 +50,7 @@ import java.util.Set;
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-public class IndexListener implements EventJournal
+public class IndexListener
 {
 
    private static final Log LOG = ExoLogger.getLogger(IndexListener.class);
@@ -77,6 +76,8 @@ public class IndexListener implements EventJournal
 
    public void created(ObjectData object)
    {
+
+      //LOG.info(object.getObjectId() + " " + object.getParent().getPath() + "/" + object.getName());
       List<ContentEntry> contentEntries = new ArrayList<ContentEntry>(1);
       try
       {
@@ -94,12 +95,10 @@ public class IndexListener implements EventJournal
       }
    }
 
-   public void removed(String id)
+   public void removed(Set<String> removed)
    {
       try
       {
-         Set<String> removed = new HashSet<String>();
-         removed.add(id);
          searchService.update(Collections.EMPTY_LIST, removed);
       }
       catch (IndexModificationException e)

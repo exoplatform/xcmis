@@ -69,8 +69,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.jcr.Item;
 import javax.jcr.ItemExistsException;
@@ -575,7 +577,9 @@ public class StorageImpl implements Storage
 
       if (indexListener != null)
       {
-         indexListener.removed(objectId);
+         Set<String> removed = new HashSet<String>();
+         removed.add(objectId);
+         indexListener.removed(removed);
       }
    }
 
@@ -658,6 +662,10 @@ public class StorageImpl implements Storage
          }
 
          session.save();
+         if (indexListener != null)
+         {
+            indexListener.removed(new HashSet<String>(v.getDeleteObjects()));
+         }
       }
       catch (RepositoryException re)
       {
