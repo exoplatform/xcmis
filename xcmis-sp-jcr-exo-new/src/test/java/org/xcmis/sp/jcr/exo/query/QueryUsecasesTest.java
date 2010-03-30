@@ -762,124 +762,128 @@ public class QueryUsecasesTest extends BaseQueryTest
 
    }
 
-   //
-   //   /**
-   //    * Test IN_TREE constraint.
-   //    * <p>
-   //    * Initial data:
-   //    * <p>
-   //    * folder1
-   //    * <p>
-   //    * - document doc1
-   //    * <p>
-   //    * - folder2
-   //    * <p>
-   //    * -- document doc2
-   //    * <p>
-   //    * Query : Select all documents that are in tree of folder1.
-   //    * <p>
-   //    * Expected result: doc1,doc2.
-   //    * 
-   //    * @throws Exception if an unexpected error occurs
-   //    */
-   //   public void testTreeConstrain() throws Exception
-   //   {
-   //      // create data
-   //      Document folder1 = createFolder(root, "folder1");
-   //
-   //      Document doc1 = createDocument(folder1.getObjectId(), "node1", "hello world".getBytes(), "text/plain");
-   //
-   //      Document subfolder1 = createFolder(folder1.getObjectId(), "folder2");
-   //
-   //      Document doc2 = createDocument(subfolder1.getObjectId(), "node1", "hello world".getBytes(), "text/plain");
-   //
-   //      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE IN_TREE('" + folder1.getObjectId() + "')";
-   //
-   //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = storage.query(query);
-   //
-   //      checkResult(result, new Document[]{doc1, doc2});
-   //   }
-   //
-   //   /**
-   //    * Test not equal comparison (<>).
-   //    * <p>
-   //    * Initial data:
-   //    * <ul>
-   //    * <li>doc1: <b>Title</b> - node1 <b>long</b> - 3
-   //    * <li>doc2: <b>Title</b> - node2 <b>long</b> - 15
-   //    * </ul>
-   //    * <p>
-   //    * Query : Select all documents property long not equal to 3.
-   //    * <p>
-   //    * Expected result: doc2.
-   //    * 
-   //    * @throws Exception if an unexpected error occurs
-   //    */
-   //   public void testNotEqualDecimal() throws Exception
-   //   {
-   //      // create data
-   //      String name = "fileCS2.doc";
-   //      String name2 = "fileCS3.doc";
-   //      String contentType = "text/plain";
-   //
-   //      Document folder = createFolder(root, "NotEqualDecimal");
-   //
-   //      Document doc1 = createDocument(folder.getObjectId(), name, new byte[0], contentType);
-   //      doc1.setDecimal("long", new BigDecimal(3));
-   //      doc1.save();
-   //
-   //      Document doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
-   //      doc2.setDecimal("long", new BigDecimal(15));
-   //      doc2.save();
-   //
-   //      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE long <> 3";
-   //
-   //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = storage.query(query);
-   //
-   //      checkResult(result, new Document[]{doc2});
-   //   }
-   //
-   //   /**
-   //    * Test more than comparison (>).
-   //    * <p>
-   //    * Initial data:
-   //    * <ul>
-   //    * <li>doc1: <b>Title</b> - node1 <b>long</b> - 3
-   //    * <li>doc2: <b>Title</b> - node2 <b>long</b> - 15
-   //    * </ul>
-   //    * <p>
-   //    * Query : Select all documents property long more than 5.
-   //    * <p>
-   //    * Expected result: doc2.
-   //    * 
-   //    * @throws Exception if an unexpected error occurs
-   //    */
-   //   public void testMoreThanDecimal() throws Exception
-   //   {
-   //      // create data
-   //      String name = "fileCS2.doc";
-   //      String name2 = "fileCS3.doc";
-   //      String contentType = "text/plain";
-   //
-   //      Document folder = this.createFolder(root, "CASETest");
-   //
-   //      Document doc1 = createDocument(folder.getObjectId(), name, new byte[0], contentType);
-   //      doc1.setDecimal("long", new BigDecimal(3));
-   //      doc1.save();
-   //
-   //      Document doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
-   //      doc2.setDecimal("long", new BigDecimal(15));
-   //      doc2.save();
-   //
-   //      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE long > 5";
-   //
-   //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = storage.query(query);
-   //
-   //      checkResult(result, new Document[]{doc2});
-   //   }
+   /**
+    * Test IN_TREE constraint.
+    * <p>
+    * Initial data:
+    * <p>
+    * folder1
+    * <p>
+    * - document doc1
+    * <p>
+    * - folder2
+    * <p>
+    * -- document doc2
+    * <p>
+    * Query : Select all documents that are in tree of folder1.
+    * <p>
+    * Expected result: doc1,doc2.
+    * 
+    * @throws Exception if an unexpected error occurs
+    */
+   public void testTreeConstrain() throws Exception
+   {
+      // create data
+      Folder folder1 = createFolder(testRoot, "folder1", "cmis:folder");
+
+      Document doc1 = createDocument(folder1, "node1", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
+
+      Folder subfolder1 = createFolder(folder1, "folder2", "cmis:folder");
+
+      Document doc2 = createDocument(subfolder1, "node1", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
+
+      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE IN_TREE('" + folder1.getObjectId() + "')";
+
+      Query query = new Query(statement, true);
+      ItemsIterator<Result> result = storage.query(query);
+
+      checkResult(result, new Document[]{doc1, doc2});
+   }
+
+   /**
+    * Test not equal comparison (<>).
+    * <p>
+    * Initial data:
+    * <ul>
+    * <li>doc1: <b>Title</b> - node1 <b>long</b> - 3
+    * <li>doc2: <b>Title</b> - node2 <b>long</b> - 15
+    * </ul>
+    * <p>
+    * Query : Select all documents property long not equal to 3.
+    * <p>
+    * Expected result: doc2.
+    * 
+    * @throws Exception if an unexpected error occurs
+    */
+   public void testNotEqualDecimal() throws Exception
+   {
+      // create data
+      String name = "fileCS2.doc";
+      String name2 = "fileCS3.doc";
+      String contentType = "text/plain";
+
+      Folder folder = createFolder(testRoot, "NotEqualDecimal", "cmis:folder");
+      storage.saveObject(folder);
+      Document doc1 = createDocument(folder, name, NASA_DOCUMENT, new byte[0], contentType);
+      doc1.setProperty(new DecimalProperty(PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS,
+         PROPERTY_BOOSTER_MASS, new BigDecimal(3)));
+      storage.saveObject(doc1);
+
+      Document doc2 = createDocument(folder, name2, NASA_DOCUMENT, new byte[0], contentType);
+      doc2.setProperty(new DecimalProperty(PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS,
+         PROPERTY_BOOSTER_MASS, new BigDecimal(15)));
+      storage.saveObject(doc2);
+      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE " + PROPERTY_BOOSTER_MASS + " <> 3";
+
+      Query query = new Query(statement, true);
+      ItemsIterator<Result> result = storage.query(query);
+
+      checkResult(result, new Document[]{doc2});
+   }
+
+   /**
+    * Test more than comparison (>).
+    * <p>
+    * Initial data:
+    * <ul>
+    * <li>doc1: <b>Title</b> - node1 <b>long</b> - 3
+    * <li>doc2: <b>Title</b> - node2 <b>long</b> - 15
+    * </ul>
+    * <p>
+    * Query : Select all documents property long more than 5.
+    * <p>
+    * Expected result: doc2.
+    * 
+    * @throws Exception if an unexpected error occurs
+    */
+   public void testMoreThanDecimal() throws Exception
+   {
+      // create data
+      String name = "fileCS2.doc";
+      String name2 = "fileCS3.doc";
+      String contentType = "text/plain";
+
+      Folder folder = createFolder(testRoot, "CASETest", "cmis:folder");
+      storage.saveObject(folder);
+
+      Document doc1 = createDocument(folder, name, NASA_DOCUMENT, new byte[0], contentType);
+      doc1.setProperty(new DecimalProperty(PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS,
+         PROPERTY_BOOSTER_MASS, new BigDecimal(3)));
+      storage.saveObject(doc1);
+
+      Document doc2 = createDocument(folder, name2, NASA_DOCUMENT, new byte[0], contentType);
+      doc2.setProperty(new DecimalProperty(PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS,
+         PROPERTY_BOOSTER_MASS, new BigDecimal(15)));
+      storage.saveObject(doc2);
+
+      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE " + PROPERTY_BOOSTER_MASS + " > 5";
+
+      Query query = new Query(statement, true);
+      ItemsIterator<Result> result = storage.query(query);
+
+      checkResult(result, new Document[]{doc2});
+   }
+
    //
    //   /**
    //    * Test not equal comparison (<>) string.
