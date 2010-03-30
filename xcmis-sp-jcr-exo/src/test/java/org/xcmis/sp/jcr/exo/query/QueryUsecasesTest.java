@@ -928,46 +928,47 @@ public class QueryUsecasesTest extends BaseQueryTest
       checkResult(result, new Document[]{doc1});
    }
 
-   //
-   //   /**
-   //    * Test fulltext search from jcr:content.
-   //    * <p>
-   //    * Initial data:
-   //    * <ul>
-   //    * <li>doc1: <b>Title</b> - node1 <b>content</b> - "There must be test word"
-   //    * <li>doc2: <b>Title</b> - node2 <b>content</b> - " Test word is not here"
-   //    * </ul>
-   //    * <p>
-   //    * Query : Select all documents that contains "here" word.
-   //    * <p>
-   //    * Expected result: doc2.
-   //    * 
-   //    * @throws Exception if an unexpected error occurs
-   //    */
-   //   public void testSimpleFulltext() throws Exception
-   //   {
-   //      // create data
-   //      String name1 = "fileFirst";
-   //      String name2 = "fileSecond";
-   //      String contentType = "text/plain";
-   //
-   //      Document folder = createFolder(root, "SimpleFullTextTest");
-   //
-   //      Document doc1 = createDocument(folder.getObjectId(), name1, new byte[0], contentType);
-   //      doc1.setString("strprop", "There must be test word");
-   //      doc1.save();
-   //
-   //      Document doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
-   //      doc2.setString("strprop", " Test word is not here");
-   //      doc2.save();
-   //
-   //      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"here\")";
-   //
-   //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = storage.query(query);
-   //
-   //      checkResult(result, new Document[]{doc2});
-   //   }
+   /**
+    * Test fulltext search from jcr:content.
+    * <p>
+    * Initial data:
+    * <ul>
+    * <li>doc1: <b>Title</b> - node1 <b>content</b> - "There must be test word"
+    * <li>doc2: <b>Title</b> - node2 <b>content</b> - " Test word is not here"
+    * </ul>
+    * <p>
+    * Query : Select all documents that contains "here" word.
+    * <p>
+    * Expected result: doc2.
+    * 
+    * @throws Exception if an unexpected error occurs
+    */
+   public void testSimpleFulltext() throws Exception
+   {
+      // create data
+      String name1 = "fileFirst";
+      String name2 = "fileSecond";
+      String contentType = "text/plain";
+
+      Folder folder = createFolder(testRoot, "SimpleFullTextTest", "cmis:folder");
+      storage.saveObject(folder);
+      Document doc1 = createDocument(folder, name1, NASA_DOCUMENT, new byte[0], contentType);
+      doc1.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+         PROPERTY_COMMANDER, "There must be test word"));
+      storage.saveObject(doc1);
+
+      Document doc2 = createDocument(folder, name2, NASA_DOCUMENT, new byte[0], contentType);
+      doc2.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+         PROPERTY_COMMANDER, "Test word is not here"));
+      storage.saveObject(doc2);
+      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"here\")";
+
+      Query query = new Query(statement, true);
+      ItemsIterator<Result> result = storage.query(query);
+
+      checkResult(result, new Document[]{doc2});
+   }
+
    //
    //   /**
    //    * Test complex fulltext query.
