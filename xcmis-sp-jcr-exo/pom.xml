@@ -5,7 +5,7 @@
       <artifactId>xcmis-parent</artifactId>
       <version>1.0-SNAPSHOT</version>
    </parent>
-   <artifactId>xcmis-sp-jcr-exo</artifactId>
+   <artifactId>xcmis-sp-jcr-exo-new</artifactId>
    <name>xCMIS :: SP :: JCR :: eXo</name>
    <dependencies>
       <dependency>
@@ -14,7 +14,13 @@
       </dependency>
       <dependency>
          <groupId>org.xcmis</groupId>
-         <artifactId>xcmis-search-lucene</artifactId>
+         <artifactId>xcmis-search-service</artifactId>
+         <version>1.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+         <groupId>org.xcmis</groupId>
+         <artifactId>xcmis-search-parser-cmis</artifactId>
+         <version>1.0-SNAPSHOT</version>
       </dependency>
       <dependency>
          <groupId>org.exoplatform.jcr</groupId>
@@ -45,8 +51,14 @@
          <groupId>org.fontbox</groupId>
          <artifactId>fontbox</artifactId>
       </dependency>
+      <dependency>
+         <groupId>commons-io</groupId>
+         <artifactId>commons-io</artifactId>
+         <version>1.4</version>
+         <scope>test</scope>
+      </dependency>
    </dependencies>
-
+<!-- 
    <build>
       <plugins>
          <plugin>
@@ -62,4 +74,5 @@
          </plugin>
       </plugins>
    </build>
+   -->
 </project>

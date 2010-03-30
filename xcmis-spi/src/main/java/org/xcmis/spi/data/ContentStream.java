@@ -24,7 +24,7 @@ import java.io.InputStream;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: ContentStream.java 316 2010-03-09 15:20:28Z andrew00x $
  */
 public interface ContentStream
 {
@@ -36,6 +36,8 @@ public interface ContentStream
    /**
     * @return content stream media type
     */
+   // TODO : use org.xcmis.spi.utils.MimeType instead String !!!
+   // Have problem with encoding text content now.
    String getMediaType();
 
    /**

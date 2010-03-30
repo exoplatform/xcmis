@@ -27,7 +27,7 @@ import java.util.NoSuchElementException;
  * 
  * @param <T>
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: ItemsIterator.java 316 2010-03-09 15:20:28Z andrew00x $
  */
 public interface ItemsIterator<T> extends Iterator<T>
 {
@@ -39,7 +39,7 @@ public interface ItemsIterator<T> extends Iterator<T>
     * @throws NoSuchElementException if skipped past the last item in the
     *           iterator
     */
-   void skip(long skip) throws NoSuchElementException;
+   void skip(int skip) throws NoSuchElementException;
 
    /**
     * Get total number of items in iterator. If not able determine number
@@ -47,6 +47,6 @@ public interface ItemsIterator<T> extends Iterator<T>
     * 
     * @return number of items or -1
     */
-   long size();
+   int size();
 
 }

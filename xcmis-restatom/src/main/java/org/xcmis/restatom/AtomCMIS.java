@@ -19,16 +19,13 @@
 
 package org.xcmis.restatom;
 
-import org.xcmis.atom.EnumArguments;
-import org.xcmis.atom.EnumCollectionType;
-import org.xcmis.atom.EnumLinkRelations;
 import org.xcmis.spi.CMIS;
 
 import javax.xml.namespace.QName;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: AtomCMIS.java 211 2010-02-12 14:12:45Z alexey.zavizionov $
  */
 public interface AtomCMIS extends CMIS
 {
@@ -66,8 +63,6 @@ public interface AtomCMIS extends CMIS
    QName CAN_CREATE_DOCUMENT = new QName(CMIS_NS_URI, "canCreateDocument", CMIS_PREFIX);
 
    QName CAN_CREATE_FOLDER = new QName(CMIS_NS_URI, "canCreateFolder", CMIS_PREFIX);
-
-   QName CAN_CREATE_POLICY = new QName(CMIS_NS_URI, "canCreatePolicy", CMIS_PREFIX);
 
    QName CAN_CREATE_RELATIONSHIP = new QName(CMIS_NS_URI, "canCreateRelationship", CMIS_PREFIX);
 
@@ -162,22 +157,6 @@ public interface AtomCMIS extends CMIS
 
    QName CHOICE = new QName(CMIS_NS_URI, "choice", CMIS_PREFIX);
 
-   QName CHOICE_BOOLEAN = new QName(CMIS_NS_URI, "choiceBoolean", CMIS_PREFIX);
-
-   QName CHOICE_DATE_TIME = new QName(CMIS_NS_URI, "choiceDateTime", CMIS_PREFIX);
-
-   QName CHOICE_DECIMAL = new QName(CMIS_NS_URI, "choiceDecimal", CMIS_PREFIX);
-
-   QName CHOICE_HTML = new QName(CMIS_NS_URI, "choiceHtml", CMIS_PREFIX);
-
-   QName CHOICE_ID = new QName(CMIS_NS_URI, "choiceId", CMIS_PREFIX);
-
-   QName CHOICE_INTEGER = new QName(CMIS_NS_URI, "choiceInteger", CMIS_PREFIX);
-
-   QName CHOICE_STRING = new QName(CMIS_NS_URI, "choiceString", CMIS_PREFIX);
-
-   QName CHOICE_URI = new QName(CMIS_NS_URI, "choiceUri", CMIS_PREFIX);
-
    QName RESOLUTION = new QName(CMIS_NS_URI, "resolution", CMIS_PREFIX);
 
    QName COLLECTION_TYPE = new QName(CMISRA_NS_URI, "collectionType", CMISRA_PREFIX);
@@ -242,8 +221,7 @@ public interface AtomCMIS extends CMIS
 
    QName KEY = new QName(CMIS_NS_URI, "key", CMIS_PREFIX);
 
-   /* TODO : check name */
-   QName MAPPING = new QName(CMIS_NS_URI, "permissionMapping", CMIS_PREFIX);
+   QName MAPPING = new QName(CMIS_NS_URI, "mapping", CMIS_PREFIX);
 
    QName PRECISION = new QName(CMIS_NS_URI, "precision", CMIS_PREFIX);
 
@@ -267,9 +245,7 @@ public interface AtomCMIS extends CMIS
 
    QName PROPERTY_DEFINITION = new QName(CMIS_NS_URI, "propertyDefinition", CMIS_PREFIX);
 
-   QName PROPERTY_DEFINITION_ID = new QName(/*CMIS_NS_URI, */"propertyDefinitionId"/*, CMIS_PREFIX*/);
-
-   QName PROPERTY_LOCAL_NAME = new QName(/*CMIS_NS_URI, */"localName"/*, CMIS_PREFIX*/);
+   QName PROPERTY_DEFINITION_ID = new QName(CMIS_NS_URI, "propertyDefinitionId", CMIS_PREFIX);
 
    QName LOCAL_NAME = new QName(CMIS_NS_URI, "localName", CMIS_PREFIX);
 
@@ -418,139 +394,139 @@ public interface AtomCMIS extends CMIS
 
    QName LATEST_CHANGE_LOG_TOKEN = new QName(CMIS_NS_URI, "latestChangeLogToken", CMIS_PREFIX);
 
-   String PARAM_CHILD_TYPES = EnumArguments.CHILD_TYPES.value();
-
-   String PARAM_CONTINUE_ON_FAILURE = EnumArguments.CONTINUE_ON_FAILURE.value();
-
-   String PARAM_CHECKIN = EnumArguments.CHECKIN.value();
-
-   String PARAM_CHECKIN_COMMENT = EnumArguments.CHECKIN_COMMENT.value();
-
-   String PARAM_DEPTH = EnumArguments.DEPTH.value();
-
-   String PARAM_DIRECTION = EnumArguments.DIRECTION.value();
-
-   String PARAM_FILTER = EnumArguments.FILTER.value();
-
-   String PARAM_RENDITION_FILTER = EnumArguments.RENDITION_FILTER.value();
-
-   String PARAM_FOLDER_ID = EnumArguments.FOLDER_ID.value();
-
-   String PARAM_INCLUDE_ACL = EnumArguments.INCLUDE_ACL.value();
-
-   String PARAM_INCLUDE_ALLOWABLE_ACTIONS = EnumArguments.INCLUDE_ALLOWABLE_ACTIONS.value();
-
-   String PARAM_INCLUDE_PROPERTIES = EnumArguments.INCLUDE_PROPERTIES.value();
-
-   String PARAM_INCLUDE_PATH_SEGMENT = EnumArguments.INCLUDE_PATH_SEGMENT.value();
-
-   String PARAM_INCLUDE_RELATIVE_PATH_SEGMENT = EnumArguments.INCLUDE_RELATIVE_PATH_SEGMENT.value();
-
-   String PARAM_INCLUDE_PROPERTY_DEFINITIONS = EnumArguments.INCLUDE_PROPERTY_DEFINITIONS.value();
-
-   String PARAM_INCLUDE_POLICY_IDS = EnumArguments.INCLUDE_POLICY_IDS.value();
-
-   String PARAM_INCLUDE_RELATIONSHIPS = EnumArguments.INCLUDE_RELATIONSHIPS.value();
-
-   String PARAM_INCLUDE_SUB_RELATIONSHIP_TYPES = EnumArguments.INCLUDE_SUB_RELATIONSHIP_TYPES.value();
-
-   String PARAM_LENGTH = EnumArguments.LENGTH.value();
-
-   String PARAM_MAJOR = EnumArguments.MAJOR.value();
-
-   String PARAM_MAX_ITEMS = EnumArguments.MAX_ITEMS.value();
-
    String PARAM_ORDER_BY = "orderBy";
 
-   String PARAM_OVERWRITE_FLAG = EnumArguments.OVERWRITE_FLAG.value();
+   String PARAM_CHILD_TYPES = "childTypes";
 
-   String PARAM_REMOVE_FROM = EnumArguments.REMOVE_FROM.value();
+   String PARAM_CONTINUE_ON_FAILURE = "continueOnFailure";
 
-   String PARAM_RELATIONSHIP_DIRECTION = EnumArguments.RELATIONSHIP_DIRECTION.value();
+   String PARAM_CHECKIN = "checkin";
 
-   String PARAM_RELATIONSHIP_TYPE = EnumArguments.RELATIONSHIP_TYPE.value();
+   String PARAM_CHECKIN_COMMENT = "checkinComment";
 
-   String PARAM_REPOSITORY_ID = EnumArguments.REPOSITORY_ID.value();
+   String PARAM_DEPTH = "depth";
 
-   String PARAM_RETURN_VERSION = EnumArguments.RETURN_VERSION.value();
+   String PARAM_DIRECTION = "direction";
 
-   String PARAM_SKIP_COUNT = EnumArguments.SKIP_COUNT.value();
+   String PARAM_FILTER = "filter";
 
-   String PARAM_THIS_VERSION = EnumArguments.THIS_VERSION.value();
+   String PARAM_FOLDER_ID = "folderId";
 
-   String PARAM_TYPE_ID = EnumArguments.TYPE_ID.value();
+   String PARAM_INCLUDE_ACL = "includeACL";
 
-   String PARAM_TYPES = EnumArguments.TYPES.value();
+   String PARAM_INCLUDE_ALLOWABLE_ACTIONS = "includeAllowableActions";
 
-   String PARAM_UNFILE_OBJECT = EnumArguments.UNFILE_OBJECTS.value();
+   String PARAM_INCLUDE_PROPERTIES = "includeProperties";
 
-   String PARAM_VERSIONING_STATE = EnumArguments.VERSIONING_STATE.value();
+   String PARAM_INCLUDE_PATH_SEGMENT = "includePathSegment";
 
-   String PARAM_SEARCH_ALL_VERSIONS = "searchAllVersions";
+   String PARAM_INCLUDE_RELATIVE_PATH_SEGMENT = "includeRelativePathSegment";
 
-   String LINK_SELF = EnumLinkRelations.SELF.value();
+   String PARAM_INCLUDE_PROPERTY_DEFINITIONS = "includePropertyDefinitions";
 
-   String LINK_EDIT = EnumLinkRelations.EDIT.value();
+   String PARAM_INCLUDE_POLICY_IDS = "includePolicyIds";
 
-   String LINK_EDIT_MEDIA = EnumLinkRelations.EDIT_MEDIA.value();
+   String PARAM_INCLUDE_RELATIONSHIPS = "includeRelationships";
 
-   String LINK_VIA = EnumLinkRelations.VIA.value();
+   String PARAM_INCLUDE_SUB_RELATIONSHIP_TYPES = "includeSubRelationshipTypes";
 
-   String LINK_UP = EnumLinkRelations.UP.value();
+   String PARAM_LENGTH = "length";
 
-   String LINK_DOWN = EnumLinkRelations.DOWN.value();
+   String PARAM_MAJOR = "major";
 
-   String LINK_ALTERNATE = EnumLinkRelations.ALTERNATE.value();
+   String PARAM_MAX_ITEMS = "maxItems";
 
-   String LINK_VERSION_HISTORY = EnumLinkRelations.VERSION_HISTORY.value();
+   String PARAM_OVERWRITE_FLAG = "overwriteFlag";
 
-   String LINK_CURRENT_VERSION = EnumLinkRelations.CURRENT_VERSION.value();
+   String PARAM_RELATIONSHIP_DIRECTION = "relationshipDirection";
 
-   String LINK_WORKING_COPY = EnumLinkRelations.WORKING_COPY.value();
+   String PARAM_RELATIONSHIP_TYPE = "relationshipType";
 
-   String LINK_SERVICE = EnumLinkRelations.SERVICE.value();
+   String PARAM_RENDITION_FILTER = "renditionFilter";
 
-   String LINK_DESCRIBEDBY = EnumLinkRelations.DESCRIBEDBY.value();
+   String PARAM_REMOVE_FROM = "removeFrom";
 
-   String LINK_FIRST = EnumLinkRelations.FIRST.value();
+   String PARAM_REPOSITORY_ID = "repositoryId";
 
-   String LINK_LAST = EnumLinkRelations.LAST.value();
+   String PARAM_RETURN_VERSION = "returnVersion";
 
-   String LINK_NEXT = EnumLinkRelations.NEXT.value();
+   String PARAM_SKIP_COUNT = "skipCount";
 
-   String LINK_PREVIOUS = EnumLinkRelations.PREVIOUS.value();
+   String PARAM_SOURCE_FOLDER_ID = "sourceFolderId";
 
-   String LINK_CMIS_ALLOWABLEACTIONS = EnumLinkRelations.CMIS_ALLOWABLEACTIONS.value();
+   String PARAM_THIS_VERSION = "thisVersion";
 
-   String LINK_CMIS_RELATIONSHIPS = EnumLinkRelations.CMIS_RELATIONSHIPS.value();
+   String PARAM_TYPE_ID = "typeId";
 
-   String LINK_CMIS_SOURCE = EnumLinkRelations.CMIS_SOURCE.value();
+   String PARAM_TYPES = "types";
 
-   String LINK_CMIS_TARGET = EnumLinkRelations.CMIS_TARGET.value();
+   String PARAM_UNFILE_OBJECT = "unfileObjects";
 
-   String LINK_CMIS_POLICIES = EnumLinkRelations.CMIS_POLICIES.value();
+   String PARAM_VERSIONING_STATE = "versioningState";
 
-   String LINK_CMIS_ACL = EnumLinkRelations.CMIS_ACL.value();
+   String LINK_SELF = "self";
 
-   String LINK_CMIS_CHANGES = EnumLinkRelations.CMIS_CHANGES.value();
+   String LINK_EDIT = "edit";
 
-   String LINK_CMIS_FOLDERTREE = EnumLinkRelations.CMIS_FOLDERTREE.value();
+   String LINK_EDIT_MEDIA = "edit-media";
 
-   String LINK_CMIS_TYPEDESCENDANTS = EnumLinkRelations.CMIS_TYPEDESCENDANTS.value();
+   String LINK_VIA = "via";
 
-   String LINK_CMIS_ROOTDESCENDANTS = EnumLinkRelations.CMIS_ROOTDESCENDANTS.value();
+   String LINK_UP = "up";
 
-   String COLLECTION_TYPE_CHECKEDOUT = EnumCollectionType.CHECKEDOUT.value();
+   String LINK_DOWN = "down";
 
-   String COLLECTION_TYPE_CHANGES = EnumCollectionType.CHANGES.value();
+   String LINK_ALTERNATE = "alternate";
 
-   String COLLECTION_TYPE_QUERY = EnumCollectionType.QUERY.value();
+   String LINK_VERSION_HISTORY = "version-history";
 
-   String COLLECTION_TYPE_ROOT = EnumCollectionType.ROOT.value();
+   String LINK_CURRENT_VERSION = "current-version";
 
-   String COLLECTION_TYPE_TYPES = EnumCollectionType.TYPES.value();
+   String LINK_WORKING_COPY = "working-copy";
 
-   String COLLECTION_TYPE_UNFILED = EnumCollectionType.UNFILED.value();
+   String LINK_SERVICE = "service";
+
+   String LINK_DESCRIBEDBY = "describedby";
+
+   String LINK_FIRST = "first";
+
+   String LINK_LAST = "last";
+
+   String LINK_NEXT = "next";
+
+   String LINK_PREVIOUS = "previous";
+
+   String LINK_CMIS_ALLOWABLEACTIONS = "http://docs.oasis-open.org/ns/cmis/link/200908/allowableactions";
+
+   String LINK_CMIS_RELATIONSHIPS = "http://docs.oasis-open.org/ns/cmis/link/200908/relationships";
+
+   String LINK_CMIS_SOURCE = "http://docs.oasis-open.org/ns/cmis/link/200908/source";
+
+   String LINK_CMIS_TARGET = "http://docs.oasis-open.org/ns/cmis/link/200908/target";
+
+   String LINK_CMIS_POLICIES = "http://docs.oasis-open.org/ns/cmis/link/200908/policies";
+
+   String LINK_CMIS_ACL = "http://docs.oasis-open.org/ns/cmis/link/200908/acl";
+
+   String LINK_CMIS_CHANGES = "http://docs.oasis-open.org/ns/cmis/link/200908/changes";
+
+   String LINK_CMIS_FOLDERTREE = "http://docs.oasis-open.org/ns/cmis/link/200908/foldertree";
+
+   String LINK_CMIS_TYPEDESCENDANTS = "http://docs.oasis-open.org/ns/cmis/link/200908/typedescendants";
+
+   String LINK_CMIS_ROOTDESCENDANTS = "http://docs.oasis-open.org/ns/cmis/link/200908/rootdescendants";
+
+   String COLLECTION_TYPE_ROOT = "root";
+
+   String COLLECTION_TYPE_UNFILED = "unfiled";
+
+   String COLLECTION_TYPE_CHECKEDOUT = "checkedout";
+
+   String COLLECTION_TYPE_TYPES = "types";
+
+   String COLLECTION_TYPE_QUERY = "query";
+
+   String COLLECTION_TYPE_CHANGES = "changes";
 
    String MEDIATYPE_ALLOWABLE_ACTIONS = "application/cmis+xml;type=allowableActions";
 
@@ -573,5 +549,5 @@ public interface AtomCMIS extends CMIS
    String URITEMPLATE_TYPEBYID = "typebyid";
 
    String CONTENT_DISPOSITION_HEADER = "Content-Disposition";
-
+   
 }

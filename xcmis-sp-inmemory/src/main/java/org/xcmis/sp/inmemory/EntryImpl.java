@@ -62,7 +62,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: EntryImpl.java 218 2010-02-15 07:38:06Z andrew00x $
  */
 public class EntryImpl extends TypeManagerImpl implements Entry
 {

@@ -35,7 +35,7 @@ import java.util.Set;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: EntryTest.java 218 2010-02-15 07:38:06Z andrew00x $
  */
 public class EntryTest extends BaseTest
 {

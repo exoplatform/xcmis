@@ -21,10 +21,10 @@ package org.xcmis.spi;
 
 /**
  * Should be thrown for any others errors that are not expressible by another
- * CMIS exception.
+ * CMIS exception. Used as base class for any CMIS unchecked exceptions.
  *
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: CmisRuntimeException.java 232 2010-02-18 10:27:51Z andrew00x $
  */
 public class CmisRuntimeException extends RuntimeException
 {

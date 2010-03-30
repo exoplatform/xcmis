@@ -19,19 +19,12 @@
 
 package org.xcmis.spi;
 
-import org.xcmis.core.EnumBaseObjectTypeIds;
-import org.xcmis.core.EnumPropertiesBase;
-import org.xcmis.core.EnumPropertiesDocument;
-import org.xcmis.core.EnumPropertiesFolder;
-import org.xcmis.core.EnumPropertiesPolicy;
-import org.xcmis.core.EnumPropertiesRelationship;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: CMIS.java 260 2010-03-03 15:53:42Z andrew00x $
  */
 public interface CMIS
 {
@@ -46,22 +39,19 @@ public interface CMIS
 
    String WILDCARD = "*";
 
-   String DOCUMENT = EnumBaseObjectTypeIds.CMIS_DOCUMENT.value();
+   String DOCUMENT = "cmis:document";
 
-   String FOLDER = EnumBaseObjectTypeIds.CMIS_FOLDER.value();
+   String FOLDER = "cmis:folder";
 
-   String POLICY = EnumBaseObjectTypeIds.CMIS_POLICY.value();
+   String POLICY = "cmis:policy";
 
-   String RELATIONSHIP = EnumBaseObjectTypeIds.CMIS_RELATIONSHIP.value();
+   String RELATIONSHIP = "cmis:relationship";
 
    // TODO need have configurable ?
    int MAX_ITEMS = 10;
 
    /* 2^16 */
-   BigInteger MAX_STRING_LENGTH = BigInteger.valueOf(65536);
-
-   // TODO : get smarter about precisions
-   BigInteger PRECISION = BigInteger.valueOf(32);
+   int MAX_STRING_LENGTH = 65536;
 
    BigDecimal MAX_DECIMAL_VALUE = BigDecimal.valueOf(Double.MAX_VALUE);
 
@@ -73,62 +63,66 @@ public interface CMIS
 
    // --------- Properties -----------
 
-   String IS_LATEST_VERSION = EnumPropertiesDocument.CMIS_IS_LATEST_VERSION.value();
+   String IS_LATEST_VERSION = "cmis:isLatestVersion";
 
-   String IS_LATEST_MAJOR_VERSION = EnumPropertiesDocument.CMIS_IS_LATEST_MAJOR_VERSION.value();
+   String IS_LATEST_MAJOR_VERSION = "cmis:isLatestMajorVersion";
 
-   String IS_MAJOR_VERSION = EnumPropertiesDocument.CMIS_IS_MAJOR_VERSION.value();
+   String IS_MAJOR_VERSION = "cmis:isMajorVersion";
 
-   String CREATED_BY = EnumPropertiesBase.CMIS_CREATED_BY.value();
+   String CREATED_BY = "cmis:createdBy";
 
-   String CREATION_DATE = EnumPropertiesBase.CMIS_CREATION_DATE.value();
+   String CREATION_DATE = "cmis:creationDate";
 
-   String LAST_MODIFIED_BY = EnumPropertiesBase.CMIS_LAST_MODIFIED_BY.value();
+   String LAST_MODIFIED_BY = "cmis:lastModifiedBy";
 
-   String LAST_MODIFICATION_DATE = EnumPropertiesBase.CMIS_LAST_MODIFICATION_DATE.value();
+   String LAST_MODIFICATION_DATE = "cmis:lastModificationDate";
 
-   String CHANGE_TOKEN = EnumPropertiesBase.CMIS_CHANGE_TOKEN.value();
+   String CHANGE_TOKEN = "cmis:changeToken";
 
-   String VERSION_SERIES_ID = EnumPropertiesDocument.CMIS_VERSION_SERIES_ID.value();
+   String VERSION_SERIES_ID = "cmis:versionSeriesId";
 
-   String VERSION_LABEL = EnumPropertiesDocument.CMIS_VERSION_LABEL.value();
+   String VERSION_LABEL = "cmis:versionLabel";
 
-   String SOURCE_ID = EnumPropertiesRelationship.CMIS_SOURCE_ID.value();
+   String SOURCE_ID = "cmis:sourceId";
 
-   String TARGET_ID = EnumPropertiesRelationship.CMIS_TARGET_ID.value();
+   String TARGET_ID = "cmis:targetId";
 
-   String CHECKIN_COMMENT = EnumPropertiesDocument.CMIS_CHECKIN_COMMENT.value();
+   String CHECKIN_COMMENT = "cmis:checkinComment";
 
-   String IS_VERSION_SERIES_CHECKED_OUT = EnumPropertiesDocument.CMIS_IS_VERSION_SERIES_CHECKED_OUT.value();
+   String IS_VERSION_SERIES_CHECKED_OUT = "cmis:isVersionSeriesCheckedOut";
 
-   String VERSION_SERIES_CHECKED_OUT_BY = EnumPropertiesDocument.CMIS_VERSION_SERIES_CHECKED_OUT_BY.value();
+   String VERSION_SERIES_CHECKED_OUT_BY = "cmis:versionSeriesCheckedOutBy";
 
-   String VERSION_SERIES_CHECKED_OUT_ID = EnumPropertiesDocument.CMIS_VERSION_SERIES_CHECKED_OUT_ID.value();
+   String VERSION_SERIES_CHECKED_OUT_ID = "cmis:versionSeriesCheckedOutId";
 
-   String NAME = EnumPropertiesBase.CMIS_NAME.value();
+   String NAME = "cmis:name";
 
-   String OBJECT_ID = EnumPropertiesBase.CMIS_OBJECT_ID.value();
+   String OBJECT_ID = "cmis:objectId";
 
-   String OBJECT_TYPE_ID = EnumPropertiesBase.CMIS_OBJECT_TYPE_ID.value();
+   String OBJECT_TYPE_ID = "cmis:objectTypeId";
 
-   String BASE_TYPE_ID = EnumPropertiesBase.CMIS_BASE_TYPE_ID.value();
+   String BASE_TYPE_ID = "cmis:baseTypeId";
 
-   String IS_IMMUTABLE = EnumPropertiesDocument.CMIS_IS_IMMUTABLE.value();
+   String IS_IMMUTABLE = "cmis:isImmutable";
 
-   String CONTENT_STREAM_LENGTH = EnumPropertiesDocument.CMIS_CONTENT_STREAM_LENGTH.value();
+   String CONTENT_STREAM_LENGTH = "cmis:contentStreamLength";
 
-   String CONTENT_STREAM_MIME_TYPE = EnumPropertiesDocument.CMIS_CONTENT_STREAM_MIME_TYPE.value();
+   String CONTENT_STREAM_MIME_TYPE = "cmis:contentStreamMimeType";
 
-   String CONTENT_STREAM_FILE_NAME = EnumPropertiesDocument.CMIS_CONTENT_STREAM_FILE_NAME.value();
+   String CONTENT_STREAM_FILE_NAME = "cmis:contentStreamFileName";
 
-   String CONTENT_STREAM_ID = EnumPropertiesDocument.CMIS_CONTENT_STREAM_ID.value();
+   String CONTENT_STREAM_ID = "cmis:contentStreamId";
 
-   String POLICY_TEXT = EnumPropertiesPolicy.CMIS_POLICY_TEXT.value();
+   String POLICY_TEXT = "cmis:policyText";
 
-   String PARENT_ID = EnumPropertiesFolder.CMIS_PARENT_ID.value();
+   String PARENT_ID = "cmis:parentId";
 
-   String PATH = EnumPropertiesFolder.CMIS_PATH.value();
+   String PATH = "cmis:path";
 
-   String ALLOWED_CHILD_OBJECT_TYPE_IDS = EnumPropertiesFolder.CMIS_ALLOWED_CHILD_OBJECT_TYPE_IDS.value();
+   String ALLOWED_CHILD_OBJECT_TYPE_IDS = "cmis:allowedChildObjectTypeIds";
+
+   Integer SKIP_COUNT = Integer.valueOf(0);
+
+   Integer DEPTH = Integer.valueOf(1);
 
 }

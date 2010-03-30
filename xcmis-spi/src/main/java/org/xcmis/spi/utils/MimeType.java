@@ -23,7 +23,7 @@ import org.xcmis.spi.CMIS;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: MimeType.java 2 2010-02-04 17:21:49Z andrew00x $
  */
 public class MimeType
 {
@@ -58,6 +58,7 @@ public class MimeType
     *           All parameters after ';' in <code>source</code> will be ignored. 
     * @return MimeType
     */
+   // TODO : support for parameter. 
    public static MimeType fromString(String source)
    {
       if (source == null || source.length() == 0 || source.charAt(0) == ';')

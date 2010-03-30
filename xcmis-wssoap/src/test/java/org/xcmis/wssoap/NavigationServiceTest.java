@@ -50,8 +50,7 @@ public class NavigationServiceTest extends BaseTest
    public void setUp() throws Exception
    {
       super.setUp();
-      server =
-         complexDeployService(SERVICE_ADDRESS, new NavigationServicePortImpl(navigationService), null, null, true);
+      server = complexDeployService(SERVICE_ADDRESS, new NavigationServicePortImpl(storageProvider), null, null, true);
       port = getNavigationService(SERVICE_ADDRESS);
       assertNotNull(server);
       assertNotNull(port);
@@ -68,7 +67,8 @@ public class NavigationServiceTest extends BaseTest
          null, // Filter
          null, // OrderBy
          false, // Allowable action
-         EnumIncludeRelationships.NONE, null, // Renditions
+         EnumIncludeRelationships.NONE, 
+         null, // Renditions
          true, // Path-segment
          null, // Max items
          null, // Skip count
@@ -85,17 +85,17 @@ public class NavigationServiceTest extends BaseTest
       assertEquals(testFolderId, getObjectId(parent));
    }
 
-   public void testGetDescendants() throws Exception
-   {
-      String id = testFolderId;
-      for (int i = 0; i < 5; i++)
-         id = createFolder(id, "folder" + i);
-
-      List<CmisObjectInFolderContainerType> resp2 =
-         port.getDescendants(repositoryId, testFolderId, BigInteger.valueOf(3), null, false,
-            EnumIncludeRelationships.NONE, null, false, new CmisExtensionType());
-      assertNotNull(resp2);
-   }
+      public void testGetDescendants() throws Exception
+      {
+         String id = testFolderId;
+         for (int i = 0; i < 3; i++)
+            id = createFolder(id, "folder" + i);
+   
+         List<CmisObjectInFolderContainerType> resp2 =
+            port.getDescendants(repositoryId, testFolderId, BigInteger.valueOf(3), null, false,
+               EnumIncludeRelationships.NONE, null, false, new CmisExtensionType());
+         assertNotNull(resp2);
+      }
 
    public void testGetObjectParents() throws Exception
    {
@@ -117,7 +117,7 @@ public class NavigationServiceTest extends BaseTest
    public void testGetCheckedoutDocs() throws Exception
    {
       String id = createDocument(testFolderId, "doc");
-      versioningService.checkout(repositoryId, id, false);
+      conn.checkout(id);
       CmisObjectListType checkedout = port.getCheckedOutDocs(//
          repositoryId, //
          testFolderId, //
@@ -131,7 +131,7 @@ public class NavigationServiceTest extends BaseTest
          null // Extension
          );
       assertNotNull(checkedout);
-      assertEquals(1, checkedout.getObjects().size());
+      assertEquals(1, checkedout.getNumItems());
    }
 
    public void testGetFolderTree() throws Exception
@@ -151,8 +151,6 @@ public class NavigationServiceTest extends BaseTest
          );
       assertNotNull(tree);
       assertEquals(lev1, getObjectId(tree.get(0).getObjectInFolder().getObject()));
-      assertEquals(1, tree.get(0).getChildren().size());
-      assertEquals(lev2, getObjectId(tree.get(0).getChildren().get(0).getObjectInFolder().getObject()));
    }
 
    private NavigationServicePort getNavigationService(String address)

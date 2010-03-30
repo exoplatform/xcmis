@@ -37,12 +37,39 @@
     <supertypes>
       <supertype>cmis:article-animals</supertype>
     </supertypes>
-  </nodeType>
+  </nodeType> 
 
   <nodeType name="cmis:football-DynamoK" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
     <supertypes>
       <supertype>cmis:sport-football</supertype>
     </supertypes>
+  </nodeType>
+  
+  <nodeType name="cmis:nasa-mission" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
+    <supertypes>
+      <supertype>nt:file</supertype>
+    </supertypes>
+        <propertyDefinitions>
+      <propertyDefinition name="cmis:booster-name" requiredType="String" autoCreated="false"
+        mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
+      </propertyDefinition>
+      
+      <propertyDefinition name="cmis:commander" requiredType="String" autoCreated="false"
+        mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
+        </propertyDefinition>
+      <propertyDefinition name="cmis:command-module-pilot" requiredType="String" autoCreated="false"
+        mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
+      </propertyDefinition>
+      <propertyDefinition name="cmis:lunar-module-pilot" requiredType="String" autoCreated="false"
+        mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
+      </propertyDefinition>
+      <propertyDefinition name="cmis:booster-mass" requiredType="Double" autoCreated="false"
+        mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
+      </propertyDefinition>
+      <propertyDefinition name="cmis:sample-returned" requiredType="Double" autoCreated="false"
+        mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
+      </propertyDefinition>
+    </propertyDefinitions>
   </nodeType>
   
 </nodeTypes>

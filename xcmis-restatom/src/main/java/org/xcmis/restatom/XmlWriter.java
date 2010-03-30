@@ -39,7 +39,7 @@ import javax.xml.stream.XMLStreamWriter;
  * Remove this when change to sjsxp-1.0.1.
  * 
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: XmlWriter.java 44 2010-02-08 17:36:56Z andrew00x $
  */
 class XmlWriter extends PrettyWriter
 {

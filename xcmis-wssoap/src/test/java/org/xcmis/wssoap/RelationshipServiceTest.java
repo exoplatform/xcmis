@@ -48,7 +48,7 @@ public class RelationshipServiceTest extends BaseTest
    {
       super.setUp();
       server =
-         complexDeployService(SERVICE_ADDRESS, new RelationshipServicePortImpl(relationshipService), null, null, true);
+         complexDeployService(SERVICE_ADDRESS, new RelationshipServicePortImpl(storageProvider), null, null, true);
       port = getRelationshipService(SERVICE_ADDRESS);
       assertNotNull(server);
       assertNotNull(port);
@@ -92,6 +92,8 @@ public class RelationshipServiceTest extends BaseTest
       ids.add(getObjectId(resp.getObjects().get(1)));
       assertTrue(ids.contains(relationship1));
       assertTrue(ids.contains(relationship2));
+      conn.deleteObject(relationship1, true);
+      conn.deleteObject(relationship2, true);
    }
 
    private RelationshipServicePort getRelationshipService(String address)

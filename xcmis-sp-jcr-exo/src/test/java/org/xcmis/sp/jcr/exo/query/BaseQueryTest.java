@@ -22,31 +22,103 @@ package org.xcmis.sp.jcr.exo.query;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.sp.jcr.exo.BaseTest;
-import org.xcmis.sp.jcr.exo.object.EntryImpl;
-import org.xcmis.spi.object.Entry;
-import org.xcmis.spi.object.ItemsIterator;
+import org.xcmis.sp.jcr.exo.JcrCMIS;
+import org.xcmis.spi.ItemsIterator;
+import org.xcmis.spi.Storage;
+import org.xcmis.spi.VersioningState;
+import org.xcmis.spi.data.BaseContentStream;
+import org.xcmis.spi.data.ContentStream;
+import org.xcmis.spi.data.Document;
+import org.xcmis.spi.data.Folder;
+import org.xcmis.spi.data.ObjectData;
 import org.xcmis.spi.query.Result;
 
 import java.util.HashSet;
 import java.util.Set;
-
-import javax.jcr.PathNotFoundException;
 
 /**
  * Created by The eXo Platform SAS. <br/>
  * Date:
  * 
  * @author <a href="karpenko.sergiy@gmail.com">Karpenko Sergiy</a>
- * @version $Id$
+ * @version $Id: BaseQueryTest.java 2 2010-02-04 17:21:49Z andrew00x $
  */
 public abstract class BaseQueryTest extends BaseTest
 {
    private static final Log LOG = ExoLogger.getLogger(BaseQueryTest.class.getName());
 
-   @Override
+   protected Storage storage;
+
+   protected Folder rootFolder;
+
    public void setUp() throws Exception
    {
       super.setUp();
+      storage = storageProvider.getConnection(cmisRepositoryId, null).getStorage();
+      rootFolder = (Folder)storage.getObject(JcrCMIS.ROOT_FOLDER_ID);
+   }
+
+   protected Document createDocument(Folder folder, String name, String typeId, byte[] content, String mimeType)
+      throws Exception
+   {
+
+      return createDocument(folder, name, typeId, new BaseContentStream(content, null, mimeType), null);
+   }
+
+   protected Document createDocument(Folder folder, String name, String typeId, ContentStream content,
+      VersioningState versioningState) throws Exception//   /**
+   //    * Test NOT IN constraint.
+   //    * <p>
+   //    * Initial data:
+   //    * <ul>
+   //    * <li>doc1: <b>Title</b> - node1 <b>long</b> - 3
+   //    * <li>doc2: <b>Title</b> - node2 <b>long</b> - 15
+   //    * </ul>
+   //    * <p>
+   //    * Query : Select all documents where long property not in set {15 , 20}.
+   //    * <p>
+   //    * Expected result: doc1
+   //    * 
+   //    * @throws Exception if an unexpected error occurs
+   //    */
+   //   public void testNotINConstraint() throws Exception
+   //   {
+   //
+   //      // create data
+   //      String name = "fileCS2.doc";
+   //      String name2 = "fileCS3.doc";
+   //      String contentType = "text/plain";
+   //
+   //      Document doc1 = createDocument(testRoot, name, new byte[0], contentType);
+   //      doc1.setDecimal("long", new BigDecimal(3));
+   //
+   //      Document doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
+   //      doc2.setDecimal("long", new BigDecimal(15));
+   //
+   //      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE long NOT IN (15, 20)";
+   //
+   //      Query query = new Query(statement, true);
+   //      ItemsIterator<Result> result = storage.query(query);
+   //
+   //      checkResult(result, new Document[]{doc1});
+   //   }
+   {
+      Document document =
+         storage.createDocument(folder, typeId, versioningState == null ? VersioningState.MAJOR : versioningState);
+      document.setName(name);
+      document.setContentStream(content);
+      storage.saveObject(document);
+      //document.save();
+      return document;
+   }
+
+   protected Folder createFolder(Folder folder, String name, String typeId) throws Exception
+   {
+      Folder newFolder = storage.createFolder(folder, typeId);
+      newFolder.setName(name);
+      storage.saveObject(newFolder);
+      //      newFolder.save();
+      return newFolder;
    }
 
    protected void checkResult(ItemsIterator<Result> result, String[] columns, String[][] expectedResults)
@@ -97,7 +169,7 @@ public abstract class BaseQueryTest extends BaseTest
       checkResults(expectedPaths, resultPaths);
    }
 
-   protected void checkResult(ItemsIterator<Result> result, Entry[] nodes)
+   protected void checkResult(ItemsIterator<Result> result, ObjectData[] nodes)
    {
       // collect rows
       Set<String> expectedPaths = new HashSet<String>();
@@ -106,7 +178,7 @@ public abstract class BaseQueryTest extends BaseTest
          LOG.debug("expected:");
       }
 
-      for (Entry node : nodes)
+      for (ObjectData node : nodes)
       {
          expectedPaths.add(node.getObjectId());
          if (LOG.isDebugEnabled())
@@ -122,18 +194,17 @@ public abstract class BaseQueryTest extends BaseTest
       }
       while (result.hasNext())
       {
-         String id = result.next().getObjectId();
+         Result next = result.next();
+         String id = next.getObjectId();
          resultPaths.add(id);
-         if (LOG.isDebugEnabled())
-         {
-            LOG.debug(id);
-         }
+         ObjectData object = storage.getObject(id);
+         LOG.debug("id:=" + id + " path:=" + object.getParent().getPath() + "/" + object.getName());
       }
 
       checkResults(expectedPaths, resultPaths);
    }
 
-   protected void checkResultOrder(ItemsIterator<Result> result, Entry[] nodes)
+   protected void checkResultOrder(ItemsIterator<Result> result, ObjectData[] nodes)
    {
       // collect rows
       String expectedPaths = "";
@@ -142,9 +213,9 @@ public abstract class BaseQueryTest extends BaseTest
          LOG.debug("expected:");
       }
 
-      for (Entry node : nodes)
+      for (ObjectData node : nodes)
       {
-         expectedPaths += node.getObjectId();
+         expectedPaths += ":" + node.getObjectId();
          if (LOG.isDebugEnabled())
          {
             LOG.debug(node.getObjectId());
@@ -159,7 +230,7 @@ public abstract class BaseQueryTest extends BaseTest
       while (result.hasNext())
       {
          String id = result.next().getObjectId();
-         resultPaths += id;
+         resultPaths += ":" + id;
          if (LOG.isDebugEnabled())
          {
             LOG.debug(id);
@@ -185,15 +256,8 @@ public abstract class BaseQueryTest extends BaseTest
 
    private String getProperty(String objectId, String propertyId) throws Exception
    {
-      EntryImpl entry = (EntryImpl)cmisRepository.getObjectById(objectId);
-      try
-      {
-         return entry.getNode().getProperty(propertyId).getString();
-      }
-      catch (PathNotFoundException e)
-      {
-         return null;
-      }
+      ObjectData entry = storage.getObject(objectId);
+      return entry.getProperty(propertyId).toString();
    }
 
 }

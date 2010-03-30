@@ -19,8 +19,8 @@
 
 package org.xcmis.sp.jcr.exo.rendition;
 
-import org.xcmis.core.EnumRenditionKind;
-import org.xcmis.spi.object.ContentStream;
+
+import org.xcmis.spi.data.ContentStream;
 
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -54,8 +54,8 @@ public class ImageRenditionProvider implements RenditionProvider
    /**
     * {@inheritDoc}
     */
-   public RenditionContentStream getRenditionStream(ContentStream stream) throws IOException,
-      org.xcmis.spi.RepositoryException
+   public RenditionContentStream getRenditionStream(ContentStream stream) throws IOException
+      /*org.xcmis.spi.RepositoryException*/
    {
       BufferedImage image = ImageIO.read(stream.getStream());
       // Determine scale and be sure both width and height are not greater the max
@@ -74,7 +74,7 @@ public class ImageRenditionProvider implements RenditionProvider
       ByteArrayOutputStream out = new ByteArrayOutputStream();
       ImageIO.write(scaledImage, "png", out);
       RenditionContentStream renditionStream =
-         new RenditionContentStream(out.toByteArray(), null, "image/png", EnumRenditionKind.CMIS_THUMBNAIL.value());
+         new RenditionContentStream(out.toByteArray(), null, "image/png", "cmis:thumbnail");
       renditionStream.setHeight(height);
       renditionStream.setWidth(width);
       return renditionStream;
@@ -94,4 +94,5 @@ public class ImageRenditionProvider implements RenditionProvider
    public boolean canStoreRendition() {
       return CAN_STORE_RENDITIONS;
    }
+
 }

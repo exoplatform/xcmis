@@ -7,7 +7,7 @@
       <version>1.0-SNAPSHOT</version>
    </parent>
 
-   <artifactId>xcmis-server-tomcat-demo</artifactId>
+   <artifactId>xcmis-server-demo-war</artifactId>
    <name>xCMIS :: Server WAR</name>
    <description>xCMIS Server WAR</description>
 

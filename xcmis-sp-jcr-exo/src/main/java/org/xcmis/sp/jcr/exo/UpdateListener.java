@@ -36,8 +36,8 @@ import org.exoplatform.services.log.Log;
 import org.xcmis.sp.jcr.exo.rendition.RenditionContentStream;
 import org.xcmis.sp.jcr.exo.rendition.RenditionProvider;
 import org.xcmis.spi.CMIS;
-import org.xcmis.spi.object.BaseContentStream;
-import org.xcmis.spi.object.ContentStream;
+import org.xcmis.spi.data.BaseContentStream;
+import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.utils.MimeType;
 
 public class UpdateListener implements EventListener

@@ -24,9 +24,9 @@ package org.xcmis.spi;
  * repository.
  * 
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: NotSupportedException.java 2 2010-02-04 17:21:49Z andrew00x $
  */
-public final class NotSupportedException extends RuntimeException
+public final class NotSupportedException extends CmisRuntimeException
 {
 
    /**

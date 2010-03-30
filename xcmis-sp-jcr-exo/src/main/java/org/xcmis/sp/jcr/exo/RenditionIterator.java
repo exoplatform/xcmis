@@ -19,12 +19,12 @@
 
 package org.xcmis.sp.jcr.exo;
 
-import org.xcmis.core.CmisRenditionType;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.spi.object.ItemsIterator;
+import org.xcmis.spi.ItemsIterator;
+import org.xcmis.spi.Rendition;
+import org.xcmis.spi.impl.RenditionImpl;
 
-import java.math.BigInteger;
 import java.util.NoSuchElementException;
 
 import javax.jcr.Node;
@@ -37,7 +37,7 @@ import javax.jcr.PathNotFoundException;
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id$
  */
-class RenditionIterator implements ItemsIterator<CmisRenditionType>
+class RenditionIterator implements ItemsIterator<Rendition>
 {
 
    /** Logger. */
@@ -47,7 +47,7 @@ class RenditionIterator implements ItemsIterator<CmisRenditionType>
    protected final NodeIterator iter;
 
    /** Next rendition. */
-   protected CmisRenditionType next;
+   protected Rendition next;
 
    /**
     * Create RenditionIterator instance.
@@ -65,7 +65,7 @@ class RenditionIterator implements ItemsIterator<CmisRenditionType>
     * 
     * @param iter the node iterator
     */
-   public RenditionIterator (CmisRenditionType type){
+   public RenditionIterator (Rendition type){
       this.iter = null;
       this.next = type;
    }
@@ -81,11 +81,11 @@ class RenditionIterator implements ItemsIterator<CmisRenditionType>
    /**
     * {@inheritDoc}
     */
-   public CmisRenditionType next()
+   public Rendition next()
    {
       if (next == null)
          throw new NoSuchElementException();
-      CmisRenditionType n = next;
+      Rendition n = next;
       fetchNext();
       return n;
    }
@@ -101,7 +101,7 @@ class RenditionIterator implements ItemsIterator<CmisRenditionType>
    /**
     * {@inheritDoc}
     */
-   public long size()
+   public int size()
    {
       return -1;
    }
@@ -109,7 +109,7 @@ class RenditionIterator implements ItemsIterator<CmisRenditionType>
    /**
     * {@inheritDoc}
     */
-   public void skip(long skip) throws NoSuchElementException
+   public void skip(int skip) throws NoSuchElementException
    {
       while (skip-- > 0)
          iter.next();
@@ -132,15 +132,15 @@ class RenditionIterator implements ItemsIterator<CmisRenditionType>
          {
             if (node.isNodeType(JcrCMIS.CMIS_NT_RENDITION))
             {
-               CmisRenditionType rendition = new CmisRenditionType();
+               RenditionImpl rendition = new RenditionImpl();
                rendition.setStreamId(node.getName());
                rendition.setKind(node.getProperty(JcrCMIS.CMIS_RENDITION_KIND).getString());
-               rendition.setMimetype(node.getProperty(JcrCMIS.CMIS_RENDITION_MIME_TYPE).getString());
-               rendition.setLength(BigInteger.valueOf(node.getProperty(JcrCMIS.CMIS_RENDITION_STREAM).getLength()));
+               rendition.setMimeType(node.getProperty(JcrCMIS.CMIS_RENDITION_MIME_TYPE).getString());
+               rendition.setLength(node.getProperty(JcrCMIS.CMIS_RENDITION_STREAM).getLength());
                try
                {
-                  rendition.setHeight(BigInteger.valueOf(node.getProperty(JcrCMIS.CMIS_RENDITION_HEIGHT).getLong()));
-                  rendition.setWidth(BigInteger.valueOf(node.getProperty(JcrCMIS.CMIS_RENDITION_WIDTH).getLong()));
+                  rendition.setHeight(Long.valueOf(node.getProperty(JcrCMIS.CMIS_RENDITION_HEIGHT).getLong()).intValue());
+                  rendition.setWidth(Long.valueOf(node.getProperty(JcrCMIS.CMIS_RENDITION_WIDTH).getLong()).intValue());
                }
                catch (PathNotFoundException pnfe)
                {
@@ -156,5 +156,7 @@ class RenditionIterator implements ItemsIterator<CmisRenditionType>
          }
       }
    }
+
+  
 
 }

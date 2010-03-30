@@ -19,7 +19,7 @@
 
 package org.xcmis.sp.jcr.exo.rendition;
 
-import org.xcmis.spi.object.BaseContentStream;
+import org.xcmis.spi.data.BaseContentStream;
 
 import java.io.InputStream;
 

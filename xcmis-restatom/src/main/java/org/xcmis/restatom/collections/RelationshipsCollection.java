@@ -27,27 +27,22 @@ import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.ResponseContext;
 import org.apache.abdera.protocol.server.TargetType;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
-import org.xcmis.core.CmisAccessControlListType;
-import org.xcmis.core.CmisObjectType;
-import org.xcmis.core.CmisPropertiesType;
-import org.xcmis.core.CmisProperty;
-import org.xcmis.core.CmisPropertyId;
-import org.xcmis.core.EnumRelationshipDirection;
-import org.xcmis.core.ObjectService;
-import org.xcmis.core.RelationshipService;
-import org.xcmis.core.RepositoryService;
-import org.xcmis.core.VersioningService;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.abdera.ObjectTypeElement;
+import org.xcmis.spi.AccessControlEntry;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
+import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.RepositoryException;
+import org.xcmis.spi.RelationshipDirection;
+import org.xcmis.spi.StorageException;
+import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.object.CmisObject;
-import org.xcmis.spi.object.CmisObjectList;
-import org.xcmis.spi.object.impl.CmisObjectImpl;
+import org.xcmis.spi.object.Property;
+import org.xcmis.spi.object.impl.IdProperty;
 
 import java.util.HashMap;
 import java.util.List;
@@ -61,22 +56,13 @@ import java.util.Map;
 public class RelationshipsCollection extends CmisObjectCollection
 {
 
-   /** The relationship service. */
-   protected final RelationshipService relationshipService;
-
    /**
     * Instantiates a new relationships collection.
-    * 
-    * @param repositoryService the repository service
-    * @param objectService the object service
-    * @param versioningService the versioning service
-    * @param relationshipService the relationship service
+    * @param storageProvider TODO
     */
-   public RelationshipsCollection(RepositoryService repositoryService, ObjectService objectService,
-      VersioningService versioningService, RelationshipService relationshipService)
+   public RelationshipsCollection(StorageProvider storageProvider)
    {
-      super(repositoryService, objectService, versioningService);
-      this.relationshipService = relationshipService;
+      super(storageProvider);
       setHref("/relationships");
    }
 
@@ -114,49 +100,62 @@ public class RelationshipsCollection extends CmisObjectCollection
       }
 
       ObjectTypeElement objectElement = entry.getFirstChild(AtomCMIS.OBJECT);
-      CmisObjectType cmisObjectType = objectElement.getObject();
-      CmisObject object = new CmisObjectImpl(cmisObjectType);
-      if (object.getProperties() == null)
-         object.setProperties(new CmisPropertiesType());
+      CmisObject object = objectElement.getObject();
       updatePropertiesFromEntry(object, entry);
 
       String typeId = null;
       String sourceId = null;
       String targetId = null;
 
-      CmisPropertiesType properties = object.getProperties();
-      for (CmisProperty p : properties.getProperty())
+      Map<String, Property<?>> properties = object.getProperties();
+      for (Property<?> p : properties.values())
       {
-         String pId = p.getPropertyDefinitionId();
+         String pId = p.getId();
          if (CMIS.OBJECT_TYPE_ID.equals(pId))
-            typeId = ((CmisPropertyId)p).getValue().get(0);
+         {
+            typeId = ((IdProperty)p).getValues().get(0);
+         }
          else if (CMIS.SOURCE_ID.equals(pId))
-            sourceId = ((CmisPropertyId)p).getValue().get(0);
+         {
+            sourceId = ((IdProperty)p).getValues().get(0);
+         }
          else if (CMIS.TARGET_ID.equals(pId))
-            targetId = ((CmisPropertyId)p).getValue().get(0);
+         {
+            targetId = ((IdProperty)p).getValues().get(0);
+         }
       }
 
       if (typeId == null)
-         return createErrorResponse("cmis:objectTypeId is not specified.", 400);
+      {
+         return createErrorResponse("ObjectTypeId is not specified.", 400);
+      }
       if (sourceId == null)
-         return createErrorResponse("cmis:sourceId is not specified.", 400);
+      {
+         return createErrorResponse("Source id is not specified.", 400);
+      }
       if (targetId == null)
-         return createErrorResponse("cmis:targetId is not specified.", 400);
+      {
+         return createErrorResponse("Traget id is not specified.", 400);
+      }
 
-      CmisAccessControlListType addACL = null;
-      CmisAccessControlListType removeACL = null;
+      List<AccessControlEntry> addACL = null;
+      List<AccessControlEntry> removeACL = null;
       List<String> policies = null;
+
+      String relationshipId;
       CmisObject relationship;
+      Connection conn = null;
       try
       {
-         relationship =
-            objectService.createRelationship(getRepositoryId(request), properties, addACL, removeACL, policies, true);
+         conn = getConnection(request);
+         relationshipId = conn.createRelationship(properties, addACL, removeACL, policies);
+         relationship = conn.getProperties(relationshipId, true, CMIS.WILDCARD);
       }
       catch (ConstraintException cve)
       {
          return createErrorResponse(cve, 409);
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          return createErrorResponse(re, 500);
       }
@@ -171,6 +170,13 @@ public class RelationshipsCollection extends CmisObjectCollection
       catch (Throwable t)
       {
          return createErrorResponse(t, 500);
+      }
+      finally
+      {
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
 
       entry = request.getAbdera().getFactory().newEntry();
@@ -199,69 +205,41 @@ public class RelationshipsCollection extends CmisObjectCollection
       // Filter will be applied during build final Atom Document.
       //      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
       String propertyFilter = null;
-      boolean includeSubRelationship =
-         Boolean.parseBoolean(request.getParameter(AtomCMIS.PARAM_INCLUDE_SUB_RELATIONSHIP_TYPES));
-      boolean includeAllowableActions =
-         Boolean.parseBoolean(request.getParameter(AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS));
-      int maxItems;
-      try
-      {
-         maxItems =
-            request.getParameter(AtomCMIS.PARAM_MAX_ITEMS) == null
-               || request.getParameter(AtomCMIS.PARAM_MAX_ITEMS).length() == 0 ? CMIS.MAX_ITEMS : Integer
-               .parseInt(request.getParameter(AtomCMIS.PARAM_MAX_ITEMS));
-      }
-      catch (NumberFormatException nfe)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_MAX_ITEMS);
-         throw new ResponseContextException(msg, 400);
-      }
-      int skipCount;
-      try
-      {
-         skipCount =
-            request.getParameter(AtomCMIS.PARAM_SKIP_COUNT) == null
-               || request.getParameter(AtomCMIS.PARAM_SKIP_COUNT).length() == 0 ? 0 : Integer.parseInt(request
-               .getParameter(AtomCMIS.PARAM_SKIP_COUNT));
-      }
-      catch (NumberFormatException nfe)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_SKIP_COUNT);
-         throw new ResponseContextException(msg, 400);
-      }
-      EnumRelationshipDirection direction;
+      boolean includeSubRelationship = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_SUB_RELATIONSHIP_TYPES, false);
+      boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
+      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CMIS.MAX_ITEMS);
+      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CMIS.SKIP_COUNT);
+      RelationshipDirection direction;
       try
       {
          direction =
             request.getParameter(AtomCMIS.PARAM_RELATIONSHIP_DIRECTION) == null
                || request.getParameter(AtomCMIS.PARAM_RELATIONSHIP_DIRECTION).length() == 0
-               ? EnumRelationshipDirection.EITHER : EnumRelationshipDirection
-                  .fromValue(AtomCMIS.PARAM_RELATIONSHIP_DIRECTION);
+               ? RelationshipDirection.EITHER : RelationshipDirection.fromValue(AtomCMIS.PARAM_RELATIONSHIP_DIRECTION);
       }
       catch (IllegalArgumentException iae)
       {
          String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_RELATIONSHIP_DIRECTION);
          throw new ResponseContextException(msg, 400);
       }
+      Connection conn = null;
       try
       {
-         CmisObjectList list =
-            relationshipService.getObjectRelationships(getRepositoryId(request), objectId, direction, typeId,
-               includeSubRelationship, includeAllowableActions, propertyFilter, maxItems, skipCount, true);
-         if (list.getObjects().size() > 0)
+         conn = getConnection(request);
+         ItemsList<CmisObject> list =
+            conn.getObjectRelationships(objectId, direction, typeId, includeSubRelationship, includeAllowableActions,
+               true, propertyFilter, maxItems, skipCount);
+         if (list.getItems().size() > 0)
          {
             // add cmisra:numItems
-            if (list.getNumItems() != null)
-            {
-               Element numItems = feed.addExtension(AtomCMIS.NUM_ITEMS);
-               numItems.setText(list.getNumItems().toString());
-            }
+            Element numItems = feed.addExtension(AtomCMIS.NUM_ITEMS);
+            numItems.setText(Integer.toString(list.getNumItems()));
 
             //Paging links
-            addPageLinks(objectId, feed, "relationships", maxItems, skipCount, list.getNumItems() == null ? -1 : list
-               .getNumItems().intValue(), list.isHasMoreItems(), request);
+            addPageLinks(objectId, feed, "relationships", maxItems, skipCount, list.getNumItems(), list
+               .isHasMoreItems(), request);
 
-            for (CmisObject object : list.getObjects())
+            for (CmisObject object : list.getItems())
             {
                Entry e = feed.addEntry();
                IRI feedIri = new IRI(getFeedIriForEntry(object, request));
@@ -269,7 +247,7 @@ public class RelationshipsCollection extends CmisObjectCollection
             }
          }
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          throw new ResponseContextException(createErrorResponse(re, 500));
       }
@@ -288,6 +266,13 @@ public class RelationshipsCollection extends CmisObjectCollection
       catch (Throwable t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
+      }
+      finally
+      {
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 

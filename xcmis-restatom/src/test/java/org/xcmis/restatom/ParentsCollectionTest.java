@@ -21,8 +21,6 @@ package org.xcmis.restatom;
 
 import org.exoplatform.services.rest.impl.ContainerResponse;
 import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
-import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.object.Entry;
 
 import java.io.ByteArrayInputStream;
 
@@ -33,7 +31,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
  * 
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com.ua">Alexey
  *         Zavizionov</a>
- * @version $Id$ Aug 12, 2009
+ * @version $Id: ParentsCollectionTest.java 2 2010-02-04 17:21:49Z andrew00x $ Aug 12, 2009
  */
 public class ParentsCollectionTest extends BaseTest
 {
@@ -79,17 +77,14 @@ public class ParentsCollectionTest extends BaseTest
          assertEquals(testFolderName, getStringElement("cmisra:relativePathSegment", xmlEntry));
       }
    */
-   
+
    public void testGetObjectParents() throws Exception
    {
-      Entry doc = createDocument(testFolderId, "doc1", null, null);
-      String docId = doc.getObjectId();
+      String docId = createDocument(testFolderId, "doc1", null, null);
 
-      String requestURI = "http://localhost:8080/rest" //
-         + "/cmisatom/" //
-         + cmisRepositoryId //
-         + "/parents/" //
-         + docId;
+      String requestURI =
+         "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/parents/" + docId
+            + "?includeRelativePathSegment=true";
 
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
       ContainerResponse resp = service("GET", requestURI, "http://localhost:8080/rest", null, null, writer);
@@ -113,6 +108,6 @@ public class ParentsCollectionTest extends BaseTest
       org.w3c.dom.Node xmlEntry = getNode("atom:entry", xmlFeed);
       validateObjectEntry(xmlEntry, "cmis:folder");
 
-      assertEquals(doc.getName(), getStringElement("cmisra:relativePathSegment", xmlEntry));
+      assertEquals(testFolderName, getStringElement("cmisra:relativePathSegment", xmlEntry));
    }
 }

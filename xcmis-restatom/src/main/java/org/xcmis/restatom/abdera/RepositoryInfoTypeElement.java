@@ -22,17 +22,17 @@ package org.xcmis.restatom.abdera;
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
-import org.xcmis.core.CmisRepositoryInfoType;
-import org.xcmis.core.EnumBaseObjectTypeIds;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.spi.BaseType;
+import org.xcmis.spi.RepositoryInfo;
 
-import java.util.List;
+import java.util.Collection;
 
 import javax.xml.namespace.QName;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: RepositoryInfoTypeElement.java 2 2010-02-04 17:21:49Z andrew00x $
  */
 public class RepositoryInfoTypeElement extends ExtensibleElementWrapper
 {
@@ -63,7 +63,7 @@ public class RepositoryInfoTypeElement extends ExtensibleElementWrapper
     * 
     * @param repoInfo the repo info
     */
-   public void build(CmisRepositoryInfoType repoInfo)
+   public void build(RepositoryInfo repoInfo)
    {
       if (repoInfo != null)
       {
@@ -77,13 +77,14 @@ public class RepositoryInfoTypeElement extends ExtensibleElementWrapper
          addSimpleExtension(AtomCMIS.LATEST_CHANGE_LOG_TOKEN, repoInfo.getLatestChangeLogToken());
          addSimpleExtension(AtomCMIS.CMIS_VERSION_SUPPORTED, repoInfo.getCmisVersionSupported());
          addSimpleExtension(AtomCMIS.THIN_CLIENT_URI, repoInfo.getThinClientURI());
-         if (repoInfo.isChangesIncomplete() != null)
-            addSimpleExtension(AtomCMIS.CHANGES_INCOMPLETE, repoInfo.isChangesIncomplete().toString());
-         List<EnumBaseObjectTypeIds> listChangesOnType = repoInfo.getChangesOnType();
+         addSimpleExtension(AtomCMIS.CHANGES_INCOMPLETE, Boolean.toString(repoInfo.isChangesIncomplete()));
+         Collection<BaseType> listChangesOnType = repoInfo.getChangesOnType();
          if (listChangesOnType != null && listChangesOnType.size() > 0)
          {
-            for (EnumBaseObjectTypeIds enumBaseObjectTypeIds : listChangesOnType)
-               addSimpleExtension(AtomCMIS.CHANGES_ON_TYPE, enumBaseObjectTypeIds.value());
+            for (BaseType baseType : listChangesOnType)
+            {
+               addSimpleExtension(AtomCMIS.CHANGES_ON_TYPE, baseType.value());
+            }
          }
          addSimpleExtension(AtomCMIS.PRINCIPAL_ANONYMOUS, repoInfo.getPrincipalAnonymous());
          addSimpleExtension(AtomCMIS.PRINCIPAL_ANYONE, repoInfo.getPrincipalAnyone());

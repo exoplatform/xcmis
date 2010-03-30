@@ -22,8 +22,10 @@ package org.xcmis.restatom.abdera;
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
-import org.xcmis.core.CmisAccessControlEntryType;
+import org.apache.abdera.parser.stax.FOMExtensibleElement;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.spi.AccessControlEntry;
+import org.xcmis.spi.impl.AccessControlEntryImpl;
 
 import java.util.List;
 
@@ -31,7 +33,7 @@ import javax.xml.namespace.QName;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: AccessControlEntryTypeElement.java 2 2010-02-04 17:21:49Z andrew00x $
  */
 public class AccessControlEntryTypeElement extends ExtensibleElementWrapper
 {
@@ -60,44 +62,75 @@ public class AccessControlEntryTypeElement extends ExtensibleElementWrapper
    /**
     * Builds the element.
     * 
-    * @param value the value
+    * @param value the AccessControlEntry
     */
-   public void build(CmisAccessControlEntryType value)
+   public void build(AccessControlEntry accessControlEntry)
    {
-      if (value != null)
-      {
-         AccessControlPrincipalTypeElement accessControlPrincipalTypeElement = addExtension(AtomCMIS.PRINCIPAL);
-         accessControlPrincipalTypeElement.build(value.getPrincipal());
+      declareNS(org.apache.abdera.util.Constants.ATOM_NS, "atom");
+      declareNS(org.apache.abdera.util.Constants.APP_NS, "app");
 
-         if (value.getPermission() != null && value.getPermission().size() > 0)
-         {
-            for (String one : value.getPermission())
-               addSimpleExtension(AtomCMIS.PERMISSION, one);
-         }
-         addSimpleExtension(AtomCMIS.DIRECT, value.isDirect() ? "true" : "false");
+      // PRINCIPAL
+      if (accessControlEntry.getPrincipal() != null)
+      {
+         String principal = accessControlEntry.getPrincipal();
+         FOMExtensibleElement principalElement = addExtension(AtomCMIS.PRINCIPAL);
+         principalElement.addSimpleExtension(AtomCMIS.PRINCIPAL_ID, principal);
       }
+
+      // PERMISSION
+      if (accessControlEntry.getPermissions() != null && accessControlEntry.getPermissions().size() > 0)
+      {
+         for (String one : accessControlEntry.getPermissions())
+         {
+            addSimpleExtension(AtomCMIS.PERMISSION, one);
+         }
+      }
+
+      // DIRECT
+      // TODO direct element
+      //      permissionElement.addSimpleExtension(AtomCMIS.DIRECT, accessControlEntry.isDirect() ? "true" : "false");
    }
 
    /**
-    * Gets the CmisAccessControlEntryType.
+    * Gets the AccessControlEntry.
     * 
-    * @return CmisAccessControlEntryType 
+    * @return AccessControlEntry
     */
-   public CmisAccessControlEntryType getACE()
+   public AccessControlEntry getACE()
    {
-      CmisAccessControlEntryType ace = new CmisAccessControlEntryType();
-      AccessControlPrincipalTypeElement principal = getExtension(AtomCMIS.PRINCIPAL);
-      if (principal != null)
-         ace.setPrincipal(principal.getPrincipal());
-      List<Element> els = getExtensions(AtomCMIS.PERMISSION);
-      if (els != null && els.size() > 0)
+
+      AccessControlEntryImpl accessControlEntry = new AccessControlEntryImpl();
+
+      // PRINCIPAL
+      FOMExtensibleElement principalElement = getExtension(AtomCMIS.PRINCIPAL);
+      if (principalElement != null)
       {
-         for (Element el : els)
-            ace.getPermission().add(el.getText());
+         String principalId = principalElement.getSimpleExtension(AtomCMIS.PRINCIPAL_ID);
+         if (principalId != null)
+         {
+            accessControlEntry.setPrincipal(principalId);
+         }
       }
-      Element direct = getExtension(AtomCMIS.DIRECT);
-      ace.setDirect(direct == null ? true : Boolean.parseBoolean(direct.getText()));
-      return ace;
+
+      // PERMISSION
+      List<ExtensibleElementWrapper> permissionElements = getExtensions(AtomCMIS.PERMISSION);
+      if (permissionElements != null && !permissionElements.isEmpty())
+      {
+         for (ExtensibleElementWrapper permissionElement : permissionElements)
+         {
+            if (permissionElement.getText() != null)
+            {
+               accessControlEntry.getPermissions().add(permissionElement.getText());
+            }
+         }
+      }
+
+      // DIRECT
+      // TODO direct element
+      //            Element direct = el.getExtension(AtomCMIS.DIRECT);
+      //            accessControlEntry.setDirect(direct == null ? true : Boolean.parseBoolean(direct.getText()));
+
+      return accessControlEntry;
    }
 
 }

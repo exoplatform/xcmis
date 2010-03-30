@@ -27,37 +27,34 @@ import org.apache.abdera.model.Feed;
 import org.apache.abdera.model.Link;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
-import org.xcmis.core.CmisTypeDefinitionType;
-import org.xcmis.core.RepositoryService;
-import org.xcmis.messaging.CmisTypeContainer;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
+import org.xcmis.spi.CMIS;
+import org.xcmis.spi.Connection;
 import org.xcmis.spi.InvalidArgumentException;
+import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.RepositoryException;
+import org.xcmis.spi.StorageException;
+import org.xcmis.spi.StorageProvider;
+import org.xcmis.spi.TypeDefinition;
 
 import java.util.Calendar;
 import java.util.List;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: TypesDescendantsCollection.java 216 2010-02-12 17:19:50Z andrew00x $
  */
 public class TypesDescendantsCollection extends CmisTypeCollection
 {
-
-   /** The repository service. */
-   protected final RepositoryService repositoryService;
-
    /**
     * Instantiates a new types descendants collection.
-    * 
+    * @param storageProvider TODO
     * @param repositoryService the repository service
     */
-   public TypesDescendantsCollection(RepositoryService repositoryService)
+   public TypesDescendantsCollection(StorageProvider storageProvider)
    {
-      super(repositoryService);
-      this.repositoryService = repositoryService;
+      super(storageProvider);
       setHref("/typedescendants");
    }
 
@@ -65,7 +62,7 @@ public class TypesDescendantsCollection extends CmisTypeCollection
     * {@inheritDoc}
     */
    @Override
-   public Iterable<CmisTypeDefinitionType> getEntries(RequestContext request) throws ResponseContextException
+   public Iterable<TypeDefinition> getEntries(RequestContext request) throws ResponseContextException
    {
       // To process hierarchically structure override addFeedDetails(Feed, RequestContext) method.
       throw new UnsupportedOperationException("entries");
@@ -78,26 +75,14 @@ public class TypesDescendantsCollection extends CmisTypeCollection
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
       String typeId = request.getTarget().getParameter(AtomCMIS.PARAM_TYPE_ID);
-      boolean includePropertyDefinitions =
-         Boolean.parseBoolean(request.getParameter(AtomCMIS.PARAM_INCLUDE_PROPERTY_DEFINITIONS));
-      int depth;
+      boolean includePropertyDefinitions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PROPERTY_DEFINITIONS, false);
+      int depth = getIntegerParameter(request, AtomCMIS.PARAM_DEPTH, CMIS.DEPTH);
+      Connection conn = null;
       try
       {
-         depth =
-            request.getParameter(AtomCMIS.PARAM_DEPTH) == null
-               || request.getParameter(AtomCMIS.PARAM_DEPTH).length() == 0 ? 1 : Integer.parseInt(request
-               .getParameter(AtomCMIS.PARAM_DEPTH));
-      }
-      catch (NumberFormatException e)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_DEPTH);
-         throw new ResponseContextException(msg, 400);
-      }
-      try
-      {
-         String repositoryId = getRepositoryId(request);
-         List<CmisTypeContainer> descendants =
-            repositoryService.getTypeDescendants(repositoryId, typeId, depth, includePropertyDefinitions);
+         conn = getConnection(request);
+         List<ItemsTree<TypeDefinition>> descendants =
+            conn.getTypeDescendants(typeId, depth, includePropertyDefinitions);
 
          String down = getTypeChildrenLink(typeId, request);
          feed.addLink(down, AtomCMIS.LINK_DOWN, AtomCMIS.MEDIATYPE_ATOM_FEED, null, null, -1);
@@ -107,7 +92,7 @@ public class TypesDescendantsCollection extends CmisTypeCollection
             String typeLink = getObjectTypeLink(typeId, request);
             feed.addLink(typeLink, AtomCMIS.LINK_VIA, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null, null, -1);
 
-            CmisTypeDefinitionType type = repositoryService.getTypeDefinition(repositoryId, typeId);
+            TypeDefinition type = conn.getTypeDefinition(typeId);
             String parentType = type.getParentId();
             if (parentType != null)
             {
@@ -115,16 +100,18 @@ public class TypesDescendantsCollection extends CmisTypeCollection
                feed.addLink(parent, AtomCMIS.LINK_UP, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null, null, -1);
             }
          }
-         for (CmisTypeContainer typeContainer : descendants)
+         for (ItemsTree<TypeDefinition> typeContainer : descendants)
          {
             Entry e = feed.addEntry();
-            IRI feedIri = new IRI(getFeedIriForEntry(typeContainer.getType(), request));
-            addEntryDetails(request, e, feedIri, typeContainer.getType());
+            IRI feedIri = new IRI(getFeedIriForEntry(typeContainer.getContainer(), request));
+            addEntryDetails(request, e, feedIri, typeContainer.getContainer());
             if (typeContainer.getChildren().size() > 0)
+            {
                addChildren(e, typeContainer.getChildren(), feedIri, request);
+            }
          }
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          throw new ResponseContextException(createErrorResponse(re, 500));
       }
@@ -141,6 +128,13 @@ public class TypesDescendantsCollection extends CmisTypeCollection
          t.printStackTrace();
          throw new ResponseContextException(createErrorResponse(t, 500));
       }
+      finally
+      {
+         if (conn != null)
+         {
+            conn.close();
+         }
+      }
 
    }
 
@@ -154,7 +148,7 @@ public class TypesDescendantsCollection extends CmisTypeCollection
     * 
     * @throws ResponseContextException the response context exception
     */
-   protected void addChildren(Entry entry, List<CmisTypeContainer> children, IRI feedIri, RequestContext request)
+   protected void addChildren(Entry entry, List children, IRI feedIri, RequestContext request)
       throws ResponseContextException
    {
       Element childrenElement = entry.addExtension(AtomCMIS.CHILDREN);
@@ -171,7 +165,9 @@ public class TypesDescendantsCollection extends CmisTypeCollection
          entry.getLinks(AtomCMIS.LINK_SERVICE, AtomCMIS.LINK_SELF, AtomCMIS.LINK_DOWN,
             AtomCMIS.LINK_CMIS_TYPEDESCENDANTS, AtomCMIS.LINK_UP);
       for (Link l : links)
+      {
          childFeed.addLink((Link)l.clone());
+      }
 
       childFeed.addLink(getObjectTypeLink(entryId, request), AtomCMIS.LINK_VIA, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null,
          null, -1);
@@ -180,12 +176,14 @@ public class TypesDescendantsCollection extends CmisTypeCollection
       Element numItems = request.getAbdera().getFactory().newElement(AtomCMIS.NUM_ITEMS, childrenElement);
       numItems.setText(Integer.toString(children.size()));
 
-      for (CmisTypeContainer typeContainer : children)
+      for (ItemsTree<?> typeContainer : (List<ItemsTree<?>>)children)
       {
          Entry ch = entry.getFactory().newEntry(childrenElement);
-         addEntryDetails(request, ch, feedIri, typeContainer.getType());
+         addEntryDetails(request, ch, feedIri, (TypeDefinition)typeContainer.getContainer());
          if (typeContainer.getChildren().size() > 0)
+         {
             addChildren(ch, typeContainer.getChildren(), feedIri, request);
+         }
       }
    }
 

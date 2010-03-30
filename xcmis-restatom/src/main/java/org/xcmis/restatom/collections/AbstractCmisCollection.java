@@ -37,6 +37,8 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.ProviderImpl;
+import org.xcmis.spi.Connection;
+import org.xcmis.spi.StorageProvider;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -54,11 +56,16 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
    /** The logger. */
    private static final Log LOG = ExoLogger.getLogger(AbstractCmisCollection.class);
 
+   /** The Storage provider */
+   protected StorageProvider storageProvider;
+
    /**
     * Instantiates a new abstract cmis collection.
+    * @param storageProvider TODO
     */
-   public AbstractCmisCollection()
+   public AbstractCmisCollection(StorageProvider storageProvider)
    {
+      this.storageProvider = storageProvider;
    }
 
    /**
@@ -151,9 +158,13 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
             int pages = (total - skipCount) / maxItems;
             int rem = (total - skipCount) % maxItems;
             if (rem == 0)
+            {
                skipCount = total - maxItems;
+            }
             else if (pages != 0)
+            {
                skipCount = skipCount + pages * maxItems;
+            }
             params.put(AtomCMIS.PARAM_SKIP_COUNT, Integer.toString(skipCount));
             params.put(AtomCMIS.PARAM_MAX_ITEMS, Integer.toString(maxItems));
             feed.addLink(request.absoluteUrlFor("feed", params), AtomCMIS.LINK_LAST, AtomCMIS.MEDIATYPE_ATOM_FEED,
@@ -262,7 +273,7 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
     * Create link to AtomPub Service Document contains the set of repositories
     * that are available.
     * 
-    * @param request request context
+    * @param request the request context
     * @return link to AtomPub Service Document
     */
    protected String getServiceLink(RequestContext request)
@@ -271,6 +282,56 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
       p.put("repoid", getRepositoryId(request));
       String service = request.absoluteUrlFor(TargetType.SERVICE, p);
       return service;
+   }
+
+   /**
+    * To get Connection for provided repository Id within request.
+    * 
+    * @param request the request context
+    * @return the Connection to CMIS storage
+    */
+   protected Connection getConnection(RequestContext request)
+   {
+      return storageProvider.getConnection(getRepositoryId(request), null);
+   }
+
+   protected boolean getBooleanParameter(RequestContext request, String name, boolean defaultValue)
+   {
+      Boolean result;
+      String param = request.getParameter(name);
+      if (param != null && param.length() > 0)
+      {
+         result = Boolean.parseBoolean(param);
+      }
+      else
+      {
+         result = defaultValue;
+      }
+      return result;
+   }
+
+   protected Integer getIntegerParameter(RequestContext request, String name, Integer defaultValue)
+      throws ResponseContextException
+   {
+      Integer result;
+      String param = request.getParameter(name);
+      if (param != null && param.length() > 0)
+      {
+         try
+         {
+            result = new Integer(param);
+         }
+         catch (NumberFormatException nfe)
+         {
+            String msg = "Invalid parameter for name '" + name + "' with value: '" + name + "'";
+            throw new ResponseContextException(msg, 400);
+         }
+      }
+      else
+      {
+         result = defaultValue;
+      }
+      return result;
    }
 
 }

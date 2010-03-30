@@ -35,7 +35,6 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.security.ConversationState;
 import org.exoplatform.services.security.Identity;
-import org.xcmis.core.AccessControlService;
 import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.CmisPropertiesType;
 import org.xcmis.core.CmisProperty;
@@ -43,16 +42,15 @@ import org.xcmis.core.CmisPropertyId;
 import org.xcmis.core.CmisPropertyString;
 import org.xcmis.core.EnumBaseObjectTypeIds;
 import org.xcmis.core.EnumPropertiesRelationship;
-import org.xcmis.core.EnumVersioningState;
-import org.xcmis.core.NavigationService;
-import org.xcmis.core.ObjectService;
-import org.xcmis.core.PolicyService;
-import org.xcmis.core.RelationshipService;
-import org.xcmis.core.RepositoryService;
-import org.xcmis.core.VersioningService;
+import org.xcmis.spi.BaseType;
 import org.xcmis.spi.CMIS;
-import org.xcmis.spi.Repository;
-import org.xcmis.spi.object.Entry;
+import org.xcmis.spi.Connection;
+import org.xcmis.spi.ItemsList;
+import org.xcmis.spi.StorageProvider;
+import org.xcmis.spi.VersioningState;
+import org.xcmis.spi.object.CmisObject;
+import org.xcmis.wssoap.impl.TypeConverter;
+import org.xcmis.wssoap.impl.server.IdentityInterceptor;
 
 import java.util.Iterator;
 import java.util.List;
@@ -66,23 +64,13 @@ public abstract class BaseTest extends TestCase
 
    protected StandaloneContainer container;
 
-   public RepositoryService cmisRepositoryService;
+   protected StorageProvider storageProvider;
 
-   public ObjectService objectService;
+   protected Connection conn;
 
-   public NavigationService navigationService;
-
-   public RelationshipService relationshipService;
-
-   public VersioningService versioningService;
-
-   public PolicyService policyService;
-
-   public AccessControlService aclService;
+   protected String rootFolderId;
 
    protected String testFolderId;
-
-   public Repository repository;
 
    public void setUp() throws Exception
    {
@@ -93,16 +81,21 @@ public abstract class BaseTest extends TestCase
       ConversationState state = new ConversationState(new Identity("root"));
       ConversationState.setCurrent(state);
 
-      cmisRepositoryService = (RepositoryService)container.getComponentInstanceOfType(RepositoryService.class);
-      objectService = (ObjectService)container.getComponentInstanceOfType(ObjectService.class);
-      navigationService = (NavigationService)container.getComponentInstanceOfType(NavigationService.class);
-      relationshipService = (RelationshipService)container.getComponentInstanceOfType(RelationshipService.class);
-      versioningService = (VersioningService)container.getComponentInstanceOfType(VersioningService.class);
-      policyService = (PolicyService)container.getComponentInstanceOfType(PolicyService.class);
-      aclService = (AccessControlService)container.getComponentInstanceOfType(AccessControlService.class);
+      storageProvider = (StorageProvider)container.getComponentInstanceOfType(StorageProvider.class);
 
-      repository = cmisRepositoryService.getRepository(repositoryId);
-      testFolderId = createFolder(repository.getRepositoryInfo().getRootFolderId(), "testFolder");
+      conn = storageProvider.getConnection(repositoryId, state);
+
+      rootFolderId = conn.getStorage().getRepositoryInfo().getRootFolderId();
+      try
+      {
+         testFolderId = createFolder(rootFolderId, "testFolder");
+      }
+      catch (Exception e)
+      {
+         clearRoot();
+         testFolderId = createFolder(rootFolderId, "testFolder");
+      }
+
    }
 
    /**
@@ -136,7 +129,7 @@ public abstract class BaseTest extends TestCase
       }
       if (inInterceptors != null && inInterceptors.size() > 0)
       {
-         for (AbstractPhaseInterceptor<?> in : inInterceptors)
+         for (AbstractPhaseInterceptor<?> in : inInterceptors) 
             serverFactory.getServiceFactory().getService().getInInterceptors().add(in);
       }
 
@@ -173,10 +166,8 @@ public abstract class BaseTest extends TestCase
 
       props.getProperty().add(propTypeId);
       props.getProperty().add(propName);
-      CmisObjectType document =
-         objectService.createDocument(repositoryId, parentId, props, null, EnumVersioningState.MAJOR, null, null,
-            null, false).toCmisObjectType();
-      return getObjectId(document);
+      return conn.createDocument(parentId, TypeConverter.getPropertyMap(props), null, null, null, null,
+         VersioningState.MAJOR);
    }
 
    protected String createFolder(String parentId, String name) throws Exception
@@ -193,8 +184,8 @@ public abstract class BaseTest extends TestCase
 
       props.getProperty().add(propTypeId);
       props.getProperty().add(propName);
-      CmisObjectType folder = objectService.createFolder(repositoryId, parentId, props, null, null, null, false).toCmisObjectType();
-      return getObjectId(folder);
+      return conn.createFolder(parentId, TypeConverter.getPropertyMap(props), null, null, null);
+
    }
 
    protected String createPolicy(String parentId, String name, String policyText) throws Exception
@@ -203,21 +194,23 @@ public abstract class BaseTest extends TestCase
       // typeId
       CmisPropertyId propTypeId = new CmisPropertyId();
       propTypeId.setPropertyDefinitionId(CMIS.OBJECT_TYPE_ID);
+      propTypeId.setLocalName(CMIS.OBJECT_TYPE_ID);
       propTypeId.getValue().add(EnumBaseObjectTypeIds.CMIS_POLICY.value());
       // name
       CmisPropertyString propName = new CmisPropertyString();
       propName.setPropertyDefinitionId(CMIS.NAME);
-      propName.getValue().add(name);
+      propName.setLocalName(CMIS.NAME);
+      propName.getValue().add(name + "1");
       // text
       CmisPropertyString propText = new CmisPropertyString();
       propText.setPropertyDefinitionId(CMIS.POLICY_TEXT);
-      propText.getValue().add(name);
+      propText.setLocalName(CMIS.POLICY_TEXT);
+      propText.getValue().add(name + "2");
 
       props.getProperty().add(propTypeId);
       props.getProperty().add(propName);
       props.getProperty().add(propText);
-      CmisObjectType policy = objectService.createPolicy(repositoryId, parentId, props, null, null, null, false).toCmisObjectType();
-      return getObjectId(policy);
+      return conn.createPolicy(parentId, TypeConverter.getPropertyMap(props), null, null, null);
    }
 
    protected String createRelationship(String source, String target) throws Exception
@@ -229,7 +222,7 @@ public abstract class BaseTest extends TestCase
       // name
       CmisPropertyString propName = new CmisPropertyString();
       propName.setPropertyDefinitionId(CMIS.NAME);
-      propName.getValue().add("relation1");
+      propName.getValue().add("relation1"+ source);
       // sourceId
       CmisPropertyId sourceId = new CmisPropertyId();
       sourceId.setPropertyDefinitionId(EnumPropertiesRelationship.CMIS_SOURCE_ID.value());
@@ -245,8 +238,7 @@ public abstract class BaseTest extends TestCase
       props.getProperty().add(sourceId);
       props.getProperty().add(targetId);
 
-      CmisObjectType relationship = objectService.createRelationship(repositoryId, props, null, null, null, false).toCmisObjectType();
-      return getObjectId(relationship);
+      return conn.createRelationship(TypeConverter.getPropertyMap(props), null, null, null);
    }
 
    protected String getObjectId(CmisObjectType cmis)
@@ -265,13 +257,80 @@ public abstract class BaseTest extends TestCase
       return null;
    }
 
-   protected void tearDown() throws Exception
+   private void deleteObject(CmisObject obj)
    {
-      super.tearDown();
-      for (Iterator<Entry> iter = repository.getCheckedOutDocuments(null); iter.hasNext();)
-         iter.next().delete();
-      for (Iterator<Entry> iter = repository.getRootFolder().getChildren(); iter.hasNext();)
-         iter.next().delete();
+      String objId = obj.getObjectInfo().getId();
+      try
+      {
+         if (obj.getObjectInfo().getBaseType().value().equals(BaseType.FOLDER.value()))
+         {
+            for (Iterator<CmisObject> iter = getChildren(objId).getItems().iterator(); iter.hasNext();)
+            {
+               CmisObject obj2 = iter.next();
+               deleteObject(obj2);
+            }
+         }
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+      try
+      {
+         conn.deleteObject(objId, null);
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+
    }
 
+   protected ItemsList<CmisObject> getChildren(String folderId)
+   {
+      return conn.getChildren(folderId, false, null, false, true, CMIS.WILDCARD, null, null, -1, 0);
+   }
+
+   protected void tearDown() throws Exception
+   {
+
+      // TODO to remove this "if" statement when it was fixed for JCR storage
+      //      try
+      //      {
+      //         if (conn.getCheckedOutDocs(rootFolderId, false, IncludeRelationships.NONE, true, null, null, null, -1, 0) != null)
+      //         {
+      //            for (Iterator<CmisObject> iter =
+      //               conn.getCheckedOutDocs(rootFolderId, false, IncludeRelationships.NONE, true, null, null, null, -1, 0).getItems().iterator(); iter
+      //               .hasNext();)
+      //            {
+      //               conn.deleteObject(iter.next().getObjectInfo().getId(), null);
+      //            }
+      //         }
+      //      }
+      //      catch (Exception e)
+      //      {
+      //         e.printStackTrace();
+      //      }
+
+      clearRoot();
+
+      super.tearDown();
+      conn.close();
+   }
+
+   private void clearRoot()
+   {
+      try
+      {
+         for (Iterator<CmisObject> iter = getChildren(rootFolderId).getItems().iterator(); iter.hasNext();)
+         {
+            CmisObject obj = iter.next();
+            deleteObject(obj);
+         }
+      }
+      catch (Exception ex)
+      {
+         ex.printStackTrace();
+      }
+   }
 }

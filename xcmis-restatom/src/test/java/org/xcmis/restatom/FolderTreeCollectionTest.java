@@ -24,13 +24,12 @@ package org.xcmis.restatom;
  * 
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com.ua">Alexey
  *         Zavizionov</a>
- * @version $Id$ Jul 28, 2009
+ * @version $Id: FolderTreeCollectionTest.java 2 2010-02-04 17:21:49Z andrew00x $ Jul 28, 2009
  */
-import org.xcmis.core.EnumIncludeRelationships;
-import org.xcmis.restatom.AtomCMIS;
 import org.exoplatform.services.rest.impl.ContainerResponse;
 import org.exoplatform.services.rest.impl.MultivaluedMapImpl;
 import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
+import org.xcmis.spi.IncludeRelationships;
 
 import java.io.ByteArrayInputStream;
 import java.util.Arrays;
@@ -46,13 +45,13 @@ public class FolderTreeCollectionTest extends BaseTest
 
    public void testGetTree() throws Exception
    {
-      String folder1 = createFolder(testFolderId, "folder1").getObjectId();
-      String folder2 = createFolder(folder1, "folder2").getObjectId();
-      String folder3 = createFolder(folder1, "folder3").getObjectId();
-      String folder4 = createFolder(folder1, "folder4").getObjectId();
-      String folder5 = createFolder(folder2, "folder5").getObjectId();
-      String folder6 = createFolder(folder2, "folder6").getObjectId();
-      String folder7 = createFolder(folder5, "folder7").getObjectId();
+      String folder1 = createFolder(testFolderId, "folder1");
+      String folder2 = createFolder(folder1, "folder2");
+      String folder3 = createFolder(folder1, "folder3");
+      String folder4 = createFolder(folder1, "folder4");
+      String folder5 = createFolder(folder2, "folder5");
+      String folder6 = createFolder(folder2, "folder6");
+      String folder7 = createFolder(folder5, "folder7");
 
       createDocument(folder3, "doc3", null, null);
       createDocument(folder5, "doc5", null, null);
@@ -81,7 +80,7 @@ public class FolderTreeCollectionTest extends BaseTest
          + cmisRepositoryId //
          + "/foldertree/" //
          + folderId + "?depth=" + depth //
-         + "&" + AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS + "=" + EnumIncludeRelationships.NONE.value() //
+         + "&" + AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS + "=" + IncludeRelationships.NONE.value() //
          + "&" + AtomCMIS.PARAM_INCLUDE_PATH_SEGMENT + "=" + "true";
 
       MultivaluedMap<String, String> headers = new MultivaluedMapImpl();

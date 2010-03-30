@@ -21,9 +21,8 @@ package org.xcmis.restatom.abdera;
 
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
-import org.xcmis.core.CmisProperty;
-import org.xcmis.core.CmisPropertyHtml;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.spi.object.impl.HtmlProperty;
 
 import java.util.List;
 
@@ -31,9 +30,9 @@ import javax.xml.namespace.QName;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: PropertyHtmlElement.java 2 2010-02-04 17:21:49Z andrew00x $
  */
-public class PropertyHtmlElement extends PropertyElement<CmisPropertyHtml>
+public class PropertyHtmlElement extends PropertyElement<HtmlProperty>
 {
 
    /**
@@ -61,13 +60,12 @@ public class PropertyHtmlElement extends PropertyElement<CmisPropertyHtml>
     * {@inheritDoc}
     */
    @Override
-   public void build(CmisProperty value)
+   public void build(HtmlProperty value)
    {
       if (value != null)
       {
          super.build(value);
-
-         List<String> listString = ((CmisPropertyHtml)value).getValue();
+         List<String> listString = value.getValues();
          if (listString != null && listString.size() > 0)
          {
             for (String v : listString)
@@ -79,14 +77,14 @@ public class PropertyHtmlElement extends PropertyElement<CmisPropertyHtml>
    /**
     * {@inheritDoc}
     */
-   public CmisPropertyHtml getProperty()
+   public HtmlProperty getProperty()
    {
-      CmisPropertyHtml html = new CmisPropertyHtml();
+      HtmlProperty html = new HtmlProperty();
       processPropertyElement(html);
       if (getElements() != null && getElements().size() > 0)
       {
          for (Element el : getElements())
-            html.getValue().add(el.getText());
+            html.getValues().add(el.getText());
       }
       return html;
    }

@@ -23,7 +23,7 @@ package org.xcmis.spi;
  * If caller try apply property or rendition filter that is not valid.
  * 
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: FilterNotValidException.java 260 2010-03-03 15:53:42Z andrew00x $
  */
 public final class FilterNotValidException extends InvalidArgumentException
 {

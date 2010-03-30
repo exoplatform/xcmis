@@ -21,9 +21,8 @@ package org.xcmis.restatom.abdera;
 
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
-import org.xcmis.core.CmisProperty;
-import org.xcmis.core.CmisPropertyInteger;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.spi.object.impl.IntegerProperty;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -32,9 +31,9 @@ import javax.xml.namespace.QName;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: PropertyIntegerElement.java 2 2010-02-04 17:21:49Z andrew00x $
  */
-public class PropertyIntegerElement extends PropertyElement<CmisPropertyInteger>
+public class PropertyIntegerElement extends PropertyElement<IntegerProperty>
 {
 
    /**
@@ -62,13 +61,13 @@ public class PropertyIntegerElement extends PropertyElement<CmisPropertyInteger>
     * {@inheritDoc}
     */
    @Override
-   public void build(CmisProperty value)
+   public void build(IntegerProperty value)
    {
       if (value != null)
       {
          super.build(value);
 
-         List<BigInteger> listBigInteger = ((CmisPropertyInteger)value).getValue();
+         List<BigInteger> listBigInteger = value.getValues();
          if (listBigInteger != null && listBigInteger.size() > 0)
          {
             for (BigInteger v : listBigInteger)
@@ -80,14 +79,14 @@ public class PropertyIntegerElement extends PropertyElement<CmisPropertyInteger>
    /**
     * {@inheritDoc}
     */
-   public CmisPropertyInteger getProperty()
+   public IntegerProperty getProperty()
    {
-      CmisPropertyInteger i = new CmisPropertyInteger();
+      IntegerProperty i = new IntegerProperty();
       processPropertyElement(i);
       if (getElements() != null && getElements().size() > 0)
       {
          for (Element el : getElements())
-            i.getValue().add(new BigInteger(el.getText()));
+            i.getValues().add(new BigInteger(el.getText()));
       }
       return i;
    }

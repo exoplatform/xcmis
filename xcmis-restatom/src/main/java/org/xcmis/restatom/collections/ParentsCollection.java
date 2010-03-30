@@ -25,45 +25,35 @@ import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
-import org.xcmis.core.EnumIncludeRelationships;
-import org.xcmis.core.NavigationService;
-import org.xcmis.core.ObjectService;
-import org.xcmis.core.RepositoryService;
-import org.xcmis.core.VersioningService;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.Connection;
 import org.xcmis.spi.FilterNotValidException;
+import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.RepositoryException;
+import org.xcmis.spi.StorageException;
+import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.object.CmisObject;
-import org.xcmis.spi.object.CmisObjectParents;
+import org.xcmis.spi.object.ObjectParent;
 
 import java.util.List;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: ParentsCollection.java 216 2010-02-12 17:19:50Z andrew00x $
  */
 public class ParentsCollection extends CmisObjectCollection
 {
 
-   /** The navigation service. */
-   protected NavigationService navigationService;
-
    /**
     * Instantiates a new parents collection.
+    * @param storageProvider TODO
     * 
-    * @param repositoryService the repository service
-    * @param objectService the object service
-    * @param versioningService the versioning service
-    * @param navigationService the navigation service
     */
-   public ParentsCollection(RepositoryService repositoryService, ObjectService objectService,
-      VersioningService versioningService, NavigationService navigationService)
+   public ParentsCollection(StorageProvider storageProvider)
    {
-      super(repositoryService, objectService, versioningService);
-      this.navigationService = navigationService;
+      super(storageProvider);
       setHref("/parents");
    }
 
@@ -94,23 +84,22 @@ public class ParentsCollection extends CmisObjectCollection
    @Override
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
-      boolean includeAllowableActions =
-         Boolean.parseBoolean(request.getParameter(AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS));
+      boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
       boolean includeRelativePathSegment =
-         Boolean.parseBoolean(request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIVE_PATH_SEGMENT));
+         getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_RELATIVE_PATH_SEGMENT, false);
+
       // XXX At the moment get all properties from back-end. We need some of them for build correct feed.
       // Filter will be applied during build final Atom Document.
       //      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
       String propertyFilter = null;
       String renditionFilter = request.getParameter(AtomCMIS.PARAM_RENDITION_FILTER);
-      EnumIncludeRelationships includeRelationships;
+      IncludeRelationships includeRelationships;
       try
       {
          includeRelationships =
             request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS) == null
-               || request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS).length() == 0
-               ? EnumIncludeRelationships.NONE : EnumIncludeRelationships.fromValue(request
-                  .getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
+               || request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS).length() == 0 ? IncludeRelationships.NONE
+               : IncludeRelationships.fromValue(request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
       }
       catch (IllegalArgumentException iae)
       {
@@ -118,19 +107,19 @@ public class ParentsCollection extends CmisObjectCollection
          throw new ResponseContextException(msg, 400);
       }
 
-      String repositoryId = getRepositoryId(request);
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
          String objectId = getId(request);
          CmisObject object =
-            objectService.getObject(repositoryId, objectId, false, EnumIncludeRelationships.NONE, false, false,
-               CMIS.BASE_TYPE_ID, null, true);
+            conn.getObject(objectId, false, IncludeRelationships.NONE, false, false, true, CMIS.BASE_TYPE_ID, null);
 
          switch (getBaseObjectType(object))
          {
-            case CMIS_FOLDER :
-               CmisObject folderParent =
-                  navigationService.getFolderParent(repositoryId, objectId, propertyFilter, true);
+            case FOLDER :
+               CmisObject folderParent = conn.getFolderParent(objectId, true, propertyFilter);
+
                if (folderParent != null)
                {
                   // add cmisra:numItems
@@ -139,7 +128,7 @@ public class ParentsCollection extends CmisObjectCollection
                   Entry e = feed.addEntry();
                   IRI feedIri = new IRI(getFeedIriForEntry(folderParent, request));
                   addEntryDetails(request, e, feedIri, folderParent);
-                  String name = folderParent.getObjectInfo().getName();
+                  String name = object.getObjectInfo().getName();
                   if (name != null)
                   {
                      // add cmisra:relativePathSegment
@@ -149,20 +138,21 @@ public class ParentsCollection extends CmisObjectCollection
                }
                break;
             default :
-               List<CmisObjectParents> parents =
-                  navigationService.getObjectParents(repositoryId, objectId, includeAllowableActions,
-                     includeRelationships, includeRelativePathSegment, propertyFilter, renditionFilter, true);
+               List<ObjectParent> parents =
+                  conn.getObjectParents(objectId, includeAllowableActions, includeRelationships,
+                     includeRelativePathSegment, true, propertyFilter, renditionFilter);
                if (parents.size() > 0)
                {
                   // add cmisra:numItems
                   Element numItems = feed.addExtension(AtomCMIS.NUM_ITEMS);
                   numItems.setText(Integer.toString(parents.size()));
 
-                  for (CmisObjectParents parent : parents)
+                  for (ObjectParent parent : parents)
                   {
                      Entry e = feed.addEntry();
                      IRI feedIri = new IRI(getFeedIriForEntry(parent.getObject(), request));
                      addEntryDetails(request, e, feedIri, parent.getObject());
+
                      if (parent.getRelativePathSegment() != null)
                      {
                         // add cmisra:relativePathSegment
@@ -174,7 +164,7 @@ public class ParentsCollection extends CmisObjectCollection
                break;
          }
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          throw new ResponseContextException(createErrorResponse(re, 500));
       }
@@ -193,6 +183,13 @@ public class ParentsCollection extends CmisObjectCollection
       catch (Throwable t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
+      }
+      finally
+      {
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 

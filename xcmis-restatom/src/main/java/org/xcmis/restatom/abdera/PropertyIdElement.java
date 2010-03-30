@@ -21,9 +21,8 @@ package org.xcmis.restatom.abdera;
 
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
-import org.xcmis.core.CmisProperty;
-import org.xcmis.core.CmisPropertyId;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.spi.object.impl.IdProperty;
 
 import java.util.List;
 
@@ -31,9 +30,9 @@ import javax.xml.namespace.QName;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: PropertyIdElement.java 2 2010-02-04 17:21:49Z andrew00x $
  */
-public class PropertyIdElement extends PropertyElement<CmisPropertyId>
+public class PropertyIdElement extends PropertyElement<IdProperty>
 {
 
    /**
@@ -61,13 +60,13 @@ public class PropertyIdElement extends PropertyElement<CmisPropertyId>
     * {@inheritDoc}
     */
    @Override
-   public void build(CmisProperty value)
+   public void build(IdProperty value)
    {
       if (value != null)
       {
          super.build(value);
 
-         List<String> listString = ((CmisPropertyId)value).getValue();
+         List<String> listString = value.getValues();
          if (listString != null && listString.size() > 0)
          {
             for (String v : listString)
@@ -79,14 +78,15 @@ public class PropertyIdElement extends PropertyElement<CmisPropertyId>
    /**
     * {@inheritDoc}
     */
-   public CmisPropertyId getProperty()
+   public IdProperty getProperty()
    {
-      CmisPropertyId id = new CmisPropertyId();
+      IdProperty id = new IdProperty();
       processPropertyElement(id);
       if (getElements() != null && getElements().size() > 0)
       {
-         for (Element el : getElements())
-            id.getValue().add(el.getText());
+         for (Element el : getElements()) {
+            id.getValues().add(el.getText());
+         }
       }
       return id;
    }

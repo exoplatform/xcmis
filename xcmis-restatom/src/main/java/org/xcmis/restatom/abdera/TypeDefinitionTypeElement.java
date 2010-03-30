@@ -22,19 +22,16 @@ package org.xcmis.restatom.abdera;
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
-import org.xcmis.core.CmisPropertyDefinitionType;
-import org.xcmis.core.CmisTypeDefinitionType;
-import org.xcmis.core.CmisTypeDocumentDefinitionType;
-import org.xcmis.core.CmisTypeFolderDefinitionType;
-import org.xcmis.core.CmisTypePolicyDefinitionType;
-import org.xcmis.core.CmisTypeRelationshipDefinitionType;
-import org.xcmis.core.EnumBaseObjectTypeIds;
-import org.xcmis.core.EnumContentStreamAllowed;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.spi.BaseType;
+import org.xcmis.spi.ContentStreamAllowed;
 import org.xcmis.spi.InvalidArgumentException;
+import org.xcmis.spi.PropertyDefinition;
+import org.xcmis.spi.TypeDefinition;
+import org.xcmis.spi.impl.TypeDefinitionImpl;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 
@@ -72,16 +69,16 @@ public class TypeDefinitionTypeElement extends ExtensibleElementWrapper
     * 
     * @return the properties element
     */
-   public List<CmisPropertyDefinitionType> getPropertyDefinitions()
+   public Map<String, PropertyDefinition<?>> getPropertyDefinitions()
    {
-      List<CmisPropertyDefinitionType> propDefs = new ArrayList<CmisPropertyDefinitionType>();
+      Map<String, PropertyDefinition<?>> propDefs = new HashMap<String, PropertyDefinition<?>>();
       for (QName q : AtomCMIS.PROPERTY_DEFINITIONS)
       {
-         PropertyDefinitionTypeElement<CmisPropertyDefinitionType> propDefEl = getExtension(q);
+         PropertyDefinitionTypeElement propDefEl = getExtension(q);
          if (propDefEl != null)
          {
-            CmisPropertyDefinitionType propDef = propDefEl.getPropertyDefinition();
-            propDefs.add(propDef);
+            PropertyDefinition<?> propDef = propDefEl.getPropertyDefinition();
+            propDefs.put(propDef.getId(), propDef);
          }
       }
       return propDefs;
@@ -92,29 +89,28 @@ public class TypeDefinitionTypeElement extends ExtensibleElementWrapper
     * 
     * @return the type definition
     */
-   public CmisTypeDefinitionType getTypeDefinition()
+   public TypeDefinition getTypeDefinition()
    {
       String baseId = getSimpleExtension(AtomCMIS.BASE_ID);
-      EnumBaseObjectTypeIds baseType;
+      BaseType baseType;
       try
       {
-         baseType = EnumBaseObjectTypeIds.fromValue(baseId);
+         baseType = BaseType.fromValue(baseId);
       }
       catch (IllegalArgumentException e)
       {
          throw new InvalidArgumentException("Unable to parse Type Definition element. Unknown baseTypeId " + baseId);
       }
 
-      CmisTypeDefinitionType type = null;
+      TypeDefinitionImpl type = new TypeDefinitionImpl();
       switch (baseType)
       {
-         case CMIS_DOCUMENT :
-            CmisTypeDocumentDefinitionType documentType = new CmisTypeDocumentDefinitionType();
-            documentType.setVersionable(Boolean.parseBoolean(getSimpleExtension(AtomCMIS.VERSIONABLE)));
+         case DOCUMENT :
+            type.setVersionable(Boolean.parseBoolean(getSimpleExtension(AtomCMIS.VERSIONABLE)));
             String contentAllowed = getSimpleExtension(AtomCMIS.CONTENT_STREAM_ALLOWED);
             try
             {
-               documentType.setContentStreamAllowed(EnumContentStreamAllowed.fromValue(contentAllowed));
+               type.setContentStreamAllowed(ContentStreamAllowed.fromValue(contentAllowed));
             }
             catch (IllegalArgumentException e)
             {
@@ -122,19 +118,14 @@ public class TypeDefinitionTypeElement extends ExtensibleElementWrapper
                   "Unable to parse Type Definition element. Unsupported 'content stream allowed attribute': "
                      + contentAllowed);
             }
-            type = documentType;
             break;
-         case CMIS_FOLDER :
-            type = new CmisTypeFolderDefinitionType();
+         case FOLDER :
             break;
-         case CMIS_POLICY :
-            type = new CmisTypePolicyDefinitionType();
+         case POLICY :
             break;
-         case CMIS_RELATIONSHIP :
-            CmisTypeRelationshipDefinitionType relationshipType = new CmisTypeRelationshipDefinitionType();
-            relationshipType.getAllowedSourceTypes().add(getSimpleExtension(AtomCMIS.ALLOWED_SOURCE_TYPES));
-            relationshipType.getAllowedTargetTypes().add(getSimpleExtension(AtomCMIS.ALLOWED_TARGET_TYPES));
-            type = relationshipType;
+         case RELATIONSHIP :
+            type.setAllowedSourceTypes(new String[]{getSimpleExtension(AtomCMIS.ALLOWED_SOURCE_TYPES)});
+            type.setAllowedTargetTypes(new String[]{getSimpleExtension(AtomCMIS.ALLOWED_TARGET_TYPES)});
             break;
       }
 
@@ -163,8 +154,8 @@ public class TypeDefinitionTypeElement extends ExtensibleElementWrapper
       type.setControllableACL(Boolean.parseBoolean(getSimpleExtension(AtomCMIS.CONTROLLABLE)));
 
       //Property definitions
-      List<CmisPropertyDefinitionType> propDefs = getPropertyDefinitions();
-      type.getPropertyDefinition().addAll(propDefs);
+      Map<String, PropertyDefinition<?>> propDefs = getPropertyDefinitions();
+      type.setPropertyDefinitions(propDefs);
 
       return type;
    }
@@ -174,7 +165,7 @@ public class TypeDefinitionTypeElement extends ExtensibleElementWrapper
     * 
     * @param type the type
     */
-   public void build(CmisTypeDefinitionType type)
+   public void build(TypeDefinition type)
    {
       if (type != null)
       {
@@ -203,52 +194,58 @@ public class TypeDefinitionTypeElement extends ExtensibleElementWrapper
          addSimpleExtension(AtomCMIS.CONTROLLABLE_POLICY, Boolean.toString(type.isControllablePolicy()));
          addSimpleExtension(AtomCMIS.CONTROLLABLE, Boolean.toString(type.isControllableACL()));
 
-         if (type instanceof CmisTypeDocumentDefinitionType)
+         switch (type.getBaseId())
          {
-            setAttributeValue(AtomCMIS.X_TYPE, "cmis:cmisTypeDocumentDefinitionType");
+            case DOCUMENT :
+               setAttributeValue(AtomCMIS.X_TYPE, "cmis:cmisTypeDocumentDefinitionType");
 
-            addSimpleExtension(AtomCMIS.VERSIONABLE, Boolean.toString(((CmisTypeDocumentDefinitionType)type)
-               .isVersionable()));
-            if (((CmisTypeDocumentDefinitionType)type).getContentStreamAllowed() != null)
-               addSimpleExtension(AtomCMIS.CONTENT_STREAM_ALLOWED, ((CmisTypeDocumentDefinitionType)type)
-                  .getContentStreamAllowed().value());
-            else
-               addSimpleExtension(AtomCMIS.CONTENT_STREAM_ALLOWED, EnumContentStreamAllowed.ALLOWED.value());
-         }
-         else if (type instanceof CmisTypeRelationshipDefinitionType)
-         {
-            setAttributeValue(AtomCMIS.X_TYPE, "cmis:cmisTypeRelationshipDefinitionType");
+               addSimpleExtension(AtomCMIS.VERSIONABLE, Boolean.toString(type.isVersionable()));
+               if (type.getContentStreamAllowed() != null)
+                  addSimpleExtension(AtomCMIS.CONTENT_STREAM_ALLOWED, type.getContentStreamAllowed().value());
+               else
+                  addSimpleExtension(AtomCMIS.CONTENT_STREAM_ALLOWED, ContentStreamAllowed.ALLOWED.value());
 
-            List<String> listAllowedSource = ((CmisTypeRelationshipDefinitionType)type).getAllowedSourceTypes();
-            if (listAllowedSource != null && listAllowedSource.size() > 0)
-            {
-               for (String string : listAllowedSource)
-                  addSimpleExtension(AtomCMIS.ALLOWED_SOURCE_TYPES, string);
-            }
+               break;
+            case RELATIONSHIP :
+               setAttributeValue(AtomCMIS.X_TYPE, "cmis:cmisTypeRelationshipDefinitionType");
 
-            List<String> listAllowedTarget = ((CmisTypeRelationshipDefinitionType)type).getAllowedTargetTypes();
-            if (listAllowedTarget != null && listAllowedTarget.size() > 0)
-            {
-               for (String string : listAllowedTarget)
-                  addSimpleExtension(AtomCMIS.ALLOWED_TARGET_TYPES, string);
-            }
+               String[] arrayAllowedSource = type.getAllowedSourceTypes();
+               if (arrayAllowedSource != null && arrayAllowedSource.length > 0)
+               {
+                  for (String string : arrayAllowedSource)
+                     addSimpleExtension(AtomCMIS.ALLOWED_SOURCE_TYPES, string);
+               }
+
+               String[] arrayAllowedTarget = type.getAllowedTargetTypes();
+               if (arrayAllowedTarget != null && arrayAllowedTarget.length > 0)
+               {
+                  for (String string : arrayAllowedTarget)
+                     addSimpleExtension(AtomCMIS.ALLOWED_TARGET_TYPES, string);
+               }
+               break;
+            case FOLDER :
+               setAttributeValue(AtomCMIS.X_TYPE, "cmis:cmisTypeFolderDefinitionType");
+               break;
+
+            case POLICY :
+               setAttributeValue(AtomCMIS.X_TYPE, "cmis:cmisTypePolicyDefinitionType");
+               break;
          }
-         else if (type instanceof CmisTypeFolderDefinitionType)
+
+         if (type.getBaseId() == null)
          {
-            setAttributeValue(AtomCMIS.X_TYPE, "cmis:cmisTypeFolderDefinitionType");
-         }
-         else if (type instanceof CmisTypePolicyDefinitionType)
-         {
-            setAttributeValue(AtomCMIS.X_TYPE, "cmis:cmisTypePolicyDefinitionType");
+            String msg = "Specified baseType does not match with any allowed BaseTypeId";
+            throw new InvalidArgumentException(msg);
          }
 
          /* property definitions */
-         if (type.getPropertyDefinition() != null && type.getPropertyDefinition().size() > 0)
+         if (type.getPropertyDefinitions() != null && type.getPropertyDefinitions().size() > 0)
          {
-            for (CmisPropertyDefinitionType propertyDefinition : type.getPropertyDefinition())
+            for (PropertyDefinition<?> propertyDefinition : type.getPropertyDefinitions())
             {
-               PropertyDefinitionTypeElement<CmisPropertyDefinitionType> propDefEl =
-                  addExtension(CMISExtensionFactory.getElementName(propertyDefinition.getClass()));
+               PropertyDefinitionTypeElement propDefEl =
+                  addExtension(CMISExtensionFactory.getPropertyDefinitionTypeElementName(propertyDefinition
+                     .getPropertyType()));
                propDefEl.build(propertyDefinition);
             }
          }

@@ -9,15 +9,31 @@
    <name>xCMIS :: SOAP :: Binding</name>
 
    <dependencies>
-      <dependency>
+      
+<!--      <dependency>-->
+<!--         <groupId>org.xcmis</groupId>-->
+<!--         <artifactId>xcmis-core</artifactId>-->
+<!--      </dependency>-->
+
+       <dependency>
          <groupId>org.xcmis</groupId>
-         <artifactId>xcmis-core</artifactId>
+         <artifactId>xcmis-spi</artifactId>
+         <scope>compile</scope>
       </dependency>
+      
+
       <dependency>
          <groupId>org.xcmis</groupId>
          <artifactId>xcmis-sp-inmemory</artifactId>
          <scope>test</scope>
       </dependency>
+
+      <dependency>
+         <groupId>org.xcmis</groupId>
+         <artifactId>xcmis-sp-jcr-exo-new</artifactId>
+         <scope>test</scope>
+      </dependency>
+
       <!-- CXF dependencies -->
       <dependency>
          <groupId>org.apache.cxf</groupId>
@@ -72,6 +88,33 @@
    </dependencies>
    <build>
       <plugins>
+                           <plugin>
+				<groupId>org.jvnet.jaxb2.maven2</groupId>
+				<artifactId>maven-jaxb2-plugin</artifactId>
+				<version>0.6.2</version>
+				<executions>
+					<execution>
+						<id>generate cmis classes</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<phase>generate-sources</phase>
+						<configuration>
+							<schemaDirectory>src/main/resources</schemaDirectory>
+							<catalog>src/main/resources/catalog.xml</catalog>
+							<schemaLanguage>XMLSCHEMA</schemaLanguage>
+							<extension>true</extension>
+							<schemaIncludes>
+								<include>CMIS-Core.xsd</include>
+								<include>CMIS-Messaging.xsd</include>
+								<include>CMIS-RestAtom.xsd</include>
+							</schemaIncludes>
+					            <verbose>true</verbose>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
          <plugin>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-codegen-plugin</artifactId>

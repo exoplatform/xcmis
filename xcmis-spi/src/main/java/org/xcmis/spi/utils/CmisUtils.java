@@ -19,17 +19,12 @@
 
 package org.xcmis.spi.utils;
 
-import org.xcmis.core.CmisAccessControlEntryType;
-import org.xcmis.core.CmisAccessControlListType;
-import org.xcmis.core.CmisAccessControlPrincipalType;
-import org.xcmis.core.CmisPropertiesType;
-import org.xcmis.core.CmisProperty;
-import org.xcmis.core.CmisPropertyId;
-import org.xcmis.core.CmisPropertyString;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.AccessControlEntry;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.data.ObjectData;
+import org.xcmis.spi.impl.AccessControlEntryImpl;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -45,7 +40,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: CmisUtils.java 332 2010-03-11 17:24:56Z andrew00x $
  */
 public final class CmisUtils
 {
@@ -54,8 +49,8 @@ public final class CmisUtils
 
       public int compare(ObjectData object1, ObjectData object2)
       {
-         Calendar c1 = object1.getDate(CMIS.LAST_MODIFICATION_DATE);
-         Calendar c2 = object2.getDate(CMIS.LAST_MODIFICATION_DATE);
+         Calendar c1 = object1.getLastModificationDate();
+         Calendar c2 = object2.getLastModificationDate();
          return c2.compareTo(c1);
       }
 
@@ -66,12 +61,12 @@ public final class CmisUtils
    private static class EmptyItemsIterator implements ItemsIterator<Object>
    {
 
-      public long size()
+      public int size()
       {
          return 0;
       }
 
-      public void skip(long skip) throws NoSuchElementException
+      public void skip(int skip) throws NoSuchElementException
       {
          throw new NoSuchElementException("skip");
       }
@@ -98,17 +93,13 @@ public final class CmisUtils
       return (ItemsIterator<T>)EMPTY_ITEMS_ITERATOR;
    }
 
-   public static CmisAccessControlListType createAclFromPermissionMap(Map<String, Set<String>> permissions)
+   public static List<AccessControlEntry> createAclFromPermissionMap(Map<String, Set<String>> permissions)
    {
-      CmisAccessControlListType acl = new CmisAccessControlListType();
+      List<AccessControlEntry> acl = new ArrayList<AccessControlEntry>();
       for (Map.Entry<String, Set<String>> e : permissions.entrySet())
       {
-         CmisAccessControlEntryType ace = new CmisAccessControlEntryType();
-         CmisAccessControlPrincipalType principal = new CmisAccessControlPrincipalType();
-         principal.setPrincipalId(e.getKey());
-         ace.getPermission().addAll(e.getValue());
-         ace.setPrincipal(principal);
-         acl.getPermission().add(ace);
+         AccessControlEntry ace = new AccessControlEntryImpl(e.getKey(), e.getValue());
+         acl.add(ace);
       }
       return acl;
    }
@@ -139,114 +130,8 @@ public final class CmisUtils
       return xmlCalendar;
    }
 
-   /**
-    * Get "cmis:objectId" property.
-    * 
-    * @param properties the CMIS Object Type
-    * @return the "cmis:objectId" property or <code>null</code>
-    */
-   public static String getObjectId(CmisPropertiesType properties)
-   {
-      CmisPropertyId property = (CmisPropertyId)getProperty(properties, CMIS.OBJECT_ID);
-      if (property != null && property.getValue().size() > 0)
-         return property.getValue().get(0);
-      return null;
-   }
-
-   /**
-    * Get property from CMIS object type with provided property name.
-    * 
-    * @param cmis the CMIS object type
-    * @param propertyId the property ID
-    * @return the CMIS property
-    */
-   public static CmisProperty getProperty(CmisPropertiesType properties, String propertyId)
-   {
-      if (properties != null)
-      {
-         List<CmisProperty> props = properties.getProperty();
-         for (CmisProperty prop : props)
-         {
-            if (prop.getPropertyDefinitionId().equals(propertyId))
-               return prop;
-         }
-      }
-      return null;
-
-   }
-
-   /**
-    * Get "cmis:name" property.
-    * 
-    * @param properties the CMIS Properties Type.
-    * @return the "cmis:name" property or <code>null</code>
-    */
-   public static String getName(CmisPropertiesType properties)
-   {
-      CmisPropertyString property = (CmisPropertyString)getProperty(properties, CMIS.NAME);
-      if (property != null && property.getValue().size() > 0)
-         return property.getValue().get(0);
-      return null;
-   }
-
-   /**
-    * Get "cmis:policyText" property.
-    * 
-    * @param properties the CMIS Properties Type.
-    * @return the "cmis:policyText" property or <code>null</code>
-    */
-   public static String getPolicyText(CmisPropertiesType properties)
-   {
-      CmisPropertyString property = (CmisPropertyString)getProperty(properties, CMIS.POLICY_TEXT);
-      if (property != null && property.getValue().size() > 0)
-         return property.getValue().get(0);
-      return null;
-   }
-
-   /**
-    * Get "cmis:sourceId" property.
-    * 
-    * @param properties the CMIS Properties Type.
-    * @return the "cmis:sourceId" property or <code>null</code>
-    */
-   public static String getSourceId(CmisPropertiesType properties)
-   {
-      CmisPropertyId property = (CmisPropertyId)getProperty(properties, CMIS.SOURCE_ID);
-      if (property != null && property.getValue().size() > 0)
-         return property.getValue().get(0);
-      return null;
-   }
-
-   /**
-    * Get "cmis:targetId" property.
-    * 
-    * @param properties the CMIS Properties Type.
-    * @return the object "cmis:targetId" property or <code>null</code>
-    */
-   public static String getTargetId(CmisPropertiesType properties)
-   {
-      CmisPropertyId property = (CmisPropertyId)getProperty(properties, CMIS.TARGET_ID);
-      if (property != null && property.getValue().size() > 0)
-         return property.getValue().get(0);
-      return null;
-   }
-
-   /**
-    * Get "cmis:objectTypeId" property.
-    * 
-    * @param properties the CMIS Properties Type.
-    * @return the "cmis:objectTypeId" property or <code>null</code>
-    */
-   public static String getTypeId(CmisPropertiesType properties)
-   {
-      CmisPropertyId property = (CmisPropertyId)getProperty(properties, CMIS.OBJECT_TYPE_ID);
-      if (property != null && property.getValue().size() > 0)
-         return property.getValue().get(0);
-      return null;
-   }
-
-   public static CmisAccessControlListType mergeAcls(CmisAccessControlListType existedAcl,
-      CmisAccessControlListType addAcl, CmisAccessControlListType removeAcl)
+   public static List<AccessControlEntry> mergeACLs(List<AccessControlEntry> existedAcl,
+      List<AccessControlEntry> addAcl, List<AccessControlEntry> removeAcl)
    {
       Map<String, Set<String>> cache = new HashMap<String, Set<String>>();
       addAclToPermissionMap(cache, existedAcl);
@@ -255,13 +140,13 @@ public final class CmisUtils
       return createAclFromPermissionMap(cache);
    }
 
-   private static void addAclToPermissionMap(Map<String, Set<String>> map, CmisAccessControlListType acl)
+   private static void addAclToPermissionMap(Map<String, Set<String>> map, List<AccessControlEntry> acl)
    {
       if (acl != null)
       {
-         for (CmisAccessControlEntryType ace : acl.getPermission())
+         for (AccessControlEntry ace : acl)
          {
-            String principal = ace.getPrincipal() != null ? ace.getPrincipal().getPrincipalId() : null;
+            String principal = ace.getPrincipal();
             if (principal == null)
                continue;
 
@@ -271,25 +156,25 @@ public final class CmisUtils
                permissions = new HashSet<String>();
                map.put(principal, permissions);
             }
-            permissions.addAll(ace.getPermission());
+            permissions.addAll(ace.getPermissions());
          }
       }
    }
 
-   private static void removeAclFromPermissionMap(Map<String, Set<String>> map, CmisAccessControlListType acl)
+   private static void removeAclFromPermissionMap(Map<String, Set<String>> map, List<AccessControlEntry> acl)
    {
       if (acl != null)
       {
-         for (CmisAccessControlEntryType ace : acl.getPermission())
+         for (AccessControlEntry ace : acl)
          {
-            String principal = ace.getPrincipal() != null ? ace.getPrincipal().getPrincipalId() : null;
+            String principal = ace.getPrincipal();
             if (principal == null)
                continue;
 
             Set<String> permissions = map.get(principal);
             if (permissions != null)
             {
-               permissions.removeAll(ace.getPermission());
+               permissions.removeAll(ace.getPermissions());
                if (permissions.size() == 0)
                   map.remove(principal);
             }

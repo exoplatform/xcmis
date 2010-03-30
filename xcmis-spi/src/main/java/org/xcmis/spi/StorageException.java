@@ -23,9 +23,9 @@ package org.xcmis.spi;
  * If the storage can't save data that user creating or updating.
  * 
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: StorageException.java 2 2010-02-04 17:21:49Z andrew00x $
  */
-public class StorageException extends Exception
+public class StorageException extends CmisRuntimeException
 {
 
    /**

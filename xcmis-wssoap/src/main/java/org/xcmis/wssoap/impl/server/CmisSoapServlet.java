@@ -35,7 +35,7 @@ import javax.servlet.ServletException;
  * 
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com.ua">Alexey
  *         Zavizionov</a>
- * @version $Id$ Sep 17, 2008
+ * @version $Id: CmisSoapServlet.java 2 2010-02-04 17:21:49Z andrew00x $ Sep 17, 2008
  */
 public class CmisSoapServlet extends CXFNonSpringServlet
 {

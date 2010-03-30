@@ -19,721 +19,680 @@
 
 package org.xcmis.spi.impl;
 
-import org.xcmis.core.CmisAccessControlListType;
-import org.xcmis.core.CmisAllowableActionsType;
-import org.xcmis.core.CmisPropertiesType;
-import org.xcmis.core.CmisProperty;
-import org.xcmis.core.CmisPropertyDecimal;
-import org.xcmis.core.CmisPropertyDefinitionType;
-import org.xcmis.core.CmisPropertyId;
-import org.xcmis.core.CmisRenditionType;
-import org.xcmis.core.CmisTypeDefinitionType;
-import org.xcmis.core.CmisTypeDocumentDefinitionType;
-import org.xcmis.core.CmisTypeRelationshipDefinitionType;
-import org.xcmis.core.EnumACLPropagation;
-import org.xcmis.core.EnumBaseObjectTypeIds;
-import org.xcmis.core.EnumCapabilityChanges;
-import org.xcmis.core.EnumContentStreamAllowed;
-import org.xcmis.core.EnumIncludeRelationships;
-import org.xcmis.core.EnumRelationshipDirection;
-import org.xcmis.core.EnumUnfileObject;
-import org.xcmis.core.EnumUpdatability;
-import org.xcmis.core.EnumVersioningState;
-import org.xcmis.messaging.CmisTypeContainer;
-import org.xcmis.messaging.CmisTypeDefinitionListType;
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
+import org.xcmis.spi.AccessControlEntry;
+import org.xcmis.spi.AccessControlPropagation;
+import org.xcmis.spi.AllowableActions;
+import org.xcmis.spi.BaseType;
 import org.xcmis.spi.CMIS;
-import org.xcmis.spi.ChangeEvent;
+import org.xcmis.spi.CapabilityACL;
+import org.xcmis.spi.CapabilityRendition;
 import org.xcmis.spi.ChangeLogTokenHolder;
-import org.xcmis.spi.CmisRuntimeException;
+import org.xcmis.spi.ChangeTokenHolder;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentAlreadyExistsException;
 import org.xcmis.spi.FilterNotValidException;
+import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsIterator;
+import org.xcmis.spi.ItemsList;
+import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.NotSupportedException;
 import org.xcmis.spi.ObjectNotFoundException;
+import org.xcmis.spi.PropertyFilter;
+import org.xcmis.spi.RelationshipDirection;
+import org.xcmis.spi.Rendition;
+import org.xcmis.spi.RenditionFilter;
 import org.xcmis.spi.Storage;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.StreamNotSupportedException;
+import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.TypeNotFoundException;
+import org.xcmis.spi.UnfileObject;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.VersioningException;
+import org.xcmis.spi.VersioningState;
 import org.xcmis.spi.data.ContentStream;
+import org.xcmis.spi.data.Document;
+import org.xcmis.spi.data.Folder;
 import org.xcmis.spi.data.ObjectData;
+import org.xcmis.spi.data.Policy;
+import org.xcmis.spi.data.Relationship;
 import org.xcmis.spi.object.CmisObject;
-import org.xcmis.spi.object.CmisObjectInFolder;
-import org.xcmis.spi.object.CmisObjectInFolderContainer;
-import org.xcmis.spi.object.CmisObjectInFolderList;
-import org.xcmis.spi.object.CmisObjectList;
-import org.xcmis.spi.object.CmisObjectParents;
+import org.xcmis.spi.object.ObjectParent;
+import org.xcmis.spi.object.Property;
 import org.xcmis.spi.object.impl.CmisObjectImpl;
-import org.xcmis.spi.object.impl.CmisObjectInFolderContainerImpl;
-import org.xcmis.spi.object.impl.CmisObjectInFolderImpl;
-import org.xcmis.spi.object.impl.CmisObjectInFolderListImpl;
-import org.xcmis.spi.object.impl.CmisObjectListImpl;
-import org.xcmis.spi.object.impl.CmisObjectParentsImpl;
+import org.xcmis.spi.object.impl.DecimalProperty;
+import org.xcmis.spi.object.impl.ObjectInfoImpl;
+import org.xcmis.spi.object.impl.ObjectParentImpl;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 import org.xcmis.spi.query.Score;
 import org.xcmis.spi.utils.CmisUtils;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: BaseConnection.java 332 2010-03-11 17:24:56Z andrew00x $
  */
 public abstract class BaseConnection implements Connection
 {
 
-   protected final Storage storage;
+   private static final Log LOG = ExoLogger.getLogger(BaseConnection.class);
 
-   protected boolean connected;
+   protected Storage storage;
 
    public BaseConnection(Storage storage)
    {
       this.storage = storage;
-      this.connected = true;
    }
 
    // ------- Multi-filing/Unfiling -------
-   
+
    /**
     * {@inheritDoc}
     */
    public void addObjectToFolder(String objectId, String folderId, boolean allVersions) throws ObjectNotFoundException,
-      InvalidArgumentException, ConstraintException, CmisRuntimeException
+      InvalidArgumentException, ConstraintException
    {
+      checkConnection();
+
       if (!storage.getRepositoryInfo().getCapabilities().isCapabilityMultifiling())
+      {
          throw new NotSupportedException("Multi-filing is not supported.");
-      ObjectData objectData = storage.getObject(objectId);
-      if (objectData == null)
-         throw new ObjectNotFoundException("Object " + objectId + " does not exists.");
-      String typeId = objectData.getTypeId();
-      CmisTypeDefinitionType typeDefinition = getTypeDefinition(typeId, false);
-      if (!typeDefinition.isFileable())
-         throw new InvalidArgumentException("Object " + objectId + " is not fileable.");
-      ObjectData folderData = storage.getObject(folderId);
-      if (folderData == null)
-         throw new ObjectNotFoundException("Folder " + folderId + " does not exists.");
-      if (folderData.getBaseType() != EnumBaseObjectTypeIds.CMIS_FOLDER)
-         throw new InvalidArgumentException("Object " + folderId + " is not Folder.");
-      String[] allowedChildTypes = folderData.getIds(CMIS.ALLOWED_CHILD_OBJECT_TYPE_IDS);
-      if (allowedChildTypes != null && allowedChildTypes.length > 0
-         && !Arrays.asList(allowedChildTypes).contains(typeId))
-         throw new ConstraintException("Type " + typeId + " is not allowed as child for " + folderData.getTypeId());
-      storage.addObjectToFolder(objectData, folderData, allVersions);
+      }
+
+      ObjectData object = storage.getObject(objectId);
+      ObjectData folder = storage.getObject(folderId);
+
+      if (folder.getBaseType() != BaseType.FOLDER)
+      {
+         throw new InvalidArgumentException("Object " + folderId + " is not a Folder object.");
+      }
+
+      if (!object.getTypeDefinition().isFileable())
+      {
+         throw new ConstraintException("Object " + objectId + " is not fileable.");
+      }
+
+      ((Folder)folder).addObject(object);
    }
 
    /**
     * {@inheritDoc}
     */
-   public void removeObjectFromFolder(String objectId, String folderId) throws ObjectNotFoundException,
-      CmisRuntimeException
+   public void removeObjectFromFolder(String objectId, String folderId) throws ObjectNotFoundException
+
    {
+      checkConnection();
+
       if (!storage.getRepositoryInfo().getCapabilities().isCapabilityUnfiling())
+      {
          throw new NotSupportedException("Unfiling is not supported.");
-      ObjectData objectData = storage.getObject(objectId);
-      if (objectData == null)
-         throw new ObjectNotFoundException("Object " + objectId + " does not exists.");
-      ObjectData folderData = storage.getObject(folderId);
-      if (folderData == null)
-         throw new ObjectNotFoundException("Folder " + folderId + " does not exists.");
-      if (folderData.getBaseType() != EnumBaseObjectTypeIds.CMIS_FOLDER)
-         throw new InvalidArgumentException("Object " + folderId + " is not Folder.");
-      storage.removeObjectFromFolder(objectData, folderData);
+      }
+
+      ObjectData object = storage.getObject(objectId);
+      if (folderId != null)
+      {
+         ObjectData folder = storage.getObject(folderId);
+
+         if (folder.getBaseType() != BaseType.FOLDER)
+         {
+            throw new InvalidArgumentException("Object " + folderId + " is not a Folder object.");
+         }
+
+         ((Folder)folder).removeObject(object);
+      }
+      else
+      {
+         storage.unfileObject(object);
+      }
    }
-   
+
    // ------- ACL Services -------
 
    /**
     * {@inheritDoc}
     */
-   public void applyAcl(String objectId, CmisAccessControlListType addAcl, CmisAccessControlListType removeAcl,
-      EnumACLPropagation propagation) throws ObjectNotFoundException, ConstraintException, CmisRuntimeException
+   public void applyACL(String objectId, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
+      AccessControlPropagation propagation) throws ObjectNotFoundException, ConstraintException
    {
-      ObjectData objectData = storage.getObject(objectId);
-      if (objectData == null)
-         throw new ObjectNotFoundException("Object " + objectId + " does not exists.");
-      String typeId = objectData.getTypeId();
-      CmisTypeDefinitionType typeDefinition = getTypeDefinition(typeId, false);
-      if (!typeDefinition.isControllableACL())
-         throw new ConstraintException("Type " + typeId + " is not controllable by ACL.");
-      CmisAccessControlListType mergedAcls = CmisUtils.mergeAcls(objectData.getAcl(false), addAcl, removeAcl);
-      objectData.setAcl(mergedAcls);
-      try
+      if ((addACL == null || addACL.size() == 0) && (removeACL == null || removeACL.size() == 0))
       {
-         storage.saveObject(objectData);
+         return;
       }
-      catch (StorageException e)
-      {
-         throw new CmisRuntimeException("Unable apply ACL. " + e.getMessage(), e);
-      }
+
+      checkConnection();
+
+      // TODO: check ACL propagation.
+      ObjectData object = storage.getObject(objectId);
+      applyACL(object, addACL, removeACL);
+
+      //      object.save();
+      storage.saveObject(object);
    }
 
    /**
     * {@inheritDoc}
     */
-   public CmisAccessControlListType getAcl(String objectId, boolean onlyBasicPermissions)
-      throws ObjectNotFoundException, ConstraintException, CmisRuntimeException
+   public List<AccessControlEntry> getACL(String objectId, boolean onlyBasicPermissions) throws ObjectNotFoundException
    {
-      ObjectData objectData = storage.getObject(objectId);
-      if (objectData == null)
-         throw new ObjectNotFoundException("Object " + objectId + " does not exists.");
-      String typeId = objectData.getTypeId();
-      CmisTypeDefinitionType typeDefinition = getTypeDefinition(typeId, false);
-      if (!typeDefinition.isControllableACL())
-         throw new ConstraintException("Type " + typeId + " is not controllable by ACL.");
-      return objectData.getAcl(onlyBasicPermissions);
+      checkConnection();
+
+      if (storage.getRepositoryInfo().getCapabilities().getCapabilityACL() == CapabilityACL.NONE)
+      {
+         throw new NotSupportedException("ACL capability is not supported.");
+      }
+
+      ObjectData object = storage.getObject(objectId);
+
+      List<AccessControlEntry> acl = object.getACL(onlyBasicPermissions);
+
+      return acl;
    }
-   
+
    // ------- Policy Services -------
 
    /**
     * {@inheritDoc}
     */
-   public void applyPolicy(String policyId, String objectId) throws ConstraintException, ObjectNotFoundException,
-      CmisRuntimeException
+   public void applyPolicy(String policyId, String objectId) throws ConstraintException, ObjectNotFoundException
    {
-      ObjectData objectData = storage.getObject(objectId);
-      if (objectData == null)
-         throw new ObjectNotFoundException("Object " + objectId + " does not exists.");
-      String typeId = objectData.getTypeId();
-      CmisTypeDefinitionType typeDefinition = getTypeDefinition(typeId, false);
-      if (!typeDefinition.isControllablePolicy())
-         throw new ConstraintException("Type " + typeId + " is not controllable by Policy.");
-      ObjectData policyData = storage.getObject(policyId);
-      if (policyData == null)
-         throw new ObjectNotFoundException("Policy " + policyId + " does not exists.");
-      if (policyData.getBaseType() != EnumBaseObjectTypeIds.CMIS_POLICY)
-         throw new InvalidArgumentException("Object " + policyId + " is not a Policy.");
-      objectData.applyPolicy(policyData);
-      try
+      checkConnection();
+
+      ObjectData object = storage.getObject(objectId);
+      ObjectData policy = storage.getObject(policyId);
+      if (policy.getBaseType() != BaseType.POLICY)
       {
-         storage.saveObject(objectData);
+         throw new InvalidArgumentException("Object " + policy.getObjectId() + " is not a Policy object.");
       }
-      catch (StorageException e)
-      {
-         throw new CmisRuntimeException("Unable apply Policy. " + e.getMessage(), e);
-      }
+      object.applyPolicy((Policy)policy);
+      //      object.save();
+      storage.saveObject(object);
    }
 
    /**
     * {@inheritDoc}
     */
-   public List<CmisObject> getAppliedPolicies(String objectId, String propertyFilter) throws ObjectNotFoundException,
-      FilterNotValidException, CmisRuntimeException
+   public List<CmisObject> getAppliedPolicies(String objectId, boolean includeObjectInfo, String propertyFilter)
+      throws ObjectNotFoundException, FilterNotValidException
    {
-      ObjectData objectData = storage.getObject(objectId);
-      if (objectData == null)
-         throw new ObjectNotFoundException("Object " + objectId + " does not exists.");
+      checkConnection();
 
-      String typeId = objectData.getTypeId();
-      CmisTypeDefinitionType typeDefinition = getTypeDefinition(typeId, false);
-      if (!typeDefinition.isControllablePolicy())
-         throw new ConstraintException("Type " + typeId + " is not controllable by Policy.");
+      ObjectData object = storage.getObject(objectId);
 
-      PropertyFilter parsedFilter = new PropertyFilter(propertyFilter);
-      Collection<ObjectData> policyDatas = objectData.getPolicies();
-      List<CmisObject> policies = new ArrayList<CmisObject>(policyDatas.size());
-      for (ObjectData policyData : policyDatas)
+      PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
+      Collection<Policy> policies = object.getPolicies();
+      List<CmisObject> policyIDs = new ArrayList<CmisObject>(policies.size());
+      for (ObjectData policy : policies)
       {
          CmisObject cmisPolicy =
-            getCmisObject(policyData, false, EnumIncludeRelationships.NONE, false, false, parsedFilter,
-               RenditionFilter.NONE);
-         policies.add(cmisPolicy);
+            getCmisObject(policy, false, IncludeRelationships.NONE, false, false, includeObjectInfo,
+               parsedPropertyFilter, RenditionFilter.NONE);
+         policyIDs.add(cmisPolicy);
       }
-      return policies;
+      return policyIDs;
    }
 
    /**
     * {@inheritDoc}
     */
-   public void removePolicy(String policyId, String objectId) throws ConstraintException, ObjectNotFoundException,
-      CmisRuntimeException
+   public void removePolicy(String policyId, String objectId) throws ConstraintException, ObjectNotFoundException
    {
-      ObjectData objectData = storage.getObject(objectId);
-      if (objectData == null)
-         throw new ObjectNotFoundException("Object " + objectId + " does not exists.");
-      String typeId = objectData.getTypeId();
-      CmisTypeDefinitionType typeDefinition = getTypeDefinition(typeId, false);
-      if (!typeDefinition.isControllablePolicy())
-         throw new ConstraintException("Type " + typeId + " is not controllable by Policy.");
+      checkConnection();
+
+      ObjectData object = storage.getObject(objectId);
       ObjectData policyData = storage.getObject(policyId);
-      if (policyData == null)
-         throw new ObjectNotFoundException("Policy object " + policyId + " does not exists.");
-      objectData.removePolicy(policyData);
-      try
+
+      if (policyData.getBaseType() != BaseType.POLICY)
       {
-         storage.saveObject(objectData);
+         throw new InvalidArgumentException("Object " + policyId + " is not a Policy object.");
       }
-      catch (StorageException e)
-      {
-         throw new CmisRuntimeException("Unable remove Policy. " + e.getMessage(), e);
-      }
+
+      object.removePolicy((Policy)policyData);
+
+      //      object.save();
+      storage.saveObject(object);
    }
-   
-   // -------
+
+   // ------- Object Services --------
 
    /**
     * {@inheritDoc}
     */
-   public CmisObject createDocument(String folderId, CmisPropertiesType properties, ContentStream content,
-      CmisAccessControlListType addAcl, CmisAccessControlListType removeAcl, List<String> policies,
-      EnumVersioningState versioningState) throws ObjectNotFoundException, ConstraintException,
-      InvalidArgumentException, StreamNotSupportedException, NameConstraintViolationException, IOException,
-      StorageException, CmisRuntimeException
+   public String createDocument(String folderId, Map<String, Property<?>> properties, ContentStream content,
+      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<String> policies,
+      VersioningState versioningState) throws ObjectNotFoundException, ConstraintException, InvalidArgumentException,
+      StreamNotSupportedException, NameConstraintViolationException, IOException, StorageException
    {
-      String typeId = CmisUtils.getTypeId(properties);
+      if (properties == null)
+      {
+         throw new InvalidArgumentException("Properties may not by null.");
+      }
+
+      checkConnection();
+
+      String typeId = null;
+      Property<?> typeProperty = properties.get(CMIS.OBJECT_TYPE_ID);
+      if (typeProperty != null && typeProperty.getValues().size() > 0)
+      {
+         typeId = (String)typeProperty.getValues().get(0);
+      }
       if (typeId == null)
+      {
          throw new InvalidArgumentException("Type is not specified.");
-      CmisTypeDefinitionType typeDefinition = getTypeDefinition(typeId);
+      }
 
-      if (EnumBaseObjectTypeIds.CMIS_DOCUMENT != typeDefinition.getBaseId())
-         throw new ConstraintException("The typeId " + typeId
-            + " represents object-type whose baseType is not a Document.");
-
-      ObjectData folderData = null;
+      ObjectData folder = null;
       if (folderId != null)
       {
-         folderData = storage.getObject(folderId);
-         if (folderData == null)
-            throw new ObjectNotFoundException("Folder " + folderId + " does not exists.");
-         if (folderData.getBaseType() != EnumBaseObjectTypeIds.CMIS_FOLDER)
-            throw new InvalidArgumentException("Object " + folderId + " is not a Folder.");
-         String[] allowedChildTypes = folderData.getIds(CMIS.ALLOWED_CHILD_OBJECT_TYPE_IDS);
-         if (allowedChildTypes != null && allowedChildTypes.length > 0
-            && !Arrays.asList(allowedChildTypes).contains(typeId))
-            throw new ConstraintException("Type " + typeId + " is not allowed as child for " + folderData.getTypeId());
+         folder = storage.getObject(folderId);
+         if (folder.getBaseType() != BaseType.FOLDER)
+         {
+            throw new InvalidArgumentException("Object " + folderId + " is not a Folder object.");
+         }
       }
-      else
+      else if (!storage.getRepositoryInfo().getCapabilities().isCapabilityUnfiling())
       {
-         if (!storage.getRepositoryInfo().getCapabilities().isCapabilityUnfiling())
-            throw new ConstraintException("Unfiling capability is not supported, parent folder must be provided.");
-      }
-
-      if (!typeDefinition.isControllableACL()
-         && (((addAcl != null && addAcl.getPermission().size() > 0) || (addAcl != null && addAcl.getPermission().size() > 0))))
-         throw new ConstraintException("Type " + typeId + " is not controllable by ACL but at least one ACL provided.");
-
-      if (!typeDefinition.isControllablePolicy() && policies != null && policies.size() > 0)
-         throw new ConstraintException("Type " + typeId
-            + " is not controllable by Policy but at least one Policy provided.");
-
-      EnumContentStreamAllowed contentStreamAllowed =
-         ((CmisTypeDocumentDefinitionType)typeDefinition).getContentStreamAllowed();
-      if (contentStreamAllowed == EnumContentStreamAllowed.NOTALLOWED)
-      {
-         if (content != null)
-            throw new StreamNotSupportedException("Content is not allowed for type " + typeId);
-      }
-      else if (contentStreamAllowed == EnumContentStreamAllowed.REQUIRED)
-      {
-         if (content == null)
-            throw new ConstraintException("Content required for type " + typeId + " but it is null.");
+         throw new ConstraintException("Unfiling capability is not supported, parent folder must be provided.");
       }
 
       if (versioningState == null)
-         versioningState = EnumVersioningState.MAJOR;
-      boolean versionable = ((CmisTypeDocumentDefinitionType)typeDefinition).isVersionable();
-      if (!versionable)
       {
-         if (EnumVersioningState.NONE != versioningState)
-            throw new ConstraintException("Type " + typeId + " is not versionable. Versionig state " + versioningState
-               + " is not allowed.");
-      }
-      else
-      {
-         if (EnumVersioningState.NONE == versioningState)
-            throw new ConstraintException("Type " + typeId + " is versionable. Versionig state " + versioningState
-               + " is not allowed.");
+         versioningState = VersioningState.MAJOR;
       }
 
-      ObjectData newDocument =
-         storage.createDocument(folderData, typeDefinition, properties, content, addAcl, removeAcl, policies,
-            versioningState);
+      Document newDocument = storage.createDocument((Folder)folder, typeId, versioningState);
+
+      newDocument.setProperties(properties);
+
+      newDocument.setContentStream(content);
+
+      if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
+      {
+         applyACL(newDocument, addACL, removeACL);
+      }
+
+      if (policies != null && policies.size() > 0)
+      {
+         applyPolicies(newDocument, policies);
+      }
+
+      //      newDocument.save();
       storage.saveObject(newDocument);
-      CmisObject cmisDocument =
-         getCmisObject(newDocument, false, EnumIncludeRelationships.NONE, false, true, PropertyFilter.ALL,
-            RenditionFilter.NONE);
-      return cmisDocument;
+
+      return newDocument.getObjectId();
    }
 
    /**
     * {@inheritDoc}
     */
-   public CmisObject createDocumentFromSource(String sourceId, String folderId, CmisPropertiesType properties,
-      CmisAccessControlListType addAcl, CmisAccessControlListType removeAcl, List<String> policies,
-      EnumVersioningState versioningState) throws ObjectNotFoundException, ConstraintException,
-      InvalidArgumentException, NameConstraintViolationException, StorageException, CmisRuntimeException
+   public String createDocumentFromSource(String sourceId, String folderId, Map<String, Property<?>> properties,
+      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<String> policies,
+      VersioningState versioningState) throws ObjectNotFoundException, ConstraintException, InvalidArgumentException,
+      NameConstraintViolationException, StorageException
    {
-      ObjectData sourceData = storage.getObject(sourceId);
+      checkConnection();
 
-      if (sourceData == null)
-         throw new ObjectNotFoundException("Source object " + sourceId + " does not exists.");
-      if (sourceData.getBaseType() != EnumBaseObjectTypeIds.CMIS_DOCUMENT)
+      ObjectData source = storage.getObject(sourceId);
+
+      if (source.getBaseType() != BaseType.DOCUMENT)
+      {
          throw new ConstraintException("Source object is not Document.");
+      }
 
-      String typeId = sourceData.getTypeId();
-      CmisTypeDefinitionType typeDefinition = getTypeDefinition(typeId);
-
-      ObjectData folderData = null;
+      ObjectData folder = null;
       if (folderId != null)
       {
-         folderData = storage.getObject(folderId);
-         if (folderData == null)
-            throw new ObjectNotFoundException("Folder " + folderId + " does not exists.");
-         if (folderData.getBaseType() != EnumBaseObjectTypeIds.CMIS_FOLDER)
-            throw new InvalidArgumentException("Object " + folderId + " is not a Folder.");
-         String[] allowedChildTypes = folderData.getIds(CMIS.ALLOWED_CHILD_OBJECT_TYPE_IDS);
-         if (allowedChildTypes != null && allowedChildTypes.length > 0
-            && !Arrays.asList(allowedChildTypes).contains(typeId))
-            throw new ConstraintException("Type " + typeId + " is not allowed as child for " + folderData.getTypeId());
+         folder = storage.getObject(folderId);
+         if (folder.getBaseType() != BaseType.FOLDER)
+         {
+            throw new InvalidArgumentException("Object " + folderId + " is not a Folder object.");
+         }
       }
-      else
+      else if (!storage.getRepositoryInfo().getCapabilities().isCapabilityUnfiling())
       {
-         if (!storage.getRepositoryInfo().getCapabilities().isCapabilityUnfiling())
-            throw new ConstraintException("Unfiling capability is not supported, parent folder must be provided.");
+         throw new ConstraintException("Unfiling capability is not supported, parent folder must be provided.");
       }
 
-      if (!typeDefinition.isControllableACL()
-         && (((addAcl != null && addAcl.getPermission().size() > 0) || (addAcl != null && addAcl.getPermission().size() > 0))))
-         throw new ConstraintException("Type " + typeId + " is not controllable by ACL but at least one ACL provided.");
+      Document newDocument = storage.createCopyOfDocument((Document)source, (Folder)folder, versioningState);
 
-      if (!typeDefinition.isControllablePolicy() && policies != null && policies.size() > 0)
-         throw new ConstraintException("Type " + typeId
-            + " is not controllable by Policy but at least one Policy provided.");
-
-      if (versioningState == null)
-         versioningState = EnumVersioningState.MAJOR;
-      boolean versionable = ((CmisTypeDocumentDefinitionType)typeDefinition).isVersionable();
-      if (!versionable)
+      if (properties != null)
       {
-         if (EnumVersioningState.NONE != versioningState)
-            throw new ConstraintException("Type " + typeId + " is not versionable. Versionig state " + versioningState
-               + " is not allowed.");
-      }
-      else
-      {
-         if (EnumVersioningState.NONE == versioningState)
-            throw new ConstraintException("Type " + typeId + " is versionable. Versionig state " + versioningState
-               + " is not allowed.");
+         newDocument.setProperties(properties);
       }
 
-      ObjectData newDocument =
-         storage.createDocumentFromSource(sourceData, folderData, properties, addAcl, removeAcl, policies,
-            versioningState);
+      if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
+      {
+         applyACL(newDocument, addACL, removeACL);
+      }
+
+      if (policies != null && policies.size() > 0)
+      {
+         applyPolicies(newDocument, policies);
+      }
+
+      //      newDocument.save();
       storage.saveObject(newDocument);
-      CmisObject cmisDocument =
-         getCmisObject(newDocument, false, EnumIncludeRelationships.NONE, false, true, PropertyFilter.ALL,
-            RenditionFilter.NONE);
-      return cmisDocument;
+
+      return newDocument.getObjectId();
    }
 
    /**
     * {@inheritDoc}
     */
-   public CmisObject createFolder(String folderId, CmisPropertiesType properties, CmisAccessControlListType addAcl,
-      CmisAccessControlListType removeAcl, List<String> policies) throws ObjectNotFoundException, ConstraintException,
-      InvalidArgumentException, NameConstraintViolationException, StorageException, CmisRuntimeException
+   public String createFolder(String folderId, Map<String, Property<?>> properties, List<AccessControlEntry> addACL,
+      List<AccessControlEntry> removeACL, Collection<String> policies) throws ObjectNotFoundException,
+      ConstraintException, InvalidArgumentException, NameConstraintViolationException, StorageException
    {
-      String typeId = CmisUtils.getTypeId(properties);
+      if (properties == null)
+      {
+         throw new InvalidArgumentException("Properties may not by null.");
+      }
+
+      checkConnection();
+
+      String typeId = null;
+      Property<?> typeProperty = properties.get(CMIS.OBJECT_TYPE_ID);
+      if (typeProperty != null && typeProperty.getValues().size() > 0)
+      {
+         typeId = (String)typeProperty.getValues().get(0);
+      }
       if (typeId == null)
+      {
          throw new InvalidArgumentException("Type is not specified.");
-
-      CmisTypeDefinitionType typeDefinition = getTypeDefinition(typeId);
-
-      if (EnumBaseObjectTypeIds.CMIS_FOLDER != typeDefinition.getBaseId())
-         throw new ConstraintException("The typeId " + typeId
-            + " represents object-type whose baseType is not a Folder.");
-
-      if (!typeDefinition.isControllableACL()
-         && (((addAcl != null && addAcl.getPermission().size() > 0) || (addAcl != null && addAcl.getPermission().size() > 0))))
-         throw new ConstraintException("Type " + typeId + " is not controllable by ACL but at least one ACL provided.");
-
-      if (!typeDefinition.isControllablePolicy() && policies != null && policies.size() > 0)
-         throw new ConstraintException("Type " + typeId
-            + " is not controllable by Policy but at least one Policy provided.");
+      }
 
       if (folderId == null)
-         throw new ConstraintException("Parent folder id is not provided.");
+      {
+         throw new ConstraintException("Parent folder id is not specified.");
+      }
 
-      ObjectData folderData = storage.getObject(folderId);
-      if (folderData == null)
-         throw new ObjectNotFoundException("Folder " + folderId + " does not exists.");
-      if (folderData.getBaseType() != EnumBaseObjectTypeIds.CMIS_FOLDER)
-         throw new InvalidArgumentException("Object " + folderId + " is not a Folder.");
+      ObjectData folder = storage.getObject(folderId);
+      if (folder.getBaseType() != BaseType.FOLDER)
+      {
+         throw new InvalidArgumentException("Object " + folderId + " is not a Folder object.");
+      }
 
-      String[] allowedChildTypes = folderData.getIds(CMIS.ALLOWED_CHILD_OBJECT_TYPE_IDS);
-      if (allowedChildTypes != null && allowedChildTypes.length > 0
-         && !Arrays.asList(allowedChildTypes).contains(typeId))
-         throw new ConstraintException("Type " + typeId + " is not allowed as child for " + folderData.getTypeId());
+      ObjectData newFolder = storage.createFolder((Folder)folder, typeId);
 
-      ObjectData newFolder = storage.createFolder(folderData, typeDefinition, properties, addAcl, removeAcl, policies);
+      newFolder.setProperties(properties);
+
+      if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
+      {
+         applyACL(newFolder, addACL, removeACL);
+      }
+
+      if (policies != null && policies.size() > 0)
+      {
+         applyPolicies(newFolder, policies);
+      }
+
+      //      newFolder.save();
       storage.saveObject(newFolder);
-      CmisObject cmisFolder =
-         getCmisObject(newFolder, false, EnumIncludeRelationships.NONE, false, true, PropertyFilter.ALL,
-            RenditionFilter.NONE);
-      return cmisFolder;
+
+      return newFolder.getObjectId();
    }
 
    /**
     * {@inheritDoc}
     */
-   public CmisObject createPolicy(String folderId, CmisPropertiesType properties, CmisAccessControlListType addAcl,
-      CmisAccessControlListType removeAcl, List<String> policies) throws ObjectNotFoundException, ConstraintException,
-      InvalidArgumentException, NameConstraintViolationException, StorageException, CmisRuntimeException
+   public String createPolicy(String folderId, Map<String, Property<?>> properties, List<AccessControlEntry> addACL,
+      List<AccessControlEntry> removeACL, Collection<String> policies) throws ObjectNotFoundException,
+      ConstraintException, InvalidArgumentException, NameConstraintViolationException, StorageException
    {
-      String typeId = CmisUtils.getTypeId(properties);
+      if (properties == null)
+      {
+         throw new InvalidArgumentException("Properties may not by null.");
+      }
+
+      checkConnection();
+
+      String typeId = null;
+      Property<?> typeProperty = properties.get(CMIS.OBJECT_TYPE_ID);
+      if (typeProperty != null && typeProperty.getValues().size() > 0)
+      {
+         typeId = (String)typeProperty.getValues().get(0);
+      }
       if (typeId == null)
+      {
          throw new InvalidArgumentException("Type is not specified.");
+      }
 
-      String policyText = CmisUtils.getPolicyText(properties);
-      if (policyText == null)
-         throw new ConstraintException("Required property 'cmis:policyText' is not provided.");
-      
-      CmisTypeDefinitionType typeDefinition = getTypeDefinition(typeId);
-
-      if (EnumBaseObjectTypeIds.CMIS_POLICY != typeDefinition.getBaseId())
-         throw new ConstraintException("The typeId " + typeId
-            + " represents object-type whose baseType is not a Policy.");
-
-      ObjectData folderData = null;
+      ObjectData folder = null;
       if (folderId != null)
       {
-         folderData = storage.getObject(folderId);
-         if (folderData == null)
-            throw new ObjectNotFoundException("Folder object " + folderId + " does not exists.");
-         if (folderData.getBaseType() != EnumBaseObjectTypeIds.CMIS_FOLDER)
-            throw new InvalidArgumentException("Object " + folderId + " is not a Folder.");
-         String[] allowedChildTypes = folderData.getIds(CMIS.ALLOWED_CHILD_OBJECT_TYPE_IDS);
-         if (allowedChildTypes != null && allowedChildTypes.length > 0
-            && !Arrays.asList(allowedChildTypes).contains(typeId))
-            throw new ConstraintException("Type " + typeId + " is not allowed as child for " + folderData.getTypeId());
+         folder = storage.getObject(folderId);
+         if (folder.getBaseType() != BaseType.FOLDER)
+         {
+            throw new InvalidArgumentException("Object " + folderId + " is not a Folder object.");
+         }
       }
-      else
+      else if (!storage.getRepositoryInfo().getCapabilities().isCapabilityUnfiling())
       {
-         if (!storage.getRepositoryInfo().getCapabilities().isCapabilityUnfiling())
-            throw new ConstraintException("Unfiling capability is not supported, parent folder must be provided.");
+         throw new ConstraintException("Unfiling capability is not supported, parent folder must be provided.");
       }
 
-      if (!typeDefinition.isControllableACL()
-         && (((addAcl != null && addAcl.getPermission().size() > 0) || (addAcl != null && addAcl.getPermission().size() > 0))))
-         throw new ConstraintException("Type " + typeId + " is not controllable by ACL but at least one ACL provided.");
+      ObjectData newPolicy = storage.createPolicy((Folder)folder, typeId);
 
-      if (!typeDefinition.isControllablePolicy() && policies != null && policies.size() > 0)
-         throw new ConstraintException("Type " + typeId
-            + " is not controllable by Policy but at least one Policy provided.");
+      newPolicy.setProperties(properties);
 
-      ObjectData newPolicy = storage.createPolicy(folderData, typeDefinition, properties, addAcl, removeAcl, policies);
+      if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
+      {
+         applyACL(newPolicy, addACL, removeACL);
+      }
+
+      if (policies != null && policies.size() > 0)
+      {
+         applyPolicies(newPolicy, policies);
+      }
+
+      //      newPolicy.save();
       storage.saveObject(newPolicy);
-      CmisObject cmisPolicy =
-         getCmisObject(newPolicy, false, EnumIncludeRelationships.NONE, false, false, PropertyFilter.ALL,
-            RenditionFilter.NONE);
-      return cmisPolicy;
+
+      return newPolicy.getObjectId();
    }
 
    /**
     * {@inheritDoc}
     */
-   public CmisObject createRelationship(CmisPropertiesType properties, CmisAccessControlListType addAcl,
-      CmisAccessControlListType removeAcl, List<String> policies) throws ObjectNotFoundException, ConstraintException,
-      NameConstraintViolationException, StorageException, CmisRuntimeException
+   public String createRelationship(Map<String, Property<?>> properties, List<AccessControlEntry> addACL,
+      List<AccessControlEntry> removeACL, Collection<String> policies) throws ObjectNotFoundException,
+      ConstraintException, NameConstraintViolationException, StorageException
    {
-      String typeId = CmisUtils.getTypeId(properties);
+      if (properties == null)
+      {
+         throw new InvalidArgumentException("Properties may not by null.");
+      }
+
+      checkConnection();
+
+      String typeId = null;
+      Property<?> typeProperty = properties.get(CMIS.OBJECT_TYPE_ID);
+      if (typeProperty != null && typeProperty.getValues().size() > 0)
+      {
+         typeId = (String)typeProperty.getValues().get(0);
+      }
       if (typeId == null)
+      {
          throw new InvalidArgumentException("Type is not specified.");
+      }
 
-      CmisTypeDefinitionType typeDefinition = getTypeDefinition(typeId);
-
-      if (EnumBaseObjectTypeIds.CMIS_RELATIONSHIP != typeDefinition.getBaseId())
-         throw new ConstraintException("The typeId " + typeId
-            + " represents object-type whose baseType is not a Relationship.");
-
-      String sourceId = CmisUtils.getSourceId(properties);
+      String sourceId = null;
+      Property<?> sourceProperty = properties.get(CMIS.SOURCE_ID);
+      if (sourceProperty != null && sourceProperty.getValues().size() > 0)
+      {
+         sourceId = (String)sourceProperty.getValues().get(0);
+      }
       if (sourceId == null)
+      {
          throw new InvalidArgumentException("Required property 'cmis:sourceId' is not specified.");
+      }
 
-      String targetId = CmisUtils.getTargetId(properties);
+      String targetId = null;
+      Property<?> targetProperty = properties.get(CMIS.TARGET_ID);
+      if (targetProperty != null && targetProperty.getValues().size() > 0)
+      {
+         targetId = (String)targetProperty.getValues().get(0);
+      }
       if (targetId == null)
+      {
          throw new InvalidArgumentException("Required property 'cmis:targetId' is not specified.");
-
-      ObjectData sourceData = storage.getObject(sourceId);
-      if (sourceData == null)
-         throw new ObjectNotFoundException("Source object " + sourceId + " does not exists.");
-      String sourceTypeId = sourceData.getTypeId();
-      if (!(sourceData.getBaseType() == EnumBaseObjectTypeIds.CMIS_DOCUMENT
-         || sourceData.getBaseType() == EnumBaseObjectTypeIds.CMIS_FOLDER || sourceData.getBaseType() == EnumBaseObjectTypeIds.CMIS_POLICY))
-         throw new InvalidArgumentException("Object with id: " + sourceId + " and type: " + sourceTypeId
-            + " is not independent object and may not be used as 'source' of relationship");
-      ObjectData targetData = storage.getObject(targetId);
-      if (targetData == null)
-         throw new ObjectNotFoundException("Target object " + targetId + " does not exists.");
-      String targetTypeId = targetData.getTypeId();
-      if (!(targetData.getBaseType() == EnumBaseObjectTypeIds.CMIS_DOCUMENT
-         || targetData.getBaseType() == EnumBaseObjectTypeIds.CMIS_FOLDER || targetData.getBaseType() == EnumBaseObjectTypeIds.CMIS_POLICY))
-         throw new InvalidArgumentException("Object with id: " + targetId + " and type: " + targetTypeId
-            + " is not independent object and may not be used as 'target' of relationship");
-
-      List<String> allowedSourceTypes = ((CmisTypeRelationshipDefinitionType)typeDefinition).getAllowedSourceTypes();
-      if (allowedSourceTypes != null && allowedSourceTypes.size() > 0 && !allowedSourceTypes.contains(sourceTypeId))
-         throw new ConstraintException("Type " + sourceTypeId + " is not allowed as source for relationship " + typeId);
-
-      List<String> allowedTargetTypes = ((CmisTypeRelationshipDefinitionType)typeDefinition).getAllowedTargetTypes();
-      if (allowedTargetTypes != null && allowedTargetTypes.size() > 0 && !allowedTargetTypes.contains(sourceTypeId))
-         throw new ConstraintException("Type " + targetTypeId + " is not allowed as target for relationship " + typeId);
-
-      if (!typeDefinition.isControllableACL()
-         && (((addAcl != null && addAcl.getPermission().size() > 0) || (addAcl != null && addAcl.getPermission().size() > 0))))
-         throw new ConstraintException("Type " + typeId + " is not controllable by ACL but at least one ACL provided.");
-
-      if (!typeDefinition.isControllablePolicy() && policies != null && policies.size() > 0)
-         throw new ConstraintException("Type " + typeId
-            + " is not controllable by Policy but at least one Policy provided.");
+      }
 
       ObjectData newRelationship =
-         storage.createRelationship(typeDefinition, sourceData, targetData, properties, addAcl, removeAcl, policies);
+         storage.createRelationship(storage.getObject(sourceId), storage.getObject(targetId), typeId);
+
+      newRelationship.setProperties(properties);
+
+      if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
+      {
+         applyACL(newRelationship, addACL, removeACL);
+      }
+
+      if (policies != null && policies.size() > 0)
+      {
+         applyPolicies(newRelationship, policies);
+      }
+
+      //      newRelationship.save();
       storage.saveObject(newRelationship);
-      CmisObject cmisRelationship =
-         getCmisObject(newRelationship, false, EnumIncludeRelationships.NONE, false, false, PropertyFilter.ALL,
-            RenditionFilter.NONE);
-      return cmisRelationship;
-   }
 
-   /**
-    * {@inheritDoc}
-    */
-   public void deleteContentStream(String documentId, String changeToken) throws ObjectNotFoundException,
-      ConstraintException, UpdateConflictException, StorageException, CmisRuntimeException
-   {
-      ObjectData documentData = storage.getObject(documentId);
-      if (documentData == null)
-         throw new ObjectNotFoundException("Document object " + documentId + " does not exists.");
-      if (documentData.getBaseType() != EnumBaseObjectTypeIds.CMIS_DOCUMENT)
-         throw new InvalidArgumentException("Object " + documentId + " is not Document.");
-
-      validateChangeToken(documentData, changeToken);
-      String typeId = documentData.getTypeId();
-      CmisTypeDefinitionType typeDefinition = getTypeDefinition(typeId, false);
-
-      EnumContentStreamAllowed contentStreamAllowed =
-         ((CmisTypeDocumentDefinitionType)typeDefinition).getContentStreamAllowed();
-      if (contentStreamAllowed == EnumContentStreamAllowed.REQUIRED)
-         throw new ConstraintException("Content required for type " + typeId + " and can't be removed.");
-
-      storage.deleteContentStream(documentData);
-      storage.saveObject(documentData);
+      return newRelationship.getObjectId();
    }
 
    /**
     * {@inheritDoc}
     */
    public ContentStream getContentStream(String objectId, String streamId, long offset, long length)
-      throws ObjectNotFoundException, ConstraintException, CmisRuntimeException
+      throws ObjectNotFoundException, ConstraintException
    {
-      ObjectData objectData = storage.getObject(objectId);
-      if (objectData == null)
-         throw new ObjectNotFoundException("Object " + objectId + " does not exists.");
-      if (objectData.getBaseType() == EnumBaseObjectTypeIds.CMIS_FOLDER && streamId == null)
+      checkConnection();
+
+      ObjectData object = storage.getObject(objectId);
+      ContentStream contentStream = null;
+
+      if (streamId != null)
       {
-         // May be rendition stream only.
-         throw new ConstraintException("streamId is not specified.");
+         contentStream = object.getContentStream(streamId);
       }
-      return storage.getContentStream(objectData, streamId, offset, length);
+      else
+      {
+         contentStream = ((Document)object).getContentStream();
+      }
+
+      if (contentStream == null)
+      {
+         throw new ConstraintException("Object does not have content stream.");
+      }
+
+      return contentStream;
    }
 
    /**
     * {@inheritDoc}
     */
    public void deleteObject(String objectId, Boolean deleteAllVersions) throws ObjectNotFoundException,
-      ConstraintException, UpdateConflictException, StorageException, CmisRuntimeException
+      ConstraintException, UpdateConflictException, StorageException
    {
-      ObjectData objectData = storage.getObject(objectId);
-      if (objectData == null)
-         throw new ObjectNotFoundException("Object " + objectId + " does not exists.");
+      checkConnection();
+
+      ObjectData object = storage.getObject(objectId);
+
       if (deleteAllVersions == null)
-         deleteAllVersions = true; // Default.
-      if (objectData.getBaseType() == EnumBaseObjectTypeIds.CMIS_FOLDER)
       {
-         if (storage.getRepositoryInfo().getRootFolderId().equals(objectId))
-            throw new ConstraintException("Root folder can't be removed.");
-         if (storage.getChildren(objectData, null).size() > 0)
-            throw new ConstraintException("Failed delete object. Object " + objectId
-               + " is Folder and contains one or more objects.");
+         deleteAllVersions = true; // Default.
       }
-      storage.deleteObject(objectData, deleteAllVersions);
+
+      storage.deleteObject(object, deleteAllVersions);
    }
 
    /**
     * {@inheritDoc}
     */
-   public List<String> deleteTree(String folderId, Boolean deleteAllVersions, EnumUnfileObject unfileObject,
-      boolean continueOnFailure) throws ObjectNotFoundException, UpdateConflictException, StorageException,
-      CmisRuntimeException
+   public Collection<String> deleteTree(String folderId, Boolean deleteAllVersions, UnfileObject unfileObject,
+      Boolean continueOnFailure) throws ObjectNotFoundException, UpdateConflictException
    {
-      ObjectData folderData = storage.getObject(folderId);
-      if (folderData == null)
-         throw new ObjectNotFoundException("Folder object " + folderId + " does not exists.");
-      if (folderData.getBaseType() != EnumBaseObjectTypeIds.CMIS_FOLDER)
+      checkConnection();
+
+      ObjectData folder = storage.getObject(folderId);
+
+      if (folder.getBaseType() != BaseType.FOLDER)
+      {
          throw new ConstraintException("Failed delete tree. Object " + folderId + " is not a Folder.");
-      if (storage.getRepositoryInfo().getRootFolderId().equals(folderId))
+      }
+
+      if (((Folder)folder).isRoot())
+      {
          throw new ConstraintException("Root folder can't be removed.");
+      }
 
       if (unfileObject == null)
-         unfileObject = EnumUnfileObject.DELETE; // Default value.
-      if (deleteAllVersions == null)
-         deleteAllVersions = true; // Default value.
+      {
+         unfileObject = UnfileObject.DELETE; // Default value.
+      }
 
-      // TODO : need to check unfiling capability if 'unfileObject' is other then delete ??
-      Collection<ObjectData> failedDelete =
-         storage.deleteTree(folderData, deleteAllVersions, unfileObject, continueOnFailure);
-      List<String> failedIds = new ArrayList<String>(failedDelete.size());
-      for (ObjectData object : failedDelete)
-         failedIds.add(object.getObjectId());
-      return failedIds;
+      if (deleteAllVersions == null)
+      {
+         deleteAllVersions = true; // Default value.
+      }
+
+      if (continueOnFailure == null)
+      {
+         continueOnFailure = false;
+      }
+
+      // TODO : Check unfiling capability if 'unfileObject' is other then 'DELETE'
+
+      Collection<String> failedDelete =
+         storage.deleteTree((Folder)folder, deleteAllVersions, unfileObject, continueOnFailure);
+
+      return failedDelete;
    }
 
    /**
     * {@inheritDoc}
     */
-   public CmisAllowableActionsType getAllowableActions(String objectId) throws ObjectNotFoundException,
-      CmisRuntimeException
+   public AllowableActions getAllowableActions(String objectId) throws ObjectNotFoundException
    {
-      ObjectData objectData = storage.getObject(objectId);
-      if (objectData == null)
-         throw new ObjectNotFoundException("Object " + objectId + " does not exists.");
-      return storage.calculateAllowableActions(objectData);
+      checkConnection();
+      ObjectData object = storage.getObject(objectId);
+      return storage.calculateAllowableActions(object);
    }
 
    /**
     * {@inheritDoc}
     */
    public CmisObject getObject(String objectId, boolean includeAllowableActions,
-      EnumIncludeRelationships includeRelationships, boolean includePolicyIDs, boolean includeAcl,
-      String propertyFilter, String renditionFilter) throws ObjectNotFoundException, FilterNotValidException,
-      CmisRuntimeException
+      IncludeRelationships includeRelationships, boolean includePolicyIDs, boolean includeACL,
+      boolean includeObjectInfo, String propertyFilter, String renditionFilter) throws ObjectNotFoundException,
+      FilterNotValidException
    {
+      checkConnection();
+
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
       RenditionFilter parsedRenditionFilter = new RenditionFilter(renditionFilter);
       if (includeRelationships == null)
-         includeRelationships = EnumIncludeRelationships.NONE;
+      {
+         includeRelationships = IncludeRelationships.NONE;
+      }
 
       ObjectData objectData = storage.getObject(objectId);
-      if (objectData == null)
-         throw new ObjectNotFoundException("Object " + objectId + " does not exists.");
       CmisObject cmisObject =
-         getCmisObject(objectData, includeAllowableActions, includeRelationships, includePolicyIDs, includeAcl,
-            parsedPropertyFilter, parsedRenditionFilter);
+         getCmisObject(objectData, includeAllowableActions, includeRelationships, includePolicyIDs, includeACL,
+            includeObjectInfo, parsedPropertyFilter, parsedRenditionFilter);
+
       return cmisObject;
    }
 
@@ -741,270 +700,395 @@ public abstract class BaseConnection implements Connection
     * {@inheritDoc}
     */
    public CmisObject getObjectByPath(String path, boolean includeAllowableActions,
-      EnumIncludeRelationships includeRelationships, boolean includePolicyIDs, boolean includeAcl,
-      String propertyFilter, String renditionFilter) throws ObjectNotFoundException, FilterNotValidException,
-      CmisRuntimeException
+      IncludeRelationships includeRelationships, boolean includePolicyIDs, boolean includeACL,
+      boolean includeObjectInfo, String propertyFilter, String renditionFilter) throws ObjectNotFoundException,
+      FilterNotValidException
    {
+      checkConnection();
+
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
       RenditionFilter parsedRenditionFilter = new RenditionFilter(renditionFilter);
+
       if (includeRelationships == null)
-         includeRelationships = EnumIncludeRelationships.NONE;
-      ObjectData objectData = storage.getObjectByPath(path);
-      if (objectData == null)
-         throw new ObjectNotFoundException("Object " + path + " does not exists.");
-      CmisObject cmisObject =
-         getCmisObject(objectData, includeAllowableActions, includeRelationships, includePolicyIDs, includeAcl,
-            parsedPropertyFilter, parsedRenditionFilter);
-      return cmisObject;
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public CmisPropertiesType getProperties(String objectId, String propertyFilter) throws ObjectNotFoundException,
-      FilterNotValidException, CmisRuntimeException
-   {
-      ObjectData objectData = storage.getObject(objectId);
-      if (objectData == null)
-         throw new ObjectNotFoundException("Object " + objectId + " does not exists.");
-      PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
-      return getProperties(objectData, parsedPropertyFilter);
-   }
-
-   /**
-    * {@inheritDoc}
-    * 
-    * @return
-    */
-   public CmisObject moveObject(String objectId, String targetFolderId, String sourceFolderId)
-      throws ObjectNotFoundException, ConstraintException, InvalidArgumentException, UpdateConflictException,
-      StorageException, CmisRuntimeException
-   {
-      if (sourceFolderId == null)
-         throw new InvalidArgumentException("sourceFolderId is not specified.");
-
-      ObjectData objectData = storage.getObject(objectId);
-      if (objectData == null)
-         throw new ObjectNotFoundException("Object " + objectId + " does not exists.");
-      ObjectData targetData = storage.getObject(targetFolderId);
-      if (targetData == null)
-         throw new ObjectNotFoundException("Object " + targetFolderId + " does not exists.");
-      ObjectData sourceData = storage.getObject(sourceFolderId);
-      if (sourceData == null)
-         throw new ObjectNotFoundException("Object " + sourceFolderId + " does not exists.");
-
-      if (targetData.getBaseType() != EnumBaseObjectTypeIds.CMIS_FOLDER)
-         throw new InvalidArgumentException("Object " + targetFolderId + " is not a Folder.");
-      if (sourceData.getBaseType() != EnumBaseObjectTypeIds.CMIS_FOLDER)
-         throw new InvalidArgumentException("Object " + sourceFolderId + " is not a Folder.");
-
-      String objectTypeId = objectData.getTypeId();
-      String[] allowedChildTypes = targetData.getIds(CMIS.ALLOWED_CHILD_OBJECT_TYPE_IDS);
-      if (allowedChildTypes != null && allowedChildTypes.length > 0
-         && !Arrays.asList(allowedChildTypes).contains(objectTypeId))
-         throw new ConstraintException("Type " + objectTypeId + " is not allowed as child for "
-            + targetData.getTypeId());
-
-      storage.moveObject(objectData, targetData, sourceData);
-      CmisObject movedObject =
-         getCmisObject(objectData, false, EnumIncludeRelationships.NONE, false, false, PropertyFilter.ALL,
-            RenditionFilter.NONE);
-      return movedObject;
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public void setContentStream(String documentId, ContentStream content, String changeToken, boolean overwriteFlag)
-      throws ObjectNotFoundException, ContentAlreadyExistsException, StreamNotSupportedException,
-      UpdateConflictException, IOException, StorageException, CmisRuntimeException
-   {
-      ObjectData documentData = storage.getObject(documentId);
-      if (documentData == null)
-         throw new ObjectNotFoundException("Object " + documentId + " does not exists.");
-
-      if (documentData.getBaseType() != EnumBaseObjectTypeIds.CMIS_DOCUMENT)
-         throw new InvalidArgumentException("Object " + documentId + " is not a Document.");
-
-      validateChangeToken(documentData, changeToken);
-      String typeId = documentData.getTypeId();
-      CmisTypeDefinitionType typeDefinition = getTypeDefinition(typeId, false);
-      EnumContentStreamAllowed contentStreamAllowed =
-         ((CmisTypeDocumentDefinitionType)typeDefinition).getContentStreamAllowed();
-      if (contentStreamAllowed == EnumContentStreamAllowed.NOTALLOWED)
-         throw new StreamNotSupportedException("Content is not allowed for type " + typeId);
-
-      if (!overwriteFlag && storage.hasContent(documentData))
-         throw new ContentAlreadyExistsException("Document already has content stream and 'overwriteFlag' is false.");
-
-      storage.setContentStream(documentData, content);
-      storage.saveObject(documentData);
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public CmisObject updateProperties(String objectId, String changeToken, CmisPropertiesType properties)
-      throws ObjectNotFoundException, ConstraintException, NameConstraintViolationException, UpdateConflictException,
-      StorageException, CmisRuntimeException
-   {
-      ObjectData objectData = storage.getObject(objectId);
-      if (objectData == null)
-         throw new ObjectNotFoundException("Object " + objectId + " does not exists.");
-      validateChangeToken(objectData, changeToken);
-      if (properties != null)
       {
-         List<CmisPropertyDefinitionType> propertyDefinitions =
-            getTypeDefinition(objectData.getTypeId(), true).getPropertyDefinition();
-         for (CmisProperty property : properties.getProperty())
-         {
-            CmisPropertyDefinitionType def =
-               getPropertyDefinition(propertyDefinitions, property.getPropertyDefinitionId());
-            if (def.getUpdatability() == EnumUpdatability.READWRITE)
-               // TODO : check for required 
-               objectData.setProperty(property);
-         }
-         storage.saveObject(objectData);
+         includeRelationships = IncludeRelationships.NONE; // Default.
       }
-      return getCmisObject(objectData, false, EnumIncludeRelationships.NONE, false, false, PropertyFilter.ALL,
-         RenditionFilter.NONE);
+
+      ObjectData object = storage.getObjectByPath(path);
+
+      CmisObject cmis =
+         getCmisObject(object, includeAllowableActions, includeRelationships, includePolicyIDs, includeACL,
+            includeObjectInfo, parsedPropertyFilter, parsedRenditionFilter);
+
+      return cmis;
    }
 
    /**
     * {@inheritDoc}
     */
-   public List<CmisRenditionType> getRenditions(String objectId, String renditionFilter, int maxItems, int skipCount)
-      throws ObjectNotFoundException, FilterNotValidException, CmisRuntimeException
+   public CmisObject getProperties(String objectId, boolean includeObjectInfo, String propertyFilter)
+      throws ObjectNotFoundException, FilterNotValidException
    {
+      checkConnection();
+
+      ObjectData object = storage.getObject(objectId);
+      PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
+
+      CmisObject cmis =
+         getCmisObject(object, false, IncludeRelationships.NONE, false, false, includeObjectInfo, parsedPropertyFilter,
+            RenditionFilter.NONE);
+
+      return cmis;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public String moveObject(String objectId, String targetFolderId, String sourceFolderId)
+      throws ObjectNotFoundException, ConstraintException, InvalidArgumentException, UpdateConflictException,
+      StorageException
+   {
+      checkConnection();
+
+      ObjectData object = storage.getObject(objectId);
+
+      ObjectData target = storage.getObject(targetFolderId);
+      if (target.getBaseType() != BaseType.FOLDER)
+      {
+         throw new InvalidArgumentException("Object " + targetFolderId + " is not a Folder object.");
+      }
+
+      ObjectData source = storage.getObject(sourceFolderId);
+      if (source.getBaseType() != BaseType.FOLDER)
+      {
+         throw new InvalidArgumentException("Object " + sourceFolderId + " is not a Folder object.");
+      }
+
+      if (!object.getParents().contains(source))
+      {
+         throw new InvalidArgumentException("Specified source folder " + sourceFolderId + " is not a parent of "
+            + objectId);
+      }
+
+      ObjectData movedObject = storage.moveObject(object, (Folder)target, (Folder)source);
+
+      return movedObject.getObjectId();
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public String deleteContentStream(String documentId, ChangeTokenHolder changeTokenHolder)
+      throws ObjectNotFoundException, ConstraintException, UpdateConflictException, StorageException
+   {
+      if (changeTokenHolder == null)
+      {
+         throw new InvalidArgumentException("changeTokenHolder may not by null.");
+      }
+
+      checkConnection();
+
+      ObjectData document = storage.getObject(documentId);
+
+      if (document.getBaseType() != BaseType.DOCUMENT)
+      {
+         throw new InvalidArgumentException("Object " + documentId + " is not Document.");
+      }
+
+      // Validate change token, object may be already updated.
+      validateChangeToken(document, changeTokenHolder.getValue());
+
+      ((Document)document).setContentStream(null);
+
+      //      document.save();
+      storage.saveObject(document);
+
+      String changeToken = document.getChangeToken();
+      changeTokenHolder.setValue(changeToken);
+
+      return document.getObjectId();
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public String setContentStream(String documentId, ContentStream content, ChangeTokenHolder changeTokenHolder,
+      boolean overwriteFlag) throws ObjectNotFoundException, ContentAlreadyExistsException,
+      StreamNotSupportedException, UpdateConflictException, IOException, StorageException
+   {
+      if (changeTokenHolder == null)
+      {
+         throw new InvalidArgumentException("changeTokenHolder may not by null.");
+      }
+
+      checkConnection();
+
+      ObjectData document = storage.getObject(documentId);
+
+      if (document.getBaseType() != BaseType.DOCUMENT)
+      {
+         throw new InvalidArgumentException("Object " + documentId + " is not Document.");
+      }
+
+      if (!overwriteFlag && ((Document)document).hasContent())
+      {
+         throw new ContentAlreadyExistsException("Document already has content stream and 'overwriteFlag' is false.");
+      }
+
+      // Validate change token, object may be already updated.
+      validateChangeToken(document, changeTokenHolder.getValue());
+
+      ((Document)document).setContentStream(content);
+
+      //      document.save();
+      storage.saveObject(document);
+
+      String changeToken = document.getChangeToken();
+      changeTokenHolder.setValue(changeToken);
+
+      return document.getObjectId();
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public String updateProperties(String objectId, ChangeTokenHolder changeTokenHolder,
+      Map<String, Property<?>> properties) throws ObjectNotFoundException, ConstraintException,
+      NameConstraintViolationException, UpdateConflictException, StorageException
+   {
+      if (properties == null)
+      {
+         throw new InvalidArgumentException("Properties may not by null.");
+      }
+
+      if (changeTokenHolder == null)
+      {
+         throw new InvalidArgumentException("changeTokenHolder may not by null.");
+      }
+
+      checkConnection();
+
+      ObjectData object = storage.getObject(objectId);
+
+      // Validate change token, object may be already updated.
+      validateChangeToken(object, changeTokenHolder.getValue());
+
+      object.setProperties(properties);
+
+      //      object.save();
+      storage.saveObject(object);
+
+      String changeToken = object.getChangeToken();
+      changeTokenHolder.setValue(changeToken);
+
+      return object.getObjectId();
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public List<Rendition> getRenditions(String objectId, String renditionFilter, int maxItems, int skipCount)
+      throws ObjectNotFoundException, FilterNotValidException
+   {
+      checkConnection();
+
+      if (storage.getRepositoryInfo().getCapabilities().getCapabilityRenditions() == CapabilityRendition.NONE)
+      {
+         throw new NotSupportedException("Renditions is not supported.");
+      }
+
       if (skipCount < 0)
+      {
          throw new InvalidArgumentException("skipCount parameter is negative.");
+      }
+
       ObjectData objectData = storage.getObject(objectId);
-      if (objectData == null)
-         throw new ObjectNotFoundException("Object " + objectId + " does not exists.");
-      ItemsIterator<CmisRenditionType> iterator = storage.getRenditions(objectData);
+
+      ItemsIterator<Rendition> iterator = storage.getRenditions(objectData);
+
       try
       {
          if (skipCount > 0)
+         {
             iterator.skip(skipCount);
+         }
       }
       catch (NoSuchElementException nse)
       {
-         throw new InvalidArgumentException("skipCount parameter is greater then total number of argument");
+         throw new InvalidArgumentException("'skipCount' parameter is greater then total number of argument");
       }
-      List<CmisRenditionType> renditions = new ArrayList<CmisRenditionType>();
-      int count = 0;
+
+      List<Rendition> renditions = new ArrayList<Rendition>();
       RenditionFilter parsedRenditionFilter = new RenditionFilter(renditionFilter);
-      while (iterator.hasNext() && (maxItems < 0 || count < maxItems))
+
+      for (int count = 0; iterator.hasNext() && (maxItems < 0 || count < maxItems); count++)
       {
-         CmisRenditionType r = iterator.next();
+         Rendition r = iterator.next();
          if (parsedRenditionFilter.accept(r))
+         {
             renditions.add(r);
+         }
       }
+
       return renditions;
    }
 
    // ------- Versioning Services -------
-   
+
    /**
     * {@inheritDoc}
     */
-   public List<CmisObject> getAllVersions(String versionSeriesId, boolean includeAllowableActions, String propertyFilter)
-      throws ObjectNotFoundException, FilterNotValidException, CmisRuntimeException
+   public List<CmisObject> getAllVersions(String versionSeriesId, boolean includeAllowableActions,
+      boolean includeObjectInfo, String propertyFilter) throws ObjectNotFoundException, FilterNotValidException
    {
-      Collection<ObjectData> versionDatas = storage.getVersions(versionSeriesId);
-      if (versionDatas == null)
-         throw new ObjectNotFoundException("Version series " + versionSeriesId + " does not exists.");
+      checkConnection();
+
+      Collection<Document> versions = storage.getAllVersions(versionSeriesId);
+
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
-      List<CmisObject> versions = new ArrayList<CmisObject>();
-      for (ObjectData objectData : versionDatas)
+      List<CmisObject> cmisVersions = new ArrayList<CmisObject>();
+
+      for (ObjectData objectData : versions)
       {
-         versions.add(getCmisObject(objectData, includeAllowableActions, EnumIncludeRelationships.NONE, false, false,
-            parsedPropertyFilter, RenditionFilter.NONE));
+         cmisVersions.add(getCmisObject(objectData, includeAllowableActions, IncludeRelationships.NONE, false, false,
+            includeObjectInfo, parsedPropertyFilter, RenditionFilter.NONE));
       }
-      return versions;
+
+      return cmisVersions;
    }
 
    /**
     * {@inheritDoc}
     */
    public void cancelCheckout(String documentId) throws ConstraintException, UpdateConflictException,
-      VersioningException, StorageException, CmisRuntimeException
+      VersioningException, StorageException
    {
-      ObjectData document = storage.getObject(documentId);
-      if (!document.isVersionSeriesCheckedOut())
-         return; // No PWC.
-      // cancelCheckedOut may be invoked on any object in version series. In other way 
-      // 'cmis:versionSeriesCheckedOutId' may not reflect current PWC id. 
-      String versionSeriesId = document.getVersionSeriesId();
-      // Than assume via version series should be able to cancel checkout even if 
-      // 'cmis:versionSeriesCheckedOutId' for all document in version series is not 
-      // specified.
-      storage.cancelCheckout(versionSeriesId);
-   }
+      checkConnection();
 
-   public CmisObject checkin(String documentId, boolean major, CmisPropertiesType properties, ContentStream content,
-      String checkinComment, CmisAccessControlListType addACL, CmisAccessControlListType removeACL,
-      List<String> policies) throws ConstraintException, UpdateConflictException, StreamNotSupportedException,
-      IOException, StorageException
-   {
-      ObjectData pwcData = storage.getObject(documentId);
-      if (pwcData == null)
-         throw new ObjectNotFoundException("Document " + documentId + " does not exists.");
-      ObjectData version =
-         storage.checkin(pwcData, major, properties, content, checkinComment, addACL, removeACL, policies);
-      return getCmisObject(version, false, EnumIncludeRelationships.NONE, false, false, PropertyFilter.ALL,
-         RenditionFilter.NONE);
+      ObjectData document = storage.getObject(documentId);
+      if (document.getBaseType() != BaseType.DOCUMENT)
+      {
+         throw new InvalidArgumentException("Object " + documentId + " is not a Document object.");
+      }
+      // cancelCheckedOut may be invoked on any object in version series.
+      // In other way 'cmis:versionSeriesCheckedOutId' may not reflect
+      // current PWC id.
+      ((Document)document).cancelCheckout();
    }
 
    /**
     * {@inheritDoc}
     */
-   public CmisObject checkout(String documentId) throws ConstraintException, UpdateConflictException,
-      VersioningException, StorageException, CmisRuntimeException
+   public String checkin(String documentId, boolean major, Map<String, Property<?>> properties, ContentStream content,
+      String checkinComment, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
+      Collection<String> policies) throws ConstraintException, UpdateConflictException, StreamNotSupportedException,
+      IOException, StorageException
    {
-      ObjectData documentData = storage.getObject(documentId);
-      if (documentData == null)
-         throw new ObjectNotFoundException("Document " + documentId + " does not exists.");
-      if (!((CmisTypeDocumentDefinitionType)getTypeDefinition(documentData.getTypeId(), false)).isVersionable())
-         throw new ConstraintException("Type " + documentData.getTypeId() + " is not versionable.");
-      ObjectData pwcData = storage.checkout(documentData);
-      return getCmisObject(pwcData, false, EnumIncludeRelationships.NONE, false, false, PropertyFilter.ALL,
-         RenditionFilter.NONE);
+      checkConnection();
+
+      ObjectData pwc = storage.getObject(documentId);
+
+      if (pwc.getBaseType() != BaseType.DOCUMENT)
+      {
+         throw new InvalidArgumentException("Object " + documentId + " is not a Document object.");
+      }
+
+      if (!((Document)pwc).isPWC())
+      {
+         throw new VersioningException("Object " + documentId + " is not Private Working Copy.");
+      }
+
+      if (properties != null)
+      {
+         pwc.setProperties(properties);
+      }
+
+      if (content != null)
+      {
+         ((Document)pwc).setContentStream(content);
+      }
+
+      if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
+      {
+         applyACL(pwc, addACL, removeACL);
+      }
+
+      if (policies != null && policies.size() > 0)
+      {
+         applyPolicies(pwc, policies);
+      }
+
+      Document version = ((Document)pwc).checkin(major, checkinComment);
+
+      return version.getObjectId();
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public String checkout(String documentId) throws ConstraintException, UpdateConflictException, VersioningException,
+      StorageException
+   {
+      checkConnection();
+
+      ObjectData document = storage.getObject(documentId);
+
+      if (document.getBaseType() != BaseType.DOCUMENT)
+      {
+         throw new InvalidArgumentException("Object " + documentId + " is not a Document object.");
+      }
+
+      Document pwc = ((Document)document).checkout();
+
+      return pwc.getObjectId();
    }
 
    /**
     * {@inheritDoc}
     */
    public CmisObject getObjectOfLatestVersion(String versionSeriesId, boolean major, boolean includeAllowableActions,
-      EnumIncludeRelationships includeRelationships, boolean includePolicyIDs, boolean includeAcl,
-      String propertyFilter, String renditionFilter) throws ObjectNotFoundException, FilterNotValidException,
-      CmisRuntimeException
+      IncludeRelationships includeRelationships, boolean includePolicyIDs, boolean includeACL,
+      boolean includeObjectInfo, String propertyFilter, String renditionFilter) throws ObjectNotFoundException,
+      FilterNotValidException
    {
-      Collection<ObjectData> versions = storage.getVersions(versionSeriesId);
-      if (versions == null)
-         throw new ObjectNotFoundException("Version series " + versionSeriesId + " does not exists.");
+      checkConnection();
+
+      Collection<Document> versions = storage.getAllVersions(versionSeriesId);
 
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
       RenditionFilter parsedRenditionFilter = new RenditionFilter(renditionFilter);
+
       if (includeRelationships == null)
-         includeRelationships = EnumIncludeRelationships.NONE;
+      {
+         includeRelationships = IncludeRelationships.NONE; // Default
+      }
+
       // Even for not-versionable documents version series contains exactly one version of document.
       if (versions.size() == 1)
-         return getCmisObject(versions.iterator().next(), includeAllowableActions, includeRelationships, false, false,
-            parsedPropertyFilter, parsedRenditionFilter);
-
-      List<ObjectData> v = new ArrayList<ObjectData>(versions);
-      Collections.sort(v, CmisUtils.versionComparator);
-      if (!major)
-         return getCmisObject(v.get(0), includeAllowableActions, includeRelationships, false, false,
-            parsedPropertyFilter, parsedRenditionFilter);
-
-      for (ObjectData object : v)
       {
-         boolean majorProperty = object.getBoolean(CMIS.IS_MAJOR_VERSION);
-         if (majorProperty)
-            return getCmisObject(object, includeAllowableActions, includeRelationships, false, false,
-               parsedPropertyFilter, parsedRenditionFilter);
+         return getCmisObject(versions.iterator().next(), includeAllowableActions, includeRelationships, false, false,
+            includeObjectInfo, parsedPropertyFilter, parsedRenditionFilter);
+      }
+
+      // Storage#getAllVersions(versionSeriesId) return sorted by
+      // 'cmis:creationDate' descending. Latest version is version with latest
+      // 'cmis:lastModificationDate'.
+      List<Document> v = new ArrayList<Document>(versions);
+      Collections.sort(v, CmisUtils.versionComparator);
+
+      if (!major)
+      {
+         return getCmisObject(v.get(0), includeAllowableActions, includeRelationships, false, false, includeObjectInfo,
+            parsedPropertyFilter, parsedRenditionFilter);
+      }
+
+      for (Document document : v)
+      {
+         if (document.isMajorVersion())
+         {
+            return getCmisObject(document, includeAllowableActions, includeRelationships, false, false,
+               includeObjectInfo, parsedPropertyFilter, parsedRenditionFilter);
+         }
       }
 
       // May happen only if major version requested but there is no any major version.
@@ -1014,237 +1098,269 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public CmisPropertiesType getPropertiesOfLatestVersion(String versionSeriesId, boolean major, String propertyFilter)
-      throws FilterNotValidException, ObjectNotFoundException, CmisRuntimeException
+   public CmisObject getPropertiesOfLatestVersion(String versionSeriesId, boolean major, boolean includeObjectInfo,
+      String propertyFilter) throws FilterNotValidException, ObjectNotFoundException
    {
-      Collection<ObjectData> versions = storage.getVersions(versionSeriesId);
-      if (versions == null)
-         throw new ObjectNotFoundException("Version series " + versionSeriesId + " does not exists.");
-      PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
-      // Even for not-versionable documents version series contains exactly one version of document.
-      if (versions.size() == 1)
-         return getProperties(versions.iterator().next(), parsedPropertyFilter);
-
-      List<ObjectData> v = new ArrayList<ObjectData>(versions);
-      Collections.sort(v, CmisUtils.versionComparator);
-      if (!major)
-         return getProperties(v.get(0), parsedPropertyFilter);
-
-      for (ObjectData object : v)
-      {
-         boolean majorProperty = object.getBoolean(CMIS.IS_MAJOR_VERSION);
-         if (majorProperty)
-            return getProperties(object, parsedPropertyFilter);
-      }
-
-      // May happen only if major version requested but there is no any major version.
-      throw new ObjectNotFoundException("Not found any major versions in version series.");
+      return getObjectOfLatestVersion(versionSeriesId, major, false, null, false, false, includeObjectInfo,
+         propertyFilter, RenditionFilter.NONE_FILTER);
    }
 
    // ------- Navigation Services -------
-   
+
    /**
     * {@inheritDoc}
     */
-   public CmisObjectInFolderList getChildren(String folderId, boolean includeAllowableActions,
-      EnumIncludeRelationships includeRelationships, boolean includePathSegments, String propertyFilter,
-      String renditionFilter, String orderBy, int maxItems, int skipCount) throws ObjectNotFoundException,
-      InvalidArgumentException, FilterNotValidException, CmisRuntimeException
+   public ItemsList<CmisObject> getChildren(String folderId, boolean includeAllowableActions,
+      IncludeRelationships includeRelationships, boolean includePathSegments, boolean includeObjectInfo,
+      String propertyFilter, String renditionFilter, String orderBy, int maxItems, int skipCount)
+      throws ObjectNotFoundException, InvalidArgumentException, FilterNotValidException
    {
-      if (skipCount < 0)
-         throw new InvalidArgumentException("skipCount parameter is negative.");
+      checkConnection();
 
-      ObjectData folderData = storage.getObject(folderId);
-      if (folderData == null)
-         throw new ObjectNotFoundException("Fodler object " + folderId + " does not exists.");
-      if (folderData.getBaseType() != EnumBaseObjectTypeIds.CMIS_FOLDER)
+      if (skipCount < 0)
+      {
+         throw new InvalidArgumentException("skipCount parameter is negative.");
+      }
+
+      ObjectData folder = storage.getObject(folderId);
+      if (folder.getBaseType() != BaseType.FOLDER)
+      {
          throw new InvalidArgumentException("Can't get children. Object " + folderId + " is not a Folder.");
+      }
 
       /* TODO : orderBy in some more usable form */
-      ItemsIterator<ObjectData> iterator = storage.getChildren(folderData, orderBy);
+      ItemsIterator<ObjectData> iterator = ((Folder)folder).getChildren(orderBy);
       try
       {
          if (skipCount > 0)
+         {
             iterator.skip(skipCount);
+         }
       }
       catch (NoSuchElementException nse)
       {
-         throw new InvalidArgumentException("skipCount parameter is greater then total number of argument");
+         throw new InvalidArgumentException("'skipCount' parameter is greater then total number of argument");
       }
 
-      CmisObjectInFolderList children = new CmisObjectInFolderListImpl();
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
       RenditionFilter parsedRenditionFilter = new RenditionFilter(renditionFilter);
       if (includeRelationships == null)
-         includeRelationships = EnumIncludeRelationships.NONE;
-      int count = 0;
-      while (iterator.hasNext() && (maxItems < 0 || count < maxItems))
+      {
+         includeRelationships = IncludeRelationships.NONE; // Default
+      }
+
+      ItemsListImpl<CmisObject> cmisChildren = new ItemsListImpl<CmisObject>();
+      for (int count = 0; iterator.hasNext() && (maxItems < 0 || count < maxItems); count++)
       {
          ObjectData chilData = iterator.next();
+
          CmisObject child =
-            getCmisObject(chilData, includeAllowableActions, includeRelationships, false, false, parsedPropertyFilter,
-               parsedRenditionFilter);
-         CmisObjectInFolder objectInFolder = new CmisObjectInFolderImpl();
-         objectInFolder.setObject(child);
-         objectInFolder.setPathSegment(chilData.getName());
-         children.getObjects().add(objectInFolder);
-         count++;
+            getCmisObject(chilData, includeAllowableActions, includeRelationships, false, false, includeObjectInfo,
+               parsedPropertyFilter, parsedRenditionFilter);
+
+         cmisChildren.getItems().add(child);
       }
 
       // Indicate that we have some more results.
-      children.setHasMoreItems(iterator.hasNext());
-      long total = iterator.size();
-      if (total != -1)
-         children.setNumItems(BigInteger.valueOf(total));
-      return children;
+      cmisChildren.setHasMoreItems(iterator.hasNext());
+      cmisChildren.setNumItems(iterator.size()); // ItemsIterator gives -1 if total number is unknown.
+
+      return cmisChildren;
    }
 
    /**
     * {@inheritDoc}
     */
-   public CmisObject getFolderParent(String folderId, String propertyFilter) throws ObjectNotFoundException,
-      InvalidArgumentException, FilterNotValidException, CmisRuntimeException
+   public CmisObject getFolderParent(String folderId, boolean includeObjectInfo, String propertyFilter)
+      throws ObjectNotFoundException, InvalidArgumentException, FilterNotValidException
    {
-      ObjectData folderData = storage.getObject(folderId);
-      if (folderData == null)
-         throw new ObjectNotFoundException("Fodler object " + folderId + " does not exists.");
-      if (folderData.getBaseType() != EnumBaseObjectTypeIds.CMIS_FOLDER)
+      checkConnection();
+
+      ObjectData folder = storage.getObject(folderId);
+      if (folder.getBaseType() != BaseType.FOLDER)
+      {
          throw new InvalidArgumentException("Object " + folderId + " is not a Folder.");
-      if (storage.getRepositoryInfo().getRootFolderId().equals(folderId))
+      }
+
+      if (((Folder)folder).isRoot())
+      {
          throw new InvalidArgumentException("Can't get parent of root folder.");
+      }
+
+      ObjectData parent = folder.getParent();
 
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
-      ObjectData parentData = folderData.getParent();
+
       CmisObject cmisParent =
-         getCmisObject(parentData, false, EnumIncludeRelationships.NONE, false, false, parsedPropertyFilter,
+         getCmisObject(parent, false, IncludeRelationships.NONE, false, false, includeObjectInfo, parsedPropertyFilter,
             RenditionFilter.NONE);
+
       return cmisParent;
    }
 
    /**
     * {@inheritDoc}
     */
-   public List<CmisObjectParents> getObjectParents(String objectId, boolean includeAllowableActions,
-      EnumIncludeRelationships includeRelationships, boolean includeRelativePathSegment, String propertyFilter,
-      String renditionFilter) throws ObjectNotFoundException, ConstraintException, FilterNotValidException,
-      CmisRuntimeException
+   public List<ObjectParent> getObjectParents(String objectId, boolean includeAllowableActions,
+      IncludeRelationships includeRelationships, boolean includeRelativePathSegment, boolean includeObjectInfo,
+      String propertyFilter, String renditionFilter) throws ObjectNotFoundException, ConstraintException,
+      FilterNotValidException
    {
+      checkConnection();
+
       ObjectData object = storage.getObject(objectId);
-      if (object == null)
-         throw new ObjectNotFoundException("Object " + objectId + " does not exists.");
 
       String typeId = object.getTypeId();
-      CmisTypeDefinitionType typeDefinition = getTypeDefinition(typeId, false);
+      TypeDefinition typeDefinition = getTypeDefinition(typeId, false);
       if (!typeDefinition.isFileable())
+      {
          throw new ConstraintException("Can't get parents. Object " + objectId + " has type " + typeId
             + " that is not fileable");
+      }
 
-      Collection<ObjectData> parentDatas = object.getParents();
+      Collection<Folder> parents = object.getParents();
+
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
       RenditionFilter parsedRenditionFilter = new RenditionFilter(renditionFilter);
+
       if (includeRelationships == null)
-         includeRelationships = EnumIncludeRelationships.NONE;
-      List<CmisObjectParents> cmisParents = new ArrayList<CmisObjectParents>(parentDatas.size());
-      for (ObjectData parentData : parentDatas)
+      {
+         includeRelationships = IncludeRelationships.NONE; // Default
+      }
+
+      List<ObjectParent> cmisParents = new ArrayList<ObjectParent>(parents.size());
+      for (ObjectData parent : parents)
       {
          CmisObject cmisParent =
-            getCmisObject(parentData, includeAllowableActions, includeRelationships, false, false,
+            getCmisObject(parent, includeAllowableActions, includeRelationships, false, false, includeObjectInfo,
                parsedPropertyFilter, parsedRenditionFilter);
-         CmisObjectParents parentType = new CmisObjectParentsImpl();
-         parentType.setObject(cmisParent);
-         if (includeRelativePathSegment)
-            parentType.setRelativePathSegment(parentData.getName());
+
+         ObjectParent parentType =
+            new ObjectParentImpl(cmisParent, includeRelativePathSegment ? object.getName() : null);
+
          cmisParents.add(parentType);
       }
+
       return cmisParents;
    }
-   
-   /**
-    * {@inheritDoc}
-    */
-   public List<CmisObjectInFolderContainer> getDescendants(String folderId, int depth, boolean includeAllowableActions,
-      EnumIncludeRelationships includeRelationships, boolean includePathSegments, String propertyFilter,
-      String renditionFilter) throws ObjectNotFoundException, InvalidArgumentException, FilterNotValidException,
-      CmisRuntimeException
-   {
-      return getTree(folderId, depth, null, includeAllowableActions, includeRelationships, includePathSegments,
-         propertyFilter, renditionFilter);
-   }
 
    /**
     * {@inheritDoc}
     */
-   public List<CmisObjectInFolderContainer> getFolderTree(String folderId, int depth, boolean includeAllowableActions,
-      EnumIncludeRelationships includeRelationships, boolean includePathSegments, String propertyFilter,
-      String renditionFilter) throws ObjectNotFoundException, InvalidArgumentException, FilterNotValidException,
-      CmisRuntimeException
-   {
-      return getTree(folderId, depth, EnumBaseObjectTypeIds.CMIS_FOLDER, includeAllowableActions, includeRelationships,
-         includePathSegments, propertyFilter, renditionFilter);
-   }
-
-   protected List<CmisObjectInFolderContainer> getTree(String folderId, int depth, EnumBaseObjectTypeIds typeFilter,
-      boolean includeAllowableActions, EnumIncludeRelationships includeRelationships, boolean includePathSegments,
+   public List<ItemsTree<CmisObject>> getDescendants(String folderId, int depth, boolean includeAllowableActions,
+      IncludeRelationships includeRelationships, boolean includePathSegments, boolean includeObjectInfo,
       String propertyFilter, String renditionFilter) throws ObjectNotFoundException, InvalidArgumentException,
-      FilterNotValidException, CmisRuntimeException
+      FilterNotValidException
    {
-      ObjectData folderData = storage.getObject(folderId);
-      if (folderData == null)
-         throw new ObjectNotFoundException("Object " + folderId + " does not exists.");
-      if (folderData.getBaseType() != EnumBaseObjectTypeIds.CMIS_FOLDER)
+      if (depth != -1 && !(depth >= 1))
+      {
+         throw new InvalidArgumentException("Invalid depth parameter. Must be 1 or greater then 1 or -1 but " + depth
+            + " specified.");
+      }
+
+      checkConnection();
+
+      return getTree(folderId, depth, null, includeAllowableActions, includeRelationships, includePathSegments,
+         includeObjectInfo, propertyFilter, renditionFilter);
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public List<ItemsTree<CmisObject>> getFolderTree(String folderId, int depth, boolean includeAllowableActions,
+      IncludeRelationships includeRelationships, boolean includePathSegments, boolean includeObjectInfo,
+      String propertyFilter, String renditionFilter) throws ObjectNotFoundException, InvalidArgumentException,
+      FilterNotValidException
+   {
+      if (depth != -1 && !(depth >= 1))
+      {
+         throw new InvalidArgumentException("Invalid depth parameter. Must be 1 or greater then 1 or -1 but " + depth
+            + " specified.");
+      }
+
+      checkConnection();
+
+      return getTree(folderId, depth, BaseType.FOLDER, includeAllowableActions, includeRelationships,
+         includePathSegments, includeObjectInfo, propertyFilter, renditionFilter);
+   }
+
+   protected List<ItemsTree<CmisObject>> getTree(String folderId, int depth, BaseType typeFilter,
+      boolean includeAllowableActions, IncludeRelationships includeRelationships, boolean includePathSegments,
+      boolean includeObjectInfo, String propertyFilter, String renditionFilter) throws ObjectNotFoundException,
+      InvalidArgumentException, FilterNotValidException
+   {
+      ObjectData folder = storage.getObject(folderId);
+
+      if (folder.getBaseType() != BaseType.FOLDER)
+      {
          throw new InvalidArgumentException("Can't get children. Object " + folderId + " is not a Folder.");
-      List<CmisObjectInFolderContainer> tree = new ArrayList<CmisObjectInFolderContainer>();
+      }
+
+      List<ItemsTree<CmisObject>> tree = new ArrayList<ItemsTree<CmisObject>>();
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
       RenditionFilter parsedRenditionFilter = new RenditionFilter(renditionFilter);
-      for (ItemsIterator<ObjectData> children = storage.getChildren(folderData, null); children.hasNext();)
+
+      for (ItemsIterator<ObjectData> children = ((Folder)folder).getChildren(null); children.hasNext();)
       {
          ObjectData child = children.next();
+
          if (typeFilter != null && child.getBaseType() != typeFilter)
+         {
             continue;
-         CmisObjectInFolderContainer container = new CmisObjectInFolderContainerImpl();
-         CmisObjectInFolder of = new CmisObjectInFolderImpl();
-         of.setObject(getCmisObject(child, includeAllowableActions, includeRelationships, false, false,
-            parsedPropertyFilter, parsedRenditionFilter));
-         if (includePathSegments)
-            of.setPathSegment(child.getName());
-         container.setObjectInFolder(of);
-         if (child.getBaseType() == EnumBaseObjectTypeIds.CMIS_FOLDER && depth > 1)
-            container.getChildren().addAll(
-               getTree(child.getObjectId(), depth - 1, typeFilter, includeAllowableActions, includeRelationships,
-                  includePathSegments, propertyFilter, renditionFilter));
-         tree.add(container);
+         }
+
+         CmisObject container =
+            getCmisObject(child, includeAllowableActions, includeRelationships, false, false, includeObjectInfo,
+               parsedPropertyFilter, parsedRenditionFilter);
+
+         List<ItemsTree<CmisObject>> subTree =
+            (child.getBaseType() == BaseType.FOLDER && (depth > 1 || depth == -1)) //
+               ? getTree(child.getObjectId(), depth != -1 ? depth - 1 : depth, typeFilter, includeAllowableActions,
+                  includeRelationships, includePathSegments, includeObjectInfo, propertyFilter, renditionFilter) //
+               : null;
+
+         tree.add(new ItemsTreeImpl<CmisObject>(container, subTree));
       }
+
       return tree;
    }
 
    /**
     * {@inheritDoc}
     */
-   public CmisObjectList getCheckedOutDocs(String folderId, boolean includeAllowableActions,
-      EnumIncludeRelationships includeRelationships, String propertyFilter, String renditionFilter, String orderBy,
-      int maxItems, int skipCount) throws ObjectNotFoundException, InvalidArgumentException, FilterNotValidException,
-      CmisRuntimeException
+   public ItemsList<CmisObject> getCheckedOutDocs(String folderId, boolean includeAllowableActions,
+      IncludeRelationships includeRelationships, boolean includeObjectInfo, String propertyFilter,
+      String renditionFilter, String orderBy, int maxItems, int skipCount) throws ObjectNotFoundException,
+      InvalidArgumentException, FilterNotValidException
    {
-      if (skipCount < 0)
-         throw new InvalidArgumentException("skipCount parameter is negative.");
+      checkConnection();
 
-      ObjectData folderData = null;
-      if (folderId != null)
+      if (skipCount < 0)
       {
-         folderData = storage.getObject(folderId);
-         if (folderData == null)
-            throw new ObjectNotFoundException("Fodler object " + folderId + " does not exists.");
-         if (folderData.getBaseType() != EnumBaseObjectTypeIds.CMIS_FOLDER)
-            throw new InvalidArgumentException("Can't get checkedout documents. Object " + folderId
-               + " is not a Folder.");
+         throw new InvalidArgumentException("skipCount parameter is negative.");
       }
 
-      ItemsIterator<ObjectData> iterator = storage.getCheckedOutDocuments(folderData, orderBy);
+      ObjectData folder = null;
+
+      if (folderId != null)
+      {
+         folder = storage.getObject(folderId);
+
+         if (folder.getBaseType() != BaseType.FOLDER)
+         {
+            throw new InvalidArgumentException("Can't get checkedout documents. Object " + folderId
+               + " is not a Folder.");
+         }
+      }
+
+      ItemsIterator<ObjectData> iterator = storage.getCheckedOutDocuments(folder, orderBy);
 
       try
       {
          if (skipCount > 0)
+         {
             iterator.skip(skipCount);
+         }
       }
       catch (NoSuchElementException nse)
       {
@@ -1254,50 +1370,67 @@ public abstract class BaseConnection implements Connection
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
       RenditionFilter parsedRenditionFilter = new RenditionFilter(renditionFilter);
       if (includeRelationships == null)
-         includeRelationships = EnumIncludeRelationships.NONE;
-      CmisObjectList checkedout = new CmisObjectListImpl();
-      int count = 0;
-      while (iterator.hasNext() && (maxItems < 0 || count < maxItems))
+      {
+         includeRelationships = IncludeRelationships.NONE; // Default.
+      }
+
+      ItemsListImpl<CmisObject> checkedout = new ItemsListImpl<CmisObject>();
+
+      for (int count = 0; iterator.hasNext() && (maxItems < 0 || count < maxItems); count++)
       {
          ObjectData pwcData = iterator.next();
+
          CmisObject pwc =
-            getCmisObject(pwcData, includeAllowableActions, includeRelationships, false, false, parsedPropertyFilter,
-               parsedRenditionFilter);
-         checkedout.getObjects().add(pwc);
-         count++;
+            getCmisObject(pwcData, includeAllowableActions, includeRelationships, false, false, includeObjectInfo,
+               parsedPropertyFilter, parsedRenditionFilter);
+
+         checkedout.getItems().add(pwc);
       }
+
       checkedout.setHasMoreItems(iterator.hasNext());
-      long total = iterator.size();
-      if (total != -1)
-         checkedout.setNumItems(BigInteger.valueOf(total));
+      checkedout.setNumItems(iterator.size()); // ItemsIterator gives -1 if total number is unknown
+
       return checkedout;
    }
 
    // Relationships services -------
-   
+
    /**
     * {@inheritDoc}
     */
-   public CmisObjectList getObjectRelationships(String objectId, EnumRelationshipDirection direction, String typeId,
-      boolean includeSubRelationshipTypes, boolean includeAllowableActions, String propertyFilter, int maxItems,
-      int skipCount) throws FilterNotValidException, ObjectNotFoundException
+   public ItemsList<CmisObject> getObjectRelationships(String objectId, RelationshipDirection direction, String typeId,
+      boolean includeSubRelationshipTypes, boolean includeAllowableActions, boolean includeObjectInfo,
+      String propertyFilter, int maxItems, int skipCount) throws FilterNotValidException, ObjectNotFoundException
    {
+      checkConnection();
+
       if (skipCount < 0)
+      {
          throw new InvalidArgumentException("skipCount parameter is negative.");
+      }
 
       if (direction == null)
-         direction = EnumRelationshipDirection.SOURCE;
+      {
+         direction = RelationshipDirection.SOURCE; // Default
+      }
 
-      ObjectData objectData = storage.getObject(objectId);
-      if (objectData == null)
-         throw new ObjectNotFoundException("Object " + objectId + " does not exists.");
+      TypeDefinition type = getTypeDefinition(typeId == null ? BaseType.RELATIONSHIP.value() : typeId);
 
-      ItemsIterator<ObjectData> iterator = objectData.getRelationships(direction, typeId, includeSubRelationshipTypes);
+      if (type.getBaseId() != BaseType.RELATIONSHIP)
+      {
+         throw new InvalidArgumentException("Type " + typeId + " is not Relationship type.");
+      }
+
+      ObjectData object = storage.getObject(objectId);
+
+      ItemsIterator<Relationship> iterator = object.getRelationships(direction, type, includeSubRelationshipTypes);
 
       try
       {
          if (skipCount > 0)
+         {
             iterator.skip(skipCount);
+         }
       }
       catch (NoSuchElementException nse)
       {
@@ -1305,76 +1438,72 @@ public abstract class BaseConnection implements Connection
       }
 
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
-      CmisObjectList relationship = new CmisObjectListImpl();
-      long count = 0;
-      while (iterator.hasNext() && (maxItems < 0 || count < maxItems))
+      ItemsListImpl<CmisObject> relationships = new ItemsListImpl<CmisObject>();
+
+      for (int count = 0; iterator.hasNext() && (maxItems < 0 || count < maxItems); count++)
       {
-         ObjectData relationshipData = iterator.next();
+         ObjectData rel = iterator.next();
+
          CmisObject cmis =
-            getCmisObject(relationshipData, includeAllowableActions, null, false, false, parsedPropertyFilter,
+            getCmisObject(rel, includeAllowableActions, null, false, false, includeObjectInfo, parsedPropertyFilter,
                RenditionFilter.NONE);
-         relationship.getObjects().add(cmis);
-         count++;
+
+         relationships.getItems().add(cmis);
       }
 
       // Indicate we have some more results or not
-      relationship.setHasMoreItems(iterator.hasNext());
-      long total = iterator.size();
-      if (total != -1)
-         relationship.setNumItems(BigInteger.valueOf(total));
-      return relationship;
-   }
+      relationships.setHasMoreItems(iterator.hasNext());
+      relationships.setNumItems(iterator.size()); // ItemsIterator gives -1 if total number is unknown
 
-   private CmisPropertiesType getProperties(ObjectData objectData, PropertyFilter parsedPropertyFilter)
-   {
-      CmisPropertiesType properties = new CmisPropertiesType();
-      for (Map.Entry<String, CmisProperty> e : objectData.getProperties(parsedPropertyFilter).entrySet())
-         properties.getProperty().add(e.getValue());
-      return properties;
+      return relationships;
    }
 
    // ------- Repository Services. (Type Manager) -------
-   
+
    /**
     * {@inheritDoc}
     */
-   public CmisTypeDefinitionListType getTypeChildren(String typeId, boolean includePropertyDefinition, int maxItems,
-      int skipCount) throws TypeNotFoundException, CmisRuntimeException
+   public ItemsList<TypeDefinition> getTypeChildren(String typeId, boolean includePropertyDefinition, int maxItems,
+      int skipCount) throws TypeNotFoundException
    {
-      if (skipCount < 0)
-         throw new InvalidArgumentException("skipCount parameter is negative.");
+      checkConnection();
 
-      ItemsIterator<CmisTypeDefinitionType> iterator = storage.getTypeChildren(typeId, includePropertyDefinition);
+      if (skipCount < 0)
+      {
+         throw new InvalidArgumentException("skipCount parameter is negative.");
+      }
+
+      ItemsIterator<TypeDefinition> iterator = storage.getTypeChildren(typeId, includePropertyDefinition);
       try
       {
          if (skipCount > 0)
+         {
             iterator.skip(skipCount);
+         }
       }
       catch (NoSuchElementException nse)
       {
          throw new InvalidArgumentException("skipCount parameter is greater then total number of argument");
       }
 
-      CmisTypeDefinitionListType children = new CmisTypeDefinitionListType();
-      int count = 0;
-      while (iterator.hasNext() && (maxItems < 0 || count < maxItems))
+      ItemsListImpl<TypeDefinition> typeChildren = new ItemsListImpl<TypeDefinition>();
+
+      for (int count = 0; iterator.hasNext() && (maxItems < 0 || count < maxItems); count++)
       {
-         CmisTypeDefinitionType type = iterator.next();
-         children.getTypes().add(type);
-         count++;
+         TypeDefinition type = iterator.next();
+         typeChildren.getItems().add(type);
       }
       // Indicate that we have some more results.
-      children.setHasMoreItems(iterator.hasNext());
-      long total = iterator.size();
-      if (total != -1)
-         children.setNumItems(BigInteger.valueOf(total));
-      return children;
+      typeChildren.setHasMoreItems(iterator.hasNext());
+      typeChildren.setNumItems(iterator.size()); // ItemsIterator gives -1 if total number is unknown
+
+      return typeChildren;
    }
 
    /**
     * {@inheritDoc}
     */
-   public CmisTypeDefinitionType getTypeDefinition(String typeId) throws TypeNotFoundException, CmisRuntimeException
+   public TypeDefinition getTypeDefinition(String typeId) throws TypeNotFoundException
    {
       return getTypeDefinition(typeId, true);
    }
@@ -1382,46 +1511,69 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public CmisTypeDefinitionType getTypeDefinition(String typeId, boolean includePropertyDefinition)
-      throws TypeNotFoundException, CmisRuntimeException
+   public TypeDefinition getTypeDefinition(String typeId, boolean includePropertyDefinition)
+      throws TypeNotFoundException
    {
+      checkConnection();
+
       return storage.getTypeDefinition(typeId, includePropertyDefinition);
    }
 
    /**
     * {@inheritDoc}
     */
-   public void addType(CmisTypeDefinitionType type) throws StorageException, CmisRuntimeException
+   public String addType(TypeDefinition type) throws StorageException
    {
-      storage.addType(type);
+      checkConnection();
+
+      String id = storage.addType(type);
+      return id;
    }
 
    /**
     * {@inheritDoc}
     */
-   public List<CmisTypeContainer> getTypeDescendants(String typeId, int depth, boolean includePropertyDefinition)
-      throws TypeNotFoundException, CmisRuntimeException
+   public List<ItemsTree<TypeDefinition>> getTypeDescendants(String typeId, int depth, boolean includePropertyDefinition)
+      throws TypeNotFoundException
    {
-      List<CmisTypeContainer> tree = new ArrayList<CmisTypeContainer>();
-      for (ItemsIterator<CmisTypeDefinitionType> children = storage.getTypeChildren(typeId, includePropertyDefinition); children
+      if (depth != -1 && !(depth >= 1))
+      {
+         throw new InvalidArgumentException("Invalid depth parameter. Must be 1 or greater then 1 or -1 but " + depth
+            + " specified.");
+      }
+
+      checkConnection();
+
+      return getTypeTree(typeId, depth, includePropertyDefinition);
+   }
+
+   protected List<ItemsTree<TypeDefinition>> getTypeTree(String typeId, int depth, boolean includePropertyDefinition)
+      throws TypeNotFoundException
+   {
+      List<ItemsTree<TypeDefinition>> tree = new ArrayList<ItemsTree<TypeDefinition>>();
+
+      for (ItemsIterator<TypeDefinition> children = storage.getTypeChildren(typeId, includePropertyDefinition); children
          .hasNext();)
       {
-         CmisTypeDefinitionType child = children.next();
-         CmisTypeContainer container = new CmisTypeContainer();
-         container.setType(child);
-         if (typeId != null && depth > 1)
-            container.getChildren().addAll(getTypeDescendants(child.getId(), depth - 1, includePropertyDefinition));
-         tree.add(container);
+         TypeDefinition childType = children.next();
+
+         List<ItemsTree<TypeDefinition>> subTree = (depth > 1 || depth == -1) //
+            ? getTypeDescendants(childType.getId(), depth != -1 ? depth - 1 : depth, includePropertyDefinition) //
+            : null;
+
+         tree.add(new ItemsTreeImpl<TypeDefinition>(childType, subTree));
       }
+
       return tree;
    }
-   
+
    /**
     * {@inheritDoc}
     */
-   public void removeType(String typeId) throws TypeNotFoundException, ConstraintException, StorageException,
-      CmisRuntimeException
+   public void removeType(String typeId) throws TypeNotFoundException, ConstraintException, StorageException
    {
+      checkConnection();
+
       storage.removeType(typeId);
    }
 
@@ -1430,60 +1582,36 @@ public abstract class BaseConnection implements Connection
    /**
     * {@inheritDoc}
     */
-   public CmisObjectList getContentChanges(ChangeLogTokenHolder changeLogToken, boolean includeProperties,
-      String propertyFilter, boolean includePolicyIDs, boolean includeAcl, int maxItems) throws ConstraintException,
-      FilterNotValidException, CmisRuntimeException
+   public ItemsList<CmisObject> getContentChanges(ChangeLogTokenHolder changeLogToken, boolean includeProperties,
+      String propertyFilter, boolean includePolicyIDs, boolean includeACL, boolean includeObjectInfo, int maxItems)
+      throws ConstraintException, FilterNotValidException
    {
-      EnumCapabilityChanges capabilityChanges = storage.getRepositoryInfo().getCapabilities().getCapabilityChanges();
-      if (capabilityChanges == EnumCapabilityChanges.NONE)
-         throw new NotSupportedException("Changes log feature is not supported.");
-      if (changeLogToken == null)
-         throw new CmisRuntimeException("Change log token holder may not be null.");
-
-      ItemsIterator<ChangeEvent> iterator = storage.getChangeLog(changeLogToken.getToken());
-      int count = 0;
-      CmisObjectList changes = new CmisObjectListImpl();
-      // TODO :
-      // 1. How-to include changes type ?? Id id not clear how to pass this info via generated code.
-      // 2. Add policy IDs, ACL, properties. Need have this in storage, first.
-      while (iterator.hasNext() && (maxItems < 0 || count < maxItems))
-      {
-         CmisObject ch = new CmisObjectImpl();
-         CmisPropertiesType properties = new CmisPropertiesType();
-         CmisPropertyId id = new CmisPropertyId();
-         id.setPropertyDefinitionId(CMIS.OBJECT_ID);
-         id.setDisplayName(CMIS.OBJECT_ID);
-         id.setQueryName(CMIS.OBJECT_ID);
-         id.setLocalName(CMIS.OBJECT_ID);
-         id.getValue().add(iterator.next().getObjectId());
-         properties.getProperty().add(id);
-         ch.setProperties(properties);
-         changes.getObjects().add(ch);
-         count++;
-      }
-      changes.setHasMoreItems(iterator.hasNext());
-      long total = iterator.size();
-      if (total != -1)
-         changes.setNumItems(BigInteger.valueOf(total));
-      return changes;
+      // TODO : implement
+      throw new NotSupportedException("Changes log feature is not supported.");
    }
 
    /**
     * {@inheritDoc}
     */
-   public CmisObjectList query(String statement, boolean searchAllVersions, boolean includeAllowableActions,
-      EnumIncludeRelationships includeRelationships, String renditionFilter, int maxItems, int skipCount)
-      throws FilterNotValidException, CmisRuntimeException
+   public ItemsList<CmisObject> query(String statement, boolean searchAllVersions, boolean includeAllowableActions,
+      IncludeRelationships includeRelationships, boolean includeObjectInfo, String renditionFilter, int maxItems,
+      int skipCount) throws FilterNotValidException
    {
+      checkConnection();
+
       if (skipCount < 0)
+      {
          throw new InvalidArgumentException("skipCount parameter is negative.");
+      }
 
       ItemsIterator<Result> iterator = storage.query(new Query(statement, searchAllVersions));
 
       try
       {
          if (skipCount > 0)
+         {
             iterator.skip(skipCount);
+         }
       }
       catch (NoSuchElementException nse)
       {
@@ -1492,11 +1620,15 @@ public abstract class BaseConnection implements Connection
       }
 
       if (includeRelationships == null)
-         includeRelationships = EnumIncludeRelationships.NONE;
+      {
+         includeRelationships = IncludeRelationships.NONE; // Default.
+      }
+
       RenditionFilter parsedRenditionFilter = new RenditionFilter(renditionFilter);
-      CmisObjectList list = new CmisObjectListImpl();
-      int count = 0;
-      while (iterator.hasNext() && count < maxItems)
+
+      ItemsListImpl<CmisObject> list = new ItemsListImpl<CmisObject>();
+
+      for (int count = 0; iterator.hasNext() && (maxItems < 0 || count < maxItems); count++)
       {
          Result result = iterator.next();
          StringBuilder propertyFilter = new StringBuilder();
@@ -1505,67 +1637,243 @@ public abstract class BaseConnection implements Connection
             for (String s : result.getPropertyNames())
             {
                if (propertyFilter.length() > 0)
+               {
                   propertyFilter.append(',');
+               }
                propertyFilter.append(s);
             }
          }
-         ObjectData data = storage.getObject(result.getObjectId());
-         if (data == null)
-            throw new CmisRuntimeException("Object " + result.getObjectId() + " was removed.");
+
+         ObjectData data = null;
+         try
+         {
+            data = storage.getObject(result.getObjectId());
+         }
+         catch (ObjectNotFoundException e)
+         {
+            LOG.warn("Object " + result.getObjectId() + " was removed.");
+         }
+
          CmisObject object =
-            getCmisObject(data, includeAllowableActions, includeRelationships, false, false, new PropertyFilter(
-               propertyFilter.toString()), parsedRenditionFilter);
+            getCmisObject(data, includeAllowableActions, includeRelationships, false, false, includeObjectInfo,
+               new PropertyFilter(propertyFilter.toString()), parsedRenditionFilter);
 
          Score score = result.getScore();
          if (score != null)
          {
-            CmisPropertyDecimal scoreProperty = new CmisPropertyDecimal();
-            scoreProperty.setLocalName(score.getScoreColumnName());
-            scoreProperty.setDisplayName(score.getScoreColumnName());
-            scoreProperty.setPropertyDefinitionId(score.getScoreColumnName());
-            scoreProperty.getValue().add(score.getScoreValue());
-            object.getProperties().getProperty().add(0, scoreProperty);
+            String scoreColumnName = score.getScoreColumnName();
+            DecimalProperty scoreProperty =
+               new DecimalProperty(scoreColumnName, scoreColumnName, scoreColumnName, scoreColumnName, Collections
+                  .singletonList(score.getScoreValue()));
+            object.getProperties().put(scoreColumnName, scoreProperty);
          }
-         list.getObjects().add(object);
-         count++;
+         list.getItems().add(object);
       }
 
       // Indicate that we have some more results.
       list.setHasMoreItems(iterator.hasNext());
-      long total = iterator.size();
-      if (total != -1)
-         list.setNumItems(BigInteger.valueOf(total));
+      list.setNumItems(iterator.size()); // ItemsIterator gives -1 if total number is unknown
+
       return list;
    }
 
-   // -------
-   
-   private CmisPropertyDefinitionType getPropertyDefinition(List<CmisPropertyDefinitionType> all, String id)
-   {
-      if (all != null)
-      {
-         for (CmisPropertyDefinitionType propDef : all)
-         {
-            if (propDef.getId().equals(id))
-               return propDef;
-         }
-      }
-      return null;
-   }
-
-   protected abstract CmisObject getCmisObject(ObjectData object, boolean includeAllowableActions,
-      EnumIncludeRelationships includeRelationships, boolean includePolicyIds, boolean includeAcl,
-      PropertyFilter parsedPropertyFilter, RenditionFilter parsedRenditionFilter);
-
-   protected abstract void validateChangeToken(ObjectData documentData, String changeToken)
-      throws UpdateConflictException;
+   //
 
    /**
     * {@inheritDoc}
     */
-   public void close()
+   public Storage getStorage()
    {
-      connected = false;
+      return storage;
+   }
+
+   //---------
+
+   protected CmisObject getCmisObject(ObjectData object, boolean includeAllowableActions,
+      IncludeRelationships includeRelationships, boolean includePolicyIds, boolean includeACL,
+      boolean includeObjectInfo, PropertyFilter parsedPropertyFilter, RenditionFilter parsedRenditionFilter)
+   {
+      CmisObjectImpl cmis = new CmisObjectImpl();
+
+      Map<String, Property<?>> properties = object.getSubset(parsedPropertyFilter);
+      if (properties.size() != 0)
+      {
+         cmis.getProperties().putAll(properties);
+      }
+
+      if (includeAllowableActions)
+      {
+         cmis.setAllowableActions(storage.calculateAllowableActions(object));
+      }
+
+      RelationshipDirection direction = null;
+      if (includeRelationships != null)
+      {
+         switch (includeRelationships)
+         {
+            case BOTH :
+               direction = RelationshipDirection.EITHER;
+               break;
+            case SOURCE :
+               direction = RelationshipDirection.SOURCE;
+               break;
+            case TARGET :
+               direction = RelationshipDirection.TARGET;
+               break;
+            case NONE :
+               break;
+         }
+         if (direction != null)
+         {
+            for (ItemsIterator<Relationship> iter = object.getRelationships(direction, null, true); iter.hasNext();)
+            {
+               Relationship next = iter.next();
+               cmis.getRelationship().add(
+                  getCmisObject(next, false, includeRelationships, false, false, includeObjectInfo, PropertyFilter.ALL,
+                     RenditionFilter.NONE));
+            }
+         }
+      }
+      if (includePolicyIds)
+      {
+         for (Iterator<Policy> iter = object.getPolicies().iterator(); iter.hasNext();)
+         {
+            cmis.getPolicyIds().add(iter.next().getObjectId());
+         }
+      }
+
+      if (includeACL)
+      {
+         for (Iterator<AccessControlEntry> iter = object.getACL(true).iterator(); iter.hasNext();)
+         {
+            cmis.getACL().add(iter.next());
+         }
+      }
+
+      if (!parsedRenditionFilter.isNone())
+      {
+         for (ItemsIterator<Rendition> renditions = storage.getRenditions(object); renditions.hasNext();)
+         {
+            Rendition r = renditions.next();
+            if (parsedRenditionFilter.accept(r))
+            {
+               cmis.getRenditions().add(r);
+            }
+         }
+      }
+
+      if (includeObjectInfo)
+      {
+         BaseType baseType = object.getBaseType();
+
+         ObjectInfoImpl objectInfo = new ObjectInfoImpl();
+         objectInfo.setBaseType(baseType);
+         objectInfo.setTypeId(object.getTypeId());
+         objectInfo.setId(object.getObjectId());
+         objectInfo.setName(object.getName());
+         objectInfo.setCreatedBy(object.getCreatedBy());
+         objectInfo.setCreationDate(object.getCreationDate());
+         objectInfo.setLastModifiedBy(object.getLastModifiedBy());
+         objectInfo.setLastModificationDate(object.getLastModificationDate());
+         objectInfo.setChangeToken(object.getChangeToken());
+         if (baseType == BaseType.FOLDER)
+         {
+            objectInfo.setParentId(((Folder)object).isRoot() ? null : object.getParent().getObjectId());
+         }
+         else if (baseType == BaseType.DOCUMENT)
+         {
+            Document doc = (Document)object;
+            objectInfo.setLatestVersion(doc.isLatestVersion());
+            objectInfo.setMajorVersion(doc.isMajorVersion());
+            objectInfo.setLatestMajorVersion(doc.isLatestMajorVersion());
+            objectInfo.setVersionSeriesId(doc.getVersionSeriesId());
+            objectInfo.setVersionSeriesCheckedOutId(doc.getVersionSeriesCheckedOutId());
+            objectInfo.setVersionSeriesCheckedOutBy(doc.getVersionSeriesCheckedOutBy());
+            objectInfo.setVersionLabel(doc.getVersionLabel());
+            objectInfo.setContentStreamMimeType(doc.getContentStreamMimeType());;
+         }
+         else if (baseType == BaseType.RELATIONSHIP)
+         {
+            Relationship rel = (Relationship)object;
+            objectInfo.setSourceId(rel.getSourceId());
+            objectInfo.setTargetId(rel.getTargetId());
+         }
+
+         cmis.setObjectInfo(objectInfo);
+      }
+      return cmis;
+   }
+
+   /**
+    * Check is connection may be used at the moment, e.g. it may be already
+    * closed.
+    *
+    * @throws IllegalStateException if connection may not be used any more
+    */
+   protected abstract void checkConnection() throws IllegalStateException;
+
+   /**
+    * Validate change token provided by caller with current change token of
+    * object.
+    *
+    * @param object object
+    * @param changeToken change token from 'client'
+    * @throws UpdateConflictException if specified change token does not match
+    *         to object change token
+    */
+   protected abstract void validateChangeToken(ObjectData object, String changeToken) throws UpdateConflictException;
+
+   // ------------------------------- Helpers ---------------------------
+
+   private void applyPolicies(ObjectData object, Collection<String> policies)
+   {
+      TypeDefinition typeDefinition = object.getTypeDefinition();
+      if (!typeDefinition.isControllablePolicy())
+      {
+         throw new ConstraintException("Type " + typeDefinition.getId() + " is not controllable by Policy.");
+      }
+
+      for (String policyID : policies)
+      {
+         ObjectData policy = storage.getObject(policyID);
+         if (policy.getBaseType() != BaseType.POLICY)
+         {
+            throw new InvalidArgumentException("Object " + policyID + " is not a Policy object.");
+         }
+         object.applyPolicy((Policy)policy);
+      }
+   }
+
+   /**
+    * Apply ACLs to specified object.
+    *
+    * @param object object
+    * @param addACL ACL to be added
+    * @param removeACL ACL to be removed
+    */
+   private void applyACL(ObjectData object, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL)
+   {
+      CapabilityACL capabilityACL = storage.getRepositoryInfo().getCapabilities().getCapabilityACL();
+
+      if (capabilityACL == CapabilityACL.NONE)
+      {
+         throw new NotSupportedException("ACL capability is not supported.");
+      }
+      else if (capabilityACL == CapabilityACL.DISCOVER)
+      {
+         throw new NotSupportedException("ACL can be discovered but not managed via CMIS services.");
+      }
+
+      TypeDefinition typeDefinition = object.getTypeDefinition();
+      if (!typeDefinition.isControllableACL())
+      {
+         throw new ConstraintException("Type " + typeDefinition.getId() + " is not controllable by ACL.");
+      }
+
+      // Merge ACL include existed one. It may be inherited from parent even for newly created object .
+      List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(object.getACL(false), addACL, removeACL);
+
+      object.setACL(mergedACL);
    }
 
 }

@@ -75,7 +75,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: RepositoryImpl.java 218 2010-02-15 07:38:06Z andrew00x $
  */
 public class RepositoryImpl extends TypeManagerImpl implements Repository, EntryNameProducer, RenditionManager,
    ChangeTokenMatcher
@@ -464,8 +464,8 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
          info.setRepositoryName(getId());
          info.setCmisVersionSupported(CMIS.SUPPORTED_VERSION);
          info.setRepositoryDescription(""); // ?
-         info.setProductName("xCMIS (Inmemory SP)");
-         info.setVendorName("eXo Platform");
+         info.setProductName("eXo CMIS Simple");
+         info.setVendorName("eXo CMIS Simple");
          info.setProductVersion("1.0-SNAPSHOT");
          info.setRootFolderId(ROOT_FOLDER_ID);
          CmisRepositoryCapabilitiesType capabilities = new CmisRepositoryCapabilitiesType();
@@ -609,13 +609,6 @@ public class RepositoryImpl extends TypeManagerImpl implements Repository, Entry
       if (LOG.isDebugEnabled())
          LOG.debug("Get root folder.");
       return new EntryImpl(ROOT_FOLDER_ID, storage);
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public ContentStream getStream(String streamId) {
-    return null;
    }
 
    /**

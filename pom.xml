@@ -59,12 +59,13 @@
 
    <modules>
       <module>xcmis-spi</module>
-      <module>xcmis-sp-inmemory</module>
-      <module>xcmis-core</module>
-      <module>xcmis-search-lucene</module>
-      <module>xcmis-sp-jcr-exo</module>
-      <module>xcmis-restatom</module>
+      <!--module>xcmis-sp-inmemory</module-->
+      <module>xcmis-search-model</module>
+      <module>xcmis-search-parser-cmis</module>
+      <module>xcmis-search-service</module>
+      <module>xcmis-sp-jcr-exo-new</module>
       <module>xcmis-wssoap</module>
+      <module>xcmis-restatom</module>
       <module>xcmis-server-war</module>
    </modules>
 
@@ -143,6 +144,11 @@
          <dependency>
             <groupId>org.xcmis</groupId>
             <artifactId>xcmis-sp-jcr-exo</artifactId>
+            <version>${project.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>org.xcmis</groupId>
+            <artifactId>xcmis-sp-jcr-exo-new</artifactId>
             <version>${project.version}</version>
          </dependency>
          <dependency>

@@ -25,9 +25,9 @@ package org.xcmis.spi;
  * update Document.
  * 
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: UpdateConflictException.java 2 2010-02-04 17:21:49Z andrew00x $
  */
-public final class UpdateConflictException extends Exception
+public final class UpdateConflictException extends CmisRuntimeException
 {
 
    /**

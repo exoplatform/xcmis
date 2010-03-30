@@ -19,11 +19,9 @@
 
 package org.xcmis.sp.jcr.exo.rendition;
 
-import org.xcmis.core.EnumRenditionKind;
 import org.pdfbox.pdmodel.PDDocument;
 import org.pdfbox.pdmodel.PDPage;
-import org.xcmis.spi.RepositoryException;
-import org.xcmis.spi.object.ContentStream;
+import org.xcmis.spi.data.ContentStream;
 
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -56,7 +54,7 @@ public class PDFDocumentRenditionProvider implements RenditionProvider
    /**
     * {@inheritDoc}
     */
-   public RenditionContentStream getRenditionStream(ContentStream stream) throws IOException, RepositoryException
+   public RenditionContentStream getRenditionStream(ContentStream stream) throws IOException
    {
       PDDocument pdf = null;
       try
@@ -80,8 +78,7 @@ public class PDFDocumentRenditionProvider implements RenditionProvider
          ByteArrayOutputStream out = new ByteArrayOutputStream();
          ImageIO.write(scaledImage, "png", out);
          RenditionContentStream renditionStream =
-            new RenditionContentStream(out.toByteArray(), null, "image/png", EnumRenditionKind.CMIS_THUMBNAIL
-               .value());
+            new RenditionContentStream(out.toByteArray(), null, "image/png", "cmis:thumbnail");
          renditionStream.setHeight(height);
          renditionStream.setWidth(width);
          return renditionStream;

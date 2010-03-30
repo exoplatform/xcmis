@@ -22,20 +22,21 @@ package org.xcmis.restatom.abdera;
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
-import org.xcmis.core.CmisPropertyBooleanDefinitionType;
-import org.xcmis.core.CmisPropertyDateTimeDefinitionType;
-import org.xcmis.core.CmisPropertyDecimalDefinitionType;
-import org.xcmis.core.CmisPropertyDefinitionType;
-import org.xcmis.core.CmisPropertyHtmlDefinitionType;
-import org.xcmis.core.CmisPropertyIdDefinitionType;
-import org.xcmis.core.CmisPropertyIntegerDefinitionType;
-import org.xcmis.core.CmisPropertyStringDefinitionType;
-import org.xcmis.core.CmisPropertyUriDefinitionType;
-import org.xcmis.core.EnumCardinality;
-import org.xcmis.core.EnumPropertyType;
-import org.xcmis.core.EnumUpdatability;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.restatom.AtomUtils;
+import org.xcmis.spi.Choice;
 import org.xcmis.spi.InvalidArgumentException;
+import org.xcmis.spi.PropertyDefinition;
+import org.xcmis.spi.PropertyType;
+import org.xcmis.spi.Updatability;
+import org.xcmis.spi.impl.PropertyDefinitionImpl;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Calendar;
+import java.util.List;
 
 import javax.xml.namespace.QName;
 
@@ -44,8 +45,7 @@ import javax.xml.namespace.QName;
  * @version $Id: CmisPropertyDefinitionTypeElementWrapper.java 2279 2009-07-23
  *          11:47:50Z sunman $ Jul 15, 2009
  */
-public abstract class PropertyDefinitionTypeElement<T extends CmisPropertyDefinitionType> extends
-   ExtensibleElementWrapper
+public class PropertyDefinitionTypeElement extends ExtensibleElementWrapper
 {
 
    /**
@@ -74,94 +74,254 @@ public abstract class PropertyDefinitionTypeElement<T extends CmisPropertyDefini
     * 
     * @return the property definition
     */
-   public CmisPropertyDefinitionType getPropertyDefinition()
+   public PropertyDefinition<?> getPropertyDefinition()
    {
       String propertyTypeName = getSimpleExtension(AtomCMIS.PROPERTY_TYPE);
-      EnumPropertyType propertyType;
+      PropertyType propertyType;
       try
       {
-         propertyType = EnumPropertyType.fromValue(propertyTypeName);
+         propertyType = PropertyType.fromValue(propertyTypeName);
       }
       catch (IllegalArgumentException e)
       {
          throw new InvalidArgumentException("Unable to parse Property Definition element. Unsupported property type: "
             + propertyTypeName);
       }
-      CmisPropertyDefinitionType propDef = null;
+      PropertyDefinitionImpl<?> propDef = null;
+
       switch (propertyType)
       {
-         // TODO : choices & default value for each property definition.
-         case BOOLEAN :
-            propDef = new CmisPropertyBooleanDefinitionType();
+         case BOOLEAN : {
+            PropertyDefinitionImpl<Boolean> defImpl = new PropertyDefinitionImpl<Boolean>();
+            // DEFAULT VALUE
+            ExtensibleElementWrapper defValueElement = getExtension(AtomCMIS.DEFAULT_VALUE);
+            List<Element> elements = defValueElement.getExtensions(AtomCMIS.VALUE);
+            Boolean[] arrayDefs = new Boolean[elements.size()];
+            int i = 0;
+            for (Element element : elements)
+            {
+               arrayDefs[i] = Boolean.parseBoolean(element.getText());
+               i++;
+            }
+            defImpl.setDefaultValue(arrayDefs);
+            // CHOICE
+            List<ExtensibleElementWrapper> choicesElements = getExtensions(AtomCMIS.CHOICE);
+            for (ExtensibleElementWrapper choiceElement : choicesElements)
+            {
+               defImpl.getChoices().add(new ChoiceBooleanElement(choiceElement).getChoice());
+            }
+            propDef = defImpl;
             break;
-         case DATETIME :
-            propDef = new CmisPropertyDateTimeDefinitionType();
+         }
+         case DATETIME : {
+            PropertyDefinitionImpl<Calendar> defImpl = new PropertyDefinitionImpl<Calendar>();
+            // DEFAULT VALUE
+            ExtensibleElementWrapper defValueElement = getExtension(AtomCMIS.DEFAULT_VALUE);
+            List<Element> elements = defValueElement.getExtensions(AtomCMIS.VALUE);
+            Calendar[] arrayDefs = new Calendar[elements.size()];
+            int i = 0;
+            for (Element element : elements)
+            {
+               arrayDefs[i] = AtomUtils.parseCalendar(element.getText());
+               i++;
+            }
+            defImpl.setDefaultValue(arrayDefs);
+            // CHOICE
+            List<ExtensibleElementWrapper> choicesElements = getExtensions(AtomCMIS.CHOICE);
+            for (ExtensibleElementWrapper choiceElement : choicesElements)
+            {
+               defImpl.getChoices().add(new ChoiceDateTimeElement(choiceElement).getChoice());
+            }
+            propDef = defImpl;
             break;
-         case DECIMAL :
-            propDef = new CmisPropertyDecimalDefinitionType();
+         }
+         case DECIMAL : {
+            PropertyDefinitionImpl<BigDecimal> defImpl = new PropertyDefinitionImpl<BigDecimal>();
+            // DEFAULT VALUE
+            ExtensibleElementWrapper defValueElement = getExtension(AtomCMIS.DEFAULT_VALUE);
+            List<Element> elements = defValueElement.getExtensions(AtomCMIS.VALUE);
+            BigDecimal[] arrayDefs = new BigDecimal[elements.size()];
+            int i = 0;
+            for (Element element : elements)
+            {
+               arrayDefs[i] = new BigDecimal(element.getText());
+               i++;
+            }
+            defImpl.setDefaultValue(arrayDefs);
+            // CHOICE
+            List<ExtensibleElementWrapper> choicesElements = getExtensions(AtomCMIS.CHOICE);
+            for (ExtensibleElementWrapper choiceElement : choicesElements)
+            {
+               defImpl.getChoices().add(new ChoiceDecimalElement(choiceElement).getChoice());
+            }
+            propDef = defImpl;
             break;
-         case HTML :
-            propDef = new CmisPropertyHtmlDefinitionType();
+         }
+         case HTML : {
+            PropertyDefinitionImpl<String> defImpl = new PropertyDefinitionImpl<String>();
+            // DEFAULT VALUE
+            ExtensibleElementWrapper defValueElement = getExtension(AtomCMIS.DEFAULT_VALUE);
+            List<Element> elements = defValueElement.getExtensions(AtomCMIS.VALUE);
+            String[] arrayDefs = new String[elements.size()];
+            int i = 0;
+            for (Element element : elements)
+            {
+               arrayDefs[i] = element.getText();
+               i++;
+            }
+            defImpl.setDefaultValue(arrayDefs);
+            // CHOICE
+            List<ExtensibleElementWrapper> choicesElements = getExtensions(AtomCMIS.CHOICE);
+            for (ExtensibleElementWrapper choiceElement : choicesElements)
+            {
+               defImpl.getChoices().add(new ChoiceHtmlElement(choiceElement).getChoice());
+            }
+            propDef = defImpl;
             break;
-         case ID :
-            propDef = new CmisPropertyIdDefinitionType();
+         }
+         case ID : {
+            PropertyDefinitionImpl<String> defImpl = new PropertyDefinitionImpl<String>();
+            // DEFAULT VALUE
+            ExtensibleElementWrapper defValueElement = getExtension(AtomCMIS.DEFAULT_VALUE);
+            List<Element> elements = defValueElement.getExtensions(AtomCMIS.VALUE);
+            String[] arrayDefs = new String[elements.size()];
+            int i = 0;
+            for (Element element : elements)
+            {
+               arrayDefs[i] = element.getText();
+               i++;
+            }
+            defImpl.setDefaultValue(arrayDefs);
+            // CHOICE
+            List<ExtensibleElementWrapper> choicesElements = getExtensions(AtomCMIS.CHOICE);
+            for (ExtensibleElementWrapper choiceElement : choicesElements)
+            {
+               defImpl.getChoices().add(new ChoiceIdElement(choiceElement).getChoice());
+            }
+            propDef = defImpl;
             break;
-         case INTEGER :
-            propDef = new CmisPropertyIntegerDefinitionType();
+         }
+         case STRING : {
+            PropertyDefinitionImpl<String> defImpl = new PropertyDefinitionImpl<String>();
+            // DEFAULT VALUE
+            ExtensibleElementWrapper defValueElement = getExtension(AtomCMIS.DEFAULT_VALUE);
+            List<Element> elements = defValueElement.getExtensions(AtomCMIS.VALUE);
+            String[] arrayDefs = new String[elements.size()];
+            int i = 0;
+            for (Element element : elements)
+            {
+               arrayDefs[i] = element.getText();
+               i++;
+            }
+            defImpl.setDefaultValue(arrayDefs);
+            // CHOICE
+            List<ExtensibleElementWrapper> choicesElements = getExtensions(AtomCMIS.CHOICE);
+            for (ExtensibleElementWrapper choiceElement : choicesElements)
+            {
+               defImpl.getChoices().add(new ChoiceStringElement(choiceElement).getChoice());
+            }
+            propDef = defImpl;
             break;
-         case STRING :
-            propDef = new CmisPropertyStringDefinitionType();
+         }
+         case INTEGER : {
+            PropertyDefinitionImpl<BigInteger> defImpl = new PropertyDefinitionImpl<BigInteger>();
+            // DEFAULT VALUE
+            ExtensibleElementWrapper defValueElement = getExtension(AtomCMIS.DEFAULT_VALUE);
+            List<Element> elements = defValueElement.getExtensions(AtomCMIS.VALUE);
+            BigInteger[] arrayDefs = new BigInteger[elements.size()];
+            int i = 0;
+            for (Element element : elements)
+            {
+               arrayDefs[i] = new BigInteger(element.getText());
+               i++;
+            }
+            defImpl.setDefaultValue(arrayDefs);
+            // CHOICE
+            List<ExtensibleElementWrapper> choicesElements = getExtensions(AtomCMIS.CHOICE);
+            for (ExtensibleElementWrapper choiceElement : choicesElements)
+            {
+               defImpl.getChoices().add(new ChoiceIntegerElement(choiceElement).getChoice());
+            }
+            propDef = defImpl;
             break;
-         case URI :
-            propDef = new CmisPropertyUriDefinitionType();
+         }
+         case URI : {
+            PropertyDefinitionImpl<URI> defImpl = new PropertyDefinitionImpl<URI>();
+            // DEFAULT VALUE
+            ExtensibleElementWrapper defValueElement = getExtension(AtomCMIS.DEFAULT_VALUE);
+            List<Element> elements = defValueElement.getExtensions(AtomCMIS.VALUE);
+            URI[] arrayDefs = new URI[elements.size()];
+            int i = 0;
+            for (Element element : elements)
+            {
+               try
+               {
+                  arrayDefs[i] = new URI(element.getText());
+               }
+               catch (URISyntaxException e)
+               {
+               }
+               i++;
+            }
+            defImpl.setDefaultValue(arrayDefs);
+            // CHOICE
+            List<ExtensibleElementWrapper> choicesElements = getExtensions(AtomCMIS.CHOICE);
+            for (ExtensibleElementWrapper choiceElement : choicesElements)
+            {
+               defImpl.getChoices().add(new ChoiceUriElement(choiceElement).getChoice());
+            }
+            propDef = defImpl;
             break;
+         }
          default :
             // Should never happen. Exception will throw early.
             throw new InvalidArgumentException("Unknown property type " + propertyType.value());
       }
       propDef.setId(getSimpleExtension(AtomCMIS.ID));
+
+      if (getSimpleExtension(AtomCMIS.LOCAL_NAME) != null)
+         propDef.setLocalName(getSimpleExtension(AtomCMIS.LOCAL_NAME));
+      if (getSimpleExtension(AtomCMIS.LOCAL_NAMESPACE) != null)
+         propDef.setLocalNamespace(getSimpleExtension(AtomCMIS.LOCAL_NAMESPACE));
+
+      if (getSimpleExtension(AtomCMIS.DISPLAY_NAME) != null)
+         propDef.setDisplayName(getSimpleExtension(AtomCMIS.DISPLAY_NAME));
+      propDef.setQueryName(getSimpleExtension(AtomCMIS.QUERY_NAME));
+
+      if (getSimpleExtension(AtomCMIS.DESCRIPTION) != null)
+         propDef.setDescription(getSimpleExtension(AtomCMIS.DESCRIPTION));
       propDef.setPropertyType(propertyType);
-      
+
       String cardinality = getSimpleExtension(AtomCMIS.CARDINALITY);
       try
       {
-         propDef.setCardinality(EnumCardinality.fromValue(cardinality));
+         propDef.setMultivalued(cardinality == null ? false : Boolean.parseBoolean(cardinality));
       }
       catch (IllegalArgumentException e)
       {
          throw new InvalidArgumentException(
             "Unable to parse Property Definition element. Unsupported 'cardinality' attribute: " + cardinality);
       }
-      
+
       String updatability = getSimpleExtension(AtomCMIS.UPDATABILITY);
       try
       {
-         propDef.setUpdatability(EnumUpdatability.fromValue(updatability));
+         propDef.setUpdatability(Updatability.fromValue(updatability));
       }
       catch (IllegalArgumentException e)
       {
          throw new InvalidArgumentException(
             "Unable to parse Property Definition element. Unsupported 'updatability' attribute: " + updatability);
       }
-      
-      propDef.setQueryName(getSimpleExtension(AtomCMIS.QUERY_NAME));
-      if (getSimpleExtension(AtomCMIS.LOCAL_NAME) != null)
-         propDef.setLocalName(getSimpleExtension(AtomCMIS.LOCAL_NAME));
-      if (getSimpleExtension(AtomCMIS.LOCAL_NAMESPACE) != null)
-         propDef.setLocalNamespace(getSimpleExtension(AtomCMIS.LOCAL_NAMESPACE));
-      if (getSimpleExtension(AtomCMIS.DISPLAY_NAME) != null)
-         propDef.setDisplayName(getSimpleExtension(AtomCMIS.DISPLAY_NAME));
-      if (getSimpleExtension(AtomCMIS.DESCRIPTION) != null)
-         propDef.setDescription(getSimpleExtension(AtomCMIS.DESCRIPTION));
 
       /* flags */
-      propDef.setInherited(getSimpleExtension(AtomCMIS.INHERITED) != null ? false : Boolean
+      propDef.setInherited(getSimpleExtension(AtomCMIS.INHERITED) == null ? false : Boolean
          .parseBoolean(getSimpleExtension(AtomCMIS.INHERITED)));
       propDef.setRequired(Boolean.parseBoolean(getSimpleExtension(AtomCMIS.REQUIRED)));
       propDef.setQueryable(Boolean.parseBoolean(getSimpleExtension(AtomCMIS.QUERYABLE)));
       propDef.setOrderable(Boolean.parseBoolean(getSimpleExtension(AtomCMIS.ORDERABLE)));
-      //      propDef.setOpenChoice(getSimpleExtension(AtomCMIS.OPEN_CHOICE) != null ? false : Boolean
-      //         .parseBoolean(getSimpleExtension(AtomCMIS.OPEN_CHOICE)));
+      propDef.setOpenChoice(getSimpleExtension(AtomCMIS.OPEN_CHOICE) == null ? false : Boolean
+         .parseBoolean(getSimpleExtension(AtomCMIS.OPEN_CHOICE)));
       return propDef;
 
    }
@@ -171,13 +331,13 @@ public abstract class PropertyDefinitionTypeElement<T extends CmisPropertyDefini
     * 
     * @param propdef the propdef
     */
-   public void build(T propdef)
+   public void build(PropertyDefinition<?> propdef)
    {
       if (propdef != null)
       {
          addSimpleExtension(AtomCMIS.ID, propdef.getId());
          addSimpleExtension(AtomCMIS.PROPERTY_TYPE, propdef.getPropertyType().value());
-         addSimpleExtension(AtomCMIS.CARDINALITY, propdef.getCardinality().value());
+         addSimpleExtension(AtomCMIS.CARDINALITY, propdef.isMultivalued() ? "multi" : "single");
          addSimpleExtension(AtomCMIS.UPDATABILITY, propdef.getUpdatability().value());
          addSimpleExtension(AtomCMIS.QUERY_NAME, propdef.getQueryName());
          if (propdef.getLocalName() != null)
@@ -190,18 +350,209 @@ public abstract class PropertyDefinitionTypeElement<T extends CmisPropertyDefini
             addSimpleExtension(AtomCMIS.DESCRIPTION, propdef.getDescription());
 
          /* flags */
-         addSimpleExtension(AtomCMIS.INHERITED, propdef.isInherited() == null ? "false" : Boolean.toString(propdef
-            .isInherited()));
+         addSimpleExtension(AtomCMIS.INHERITED, propdef.getInherited() == null ? "false" : Boolean.toString(propdef
+            .getInherited()));
          addSimpleExtension(AtomCMIS.REQUIRED, Boolean.toString(propdef.isRequired()));
          addSimpleExtension(AtomCMIS.QUERYABLE, Boolean.toString(propdef.isQueryable()));
          addSimpleExtension(AtomCMIS.ORDERABLE, Boolean.toString(propdef.isOrderable()));
 
          // From spec. : Is only applicable to properties that provide a value for the "Choices" attribute.
          // Do not decide here provide or not this attribute. Back-end must be care about this. 
-         if (propdef.isOpenChoice() != null)
+         if (propdef.isOpenChoice())
             addSimpleExtension(AtomCMIS.OPEN_CHOICE, Boolean.toString(propdef.isOpenChoice()));
-         // TODO : choices & default value
+
+         PropertyType propertyType = propdef.getPropertyType();
+         switch (propertyType)
+         {
+            case BOOLEAN : {
+               PropertyDefinitionImpl<Boolean> defImpl = (PropertyDefinitionImpl<Boolean>)propdef;
+               // DEFAULT VALUE
+               if (defImpl.getDefaultValue() != null && defImpl.getDefaultValue().length != 0)
+               {
+                  ExtensibleElementWrapper defValueElement = addExtension(AtomCMIS.DEFAULT_VALUE);
+                  for (Boolean el : defImpl.getDefaultValue())
+                  {
+                     defValueElement.addSimpleExtension(AtomCMIS.VALUE, el.toString());
+                  }
+               }
+               // CHOICE
+               if (defImpl.getChoices() != null && defImpl.getChoices().size() != 0)
+               {
+                  List<Choice<Boolean>> choiceList = defImpl.getChoices();
+                  for (Choice<Boolean> choice : choiceList)
+                  {
+                     ExtensibleElementWrapper choiceElement = addExtension(AtomCMIS.CHOICE);
+                     (new ChoiceBooleanElement(choiceElement)).build(choice);
+                  }
+               }
+               break;
+            }
+            case DATETIME : {
+               PropertyDefinitionImpl<Calendar> defImpl = (PropertyDefinitionImpl<Calendar>)propdef;
+               // DEFAULT VALUE
+               if (defImpl.getDefaultValue() != null && defImpl.getDefaultValue().length != 0)
+               {
+                  ExtensibleElementWrapper defValueElement = addExtension(AtomCMIS.DEFAULT_VALUE);
+                  for (Calendar el : defImpl.getDefaultValue())
+                  {
+                     defValueElement.addSimpleExtension(AtomCMIS.VALUE, el.toString());
+                  }
+               }
+               // CHOICE
+               if (defImpl.getChoices() != null && defImpl.getChoices().size() != 0)
+               {
+                  List<Choice<Calendar>> choiceList = defImpl.getChoices();
+                  for (Choice<Calendar> choice : choiceList)
+                  {
+                     ExtensibleElementWrapper choiceElement = addExtension(AtomCMIS.CHOICE);
+                     (new ChoiceDateTimeElement(choiceElement)).build(choice);
+                  }
+               }
+               break;
+            }
+            case DECIMAL : {
+               PropertyDefinitionImpl<BigDecimal> defImpl = (PropertyDefinitionImpl<BigDecimal>)propdef;
+               // DEFAULT VALUE
+               if (defImpl.getDefaultValue() != null && defImpl.getDefaultValue().length != 0)
+               {
+                  ExtensibleElementWrapper defValueElement = addExtension(AtomCMIS.DEFAULT_VALUE);
+                  for (BigDecimal el : defImpl.getDefaultValue())
+                  {
+                     defValueElement.addSimpleExtension(AtomCMIS.VALUE, el.toString());
+                  }
+               }
+               // CHOICE
+               if (defImpl.getChoices() != null && defImpl.getChoices().size() != 0)
+               {
+                  List<Choice<BigDecimal>> choiceList = defImpl.getChoices();
+                  for (Choice<BigDecimal> choice : choiceList)
+                  {
+                     ExtensibleElementWrapper choiceElement = addExtension(AtomCMIS.CHOICE);
+                     (new ChoiceDecimalElement(choiceElement)).build(choice);
+                  }
+               }
+               break;
+            }
+            case HTML : {
+               PropertyDefinitionImpl<String> defImpl = (PropertyDefinitionImpl<String>)propdef;
+               // DEFAULT VALUE
+               if (defImpl.getDefaultValue() != null && defImpl.getDefaultValue().length != 0)
+               {
+                  ExtensibleElementWrapper defValueElement = addExtension(AtomCMIS.DEFAULT_VALUE);
+                  for (String el : defImpl.getDefaultValue())
+                  {
+                     defValueElement.addSimpleExtension(AtomCMIS.VALUE, el.toString());
+                  }
+               }
+               // CHOICE
+               if (defImpl.getChoices() != null && defImpl.getChoices().size() != 0)
+               {
+                  List<Choice<String>> choiceList = defImpl.getChoices();
+                  for (Choice<String> choice : choiceList)
+                  {
+                     ExtensibleElementWrapper choiceElement = addExtension(AtomCMIS.CHOICE);
+                     (new ChoiceHtmlElement(choiceElement)).build(choice);
+                  }
+               }
+               break;
+            }
+            case ID : {
+               PropertyDefinitionImpl<String> defImpl = (PropertyDefinitionImpl<String>)propdef;
+               // DEFAULT VALUE
+               if (defImpl.getDefaultValue() != null && defImpl.getDefaultValue().length != 0)
+               {
+                  ExtensibleElementWrapper defValueElement = addExtension(AtomCMIS.DEFAULT_VALUE);
+                  for (String el : defImpl.getDefaultValue())
+                  {
+                     defValueElement.addSimpleExtension(AtomCMIS.VALUE, el.toString());
+                  }
+               }
+               // CHOICE
+               if (defImpl.getChoices() != null && defImpl.getChoices().size() != 0)
+               {
+                  List<Choice<String>> choiceList = defImpl.getChoices();
+                  for (Choice<String> choice : choiceList)
+                  {
+                     ExtensibleElementWrapper choiceElement = addExtension(AtomCMIS.CHOICE);
+                     (new ChoiceIdElement(choiceElement)).build(choice);
+                  }
+               }
+               break;
+            }
+            case STRING : {
+               PropertyDefinitionImpl<String> defImpl = (PropertyDefinitionImpl<String>)propdef;
+               // DEFAULT VALUE
+               if (defImpl.getDefaultValue() != null && defImpl.getDefaultValue().length != 0)
+               {
+                  ExtensibleElementWrapper defValueElement = addExtension(AtomCMIS.DEFAULT_VALUE);
+                  for (String el : defImpl.getDefaultValue())
+                  {
+                     defValueElement.addSimpleExtension(AtomCMIS.VALUE, el.toString());
+                  }
+               }
+               // CHOICE
+               if (defImpl.getChoices() != null && defImpl.getChoices().size() != 0)
+               {
+                  List<Choice<String>> choiceList = defImpl.getChoices();
+                  for (Choice<String> choice : choiceList)
+                  {
+                     ExtensibleElementWrapper choiceElement = addExtension(AtomCMIS.CHOICE);
+                     (new ChoiceStringElement(choiceElement)).build(choice);
+                  }
+               }
+               break;
+            }
+            case INTEGER : {
+               PropertyDefinitionImpl<BigInteger> defImpl = (PropertyDefinitionImpl<BigInteger>)propdef;
+               // DEFAULT VALUE
+               if (defImpl.getDefaultValue() != null && defImpl.getDefaultValue().length != 0)
+               {
+                  ExtensibleElementWrapper defValueElement = addExtension(AtomCMIS.DEFAULT_VALUE);
+                  for (BigInteger el : defImpl.getDefaultValue())
+                  {
+                     defValueElement.addSimpleExtension(AtomCMIS.VALUE, el.toString());
+                  }
+               }
+               // CHOICE
+               if (defImpl.getChoices() != null && defImpl.getChoices().size() != 0)
+               {
+                  List<Choice<BigInteger>> choiceList = defImpl.getChoices();
+                  for (Choice<BigInteger> choice : choiceList)
+                  {
+                     ExtensibleElementWrapper choiceElement = addExtension(AtomCMIS.CHOICE);
+                     (new ChoiceIntegerElement(choiceElement)).build(choice);
+                  }
+               }
+               break;
+            }
+            case URI : {
+               PropertyDefinitionImpl<URI> defImpl = (PropertyDefinitionImpl<URI>)propdef;
+               // DEFAULT VALUE
+               if (defImpl.getDefaultValue() != null && defImpl.getDefaultValue().length != 0)
+               {
+                  ExtensibleElementWrapper defValueElement = addExtension(AtomCMIS.DEFAULT_VALUE);
+                  for (URI el : defImpl.getDefaultValue())
+                  {
+                     defValueElement.addSimpleExtension(AtomCMIS.VALUE, el.toString());
+                  }
+               }
+               // CHOICE
+               if (defImpl.getChoices() != null && defImpl.getChoices().size() != 0)
+               {
+                  List<Choice<URI>> choiceList = defImpl.getChoices();
+                  for (Choice<URI> choice : choiceList)
+                  {
+                     ExtensibleElementWrapper choiceElement = addExtension(AtomCMIS.CHOICE);
+                     (new ChoiceUriElement(choiceElement)).build(choice);
+                  }
+               }
+               break;
+            }
+            default :
+               // Should never happen. Exception will throw early.
+               throw new InvalidArgumentException("Unknown property type " + propertyType.value());
+         }
+
       }
    }
-
 }

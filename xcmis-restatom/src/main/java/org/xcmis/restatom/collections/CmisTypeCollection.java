@@ -26,15 +26,14 @@ import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.ResponseContext;
 import org.apache.abdera.protocol.server.TargetType;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
-import org.xcmis.core.CmisTypeDefinitionType;
-import org.xcmis.core.RepositoryService;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
-import org.xcmis.restatom.abdera.CMISExtensionFactory;
 import org.xcmis.restatom.abdera.TypeDefinitionTypeElement;
+import org.xcmis.spi.Connection;
 import org.xcmis.spi.InvalidArgumentException;
-import org.xcmis.spi.Repository;
-import org.xcmis.spi.RepositoryException;
+import org.xcmis.spi.StorageException;
+import org.xcmis.spi.StorageProvider;
+import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.TypeNotFoundException;
 
 import java.util.Calendar;
@@ -44,23 +43,19 @@ import java.util.Map;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: CmisTypeCollection.java 47 2010-02-08 22:59:45Z andrew00x $
  */
-public abstract class CmisTypeCollection extends AbstractCmisCollection<CmisTypeDefinitionType>
+public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefinition>
 {
-
-   /** The repository service. */
-   protected final RepositoryService repositoryService;
 
    /**
     * Instantiates a new cmis type collection.
-    * 
+    * @param storageProvider TODO
     * @param repositoryService the repository service
     */
-   public CmisTypeCollection(RepositoryService repositoryService)
+   public CmisTypeCollection(StorageProvider storageProvider)
    {
-      super();
-      this.repositoryService = repositoryService;
+      super(storageProvider);
    }
 
    /**
@@ -74,13 +69,15 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<CmisType
    /**
     * {@inheritDoc}
     */
-   public CmisTypeDefinitionType getEntry(String typeId, RequestContext request) throws ResponseContextException
+   public TypeDefinition getEntry(String typeId, RequestContext request) throws ResponseContextException
    {
+      Connection conn = null;
       try
       {
-         return repositoryService.getTypeDefinition(getRepositoryId(request), typeId);
+         conn = getConnection(request);
+         return conn.getTypeDefinition(typeId);
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          throw new ResponseContextException(createErrorResponse(re, 500));
       }
@@ -92,12 +89,17 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<CmisType
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
       }
+      finally
+      {
+         if (conn != null)
+            conn.close();
+      }
    }
 
    /**
     * {@inheritDoc}
     */
-   public String getId(CmisTypeDefinitionType entry) throws ResponseContextException
+   public String getId(TypeDefinition entry) throws ResponseContextException
    {
       return entry.getId();
    }
@@ -116,7 +118,7 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<CmisType
    /**
     * {@inheritDoc}
     */
-   public String getName(CmisTypeDefinitionType entry) throws ResponseContextException
+   public String getName(TypeDefinition entry) throws ResponseContextException
    {
       return entry.getDisplayName();
    }
@@ -124,7 +126,7 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<CmisType
    /**
     * {@inheritDoc}
     */
-   public String getTitle(CmisTypeDefinitionType entry) throws ResponseContextException
+   public String getTitle(TypeDefinition entry) throws ResponseContextException
    {
       return entry.getDisplayName();
    }
@@ -140,7 +142,7 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<CmisType
    /**
     * {@inheritDoc}
     */
-   public Date getUpdated(CmisTypeDefinitionType entry) throws ResponseContextException
+   public Date getUpdated(TypeDefinition entry) throws ResponseContextException
    {
       // TODO must be determined ones. Types are not created in runtime.
       return new Date();
@@ -162,15 +164,17 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<CmisType
          return rce.getResponseContext();
       }
 
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
          TypeDefinitionTypeElement typeElement = entry.getFirstChild(AtomCMIS.TYPE);
-         CmisTypeDefinitionType type = typeElement.getTypeDefinition();
+         TypeDefinition type = typeElement.getTypeDefinition();
          String typeId = type.getId();
-         Repository repository = repositoryService.getRepository(getRepositoryId(request));
-         repository.addType(type);
+         conn.getStorage().addType(type);
+         boolean includePropertyDefinition = false; // TODO sunman
          // Updated (formed) type definition.
-         type = repository.getTypeDefinition(typeId);
+         type = conn.getStorage().getTypeDefinition(typeId, includePropertyDefinition);
          entry = request.getAbdera().getFactory().newEntry();
          addEntryDetails(request, entry, request.getResolvedUri(), type);
       }
@@ -178,13 +182,18 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<CmisType
       {
          return createErrorResponse(iae, 400);
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          return createErrorResponse(re, 500);
       }
       catch (ResponseContextException rce)
       {
          return rce.getResponseContext();
+      }
+      finally
+      {
+         if (conn != null)
+            conn.close();
       }
 
       Map<String, String> params = new HashMap<String, String>();
@@ -196,7 +205,7 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<CmisType
     * {@inheritDoc}
     */
    @Override
-   protected String addEntryDetails(RequestContext request, Entry entry, IRI feedIri, CmisTypeDefinitionType type)
+   protected String addEntryDetails(RequestContext request, Entry entry, IRI feedIri, TypeDefinition type)
       throws ResponseContextException
    {
       entry.setId(type.getId());
@@ -233,8 +242,7 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<CmisType
       entry.addLink(descendatsLink, AtomCMIS.LINK_DOWN, AtomCMIS.MEDIATYPE_CMISTREE, null, null, -1);
 
       TypeDefinitionTypeElement objectElement =
-         new TypeDefinitionTypeElement(request.getAbdera().getFactory(), CMISExtensionFactory
-            .getElementName(CmisTypeDefinitionType.class));
+         new TypeDefinitionTypeElement(request.getAbdera().getFactory(), AtomCMIS.TYPE);
       objectElement.build(type);
 
       entry.addExtension(objectElement);
@@ -290,9 +298,11 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<CmisType
    @Override
    public void deleteEntry(String typeId, RequestContext request) throws ResponseContextException
    {
+      Connection conn = null;
       try
       {
-         repositoryService.getRepository(getRepositoryId(request)).removeType(typeId);
+         conn = getConnection(request);
+         conn.getStorage().removeType(typeId);
       }
       catch (TypeNotFoundException tnfe)
       {
@@ -302,9 +312,14 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<CmisType
       {
          createErrorResponse(iae, 400);
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          createErrorResponse(re, 500);
+      }
+      finally
+      {
+         if (conn != null)
+            conn.close();
       }
    }
 

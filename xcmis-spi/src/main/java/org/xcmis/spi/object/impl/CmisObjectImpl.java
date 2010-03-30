@@ -1,191 +1,115 @@
+/*
+ * Copyright (C) 2010 eXo Platform SAS.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ */
+
 package org.xcmis.spi.object.impl;
 
-import org.xcmis.core.CmisAccessControlListType;
-import org.xcmis.core.CmisAllowableActionsType;
-import org.xcmis.core.CmisChangeEventType;
-import org.xcmis.core.CmisListOfIdsType;
-import org.xcmis.core.CmisObjectType;
-import org.xcmis.core.CmisPropertiesType;
-import org.xcmis.core.CmisRenditionType;
+import org.xcmis.spi.AccessControlEntry;
+import org.xcmis.spi.AllowableActions;
+import org.xcmis.spi.Rendition;
+import org.xcmis.spi.object.ChangeInfo;
 import org.xcmis.spi.object.CmisObject;
 import org.xcmis.spi.object.ObjectInfo;
+import org.xcmis.spi.object.Property;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * Java class for CmisObject complex type.
- * 
- * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey Zavizionov</a>
- * @version $Id: CmisObject.java 34360 2009-07-22 23:58:59Z sunman $
+ * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
+ * @version $Id: $
  */
 public class CmisObjectImpl implements CmisObject
 {
 
-   protected CmisPropertiesType properties;
+   private Map<String, Property<?>> properties;
 
-   protected CmisAllowableActionsType allowableActions;
+   private List<AccessControlEntry> acl;
 
-   protected List<CmisObject> relationship;
+   private boolean exactACL;
 
-   protected CmisChangeEventType changeEventInfo;
+   private Set<String> policyIds;
 
-   protected CmisAccessControlListType acl;
+   private List<CmisObject> relationships;
 
-   protected Boolean exactACL;
+   private List<Rendition> renditions;
 
-   protected CmisListOfIdsType policyIds;
+   private AllowableActions allowableActions;
 
-   protected List<CmisRenditionType> rendition;
+   private ChangeInfo changeInfo;
 
-   protected ObjectInfo objectInfo;
+   private ObjectInfo objectInfo;
+
+   private String pathSegment;
 
    public CmisObjectImpl()
    {
    }
 
-   public CmisObjectImpl(CmisObjectType cmisObjectType)
+   public CmisObjectImpl(Map<String, Property<?>> properties, List<AccessControlEntry> acl, boolean exactACL, Set<String> policyIds,
+      List<CmisObject> relationships, List<Rendition> renditions, AllowableActions allowableActions,
+      ChangeInfo changeInfo, ObjectInfo objectInfo, String pathSegment)
    {
-      this.properties = cmisObjectType.getProperties();
-      this.allowableActions = cmisObjectType.getAllowableActions();
-      if (cmisObjectType.getRelationship() != null)
-      {
-         this.relationship = new ArrayList<CmisObject>();
-         for (CmisObjectType rel : cmisObjectType.getRelationship())
-         {
-            this.relationship.add(new CmisObjectImpl(rel));
-         }
-      }
-      this.changeEventInfo = cmisObjectType.getChangeEventInfo();
-      this.acl = cmisObjectType.getAcl();
-      this.exactACL = cmisObjectType.isExactACL();
-      this.policyIds = cmisObjectType.getPolicyIds();
-      this.rendition = cmisObjectType.getRendition();
-      this.objectInfo = null;
+      this.properties = properties;
+      this.acl = acl;
+      this.exactACL = exactACL;
+      this.policyIds = policyIds;
+      this.relationships = relationships;
+      this.renditions = renditions;
+      this.allowableActions = allowableActions;
+      this.changeInfo = changeInfo;
+      this.objectInfo = objectInfo;
+      this.pathSegment = pathSegment;
    }
 
    /**
-    * @see org.xcmis.spi.object.CmisObject#getProperties()
+    * {@inheritDoc}
     */
-   public CmisPropertiesType getProperties()
+   public List<AccessControlEntry> getACL()
    {
-      return properties;
+      if (acl == null)
+         acl = new ArrayList<AccessControlEntry>();
+      return acl;
    }
 
    /**
-    * @see org.xcmis.spi.object.CmisObject#setProperties(org.xcmis.core.CmisPropertiesType)
+    * {@inheritDoc}
     */
-   public void setProperties(CmisPropertiesType value)
-   {
-      this.properties = value;
-   }
-
-   /**
-    * @see org.xcmis.spi.object.CmisObject#getAllowableActions()
-    */
-   public CmisAllowableActionsType getAllowableActions()
+   public AllowableActions getAllowableActions()
    {
       return allowableActions;
    }
 
    /**
-    * @see org.xcmis.spi.object.CmisObject#setAllowableActions(org.xcmis.core.CmisAllowableActionsType)
+    * {@inheritDoc}
     */
-   public void setAllowableActions(CmisAllowableActionsType value)
+   public ChangeInfo getChangeInfo()
    {
-      this.allowableActions = value;
+      return changeInfo;
    }
 
    /**
-    * @see org.xcmis.spi.object.CmisObject#getRelationship()
-    */
-   public List<CmisObject> getRelationship()
-   {
-      if (relationship == null)
-      {
-         relationship = new ArrayList<CmisObject>();
-      }
-      return this.relationship;
-   }
-
-   /**
-    * @see org.xcmis.spi.object.CmisObject#getChangeEventInfo()
-    */
-   public CmisChangeEventType getChangeEventInfo()
-   {
-      return changeEventInfo;
-   }
-
-   /**
-    * @see org.xcmis.spi.object.CmisObject#setChangeEventInfo(org.xcmis.core.CmisChangeEventType)
-    */
-   public void setChangeEventInfo(CmisChangeEventType value)
-   {
-      this.changeEventInfo = value;
-   }
-
-   /**
-    * @see org.xcmis.spi.object.CmisObject#getAcl()
-    */
-   public CmisAccessControlListType getAcl()
-   {
-      return acl;
-   }
-
-   /**
-    * @see org.xcmis.spi.object.CmisObject#setAcl(org.xcmis.core.CmisAccessControlListType)
-    */
-   public void setAcl(CmisAccessControlListType value)
-   {
-      this.acl = value;
-   }
-
-   /**
-    * @see org.xcmis.spi.object.CmisObject#isExactACL()
-    */
-   public Boolean isExactACL()
-   {
-      return exactACL;
-   }
-
-   /**
-    * @see org.xcmis.spi.object.CmisObject#setExactACL(java.lang.Boolean)
-    */
-   public void setExactACL(Boolean value)
-   {
-      this.exactACL = value;
-   }
-
-   /**
-    * @see org.xcmis.spi.object.CmisObject#getPolicyIds()
-    */
-   public CmisListOfIdsType getPolicyIds()
-   {
-      return policyIds;
-   }
-
-   /**
-    * @see org.xcmis.spi.object.CmisObject#setPolicyIds(org.xcmis.core.CmisListOfIdsType)
-    */
-   public void setPolicyIds(CmisListOfIdsType value)
-   {
-      this.policyIds = value;
-   }
-
-   /**
-    * @see org.xcmis.spi.object.CmisObject#getRendition()
-    */
-   public List<CmisRenditionType> getRendition()
-   {
-      if (rendition == null)
-      {
-         rendition = new ArrayList<CmisRenditionType>();
-      }
-      return this.rendition;
-   }
-
-   /**
-    * @see org.xcmis.spi.object.CmisObject#getObjectInfo()
+    * {@inheritDoc}
     */
    public ObjectInfo getObjectInfo()
    {
@@ -193,35 +117,84 @@ public class CmisObjectImpl implements CmisObject
    }
 
    /**
-    * @see org.xcmis.spi.object.CmisObject#setObjectInfo(org.xcmis.spi.object.ObjectInfo)
+    * {@inheritDoc}
     */
+   public String getPathSegment()
+   {
+      return pathSegment;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public Collection<String> getPolicyIds()
+   {
+      if (policyIds == null)
+         policyIds = new HashSet<String>();
+      return policyIds;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public Map<String, Property<?>> getProperties()
+   {
+      if (properties == null)
+         properties = new HashMap<String, Property<?>>();
+      return properties;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public List<CmisObject> getRelationship()
+   {
+      if (relationships == null)
+         relationships = new ArrayList<CmisObject>();
+      return relationships;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public List<Rendition> getRenditions()
+   {
+      if (renditions == null)
+         renditions = new ArrayList<Rendition>();
+      return renditions;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isExactACL()
+   {
+      return exactACL;
+   }
+
+   public void setAllowableActions(AllowableActions allowableActions)
+   {
+      this.allowableActions = allowableActions;
+   }
+
+   public void setChangeInfo(ChangeInfo changeInfo)
+   {
+      this.changeInfo = changeInfo;
+   }
+
    public void setObjectInfo(ObjectInfo objectInfo)
    {
       this.objectInfo = objectInfo;
    }
 
-   /**
-    * @see org.xcmis.spi.object.CmisObject#toCmisObjectType()
-    */
-   public CmisObjectType toCmisObjectType()
+   public void setExactACL(boolean exactACL)
    {
-      CmisObjectType result = new CmisObjectType();
-      result.setProperties(this.properties);
-      result.setAllowableActions(this.allowableActions);
-      if (this.relationship != null)
-      {
-         for (CmisObject rel : this.relationship)
-         {
-            result.getRelationship().add(rel.toCmisObjectType());
-         }
-      }
-      result.setChangeEventInfo(this.changeEventInfo);
-      result.setAcl(this.acl);
-      result.setExactACL(this.exactACL);
-      result.setPolicyIds(this.policyIds);
-      if (this.rendition != null)
-         result.getRendition().addAll(this.rendition);
-      return result;
+      this.exactACL = exactACL;
+   }
+
+   public void setPathSegment(String pathSegment)
+   {
+      this.pathSegment = pathSegment;
    }
 
 }

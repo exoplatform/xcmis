@@ -28,7 +28,7 @@ import org.apache.abdera.protocol.server.impl.AbstractWorkspaceManager;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: WorkspaceManagerImpl.java 2 2010-02-04 17:21:49Z andrew00x $
  */
 public class WorkspaceManagerImpl extends AbstractWorkspaceManager
 {

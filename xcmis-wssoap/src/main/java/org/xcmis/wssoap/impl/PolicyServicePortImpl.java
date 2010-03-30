@@ -22,20 +22,15 @@ package org.xcmis.wssoap.impl;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.core.CmisObjectType;
-import org.xcmis.core.PolicyService;
 import org.xcmis.messaging.CmisExtensionType;
-import org.xcmis.messaging.CmisObjectParentsType;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.PolicyServicePort;
-import org.xcmis.spi.object.CmisObject;
-import org.xcmis.spi.object.CmisObjectParents;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.xcmis.spi.Connection;
+import org.xcmis.spi.StorageProvider;
 
 /**
  * @author <a href="mailto:max.shaposhnik@exoplatform.com">Max Shaposhnik</a>
- * @version $Id$
+ * @version $Id: PolicyServicePortImpl.java 2 2010-02-04 17:21:49Z andrew00x $
  */
 @javax.jws.WebService(//name = "PolicyServicePort",
 serviceName = "PolicyService", //
@@ -50,17 +45,17 @@ public class PolicyServicePortImpl implements PolicyServicePort
    /** Logger. */
    private static final Log LOG = ExoLogger.getLogger(PolicyServicePortImpl.class);
 
-   /** Policy service. */
-   private PolicyService policyService;
+   /** StorageProvider . */
+   private StorageProvider storageProvider;
 
    /**
     * Constructs instance of <code>PolicyServicePortImpl</code> .
     * 
     * @param policyService PolicyService
     */
-   public PolicyServicePortImpl(PolicyService policyService)
+   public PolicyServicePortImpl(StorageProvider storageProvider)
    {
-      this.policyService = policyService;
+      this.storageProvider = storageProvider;
    }
 
    /**
@@ -71,14 +66,20 @@ public class PolicyServicePortImpl implements PolicyServicePort
    {
       if (LOG.isDebugEnabled())
          LOG.debug("Executing operation applyPolicy");
+      Connection conn = null;
       try
       {
-         policyService.applyPolicy(repositoryId, policyId, objectId);
+         conn = storageProvider.getConnection(repositoryId, null);
+         conn.applyPolicy(policyId, objectId);
       }
       catch (Exception e)
       {
          LOG.error("Apply policy error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
+      }
+      finally
+      {
+         conn.close();
       }
       return new CmisExtensionType();
    }
@@ -86,25 +87,25 @@ public class PolicyServicePortImpl implements PolicyServicePort
    /**
     * {@inheritDoc}
     */
-   public List<CmisObjectType> getAppliedPolicies(java.lang.String repositoryId, java.lang.String objectId,
+   public java.util.List<CmisObjectType> getAppliedPolicies(java.lang.String repositoryId, java.lang.String objectId,
       java.lang.String propertyFilter, CmisExtensionType extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
          LOG.debug("Executing operation getAppliedPolicies");
+      Connection conn = null;
       try
       {
-         List<CmisObject> policies = policyService.getAppliedPolicies(repositoryId, objectId, propertyFilter, false);
-         List<CmisObjectType> result = new ArrayList<CmisObjectType>();
-         for (CmisObject cmisObject : policies)
-         {
-            result.add(cmisObject.toCmisObjectType());
-         }
-         return result;
+         conn = storageProvider.getConnection(repositoryId, null);
+         return TypeConverter.getListCmisObjectType(conn.getAppliedPolicies(objectId, true, propertyFilter));
       }
       catch (Exception e)
       {
          LOG.error("Get applied policies error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
+      }
+      finally
+      {
+         conn.close();
       }
    }
 
@@ -116,14 +117,20 @@ public class PolicyServicePortImpl implements PolicyServicePort
    {
       if (LOG.isDebugEnabled())
          LOG.debug("Executing operation removePolicy");
+      Connection conn = null;
       try
       {
-         policyService.removePolicy(repositoryId, policyId, objectId);
+         conn = storageProvider.getConnection(repositoryId, null);
+         conn.removePolicy(policyId, objectId);
       }
       catch (Exception e)
       {
          LOG.error("Remove applied policy error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
+      }
+      finally
+      {
+         conn.close();
       }
       return new CmisExtensionType();
    }

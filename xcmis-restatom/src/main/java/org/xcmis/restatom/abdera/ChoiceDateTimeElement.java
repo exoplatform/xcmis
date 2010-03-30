@@ -21,11 +21,15 @@ package org.xcmis.restatom.abdera;
 
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
-import org.xcmis.core.CmisChoiceDateTime;
+import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
+import org.xcmis.spi.Choice;
+import org.xcmis.spi.impl.ChoiceImpl;
 
-import javax.xml.datatype.XMLGregorianCalendar;
+import java.util.Calendar;
+import java.util.List;
+
 import javax.xml.namespace.QName;
 
 /**
@@ -34,7 +38,7 @@ import javax.xml.namespace.QName;
  * @version $Id: CmisChoiceDateTimeTypeElementWrapper.java 2279 2009-07-23
  *          11:47:50Z sunman $ Jul 15, 2009
  */
-public class ChoiceDateTimeElement extends ChoiceElement<CmisChoiceDateTime>
+public class ChoiceDateTimeElement extends ChoiceElement<Choice<Calendar>>
 {
 
    /**
@@ -61,29 +65,56 @@ public class ChoiceDateTimeElement extends ChoiceElement<CmisChoiceDateTime>
    /**
     * {@inheritDoc}
     */
-   public void build(CmisChoiceDateTime choice)
+   public void build(Choice<Calendar> choice)
    {
       if (choice != null)
       {
          super.build(choice);
-         if (choice.getValue() != null && choice.getValue().size() > 0)
+         // VALUES
+         if (choice.getValues() != null && choice.getValues().length > 0)
          {
-            for (XMLGregorianCalendar v : choice.getValue())
+            for (Calendar v : choice.getValues())
             {
                if (v != null)
-                  addSimpleExtension(AtomCMIS.VALUE, AtomUtils.getAtomDate(v.toGregorianCalendar()));
+                  addSimpleExtension(AtomCMIS.VALUE, AtomUtils.getAtomDate(v));
             }
          }
-         if (choice.getChoice() != null && choice.getChoice().size() > 0)
+         // CHOICE
+         if (choice.getChoices() != null && choice.getChoices().size() > 0)
          {
-
-            for (CmisChoiceDateTime ch : choice.getChoice())
+            for (Choice<Calendar> ch : choice.getChoices())
             {
-               ChoiceDateTimeElement el = addExtension(AtomCMIS.CHOICE);
-               el.build(ch);
+               ExtensibleElementWrapper el = addExtension(AtomCMIS.CHOICE);
+               new ChoiceDateTimeElement(el).build(ch);
             }
          }
       }
+   }
+
+   public Choice<Calendar> getChoice()
+   {
+      ChoiceImpl<Calendar> result = new ChoiceImpl<Calendar>();
+      // VALUES
+      List<Element> values = getExtensions(AtomCMIS.VALUE);
+      if (values != null && values.size() > 0)
+      {
+         Calendar[] array = new Calendar[values.size()];
+         int i = 0;
+         for (Element element : values)
+         {
+            array[i] = AtomUtils.parseCalendar(element.getText());
+            i++;
+         }
+         result.setValues(array);
+      }
+      // CHOICE
+      List<ExtensibleElementWrapper> choices = getExtensions(AtomCMIS.CHOICE);
+      if (choices != null && choices.size() > 0)
+         for (ExtensibleElementWrapper choiceBooleanElement : choices)
+         {
+            result.getChoices().add(new ChoiceDateTimeElement(choiceBooleanElement).getChoice());
+         }
+      return result;
    }
 
 }

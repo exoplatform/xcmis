@@ -29,7 +29,7 @@ import javax.security.auth.login.LoginException;
  * Provide access to all available CMIS storages.
  * 
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: StorageProvider.java 316 2010-03-09 15:20:28Z andrew00x $
  */
 public interface StorageProvider
 {

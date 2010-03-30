@@ -27,22 +27,20 @@ import org.apache.abdera.model.Feed;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.ResponseContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
-import org.xcmis.core.EnumIncludeRelationships;
-import org.xcmis.core.NavigationService;
-import org.xcmis.core.ObjectService;
-import org.xcmis.core.RepositoryService;
-import org.xcmis.core.VersioningService;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FilterNotValidException;
+import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
+import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.RepositoryException;
+import org.xcmis.spi.StorageException;
+import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.object.CmisObject;
-import org.xcmis.spi.object.CmisObjectList;
 
 import java.util.Calendar;
 
@@ -50,27 +48,19 @@ import java.util.Calendar;
  * Collection of checked-out documents.
  * 
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: CheckedOutCollection.java 216 2010-02-12 17:19:50Z andrew00x $
  */
 public class CheckedOutCollection extends CmisObjectCollection
 {
 
-   /** The navigation service. */
-   protected final NavigationService navigationService;
-
    /**
     * Instantiates a new checked out collection.
+    * @param storageProvider TODO
     * 
-    * @param repositoryService the repository service
-    * @param objectService the object service
-    * @param versioningService the versioning service
-    * @param navigationService the navigation service
     */
-   public CheckedOutCollection(RepositoryService repositoryService, ObjectService objectService,
-      VersioningService versioningService, NavigationService navigationService)
+   public CheckedOutCollection(StorageProvider storageProvider)
    {
-      super(repositoryService, objectService, versioningService);
-      this.navigationService = navigationService;
+      super(storageProvider);
       setHref("/checkedout");
    }
 
@@ -79,72 +69,48 @@ public class CheckedOutCollection extends CmisObjectCollection
     */
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
-      boolean includeAllowableActions =
-         Boolean.parseBoolean(request.getParameter(AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS));
+      boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
       String orderBy = request.getParameter(AtomCMIS.PARAM_ORDER_BY);
       // XXX At the moment get all properties from back-end. We need some of them for build correct feed.
       // Filter will be applied during build final Atom Document.
       //      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
       String propertyFilter = null;
       String renditionFilter = request.getParameter(AtomCMIS.PARAM_RENDITION_FILTER);
-      EnumIncludeRelationships includeRelationships;
+      IncludeRelationships includeRelationships;
       try
       {
          includeRelationships =
             request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS) == null
-               || request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS).length() == 0
-               ? EnumIncludeRelationships.NONE : EnumIncludeRelationships.fromValue(request
-                  .getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
+               || request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS).length() == 0 ? IncludeRelationships.NONE
+               : IncludeRelationships.fromValue(request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
       }
       catch (IllegalArgumentException iae)
       {
          String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS);
          throw new ResponseContextException(msg, 400);
       }
-      int maxItems;
+      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CMIS.MAX_ITEMS);
+      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CMIS.SKIP_COUNT);
+      Connection conn = null;
       try
       {
-         maxItems =
-            request.getParameter(AtomCMIS.PARAM_MAX_ITEMS) == null
-               || request.getParameter(AtomCMIS.PARAM_MAX_ITEMS).length() == 0 ? CMIS.MAX_ITEMS : Integer
-               .parseInt(request.getParameter(AtomCMIS.PARAM_MAX_ITEMS));
-      }
-      catch (NumberFormatException nfe)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_MAX_ITEMS);
-         throw new ResponseContextException(msg, 400);
-      }
-      int skipCount;
-      try
-      {
-         skipCount =
-            request.getParameter(AtomCMIS.PARAM_SKIP_COUNT) == null
-               || request.getParameter(AtomCMIS.PARAM_SKIP_COUNT).length() == 0 ? 0 : Integer.parseInt(request
-               .getParameter(AtomCMIS.PARAM_SKIP_COUNT));
-      }
-      catch (NumberFormatException nfe)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_SKIP_COUNT);
-         throw new ResponseContextException(msg, 400);
-      }
-      try
-      {
+         conn = getConnection(request);
          // NOTE : Not use method getId(request) here. It may gives incorrect id.
          String folderId = request.getTarget().getParameter("objectid");
-         CmisObjectList list =
-            navigationService.getCheckedOutDocs(getRepositoryId(request), folderId, includeAllowableActions,
-               includeRelationships, renditionFilter, propertyFilter, orderBy, maxItems, skipCount, true);
-         addPageLinks(folderId, feed, "checkedout", maxItems, skipCount, list.getNumItems() == null ? -1 : list
-            .getNumItems().intValue(), list.isHasMoreItems(), request);
-         if (list.getObjects().size() > 0)
+         ItemsList<CmisObject> list =
+            conn.getCheckedOutDocs(folderId, includeAllowableActions, includeRelationships, true, propertyFilter,
+               renditionFilter, orderBy, maxItems, skipCount);
+         addPageLinks(folderId, feed, "checkedout", maxItems, skipCount, list.getNumItems(), list.isHasMoreItems(),
+            request);
+         if (list.getItems().size() > 0)
          {
-            if (list.getNumItems() != null)
+            if (list.getNumItems() != -1)
             {
                // add cmisra:numItems
                Element numItems = feed.addExtension(AtomCMIS.NUM_ITEMS);
-               numItems.setText(list.getNumItems().toString());
+               numItems.setText(Integer.toString(list.getNumItems()));
             }
-            for (CmisObject object : list.getObjects())
+            for (CmisObject object : list.getItems())
             {
                Entry e = feed.addEntry();
                IRI feedIri = new IRI(getFeedIriForEntry(object, request));
@@ -152,7 +118,7 @@ public class CheckedOutCollection extends CmisObjectCollection
             }
          }
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          throw new ResponseContextException(createErrorResponse(re, 500));
       }
@@ -171,6 +137,13 @@ public class CheckedOutCollection extends CmisObjectCollection
       catch (Throwable t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
+      }
+      finally
+      {
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -193,7 +166,9 @@ public class CheckedOutCollection extends CmisObjectCollection
       // for Abdera.
       String id = super.getId(request);
       if (id != null)
+      {
          return id;
+      }
       // Need this for getCheckedOutDocuments when folderId is not specified.
       return "cmis:checkedout:" + getRepositoryId(request);
    }
@@ -221,10 +196,11 @@ public class CheckedOutCollection extends CmisObjectCollection
       {
          // support when id sent directly 
       }
+      Connection conn = null;
       try
       {
-         String pwcId =
-            getId(versioningService.checkout(getRepositoryId(request), id == null ? getId(request) : id, true));
+         conn = getConnection(request);
+         String pwcId = conn.checkout(id == null ? getId(request) : id);
          Entry entry = request.getAbdera().getFactory().newEntry();
          try
          {
@@ -241,7 +217,7 @@ public class CheckedOutCollection extends CmisObjectCollection
       {
          return createErrorResponse(cve, 409);
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          return createErrorResponse(re, 500);
       }
@@ -257,13 +233,16 @@ public class CheckedOutCollection extends CmisObjectCollection
       {
          return createErrorResponse(iae, 400);
       }
-      catch (ResponseContextException e)
-      {
-         return createErrorResponse(e);
-      }
       catch (Throwable t)
       {
          return createErrorResponse(t, 500);
+      }
+      finally
+      {
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 

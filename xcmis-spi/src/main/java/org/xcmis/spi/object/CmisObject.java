@@ -1,180 +1,90 @@
 package org.xcmis.spi.object;
 
-import org.xcmis.core.CmisAccessControlListType;
-import org.xcmis.core.CmisAllowableActionsType;
-import org.xcmis.core.CmisChangeEventType;
-import org.xcmis.core.CmisListOfIdsType;
-import org.xcmis.core.CmisObjectType;
-import org.xcmis.core.CmisPropertiesType;
-import org.xcmis.core.CmisRenditionType;
+import org.xcmis.spi.AccessControlEntry;
+import org.xcmis.spi.AllowableActions;
+import org.xcmis.spi.Rendition;
+import org.xcmis.spi.Permission.BasicPermissions;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
+ * Info about CMISobject that contains properties, allowable actions,
+ * relationships of object, etc. Set of this info determined by the user
+ * request. It minds any of getters may return <code>null</code> or empty
+ * collections if info provided by method was not requested even object contains
+ * such information.
  * 
- * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey Zavizionov</a>
+ * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey
+ *         Zavizionov</a>
  * @version $Id: CmisObject.java 34360 2009-07-22 23:58:59Z sunman $
- *
  */
 public interface CmisObject
 {
 
    /**
-    * Gets the value of the properties property.
-    * 
-    * @return
-    *     possible object is
-    *     {@link CmisPropertiesType }
-    *     
+    * @return object's properties, never <code>null</code>
     */
-   public abstract CmisPropertiesType getProperties();
+   Map<String, Property<?>> getProperties();
 
    /**
-    * Sets the value of the properties property.
-    * 
-    * @param value
-    *     allowed object is
-    *     {@link CmisPropertiesType }
-    *     
+    * @return allowable actions
     */
-   public abstract void setProperties(CmisPropertiesType value);
+   AllowableActions getAllowableActions();
 
    /**
-    * Gets the value of the allowableActions property.
-    * 
-    * @return
-    *     possible object is
-    *     {@link CmisAllowableActionsType }
-    *     
+    * @return objects relationships. Even object has not any relationships this
+    *         method must return empty list but never <code>null</code>
     */
-   public abstract CmisAllowableActionsType getAllowableActions();
+   List<CmisObject> getRelationship();
 
    /**
-    * Sets the value of the allowableActions property.
-    * 
-    * @param value
-    *     allowed object is
-    *     {@link CmisAllowableActionsType }
-    *     
+    * @return change info
     */
-   public abstract void setAllowableActions(CmisAllowableActionsType value);
+   ChangeInfo getChangeInfo();
 
    /**
-    * Gets the value of the relationship property.
-    * 
-    * Objects of the following type(s) are allowed in the list
-    * {@link CmisObjectType }
-    * 
+    * @return object's ACL. Even object has not any applied ACL this method must
+    *         return empty list but never <code>null</code>
     */
-   public abstract List<CmisObject> getRelationship();
+   List<AccessControlEntry> getACL();
 
    /**
-    * Gets the value of the changeEventInfo property.
-    * 
-    * @return
-    *     possible object is
-    *     {@link CmisChangeEventType }
-    *     
+    * @return <code>true</code> if method {@link #getACL()} provide information
+    *         about all object's permissions and <code>false</code> if object's
+    *         has other permissions. It may happen if repository displays only
+    *         basic permissions {@link BasicPermissions}
     */
-   public abstract CmisChangeEventType getChangeEventInfo();
+   boolean isExactACL();
 
    /**
-    * Sets the value of the changeEventInfo property.
-    * 
-    * @param value
-    *     allowed object is
-    *     {@link CmisChangeEventType }
-    *     
+    * @return set of policy IDs applied to the object. Even object has not any
+    *         applied policies this method must return empty collection but
+    *         never <code>null</code>
     */
-   public abstract void setChangeEventInfo(CmisChangeEventType value);
+   Collection<String> getPolicyIds();
 
    /**
-    * Gets the value of the acl property.
-    * 
-    * @return
-    *     possible object is
-    *     {@link CmisAccessControlListType }
-    *     
+    * @return content stream renditions. There is no rendition contents stream
+    *         just information about available renditions. Even object has not
+    *         any renditions this method must return empty list but never
+    *         <code>null</code>
     */
-   public abstract CmisAccessControlListType getAcl();
+   List<Rendition> getRenditions();
 
    /**
-    * Sets the value of the acl property.
-    * 
-    * @param value
-    *     allowed object is
-    *     {@link CmisAccessControlListType }
-    *     
+    * @return path segment of object relative to the folder that contains this
+    *         object. For Document may be 'cmis:name' or content stream filename
     */
-   public abstract void setAcl(CmisAccessControlListType value);
+   String getPathSegment();
 
    /**
-    * Gets the value of the exactACL property.
-    * 
-    * @return
-    *     possible object is
-    *     {@link Boolean }
-    *     
+    * @return external information about object. It is useful if other method
+    *         does not provide required information about object because to
+    *         caller constraint. For example {@link #getProperties()} does not
+    *         contains all required properties to build correct AtomPub document
     */
-   public abstract Boolean isExactACL();
-
-   /**
-    * Sets the value of the exactACL property.
-    * 
-    * @param value
-    *     allowed object is
-    *     {@link Boolean }
-    *     
-    */
-   public abstract void setExactACL(Boolean value);
-
-   /**
-    * Gets the value of the policyIds property.
-    * 
-    * @return
-    *     possible object is
-    *     {@link CmisListOfIdsType }
-    *     
-    */
-   public abstract CmisListOfIdsType getPolicyIds();
-
-   /**
-    * Sets the value of the policyIds property.
-    * 
-    * @param value
-    *     allowed object is
-    *     {@link CmisListOfIdsType }
-    *     
-    */
-   public abstract void setPolicyIds(CmisListOfIdsType value);
-
-   /**
-    * Gets the value of the rendition property.
-    * 
-    * Objects of the following type(s) are allowed in the list
-    * {@link CmisRenditionType }
-    * 
-    */
-   public abstract List<CmisRenditionType> getRendition();
-
-   /**
-    * Getter for ObjectInfo element.
-    * 
-    * @return
-    */
-   public abstract ObjectInfo getObjectInfo();
-
-   /**
-    * Setter for ObjectInfo element.
-    * 
-    * @param objectInfo
-    */
-   public abstract void setObjectInfo(ObjectInfo objectInfo);
-
-   /**
-    * Create an CmisObjectType instance from current object.
-    * @return CmisObjectType
-    */
-   public CmisObjectType toCmisObjectType();
+   ObjectInfo getObjectInfo();
 
 }

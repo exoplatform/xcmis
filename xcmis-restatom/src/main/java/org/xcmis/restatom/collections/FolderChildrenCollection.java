@@ -27,34 +27,29 @@ import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.ResponseContext;
 import org.apache.abdera.protocol.server.TargetType;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
-import org.xcmis.core.CmisAccessControlListType;
-import org.xcmis.core.CmisObjectType;
-import org.xcmis.core.CmisPropertiesType;
-import org.xcmis.core.CmisProperty;
-import org.xcmis.core.CmisPropertyId;
-import org.xcmis.core.CmisTypeDefinitionType;
-import org.xcmis.core.EnumBaseObjectTypeIds;
-import org.xcmis.core.EnumIncludeRelationships;
-import org.xcmis.core.EnumVersioningState;
-import org.xcmis.core.NavigationService;
-import org.xcmis.core.ObjectService;
-import org.xcmis.core.RepositoryService;
-import org.xcmis.core.VersioningService;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.abdera.ObjectTypeElement;
+import org.xcmis.spi.AccessControlEntry;
+import org.xcmis.spi.BaseType;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FilterNotValidException;
+import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
+import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.RepositoryException;
+import org.xcmis.spi.StorageException;
+import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.StreamNotSupportedException;
+import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.UpdateConflictException;
+import org.xcmis.spi.VersioningState;
 import org.xcmis.spi.object.CmisObject;
-import org.xcmis.spi.object.CmisObjectInFolder;
-import org.xcmis.spi.object.CmisObjectInFolderList;
+import org.xcmis.spi.object.Property;
 import org.xcmis.spi.object.impl.CmisObjectImpl;
+import org.xcmis.spi.object.impl.IdProperty;
 
 import java.util.HashMap;
 import java.util.List;
@@ -70,22 +65,13 @@ public class FolderChildrenCollection extends CmisObjectCollection
 
    //   private static final Log LOG = ExoLogger.getLogger(FolderChildrenCollection.class);
 
-   /** The navigation service. */
-   protected final NavigationService navigationService;
-
    /**
     * Instantiates a new folder children collection.
-    * 
-    * @param repositoryService the repository service
-    * @param objectService the object service
-    * @param versioningService the versioning service
-    * @param navigationService the navigation service
+    * @param storageProvider TODO
     */
-   public FolderChildrenCollection(RepositoryService repositoryService, ObjectService objectService,
-      VersioningService versioningService, NavigationService navigationService)
+   public FolderChildrenCollection(StorageProvider storageProvider)
    {
-      super(repositoryService, objectService, versioningService);
-      this.navigationService = navigationService;
+      super(storageProvider);
       setHref("/children");
    }
 
@@ -94,82 +80,57 @@ public class FolderChildrenCollection extends CmisObjectCollection
     */
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
-      boolean includeAllowableActions =
-         Boolean.parseBoolean(request.getParameter(AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS));
-      EnumIncludeRelationships includeRelationships;
+      boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
+      IncludeRelationships includeRelationships;
       try
       {
          includeRelationships =
             request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS) == null
-               || request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS).length() == 0
-               ? EnumIncludeRelationships.NONE : EnumIncludeRelationships.fromValue(request
-                  .getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
+               || request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS).length() == 0 ? IncludeRelationships.NONE
+               : IncludeRelationships.fromValue(request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS));
       }
       catch (IllegalArgumentException iae)
       {
          String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS);
          throw new ResponseContextException(msg, 400);
       }
-      int maxItems;
-      try
-      {
-         maxItems =
-            request.getParameter(AtomCMIS.PARAM_MAX_ITEMS) == null
-               || request.getParameter(AtomCMIS.PARAM_MAX_ITEMS).length() == 0 ? CMIS.MAX_ITEMS : Integer
-               .parseInt(request.getParameter(AtomCMIS.PARAM_MAX_ITEMS));
-      }
-      catch (NumberFormatException nfe)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_MAX_ITEMS);
-         throw new ResponseContextException(msg, 400);
-      }
-      int skipCount;
-      try
-      {
-         skipCount =
-            request.getParameter(AtomCMIS.PARAM_SKIP_COUNT) == null
-               || request.getParameter(AtomCMIS.PARAM_SKIP_COUNT).length() == 0 ? 0 : Integer.parseInt(request
-               .getParameter(AtomCMIS.PARAM_SKIP_COUNT));
-      }
-      catch (NumberFormatException nfe)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_SKIP_COUNT);
-         throw new ResponseContextException(msg, 400);
-      }
-      boolean includePathSegments = Boolean.parseBoolean(request.getParameter(AtomCMIS.PARAM_INCLUDE_PATH_SEGMENT));
+      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CMIS.MAX_ITEMS);
+      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CMIS.SKIP_COUNT);
+      boolean includePathSegments = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PATH_SEGMENT, false);
       // XXX At the moment get all properties from back-end. We need some of them for build correct feed.
       // Filter will be applied during build final Atom Document.
       //      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
       String propertyFilter = null;
       String renditionFilter = request.getParameter(AtomCMIS.PARAM_RENDITION_FILTER);
       String orderBy = request.getParameter(AtomCMIS.PARAM_ORDER_BY);
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
          String objectId = getId(request);
-         CmisObjectInFolderList list =
-            navigationService.getChildren(getRepositoryId(request), objectId, includeAllowableActions,
-               includeRelationships, includePathSegments, propertyFilter, renditionFilter, orderBy, maxItems,
-               skipCount, true);
-         addPageLinks(objectId, feed, "children", maxItems, skipCount, list.getNumItems() == null ? -1 : list
-            .getNumItems().intValue(), list.isHasMoreItems(), request);
-         if (list.getObjects().size() > 0)
+         ItemsList<CmisObject> list =
+            conn.getChildren(objectId, includeAllowableActions, includeRelationships, includePathSegments, true,
+               propertyFilter, renditionFilter, orderBy, maxItems, skipCount);
+         addPageLinks(objectId, feed, "children", maxItems, skipCount, list.getNumItems(), list.isHasMoreItems(),
+            request);
+         if (list.getItems().size() > 0)
          {
-            if (list.getNumItems() != null)
+            if (list.getNumItems() != -1)
             {
                // add cmisra:numItems
                Element numItems = feed.addExtension(AtomCMIS.NUM_ITEMS);
-               numItems.setText(list.getNumItems().toString());
+               numItems.setText(Integer.toString(list.getNumItems()));
             }
 
-            for (CmisObjectInFolder oif : list.getObjects())
+            for (CmisObject oif : list.getItems())
             {
                Entry e = feed.addEntry();
-               IRI feedIri = new IRI(getFeedIriForEntry(oif.getObject(), request));
-               addEntryDetails(request, e, feedIri, oif.getObject());
+               IRI feedIri = new IRI(getFeedIriForEntry(oif, request));
+               addEntryDetails(request, e, feedIri, oif);
             }
          }
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          throw new ResponseContextException(createErrorResponse(re, 500));
       }
@@ -188,6 +149,13 @@ public class FolderChildrenCollection extends CmisObjectCollection
       catch (Throwable t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
+      }
+      finally
+      {
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -215,87 +183,110 @@ public class FolderChildrenCollection extends CmisObjectCollection
          return rce.getResponseContext();
       }
 
+      String sourceFolderId = request.getParameter(AtomCMIS.PARAM_SOURCE_FOLDER_ID);
+
       String typeId = null;
       String id = null;
 
       ObjectTypeElement objectElement = entry.getFirstChild(AtomCMIS.OBJECT);
-      //      CmisObjectType object = objectElement.getObject();
       boolean hasCMISElement = objectElement != null;
-      CmisObjectType cmisObjectType = hasCMISElement ? objectElement.getObject() : new CmisObjectType();
-      CmisObject object = new CmisObjectImpl(cmisObjectType);
-      if (object.getProperties() == null)
-         object.setProperties(new CmisPropertiesType());
+      CmisObject object = hasCMISElement ? object = objectElement.getObject() : new CmisObjectImpl();
       updatePropertiesFromEntry(object, entry);
       if (hasCMISElement)
       {
-         for (CmisProperty p : object.getProperties().getProperty())
+         for (Property<?> p : object.getProperties().values())
          {
-            String pName = p.getPropertyDefinitionId();
+            String pName = p.getId();
             if (CMIS.OBJECT_TYPE_ID.equals(pName))
-               typeId = ((CmisPropertyId)p).getValue().get(0);
+            {
+               typeId = ((IdProperty)p).getValues().get(0);
+            }
             else if (CMIS.OBJECT_ID.equals(pName))
-               id = ((CmisPropertyId)p).getValue().get(0);
+            {
+               id = ((IdProperty)p).getValues().get(0);
+            }
+
          }
       }
       else
       {
-         typeId = "cmis:document";
-         CmisPropertyId idProperty = new CmisPropertyId();
-         idProperty.setPropertyDefinitionId(CMIS.OBJECT_TYPE_ID);
-         idProperty.getValue().add(typeId);
-         object.getProperties().getProperty().add(idProperty);
+         typeId = CMIS.DOCUMENT;
+         IdProperty idProperty = new IdProperty();
+         idProperty.setId(CMIS.OBJECT_TYPE_ID);
+         idProperty.getValues().add(typeId);
+         object.getProperties().put(idProperty.getId(), idProperty);
       }
 
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
+         String objectId = null;
+         String targetFolderId = getId(request);
          if (id != null)
          {
-            // move object
-            object = objectService.moveObject(getRepositoryId(request), id, getId(request), null, true);
+            if (sourceFolderId == null)
+            {
+               conn.addObjectToFolder(id, targetFolderId, false);
+            }
+            else
+            {
+               // move object
+               objectId = conn.moveObject(id, targetFolderId, sourceFolderId);
+            }
          }
          else
          {
-            CmisAccessControlListType addACL = object.getAcl();
+            List<AccessControlEntry> addACL = object.getACL();
             // TODO : ACEs for removing. Not clear from specification how to
             // pass (obtain) ACEs for adding and removing from one object.
-            CmisAccessControlListType removeACL = null;
+            List<AccessControlEntry> removeACL = null;
             List<String> policies = null;
-            if (object.getPolicyIds() != null && object.getPolicyIds().getId().size() > 0)
-               policies = object.getPolicyIds().getId();
+            if (object.getPolicyIds() != null && object.getPolicyIds().size() > 0)
+            {
+               policies = (List<String>)object.getPolicyIds();
+            }
 
-            CmisTypeDefinitionType type = null;
-            type = repositoryService.getTypeDefinition(getRepositoryId(request), typeId);
+            TypeDefinition type = null;
+            type = conn.getTypeDefinition(typeId);
 
-            if (type.getBaseId() == EnumBaseObjectTypeIds.CMIS_DOCUMENT)
+            if (type.getBaseId() == BaseType.DOCUMENT)
             {
                String versioningStateParam = request.getParameter(AtomCMIS.PARAM_VERSIONING_STATE);
-               EnumVersioningState versioningState;
+               VersioningState versioningState;
                try
                {
                   versioningState =
-                     versioningStateParam == null || versioningStateParam.length() == 0 ? EnumVersioningState.MAJOR
-                        : EnumVersioningState.fromValue(versioningStateParam);
+                     versioningStateParam == null || versioningStateParam.length() == 0 ? VersioningState.MAJOR
+                        : VersioningState.fromValue(versioningStateParam);
                }
                catch (IllegalArgumentException iae)
                {
                   return createErrorResponse("Invalid argument " + versioningStateParam, 400);
                }
-               object =
-                  objectService.createDocument(getRepositoryId(request), getId(request), object.getProperties(),
-                     getContentStream(entry, request), versioningState, addACL, removeACL, policies, true);
+               objectId =
+                  conn.createDocument(getId(request), object.getProperties(), getContentStream(entry, request), addACL,
+                     removeACL, policies, versioningState);
             }
-            else if (type.getBaseId() == EnumBaseObjectTypeIds.CMIS_FOLDER)
+            else if (type.getBaseId() == BaseType.FOLDER)
             {
-               object =
-                  objectService.createFolder(getRepositoryId(request), getId(request), object.getProperties(), addACL,
-                     removeACL, policies, true);
+               objectId = conn.createFolder(getId(request), object.getProperties(), addACL, removeACL, policies);
             }
-            else if (type.getBaseId() == EnumBaseObjectTypeIds.CMIS_POLICY)
+            else if (type.getBaseId() == BaseType.POLICY)
             {
-               object =
-                  objectService.createPolicy(getRepositoryId(request), getId(request), object.getProperties(), addACL,
-                     removeACL, policies, true);
+               objectId = conn.createPolicy(getId(request), object.getProperties(), addACL, removeACL, policies);
             }
+
+            // TODO do we need to fill the perameters ?
+            boolean isIncludeAllowableActions = false;
+            IncludeRelationships isIncludeRelationships = null;
+            boolean isIncludePolicyIDs = false;
+            String renditionFilter = null;
+            String propertyFilter = CMIS.WILDCARD;
+            boolean isIncludeAcl = false;
+            object =
+               conn.getObject(objectId, isIncludeAllowableActions, isIncludeRelationships, isIncludePolicyIDs,
+                  isIncludeAcl, true, propertyFilter, renditionFilter);
          }
 
       }
@@ -323,13 +314,20 @@ public class FolderChildrenCollection extends CmisObjectCollection
       {
          return createErrorResponse(se, 400); // XXX in specification status is set as 403, correct ???
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          return createErrorResponse(re, 500);
       }
       catch (Throwable t)
       {
          return createErrorResponse(t, 500);
+      }
+      finally
+      {
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
 
       entry = request.getAbdera().getFactory().newEntry();
@@ -367,47 +365,62 @@ public class FolderChildrenCollection extends CmisObjectCollection
       String id = getId(request);
 
       // Children link.
-      String repositoryId = getRepositoryId(request);
       feed.addLink(getChildrenLink(id, request), AtomCMIS.LINK_DOWN, AtomCMIS.MEDIATYPE_ATOM_FEED, null, null, -1);
 
       // Descendants link.
       String descendants = getDescendantsLink(id, request);
       if (descendants != null)
+      {
          feed.addLink(descendants, AtomCMIS.LINK_DOWN, AtomCMIS.MEDIATYPE_CMISTREE, null, null, -1);
+      }
 
       // Folder tree link.
       String folderTree = getFolderTreeLink(id, request);
       if (folderTree != null)
+      {
          feed.addLink(folderTree, AtomCMIS.LINK_CMIS_FOLDERTREE, AtomCMIS.MEDIATYPE_ATOM_FEED, null, null, -1);
+      }
 
       // Parent link for not root folder.
-      if (!id.equals(repositoryService.getRepositoryInfo(repositoryId).getRootFolderId()))
+      Connection conn = null;
+      try
       {
-         try
+         conn = getConnection(request);
+         if (!id.equals(conn.getStorage().getRepositoryInfo().getRootFolderId()))
          {
-            CmisObject parent = navigationService.getFolderParent(repositoryId, id, null, true);
-            feed.addLink(getObjectLink(getId(parent), request), AtomCMIS.LINK_UP, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null,
-               null, -1);
+            try
+            {
+               CmisObject parent = conn.getFolderParent(id, true, null);
+               feed.addLink(getObjectLink(getId(parent), request), AtomCMIS.LINK_UP, AtomCMIS.MEDIATYPE_ATOM_ENTRY,
+                  null, null, -1);
+            }
+            catch (StorageException re)
+            {
+               throw new ResponseContextException(createErrorResponse(re, 500));
+            }
+            catch (FilterNotValidException fe)
+            {
+               throw new ResponseContextException(createErrorResponse(fe, 400));
+            }
+            catch (ObjectNotFoundException onfe)
+            {
+               throw new ResponseContextException(createErrorResponse(onfe, 404));
+            }
+            catch (InvalidArgumentException iae)
+            {
+               throw new ResponseContextException(createErrorResponse(iae, 400));
+            }
+            catch (Throwable t)
+            {
+               throw new ResponseContextException(createErrorResponse(t, 500));
+            }
          }
-         catch (RepositoryException re)
+      }
+      finally
+      {
+         if (conn != null)
          {
-            throw new ResponseContextException(createErrorResponse(re, 500));
-         }
-         catch (FilterNotValidException fe)
-         {
-            throw new ResponseContextException(createErrorResponse(fe, 400));
-         }
-         catch (ObjectNotFoundException onfe)
-         {
-            throw new ResponseContextException(createErrorResponse(onfe, 404));
-         }
-         catch (InvalidArgumentException iae)
-         {
-            throw new ResponseContextException(createErrorResponse(iae, 400));
-         }
-         catch (Throwable t)
-         {
-            throw new ResponseContextException(createErrorResponse(t, 500));
+            conn.close();
          }
       }
       return feed;

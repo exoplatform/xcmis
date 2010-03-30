@@ -26,13 +26,14 @@ import org.apache.abdera.model.Feed;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.TargetType;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
-import org.xcmis.core.CmisTypeDefinitionType;
-import org.xcmis.core.RepositoryService;
-import org.xcmis.messaging.CmisTypeDefinitionListType;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
 import org.xcmis.spi.CMIS;
-import org.xcmis.spi.RepositoryException;
+import org.xcmis.spi.Connection;
+import org.xcmis.spi.ItemsList;
+import org.xcmis.spi.StorageException;
+import org.xcmis.spi.StorageProvider;
+import org.xcmis.spi.TypeDefinition;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -49,12 +50,11 @@ public class TypesChildrenCollection extends CmisTypeCollection
 
    /**
     * Instantiates a new types children collection.
-    * 
-    * @param repositoryService the repository service
+    * @param storageProvider TODO
     */
-   public TypesChildrenCollection(RepositoryService repositoryService)
+   public TypesChildrenCollection(StorageProvider storageProvider)
    {
-      super(repositoryService);
+      super(storageProvider);
       setHref("/types");
    }
 
@@ -64,41 +64,15 @@ public class TypesChildrenCollection extends CmisTypeCollection
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
       String typeId = request.getTarget().getParameter(AtomCMIS.PARAM_TYPE_ID);
-      boolean includePropertyDefinitions =
-         Boolean.parseBoolean(request.getParameter(AtomCMIS.PARAM_INCLUDE_PROPERTY_DEFINITIONS));
-      int maxItems;
+      boolean includePropertyDefinitions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PROPERTY_DEFINITIONS, false);
+      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CMIS.MAX_ITEMS);
+      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CMIS.SKIP_COUNT);
+      Connection conn = null;
       try
       {
-         maxItems =
-            request.getParameter(AtomCMIS.PARAM_MAX_ITEMS) == null
-               || request.getParameter(AtomCMIS.PARAM_MAX_ITEMS).length() == 0 ? CMIS.MAX_ITEMS : Integer
-               .parseInt(request.getParameter(AtomCMIS.PARAM_MAX_ITEMS));
-      }
-      catch (NumberFormatException nfe)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_MAX_ITEMS);
-         throw new ResponseContextException(msg, 400);
-      }
-      int skipCount;
-      try
-      {
-         skipCount =
-            request.getParameter(AtomCMIS.PARAM_SKIP_COUNT) == null
-               || request.getParameter(AtomCMIS.PARAM_SKIP_COUNT).length() == 0 ? 0 : Integer.parseInt(request
-               .getParameter(AtomCMIS.PARAM_SKIP_COUNT));
-      }
-      catch (NumberFormatException nfe)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_SKIP_COUNT);
-         throw new ResponseContextException(msg, 400);
-      }
-      try
-      {
-         String repositoryId = getRepositoryId(request);
-         CmisTypeDefinitionListType list =
-            repositoryService.getTypeChildren(repositoryId, typeId, includePropertyDefinitions, maxItems, skipCount);
-         addPageLinks(typeId, feed, "types", maxItems, skipCount, list.getNumItems() == null ? -1 : list.getNumItems()
-            .intValue(), list.isHasMoreItems(), request);
+         conn = getConnection(request);
+         ItemsList<TypeDefinition> list = conn.getTypeChildren(typeId, includePropertyDefinitions, maxItems, skipCount);
+         addPageLinks(typeId, feed, "types", maxItems, skipCount, list.getNumItems(), list.isHasMoreItems(), request);
 
          String down = getTypeDescendantsLink(typeId, request);
          feed.addLink(down, AtomCMIS.LINK_DOWN, AtomCMIS.MEDIATYPE_CMISTREE, null, null, -1);
@@ -108,7 +82,7 @@ public class TypesChildrenCollection extends CmisTypeCollection
             String typeLink = getObjectTypeLink(typeId, request);
             feed.addLink(typeLink, AtomCMIS.LINK_VIA, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null, null, -1);
 
-            CmisTypeDefinitionType type = repositoryService.getTypeDefinition(repositoryId, typeId);
+            TypeDefinition type = conn.getTypeDefinition(typeId);
             String parentType = type.getParentId();
             if (parentType != null)
             {
@@ -116,14 +90,14 @@ public class TypesChildrenCollection extends CmisTypeCollection
                feed.addLink(parent, AtomCMIS.LINK_UP, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null, null, -1);
             }
          }
-         for (CmisTypeDefinitionType type : list.getTypes())
+         for (TypeDefinition type : list.getItems())
          {
             Entry e = feed.addEntry();
             IRI feedIri = new IRI(getFeedIriForEntry(type, request));
             addEntryDetails(request, e, feedIri, type);
          }
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          throw new ResponseContextException(createErrorResponse(re, 500));
       }
@@ -131,12 +105,19 @@ public class TypesChildrenCollection extends CmisTypeCollection
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
       }
+      finally
+      {
+         if (conn != null)
+         {
+            conn.close();
+         }
+      }
    }
 
    /**
     * {@inheritDoc}
     */
-   public Iterable<CmisTypeDefinitionType> getEntries(RequestContext request) throws ResponseContextException
+   public Iterable<TypeDefinition> getEntries(RequestContext request) throws ResponseContextException
    {
       throw new UnsupportedOperationException("entries");
    }

@@ -25,15 +25,14 @@ import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
-import org.xcmis.core.ObjectService;
-import org.xcmis.core.RepositoryService;
-import org.xcmis.core.VersioningService;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.Connection;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.RepositoryException;
+import org.xcmis.spi.StorageException;
+import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.object.CmisObject;
 
 import java.util.List;
@@ -43,22 +42,18 @@ import java.util.List;
  * 
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com.ua">Alexey
  *         Zavizionov</a>
- * @version $Id$
+ * @version $Id: AllVersionsCollection.java 216 2010-02-12 17:19:50Z andrew00x $
  */
 public class AllVersionsCollection extends CmisObjectCollection
 {
 
    /**
     * Instantiates a new all versions collection.
-    * 
-    * @param repositoryService the repository service
-    * @param objectService the object service
-    * @param versioningService the versioning service
+    * @param storageProvider TODO
     */
-   public AllVersionsCollection(RepositoryService repositoryService, ObjectService objectService,
-      VersioningService versioningService)
+   public AllVersionsCollection(StorageProvider storageProvider)
    {
-      super(repositoryService, objectService, versioningService);
+      super(storageProvider);
       setHref("/versions");
    }
 
@@ -69,40 +64,16 @@ public class AllVersionsCollection extends CmisObjectCollection
    {
       String objectId = getId(request);
       String propertyFilter = null;
-      boolean includeAllowableActions =
-         Boolean.parseBoolean(request.getParameter(AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS));
-      int maxItems;
+      boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
+      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CMIS.MAX_ITEMS);
+      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CMIS.SKIP_COUNT);
+      Connection conn = null;
       try
       {
-         maxItems =
-            request.getParameter(AtomCMIS.PARAM_MAX_ITEMS) == null
-               || request.getParameter(AtomCMIS.PARAM_MAX_ITEMS).length() == 0 ? CMIS.MAX_ITEMS : Integer
-               .parseInt(request.getParameter(AtomCMIS.PARAM_MAX_ITEMS));
-      }
-      catch (NumberFormatException nfe)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_MAX_ITEMS);
-         throw new ResponseContextException(msg, 400);
-      }
-      int skipCount;
-      try
-      {
-         skipCount =
-            request.getParameter(AtomCMIS.PARAM_SKIP_COUNT) == null
-               || request.getParameter(AtomCMIS.PARAM_SKIP_COUNT).length() == 0 ? 0 : Integer.parseInt(request
-               .getParameter(AtomCMIS.PARAM_SKIP_COUNT));
-      }
-      catch (NumberFormatException nfe)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_SKIP_COUNT);
-         throw new ResponseContextException(msg, 400);
-      }
+         conn = getConnection(request);
 
-      try
-      {
-         List<CmisObject> list =
-            versioningService.getAllVersions(getRepositoryId(request), objectId, includeAllowableActions,
-               propertyFilter, true);
+         List<CmisObject> list = conn.getAllVersions(objectId, includeAllowableActions, true, propertyFilter);
+
          if (list.size() > 0)
          {
             // add cmisra:numItems
@@ -126,7 +97,7 @@ public class AllVersionsCollection extends CmisObjectCollection
             }
          }
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          throw new ResponseContextException(createErrorResponse(re, 500));
       }
@@ -146,6 +117,14 @@ public class AllVersionsCollection extends CmisObjectCollection
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
       }
+      finally
+      {
+         if (conn != null)
+         {
+            conn.close();
+         }
+      }
+
    }
 
    /**

@@ -19,13 +19,14 @@
 
 package org.xcmis.spi;
 
+
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: PropertyFilter.java 316 2010-03-09 15:20:28Z andrew00x $
  */
 public class PropertyFilter
 {

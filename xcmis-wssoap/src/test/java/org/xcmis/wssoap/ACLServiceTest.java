@@ -20,6 +20,7 @@
 package org.xcmis.wssoap;
 
 import org.apache.cxf.endpoint.Server;
+import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.xcmis.core.CmisAccessControlEntryType;
 import org.xcmis.core.CmisAccessControlListType;
 import org.xcmis.core.CmisAccessControlPrincipalType;
@@ -28,7 +29,10 @@ import org.xcmis.core.EnumBasicPermissions;
 import org.xcmis.messaging.CmisACLType;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.soap.ACLServicePort;
+import org.xcmis.spi.AccessControlPropagation;
 import org.xcmis.wssoap.impl.ACLServicePortImpl;
+import org.xcmis.wssoap.impl.TypeConverter;
+import org.xcmis.wssoap.impl.server.IdentityInterceptor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +59,9 @@ public class ACLServiceTest extends BaseTest
    public void setUp() throws Exception
    {
       super.setUp();
-      server = complexDeployService(SERVICE_ADDRESS, new ACLServicePortImpl(aclService), null, null, true);
+      ArrayList<AbstractPhaseInterceptor<?>> in = new ArrayList<AbstractPhaseInterceptor<?>>();
+      in.add(new IdentityInterceptor());
+      server = complexDeployService(SERVICE_ADDRESS, new ACLServicePortImpl(storageProvider), in, null, true);
       port = getAccessControlService(SERVICE_ADDRESS);
       assertNotNull(server);
       assertNotNull(port);
@@ -91,7 +97,7 @@ public class ACLServiceTest extends BaseTest
          EnumACLPropagation.REPOSITORYDETERMINED, //
          new CmisExtensionType());
 
-      CmisAccessControlListType acl = aclService.getACL(repositoryId, docId, true);
+      CmisAccessControlListType acl = TypeConverter.getCmisAccessControlListType(conn.getACL(docId, true));
       assertNotNull(acl.getPermission());
       for (CmisAccessControlEntryType ace : acl.getPermission())
       {
@@ -144,7 +150,8 @@ public class ACLServiceTest extends BaseTest
       entry1.getPermission().add(EnumBasicPermissions.CMIS_READ.value());
       entry1.getPermission().add(EnumBasicPermissions.CMIS_WRITE.value());
       addACL.getPermission().add(entry1);
-      aclService.applyACL(repositoryId, docId, addACL, removeACL, EnumACLPropagation.REPOSITORYDETERMINED);
+      conn.applyACL(docId, TypeConverter.getCmisListAccessControlEntry(addACL), TypeConverter
+         .getCmisListAccessControlEntry(removeACL), AccessControlPropagation.REPOSITORYDETERMINED);
       CmisACLType resp = port.getACL(repositoryId, docId, false, new CmisExtensionType());
       assertNotNull(resp);
       CmisAccessControlListType acl = resp.getACL();

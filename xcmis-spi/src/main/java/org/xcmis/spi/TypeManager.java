@@ -19,14 +19,12 @@
 
 package org.xcmis.spi;
 
-import org.xcmis.core.CmisTypeDefinitionType;
 
 /**
  * Produces type definition.
  * 
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
- * @deprecated
+ * @version $Id: TypeManager.java 316 2010-03-09 15:20:28Z andrew00x $
  */
 public interface TypeManager
 {
@@ -35,42 +33,51 @@ public interface TypeManager
     * Add new type in repository.
     * 
     * @param type type definition
-    * @throws RepositoryException if new type can't be added in repository
+    * @return ID of added type
+    * @throws StorageException if type can't be added cause to storage internal
+    *         problem
+    * @throws CmisRuntimeException if any others errors occur
     */
-   void addType(CmisTypeDefinitionType type) throws RepositoryException;
-
-   /**
-    * Get type definition for type <code>typeId</code> include property definition.
-    * 
-    * @param typeId type Id
-    * @return type definition
-    * @throws TypeNotFoundException if type <code>typeId</code> not found in
-    *           repository
-    * @throws RepositoryException if any other CMIS repository error occurs
-    */
-   CmisTypeDefinitionType getTypeDefinition(String typeId) throws TypeNotFoundException, RepositoryException;
+   String addType(TypeDefinition type) throws StorageException, CmisRuntimeException;
 
    /**
     * Get type definition for type <code>typeId</code> .
     * 
     * @param typeId type Id
-    * @param includePropertyDefinition if TRUE property definition should be included
+    * @param includePropertyDefinition if <code>true</code> property definition
+    *        should be included
     * @return type definition
-    * @throws TypeNotFoundException if type <code>typeId</code> not found in
-    *           repository
-    * @throws RepositoryException if any other CMIS repository error occurs
+    * @throws TypeNotFoundException if type <code>typeId</code> does not exists
+    * @throws CmisRuntimeException if any others errors occur
     */
-   CmisTypeDefinitionType getTypeDefinition(String typeId, boolean includePropertyDefinition)
-      throws TypeNotFoundException, RepositoryException;
+   TypeDefinition getTypeDefinition(String typeId, boolean includePropertyDefinition)
+      throws TypeNotFoundException, CmisRuntimeException;
+
+   /**
+    * Iterator over object types.
+    * 
+    * @param typeId the type id, if not <code>null</code> then return only
+    *        specified Object Type and its direct descendant. If
+    *        <code>null</code> then return base types
+    * @param includePropertyDefinition <code>true</code> if property definition
+    *        should be included <code>false</code> otherwise
+    * @return set of base types or specified object type and its direct children
+    * @throws TypeNotFoundException if type <code>typeId</code> does not exist
+    * @throws CmisRuntimeException if any others errors occur
+    */
+   ItemsIterator<TypeDefinition> getTypeChildren(String typeId, boolean includePropertyDefinitions)
+      throws TypeNotFoundException, CmisRuntimeException;
 
    /**
     * Remove type definition for type <code>typeId</code> .
     * 
     * @param typeId type Id
     * @throws TypeNotFoundException if type <code>typeId</code> not found in
-    *           repository
-    * @throws RepositoryException if any other CMIS repository error occurs
+    *         repository
+    * @throws StorageException if type can't be added cause to storage internal
+    *         problem
+    * @throws CmisRuntimeException if any others errors occur
     */
-   void removeType(String typeId) throws TypeNotFoundException, RepositoryException;
+   void removeType(String typeId) throws TypeNotFoundException, StorageException, CmisRuntimeException;
 
 }

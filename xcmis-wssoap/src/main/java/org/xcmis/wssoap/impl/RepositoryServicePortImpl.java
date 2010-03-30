@@ -22,7 +22,6 @@ package org.xcmis.wssoap.impl;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.core.CmisTypeDefinitionType;
-import org.xcmis.core.RepositoryService;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.messaging.CmisRepositoryEntryType;
 import org.xcmis.messaging.CmisTypeContainer;
@@ -30,13 +29,18 @@ import org.xcmis.messaging.CmisTypeDefinitionListType;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.RepositoryServicePort;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.Connection;
+import org.xcmis.spi.RepositoryInfo;
+import org.xcmis.spi.StorageProvider;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author <a href="mailto:max.shaposhnik@exoplatform.com">Max Shaposhnik</a>
- * @version $Id$
+ * @version $Id: RepositoryServicePortImpl.java 2 2010-02-04 17:21:49Z andrew00x $
  */
 @javax.jws.WebService(// name = "RepositoryServicePort",
 serviceName = "RepositoryService", //
@@ -50,17 +54,17 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
    /** Logger. */
    private static final Log LOG = ExoLogger.getLogger(RepositoryServicePortImpl.class);
 
-   /** Repository service. */   
-   private RepositoryService repoService;
+   /** StorageProvider. */
+   private StorageProvider storageProvider;
 
    /**
     * Constructs instance of <code>RepositoryServicePortImpl</code> .
     * 
     * @param repoService RepositoryService
     */
-   public RepositoryServicePortImpl(RepositoryService repoService)
+   public RepositoryServicePortImpl(StorageProvider storageProvider)
    {
-      this.repoService = repoService;
+      this.storageProvider = storageProvider;
    }
 
    /**
@@ -70,18 +74,33 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
    {
       if (LOG.isDebugEnabled())
          LOG.debug("Executing operation getRepositories");
-      return repoService.getRepositories();
+      Connection conn = null;
+      Set<String> entries = storageProvider.getStorageIDs();
+      List<CmisRepositoryEntryType> res = new ArrayList<CmisRepositoryEntryType>();
+      for (String storageId : entries)
+      {
+         conn = storageProvider.getConnection(storageId, null);
+         RepositoryInfo repoInfo = conn.getStorage().getRepositoryInfo();
+         CmisRepositoryEntryType type = new CmisRepositoryEntryType();
+         type.setRepositoryId(repoInfo.getRepositoryId());
+         type.setRepositoryName(repoInfo.getRepositoryName());
+         res.add(type);
+      }
+      conn.close();
+      return res;
    }
 
    /**
     * {@inheritDoc}
     */
-   public org.xcmis.core.CmisRepositoryInfoType getRepositoryInfo(String repositoryId,
-      CmisExtensionType extension) throws CmisException
+   public org.xcmis.core.CmisRepositoryInfoType getRepositoryInfo(String repositoryId, CmisExtensionType extension)
+      throws CmisException
    {
       if (LOG.isDebugEnabled())
          LOG.debug("Executing operation getRepositoryInfo");
-      return repoService.getRepositoryInfo(repositoryId);
+      Connection conn = null;
+      conn = storageProvider.getConnection(repositoryId, null);
+      return TypeConverter.getCmisRepositoryInfoType(conn.getStorage().getRepositoryInfo());
    }
 
    /**
@@ -96,18 +115,23 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
    {
       if (LOG.isDebugEnabled())
          LOG.debug("Executing operation getTypeChildren");
+      Connection conn = null;
       try
       {
-         return repoService.getTypeChildren(repositoryId, //
-            typeId, //
+         conn = storageProvider.getConnection(repositoryId, null);
+         return TypeConverter.getCmisTypeDefinitionListType(conn.getTypeChildren(typeId, //
             includePropertyDefinitions == null ? false : includePropertyDefinitions, //
             maxItems == null ? CMIS.MAX_ITEMS : maxItems.intValue(), //
-            skipCount == null ? 0 : skipCount.intValue());
+            skipCount == null ? 0 : skipCount.intValue()));
       }
       catch (Exception e)
       {
          LOG.error("Get type children error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
+      }
+      finally
+      {
+         conn.close();
       }
 
    }
@@ -120,14 +144,20 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
    {
       if (LOG.isDebugEnabled())
          LOG.debug("Executing operation getTypeDefinition");
+      Connection conn = null;
       try
       {
-         return repoService.getTypeDefinition(repositoryId, typeId);
+         conn = storageProvider.getConnection(repositoryId, null);
+         return TypeConverter.getCmisTypeDefinitionType(conn.getTypeDefinition(typeId));
       }
       catch (Exception e)
       {
          LOG.error("Get type definition error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
+      }
+      finally
+      {
+         conn.close();
       }
    }
 
@@ -139,17 +169,22 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
    {
       if (LOG.isDebugEnabled())
          LOG.debug("Executing operation getTypeDescendants");
+      Connection conn = null;
       try
       {
-         return repoService.getTypeDescendants(repositoryId, //
-            typeId, //
+         conn = storageProvider.getConnection(repositoryId, null);
+         return TypeConverter.getCmisTypeContainer(conn.getTypeDescendants(typeId, //
             depth == null ? 1 : depth.intValue(), //
-            includePropertyDefinitions == null ? false : includePropertyDefinitions);
+            includePropertyDefinitions == null ? false : includePropertyDefinitions));
       }
       catch (Exception e)
       {
          LOG.error("Get type descendants error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
+      }
+      finally
+      {
+         conn.close();
       }
    }
 

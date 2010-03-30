@@ -30,15 +30,6 @@ import org.apache.abdera.protocol.server.impl.AbstractWorkspaceManager;
 import org.apache.abdera.protocol.server.impl.RegexTargetResolver;
 import org.apache.abdera.protocol.server.impl.SimpleWorkspaceInfo;
 import org.apache.abdera.protocol.server.impl.TemplateTargetBuilder;
-import org.xcmis.core.AccessControlService;
-import org.xcmis.core.DiscoveryService;
-import org.xcmis.core.MultifilingService;
-import org.xcmis.core.NavigationService;
-import org.xcmis.core.ObjectService;
-import org.xcmis.core.PolicyService;
-import org.xcmis.core.RelationshipService;
-import org.xcmis.core.RepositoryService;
-import org.xcmis.core.VersioningService;
 import org.xcmis.restatom.collections.AllVersionsCollection;
 import org.xcmis.restatom.collections.CheckedOutCollection;
 import org.xcmis.restatom.collections.FolderChildrenCollection;
@@ -50,10 +41,11 @@ import org.xcmis.restatom.collections.QueryCollection;
 import org.xcmis.restatom.collections.RelationshipsCollection;
 import org.xcmis.restatom.collections.TypesChildrenCollection;
 import org.xcmis.restatom.collections.TypesDescendantsCollection;
+import org.xcmis.spi.StorageProvider;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: ProviderImpl.java 216 2010-02-12 17:19:50Z andrew00x $
  */
 public class ProviderImpl extends AbstractProvider
 {
@@ -69,33 +61,16 @@ public class ProviderImpl extends AbstractProvider
 
    /**
     * Instantiates a new provider impl.
+    * @param storageProvider TODO
     * 
-    * @param repositoryService the repository service
-    * @param objectService the object service
-    * @param navigationService the navigation service
-    * @param relationshipService the relationship service
-    * @param policyService the policy service
-    * @param aclService the acl service
-    * @param queryService the query service
-    * @param multifilingService the multifiling service
-    * @param versioningService the versioning service
     */
-   public ProviderImpl(RepositoryService repositoryService, //
-      ObjectService objectService, //
-      NavigationService navigationService, //
-      RelationshipService relationshipService, //
-      PolicyService policyService, //
-      AccessControlService aclService, //
-      DiscoveryService queryService, //
-      MultifilingService multifilingService, //
-      VersioningService versioningService)
+   public ProviderImpl(StorageProvider storageProvider)
    {
       targetBuilder = new TemplateTargetBuilder();
       targetBuilder.setTemplate(TargetType.ENTRY, "{target_base}/cmisatom/{repoid}/{atomdoctype}/{id}");
       targetBuilder.setTemplate(TargetType.SERVICE, "{target_base}/cmisatom/{repoid}");
-      targetBuilder
-         .setTemplate("feed",
-            "{target_base}/cmisatom/{repoid}/{atomdoctype}/{id}{-opt|?|q,maxItems,skipCount}{-join|&|q,maxItems,skipCount}");
+      targetBuilder.setTemplate("feed",
+         "{target_base}/cmisatom/{repoid}/{atomdoctype}/{id}{-opt|?|maxItems,skipCount}{-join|&|maxItems,skipCount}");
 
       resolver = new RegexTargetResolver();
 
@@ -116,9 +91,11 @@ public class ProviderImpl extends AbstractProvider
          "slash", // No slash if 'typeid' is absent. 
          "typeid");
 
-      resolver.setPattern("/cmisatom/([^/]+)/checkedout(.?)*?", //
+      resolver.setPattern("/cmisatom/([^/]+)/checkedout(/)?([^/?]+)?(\\??.*)?", //
          TargetType.TYPE_COLLECTION, //
-         "repoid");
+         "repoid", //
+         "slash", // No slash if 'objectid' is absent. 
+         "objectid");
 
       resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+)/children/([^/?]+)(\\??.*)?", //
          TargetType.TYPE_COLLECTION, //
@@ -130,9 +107,10 @@ public class ProviderImpl extends AbstractProvider
          "repoid", //
          "objectid");
 
-      resolver.setPattern("/cmisatom/([^/]+?)/objectbypath(.?)*", //
+      resolver.setPattern("/cmisatom/([^/]+?)/objectbypath([^\\??]+)(\\??.*)?", //
          TargetType.TYPE_ENTRY, //
-         "repoid");
+         "repoid", //
+         "objectpath");
 
       resolver.setPattern("/cmisatom/([^/]+)/parents/([^/?]+)(\\??.*)?", //
          TargetType.TYPE_COLLECTION, //
@@ -159,10 +137,9 @@ public class ProviderImpl extends AbstractProvider
          "repoid", //
          "objectid");
 
-      resolver.setPattern("/cmisatom/([^/]+)/query(/)?(\\??.*)?", //
+      resolver.setPattern("/cmisatom/([^/]+)/query(\\??.*)?", //
          TargetType.TYPE_COLLECTION, //
-         "repoid", //
-         "slash"); // Slash. 
+         "repoid"); //
 
       resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+)/file/([^/?]+)(\\??.*)?", //
          TargetType.TYPE_MEDIA, //
@@ -171,8 +148,7 @@ public class ProviderImpl extends AbstractProvider
 
       resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+)/policies/([^/?]+)(\\??.*)?", //
          TargetType.TYPE_COLLECTION, //
-         "repoid", //
-         "objectid"); //
+         "repoid", "objectid"); //
 
       resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+)/alternate/([^/?]+)/([^/?]+)(\\??.*)?", //
          TargetType.TYPE_COLLECTION, //
@@ -181,23 +157,17 @@ public class ProviderImpl extends AbstractProvider
          "streamid");
 
       SimpleWorkspaceInfo wInfo = new SimpleWorkspaceInfo();
-      wInfo.addCollection(new FolderChildrenCollection(repositoryService, objectService, versioningService,
-         navigationService));
-      wInfo
-         .addCollection(new ParentsCollection(repositoryService, objectService, versioningService, navigationService));
-      wInfo.addCollection(new RelationshipsCollection(repositoryService, objectService, versioningService,
-         relationshipService));
-      wInfo.addCollection(new FolderDescentantsCollection(repositoryService, objectService, versioningService,
-         navigationService));
-      wInfo.addCollection(new FolderTreeCollection(repositoryService, objectService, versioningService,
-         navigationService));
-      wInfo.addCollection(new TypesChildrenCollection(repositoryService));
-      wInfo.addCollection(new TypesDescendantsCollection(repositoryService));
-      wInfo.addCollection(new CheckedOutCollection(repositoryService, objectService, versioningService,
-         navigationService));
-      wInfo.addCollection(new AllVersionsCollection(repositoryService, objectService, versioningService));
-      wInfo.addCollection(new QueryCollection(repositoryService, objectService, versioningService, queryService));
-      wInfo.addCollection(new PoliciesCollection(repositoryService, objectService, versioningService, policyService));
+      wInfo.addCollection(new FolderChildrenCollection(storageProvider));
+      wInfo.addCollection(new ParentsCollection(storageProvider));
+      wInfo.addCollection(new RelationshipsCollection(storageProvider));
+      wInfo.addCollection(new FolderDescentantsCollection(storageProvider));
+      wInfo.addCollection(new FolderTreeCollection(storageProvider));
+      wInfo.addCollection(new TypesChildrenCollection(storageProvider));
+      wInfo.addCollection(new TypesDescendantsCollection(storageProvider));
+      wInfo.addCollection(new CheckedOutCollection(storageProvider));
+      wInfo.addCollection(new AllVersionsCollection(storageProvider));
+      wInfo.addCollection(new QueryCollection(storageProvider));
+      wInfo.addCollection(new PoliciesCollection(storageProvider));
       // The other described patterns according collections by WorkspaceManagerImpl#getCollectionAdapter 
       manager = new WorkspaceManagerImpl();
       manager.addWorkspace(wInfo);

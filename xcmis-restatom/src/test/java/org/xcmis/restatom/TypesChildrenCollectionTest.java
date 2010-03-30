@@ -19,41 +19,41 @@
 
 package org.xcmis.restatom;
 
-import org.xcmis.core.CmisPropertyDefinitionType;
-import org.xcmis.core.CmisPropertyStringDefinitionType;
-import org.xcmis.core.CmisTypeDefinitionType;
-import org.xcmis.core.CmisTypeDocumentDefinitionType;
-import org.xcmis.core.EnumBaseObjectTypeIds;
-import org.xcmis.core.EnumCardinality;
-import org.xcmis.core.EnumContentStreamAllowed;
-import org.xcmis.core.EnumPropertyType;
-import org.xcmis.core.EnumUpdatability;
 import org.exoplatform.services.rest.impl.ContainerResponse;
 import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
 import org.w3c.dom.NodeList;
-import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.spi.BaseType;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.ContentStreamAllowed;
+import org.xcmis.spi.PropertyDefinition;
+import org.xcmis.spi.PropertyType;
+import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.TypeNotFoundException;
+import org.xcmis.spi.Updatability;
+import org.xcmis.spi.impl.PropertyDefinitionImpl;
+import org.xcmis.spi.impl.TypeDefinitionImpl;
 
 import java.io.ByteArrayInputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: TypesChildrenCollectionTest.java 44 2010-02-08 17:36:56Z andrew00x $
  */
 public class TypesChildrenCollectionTest extends BaseTest
 {
 
-   private CmisTypeDocumentDefinitionType article;
+   private TypeDefinitionImpl article;
 
    public void setUp() throws Exception
    {
       super.setUp();
       //cmis:article
-      article = new CmisTypeDocumentDefinitionType();
-      article.setBaseId(EnumBaseObjectTypeIds.CMIS_DOCUMENT);
+      article = new TypeDefinitionImpl();
+      article.setBaseId(BaseType.DOCUMENT);
       article.setControllableACL(false);
       article.setControllablePolicy(false);
       article.setCreatable(true);
@@ -67,19 +67,22 @@ public class TypesChildrenCollectionTest extends BaseTest
       article.setParentId("cmis:document");
       article.setQueryable(false);
       article.setQueryName("cmis:article");
-      article.setContentStreamAllowed(EnumContentStreamAllowed.ALLOWED);
+      article.setContentStreamAllowed(ContentStreamAllowed.ALLOWED);
       article.setVersionable(false);
 
-      CmisPropertyStringDefinitionType pd = new CmisPropertyStringDefinitionType();
-      pd.setCardinality(EnumCardinality.SINGLE);
-      pd.setUpdatability(EnumUpdatability.READWRITE);
+      PropertyDefinitionImpl<String> pd = new PropertyDefinitionImpl<String>();
+      pd.setMultivalued(false);
+      pd.setUpdatability(Updatability.READWRITE);
       pd.setDisplayName("cmis:hello");
       pd.setId("cmis:hello");
       pd.setInherited(false);
-      pd.setPropertyType(EnumPropertyType.STRING);
-      article.getPropertyDefinition().add(pd);
+      pd.setPropertyType(PropertyType.STRING);
+      Map<String, PropertyDefinition<?>> mapPD = new HashMap<String, PropertyDefinition<?>>();
+      mapPD.put(pd.getId(), pd);
+      article.setPropertyDefinitions(mapPD);
 
-      repository.addType(article);
+      conn.addType(article);
+
    }
 
    @Override
@@ -87,10 +90,15 @@ public class TypesChildrenCollectionTest extends BaseTest
    {
       try
       {
-         repository.removeType(article.getId());
+         conn.removeType(article.getId());
       }
       catch (TypeNotFoundException ignored)
       {
+         ignored.printStackTrace();
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
       }
       super.tearDown();
    }
@@ -182,7 +190,7 @@ public class TypesChildrenCollectionTest extends BaseTest
 
       try
       {
-         repository.getTypeDefinition("cmis:folder1");
+         conn.getTypeDefinition("cmis:folder1");
          fail();
       }
       catch (TypeNotFoundException e)
@@ -197,17 +205,17 @@ public class TypesChildrenCollectionTest extends BaseTest
       //      printBody(writer.getBody());
       assertEquals(201, resp.getStatus());
 
-      CmisTypeDefinitionType type = null;
+      TypeDefinition type = null;
       try
       {
-         type = repository.getTypeDefinition("cmis:folder1");
+         type = conn.getTypeDefinition("cmis:folder1");
       }
       catch (TypeNotFoundException e)
       {
          fail("Type 'cmis:folder1' must be added.");
       }
       boolean propDef = false;
-      for (CmisPropertyDefinitionType d : type.getPropertyDefinition())
+      for (PropertyDefinition<?> d : type.getPropertyDefinitions())
          if (d.getId().equals("cmis:newProperty"))
             propDef = true;
 

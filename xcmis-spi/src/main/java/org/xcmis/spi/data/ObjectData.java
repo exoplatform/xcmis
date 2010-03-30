@@ -19,25 +19,28 @@
 
 package org.xcmis.spi.data;
 
-import org.xcmis.core.CmisAccessControlListType;
-import org.xcmis.core.CmisProperty;
-import org.xcmis.core.EnumBaseObjectTypeIds;
-import org.xcmis.core.EnumRelationshipDirection;
-import org.xcmis.spi.NameConstraintViolationException;
-import org.xcmis.spi.impl.CmisVisitor;
-import org.xcmis.spi.impl.PropertyFilter;
+import org.xcmis.spi.AccessControlEntry;
+import org.xcmis.spi.BaseType;
+import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ItemsIterator;
+import org.xcmis.spi.NameConstraintViolationException;
+import org.xcmis.spi.NotSupportedException;
+import org.xcmis.spi.PropertyFilter;
+import org.xcmis.spi.RelationshipDirection;
+import org.xcmis.spi.Storage;
+import org.xcmis.spi.TypeDefinition;
+import org.xcmis.spi.Permission.BasicPermissions;
+import org.xcmis.spi.impl.CmisVisitor;
+import org.xcmis.spi.object.Property;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.net.URI;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: ObjectData.java 316 2010-03-09 15:20:28Z andrew00x $
  */
 public interface ObjectData
 {
@@ -46,105 +49,263 @@ public interface ObjectData
 
    // ACL
 
-   void setAcl(CmisAccessControlListType acl);
+   /**
+    * Set new ACL for object. New ACL overwrite existed one. If ACL capability
+    * is not supported then this method must throw {@link NotSupportedException}
+    * .
+    * 
+    * @param acl ACL that should replace currently applied ACL
+    * @throws ConstraintException if current object is not controllable by ACL,
+    *         see {@link TypeDefinition#isControllableACL()}.
+    */
+   void setACL(List<AccessControlEntry> acl) throws ConstraintException;
 
-   CmisAccessControlListType getAcl(boolean onlyBasicPermissions);
+   /**
+    * Get ACL currently applied to object. If ACL capability is not supported
+    * then this method must throw {@link NotSupportedException}.
+    * 
+    * @param onlyBasicPermissions if <code>true</code> then only CMIS basic
+    *        permissions {@link BasicPermissions} must be returned if
+    *        <code>false</code> then basic permissions and repository specific
+    *        permissions must be returned
+    * @return applied ACL. If there is no ACL applied to object or if object is
+    *         not controllable by ACL empty list must be returned, never
+    *         <code>null</code>
+    * @see BasicPermissions
+    */
+   List<AccessControlEntry> getACL(boolean onlyBasicPermissions);
 
    // Policies
 
-   void applyPolicy(ObjectData policy);
+   /**
+    * Applied specified policy to the current object. If Policy object type is
+    * not supported then this method must throw {@link NotSupportedException}.
+    * 
+    * @param policy policy to be applied
+    * @throws ConstraintException if current object is not controllable by
+    *         Policy, see {@link TypeDefinition#isControllablePolicy()}.
+    */
+   void applyPolicy(Policy policy) throws ConstraintException;
 
-   Collection<ObjectData> getPolicies();
+   /**
+    * Get policies applied to the current object. If Policy object type is not
+    * supported then this method must throw {@link NotSupportedException}.
+    * 
+    * @return applied Policies. If there is no policies applied to object or if
+    *         object is not controllable by policy then empty list must be
+    *         returned, never <code>null</code>
+    */
+   Collection<Policy> getPolicies();
 
-   void removePolicy(ObjectData policy);
+   /**
+    * Remove specified policy from object. This method must not remove Policy
+    * object itself. If Policy object type is not supported then this method
+    * must throw {@link NotSupportedException}.
+    * 
+    * @param policy policy object
+    * @throws ConstraintException if current object is not controllable by
+    *         Policy, see {@link TypeDefinition#isControllablePolicy()}.
+    */
+   void removePolicy(Policy policy) throws ConstraintException;
 
    //
+
+   /**
+    * @return <code>true</code> if current object is newly created and was not
+    *         persisted yet. If may be created via
+    *         {@link Storage#createDocument(Folder, String, org.xcmis.spi.VersioningState)}
+    *         , {@link Storage#createFolder(Folder, String)}, etc.
+    */
    boolean isNew();
-   // 
 
-   EnumBaseObjectTypeIds getBaseType();
+   /**
+    * @return base type of object
+    * @see BaseType
+    */
+   BaseType getBaseType();
 
+   /**
+    * Shortcut to 'cmis:changeToken' property.
+    * 
+    * @return 'cmis:changeToken' property
+    */
    String getChangeToken();
 
+   /**
+    * Shortcut to 'cmis:createdBy' property.
+    * 
+    * @return 'cmis:createdBy' property
+    */
    String getCreatedBy();
 
+   /**
+    * Shortcut to 'cmis:creationDate' property.
+    * 
+    * @return 'cmis:creationDate' property
+    */
    Calendar getCreationDate();
 
+   /**
+    * Shortcut to 'cmis:lastModifiedBy' property.
+    * 
+    * @return 'cmis:lastModifiedBy' property
+    */
    String getLastModifiedBy();
 
-   Calendar getLatsModificationDate();
+   /**
+    * Shortcut to 'cmis:lastModificationDate' property.
+    * 
+    * @return 'cmis:lastModificationDate' property
+    */
+   Calendar getLastModificationDate();
 
+   /**
+    * Shortcut to 'cmis:name' property.
+    * 
+    * @return 'cmis:name' property
+    */
    String getName();
 
+   /**
+    * Shortcut to 'cmis:objectId' property. This method always return
+    * <code>null</code> for newly created unsaved objects. See {@link #isNew()}.
+    * 
+    * @return 'cmis:objectId' property
+    */
    String getObjectId();
 
-   ObjectData getParent();
+   /**
+    * Get object parent.
+    * 
+    * @return parent of current object
+    * @throws ConstraintException if object has more then one parent or if
+    *         current object is root folder
+    */
+   Folder getParent() throws ConstraintException;
 
-   Collection<ObjectData> getParents();
+   /**
+    * Get collections of parent folders. It may contains exactly one object for
+    * single-filed and empty collection for unfiled object or root folder.
+    * 
+    * @return collection of object's parents
+    */
+   Collection<Folder> getParents();
 
-   ItemsIterator<ObjectData> getRelationships(EnumRelationshipDirection direction, String typeId,
+   /**
+    * Objects relationships.
+    * 
+    * @param direction relationship's direction.
+    * @param type relationship type. If
+    *        <code>includeSubRelationshipTypes == true</code> then all
+    *        descendants of this type must be returned. If
+    *        <code>includeSubRelationshipTypes == true</code> only relationship
+    *        of the same type must be returned
+    * @param includeSubRelationshipTypes if <code>true</code>, then the return
+    *        all relationships whose object types are descendant types of
+    *        <code>typeId</code>.
+    * @return relationships if object has not any relationships then empty
+    *         {@link ItemsIterator} must be returned, never <code>null</code>
+    * @see RelationshipDirection
+    */
+   ItemsIterator<Relationship> getRelationships(RelationshipDirection direction, TypeDefinition type,
       boolean includeSubRelationshipTypes);
 
+   /**
+    * @return type id
+    */
    String getTypeId();
 
-   String getVersionLabel();
+   /**
+    * @return type definition of object
+    */
+   TypeDefinition getTypeDefinition();
 
-   String getVersionSeriesCheckedOutBy();
-
-   String getVersionSeriesCheckedOutId();
-
-   String getVersionSeriesId();
-
-   boolean isLatestMajorVersion();
-
-   boolean isLatestVersion();
-
-   boolean isMajorVersion();
-
-   boolean isVersionSeriesCheckedOut();
-
+   /**
+    * Shortcut setter for 'cmis:name' property.
+    * 
+    * @throws NameConstraintViolationException if <i>cmis:name</i> specified in
+    *         properties throws conflict
+    */
    void setName(String name) throws NameConstraintViolationException;
 
    // Properties
 
-   Map<String, CmisProperty> getProperties();
+   /**
+    * @param id property ID
+    * @return property with specified ID or <code>null</code>
+    */
+   Property<?> getProperty(String id);
 
-   Map<String, CmisProperty> getProperties(PropertyFilter filter);
+   /**
+    * @return set of CMIS properties
+    */
+   Map<String, Property<?>> getProperties();
 
-   CmisProperty getProperty(String name);
-   
-   void setProperty(CmisProperty property);
+   /**
+    * Get subset of properties accepted by {@link PropertyFilter}
+    * 
+    * @param filter property filter
+    * @return subset of properties
+    */
+   Map<String, Property<?>> getSubset(PropertyFilter filter);
 
-   boolean getBoolean(String name);
+   /**
+    * Set or update property. Changes may be updated immediately or after
+    * calling {@link ObjectData#save()}. This is implementation specific. Empty
+    * list for property value {@link Property#getValues()} minds the property
+    * will be in 'value not set' state. If property is required then
+    * {@link ConstraintException} will be thrown.
+    * 
+    * @param property new property
+    * @throws ConstraintException if value of the property violates the
+    *         min/max/required/length constraints specified in the property
+    *         definition in the object type
+    * @throws NameConstraintViolationException if <i>cmis:name</i> specified in
+    *         properties throws conflict
+    */
+   void setProperty(Property<?> property) throws ConstraintException;
 
-   boolean[] getBooleans(String name);
+   /**
+    * Set or add new properties. Properties will be merged with existed one and
+    * not replace whole set of existed properties. Changes may be updated
+    * immediately or after calling {@link ObjectData#save()}. This is
+    * implementation specific. Empty list for property value
+    * {@link Property#getValues()} minds the property will be in 'value not set'
+    * state. If property is required then {@link ConstraintException} will be
+    * thrown.
+    * 
+    * @param properties new set of properties
+    * @throws ConstraintException if value of any of the properties violates the
+    *         min/max/required/length constraints specified in the property
+    *         definition in the object type
+    * @throws NameConstraintViolationException if <i>cmis:name</i> specified in
+    *         properties throws conflict
+    */
+   void setProperties(Map<String, Property<?>> properties) throws ConstraintException, NameConstraintViolationException;
 
-   Calendar getDate(String name);
+   //
 
-   Calendar[] getDates(String name);
+   /**
+    * Get the content stream with specified id. Often it should be rendition
+    * stream. If object has type other then Document and
+    * <code>streamId == null</code> then this method return <code>null</code>.
+    * For Document objects default content stream will be returned.
+    * 
+    * @param streamId content stream id
+    * @return content stream or <code>null</code>
+    */
+   ContentStream getContentStream(String streamId);
 
-   BigDecimal getDecimal(String name);
-
-   BigDecimal[] getDecimals(String name);
-
-   String getHTML(String name);
-
-   String[] getHTMLs(String name);
-
-   String getId(String name);
-
-   String[] getIds(String name);
-
-   BigInteger getInteger(String name);
-
-   BigInteger[] getIntegers(String name);
-
-   String getString(String name);
-
-   String[] getStrings(String name);
-
-   URI getURI(String name);
-
-   URI[] getURIs(String name);
+   //   /**
+   //    * Save updated object or newly created object.
+   //    * 
+   //    * @throws StorageException if changes can't be saved cause storage internal
+   //    *         errors
+   //    * @throws NameConstraintViolationException if updated name (property
+   //    *         'cmis:name') cause name conflict, e.g. object with the same name
+   //    *         already exists
+   //    * @throws UpdateConflictException if saved object is not current any more
+   //    */
+   //   void save() throws StorageException, NameConstraintViolationException, UpdateConflictException;
 
 }

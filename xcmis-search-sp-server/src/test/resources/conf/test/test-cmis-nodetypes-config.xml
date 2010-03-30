@@ -1,0 +1,48 @@
+<nodeTypes xmlns:nt="http://www.jcp.org/jcr/nt/1.0" xmlns:mix="http:/www.jcp.org/jcr/mix/1.0"
+  xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:dc="http://purl.org/dc/elements/1.1/">
+
+  <nodeType name="cmis:article" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
+    <supertypes>
+      <supertype>nt:file</supertype>
+    </supertypes>
+    <propertyDefinitions>
+      <propertyDefinition name="cmis:article-title" requiredType="String" autoCreated="true"
+        mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
+        <defaultValues>
+          <defaultValue>hello</defaultValue>
+        </defaultValues>
+      </propertyDefinition>
+    </propertyDefinitions>
+  </nodeType>
+
+  <nodeType name="cmis:article-sports" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
+    <supertypes>
+      <supertype>cmis:article</supertype>
+    </supertypes>
+  </nodeType>
+
+  <nodeType name="cmis:article-animals" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
+    <supertypes>
+      <supertype>cmis:article</supertype>
+    </supertypes>
+  </nodeType>
+  
+  <nodeType name="cmis:sport-football" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
+    <supertypes>
+      <supertype>cmis:article-sports</supertype>
+    </supertypes>
+  </nodeType>
+  
+  <nodeType name="cmis:animals-dogs" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
+    <supertypes>
+      <supertype>cmis:article-animals</supertype>
+    </supertypes>
+  </nodeType>
+
+  <nodeType name="cmis:football-DynamoK" isMixin="false" hasOrderableChildNodes="false" primaryItemName="">
+    <supertypes>
+      <supertype>cmis:sport-football</supertype>
+    </supertypes>
+  </nodeType>
+  
+</nodeTypes>

@@ -23,7 +23,7 @@ import org.xcmis.spi.data.ObjectData;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: CmisVisitor.java 316 2010-03-09 15:20:28Z andrew00x $
  */
 public interface CmisVisitor
 {

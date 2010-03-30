@@ -19,19 +19,48 @@
 
 package org.xcmis.spi;
 
-import org.xcmis.core.EnumTypeOfChanges;
+import org.xcmis.spi.object.Property;
+
+import java.util.Calendar;
+import java.util.List;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: ChangeEvent.java 316 2010-03-09 15:20:28Z andrew00x $
  */
 public interface ChangeEvent
 {
 
+   /**
+    * Get change log token. It is unique identifier of change.
+    * 
+    * @return change log token
+    */
    String getLogToken();
-   
+
+   /**
+    * @return id of changed object
+    */
    String getObjectId();
-   
-   EnumTypeOfChanges getType();
-   
+
+   /**
+    * @return type of changes
+    * @see ChangeType
+    */
+   ChangeType getType();
+
+   /**
+    * Time of change to the object.
+    * 
+    * @return time of change or <code>null</code> if this info is unavailable
+    */
+   Calendar getDate();
+
+   /**
+    * For events of changeType "updated", list may optionally include the new
+    * values of properties on the object.
+    * 
+    * @return updated properties or <code>null</code>
+    */
+   List<Property<?>> getProperties();
 }

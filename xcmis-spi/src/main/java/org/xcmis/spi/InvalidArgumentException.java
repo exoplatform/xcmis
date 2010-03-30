@@ -23,7 +23,7 @@ package org.xcmis.spi;
  * Should thrown by CMIS service it got not valid argument.
  * 
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: InvalidArgumentException.java 232 2010-02-18 10:27:51Z andrew00x $
  */
 public class InvalidArgumentException extends CmisRuntimeException
 {

@@ -27,7 +27,7 @@ import java.util.NoSuchElementException;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: SimpleItemsIterator.java 2 2010-02-04 17:21:49Z andrew00x $
  * 
  * @param <T> 
  */

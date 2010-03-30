@@ -22,14 +22,14 @@ package org.xcmis.restatom.abdera;
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
-import org.xcmis.atom.CmisUriTemplateType;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.restatom.types.CmisUriTemplateType;
 
 import javax.xml.namespace.QName;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: UriTemplateTypeElement.java 2 2010-02-04 17:21:49Z andrew00x $
  */
 public class UriTemplateTypeElement extends ExtensibleElementWrapper
 {

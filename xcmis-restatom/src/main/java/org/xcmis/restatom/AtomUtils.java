@@ -29,7 +29,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: AtomUtils.java 2 2010-02-04 17:21:49Z andrew00x $
  */
 public class AtomUtils
 {

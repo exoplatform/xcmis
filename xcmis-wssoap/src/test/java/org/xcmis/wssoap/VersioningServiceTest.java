@@ -23,15 +23,14 @@ import org.apache.cxf.endpoint.Server;
 import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.CmisPropertiesType;
 import org.xcmis.core.CmisPropertyId;
-import org.xcmis.core.EnumIncludeRelationships;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.messaging.CmisObjectListType;
 import org.xcmis.soap.VersioningServicePort;
 import org.xcmis.spi.CMIS;
-import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.IncludeRelationships;
+import org.xcmis.wssoap.impl.TypeConverter;
 import org.xcmis.wssoap.impl.VersioningServicePortImpl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.ws.Holder;
@@ -53,8 +52,7 @@ public class VersioningServiceTest extends BaseTest
    public void setUp() throws Exception
    {
       super.setUp();
-      server =
-         complexDeployService(SERVICE_ADDRESS, new VersioningServicePortImpl(versioningService), null, null, true);
+      server = complexDeployService(SERVICE_ADDRESS, new VersioningServicePortImpl(storageProvider), null, null, true);
       port = getVersioningService(SERVICE_ADDRESS);
       assertNotNull(server);
       assertNotNull(port);
@@ -67,67 +65,61 @@ public class VersioningServiceTest extends BaseTest
       Holder<Boolean> contentCopiedHolder = new Holder<Boolean>();
       port
          .checkOut(repositoryId, idHolder, new Holder<CmisExtensionType>(new CmisExtensionType()), contentCopiedHolder);
-      CmisObjectListType checkedout = navigationService.getCheckedOutDocs(//
-         repositoryId, //
+      CmisObjectListType checkedout = TypeConverter.getCmisObjectListType(conn.getCheckedOutDocs(//
          testFolderId, //
          false, // Allowable actions
-         EnumIncludeRelationships.NONE, //
-         null, // Property filter
+         IncludeRelationships.NONE, //
+         false, null, // Property filter
          null, // Rendition filter
          null, // Order by
          10, // Max items
          0 // Skip count
-         , false).toCmisObjectList();
+         ));
       assertEquals(1, checkedout.getObjects().size());
    }
 
    public void testCancelCheckOut() throws Exception
    {
       String id = createDocument(testFolderId, "doc1");
-      CmisObjectType resp = versioningService.checkout(repositoryId, id, false).toCmisObjectType();
-      CmisObjectListType checkedout = navigationService.getCheckedOutDocs(//
-         repositoryId, //
+      String pwcId = conn.checkout(id);
+      CmisObjectListType checkedout = TypeConverter.getCmisObjectListType(conn.getCheckedOutDocs(//
          testFolderId, //
          false, // Allowable actions
-         EnumIncludeRelationships.NONE, //
-         null, // Property filter
+         IncludeRelationships.NONE, //
+         false, null, // Property filter
          null, // Rendition filter
          null, // Order by
          10, // Max items
          0 // Skip count
-         , false).toCmisObjectList();
+         ));
       assertEquals(1, checkedout.getObjects().size());
-      String pwcId = getObjectId(resp);
       port.cancelCheckOut(repositoryId, pwcId, new CmisExtensionType());
       // No more checked-out documents
-      checkedout = navigationService.getCheckedOutDocs(//
-         repositoryId, //
+      checkedout = TypeConverter.getCmisObjectListType(conn.getCheckedOutDocs(//
          testFolderId, //
          false, // Allowable actions
-         EnumIncludeRelationships.NONE, //
-         null, // Property filter
+         IncludeRelationships.NONE, //
+         false, null, // Property filter
          null, // Rendition filter
          null, // Order by
          10, // Max items
          0 // Skip count
-         , false).toCmisObjectList();
+         ));
       assertEquals(0, checkedout.getObjects().size());
    }
 
    public void testCheckIn() throws Exception
    {
       String id = createDocument(testFolderId, "doc1");
-      CmisObjectType pwc = versioningService.checkout(repositoryId, id, false).toCmisObjectType();
-      String pwcId = getObjectId(pwc);
+      String pwcId = conn.checkout(id);
       Holder<String> pwcHolder = new Holder<String>(pwcId);
+      CmisObjectType pwc =
+         TypeConverter.getCmisObjectType(conn.getObject(pwcId, false, IncludeRelationships.NONE, false, false, false,
+            null, null));
       CmisPropertyId versionSeriesIdProp = (CmisPropertyId)getProperty(pwc, CMIS.VERSION_SERIES_ID);
       String versionSeriesId = versionSeriesIdProp.getValue().get(0);
-      List<CmisObject> allVer = versioningService.getAllVersions(repositoryId, versionSeriesId, false, null, false);
-      List<CmisObjectType> allVersions = new ArrayList<CmisObjectType>();
-      for (CmisObject cmisObject : allVer)
-      {
-         allVersions.add(cmisObject.toCmisObjectType());
-      }
+      List<CmisObjectType> allVersions =
+         TypeConverter.getListCmisObjectType(conn.getAllVersions(versionSeriesId, false, false, null));
       //      assertEquals(1, allVersions.size());
       assertEquals(2, allVersions.size());
       port.checkIn(//
@@ -142,22 +134,15 @@ public class VersioningServiceTest extends BaseTest
          null, // Remove ACL
          new Holder<CmisExtensionType>() // Extensions
          );
-      allVer = versioningService.getAllVersions(repositoryId, versionSeriesId, false, null, false);
-      allVersions = new ArrayList<CmisObjectType>();
-      for (CmisObject cmisObject : allVer)
-      {
-         allVersions.add(cmisObject.toCmisObjectType());
-      }
+      allVersions = TypeConverter.getListCmisObjectType(conn.getAllVersions(versionSeriesId, false, false, null));
       assertEquals(2, allVersions.size());
    }
 
    public void testGetAllVersions() throws Exception
    {
       String docId = createDocument(testFolderId, "doc1");
-      CmisObjectType pwc = versioningService.checkout(repositoryId, docId, false).toCmisObjectType();
-      String pwcId = getObjectId(pwc);
-      versioningService.checkin(//
-         repositoryId, //
+      String pwcId = conn.checkout(docId);
+      conn.checkin(//
          pwcId, //
          true, // Major
          null, // Properties
@@ -166,7 +151,10 @@ public class VersioningServiceTest extends BaseTest
          null, // Add ACL
          null, // Remove ACL
          null // Policies
-         , false);
+         );
+      CmisObjectType pwc =
+         TypeConverter.getCmisObjectType(conn.getObject(pwcId, false, IncludeRelationships.NONE, false, false, false,
+            null, null));
       CmisPropertyId versionSeriesIdProp = (CmisPropertyId)getProperty(pwc, CMIS.VERSION_SERIES_ID);
       String versionSeriesId = versionSeriesIdProp.getValue().get(0);
       List<CmisObjectType> allVersions = port.getAllVersions(repositoryId, versionSeriesId, null, false, null);
@@ -179,10 +167,8 @@ public class VersioningServiceTest extends BaseTest
       String id = createDocument(testFolderId, "doc1");
       // XXX : Be sure creation document and PWC have different Last Modification dates.
       Thread.sleep(500);
-      CmisObjectType pwc = versioningService.checkout(repositoryId, id, false).toCmisObjectType();
-      String pwcId = getObjectId(pwc);
-      String lv = getObjectId(versioningService.checkin(//
-         repositoryId, //
+      String pwcId = conn.checkout(id);
+      String lv = conn.checkin(//
          pwcId, //
          true, // Major
          null, // Properties
@@ -191,7 +177,10 @@ public class VersioningServiceTest extends BaseTest
          null, // Add ACL
          null, // Remove ACL
          null // Policies
-         , false).toCmisObjectType());
+         );
+      CmisObjectType pwc =
+         TypeConverter.getCmisObjectType(conn.getObject(pwcId, false, IncludeRelationships.NONE, false, false, false,
+            null, null));
       CmisPropertyId versionSeriesIdProp = (CmisPropertyId)getProperty(pwc, CMIS.VERSION_SERIES_ID);
       String versionSeriesId = versionSeriesIdProp.getValue().get(0);
 

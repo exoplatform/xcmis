@@ -21,42 +21,14 @@ package org.xcmis.restatom.abdera;
 
 import junit.framework.TestCase;
 
-import org.xcmis.core.CmisChoiceBoolean;
-import org.xcmis.core.CmisChoiceDateTime;
-import org.xcmis.core.CmisChoiceDecimal;
-import org.xcmis.core.CmisChoiceId;
-import org.xcmis.core.CmisChoiceInteger;
-import org.xcmis.core.CmisChoiceString;
-import org.xcmis.core.CmisChoiceUri;
-import org.xcmis.core.CmisPropertyBoolean;
-import org.xcmis.core.CmisPropertyBooleanDefinitionType;
-import org.xcmis.core.CmisPropertyDateTime;
-import org.xcmis.core.CmisPropertyDateTimeDefinitionType;
-import org.xcmis.core.CmisPropertyDecimal;
-import org.xcmis.core.CmisPropertyDecimalDefinitionType;
-import org.xcmis.core.CmisPropertyDefinitionType;
-import org.xcmis.core.CmisPropertyId;
-import org.xcmis.core.CmisPropertyIdDefinitionType;
-import org.xcmis.core.CmisPropertyInteger;
-import org.xcmis.core.CmisPropertyIntegerDefinitionType;
-import org.xcmis.core.CmisPropertyString;
-import org.xcmis.core.CmisPropertyStringDefinitionType;
-import org.xcmis.core.CmisPropertyUri;
-import org.xcmis.core.CmisPropertyUriDefinitionType;
-import org.xcmis.core.EnumCardinality;
-import org.xcmis.core.EnumPropertyType;
-import org.xcmis.core.EnumUpdatability;
 import org.xcmis.restatom.AbderaFactory;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.NamespaceResolver;
-import org.xcmis.restatom.abdera.PropertyBooleanDefinitionTypeElement;
-import org.xcmis.restatom.abdera.PropertyDateTimeDefinitionTypeElement;
-import org.xcmis.restatom.abdera.PropertyDecimalDefinitionTypeElement;
-import org.xcmis.restatom.abdera.PropertyIdDefinitionTypeElement;
-import org.xcmis.restatom.abdera.PropertyIntegerDefinitionTypeElement;
-import org.xcmis.restatom.abdera.PropertyStringDefinitionTypeElement;
-import org.xcmis.restatom.abdera.PropertyUriDefinitionTypeElement;
-import org.xcmis.spi.utils.CmisUtils;
+import org.xcmis.spi.Precision;
+import org.xcmis.spi.PropertyType;
+import org.xcmis.spi.Updatability;
+import org.xcmis.spi.impl.ChoiceImpl;
+import org.xcmis.spi.impl.PropertyDefinitionImpl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -71,35 +43,33 @@ import javax.xml.xpath.XPathFactory;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: PropertyDefinitionElementTest.java 2 2010-02-04 17:21:49Z andrew00x $
  */
 public class PropertyDefinitionElementTest extends TestCase
 {
 
    public void testWriteBoolean() throws Exception
    {
-      CmisPropertyBooleanDefinitionType def = new CmisPropertyBooleanDefinitionType();
+      PropertyDefinitionImpl<Boolean> def = new PropertyDefinitionImpl<Boolean>();
       addCommonAttributes(def);
 
-      def.setPropertyType(EnumPropertyType.BOOLEAN);
+      def.setPropertyType(PropertyType.BOOLEAN);
 
-      CmisChoiceBoolean bc1 = new CmisChoiceBoolean();
+      ChoiceImpl<Boolean> bc1 = new ChoiceImpl<Boolean>();
       bc1.setDisplayName("key1");
-      bc1.getValue().add(new Boolean(true));
+      bc1.setValues(new Boolean[]{true});
 
-      CmisChoiceBoolean bc2 = new CmisChoiceBoolean();
+      ChoiceImpl<Boolean> bc2 = new ChoiceImpl<Boolean>();
       bc2.setDisplayName("key2");
-      bc2.getValue().add(new Boolean(true));
+      bc2.setValues(new Boolean[]{true});
 
-      def.getChoice().add(bc1);
-      def.getChoice().add(bc2);
+      def.getChoices().add(bc1);
+      def.getChoices().add(bc2);
 
-      CmisPropertyBoolean defaultValue = new CmisPropertyBoolean();
-      defaultValue.getValue().add(true);
-      def.setDefaultValue(defaultValue);
+      def.setDefaultValue(new Boolean[]{true});
 
-      PropertyBooleanDefinitionTypeElement el =
-         new PropertyBooleanDefinitionTypeElement(AbderaFactory.getInstance().getFactory(),
+      PropertyDefinitionTypeElement el =
+         new PropertyDefinitionTypeElement(AbderaFactory.getInstance().getFactory(),
             AtomCMIS.PROPERTY_BOOLEAN_DEFINITION);
       el.build(def);
 
@@ -111,6 +81,9 @@ public class PropertyDefinitionElementTest extends TestCase
       DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
       f.setNamespaceAware(true);
       org.w3c.dom.Document xmlDoc = f.newDocumentBuilder().parse(new ByteArrayInputStream(out.toByteArray()));
+
+      assertNotNull(xmlDoc);
+
       XPath xp = XPathFactory.newInstance().newXPath();
       xp.setNamespaceContext(new NamespaceResolver());
 
@@ -123,7 +96,8 @@ public class PropertyDefinitionElementTest extends TestCase
       assertEquals("2", r);
       r = (String)xp.evaluate("count(/" + baseElement + "/cmis:defaultValue)", xmlDoc, XPathConstants.STRING);
       assertEquals("1", r);
-      r = (String)xp.evaluate("count(/" + baseElement + "/cmis:defaultValue/cmis:value)", xmlDoc, XPathConstants.STRING);
+      r =
+         (String)xp.evaluate("count(/" + baseElement + "/cmis:defaultValue/cmis:value)", xmlDoc, XPathConstants.STRING);
       assertEquals("1", r);
       r = (String)xp.evaluate(baseElement + "/cmis:defaultValue/cmis:value", xmlDoc, XPathConstants.STRING);
       assertEquals("true", r);
@@ -131,27 +105,25 @@ public class PropertyDefinitionElementTest extends TestCase
 
    public void testWriteDateTime() throws Exception
    {
-      CmisPropertyDateTimeDefinitionType def = new CmisPropertyDateTimeDefinitionType();
+      PropertyDefinitionImpl<Calendar> def = new PropertyDefinitionImpl<Calendar>();
       addCommonAttributes(def);
-      def.setPropertyType(EnumPropertyType.DATETIME);
+      def.setPropertyType(PropertyType.DATETIME);
 
-      CmisChoiceDateTime dtc1 = new CmisChoiceDateTime();
+      ChoiceImpl<Calendar> dtc1 = new ChoiceImpl<Calendar>();
       dtc1.setDisplayName("key1");
-      dtc1.getValue().add(CmisUtils.fromCalendar(Calendar.getInstance()));
+      dtc1.setValues(new Calendar[]{Calendar.getInstance()});
 
-      CmisChoiceDateTime dtc2 = new CmisChoiceDateTime();
+      ChoiceImpl<Calendar> dtc2 = new ChoiceImpl<Calendar>();
       dtc2.setDisplayName("key2");
-      dtc2.getValue().add(CmisUtils.fromCalendar(Calendar.getInstance()));
+      dtc2.setValues(new Calendar[]{Calendar.getInstance()});
 
-      def.getChoice().add(dtc1);
-      def.getChoice().add(dtc2);
+      def.getChoices().add(dtc1);
+      def.getChoices().add(dtc2);
 
-      CmisPropertyDateTime defaultValue = new CmisPropertyDateTime();
-      defaultValue.getValue().add(CmisUtils.fromCalendar(Calendar.getInstance()));
-      def.setDefaultValue(defaultValue);
+      def.setDefaultValue(new Calendar[]{Calendar.getInstance()});
 
-      PropertyDateTimeDefinitionTypeElement el =
-         new PropertyDateTimeDefinitionTypeElement(AbderaFactory.getInstance().getFactory(),
+      PropertyDefinitionTypeElement el =
+         new PropertyDefinitionTypeElement(AbderaFactory.getInstance().getFactory(),
             AtomCMIS.PROPERTY_DATE_TIME_DEFINITION);
       el.build(def);
 
@@ -163,6 +135,9 @@ public class PropertyDefinitionElementTest extends TestCase
       DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
       f.setNamespaceAware(true);
       org.w3c.dom.Document xmlDoc = f.newDocumentBuilder().parse(new ByteArrayInputStream(out.toByteArray()));
+
+      assertNotNull(xmlDoc);
+
       XPath xp = XPathFactory.newInstance().newXPath();
       xp.setNamespaceContext(new NamespaceResolver());
 
@@ -175,34 +150,33 @@ public class PropertyDefinitionElementTest extends TestCase
       assertEquals("2", r);
       r = (String)xp.evaluate("count(/" + baseElement + "/cmis:defaultValue)", xmlDoc, XPathConstants.STRING);
       assertEquals("1", r);
-      r = (String)xp.evaluate("count(/" + baseElement + "/cmis:defaultValue/cmis:value)", xmlDoc, XPathConstants.STRING);
+      r =
+         (String)xp.evaluate("count(/" + baseElement + "/cmis:defaultValue/cmis:value)", xmlDoc, XPathConstants.STRING);
       assertEquals("1", r);
    }
 
    public void testWriteDecimal() throws Exception
    {
-      CmisPropertyDecimalDefinitionType def = new CmisPropertyDecimalDefinitionType();
+      PropertyDefinitionImpl<BigDecimal> def = new PropertyDefinitionImpl<BigDecimal>();
       addCommonAttributes(def);
-      def.setPropertyType(EnumPropertyType.DECIMAL);
-      def.setPrecision(BigInteger.valueOf(32));
+      def.setPropertyType(PropertyType.DECIMAL);
+      def.setPrecision(Precision.Bit32);
 
-      CmisChoiceDecimal d1 = new CmisChoiceDecimal();
+      ChoiceImpl<BigDecimal> d1 = new ChoiceImpl<BigDecimal>();
       d1.setDisplayName("key1");
-      d1.getValue().add(new BigDecimal(0));
+      d1.setValues(new BigDecimal[]{BigDecimal.ZERO});
 
-      CmisChoiceDecimal d2 = new CmisChoiceDecimal();
+      ChoiceImpl<BigDecimal> d2 = new ChoiceImpl<BigDecimal>();
       d2.setDisplayName("key2");
-      d2.getValue().add(new BigDecimal(1));
+      d2.setValues(new BigDecimal[]{BigDecimal.ONE});
 
-      def.getChoice().add(d1);
-      def.getChoice().add(d2);
+      def.getChoices().add(d1);
+      def.getChoices().add(d2);
 
-      CmisPropertyDecimal defaultValue = new CmisPropertyDecimal();
-      defaultValue.getValue().add(BigDecimal.valueOf(1));
-      def.setDefaultValue(defaultValue);
+      def.setDefaultValue(new BigDecimal[]{BigDecimal.valueOf(1)});
 
-      PropertyDecimalDefinitionTypeElement el =
-         new PropertyDecimalDefinitionTypeElement(AbderaFactory.getInstance().getFactory(),
+      PropertyDefinitionTypeElement el =
+         new PropertyDefinitionTypeElement(AbderaFactory.getInstance().getFactory(),
             AtomCMIS.PROPERTY_DECIMAL_DEFINITION);
       el.build(def);
 
@@ -214,6 +188,9 @@ public class PropertyDefinitionElementTest extends TestCase
       DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
       f.setNamespaceAware(true);
       org.w3c.dom.Document xmlDoc = f.newDocumentBuilder().parse(new ByteArrayInputStream(out.toByteArray()));
+
+      assertNotNull(xmlDoc);
+
       XPath xp = XPathFactory.newInstance().newXPath();
       xp.setNamespaceContext(new NamespaceResolver());
 
@@ -228,33 +205,32 @@ public class PropertyDefinitionElementTest extends TestCase
       assertEquals("2", r);
       r = (String)xp.evaluate("count(/" + baseElement + "/cmis:defaultValue)", xmlDoc, XPathConstants.STRING);
       assertEquals("1", r);
-      r = (String)xp.evaluate("count(/" + baseElement + "/cmis:defaultValue/cmis:value)", xmlDoc, XPathConstants.STRING);
+      r =
+         (String)xp.evaluate("count(/" + baseElement + "/cmis:defaultValue/cmis:value)", xmlDoc, XPathConstants.STRING);
       assertEquals("1", r);
    }
 
    public void testWriteId() throws Exception
    {
-      CmisPropertyIdDefinitionType def = new CmisPropertyIdDefinitionType();
+      PropertyDefinitionImpl<String> def = new PropertyDefinitionImpl<String>();
       addCommonAttributes(def);
-      def.setPropertyType(EnumPropertyType.ID);
+      def.setPropertyType(PropertyType.ID);
 
-      CmisChoiceId idc1 = new CmisChoiceId();
+      ChoiceImpl<String> idc1 = new ChoiceImpl<String>();
       idc1.setDisplayName("key1");
-      idc1.getValue().add("id1");
+      idc1.setValues(new String[]{"id1"});
 
-      CmisChoiceId idc2 = new CmisChoiceId();
+      ChoiceImpl<String> idc2 = new ChoiceImpl<String>();
       idc2.setDisplayName("key2");
-      idc2.getValue().add("id2");
+      idc2.setValues(new String[]{"id2"});
 
-      def.getChoice().add(idc1);
-      def.getChoice().add(idc2);
+      def.getChoices().add(idc1);
+      def.getChoices().add(idc2);
 
-      CmisPropertyId defaultValue = new CmisPropertyId();
-      defaultValue.getValue().add("id:1");
-      def.setDefaultValue(defaultValue);
+      def.setDefaultValue(new String[]{"id:1"});
 
-      PropertyIdDefinitionTypeElement el =
-         new PropertyIdDefinitionTypeElement(AbderaFactory.getInstance().getFactory(), AtomCMIS.PROPERTY_ID_DEFINITION);
+      PropertyDefinitionTypeElement el =
+         new PropertyDefinitionTypeElement(AbderaFactory.getInstance().getFactory(), AtomCMIS.PROPERTY_ID_DEFINITION);
       el.build(def);
 
       //    System.out.println("PropertyIdDefinition: " + el);
@@ -265,6 +241,9 @@ public class PropertyDefinitionElementTest extends TestCase
       DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
       f.setNamespaceAware(true);
       org.w3c.dom.Document xmlDoc = f.newDocumentBuilder().parse(new ByteArrayInputStream(out.toByteArray()));
+
+      assertNotNull(xmlDoc);
+
       XPath xp = XPathFactory.newInstance().newXPath();
       xp.setNamespaceContext(new NamespaceResolver());
 
@@ -277,7 +256,8 @@ public class PropertyDefinitionElementTest extends TestCase
       assertEquals("2", r);
       r = (String)xp.evaluate("count(/" + baseElement + "/cmis:defaultValue)", xmlDoc, XPathConstants.STRING);
       assertEquals("1", r);
-      r = (String)xp.evaluate("count(/" + baseElement + "/cmis:defaultValue/cmis:value)", xmlDoc, XPathConstants.STRING);
+      r =
+         (String)xp.evaluate("count(/" + baseElement + "/cmis:defaultValue/cmis:value)", xmlDoc, XPathConstants.STRING);
       assertEquals("1", r);
       r = (String)xp.evaluate(baseElement + "/cmis:defaultValue/cmis:value", xmlDoc, XPathConstants.STRING);
       assertEquals("id:1", r);
@@ -285,29 +265,27 @@ public class PropertyDefinitionElementTest extends TestCase
 
    public void testWriteInteger() throws Exception
    {
-      CmisPropertyIntegerDefinitionType def = new CmisPropertyIntegerDefinitionType();
+      PropertyDefinitionImpl<BigInteger> def = new PropertyDefinitionImpl<BigInteger>();
       addCommonAttributes(def);
-      def.setPropertyType(EnumPropertyType.INTEGER);
-      def.setMinValue(BigInteger.valueOf(Long.MIN_VALUE));
-      def.setMaxValue(BigInteger.valueOf(Long.MAX_VALUE));
+      def.setPropertyType(PropertyType.INTEGER);
+      def.setMinInteger(BigInteger.valueOf(Long.MIN_VALUE));
+      def.setMaxInteger(BigInteger.valueOf(Long.MAX_VALUE));
 
-      CmisChoiceInteger ic1 = new CmisChoiceInteger();
+      ChoiceImpl<BigInteger> ic1 = new ChoiceImpl<BigInteger>();
       ic1.setDisplayName("key1");
-      ic1.getValue().add(BigInteger.valueOf(1));
+      ic1.setValues(new BigInteger[]{BigInteger.ONE});
 
-      CmisChoiceInteger ic2 = new CmisChoiceInteger();
+      ChoiceImpl<BigInteger> ic2 = new ChoiceImpl<BigInteger>();
       ic2.setDisplayName("key2");
-      ic2.getValue().add(BigInteger.valueOf(1));
+      ic2.setValues(new BigInteger[]{BigInteger.ONE});
 
-      def.getChoice().add(ic1);
-      def.getChoice().add(ic2);
+      def.getChoices().add(ic1);
+      def.getChoices().add(ic2);
 
-      CmisPropertyInteger defaultValue = new CmisPropertyInteger();
-      defaultValue.getValue().add(BigInteger.valueOf(1));
-      def.setDefaultValue(defaultValue);
+      def.setDefaultValue(new BigInteger[]{BigInteger.ONE});
 
-      PropertyIntegerDefinitionTypeElement el =
-         new PropertyIntegerDefinitionTypeElement(AbderaFactory.getInstance().getFactory(),
+      PropertyDefinitionTypeElement el =
+         new PropertyDefinitionTypeElement(AbderaFactory.getInstance().getFactory(),
             AtomCMIS.PROPERTY_INTEGER_DEFINITION);
       el.build(def);
 
@@ -319,6 +297,9 @@ public class PropertyDefinitionElementTest extends TestCase
       DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
       f.setNamespaceAware(true);
       org.w3c.dom.Document xmlDoc = f.newDocumentBuilder().parse(new ByteArrayInputStream(out.toByteArray()));
+
+      assertNotNull(xmlDoc);
+
       XPath xp = XPathFactory.newInstance().newXPath();
       xp.setNamespaceContext(new NamespaceResolver());
 
@@ -335,34 +316,33 @@ public class PropertyDefinitionElementTest extends TestCase
       assertEquals("2", r);
       r = (String)xp.evaluate("count(/" + baseElement + "/cmis:defaultValue)", xmlDoc, XPathConstants.STRING);
       assertEquals("1", r);
-      r = (String)xp.evaluate("count(/" + baseElement + "/cmis:defaultValue/cmis:value)", xmlDoc, XPathConstants.STRING);
+      r =
+         (String)xp.evaluate("count(/" + baseElement + "/cmis:defaultValue/cmis:value)", xmlDoc, XPathConstants.STRING);
       assertEquals("1", r);
    }
 
    public void testWriteString() throws Exception
    {
-      CmisPropertyStringDefinitionType def = new CmisPropertyStringDefinitionType();
+      PropertyDefinitionImpl<String> def = new PropertyDefinitionImpl<String>();
       addCommonAttributes(def);
-      def.setPropertyType(EnumPropertyType.STRING);
-      def.setMaxLength(BigInteger.valueOf(65536));
+      def.setPropertyType(PropertyType.STRING);
+      def.setMaxLength(Integer.valueOf(65536));
 
-      CmisChoiceString sc1 = new CmisChoiceString();
+      ChoiceImpl<String> sc1 = new ChoiceImpl<String>();
       sc1.setDisplayName("key1");
-      sc1.getValue().add("string1");
+      sc1.setValues(new String[]{"string1"});
 
-      CmisChoiceString sc2 = new CmisChoiceString();
+      ChoiceImpl<String> sc2 = new ChoiceImpl<String>();
       sc2.setDisplayName("key2");
-      sc2.getValue().add("string2");
+      sc2.setValues(new String[]{"string2"});
 
-      def.getChoice().add(sc1);
-      def.getChoice().add(sc2);
+      def.getChoices().add(sc1);
+      def.getChoices().add(sc2);
 
-      CmisPropertyString defaultValue = new CmisPropertyString();
-      defaultValue.getValue().add("hello");
-      def.setDefaultValue(defaultValue);
+      def.setDefaultValue(new String[]{"hello"});
 
-      PropertyStringDefinitionTypeElement el =
-         new PropertyStringDefinitionTypeElement(AbderaFactory.getInstance().getFactory(),
+      PropertyDefinitionTypeElement el =
+         new PropertyDefinitionTypeElement(AbderaFactory.getInstance().getFactory(),
             AtomCMIS.PROPERTY_STRING_DEFINITION);
       el.build(def);
 
@@ -374,6 +354,9 @@ public class PropertyDefinitionElementTest extends TestCase
       DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
       f.setNamespaceAware(true);
       org.w3c.dom.Document xmlDoc = f.newDocumentBuilder().parse(new ByteArrayInputStream(out.toByteArray()));
+
+      assertNotNull(xmlDoc);
+
       XPath xp = XPathFactory.newInstance().newXPath();
       xp.setNamespaceContext(new NamespaceResolver());
 
@@ -388,7 +371,8 @@ public class PropertyDefinitionElementTest extends TestCase
       assertEquals("2", r);
       r = (String)xp.evaluate("count(/" + baseElement + "/cmis:defaultValue)", xmlDoc, XPathConstants.STRING);
       assertEquals("1", r);
-      r = (String)xp.evaluate("count(/" + baseElement + "/cmis:defaultValue/cmis:value)", xmlDoc, XPathConstants.STRING);
+      r =
+         (String)xp.evaluate("count(/" + baseElement + "/cmis:defaultValue/cmis:value)", xmlDoc, XPathConstants.STRING);
       assertEquals("1", r);
       r = (String)xp.evaluate(baseElement + "/cmis:defaultValue/cmis:value", xmlDoc, XPathConstants.STRING);
       assertEquals("hello", r);
@@ -396,28 +380,25 @@ public class PropertyDefinitionElementTest extends TestCase
 
    public void testWriteUri() throws Exception
    {
-      CmisPropertyUriDefinitionType def = new CmisPropertyUriDefinitionType();
+      PropertyDefinitionImpl<String> def = new PropertyDefinitionImpl<String>();
       addCommonAttributes(def);
-      def.setPropertyType(EnumPropertyType.URI);
+      def.setPropertyType(PropertyType.URI);
 
-      CmisChoiceUri bc1 = new CmisChoiceUri();
+      ChoiceImpl<String> bc1 = new ChoiceImpl<String>();
       bc1.setDisplayName("key1");
-      bc1.getValue().add("htt://host1/a/b/c/d");
+      bc1.setValues(new String[]{"http://host1/a/b/c/d"});
 
-      CmisChoiceUri bc2 = new CmisChoiceUri();
+      ChoiceImpl<String> bc2 = new ChoiceImpl<String>();
       bc2.setDisplayName("key2");
-      bc2.getValue().add("htt://host2/a/b/c/d");
+      bc2.setValues(new String[]{"http://host2/a/b/c/d"});
 
-      def.getChoice().add(bc1);
-      def.getChoice().add(bc2);
+      def.getChoices().add(bc1);
+      def.getChoices().add(bc2);
 
-      CmisPropertyUri defaultValue = new CmisPropertyUri();
-      defaultValue.getValue().add("htt://host2/a");
-      def.setDefaultValue(defaultValue);
+      def.setDefaultValue(new String[]{"http://host2/a"});
 
-      PropertyUriDefinitionTypeElement el =
-         new PropertyUriDefinitionTypeElement(AbderaFactory.getInstance().getFactory(),
-            AtomCMIS.PROPERTY_URI_DEFINITION);
+      PropertyDefinitionTypeElement el =
+         new PropertyDefinitionTypeElement(AbderaFactory.getInstance().getFactory(), AtomCMIS.PROPERTY_URI_DEFINITION);
       el.build(def);
 
       //    System.out.println("PropertyUriDefinition: " + el);
@@ -428,6 +409,9 @@ public class PropertyDefinitionElementTest extends TestCase
       DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
       f.setNamespaceAware(true);
       org.w3c.dom.Document xmlDoc = f.newDocumentBuilder().parse(new ByteArrayInputStream(out.toByteArray()));
+
+      assertNotNull(xmlDoc);
+
       XPath xp = XPathFactory.newInstance().newXPath();
       xp.setNamespaceContext(new NamespaceResolver());
 
@@ -440,13 +424,14 @@ public class PropertyDefinitionElementTest extends TestCase
       assertEquals("2", r);
       r = (String)xp.evaluate("count(/" + baseElement + "/cmis:defaultValue)", xmlDoc, XPathConstants.STRING);
       assertEquals("1", r);
-      r = (String)xp.evaluate("count(/" + baseElement + "/cmis:defaultValue/cmis:value)", xmlDoc, XPathConstants.STRING);
+      r =
+         (String)xp.evaluate("count(/" + baseElement + "/cmis:defaultValue/cmis:value)", xmlDoc, XPathConstants.STRING);
       assertEquals("1", r);
       r = (String)xp.evaluate(baseElement + "/cmis:defaultValue/cmis:value", xmlDoc, XPathConstants.STRING);
-      assertEquals("htt://host2/a", r);
+      assertEquals("http://host2/a", r);
    }
 
-   private void addCommonAttributes(CmisPropertyDefinitionType def)
+   private void addCommonAttributes(PropertyDefinitionImpl<?> def)
    {
       def.setDescription("description");
       def.setDisplayName("displayName");
@@ -456,14 +441,15 @@ public class PropertyDefinitionElementTest extends TestCase
       def.setLocalNamespace("localNamespace");
       def.setQueryable(true);
       def.setQueryName("queryName");
-      def.setCardinality(EnumCardinality.SINGLE);
+      def.setMultivalued(false);
       def.setRequired(true);
       def.setOpenChoice(new Boolean(true));
-      def.setUpdatability(EnumUpdatability.READONLY);
+      def.setUpdatability(Updatability.READONLY);
    }
 
    private void checkCommonAttributes(XPath xp, org.w3c.dom.Document xmlDoc, String baseElement) throws Exception
    {
+      assertNotNull(xmlDoc);
       String r = (String)xp.evaluate("/" + baseElement + "/cmis:name", xmlDoc, XPathConstants.STRING);
       r = (String)xp.evaluate(baseElement + "/cmis:cardinality", xmlDoc, XPathConstants.STRING);
       assertEquals("single", r);

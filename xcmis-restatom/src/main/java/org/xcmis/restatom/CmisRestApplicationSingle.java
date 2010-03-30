@@ -19,16 +19,6 @@
 
 package org.xcmis.restatom;
 
-import org.xcmis.core.AccessControlService;
-import org.xcmis.core.DiscoveryService;
-import org.xcmis.core.MultifilingService;
-import org.xcmis.core.NavigationService;
-import org.xcmis.core.ObjectService;
-import org.xcmis.core.PolicyService;
-import org.xcmis.core.RelationshipService;
-import org.xcmis.core.RepositoryService;
-import org.xcmis.core.VersioningService;
-
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -37,7 +27,7 @@ import javax.ws.rs.core.Application;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: CmisRestApplicationSingle.java 2 2010-02-04 17:21:49Z andrew00x $
  */
 public class CmisRestApplicationSingle extends Application
 {
@@ -48,31 +38,10 @@ public class CmisRestApplicationSingle extends Application
    /**
     * Instantiates a new cmis rest application single.
     * 
-    * @param repositoryService the repository service
-    * @param objectService the object service
-    * @param navigationService the navigation service
-    * @param relationshipService the relationship service
-    * @param policyService the policy service
-    * @param aclService the acl service
-    * @param queryService the query service
-    * @param multifilingService the multifiling service
-    * @param versioningService the versioning service
     */
-   public CmisRestApplicationSingle(RepositoryService repositoryService, ObjectService objectService,
-      NavigationService navigationService, RelationshipService relationshipService, PolicyService policyService,
-      AccessControlService aclService, DiscoveryService queryService, MultifilingService multifilingService,
-      VersioningService versioningService)
+   public CmisRestApplicationSingle()
    {
-      singleton.add(new AtomCmisService(//
-         repositoryService, //
-         objectService, //
-         navigationService, //
-         relationshipService, //
-         policyService, //
-         aclService, //
-         queryService, //
-         multifilingService, //
-         versioningService));
+      singleton.add(new AtomCmisService(null));
       singleton.add(new AbderaResponseEntityProvider());
       singleton.add(new AbderaElementEntityProvider());
    }

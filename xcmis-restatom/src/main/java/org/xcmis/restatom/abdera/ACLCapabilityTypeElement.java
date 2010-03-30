@@ -22,10 +22,10 @@ package org.xcmis.restatom.abdera;
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
-import org.xcmis.core.CmisACLCapabilityType;
-import org.xcmis.core.CmisPermissionDefinition;
-import org.xcmis.core.CmisPermissionMapping;
 import org.xcmis.restatom.AtomCMIS;
+import org.xcmis.spi.ACLCapability;
+import org.xcmis.spi.Permission;
+import org.xcmis.spi.PermissionMapping;
 
 import java.util.List;
 
@@ -33,7 +33,7 @@ import javax.xml.namespace.QName;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: ACLCapabilityTypeElement.java 2 2010-02-04 17:21:49Z andrew00x $
  */
 public class ACLCapabilityTypeElement extends ExtensibleElementWrapper
 {
@@ -64,7 +64,7 @@ public class ACLCapabilityTypeElement extends ExtensibleElementWrapper
     * 
     * @param aclCapability the acl capability
     */
-   public void build(CmisACLCapabilityType aclCapability)
+   public void build(ACLCapability aclCapability)
    {
       if (aclCapability != null)
       {
@@ -73,23 +73,23 @@ public class ACLCapabilityTypeElement extends ExtensibleElementWrapper
          if (aclCapability.getSupportedPermissions() != null)
             addSimpleExtension(AtomCMIS.SUPPORTED_PERMISSIONS, aclCapability.getSupportedPermissions().value());
 
-         List<CmisPermissionDefinition> listCmisPermissionDefinition = aclCapability.getPermissions();
-         if (listCmisPermissionDefinition != null && listCmisPermissionDefinition.size() > 0)
+         List<Permission> listPermission = aclCapability.getPermissions();
+         if (listPermission != null && listPermission.size() > 0)
          {
-            for (CmisPermissionDefinition cmisPermissionDefinition : listCmisPermissionDefinition)
+            for (Permission permission : listPermission)
             {
-               PermissionDefinitionElement permissionDefinition = addExtension(AtomCMIS.PERMISSIONS);
-               permissionDefinition.build(cmisPermissionDefinition);
+               PermissionDefinitionElement permissionDefinitionElement = addExtension(AtomCMIS.PERMISSIONS);
+               permissionDefinitionElement.build(permission);
             }
          }
 
-         List<CmisPermissionMapping> listCmisPermissionMapping = aclCapability.getMapping();
-         if (listCmisPermissionMapping != null && listCmisPermissionMapping.size() > 0)
+         List<PermissionMapping> listPermissionMapping = aclCapability.getMapping();
+         if (listPermissionMapping != null && listPermissionMapping.size() > 0)
          {
-            for (CmisPermissionMapping cmisPermissionMapping : listCmisPermissionMapping)
+            for (PermissionMapping permissionMapping : listPermissionMapping)
             {
-               PermissionMappingElement permissionMapping = addExtension(AtomCMIS.MAPPING);
-               permissionMapping.build(cmisPermissionMapping);
+               PermissionMappingElement permissionMappingElement = addExtension(AtomCMIS.MAPPING);
+               permissionMappingElement.build(permissionMapping);
             }
          }
       }

@@ -28,24 +28,20 @@ import org.apache.abdera.protocol.server.ResponseContext;
 import org.apache.abdera.protocol.server.TargetType;
 import org.apache.abdera.protocol.server.context.EmptyResponseContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
-import org.xcmis.core.CmisObjectType;
-import org.xcmis.core.CmisProperty;
-import org.xcmis.core.CmisPropertyId;
-import org.xcmis.core.EnumIncludeRelationships;
-import org.xcmis.core.EnumPropertiesBase;
-import org.xcmis.core.ObjectService;
-import org.xcmis.core.PolicyService;
-import org.xcmis.core.RepositoryService;
-import org.xcmis.core.VersioningService;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.abdera.ObjectTypeElement;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FilterNotValidException;
+import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.RepositoryException;
+import org.xcmis.spi.StorageException;
+import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.object.Property;
+import org.xcmis.spi.object.impl.IdProperty;
 
 import java.util.HashMap;
 import java.util.List;
@@ -59,22 +55,13 @@ import java.util.Map;
 public class PoliciesCollection extends CmisObjectCollection
 {
 
-   /** The policy service. */
-   protected final PolicyService policyService;
-
    /**
     * Instantiates a new policies collection.
-    * 
-    * @param repositoryService the repository service
-    * @param objectService the object service
-    * @param versioningService the versioning service
-    * @param policyService the policy service
+    * @param storageProvider TODO
     */
-   public PoliciesCollection(RepositoryService repositoryService, ObjectService objectService,
-      VersioningService versioningService, PolicyService policyService)
+   public PoliciesCollection(StorageProvider storageProvider)
    {
-      super(repositoryService, objectService, versioningService);
-      this.policyService = policyService;
+      super(storageProvider);
       setHref("/policies");
    }
 
@@ -85,38 +72,15 @@ public class PoliciesCollection extends CmisObjectCollection
    {
       String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
 
-      int maxItems;
-      try
-      {
-         maxItems =
-            request.getParameter(AtomCMIS.PARAM_MAX_ITEMS) == null
-               || request.getParameter(AtomCMIS.PARAM_MAX_ITEMS).length() == 0 ? CMIS.MAX_ITEMS : Integer
-               .parseInt(request.getParameter(AtomCMIS.PARAM_MAX_ITEMS));
-      }
-      catch (NumberFormatException nfe)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_MAX_ITEMS);
-         throw new ResponseContextException(msg, 400);
-      }
-      int skipCount;
-      try
-      {
-         skipCount =
-            request.getParameter(AtomCMIS.PARAM_SKIP_COUNT) == null
-               || request.getParameter(AtomCMIS.PARAM_SKIP_COUNT).length() == 0 ? 0 : Integer.parseInt(request
-               .getParameter(AtomCMIS.PARAM_SKIP_COUNT));
-      }
-      catch (NumberFormatException nfe)
-      {
-         String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_SKIP_COUNT);
-         throw new ResponseContextException(msg, 400);
-      }
+      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CMIS.MAX_ITEMS);
+      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CMIS.SKIP_COUNT);
 
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
          String objectId = getId(request);
-         List<CmisObject> list =
-            policyService.getAppliedPolicies(getRepositoryId(request), objectId, propertyFilter, true);
+         List<CmisObject> list = conn.getAppliedPolicies(objectId, true, propertyFilter);
          if (list.size() > 0)
          {
             // add cmisra:numItems
@@ -141,7 +105,7 @@ public class PoliciesCollection extends CmisObjectCollection
             }
          }
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          throw new ResponseContextException(createErrorResponse(re, 500));
       }
@@ -156,6 +120,13 @@ public class PoliciesCollection extends CmisObjectCollection
       catch (Throwable t)
       {
          throw new ResponseContextException(createErrorResponse(t, 500));
+      }
+      finally
+      {
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -178,22 +149,28 @@ public class PoliciesCollection extends CmisObjectCollection
       }
 
       ObjectTypeElement objectElement = entry.getFirstChild(AtomCMIS.OBJECT);
-      CmisObjectType object = objectElement.getObject();
+      CmisObject object = objectElement.getObject();
 
       String policyId = null;
 
-      for (CmisProperty p : object.getProperties().getProperty())
+      for (Property<?> p : object.getProperties().values())
       {
-         String pName = p.getPropertyDefinitionId();
-         if (pName.equals(EnumPropertiesBase.CMIS_OBJECT_ID.value()))
-            policyId = ((CmisPropertyId)p).getValue().get(0);
+         String pName = p.getId();
+         if (pName.equals(CMIS.OBJECT_ID))
+         {
+            policyId = ((IdProperty)p).getValues().get(0);
+         }
       }
-      String repositoryId = getRepositoryId(request);
+
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
          // apply policy
          if (policyId != null)
-            policyService.applyPolicy(repositoryId, policyId, objectId);
+         {
+            conn.applyPolicy(policyId, objectId);
+         }
       }
       catch (ConstraintException cve)
       {
@@ -207,7 +184,7 @@ public class PoliciesCollection extends CmisObjectCollection
       {
          return createErrorResponse(iae, 400);
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          return createErrorResponse(re, 500);
       }
@@ -215,13 +192,20 @@ public class PoliciesCollection extends CmisObjectCollection
       {
          return createErrorResponse(t, 500);
       }
+      finally
+      {
+         if (conn != null)
+         {
+            conn.close();
+         }
+      }
 
       entry = request.getAbdera().getFactory().newEntry();
       try
       {
          // updated object
-         addEntryDetails(request, entry, request.getResolvedUri(), (CmisObject)objectService.getObject(
-            repositoryId, policyId, true, EnumIncludeRelationships.BOTH, true, true, null, null, true));
+         addEntryDetails(request, entry, request.getResolvedUri(), conn.getObject(policyId, true,
+            IncludeRelationships.BOTH, true, true, true, null, null));
       }
       catch (ResponseContextException rce)
       {
@@ -235,7 +219,7 @@ public class PoliciesCollection extends CmisObjectCollection
       {
          return createErrorResponse(fae, 400);
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          return createErrorResponse(re, 500);
       }
@@ -264,20 +248,26 @@ public class PoliciesCollection extends CmisObjectCollection
       }
 
       ObjectTypeElement objectElement = entry.getFirstChild(AtomCMIS.OBJECT);
-      CmisObjectType object = objectElement.getObject();
+      CmisObject object = objectElement.getObject();
 
       String policyId = null;
 
-      for (CmisProperty p : object.getProperties().getProperty())
+      for (Property<?> p : object.getProperties().values())
       {
-         String pName = p.getPropertyDefinitionId();
-         if (pName.equals(EnumPropertiesBase.CMIS_OBJECT_ID.value()))
-            policyId = ((CmisPropertyId)p).getValue().get(0);
+         String pName = p.getId();
+         if (pName.equals(CMIS.OBJECT_ID))
+         {
+            policyId = ((IdProperty)p).getValues().get(0);
+         }
       }
+      Connection conn = null;
       try
       {
+         conn = getConnection(request);
          if (policyId != null)
-            policyService.removePolicy(getRepositoryId(request), policyId, objectId);
+         {
+            conn.removePolicy(policyId, objectId);
+         }
          ResponseContext response = new EmptyResponseContext(200);
          return response;
       }
@@ -293,13 +283,20 @@ public class PoliciesCollection extends CmisObjectCollection
       {
          return createErrorResponse(iae, 400);
       }
-      catch (RepositoryException re)
+      catch (StorageException re)
       {
          return createErrorResponse(re, 500);
       }
       catch (Throwable t)
       {
          return createErrorResponse(t, 500);
+      }
+      finally
+      {
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 

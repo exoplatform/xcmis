@@ -19,15 +19,13 @@
 
 package org.xcmis.restatom;
 
-import org.xcmis.restatom.AtomUtils;
-
 import junit.framework.TestCase;
 
 import java.util.Calendar;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: CallendarParserTest.java 2 2010-02-04 17:21:49Z andrew00x $
  */
 public class CallendarParserTest extends TestCase
 {

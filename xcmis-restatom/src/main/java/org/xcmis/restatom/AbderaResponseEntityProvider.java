@@ -40,7 +40,7 @@ import javax.ws.rs.ext.Provider;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: AbderaResponseEntityProvider.java 44 2010-02-08 17:36:56Z andrew00x $
  */
 @Provider
 public class AbderaResponseEntityProvider implements EntityProvider<ResponseContext>

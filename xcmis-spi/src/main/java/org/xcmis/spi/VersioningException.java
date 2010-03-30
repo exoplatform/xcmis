@@ -25,9 +25,9 @@ package org.xcmis.spi;
  * of its position in version series (not current version).
  * 
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: VersioningException.java 2 2010-02-04 17:21:49Z andrew00x $
  */
-public final class VersioningException extends InvalidArgumentException
+public final class VersioningException extends CmisRuntimeException
 {
 
    /**

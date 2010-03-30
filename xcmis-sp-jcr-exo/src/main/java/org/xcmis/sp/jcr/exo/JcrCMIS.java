@@ -48,20 +48,8 @@ public interface JcrCMIS extends CMIS
    
    String CMIS_SYSTEM_NODETYPE = "xcmis:system";
    
-   // --- CMIS system ---
-
    String ROOT_FOLDER_ID = org.exoplatform.services.jcr.impl.Constants.ROOT_UUID;
    
-   String CMIS_SYSTEM = "xcmis:system";
-
-   String CMIS_RELATIONSHIPS = "xcmis:relationships";
-
-   String CMIS_WORKING_COPIES = "xcmis:workingCopies";
-   
-   String CMIS_UNFILINGS = "xcmis:unfilings";
-   
-   String CMIS_MULTIFILINGS = "xcmis:multifilings";
-
    // --- Renditions ---
    
    String CMIS_RENDITION_STREAM = "xcmis:renditionStream";
@@ -74,20 +62,6 @@ public interface JcrCMIS extends CMIS
 
    String CMIS_RENDITION_WIDTH = "xcmis:renditionWidth";
    
-   // ---
-   
-   String CMIS_LATEST_VERSION = "xcmis:latestVersion";
-
-   // TODO =============== move in configuration ===============
-
-   String DEFAULT_FOLDER_NAME = "New Folder";
-
-   String DEFAULT_DOCUMENT_NAME = "New Document";
-
-   String DEFAULT_POLICY_NAME = "New Policy";
-
-   // ===========================================================
-
    // JCR stuff
 
    String NT_FROZEN_NODE = "nt:frozenNode";
@@ -95,8 +69,6 @@ public interface JcrCMIS extends CMIS
    String NT_FILE = "nt:file";
 
    String NT_FOLDER = "nt:folder";
-   
-   String NT_LINKEDFILE = "nt:linkedFile";
 
    String NT_RESOURCE = "nt:resource";
 
@@ -111,6 +83,8 @@ public interface JcrCMIS extends CMIS
    String JCR_CONTENT = "jcr:content";
 
    String JCR_CREATED = "jcr:created";
+   
+   String JCR_VERSION_HISTORY = "jcr:versionHistory";
 
    String JCR_FROZEN_NODE = "jcr:frozenNode";
 

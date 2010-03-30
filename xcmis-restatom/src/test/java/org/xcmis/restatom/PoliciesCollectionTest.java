@@ -22,7 +22,6 @@ package org.xcmis.restatom;
 import org.exoplatform.services.rest.impl.ContainerResponse;
 import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
 import org.xcmis.spi.object.CmisObject;
-import org.xcmis.spi.object.Entry;
 
 import java.io.ByteArrayInputStream;
 import java.util.List;
@@ -31,14 +30,10 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * @author <a href="mailto:max.shaposhnik@exoplatform.com">Max Shaposhnik</a>
- * @version $$Id$$
+ * @version $$Id: PoliciesCollectionTest.java 2 2010-02-04 17:21:49Z andrew00x $$
  */
 public class PoliciesCollectionTest extends BaseTest
 {
-
-   private Entry doc;
-
-   private Entry policy;
 
    private String docId;
 
@@ -47,22 +42,19 @@ public class PoliciesCollectionTest extends BaseTest
    public void setUp() throws Exception
    {
       super.setUp();
-      doc = createDocument(testFolderId, "doc1", null, null);
-      docId = doc.getObjectId();
-      policy = createPolicy(testFolderId, "policy1", "policy text");
-
-      policyId = policy.getObjectId();
+      docId = createDocument(testFolderId, "doc1", null, null);
+      policyId = createPolicy(testFolderId, "policy1", "policy text");
    }
 
    public void tearDown() throws Exception
    {
-      doc.removePolicy(policy);
+      conn.removePolicy(policyId, docId);
       super.tearDown();
    }
 
    public void testGetAppliedPolicies() throws Exception
    {
-      policyService.applyPolicy(cmisRepositoryId, policyId, docId);
+      conn.applyPolicy(policyId, docId);
 
       String requestURI = "http://localhost:8080/rest" //
          + "/cmisatom/" //
@@ -137,7 +129,7 @@ public class PoliciesCollectionTest extends BaseTest
 
    public void testDeletePolicy() throws Exception
    {
-      policyService.applyPolicy(cmisRepositoryId, policyId, docId);
+      conn.applyPolicy(policyId, docId);
       String s =
          "<?xml version='1.0' encoding='UTF-8' standalone='yes'?>" //
             + "<atom:entry xmlns:app='http://www.w3.org/2007/app' " //
@@ -168,7 +160,7 @@ public class PoliciesCollectionTest extends BaseTest
       ContainerResponse resp = service("DELETE", requestURI, "http://localhost:8080/rest", null, s.getBytes(), writer);
 
       assertEquals(200, resp.getStatus());
-      List<CmisObject> res = policyService.getAppliedPolicies(cmisRepositoryId, docId, null, true);
+      List<CmisObject> res = conn.getAppliedPolicies(docId, true, null);
       assertEquals(0, res.size()); // No policies 
    }
 }

@@ -19,189 +19,104 @@
 package org.xcmis.sp.jcr.exo;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.exoplatform.services.jcr.core.ExtendedSession;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
-import org.xcmis.spi.utils.MimeType;
 
 import javax.jcr.ItemNotFoundException;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
+import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import javax.jcr.version.Version;
 
-import org.xcmis.core.CmisRenditionType;
-import org.xcmis.sp.jcr.exo.object.EntryImpl;
-import org.xcmis.sp.jcr.exo.object.EntryVersion;
+import org.exoplatform.services.jcr.core.ExtendedSession;
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
+import org.xcmis.spi.Rendition;
 import org.xcmis.sp.jcr.exo.rendition.RenditionContentStream;
 import org.xcmis.sp.jcr.exo.rendition.RenditionProvider;
+import org.xcmis.spi.BaseType;
+import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.RepositoryException;
-import org.xcmis.spi.object.ContentStream;
-import org.xcmis.spi.object.Entry;
-import org.xcmis.spi.object.ItemsIterator;
+import org.xcmis.spi.StorageException;
+import org.xcmis.spi.TypeDefinition;
+import org.xcmis.spi.data.ContentStream;
+import org.xcmis.spi.data.ObjectData;
 import org.xcmis.spi.object.RenditionManager;
+import org.xcmis.spi.impl.RenditionImpl;
+import org.xcmis.spi.ItemsIterator;
+import org.xcmis.spi.utils.MimeType;
 
 public class RenditionManagerImpl implements RenditionManager
 {
 
    /** The streams map. */
-   private Map<String, ContentStream> streamsMap;
 
    private final Map<MimeType, RenditionProvider> renditionProviders;
-
-   private Session session;
 
    /** Logger. */
    private static final Log LOG = ExoLogger.getLogger(RenditionManagerImpl.class);
 
-   public RenditionManagerImpl(Map<MimeType, RenditionProvider> renditionProviders, Session session)
+   public RenditionManagerImpl(Map<MimeType, RenditionProvider> renditionProviders)
    {
       this.renditionProviders = renditionProviders;
-      this.streamsMap = new HashMap<String, ContentStream>();
-      this.session = session;
    }
 
    /**
     * {@inheritDoc}
     */
-   public ItemsIterator<CmisRenditionType> getRenditions(Entry entry) throws RepositoryException
+   public ItemsIterator<Rendition> getRenditions(ObjectData obj) throws StorageException
    {
       try
       {
-         RenditionIterator it = new RenditionIterator(((EntryImpl)entry).getNode().getNodes());
+         RenditionIterator it = new RenditionIterator(((BaseObjectData)obj).getNode().getNodes());
          if (it.hasNext())
          {
             return it;
          }
          else
          {
-            if (entry.getContent(null) != null)
-            {
-               MimeType contentType = MimeType.fromString(entry.getContent(null).getMediaType());
-               for (Map.Entry<MimeType, RenditionProvider> e : renditionProviders.entrySet())
-               {
-                  if (e.getKey().match(contentType))
-                  {
-                     RenditionProvider renditionProvider = e.getValue();
-                     RenditionContentStream renditionContentStream =
-                        renditionProvider.getRenditionStream(entry.getContent(null));
-                     //String id = IdGenerator.generate();
-                     String id = entry.getObjectId();
-                     streamsMap.put(id, renditionContentStream);
-                     CmisRenditionType rendition = new CmisRenditionType();
-                     rendition.setStreamId(id);
-                     rendition.setKind(renditionContentStream.getKind());
-                     rendition.setMimetype(renditionContentStream.getMediaType());
-                     rendition.setLength(BigInteger.valueOf(renditionContentStream.length()));
-                     rendition.setHeight(BigInteger.valueOf(renditionContentStream.getHeight()));
-                     rendition.setWidth(BigInteger.valueOf(renditionContentStream.getWidth()));
-                     return new RenditionIterator(rendition);
-                  }
-               }
-            }
+            MimeType contentType = MimeType.fromString(((DocumentImpl)obj).getContentStreamMimeType());
+            RenditionImpl rendition = new RenditionImpl();
+            rendition.setStreamId(contentType.toString());
+            rendition.setKind("cmis:thumbnail");
+            return new RenditionIterator(rendition);
          }
       }
       catch (javax.jcr.RepositoryException re)
       {
-         String msg =
-            "Unable get renditions for object " + entry.getObjectId() + " Unexpected error " + re.getMessage();
-         throw new RepositoryException(msg, re);
+         String msg = "Unable get renditions for object " + obj.getObjectId() + " Unexpected error " + re.getMessage();
+         throw new StorageException(msg, re);
       }
-      catch (IOException e)
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public RenditionContentStream getStream(ObjectData obj, String streamId)
+   {
+      for (Map.Entry<MimeType, RenditionProvider> e : renditionProviders.entrySet())
       {
-         String msg = "Unable get renditions for object " + entry.getObjectId() + " Unexpected error " + e.getMessage();
-         throw new RepositoryException(msg, e);
+         if (e.getKey().match(MimeType.fromString(streamId)))
+         {
+            RenditionProvider renditionProvider = e.getValue();
+            RenditionContentStream renditionContentStream = null;
+            if (!renditionProvider.canStoreRendition())
+            {
+               try
+               {
+                  renditionContentStream =
+                     renditionProvider.getRenditionStream(obj.getContentStream(null));
+               }
+               catch (IOException ioe)
+               {
+                  String msg =
+                     "Unable get renditions for object " + obj.getObjectId() + " Unexpected error " + ioe.getMessage();
+                  throw new StorageException(msg, ioe);
+               }
+               return renditionContentStream;
+            }
+         }
       }
       return null;
    }
-
-   /**
-    * {@inheritDoc}
-    */
-   public ItemsIterator<CmisRenditionType> getRenditions(String objectId) throws ObjectNotFoundException,
-      RepositoryException
-   {
-      return getRenditions(getObjectById(objectId));
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public ContentStream getStream(String streamId)
-   {
-      RenditionContentStream str = (RenditionContentStream)streamsMap.get(streamId);
-      return str;
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public void removeRenditions(Entry entry) throws RepositoryException
-   {
-      try
-      {
-         int count = 0;
-         for (NodeIterator iter = ((EntryImpl)entry).getNode().getNodes(); iter.hasNext();)
-         {
-            Node item = iter.nextNode();
-            if (item.isNodeType(JcrCMIS.CMIS_NT_RENDITION))
-            {
-               item.remove();
-               count++;
-            }
-         }
-         if (count > 0)
-            ((EntryImpl)entry).getNode().save();
-         else
-            streamsMap.remove(entry.getObjectId());
-      }
-      catch (javax.jcr.RepositoryException re)
-      {
-         String msg = "Unable to remove renditions for object " + entry.getObjectId() + ". " + re.getMessage();
-         throw new RepositoryException(msg, re);
-      }
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public void removeRenditions(String objectId) throws ObjectNotFoundException, RepositoryException
-   {
-      removeRenditions(getObjectById(objectId));
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   private Entry getObjectById(String objectId) throws ObjectNotFoundException, RepositoryException
-   {
-      if (LOG.isDebugEnabled())
-         LOG.debug("Get object with id " + objectId);
-      try
-      {
-         Node node = ((ExtendedSession)session).getNodeByIdentifier(objectId);
-         Entry object = null;
-         if (node.isNodeType(JcrCMIS.NT_VERSION))
-            object = new EntryVersion((Version)node);
-         else
-            object = new EntryImpl(node);
-         return object;
-      }
-      catch (ItemNotFoundException infe)
-      {
-         String msg = "Object " + objectId + " not found.";
-         throw new ObjectNotFoundException(msg);
-      }
-      catch (javax.jcr.RepositoryException re)
-      {
-         String msg = "Unexpected error. " + re.getMessage();
-         throw new RepositoryException(msg, re);
-      }
-   }
-
 }

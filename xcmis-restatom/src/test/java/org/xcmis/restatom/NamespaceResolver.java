@@ -19,8 +19,6 @@
 
 package org.xcmis.restatom;
 
-import org.xcmis.restatom.AtomCMIS;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -30,7 +28,7 @@ import javax.xml.namespace.NamespaceContext;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: NamespaceResolver.java 2 2010-02-04 17:21:49Z andrew00x $
  */
 public class NamespaceResolver implements NamespaceContext
 {

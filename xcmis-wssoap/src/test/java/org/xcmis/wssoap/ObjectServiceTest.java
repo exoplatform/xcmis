@@ -33,10 +33,12 @@ import org.xcmis.messaging.CmisContentStreamType;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.soap.ObjectServicePort;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.ChangeTokenHolder;
 import org.xcmis.spi.ConstraintException;
+import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.object.BaseContentStream;
-import org.xcmis.spi.object.ContentStream;
+import org.xcmis.spi.data.BaseContentStream;
+import org.xcmis.spi.data.ContentStream;
 import org.xcmis.wssoap.impl.ObjectServicePortImpl;
 
 import javax.activation.DataHandler;
@@ -59,7 +61,7 @@ public class ObjectServiceTest extends BaseTest
    public void setUp() throws Exception
    {
       super.setUp();
-      server = complexDeployService(SERVICE_ADDRESS, new ObjectServicePortImpl(objectService), null, null, true);
+      server = complexDeployService(SERVICE_ADDRESS, new ObjectServicePortImpl(storageProvider), null, null, true);
       port = getObjectService(SERVICE_ADDRESS);
       assertNotNull(server);
       assertNotNull(port);
@@ -95,7 +97,7 @@ public class ObjectServiceTest extends BaseTest
          );
       try
       {
-         repository.getObjectById(created.value);
+         conn.getObject(created.value, false, IncludeRelationships.NONE, false, false, false, null, null);
       }
       catch (ObjectNotFoundException onfe)
       {
@@ -131,7 +133,7 @@ public class ObjectServiceTest extends BaseTest
          );
       try
       {
-         repository.getObjectById(created.value);
+         conn.getObject(created.value, false, IncludeRelationships.NONE, false, false, false, null, null);
       }
       catch (ObjectNotFoundException onfe)
       {
@@ -179,12 +181,13 @@ public class ObjectServiceTest extends BaseTest
          );
       try
       {
-         repository.getObjectById(created.value);
+         conn.getObject(created.value, false, IncludeRelationships.NONE, false, false, false, null, null);
       }
       catch (ObjectNotFoundException onfe)
       {
          fail("Relationship not found.");
       }
+      conn.deleteObject(created.value, true);
    }
 
    public void testCreatePolicy() throws Exception
@@ -192,15 +195,23 @@ public class ObjectServiceTest extends BaseTest
       // typeId
       CmisPropertyId propTypeId = new CmisPropertyId();
       propTypeId.setPropertyDefinitionId(CMIS.OBJECT_TYPE_ID);
+      propTypeId.setLocalName(CMIS.OBJECT_TYPE_ID);
       propTypeId.getValue().add(EnumBaseObjectTypeIds.CMIS_POLICY.value());
       // name
       CmisPropertyString propName = new CmisPropertyString();
       propName.setPropertyDefinitionId(CMIS.NAME);
+      propName.setLocalName(CMIS.NAME);
       propName.getValue().add("policy1");
+
+      CmisPropertyString propText = new CmisPropertyString();
+      propText.setPropertyDefinitionId(CMIS.POLICY_TEXT);
+      propText.setLocalName(CMIS.POLICY_TEXT);
+      propText.getValue().add("policy23");
 
       CmisPropertiesType props = new CmisPropertiesType();
       props.getProperty().add(propTypeId);
       props.getProperty().add(propName);
+      props.getProperty().add(propText);
 
       javax.xml.ws.Holder<String> created = new javax.xml.ws.Holder<String>();
       port.createPolicy(//
@@ -215,7 +226,7 @@ public class ObjectServiceTest extends BaseTest
          );
       try
       {
-         repository.getObjectById(created.value);
+         conn.getObject(created.value, false, IncludeRelationships.NONE, false, false, false, null, null);
       }
       catch (ObjectNotFoundException onfe)
       {
@@ -228,16 +239,15 @@ public class ObjectServiceTest extends BaseTest
       String docId = createDocument(testFolderId, "doc1");
       String content = "<?xml version='1.0' encoding='UTF-8'?>";
       ContentStream stream = new BaseContentStream(content.getBytes(), "test", "text/xml");
-      CmisObjectType updated = objectService.setContentStream(//
-         repositoryId, //
+      String updated = conn.setContentStream(//
          docId, //
          stream, //
-         null, // change token
+         new ChangeTokenHolder(), // change token
          true // overwrite
-         , false).toCmisObjectType();
-      Holder<String> hId = new Holder<String>(getObjectId(updated));
+         );
+      Holder<String> hId = new Holder<String>(updated);
 
-      ContentStream cs = objectService.getContentStream(repositoryId, hId.value, null, 0, -1);
+      ContentStream cs = conn.getContentStream(updated, null, 0, -1);
       byte b[] = new byte[1024];
       int rd = cs.getStream().read(b);
       assertEquals(content, new String(b, 0, rd));
@@ -247,14 +257,14 @@ public class ObjectServiceTest extends BaseTest
          new CmisExtensionType()));
       try
       {
-         cs = objectService.getContentStream(repositoryId, hId.value, null, 0, -1);
-         fail("Content stream has not been deleted.");
+         cs = conn.getContentStream(hId.value, null, 0, -1);
+         fail();
       }
-      catch (ConstraintException e)
+      catch (ConstraintException ex)
       {
-         // It's OK. No content.
-         assertEquals("Content stream not found", e.getMessage());
+
       }
+
    }
 
    public void testDeleteObject() throws Exception
@@ -263,7 +273,7 @@ public class ObjectServiceTest extends BaseTest
       port.deleteObject(repositoryId, id, true, null);
       try
       {
-         repository.getObjectById(id);
+         conn.getObject(id, false, IncludeRelationships.NONE, false, false, false, null, null);
          fail("Object " + id + " must be removed.");
       }
       catch (ObjectNotFoundException ex)
@@ -324,7 +334,7 @@ public class ObjectServiceTest extends BaseTest
          repositoryId, //
          hId, //
          targetId, // Target folder
-         null, // Source folder (don't need provide because multi-filing is not supported)
+         testFolderId, // Source folder (don't need provide because multi-filing is not supported)
          new Holder<CmisExtensionType>() // Extension
          );
       assertEquals(id, hId.value);
@@ -347,18 +357,6 @@ public class ObjectServiceTest extends BaseTest
    {
       String docId = createDocument(testFolderId, "doc1");
 
-      ContentStream cs = null;
-      try
-      {
-         cs = objectService.getContentStream(repositoryId, docId, null, 0, -1);
-         fail("Content stream has not been deleted.");
-      }
-      catch (ConstraintException e)
-      {
-         // It's OK. No content.
-         assertEquals("Content stream not found", e.getMessage());
-      }
-
       String content = "hello";
       Holder<String> hId = new Holder<String>(docId);
       CmisContentStreamType contentStreamType = new CmisContentStreamType();
@@ -374,7 +372,7 @@ public class ObjectServiceTest extends BaseTest
          new Holder<CmisExtensionType>() // Extension
          );
 
-      cs = objectService.getContentStream(repositoryId, hId.value, null, 0, -1);
+      ContentStream cs = conn.getContentStream(hId.value, null, 0, -1);
       byte[] b = new byte[128];
       int rd = cs.getStream().read(b);
       assertEquals(content, new String(b, 0, rd));

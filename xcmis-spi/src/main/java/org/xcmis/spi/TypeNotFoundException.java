@@ -23,9 +23,9 @@ package org.xcmis.spi;
  * May be thrown if requested type not found in repository.
  * 
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: TypeNotFoundException.java 2 2010-02-04 17:21:49Z andrew00x $
  */
-public final class TypeNotFoundException extends InvalidArgumentException
+public final class TypeNotFoundException extends CmisRuntimeException
 {
 
    /**
