@@ -63,7 +63,6 @@ public class ContentEntry
       Validate.notNull(name, "The value argument may not be null");
       Validate.notEmpty(tableNames, "The tableNames may not be empty");
       Validate.notNull(identifer, "The identifier argument may not be null");
-      Validate.notEmpty(parentIdentifiers, "The parentIdentifiers may not be empty");
       this.name = name;
       this.tableNames = tableNames;
       this.identifier = identifer;
