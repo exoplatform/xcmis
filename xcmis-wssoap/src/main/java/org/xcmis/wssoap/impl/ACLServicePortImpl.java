@@ -91,6 +91,10 @@ public class ACLServicePortImpl implements ACLServicePort
          LOG.error("Apply ACL error: " + e.getMessage());
          throw ExceptionFactory.generateException(e);
       }
+      finally
+      {
+         conn.close();
+      }
    }
 
    /**
@@ -117,6 +121,10 @@ public class ACLServicePortImpl implements ACLServicePort
       {
          LOG.error("Get ACL error: " + e.getMessage());
          throw ExceptionFactory.generateException(e);
+      }
+      finally
+      {
+         conn.close();
       }
    }
 

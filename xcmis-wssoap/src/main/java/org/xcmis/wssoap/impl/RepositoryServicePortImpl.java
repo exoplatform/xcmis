@@ -86,6 +86,7 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
          type.setRepositoryName(repoInfo.getRepositoryName());
          res.add(type);
       }
+      conn.close();
       return res;
    }
 
@@ -128,6 +129,10 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
          LOG.error("Get type children error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
       }
+      finally
+      {
+         conn.close();
+      }
 
    }
 
@@ -149,6 +154,10 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
       {
          LOG.error("Get type definition error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
+      }
+      finally
+      {
+         conn.close();
       }
    }
 
@@ -172,6 +181,10 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
       {
          LOG.error("Get type descendants error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
+      }
+      finally
+      {
+         conn.close();
       }
    }
 

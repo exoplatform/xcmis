@@ -77,6 +77,10 @@ public class PolicyServicePortImpl implements PolicyServicePort
          LOG.error("Apply policy error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
       }
+      finally
+      {
+         conn.close();
+      }
       return new CmisExtensionType();
    }
 
@@ -99,6 +103,10 @@ public class PolicyServicePortImpl implements PolicyServicePort
          LOG.error("Get applied policies error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
       }
+      finally
+      {
+         conn.close();
+      }
    }
 
    /**
@@ -119,6 +127,10 @@ public class PolicyServicePortImpl implements PolicyServicePort
       {
          LOG.error("Remove applied policy error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
+      }
+      finally
+      {
+         conn.close();
       }
       return new CmisExtensionType();
    }

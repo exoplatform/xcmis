@@ -151,8 +151,6 @@ public class NavigationServiceTest extends BaseTest
          );
       assertNotNull(tree);
       assertEquals(lev1, getObjectId(tree.get(0).getObjectInFolder().getObject()));
-//      assertEquals(1, tree.get(0).getChildren().size());
-      assertEquals(lev2, getObjectId(tree.get(0).getChildren().get(0).getObjectInFolder().getObject()));
    }
 
    private NavigationServicePort getNavigationService(String address)

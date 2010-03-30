@@ -108,6 +108,10 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
          LOG.error("Query error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
       }
+      finally
+      {
+         conn.close();
+      }
    }
 
    /**
@@ -142,6 +146,10 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
       {
          LOG.error("Get content changes error: " + e.getMessage());
          throw ExceptionFactory.generateException(e);
+      }
+      finally
+      {
+         conn.close();
       }
    }
 }

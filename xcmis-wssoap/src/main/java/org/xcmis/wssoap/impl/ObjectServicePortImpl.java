@@ -119,6 +119,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
          LOG.error("Create document error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
       }
+      finally
+      {
+         conn.close();
+      }
    }
 
    /**
@@ -156,6 +160,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
          LOG.error("Create document from source error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
       }
+      finally
+      {
+         conn.close();
+      }
 
    }
 
@@ -188,6 +196,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
          LOG.error("Create folder error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
       }
+      finally
+      {
+         conn.close();
+      }
    }
 
    /**
@@ -218,6 +230,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
          LOG.error("Create policy error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
       }
+      finally
+      {
+         conn.close();
+      }
    }
 
    /**
@@ -247,6 +263,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
          LOG.error("Create relationship error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
       }
+      finally
+      {
+         conn.close();
+      }
    }
 
    /**
@@ -272,6 +292,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
          LOG.error("Delete document's content error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
       }
+      finally
+      {
+         conn.close();
+      }
    }
 
    /**
@@ -292,6 +316,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
       {
          LOG.error("Delete object error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
+      }
+      finally
+      {
+         conn.close();
       }
       return new CmisExtensionType();
    }
@@ -324,6 +352,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
          LOG.error("Delete folder tree error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
       }
+      finally
+      {
+         conn.close();
+      }
    }
 
    /**
@@ -344,6 +376,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
       {
          LOG.error("Get allowable actions error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
+      }
+      finally
+      {
+         conn.close();
       }
    }
 
@@ -381,6 +417,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
          LOG.error("Get content stream error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
       }
+      finally
+      {
+         conn.close();
+      }
    }
 
    /**
@@ -415,6 +455,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
       {
          LOG.error("Get object error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
+      }
+      finally
+      {
+         conn.close();
       }
 
    }
@@ -452,6 +496,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
          LOG.error("Get object by path error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
       }
+      finally
+      {
+         conn.close();
+      }
 
    }
 
@@ -473,6 +521,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
       {
          LOG.error("Get properties error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
+      }
+      finally
+      {
+         conn.close();
       }
    }
 
@@ -498,6 +550,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
          LOG.error("Get renditions error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
       }
+      finally
+      {
+         conn.close();
+      }
    }
 
    /**
@@ -518,6 +574,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
       {
          LOG.error("Move object error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
+      }
+      finally
+      {
+         conn.close();
       }
    }
 
@@ -557,6 +617,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
          LOG.error("Set content stream error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
       }
+      finally
+      {
+         conn.close();
+      }
    }
 
    /**
@@ -586,6 +650,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
       {
          LOG.error("Update properties error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
+      }
+      finally
+      {
+         conn.close();
       }
    }
 

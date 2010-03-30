@@ -105,6 +105,10 @@ public class NavigationServicePortImpl implements NavigationServicePort
          LOG.error("Get checked-out documents error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
       }
+      finally
+      {
+         conn.close();
+      }
    }
 
    /**
@@ -146,6 +150,10 @@ public class NavigationServicePortImpl implements NavigationServicePort
          LOG.error("Get children error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
       }
+      finally
+      {
+         conn.close();
+      }
    }
 
    /**
@@ -182,6 +190,10 @@ public class NavigationServicePortImpl implements NavigationServicePort
          LOG.error("Get descendants error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
       }
+      finally
+      {
+         conn.close();
+      }
    }
 
    /**
@@ -202,6 +214,10 @@ public class NavigationServicePortImpl implements NavigationServicePort
       {
          LOG.error("Get folder parent error: " + e.getMessage());
          throw ExceptionFactory.generateException(e);
+      }
+      finally
+      {
+         conn.close();
       }
    }
 
@@ -237,6 +253,10 @@ public class NavigationServicePortImpl implements NavigationServicePort
       {
          LOG.error("Get folder tree error: " + e.getMessage());
          throw ExceptionFactory.generateException(e);
+      }
+      finally
+      {
+         conn.close();
       }
    }
 
@@ -278,6 +298,10 @@ public class NavigationServicePortImpl implements NavigationServicePort
       {
          LOG.error("Get object parents error: " + e.getMessage());
          throw ExceptionFactory.generateException(e);
+      }
+      finally
+      {
+         conn.close();
       }
    }
 }

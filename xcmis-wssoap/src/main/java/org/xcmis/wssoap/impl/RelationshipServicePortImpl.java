@@ -101,5 +101,9 @@ public class RelationshipServicePortImpl implements RelationshipServicePort
          LOG.error("Get relationships error : " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
       }
+      finally
+      {
+         conn.close();
+      }
    }
 }

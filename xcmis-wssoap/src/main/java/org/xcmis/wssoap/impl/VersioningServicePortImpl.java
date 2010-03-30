@@ -88,6 +88,10 @@ public class VersioningServicePortImpl implements VersioningServicePort
          LOG.error("Cancel checkout error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
       }
+      finally
+      {
+         conn.close();
+      }
    }
 
    /**
@@ -132,6 +136,10 @@ public class VersioningServicePortImpl implements VersioningServicePort
          LOG.error("CheckIn error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
       }
+      finally
+      {
+         conn.close();
+      }
    }
 
    /**
@@ -157,6 +165,10 @@ public class VersioningServicePortImpl implements VersioningServicePort
       {
          LOG.error("Checkout error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
+      }
+      finally
+      {
+         conn.close();
       }
    }
 
@@ -185,6 +197,10 @@ public class VersioningServicePortImpl implements VersioningServicePort
       {
          LOG.error("Get all versions error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
+      }
+      finally
+      {
+         conn.close();
       }
       return res;
    }
@@ -221,6 +237,10 @@ public class VersioningServicePortImpl implements VersioningServicePort
          LOG.error("Get object of latest version error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
       }
+      finally
+      {
+         conn.close();
+      }
    }
 
    /**
@@ -243,6 +263,10 @@ public class VersioningServicePortImpl implements VersioningServicePort
       {
          LOG.error("Get properties of latest version error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
+      }
+      finally
+      {
+         conn.close();
       }
    }
 

@@ -76,6 +76,10 @@ public class MultiFilingServicePortImpl implements MultiFilingServicePort
          LOG.error(e.getMessage());
          throw ExceptionFactory.generateException(e);
       }
+      finally
+      {
+         conn.close();
+      }
       return new CmisExtensionType();
    }
 
@@ -97,6 +101,10 @@ public class MultiFilingServicePortImpl implements MultiFilingServicePort
       {
          LOG.error(e.getMessage());
          throw ExceptionFactory.generateException(e);
+      }
+      finally
+      {
+         conn.close();
       }
       return new CmisExtensionType();
    }
