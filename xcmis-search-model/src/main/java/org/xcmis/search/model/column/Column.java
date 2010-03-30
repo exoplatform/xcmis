@@ -58,6 +58,8 @@ public class Column implements QueryElement
     */
    private final int hcode;
 
+   private final ColumnFunction columnFunction;
+
    /**
     * Include a column for each of the single-valued, accessible properties on
     * the node identified by the selector.
@@ -89,7 +91,20 @@ public class Column implements QueryElement
       this.selectorName = selectorName;
       this.propertyName = propertyName;
       this.columnName = columnName;
+      this.columnFunction = null;
       this.hcode = new HashCodeBuilder().append(selectorName).append(propertyName).append(columnName).toHashCode();
+   }
+
+   public Column(ColumnFunction columnFunction, String columnName)
+   {
+
+      Validate.notNull(columnFunction, "The selectorName argument may not be null");
+      Validate.notNull(columnName, "The propertyName argument may not be null");
+      this.columnFunction = columnFunction;
+      this.columnName = columnName;
+      this.selectorName = null;
+      this.propertyName = null;
+      this.hcode = new HashCodeBuilder().append(columnFunction).append(columnName).toHashCode();
    }
 
    /**
@@ -151,6 +166,23 @@ public class Column implements QueryElement
    }
 
    /**
+    * 
+    * @return true of columnt is function
+    */
+   public final boolean isFunction()
+   {
+      return columnFunction != null;
+   }
+
+   /**
+    * @return the columnFunction
+    */
+   public ColumnFunction getColumnFunction()
+   {
+      return columnFunction;
+   }
+
+   /**
     * Get the name of the selector for the node.
     * 
     * @return the selector name; never null
@@ -195,6 +227,33 @@ public class Column implements QueryElement
    public Column with(SelectorName newSelectorName)
    {
       return new Column(newSelectorName, propertyName, columnName);
+   }
+
+   /**
+    * Basic interface for column operations. 
+    *
+    */
+   public interface ColumnFunction
+   {
+
+   }
+
+   /**
+    * This is a predicate function that encapsulates the full-text 
+    * search capability that MAY be provided by a service
+    */
+   public static class ScoreFunction implements ColumnFunction
+   {
+
+      /**
+       * @see java.lang.Object#toString()
+       */
+      @Override
+      public String toString()
+      {
+         return "SCORE()";
+      }
+
    }
 
 }

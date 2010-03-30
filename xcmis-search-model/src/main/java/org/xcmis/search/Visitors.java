@@ -152,7 +152,10 @@ public class Visitors
             @Override
             public void visit(Column column)
             {
-               symbols.add(column.getSelectorName());
+               if (!column.isFunction())
+               {
+                  symbols.add(column.getSelectorName());
+               }
             }
 
             @Override
@@ -1054,18 +1057,26 @@ public class Visitors
        */
       public void visit(Column column)
       {
-         append(column.getSelectorName());
-         if (column.getPropertyName() == null)
+         if (column.isFunction())
          {
-            append(".*");
+            append(column.getColumnFunction().toString());
+            append(" AS ").append(column.getColumnName());
          }
          else
          {
-            String propertyName = column.getPropertyName();
-            append('.').append(propertyName);
-            if (!propertyName.equals(column.getColumnName()) && !propertyName.equals(column.getColumnName()))
+            append(column.getSelectorName());
+            if (column.getPropertyName() == null)
             {
-               append(" AS ").append(column.getColumnName());
+               append(".*");
+            }
+            else
+            {
+               String propertyName = column.getPropertyName();
+               append('.').append(propertyName);
+               if (!propertyName.equals(column.getColumnName()) && !propertyName.equals(column.getColumnName()))
+               {
+                  append(" AS ").append(column.getColumnName());
+               }
             }
          }
       }
