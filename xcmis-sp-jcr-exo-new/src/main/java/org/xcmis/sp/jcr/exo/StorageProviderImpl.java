@@ -379,8 +379,6 @@ public class StorageProviderImpl implements StorageProvider, Startable
             StorageImpl storage = new StorageImpl(session, cmisRepositoryConfiguration);
             IndexConfigurationImpl indexConfiguration =
                (IndexConfigurationImpl)cmisRepositoryConfiguration.getIndexConfiguration();
-            //TODO real config
-            //indexConfiguration.setIndexDir("target/temp/index");
             indexConfiguration.setIndexRecoverService(new CmisRecoverService(storage));
             indexConfiguration.setIndexRestoreService(new CmisRestoreService(storage));
             //default invocation context
