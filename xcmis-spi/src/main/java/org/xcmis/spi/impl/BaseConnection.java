@@ -764,9 +764,11 @@ public abstract class BaseConnection implements Connection
          throw new InvalidArgumentException("Object " + sourceFolderId + " is not a Folder object.");
       }
 
-      //      if (!object.getParents().contains(source))
-      //         throw new InvalidArgumentException("Specified source folder " + sourceFolderId + " is not a parent of "
-      //            + objectId);
+      if (!object.getParents().contains(source))
+      {
+         throw new InvalidArgumentException("Specified source folder " + sourceFolderId + " is not a parent of "
+            + objectId);
+      }
 
       ObjectData movedObject = storage.moveObject(object, (Folder)target, (Folder)source);
 

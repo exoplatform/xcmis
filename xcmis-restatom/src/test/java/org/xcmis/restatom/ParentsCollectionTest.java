@@ -77,16 +77,14 @@ public class ParentsCollectionTest extends BaseTest
          assertEquals(testFolderName, getStringElement("cmisra:relativePathSegment", xmlEntry));
       }
    */
-   
+
    public void testGetObjectParents() throws Exception
    {
       String docId = createDocument(testFolderId, "doc1", null, null);
 
-      String requestURI = "http://localhost:8080/rest" //
-         + "/cmisatom/" //
-         + cmisRepositoryId //
-         + "/parents/" //
-         + docId;
+      String requestURI =
+         "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/parents/" + docId
+            + "?includeRelativePathSegment=true";
 
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
       ContainerResponse resp = service("GET", requestURI, "http://localhost:8080/rest", null, null, writer);

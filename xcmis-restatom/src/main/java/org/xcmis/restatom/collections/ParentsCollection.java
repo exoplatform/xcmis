@@ -85,7 +85,9 @@ public class ParentsCollection extends CmisObjectCollection
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
       boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
-      boolean includeRelativePathSegment = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_RELATIVE_PATH_SEGMENT, false);
+      boolean includeRelativePathSegment =
+         getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_RELATIVE_PATH_SEGMENT, false);
+
       // XXX At the moment get all properties from back-end. We need some of them for build correct feed.
       // Filter will be applied during build final Atom Document.
       //      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
@@ -117,6 +119,7 @@ public class ParentsCollection extends CmisObjectCollection
          {
             case FOLDER :
                CmisObject folderParent = conn.getFolderParent(objectId, true, propertyFilter);
+
                if (folderParent != null)
                {
                   // add cmisra:numItems
@@ -136,8 +139,8 @@ public class ParentsCollection extends CmisObjectCollection
                break;
             default :
                List<ObjectParent> parents =
-                  conn.getObjectParents(objectId, includeAllowableActions, includeRelationships, true,
-                     includeRelativePathSegment, propertyFilter, renditionFilter);
+                  conn.getObjectParents(objectId, includeAllowableActions, includeRelationships,
+                     includeRelativePathSegment, true, propertyFilter, renditionFilter);
                if (parents.size() > 0)
                {
                   // add cmisra:numItems
@@ -149,6 +152,7 @@ public class ParentsCollection extends CmisObjectCollection
                      Entry e = feed.addEntry();
                      IRI feedIri = new IRI(getFeedIriForEntry(parent.getObject(), request));
                      addEntryDetails(request, e, feedIri, parent.getObject());
+
                      if (parent.getRelativePathSegment() != null)
                      {
                         // add cmisra:relativePathSegment

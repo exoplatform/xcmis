@@ -94,16 +94,20 @@ public class ObjectServicePortImpl implements ObjectServicePort
       javax.xml.ws.Holder<String> objectId) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation createDocument");
+      }
       ContentStream cs = null;
       Connection conn = null;
       try
       {
          conn = storageProvider.getConnection(repositoryId, null);
          if (contentStream != null)
+         {
             cs =
                new BaseContentStream(contentStream.getStream().getInputStream(), contentStream.getFilename(),
                   contentStream.getMimeType());
+         }
          objectId.value =
             conn.createDocument(folderId, //
                TypeConverter.getPropertyMap(properties), //
@@ -140,7 +144,9 @@ public class ObjectServicePortImpl implements ObjectServicePort
       javax.xml.ws.Holder<String> objectId) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation createDocumentFromSource");
+      }
       Connection conn = null;
       try
       {
@@ -180,7 +186,9 @@ public class ObjectServicePortImpl implements ObjectServicePort
       javax.xml.ws.Holder<String> objectId) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation createFolder");
+      }
       Connection conn = null;
       try
       {
@@ -215,7 +223,9 @@ public class ObjectServicePortImpl implements ObjectServicePort
       javax.xml.ws.Holder<String> objectId) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation createPolicy");
+      }
       Connection conn = null;
       try
       {
@@ -248,7 +258,9 @@ public class ObjectServicePortImpl implements ObjectServicePort
       javax.xml.ws.Holder<String> objectId) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation createRelationship");
+      }
       Connection conn = null;
       try
       {
@@ -276,14 +288,18 @@ public class ObjectServicePortImpl implements ObjectServicePort
       javax.xml.ws.Holder<String> changeToken, javax.xml.ws.Holder<CmisExtensionType> extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation deleteContentStream");
+      }
       Connection conn = null;
       try
       {
          conn = storageProvider.getConnection(repositoryId, null);
          ChangeTokenHolder hold = new ChangeTokenHolder();
          if (changeToken != null)
+         {
             hold.setValue(changeToken.value);
+         }
          documentId.value = conn.deleteContentStream(documentId.value, //
             changeToken != null ? hold : null);
       }
@@ -305,12 +321,14 @@ public class ObjectServicePortImpl implements ObjectServicePort
       CmisExtensionType extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation deleteObject");
+      }
       Connection conn = null;
       try
       {
          conn = storageProvider.getConnection(repositoryId, null);
-         conn.deleteObject(objectId, allVersions == null ? true : allVersions);
+         conn.deleteObject(objectId, allVersions);
       }
       catch (Exception e)
       {
@@ -335,7 +353,9 @@ public class ObjectServicePortImpl implements ObjectServicePort
       CmisExtensionType extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation deleteTree");
+      }
       Connection conn = null;
       try
       {
@@ -365,7 +385,9 @@ public class ObjectServicePortImpl implements ObjectServicePort
       throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation getAllowableActions");
+      }
       Connection conn = null;
       try
       {
@@ -394,7 +416,9 @@ public class ObjectServicePortImpl implements ObjectServicePort
       CmisExtensionType extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation getContentStream");
+      }
       Connection conn = null;
       try
       {
@@ -408,7 +432,9 @@ public class ObjectServicePortImpl implements ObjectServicePort
          stream.setFilename(cs.getFileName());
          stream.setMimeType(cs.getMediaType());
          if (cs.length() != -1)
+         {
             stream.setLength(BigInteger.valueOf(cs.length()));
+         }
          stream.setStream(new DataHandler(cs.getStream(), cs.getMediaType()));
          return stream;
       }
@@ -437,7 +463,9 @@ public class ObjectServicePortImpl implements ObjectServicePort
       CmisExtensionType extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation getObject");
+      }
       Connection conn = null;
       try
       {
@@ -477,7 +505,9 @@ public class ObjectServicePortImpl implements ObjectServicePort
       CmisExtensionType extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation getObjectByPath");
+      }
       Connection conn = null;
       try
       {
@@ -510,7 +540,9 @@ public class ObjectServicePortImpl implements ObjectServicePort
       CmisExtensionType extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation getProperties");
+      }
       Connection conn = null;
       try
       {
@@ -535,7 +567,9 @@ public class ObjectServicePortImpl implements ObjectServicePort
       BigInteger maxItems, BigInteger skipCount, CmisExtensionType extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation getRenditions");
+      }
       Connection conn = null;
       try
       {
@@ -563,7 +597,9 @@ public class ObjectServicePortImpl implements ObjectServicePort
       String sourceFolderId, javax.xml.ws.Holder<CmisExtensionType> extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation moveObject");
+      }
       Connection conn = null;
       try
       {
@@ -592,20 +628,26 @@ public class ObjectServicePortImpl implements ObjectServicePort
       javax.xml.ws.Holder<CmisExtensionType> extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation setContentStream");
+      }
       Connection conn = null;
       try
       {
          conn = storageProvider.getConnection(repositoryId, null);
          ContentStream cs = null;
          if (contentStream != null)
+         {
             cs = new BaseContentStream(contentStream.getStream().getInputStream(), //
                contentStream.getFilename(), //
                contentStream.getMimeType());
+         }
 
          ChangeTokenHolder hold = new ChangeTokenHolder();
          if (changeToken != null)
+         {
             hold.setValue(changeToken.value);
+         }
 
          documentId.value = conn.setContentStream(documentId.value, //
             cs, //
@@ -633,14 +675,18 @@ public class ObjectServicePortImpl implements ObjectServicePort
       javax.xml.ws.Holder<CmisExtensionType> extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation updateProperties");
+      }
       Connection conn = null;
       try
       {
          conn = storageProvider.getConnection(repositoryId, null);
          ChangeTokenHolder hold = new ChangeTokenHolder();
          if (changeToken != null)
+         {
             hold.setValue(changeToken.value);
+         }
 
          objectId.value = conn.updateProperties(objectId.value, //
             changeToken.value == null ? null : hold, //
