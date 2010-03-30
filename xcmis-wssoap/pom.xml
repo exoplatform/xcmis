@@ -30,7 +30,7 @@
 
       <dependency>
          <groupId>org.xcmis</groupId>
-         <artifactId>xcmis-sp-jcr-exo-new</artifactId>
+         <artifactId>xcmis-sp-jcr-exo</artifactId>
          <scope>test</scope>
       </dependency>
 
