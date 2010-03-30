@@ -72,7 +72,7 @@ public class ACLServiceTest extends BaseTest
 
       CmisAccessControlEntryType entry1 = new CmisAccessControlEntryType();
       CmisAccessControlPrincipalType principal1 = new CmisAccessControlPrincipalType();
-      principal1.setPrincipalId("__anonim");
+      principal1.setPrincipalId("Makis");
       entry1.setPrincipal(principal1);
       entry1.getPermission().add(EnumBasicPermissions.CMIS_WRITE.value());
 
@@ -97,7 +97,7 @@ public class ACLServiceTest extends BaseTest
       assertNotNull(acl.getPermission());
       for (CmisAccessControlEntryType ace : acl.getPermission())
       {
-         if ("__anonim".equals(ace.getPrincipal().getPrincipalId()))
+         if ("Makis".equals(ace.getPrincipal().getPrincipalId()))
          {
             assertEquals(1, ace.getPermission().size());
             assertEquals(EnumBasicPermissions.CMIS_WRITE.value(), ace.getPermission().get(0));

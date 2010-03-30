@@ -61,6 +61,8 @@ public class PolicyServiceTest extends BaseTest
       policies = TypeConverter.getListCmisObjectType(conn.getAppliedPolicies(docId, false, null));
       assertEquals(1, policies.size());
       assertEquals(policyId, getObjectId(policies.get(0)));
+      conn.removePolicy(policyId, docId);
+      conn.deleteObject(policyId, true);
    }
 
    public void testRemovePolicy() throws Exception
@@ -73,6 +75,7 @@ public class PolicyServiceTest extends BaseTest
       port.removePolicy(repositoryId, policyId, docId, new CmisExtensionType());
       policies = TypeConverter.getListCmisObjectType(conn.getAppliedPolicies(docId, false, null));
       assertEquals(0, policies.size());
+      conn.deleteObject(policyId, true);
    }
 
    public void testAppliedPolicies() throws Exception
@@ -94,6 +97,12 @@ public class PolicyServiceTest extends BaseTest
       assertTrue(ids.contains(policy1Id));
       assertTrue(ids.contains(policy2Id));
       assertTrue(ids.contains(policy3Id));
+      conn.removePolicy(policy1Id, docId);
+      conn.removePolicy(policy2Id, docId);
+      conn.removePolicy(policy3Id, docId);
+      conn.deleteObject(policy1Id, true);
+      conn.deleteObject(policy2Id, true);
+      conn.deleteObject(policy3Id, true);
    }
 
    private PolicyServicePort getPolicyService(String address)

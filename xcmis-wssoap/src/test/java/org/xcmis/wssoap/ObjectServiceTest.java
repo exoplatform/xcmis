@@ -206,7 +206,7 @@ public class ObjectServiceTest extends BaseTest
       CmisPropertyString propText = new CmisPropertyString();
       propText.setPropertyDefinitionId(CMIS.POLICY_TEXT);
       propText.setLocalName(CMIS.POLICY_TEXT);
-      propText.getValue().add("policy1");
+      propText.getValue().add("policy23");
 
       CmisPropertiesType props = new CmisPropertiesType();
       props.getProperty().add(propTypeId);

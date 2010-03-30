@@ -82,7 +82,7 @@ public abstract class BaseTest extends TestCase
 
       storageProvider = (StorageProvider)container.getComponentInstanceOfType(StorageProvider.class);
 
-      conn = storageProvider.getConnection(repositoryId, null);
+      conn = storageProvider.getConnection(repositoryId, state);
 
       rootFolderId = conn.getStorage().getRepositoryInfo().getRootFolderId();
       try
@@ -199,12 +199,12 @@ public abstract class BaseTest extends TestCase
       CmisPropertyString propName = new CmisPropertyString();
       propName.setPropertyDefinitionId(CMIS.NAME);
       propName.setLocalName(CMIS.NAME);
-      propName.getValue().add(name);
+      propName.getValue().add(name + "1");
       // text
       CmisPropertyString propText = new CmisPropertyString();
       propText.setPropertyDefinitionId(CMIS.POLICY_TEXT);
       propText.setLocalName(CMIS.POLICY_TEXT);
-      propText.getValue().add(name);
+      propText.getValue().add(name + "2");
 
       props.getProperty().add(propTypeId);
       props.getProperty().add(propName);
@@ -221,7 +221,7 @@ public abstract class BaseTest extends TestCase
       // name
       CmisPropertyString propName = new CmisPropertyString();
       propName.setPropertyDefinitionId(CMIS.NAME);
-      propName.getValue().add("relation1");
+      propName.getValue().add("relation1"+ source);
       // sourceId
       CmisPropertyId sourceId = new CmisPropertyId();
       sourceId.setPropertyDefinitionId(EnumPropertiesRelationship.CMIS_SOURCE_ID.value());

@@ -361,9 +361,12 @@ public class TypeConverter
          CmisTypeContainer containerType = new CmisTypeContainer();
          CmisTypeDefinitionType type = getCmisTypeDefinitionType((TypeDefinition)one.getContainer());
          containerType.setType(type);
-         while (!one.getChildren().isEmpty())
+         if (one.getChildren() != null)
          {
-            containerType.getChildren().addAll(getCmisTypeContainer(one.getChildren()));
+            for (ItemsTree<TypeDefinition> d : one.getChildren())
+            {
+               containerType.getChildren().addAll(getCmisTypeContainer(d.getChildren()));
+            }
          }
          result.add(containerType);
       }
@@ -379,11 +382,14 @@ public class TypeConverter
          CmisObjectInFolderContainerType containerType = new CmisObjectInFolderContainerType();
          CmisObjectInFolderType type = getCmisObjectInFolderType(one.getContainer());
          containerType.setObjectInFolder(type);
-         while (!one.getChildren().isEmpty())
+         if (one.getChildren() != null)
          {
-            containerType.getChildren().addAll(getCmisObjectInFolderContainerType(one.getChildren()));
+            for (ItemsTree<CmisObject> d : one.getChildren())
+            {
+               containerType.getChildren().addAll(getCmisObjectInFolderContainerType(d.getChildren()));
+            }
          }
-         result.add(containerType);
+         result.add(containerType);         
       }
       return result;
    }
