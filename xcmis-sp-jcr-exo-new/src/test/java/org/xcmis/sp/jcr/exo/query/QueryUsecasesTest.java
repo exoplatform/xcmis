@@ -602,7 +602,7 @@ public class QueryUsecasesTest extends BaseQueryTest
 
       StringBuffer sql = new StringBuffer();
       sql.append("SELECT  ");
-      sql.append(CMIS.LAST_MODIFIED_BY + " , ");
+      sql.append(CMIS.LAST_MODIFIED_BY + " as last , ");
       sql.append(CMIS.OBJECT_ID + " , ");
       sql.append(CMIS.LAST_MODIFICATION_DATE);
       sql.append(" FROM ");
@@ -628,119 +628,135 @@ public class QueryUsecasesTest extends BaseQueryTest
       }
    }
 
-   //
-   //   /**
-   //    * Test ORDER BY ASC.
-   //    * <p>
-   //    * Initial data: see createApolloContent
-   //    * <p>
-   //    * Query : Select all documents and order by propertyComander values
-   //    * ascending.
-   //    * <p>
-   //    * Expected result: doc2, doc3, doc1
-   //    * 
-   //    * @throws Exception if an unexpected error occurs
-   //    */
-   //   public void testOrderByFieldAsk() throws Exception
-   //   {
-   //
-   //      Document folder = createFolder(root, "testColumn");
-   //      List<Document> appolloContent = createApolloContent(folder);
-   //
-   //      StringBuffer sql = new StringBuffer();
-   //      sql.append("SELECT ");
-   //      sql.append(CMIS.LAST_MODIFIED_BY + ", ");
-   //      sql.append(CMIS.OBJECT_ID + ", ");
-   //      sql.append(CMIS.LAST_MODIFICATION_DATE);
-   //      sql.append(" FROM ");
-   //      sql.append(NASA_DOCUMENT);
-   //      sql.append(" ORDER BY ");
-   //      sql.append(PROPERTY_COMMANDER);
-   //
-   //      String statement = sql.toString();
-   //
-   //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = storage.query(query);
-   //      // Frank F. Borman, II (1)
-   //      // James A. Lovell, Jr. (2)
-   //      // Walter M. Schirra (0)
-   //
-   //      checkResultOrder(result, new Document[]{appolloContent.get(1), appolloContent.get(2), appolloContent.get(0)});
-   //   }
-   //
-   //   /**
-   //    * Test ORDER BY default.
-   //    * <p>
-   //    * Initial data: see createApolloContent
-   //    * <p>
-   //    * Query : Select all documents and order by propertyComander values
-   //    * ascending.
-   //    * <p>
-   //    * Expected result: doc3, doc1, doc2
-   //    * 
-   //    * @throws Exception if an unexpected error occurs
-   //    */
-   //   public void testOrderByDefault() throws Exception
-   //   {
-   //
-   //      Document folder = createFolder(root, "testColumn");
-   //      List<Document> appolloContent = createApolloContent(folder);
-   //
-   //      StringBuffer sql = new StringBuffer();
-   //      sql.append("SELECT ");
-   //      sql.append(CMIS.LAST_MODIFIED_BY + ", ");
-   //      sql.append(CMIS.OBJECT_ID + ", ");
-   //      sql.append(CMIS.LAST_MODIFICATION_DATE);
-   //      sql.append(" FROM ");
-   //      sql.append(NASA_DOCUMENT);
-   //
-   //      String statement = sql.toString();
-   //
-   //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = storage.query(query);
-   //      // Apollo 13 (2)
-   //      // Apollo 7 (0)
-   //      // Apollo 8 (1)
-   //      checkResultOrder(result, new Document[]{appolloContent.get(2), appolloContent.get(0), appolloContent.get(1)});
-   //   }
-   //
-   //   /**
-   //    * Test ORDER BY SCORE().
-   //    * <p>
-   //    * Initial data: see createApolloContent
-   //    * <p>
-   //    * Query : Select all documents and order by propertyComander values
-   //    * ascending.
-   //    * <p>
-   //    * Expected result: doc3, doc1, doc2
-   //    * 
-   //    * @throws Exception if an unexpected error occurs
-   //    */
-   //   public void testOrderByScore() throws Exception
-   //   {
-   //
-   //      Document folder = createFolder(root, "testColumn");
-   //      List<Document> appolloContent = createApolloContent(folder);
-   //
-   //      StringBuffer sql = new StringBuffer();
-   //      sql.append("SELECT ");
-   //      sql.append(" SCORE() AS scoreCol, ");
-   //      sql.append(CMIS.LAST_MODIFIED_BY + ", ");
-   //      sql.append(CMIS.OBJECT_ID + ", ");
-   //      sql.append(CMIS.LAST_MODIFICATION_DATE);
-   //      sql.append(" FROM ");
-   //      sql.append(NASA_DOCUMENT);
-   //      sql.append(" WHERE CONTAINS(\"moon\") ");
-   //      sql.append(" ORDER BY SCORE() ");
-   //
-   //      String statement = sql.toString();
-   //
-   //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = storage.query(query);
-   //      // Apollo 13 (2)
-   //      // Apollo 8 (1)
-   //      checkResultOrder(result, new Document[]{appolloContent.get(2), appolloContent.get(1)});
-   //   }
+   /**
+    * Test ORDER BY ASC.
+    * <p>
+    * Initial data: see createApolloContent
+    * <p>
+    * Query : Select all documents and order by propertyComander values
+    * ascending.
+    * <p>
+    * Expected result: doc2, doc3, doc1
+    * 
+    * @throws Exception if an unexpected error occurs
+    */
+   public void testOrderByFieldAsk() throws Exception
+   {
+
+      List<Document> appolloContent = createNasaContent(testRoot);
+
+      StringBuffer sql = new StringBuffer();
+      sql.append("SELECT ");
+      sql.append(CMIS.LAST_MODIFIED_BY + ", ");
+      sql.append(CMIS.OBJECT_ID + ", ");
+      sql.append(CMIS.LAST_MODIFICATION_DATE);
+      sql.append(" FROM ");
+      sql.append(NASA_DOCUMENT);
+      sql.append(" ORDER BY ");
+      sql.append(PROPERTY_COMMANDER);
+
+      String statement = sql.toString();
+
+      Query query = new Query(statement, true);
+      ItemsIterator<Result> result = storage.query(query);
+      //Eugene A. Cernan  (3)
+      // Frank F. Borman, II (1)
+      // James A. Lovell, Jr. (2)
+      // Walter M. Schirra (0)
+
+      checkResultOrder(result, new Document[]{appolloContent.get(3), appolloContent.get(1), appolloContent.get(2),
+         appolloContent.get(0)});
+
+      for (Document doc : appolloContent)
+      {
+         storage.deleteObject(doc, true);
+      }
+   }
+
+   /**
+    * Test ORDER BY default.
+    * <p>
+    * Initial data: see createApolloContent
+    * <p>
+    * Query : Select all documents and order by propertyComander values
+    * ascending.
+    * <p>
+    * Expected result: doc3, doc1, doc2
+    * 
+    * @throws Exception if an unexpected error occurs
+    */
+   public void testOrderByDefault() throws Exception
+   {
+
+      List<Document> appolloContent = createNasaContent(testRoot);
+
+      StringBuffer sql = new StringBuffer();
+      sql.append("SELECT ");
+      sql.append(CMIS.LAST_MODIFIED_BY + ", ");
+      sql.append(CMIS.OBJECT_ID + ", ");
+      sql.append(CMIS.LAST_MODIFICATION_DATE);
+      sql.append(" FROM ");
+      sql.append(NASA_DOCUMENT);
+
+      String statement = sql.toString();
+
+      Query query = new Query(statement, true);
+      ItemsIterator<Result> result = storage.query(query);
+      // Apollo 13 (2)
+      // Apollo 17 (3)
+      // Apollo 7 (0)
+      // Apollo 8 (1)
+      checkResultOrder(result, new Document[]{appolloContent.get(2), appolloContent.get(3), appolloContent.get(0),
+         appolloContent.get(1)});
+
+      for (Document doc : appolloContent)
+      {
+         storage.deleteObject(doc, true);
+      }
+   }
+
+   /**
+    * Test ORDER BY SCORE().
+    * <p>
+    * Initial data: see createApolloContent
+    * <p>
+    * Query : Select all documents and order by propertyComander values
+    * ascending.
+    * <p>
+    * Expected result: doc3, doc1, doc2
+    * 
+    * @throws Exception if an unexpected error occurs
+    */
+   public void testOrderByScore() throws Exception
+   {
+
+      List<Document> appolloContent = createNasaContent(testRoot);
+
+      StringBuffer sql = new StringBuffer();
+      sql.append("SELECT ");
+      sql.append(" SCORE() AS scoreCol, ");
+      sql.append(CMIS.LAST_MODIFIED_BY + ", ");
+      sql.append(CMIS.OBJECT_ID + ", ");
+      sql.append(CMIS.LAST_MODIFICATION_DATE);
+      sql.append(" FROM ");
+      sql.append(NASA_DOCUMENT);
+      sql.append(" WHERE CONTAINS(\"moon\") ");
+      sql.append(" ORDER BY SCORE() ");
+
+      String statement = sql.toString();
+
+      Query query = new Query(statement, true);
+      ItemsIterator<Result> result = storage.query(query);
+      // Apollo 13 (2)
+      // Apollo 8 (1)
+      checkResultOrder(result, new Document[]{appolloContent.get(2), appolloContent.get(1)});
+
+      for (Document doc : appolloContent)
+      {
+         storage.deleteObject(doc, true);
+      }
+   }
+
    //
    /**
     * Test property existence constraint (IS [NOT] NULL) .
