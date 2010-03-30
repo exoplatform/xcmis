@@ -1091,44 +1091,41 @@ public class QueryUsecasesTest extends BaseQueryTest
       checkResult(result, new Document[]{doc2});
    }
 
-   //
-   //   /**
-   //    * Test comparison of date property.
-   //    * <p>
-   //    * Initial data:
-   //    * <ul>
-   //    * <li>doc1: <b>Title</b> - node1 <b>dateProp</b> - 2009-08-08
-   //    * <li>doc2: <b>Title</b> - node2 <b>dateProp</b> - 2009-08-08
-   //    * </ul>
-   //    * <p>
-   //    * Query : Select all documents where dateProp more than 2007-01-01.
-   //    * <p>
-   //    * Expected result: doc2.
-   //    * 
-   //    * @throws Exception if an unexpected error occurs
-   //    */
-   //   public void testDateConstraint() throws Exception
-   //   {
-   //      // create data
-   //      String name = "fileCS2.doc";
-   //      String name2 = "fileCS3.doc";
-   //      String contentType = "text/plain";
-   //
-   //      Document folder = createFolder(root, "CASETest");
-   //
-   //      Document doc1 = createDocument(folder.getObjectId(), name, new byte[0], contentType);
-   //
-   //      Document doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
-   //
-   //      String statement =
-   //         "SELECT * FROM " + NASA_DOCUMENT
-   //            + " WHERE ( cmis:lastModificationDate >= TIMESTAMP '2007-01-01T00:00:00.000Z' )";
-   //
-   //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = storage.query(query);
-   //
-   //      checkResult(result, new Document[]{doc1, doc2});
-   //   }
+   /**
+    * Test comparison of date property.
+    * <p>
+    * Initial data:
+    * <ul>
+    * <li>doc1: <b>Title</b> - node1 <b>dateProp</b> - 2009-08-08
+    * <li>doc2: <b>Title</b> - node2 <b>dateProp</b> - 2009-08-08
+    * </ul>
+    * <p>
+    * Query : Select all documents where dateProp more than 2007-01-01.
+    * <p>
+    * Expected result: doc2.
+    * 
+    * @throws Exception if an unexpected error occurs
+    */
+   public void testDateConstraint() throws Exception
+   {
+      // create data
+      String name = "fileCS2.doc";
+      String name2 = "fileCS3.doc";
+      String contentType = "text/plain";
+
+      Document doc1 = createDocument(testRoot, name, NASA_DOCUMENT, new byte[0], contentType);
+      storage.saveObject(doc1);
+      Document doc2 = createDocument(testRoot, name2, NASA_DOCUMENT, new byte[0], contentType);
+      storage.saveObject(doc2);
+      String statement =
+         "SELECT * FROM " + NASA_DOCUMENT
+            + " WHERE ( cmis:lastModificationDate >= TIMESTAMP '2007-01-01T00:00:00.000Z' )";
+
+      Query query = new Query(statement, true);
+      ItemsIterator<Result> result = storage.query(query);
+
+      checkResult(result, new Document[]{doc1, doc2});
+   }
 
    /**
     * Simple test.
