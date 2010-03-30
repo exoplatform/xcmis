@@ -113,10 +113,7 @@ public class QueryUsecasesTest extends BaseQueryTest
       ItemsIterator<Result> result = storage.query(query);
       // check results
       checkResult(result, new Document[]{appolloContent.get(1), appolloContent.get(2)});
-      for (Document doc : appolloContent)
-      {
-         storage.deleteObject(doc, true);
-      }
+
    }
 
    /**
@@ -139,8 +136,8 @@ public class QueryUsecasesTest extends BaseQueryTest
    public void testDocumentInFolderConstrain() throws Exception
    {
       // create data
-      Folder testRoot1 = createFolder(rootFolder, "testDocumentInFolderConstrain1", "cmis:folder");
-      Folder testRoot2 = createFolder(rootFolder, "testDocumentInFolderConstrain2", "cmis:folder");
+      Folder testRoot1 = createFolder(testRoot, "testDocumentInFolderConstrain1", "cmis:folder");
+      Folder testRoot2 = createFolder(testRoot, "testDocumentInFolderConstrain2", "cmis:folder");
 
       List<Document> appolloContent = createNasaContent(testRoot1);
       List<Document> appolloContent2 = createNasaContent(testRoot2);
@@ -152,16 +149,6 @@ public class QueryUsecasesTest extends BaseQueryTest
 
       // check results
       checkResult(result, appolloContent2.toArray(new Document[appolloContent2.size()]));
-      for (Document doc : appolloContent)
-      {
-         storage.deleteObject(doc, true);
-      }
-      for (Document doc : appolloContent2)
-      {
-         storage.deleteObject(doc, true);
-      }
-      storage.deleteObject(testRoot1, true);
-      storage.deleteObject(testRoot2, true);
 
    }
 
@@ -219,18 +206,6 @@ public class QueryUsecasesTest extends BaseQueryTest
 
       // check results
       checkResult(result, new Folder[]{folder3});
-
-      storage.deleteObject(folder4, true);
-
-      storage.deleteObject(doc3, true);
-
-      storage.deleteObject(folder3, true);
-
-      storage.deleteObject(doc2, true);
-      storage.deleteObject(folder2, true);
-
-      storage.deleteObject(doc1, true);
-      storage.deleteObject(folder1, true);
 
    }
 
@@ -303,10 +278,6 @@ public class QueryUsecasesTest extends BaseQueryTest
       assertEquals(2, result2.size());
       checkResult(result2, new Document[]{appolloContent.get(1), appolloContent.get(2)});
 
-      for (Document doc : appolloContent)
-      {
-         storage.deleteObject(doc, true);
-      }
    }
 
    /**
@@ -338,10 +309,7 @@ public class QueryUsecasesTest extends BaseQueryTest
       ItemsIterator<Result> result = storage.query(query);
       assertEquals(1, result.size());
       checkResult(result, new Document[]{appolloContent.get(1)});
-      for (Document doc : appolloContent)
-      {
-         storage.deleteObject(doc, true);
-      }
+
    }
 
    //
@@ -420,10 +388,6 @@ public class QueryUsecasesTest extends BaseQueryTest
       assertEquals(1, result.size());
       checkResult(result, new Document[]{appolloContent.get(2)});
 
-      for (Document doc : appolloContent)
-      {
-         storage.deleteObject(doc, true);
-      }
    }
 
    /**
@@ -471,9 +435,6 @@ public class QueryUsecasesTest extends BaseQueryTest
       assertEquals(1, result.size());
       checkResult(result, new Document[]{doc1});
 
-      storage.deleteObject(doc1, true);
-      storage.deleteObject(doc2, true);
-      storage.deleteObject(doc3, true);
    }
 
    /**
@@ -505,9 +466,6 @@ public class QueryUsecasesTest extends BaseQueryTest
       ItemsIterator<Result> result = storage.query(query);
 
       checkResult(result, new Document[]{doc2});
-      storage.deleteObject(doc2, true);
-      storage.deleteObject(folder2, true);
-      storage.deleteObject(doc1, true);
 
    }
 
@@ -539,10 +497,6 @@ public class QueryUsecasesTest extends BaseQueryTest
 
       checkResult(result, new Document[]{appolloContent.get(1), appolloContent.get(3)});
 
-      for (Document doc : appolloContent)
-      {
-         storage.deleteObject(doc, true);
-      }
    }
 
    /**
@@ -574,10 +528,6 @@ public class QueryUsecasesTest extends BaseQueryTest
 
       checkResult(result, new Document[]{appolloContent.get(2)});
 
-      for (Document doc : appolloContent)
-      {
-         storage.deleteObject(doc, true);
-      }
    }
 
    /**
@@ -622,10 +572,6 @@ public class QueryUsecasesTest extends BaseQueryTest
       checkResultOrder(result, new Document[]{appolloContent.get(0), appolloContent.get(2), appolloContent.get(1),
          appolloContent.get(3)});
 
-      for (Document doc : appolloContent)
-      {
-         storage.deleteObject(doc, true);
-      }
    }
 
    /**
@@ -667,10 +613,6 @@ public class QueryUsecasesTest extends BaseQueryTest
       checkResultOrder(result, new Document[]{appolloContent.get(3), appolloContent.get(1), appolloContent.get(2),
          appolloContent.get(0)});
 
-      for (Document doc : appolloContent)
-      {
-         storage.deleteObject(doc, true);
-      }
    }
 
    /**
@@ -709,10 +651,6 @@ public class QueryUsecasesTest extends BaseQueryTest
       checkResultOrder(result, new Document[]{appolloContent.get(2), appolloContent.get(3), appolloContent.get(0),
          appolloContent.get(1)});
 
-      for (Document doc : appolloContent)
-      {
-         storage.deleteObject(doc, true);
-      }
    }
 
    /**
@@ -751,10 +689,6 @@ public class QueryUsecasesTest extends BaseQueryTest
       // Apollo 8 (1)
       checkResultOrder(result, new Document[]{appolloContent.get(2), appolloContent.get(1)});
 
-      for (Document doc : appolloContent)
-      {
-         storage.deleteObject(doc, true);
-      }
    }
 
    //
@@ -790,50 +724,44 @@ public class QueryUsecasesTest extends BaseQueryTest
       ItemsIterator<Result> result = storage.query(query);
       checkResult(result, new Document[]{doc1});
 
-      storage.deleteObject(doc1, true);
-      storage.deleteObject(doc2, true);
    }
 
-   //
-   //   /**
-   //    * Test SCORE as column.
-   //    * <p>
-   //    * Initial data:
-   //    * <ul>
-   //    * <li>doc1: <b>Title</b> - node1 <b>content</b> - hello world
-   //    * <li>doc2: <b>Title</b> - node2 <b>content</b> - hello
-   //    * </ul>
-   //    * <p>
-   //    * Query : Select all documents that contains hello or world words, and show
-   //    * search score .
-   //    * <p>
-   //    * Expected result: doc1 and doc2 score numbers.
-   //    * 
-   //    * @throws Exception if an unexpected error occurs
-   //    */
-   //   public void testScoreAsColumn() throws Exception
-   //   {
-   //      Document folder1 = createFolder(root, "CASETest");
-   //
-   //      Document doc1 = createDocument(folder1.getObjectId(), "node1", "hello world".getBytes(), "text/plain");
-   //
-   //      Document doc2 = createDocument(folder1.getObjectId(), "node2", "hello".getBytes(), "text/plain");
-   //
-   //      String statement =
-   //         "SELECT SCORE() AS scoreCol , " + CMIS.NAME + " AS id FROM " + NASA_DOCUMENT
-   //            + " WHERE CONTAINS(\"hello OR world\") ORDER BY SCORE()";
-   //
-   //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = storage.query(query);
-   //
-   //      // check result
-   //      while (result.hasNext())
-   //      {
-   //         Result next = result.next();
-   //         assertTrue(next.getScore().getScoreValue().doubleValue() > 0);
-   //      }
-   //
-   //   }
+   /**
+    * Test SCORE as column.
+    * <p>
+    * Initial data:
+    * <ul>
+    * <li>doc1: <b>Title</b> - node1 <b>content</b> - hello world
+    * <li>doc2: <b>Title</b> - node2 <b>content</b> - hello
+    * </ul>
+    * <p>
+    * Query : Select all documents that contains hello or world words, and show
+    * search score .
+    * <p>
+    * Expected result: doc1 and doc2 score numbers.
+    * 
+    * @throws Exception if an unexpected error occurs
+    */
+   public void testScoreAsColumn() throws Exception
+   {
+      List<Document> appolloContent = createNasaContent(testRoot);
+
+      String statement =
+         "SELECT SCORE() AS scoreCol , " + CMIS.NAME + " AS id FROM " + NASA_DOCUMENT
+            + " WHERE CONTAINS(\"hello OR world\") ORDER BY SCORE()";
+
+      Query query = new Query(statement, true);
+      ItemsIterator<Result> result = storage.query(query);
+
+      // check result
+      while (result.hasNext())
+      {
+         Result next = result.next();
+         assertTrue(next.getScore().getScoreValue().doubleValue() > 0);
+      }
+
+   }
+
    //
    //   /**
    //    * Test IN_TREE constraint.
@@ -1202,10 +1130,7 @@ public class QueryUsecasesTest extends BaseQueryTest
       Query query = new Query(statement, true);
       ItemsIterator<Result> result = storage.query(query);
       checkResult(result, appolloContent.toArray(new Document[appolloContent.size()]));
-      for (Document doc : appolloContent)
-      {
-         storage.deleteObject(doc, true);
-      }
+
    }
 
    /**
@@ -1257,8 +1182,6 @@ public class QueryUsecasesTest extends BaseQueryTest
 
       assertEquals(1, result.size());
       checkResult(result, new Document[]{doc3});
-
-      storage.deleteObject(doc3, true);
 
    }
 
