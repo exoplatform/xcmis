@@ -26,6 +26,7 @@ import org.xcmis.spi.data.BaseContentStream;
 import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.data.Document;
 import org.xcmis.spi.data.Folder;
+import org.xcmis.spi.object.impl.BooleanProperty;
 import org.xcmis.spi.object.impl.DecimalProperty;
 import org.xcmis.spi.object.impl.StringProperty;
 import org.xcmis.spi.query.Query;
@@ -60,6 +61,8 @@ public class QueryUsecasesTest extends BaseQueryTest
    private final static String PROPERTY_BOOSTER_MASS = "cmis:booster-mass";
 
    private final static String PROPERTY_SAMPLE_RETURNED = "cmis:sample-returned";
+
+   private final static String PROPERTY_STATUS = "cmis:status";
 
    private Folder testRoot;
 
@@ -1022,74 +1025,72 @@ public class QueryUsecasesTest extends BaseQueryTest
       checkResult(result, new Document[]{doc1});
    }
 
-   //
-   //   /**
-   //    * Same as testNOTConstraint.
-   //    */
-   //   public void testNotContains() throws Exception
-   //   {
-   //      // create data
-   //      String name = "fileCS2.doc";
-   //      String name2 = "fileCS3.doc";
-   //      String contentType = "text/plain";
-   //
-   //      Document folder = createFolder(root, "NotContains");
-   //
-   //      Document doc1 = createDocument(folder.getObjectId(), name, new byte[0], contentType);
-   //      doc1.setString("strprop", "There must be test word");
-   //      doc1.save();
-   //
-   //      Document doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
-   //      doc2.setString("strprop", " Test word is not here");
-   //      doc2.save();
-   //
-   //      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE NOT CONTAINS(\"here\")";
-   //
-   //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = storage.query(query);
-   //
-   //      checkResult(result, new Document[]{doc1});
-   //   }
-   //
-   //   /**
-   //    * Test comparison of boolean property.
-   //    * <p>
-   //    * Initial data:
-   //    * <ul>
-   //    * <li>doc1: <b>Title</b> - node1 <b>boolprop</b> - true
-   //    * <li>doc2: <b>Title</b> - node2 <b>boolprop</b> - false
-   //    * </ul>
-   //    * <p>
-   //    * Query : Select all documents where boolprop equal to false.
-   //    * <p>
-   //    * Expected result: doc2.
-   //    * 
-   //    * @throws Exception if an unexpected error occurs
-   //    */
-   //   public void testBooleanConstraint() throws Exception
-   //   {
-   //      // create data
-   //      String name = "fileCS2.doc";
-   //      String name2 = "fileCS3.doc";
-   //      String contentType = "text/plain";
-   //
-   //      Document folder = this.createFolder(root, "CASETest");
-   //
-   //      Document doc1 = createDocument(folder.getObjectId(), name, new byte[0], contentType);
-   //      doc1.setBoolean("boolprop", true);
-   //      doc1.save();
-   //
-   //      Document doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
-   //      doc2.setBoolean("boolprop", false);
-   //      doc2.save();
-   //
-   //      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE (boolprop = FALSE )";
-   //
-   //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = storage.query(query);
-   //
-   //      checkResult(result, new Document[]{doc2});
-   //   }
+   /**
+    * Same as testNOTConstraint.
+    */
+   public void testNotContains() throws Exception
+   {
+      // create data
+      String name = "fileCS2.doc";
+      String name2 = "fileCS3.doc";
+      String contentType = "text/plain";
+
+      Document doc1 = createDocument(testRoot, name, NASA_DOCUMENT, new byte[0], contentType);
+      doc1.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+         PROPERTY_COMMANDER, "There must be test word"));
+      storage.saveObject(doc1);
+
+      Document doc2 = createDocument(testRoot, name2, NASA_DOCUMENT, new byte[0], contentType);
+      doc2.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+         PROPERTY_COMMANDER, "Test word is not here"));
+      storage.saveObject(doc2);
+
+      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE NOT CONTAINS(\"here\")";
+
+      Query query = new Query(statement, true);
+      ItemsIterator<Result> result = storage.query(query);
+
+      checkResult(result, new Document[]{doc1});
+   }
+
+   /**
+    * Test comparison of boolean property.
+    * <p>
+    * Initial data:
+    * <ul>
+    * <li>doc1: <b>Title</b> - node1 <b>boolprop</b> - true
+    * <li>doc2: <b>Title</b> - node2 <b>boolprop</b> - false
+    * </ul>
+    * <p>
+    * Query : Select all documents where boolprop equal to false.
+    * <p>
+    * Expected result: doc2.
+    * 
+    * @throws Exception if an unexpected error occurs
+    */
+   public void testBooleanConstraint() throws Exception
+   {
+      // create data
+      String name = "fileCS2.doc";
+      String name2 = "fileCS3.doc";
+      String contentType = "text/plain";
+
+      Document doc1 = createDocument(testRoot, name, NASA_DOCUMENT, new byte[0], contentType);
+      doc1.setProperty(new BooleanProperty(PROPERTY_STATUS, PROPERTY_STATUS, PROPERTY_STATUS, PROPERTY_STATUS, true));
+      storage.saveObject(doc1);
+
+      Document doc2 = createDocument(testRoot, name2, NASA_DOCUMENT, new byte[0], contentType);
+      doc2.setProperty(new BooleanProperty(PROPERTY_STATUS, PROPERTY_STATUS, PROPERTY_STATUS, PROPERTY_STATUS, false));
+      storage.saveObject(doc2);
+
+      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE (" + PROPERTY_STATUS + " = FALSE )";
+
+      Query query = new Query(statement, true);
+      ItemsIterator<Result> result = storage.query(query);
+
+      checkResult(result, new Document[]{doc2});
+   }
+
    //
    //   /**
    //    * Test comparison of date property.
