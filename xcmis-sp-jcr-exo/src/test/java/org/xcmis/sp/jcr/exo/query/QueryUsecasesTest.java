@@ -1273,4 +1273,22 @@ public class QueryUsecasesTest extends BaseQueryTest
       return result;
    }
 
+   public void testIncludedInSupertypeQueryTestTwoDocTypes() throws Exception
+   {
+      // create data
+
+      Document doc1 = createDocument(testRoot, "node1", "cmis:article-sports", "hello world".getBytes(), "text/plain");
+      storage.saveObject(doc1);
+
+      Document doc2 = createDocument(testRoot, "node2", "cmis:article-animals", "hello world".getBytes(), "text/plain");
+      storage.saveObject(doc2);
+
+      String stat = "SELECT * FROM cmis:article WHERE IN_FOLDER( '" + testRoot.getObjectId() + "')";
+
+      Query query = new Query(stat, false);
+      ItemsIterator<Result> result = storage.query(query);
+
+      // check results
+      checkResult(result, new Document[]{doc1, doc2});
+   }
 }

@@ -37,12 +37,12 @@ import org.xcmis.search.config.IndexConfigurationImpl;
 import org.xcmis.search.config.SearchServiceConfiguration;
 import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.lucene.LuceneSearchService;
-import org.xcmis.search.lucene.content.SchemaTableResolver;
 import org.xcmis.search.value.ToStringNameConverter;
 import org.xcmis.sp.jcr.exo.index.CmisContentReader;
 import org.xcmis.sp.jcr.exo.index.CmisRecoverService;
 import org.xcmis.sp.jcr.exo.index.CmisRestoreService;
 import org.xcmis.sp.jcr.exo.index.CmisSchema;
+import org.xcmis.sp.jcr.exo.index.CmisSchemaTableResolver;
 import org.xcmis.sp.jcr.exo.index.IndexListener;
 import org.xcmis.sp.jcr.exo.index.JcrPathSplitter;
 import org.xcmis.sp.jcr.exo.rendition.ImageRenditionProvider;
@@ -387,7 +387,8 @@ public class StorageProviderImpl implements StorageProvider, Startable
             CmisSchema schema = new CmisSchema(storage);
             invocationContext.setSchema(schema);
             invocationContext.setPathSplitter(new JcrPathSplitter(((SessionImpl)session).getLocationFactory()));
-            invocationContext.setTableResolver(new SchemaTableResolver(new ToStringNameConverter(), schema));
+            invocationContext
+               .setTableResolver(new CmisSchemaTableResolver(new ToStringNameConverter(), schema, storage));
 
             SearchServiceConfiguration configuration = new SearchServiceConfiguration();
             configuration.setIndexConfiguration(indexConfiguration);
