@@ -29,14 +29,20 @@ import org.xcmis.search.result.ScoredRow;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.Storage;
+import org.xcmis.spi.data.Folder;
+import org.xcmis.spi.data.ObjectData;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 import org.xcmis.spi.query.Score;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -91,7 +97,13 @@ public class QueryableStorage extends StorageImpl
       {
          org.xcmis.search.model.Query qom = cmisQueryParser.parseQuery(query.getStatement());
          List<ScoredRow> rows = searchService.execute(qom);
-
+         //check if needed default sorting
+         if (qom.getOrderings().size() == 0)
+         {
+            Set<SelectorName> selectorsReferencedBy = Visitors.getSelectorsReferencedBy(qom);
+            Collections.sort(rows, new DocumentOrderResultSorter(selectorsReferencedBy.iterator().next().getName(),
+               this));
+         }
          return new QueryResultIterator(rows, qom);
       }
       catch (InvalidQueryException e)
@@ -103,7 +115,7 @@ public class QueryableStorage extends StorageImpl
    /**
     * Iterator over query result's.
     */
-   class QueryResultIterator implements ItemsIterator<Result>
+   private static class QueryResultIterator implements ItemsIterator<Result>
    {
 
       private final Iterator<ScoredRow> rows;
@@ -216,13 +228,12 @@ public class QueryableStorage extends StorageImpl
             }
          }
       }
-
    }
 
    /**
     * Single row from query result.
     */
-   public class ResultImpl implements Result
+   public static class ResultImpl implements Result
    {
 
       private final String id;
@@ -254,4 +265,70 @@ public class QueryableStorage extends StorageImpl
       }
 
    }
+
+   public static class DocumentOrderResultSorter implements Comparator<ScoredRow>
+   {
+
+      /** The selector name. */
+      private final String selectorName;
+
+      private final Map<String, ObjectData> itemCache;
+
+      private final Storage storage;
+
+      /**
+       * The Constructor.
+       * 
+       * @param itemMgr the item mgr
+       * @param selectorName the selector name
+       */
+      public DocumentOrderResultSorter(final String selectorName, Storage storage)
+      {
+         this.selectorName = selectorName;
+         this.storage = storage;
+         this.itemCache = new HashMap<String, ObjectData>();
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public int compare(ScoredRow o1, ScoredRow o2)
+      {
+         if (o1.equals(o2))
+         {
+            return 0;
+         }
+         final String path1 = getPath(o1.getNodeIdentifer(selectorName));
+         final String path2 = getPath(o2.getNodeIdentifer(selectorName));
+         // TODO should be checked
+         if (path1 == null || path2 == null)
+         {
+            return 0;
+         }
+         return path1.compareTo(path2);
+      }
+
+      /**
+       * Return comparable location of the object
+       * @param identifer
+       * @return
+       */
+      public String getPath(String identifer)
+      {
+         ObjectData obj = itemCache.get(identifer);
+         if (obj == null)
+         {
+            obj = storage.getObject(identifer);
+            itemCache.put(identifer, obj);
+         }
+
+         Folder parent = obj.getParent();
+         if (parent == null)
+         {
+            return obj.getName();
+         }
+         return parent.getPath() + "/" + obj.getName();
+      }
+   }
+
 }
