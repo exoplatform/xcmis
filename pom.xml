@@ -138,17 +138,7 @@
          </dependency>
          <dependency>
             <groupId>org.xcmis</groupId>
-            <artifactId>xcmis-core</artifactId>
-            <version>${project.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>org.xcmis</groupId>
             <artifactId>xcmis-sp-jcr-exo</artifactId>
-            <version>${project.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>org.xcmis</groupId>
-            <artifactId>xcmis-search-lucene</artifactId>
             <version>${project.version}</version>
          </dependency>
          <dependency>

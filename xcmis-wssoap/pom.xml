@@ -10,17 +10,11 @@
 
    <dependencies>
       
-<!--      <dependency>-->
-<!--         <groupId>org.xcmis</groupId>-->
-<!--         <artifactId>xcmis-core</artifactId>-->
-<!--      </dependency>-->
-
        <dependency>
          <groupId>org.xcmis</groupId>
          <artifactId>xcmis-spi</artifactId>
          <scope>compile</scope>
       </dependency>
-      
 
       <dependency>
          <groupId>org.xcmis</groupId>

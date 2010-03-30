@@ -32,12 +32,6 @@
 
       <dependency>
          <groupId>org.xcmis</groupId>
-         <artifactId>xcmis-core</artifactId>
-         <scope>runtime</scope>
-      </dependency>
-
-      <dependency>
-         <groupId>org.xcmis</groupId>
          <artifactId>xcmis-sp-jcr-exo</artifactId>
          <scope>runtime</scope>
       </dependency>
