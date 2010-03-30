@@ -1620,7 +1620,12 @@ abstract class BaseObjectData implements ObjectData
    {
       if (isNew())
       {
-         throw new UnsupportedOperationException("Not supported for newly created objects.");
+         throw new ConstraintException("Not supported for newly created objects.");
+      }
+
+      if (!getTypeDefinition().isFileable())
+      {
+         throw new ConstraintException("Object is not fileable.");
       }
 
       try

@@ -661,7 +661,7 @@ public class StorageImpl implements Storage
       }
       catch (RepositoryException re)
       {
-         // TODO : provide list of node deleted resources resources.
+         // TODO : provide list of not deleted objects.
          // If fact plain list of all items in current tree.
          throw new CmisRuntimeException(re.getMessage(), re);
       }
@@ -996,18 +996,18 @@ public class StorageImpl implements Storage
       return nt;
    }
 
-   private static class DeleteTreeVisitor implements ItemVisitor
+   private class DeleteTreeVisitor implements ItemVisitor
    {
 
       private final String treePath;
 
       private final UnfileObject unfileObject;
 
-      private List<String> deleteObjects = new ArrayList<String>();
+      private final List<String> deleteObjects = new ArrayList<String>();
 
-      private List<String> deleteLinks = new ArrayList<String>();
+      private final List<String> deleteLinks = new ArrayList<String>();
 
-      private Map<String, String> moveMapping = new HashMap<String, String>();
+      private final Map<String, String> moveMapping = new HashMap<String, String>();
 
       public DeleteTreeVisitor(String path, UnfileObject unfileObject)
       {
