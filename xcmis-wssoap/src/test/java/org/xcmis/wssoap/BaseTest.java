@@ -50,6 +50,7 @@ import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.VersioningState;
 import org.xcmis.spi.object.CmisObject;
 import org.xcmis.wssoap.impl.TypeConverter;
+import org.xcmis.wssoap.impl.server.IdentityInterceptor;
 
 import java.util.Iterator;
 import java.util.List;
@@ -128,7 +129,7 @@ public abstract class BaseTest extends TestCase
       }
       if (inInterceptors != null && inInterceptors.size() > 0)
       {
-         for (AbstractPhaseInterceptor<?> in : inInterceptors)
+         for (AbstractPhaseInterceptor<?> in : inInterceptors) 
             serverFactory.getServiceFactory().getService().getInInterceptors().add(in);
       }
 

@@ -190,7 +190,6 @@ public class WebServiceLoader
          ServerImpl server = endpointImpl.getServer();
          server.getEndpoint().getInInterceptors().add(new LoggingInInterceptor());
          server.getEndpoint().getOutInterceptors().add(new LoggingOutInterceptor());
-         //    server.getEndpoint().getOutFaultInterceptors().add(new FaultThrowingInterceptor());
       }
 
       if (endpoint.isPublished())
