@@ -756,8 +756,14 @@ public abstract class BaseConnection implements Connection
       {
          throw new InvalidArgumentException("Object " + sourceFolderId + " is not a Folder object.");
       }
-
-      if (!object.getParents().contains(source))
+      
+      boolean found = false;
+      for (ObjectData one : object.getParents())
+      {
+         if (one.getObjectId().equals(sourceFolderId))
+            found = true;
+      }
+      if (!found)
       {
          throw new InvalidArgumentException("Specified source folder " + sourceFolderId + " is not a parent of "
             + objectId);
