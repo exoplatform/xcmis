@@ -303,11 +303,13 @@ public abstract class BaseTest extends TestCase
       String typeId = CMIS.DOCUMENT;
       IdProperty typeIdProperty = new IdProperty();
       typeIdProperty.setId(CMIS.OBJECT_TYPE_ID);
+      typeIdProperty.setLocalName(CMIS.OBJECT_TYPE_ID);
       typeIdProperty.getValues().add(typeId);
       properties.put(typeIdProperty.getId(), typeIdProperty);
       // NAME
       StringProperty nameProperty = new StringProperty();
       nameProperty.setId(CMIS.NAME);
+      nameProperty.setLocalName(CMIS.NAME);
       nameProperty.getValues().add(name);
       properties.put(nameProperty.getId(), nameProperty);
       // Create Document
@@ -322,11 +324,13 @@ public abstract class BaseTest extends TestCase
       String typeId = CMIS.FOLDER;
       IdProperty typeIdProperty = new IdProperty();
       typeIdProperty.setId(CMIS.OBJECT_TYPE_ID);
+      typeIdProperty.setLocalName(CMIS.OBJECT_TYPE_ID);
       typeIdProperty.getValues().add(typeId);
       properties.put(typeIdProperty.getId(), typeIdProperty);
       // NAME
       StringProperty nameProperty = new StringProperty();
       nameProperty.setId(CMIS.NAME);
+      nameProperty.setLocalName(CMIS.NAME);
       nameProperty.getValues().add(name);
       properties.put(nameProperty.getId(), nameProperty);
       // Create Folder
@@ -346,11 +350,13 @@ public abstract class BaseTest extends TestCase
       // NAME
       StringProperty nameProperty = new StringProperty();
       nameProperty.setId(CMIS.NAME);
+      nameProperty.setLocalName(CMIS.NAME);
       nameProperty.getValues().add(name);
       properties.put(nameProperty.getId(), nameProperty);
       // POLICY_TEXT
       StringProperty policyTextProperty = new StringProperty();
       policyTextProperty.setId(CMIS.POLICY_TEXT);
+      policyTextProperty.setLocalName(CMIS.POLICY_TEXT);
       policyTextProperty.getValues().add(name);
       properties.put(policyTextProperty.getId(), policyTextProperty);
       // Create Folder

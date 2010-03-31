@@ -1232,7 +1232,7 @@ public abstract class BaseConnection implements Connection
                parsedPropertyFilter, parsedRenditionFilter);
 
          ObjectParent parentType =
-            new ObjectParentImpl(cmisParent, includeRelativePathSegment ? object.getName() : null);
+            new ObjectParentImpl(cmisParent, includeRelativePathSegment ? parent.getName() : null);
 
          cmisParents.add(parentType);
       }

@@ -166,31 +166,62 @@ public class PoliciesCollection extends CmisObjectCollection
       try
       {
          conn = getConnection(request);
-         // apply policy
-         if (policyId != null)
+         try
          {
-            conn.applyPolicy(policyId, objectId);
+            // apply policy
+            if (policyId != null)
+            {
+               conn.applyPolicy(policyId, objectId);
+            }
          }
-      }
-      catch (ConstraintException cve)
-      {
-         return createErrorResponse(cve, 409);
-      }
-      catch (ObjectNotFoundException onfe)
-      {
-         return createErrorResponse(onfe, 404);
-      }
-      catch (InvalidArgumentException iae)
-      {
-         return createErrorResponse(iae, 400);
-      }
-      catch (StorageException re)
-      {
-         return createErrorResponse(re, 500);
-      }
-      catch (Throwable t)
-      {
-         return createErrorResponse(t, 500);
+         catch (ConstraintException cve)
+         {
+            return createErrorResponse(cve, 409);
+         }
+         catch (ObjectNotFoundException onfe)
+         {
+            return createErrorResponse(onfe, 404);
+         }
+         catch (InvalidArgumentException iae)
+         {
+            return createErrorResponse(iae, 400);
+         }
+         catch (StorageException re)
+         {
+            return createErrorResponse(re, 500);
+         }
+         catch (Throwable t)
+         {
+            return createErrorResponse(t, 500);
+         }
+
+         entry = request.getAbdera().getFactory().newEntry();
+         try
+         {
+            // updated object
+            addEntryDetails(request, entry, request.getResolvedUri(), conn.getObject(policyId, true,
+               IncludeRelationships.BOTH, true, true, true, null, null));
+         }
+         catch (ResponseContextException rce)
+         {
+            return rce.getResponseContext();
+         }
+         catch (ObjectNotFoundException onfe)
+         {
+            return createErrorResponse(onfe, 404);
+         }
+         catch (FilterNotValidException fae)
+         {
+            return createErrorResponse(fae, 400);
+         }
+         catch (StorageException re)
+         {
+            return createErrorResponse(re, 500);
+         }
+
+         Map<String, String> params = new HashMap<String, String>();
+         String link = request.absoluteUrlFor(TargetType.ENTRY, params);
+         return buildCreateEntryResponse(link, entry);
       }
       finally
       {
@@ -199,34 +230,6 @@ public class PoliciesCollection extends CmisObjectCollection
             conn.close();
          }
       }
-
-      entry = request.getAbdera().getFactory().newEntry();
-      try
-      {
-         // updated object
-         addEntryDetails(request, entry, request.getResolvedUri(), conn.getObject(policyId, true,
-            IncludeRelationships.BOTH, true, true, true, null, null));
-      }
-      catch (ResponseContextException rce)
-      {
-         return rce.getResponseContext();
-      }
-      catch (ObjectNotFoundException onfe)
-      {
-         return createErrorResponse(onfe, 404);
-      }
-      catch (FilterNotValidException fae)
-      {
-         return createErrorResponse(fae, 400);
-      }
-      catch (StorageException re)
-      {
-         return createErrorResponse(re, 500);
-      }
-
-      Map<String, String> params = new HashMap<String, String>();
-      String link = request.absoluteUrlFor(TargetType.ENTRY, params);
-      return buildCreateEntryResponse(link, entry);
    }
 
    /**

@@ -75,7 +75,8 @@ public class TypesDescendantsCollection extends CmisTypeCollection
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
       String typeId = request.getTarget().getParameter(AtomCMIS.PARAM_TYPE_ID);
-      boolean includePropertyDefinitions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PROPERTY_DEFINITIONS, false);
+      boolean includePropertyDefinitions =
+         getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PROPERTY_DEFINITIONS, false);
       int depth = getIntegerParameter(request, AtomCMIS.PARAM_DEPTH, CMIS.DEPTH);
       Connection conn = null;
       try
@@ -105,7 +106,7 @@ public class TypesDescendantsCollection extends CmisTypeCollection
             Entry e = feed.addEntry();
             IRI feedIri = new IRI(getFeedIriForEntry(typeContainer.getContainer(), request));
             addEntryDetails(request, e, feedIri, typeContainer.getContainer());
-            if (typeContainer.getChildren().size() > 0)
+            if (typeContainer.getChildren() != null && !typeContainer.getChildren().isEmpty())
             {
                addChildren(e, typeContainer.getChildren(), feedIri, request);
             }

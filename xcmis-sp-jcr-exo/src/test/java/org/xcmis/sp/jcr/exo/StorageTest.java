@@ -326,7 +326,8 @@ public class StorageTest extends BaseTest
 
       List<String> r = new ArrayList<String>();
       // Should be both documents
-      for (ItemsIterator<ObjectData> checkedOutDocs = storage.getCheckedOutDocuments(null, null); checkedOutDocs.hasNext();)
+      for (ItemsIterator<ObjectData> checkedOutDocs = storage.getCheckedOutDocuments(null, null); checkedOutDocs
+         .hasNext();)
       {
          r.add(checkedOutDocs.next().getObjectId());
       }
@@ -337,7 +338,8 @@ public class StorageTest extends BaseTest
       r.clear();
 
       // Should be only PWC "from" specified folder
-      for (ItemsIterator<ObjectData> checkedOutDocs = storage.getCheckedOutDocuments(folder, null); checkedOutDocs.hasNext();)
+      for (ItemsIterator<ObjectData> checkedOutDocs = storage.getCheckedOutDocuments(folder, null); checkedOutDocs
+         .hasNext();)
       {
          r.add(checkedOutDocs.next().getObjectId());
       }
@@ -1067,7 +1069,8 @@ public class StorageTest extends BaseTest
          assertTrue("Folder " + f.getObjectId() + " must be in parents list.", expectedParents
             .contains(f.getObjectId()));
       }
-      System.out.println(">>> new location: " + ((DocumentImpl)document).getNode().getPath());
+      System.out
+         .println(" StorageTest.testMultifiling > new location: " + ((DocumentImpl)document).getNode().getPath());
    }
 
    public void testRenameDocument() throws Exception

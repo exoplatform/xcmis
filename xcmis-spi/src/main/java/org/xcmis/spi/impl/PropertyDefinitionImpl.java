@@ -72,7 +72,7 @@ public class PropertyDefinitionImpl<T> implements PropertyDefinition<T>
 
    private DateResolution dateResolution;
 
-   private Precision precision;
+   private Precision decimalPrecision;
 
    private T[] defaultValue;
 
@@ -242,7 +242,7 @@ public class PropertyDefinitionImpl<T> implements PropertyDefinition<T>
     */
    public Precision getDecimalPrecision()
    {
-      return precision;
+      return decimalPrecision;
    }
 
    /**
@@ -383,9 +383,9 @@ public class PropertyDefinitionImpl<T> implements PropertyDefinition<T>
       this.dateResolution = dateResolution;
    }
 
-   public void setPrecision(Precision precision)
+   public void setDecimalPrecision(Precision decimalPrecision)
    {
-      this.precision = precision;
+      this.decimalPrecision = decimalPrecision;
    }
 
    public void setDefaultValue(T[] defaultValue)

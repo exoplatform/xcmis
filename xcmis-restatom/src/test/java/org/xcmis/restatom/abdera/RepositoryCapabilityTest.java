@@ -31,65 +31,65 @@ public class RepositoryCapabilityTest extends TestCase
    public void testWriteCapability() throws Exception
    {
       assertTrue(true);
-//      RepositoryCapabilities capabilities = new RepositoryCapabilities();
-//      capabilities.setCapabilityACL(EnumCapabilityACL.NONE);
-//      capabilities.setCapabilityAllVersionsSearchable(true);
-//      capabilities.setCapabilityChanges(EnumCapabilityChanges.NONE);
-//      capabilities.setCapabilityContentStreamUpdatability(EnumCapabilityContentStreamUpdates.ANYTIME);
-//      capabilities.setCapabilityGetDescendants(true);
-//      capabilities.setCapabilityGetFolderTree(true);
-//      capabilities.setCapabilityJoin(EnumCapabilityJoin.NONE);
-//      capabilities.setCapabilityMultifiling(false);
-//      capabilities.setCapabilityPWCSearchable(true);
-//      capabilities.setCapabilityPWCUpdatable(false);
-//      capabilities.setCapabilityQuery(EnumCapabilityQuery.BOTHSEPARATE);
-//      capabilities.setCapabilityRenditions(EnumCapabilityRendition.READ);
-//      capabilities.setCapabilityUnfiling(false);
-//      capabilities.setCapabilityVersionSpecificFiling(false);
-//
-//      RepositoryCapabilitiesTypeElement el =
-//         new RepositoryCapabilitiesTypeElement(AbderaFactory.getInstance().getFactory(), AtomCMIS.CAPABILITIES);
-//      el.build(capabilities);
-//
-//      ByteArrayOutputStream out = new ByteArrayOutputStream();
-//      el.writeTo(out);
-//
-//      DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
-//      f.setNamespaceAware(true);
-//      org.w3c.dom.Document xmlDoc = f.newDocumentBuilder().parse(new ByteArrayInputStream(out.toByteArray()));
-//      XPath xp = XPathFactory.newInstance().newXPath();
-//      xp.setNamespaceContext(new NamespaceResolver());
-//
-//      String r = (String)xp.evaluate("/cmis:capabilities/cmis:capabilityMultifiling", xmlDoc, XPathConstants.STRING);
-//      assertEquals("false", r);
-//      r = (String)xp.evaluate("/cmis:capabilities/cmis:capabilityACL", xmlDoc, XPathConstants.STRING);
-//      assertEquals("none", r);
-//      r = (String)xp.evaluate("/cmis:capabilities/cmis:capabilityAllVersionsSearchable", xmlDoc, XPathConstants.STRING);
-//      assertEquals("true", r);
-//      r = (String)xp.evaluate("/cmis:capabilities/cmis:capabilityChanges", xmlDoc, XPathConstants.STRING);
-//      assertEquals("none", r);
-//      r = (String)xp.evaluate("/cmis:capabilities/cmis:capabilityContentStreamUpdatability", xmlDoc, XPathConstants.STRING);
-//      assertEquals("anytime", r);
-//      r = (String)xp.evaluate("/cmis:capabilities/cmis:capabilityGetDescendants", xmlDoc, XPathConstants.STRING);
-//      assertEquals("true", r);
-//      r = (String)xp.evaluate("/cmis:capabilities/cmis:capabilityGetFolderTree", xmlDoc, XPathConstants.STRING);
-//      assertEquals("true", r);
-//      r = (String)xp.evaluate("/cmis:capabilities/cmis:capabilityJoin", xmlDoc, XPathConstants.STRING);
-//      assertEquals("none", r);
-//      r = (String)xp.evaluate("/cmis:capabilities/cmis:capabilityMultifiling", xmlDoc, XPathConstants.STRING);
-//      assertEquals("false", r);
-//      r = (String)xp.evaluate("/cmis:capabilities/cmis:capabilityPWCSearchable", xmlDoc, XPathConstants.STRING);
-//      assertEquals("true", r);
-//      r = (String)xp.evaluate("/cmis:capabilities/cmis:capabilityPWCUpdateable", xmlDoc, XPathConstants.STRING);
-//      assertEquals("false", r);
-//      r = (String)xp.evaluate("/cmis:capabilities/cmis:capabilityQuery", xmlDoc, XPathConstants.STRING);
-//      assertEquals("bothseparate", r);
-//      r = (String)xp.evaluate("/cmis:capabilities/cmis:capabilityRenditions", xmlDoc, XPathConstants.STRING);
-//      assertEquals("read", r);
-//      r = (String)xp.evaluate("/cmis:capabilities/cmis:capabilityUnfiling", xmlDoc, XPathConstants.STRING);
-//      assertEquals("false", r);
-//      r = (String)xp.evaluate("/cmis:capabilities/cmis:capabilityVersionSpecificFiling", xmlDoc, XPathConstants.STRING);
-//      assertEquals("false", r);
+      //      RepositoryCapabilities capabilities = new RepositoryCapabilities();
+      //      capabilities.setCapabilityACL(EnumCapabilityACL.NONE);
+      //      capabilities.setCapabilityAllVersionsSearchable(true);
+      //      capabilities.setCapabilityChanges(EnumCapabilityChanges.NONE);
+      //      capabilities.setCapabilityContentStreamUpdatability(EnumCapabilityContentStreamUpdates.ANYTIME);
+      //      capabilities.setCapabilityGetDescendants(true);
+      //      capabilities.setCapabilityGetFolderTree(true);
+      //      capabilities.setCapabilityJoin(EnumCapabilityJoin.NONE);
+      //      capabilities.setCapabilityMultifiling(false);
+      //      capabilities.setCapabilityPWCSearchable(true);
+      //      capabilities.setCapabilityPWCUpdatable(false);
+      //      capabilities.setCapabilityQuery(EnumCapabilityQuery.BOTHSEPARATE);
+      //      capabilities.setCapabilityRenditions(EnumCapabilityRendition.READ);
+      //      capabilities.setCapabilityUnfiling(false);
+      //      capabilities.setCapabilityVersionSpecificFiling(false);
+      //
+      //      RepositoryCapabilitiesTypeElement el =
+      //         new RepositoryCapabilitiesTypeElement(AbderaFactory.getInstance().getFactory(), AtomCMIS.CAPABILITIES);
+      //      el.build(capabilities);
+      //
+      //      ByteArrayOutputStream out = new ByteArrayOutputStream();
+      //      el.writeTo(out);
+      //
+      //      DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
+      //      f.setNamespaceAware(true);
+      //      org.w3c.dom.Document xmlDoc = f.newDocumentBuilder().parse(new ByteArrayInputStream(out.toByteArray()));
+      //      XPath xp = XPathFactory.newInstance().newXPath();
+      //      xp.setNamespaceContext(new NamespaceResolver());
+      //
+      //      String r = (String)xp.evaluate("/cmis:capabilities/cmis:capabilityMultifiling", xmlDoc, XPathConstants.STRING);
+      //      assertEquals("false", r);
+      //      r = (String)xp.evaluate("/cmis:capabilities/cmis:capabilityACL", xmlDoc, XPathConstants.STRING);
+      //      assertEquals("none", r);
+      //      r = (String)xp.evaluate("/cmis:capabilities/cmis:capabilityAllVersionsSearchable", xmlDoc, XPathConstants.STRING);
+      //      assertEquals("true", r);
+      //      r = (String)xp.evaluate("/cmis:capabilities/cmis:capabilityChanges", xmlDoc, XPathConstants.STRING);
+      //      assertEquals("none", r);
+      //      r = (String)xp.evaluate("/cmis:capabilities/cmis:capabilityContentStreamUpdatability", xmlDoc, XPathConstants.STRING);
+      //      assertEquals("anytime", r);
+      //      r = (String)xp.evaluate("/cmis:capabilities/cmis:capabilityGetDescendants", xmlDoc, XPathConstants.STRING);
+      //      assertEquals("true", r);
+      //      r = (String)xp.evaluate("/cmis:capabilities/cmis:capabilityGetFolderTree", xmlDoc, XPathConstants.STRING);
+      //      assertEquals("true", r);
+      //      r = (String)xp.evaluate("/cmis:capabilities/cmis:capabilityJoin", xmlDoc, XPathConstants.STRING);
+      //      assertEquals("none", r);
+      //      r = (String)xp.evaluate("/cmis:capabilities/cmis:capabilityMultifiling", xmlDoc, XPathConstants.STRING);
+      //      assertEquals("false", r);
+      //      r = (String)xp.evaluate("/cmis:capabilities/cmis:capabilityPWCSearchable", xmlDoc, XPathConstants.STRING);
+      //      assertEquals("true", r);
+      //      r = (String)xp.evaluate("/cmis:capabilities/cmis:capabilityPWCUpdateable", xmlDoc, XPathConstants.STRING);
+      //      assertEquals("false", r);
+      //      r = (String)xp.evaluate("/cmis:capabilities/cmis:capabilityQuery", xmlDoc, XPathConstants.STRING);
+      //      assertEquals("bothseparate", r);
+      //      r = (String)xp.evaluate("/cmis:capabilities/cmis:capabilityRenditions", xmlDoc, XPathConstants.STRING);
+      //      assertEquals("read", r);
+      //      r = (String)xp.evaluate("/cmis:capabilities/cmis:capabilityUnfiling", xmlDoc, XPathConstants.STRING);
+      //      assertEquals("false", r);
+      //      r = (String)xp.evaluate("/cmis:capabilities/cmis:capabilityVersionSpecificFiling", xmlDoc, XPathConstants.STRING);
+      //      assertEquals("false", r);
    }
 
 }

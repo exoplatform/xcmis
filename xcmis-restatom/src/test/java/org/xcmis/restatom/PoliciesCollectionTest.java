@@ -49,6 +49,7 @@ public class PoliciesCollectionTest extends BaseTest
    public void tearDown() throws Exception
    {
       conn.removePolicy(policyId, docId);
+      conn.deleteObject(policyId, null);
       super.tearDown();
    }
 
@@ -100,13 +101,13 @@ public class PoliciesCollectionTest extends BaseTest
             + "' />" //
             + "<atom:id>urn:uuid:" + policyId + "</atom:id>"
             + "<atom:title type='text'>Security Policy</atom:title>"
-            + "<atom:updated>2009-11-26T11:49:00.212-02:00</atom:updated>"
-            + "<cmisra:object>"
+            + "<atom:updated>2009-11-26T11:49:00.212-02:00</atom:updated>" + "<cmisra:object>"
             + "<cmis:properties>"
-            + "<cmis:propertyId cmis:localName='rep-cmis:objectId' propertyDefinitionId='cmis:objectId'>"
-            + "<cmis:value>" + policyId + "</cmis:value>" + "</cmis:propertyId>"
-            + "</cmis:properties>"
-            + "</cmisra:object>" + "</atom:entry>";
+            + "<cmis:propertyId localName='rep-cmis:objectId' propertyDefinitionId='cmis:objectId'>"
+            + "<cmis:value>"
+            + policyId + "</cmis:value>" + "</cmis:propertyId>" + "</cmis:properties>"
+            + "</cmisra:object>"
+            + "</atom:entry>";
 
       String requestURI = "http://localhost:8080/rest" //
          + "/cmisatom/" //

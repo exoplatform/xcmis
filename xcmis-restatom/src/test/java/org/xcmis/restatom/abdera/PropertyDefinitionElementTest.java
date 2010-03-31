@@ -21,6 +21,7 @@ package org.xcmis.restatom.abdera;
 
 import junit.framework.TestCase;
 
+import org.w3c.dom.Node;
 import org.xcmis.restatom.AbderaFactory;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.NamespaceResolver;
@@ -32,11 +33,20 @@ import org.xcmis.spi.impl.PropertyDefinitionImpl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Calendar;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
@@ -92,7 +102,7 @@ public class PropertyDefinitionElementTest extends TestCase
 
       String r = (String)xp.evaluate(baseElement + "/cmis:propertyType", xmlDoc, XPathConstants.STRING);
       assertEquals("boolean", r);
-      r = (String)xp.evaluate("count(/" + baseElement + "/cmis:choiceBoolean)", xmlDoc, XPathConstants.STRING);
+      r = (String)xp.evaluate("count(/" + baseElement + "/cmis:choice)", xmlDoc, XPathConstants.STRING);
       assertEquals("2", r);
       r = (String)xp.evaluate("count(/" + baseElement + "/cmis:defaultValue)", xmlDoc, XPathConstants.STRING);
       assertEquals("1", r);
@@ -146,7 +156,7 @@ public class PropertyDefinitionElementTest extends TestCase
 
       String r = (String)xp.evaluate("/" + baseElement + "/cmis:propertyType", xmlDoc, XPathConstants.STRING);
       assertEquals("datetime", r);
-      r = (String)xp.evaluate("count(/" + baseElement + "/cmis:choiceDateTime)", xmlDoc, XPathConstants.STRING);
+      r = (String)xp.evaluate("count(/" + baseElement + "/cmis:choice)", xmlDoc, XPathConstants.STRING);
       assertEquals("2", r);
       r = (String)xp.evaluate("count(/" + baseElement + "/cmis:defaultValue)", xmlDoc, XPathConstants.STRING);
       assertEquals("1", r);
@@ -160,7 +170,7 @@ public class PropertyDefinitionElementTest extends TestCase
       PropertyDefinitionImpl<BigDecimal> def = new PropertyDefinitionImpl<BigDecimal>();
       addCommonAttributes(def);
       def.setPropertyType(PropertyType.DECIMAL);
-      def.setPrecision(Precision.Bit32);
+      def.setDecimalPrecision(Precision.Bit32);
 
       ChoiceImpl<BigDecimal> d1 = new ChoiceImpl<BigDecimal>();
       d1.setDisplayName("key1");
@@ -201,7 +211,7 @@ public class PropertyDefinitionElementTest extends TestCase
       assertEquals("decimal", r);
       r = (String)xp.evaluate("/" + baseElement + "/cmis:precision", xmlDoc, XPathConstants.STRING);
       assertEquals("32", r);
-      r = (String)xp.evaluate("count(/" + baseElement + "/cmis:choiceDecimal)", xmlDoc, XPathConstants.STRING);
+      r = (String)xp.evaluate("count(/" + baseElement + "/cmis:choice)", xmlDoc, XPathConstants.STRING);
       assertEquals("2", r);
       r = (String)xp.evaluate("count(/" + baseElement + "/cmis:defaultValue)", xmlDoc, XPathConstants.STRING);
       assertEquals("1", r);
@@ -252,7 +262,7 @@ public class PropertyDefinitionElementTest extends TestCase
 
       String r = (String)xp.evaluate("/" + baseElement + "/cmis:propertyType", xmlDoc, XPathConstants.STRING);
       assertEquals("id", r);
-      r = (String)xp.evaluate("count(/" + baseElement + "/cmis:choiceId)", xmlDoc, XPathConstants.STRING);
+      r = (String)xp.evaluate("count(/" + baseElement + "/cmis:choice)", xmlDoc, XPathConstants.STRING);
       assertEquals("2", r);
       r = (String)xp.evaluate("count(/" + baseElement + "/cmis:defaultValue)", xmlDoc, XPathConstants.STRING);
       assertEquals("1", r);
@@ -312,7 +322,7 @@ public class PropertyDefinitionElementTest extends TestCase
       assertEquals(Long.toString(Long.MIN_VALUE), r);
       r = (String)xp.evaluate("/" + baseElement + "/cmis:maxValue", xmlDoc, XPathConstants.STRING);
       assertEquals(Long.toString(Long.MAX_VALUE), r);
-      r = (String)xp.evaluate("count(/" + baseElement + "/cmis:choiceInteger)", xmlDoc, XPathConstants.STRING);
+      r = (String)xp.evaluate("count(/" + baseElement + "/cmis:choice)", xmlDoc, XPathConstants.STRING);
       assertEquals("2", r);
       r = (String)xp.evaluate("count(/" + baseElement + "/cmis:defaultValue)", xmlDoc, XPathConstants.STRING);
       assertEquals("1", r);
@@ -367,7 +377,7 @@ public class PropertyDefinitionElementTest extends TestCase
       assertEquals("string", r);
       r = (String)xp.evaluate("/" + baseElement + "/cmis:maxLength", xmlDoc, XPathConstants.STRING);
       assertEquals("65536", r);
-      r = (String)xp.evaluate("count(/" + baseElement + "/cmis:choiceString)", xmlDoc, XPathConstants.STRING);
+      r = (String)xp.evaluate("count(/" + baseElement + "/cmis:choice)", xmlDoc, XPathConstants.STRING);
       assertEquals("2", r);
       r = (String)xp.evaluate("count(/" + baseElement + "/cmis:defaultValue)", xmlDoc, XPathConstants.STRING);
       assertEquals("1", r);
@@ -420,7 +430,7 @@ public class PropertyDefinitionElementTest extends TestCase
 
       String r = (String)xp.evaluate("/" + baseElement + "/cmis:propertyType", xmlDoc, XPathConstants.STRING);
       assertEquals("uri", r);
-      r = (String)xp.evaluate("count(/" + baseElement + "/cmis:choiceUri)", xmlDoc, XPathConstants.STRING);
+      r = (String)xp.evaluate("count(/" + baseElement + "/cmis:choice)", xmlDoc, XPathConstants.STRING);
       assertEquals("2", r);
       r = (String)xp.evaluate("count(/" + baseElement + "/cmis:defaultValue)", xmlDoc, XPathConstants.STRING);
       assertEquals("1", r);
@@ -475,5 +485,28 @@ public class PropertyDefinitionElementTest extends TestCase
       assertEquals("true", r);
       r = (String)xp.evaluate(baseElement + "/cmis:openChoice", xmlDoc, XPathConstants.STRING);
       assertEquals("true", r);
+   }
+
+   private static String xmlToString(Node node)
+   {
+      try
+      {
+         Source source = new DOMSource(node);
+         StringWriter stringWriter = new StringWriter();
+         Result result = new StreamResult(stringWriter);
+         TransformerFactory factory = TransformerFactory.newInstance();
+         Transformer transformer = factory.newTransformer();
+         transformer.transform(source, result);
+         return stringWriter.getBuffer().toString();
+      }
+      catch (TransformerConfigurationException e)
+      {
+         e.printStackTrace();
+      }
+      catch (TransformerException e)
+      {
+         e.printStackTrace();
+      }
+      return null;
    }
 }

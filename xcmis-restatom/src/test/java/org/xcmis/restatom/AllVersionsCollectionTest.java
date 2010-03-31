@@ -82,13 +82,13 @@ public class AllVersionsCollectionTest extends BaseTest
    public void testGetAllVersions() throws Exception
    {
       String docId = createDocument(testFolderId, "doc1", null, null);
-      conn.checkout(docId);
+      String docIdPWC = conn.checkout(docId);
 
       CmisObject doc = getCmisObject(docId);
       String versionSeriesId = doc.getObjectInfo().getVersionSeriesId();
 
       ContentStream data = new BaseContentStream("test".getBytes("UTF-8"), "test", "text/plain");
-      conn.checkin(docId, true, null, data, "checkin comment", null, null, null);
+      conn.checkin(docIdPWC, true, null, data, "checkin comment", null, null, null);
 
       // One source document and new version in version series.
       String requestURI =
