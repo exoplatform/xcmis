@@ -87,7 +87,6 @@ public class ACLServicePortImpl implements ACLServicePort
       }
       catch (Exception e)
       {
-         e.printStackTrace();
          LOG.error("Apply ACL error: " + e.getMessage());
          throw ExceptionFactory.generateException(e);
       }

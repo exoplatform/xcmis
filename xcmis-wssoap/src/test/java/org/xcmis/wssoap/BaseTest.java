@@ -19,8 +19,6 @@
 
 package org.xcmis.wssoap;
 
-import junit.framework.TestCase;
-
 import org.apache.cxf.bus.CXFBusFactory;
 import org.apache.cxf.endpoint.Server;
 import org.apache.cxf.interceptor.LoggingInInterceptor;
@@ -50,10 +48,11 @@ import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.VersioningState;
 import org.xcmis.spi.object.CmisObject;
 import org.xcmis.wssoap.impl.TypeConverter;
-import org.xcmis.wssoap.impl.server.IdentityInterceptor;
 
 import java.util.Iterator;
 import java.util.List;
+
+import junit.framework.TestCase;
 
 public abstract class BaseTest extends TestCase
 {
@@ -116,7 +115,6 @@ public abstract class BaseTest extends TestCase
          LOG.debug("Starting Service: object = " + object + " at the address = " + address);
 
       JaxWsServerFactoryBean serverFactory = new JaxWsServerFactoryBean();
-      //serverFactory.setBindingFactory(new HttpBindingInfoFactoryBean());
       serverFactory.getServiceFactory().setDataBinding(new JAXBDataBinding());
       serverFactory.setServiceClass(object.getClass());
       serverFactory.setAddress(address);
@@ -129,7 +127,7 @@ public abstract class BaseTest extends TestCase
       }
       if (inInterceptors != null && inInterceptors.size() > 0)
       {
-         for (AbstractPhaseInterceptor<?> in : inInterceptors) 
+         for (AbstractPhaseInterceptor<?> in : inInterceptors)
             serverFactory.getServiceFactory().getService().getInInterceptors().add(in);
       }
 
@@ -222,7 +220,7 @@ public abstract class BaseTest extends TestCase
       // name
       CmisPropertyString propName = new CmisPropertyString();
       propName.setPropertyDefinitionId(CMIS.NAME);
-      propName.getValue().add("relation1"+ source);
+      propName.getValue().add("relation1" + source);
       // sourceId
       CmisPropertyId sourceId = new CmisPropertyId();
       sourceId.setPropertyDefinitionId(EnumPropertiesRelationship.CMIS_SOURCE_ID.value());
@@ -293,27 +291,7 @@ public abstract class BaseTest extends TestCase
 
    protected void tearDown() throws Exception
    {
-
-      // TODO to remove this "if" statement when it was fixed for JCR storage
-      //      try
-      //      {
-      //         if (conn.getCheckedOutDocs(rootFolderId, false, IncludeRelationships.NONE, true, null, null, null, -1, 0) != null)
-      //         {
-      //            for (Iterator<CmisObject> iter =
-      //               conn.getCheckedOutDocs(rootFolderId, false, IncludeRelationships.NONE, true, null, null, null, -1, 0).getItems().iterator(); iter
-      //               .hasNext();)
-      //            {
-      //               conn.deleteObject(iter.next().getObjectInfo().getId(), null);
-      //            }
-      //         }
-      //      }
-      //      catch (Exception e)
-      //      {
-      //         e.printStackTrace();
-      //      }
-
       clearRoot();
-
       super.tearDown();
       conn.close();
    }

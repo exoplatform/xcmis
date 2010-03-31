@@ -67,8 +67,7 @@ public class NavigationServiceTest extends BaseTest
          null, // Filter
          null, // OrderBy
          false, // Allowable action
-         EnumIncludeRelationships.NONE, 
-         null, // Renditions
+         EnumIncludeRelationships.NONE, null, // Renditions
          true, // Path-segment
          null, // Max items
          null, // Skip count
@@ -85,17 +84,17 @@ public class NavigationServiceTest extends BaseTest
       assertEquals(testFolderId, getObjectId(parent));
    }
 
-      public void testGetDescendants() throws Exception
-      {
-         String id = testFolderId;
-         for (int i = 0; i < 3; i++)
-            id = createFolder(id, "folder" + i);
-   
-         List<CmisObjectInFolderContainerType> resp2 =
-            port.getDescendants(repositoryId, testFolderId, BigInteger.valueOf(3), null, false,
-               EnumIncludeRelationships.NONE, null, false, new CmisExtensionType());
-         assertNotNull(resp2);
-      }
+   public void testGetDescendants() throws Exception
+   {
+      String id = testFolderId;
+      for (int i = 0; i < 3; i++)
+         id = createFolder(id, "folder" + i);
+
+      List<CmisObjectInFolderContainerType> resp2 =
+         port.getDescendants(repositoryId, testFolderId, BigInteger.valueOf(3), null, false,
+            EnumIncludeRelationships.NONE, null, false, new CmisExtensionType());
+      assertNotNull(resp2);
+   }
 
    public void testGetObjectParents() throws Exception
    {
@@ -131,13 +130,12 @@ public class NavigationServiceTest extends BaseTest
          null // Extension
          );
       assertNotNull(checkedout);
-      assertEquals(1, checkedout.getNumItems());
+      assertEquals(BigInteger.ONE, checkedout.getNumItems());
    }
 
    public void testGetFolderTree() throws Exception
    {
       String lev1 = createFolder(testFolderId, "folder1");
-      String lev2 = createFolder(lev1, "folder2");
       List<CmisObjectInFolderContainerType> tree = port.getFolderTree(//
          repositoryId, //
          testFolderId, //

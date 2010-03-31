@@ -18,21 +18,6 @@
  */
 package org.xcmis.wssoap.impl;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.activation.DataHandler;
-import javax.mail.util.ByteArrayDataSource;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.xcmis.core.CmisACLCapabilityType;
 import org.xcmis.core.CmisAccessControlEntryType;
@@ -68,8 +53,8 @@ import org.xcmis.messaging.CmisObjectInFolderContainerType;
 import org.xcmis.messaging.CmisObjectInFolderListType;
 import org.xcmis.messaging.CmisObjectInFolderType;
 import org.xcmis.messaging.CmisObjectListType;
-import org.xcmis.messaging.CmisRepositoryEntryType;
 import org.xcmis.messaging.CmisObjectParentsType;
+import org.xcmis.messaging.CmisRepositoryEntryType;
 import org.xcmis.messaging.CmisTypeContainer;
 import org.xcmis.messaging.CmisTypeDefinitionListType;
 import org.xcmis.spi.ACLCapability;
@@ -81,10 +66,10 @@ import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.PropertyDefinition;
 import org.xcmis.spi.PropertyType;
+import org.xcmis.spi.Rendition;
 import org.xcmis.spi.RepositoryCapabilities;
 import org.xcmis.spi.RepositoryInfo;
 import org.xcmis.spi.TypeDefinition;
-import org.xcmis.spi.Rendition;
 import org.xcmis.spi.Updatability;
 import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.impl.AccessControlEntryImpl;
@@ -104,6 +89,22 @@ import org.xcmis.spi.object.impl.IntegerProperty;
 import org.xcmis.spi.object.impl.StringProperty;
 import org.xcmis.spi.object.impl.UriProperty;
 import org.xcmis.spi.utils.CmisUtils;
+
+import javax.activation.DataHandler;
+import javax.mail.util.ByteArrayDataSource;
+import javax.xml.datatype.XMLGregorianCalendar;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:max.shaposhnik@exoplatform.com">Max Shaposhnik</a>
@@ -302,11 +303,13 @@ public class TypeConverter
       return null;
    }
 
-   @SuppressWarnings("unchecked")
-   public static CmisObjectListType getCmisObjectListType(ItemsList<?> source)
+   public static CmisObjectListType getCmisObjectListType(ItemsList<CmisObject> source)
    {
       CmisObjectListType result = new CmisObjectListType();
-      result.getObjects().addAll((List<CmisObjectType>)source.getItems()); //TODO: right ?
+      for (CmisObject one : source.getItems())
+      {
+         result.getObjects().add(getCmisObjectType(one));
+      }
       result.setHasMoreItems(source.isHasMoreItems());
       result.setNumItems(BigInteger.valueOf(source.getNumItems()));
       return result;
@@ -389,7 +392,7 @@ public class TypeConverter
                containerType.getChildren().addAll(getCmisObjectInFolderContainerType(d.getChildren()));
             }
          }
-         result.add(containerType);         
+         result.add(containerType);
       }
       return result;
    }
@@ -453,6 +456,7 @@ public class TypeConverter
       return result;
    }
 
+   @SuppressWarnings("unchecked")
    public static Map<String, PropertyDefinition<?>> getPropertyDefinitionMap(List<CmisPropertyDefinitionType> source)
    {
 

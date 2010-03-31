@@ -327,21 +327,21 @@ public class ObjectServiceTest extends BaseTest
 
    public void testMoveObject() throws Exception
    {
-      String id = createDocument(testFolderId, "doc1");
+      String id = createDocument(testFolderId, "doc1234");
       String targetId = createFolder(testFolderId, "folder1");
       Holder<String> hId = new Holder<String>(id);
       port.moveObject(//
          repositoryId, //
          hId, //
          targetId, // Target folder
-         testFolderId, // Source folder (don't need provide because multi-filing is not supported)
+         testFolderId, // Source folder 
          new Holder<CmisExtensionType>() // Extension
          );
       assertEquals(id, hId.value);
       // Check it is moved. 
       CmisObjectType moved = port.getObjectByPath(//
          repositoryId, //
-         "/testFolder/folder1/doc1", // 'testFolder' is root folder for test
+         "/testFolder/folder1/doc1234", // 'testFolder' is root folder for test
          null, //
          false, //
          EnumIncludeRelationships.NONE, //

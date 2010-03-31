@@ -19,6 +19,9 @@
 
 package org.xcmis.wssoap.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.core.CmisAccessControlListType;
@@ -34,9 +37,6 @@ import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.data.BaseContentStream;
 import org.xcmis.spi.object.CmisObject;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author <a href="mailto:max.shaposhnik@exoplatform.com">Max Shaposhnik</a>
