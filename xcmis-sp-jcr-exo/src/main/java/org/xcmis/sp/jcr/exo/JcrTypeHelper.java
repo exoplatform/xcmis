@@ -391,7 +391,7 @@ class JcrTypeHelper
                               : Updatability.READWRITE, false, jcrPropertyDef.isMandatory(), true, true, null,
                            jcrPropertyDef.isMultiple(), null, null);
 
-                     decimalDef.setPrecision(Precision.Bit32);
+                     decimalDef.setDecimalPrecision(Precision.Bit32);
                      decimalDef.setMaxDecimal(CMIS.MAX_DECIMAL_VALUE);
                      decimalDef.setMinDecimal(CMIS.MIN_DECIMAL_VALUE);
                      cmisPropDef = decimalDef;
