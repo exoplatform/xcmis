@@ -20,7 +20,7 @@
 package org.xcmis.gwtframework.client.unmarshallers;
 
 import org.xcmis.gwtframework.client.model.CmisContentStreamType;
-import org.xcmis.gwtframework.client.util.Unmarshallable;
+import org.xcmis.gwtframework.client.rest.Unmarshallable;
 
 /**
  * Document's content stream unmarshaller

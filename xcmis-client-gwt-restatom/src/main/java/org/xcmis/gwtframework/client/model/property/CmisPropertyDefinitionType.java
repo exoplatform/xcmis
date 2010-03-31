@@ -22,7 +22,7 @@ package org.xcmis.gwtframework.client.model.property;
 import org.xcmis.gwtframework.client.model.EnumCardinality;
 import org.xcmis.gwtframework.client.model.EnumPropertyType;
 import org.xcmis.gwtframework.client.model.EnumUpdatability;
-import org.xcmis.gwtframework.client.util.QName;
+import org.xcmis.gwtframework.client.rest.QName;
 
 import java.util.ArrayList;
 import java.util.HashMap;

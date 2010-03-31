@@ -21,8 +21,8 @@ package org.xcmis.gwtframework.client.unmarshallers;
 
 import org.xcmis.gwtframework.client.CmisNameSpace;
 import org.xcmis.gwtframework.client.model.repository.CmisRepositoryInfo;
+import org.xcmis.gwtframework.client.rest.Unmarshallable;
 import org.xcmis.gwtframework.client.unmarshallers.parser.RepositoryInfoParser;
-import org.xcmis.gwtframework.client.util.Unmarshallable;
 
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Node;

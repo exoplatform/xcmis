@@ -21,7 +21,7 @@ package org.xcmis.gwtframework.client.marshallers;
 
 import org.xcmis.gwtframework.client.marshallers.builder.ObjectXMLBuilder;
 import org.xcmis.gwtframework.client.model.actions.CreateFolder;
-import org.xcmis.gwtframework.client.util.Marshallable;
+import org.xcmis.gwtframework.client.rest.Marshallable;
 
 
 /**

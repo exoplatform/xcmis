@@ -21,7 +21,7 @@ package org.xcmis.gwtframework.client.marshallers;
 
 import org.xcmis.gwtframework.client.marshallers.builder.TypeXMLBuilder;
 import org.xcmis.gwtframework.client.model.type.CmisTypeDefinitionType;
-import org.xcmis.gwtframework.client.util.Marshallable;
+import org.xcmis.gwtframework.client.rest.Marshallable;
 
 /**
  * @author <a href="mailto:zhulevaanna@gmail.com">Ann Zhuleva</a>

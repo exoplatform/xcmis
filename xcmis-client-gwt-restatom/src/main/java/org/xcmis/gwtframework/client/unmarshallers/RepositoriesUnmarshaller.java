@@ -20,8 +20,8 @@
 package org.xcmis.gwtframework.client.unmarshallers;
 
 import org.xcmis.gwtframework.client.model.restatom.CmisRepositories;
+import org.xcmis.gwtframework.client.rest.Unmarshallable;
 import org.xcmis.gwtframework.client.unmarshallers.parser.RepositoriesParser;
-import org.xcmis.gwtframework.client.util.Unmarshallable;
 
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.XMLParser;

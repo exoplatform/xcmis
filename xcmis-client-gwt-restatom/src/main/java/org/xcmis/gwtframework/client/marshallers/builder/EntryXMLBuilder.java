@@ -20,7 +20,7 @@
 package org.xcmis.gwtframework.client.marshallers.builder;
 
 import org.xcmis.gwtframework.client.CmisNameSpace;
-import org.xcmis.gwtframework.client.util.QName;
+import org.xcmis.gwtframework.client.rest.QName;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.xml.client.Document;

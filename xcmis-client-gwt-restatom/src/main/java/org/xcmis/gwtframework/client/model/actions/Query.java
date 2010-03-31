@@ -21,7 +21,7 @@ package org.xcmis.gwtframework.client.model.actions;
 
 import org.xcmis.gwtframework.client.model.CmisExtensionType;
 import org.xcmis.gwtframework.client.model.EnumIncludeRelationships;
-import org.xcmis.gwtframework.client.util.QName;
+import org.xcmis.gwtframework.client.rest.QName;
 
 import java.util.HashMap;
 import java.util.Map;

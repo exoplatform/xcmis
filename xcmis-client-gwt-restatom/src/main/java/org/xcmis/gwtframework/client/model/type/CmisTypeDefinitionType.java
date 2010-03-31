@@ -21,7 +21,7 @@ package org.xcmis.gwtframework.client.model.type;
 
 import org.xcmis.gwtframework.client.model.EnumBaseObjectTypeIds;
 import org.xcmis.gwtframework.client.model.property.CmisPropertyDefinitionType;
-import org.xcmis.gwtframework.client.util.QName;
+import org.xcmis.gwtframework.client.rest.QName;
 
 import java.util.ArrayList;
 import java.util.HashMap;

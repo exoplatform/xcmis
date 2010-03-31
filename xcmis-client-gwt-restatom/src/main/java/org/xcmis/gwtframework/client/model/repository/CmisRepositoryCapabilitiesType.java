@@ -25,7 +25,7 @@ import org.xcmis.gwtframework.client.model.EnumCapabilityContentStreamUpdates;
 import org.xcmis.gwtframework.client.model.EnumCapabilityJoin;
 import org.xcmis.gwtframework.client.model.EnumCapabilityQuery;
 import org.xcmis.gwtframework.client.model.EnumCapabilityRendition;
-import org.xcmis.gwtframework.client.util.QName;
+import org.xcmis.gwtframework.client.rest.QName;
 
 import java.util.ArrayList;
 import java.util.HashMap;

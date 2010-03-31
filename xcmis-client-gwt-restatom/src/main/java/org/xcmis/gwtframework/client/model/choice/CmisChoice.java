@@ -19,7 +19,7 @@
 
 package org.xcmis.gwtframework.client.model.choice;
 
-import org.xcmis.gwtframework.client.util.QName;
+import org.xcmis.gwtframework.client.rest.QName;
 
 import java.util.HashMap;
 import java.util.Map;
