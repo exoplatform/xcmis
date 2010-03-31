@@ -69,6 +69,7 @@ public class StorageTest extends BaseTest
 
    protected Folder rootFolder;
 
+   @Override
    public void setUp() throws Exception
    {
       super.setUp();
@@ -113,10 +114,146 @@ public class StorageTest extends BaseTest
 
    public void testCheckOut() throws Exception
    {
-      //      Document document = createDocument(rootFolder, "checkoutTest", "cmis:document", null, null);
-      //      document.checkout();
-      //      for (NodeIterator i = root.getNodes(); i.hasNext();)
-      //         System.out.println(">>>> "+i.nextNode().getName());
+      Document document =
+         createDocument(rootFolder, "checkoutTest", "cmis:document", new BaseContentStream("checkout test".getBytes(),
+            null, "text/plain"), null);
+
+      Document checkedOut = document.checkout();
+
+      assertTrue(document.isVersionSeriesCheckedOut());
+      assertTrue(checkedOut.isVersionSeriesCheckedOut());
+      assertEquals(document.getVersionSeriesId(), checkedOut.getVersionSeriesId());
+      assertEquals(document.getVersionSeriesCheckedOutId(), checkedOut.getObjectId());
+      assertNotNull(document.getVersionSeriesCheckedOutBy());
+      assertNotNull(checkedOut.getVersionSeriesCheckedOutBy());
+
+      // check content
+      byte[] b = new byte[128];
+      int r = checkedOut.getContentStream().getStream().read(b);
+      assertEquals("checkout test", new String(b, 0, r));
+   }
+
+   public void testCheckIn() throws Exception
+   {
+      Document document =
+         createDocument(rootFolder, "checkinTest", "cmis:document", new BaseContentStream("checkin test".getBytes(),
+            null, "text/plain"), null);
+      Document checkedOut = document.checkout();
+      String pwcId = checkedOut.getObjectId();
+
+      // Get PWC from storage
+      checkedOut = (Document)storage.getObject(pwcId);
+
+      checkedOut
+         .setContentStream(new BaseContentStream("checkin test. content updated".getBytes(), null, "text/plain"));
+      checkedOut.checkin(true, "my comment");
+
+      try
+      {
+         storage.getObject(pwcId);
+         fail("PWC must be removed.");
+      }
+      catch (ObjectNotFoundException e)
+      {
+         // OK
+      }
+
+      assertFalse(document.isVersionSeriesCheckedOut());
+      assertNull(document.getVersionSeriesCheckedOutId());
+      assertNull(document.getVersionSeriesCheckedOutBy());
+      assertEquals("my comment", document.getProperty(CMIS.CHECKIN_COMMENT).getValues().get(0));
+
+      // check content
+      byte[] b = new byte[128];
+      int r = document.getContentStream().getStream().read(b);
+      assertEquals("checkin test. content updated", new String(b, 0, r));
+   }
+
+   public void testCancelCheckOutDocument() throws Exception
+   {
+      Document document =
+         createDocument(rootFolder, "cancelCheckoutDocumentTest", "cmis:document", new BaseContentStream(
+            "cancel checkout test".getBytes(), null, "text/plain"), null);
+      Document checkedOut = document.checkout();
+      String pwcId = checkedOut.getObjectId();
+
+      // Call cancel checkout on other then PWC version in repository.
+      document.cancelCheckout();
+
+      try
+      {
+         storage.getObject(pwcId);
+         fail("PWC must be removed.");
+      }
+      catch (ObjectNotFoundException e)
+      {
+         // OK
+      }
+
+      assertFalse(document.isVersionSeriesCheckedOut());
+      assertNull(document.getVersionSeriesCheckedOutId());
+      assertNull(document.getVersionSeriesCheckedOutBy());
+   }
+
+   public void testCancelCheckOutPWC() throws Exception
+   {
+      Document document =
+         createDocument(rootFolder, "cancelCheckoutPWCTest", "cmis:document", new BaseContentStream(
+            "cancel checkout test".getBytes(), null, "text/plain"), null);
+
+      Document checkedOut = document.checkout();
+      String pwcId = checkedOut.getObjectId();
+
+      // Get PWC from storage
+      checkedOut = (Document)storage.getObject(pwcId);
+
+      // Call cancel checkout on PWC.
+      checkedOut.cancelCheckout();
+
+      try
+      {
+         storage.getObject(pwcId);
+         fail("PWC must be removed.");
+      }
+      catch (ObjectNotFoundException e)
+      {
+         // OK
+      }
+
+      assertFalse(document.isVersionSeriesCheckedOut());
+      assertNull(document.getVersionSeriesCheckedOutId());
+      assertNull(document.getVersionSeriesCheckedOutBy());
+   }
+
+   public void testDeletePWC() throws Exception
+   {
+      Document document =
+         createDocument(rootFolder, "deletePWCTest", "cmis:document", new BaseContentStream("delete PWC test"
+            .getBytes(), null, "text/plain"), null);
+
+      Document checkedOut = document.checkout();
+      String pwcId = checkedOut.getObjectId();
+
+      // Get PWC from storage
+      checkedOut = (Document)storage.getObject(pwcId);
+
+      // Delete PWC.
+      storage.deleteObject(checkedOut, true);
+
+      try
+      {
+         storage.getObject(pwcId);
+         fail("PWC mus be removed.");
+      }
+      catch (ObjectNotFoundException e)
+      {
+         // OK
+      }
+
+      // Property on document must be the same as in not checked-out state.
+      assertFalse(document.isVersionSeriesCheckedOut());
+      assertNull(document.getVersionSeriesCheckedOutId());
+      assertNull(document.getVersionSeriesCheckedOutBy());
    }
 
    public void testChildren() throws Exception
@@ -229,7 +366,7 @@ public class StorageTest extends BaseTest
       assertFalse(documentCopy.isMajorVersion());
    }
 
-   public void testCreateDocumentUnfiled() throws Exception
+   public void _testCreateDocumentUnfiled() throws Exception
    {
       Document document = createDocument(null, "createUnfiledDocumentTest", "cmis:document", null, null);
 

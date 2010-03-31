@@ -604,10 +604,6 @@ public class StorageImpl implements Storage
       {
          v.visit(((FolderImpl)folder).getNode());
 
-         if (LOG.isDebugEnabled())
-         {
-            LOG.debug("<DELETE LINKS>");
-         }
          for (String id : v.getDeleteLinks())
          {
             if (LOG.isDebugEnabled())
@@ -617,10 +613,6 @@ public class StorageImpl implements Storage
             ((ExtendedSession)session).getNodeByIdentifier(id).remove();
          }
 
-         if (LOG.isDebugEnabled())
-         {
-            LOG.debug("<MOVE>");
-         }
          for (Map.Entry<String, String> e : v.getMoveMapping().entrySet())
          {
             String scrPath = e.getKey();
@@ -648,10 +640,6 @@ public class StorageImpl implements Storage
             session.move(scrPath, destPath);
          }
 
-         if (LOG.isDebugEnabled())
-         {
-            LOG.debug("<DELETE OBJECTS>");
-         }
          for (String e : v.getDeleteObjects())
          {
             if (LOG.isDebugEnabled())
@@ -673,7 +661,6 @@ public class StorageImpl implements Storage
          // If fact plain list of all items in current tree.
          throw new CmisRuntimeException(re.getMessage(), re);
       }
-      // TODO : index listener
       return failedToDelete;
    }
 
@@ -693,8 +680,43 @@ public class StorageImpl implements Storage
 
    public ItemsIterator<ObjectData> getCheckedOutDocuments(ObjectData folder, String orderBy)
    {
-      // TODO Auto-generated method stub
-      return null;
+      try
+      {
+         Node workingCopies =
+            (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_WORKING_COPIES);
+
+         List<ObjectData> checkedOut = new ArrayList<ObjectData>();
+
+         for (NodeIterator iterator = workingCopies.getNodes(); iterator.hasNext();)
+         {
+            Node wc = iterator.nextNode();
+            Node node = wc.getNodes().nextNode();
+            TypeDefinition type = JcrTypeHelper.getTypeDefinition(node.getPrimaryNodeType(), true);
+            String latestVersion = node.getProperty("xcmis:latestVersionId").getString();
+            PWC pwc = new PWC(type, node, (Document)getObject(latestVersion));
+            if (folder != null)
+            {
+               for (Folder parent : pwc.getParents())
+               {
+                  // TODO equals and hashCode for objects
+                  if (parent.getObjectId().equals(folder.getObjectId()))
+                  {
+                     checkedOut.add(pwc);
+                  }
+               }
+            }
+            else
+            {
+               checkedOut.add(pwc);
+            }
+         }
+
+         return new BaseItemsIterator<ObjectData>(checkedOut);
+      }
+      catch (RepositoryException re)
+      {
+         throw new CmisRuntimeException("Unable get checked-out documents. " + re.getMessage(), re);
+      }
    }
 
    /**
@@ -713,10 +735,22 @@ public class StorageImpl implements Storage
       try
       {
          Node node = ((ExtendedSession)session).getNodeByIdentifier(objectId);
+         if (node.isNodeType(JcrCMIS.NT_VERSION))
+         {
+            Node frozen = node.getNode(JcrCMIS.JCR_FROZEN_NODE);
+            JcrTypeHelper.getTypeDefinition(
+               getNodeType(frozen.getProperty(JcrCMIS.JCR_FROZEN_PRIMARY_TYPE).getString()), true);
+         }
          TypeDefinition type = JcrTypeHelper.getTypeDefinition(node.getPrimaryNodeType(), true);
 
          if (type.getBaseId() == BaseType.DOCUMENT)
          {
+            if (node.getParent().isNodeType("xcmis:workingCopy"))
+            {
+               // TODO get smarter (simpler)
+               String latestVersion = node.getProperty("xcmis:latestVersionId").getString();
+               return new PWC(type, node, (Document)getObject(latestVersion));
+            }
             return new DocumentImpl(type, node, renditionManager);
          }
          else if (type.getBaseId() == BaseType.FOLDER)

@@ -20,11 +20,13 @@
 package org.xcmis.sp.jcr.exo;
 
 import org.exoplatform.services.jcr.core.ExtendedNode;
+import org.exoplatform.services.jcr.core.ExtendedSession;
 import org.exoplatform.services.jcr.util.IdGenerator;
 import org.xcmis.sp.jcr.exo.rendition.RenditionContentStream;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
+import org.xcmis.spi.ContentStreamAllowed;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.TypeDefinition;
@@ -42,6 +44,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Calendar;
 
+import javax.jcr.ItemNotFoundException;
 import javax.jcr.Node;
 import javax.jcr.PathNotFoundException;
 import javax.jcr.PropertyIterator;
@@ -84,25 +87,80 @@ class DocumentImpl extends BaseObjectData implements Document
       this.renditionManager = manager;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public void cancelCheckout() throws StorageException
    {
-      // TODO Auto-generated method stub
+      if (isNew())
+      {
+         throw new UnsupportedOperationException("Unable cancel checkout newly created Document.");
+      }
 
+      if (!type.isVersionable())
+      {
+         throw new ConstraintException("Object is not versionable.");
+      }
+
+      if (!isVersionSeriesCheckedOut())
+      {
+         throw new ConstraintException("There is no Private Working Copy in version series.");
+      }
+
+      try
+      {
+         Node pwcNode = ((ExtendedSession)session).getNodeByIdentifier(getVersionSeriesCheckedOutId());
+         PWC pwc = new PWC(type, pwcNode, this);
+         pwc.delete();
+      }
+      catch (ItemNotFoundException e)
+      {
+         throw new ConstraintException("There is no Private Working Copy in version series.");
+      }
+      catch (RepositoryException re)
+      {
+         throw new StorageException("Unable cancel checkout. " + re.getMessage(), re);
+      }
    }
 
+   /**
+    * {@inheritDoc}
+    */
+   // Will be overridden in PWC
    public Document checkin(boolean major, String checkinComment) throws ConstraintException, StorageException
    {
-      // TODO Auto-generated method stub
-      return null;
+      if (!type.isVersionable())
+      {
+         throw new ConstraintException("Object is not versionable.");
+      }
+
+      throw new ConstraintException("Current object is not Private Working Copy.");
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public Document checkout() throws ConstraintException, VersioningException, StorageException
    {
-      // TODO
-      //      DocumentCopy copy = new DocumentCopy(this, getParent(), getName() + "_PWC", null);
-      //      copy.save();
-      //      return copy;
-      return null;
+      if (isNew())
+      {
+         throw new UnsupportedOperationException("Unable checkout newly created Document.");
+      }
+
+      if (!type.isVersionable())
+      {
+         throw new ConstraintException("Object is not versionable.");
+      }
+
+      if (isVersionSeriesCheckedOut())
+      {
+         throw new VersioningException("Version series already checked-out. "
+            + "Not allowed have more then one PWC for version series at a time.");
+      }
+
+      PWC pwc = new PWC(this, session);
+      pwc.save();
+      return pwc;
    }
 
    /**
@@ -269,9 +327,11 @@ class DocumentImpl extends BaseObjectData implements Document
       return major == null ? false : major;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public boolean isPWC()
    {
-      // TODO Auto-generated method stub
       return false;
    }
 
@@ -410,6 +470,16 @@ class DocumentImpl extends BaseObjectData implements Document
     */
    public void setContentStream(ContentStream contentStream) throws ConstraintException
    {
+      if (type.getContentStreamAllowed() == ContentStreamAllowed.REQUIRED && contentStream == null)
+      {
+         throw new ConstraintException("Content stream required for object of type " + getTypeId()
+            + ", it can't be null.");
+      }
+      if (type.getContentStreamAllowed() == ContentStreamAllowed.NOT_ALLOWED && contentStream != null)
+      {
+         throw new ConstraintException("Content stream not allowed for object of type " + getTypeId());
+      }
+
       if (isNew())
       {
          this.content = contentStream;

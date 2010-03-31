@@ -179,7 +179,6 @@ public abstract class BaseConnection implements Connection
       ObjectData object = storage.getObject(objectId);
       applyACL(object, addACL, removeACL);
 
-      //      object.save();
       storage.saveObject(object);
    }
 
@@ -218,7 +217,7 @@ public abstract class BaseConnection implements Connection
          throw new InvalidArgumentException("Object " + policy.getObjectId() + " is not a Policy object.");
       }
       object.applyPolicy((Policy)policy);
-      //      object.save();
+
       storage.saveObject(object);
    }
 
@@ -262,7 +261,6 @@ public abstract class BaseConnection implements Connection
 
       object.removePolicy((Policy)policyData);
 
-      //      object.save();
       storage.saveObject(object);
    }
 
@@ -329,7 +327,6 @@ public abstract class BaseConnection implements Connection
          applyPolicies(newDocument, policies);
       }
 
-      //      newDocument.save();
       storage.saveObject(newDocument);
 
       return newDocument.getObjectId();
@@ -383,7 +380,6 @@ public abstract class BaseConnection implements Connection
          applyPolicies(newDocument, policies);
       }
 
-      //      newDocument.save();
       storage.saveObject(newDocument);
 
       return newDocument.getObjectId();
@@ -439,7 +435,6 @@ public abstract class BaseConnection implements Connection
          applyPolicies(newFolder, policies);
       }
 
-      //      newFolder.save();
       storage.saveObject(newFolder);
 
       return newFolder.getObjectId();
@@ -498,7 +493,6 @@ public abstract class BaseConnection implements Connection
          applyPolicies(newPolicy, policies);
       }
 
-      //      newPolicy.save();
       storage.saveObject(newPolicy);
 
       return newPolicy.getObjectId();
@@ -566,7 +560,6 @@ public abstract class BaseConnection implements Connection
          applyPolicies(newRelationship, policies);
       }
 
-      //      newRelationship.save();
       storage.saveObject(newRelationship);
 
       return newRelationship.getObjectId();
@@ -800,7 +793,6 @@ public abstract class BaseConnection implements Connection
 
       ((Document)document).setContentStream(null);
 
-      //      document.save();
       storage.saveObject(document);
 
       String changeToken = document.getChangeToken();
@@ -840,7 +832,6 @@ public abstract class BaseConnection implements Connection
 
       ((Document)document).setContentStream(content);
 
-      //      document.save();
       storage.saveObject(document);
 
       String changeToken = document.getChangeToken();
@@ -875,7 +866,6 @@ public abstract class BaseConnection implements Connection
 
       object.setProperties(properties);
 
-      //      object.save();
       storage.saveObject(object);
 
       String changeToken = object.getChangeToken();
