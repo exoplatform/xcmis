@@ -557,6 +557,12 @@ class DocumentImpl extends BaseObjectData implements Document
                next.remove();
             }
          }
+         String pwcId = getVersionSeriesCheckedOutId();
+         if (pwcId != null)
+         {
+            Node pwcNode = ((ExtendedSession)session).getNodeByIdentifier(pwcId);
+            pwcNode.remove();
+         }
       }
       catch (RepositoryException re)
       {
