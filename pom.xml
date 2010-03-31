@@ -64,8 +64,8 @@
       <module>xcmis-search-parser-cmis</module>
       <module>xcmis-search-service</module>
       <module>xcmis-sp-jcr-exo</module>
-      <module>xcmis-wssoap</module>
       <module>xcmis-restatom</module>
+      <module>xcmis-wssoap</module>
       <module>xcmis-server-war</module>
    </modules>
 

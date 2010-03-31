@@ -27,6 +27,12 @@
          <groupId>org.xcmis</groupId>
          <artifactId>xcmis-sp-jcr-exo</artifactId>
          <scope>test</scope>
+         <exclusions>
+            <exclusion>
+               <groupId>dom4j</groupId>
+               <artifactId>dom4j</artifactId>
+            </exclusion>
+         </exclusions>
       </dependency>
 
       <!-- CXF dependencies -->
@@ -76,10 +82,12 @@
          <groupId>wsdl4j</groupId>
          <artifactId>wsdl4j</artifactId>
       </dependency>
+
       <dependency>
          <groupId>jdom</groupId>
          <artifactId>jdom</artifactId>
       </dependency>
+
    </dependencies>
    <build>
       <plugins>
