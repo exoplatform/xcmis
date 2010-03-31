@@ -1,3 +1,5 @@
+package org.xcmis.search.parser;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.xcmis.search.InvalidQueryException;
