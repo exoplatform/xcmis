@@ -131,11 +131,13 @@
             <artifactId>xcmis-spi</artifactId>
             <version>${project.version}</version>
          </dependency>
+<!--
          <dependency>
             <groupId>org.xcmis</groupId>
             <artifactId>xcmis-sp-inmemory</artifactId>
             <version>${project.version}</version>
          </dependency>
+-->
          <dependency>
             <groupId>org.xcmis</groupId>
             <artifactId>xcmis-sp-jcr-exo</artifactId>
