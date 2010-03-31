@@ -29,6 +29,7 @@ import org.apache.tika.Tika;
 import org.apache.tika.metadata.Metadata;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.xcmis.search.config.IndexConfiguration;
 import org.xcmis.search.content.ContentEntry;
 import org.xcmis.search.content.Property;
 import org.xcmis.search.content.Property.BinaryValue;
@@ -49,13 +50,16 @@ public class NodeIndexer
     */
    private final Tika extractor;
 
+   private final IndexConfiguration indexConfiguration;
+
    /**
     * @param extractor
     */
-   public NodeIndexer(Tika extractor)
+   public NodeIndexer(Tika extractor, IndexConfiguration indexConfiguration)
    {
       super();
       this.extractor = extractor;
+      this.indexConfiguration = indexConfiguration;
    }
 
    /**
@@ -71,21 +75,21 @@ public class NodeIndexer
       doc.add(new Field(FieldNames.UUID, contentEntry.getIdentifier(), Field.Store.YES,
          Field.Index.NOT_ANALYZED_NO_NORMS, Field.TermVector.NO));
 
-      //parent uuids
-      for (int i = 0; i < contentEntry.getParentIdentifiers().length; i++)
+      //root
+      if (contentEntry.getParentIdentifiers().length == 0)
       {
-         String parentIdetifier = contentEntry.getParentIdentifiers()[i];
-         // parent UUID
-         if (parentIdetifier == null)
+         doc.add(new Field(FieldNames.PARENT, indexConfiguration.getRootParentUuid(), Field.Store.YES,
+            Field.Index.NOT_ANALYZED_NO_NORMS, Field.TermVector.NO));
+         doc.add(new Field(FieldNames.LABEL, "", Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS,
+            Field.TermVector.NO));
+      }
+      else
+      {
+         //parent uuids
+         for (int i = 0; i < contentEntry.getParentIdentifiers().length; i++)
          {
-            // root node
-            doc.add(new Field(FieldNames.PARENT, "", Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS,
-               Field.TermVector.NO));
-            doc.add(new Field(FieldNames.LABEL, "", Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS,
-               Field.TermVector.NO));
-         }
-         else
-         {
+            String parentIdetifier = contentEntry.getParentIdentifiers()[i];
+
             doc.add(new Field(FieldNames.PARENT, parentIdetifier, Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS,
                Field.TermVector.NO));
 

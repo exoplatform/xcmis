@@ -19,6 +19,7 @@
 package org.xcmis.search.lucene;
 
 import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang.Validate;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
@@ -35,6 +36,7 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.search.VisitException;
 import org.xcmis.search.Visitors;
+import org.xcmis.search.config.IndexConfiguration;
 import org.xcmis.search.config.IndexConfigurationException;
 import org.xcmis.search.config.SearchServiceConfiguration;
 import org.xcmis.search.content.ContentEntry;
@@ -208,6 +210,8 @@ public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndex
     */
    private NodeIndexer nodeIndexer;
 
+   private IndexConfiguration indexConfuguration;
+
    /**
     * @param indexConfuguration
     * @throws IndexException
@@ -217,19 +221,33 @@ public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndex
    public AbstractLuceneQueryableIndexStorage(SearchServiceConfiguration serviceConfuguration) throws IndexException
    {
       super();
+      Validate.notNull(serviceConfuguration.getTableResolver(),
+         "The serviceConfuguration.getTableResolver() argument may not be null");
+      Validate.notNull(serviceConfuguration.getNameConverter(),
+         "The serviceConfuguration.getNameConverter() argument may not be null");
+      Validate.notNull(serviceConfuguration.getPathSplitter(),
+         "The serviceConfuguration.getPathSplitter() argument may not be null");
+      Validate.notNull(serviceConfuguration.getIndexConfuguration(),
+         "The serviceConfuguration.getTableResolver() argument may not be null");
+      Validate.notNull(serviceConfuguration.getIndexConfuguration().getRootParentUuid(),
+         "The serviceConfuguration.getIndexConfuguration().getRootParentUuid() argument may not be null");
+      Validate.notNull(serviceConfuguration.getIndexConfuguration().getRootUuid(),
+         "The serviceConfuguration.getIndexConfuguration().getRootUuid() argument may not be null");
 
       this.tableResolver = serviceConfuguration.getTableResolver();
       this.nameConverter = serviceConfuguration.getNameConverter();
       this.pathSplitter = serviceConfuguration.getPathSplitter();
-      TikaConfig tikaConfig = serviceConfuguration.getIndexConfuguration().getTikaConfig();
-      this.nodeIndexer = new NodeIndexer(tikaConfig == null ? new Tika() : new Tika(tikaConfig));
+      this.indexConfuguration = serviceConfuguration.getIndexConfuguration();
+
+      TikaConfig tikaConfig = indexConfuguration.getTikaConfig();
+      this.nodeIndexer = new NodeIndexer(tikaConfig == null ? new Tika() : new Tika(tikaConfig), indexConfuguration);
 
    }
 
    public Query getConstrainQuery(Constraint constraint, Map<String, Object> bindVariablesValues) throws VisitException
    {
       LuceneQueryBuilder luceneQueryBuilder =
-         new LuceneQueryBuilder(getIndexReader(), nameConverter, pathSplitter, bindVariablesValues);
+         new LuceneQueryBuilder(getIndexReader(), nameConverter, pathSplitter, bindVariablesValues, indexConfuguration);
       Visitors.visit(constraint, luceneQueryBuilder);
       return luceneQueryBuilder.getQuery();
    }

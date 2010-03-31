@@ -22,6 +22,7 @@ import org.apache.commons.lang.Validate;
 import org.xcmis.search.value.PropertyType;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -46,6 +47,20 @@ public class Property<V>
       this.type = type;
       this.name = name;
       this.value = value;
+   }
+
+   /**
+    * @param type
+    * @param name
+    * @param value
+    */
+   public Property(PropertyType type, String name, ContentValue<V> value)
+   {
+      super();
+      this.type = type;
+      this.name = name;
+      this.value = new ArrayList<ContentValue<V>>(1);
+      this.value.add(value);
    }
 
    /**

@@ -40,6 +40,42 @@ public class IndexConfigurationImpl implements IndexConfiguration
 
    private IndexRestoreService indexRestoreService;
 
+   private String rootUuid;
+
+   private String rootParentUuid;
+
+   /**
+    * @return the rootUuid
+    */
+   public String getRootUuid()
+   {
+      return rootUuid;
+   }
+
+   /**
+    * @param rootUuid the rootUuid to set
+    */
+   public void setRootUuid(String rootUuid)
+   {
+      this.rootUuid = rootUuid;
+   }
+
+   /**
+    * @return the rootParentUuid
+    */
+   public String getRootParentUuid()
+   {
+      return rootParentUuid;
+   }
+
+   /**
+    * @param rootParentUuid the rootParentUuid to set
+    */
+   public void setRootParentUuid(String rootParentUuid)
+   {
+      this.rootParentUuid = rootParentUuid;
+   }
+
    /**
     * {@inheritDoc}
     */

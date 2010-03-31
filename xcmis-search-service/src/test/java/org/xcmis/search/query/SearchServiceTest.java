@@ -48,6 +48,7 @@ import org.xcmis.search.result.ScoredRow;
 import org.xcmis.search.value.CastSystem;
 import org.xcmis.search.value.NameConverter;
 import org.xcmis.search.value.PropertyType;
+import org.xcmis.search.value.SlashSplitter;
 import org.xcmis.search.value.ToStringNameConverter;
 
 import java.io.ByteArrayInputStream;
@@ -109,16 +110,24 @@ public class SearchServiceTest
    @Test
    public void testShouldCreateSearchServie() throws SearchServiceException
    {
+      NameConverter<String> nameConverter = new ToStringNameConverter();
+      SchemaTableResolver tableResolver = new SchemaTableResolver(nameConverter, schema);
+
       //index configuration
       IndexConfigurationImpl indexConfuration = new IndexConfigurationImpl();
       indexConfuration.setIndexDir(tempDir.getAbsolutePath());
       indexConfuration.setIndexRecoverService(mock(IndexRecoverService.class));
       indexConfuration.setIndexRestoreService(mock(IndexRestoreService.class));
+      indexConfuration.setRootParentUuid("rootParentUuid");
+      indexConfuration.setRootUuid("rootUuid");
 
       //search service configuration
       SearchServiceConfiguration configuration = new SearchServiceConfiguration();
       configuration.setIndexConfiguration(indexConfuration);
       configuration.setContentReader(mock(ContentReaderInterceptor.class));
+      configuration.setPathSplitter(new SlashSplitter());
+      configuration.setTableResolver(tableResolver);
+      configuration.setNameConverter(nameConverter);
       LuceneSearchService luceneSearchService = new LuceneSearchService(configuration);
 
       assertThat(luceneSearchService, notNullValue());
@@ -137,6 +146,8 @@ public class SearchServiceTest
       indexConfuration.setIndexDir(tempDir.getAbsolutePath());
       indexConfuration.setIndexRecoverService(mock(IndexRecoverService.class));
       indexConfuration.setIndexRestoreService(mock(IndexRestoreService.class));
+      indexConfuration.setRootParentUuid("rootParentUuid");
+      indexConfuration.setRootUuid("rootUuid");
 
       //search service configuration
       SearchServiceConfiguration configuration = new SearchServiceConfiguration();
@@ -144,6 +155,7 @@ public class SearchServiceTest
       configuration.setContentReader(mock(ContentReaderInterceptor.class));
       configuration.setNameConverter(nameConverter);
       configuration.setTableResolver(tableResolver);
+      configuration.setPathSplitter(new SlashSplitter());
 
       LuceneSearchService luceneSearchService = new LuceneSearchService(configuration);
 
@@ -171,6 +183,8 @@ public class SearchServiceTest
       indexConfuration.setIndexDir(tempDir.getAbsolutePath());
       indexConfuration.setIndexRecoverService(mock(IndexRecoverService.class));
       indexConfuration.setIndexRestoreService(mock(IndexRestoreService.class));
+      indexConfuration.setRootParentUuid("rootParentUuid");
+      indexConfuration.setRootUuid("rootUuid");
 
       //search service configuration
       SearchServiceConfiguration configuration = new SearchServiceConfiguration();
@@ -178,6 +192,7 @@ public class SearchServiceTest
       configuration.setContentReader(mock(ContentReaderInterceptor.class));
       configuration.setNameConverter(nameConverter);
       configuration.setTableResolver(tableResolver);
+      configuration.setPathSplitter(new SlashSplitter());
 
       LuceneSearchService luceneSearchService = new LuceneSearchService(configuration);
       luceneSearchService.start();
