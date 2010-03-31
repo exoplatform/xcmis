@@ -722,6 +722,12 @@ public class StorageImpl implements Storage
          for (NodeIterator iterator = workingCopies.getNodes(); iterator.hasNext();)
          {
             Node wc = iterator.nextNode();
+            if (!wc.hasNodes())
+            {
+               // Must not happen.
+               LOG.error("PWC node not fould.");
+               continue;
+            }
             Node node = wc.getNodes().nextNode();
             TypeDefinition type = JcrTypeHelper.getTypeDefinition(node.getPrimaryNodeType(), true);
             String latestVersion = node.getProperty("xcmis:latestVersionId").getString();

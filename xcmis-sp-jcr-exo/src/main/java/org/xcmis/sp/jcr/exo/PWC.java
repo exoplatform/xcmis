@@ -77,7 +77,7 @@ class PWC extends DocumentImpl
          docNode.setProperty(CMIS.VERSION_SERIES_CHECKED_OUT_BY, //
             (String)null);
 
-         node.remove();
+         node.getParent().remove();
 
          session.save();
 
