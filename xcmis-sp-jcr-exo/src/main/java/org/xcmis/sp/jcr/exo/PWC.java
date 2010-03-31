@@ -178,6 +178,15 @@ class PWC extends DocumentImpl
       return document.getParents();
    }
 
+   /**
+    * {@inheritDoc}
+    */
+   @Override
+   public boolean isPWC()
+   {
+      return true;
+   }
+
    @Override
    protected void create() throws StorageException, NameConstraintViolationException
    {
