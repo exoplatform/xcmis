@@ -70,6 +70,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -87,6 +88,9 @@ import javax.jcr.nodetype.NoSuchNodeTypeException;
 import javax.jcr.nodetype.NodeType;
 import javax.jcr.nodetype.NodeTypeIterator;
 import javax.jcr.version.OnParentVersionAction;
+import javax.jcr.version.Version;
+import javax.jcr.version.VersionHistory;
+import javax.jcr.version.VersionIterator;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
@@ -666,8 +670,36 @@ public class StorageImpl implements Storage
 
    public Collection<Document> getAllVersions(String versionSeriesId) throws ObjectNotFoundException
    {
-      // TODO Auto-generated method stub
-      return null;
+      try
+      {
+         Node node = ((ExtendedSession)session).getNodeByIdentifier(versionSeriesId);
+         VersionHistory vh = ((VersionHistory)node);
+         LinkedList<Document> versions = new LinkedList<Document>();
+         VersionIterator iterator = vh.getAllVersions();
+         iterator.next(); // skip jcr:rootVersion
+         while (iterator.hasNext())
+         {
+            Version v = iterator.nextVersion();
+            versions.addFirst(getDocumentVersion(v.getNode(JcrCMIS.JCR_FROZEN_NODE)));
+         }
+         Document latest = (Document)getObject(vh.getVersionableUUID());
+         versions.addFirst(latest);
+         String pwcId = latest.getVersionSeriesCheckedOutId();
+         if (pwcId != null)
+         {
+            PWC pwc = (PWC)getObject(pwcId);
+            versions.addFirst(pwc);
+         }
+         return versions;
+      }
+      catch (ItemNotFoundException infe)
+      {
+         throw new ObjectNotFoundException("Version series " + versionSeriesId + " does not exist.");
+      }
+      catch (javax.jcr.RepositoryException re)
+      {
+         throw new CmisRuntimeException("Unable get version series " + versionSeriesId + ". " + re.getMessage(), re);
+      }
    }
 
    /**
@@ -735,11 +767,9 @@ public class StorageImpl implements Storage
       try
       {
          Node node = ((ExtendedSession)session).getNodeByIdentifier(objectId);
-         if (node.isNodeType(JcrCMIS.NT_VERSION))
+         if (node.isNodeType(JcrCMIS.JCR_FROZEN_NODE))
          {
-            Node frozen = node.getNode(JcrCMIS.JCR_FROZEN_NODE);
-            JcrTypeHelper.getTypeDefinition(
-               getNodeType(frozen.getProperty(JcrCMIS.JCR_FROZEN_PRIMARY_TYPE).getString()), true);
+            return getDocumentVersion(node);
          }
          TypeDefinition type = JcrTypeHelper.getTypeDefinition(node.getPrimaryNodeType(), true);
 
@@ -777,6 +807,14 @@ public class StorageImpl implements Storage
       {
          throw new CmisRuntimeException(re.getMessage(), re);
       }
+   }
+
+   private DocumentVersion getDocumentVersion(Node node) throws RepositoryException
+   {
+      TypeDefinition type = JcrTypeHelper.getTypeDefinition(
+         getNodeType(node.getProperty(JcrCMIS.JCR_FROZEN_PRIMARY_TYPE).getString()), true);
+
+      return new DocumentVersion(type, node);
    }
 
    /**

@@ -109,10 +109,24 @@ class PWC extends DocumentImpl
             (String)null);
          docNode.setProperty(CMIS.VERSION_SERIES_CHECKED_OUT_BY, //
             (String)null);
+         // Update creation date & last modification date
+         // to emulate creation new version.
+         docNode.setProperty(CMIS.CREATED_BY, //
+            session.getUserID());
+         docNode.setProperty(CMIS.CREATION_DATE, //
+            Calendar.getInstance());
+         docNode.setProperty(CMIS.LAST_MODIFIED_BY, //
+            session.getUserID());
+         docNode.setProperty(CMIS.LAST_MODIFICATION_DATE, //
+            Calendar.getInstance());
+         //
          docNode.setProperty(CMIS.IS_MAJOR_VERSION, //
             major);
-         docNode.setProperty(CMIS.CHECKIN_COMMENT, //
-            checkinComment);
+         if (checkinComment != null)
+         {
+            docNode.setProperty(CMIS.CHECKIN_COMMENT, //
+               checkinComment);
+         }
 
          try
          {
@@ -125,7 +139,7 @@ class PWC extends DocumentImpl
             throw new CmisRuntimeException("Unable copy content for new document. " + ioe.getMessage(), ioe);
          }
 
-         node.remove();
+         node.getParent().remove();
 
          session.save();
 
