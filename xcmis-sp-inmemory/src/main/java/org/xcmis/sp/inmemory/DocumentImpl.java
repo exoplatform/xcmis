@@ -19,35 +19,28 @@
 
 package org.xcmis.sp.inmemory;
 
-import org.xcmis.spi.AccessControlEntry;
-import org.xcmis.spi.BaseType;
+import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ConstraintException;
-import org.xcmis.spi.ItemsIterator;
-import org.xcmis.spi.NameConstraintViolationException;
-import org.xcmis.spi.PropertyFilter;
-import org.xcmis.spi.RelationshipDirection;
+import org.xcmis.spi.ContentStreamAllowed;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.data.Document;
-import org.xcmis.spi.data.Folder;
-import org.xcmis.spi.data.Policy;
-import org.xcmis.spi.data.Relationship;
-import org.xcmis.spi.impl.CmisVisitor;
-import org.xcmis.spi.object.Property;
-
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-public class DocumentImpl implements Document
+class DocumentImpl extends BaseObjectData implements Document
 {
+
+   private ContentStream contentStream;
+
+   public DocumentImpl(String objectId, TypeDefinition type, StorageImpl storage)
+   {
+      super(objectId, type, storage);
+   }
 
    public void cancelCheckout() throws StorageException
    {
@@ -67,246 +60,156 @@ public class DocumentImpl implements Document
       return null;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public ContentStream getContentStream()
    {
-      // TODO Auto-generated method stub
-      return null;
+      if (isNew())
+      {
+         throw new UnsupportedOperationException("getContentStream");
+      }
+
+      ByteArrayContentStream content = storage.contents.get(objectId);
+      return content.clone();
    }
 
-   public String getContentStreamMimeType()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public String getVersionLabel()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public String getVersionSeriesCheckedOutBy()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public String getVersionSeriesCheckedOutId()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public String getVersionSeriesId()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public boolean hasContent()
-   {
-      // TODO Auto-generated method stub
-      return false;
-   }
-
-   public boolean isLatestMajorVersion()
-   {
-      // TODO Auto-generated method stub
-      return false;
-   }
-
-   public boolean isLatestVersion()
-   {
-      // TODO Auto-generated method stub
-      return false;
-   }
-
-   public boolean isMajorVersion()
-   {
-      // TODO Auto-generated method stub
-      return false;
-   }
-
-   public boolean isPWC()
-   {
-      // TODO Auto-generated method stub
-      return false;
-   }
-
-   public boolean isVersionSeriesCheckedOut()
-   {
-      // TODO Auto-generated method stub
-      return false;
-   }
-
-   public void setContentStream(ContentStream contentStream) throws ConstraintException
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   public void accept(CmisVisitor visitor)
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   public void applyPolicy(Policy policy) throws ConstraintException
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   public List<AccessControlEntry> getACL(boolean onlyBasicPermissions)
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public BaseType getBaseType()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public String getChangeToken()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
+   /**
+    * {@inheritDoc}
+    */
    public ContentStream getContentStream(String streamId)
    {
-      // TODO Auto-generated method stub
+      if (isNew())
+      {
+         throw new UnsupportedOperationException("getContentStream");
+      }
+
+      if (streamId == null || streamId.equals(getString(CMIS.CONTENT_STREAM_ID)))
+      {
+         return getContentStream();
+      }
+
+      // TODO renditions
       return null;
    }
 
-   public String getCreatedBy()
+   /**
+    * {@inheritDoc}
+    */
+   public String getContentStreamMimeType()
    {
-      // TODO Auto-generated method stub
-      return null;
+      return getString(CMIS.CONTENT_STREAM_MIME_TYPE);
    }
 
-   public Calendar getCreationDate()
+   /**
+    * {@inheritDoc}
+    */
+   public String getVersionLabel()
    {
-      // TODO Auto-generated method stub
-      return null;
+      return getString(CMIS.VERSION_LABEL);
    }
 
-   public Calendar getLastModificationDate()
+   /**
+    * {@inheritDoc}
+    */
+   public String getVersionSeriesCheckedOutBy()
    {
-      // TODO Auto-generated method stub
-      return null;
+      return getString(CMIS.VERSION_SERIES_CHECKED_OUT_BY);
    }
 
-   public String getLastModifiedBy()
+   /**
+    * {@inheritDoc}
+    */
+   public String getVersionSeriesCheckedOutId()
    {
-      // TODO Auto-generated method stub
-      return null;
+      return getString(CMIS.VERSION_SERIES_CHECKED_OUT_ID);
    }
 
-   public String getName()
+   /**
+    * {@inheritDoc}
+    */
+   public String getVersionSeriesId()
    {
-      // TODO Auto-generated method stub
-      return null;
+      return getString(CMIS.VERSION_SERIES_ID);
    }
 
-   public String getObjectId()
+   /**
+    * {@inheritDoc}
+    */
+   public boolean hasContent()
    {
-      // TODO Auto-generated method stub
-      return null;
+      if (isNew())
+      {
+         return false;
+      }
+
+      return storage.contents.get(objectId) != null;
    }
 
-   public Folder getParent() throws ConstraintException
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isLatestMajorVersion()
    {
-      // TODO Auto-generated method stub
-      return null;
+      return isLatestVersion() && isMajorVersion();
    }
 
-   public Collection<Folder> getParents()
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isLatestVersion()
    {
-      // TODO Auto-generated method stub
-      return null;
+      Boolean latest = getBoolean(CMIS.IS_LATEST_VERSION);
+      return latest == null ? true : latest;
    }
 
-   public Collection<Policy> getPolicies()
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isMajorVersion()
    {
-      // TODO Auto-generated method stub
-      return null;
+      Boolean major = getBoolean(CMIS.IS_MAJOR_VERSION);
+      return major == null ? false : major;
    }
 
-   public Map<String, Property<?>> getProperties()
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isPWC()
    {
-      // TODO Auto-generated method stub
-      return null;
+      if (isNew())
+      {
+         return false;
+      }
+
+      return objectId.equals(getVersionSeriesCheckedOutId());
    }
 
-   public Property<?> getProperty(String id)
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isVersionSeriesCheckedOut()
    {
-      // TODO Auto-generated method stub
-      return null;
+      Boolean checkout = getBoolean(CMIS.IS_VERSION_SERIES_CHECKED_OUT);
+      return checkout == null ? false : checkout;
    }
 
-   public ItemsIterator<Relationship> getRelationships(RelationshipDirection direction, TypeDefinition type,
-      boolean includeSubRelationshipTypes)
+   /**
+    * {@inheritDoc}
+    */
+   public void setContentStream(ContentStream contentStream) throws ConstraintException
    {
-      // TODO Auto-generated method stub
-      return null;
-   }
+      if (type.getContentStreamAllowed() == ContentStreamAllowed.REQUIRED && contentStream == null)
+      {
+         throw new ConstraintException("Content stream required for object of type " + getTypeId()
+            + ", it can't be null.");
+      }
+      if (type.getContentStreamAllowed() == ContentStreamAllowed.NOT_ALLOWED && contentStream != null)
+      {
+         throw new ConstraintException("Content stream not allowed for object of type " + getTypeId());
+      }
 
-   public Map<String, Property<?>> getSubset(PropertyFilter filter)
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public TypeDefinition getTypeDefinition()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public String getTypeId()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public boolean isNew()
-   {
-      // TODO Auto-generated method stub
-      return false;
-   }
-
-   public void removePolicy(Policy policy) throws ConstraintException
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   public void setACL(List<AccessControlEntry> acl) throws ConstraintException
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   public void setName(String name) throws NameConstraintViolationException
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   public void setProperties(Map<String, Property<?>> properties) throws ConstraintException,
-      NameConstraintViolationException
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   public void setProperty(Property<?> property) throws ConstraintException
-   {
-      // TODO Auto-generated method stub
-
+      this.contentStream = contentStream;
    }
 
 }

@@ -52,7 +52,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -84,14 +83,17 @@ abstract class BaseObjectData implements ObjectData
    protected Folder parent;
 
    /**
-    * Temporary storage for policies applied to object. For newly created all
-    * policies will be stored in here before calling {@link #save()}.
+    * Temporary storage for policies which should be applied to object.
     */
-   protected Set<Policy> policies;
+   protected Set<Policy> applyPolicies;
 
    /**
-    * Temporary storage for ACL applied to object. For newly created all ACL
-    * will be stored in here before calling {@link #save()}.
+    * Temporary storage for policies which should be removed from object.
+    */
+   protected Set<Policy> removePolicies;
+
+   /**
+    * Temporary storage for ACL which should be applied to object.
     */
    protected List<AccessControlEntry> acl;
 
@@ -123,20 +125,11 @@ abstract class BaseObjectData implements ObjectData
          throw new CmisRuntimeException("Unable apply newly created policy.");
       }
 
-      if (isNew())
+      if (applyPolicies == null)
       {
-         policies.add(policy);
+         applyPolicies = new HashSet<Policy>();
       }
-      else
-      {
-         Set<String> appliedPolicies = storage.policies.get(objectId);
-         if (appliedPolicies == null)
-         {
-            appliedPolicies = new HashSet<String>();
-            storage.policies.put(objectId, appliedPolicies);
-         }
-         appliedPolicies.add(policy.getObjectId());
-      }
+      applyPolicies.add(policy);
    }
 
    /**
@@ -159,15 +152,16 @@ abstract class BaseObjectData implements ObjectData
       }
       else
       {
+         if (acl != null)
+         {
+            return Collections.unmodifiableList(acl);
+         }
          Map<String, Set<String>> aces = storage.acls.get(objectId);
          if (aces == null)
          {
             return Collections.emptyList();
          }
-         else
-         {
-            return CmisUtils.createAclFromPermissionMap(aces);
-         }
+         return CmisUtils.createAclFromPermissionMap(aces);
       }
    }
 
@@ -308,11 +302,11 @@ abstract class BaseObjectData implements ObjectData
 
       if (isNew())
       {
-         if (policies == null)
+         if (applyPolicies == null)
          {
             return Collections.emptySet();
          }
-         return Collections.unmodifiableSet(policies);
+         return Collections.unmodifiableSet(applyPolicies);
       }
 
       Set<Policy> policies = new HashSet<Policy>();
@@ -397,15 +391,15 @@ abstract class BaseObjectData implements ObjectData
    public Map<String, Property<?>> getSubset(PropertyFilter filter)
    {
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-      for (PropertyDefinition<?> def : type.getPropertyDefinitions())
+      for (PropertyDefinition<?> definition : type.getPropertyDefinitions())
       {
-         String queryName = def.getQueryName();
+         String queryName = definition.getQueryName();
          if (!filter.accept(queryName))
          {
             continue;
          }
-         String id = def.getId();
-         properties.put(id, getProperty(def));
+         String id = definition.getId();
+         properties.put(id, getProperty(definition));
       }
       return properties;
    }
@@ -444,22 +438,11 @@ abstract class BaseObjectData implements ObjectData
          throw new ConstraintException("Type " + type.getId() + " is not controlable by Policy.");
       }
 
-      if (isNew())
+      if (removePolicies == null)
       {
-         for (Iterator<Policy> policyIterator = policies.iterator(); policyIterator.hasNext();)
-         {
-            if (policyIterator.next().getObjectId().equals(policy.getObjectId()))
-            {
-               policies.remove(policy);
-            }
-         }
+         removePolicies = new HashSet<Policy>();
       }
-
-      Set<String> policyIds = storage.policies.get(objectId);
-      if (policyIds != null)
-      {
-         policyIds.remove(policy.getObjectId());
-      }
+      removePolicies.add(policy);
    }
 
    /**
@@ -472,27 +455,18 @@ abstract class BaseObjectData implements ObjectData
          throw new ConstraintException("Type " + type.getId() + " is not controlable by ACL.");
       }
 
-      if (isNew())
+      if (this.acl != null)
       {
-         if (this.acl != null)
-         {
-            this.acl.clear(); // Not merged, just replaced.
-         }
-
-         if (aces != null && aces.size() > 0)
-         {
-            if (this.acl == null)
-            {
-               this.acl = new ArrayList<AccessControlEntry>();
-            }
-            this.acl.addAll(aces);
-         }
+         this.acl.clear(); // Not merged, just replaced.
       }
-      else
+
+      if (aces != null && aces.size() > 0)
       {
-         Map<String, Set<String>> permissions = new HashMap<String, Set<String>>();
-         CmisUtils.addAclToPermissionMap(permissions, aces);
-         storage.acls.put(objectId, permissions);
+         if (this.acl == null)
+         {
+            this.acl = new ArrayList<AccessControlEntry>();
+         }
+         this.acl.addAll(aces);
       }
    }
 
@@ -505,14 +479,7 @@ abstract class BaseObjectData implements ObjectData
       StringProperty nameProperty =
          new StringProperty(CMIS.NAME, definition.getQueryName(), definition.getLocalName(), definition
             .getDisplayName(), name);
-      if (isNew())
-      {
-         properties.put(CMIS.NAME, nameProperty);
-      }
-      else
-      {
-         storage.properties.get(objectId).put(CMIS.NAME, nameProperty);
-      }
+      properties.put(CMIS.NAME, nameProperty);
    }
 
    /**
@@ -569,14 +536,7 @@ abstract class BaseObjectData implements ObjectData
          || (updatability == Updatability.WHENCHECKEDOUT && getBaseType() == BaseType.DOCUMENT && ((Document)this)
             .isPWC()))
       {
-         if (isNew())
-         {
-            properties.put(property.getId(), property);
-         }
-         else
-         {
-            storage.properties.get(objectId).put(property.getId(), property);
-         }
+         properties.put(property.getId(), property);
       }
       else
       {
@@ -590,15 +550,16 @@ abstract class BaseObjectData implements ObjectData
 
    private Property<?> getProperty(PropertyDefinition<?> definition)
    {
-      if (isNew())
+      Property<?> property = properties.get(definition.getId());
+      if (property == null)
       {
-         return properties.get(definition.getId());
+         property = storage.properties.get(objectId).get(definition.getId());
       }
 
-      return storage.properties.get(objectId).get(definition.getId());
+      return property;
    }
 
-   // Helpers for accessing properties. For internal usage only.
+   // Helpers for accessing properties of saved object. For internal usage only.
 
    protected Boolean getBoolean(String id)
    {

@@ -37,7 +37,6 @@ import org.xcmis.spi.UnfileObject;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.VersioningState;
-import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.data.Document;
 import org.xcmis.spi.data.Folder;
 import org.xcmis.spi.data.ObjectData;
@@ -79,7 +78,7 @@ public class StorageImpl implements Storage
    final Set<String> unfiling;
 
    /** Map of id -> content. */
-   final Map<String, ContentStream> contents;
+   final Map<String, ByteArrayContentStream> contents;
 
    /** Map of id -> ACLs. */
    final Map<String, Map<String, Set<String>>> acls;
@@ -94,7 +93,7 @@ public class StorageImpl implements Storage
       this.policies = new ConcurrentHashMap<String, Set<String>>();
       this.versions = new ConcurrentHashMap<String, Set<String>>();
       this.unfiling = new HashSet<String>();
-      this.contents = new ConcurrentHashMap<String, ContentStream>();
+      this.contents = new ConcurrentHashMap<String, ByteArrayContentStream>();
       this.acls = new ConcurrentHashMap<String, Map<String, Set<String>>>();
       this.relationships = new ConcurrentHashMap<String, Set<RelationshipInfo>>();
    }
