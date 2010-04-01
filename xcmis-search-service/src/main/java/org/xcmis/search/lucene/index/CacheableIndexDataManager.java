@@ -24,8 +24,8 @@ import org.apache.lucene.index.MultiReader;
 import org.apache.lucene.store.Directory;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.search.config.IndexConfigurationException;
 import org.xcmis.search.config.IndexConfiguration;
+import org.xcmis.search.config.IndexConfigurationException;
 import org.xcmis.search.lucene.index.merge.AggregatePolicy;
 import org.xcmis.search.lucene.index.merge.DocumentCountAggregatePolicy;
 import org.xcmis.search.lucene.index.merge.MaxCandidatsCountAggrigatePolicy;
@@ -331,10 +331,6 @@ public class CacheableIndexDataManager extends LocalIndexDataManagerProxy
          e.printStackTrace();
       }
       catch (final IndexException e)
-      {
-         e.printStackTrace();
-      }
-      catch (final IndexTransactionException e)
       {
          e.printStackTrace();
       }

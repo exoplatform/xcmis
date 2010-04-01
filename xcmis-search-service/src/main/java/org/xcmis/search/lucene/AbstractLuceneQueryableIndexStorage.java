@@ -87,130 +87,32 @@ public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndex
     */
    private static final Log LOG = ExoLogger.getLogger(AbstractLuceneQueryableIndexStorage.class);
 
-   private class SortFieldVisitor extends Visitors.AbstractModelVisitor
-   {
-
-      private Order order;
-
-      private SortField sortField;
-
-      public SortField getSortField()
-      {
-         return sortField;
-      }
-
-      /**
-       * @see org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search.model.operand.FullTextSearchScore)
-       */
-      @Override
-      public void visit(FullTextSearchScore node) throws VisitException
-      {
-         sortField = new SortField(null, SortField.SCORE, order == Order.DESCENDING);
-      }
-
-      /**
-       * @see org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search.model.operand.Length)
-       */
-      @Override
-      public void visit(Length node) throws VisitException
-      {
-         throw new NotImplementedException();
-      }
-
-      /**
-       * @see org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search.model.operand.LowerCase)
-       */
-      @Override
-      public void visit(LowerCase node) throws VisitException
-      {
-         throw new NotImplementedException();
-      }
-
-      /**
-       * @see org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search.model.operand.NodeDepth)
-       */
-      @Override
-      public void visit(NodeDepth depth) throws VisitException
-      {
-         throw new NotImplementedException();
-      }
-
-      /**
-       * @see org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search.model.operand.NodeLocalName)
-       */
-      @Override
-      public void visit(NodeLocalName node) throws VisitException
-      {
-         // TODO Auto-generated method stub
-         super.visit(node);
-      }
-
-      /**
-       * @see org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search.model.operand.NodeName)
-       */
-      @Override
-      public void visit(NodeName node) throws VisitException
-      {
-         throw new NotImplementedException();
-      }
-
-      /*
-       * @see
-       * org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search
-       * .model.ordering.Ordering)
-       */
-      @Override
-      public void visit(Ordering node) throws VisitException
-      {
-         order = node.getOrder();
-      }
-
-      /**
-       * @see org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search.model.operand.PropertyValue)
-       */
-      @Override
-      public void visit(PropertyValue node) throws VisitException
-      {
-         sortField =
-            new SortField(FieldNames.createPropertyFieldName(node.getPropertyName()), order == Order.DESCENDING);
-      }
-
-      /**
-       * @see org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search.model.operand.UpperCase)
-       */
-      @Override
-      public void visit(UpperCase node) throws VisitException
-      {
-         throw new NotImplementedException();
-      }
-   }
-
    /**
     * The upper limit for the initial fetch size.
     */
-   private static final int MAX_FETCH_SIZE = 32 * 1024;
+   protected static final int MAX_FETCH_SIZE = 32 * 1024;
 
    /**
     * Convert one Sting name to other String name.
     */
-   private final NameConverter nameConverter;
+   protected final NameConverter nameConverter;
 
    /**
     * Split path string to names
     */
-   private final PathSplitter pathSplitter;
+   protected final PathSplitter pathSplitter;
 
    /**
     * Reselve selector names to lucene querys.
     */
-   private final VirtualTableResolver tableResolver;
+   protected final VirtualTableResolver tableResolver;
 
    /**
     * Node indexer.
     */
-   private LuceneIndexer nodeIndexer;
+   protected LuceneIndexer nodeIndexer;
 
-   private IndexConfiguration indexConfuguration;
+   protected IndexConfiguration indexConfuguration;
 
    /**
     * @param indexConfuguration
@@ -251,35 +153,6 @@ public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndex
       Visitors.visit(constraint, luceneQueryBuilder);
       return luceneQueryBuilder.getQuery();
    }
-
-   /**
-    * @see org.xcmis.search.content.interceptors.QueryableIndexStorage#visitModifyIndexCommand(org.xcmis.search.content.command.InvocationContext,
-    *      org.xcmis.search.content.command.index.ModifyIndexCommand)
-    */
-   @Override
-   public Object visitModifyIndexCommand(InvocationContext ctx, ModifyIndexCommand command) throws Throwable
-   {
-      Map<String, Document> addedDocuments = new HashMap<String, Document>();
-      //indexing content
-      for (ContentEntry entry : command.getAddedDocuments())
-      {
-         addedDocuments.put(entry.getIdentifier(), nodeIndexer.createDocument(entry));
-      }
-
-      LuceneIndexTransaction indexTransaction =
-         new LuceneIndexTransaction(addedDocuments, command.getDeletedDocuments());
-
-      return save(indexTransaction);
-   }
-
-   /**
-    * @param indexTransaction
-    * @return
-    * @throws IndexTransactionException 
-    * @throws IndexException 
-    */
-   protected abstract Object save(LuceneIndexTransaction indexTransaction) throws IndexException,
-      IndexTransactionException;
 
    /**
     * @see org.xcmis.search.content.interceptors.QueryableIndexStorage#visitExecuteSelectorCommand(org.xcmis.search.content.command.InvocationContext,
@@ -355,9 +228,38 @@ public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndex
    }
 
    /**
+    * @see org.xcmis.search.content.interceptors.QueryableIndexStorage#visitModifyIndexCommand(org.xcmis.search.content.command.InvocationContext,
+    *      org.xcmis.search.content.command.index.ModifyIndexCommand)
+    */
+   @Override
+   public Object visitModifyIndexCommand(InvocationContext ctx, ModifyIndexCommand command) throws Throwable
+   {
+      Map<String, Document> addedDocuments = new HashMap<String, Document>();
+      //indexing content
+      for (ContentEntry entry : command.getAddedDocuments())
+      {
+         addedDocuments.put(entry.getIdentifier(), nodeIndexer.createDocument(entry));
+      }
+
+      LuceneIndexTransaction indexTransaction =
+         new LuceneIndexTransaction(addedDocuments, command.getDeletedDocuments());
+
+      return save(indexTransaction);
+   }
+
+   /**
     * Different lucene storage's should override this method
     */
    protected abstract IndexReader getIndexReader();
+
+   /**
+    * @param indexTransaction
+    * @return
+    * @throws IndexTransactionException 
+    * @throws IndexException 
+    */
+   protected abstract Object save(LuceneIndexTransaction indexTransaction) throws IndexException,
+      IndexTransactionException;
 
    /**
     * Return lucene sorter by list of orderings
@@ -382,5 +284,101 @@ public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndex
 
       }
       return new Sort();
+   }
+
+   private class SortFieldVisitor extends Visitors.AbstractModelVisitor
+   {
+
+      private Order order;
+
+      private SortField sortField;
+
+      public SortField getSortField()
+      {
+         return sortField;
+      }
+
+      /**
+       * @see org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search.model.operand.FullTextSearchScore)
+       */
+      @Override
+      public void visit(FullTextSearchScore node) throws VisitException
+      {
+         sortField = new SortField(null, SortField.SCORE, order == Order.DESCENDING);
+      }
+
+      /**
+       * @see org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search.model.operand.Length)
+       */
+      @Override
+      public void visit(Length node) throws VisitException
+      {
+         throw new NotImplementedException();
+      }
+
+      /**
+       * @see org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search.model.operand.LowerCase)
+       */
+      @Override
+      public void visit(LowerCase node) throws VisitException
+      {
+         throw new NotImplementedException();
+      }
+
+      /**
+       * @see org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search.model.operand.NodeDepth)
+       */
+      @Override
+      public void visit(NodeDepth depth) throws VisitException
+      {
+         throw new NotImplementedException();
+      }
+
+      /**
+       * @see org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search.model.operand.NodeLocalName)
+       */
+      @Override
+      public void visit(NodeLocalName node) throws VisitException
+      {
+         // TODO Auto-generated method stub
+         super.visit(node);
+      }
+
+      /**
+       * @see org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search.model.operand.NodeName)
+       */
+      @Override
+      public void visit(NodeName node) throws VisitException
+      {
+         throw new NotImplementedException();
+      }
+
+      /**
+       * 
+       * @see org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search.model.ordering.Ordering)
+       */
+      public void visit(Ordering node) throws VisitException
+      {
+         order = node.getOrder();
+      }
+
+      /**
+       * @see org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search.model.operand.PropertyValue)
+       */
+      @Override
+      public void visit(PropertyValue node) throws VisitException
+      {
+         sortField =
+            new SortField(FieldNames.createPropertyFieldName(node.getPropertyName()), order == Order.DESCENDING);
+      }
+
+      /**
+       * @see org.xcmis.search.Visitors.AbstractModelVisitor#visit(org.xcmis.search.model.operand.UpperCase)
+       */
+      @Override
+      public void visit(UpperCase node) throws VisitException
+      {
+         throw new NotImplementedException();
+      }
    }
 }

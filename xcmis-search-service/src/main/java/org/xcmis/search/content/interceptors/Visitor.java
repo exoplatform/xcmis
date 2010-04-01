@@ -23,11 +23,8 @@ import org.xcmis.search.content.command.VisitableCommand;
 import org.xcmis.search.content.command.index.ModifyIndexCommand;
 import org.xcmis.search.content.command.query.ExecuteSelectorCommand;
 import org.xcmis.search.content.command.query.ProcessQueryCommand;
-import org.xcmis.search.content.command.read.GetChildNodeCommand;
-import org.xcmis.search.content.command.read.GetChildNodesCommand;
-import org.xcmis.search.content.command.read.GetNodeCommand;
-import org.xcmis.search.content.command.read.GetPropertiesCommand;
-import org.xcmis.search.content.command.read.GetPropertyCommand;
+import org.xcmis.search.content.command.read.GetChildEntriesCommand;
+import org.xcmis.search.content.command.read.GetContentEntryCommand;
 import org.xcmis.search.content.command.tx.CommitCommand;
 import org.xcmis.search.content.command.tx.RollBackCommand;
 
@@ -70,39 +67,18 @@ public interface Visitor
 
    /**
     * @param ctx
-    * @param getChildNodeCommand
-    * @return
-    */
-   Object visitGetChildNodeCommand(InvocationContext ctx, GetChildNodeCommand command) throws Throwable;
-
-   /**
-    * @param ctx
     * @param getChildNodesCommand
     * @return
     * @throws Throwable
     */
-   Object visitGetChildNodesCommand(InvocationContext ctx, GetChildNodesCommand command) throws Throwable;
+   Object visitChildEntriesCommand(InvocationContext ctx, GetChildEntriesCommand command) throws Throwable;
 
    /**
     * @param ctx
     * @param getNodeCommand
     * @return
     */
-   Object visitGetNodeCommand(InvocationContext ctx, GetNodeCommand command) throws Throwable;
-
-   /**
-    * @param ctx
-    * @param getPropertiesCommand
-    * @return
-    */
-   Object visitGetPropertiesCommand(InvocationContext ctx, GetPropertiesCommand command) throws Throwable;
-
-   /**
-    * @param ctx
-    * @param getPropertyCommand
-    * @return
-    */
-   Object visitGetPropertyCommand(InvocationContext ctx, GetPropertyCommand command) throws Throwable;
+   Object visitGetContentEntryCommand(InvocationContext ctx, GetContentEntryCommand command) throws Throwable;
 
    /**
     * Visits a RollBackCommand.

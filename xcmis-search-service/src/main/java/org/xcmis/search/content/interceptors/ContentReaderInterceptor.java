@@ -19,10 +19,8 @@
 package org.xcmis.search.content.interceptors;
 
 import org.xcmis.search.content.command.InvocationContext;
-import org.xcmis.search.content.command.read.GetChildNodesCommand;
-import org.xcmis.search.content.command.read.GetNodeCommand;
-import org.xcmis.search.content.command.read.GetPropertiesCommand;
-import org.xcmis.search.content.command.read.GetPropertyCommand;
+import org.xcmis.search.content.command.read.GetChildEntriesCommand;
+import org.xcmis.search.content.command.read.GetContentEntryCommand;
 
 /**
  * Abstract class that interpret only read-only operation's.
@@ -31,24 +29,17 @@ public abstract class ContentReaderInterceptor extends CommandInterceptor
 {
 
    /**
-    * 
-    * @see org.xcmis.search.content.interceptors.AbstractVisitor#visitGetChildNodesCommand(org.xcmis.search.content.command.InvocationContext, org.xcmis.search.content.command.read.GetChildNodesCommand)
+    * @see org.xcmis.search.content.interceptors.AbstractVisitor#visitChildEntriesCommand(org.xcmis.search.content.command.InvocationContext, org.xcmis.search.content.command.read.GetChildEntriesCommand)
     */
-   public abstract Object visitGetChildNodesCommand(InvocationContext ctx, GetChildNodesCommand command) throws Throwable;
+   @Override
+   public abstract Object visitChildEntriesCommand(InvocationContext ctx, GetChildEntriesCommand command)
+      throws Throwable;
+
    /**
-    * 
-    * @see org.xcmis.search.content.interceptors.AbstractVisitor#visitGetNodeCommand(org.xcmis.search.content.command.InvocationContext, org.xcmis.search.content.command.read.GetNodeCommand)
+    * @see org.xcmis.search.content.interceptors.AbstractVisitor#visitGetContentEntryCommand(org.xcmis.search.content.command.InvocationContext, org.xcmis.search.content.command.read.GetContentEntryCommand)
     */
-   public abstract Object visitGetNodeCommand(InvocationContext ctx, GetNodeCommand command) throws Throwable;
-   /**
-    * 
-    * @see org.xcmis.search.content.interceptors.AbstractVisitor#visitGetPropertiesCommand(org.xcmis.search.content.command.InvocationContext, org.xcmis.search.content.command.read.GetPropertiesCommand)
-    */
-   public abstract Object visitGetPropertiesCommand(InvocationContext ctx, GetPropertiesCommand command) throws Throwable;
-   /**
-    * 
-    * @see org.xcmis.search.content.interceptors.AbstractVisitor#visitGetPropertyCommand(org.xcmis.search.content.command.InvocationContext, org.xcmis.search.content.command.read.GetPropertyCommand)
-    */
-   public abstract Object visitGetPropertyCommand(InvocationContext ctx, GetPropertyCommand command) throws Throwable;
+   @Override
+   public abstract Object visitGetContentEntryCommand(InvocationContext ctx, GetContentEntryCommand command)
+      throws Throwable;
 
 }

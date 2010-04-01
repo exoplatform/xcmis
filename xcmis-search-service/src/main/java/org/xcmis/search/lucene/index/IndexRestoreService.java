@@ -31,7 +31,8 @@ public interface IndexRestoreService
     * 
     * @param indexDataKeeper
     *           -index data keeper.
+    * @throws IndexException 
     */
-   void restoreIndex(IndexDataKeeper<Document> indexDataKeeper);
+   void restoreIndex(IndexDataKeeper<Document> indexDataKeeper) throws IndexException;
 
 }

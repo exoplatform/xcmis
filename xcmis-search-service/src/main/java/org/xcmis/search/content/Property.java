@@ -50,6 +50,16 @@ public class Property<V>
    }
 
    /**
+    * @see java.lang.Object#toString()
+    */
+   @Override
+   public String toString()
+   {
+
+      return name + "=" + value.toString();
+   }
+
+   /**
     * @param type
     * @param name
     * @param value
@@ -146,6 +156,15 @@ public class Property<V>
       public V getValue()
       {
          return value;
+      }
+
+      /**
+       * @see java.lang.Object#toString()
+       */
+      @Override
+      public String toString()
+      {
+         return value.toString();
       }
 
    }

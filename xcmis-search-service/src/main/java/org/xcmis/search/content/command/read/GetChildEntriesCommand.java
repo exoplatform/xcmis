@@ -22,17 +22,38 @@ import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.content.interceptors.Visitor;
 
 /**
- * Command for add property to node.
+ *  Add node command
  */
-public class GetPropertyCommand implements AbstractReadDataCommand
+public class GetChildEntriesCommand implements AbstractReadDataCommand
 {
+   /**
+    * Parent content entry unique identifier.
+    */
+   private final String parentUuid;
+
+   /**
+    * @param parentUuid
+    */
+   public GetChildEntriesCommand(String parentUuid)
+   {
+      super();
+      this.parentUuid = parentUuid;
+   }
+
+   /**
+    * @return the parentUuid
+    */
+   public String getParentUuid()
+   {
+      return parentUuid;
+   }
 
    /**
     * @see org.exoplatform.services.jcr.impl.storage.command.JcrCommand#acceptVisitor(org.exoplatform.services.jcr.impl.storage.command.JcrInvocationContext, org.jboss.cache.commands.Visitor)
     */
    public Object acceptVisitor(InvocationContext ctx, Visitor visitor) throws Throwable
    {
-      return visitor.visitGetPropertyCommand(ctx, this);
+      return visitor.visitChildEntriesCommand(ctx, this);
    }
 
 }

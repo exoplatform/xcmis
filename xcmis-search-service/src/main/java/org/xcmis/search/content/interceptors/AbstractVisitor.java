@@ -23,11 +23,8 @@ import org.xcmis.search.content.command.VisitableCommand;
 import org.xcmis.search.content.command.index.ModifyIndexCommand;
 import org.xcmis.search.content.command.query.ExecuteSelectorCommand;
 import org.xcmis.search.content.command.query.ProcessQueryCommand;
-import org.xcmis.search.content.command.read.GetChildNodeCommand;
-import org.xcmis.search.content.command.read.GetChildNodesCommand;
-import org.xcmis.search.content.command.read.GetNodeCommand;
-import org.xcmis.search.content.command.read.GetPropertiesCommand;
-import org.xcmis.search.content.command.read.GetPropertyCommand;
+import org.xcmis.search.content.command.read.GetChildEntriesCommand;
+import org.xcmis.search.content.command.read.GetContentEntryCommand;
 import org.xcmis.search.content.command.tx.CommitCommand;
 import org.xcmis.search.content.command.tx.RollBackCommand;
 
@@ -38,10 +35,9 @@ public class AbstractVisitor implements Visitor
 {
 
    /**
-    * @see org.xcmis.search.content.interceptors.Visitor#visitModifyIndexCommand(org.xcmis.search.content.command.InvocationContext,
-    *      org.xcmis.search.content.command.index.ModifyIndexCommand)
+    * @see org.xcmis.search.content.interceptors.Visitor#visitChildEntriesCommand(org.xcmis.search.content.command.InvocationContext, org.xcmis.search.content.command.read.GetChildEntriesCommand)
     */
-   public Object visitModifyIndexCommand(InvocationContext ctx, ModifyIndexCommand command) throws Throwable
+   public Object visitChildEntriesCommand(InvocationContext ctx, GetChildEntriesCommand command) throws Throwable
    {
       return handleDefault(ctx, command);
    }
@@ -65,50 +61,28 @@ public class AbstractVisitor implements Visitor
    }
 
    /**
-    * @see org.xcmis.search.content.interceptors.Visitor#visitGetChildNodeCommand(org.xcmis.search.content.command.InvocationContext,
-    *      org.xcmis.search.content.command.read.GetChildNodeCommand)
+    * @see org.xcmis.search.content.interceptors.Visitor#visitGetContentEntryCommand(org.xcmis.search.content.command.InvocationContext, org.xcmis.search.content.command.read.GetContentEntryCommand)
     */
-   public Object visitGetChildNodeCommand(InvocationContext ctx, GetChildNodeCommand command) throws Throwable
+   public Object visitGetContentEntryCommand(InvocationContext ctx, GetContentEntryCommand command) throws Throwable
+   {
+      return handleDefault(ctx, command);
+   }
+
+   /**
+    * @see org.xcmis.search.content.interceptors.Visitor#visitModifyIndexCommand(org.xcmis.search.content.command.InvocationContext,
+    *      org.xcmis.search.content.command.index.ModifyIndexCommand)
+    */
+   public Object visitModifyIndexCommand(InvocationContext ctx, ModifyIndexCommand command) throws Throwable
    {
       return handleDefault(ctx, command);
    }
 
    /**
     * @throws Throwable
-    * @see org.xcmis.search.content.interceptors.Visitor#visitGetChildNodesCommand(org.xcmis.search.content.command.InvocationContext,
-    *      org.xcmis.search.content.command.read.GetChildNodesCommand)
+    * @see org.xcmis.search.content.interceptors.Visitor#visitProcessQueryCommand(org.xcmis.search.content.command.InvocationContext,
+    *      org.xcmis.search.content.command.query.ProcessQueryCommand)
     */
-   public Object visitGetChildNodesCommand(InvocationContext ctx, GetChildNodesCommand command) throws Throwable
-   {
-      return handleDefault(ctx, command);
-   }
-
-   /**
-    * @throws Throwable
-    * @see org.xcmis.search.content.interceptors.Visitor#visitGetNodeCommand(org.xcmis.search.content.command.InvocationContext,
-    *      org.xcmis.search.content.command.read.GetNodeCommand)
-    */
-   public Object visitGetNodeCommand(InvocationContext ctx, GetNodeCommand command) throws Throwable
-   {
-      return handleDefault(ctx, command);
-   }
-
-   /**
-    * @throws Throwable
-    * @see org.xcmis.search.content.interceptors.Visitor#visitGetPropertiesCommand(org.xcmis.search.content.command.InvocationContext,
-    *      org.xcmis.search.content.command.read.GetPropertiesCommand)
-    */
-   public Object visitGetPropertiesCommand(InvocationContext ctx, GetPropertiesCommand command) throws Throwable
-   {
-      return handleDefault(ctx, command);
-   }
-
-   /**
-    * @throws Throwable
-    * @see org.xcmis.search.content.interceptors.Visitor#visitGetPropertyCommand(org.xcmis.search.content.command.InvocationContext,
-    *      org.xcmis.search.content.command.read.GetPropertyCommand)
-    */
-   public Object visitGetPropertyCommand(InvocationContext ctx, GetPropertyCommand command) throws Throwable
+   public Object visitProcessQueryCommand(InvocationContext ctx, ProcessQueryCommand command) throws Throwable
    {
       return handleDefault(ctx, command);
    }
@@ -135,16 +109,6 @@ public class AbstractVisitor implements Visitor
     *            in the case of a problem
     */
    protected Object handleDefault(InvocationContext ctx, VisitableCommand command) throws Throwable
-   {
-      return handleDefault(ctx, command);
-   }
-
-   /**
-    * @throws Throwable
-    * @see org.xcmis.search.content.interceptors.Visitor#visitProcessQueryCommand(org.xcmis.search.content.command.InvocationContext,
-    *      org.xcmis.search.content.command.query.ProcessQueryCommand)
-    */
-   public Object visitProcessQueryCommand(InvocationContext ctx, ProcessQueryCommand command) throws Throwable
    {
       return handleDefault(ctx, command);
    }

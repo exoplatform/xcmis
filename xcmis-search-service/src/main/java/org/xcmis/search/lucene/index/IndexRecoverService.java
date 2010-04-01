@@ -29,6 +29,7 @@ public interface IndexRecoverService
 {
 
    /**
+    * @param transactionableIndexDataManager 
     * @param uuids - set of unsaved to the persisted storage uuids.
     * @throws IndexException
     */

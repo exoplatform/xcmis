@@ -22,8 +22,8 @@ package org.xcmis.search.lucene.index;
 import org.apache.lucene.document.Document;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.search.config.IndexConfigurationException;
 import org.xcmis.search.config.IndexConfiguration;
+import org.xcmis.search.config.IndexConfigurationException;
 
 import java.io.File;
 import java.io.IOException;
@@ -65,10 +65,11 @@ public class StartableIndexingService extends LuceneIndexingService
     * @throws IndexConfigurationException
     * @throws IndexException
     */
-   public StartableIndexingService(IndexConfiguration configuration) throws IndexConfigurationException, IndexException
+   public StartableIndexingService(IndexConfiguration configuration, IndexRecoverService recoverService,
+      IndexRestoreService indexRestoreService) throws IndexConfigurationException, IndexException
    {
-      super(configuration);
-      this.indexRestoreService = configuration.getIndexRestoreService();
+      super(configuration, recoverService);
+      this.indexRestoreService = indexRestoreService;
       this.indexDir = new File(configuration.getIndexDir());
       if (!indexDir.exists() && !indexDir.mkdirs())
       {
@@ -122,11 +123,6 @@ public class StartableIndexingService extends LuceneIndexingService
          }
       }
       catch (IndexException e)
-      {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      }
-      catch (IndexTransactionException e)
       {
          // TODO Auto-generated catch block
          e.printStackTrace();

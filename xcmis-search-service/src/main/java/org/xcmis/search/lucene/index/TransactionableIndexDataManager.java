@@ -21,8 +21,8 @@ package org.xcmis.search.lucene.index;
 import org.apache.lucene.document.Document;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.search.config.IndexConfigurationException;
 import org.xcmis.search.config.IndexConfiguration;
+import org.xcmis.search.config.IndexConfigurationException;
 
 import java.io.File;
 import java.util.HashSet;
@@ -49,11 +49,11 @@ public class TransactionableIndexDataManager extends CacheableIndexDataManager
 
    private final FSIndexTransactionService transactionService;
 
-   public TransactionableIndexDataManager(final IndexConfiguration indexConfuguration) throws IndexException,
-      IndexConfigurationException
+   public TransactionableIndexDataManager(IndexConfiguration indexConfuguration, IndexRecoverService recoverService)
+      throws IndexException, IndexConfigurationException
    {
       super(indexConfuguration);
-      this.recoverService = indexConfuguration.getIndexRecoverService();
+      this.recoverService = recoverService;
 
       final File indexDir = new File(indexConfuguration.getIndexDir());
 

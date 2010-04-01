@@ -24,15 +24,35 @@ import org.xcmis.search.content.interceptors.Visitor;
 /**
  *  Add node command
  */
-public class GetChildNodeCommand implements AbstractReadDataCommand
+public class GetContentEntryCommand implements AbstractReadDataCommand
 {
+   /**
+    * Content entry unique identifier.
+    */
+   private final String entryUuid;
+
+   /**
+    * @param entryUuid
+    */
+   public GetContentEntryCommand(String entryUuid)
+   {
+      super();
+      this.entryUuid = entryUuid;
+   }
 
    /**
     * @see org.exoplatform.services.jcr.impl.storage.command.JcrCommand#acceptVisitor(org.exoplatform.services.jcr.impl.storage.command.JcrInvocationContext, org.jboss.cache.commands.Visitor)
     */
    public Object acceptVisitor(InvocationContext ctx, Visitor visitor) throws Throwable
    {
-      return visitor.visitGetChildNodeCommand(ctx, this);
+      return visitor.visitGetContentEntryCommand(ctx, this);
    }
 
+   /**
+    * @return the entryUuid
+    */
+   public String getEntryUuid()
+   {
+      return entryUuid;
+   }
 }
