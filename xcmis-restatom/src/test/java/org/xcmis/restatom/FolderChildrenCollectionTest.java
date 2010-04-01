@@ -76,7 +76,7 @@ public class FolderChildrenCollectionTest extends BaseTest
          + "<title>title</title><summary>summary</summary>" //
          + "<content type='text'>hello</content>" //
          + "<cmisra:object><cmis:properties>" //
-         + "<cmis:propertyId propertyDefinitionId='cmis:objectTypeId'>" //
+         + "<cmis:propertyId localName='cmis:objectTypeId' propertyDefinitionId='cmis:objectTypeId'>" //
          + "<cmis:value>cmis:document</cmis:value></cmis:propertyId>" //
          + "</cmis:properties>" + "</cmisra:object></entry>";
       String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/children/" + testFolderId;
@@ -110,7 +110,7 @@ public class FolderChildrenCollectionTest extends BaseTest
          + "<cmisra:base64>" + new String(Base64.encodeBase64("hello".getBytes())) + "</cmisra:base64>" //
          + "</cmisra:content>" //
          + "<cmisra:object><cmis:properties>" //
-         + "<cmis:propertyId propertyDefinitionId='cmis:objectTypeId'>" //
+         + "<cmis:propertyId localName='cmis:objectTypeId' propertyDefinitionId='cmis:objectTypeId'>" //
          + "<cmis:value>cmis:document</cmis:value></cmis:propertyId>" //
          + "</cmis:properties>" + "</cmisra:object></entry>";
       String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/children/" + testFolderId;
@@ -144,7 +144,7 @@ public class FolderChildrenCollectionTest extends BaseTest
          + " xmlns:cmisra='" + AtomCMIS.CMISRA_NS_URI + "'>" //
          + "<title>title</title><summary>summary</summary>" //
          + "<cmisra:object><cmis:properties>" //
-         + "<cmis:propertyId propertyDefinitionId='cmis:objectTypeId'>" //
+         + "<cmis:propertyId localName='cmis:objectTypeId' propertyDefinitionId='cmis:objectTypeId'>" //
          + "<cmis:value>cmis:folder</cmis:value></cmis:propertyId>" //
          + "</cmis:properties>" //
          + "</cmisra:object></entry>";
@@ -363,18 +363,21 @@ public class FolderChildrenCollectionTest extends BaseTest
          + " xmlns:cmisra='" + AtomCMIS.CMISRA_NS_URI + "'>" //
          + "<title>title</title><summary>summary</summary>" //
          + "<cmisra:object><cmis:properties>" //
-         + "<cmis:propertyId propertyDefinitionId=\"cmis:objectId\"><cmis:value>" //
+         + "<cmis:propertyId localName='cmis:objectId' propertyDefinitionId='cmis:objectId'><cmis:value>" //
          + id //
          + "</cmis:value></cmis:propertyId>" //
          + "</cmis:properties></cmisra:object></entry>";
 
-      String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/children/" + rootFolderId;
+      String requestURI =
+         "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/children/" + rootFolderId + "?sourceFolderId="
+            + testFolderId;
       assertEquals(testFolderId, getParents(id).get(0).getObject().getObjectInfo().getId());
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
 
       ContainerResponse resp = service("POST", requestURI, "http://localhost:8080/rest", null, s.getBytes(), writer);
 
-      //                  printBody(writer.getBody());
+      //      printBody(writer.getBody());
+
       assertEquals(201, resp.getStatus());
 
       assertNotNull(resp.getHttpHeaders().getFirst(HttpHeaders.LOCATION));

@@ -187,6 +187,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
 
       String typeId = null;
       String id = null;
+      CmisObject newObject = null;
 
       ObjectTypeElement objectElement = entry.getFirstChild(AtomCMIS.OBJECT);
       boolean hasCMISElement = objectElement != null;
@@ -277,17 +278,17 @@ public class FolderChildrenCollection extends CmisObjectCollection
                objectId = conn.createPolicy(getId(request), object.getProperties(), addACL, removeACL, policies);
             }
 
-            // TODO do we need to fill the perameters ?
-            boolean isIncludeAllowableActions = false;
-            IncludeRelationships isIncludeRelationships = null;
-            boolean isIncludePolicyIDs = false;
-            String renditionFilter = null;
-            String propertyFilter = CMIS.WILDCARD;
-            boolean isIncludeAcl = false;
-            object =
-               conn.getObject(objectId, isIncludeAllowableActions, isIncludeRelationships, isIncludePolicyIDs,
-                  isIncludeAcl, true, propertyFilter, renditionFilter);
          }
+         // TODO do we need to fill the perameters ?
+         boolean isIncludeAllowableActions = false;
+         IncludeRelationships isIncludeRelationships = null;
+         boolean isIncludePolicyIDs = false;
+         String renditionFilter = null;
+         String propertyFilter = CMIS.WILDCARD;
+         boolean isIncludeAcl = false;
+         newObject =
+            conn.getObject(objectId, isIncludeAllowableActions, isIncludeRelationships, isIncludePolicyIDs,
+               isIncludeAcl, true, propertyFilter, renditionFilter);
 
       }
       catch (ConstraintException cve)
@@ -334,7 +335,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
       try
       {
          // updated object
-         addEntryDetails(request, entry, request.getResolvedUri(), object);
+         addEntryDetails(request, entry, request.getResolvedUri(), newObject);
       }
       catch (ResponseContextException rce)
       {

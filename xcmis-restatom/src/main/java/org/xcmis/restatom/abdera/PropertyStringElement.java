@@ -70,7 +70,9 @@ public class PropertyStringElement extends PropertyElement<StringProperty>
          if (listString != null && listString.size() > 0)
          {
             for (String v : listString)
+            {
                addSimpleExtension(AtomCMIS.VALUE, v);
+            }
          }
       }
    }
@@ -85,7 +87,9 @@ public class PropertyStringElement extends PropertyElement<StringProperty>
       if (getElements() != null && getElements().size() > 0)
       {
          for (Element el : getElements())
+         {
             s.getValues().add(el.getText());
+         }
       }
       return s;
    }

@@ -1527,6 +1527,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          {
             name = new StringProperty();
             name.setId(CMIS.NAME);
+            name.setLocalName(CMIS.NAME);
             name.getValues().add(title);
             object.getProperties().put(name.getId(), name);
          }

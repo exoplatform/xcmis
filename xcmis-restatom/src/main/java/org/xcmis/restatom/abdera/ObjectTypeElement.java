@@ -144,45 +144,85 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
       String pId = p.getId();
 
       if (CMIS.NAME.equals(pId))
+      {
          objectInfo.setName(((StringProperty)p).getValues().get(0));
+      }
       else if (CMIS.OBJECT_ID.equals(pId))
+      {
          objectInfo.setId(((IdProperty)p).getValues().get(0));
+      }
       else if (CMIS.BASE_TYPE_ID.equals(pId))
+      {
          objectInfo.setBaseType(BaseType.fromValue((((IdProperty)p).getValues().get(0))));
+      }
       else if (CMIS.OBJECT_TYPE_ID.equals(pId))
+      {
          objectInfo.setTypeId(((IdProperty)p).getValues().get(0));
+      }
       else if (CMIS.CREATED_BY.equals(pId))
+      {
          objectInfo.setCreatedBy(((IdProperty)p).getValues().get(0));
+      }
       else if (CMIS.CREATION_DATE.equals(pId))
+      {
          objectInfo.setCreationDate(((DateTimeProperty)p).getValues().get(0));
+      }
       else if (CMIS.LAST_MODIFIED_BY.equals(pId))
+      {
          objectInfo.setLastModifiedBy(((StringProperty)p).getValues().get(0));
+      }
       else if (CMIS.LAST_MODIFICATION_DATE.equals(pId))
+      {
          objectInfo.setLastModificationDate(((DateTimeProperty)p).getValues().get(0));
+      }
       else if (CMIS.CHANGE_TOKEN.equals(pId))
+      {
          objectInfo.setChangeToken(((StringProperty)p).getValues().get(0));
+      }
       else if (CMIS.PARENT_ID.equals(pId))
+      {
          objectInfo.setParentId(((IdProperty)p).getValues().get(0));
+      }
       else if (CMIS.IS_LATEST_VERSION.equals(pId))
+      {
          objectInfo.setLatestVersion(((BooleanProperty)p).getValues().get(0));
+      }
       else if (CMIS.IS_MAJOR_VERSION.equals(pId))
+      {
          objectInfo.setMajorVersion(((BooleanProperty)p).getValues().get(0));
+      }
       else if (CMIS.IS_LATEST_MAJOR_VERSION.equals(pId))
+      {
          objectInfo.setLatestMajorVersion(((BooleanProperty)p).getValues().get(0));
+      }
       else if (CMIS.VERSION_LABEL.equals(pId))
+      {
          objectInfo.setVersionLabel(((StringProperty)p).getValues().get(0));
+      }
       else if (CMIS.VERSION_SERIES_ID.equals(pId))
+      {
          objectInfo.setVersionSeriesId(((IdProperty)p).getValues().get(0));
+      }
       else if (CMIS.VERSION_SERIES_CHECKED_OUT_ID.equals(pId))
+      {
          objectInfo.setVersionSeriesCheckedOutId(((StringProperty)p).getValues().get(0));
+      }
       else if (CMIS.VERSION_SERIES_CHECKED_OUT_BY.equals(pId))
+      {
          objectInfo.setVersionSeriesCheckedOutBy(((StringProperty)p).getValues().get(0));
+      }
       else if (CMIS.CONTENT_STREAM_MIME_TYPE.equals(pId))
+      {
          objectInfo.setContentStreamMimeType(((StringProperty)p).getValues().get(0));
+      }
       else if (CMIS.SOURCE_ID.equals(pId))
+      {
          objectInfo.setSourceId(((IdProperty)p).getValues().get(0));
+      }
       else if (CMIS.TARGET_ID.equals(pId))
+      {
          objectInfo.setTargetId(((IdProperty)p).getValues().get(0));
+      }
    }
 
    /**
@@ -275,7 +315,9 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
          {
             ObjectTypeElement relationshipElement = addExtension(AtomCMIS.RELATIOSNHIP);
             for (CmisObject cmisObject : relationship)
+            {
                relationshipElement.build(cmisObject);
+            }
          }
 
          // ChangeEventInfo
@@ -318,7 +360,9 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
          {
             RenditionTypeElement renditionElement = addExtension(AtomCMIS.RENDITION);
             for (Rendition rendition : listRendition)
+            {
                renditionElement.build(rendition);
+            }
          }
       }
    }

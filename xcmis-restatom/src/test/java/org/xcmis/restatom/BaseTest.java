@@ -19,6 +19,8 @@
 
 package org.xcmis.restatom;
 
+import junit.framework.AssertionFailedError;
+
 import junit.framework.TestCase;
 
 import org.apache.abdera.Abdera;
@@ -127,9 +129,11 @@ public abstract class BaseTest extends TestCase
       Map<String, Property<?>> props = new HashMap<String, Property<?>>();
       IdProperty propId = new IdProperty();
       propId.setId(CMIS.OBJECT_TYPE_ID);
+      propId.setLocalName(CMIS.OBJECT_TYPE_ID);
       propId.getValues().add(BaseType.FOLDER.value());
       StringProperty propName = new StringProperty();
       propName.setId(CMIS.NAME);
+      propName.setLocalName(CMIS.NAME);
       propName.getValues().add(testFolderName);
       props.put(propId.getId(), propId);
       props.put(propName.getId(), propName);
@@ -345,6 +349,7 @@ public abstract class BaseTest extends TestCase
       String typeId = CMIS.POLICY;
       IdProperty typeIdProperty = new IdProperty();
       typeIdProperty.setId(CMIS.OBJECT_TYPE_ID);
+      typeIdProperty.setLocalName(CMIS.OBJECT_TYPE_ID);
       typeIdProperty.getValues().add(typeId);
       properties.put(typeIdProperty.getId(), typeIdProperty);
       // NAME
@@ -512,7 +517,15 @@ public abstract class BaseTest extends TestCase
 
       for (String el : expected)
       {
-         assertTrue("Not found xml element " + el, hasElementValue(el, xmlEntry));
+         try
+         {
+            assertTrue("Not found xml element " + el, hasElementValue(el, xmlEntry));
+         }
+         catch (AssertionFailedError e)
+         {
+            String elNew = el.substring("atom:".length());
+            assertTrue("Not found xml element " + elNew, hasElementValue(elNew, xmlEntry));
+         }
       }
    }
 

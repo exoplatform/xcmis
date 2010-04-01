@@ -756,12 +756,14 @@ public abstract class BaseConnection implements Connection
       {
          throw new InvalidArgumentException("Object " + sourceFolderId + " is not a Folder object.");
       }
-      
+
       boolean found = false;
       for (ObjectData one : object.getParents())
       {
          if (one.getObjectId().equals(sourceFolderId))
+         {
             found = true;
+         }
       }
       if (!found)
       {

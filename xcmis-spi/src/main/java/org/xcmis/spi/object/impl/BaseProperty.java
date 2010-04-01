@@ -56,7 +56,8 @@ public abstract class BaseProperty<T> implements Property<T>
       this.queryName = queryName;
       this.localName = localName;
       this.displayName = displayName;
-      if (value != null) {
+      if (value != null)
+      {
          this.values = new ArrayList<T>(1);
          this.values.add(value);
       }
@@ -69,7 +70,9 @@ public abstract class BaseProperty<T> implements Property<T>
       this.localName = localName;
       this.displayName = displayName;
       if (values != null)
+      {
          this.values = new ArrayList<T>(values);
+      }
    }
 
    /**
@@ -110,7 +113,9 @@ public abstract class BaseProperty<T> implements Property<T>
    public List<T> getValues()
    {
       if (values == null)
+      {
          values = new ArrayList<T>();
+      }
       return values;
    }
 
