@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.xcmis.search.InvalidQueryException;
 import org.xcmis.search.content.IndexModificationException;
 import org.xcmis.search.model.Query;
+import org.xcmis.search.query.QueryExecutionException;
 import org.xcmis.search.result.ScoredRow;
 
 import java.util.List;
@@ -30,7 +31,7 @@ import java.util.List;
 public class AndConstraintTest extends AbstractQueryTest
 {
    @Test
-   public void testAnd() throws InvalidQueryException, IndexModificationException
+   public void testAnd() throws InvalidQueryException, IndexModificationException, QueryExecutionException
    {
       Node n1 = testRootNode.addNode(nodeName1, testNodeType);
       n1.setProperty(propertyName1, "foo");

@@ -31,6 +31,7 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.search.config.IndexConfiguration;
 import org.xcmis.search.content.ContentEntry;
+import org.xcmis.search.content.ContentIndexer;
 import org.xcmis.search.content.Property;
 import org.xcmis.search.content.Property.BinaryValue;
 import org.xcmis.search.content.Property.ContentValue;
@@ -43,7 +44,7 @@ import java.util.Collection;
 /**
  * Create {@link Document} from {@link ContentEntry}
  */
-public class NodeIndexer
+public class LuceneIndexer implements ContentIndexer<Document>
 {
    /**
     * Content extractor.
@@ -53,9 +54,14 @@ public class NodeIndexer
    private final IndexConfiguration indexConfiguration;
 
    /**
+    * Class logger.
+    */
+   private static final Log LOG = ExoLogger.getLogger(LuceneIndexer.class);
+
+   /**
     * @param extractor
     */
-   public NodeIndexer(Tika extractor, IndexConfiguration indexConfiguration)
+   public LuceneIndexer(Tika extractor, IndexConfiguration indexConfiguration)
    {
       super();
       this.extractor = extractor;
@@ -63,10 +69,9 @@ public class NodeIndexer
    }
 
    /**
-    * Class logger.
+    * 
+    * @see org.xcmis.search.content.ContentIndexer#createDocument(org.xcmis.search.content.ContentEntry)
     */
-   private static final Log LOG = ExoLogger.getLogger(NodeIndexer.class);
-
    public Document createDocument(ContentEntry contentEntry)
    {
       final Document doc = new Document();
@@ -116,6 +121,130 @@ public class NodeIndexer
    }
 
    /**
+    * Extract content of binary value.
+    * @param doc
+    * @param propName
+    * @param data
+    */
+   private void addBinaryProperty(final Document doc, String propName, BinaryValue data)
+   {
+      if (data.getMimeType() != null)
+      {
+         Metadata metadata = new Metadata();
+         metadata.set(Metadata.CONTENT_TYPE, data.getMimeType());
+         if (data.getEncoding() != null)
+         {
+            metadata.set(Metadata.CONTENT_ENCODING, data.getEncoding());
+         }
+         InputStream stream = data.getValue();
+         try
+         {
+            try
+            {
+               doc.add(new Field(FieldNames.createFullTextFieldName(propName), extractor.parse(stream, metadata)));
+
+            }
+            finally
+            {
+               stream.close();
+            }
+         }
+         catch (IOException e)
+         {
+            if (LOG.isDebugEnabled())
+            {
+               LOG.warn("Binary value indexer IO error " + e, e);
+            }
+         }
+      }
+   }
+
+   /**
+    * Adds the string representation of the boolean value to the document as the
+    * named field.
+    * 
+    * @param doc The document to which to add the field
+    * @param fieldName The name of the field to add
+    * @param internalValue The value for the field to add to the document.
+    */
+   private void addBooleanValue(final Document doc, final String fieldName, final Boolean internalValue)
+   {
+      doc.add(createFieldWithoutNorms(fieldName, internalValue.toString(), false));
+   }
+
+   /**
+    * Adds the calendar value to the document as the named field. The calendar
+    * value is converted to an indexable string value using the {@link DateTools}
+    * class.
+    * 
+    * @param doc The document to which to add the field
+    * @param fieldName The name of the field to add
+    * @param value The value for the field to add to the document.
+    */
+   private void addCalendarValue(final Document doc, final String fieldName, final Calendar value)
+   {
+
+      doc.add(createFieldWithoutNorms(fieldName, DateTools.dateToString(value.getTime(),
+         DateTools.Resolution.MILLISECOND), false));
+   }
+
+   /**
+    * Adds the double value to the document as the named field. The double value
+    * is converted to an indexable string value using the {@link DoubleField}
+    * class.
+    * 
+    * @param doc The document to which to add the field
+    * @param fieldName The name of the field to add
+    * @param internalValue The value for the field to add to the document.
+    */
+   private void addDoubleValue(final Document doc, final String fieldName, final Double doubleValue)
+   {
+      doc.add(createFieldWithoutNorms(fieldName, ExtendedNumberTools.doubleToString(doubleValue), false));
+   }
+
+   /**
+    * Adds the length field.
+    * @param doc
+    * @param propName - property name.
+    * @param value 
+    */
+   private void addLengthField(Document doc, String propName, ContentValue value)
+   {
+      doc.add(new Field(FieldNames.createFieldLengthName(propName), //
+         NumberTools.longToString(value.getLength()), //
+         Store.YES, //
+         Index.NOT_ANALYZED_NO_NORMS));
+
+   }
+
+   /**
+    * Adds the long value to the document as the named field. The long value is
+    * converted to an indexable string value using the {@link NumberTools} class.
+    * 
+    * @param doc The document to which to add the field
+    * @param fieldName The name of the field to add
+    * @param longValue The value for the field to add to the document.
+    */
+   private void addLongValue(final Document doc, final String fieldName, final Long longValue)
+   {
+
+      doc.add(createFieldWithoutNorms(fieldName, NumberTools.longToString(longValue), false));
+   }
+
+   /**
+    * Adds a {@link FieldNames#MVP} field to <code>doc</code> with the resolved
+    * <code>name</code> using the internal search index namespace mapping.
+    * 
+    * @param doc the lucene document.
+    * @param propName the name of the multi-value property.
+    * @throws RepositoryException if any repository errors
+    */
+   private void addMVPName(final Document doc, final String propName)
+   {
+      doc.add(new Field(FieldNames.MVP, propName, Field.Store.YES, Field.Index.NOT_ANALYZED, Field.TermVector.NO));
+   }
+
+   /**
     * Adds the non binary property.
     * 
     * @param doc the doc
@@ -123,7 +252,7 @@ public class NodeIndexer
     * @throws RepositoryException the repository exception
     */
    @SuppressWarnings("unchecked")
-   public void addProperty(final Document doc, final Property propertyData)
+   private void addProperty(final Document doc, final Property propertyData)
    {
       final String propName = propertyData.getName();
 
@@ -174,58 +303,6 @@ public class NodeIndexer
    }
 
    /**
-    * Extract content of binary value.
-    * @param doc
-    * @param propName
-    * @param data
-    */
-   private void addBinaryProperty(final Document doc, String propName, BinaryValue data)
-   {
-      if (data.getMimeType() != null)
-      {
-         Metadata metadata = new Metadata();
-         metadata.set(Metadata.CONTENT_TYPE, data.getMimeType());
-         if (data.getEncoding() != null)
-         {
-            metadata.set(Metadata.CONTENT_ENCODING, data.getEncoding());
-         }
-         InputStream stream = data.getValue();
-         try
-         {
-            try
-            {
-               doc.add(new Field(FieldNames.createFullTextFieldName(propName), extractor.parse(stream, metadata)));
-
-            }
-            finally
-            {
-               stream.close();
-            }
-         }
-         catch (IOException e)
-         {
-            if (LOG.isDebugEnabled())
-            {
-               LOG.warn("Binary value indexer IO error " + e, e);
-            }
-         }
-      }
-   }
-
-   /**
-    * Adds a {@link FieldNames#MVP} field to <code>doc</code> with the resolved
-    * <code>name</code> using the internal search index namespace mapping.
-    * 
-    * @param doc the lucene document.
-    * @param propName the name of the multi-value property.
-    * @throws RepositoryException if any repository errors
-    */
-   private void addMVPName(final Document doc, final String propName)
-   {
-      doc.add(new Field(FieldNames.MVP, propName, Field.Store.YES, Field.Index.NOT_ANALYZED, Field.TermVector.NO));
-   }
-
-   /**
     * Adds the property name to the lucene _:PROPERTIES_SET field.
     * 
     * @param doc the document.
@@ -235,95 +312,6 @@ public class NodeIndexer
    private void addPropertyName(final Document doc, final String propertyName)
    {
       doc.add(new Field(FieldNames.PROPERTIES_SET, propertyName, Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS));
-   }
-
-   /**
-    * Adds the string representation of the boolean value to the document as the
-    * named field.
-    * 
-    * @param doc The document to which to add the field
-    * @param fieldName The name of the field to add
-    * @param internalValue The value for the field to add to the document.
-    */
-   private void addBooleanValue(final Document doc, final String fieldName, final Boolean internalValue)
-   {
-      doc.add(createFieldWithoutNorms(fieldName, internalValue.toString(), false));
-   }
-
-   /**
-    * Creates a document field name as prefixed <code>fieldName</code> with the
-    * value of <code>
-    * internalValue</code> . The created field is indexed without norms.
-    * 
-    * @param fieldName The name of the field to add
-    * @param internalValue The value for the field to add to the document.
-    * @param store <code>true</code> if the value should be stored,
-    *          <code>false</code> otherwise
-    *  @return field  Field 
-    */
-   private Field createFieldWithoutNorms(final String fieldName, final String internalValue, final boolean store)
-   {
-
-      final Field field =
-         new Field(FieldNames.createPropertyFieldName(fieldName), internalValue, store ? Field.Store.YES
-            : Field.Store.NO, Field.Index.NOT_ANALYZED_NO_NORMS, Field.TermVector.NO);
-      return field;
-   }
-
-   /**
-    * Adds the calendar value to the document as the named field. The calendar
-    * value is converted to an indexable string value using the {@link DateTools}
-    * class.
-    * 
-    * @param doc The document to which to add the field
-    * @param fieldName The name of the field to add
-    * @param value The value for the field to add to the document.
-    */
-   private void addCalendarValue(final Document doc, final String fieldName, final Calendar value)
-   {
-
-      doc.add(createFieldWithoutNorms(fieldName, DateTools.dateToString(value.getTime(),
-         DateTools.Resolution.MILLISECOND), false));
-   }
-
-   /**
-    * Adds the double value to the document as the named field. The double value
-    * is converted to an indexable string value using the {@link DoubleField}
-    * class.
-    * 
-    * @param doc The document to which to add the field
-    * @param fieldName The name of the field to add
-    * @param internalValue The value for the field to add to the document.
-    */
-   private void addDoubleValue(final Document doc, final String fieldName, final Double doubleValue)
-   {
-      doc.add(createFieldWithoutNorms(fieldName, ExtendedNumberTools.doubleToString(doubleValue), false));
-   }
-
-   /**
-    * Adds the long value to the document as the named field. The long value is
-    * converted to an indexable string value using the {@link NumberTools} class.
-    * 
-    * @param doc The document to which to add the field
-    * @param fieldName The name of the field to add
-    * @param longValue The value for the field to add to the document.
-    */
-   private void addLongValue(final Document doc, final String fieldName, final Long longValue)
-   {
-
-      doc.add(createFieldWithoutNorms(fieldName, NumberTools.longToString(longValue), false));
-   }
-
-   /**
-   * Returns <code>true</code> if the property with the given name should be indexed.
-   *
-   * @param propertyName name of a property.
-   * @return <code>true</code> if the property should be fulltext indexed;   <code>false</code>
-   * otherwise.
-   */
-   private boolean isIndexed(final String propertyName)
-   {
-      return true;
    }
 
    /** Adds the string value to the document both as the named field and
@@ -353,18 +341,35 @@ public class NodeIndexer
    }
 
    /**
-    * Adds the length field.
-    * @param doc
-    * @param propName - property name.
-    * @param value 
+    * Creates a document field name as prefixed <code>fieldName</code> with the
+    * value of <code>
+    * internalValue</code> . The created field is indexed without norms.
+    * 
+    * @param fieldName The name of the field to add
+    * @param internalValue The value for the field to add to the document.
+    * @param store <code>true</code> if the value should be stored,
+    *          <code>false</code> otherwise
+    *  @return field  Field 
     */
-   private void addLengthField(Document doc, String propName, ContentValue value)
+   private Field createFieldWithoutNorms(final String fieldName, final String internalValue, final boolean store)
    {
-      doc.add(new Field(FieldNames.createFieldLengthName(propName), //
-         NumberTools.longToString(value.getLength()), //
-         Store.YES, //
-         Index.NOT_ANALYZED_NO_NORMS));
 
+      final Field field =
+         new Field(FieldNames.createPropertyFieldName(fieldName), internalValue, store ? Field.Store.YES
+            : Field.Store.NO, Field.Index.NOT_ANALYZED_NO_NORMS, Field.TermVector.NO);
+      return field;
+   }
+
+   /**
+   * Returns <code>true</code> if the property with the given name should be indexed.
+   *
+   * @param propertyName name of a property.
+   * @return <code>true</code> if the property should be fulltext indexed;   <code>false</code>
+   * otherwise.
+   */
+   private boolean isIndexed(final String propertyName)
+   {
+      return true;
    }
 
 }

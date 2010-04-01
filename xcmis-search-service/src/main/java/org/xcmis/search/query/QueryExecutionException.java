@@ -16,17 +16,47 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xcmis.search.content;
+package org.xcmis.search.query;
+
+import org.xcmis.search.SearchServiceException;
 
 /**
- * Convert {@link ContentEntry} to the suitable format D for indexing 
+  * Exception what can  occur during query execution.  
  */
-public interface ContentIndexer<D>
+public class QueryExecutionException extends SearchServiceException
 {
+
    /**
-    * Convert changes to a suitable format for the index
-    * @param changes
-    * @return index transaction
+    * 
     */
-   D createDocument(ContentEntry contentEntry);
+   public QueryExecutionException()
+   {
+      super();
+   }
+
+   /**
+    * @param message
+    * @param cause
+    */
+   public QueryExecutionException(String message, Throwable cause)
+   {
+      super(message, cause);
+   }
+
+   /**
+    * @param message
+    */
+   public QueryExecutionException(String message)
+   {
+      super(message);
+   }
+
+   /**
+    * @param cause
+    */
+   public QueryExecutionException(Throwable cause)
+   {
+      super(cause);
+   }
+
 }

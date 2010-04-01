@@ -156,19 +156,18 @@ public class SearchServiceTest
       configuration.setNameConverter(nameConverter);
       configuration.setTableResolver(tableResolver);
       configuration.setPathSplitter(new SlashSplitter());
-
-      LuceneSearchService luceneSearchService = new LuceneSearchService(configuration);
-
-      Query query = builder.selectStar().from("someTable").query();
-
       InvocationContext invocationContext = new InvocationContext();
       invocationContext.setSchema(schema);
 
       invocationContext.setTableResolver(tableResolver);
       invocationContext.setNameConverter(nameConverter);
-      luceneSearchService.setInvocationContext(invocationContext);
+      configuration.setDefaultInvocationContext(invocationContext);
 
-      luceneSearchService.execute(query, new HashMap<String, Object>());
+      LuceneSearchService luceneSearchService = new LuceneSearchService(configuration);
+
+      Query query = builder.selectStar().from("someTable").query();
+
+      luceneSearchService.execute(query);
    }
 
    @Test
@@ -218,10 +217,9 @@ public class SearchServiceTest
 
       invocationContext.setTableResolver(tableResolver);
       invocationContext.setNameConverter(nameConverter);
-      luceneSearchService.setInvocationContext(invocationContext);
 
       Query query = builder.selectStar().from("someTable AS someTable").query();
-      List<ScoredRow> result = luceneSearchService.execute(query, new HashMap());
+      List<ScoredRow> result = luceneSearchService.execute(query, new HashMap(), invocationContext);
       assertThat(result.size(), is(1));
    }
 }

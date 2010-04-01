@@ -49,7 +49,7 @@ import org.xcmis.search.lucene.index.FieldNames;
 import org.xcmis.search.lucene.index.IndexException;
 import org.xcmis.search.lucene.index.IndexTransactionException;
 import org.xcmis.search.lucene.index.LuceneIndexTransaction;
-import org.xcmis.search.lucene.index.NodeIndexer;
+import org.xcmis.search.lucene.index.LuceneIndexer;
 import org.xcmis.search.lucene.search.UUIDFieldSelector;
 import org.xcmis.search.model.Limit;
 import org.xcmis.search.model.constraint.Constraint;
@@ -208,7 +208,7 @@ public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndex
    /**
     * Node indexer.
     */
-   private NodeIndexer nodeIndexer;
+   private LuceneIndexer nodeIndexer;
 
    private IndexConfiguration indexConfuguration;
 
@@ -240,7 +240,7 @@ public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndex
       this.indexConfuguration = serviceConfuguration.getIndexConfuguration();
 
       TikaConfig tikaConfig = indexConfuguration.getTikaConfig();
-      this.nodeIndexer = new NodeIndexer(tikaConfig == null ? new Tika() : new Tika(tikaConfig), indexConfuguration);
+      this.nodeIndexer = new LuceneIndexer(tikaConfig == null ? new Tika() : new Tika(tikaConfig), indexConfuguration);
 
    }
 

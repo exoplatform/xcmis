@@ -18,6 +18,8 @@
  */
 package org.xcmis.search.content;
 
+import org.xcmis.search.content.command.InvocationContext;
+
 import java.util.List;
 import java.util.Set;
 
@@ -28,9 +30,32 @@ public interface ContentModificationListener
 {
    /**
     * Notify listener about changes in content.
-    * @param changes - content changes.
     * 
+    * @param changes - added content
+    * @param removedEntries - removed content
+    * @param invocationContext
+    * @throws IndexModificationException
     */
+   void update(ContentEntry addedEntry, String removedEntry) throws IndexModificationException;
 
-   void update(List<ContentEntry> changes, Set<String> removedEntries) throws IndexModificationException;
+   /**
+    * Notify listener about changes in content.
+    * 
+    * @param changes - added content
+    * @param removedEntries - removed content
+    * @param invocationContext
+    * @throws IndexModificationException
+    */
+   void update(List<ContentEntry> addedEntries, Set<String> removedEntries, InvocationContext invocationContext)
+      throws IndexModificationException;
+
+   /**
+    * Notify listener about changes in content with default {@link InvocationContext}
+    * 
+    * @param changes - added content
+    * @param removedEntries - removed content
+    * @param invocationContext
+    * @throws IndexModificationException
+    */
+   void update(List<ContentEntry> addedEntries, Set<String> removedEntries) throws IndexModificationException;
 }

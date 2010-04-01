@@ -48,7 +48,6 @@ public class LuceneSearchService extends SearchService
 
       interceptorChain.addBeforeInterceptor(new LuceneQueryableIndexStorage(configuration),
          ContentReaderInterceptor.class);
-
    }
 
 }
