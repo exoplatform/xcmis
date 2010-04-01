@@ -44,7 +44,7 @@ public interface JcrCMIS extends CMIS
 
    String CMIS_NT_POLICY = "cmis:policy";
 
-   String CMIS_NT_RENDITION = "cmis:rendition";
+   String CMIS_NT_RENDITION = "xcmis:rendition";
    
    String CMIS_SYSTEM_NODETYPE = "xcmis:system";
    

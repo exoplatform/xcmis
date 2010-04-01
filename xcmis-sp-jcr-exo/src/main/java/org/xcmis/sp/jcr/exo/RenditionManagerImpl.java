@@ -77,7 +77,7 @@ public class RenditionManagerImpl implements RenditionManager
          {
             MimeType contentType = MimeType.fromString(((DocumentImpl)obj).getContentStreamMimeType());
             RenditionImpl rendition = new RenditionImpl();
-            rendition.setStreamId(contentType.toString());
+            rendition.setStreamId(encode(contentType.toString()));
             rendition.setKind("cmis:thumbnail");
             return new RenditionIterator(rendition);
          }
@@ -96,7 +96,7 @@ public class RenditionManagerImpl implements RenditionManager
    {
       for (Map.Entry<MimeType, RenditionProvider> e : renditionProviders.entrySet())
       {
-         if (e.getKey().match(MimeType.fromString(streamId)))
+         if (e.getKey().match(MimeType.fromString(decode(streamId))))
          {
             RenditionProvider renditionProvider = e.getValue();
             RenditionContentStream renditionContentStream = null;
@@ -119,4 +119,24 @@ public class RenditionManagerImpl implements RenditionManager
       }
       return null;
    }
+   
+   private static String encode(String in){
+      StringBuffer out = new StringBuffer();
+      for  (int i =0; i<in.length(); i++){
+         out.append( Integer.toHexString((int)in.charAt(i)));      
+      }
+      return out.toString();
+   }
+
+   private static String decode(String in){
+   StringBuffer out = new StringBuffer();
+   int offset = 0;
+   while (offset < in.length()){
+      int part =Integer.parseInt(in.substring(offset, offset+2), 16);
+      out.append((char)part);
+      offset = offset+2;
+   }
+   return out.toString();
+   }
+
 }
