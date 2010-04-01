@@ -121,17 +121,19 @@ public class LuceneQueryableIndexStorage extends AbstractLuceneQueryableIndexSto
       try
       {
 
-         final TermDocs termDocs = reader.termDocs(new Term(FieldNames.UUID, uuid));
-         if (termDocs.next())
+         if (reader != null)
          {
-            final Document document = reader.document(termDocs.doc());
+            final TermDocs termDocs = reader.termDocs(new Term(FieldNames.UUID, uuid));
             if (termDocs.next())
             {
-               throw new IndexException("More then one document found for uuid:" + uuid);
+               final Document document = reader.document(termDocs.doc());
+               if (termDocs.next())
+               {
+                  throw new IndexException("More then one document found for uuid:" + uuid);
+               }
+               return document;
             }
-            return document;
          }
-
       }
       catch (final IOException e)
       {
@@ -222,7 +224,10 @@ public class LuceneQueryableIndexStorage extends AbstractLuceneQueryableIndexSto
          {
             try
             {
-               reader.close();
+               if (reader != null)
+               {
+                  reader.close();
+               }
             }
             catch (IOException e)
             {
