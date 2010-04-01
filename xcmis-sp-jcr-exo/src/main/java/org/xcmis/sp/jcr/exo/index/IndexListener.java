@@ -133,20 +133,24 @@ public class IndexListener
        */
       public ContentEntry createEntry(ObjectData objectData) throws IOException
       {
-         switch (objectData.getBaseType())
+         if (objectData != null)
          {
-            case DOCUMENT :
-               return createFromDocument((Document)objectData);
-            case FOLDER :
-               return createFromFolder((Folder)objectData);
-            case POLICY :
-               return createFromPolicy((Policy)objectData);
-            case RELATIONSHIP :
-               return createFromRelationship((Relationship)objectData);
-            default :
-               throw new UnsupportedOperationException(objectData.getBaseType().toString()
-                  + " is not supported for indexing");
+            switch (objectData.getBaseType())
+            {
+               case DOCUMENT :
+                  return createFromDocument((Document)objectData);
+               case FOLDER :
+                  return createFromFolder((Folder)objectData);
+               case POLICY :
+                  return createFromPolicy((Policy)objectData);
+               case RELATIONSHIP :
+                  return createFromRelationship((Relationship)objectData);
+               default :
+                  throw new UnsupportedOperationException(objectData.getBaseType().toString()
+                     + " is not supported for indexing");
+            }
          }
+         return null;
       }
 
       /**
