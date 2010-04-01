@@ -396,8 +396,7 @@ public class RepositoryInfoImpl implements RepositoryInfo, RepositoryCapabilitie
     */
    public boolean isCapabilityMultifiling()
    {
-      // TODO : update when implement
-      return false;
+      return true;
    }
 
    /**
@@ -421,8 +420,7 @@ public class RepositoryInfoImpl implements RepositoryInfo, RepositoryCapabilitie
     */
    public boolean isCapabilityUnfiling()
    {
-      // TODO : update when implement
-      return false;
+      return true;
    }
 
    /**

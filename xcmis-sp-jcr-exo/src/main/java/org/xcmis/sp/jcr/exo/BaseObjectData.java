@@ -76,6 +76,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -612,7 +613,14 @@ abstract class BaseObjectData implements ObjectData
       if (isNew())
       {
          // If not saved yet simply remove from temporary storage
-         policies.remove(policy);
+         // TODO override equals & hashCode for CMIS objects classes
+         for (Iterator<Policy> policyIterator = policies.iterator(); policyIterator.hasNext();)
+         {
+            if (policyIterator.next().getObjectId().equals(policy.getObjectId()))
+            {
+               policies.remove(policy);
+            }
+         }
       }
       else
       {
@@ -1021,64 +1029,61 @@ abstract class BaseObjectData implements ObjectData
       {
          return properties.get(definition.getId());
       }
-      else
+      try
       {
          try
          {
-            try
-            {
-               javax.jcr.Property jcrProperty = node.getProperty(definition.getLocalName());
+            javax.jcr.Property jcrProperty = node.getProperty(definition.getLocalName());
 
-               return createProperty(definition, //
-                  definition.isMultivalued() ? jcrProperty.getValues() : new Value[]{jcrProperty.getValue()});
+            return createProperty(definition, //
+               definition.isMultivalued() ? jcrProperty.getValues() : new Value[]{jcrProperty.getValue()});
+         }
+         catch (PathNotFoundException pnf)
+         {
+            if (LOG.isDebugEnabled())
+            {
+               LOG.debug("Property " + definition.getId() + " is not set.");
             }
-            catch (PathNotFoundException pnf)
-            {
-               if (LOG.isDebugEnabled())
-               {
-                  LOG.debug("Property " + definition.getId() + " is not set.");
-               }
 
-               if (definition.getId().equals(CMIS.OBJECT_ID))
-               {
-                  return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
-                     definition.getDisplayName(), getObjectId());
-               }
-               else if (definition.getId().equals(CMIS.NAME))
+            if (definition.getId().equals(CMIS.OBJECT_ID))
+            {
+               return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
+                  definition.getDisplayName(), getObjectId());
+            }
+            else if (definition.getId().equals(CMIS.NAME))
+            {
+               return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
+                  definition.getDisplayName(), getName());
+            }
+            else if (definition.getId().equals(CMIS.PATH))
+            {
+               return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
+                  definition.getDisplayName(), node.getPath());
+            }
+            else if (definition.getId().equals(CMIS.PARENT_ID) && node.getDepth() != 0)
+            {
+               return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
+                  definition.getDisplayName(), ((ExtendedNode)node.getParent()).getIdentifier());
+            }
+            else if (definition.getId().equals(CMIS.CONTENT_STREAM_FILE_NAME))
+            {
+               if (((Document)this).hasContent())
                {
                   return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
                      definition.getDisplayName(), getName());
                }
-               else if (definition.getId().equals(CMIS.PATH))
-               {
-                  return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
-                     definition.getDisplayName(), node.getPath());
-               }
-               else if (definition.getId().equals(CMIS.PARENT_ID) && node.getDepth() != 0)
-               {
-                  return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
-                     definition.getDisplayName(), ((ExtendedNode)node.getParent()).getIdentifier());
-               }
-               else if (definition.getId().equals(CMIS.CONTENT_STREAM_FILE_NAME))
-               {
-                  if (((Document)this).hasContent())
-                  {
-                     return new StringProperty(definition.getId(), definition.getQueryName(),
-                        definition.getLocalName(), definition.getDisplayName(), getName());
-                  }
-               }
-
-               // TODO : need more virtual properties ??
-
-               // Property is valid but not set in back-end.
-               // Return property in 'value not set' state.
-               return createProperty(definition, new Value[0]);
             }
+
+            // TODO : need more virtual properties ??
+
+            // Property is valid but not set in back-end.
+            // Return property in 'value not set' state.
+            return createProperty(definition, new Value[0]);
          }
-         catch (RepositoryException re)
-         {
-            throw new CmisRuntimeException("Unable get property " + definition.getId() + ". " + re.getMessage(), re);
-         }
+      }
+      catch (RepositoryException re)
+      {
+         throw new CmisRuntimeException("Unable get property " + definition.getId() + ". " + re.getMessage(), re);
       }
    }
 
@@ -1100,7 +1105,7 @@ abstract class BaseObjectData implements ObjectData
     */
    protected abstract void create() throws StorageException, NameConstraintViolationException;
 
-   // ------- helpers
+   // Helpers for internal usage ONLY. There is no validation for property type.
 
    protected Boolean getBoolean(String id)
    {
@@ -1647,8 +1652,7 @@ abstract class BaseObjectData implements ObjectData
             }
          }
 
-         Node unfiledStore =
-            (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_UNFILED);
+         Node unfiledStore = (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_UNFILED);
          Node unfiled = unfiledStore.addNode(getObjectId(), "xcmis:unfiledObject");
 
          String destPath = unfiled.getPath() + "/" + node.getName();
