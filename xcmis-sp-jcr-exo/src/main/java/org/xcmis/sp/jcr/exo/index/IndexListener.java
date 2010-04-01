@@ -42,7 +42,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -78,12 +77,9 @@ public class IndexListener
    {
 
       //LOG.info(object.getObjectId() + " " + object.getParent().getPath() + "/" + object.getName());
-      List<ContentEntry> contentEntries = new ArrayList<ContentEntry>(1);
       try
       {
-
-         contentEntries.add(contentEntryAdapter.createEntry(object));
-         searchService.update(contentEntries, Collections.EMPTY_SET);
+         searchService.update(contentEntryAdapter.createEntry(object), null);
       }
       catch (IndexModificationException e)
       {
@@ -109,13 +105,9 @@ public class IndexListener
 
    public void updated(ObjectData object)
    {
-      Set<String> removed = new HashSet<String>();
-      removed.add(object.getObjectId());
-      List<ContentEntry> contentEntries = new ArrayList<ContentEntry>(1);
       try
       {
-         contentEntries.add(contentEntryAdapter.createEntry(object));
-         searchService.update(contentEntries, removed);
+         searchService.update(contentEntryAdapter.createEntry(object), object.getObjectId());
       }
       catch (IndexModificationException e)
       {

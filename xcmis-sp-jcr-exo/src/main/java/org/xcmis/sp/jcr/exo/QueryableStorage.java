@@ -25,7 +25,9 @@ import org.xcmis.search.model.column.Column;
 import org.xcmis.search.model.source.SelectorName;
 import org.xcmis.search.parser.CmisQueryParser;
 import org.xcmis.search.parser.QueryParser;
+import org.xcmis.search.query.QueryExecutionException;
 import org.xcmis.search.result.ScoredRow;
+import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.Storage;
@@ -109,6 +111,10 @@ public class QueryableStorage extends StorageImpl
       catch (InvalidQueryException e)
       {
          throw new InvalidArgumentException(e.getLocalizedMessage(), e);
+      }
+      catch (QueryExecutionException e)
+      {
+         throw new CmisRuntimeException(e.getLocalizedMessage(), e);
       }
    }
 
