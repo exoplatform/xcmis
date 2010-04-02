@@ -19,7 +19,6 @@
 
 package org.xcmis.spi;
 
-import org.xcmis.spi.data.ObjectData;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
@@ -28,10 +27,23 @@ import org.xcmis.spi.data.ObjectData;
 public interface EventJournal
 {
 
-   void updated(ObjectData object);
+   /**
+    * Add new event.
+    *
+    * @param objectId id of update/created/removed object.
+    * @param eventType event type
+    * @return change log token for add event
+    */
+   String addEvent(String objectId, ChangeEvent eventType);
 
-   void created(ObjectData object);
-
-   void removed(String id);
+   /**
+    * Get event by log token.
+    *
+    * @param logToken change log token
+    * @return change event or <code>null</code> if there is no event for
+    *         specified log token. It may happen if <code>logToken</code> is
+    *         invalid or if changes log was truncated
+    */
+   ChangeEvent getEvent(String logToken);
 
 }

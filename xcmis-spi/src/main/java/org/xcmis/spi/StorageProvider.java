@@ -37,7 +37,7 @@ public interface StorageProvider
    /**
     * Get storage with specified id.
     * 
-    * @param id storage id
+    * @param storageId storage id
     * @param user user name
     * @param password user password
     * @return connection
@@ -46,18 +46,18 @@ public interface StorageProvider
     * @throws InvalidArgumentException if storage with <code>id</code> does not
     *         exists
     */
-   Connection getConnection(String id, String user, String password) throws LoginException, InvalidArgumentException;
+   Connection getConnection(String storageId, String user, String password) throws LoginException, InvalidArgumentException;
 
    /**
     * Create new connection for user that has specified
     * <code>conversation</code>.
     * 
-    * @param id storage id
+    * @param storageId storage id
     * @param conversation user's state that contains user identity and some
     *        optional context specific attributes
     * @return connection
     */
-   Connection getConnection(String id, ConversationState conversation);
+   Connection getConnection(String storageId, ConversationState conversation);
 
    /**
     * Get id of all available storages.
