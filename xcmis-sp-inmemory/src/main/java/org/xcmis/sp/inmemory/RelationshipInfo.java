@@ -23,7 +23,7 @@ package org.xcmis.sp.inmemory;
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-class RelationshipInfo
+final class RelationshipInfo
 {
 
    public static final int SOURCE = 0;

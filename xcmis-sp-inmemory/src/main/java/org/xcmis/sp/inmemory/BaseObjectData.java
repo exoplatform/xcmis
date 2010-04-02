@@ -37,20 +37,20 @@ import org.xcmis.spi.impl.BaseItemsIterator;
 import org.xcmis.spi.impl.CmisVisitor;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.PropertyType;
 import org.xcmis.spi.model.RelationshipDirection;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.Updatability;
-import org.xcmis.spi.object.Property;
-import org.xcmis.spi.object.impl.BooleanProperty;
-import org.xcmis.spi.object.impl.DateTimeProperty;
-import org.xcmis.spi.object.impl.DecimalProperty;
-import org.xcmis.spi.object.impl.HtmlProperty;
-import org.xcmis.spi.object.impl.IdProperty;
-import org.xcmis.spi.object.impl.IntegerProperty;
-import org.xcmis.spi.object.impl.StringProperty;
-import org.xcmis.spi.object.impl.UriProperty;
+import org.xcmis.spi.model.impl.BooleanProperty;
+import org.xcmis.spi.model.impl.DateTimeProperty;
+import org.xcmis.spi.model.impl.DecimalProperty;
+import org.xcmis.spi.model.impl.HtmlProperty;
+import org.xcmis.spi.model.impl.IdProperty;
+import org.xcmis.spi.model.impl.IntegerProperty;
+import org.xcmis.spi.model.impl.StringProperty;
+import org.xcmis.spi.model.impl.UriProperty;
 import org.xcmis.spi.utils.CmisUtils;
 
 import java.math.BigDecimal;
@@ -111,14 +111,15 @@ abstract class BaseObjectData implements ObjectData
    {
       this.entry = entry;
       this.type = type;
-      //      this.storage = storage;
+      this.storage = storage;
    }
 
    public BaseObjectData(Folder parent, TypeDefinition type, StorageImpl storage)
    {
       this.parent = parent;
       this.type = type;
-      //      this.storage = storage;
+      this.storage = storage;
+      this.entry = new Entry(type.getBaseId(), type.getId());
    }
 
    public void accept(CmisVisitor visitor)
@@ -401,7 +402,7 @@ abstract class BaseObjectData implements ObjectData
     */
    public boolean isNew()
    {
-      return entry == null;
+      return entry.getId() == null;
    }
 
    /**

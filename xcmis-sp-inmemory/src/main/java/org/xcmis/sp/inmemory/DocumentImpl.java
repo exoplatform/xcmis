@@ -20,13 +20,22 @@
 package org.xcmis.sp.inmemory;
 
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.VersioningException;
+import org.xcmis.spi.data.BaseContentStream;
 import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.data.Document;
+import org.xcmis.spi.data.Folder;
 import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.model.VersioningState;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Calendar;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
@@ -35,11 +44,24 @@ import org.xcmis.spi.model.TypeDefinition;
 class DocumentImpl extends BaseObjectData implements Document
 {
 
+   static String latestLabel = "latest";
+
+   static String pwcLabel = "pwc";
+
    private ContentStream contentStream;
+
+   protected final VersioningState versioningState;
 
    public DocumentImpl(Entry entry, TypeDefinition type, StorageImpl storage)
    {
       super(entry, type, storage);
+      this.versioningState = null;
+   }
+
+   public DocumentImpl(Folder parent, TypeDefinition type, VersioningState versioningState, StorageImpl storage)
+   {
+      super(parent, type, storage);
+      this.versioningState = versioningState;
    }
 
    public void cancelCheckout() throws StorageException
@@ -70,8 +92,12 @@ class DocumentImpl extends BaseObjectData implements Document
          throw new UnsupportedOperationException("getContentStream");
       }
 
-      ByteArrayContentStream content = storage.contents.get(entry.getId());
-      return content;
+      byte[] bytes = storage.contents.get(entry.getId());
+      if (bytes != null)
+      {
+         return new BaseContentStream(bytes, getName(), getString(CMIS.CONTENT_STREAM_FILE_NAME));
+      }
+      return null;
    }
 
    /**
@@ -216,6 +242,67 @@ class DocumentImpl extends BaseObjectData implements Document
    protected void save() throws StorageException
    {
       // TODO
-   }
+      if (isNew())
+      {
+         String id = StorageImpl.generateId();
+         entry.setId(id);
 
+         //         entry.setValue(CMIS.CREATED_BY, //
+         //            new StringValue(""));
+         entry.setValue(CMIS.CREATION_DATE, //
+            new DateValue(Calendar.getInstance()));
+         entry.setValue(CMIS.VERSION_SERIES_ID, //
+            new StringValue(StorageImpl.generateId()));
+         entry.setValue(CMIS.IS_LATEST_VERSION, //
+            new BooleanValue(true));
+         entry.setValue(CMIS.IS_MAJOR_VERSION, //
+            new BooleanValue(versioningState == VersioningState.MAJOR));
+         entry.setValue(CMIS.VERSION_LABEL, //
+            new StringValue(versioningState == VersioningState.CHECKEDOUT ? pwcLabel : latestLabel));
+         entry.setValue(CMIS.IS_VERSION_SERIES_CHECKED_OUT, //
+            new BooleanValue(versioningState == VersioningState.CHECKEDOUT));
+         if (versioningState == VersioningState.CHECKEDOUT)
+         {
+            entry.setValue(CMIS.VERSION_SERIES_CHECKED_OUT_ID, //
+               new StringValue(id));
+            //            entry.setValue(CMIS.VERSION_SERIES_CHECKED_OUT_BY, //
+            //               new StringValue(""));
+         }
+      }
+      //         entry.setValue(CMIS.LAST_MODIFIED_BY, //
+      //            new StringValue(""));
+      entry.setValue(CMIS.LAST_MODIFICATION_DATE, //
+         new DateValue(Calendar.getInstance()));
+      entry.setValue(CMIS.CHANGE_TOKEN, //
+         new StringValue(StorageImpl.generateId()));
+      if (contentStream != null)
+      {
+         try
+         {
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            InputStream in = contentStream.getStream();
+            if (in != null)
+            {
+               byte[] buf = new byte[1024];
+               int r = -1;
+               while ((r = in.read(buf)) != -1)
+               {
+                  bout.write(buf, 0, r);
+               }
+               storage.contents.put(entry.getId(), bout.toByteArray());
+
+               String mediaType = contentStream.getMediaType();
+               if (mediaType == null)
+               {
+                  mediaType = "application/octet-stream";
+               }
+               entry.setValue(CMIS.CONTENT_STREAM_MIME_TYPE, new StringValue(mediaType));
+            }
+         }
+         catch (IOException e)
+         {
+            throw new CmisRuntimeException("Unable add content for document. " + e.getMessage(), e);
+         }
+      }
+   }
 }

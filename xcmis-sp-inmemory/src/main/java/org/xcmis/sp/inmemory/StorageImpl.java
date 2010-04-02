@@ -83,7 +83,7 @@ public class StorageImpl implements Storage
    final Set<String> unfiling;
 
    /** Map of id -> content. */
-   final Map<String, ByteArrayContentStream> contents;
+   final Map<String, byte[]> contents;
 
    /** Map of id -> ACLs. */
 //   final Map<String, Map<String, Set<String>>> acls;
@@ -98,7 +98,7 @@ public class StorageImpl implements Storage
 //      this.policies = new ConcurrentHashMap<String, Set<String>>();
       this.versions = new ConcurrentHashMap<String, Set<String>>();
       this.unfiling = new HashSet<String>();
-      this.contents = new ConcurrentHashMap<String, ByteArrayContentStream>();
+      this.contents = new ConcurrentHashMap<String, byte[]>();
 //      this.acls = new ConcurrentHashMap<String, Map<String, Set<String>>>();
       this.relationships = new ConcurrentHashMap<String, Set<RelationshipInfo>>();
    }
