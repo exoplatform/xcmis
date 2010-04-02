@@ -18,11 +18,12 @@
  */
 package org.xcmis.sp.jcr.exo;
 
+
+import org.xcmis.spi.Rendition;
 import org.xcmis.sp.jcr.exo.rendition.RenditionContentStream;
 import org.xcmis.sp.jcr.exo.rendition.RenditionProvider;
 import org.xcmis.spi.BaseType;
 import org.xcmis.spi.ItemsIterator;
-import org.xcmis.spi.Rendition;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.data.ObjectData;
 import org.xcmis.spi.impl.RenditionImpl;
@@ -32,6 +33,7 @@ import org.xcmis.spi.utils.MimeType;
 
 import java.io.IOException;
 import java.util.Map;
+
 
 public class RenditionManagerImpl implements RenditionManager
 {

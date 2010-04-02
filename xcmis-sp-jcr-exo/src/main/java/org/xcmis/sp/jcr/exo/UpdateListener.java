@@ -96,7 +96,7 @@ public class UpdateListener implements EventListener
                Property fileContent = contentNode.getProperty(JcrCMIS.JCR_DATA);
                long length = fileContent.getLength();
                if (length == 0)
-                  content =  null; // No content, but node has empty stream.
+                  return; // No content, but node has empty stream.
                content = new BaseContentStream(fileContent.getStream(), //
                   length, //
                   node.getDepth() == 0 ? CMIS.ROOT_FOLDER_NAME : node.getName(), //
