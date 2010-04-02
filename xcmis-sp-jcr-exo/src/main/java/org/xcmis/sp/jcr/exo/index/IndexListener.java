@@ -19,6 +19,7 @@
 
 package org.xcmis.sp.jcr.exo.index;
 
+import org.apache.commons.lang.Validate;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.search.SearchService;
@@ -68,6 +69,7 @@ public class IndexListener
 
    public IndexListener(Storage storage, SearchService searchService)
    {
+      Validate.notNull(searchService, "The searchService argument may not be null");
       this.storage = storage;
       this.searchService = searchService;
       this.contentEntryAdapter = new ContentEntryAdapter();
