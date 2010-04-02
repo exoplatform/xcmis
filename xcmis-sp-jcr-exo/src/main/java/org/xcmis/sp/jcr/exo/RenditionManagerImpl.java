@@ -65,7 +65,7 @@ public class RenditionManagerImpl implements RenditionManager
          else
          {
             // TODO ???
-            if (obj.getBaseType() == BaseType.DOCUMENT)
+            if (obj.getBaseType() == BaseType.DOCUMENT && obj.getContentStream(null) != null)
             {
                MimeType contentType = MimeType.fromString(((DocumentImpl)obj).getContentStreamMimeType());
                RenditionImpl rendition = new RenditionImpl();
