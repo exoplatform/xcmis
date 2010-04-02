@@ -105,11 +105,6 @@
       </init-params>
    </component>
 
-  <component>
-      <key>org.exoplatform.services.security.RolesExtractor</key>
-      <type>org.exoplatform.services.security.impl.DefaultRolesExtractorImpl</type>
-   </component>
-
    <component>
       <key>org.exoplatform.services.organization.OrganizationService</key>
       <type>org.exoplatform.services.organization.impl.mock.DummyOrganizationService</type>
