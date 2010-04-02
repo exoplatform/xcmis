@@ -18,33 +18,20 @@
  */
 package org.xcmis.sp.jcr.exo;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.jcr.ItemNotFoundException;
-import javax.jcr.Node;
-import javax.jcr.NodeIterator;
-import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-
-import org.exoplatform.services.jcr.core.ExtendedSession;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
-import org.xcmis.spi.Rendition;
 import org.xcmis.sp.jcr.exo.rendition.RenditionContentStream;
 import org.xcmis.sp.jcr.exo.rendition.RenditionProvider;
 import org.xcmis.spi.BaseType;
-import org.xcmis.spi.CmisRuntimeException;
-import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.StorageException;
-import org.xcmis.spi.TypeDefinition;
-import org.xcmis.spi.data.ContentStream;
-import org.xcmis.spi.data.ObjectData;
-import org.xcmis.spi.object.RenditionManager;
-import org.xcmis.spi.impl.RenditionImpl;
 import org.xcmis.spi.ItemsIterator;
+import org.xcmis.spi.Rendition;
+import org.xcmis.spi.StorageException;
+import org.xcmis.spi.data.ObjectData;
+import org.xcmis.spi.impl.RenditionImpl;
+import org.xcmis.spi.object.RenditionManager;
+import org.xcmis.spi.utils.CmisUtils;
 import org.xcmis.spi.utils.MimeType;
+
+import java.io.IOException;
+import java.util.Map;
 
 public class RenditionManagerImpl implements RenditionManager
 {
@@ -54,7 +41,7 @@ public class RenditionManagerImpl implements RenditionManager
    private final Map<MimeType, RenditionProvider> renditionProviders;
 
    /** Logger. */
-   private static final Log LOG = ExoLogger.getLogger(RenditionManagerImpl.class);
+   //   private static final Log LOG = ExoLogger.getLogger(RenditionManagerImpl.class);
 
    public RenditionManagerImpl(Map<MimeType, RenditionProvider> renditionProviders)
    {
@@ -75,11 +62,16 @@ public class RenditionManagerImpl implements RenditionManager
          }
          else
          {
-            MimeType contentType = MimeType.fromString(((DocumentImpl)obj).getContentStreamMimeType());
-            RenditionImpl rendition = new RenditionImpl();
-            rendition.setStreamId(encode(contentType.toString()));
-            rendition.setKind("cmis:thumbnail");
-            return new RenditionIterator(rendition);
+            // TODO ???
+            if (obj.getBaseType() == BaseType.DOCUMENT)
+            {
+               MimeType contentType = MimeType.fromString(((DocumentImpl)obj).getContentStreamMimeType());
+               RenditionImpl rendition = new RenditionImpl();
+               rendition.setStreamId(encode(contentType.toString()));
+               rendition.setKind("cmis:thumbnail");
+               return new RenditionIterator(rendition);
+            }
+            return CmisUtils.emptyItemsIterator();
          }
       }
       catch (javax.jcr.RepositoryException re)
@@ -104,8 +96,7 @@ public class RenditionManagerImpl implements RenditionManager
             {
                try
                {
-                  renditionContentStream =
-                     renditionProvider.getRenditionStream(obj.getContentStream(null));
+                  renditionContentStream = renditionProvider.getRenditionStream(obj.getContentStream(null));
                }
                catch (IOException ioe)
                {
@@ -119,24 +110,28 @@ public class RenditionManagerImpl implements RenditionManager
       }
       return null;
    }
-   
-   private static String encode(String in){
+
+   private static String encode(String in)
+   {
       StringBuffer out = new StringBuffer();
-      for  (int i =0; i<in.length(); i++){
-         out.append( Integer.toHexString((int)in.charAt(i)));      
+      for (int i = 0; i < in.length(); i++)
+      {
+         out.append(Integer.toHexString(in.charAt(i)));
       }
       return out.toString();
    }
 
-   private static String decode(String in){
-   StringBuffer out = new StringBuffer();
-   int offset = 0;
-   while (offset < in.length()){
-      int part =Integer.parseInt(in.substring(offset, offset+2), 16);
-      out.append((char)part);
-      offset = offset+2;
-   }
-   return out.toString();
+   private static String decode(String in)
+   {
+      StringBuffer out = new StringBuffer();
+      int offset = 0;
+      while (offset < in.length())
+      {
+         int part = Integer.parseInt(in.substring(offset, offset + 2), 16);
+         out.append((char)part);
+         offset = offset + 2;
+      }
+      return out.toString();
    }
 
 }
