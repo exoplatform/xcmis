@@ -1368,6 +1368,7 @@ abstract class BaseObjectData implements ObjectData
 
       // Not merge ACL overwrite it.
       extNode.clearACL();
+
       if (aces != null && aces.size() > 0)
       {
          extNode.setPermissions(createPermissionMap(aces));
