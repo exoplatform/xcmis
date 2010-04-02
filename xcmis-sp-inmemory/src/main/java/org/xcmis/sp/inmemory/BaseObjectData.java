@@ -21,18 +21,13 @@ package org.xcmis.sp.inmemory;
 
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.spi.AccessControlEntry;
-import org.xcmis.spi.BaseType;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
-import org.xcmis.spi.PropertyDefinition;
 import org.xcmis.spi.PropertyFilter;
-import org.xcmis.spi.RelationshipDirection;
-import org.xcmis.spi.TypeDefinition;
-import org.xcmis.spi.Updatability;
+import org.xcmis.spi.StorageException;
 import org.xcmis.spi.data.Document;
 import org.xcmis.spi.data.Folder;
 import org.xcmis.spi.data.ObjectData;
@@ -40,13 +35,29 @@ import org.xcmis.spi.data.Policy;
 import org.xcmis.spi.data.Relationship;
 import org.xcmis.spi.impl.BaseItemsIterator;
 import org.xcmis.spi.impl.CmisVisitor;
+import org.xcmis.spi.model.AccessControlEntry;
+import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.PropertyDefinition;
+import org.xcmis.spi.model.PropertyType;
+import org.xcmis.spi.model.RelationshipDirection;
+import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.model.Updatability;
 import org.xcmis.spi.object.Property;
+import org.xcmis.spi.object.impl.BooleanProperty;
+import org.xcmis.spi.object.impl.DateTimeProperty;
+import org.xcmis.spi.object.impl.DecimalProperty;
+import org.xcmis.spi.object.impl.HtmlProperty;
+import org.xcmis.spi.object.impl.IdProperty;
+import org.xcmis.spi.object.impl.IntegerProperty;
 import org.xcmis.spi.object.impl.StringProperty;
+import org.xcmis.spi.object.impl.UriProperty;
 import org.xcmis.spi.utils.CmisUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -68,14 +79,11 @@ abstract class BaseObjectData implements ObjectData
    protected final TypeDefinition type;
 
    /**
-    * Temporary storage for object properties. For newly create object all
-    * properties will be stored here before calling {@link #save()}.
+    * Temporary storage for object properties.
     */
-   protected final Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+   //   protected final Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
 
    protected StorageImpl storage;
-
-   protected String objectId;
 
    /**
     * Parent folder id for newly created fileable objects.
@@ -85,23 +93,32 @@ abstract class BaseObjectData implements ObjectData
    /**
     * Temporary storage for policies which should be applied to object.
     */
-   protected Set<Policy> applyPolicies;
+   //   protected Set<String> addedPolicies;
 
    /**
     * Temporary storage for policies which should be removed from object.
     */
-   protected Set<Policy> removePolicies;
+   //   protected Set<String> removedPolicies;
 
    /**
-    * Temporary storage for ACL which should be applied to object.
+    * Temporary storage for permissions which should be applied to object.
     */
-   protected List<AccessControlEntry> acl;
+   //   protected Map<String, Set<String>> permissions;
 
-   public BaseObjectData(String objectId, TypeDefinition type, StorageImpl storage)
+   protected Entry entry;
+
+   public BaseObjectData(Entry entry, TypeDefinition type, StorageImpl storage)
    {
-      this.objectId = objectId;
+      this.entry = entry;
       this.type = type;
-      this.storage = storage;
+      //      this.storage = storage;
+   }
+
+   public BaseObjectData(Folder parent, TypeDefinition type, StorageImpl storage)
+   {
+      this.parent = parent;
+      this.type = type;
+      //      this.storage = storage;
    }
 
    public void accept(CmisVisitor visitor)
@@ -125,11 +142,7 @@ abstract class BaseObjectData implements ObjectData
          throw new CmisRuntimeException("Unable apply newly created policy.");
       }
 
-      if (applyPolicies == null)
-      {
-         applyPolicies = new HashSet<Policy>();
-      }
-      applyPolicies.add(policy);
+      entry.addPolicy(policy.getObjectId());
    }
 
    /**
@@ -141,28 +154,7 @@ abstract class BaseObjectData implements ObjectData
       {
          return Collections.emptyList();
       }
-
-      if (isNew())
-      {
-         if (acl == null)
-         {
-            return Collections.emptyList();
-         }
-         return Collections.unmodifiableList(acl);
-      }
-      else
-      {
-         if (acl != null)
-         {
-            return Collections.unmodifiableList(acl);
-         }
-         Map<String, Set<String>> aces = storage.acls.get(objectId);
-         if (aces == null)
-         {
-            return Collections.emptyList();
-         }
-         return CmisUtils.createAclFromPermissionMap(aces);
-      }
+      return CmisUtils.createAclFromPermissionMap(entry.getPermissions());
    }
 
    /**
@@ -226,7 +218,11 @@ abstract class BaseObjectData implements ObjectData
     */
    public String getObjectId()
    {
-      return objectId;
+      if (isNew())
+      {
+         return null;
+      }
+      return entry.getId();
    }
 
    /**
@@ -239,7 +235,7 @@ abstract class BaseObjectData implements ObjectData
          return parent;
       }
 
-      if (storage.getRepositoryInfo().getRootFolderId().equals(objectId))
+      if (storage.getRepositoryInfo().getRootFolderId().equals(entry.getId()))
       {
          throw new ConstraintException("Unable get parent of root folder.");
       }
@@ -249,14 +245,11 @@ abstract class BaseObjectData implements ObjectData
       {
          throw new ConstraintException("Object has more then one parent.");
       }
-      else if (parents.size() == 0)
-      {
-         return null;
-      }
-      else
+      if (parents.size() == 1)
       {
          return parents.iterator().next();
       }
+      return null;
    }
 
    /**
@@ -277,7 +270,7 @@ abstract class BaseObjectData implements ObjectData
       }
 
       Set<Folder> parents = new HashSet<Folder>();
-      Set<String> parentIds = storage.parents.get(objectId);
+      Set<String> parentIds = storage.parents.get(entry.getId());
 
       if (parentIds != null)
       {
@@ -300,26 +293,11 @@ abstract class BaseObjectData implements ObjectData
          return Collections.emptyList();
       }
 
-      if (isNew())
+      List<Policy> policies = new ArrayList<Policy>();
+      for (String id : entry.getPolicies())
       {
-         if (applyPolicies == null)
-         {
-            return Collections.emptySet();
-         }
-         return Collections.unmodifiableSet(applyPolicies);
+         policies.add((Policy)storage.getObject(id));
       }
-
-      Set<Policy> policies = new HashSet<Policy>();
-      Set<String> policyIds = storage.policies.get(objectId);
-
-      if (policyIds != null)
-      {
-         for (String id : policyIds)
-         {
-            policies.add((Policy)storage.getObject(id));
-         }
-      }
-
       return policies;
    }
 
@@ -329,12 +307,10 @@ abstract class BaseObjectData implements ObjectData
    public Map<String, Property<?>> getProperties()
    {
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-
       for (PropertyDefinition<?> def : type.getPropertyDefinitions())
       {
          properties.put(def.getId(), getProperty(def));
       }
-
       return properties;
    }
 
@@ -348,7 +324,6 @@ abstract class BaseObjectData implements ObjectData
       {
          return null;
       }
-
       return getProperty(definition);
    }
 
@@ -360,10 +335,11 @@ abstract class BaseObjectData implements ObjectData
    {
       if (isNew())
       {
+         // Newly created object may not have relationship.
          return CmisUtils.emptyItemsIterator();
       }
 
-      Set<RelationshipInfo> relationshipsInfo = storage.relationships.get(objectId);
+      Set<RelationshipInfo> relationshipsInfo = storage.relationships.get(entry.getId());
       if (relationshipsInfo == null)
       {
          return CmisUtils.emptyItemsIterator();
@@ -425,7 +401,7 @@ abstract class BaseObjectData implements ObjectData
     */
    public boolean isNew()
    {
-      return objectId == null;
+      return entry == null;
    }
 
    /**
@@ -437,12 +413,7 @@ abstract class BaseObjectData implements ObjectData
       {
          throw new ConstraintException("Type " + type.getId() + " is not controlable by Policy.");
       }
-
-      if (removePolicies == null)
-      {
-         removePolicies = new HashSet<Policy>();
-      }
-      removePolicies.add(policy);
+      entry.removePolicy(policy.getObjectId());
    }
 
    /**
@@ -455,19 +426,7 @@ abstract class BaseObjectData implements ObjectData
          throw new ConstraintException("Type " + type.getId() + " is not controlable by ACL.");
       }
 
-      if (this.acl != null)
-      {
-         this.acl.clear(); // Not merged, just replaced.
-      }
-
-      if (aces != null && aces.size() > 0)
-      {
-         if (this.acl == null)
-         {
-            this.acl = new ArrayList<AccessControlEntry>();
-         }
-         this.acl.addAll(aces);
-      }
+      CmisUtils.addAclToPermissionMap(entry.getPermissions(), aces);
    }
 
    /**
@@ -475,11 +434,12 @@ abstract class BaseObjectData implements ObjectData
     */
    public void setName(String name) throws NameConstraintViolationException
    {
-      PropertyDefinition<?> definition = type.getPropertyDefinition(CMIS.NAME);
-      StringProperty nameProperty =
-         new StringProperty(CMIS.NAME, definition.getQueryName(), definition.getLocalName(), definition
-            .getDisplayName(), name);
-      properties.put(CMIS.NAME, nameProperty);
+      if (name == null || name.length() == 0)
+      {
+         throw new NameConstraintViolationException("Invalid name '" + name + "'.");
+      }
+
+      entry.setValue(CMIS.NAME, new StringValue(name));
    }
 
    /**
@@ -497,6 +457,7 @@ abstract class BaseObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
+   @SuppressWarnings("unchecked")
    public void setProperty(Property<?> property) throws ConstraintException
    {
       PropertyDefinition<?> definition = type.getPropertyDefinition(property.getId());
@@ -536,7 +497,37 @@ abstract class BaseObjectData implements ObjectData
          || (updatability == Updatability.WHENCHECKEDOUT && getBaseType() == BaseType.DOCUMENT && ((Document)this)
             .isPWC()))
       {
-         properties.put(property.getId(), property);
+         if (property.getType() == PropertyType.BOOLEAN)
+         {
+            List<Boolean> booleans = (List<Boolean>)property.getValues();
+            entry.setValue(property.getId(), new BooleanValue(booleans));
+         }
+         else if (property.getType() == PropertyType.DATETIME)
+         {
+            List<Calendar> dates = (List<Calendar>)property.getValues();
+            entry.setValue(property.getId(), new DateValue(dates));
+         }
+         else if (property.getType() == PropertyType.DECIMAL)
+         {
+            List<BigDecimal> decimals = (List<BigDecimal>)property.getValues();
+            entry.setValue(property.getId(), new DecimalValue(decimals));
+         }
+         else if (property.getType() == PropertyType.INTEGER)
+         {
+            List<BigInteger> integers = (List<BigInteger>)property.getValues();
+            entry.setValue(property.getId(), new IntegerValue(integers));
+         }
+         else if (property.getType() == PropertyType.URI)
+         {
+            List<URI> uris = (List<URI>)property.getValues();
+            entry.setValue(property.getId(), new UriValue(uris));
+         }
+         else if (property.getType() == PropertyType.STRING || property.getType() == PropertyType.HTML
+            || property.getType() == PropertyType.ID)
+         {
+            List<String> text = (List<String>)property.getValues();
+            entry.setValue(property.getId(), new StringValue(text));
+         }
       }
       else
       {
@@ -550,97 +541,118 @@ abstract class BaseObjectData implements ObjectData
 
    private Property<?> getProperty(PropertyDefinition<?> definition)
    {
-      Property<?> property = properties.get(definition.getId());
-      if (property == null)
-      {
-         property = storage.properties.get(objectId).get(definition.getId());
-      }
-
-      return property;
+      // Check in updates for properties.
+      Value value = entry.getValue(definition.getId());
+      return createProperty(definition, value);
    }
 
-   // Helpers for accessing properties of saved object. For internal usage only.
+   private Property<?> createProperty(PropertyDefinition<?> def, Value value)
+   {
+      if (def.getPropertyType() == PropertyType.BOOLEAN)
+      {
+         return new BooleanProperty(def.getId(), def.getQueryName(), def.getLocalName(), def.getDisplayName(),
+            value == null ? null : Arrays.asList(value.getBooleans()));
+      }
+      else if (def.getPropertyType() == PropertyType.DATETIME)
+      {
+         return new DateTimeProperty(def.getId(), def.getQueryName(), def.getLocalName(), def.getDisplayName(),
+            value == null ? null : Arrays.asList(value.getDates()));
+      }
+      else if (def.getPropertyType() == PropertyType.DECIMAL)
+      {
+         return new DecimalProperty(def.getId(), def.getQueryName(), def.getLocalName(), def.getDisplayName(),
+            value == null ? null : Arrays.asList(value.getDecimals()));
+      }
+      else if (def.getPropertyType() == PropertyType.HTML)
+      {
+         return new HtmlProperty(def.getId(), def.getQueryName(), def.getLocalName(), def.getDisplayName(),
+            value == null ? null : Arrays.asList(value.getStrings()));
+      }
+      else if (def.getPropertyType() == PropertyType.ID)
+      {
+         return new IdProperty(def.getId(), def.getQueryName(), def.getLocalName(), def.getDisplayName(), value == null
+            ? null : Arrays.asList(value.getStrings()));
+      }
+      else if (def.getPropertyType() == PropertyType.INTEGER)
+      {
+         return new IntegerProperty(def.getId(), def.getQueryName(), def.getLocalName(), def.getDisplayName(),
+            value == null ? null : Arrays.asList(value.getIntegers()));
+      }
+      else if (def.getPropertyType() == PropertyType.STRING)
+      {
+         return new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def.getDisplayName(),
+            value == null ? null : Arrays.asList(value.getStrings()));
+      }
+      else if (def.getPropertyType() == PropertyType.URI)
+      {
+         return new UriProperty(def.getId(), def.getQueryName(), def.getLocalName(), def.getDisplayName(),
+            value == null ? null : Arrays.asList(value.getURI()));
+      }
+      else
+      {
+         throw new CmisRuntimeException("Unknown property type.");
+      }
+   }
 
    protected Boolean getBoolean(String id)
    {
-      if (isNew())
+      Value value = entry.getValue(id);
+      if (value != null)
       {
-         return null;
-      }
-      List<?> values = storage.properties.get(objectId).get(id).getValues();
-      if (values.size() > 0)
-      {
-         return (Boolean)values.get(0);
+         Boolean[] booleans = value.getBooleans();
+         return booleans.length > 0 ? booleans[0] : null;
       }
       return null;
    }
 
    protected Boolean[] getBooleans(String id)
    {
-      if (isNew())
+      Value value = entry.getValue(id);
+      if (value != null)
       {
-         return null;
-      }
-      List<?> values = storage.properties.get(objectId).get(id).getValues();
-      if (values.size() > 0)
-      {
-         return values.toArray(new Boolean[values.size()]);
+         return value.getBooleans();
       }
       return null;
    }
 
    protected Calendar getDate(String id)
    {
-      if (isNew())
+      Value value = entry.getValue(id);
+      if (value != null)
       {
-         return null;
-      }
-      List<?> values = storage.properties.get(objectId).get(id).getValues();
-      if (values.size() > 0)
-      {
-         return (Calendar)values.get(0);
+         Calendar[] dates = value.getDates();
+         return dates.length > 0 ? dates[0] : null;
       }
       return null;
    }
 
    protected Calendar[] getDates(String id)
    {
-      if (isNew())
+      Value value = entry.getValue(id);
+      if (value != null)
       {
-         return null;
-      }
-      List<?> values = storage.properties.get(objectId).get(id).getValues();
-      if (values.size() > 0)
-      {
-         return values.toArray(new Calendar[values.size()]);
+         return value.getDates();
       }
       return null;
    }
 
    protected BigDecimal getDecimal(String id)
    {
-      if (isNew())
+      Value value = entry.getValue(id);
+      if (value != null)
       {
-         return null;
-      }
-      List<?> values = storage.properties.get(objectId).get(id).getValues();
-      if (values.size() > 0)
-      {
-         return (BigDecimal)values.get(0);
+         BigDecimal[] decimals = value.getDecimals();
+         return decimals.length > 0 ? decimals[0] : null;
       }
       return null;
    }
 
    protected BigDecimal[] getDecimals(String id)
    {
-      if (isNew())
+      Value value = entry.getValue(id);
+      if (value != null)
       {
-         return null;
-      }
-      List<?> values = storage.properties.get(objectId).get(id).getValues();
-      if (values.size() > 0)
-      {
-         return values.toArray(new BigDecimal[values.size()]);
+         return value.getDecimals();
       }
       return null;
    }
@@ -657,58 +669,46 @@ abstract class BaseObjectData implements ObjectData
 
    protected BigInteger getInteger(String id)
    {
-      if (isNew())
+      Value value = entry.getValue(id);
+      if (value != null)
       {
-         return null;
-      }
-      List<?> values = storage.properties.get(objectId).get(id).getValues();
-      if (values.size() > 0)
-      {
-         return (BigInteger)values.get(0);
+         BigInteger[] integers = value.getIntegers();
+         return integers.length > 0 ? integers[0] : null;
       }
       return null;
    }
 
    protected BigInteger[] getIntegers(String id)
    {
-      if (isNew())
+      Value value = entry.getValue(id);
+      if (value != null)
       {
-         return null;
-      }
-      List<?> values = storage.properties.get(objectId).get(id).getValues();
-      if (values.size() > 0)
-      {
-         return values.toArray(new BigInteger[values.size()]);
+         return value.getIntegers();
       }
       return null;
    }
 
    protected String getString(String id)
    {
-      if (isNew())
+      Value value = entry.getValue(id);
+      if (value != null)
       {
-         return null;
-      }
-      List<?> values = storage.properties.get(objectId).get(id).getValues();
-      if (values.size() > 0)
-      {
-         return (String)values.get(0);
+         String[] strings = value.getStrings();
+         return strings.length > 0 ? strings[0] : null;
       }
       return null;
    }
 
    protected String[] getStrings(String id)
    {
-      if (isNew())
+      Value value = entry.getValue(id);
+      if (value != null)
       {
-         return null;
-      }
-      List<?> values = storage.properties.get(objectId).get(id).getValues();
-      if (values.size() > 0)
-      {
-         return values.toArray(new String[values.size()]);
+         return value.getStrings();
       }
       return null;
    }
+
+   protected abstract void save() throws StorageException;
 
 }

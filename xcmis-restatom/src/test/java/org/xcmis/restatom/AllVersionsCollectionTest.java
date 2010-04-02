@@ -24,7 +24,7 @@ import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
 import org.w3c.dom.NodeList;
 import org.xcmis.spi.data.BaseContentStream;
 import org.xcmis.spi.data.ContentStream;
-import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.model.CmisObject;
 
 import java.io.ByteArrayInputStream;
 

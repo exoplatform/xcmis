@@ -23,9 +23,9 @@ import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.ACLCapability;
-import org.xcmis.spi.Permission;
-import org.xcmis.spi.PermissionMapping;
+import org.xcmis.spi.model.ACLCapability;
+import org.xcmis.spi.model.Permission;
+import org.xcmis.spi.model.PermissionMapping;
 
 import java.util.List;
 
@@ -37,10 +37,10 @@ import javax.xml.namespace.QName;
  */
 public class ACLCapabilityTypeElement extends ExtensibleElementWrapper
 {
-   
+
    /**
     * Instantiates a new aCL capability type element.
-    * 
+    *
     * @param internal the internal
     */
    public ACLCapabilityTypeElement(Element internal)
@@ -50,7 +50,7 @@ public class ACLCapabilityTypeElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new aCL capability type element.
-    * 
+    *
     * @param factory the factory
     * @param qname the qname
     */
@@ -61,7 +61,7 @@ public class ACLCapabilityTypeElement extends ExtensibleElementWrapper
 
    /**
     * Builds the element.
-    * 
+    *
     * @param aclCapability the acl capability
     */
    public void build(ACLCapability aclCapability)
@@ -69,9 +69,13 @@ public class ACLCapabilityTypeElement extends ExtensibleElementWrapper
       if (aclCapability != null)
       {
          if (aclCapability.getPropagation() != null)
+         {
             addSimpleExtension(AtomCMIS.PROPAGATION, aclCapability.getPropagation().value());
+         }
          if (aclCapability.getSupportedPermissions() != null)
+         {
             addSimpleExtension(AtomCMIS.SUPPORTED_PERMISSIONS, aclCapability.getSupportedPermissions().value());
+         }
 
          List<Permission> listPermission = aclCapability.getPermissions();
          if (listPermission != null && listPermission.size() > 0)

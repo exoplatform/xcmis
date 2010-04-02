@@ -22,10 +22,10 @@ package org.xcmis.restatom;
 import org.exoplatform.services.rest.impl.ContainerResponse;
 import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
 import org.w3c.dom.NodeList;
-import org.xcmis.spi.AccessControlEntry;
-import org.xcmis.spi.AccessControlPropagation;
-import org.xcmis.spi.Permission.BasicPermissions;
-import org.xcmis.spi.impl.AccessControlEntryImpl;
+import org.xcmis.spi.model.AccessControlEntry;
+import org.xcmis.spi.model.AccessControlPropagation;
+import org.xcmis.spi.model.Permission.BasicPermissions;
+import org.xcmis.spi.model.impl.AccessControlEntryImpl;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * Created by The eXo Platform SAS .
- * 
+ *
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com.ua">Alexey Zavizionov</a>
  * @version $Id: RepositoryServiceTest.java 2734 2009-08-19 15:42:18Z andrew00x
  *          $ Jul 20, 2009

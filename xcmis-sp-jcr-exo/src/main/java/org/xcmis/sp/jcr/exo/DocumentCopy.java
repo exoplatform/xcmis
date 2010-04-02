@@ -25,11 +25,11 @@ import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.UpdateConflictException;
-import org.xcmis.spi.VersioningState;
 import org.xcmis.spi.data.Document;
 import org.xcmis.spi.data.Folder;
 import org.xcmis.spi.data.Policy;
-import org.xcmis.spi.object.Property;
+import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.VersioningState;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -56,6 +56,7 @@ class DocumentCopy extends DocumentImpl
    /**
     * {@inheritDoc}
     */
+   @Override
    protected void create() throws StorageException, NameConstraintViolationException, UpdateConflictException
    {
       try
@@ -64,7 +65,9 @@ class DocumentCopy extends DocumentImpl
          {
             Property<?> nameProperty = properties.get(CMIS.NAME);
             if (nameProperty != null)
+            {
                name = (String)nameProperty.getValues().get(0);
+            }
          }
 
          if (name == null || name.length() == 0)
@@ -82,10 +85,14 @@ class DocumentCopy extends DocumentImpl
 
          Node doc = parentNode.addNode(name, type.getLocalName());
 
-         if (!doc.isNodeType(JcrCMIS.CMIS_MIX_DOCUMENT)) // May be already inherited.
+         if (!doc.isNodeType(JcrCMIS.CMIS_MIX_DOCUMENT))
+         {
             doc.addMixin(JcrCMIS.CMIS_MIX_DOCUMENT);
-         if (doc.canAddMixin(JcrCMIS.MIX_VERSIONABLE)) // Document type is versionable.
+         }
+         if (doc.canAddMixin(JcrCMIS.MIX_VERSIONABLE))
+         {
             doc.addMixin(JcrCMIS.MIX_VERSIONABLE);
+         }
 
          doc.setProperty(CMIS.OBJECT_TYPE_ID, //
             type.getId());
@@ -99,7 +106,7 @@ class DocumentCopy extends DocumentImpl
             session.getUserID());
          doc.setProperty(CMIS.LAST_MODIFICATION_DATE, //
             Calendar.getInstance());
-         doc.setProperty(CMIS.VERSION_SERIES_ID, //  
+         doc.setProperty(CMIS.VERSION_SERIES_ID, //
             doc.getProperty(JcrCMIS.JCR_VERSION_HISTORY).getString());
          doc.setProperty(CMIS.IS_LATEST_VERSION, //
             true);
@@ -137,11 +144,15 @@ class DocumentCopy extends DocumentImpl
          if (policies != null && policies.size() > 0)
          {
             for (Policy policy : policies)
+            {
                applyPolicy(doc, policy);
+            }
          }
 
          if (acl != null && acl.size() > 0)
+         {
             setACL(doc, acl);
+         }
 
          session.save();
 

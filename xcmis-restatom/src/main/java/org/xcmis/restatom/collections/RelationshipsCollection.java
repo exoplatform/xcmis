@@ -29,7 +29,6 @@ import org.apache.abdera.protocol.server.TargetType;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.abdera.ObjectTypeElement;
-import org.xcmis.spi.AccessControlEntry;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
@@ -37,12 +36,13 @@ import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.RelationshipDirection;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.StorageProvider;
-import org.xcmis.spi.object.CmisObject;
-import org.xcmis.spi.object.Property;
-import org.xcmis.spi.object.impl.IdProperty;
+import org.xcmis.spi.model.AccessControlEntry;
+import org.xcmis.spi.model.CmisObject;
+import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.RelationshipDirection;
+import org.xcmis.spi.model.impl.IdProperty;
 
 import java.util.HashMap;
 import java.util.List;
@@ -69,6 +69,7 @@ public class RelationshipsCollection extends CmisObjectCollection
    /**
     * {@inheritDoc}
     */
+   @Override
    public Iterable<CmisObject> getEntries(RequestContext request) throws ResponseContextException
    {
       // To process hierarchically structure override addFeedDetails(Feed, RequestContext) method.
@@ -196,6 +197,7 @@ public class RelationshipsCollection extends CmisObjectCollection
    /**
     * {@inheritDoc}
     */
+   @Override
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
 

@@ -29,27 +29,27 @@ import org.apache.abdera.protocol.server.TargetType;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.abdera.ObjectTypeElement;
-import org.xcmis.spi.AccessControlEntry;
-import org.xcmis.spi.BaseType;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FilterNotValidException;
-import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.StreamNotSupportedException;
-import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.UpdateConflictException;
-import org.xcmis.spi.VersioningState;
-import org.xcmis.spi.object.CmisObject;
-import org.xcmis.spi.object.Property;
-import org.xcmis.spi.object.impl.CmisObjectImpl;
-import org.xcmis.spi.object.impl.IdProperty;
+import org.xcmis.spi.model.AccessControlEntry;
+import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.CmisObject;
+import org.xcmis.spi.model.IncludeRelationships;
+import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.model.VersioningState;
+import org.xcmis.spi.model.impl.CmisObjectImpl;
+import org.xcmis.spi.model.impl.IdProperty;
 
 import java.util.HashMap;
 import java.util.List;
@@ -78,6 +78,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
    /**
     * {@inheritDoc}
     */
+   @Override
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
       boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
@@ -162,6 +163,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
    /**
     * {@inheritDoc}
     */
+   @Override
    public Iterable<CmisObject> getEntries(RequestContext request) throws ResponseContextException
    {
       throw new UnsupportedOperationException("entries");

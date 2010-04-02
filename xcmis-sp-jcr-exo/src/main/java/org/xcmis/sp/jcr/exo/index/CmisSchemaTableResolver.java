@@ -22,8 +22,8 @@ import org.xcmis.search.content.Schema;
 import org.xcmis.search.lucene.content.SchemaTableResolver;
 import org.xcmis.search.value.NameConverter;
 import org.xcmis.spi.ItemsIterator;
-import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.TypeManager;
+import org.xcmis.spi.model.TypeDefinition;
 
 import java.util.HashSet;
 import java.util.Set;

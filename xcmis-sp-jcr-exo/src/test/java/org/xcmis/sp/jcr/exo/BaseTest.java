@@ -35,7 +35,7 @@ import org.exoplatform.services.security.ConversationState;
 import org.exoplatform.services.security.Identity;
 import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.data.Document;
-import org.xcmis.spi.object.impl.StringProperty;
+import org.xcmis.spi.model.impl.StringProperty;
 
 import java.io.File;
 

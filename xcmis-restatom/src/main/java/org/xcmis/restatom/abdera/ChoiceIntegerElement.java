@@ -23,8 +23,8 @@ import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.Choice;
-import org.xcmis.spi.impl.ChoiceImpl;
+import org.xcmis.spi.model.Choice;
+import org.xcmis.spi.model.impl.ChoiceImpl;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -42,7 +42,7 @@ public class ChoiceIntegerElement extends ChoiceElement<Choice<BigInteger>>
 
    /**
     * Instantiates a new choice integer element.
-    * 
+    *
     * @param internal the internal
     */
    public ChoiceIntegerElement(Element internal)
@@ -52,7 +52,7 @@ public class ChoiceIntegerElement extends ChoiceElement<Choice<BigInteger>>
 
    /**
     * Instantiates a new choice integer element.
-    * 
+    *
     * @param factory the factory
     * @param qname the qname
     */
@@ -64,6 +64,7 @@ public class ChoiceIntegerElement extends ChoiceElement<Choice<BigInteger>>
    /**
     * {@inheritDoc}
     */
+   @Override
    public void build(Choice<BigInteger> choice)
    {
       if (choice != null)
@@ -75,7 +76,9 @@ public class ChoiceIntegerElement extends ChoiceElement<Choice<BigInteger>>
             for (BigInteger v : choice.getValues())
             {
                if (v != null)
+               {
                   addSimpleExtension(AtomCMIS.VALUE, v.toString());
+               }
             }
          }
          // CHOICE
@@ -90,6 +93,7 @@ public class ChoiceIntegerElement extends ChoiceElement<Choice<BigInteger>>
       }
    }
 
+   @Override
    public Choice<BigInteger> getChoice()
    {
       ChoiceImpl<BigInteger> result = new ChoiceImpl<BigInteger>();
@@ -109,10 +113,12 @@ public class ChoiceIntegerElement extends ChoiceElement<Choice<BigInteger>>
       // CHOICE
       List<ExtensibleElementWrapper> choices = getExtensions(AtomCMIS.CHOICE);
       if (choices != null && choices.size() > 0)
+      {
          for (ExtensibleElementWrapper choiceIntegerElement : choices)
          {
             result.getChoices().add(new ChoiceIntegerElement(choiceIntegerElement).getChoice());
          }
+      }
       return result;
    }
 

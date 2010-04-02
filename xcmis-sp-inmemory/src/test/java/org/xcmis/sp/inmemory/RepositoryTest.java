@@ -19,18 +19,8 @@
 
 package org.xcmis.sp.inmemory;
 
-import org.xcmis.core.CmisPropertyDefinitionType;
-import org.xcmis.core.CmisPropertyStringDefinitionType;
-import org.xcmis.core.CmisTypeDefinitionType;
-import org.xcmis.core.EnumBaseObjectTypeIds;
-import org.xcmis.core.EnumCardinality;
-import org.xcmis.core.EnumPropertyType;
-import org.xcmis.core.EnumVersioningState;
-import org.xcmis.messaging.CmisTypeContainer;
-import org.xcmis.sp.inmemory.SimpleContentStream;
+import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.object.Entry;
-import org.xcmis.spi.object.ItemsIterator;
 
 import java.util.ArrayList;
 import java.util.List;

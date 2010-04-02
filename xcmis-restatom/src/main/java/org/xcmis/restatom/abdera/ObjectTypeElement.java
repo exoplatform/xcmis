@@ -24,27 +24,27 @@ import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.apache.abdera.parser.stax.FOMExtensibleElement;
 import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.AccessControlEntry;
-import org.xcmis.spi.AllowableActions;
-import org.xcmis.spi.BaseType;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.PropertyFilter;
-import org.xcmis.spi.PropertyType;
-import org.xcmis.spi.Rendition;
-import org.xcmis.spi.object.ChangeInfo;
-import org.xcmis.spi.object.CmisObject;
-import org.xcmis.spi.object.Property;
-import org.xcmis.spi.object.impl.BooleanProperty;
-import org.xcmis.spi.object.impl.CmisObjectImpl;
-import org.xcmis.spi.object.impl.DateTimeProperty;
-import org.xcmis.spi.object.impl.DecimalProperty;
-import org.xcmis.spi.object.impl.HtmlProperty;
-import org.xcmis.spi.object.impl.IdProperty;
-import org.xcmis.spi.object.impl.IntegerProperty;
-import org.xcmis.spi.object.impl.ObjectInfoImpl;
-import org.xcmis.spi.object.impl.StringProperty;
-import org.xcmis.spi.object.impl.UriProperty;
+import org.xcmis.spi.model.AccessControlEntry;
+import org.xcmis.spi.model.AllowableActions;
+import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.ChangeInfo;
+import org.xcmis.spi.model.CmisObject;
+import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.PropertyType;
+import org.xcmis.spi.model.Rendition;
+import org.xcmis.spi.model.impl.BooleanProperty;
+import org.xcmis.spi.model.impl.CmisObjectImpl;
+import org.xcmis.spi.model.impl.DateTimeProperty;
+import org.xcmis.spi.model.impl.DecimalProperty;
+import org.xcmis.spi.model.impl.HtmlProperty;
+import org.xcmis.spi.model.impl.IdProperty;
+import org.xcmis.spi.model.impl.IntegerProperty;
+import org.xcmis.spi.model.impl.ObjectInfoImpl;
+import org.xcmis.spi.model.impl.StringProperty;
+import org.xcmis.spi.model.impl.UriProperty;
 
 import java.util.Collection;
 import java.util.List;
@@ -62,7 +62,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new object type element.
-    * 
+    *
     * @param internal the internal
     */
    public ObjectTypeElement(Element internal)
@@ -72,7 +72,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new object type element.
-    * 
+    *
     * @param factory the factory
     * @param qname the qname
     */
@@ -83,7 +83,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
 
    /**
     * Gets the allowable actions element.
-    * 
+    *
     * @return the allowable actions element
     */
    public AllowableActionsElement getAllowableActionsElement()
@@ -93,7 +93,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
 
    /**
     * Gets the object.
-    * 
+    *
     * @return the object
     */
    public CmisObject getObject()
@@ -129,7 +129,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
       //      object.setPathSegment(pathSegment)
 
       // XXX At the moment do not process other stuff from XML.
-      // Don't need this now. It is not clear from specification 
+      // Don't need this now. It is not clear from specification
       // how to process (apply) policies.
       return object;
    }
@@ -227,7 +227,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
 
    /**
     * Builds the element.
-    * 
+    *
     * @param objectType the object type
     * @param filter the filter
     */
@@ -236,9 +236,9 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
       if (objectType != null)
       {
          // XXX: Workaround to get work updating properties under 'Cmis Connector Firefox plugin'.
-         // Plugin miss namespace when create entry for updating. Namespace for prefix 'cmisra' 
+         // Plugin miss namespace when create entry for updating. Namespace for prefix 'cmisra'
          // declared in entry tag. But this tag is overwritten in plugin and has no namespace
-         // declaration any more. 
+         // declaration any more.
          setAttributeValue("xmlns:cmisra", "http://docs.oasis-open.org/ns/cmis/restatom/200908/");
 
          // PROPERTIES
@@ -369,7 +369,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
 
    /**
     * Builds the element.
-    * 
+    *
     * @param objectType the object type
     */
    public void build(CmisObject objectType)

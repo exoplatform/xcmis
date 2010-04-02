@@ -27,7 +27,7 @@ import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.messaging.CmisObjectListType;
 import org.xcmis.soap.VersioningServicePort;
 import org.xcmis.spi.CMIS;
-import org.xcmis.spi.IncludeRelationships;
+import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.wssoap.impl.TypeConverter;
 import org.xcmis.wssoap.impl.VersioningServicePortImpl;
 

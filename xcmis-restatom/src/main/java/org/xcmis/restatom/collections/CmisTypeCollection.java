@@ -33,8 +33,8 @@ import org.xcmis.spi.Connection;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.StorageProvider;
-import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.TypeNotFoundException;
+import org.xcmis.spi.model.TypeDefinition;
 
 import java.util.Calendar;
 import java.util.Date;

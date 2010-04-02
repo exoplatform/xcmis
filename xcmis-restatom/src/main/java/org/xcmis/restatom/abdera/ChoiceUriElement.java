@@ -23,11 +23,9 @@ import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.Choice;
-import org.xcmis.spi.impl.ChoiceImpl;
+import org.xcmis.spi.model.Choice;
+import org.xcmis.spi.model.impl.ChoiceImpl;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 
 import javax.xml.namespace.QName;
@@ -42,7 +40,7 @@ public class ChoiceUriElement extends ChoiceElement<Choice<String>>
 
    /**
     * Instantiates a new choice uri element.
-    * 
+    *
     * @param internal the internal
     */
    public ChoiceUriElement(Element internal)
@@ -52,7 +50,7 @@ public class ChoiceUriElement extends ChoiceElement<Choice<String>>
 
    /**
     * Instantiates a new choice uri element.
-    * 
+    *
     * @param factory the factory
     * @param qname the qname
     */
@@ -64,6 +62,7 @@ public class ChoiceUriElement extends ChoiceElement<Choice<String>>
    /**
     * {@inheritDoc}
     */
+   @Override
    public void build(Choice<String> choice)
    {
       if (choice != null)
@@ -92,6 +91,7 @@ public class ChoiceUriElement extends ChoiceElement<Choice<String>>
       }
    }
 
+   @Override
    public Choice<String> getChoice()
    {
       ChoiceImpl<String> result = new ChoiceImpl<String>();

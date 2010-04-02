@@ -25,14 +25,14 @@ import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.apache.abdera.parser.stax.FOMExtensibleElement;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
-import org.xcmis.spi.Choice;
-import org.xcmis.spi.DateResolution;
 import org.xcmis.spi.InvalidArgumentException;
-import org.xcmis.spi.Precision;
-import org.xcmis.spi.PropertyDefinition;
-import org.xcmis.spi.PropertyType;
-import org.xcmis.spi.Updatability;
-import org.xcmis.spi.impl.PropertyDefinitionImpl;
+import org.xcmis.spi.model.Choice;
+import org.xcmis.spi.model.DateResolution;
+import org.xcmis.spi.model.Precision;
+import org.xcmis.spi.model.PropertyDefinition;
+import org.xcmis.spi.model.PropertyType;
+import org.xcmis.spi.model.Updatability;
+import org.xcmis.spi.model.impl.PropertyDefinitionImpl;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -51,7 +51,7 @@ public class PropertyDefinitionTypeElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new property definition type element.
-    * 
+    *
     * @param internal the internal
     */
    public PropertyDefinitionTypeElement(Element internal)
@@ -61,7 +61,7 @@ public class PropertyDefinitionTypeElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new property definition type element.
-    * 
+    *
     * @param factory the factory
     * @param qname the qname
     */
@@ -72,7 +72,7 @@ public class PropertyDefinitionTypeElement extends ExtensibleElementWrapper
 
    /**
     * Gets the property definition.
-    * 
+    *
     * @return the property definition
     */
    public PropertyDefinition<?> getPropertyDefinition()
@@ -369,7 +369,7 @@ public class PropertyDefinitionTypeElement extends ExtensibleElementWrapper
 
    /**
     * Builds the element.
-    * 
+    *
     * @param propdef the propdef
     */
    public void build(PropertyDefinition<?> propdef)
@@ -406,7 +406,7 @@ public class PropertyDefinitionTypeElement extends ExtensibleElementWrapper
          addSimpleExtension(AtomCMIS.ORDERABLE, Boolean.toString(propdef.isOrderable()));
 
          // From spec. : Is only applicable to properties that provide a value for the "Choices" attribute.
-         // Do not decide here provide or not this attribute. Back-end must be care about this. 
+         // Do not decide here provide or not this attribute. Back-end must be care about this.
          if (propdef.isOpenChoice() != null && propdef.isOpenChoice())
          {
             addSimpleExtension(AtomCMIS.OPEN_CHOICE, Boolean.toString(propdef.isOpenChoice()));

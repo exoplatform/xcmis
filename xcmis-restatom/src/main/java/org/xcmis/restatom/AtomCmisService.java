@@ -40,17 +40,17 @@ import org.xcmis.restatom.abdera.AllowableActionsElement;
 import org.xcmis.restatom.abdera.RepositoryInfoTypeElement;
 import org.xcmis.restatom.abdera.UriTemplateTypeElement;
 import org.xcmis.restatom.types.CmisUriTemplateType;
-import org.xcmis.spi.AccessControlEntry;
-import org.xcmis.spi.AccessControlPropagation;
-import org.xcmis.spi.AllowableActions;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.RepositoryInfo;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.StorageProvider;
-import org.xcmis.spi.UnfileObject;
 import org.xcmis.spi.UpdateConflictException;
+import org.xcmis.spi.model.AccessControlEntry;
+import org.xcmis.spi.model.AccessControlPropagation;
+import org.xcmis.spi.model.AllowableActions;
+import org.xcmis.spi.model.RepositoryInfo;
+import org.xcmis.spi.model.UnfileObject;
 
 import java.io.IOException;
 import java.net.URI;
@@ -606,7 +606,7 @@ public class AtomCmisService implements ResourceContainer
             }
          }
       }
-      // XXX 
+      // XXX
       throw new WebApplicationException(new InvalidArgumentException("Content of document is missing."), 400);
    }
 

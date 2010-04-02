@@ -28,8 +28,8 @@ import org.xcmis.soap.CmisException;
 import org.xcmis.soap.RelationshipServicePort;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.Connection;
-import org.xcmis.spi.RelationshipDirection;
 import org.xcmis.spi.StorageProvider;
+import org.xcmis.spi.model.RelationshipDirection;
 
 import java.math.BigInteger;
 

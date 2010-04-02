@@ -19,13 +19,13 @@
 
 package org.xcmis.sp.jcr.exo;
 
-import org.xcmis.spi.BaseType;
 import org.xcmis.spi.CMIS;
-import org.xcmis.spi.Choice;
-import org.xcmis.spi.PropertyDefinition;
-import org.xcmis.spi.PropertyType;
-import org.xcmis.spi.Updatability;
-import org.xcmis.spi.impl.PropertyDefinitionImpl;
+import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.Choice;
+import org.xcmis.spi.model.PropertyDefinition;
+import org.xcmis.spi.model.PropertyType;
+import org.xcmis.spi.model.Updatability;
+import org.xcmis.spi.model.impl.PropertyDefinitionImpl;
 
 import java.util.Collections;
 import java.util.HashMap;

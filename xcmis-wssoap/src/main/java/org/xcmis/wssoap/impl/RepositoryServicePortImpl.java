@@ -30,8 +30,8 @@ import org.xcmis.soap.CmisException;
 import org.xcmis.soap.RepositoryServicePort;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.Connection;
-import org.xcmis.spi.RepositoryInfo;
 import org.xcmis.spi.StorageProvider;
+import org.xcmis.spi.model.RepositoryInfo;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -59,7 +59,7 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
 
    /**
     * Constructs instance of <code>RepositoryServicePortImpl</code> .
-    * 
+    *
     * @param repoService RepositoryService
     */
    public RepositoryServicePortImpl(StorageProvider storageProvider)
@@ -73,7 +73,9 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
    public List<CmisRepositoryEntryType> getRepositories(CmisExtensionType extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation getRepositories");
+      }
       Connection conn = null;
       Set<String> entries = storageProvider.getStorageIDs();
       List<CmisRepositoryEntryType> res = new ArrayList<CmisRepositoryEntryType>();
@@ -97,7 +99,9 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
       throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation getRepositoryInfo");
+      }
       Connection conn = null;
       conn = storageProvider.getConnection(repositoryId, null);
       return TypeConverter.getCmisRepositoryInfoType(conn.getStorage().getRepositoryInfo());
@@ -114,7 +118,9 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
       CmisExtensionType extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation getTypeChildren");
+      }
       Connection conn = null;
       try
       {
@@ -143,7 +149,9 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
       throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation getTypeDefinition");
+      }
       Connection conn = null;
       try
       {
@@ -168,7 +176,9 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
       Boolean includePropertyDefinitions, CmisExtensionType extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation getTypeDescendants");
+      }
       Connection conn = null;
       try
       {

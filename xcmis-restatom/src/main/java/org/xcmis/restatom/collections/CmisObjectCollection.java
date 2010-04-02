@@ -43,31 +43,31 @@ import org.xcmis.restatom.abdera.ContentTypeElement;
 import org.xcmis.restatom.abdera.ObjectTypeElement;
 import org.xcmis.restatom.types.CmisContentType;
 import org.xcmis.restatom.types.EnumReturnVersion;
-import org.xcmis.spi.AccessControlEntry;
-import org.xcmis.spi.BaseType;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ChangeTokenHolder;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentAlreadyExistsException;
 import org.xcmis.spi.FilterNotValidException;
-import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.PropertyFilter;
-import org.xcmis.spi.Rendition;
-import org.xcmis.spi.RepositoryCapabilities;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.StreamNotSupportedException;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.data.BaseContentStream;
 import org.xcmis.spi.data.ContentStream;
-import org.xcmis.spi.object.CmisObject;
-import org.xcmis.spi.object.Property;
-import org.xcmis.spi.object.impl.CmisObjectImpl;
-import org.xcmis.spi.object.impl.StringProperty;
+import org.xcmis.spi.model.AccessControlEntry;
+import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.CmisObject;
+import org.xcmis.spi.model.IncludeRelationships;
+import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.Rendition;
+import org.xcmis.spi.model.RepositoryCapabilities;
+import org.xcmis.spi.model.impl.CmisObjectImpl;
+import org.xcmis.spi.model.impl.StringProperty;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -275,6 +275,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    /**
     * {@inheritDoc}
     */
+   @Override
    public String getAuthor(RequestContext request) throws ResponseContextException
    {
       Principal principal = request.getPrincipal();
@@ -322,6 +323,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    /**
     * {@inheritDoc}
     */
+   @Override
    public CmisObject getEntry(String id, RequestContext request) throws ResponseContextException
    {
       boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
@@ -352,7 +354,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          CmisObject object;
          if (id.charAt(0) != '/')
          {
-            // Get by id. 
+            // Get by id.
             object =
                conn.getObject(id, includeAllowableActions, includeRelationships, includePolicies, includeACL, true,
                   propertyFilter, renditionFilter);
@@ -446,6 +448,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    /**
     * {@inheritDoc}
     */
+   @Override
    public String getId(CmisObject object) throws ResponseContextException
    {
       return object.getObjectInfo().getId();
@@ -454,6 +457,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    /**
     * {@inheritDoc}
     */
+   @Override
    public String getId(RequestContext request)
    {
       return request.getTarget().getParameter("objectid");
@@ -469,12 +473,12 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       try
       {
          conn = getConnection(request);
-         // TODO : resolve (optional) offset, length 
+         // TODO : resolve (optional) offset, length
          ContentStream content = conn.getContentStream(//
             //
             getId(request), //
             getStreamId(request), //
-            0, // 
+            0, //
             Long.MAX_VALUE);
          /*         if (content == null)
                      return new EmptyResponseContext(200);
@@ -515,6 +519,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    /**
     * {@inheritDoc}
     */
+   @Override
    public String getName(CmisObject object) throws ResponseContextException
    {
       return object.getObjectInfo().getName();
@@ -531,6 +536,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    /**
     * {@inheritDoc}
     */
+   @Override
    public String getTitle(CmisObject object) throws ResponseContextException
    {
       return object.getObjectInfo().getName();
@@ -539,6 +545,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    /**
     * {@inheritDoc}
     */
+   @Override
    public Date getUpdated(CmisObject object) throws ResponseContextException
    {
       return getLastModificationDate(object).getTime();
@@ -596,7 +603,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
             // weak validators or strong validators. Clients MUST NOT use weak
             // validators in other forms of request.
             // ------------------------------------------
-            // Method is PUT - use strong comparison. 
+            // Method is PUT - use strong comparison.
             ChangeTokenHolder changeTokenHolder = new ChangeTokenHolder();
             changeTokenHolder.setValue(request.getHeader(HttpHeaders.IF_MATCH));
             updatedId = conn.updateProperties(getId(request), changeTokenHolder, properties);
@@ -651,13 +658,13 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Put media.
-    * 
+    *
     * @param entryObj the entry obj
     * @param contentType the content type
     * @param slug the slug
     * @param inputStream the input stream
     * @param request the request
-    * 
+    *
     * @throws ResponseContextException the response context exception
     */
    @Override
@@ -787,11 +794,11 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Process rendition links.
-    * 
+    *
     * @param entry the entry
     * @param object the object
     * @param request the request
-    * 
+    *
     * @throws ResponseContextException the response context exception
     */
    private void processRenditionLinks(Entry entry, CmisObject object, RequestContext request)
@@ -1043,7 +1050,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get link to AtomPub Document that describes object's ACL.
-    * 
+    *
     * @param id object id
     * @param request request context
     * @return link to allowable actions document
@@ -1060,7 +1067,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get link to AtomPub Document that describes object's allowable actions.
-    * 
+    *
     * @param id object id
     * @param request request context
     * @return link to allowable actions document
@@ -1077,7 +1084,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get link to AtomPub Document that describes object's versions.
-    * 
+    *
     * @param id objects id
     * @param request request context
     * @return link to AtomPub Document that describes object's versions
@@ -1094,7 +1101,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get object's base type.
-    * 
+    *
     * @param object object
     * @return object's base type
     */
@@ -1105,7 +1112,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get link to express renditions.
-    * 
+    *
     * @param id objects id
     * @param request request context
     * @return link to AtomPub Document that describes object's parent(s)
@@ -1122,7 +1129,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get link to AtomPub document that describes folder's children.
-    * 
+    *
     * @param id folder id
     * @param request request context
     * @return link to AtomPub document that describes folder's children
@@ -1139,7 +1146,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get link to document content.
-    * 
+    *
     * @param id document id
     * @param request request context
     * @return link to document content
@@ -1156,7 +1163,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get content stream from entry.
-    * 
+    *
     * @param entry source entry
     * @param request request context
     * @return content stream as <code>ContentStream</code> or null if there is
@@ -1198,7 +1205,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
                else
                {
                   HTTPConnection connection = new HTTPConnection(//
-                     src.getScheme(), // 
+                     src.getScheme(), //
                      src.getHost(), //
                      src.getPort());
                   // Disable user interaction.
@@ -1266,7 +1273,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
                   byte[] data;
                   // XXX CMISSpaces sends XML content as Base64 encoded but
                   // Abdera waits for plain text.
-                  // TODO Done just for research work. Find good solution to fix this. 
+                  // TODO Done just for research work. Find good solution to fix this.
                   if (SPACES_AIR_SPECIFIC_REFERER.equalsIgnoreCase(request.getHeader("referer")))
                   {
                      data = Base64.decodeBase64(content.getText().getBytes());
@@ -1292,7 +1299,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get object creation date.
-    * 
+    *
     * @param object source object
     * @return creation date
     */
@@ -1313,11 +1320,11 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
     * Get link to AtomPub document that describes folder's descendants.
     * If repository does not support capability 'getDescendants' this method will
     * return null.
-    * 
+    *
     * @param id folder id
     * @param request request context
     * @return link to AtomPub document that describes folder's descendants or null
-    *            if capability 'getDescendants' is not supported. 
+    *            if capability 'getDescendants' is not supported.
     */
    protected String getDescendantsLink(String id, RequestContext request)
    {
@@ -1350,11 +1357,11 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
     * Get link to AtomPub document that describes folder's tree.
     * If repository does not support capability 'getFolderTree' this method will
     * return null.
-    * 
+    *
     * @param id folder id
     * @param request request context
     * @return link to AtomPub document that describes folder's tree or null
-    *            if capability 'getFolderTree' is not supported. 
+    *            if capability 'getFolderTree' is not supported.
     */
    protected String getFolderTreeLink(String id, RequestContext request)
    {
@@ -1385,7 +1392,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get object creation date.
-    * 
+    *
     * @param object source object
     * @return creation date
     */
@@ -1404,7 +1411,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get link to AtomPub Document that describes object with <code>id</code>.
-    * 
+    *
     * @param id object id
     * @param request request context
     * @return link to AtomPub Document that describes object with <code>id</code>
@@ -1421,7 +1428,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get link to AtomPub Document that describes object's parent(s).
-    * 
+    *
     * @param id objects id
     * @param request request context
     * @return link to AtomPub Document that describes object's parent(s)
@@ -1438,7 +1445,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get link to AtomPub Document that describes object's policies.
-    * 
+    *
     * @param id objects id
     * @param request request context
     * @return link to AtomPub Document that describes policies applied to object
@@ -1455,7 +1462,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get object's property.
-    * 
+    *
     * @param object object
     * @param propertyName property name
     * @return property or null if property does not exists
@@ -1478,7 +1485,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get link to AtomPub Document that describes object's relationships.
-    * 
+    *
     * @param id objects id
     * @param request request context
     * @return link to AtomPub Document that describes object's relationships
@@ -1496,6 +1503,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    /**
     * Get's the name of the specific resource requested
     */
+   @Override
    protected String getResourceName(RequestContext request)
    {
       // TODO : can get smarter?
@@ -1512,7 +1520,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
     * When POSTing an Atom Document, the Atom elements MUST take precedence over
     * the corresponding writable CMIS property.
     * For example, atom:title will overwrite cmis:name.
-    * 
+    *
     * @param object CMIS object
     * @param entry entry that delivered CMIS object.
     */

@@ -19,6 +19,7 @@
 
 package org.xcmis.spi;
 
+import org.xcmis.spi.model.Rendition;
 import org.xcmis.spi.utils.MimeType;
 
 import java.util.Collections;

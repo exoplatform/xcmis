@@ -57,42 +57,38 @@ import org.xcmis.messaging.CmisObjectParentsType;
 import org.xcmis.messaging.CmisRepositoryEntryType;
 import org.xcmis.messaging.CmisTypeContainer;
 import org.xcmis.messaging.CmisTypeDefinitionListType;
-import org.xcmis.spi.ACLCapability;
-import org.xcmis.spi.AccessControlEntry;
-import org.xcmis.spi.AllowableActions;
-import org.xcmis.spi.BaseType;
-import org.xcmis.spi.ContentStreamAllowed;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ItemsTree;
-import org.xcmis.spi.PropertyDefinition;
-import org.xcmis.spi.PropertyType;
-import org.xcmis.spi.Rendition;
-import org.xcmis.spi.RepositoryCapabilities;
-import org.xcmis.spi.RepositoryInfo;
-import org.xcmis.spi.TypeDefinition;
-import org.xcmis.spi.Updatability;
 import org.xcmis.spi.data.ContentStream;
-import org.xcmis.spi.impl.AccessControlEntryImpl;
-import org.xcmis.spi.impl.PropertyDefinitionImpl;
-import org.xcmis.spi.impl.RenditionImpl;
-import org.xcmis.spi.impl.TypeDefinitionImpl;
-import org.xcmis.spi.object.ChangeInfo;
-import org.xcmis.spi.object.CmisObject;
-import org.xcmis.spi.object.ObjectParent;
-import org.xcmis.spi.object.Property;
-import org.xcmis.spi.object.impl.BooleanProperty;
-import org.xcmis.spi.object.impl.DateTimeProperty;
-import org.xcmis.spi.object.impl.DecimalProperty;
-import org.xcmis.spi.object.impl.HtmlProperty;
-import org.xcmis.spi.object.impl.IdProperty;
-import org.xcmis.spi.object.impl.IntegerProperty;
-import org.xcmis.spi.object.impl.StringProperty;
-import org.xcmis.spi.object.impl.UriProperty;
+import org.xcmis.spi.model.ACLCapability;
+import org.xcmis.spi.model.AccessControlEntry;
+import org.xcmis.spi.model.AllowableActions;
+import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.ChangeInfo;
+import org.xcmis.spi.model.CmisObject;
+import org.xcmis.spi.model.ContentStreamAllowed;
+import org.xcmis.spi.model.ObjectParent;
+import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.PropertyDefinition;
+import org.xcmis.spi.model.PropertyType;
+import org.xcmis.spi.model.Rendition;
+import org.xcmis.spi.model.RepositoryCapabilities;
+import org.xcmis.spi.model.RepositoryInfo;
+import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.model.Updatability;
+import org.xcmis.spi.model.impl.AccessControlEntryImpl;
+import org.xcmis.spi.model.impl.BooleanProperty;
+import org.xcmis.spi.model.impl.DateTimeProperty;
+import org.xcmis.spi.model.impl.DecimalProperty;
+import org.xcmis.spi.model.impl.HtmlProperty;
+import org.xcmis.spi.model.impl.IdProperty;
+import org.xcmis.spi.model.impl.IntegerProperty;
+import org.xcmis.spi.model.impl.PropertyDefinitionImpl;
+import org.xcmis.spi.model.impl.RenditionImpl;
+import org.xcmis.spi.model.impl.StringProperty;
+import org.xcmis.spi.model.impl.TypeDefinitionImpl;
+import org.xcmis.spi.model.impl.UriProperty;
 import org.xcmis.spi.utils.CmisUtils;
-
-import javax.activation.DataHandler;
-import javax.mail.util.ByteArrayDataSource;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -105,6 +101,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.activation.DataHandler;
+import javax.mail.util.ByteArrayDataSource;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * @author <a href="mailto:max.shaposhnik@exoplatform.com">Max Shaposhnik</a>
@@ -203,35 +203,51 @@ public class TypeConverter
       for (CmisProperty source : input.getProperty())
       {
          if (source instanceof CmisPropertyHtml)
+         {
             result.put(source.getPropertyDefinitionId(), new HtmlProperty(source.getPropertyDefinitionId(), source
                .getQueryName(), source.getLocalName(), source.getDisplayName(), ((CmisPropertyHtml)source).getValue()));
+         }
          else if (source instanceof CmisPropertyDecimal)
+         {
             result.put(source.getPropertyDefinitionId(), new DecimalProperty(source.getPropertyDefinitionId(), source
                .getQueryName(), source.getLocalName(), source.getDisplayName(), ((CmisPropertyDecimal)source)
                .getValue()));
+         }
          else if (source instanceof CmisPropertyDateTime)
+         {
             result.put(source.getPropertyDefinitionId(), new DateTimeProperty(source.getPropertyDefinitionId(), source
                .getQueryName(), source.getLocalName(), source.getDisplayName(),
                getCalendar(((CmisPropertyDateTime)source).getValue())));
+         }
          else if (source instanceof CmisPropertyId)
+         {
             result.put(source.getPropertyDefinitionId(), new IdProperty(source.getPropertyDefinitionId(), source
                .getQueryName(), source.getLocalName(), source.getDisplayName(), ((CmisPropertyId)source).getValue()));
+         }
          else if (source instanceof CmisPropertyString)
+         {
             result.put(source.getPropertyDefinitionId(),
                new StringProperty(source.getPropertyDefinitionId(), source.getQueryName(), source.getLocalName(),
                   source.getDisplayName(), ((CmisPropertyString)source).getValue()));
+         }
          else if (source instanceof CmisPropertyUri)
+         {
             result.put(source.getPropertyDefinitionId(), new UriProperty(source.getPropertyDefinitionId(), source
                .getQueryName(), source.getLocalName(), source.getDisplayName(), getURI(((CmisPropertyUri)source)
                .getValue())));
+         }
          else if (source instanceof CmisPropertyBoolean)
+         {
             result.put(source.getPropertyDefinitionId(), new BooleanProperty(source.getPropertyDefinitionId(), source
                .getQueryName(), source.getLocalName(), source.getDisplayName(), ((CmisPropertyBoolean)source)
                .getValue()));
+         }
          else if (source instanceof CmisPropertyInteger)
+         {
             result.put(source.getPropertyDefinitionId(), new IntegerProperty(source.getPropertyDefinitionId(), source
                .getQueryName(), source.getLocalName(), source.getDisplayName(), ((CmisPropertyInteger)source)
                .getValue()));
+         }
       }
       return result;
    }
@@ -268,9 +284,13 @@ public class TypeConverter
       result.setProperties(props);
       result.setAcl(getCmisAccessControlListType(object.getACL()));
       if (object.getAllowableActions() != null)
+      {
          result.setAllowableActions(getAllowableActionsType(object.getAllowableActions()));
+      }
       if (object.getChangeInfo() != null)
+      {
          result.setChangeEventInfo(getChangeEventType(object.getChangeInfo()));
+      }
       result.setExactACL(object.isExactACL());
       result.setPolicyIds(getCmisListOfIdsType(object.getPolicyIds()));
       return result;
@@ -341,7 +361,9 @@ public class TypeConverter
       for (Object one : source.getItems())
       {
          if (one instanceof CmisObject)
+         {
             result.getObjects().add(getCmisObjectInFolderType((CmisObject)one));
+         }
       }
       result.setHasMoreItems(source.isHasMoreItems());
       result.setNumItems(BigInteger.valueOf(source.getNumItems()));
@@ -362,7 +384,7 @@ public class TypeConverter
       for (ItemsTree<TypeDefinition> one : source)
       {
          CmisTypeContainer containerType = new CmisTypeContainer();
-         CmisTypeDefinitionType type = getCmisTypeDefinitionType((TypeDefinition)one.getContainer());
+         CmisTypeDefinitionType type = getCmisTypeDefinitionType(one.getContainer());
          containerType.setType(type);
          if (one.getChildren() != null)
          {

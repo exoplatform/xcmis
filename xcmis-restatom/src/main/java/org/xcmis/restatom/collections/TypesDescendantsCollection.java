@@ -36,7 +36,7 @@ import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.StorageProvider;
-import org.xcmis.spi.TypeDefinition;
+import org.xcmis.spi.model.TypeDefinition;
 
 import java.util.Calendar;
 import java.util.List;

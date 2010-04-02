@@ -19,15 +19,6 @@
 
 package org.xcmis.sp.inmemory;
 
-import org.xcmis.core.CmisAccessControlEntryType;
-import org.xcmis.core.CmisAccessControlListType;
-import org.xcmis.core.CmisAccessControlPrincipalType;
-import org.xcmis.core.CmisObjectType;
-import org.xcmis.core.CmisPropertiesType;
-import org.xcmis.core.CmisPropertyId;
-import org.xcmis.core.CmisPropertyString;
-import org.xcmis.core.EnumBasicPermissions;
-import org.xcmis.core.EnumVersioningState;
 import org.xcmis.spi.CMIS;
 
 /**

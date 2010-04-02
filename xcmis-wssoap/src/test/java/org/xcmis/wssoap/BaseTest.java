@@ -19,6 +19,8 @@
 
 package org.xcmis.wssoap;
 
+import junit.framework.TestCase;
+
 import org.apache.cxf.bus.CXFBusFactory;
 import org.apache.cxf.endpoint.Server;
 import org.apache.cxf.interceptor.LoggingInInterceptor;
@@ -40,19 +42,17 @@ import org.xcmis.core.CmisPropertyId;
 import org.xcmis.core.CmisPropertyString;
 import org.xcmis.core.EnumBaseObjectTypeIds;
 import org.xcmis.core.EnumPropertiesRelationship;
-import org.xcmis.spi.BaseType;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.StorageProvider;
-import org.xcmis.spi.VersioningState;
-import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.CmisObject;
+import org.xcmis.spi.model.VersioningState;
 import org.xcmis.wssoap.impl.TypeConverter;
 
 import java.util.Iterator;
 import java.util.List;
-
-import junit.framework.TestCase;
 
 public abstract class BaseTest extends TestCase
 {
@@ -71,6 +71,7 @@ public abstract class BaseTest extends TestCase
 
    protected String testFolderId;
 
+   @Override
    public void setUp() throws Exception
    {
       String containerConf = getClass().getResource("/conf/standalone/test-configuration.xml").toString();
@@ -99,7 +100,7 @@ public abstract class BaseTest extends TestCase
 
    /**
     * Complex deploy service.
-    * 
+    *
     * @param address string service address
     * @param object service object
     * @param inInterceptors List<AbstractPhaseInterceptor> in interceptors
@@ -112,7 +113,9 @@ public abstract class BaseTest extends TestCase
       boolean wrapped)
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Starting Service: object = " + object + " at the address = " + address);
+      }
 
       JaxWsServerFactoryBean serverFactory = new JaxWsServerFactoryBean();
       serverFactory.getServiceFactory().setDataBinding(new JAXBDataBinding());
@@ -128,13 +131,17 @@ public abstract class BaseTest extends TestCase
       if (inInterceptors != null && inInterceptors.size() > 0)
       {
          for (AbstractPhaseInterceptor<?> in : inInterceptors)
+         {
             serverFactory.getServiceFactory().getService().getInInterceptors().add(in);
+         }
       }
 
       if (outInterceptors != null && outInterceptors.size() > 0)
       {
          for (AbstractPhaseInterceptor<?> out : outInterceptors)
+         {
             serverFactory.getServiceFactory().getService().getOutInterceptors().add(out);
+         }
       }
 
       if (wrapped)
@@ -250,7 +257,9 @@ public abstract class BaseTest extends TestCase
       for (CmisProperty prop : props)
       {
          if (prop.getPropertyDefinitionId().equals(propName))
+         {
             return prop;
+         }
       }
       return null;
    }
@@ -289,6 +298,7 @@ public abstract class BaseTest extends TestCase
       return conn.getChildren(folderId, false, null, false, true, CMIS.WILDCARD, null, null, -1, 0);
    }
 
+   @Override
    protected void tearDown() throws Exception
    {
       clearRoot();

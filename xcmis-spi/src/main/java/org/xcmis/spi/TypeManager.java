@@ -19,6 +19,8 @@
 
 package org.xcmis.spi;
 
+import org.xcmis.spi.model.TypeDefinition;
+
 
 /**
  * Produces type definition.

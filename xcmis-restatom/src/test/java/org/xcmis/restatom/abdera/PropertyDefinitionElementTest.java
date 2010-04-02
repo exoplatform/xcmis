@@ -25,11 +25,11 @@ import org.w3c.dom.Node;
 import org.xcmis.restatom.AbderaFactory;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.NamespaceResolver;
-import org.xcmis.spi.Precision;
-import org.xcmis.spi.PropertyType;
-import org.xcmis.spi.Updatability;
-import org.xcmis.spi.impl.ChoiceImpl;
-import org.xcmis.spi.impl.PropertyDefinitionImpl;
+import org.xcmis.spi.model.Precision;
+import org.xcmis.spi.model.PropertyType;
+import org.xcmis.spi.model.Updatability;
+import org.xcmis.spi.model.impl.ChoiceImpl;
+import org.xcmis.spi.model.impl.PropertyDefinitionImpl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

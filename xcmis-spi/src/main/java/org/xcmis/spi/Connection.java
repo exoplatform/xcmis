@@ -20,10 +20,19 @@
 package org.xcmis.spi;
 
 import org.xcmis.spi.data.ContentStream;
-import org.xcmis.spi.object.CmisObject;
-import org.xcmis.spi.object.ObjectInfo;
-import org.xcmis.spi.object.ObjectParent;
-import org.xcmis.spi.object.Property;
+import org.xcmis.spi.model.AccessControlEntry;
+import org.xcmis.spi.model.AccessControlPropagation;
+import org.xcmis.spi.model.AllowableActions;
+import org.xcmis.spi.model.CmisObject;
+import org.xcmis.spi.model.IncludeRelationships;
+import org.xcmis.spi.model.ObjectInfo;
+import org.xcmis.spi.model.ObjectParent;
+import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.RelationshipDirection;
+import org.xcmis.spi.model.Rendition;
+import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.model.UnfileObject;
+import org.xcmis.spi.model.VersioningState;
 
 import java.io.IOException;
 import java.util.Collection;

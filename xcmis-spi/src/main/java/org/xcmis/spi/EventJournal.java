@@ -19,6 +19,8 @@
 
 package org.xcmis.spi;
 
+import org.xcmis.spi.model.ChangeEvent;
+
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>

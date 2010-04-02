@@ -21,7 +21,7 @@ package org.xcmis.restatom;
 
 import org.exoplatform.services.rest.impl.ContainerResponse;
 import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
-import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.model.CmisObject;
 
 import java.io.ByteArrayInputStream;
 import java.util.List;

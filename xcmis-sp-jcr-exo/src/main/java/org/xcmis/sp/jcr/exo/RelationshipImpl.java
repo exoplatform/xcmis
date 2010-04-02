@@ -23,13 +23,13 @@ import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.data.Folder;
 import org.xcmis.spi.data.ObjectData;
 import org.xcmis.spi.data.Policy;
 import org.xcmis.spi.data.Relationship;
-import org.xcmis.spi.object.Property;
+import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.TypeDefinition;
 
 import java.util.Calendar;
 import java.util.Collection;
@@ -132,6 +132,7 @@ class RelationshipImpl extends BaseObjectData implements Relationship
    /**
     * {@inheritDoc}
     */
+   @Override
    protected void create() throws StorageException, NameConstraintViolationException
    {
       try

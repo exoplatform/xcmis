@@ -19,30 +19,29 @@
 
 package org.xcmis.sp.inmemory;
 
-import org.xcmis.spi.AllowableActions;
-import org.xcmis.spi.ChangeEvent;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.Rendition;
-import org.xcmis.spi.RepositoryInfo;
 import org.xcmis.spi.Storage;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.TypeNotFoundException;
-import org.xcmis.spi.UnfileObject;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.VersioningException;
-import org.xcmis.spi.VersioningState;
 import org.xcmis.spi.data.Document;
 import org.xcmis.spi.data.Folder;
 import org.xcmis.spi.data.ObjectData;
 import org.xcmis.spi.data.Policy;
 import org.xcmis.spi.data.Relationship;
-import org.xcmis.spi.object.Property;
+import org.xcmis.spi.model.AllowableActions;
+import org.xcmis.spi.model.ChangeEvent;
+import org.xcmis.spi.model.Rendition;
+import org.xcmis.spi.model.RepositoryInfo;
+import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.model.UnfileObject;
+import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 
@@ -50,6 +49,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -59,8 +59,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class StorageImpl implements Storage
 {
 
+   public static String generateId()
+   {
+      return UUID.randomUUID().toString();
+   }
+
    /** Map of id -> data.*/
-   final Map<String, Map<String, Property<?>>> properties;
+//   final Map<String, Map<String, Property<?>>> properties;
 
    /** Map of id -> children IDs. */
    final Map<String, Set<String>> children;
@@ -69,7 +74,7 @@ public class StorageImpl implements Storage
    final Map<String, Set<String>> parents;
 
    /** Map of id -> policies IDs. */
-   final Map<String, Set<String>> policies;
+//   final Map<String, Set<String>> policies;
 
    /** Map of id -> versions. */
    final Map<String, Set<String>> versions;
@@ -81,20 +86,20 @@ public class StorageImpl implements Storage
    final Map<String, ByteArrayContentStream> contents;
 
    /** Map of id -> ACLs. */
-   final Map<String, Map<String, Set<String>>> acls;
+//   final Map<String, Map<String, Set<String>>> acls;
 
    final Map<String, Set<RelationshipInfo>> relationships;
 
    public StorageImpl()
    {
-      this.properties = new ConcurrentHashMap<String, Map<String, Property<?>>>();
+//      this.properties = new ConcurrentHashMap<String, Map<String, Property<?>>>();
       this.children = new ConcurrentHashMap<String, Set<String>>();
       this.parents = new ConcurrentHashMap<String, Set<String>>();
-      this.policies = new ConcurrentHashMap<String, Set<String>>();
+//      this.policies = new ConcurrentHashMap<String, Set<String>>();
       this.versions = new ConcurrentHashMap<String, Set<String>>();
       this.unfiling = new HashSet<String>();
       this.contents = new ConcurrentHashMap<String, ByteArrayContentStream>();
-      this.acls = new ConcurrentHashMap<String, Map<String, Set<String>>>();
+//      this.acls = new ConcurrentHashMap<String, Map<String, Set<String>>>();
       this.relationships = new ConcurrentHashMap<String, Set<RelationshipInfo>>();
    }
 

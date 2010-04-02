@@ -20,14 +20,11 @@
 package org.xcmis.sp.jcr.exo;
 
 import org.exoplatform.services.jcr.core.ExtendedSession;
-import org.xcmis.spi.AccessControlEntry;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
-import org.xcmis.spi.RelationshipDirection;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.data.ContentStream;
@@ -35,7 +32,10 @@ import org.xcmis.spi.data.Document;
 import org.xcmis.spi.data.Folder;
 import org.xcmis.spi.data.Policy;
 import org.xcmis.spi.data.Relationship;
-import org.xcmis.spi.object.Property;
+import org.xcmis.spi.model.AccessControlEntry;
+import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.RelationshipDirection;
+import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.utils.CmisUtils;
 
 import java.util.Collection;

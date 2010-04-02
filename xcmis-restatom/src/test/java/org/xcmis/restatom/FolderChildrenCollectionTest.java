@@ -29,7 +29,7 @@ import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.data.BaseContentStream;
 import org.xcmis.spi.data.ContentStream;
-import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.model.CmisObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

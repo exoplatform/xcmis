@@ -22,8 +22,8 @@ package org.xcmis.sp.jcr.exo;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.spi.ItemsIterator;
-import org.xcmis.spi.Rendition;
-import org.xcmis.spi.impl.RenditionImpl;
+import org.xcmis.spi.model.Rendition;
+import org.xcmis.spi.model.impl.RenditionImpl;
 
 import java.util.NoSuchElementException;
 

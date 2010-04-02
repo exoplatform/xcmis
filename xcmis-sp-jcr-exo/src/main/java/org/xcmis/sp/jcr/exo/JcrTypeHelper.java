@@ -19,17 +19,17 @@
 
 package org.xcmis.sp.jcr.exo;
 
-import org.xcmis.spi.BaseType;
 import org.xcmis.spi.CMIS;
-import org.xcmis.spi.ContentStreamAllowed;
-import org.xcmis.spi.DateResolution;
-import org.xcmis.spi.Precision;
-import org.xcmis.spi.PropertyDefinition;
-import org.xcmis.spi.PropertyType;
-import org.xcmis.spi.TypeDefinition;
-import org.xcmis.spi.Updatability;
-import org.xcmis.spi.impl.PropertyDefinitionImpl;
-import org.xcmis.spi.impl.TypeDefinitionImpl;
+import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.ContentStreamAllowed;
+import org.xcmis.spi.model.DateResolution;
+import org.xcmis.spi.model.Precision;
+import org.xcmis.spi.model.PropertyDefinition;
+import org.xcmis.spi.model.PropertyType;
+import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.model.Updatability;
+import org.xcmis.spi.model.impl.PropertyDefinitionImpl;
+import org.xcmis.spi.model.impl.TypeDefinitionImpl;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

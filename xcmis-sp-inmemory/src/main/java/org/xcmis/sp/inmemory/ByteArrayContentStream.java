@@ -32,7 +32,7 @@ import java.io.InputStream;
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */
-class ByteArrayContentStream implements ContentStream
+final class ByteArrayContentStream implements ContentStream
 {
 
    /** The bytes[]. */
@@ -76,7 +76,7 @@ class ByteArrayContentStream implements ContentStream
       this.length = bytes.length;
    }
 
-   private ByteArrayContentStream(ByteArrayContentStream that)
+   public ByteArrayContentStream(ByteArrayContentStream that)
    {
       this.mediaType = that.getMediaType();
       this.fileName = that.getFileName();
@@ -85,7 +85,7 @@ class ByteArrayContentStream implements ContentStream
       System.arraycopy(that.bytes, 0, this.bytes, 0, this.length);
    }
 
-   public ByteArrayContentStream clone()
+   public ByteArrayContentStream copy()
    {
       return new ByteArrayContentStream(this);
    }

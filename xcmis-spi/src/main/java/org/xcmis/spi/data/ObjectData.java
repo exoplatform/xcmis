@@ -19,19 +19,19 @@
 
 package org.xcmis.spi.data;
 
-import org.xcmis.spi.AccessControlEntry;
-import org.xcmis.spi.BaseType;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.NotSupportedException;
 import org.xcmis.spi.PropertyFilter;
-import org.xcmis.spi.RelationshipDirection;
 import org.xcmis.spi.Storage;
-import org.xcmis.spi.TypeDefinition;
-import org.xcmis.spi.Permission.BasicPermissions;
 import org.xcmis.spi.impl.CmisVisitor;
-import org.xcmis.spi.object.Property;
+import org.xcmis.spi.model.AccessControlEntry;
+import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.RelationshipDirection;
+import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.model.Permission.BasicPermissions;
 
 import java.util.Calendar;
 import java.util.Collection;

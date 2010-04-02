@@ -18,16 +18,6 @@
  */
 package org.xcmis.sp.jcr.exo;
 
-import java.util.Map;
-
-import javax.jcr.Node;
-import javax.jcr.Property;
-import javax.jcr.Repository;
-import javax.jcr.Session;
-import javax.jcr.observation.Event;
-import javax.jcr.observation.EventIterator;
-import javax.jcr.observation.EventListener;
-
 import org.exoplatform.services.jcr.core.ManageableRepository;
 import org.exoplatform.services.jcr.ext.common.SessionProvider;
 import org.exoplatform.services.jcr.util.IdGenerator;
@@ -39,6 +29,16 @@ import org.xcmis.spi.CMIS;
 import org.xcmis.spi.data.BaseContentStream;
 import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.utils.MimeType;
+
+import java.util.Map;
+
+import javax.jcr.Node;
+import javax.jcr.Property;
+import javax.jcr.Repository;
+import javax.jcr.Session;
+import javax.jcr.observation.Event;
+import javax.jcr.observation.EventIterator;
+import javax.jcr.observation.EventListener;
 
 public class UpdateListener implements EventListener
 {

@@ -30,8 +30,8 @@ import org.xcmis.soap.DiscoveryServicePort;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ChangeLogTokenHolder;
 import org.xcmis.spi.Connection;
-import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.StorageProvider;
+import org.xcmis.spi.model.IncludeRelationships;
 
 /**
  * @author <a href="mailto:max.shaposhnik@exoplatform.com">Max Shaposhnik</a>

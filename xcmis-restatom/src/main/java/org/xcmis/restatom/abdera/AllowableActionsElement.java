@@ -23,8 +23,8 @@ import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.AllowableActions;
-import org.xcmis.spi.impl.AllowableActionsImpl;
+import org.xcmis.spi.model.AllowableActions;
+import org.xcmis.spi.model.impl.AllowableActionsImpl;
 
 import javax.xml.namespace.QName;
 
@@ -37,7 +37,7 @@ public class AllowableActionsElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new allowable actions element.
-    * 
+    *
     * @param internal the internal
     */
    public AllowableActionsElement(Element internal)
@@ -47,7 +47,7 @@ public class AllowableActionsElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new allowable actions element.
-    * 
+    *
     * @param factory the factory
     * @param qname the qname
     */
@@ -59,7 +59,7 @@ public class AllowableActionsElement extends ExtensibleElementWrapper
    // Never use in real life. Useful for tests.
    /**
     * Gets the allowable actions.
-    * 
+    *
     * @return the allowable actions
     */
    public AllowableActions getAllowableActions()
@@ -135,7 +135,7 @@ public class AllowableActionsElement extends ExtensibleElementWrapper
 
    /**
     * Builds the element.
-    * 
+    *
     * @param actions the actions
     */
    public void build(AllowableActions actions)

@@ -37,12 +37,12 @@ import org.xcmis.soap.ObjectServicePort;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ChangeTokenHolder;
 import org.xcmis.spi.Connection;
-import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.StorageProvider;
-import org.xcmis.spi.UnfileObject;
-import org.xcmis.spi.VersioningState;
 import org.xcmis.spi.data.BaseContentStream;
 import org.xcmis.spi.data.ContentStream;
+import org.xcmis.spi.model.IncludeRelationships;
+import org.xcmis.spi.model.UnfileObject;
+import org.xcmis.spi.model.VersioningState;
 
 import java.math.BigInteger;
 import java.util.List;

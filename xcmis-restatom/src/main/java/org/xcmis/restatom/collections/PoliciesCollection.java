@@ -34,14 +34,14 @@ import org.xcmis.spi.CMIS;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FilterNotValidException;
-import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.StorageProvider;
-import org.xcmis.spi.object.CmisObject;
-import org.xcmis.spi.object.Property;
-import org.xcmis.spi.object.impl.IdProperty;
+import org.xcmis.spi.model.CmisObject;
+import org.xcmis.spi.model.IncludeRelationships;
+import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.impl.IdProperty;
 
 import java.util.HashMap;
 import java.util.List;
@@ -68,6 +68,7 @@ public class PoliciesCollection extends CmisObjectCollection
    /**
     * {@inheritDoc}
     */
+   @Override
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
       String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);

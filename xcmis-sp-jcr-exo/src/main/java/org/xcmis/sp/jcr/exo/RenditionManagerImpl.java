@@ -19,15 +19,15 @@
 package org.xcmis.sp.jcr.exo;
 
 
-import org.xcmis.spi.Rendition;
 import org.xcmis.sp.jcr.exo.rendition.RenditionContentStream;
 import org.xcmis.sp.jcr.exo.rendition.RenditionProvider;
-import org.xcmis.spi.BaseType;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.data.ObjectData;
-import org.xcmis.spi.impl.RenditionImpl;
-import org.xcmis.spi.object.RenditionManager;
+import org.xcmis.spi.impl.RenditionManager;
+import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.Rendition;
+import org.xcmis.spi.model.impl.RenditionImpl;
 import org.xcmis.spi.utils.CmisUtils;
 import org.xcmis.spi.utils.MimeType;
 

@@ -21,12 +21,12 @@ package org.xcmis.sp.inmemory;
 
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ConstraintException;
-import org.xcmis.spi.ContentStreamAllowed;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.data.Document;
+import org.xcmis.spi.model.ContentStreamAllowed;
+import org.xcmis.spi.model.TypeDefinition;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
@@ -37,9 +37,9 @@ class DocumentImpl extends BaseObjectData implements Document
 
    private ContentStream contentStream;
 
-   public DocumentImpl(String objectId, TypeDefinition type, StorageImpl storage)
+   public DocumentImpl(Entry entry, TypeDefinition type, StorageImpl storage)
    {
-      super(objectId, type, storage);
+      super(entry, type, storage);
    }
 
    public void cancelCheckout() throws StorageException
@@ -70,8 +70,8 @@ class DocumentImpl extends BaseObjectData implements Document
          throw new UnsupportedOperationException("getContentStream");
       }
 
-      ByteArrayContentStream content = storage.contents.get(objectId);
-      return content.clone();
+      ByteArrayContentStream content = storage.contents.get(entry.getId());
+      return content;
    }
 
    /**
@@ -143,7 +143,7 @@ class DocumentImpl extends BaseObjectData implements Document
          return false;
       }
 
-      return storage.contents.get(objectId) != null;
+      return storage.contents.get(entry.getId()) != null;
    }
 
    /**
@@ -182,7 +182,7 @@ class DocumentImpl extends BaseObjectData implements Document
          return false;
       }
 
-      return objectId.equals(getVersionSeriesCheckedOutId());
+      return entry.getId().equals(getVersionSeriesCheckedOutId());
    }
 
    /**
@@ -210,6 +210,12 @@ class DocumentImpl extends BaseObjectData implements Document
       }
 
       this.contentStream = contentStream;
+   }
+
+   @Override
+   protected void save() throws StorageException
+   {
+      // TODO
    }
 
 }

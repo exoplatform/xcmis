@@ -22,7 +22,7 @@ package org.xcmis.restatom.abdera;
 import org.apache.abdera.util.AbstractExtensionFactory;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.spi.CMIS;
-import org.xcmis.spi.PropertyType;
+import org.xcmis.spi.model.PropertyType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -92,7 +92,7 @@ public class CMISExtensionFactory extends AbstractExtensionFactory
 
    /**
     * Gets the Property Definition Type element name.
-    * 
+    *
     * @param propertyType the PropertyType
     * @return the QName element name
     */

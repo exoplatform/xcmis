@@ -19,16 +19,14 @@
 
 package org.xcmis.sp.inmemory;
 
+import com.sun.corba.se.impl.activation.RepositoryImpl;
+import junit.framework.TestCase;
+
 import org.exoplatform.services.log.LogConfigurator;
 import org.exoplatform.services.log.impl.Log4JConfigurator;
-import org.xcmis.sp.inmemory.CMISRepositoryConfiguration;
-import org.xcmis.sp.inmemory.RepositoryImpl;
-import org.xcmis.spi.Repository;
 
 import java.util.HashMap;
 import java.util.Properties;
-
-import junit.framework.TestCase;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>

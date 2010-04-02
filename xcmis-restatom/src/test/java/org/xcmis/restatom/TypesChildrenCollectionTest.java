@@ -22,16 +22,16 @@ package org.xcmis.restatom;
 import org.exoplatform.services.rest.impl.ContainerResponse;
 import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
 import org.w3c.dom.NodeList;
-import org.xcmis.spi.BaseType;
 import org.xcmis.spi.CMIS;
-import org.xcmis.spi.ContentStreamAllowed;
-import org.xcmis.spi.PropertyDefinition;
-import org.xcmis.spi.PropertyType;
-import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.TypeNotFoundException;
-import org.xcmis.spi.Updatability;
-import org.xcmis.spi.impl.PropertyDefinitionImpl;
-import org.xcmis.spi.impl.TypeDefinitionImpl;
+import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.ContentStreamAllowed;
+import org.xcmis.spi.model.PropertyDefinition;
+import org.xcmis.spi.model.PropertyType;
+import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.model.Updatability;
+import org.xcmis.spi.model.impl.PropertyDefinitionImpl;
+import org.xcmis.spi.model.impl.TypeDefinitionImpl;
 
 import java.io.ByteArrayInputStream;
 import java.util.HashMap;
@@ -48,6 +48,7 @@ public class TypesChildrenCollectionTest extends BaseTest
 
    private TypeDefinitionImpl article;
 
+   @Override
    public void setUp() throws Exception
    {
       super.setUp();
@@ -164,7 +165,7 @@ public class TypesChildrenCollectionTest extends BaseTest
 
    public void testAddType() throws Exception
    {
-      String req = "<?xml version='1.0' encoding='utf-8'?>" // 
+      String req = "<?xml version='1.0' encoding='utf-8'?>" //
          + "<entry xmlns='http://www.w3.org/2005/Atom'" //
          + " xmlns:cmis='" + CMIS.CMIS_NS_URI + "'" //
          + " xmlns:cmisra='" + AtomCMIS.CMISRA_NS_URI + "'>" + "<id>cmis:folder1</id>"//
@@ -216,8 +217,12 @@ public class TypesChildrenCollectionTest extends BaseTest
       }
       boolean propDef = false;
       for (PropertyDefinition<?> d : type.getPropertyDefinitions())
+      {
          if (d.getId().equals("cmis:newProperty"))
+         {
             propDef = true;
+         }
+      }
 
       assertTrue("Property definition for newly created type not found.", propDef);
    }

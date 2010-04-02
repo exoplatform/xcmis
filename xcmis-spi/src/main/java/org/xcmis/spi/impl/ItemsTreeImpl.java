@@ -20,8 +20,8 @@
 package org.xcmis.spi.impl;
 
 import org.xcmis.spi.ItemsTree;
-import org.xcmis.spi.TypeDefinition;
-import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.model.CmisObject;
+import org.xcmis.spi.model.TypeDefinition;
 
 import java.util.List;
 

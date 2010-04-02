@@ -33,7 +33,7 @@ import org.xcmis.spi.Connection;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.StorageProvider;
-import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.model.CmisObject;
 
 import java.io.IOException;
 import java.util.Calendar;

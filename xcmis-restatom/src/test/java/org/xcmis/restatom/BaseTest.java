@@ -20,7 +20,6 @@
 package org.xcmis.restatom;
 
 import junit.framework.AssertionFailedError;
-
 import junit.framework.TestCase;
 
 import org.apache.abdera.Abdera;
@@ -42,18 +41,18 @@ import org.exoplatform.services.test.mock.MockHttpServletRequest;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xcmis.restatom.abdera.CMISExtensionFactory;
-import org.xcmis.spi.BaseType;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.StorageProvider;
-import org.xcmis.spi.VersioningState;
 import org.xcmis.spi.data.ContentStream;
-import org.xcmis.spi.object.CmisObject;
-import org.xcmis.spi.object.ObjectParent;
-import org.xcmis.spi.object.Property;
-import org.xcmis.spi.object.impl.IdProperty;
-import org.xcmis.spi.object.impl.StringProperty;
+import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.CmisObject;
+import org.xcmis.spi.model.ObjectParent;
+import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.VersioningState;
+import org.xcmis.spi.model.impl.IdProperty;
+import org.xcmis.spi.model.impl.StringProperty;
 
 import java.io.ByteArrayInputStream;
 import java.net.URI;
@@ -106,6 +105,7 @@ public abstract class BaseTest extends TestCase
 
    }
 
+   @Override
    public void setUp() throws Exception
    {
       String containerConf = getClass().getResource("/conf/standalone/test-configuration.xml").toString();
@@ -144,6 +144,7 @@ public abstract class BaseTest extends TestCase
       xp.setNamespaceContext(new NamespaceResolver());
    }
 
+   @Override
    public void tearDown() throws Exception
    {
       container = null;

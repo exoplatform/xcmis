@@ -29,7 +29,7 @@ import org.xcmis.core.EnumBasicPermissions;
 import org.xcmis.messaging.CmisACLType;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.soap.ACLServicePort;
-import org.xcmis.spi.AccessControlPropagation;
+import org.xcmis.spi.model.AccessControlPropagation;
 import org.xcmis.wssoap.impl.ACLServicePortImpl;
 import org.xcmis.wssoap.impl.TypeConverter;
 import org.xcmis.wssoap.impl.server.IdentityInterceptor;

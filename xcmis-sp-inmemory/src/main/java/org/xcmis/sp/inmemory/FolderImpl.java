@@ -21,10 +21,11 @@ package org.xcmis.sp.inmemory;
 
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ItemsIterator;
-import org.xcmis.spi.TypeDefinition;
+import org.xcmis.spi.StorageException;
 import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.data.Folder;
 import org.xcmis.spi.data.ObjectData;
+import org.xcmis.spi.model.TypeDefinition;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
@@ -33,10 +34,9 @@ import org.xcmis.spi.data.ObjectData;
 class FolderImpl extends BaseObjectData implements Folder
 {
 
-   public FolderImpl(String objectId, TypeDefinition type, StorageImpl storage)
+   public FolderImpl(Entry entry, TypeDefinition type, StorageImpl storage)
    {
-      super(objectId, type, storage);
-      // TODO Auto-generated constructor stub
+      super(entry, type, storage);
    }
 
 
@@ -93,6 +93,14 @@ class FolderImpl extends BaseObjectData implements Folder
    {
       // TODO Auto-generated method stub
       return null;
+   }
+
+
+   @Override
+   protected void save() throws StorageException
+   {
+      // TODO Auto-generated method stub
+
    }
 
 }

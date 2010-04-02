@@ -122,8 +122,8 @@ public class IndexListener
    }
 
    /**
-    * Adapt changes produced by CMIS SPI to {@link ContentEntry} 
-    * acceptable for {@link SearchService} 
+    * Adapt changes produced by CMIS SPI to {@link ContentEntry}
+    * acceptable for {@link SearchService}
     */
    public static class ContentEntryAdapter
    {
@@ -131,7 +131,7 @@ public class IndexListener
        * Convert {@link ObjectData} to {@link ContentEntry}.
        * @param objectData
        * @return
-       * @throws IOException 
+       * @throws IOException
        */
       public ContentEntry createEntry(ObjectData objectData) throws IOException
       {
@@ -192,7 +192,7 @@ public class IndexListener
             contentEntry.parentIdentifiers.add(folder.getObjectId());
          }
 
-         for (org.xcmis.spi.object.Property<?> property : objectData.getProperties().values())
+         for (org.xcmis.spi.model.Property<?> property : objectData.getProperties().values())
          {
             if (property.getValues().size() > 0)
             {
@@ -202,7 +202,7 @@ public class IndexListener
          return contentEntry;
       }
 
-      private <G> Property<G> convertProperty(org.xcmis.spi.object.Property<G> property)
+      private <G> Property<G> convertProperty(org.xcmis.spi.model.Property<G> property)
       {
          Collection<ContentValue<G>> value = new ArrayList<ContentValue<G>>();
          for (G contentValue : property.getValues())
@@ -229,7 +229,7 @@ public class IndexListener
        * Convert {@link Document} to {@link ContentEntry}.
        * @param objectData
        * @return
-       * @throws IOException 
+       * @throws IOException
        */
       private ContentEntry createFromDocument(Document objectData) throws IOException
       {
@@ -275,7 +275,7 @@ public class IndexListener
       List<Property> properties;
 
       /**
-       * 
+       *
        */
       MockContentEntry()
       {

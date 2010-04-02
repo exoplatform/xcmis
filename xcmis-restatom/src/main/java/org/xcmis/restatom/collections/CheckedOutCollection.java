@@ -33,14 +33,14 @@ import org.xcmis.spi.CMIS;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FilterNotValidException;
-import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.UpdateConflictException;
-import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.model.CmisObject;
+import org.xcmis.spi.model.IncludeRelationships;
 
 import java.util.Calendar;
 

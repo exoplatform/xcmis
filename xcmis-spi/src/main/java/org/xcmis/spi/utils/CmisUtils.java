@@ -19,10 +19,10 @@
 
 package org.xcmis.spi.utils;
 
-import org.xcmis.spi.AccessControlEntry;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.data.ObjectData;
-import org.xcmis.spi.impl.AccessControlEntryImpl;
+import org.xcmis.spi.model.AccessControlEntry;
+import org.xcmis.spi.model.impl.AccessControlEntryImpl;
 
 import java.util.ArrayList;
 import java.util.Calendar;

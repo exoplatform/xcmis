@@ -29,7 +29,7 @@ package org.xcmis.restatom;
 import org.exoplatform.services.rest.impl.ContainerResponse;
 import org.exoplatform.services.rest.impl.MultivaluedMapImpl;
 import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
-import org.xcmis.spi.IncludeRelationships;
+import org.xcmis.spi.model.IncludeRelationships;
 
 import java.io.ByteArrayInputStream;
 import java.util.Arrays;

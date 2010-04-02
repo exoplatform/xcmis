@@ -32,9 +32,9 @@ import org.xcmis.soap.CmisException;
 import org.xcmis.soap.NavigationServicePort;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.Connection;
-import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.StorageProvider;
-import org.xcmis.spi.object.ObjectParent;
+import org.xcmis.spi.model.IncludeRelationships;
+import org.xcmis.spi.model.ObjectParent;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

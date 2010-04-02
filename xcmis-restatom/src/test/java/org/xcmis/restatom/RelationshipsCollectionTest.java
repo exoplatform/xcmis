@@ -19,15 +19,6 @@
 
 package org.xcmis.restatom;
 
-import org.exoplatform.services.rest.impl.ContainerResponse;
-import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
-import org.xcmis.spi.CMIS;
-import org.xcmis.spi.RelationshipDirection;
-import org.xcmis.spi.data.Relationship;
-
-import java.io.ByteArrayInputStream;
-
-import javax.xml.parsers.DocumentBuilderFactory;
 
 public class RelationshipsCollectionTest extends BaseTest
 {

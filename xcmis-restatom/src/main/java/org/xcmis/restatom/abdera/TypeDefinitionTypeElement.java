@@ -23,12 +23,12 @@ import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.BaseType;
-import org.xcmis.spi.ContentStreamAllowed;
 import org.xcmis.spi.InvalidArgumentException;
-import org.xcmis.spi.PropertyDefinition;
-import org.xcmis.spi.TypeDefinition;
-import org.xcmis.spi.impl.TypeDefinitionImpl;
+import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.ContentStreamAllowed;
+import org.xcmis.spi.model.PropertyDefinition;
+import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.model.impl.TypeDefinitionImpl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,7 +45,7 @@ public class TypeDefinitionTypeElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new type definition type element.
-    * 
+    *
     * @param internal the internal
     */
    public TypeDefinitionTypeElement(Element internal)
@@ -55,7 +55,7 @@ public class TypeDefinitionTypeElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new type definition type element.
-    * 
+    *
     * @param factory the factory
     * @param qname the qname
     */
@@ -66,7 +66,7 @@ public class TypeDefinitionTypeElement extends ExtensibleElementWrapper
 
    /**
     * Gets the properties element.
-    * 
+    *
     * @return the properties element
     */
    public Map<String, PropertyDefinition<?>> getPropertyDefinitions()
@@ -86,7 +86,7 @@ public class TypeDefinitionTypeElement extends ExtensibleElementWrapper
 
    /**
     * Gets the type definition.
-    * 
+    *
     * @return the type definition
     */
    public TypeDefinition getTypeDefinition()
@@ -162,7 +162,7 @@ public class TypeDefinitionTypeElement extends ExtensibleElementWrapper
 
    /**
     * Builds the element.
-    * 
+    *
     * @param type the type
     */
    public void build(TypeDefinition type)
@@ -178,7 +178,9 @@ public class TypeDefinitionTypeElement extends ExtensibleElementWrapper
 
          /* base type */
          if (type.getBaseId() != null)
+         {
             addSimpleExtension(AtomCMIS.BASE_ID, type.getBaseId().value());
+         }
 
          /* parent */
          addSimpleExtension(AtomCMIS.PARENT_ID, type.getParentId());
@@ -201,9 +203,13 @@ public class TypeDefinitionTypeElement extends ExtensibleElementWrapper
 
                addSimpleExtension(AtomCMIS.VERSIONABLE, Boolean.toString(type.isVersionable()));
                if (type.getContentStreamAllowed() != null)
+               {
                   addSimpleExtension(AtomCMIS.CONTENT_STREAM_ALLOWED, type.getContentStreamAllowed().value());
+               }
                else
+               {
                   addSimpleExtension(AtomCMIS.CONTENT_STREAM_ALLOWED, ContentStreamAllowed.ALLOWED.value());
+               }
 
                break;
             case RELATIONSHIP :
@@ -213,14 +219,18 @@ public class TypeDefinitionTypeElement extends ExtensibleElementWrapper
                if (arrayAllowedSource != null && arrayAllowedSource.length > 0)
                {
                   for (String string : arrayAllowedSource)
+                  {
                      addSimpleExtension(AtomCMIS.ALLOWED_SOURCE_TYPES, string);
+                  }
                }
 
                String[] arrayAllowedTarget = type.getAllowedTargetTypes();
                if (arrayAllowedTarget != null && arrayAllowedTarget.length > 0)
                {
                   for (String string : arrayAllowedTarget)
+                  {
                      addSimpleExtension(AtomCMIS.ALLOWED_TARGET_TYPES, string);
+                  }
                }
                break;
             case FOLDER :

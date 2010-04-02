@@ -22,10 +22,10 @@ package org.xcmis.sp.jcr.exo;
 import org.exoplatform.services.jcr.impl.core.NodeImpl;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.spi.BaseType;
 import org.xcmis.spi.ItemsIterator;
-import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.data.ObjectData;
+import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.TypeDefinition;
 
 import java.util.HashSet;
 import java.util.NoSuchElementException;

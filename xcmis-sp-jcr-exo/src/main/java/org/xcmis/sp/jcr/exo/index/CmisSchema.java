@@ -22,9 +22,9 @@ import org.xcmis.search.content.InMemoryColumn;
 import org.xcmis.search.content.Schema;
 import org.xcmis.search.model.source.SelectorName;
 import org.xcmis.search.value.PropertyType;
-import org.xcmis.spi.PropertyDefinition;
-import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.TypeManager;
+import org.xcmis.spi.model.PropertyDefinition;
+import org.xcmis.spi.model.TypeDefinition;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,18 +39,18 @@ import java.util.Map;
  */
 public class CmisSchema implements Schema
 {
-   public static Map<org.xcmis.spi.PropertyType, PropertyType> PROPERTY_TYPES_MAP;
+   public static Map<org.xcmis.spi.model.PropertyType, PropertyType> PROPERTY_TYPES_MAP;
    static
    {
-      PROPERTY_TYPES_MAP = new HashMap<org.xcmis.spi.PropertyType, PropertyType>();
-      PROPERTY_TYPES_MAP.put(org.xcmis.spi.PropertyType.BOOLEAN, PropertyType.BOOLEAN);
-      PROPERTY_TYPES_MAP.put(org.xcmis.spi.PropertyType.ID, PropertyType.STRING);
-      PROPERTY_TYPES_MAP.put(org.xcmis.spi.PropertyType.INTEGER, PropertyType.LONG);
-      PROPERTY_TYPES_MAP.put(org.xcmis.spi.PropertyType.DATETIME, PropertyType.DATE);
-      PROPERTY_TYPES_MAP.put(org.xcmis.spi.PropertyType.DECIMAL, PropertyType.DOUBLE);
-      PROPERTY_TYPES_MAP.put(org.xcmis.spi.PropertyType.HTML, PropertyType.STRING);
-      PROPERTY_TYPES_MAP.put(org.xcmis.spi.PropertyType.STRING, PropertyType.STRING);
-      PROPERTY_TYPES_MAP.put(org.xcmis.spi.PropertyType.URI, PropertyType.STRING);
+      PROPERTY_TYPES_MAP = new HashMap<org.xcmis.spi.model.PropertyType, PropertyType>();
+      PROPERTY_TYPES_MAP.put(org.xcmis.spi.model.PropertyType.BOOLEAN, PropertyType.BOOLEAN);
+      PROPERTY_TYPES_MAP.put(org.xcmis.spi.model.PropertyType.ID, PropertyType.STRING);
+      PROPERTY_TYPES_MAP.put(org.xcmis.spi.model.PropertyType.INTEGER, PropertyType.LONG);
+      PROPERTY_TYPES_MAP.put(org.xcmis.spi.model.PropertyType.DATETIME, PropertyType.DATE);
+      PROPERTY_TYPES_MAP.put(org.xcmis.spi.model.PropertyType.DECIMAL, PropertyType.DOUBLE);
+      PROPERTY_TYPES_MAP.put(org.xcmis.spi.model.PropertyType.HTML, PropertyType.STRING);
+      PROPERTY_TYPES_MAP.put(org.xcmis.spi.model.PropertyType.STRING, PropertyType.STRING);
+      PROPERTY_TYPES_MAP.put(org.xcmis.spi.model.PropertyType.URI, PropertyType.STRING);
    }
 
    private final TypeManager typeManager;
@@ -84,7 +84,7 @@ public class CmisSchema implements Schema
       private final TypeDefinition typeDefinition;
 
       /**
-       * @param typeDefinition 
+       * @param typeDefinition
        * @param typeId
        * @param typeManager
        */

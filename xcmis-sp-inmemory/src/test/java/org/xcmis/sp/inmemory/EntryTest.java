@@ -19,12 +19,7 @@
 
 package org.xcmis.sp.inmemory;
 
-import org.xcmis.core.CmisAccessControlEntryType;
-import org.xcmis.core.CmisAccessControlPrincipalType;
-import org.xcmis.core.EnumBasicPermissions;
-import org.xcmis.core.EnumVersioningState;
-import org.xcmis.sp.inmemory.RepositoryImpl;
-import org.xcmis.spi.object.Entry;
+import com.sun.corba.se.impl.activation.RepositoryImpl;
 
 import java.util.ArrayList;
 import java.util.HashMap;

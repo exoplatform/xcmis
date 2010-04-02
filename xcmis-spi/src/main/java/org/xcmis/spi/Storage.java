@@ -24,7 +24,12 @@ import org.xcmis.spi.data.Folder;
 import org.xcmis.spi.data.ObjectData;
 import org.xcmis.spi.data.Policy;
 import org.xcmis.spi.data.Relationship;
-import org.xcmis.spi.object.RenditionManager;
+import org.xcmis.spi.model.AllowableActions;
+import org.xcmis.spi.model.ChangeEvent;
+import org.xcmis.spi.model.Rendition;
+import org.xcmis.spi.model.RepositoryInfo;
+import org.xcmis.spi.model.UnfileObject;
+import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 
@@ -39,14 +44,14 @@ public interface Storage extends TypeManager
 
    /**
     * Get storage unique id.
-    * 
+    *
     * @return storage id
     */
    String getId();
 
    /**
     * Calculate allowable actions for specified object.
-    * 
+    *
     * @param object object
     * @return allowable actions for object
     */
@@ -54,7 +59,7 @@ public interface Storage extends TypeManager
 
    /**
     * Get checkedout objects (private working copies) that user has access to.
-    * 
+    *
     * @param folder folder, if <code>null</code> then get all checked out
     *        objects in any folders
     * @param orderBy comma-separated list of query names and the ascending
@@ -73,7 +78,7 @@ public interface Storage extends TypeManager
     * and has not ID (method {@link ObjectData#getObjectId()} returns
     * <code>null</code>). To save this document method {@link ObjectData#save()}
     * must be used.
-    * 
+    *
     * @param folder parent folder or <code>null</code> if document should be
     *        created in unfiling state
     * @param typeId type id
@@ -109,7 +114,7 @@ public interface Storage extends TypeManager
     * persisted instance may be created. This behavior is implementation
     * specific. In both cases caller may apply new properties and save it. See
     * {@link ObjectData#save()}.
-    * 
+    *
     * @param source source document
     * @param folder parent folder or <code>null</code> if document should be
     *        created in unfiling state
@@ -142,7 +147,7 @@ public interface Storage extends TypeManager
     * <code>folder</code> as parent. It is not persisted instance and has not ID
     * (method {@link ObjectData#getObjectId()} returns <code>null</code>). To
     * save this folder method {@link ObjectData#save()} must be used.
-    * 
+    *
     * @param folder parent folder
     * @param typeId type id
     * @return new unsaved instance of folder
@@ -164,7 +169,7 @@ public interface Storage extends TypeManager
     * created in unfiling state. It is not persisted instance and has not ID
     * (method {@link ObjectData#getObjectId()} returns <code>null</code>). To
     * save this policy method {@link ObjectData#save()} must be used.
-    * 
+    *
     * @param folder parent folder
     * @param typeId type id
     * @return new unsaved instance of policy
@@ -187,7 +192,7 @@ public interface Storage extends TypeManager
     * <code>target</code>. It is not persisted instance and has not ID (method
     * {@link ObjectData#getObjectId()} returns <code>null</code>). To save this
     * relationship method {@link ObjectData#save()} must be used.
-    * 
+    *
     * @param source source of relationship
     * @param target target of relationship
     * @param typeId type of relationship
@@ -209,7 +214,7 @@ public interface Storage extends TypeManager
     * removed from all folders it is filed in. If specified object is private
     * working copy the deletion object is the same as to cancel checkout
     * operation. See {@link Document#cancelCheckout()}.
-    * 
+    *
     * @param object object to be deleted
     * @param deleteAllVersions if <code>false</code> then delete only the object
     *        specified, if <code>true</code> delete all versions of versionable
@@ -228,7 +233,7 @@ public interface Storage extends TypeManager
    /**
     * Delete the specified folder object and all of its child- and
     * descendant-objects.
-    * 
+    *
     * @param folder folder to be deleted
     * @param deleteAllVersions if <code>true</code> then delete all versions of
     *        the document in this folder. If <code>false</code>, delete only the
@@ -258,14 +263,14 @@ public interface Storage extends TypeManager
    /**
     * Remove non-folder fileable object from all folder where in which it is
     * currently filed. This method never remove object itself.
-    * 
+    *
     * @param object object
     */
    void unfileObject(ObjectData object);
 
    /**
     * Save updated object or newly created object.
-    * 
+    *
     * @param object object to be saved
     * @throws StorageException if changes can't be saved cause storage internal
     *         errors
@@ -279,7 +284,7 @@ public interface Storage extends TypeManager
 
    /**
     * Gets content changes.
-    * 
+    *
     * @param changeLogToken if value other than <code>null</code>, then change
     *        event corresponded to the value of the specified change log token
     *        will be returned as the first result in the output. If not
@@ -297,7 +302,7 @@ public interface Storage extends TypeManager
 
    /**
     * Handle specified SQL query.
-    * 
+    *
     * @param query SQL query
     * @return set of query results
     * @throws InvalidArgumentException if specified <code>query</code> is
@@ -307,7 +312,7 @@ public interface Storage extends TypeManager
 
    /**
     * Get object by unique identifier.
-    * 
+    *
     * @param objectId object's ID
     * @return object
     * @throws ObjectNotFoundException if object with specified ID was not found
@@ -316,7 +321,7 @@ public interface Storage extends TypeManager
 
    /**
     * Get object by path.
-    * 
+    *
     * @param path path
     * @return object
     * @throws ObjectNotFoundException if object with specified path was not
@@ -327,7 +332,7 @@ public interface Storage extends TypeManager
    /**
     * Move <code>object</code> from <code>source</code> to <code>target</code>.
     * If operation successful then changes saved immediately.
-    * 
+    *
     * @param object object to be moved
     * @param target destination folder
     * @param source folder from which object must be moved
@@ -352,7 +357,7 @@ public interface Storage extends TypeManager
 
    /**
     * Get object renditions.
-    * 
+    *
     * @param object object
     * @return iterator over object's renditions. If object has not any
     *         renditions then empty iterator must be returned but never
@@ -362,7 +367,7 @@ public interface Storage extends TypeManager
 
    /**
     * Get description of storage and its capabilities.
-    * 
+    *
     * @return storage description
     */
    RepositoryInfo getRepositoryInfo();
@@ -370,7 +375,7 @@ public interface Storage extends TypeManager
    /**
     * Collection of all Document in the specified version series, sorted by
     * cmis:creationDate descending.
-    * 
+    *
     * @param versionSeriesId id of version series
     * @return document versions
     * @throws ObjectNotFoundException if version series with

@@ -22,9 +22,9 @@ package org.xcmis.spi.data;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.VersioningException;
+import org.xcmis.spi.model.TypeDefinition;
 
 /**
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>

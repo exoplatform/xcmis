@@ -23,7 +23,7 @@ import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
-import org.xcmis.spi.object.impl.DateTimeProperty;
+import org.xcmis.spi.model.impl.DateTimeProperty;
 
 import java.util.Calendar;
 import java.util.List;

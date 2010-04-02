@@ -22,7 +22,7 @@ package org.xcmis.restatom.abdera;
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.object.impl.IdProperty;
+import org.xcmis.spi.model.impl.IdProperty;
 
 import java.util.List;
 

@@ -30,13 +30,13 @@ import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.FilterNotValidException;
-import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.StorageProvider;
-import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.model.CmisObject;
+import org.xcmis.spi.model.IncludeRelationships;
 
 import java.util.List;
 

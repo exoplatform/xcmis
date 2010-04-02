@@ -25,12 +25,12 @@ import org.xcmis.sp.jcr.exo.BaseTest;
 import org.xcmis.sp.jcr.exo.JcrCMIS;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.Storage;
-import org.xcmis.spi.VersioningState;
 import org.xcmis.spi.data.BaseContentStream;
 import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.data.Document;
 import org.xcmis.spi.data.Folder;
 import org.xcmis.spi.data.ObjectData;
+import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.query.Result;
 
 import java.util.HashSet;
