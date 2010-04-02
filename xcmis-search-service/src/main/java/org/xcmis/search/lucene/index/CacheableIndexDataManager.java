@@ -37,6 +37,8 @@ import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by The eXo Platform SAS.
@@ -60,7 +62,7 @@ public class CacheableIndexDataManager extends LocalIndexDataManagerProxy
    /**
     * Class logger.
     */
-   private final Log log = ExoLogger.getLogger(CacheableIndexDataManager.class);
+   private static final Log LOG = ExoLogger.getLogger(CacheableIndexDataManager.class);
 
    /**
     * Index chains.
@@ -72,7 +74,23 @@ public class CacheableIndexDataManager extends LocalIndexDataManagerProxy
     */
    private final PendingAggregatePolicy persistentAggregationPolicy;
 
-   // private final IndexTransactionService storage;
+   /**
+    * The time this index was last flushed or a transaction was committed.
+    */
+   private volatile long lastFlushTime;
+
+   /**
+    * Task that is periodically called by {@link #FLUSH_TIMER} and checks if
+    * index should be flushed.
+    */
+   private TimerTask flushTask;
+
+   /**
+    * Timer to schedule flushes of this index after some idle time.
+    */
+   private static final Timer FLUSH_TIMER = new Timer(true);
+
+   private final static int DEFAULT_IDLE_TIME = 10 * 1000;
 
    /**
     * @param queryHandlerEntry
@@ -97,6 +115,7 @@ public class CacheableIndexDataManager extends LocalIndexDataManagerProxy
       persistentAggregationPolicy.setMinDocuments4Dir(100);
       persistentAggregationPolicy.setMinAggregateTime(1 * 1000);
       persistentAggregationPolicy.setMinModificationTime(3 * 1000);
+      scheduleFlushTask();
 
    }
 
@@ -128,15 +147,16 @@ public class CacheableIndexDataManager extends LocalIndexDataManagerProxy
          if (candidats2Save.size() > 0)
          {
             super.aggregate(candidats2Save);
+
             for (final LuceneIndexDataManager luceneIndexDataManager : candidats2Save)
             {
                dataKeeperFactory.dispose(luceneIndexDataManager);
                ((TransactionableLuceneIndexDataManager)luceneIndexDataManager).getTransactionLog().removeLog();
                indexes.remove(luceneIndexDataManager);
             }
+            lastFlushTime = System.currentTimeMillis();
          }
       }
-      // LOG.info("---" + indexes.size() + "-----");
       return null;
    }
 
@@ -261,6 +281,57 @@ public class CacheableIndexDataManager extends LocalIndexDataManagerProxy
       return result;
    }
 
+   /**
+    * Cancel flush task and add new one
+    */
+   private void scheduleFlushTask()
+   {
+      // cancel task
+      if (flushTask != null)
+      {
+         flushTask.cancel();
+      }
+      // clear canceled tasks
+      FLUSH_TIMER.purge();
+      // new flush task, cause canceled can't be re-used
+      flushTask = new TimerTask()
+      {
+         public void run()
+         {
+            long idleTime = System.currentTimeMillis() - lastFlushTime;
+            //10 sec
+            if (idleTime > DEFAULT_IDLE_TIME)
+            {
+               if (memoryChains.size() > 0)
+               {
+                  synchronized (memoryChains)
+                  {
+                     try
+                     {
+                        flash();
+                     }
+                     catch (TransactionLogException e)
+                     {
+                        LOG.error(e.getLocalizedMessage(), e);
+                     }
+                     catch (IndexTransactionException e)
+                     {
+                        LOG.error(e.getLocalizedMessage(), e);
+                     }
+                     catch (IndexException e)
+                     {
+                        LOG.error(e.getLocalizedMessage(), e);
+                     }
+                  }
+               }
+            }
+
+         }
+      };
+      FLUSH_TIMER.schedule(flushTask, 0, 1000);
+      lastFlushTime = System.currentTimeMillis();
+   }
+
    @Override
    public long getLastModifedTime()
    {
@@ -298,8 +369,8 @@ public class CacheableIndexDataManager extends LocalIndexDataManagerProxy
          {
             super.save(changes);
          }
-         aggregate(memoryChains);
       }
+      aggregate(memoryChains);
       return null;
    }
 
@@ -311,20 +382,21 @@ public class CacheableIndexDataManager extends LocalIndexDataManagerProxy
    {
       try
       {
-         synchronized (memoryChains)
+         if (memoryChains.size() > 0)
          {
-            if (memoryChains.size() > 0)
+            synchronized (memoryChains)
             {
-               super.aggregate(memoryChains);
-               for (final LuceneIndexDataManager luceneIndexDataManager : memoryChains)
-               {
-                  dataKeeperFactory.dispose(luceneIndexDataManager);
-                  ((TransactionableLuceneIndexDataManager)luceneIndexDataManager).getTransactionLog().removeLog();
-
-               }
-               memoryChains.clear();
+               flash();
             }
          }
+         // cancel task
+         if (flushTask != null)
+         {
+            flushTask.cancel();
+         }
+         // clear canceled tasks
+         FLUSH_TIMER.purge();
+         FLUSH_TIMER.cancel();
       }
       catch (final ConcurrentModificationException e)
       {
@@ -337,12 +409,30 @@ public class CacheableIndexDataManager extends LocalIndexDataManagerProxy
       super.stop();
    }
 
-   private void dump()
+   /**
+    * @throws IndexException
+    * @throws IndexTransactionException
+    * @throws TransactionLogException
+    */
+   private void flash() throws IndexException, IndexTransactionException, TransactionLogException
    {
-      log.info("====" + memoryChains.size() + "=====");
+      super.aggregate(memoryChains);
       for (final LuceneIndexDataManager luceneIndexDataManager : memoryChains)
       {
-         log.info(luceneIndexDataManager.getDirectorySize(false) + "\t\t" + luceneIndexDataManager.getDocumentCount()
+         dataKeeperFactory.dispose(luceneIndexDataManager);
+         ((TransactionableLuceneIndexDataManager)luceneIndexDataManager).getTransactionLog().removeLog();
+
+      }
+      memoryChains.clear();
+      lastFlushTime = System.currentTimeMillis();
+   }
+
+   private void dump()
+   {
+      LOG.info("====" + memoryChains.size() + "=====");
+      for (final LuceneIndexDataManager luceneIndexDataManager : memoryChains)
+      {
+         LOG.info(luceneIndexDataManager.getDirectorySize(false) + "\t\t" + luceneIndexDataManager.getDocumentCount()
             + "\t\t" + (System.currentTimeMillis() - luceneIndexDataManager.getLastModifedTime()) + " msec");
       }
    }
