@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.exoplaform.org/xml/ns/kernel_1_0.xsd http://www.exoplaform.org/xml/ns/kernel_1_0.xsd" xmlns="http://www.exoplaform.org/xml/ns/kernel_1_0.xsd">
-
-   
    
    <component>
       <key>org.exoplatform.services.log.LogConfigurationInitializer</key>
@@ -92,7 +90,6 @@
       </init-params>
    </component>
 
-
    <component>
       <key>org.exoplatform.services.jcr.RepositoryService</key>
       <type>org.exoplatform.services.jcr.impl.RepositoryServiceImpl</type>
@@ -106,6 +103,16 @@
             <property name="repository" value="production" />
          </properties-param>
       </init-params>
+   </component>
+
+  <component>
+      <key>org.exoplatform.services.security.RolesExtractor</key>
+      <type>org.exoplatform.services.security.impl.DefaultRolesExtractorImpl</type>
+   </component>
+
+   <component>
+      <key>org.exoplatform.services.organization.OrganizationService</key>
+      <type>org.exoplatform.services.organization.impl.mock.DummyOrganizationService</type>
    </component>
 
    <component>
