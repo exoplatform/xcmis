@@ -31,6 +31,6 @@
 	<inherits name='com.google.gwt.user.theme.standard.Standard' />
 
 	<!-- Specify the app entry point class.                         -->
-	<entry-point class='org.xcmis.gwtframework.client.Framework' />
+	<entry-point class='org.xcmis.client.gwt.client.TestEntryPoint' />
 	
 </module>
