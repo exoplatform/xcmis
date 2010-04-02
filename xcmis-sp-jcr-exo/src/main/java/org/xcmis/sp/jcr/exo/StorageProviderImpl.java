@@ -440,6 +440,10 @@ public class StorageProviderImpl implements StorageProvider, Startable
     */
    public void stop()
    {
+      for (SearchService searchService : searchServices.values())
+      {
+         searchService.stop();
+      }
    }
 
    public StorageConfiguration getStorageConfiguration(String id)
