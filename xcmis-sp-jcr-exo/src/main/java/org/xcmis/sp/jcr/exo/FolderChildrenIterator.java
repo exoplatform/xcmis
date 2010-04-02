@@ -169,7 +169,6 @@ class FolderChildrenIterator implements ItemsIterator<ObjectData>
                // unsupported by xCMIS nodes met.
                LOG.warn("Unable get next object . " + iae.getMessage());
             }
-            LOG.warn("Unable get next object . " + iae.getMessage());
          }
          catch (javax.jcr.RepositoryException re)
          {
