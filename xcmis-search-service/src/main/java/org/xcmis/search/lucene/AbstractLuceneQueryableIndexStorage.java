@@ -1,20 +1,20 @@
 /*
  * Copyright (C) 2010 eXo Platform SAS.
- *
- * This is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation; either version 2.1 of
- * the License, or (at your option) any later version.
- *
- * This software is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this software; if not, write to the Free
- * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
- * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ * 
+ * This is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either version 2.1 of the License, or (at your option)
+ * any later version.
+ * 
+ * This software is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this software; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA, or see the FSF
+ * site: http://www.fsf.org.
  */
 package org.xcmis.search.lucene;
 
@@ -32,6 +32,7 @@ import org.apache.lucene.search.TopFieldDocs;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.tika.Tika;
 import org.apache.tika.config.TikaConfig;
+import org.apache.tika.exception.TikaException;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.search.VisitException;
@@ -67,6 +68,7 @@ import org.xcmis.search.result.ScoredNodesImpl;
 import org.xcmis.search.result.ScoredRow;
 import org.xcmis.search.value.NameConverter;
 import org.xcmis.search.value.PathSplitter;
+import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -77,7 +79,7 @@ import java.util.Map;
 
 /**
  * Base implementation of Lucene based {@link QueryableIndexStorage}
- *
+ * 
  */
 public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndexStorage
 {
@@ -141,9 +143,35 @@ public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndex
       this.pathSplitter = serviceConfuguration.getPathSplitter();
       this.indexConfuguration = serviceConfuguration.getIndexConfuguration();
 
-      TikaConfig tikaConfig = indexConfuguration.getTikaConfig();
-      this.nodeIndexer = new LuceneIndexer(tikaConfig == null ? new Tika() : new Tika(tikaConfig), indexConfuguration);
+      this.nodeIndexer =
+         new LuceneIndexer(createExtractor(indexConfuguration.getTikaConfiguration()), indexConfuguration);
 
+   }
+
+   /**
+    * Create Tika from configuration
+    * 
+    * @return
+    * @throws IndexConfigurationException
+    */
+   private Tika createExtractor(String tikaConfiguration) throws IndexConfigurationException
+   {
+      try
+      {
+         return tikaConfiguration == null ? new Tika() : new Tika(new TikaConfig(tikaConfiguration));
+      }
+      catch (TikaException e)
+      {
+         throw new IndexConfigurationException(e.getLocalizedMessage(), e);
+      }
+      catch (IOException e)
+      {
+         throw new IndexConfigurationException(e.getLocalizedMessage(), e);
+      }
+      catch (SAXException e)
+      {
+         throw new IndexConfigurationException(e.getLocalizedMessage(), e);
+      }
    }
 
    public Query getConstrainQuery(Constraint constraint, Map<String, Object> bindVariablesValues) throws VisitException
@@ -235,7 +263,7 @@ public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndex
    public Object visitModifyIndexCommand(InvocationContext ctx, ModifyIndexCommand command) throws Throwable
    {
       Map<String, Document> addedDocuments = new HashMap<String, Document>();
-      //indexing content
+      // indexing content
       for (ContentEntry entry : command.getAddedDocuments())
       {
          addedDocuments.put(entry.getIdentifier(), nodeIndexer.createDocument(entry));
@@ -255,8 +283,8 @@ public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndex
    /**
     * @param indexTransaction
     * @return
-    * @throws IndexTransactionException 
-    * @throws IndexException 
+    * @throws IndexTransactionException
+    * @throws IndexException
     */
    protected abstract Object save(LuceneIndexTransaction indexTransaction) throws IndexException,
       IndexTransactionException;

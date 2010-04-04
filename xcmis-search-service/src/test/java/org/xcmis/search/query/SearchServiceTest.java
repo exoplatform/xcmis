@@ -29,7 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xcmis.search.InvalidQueryException;
 import org.xcmis.search.SearchServiceException;
-import org.xcmis.search.config.IndexConfigurationImpl;
+import org.xcmis.search.config.IndexConfiguration;
 import org.xcmis.search.config.SearchServiceConfiguration;
 import org.xcmis.search.content.ContentEntry;
 import org.xcmis.search.content.InMemorySchema;
@@ -114,10 +114,8 @@ public class SearchServiceTest
       SchemaTableResolver tableResolver = new SchemaTableResolver(nameConverter, schema);
 
       //index configuration
-      IndexConfigurationImpl indexConfuration = new IndexConfigurationImpl();
+      IndexConfiguration indexConfuration = new IndexConfiguration();
       indexConfuration.setIndexDir(tempDir.getAbsolutePath());
-      indexConfuration.setIndexRecoverService(mock(IndexRecoverService.class));
-      indexConfuration.setIndexRestoreService(mock(IndexRestoreService.class));
       indexConfuration.setRootParentUuid("rootParentUuid");
       indexConfuration.setRootUuid("rootUuid");
 
@@ -142,10 +140,8 @@ public class SearchServiceTest
       SchemaTableResolver tableResolver = new SchemaTableResolver(nameConverter, schema);
 
       //index configuration
-      IndexConfigurationImpl indexConfuration = new IndexConfigurationImpl();
+      IndexConfiguration indexConfuration = new IndexConfiguration();
       indexConfuration.setIndexDir(tempDir.getAbsolutePath());
-      indexConfuration.setIndexRecoverService(mock(IndexRecoverService.class));
-      indexConfuration.setIndexRestoreService(mock(IndexRestoreService.class));
       indexConfuration.setRootParentUuid("rootParentUuid");
       indexConfuration.setRootUuid("rootUuid");
 
@@ -178,10 +174,8 @@ public class SearchServiceTest
       SchemaTableResolver tableResolver = new SchemaTableResolver(nameConverter, schema);
 
       //index configuration
-      IndexConfigurationImpl indexConfuration = new IndexConfigurationImpl();
+      IndexConfiguration indexConfuration = new IndexConfiguration();
       indexConfuration.setIndexDir(tempDir.getAbsolutePath());
-      indexConfuration.setIndexRecoverService(mock(IndexRecoverService.class));
-      indexConfuration.setIndexRestoreService(mock(IndexRestoreService.class));
       indexConfuration.setRootParentUuid("rootParentUuid");
       indexConfuration.setRootUuid("rootUuid");
 

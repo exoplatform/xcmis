@@ -35,7 +35,7 @@ import org.apache.lucene.store.RAMDirectory;
 import org.apache.tika.Tika;
 import org.junit.Before;
 import org.junit.Test;
-import org.xcmis.search.config.IndexConfigurationImpl;
+import org.xcmis.search.config.IndexConfiguration;
 import org.xcmis.search.content.ContentEntry;
 import org.xcmis.search.content.Property;
 import org.xcmis.search.content.Property.BinaryValue;
@@ -50,14 +50,14 @@ import java.util.UUID;
  */
 public class LuceneIndexerTest
 {
-   private IndexConfigurationImpl indexConfiguration;
+   private IndexConfiguration indexConfiguration;
 
    private LuceneIndexer nodeIndex;
 
    @Before
    public void beforeEach()
    {
-      indexConfiguration = new IndexConfigurationImpl();
+      indexConfiguration = new IndexConfiguration();
       indexConfiguration.setRootParentUuid(UUID.randomUUID().toString());
       indexConfiguration.setRootUuid(UUID.randomUUID().toString());
       nodeIndex = new LuceneIndexer(new Tika(), indexConfiguration);
