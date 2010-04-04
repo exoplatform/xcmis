@@ -20,6 +20,7 @@ package org.xcmis.search.lucene.index;
 
 import junit.framework.Assert;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.CorruptIndexException;
@@ -40,6 +41,7 @@ import org.xcmis.search.content.Property;
 import org.xcmis.search.content.Property.BinaryValue;
 import org.xcmis.search.value.PropertyType;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.UUID;
 
@@ -103,7 +105,7 @@ public class LuceneIndexerTest
    @Test
    public void testReaderExtractingFromOdt() throws IOException
    {
-      assertIndexed("../../../../../testEn.odt", "application/vnd.oasis.opendocument.text", "dolor");
+         assertIndexed("../../../../../testEn.odt", "application/vnd.oasis.opendocument.text", "dolor");
    }
 
    /**
@@ -117,11 +119,12 @@ public class LuceneIndexerTest
       assertIndexed("../../../../../testEnUtf-8.txt", "text/plain", "dn8dolor");
    }
 
-   private void assertIndexed(String filePath, String contentType, String testString)
+   private void assertIndexed(String filePath, String contentType, String testString) throws CorruptIndexException, LockObtainFailedException, IOException
    {
       //prepare content entry
       Property<BinaryValue>[] property = new Property[1];
-      BinaryValue binaryValue = new BinaryValue(this.getClass().getResourceAsStream(filePath), contentType, null, -1);
+      byte[] buf = IOUtils.toByteArray(this.getClass().getResourceAsStream(filePath));
+      BinaryValue binaryValue = new BinaryValue(new ByteArrayInputStream(buf), contentType, null, -1);
       property[0] = new Property(PropertyType.BINARY, "content", binaryValue);
 
       ContentEntry contentEntry =
@@ -132,8 +135,7 @@ public class LuceneIndexerTest
 
       Assert.assertNotNull(document);
       RAMDirectory directory = new RAMDirectory();
-      try
-      {
+
          //write document to th
          IndexWriter writer = new IndexWriter(directory, new StandardAnalyzer(), MaxFieldLength.UNLIMITED);
          writer.addDocument(document);
@@ -143,19 +145,7 @@ public class LuceneIndexerTest
          TopDocs docs =
             searcher.search(new TermQuery(new Term(FieldNames.createFullTextFieldName("content"), testString)), 10);
          Assert.assertEquals(1, docs.totalHits);
-      }
-      catch (CorruptIndexException e)
-      {
-         Assert.fail(e.getLocalizedMessage());
-      }
-      catch (LockObtainFailedException e)
-      {
-         Assert.fail(e.getLocalizedMessage());
-      }
-      catch (IOException e)
-      {
-         Assert.fail(e.getLocalizedMessage());
-      }
+    
 
    }
 }
