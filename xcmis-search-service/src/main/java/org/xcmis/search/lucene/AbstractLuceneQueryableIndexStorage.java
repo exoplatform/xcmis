@@ -174,7 +174,7 @@ public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndex
       }
    }
 
-   public Query getConstrainQuery(Constraint constraint, Map<String, Object> bindVariablesValues) throws VisitException
+   public Query getConstrainQuery(Constraint constraint, Map<String, Object> bindVariablesValues) throws VisitException, IndexException
    {
       LuceneQueryBuilder luceneQueryBuilder =
          new LuceneQueryBuilder(getIndexReader(), nameConverter, pathSplitter, bindVariablesValues, indexConfuguration);
@@ -278,7 +278,7 @@ public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndex
    /**
     * Different lucene storage's should override this method
     */
-   protected abstract IndexReader getIndexReader();
+   protected abstract IndexReader getIndexReader() throws IndexException;
 
    /**
     * @param indexTransaction

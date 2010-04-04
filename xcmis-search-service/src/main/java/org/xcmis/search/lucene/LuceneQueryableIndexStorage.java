@@ -50,7 +50,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Lucene persisted implementation of {@link QueryableIndexStorage}  
+ * Lucene persisted implementation of {@link QueryableIndexStorage}
  * 
  */
 public class LuceneQueryableIndexStorage extends AbstractLuceneQueryableIndexStorage
@@ -98,21 +98,13 @@ public class LuceneQueryableIndexStorage extends AbstractLuceneQueryableIndexSto
    }
 
    /**
+    * 
     * @see org.xcmis.search.lucene.AbstractLuceneQueryableIndexStorage#getIndexReader()
     */
    @Override
-   protected IndexReader getIndexReader()
+   protected IndexReader getIndexReader() throws IndexException
    {
-      try
-      {
-         return indexDataManager.getIndexReader();
-      }
-      catch (IndexException e)
-      {
-         e.printStackTrace();
-         LOG.error(e.getLocalizedMessage(), e);
-      }
-      return null;
+      return indexDataManager.getIndexReader();
    }
 
    protected Document getDocument(String uuid, IndexReader reader) throws IndexException
@@ -143,8 +135,8 @@ public class LuceneQueryableIndexStorage extends AbstractLuceneQueryableIndexSto
    }
 
    /**
-    * @throws IndexTransactionException 
-    * @throws IndexException 
+    * @throws IndexTransactionException
+    * @throws IndexException
     * @see org.xcmis.search.lucene.AbstractLuceneQueryableIndexStorage#save(org.xcmis.search.lucene.index.LuceneIndexTransaction)
     */
    @Override
@@ -166,7 +158,7 @@ public class LuceneQueryableIndexStorage extends AbstractLuceneQueryableIndexSto
 
       /**
        * @param indexStorage
-       * @param nodeIndexer 
+       * @param nodeIndexer
        */
       public LuceneRecoverService(LuceneQueryableIndexStorage indexStorage, LuceneIndexer nodeIndexer)
       {
@@ -192,7 +184,8 @@ public class LuceneQueryableIndexStorage extends AbstractLuceneQueryableIndexSto
                {
                   if (indexStorage.getDocument(nodeUuid, reader) != null)
                   {
-                     // item exist in index storage but doesn't exist in persistence storage
+                     // item exist in index storage but doesn't exist in
+                     // persistence storage
                      removedDocuments.add(nodeUuid);
                   }
                }
@@ -203,13 +196,13 @@ public class LuceneQueryableIndexStorage extends AbstractLuceneQueryableIndexSto
 
                   if (indexStorage.getDocument(nodeUuid, reader) != null)
                   {
-                     //out dated content
+                     // out dated content
                      addedDocuments.put(nodeUuid, doc);
                      removedDocuments.add(nodeUuid);
                   }
                   else
                   {
-                     //content desn't exist
+                     // content desn't exist
                      addedDocuments.put(nodeUuid, doc);
                   }
                }
@@ -252,8 +245,8 @@ public class LuceneQueryableIndexStorage extends AbstractLuceneQueryableIndexSto
 
       /**
        * @param indexStorage
-       * @param nodeIndexer 
-       * @param indexConfiguration 
+       * @param nodeIndexer
+       * @param indexConfiguration
        */
       public LuceneRestoreService(LuceneQueryableIndexStorage indexStorage, LuceneIndexer nodeIndexer,
          IndexConfiguration indexConfiguration)
@@ -287,13 +280,14 @@ public class LuceneQueryableIndexStorage extends AbstractLuceneQueryableIndexSto
       /**
        * Restore content of branch starting from branchUuid.
        * 
-       * @param branchUuid - Uuid of root element of branch.
+       * @param branchUuid
+       *           - Uuid of root element of branch.
        * @param documentBuffer
-       * @throws Throwable 
+       * @throws Throwable
        */
       private void restoreBranch(String branchUuid, Map<String, Document> documentBuffer) throws Throwable
       {
-         //add root.
+         // add root.
          GetContentEntryCommand getCommand = new GetContentEntryCommand(branchUuid);
          final ContentEntry rootEntry = (ContentEntry)indexStorage.invokeNextInterceptor(null, getCommand);
          if (rootEntry != null)
