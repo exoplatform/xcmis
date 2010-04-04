@@ -119,7 +119,7 @@
                               <string>ws1</string>
                            </field>
                            <field name="indexConfiguration">
-                              <object type="org.xcmis.search.config.IndexConfigurationImpl">
+                              <object type="org.xcmis.search.config.IndexConfiguration">
                                  <field name="indexDir">
                                     <string>target/temp/index/db1/ws1</string>
                                  </field>
