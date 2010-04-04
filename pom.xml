@@ -59,7 +59,7 @@
 
    <modules>
       <module>xcmis-spi</module>
-      <!--module>xcmis-sp-inmemory</module-->
+      <!--module>xcmis-sp-inmemory</module -->
       <module>xcmis-search-model</module>
       <module>xcmis-search-parser-cmis</module>
       <module>xcmis-search-service</module>
@@ -131,13 +131,22 @@
             <artifactId>xcmis-spi</artifactId>
             <version>${project.version}</version>
          </dependency>
-<!--
+         <!-- Search -->
          <dependency>
             <groupId>org.xcmis</groupId>
-            <artifactId>xcmis-sp-inmemory</artifactId>
+            <artifactId>xcmis-search-model</artifactId>
             <version>${project.version}</version>
          </dependency>
--->
+         <dependency>
+            <groupId>org.xcmis</groupId>
+            <artifactId>xcmis-search-parser-cmis</artifactId>
+            <version>${project.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>org.xcmis</groupId>
+            <artifactId>xcmis-search-service</artifactId>
+            <version>${project.version}</version>
+         </dependency>
          <dependency>
             <groupId>org.xcmis</groupId>
             <artifactId>xcmis-sp-jcr-exo</artifactId>
@@ -156,6 +165,11 @@
          <dependency>
             <groupId>org.exoplatform.kernel</groupId>
             <artifactId>exo.kernel.component.common</artifactId>
+            <version>${org.exoplatform.kernel.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>org.exoplatform.kernel</groupId>
+            <artifactId>exo.kernel.commons</artifactId>
             <version>${org.exoplatform.kernel.version}</version>
          </dependency>
          <dependency>
@@ -363,6 +377,11 @@
             <version>1.4</version>
          </dependency>
          <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.5</version>
+         </dependency>
+         <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>mail</artifactId>
             <version>1.4</version>
@@ -398,10 +417,10 @@
             <version>1.0</version>
          </dependency>
          <dependency>
-            <!--        <groupId>org.apache.pdfbox</groupId>-->
+            <!-- <groupId>org.apache.pdfbox</groupId> -->
             <groupId>pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
-            <!--        <version>0.8.0-incubating</version>-->
+            <!-- <version>0.8.0-incubating</version> -->
             <version>0.7.3</version>
          </dependency>
          <dependency>
@@ -438,6 +457,17 @@
             <groupId>com.google.code.guice</groupId>
             <artifactId>guice-jmx</artifactId>
             <version>2.0</version>
+         </dependency>
+         <!-- content reader reader service -->
+         <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-core</artifactId>
+            <version>0.6</version>
+         </dependency>
+         <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-parsers</artifactId>
+            <version>0.6</version>
          </dependency>
       </dependencies>
    </dependencyManagement>
@@ -545,7 +575,7 @@
             </plugin>
          </plugins>
       </pluginManagement>
-      
+
       <plugins>
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
@@ -563,7 +593,7 @@
             </configuration>
          </plugin>
       </plugins>
-      
+
    </build>
 
    <reporting>
@@ -602,5 +632,5 @@
          </plugin>
       </plugins>
    </reporting>
-   
+
 </project>
