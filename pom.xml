@@ -504,7 +504,10 @@
                <include>**/*.conf</include>
                <include>**/*.config</include>
                <include>**/*.groovy</include>
-               <include>**/*.wsdl</include>
+               <include>**/*.doc</include>
+               <include>**/*.html</include>
+               <include>**/*.odt</include>
+               <include>**/*.pdf</include>
             </includes>
          </testResource>
       </testResources>
