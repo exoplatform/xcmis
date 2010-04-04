@@ -32,15 +32,13 @@ import org.exoplatform.services.security.ConversationState;
 import org.picocontainer.Startable;
 import org.xcmis.search.SearchService;
 import org.xcmis.search.SearchServiceException;
-import org.xcmis.search.config.IndexConfigurationImpl;
+import org.xcmis.search.config.IndexConfiguration;
 import org.xcmis.search.config.SearchServiceConfiguration;
 import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.lucene.LuceneSearchService;
 import org.xcmis.search.value.SlashSplitter;
 import org.xcmis.search.value.ToStringNameConverter;
 import org.xcmis.sp.jcr.exo.index.CmisContentReader;
-import org.xcmis.sp.jcr.exo.index.CmisRecoverService;
-import org.xcmis.sp.jcr.exo.index.CmisRestoreService;
 import org.xcmis.sp.jcr.exo.index.CmisSchema;
 import org.xcmis.sp.jcr.exo.index.CmisSchemaTableResolver;
 import org.xcmis.sp.jcr.exo.index.IndexListener;
@@ -380,10 +378,8 @@ public class StorageProviderImpl implements StorageProvider, Startable
             CmisSchemaTableResolver tableResolver =
                new CmisSchemaTableResolver(new ToStringNameConverter(), schema, storage);
 
-            IndexConfigurationImpl indexConfiguration =
-               (IndexConfigurationImpl)cmisRepositoryConfiguration.getIndexConfiguration();
-            indexConfiguration.setIndexRecoverService(new CmisRecoverService(storage));
-            indexConfiguration.setIndexRestoreService(new CmisRestoreService(storage));
+            IndexConfiguration indexConfiguration =
+               cmisRepositoryConfiguration.getIndexConfiguration();
             indexConfiguration.setRootUuid(storage.getRepositoryInfo().getRootFolderId());
             //if list of root parents is empty it will be indexed as empty string
             indexConfiguration.setRootParentUuid("");
