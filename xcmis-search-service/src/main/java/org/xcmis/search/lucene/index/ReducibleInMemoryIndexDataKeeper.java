@@ -342,6 +342,7 @@ public class ReducibleInMemoryIndexDataKeeper implements TransactionableLuceneIn
     */
    private void commitPending() throws IndexException
    {
+      IndexWriter writer = null;
       try
       {
          if (this.pendingDocumentsBuffer.size() > 0)
@@ -349,8 +350,7 @@ public class ReducibleInMemoryIndexDataKeeper implements TransactionableLuceneIn
             synchronized (this.indexDirectiry)
             {
 
-               final IndexWriter writer =
-                  new IndexWriter(this.indexDirectiry, new StandardAnalyzer(), MaxFieldLength.UNLIMITED);
+               writer = new IndexWriter(this.indexDirectiry, new StandardAnalyzer(), MaxFieldLength.UNLIMITED);
                for (final Entry<String, Document> addedDocument : this.pendingDocumentsBuffer.entrySet())
                {
                   writer.addDocument(addedDocument.getValue());
@@ -375,6 +375,24 @@ public class ReducibleInMemoryIndexDataKeeper implements TransactionableLuceneIn
       catch (final IOException e)
       {
          throw new IndexException(e.getLocalizedMessage(), e);
+      }
+      finally
+      {
+         if (writer != null)
+         {
+            try
+            {
+               writer.close();
+            }
+            catch (CorruptIndexException e)
+            {
+               throw new IndexException(e.getLocalizedMessage(), e);
+            }
+            catch (IOException e)
+            {
+               throw new IndexException(e.getLocalizedMessage(), e);
+            }
+         }
       }
    }
 }
