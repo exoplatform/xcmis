@@ -32,6 +32,7 @@ import org.xcmis.spi.utils.MimeType;
 
 import java.util.Map;
 
+import javax.jcr.Item;
 import javax.jcr.Node;
 import javax.jcr.Property;
 import javax.jcr.Repository;
@@ -81,27 +82,34 @@ public class UpdateListener implements EventListener
          {
             Event event = eventIterator.nextEvent();
             String path = event.getPath();
-            if (event.getPath().endsWith("jcr:content"))
+            if (path.contains("xcmis:system"))
+               return;
+            
+            if (event.getPath().endsWith("jcr:content") || event.getPath().endsWith("jcr:data"))
             {
                if (prov == null)
                   prov = SessionProvider.createSystemProvider();
                if (session == null)
               session = prov.getSession(workspace, (ManageableRepository)repository);
 
-               Node node = session.getItem(path).getParent();
-              //Entry entry = new EntryImpl(node);
+               Node node = null;
+               Item item = session.getItem(path);
+               if (item.isNode()){
+                   node = session.getItem(path).getParent();
+               }else {
+                 node = session.getItem(path).getParent().getParent(); 
+               }
                ContentStream content;
-               //content = entry.getContent(null);
                Node contentNode = node.getNode(JcrCMIS.JCR_CONTENT);
                Property fileContent = contentNode.getProperty(JcrCMIS.JCR_DATA);
-               long length = fileContent.getLength();
-               if (length == 0)
+               int length = fileContent.getStream().available();
+               if (length == 0) {
                   return; // No content, but node has empty stream.
+               }
                content = new BaseContentStream(fileContent.getStream(), //
                   length, //
                   node.getDepth() == 0 ? CMIS.ROOT_FOLDER_NAME : node.getName(), //
                   contentNode.getProperty(JcrCMIS.JCR_MIMETYPE).getString());
-               
                
                if (content != null)
                {
@@ -114,8 +122,9 @@ public class UpdateListener implements EventListener
                         if (renditionProvider.canStoreRendition())
                         {
                            RenditionContentStream renditionContentStream = renditionProvider.getRenditionStream(content);
+                           String id =  IdGenerator.generate();
                            Node rendition =
-                              node.addNode(IdGenerator.generate(), JcrCMIS.CMIS_NT_RENDITION);
+                              node.addNode(id, JcrCMIS.CMIS_NT_RENDITION);
                            rendition.setProperty(JcrCMIS.CMIS_RENDITION_STREAM, renditionContentStream.getStream());
                            rendition.setProperty(JcrCMIS.CMIS_RENDITION_MIME_TYPE, renditionContentStream
                               .getMediaType());

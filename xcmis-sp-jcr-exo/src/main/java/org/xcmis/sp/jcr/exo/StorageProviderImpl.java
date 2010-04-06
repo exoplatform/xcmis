@@ -369,8 +369,8 @@ public class StorageProviderImpl implements StorageProvider, Startable
                {
                   workspace.getObservationManager().addEventListener(
                      new UpdateListener(repository, cmisRepositoryConfiguration.getWorkspace(), renditionProviders),
-                     Event.NODE_ADDED | Event.PROPERTY_ADDED | Event.PROPERTY_CHANGED | Event.PROPERTY_REMOVED, "/",
-                     true, null, new String[]{JcrCMIS.NT_FILE}, false);
+                     Event.NODE_ADDED | Event.PROPERTY_ADDED | Event.PROPERTY_CHANGED , "/",
+                     true, null, new String[]{JcrCMIS.NT_FILE, JcrCMIS.NT_RESOURCE}, false);
                }
             }
             catch (Exception ex)
