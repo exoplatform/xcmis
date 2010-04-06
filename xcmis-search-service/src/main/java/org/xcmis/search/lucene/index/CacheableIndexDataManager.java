@@ -92,6 +92,11 @@ public class CacheableIndexDataManager extends LocalIndexDataManagerProxy
 
    private final static int DEFAULT_IDLE_TIME = 10 * 1000;
 
+   /** 
+    * If manager isStoped
+    */
+   private boolean isStoped = false;
+
    /**
     * @param queryHandlerEntry
     * @param dataKeeperFactory
@@ -387,6 +392,7 @@ public class CacheableIndexDataManager extends LocalIndexDataManagerProxy
             synchronized (memoryChains)
             {
                flash();
+               isStoped = true;
             }
          }
          // cancel task
@@ -416,15 +422,18 @@ public class CacheableIndexDataManager extends LocalIndexDataManagerProxy
     */
    private void flash() throws IndexException, IndexTransactionException, TransactionLogException
    {
-      super.aggregate(memoryChains);
-      for (final LuceneIndexDataManager luceneIndexDataManager : memoryChains)
+      if (!isStoped)
       {
-         dataKeeperFactory.dispose(luceneIndexDataManager);
-         ((TransactionableLuceneIndexDataManager)luceneIndexDataManager).getTransactionLog().removeLog();
+         super.aggregate(memoryChains);
+         for (final LuceneIndexDataManager luceneIndexDataManager : memoryChains)
+         {
+            dataKeeperFactory.dispose(luceneIndexDataManager);
+            ((TransactionableLuceneIndexDataManager)luceneIndexDataManager).getTransactionLog().removeLog();
 
+         }
+         memoryChains.clear();
+         lastFlushTime = System.currentTimeMillis();
       }
-      memoryChains.clear();
-      lastFlushTime = System.currentTimeMillis();
    }
 
    private void dump()
