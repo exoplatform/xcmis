@@ -747,8 +747,8 @@ public interface Connection
     *         storage internal problem
     */
    String createFolder(String folderId, Map<String, Property<?>> properties, List<AccessControlEntry> addACL,
-      List<AccessControlEntry> removeACL, Collection<String> policies) throws ObjectNotFoundException, ConstraintException,
-      InvalidArgumentException, NameConstraintViolationException, StorageException;
+      List<AccessControlEntry> removeACL, Collection<String> policies) throws ObjectNotFoundException,
+      ConstraintException, InvalidArgumentException, NameConstraintViolationException, StorageException;
 
    /**
     * Create a policy object.
@@ -797,8 +797,8 @@ public interface Connection
     *         storage internal problem
     */
    String createPolicy(String folderId, Map<String, Property<?>> properties, List<AccessControlEntry> addACL,
-      List<AccessControlEntry> removeACL, Collection<String> policies) throws ObjectNotFoundException, ConstraintException,
-      InvalidArgumentException, NameConstraintViolationException, StorageException;
+      List<AccessControlEntry> removeACL, Collection<String> policies) throws ObjectNotFoundException,
+      ConstraintException, InvalidArgumentException, NameConstraintViolationException, StorageException;
 
    /**
     * Create a relationship object.
@@ -843,8 +843,8 @@ public interface Connection
     *         cause to storage internal problem
     */
    String createRelationship(Map<String, Property<?>> properties, List<AccessControlEntry> addACL,
-      List<AccessControlEntry> removeACL, Collection<String> policies) throws ObjectNotFoundException, ConstraintException,
-      NameConstraintViolationException, StorageException;
+      List<AccessControlEntry> removeACL, Collection<String> policies) throws ObjectNotFoundException,
+      ConstraintException, NameConstraintViolationException, StorageException;
 
    /**
     * Delete the content stream for the specified Document object.
@@ -875,7 +875,7 @@ public interface Connection
    /**
     * Delete the specified object.
     * 
-    * @param objectId document id
+    * @param objectId the object id
     * @param deleteAllVersions if <code>true</code> (Default if not specified)
     *        then delete all versions of the document. If <code>false</code>,
     *        delete only the document object specified. This parameter will be
@@ -1379,8 +1379,9 @@ public interface Connection
     *         storage cause to its internal problem
     */
    String checkin(String documentId, boolean major, Map<String, Property<?>> properties, ContentStream content,
-      String checkinComment, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<String> policies)
-      throws ConstraintException, UpdateConflictException, StreamNotSupportedException, IOException;
+      String checkinComment, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
+      Collection<String> policies) throws ConstraintException, UpdateConflictException, StreamNotSupportedException,
+      IOException;
 
    /**
     * Get all documents in version series.

@@ -28,6 +28,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
 
 /**
  * Created by The eXo Platform SAS .
@@ -47,7 +50,7 @@ public class RepositoryServiceTest extends BaseTest
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
       ContainerResponse resp = service("GET", requestURI, "http://localhost:8080/rest", null, null, writer);
 
-//      printBody(writer.getBody());
+      //      printBody(writer.getBody());
       assertEquals(200, resp.getStatus());
 
       DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
@@ -58,7 +61,9 @@ public class RepositoryServiceTest extends BaseTest
       int length = workspaces.getLength();
       assertEquals(1, length);
       for (int i = 0; i < length; i++)
+      {
          validateWorkspaceElement(workspaces.item(i));
+      }
    }
 
    public void testGetRepositoryInfo() throws Exception
@@ -75,9 +80,59 @@ public class RepositoryServiceTest extends BaseTest
       org.w3c.dom.Document xmlDoc = f.newDocumentBuilder().parse(new ByteArrayInputStream(writer.getBody()));
 
       org.w3c.dom.Node workspace = getNode("/app:service/app:workspace", xmlDoc);
-      assertEquals(cmisRepositoryId, getStringElement(
-         "cmisra:repositoryInfo/cmis:repositoryId", workspace));
+      assertEquals(cmisRepositoryId, getStringElement("cmisra:repositoryInfo/cmis:repositoryId", workspace));
       validateWorkspaceElement(workspace);
+   }
+
+   public void testCapability() throws Exception
+   {
+
+      String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/";
+      ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
+
+      ContainerResponse resp = service("GET", requestURI, "http://localhost:8080/rest", null, null, writer);
+
+      //      printBody(writer.getBody());
+
+      DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
+      f.setNamespaceAware(true);
+
+      org.w3c.dom.Document xmlDoc = f.newDocumentBuilder().parse(new ByteArrayInputStream(writer.getBody()));
+
+      XPath xp = XPathFactory.newInstance().newXPath();
+      xp.setNamespaceContext(new NamespaceResolver());
+
+      String capabilities = "/app:service/app:workspace/cmisra:repositoryInfo/cmis:capabilities";
+
+      String r = (String)xp.evaluate(capabilities + "/cmis:capabilityACL", xmlDoc, XPathConstants.STRING);
+      assertEquals("manage", r);
+      r = (String)xp.evaluate(capabilities + "/cmis:capabilityAllVersionsSearchable", xmlDoc, XPathConstants.STRING);
+      assertEquals("true", r);
+      r = (String)xp.evaluate(capabilities + "/cmis:capabilityChanges", xmlDoc, XPathConstants.STRING);
+      assertEquals("none", r);
+      r =
+         (String)xp.evaluate(capabilities + "/cmis:capabilityContentStreamUpdatability", xmlDoc, XPathConstants.STRING);
+      assertEquals("anytime", r);
+      r = (String)xp.evaluate(capabilities + "/cmis:capabilityGetDescendants", xmlDoc, XPathConstants.STRING);
+      assertEquals("true", r);
+      r = (String)xp.evaluate(capabilities + "/cmis:capabilityGetFolderTree", xmlDoc, XPathConstants.STRING);
+      assertEquals("true", r);
+      r = (String)xp.evaluate(capabilities + "/cmis:capabilityMultifiling", xmlDoc, XPathConstants.STRING);
+      assertEquals("true", r);
+      r = (String)xp.evaluate(capabilities + "/cmis:capabilityPWCSearchable", xmlDoc, XPathConstants.STRING);
+      assertEquals("true", r);
+      r = (String)xp.evaluate(capabilities + "/cmis:capabilityPWCUpdateable", xmlDoc, XPathConstants.STRING);
+      assertEquals("true", r);
+      r = (String)xp.evaluate(capabilities + "/cmis:capabilityQuery", xmlDoc, XPathConstants.STRING);
+      assertEquals("bothcombined", r);
+      r = (String)xp.evaluate(capabilities + "/cmis:capabilityRenditions", xmlDoc, XPathConstants.STRING);
+      assertEquals("read", r);
+      r = (String)xp.evaluate(capabilities + "/cmis:capabilityUnfiling", xmlDoc, XPathConstants.STRING);
+      assertEquals("true", r);
+      r = (String)xp.evaluate(capabilities + "/cmis:capabilityVersionSpecificFiling", xmlDoc, XPathConstants.STRING);
+      assertEquals("false", r);
+      r = (String)xp.evaluate(capabilities + "/cmis:capabilityJoin", xmlDoc, XPathConstants.STRING);
+      assertEquals("none", r);
    }
 
    private void validateWorkspaceElement(org.w3c.dom.Node workspace) throws Exception
@@ -87,7 +142,7 @@ public class RepositoryServiceTest extends BaseTest
       assertTrue(hasElementValue("cmisra:repositoryInfo/cmis:repositoryId", workspace));
       assertTrue(hasElementValue("cmisra:repositoryInfo/cmis:cmisVersionSupported", workspace));
       assertTrue(hasElementValue("cmisra:repositoryInfo/cmis:capabilities", workspace));
-      
+
       NodeList templates = getNodeSet("cmisra:uritemplate", workspace);
       int length = templates.getLength();
       List<String> list = new ArrayList<String>();

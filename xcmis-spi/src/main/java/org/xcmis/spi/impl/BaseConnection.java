@@ -520,7 +520,7 @@ public abstract class BaseConnection implements Connection
       }
       if (typeId == null)
       {
-         throw new InvalidArgumentException("Type is not specified.");
+         throw new InvalidArgumentException("Required Type property ('cmis:objectTypeId') is not specified.");
       }
 
       String sourceId = null;
@@ -531,7 +531,7 @@ public abstract class BaseConnection implements Connection
       }
       if (sourceId == null)
       {
-         throw new InvalidArgumentException("Required property 'cmis:sourceId' is not specified.");
+         throw new InvalidArgumentException("Required Source Id property ('cmis:sourceId') is not specified.");
       }
 
       String targetId = null;
@@ -542,7 +542,7 @@ public abstract class BaseConnection implements Connection
       }
       if (targetId == null)
       {
-         throw new InvalidArgumentException("Required property 'cmis:targetId' is not specified.");
+         throw new InvalidArgumentException("Required Target Id property ('cmis:targetId') is not specified.");
       }
 
       ObjectData newRelationship =
