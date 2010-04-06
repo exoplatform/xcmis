@@ -98,6 +98,13 @@ public class CacheableIndexDataManager extends LocalIndexDataManagerProxy
    private boolean isStoped = false;
 
    /**
+    * Monitor to use to synchronize access IndexReader.
+    * Extra synchronization to avoid possibility when Timer flashing content to the disc and other 
+    * thread  call getIndexReader and received null. 
+    * */
+   private final Object updateMonitor = new Object();
+
+   /**
     * @param queryHandlerEntry
     * @param dataKeeperFactory
     * @throws IndexConfigurationException
@@ -151,15 +158,18 @@ public class CacheableIndexDataManager extends LocalIndexDataManagerProxy
             persistentAggregationPolicy.findIndexDataManagerToAggrigate(indexes, 0, 0);
          if (candidats2Save.size() > 0)
          {
-            super.aggregate(candidats2Save);
-
-            for (final LuceneIndexDataManager luceneIndexDataManager : candidats2Save)
+            synchronized (updateMonitor)
             {
-               dataKeeperFactory.dispose(luceneIndexDataManager);
-               ((TransactionableLuceneIndexDataManager)luceneIndexDataManager).getTransactionLog().removeLog();
-               indexes.remove(luceneIndexDataManager);
+               super.aggregate(candidats2Save);
+
+               for (final LuceneIndexDataManager luceneIndexDataManager : candidats2Save)
+               {
+                  dataKeeperFactory.dispose(luceneIndexDataManager);
+                  ((TransactionableLuceneIndexDataManager)luceneIndexDataManager).getTransactionLog().removeLog();
+                  indexes.remove(luceneIndexDataManager);
+               }
+               lastFlushTime = System.currentTimeMillis();
             }
-            lastFlushTime = System.currentTimeMillis();
          }
       }
       return null;
@@ -239,51 +249,54 @@ public class CacheableIndexDataManager extends LocalIndexDataManagerProxy
    public IndexReader getIndexReader() throws IndexException
    {
 
-      IndexReader result = super.getIndexReader();
-      synchronized (memoryChains)
+      synchronized (updateMonitor)
       {
-         if (memoryChains.size() > 0)
+         IndexReader result = super.getIndexReader();
+         synchronized (memoryChains)
          {
-            final List<IndexReader> readers = new ArrayList<IndexReader>(memoryChains.size());
-            final Iterator<LuceneIndexDataManager> it = memoryChains.iterator();
-
-            while (it.hasNext())
+            if (memoryChains.size() > 0)
             {
-               final LuceneIndexDataManager chain = it.next();
+               final List<IndexReader> readers = new ArrayList<IndexReader>(memoryChains.size());
+               final Iterator<LuceneIndexDataManager> it = memoryChains.iterator();
 
-               final IndexReader indexReader = chain.getIndexReader();
-               if (indexReader != null)
+               while (it.hasNext())
                {
-                  readers.add(indexReader);
-               }
+                  final LuceneIndexDataManager chain = it.next();
 
-            }
-            if (result != null)
-            {
-               readers.add(result);
-            }
-            if (readers.size() > 1)
-            {
-               final IndexReader[] indexReaders = new IndexReader[readers.size()];
-               result = new MultiReader(readers.toArray(indexReaders));
-            }
-            else if (readers.size() == 1)
-            {
-               result = readers.get(0);
-            }
-            else
-            {
-               throw new IndexReaderNotFoundException("No readers found");
+                  final IndexReader indexReader = chain.getIndexReader();
+                  if (indexReader != null)
+                  {
+                     readers.add(indexReader);
+                  }
+
+               }
+               if (result != null)
+               {
+                  readers.add(result);
+               }
+               if (readers.size() > 1)
+               {
+                  final IndexReader[] indexReaders = new IndexReader[readers.size()];
+                  result = new MultiReader(readers.toArray(indexReaders));
+               }
+               else if (readers.size() == 1)
+               {
+                  result = readers.get(0);
+               }
+               else
+               {
+                  throw new IndexReaderNotFoundException("No readers found");
+               }
             }
          }
+         if (result == null)
+         {
+            //TODO check this
+            throw new IndexReaderNotFoundException("No readers found");
+         }
+         return result;
       }
-      if (result == null)
-      {
-         //TODO check this
 
-         //throw new IndexReaderNotFoundException("No readers found");
-      }
-      return result;
    }
 
    /**
@@ -424,15 +437,18 @@ public class CacheableIndexDataManager extends LocalIndexDataManagerProxy
    {
       if (!isStoped)
       {
-         super.aggregate(memoryChains);
-         for (final LuceneIndexDataManager luceneIndexDataManager : memoryChains)
+         synchronized (updateMonitor)
          {
-            dataKeeperFactory.dispose(luceneIndexDataManager);
-            ((TransactionableLuceneIndexDataManager)luceneIndexDataManager).getTransactionLog().removeLog();
+            super.aggregate(memoryChains);
+            for (final LuceneIndexDataManager luceneIndexDataManager : memoryChains)
+            {
+               dataKeeperFactory.dispose(luceneIndexDataManager);
+               ((TransactionableLuceneIndexDataManager)luceneIndexDataManager).getTransactionLog().removeLog();
 
+            }
+            memoryChains.clear();
+            lastFlushTime = System.currentTimeMillis();
          }
-         memoryChains.clear();
-         lastFlushTime = System.currentTimeMillis();
       }
    }
 
