@@ -22,6 +22,7 @@ package org.xcmis.sp.inmemory;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
+import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.data.BaseContentStream;
@@ -36,6 +37,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Calendar;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
@@ -47,6 +50,8 @@ class DocumentImpl extends BaseObjectData implements Document
    static String latestLabel = "latest";
 
    static String pwcLabel = "pwc";
+
+   static byte[] EMPTY_CONTENT = new byte[0];
 
    private ContentStream contentStream;
 
@@ -241,14 +246,20 @@ class DocumentImpl extends BaseObjectData implements Document
    @Override
    protected void save() throws StorageException
    {
-      // TODO
+      String name = getName();
+      if (name == null || name.length() == 0)
+      {
+         throw new NameConstraintViolationException("Object name may noy be null or empty string.");
+      }
+
       if (isNew())
       {
          String id = StorageImpl.generateId();
-         entry.setId(id);
+         entry.setValue(CMIS.OBJECT_ID, //
+            new StringValue(id));
 
-         //         entry.setValue(CMIS.CREATED_BY, //
-         //            new StringValue(""));
+         entry.setValue(CMIS.CREATED_BY, //
+            new StringValue(""));
          entry.setValue(CMIS.CREATION_DATE, //
             new DateValue(Calendar.getInstance()));
          entry.setValue(CMIS.VERSION_SERIES_ID, //
@@ -265,16 +276,25 @@ class DocumentImpl extends BaseObjectData implements Document
          {
             entry.setValue(CMIS.VERSION_SERIES_CHECKED_OUT_ID, //
                new StringValue(id));
-            //            entry.setValue(CMIS.VERSION_SERIES_CHECKED_OUT_BY, //
-            //               new StringValue(""));
+            entry.setValue(CMIS.VERSION_SERIES_CHECKED_OUT_BY, //
+               new StringValue(""));
          }
+
+         storage.children.get(parent.getObjectId()).add(id);
+
+         Set<String> parents = new CopyOnWriteArraySet<String>();
+         parents.add(parent.getObjectId());
+         storage.parents.put(id, parents);
       }
-      //         entry.setValue(CMIS.LAST_MODIFIED_BY, //
-      //            new StringValue(""));
+      entry.setValue(CMIS.LAST_MODIFIED_BY, //
+         new StringValue(""));
       entry.setValue(CMIS.LAST_MODIFICATION_DATE, //
          new DateValue(Calendar.getInstance()));
       entry.setValue(CMIS.CHANGE_TOKEN, //
          new StringValue(StorageImpl.generateId()));
+
+      byte[] content;
+
       if (contentStream != null)
       {
          try
@@ -289,7 +309,8 @@ class DocumentImpl extends BaseObjectData implements Document
                {
                   bout.write(buf, 0, r);
                }
-               storage.contents.put(entry.getId(), bout.toByteArray());
+
+               content = bout.toByteArray();
 
                String mediaType = contentStream.getMediaType();
                if (mediaType == null)
@@ -298,11 +319,21 @@ class DocumentImpl extends BaseObjectData implements Document
                }
                entry.setValue(CMIS.CONTENT_STREAM_MIME_TYPE, new StringValue(mediaType));
             }
+            else
+            {
+               content = EMPTY_CONTENT;
+            }
          }
          catch (IOException e)
          {
             throw new CmisRuntimeException("Unable add content for document. " + e.getMessage(), e);
          }
       }
+      else
+      {
+         content = EMPTY_CONTENT;
+      }
+      storage.contents.put(entry.getId(), content);
+      storage.entries.put(entry.getId(), entry);
    }
 }

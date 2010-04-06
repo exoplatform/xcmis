@@ -78,32 +78,12 @@ abstract class BaseObjectData implements ObjectData
 
    protected final TypeDefinition type;
 
-   /**
-    * Temporary storage for object properties.
-    */
-   //   protected final Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-
    protected StorageImpl storage;
 
    /**
     * Parent folder id for newly created fileable objects.
     */
    protected Folder parent;
-
-   /**
-    * Temporary storage for policies which should be applied to object.
-    */
-   //   protected Set<String> addedPolicies;
-
-   /**
-    * Temporary storage for policies which should be removed from object.
-    */
-   //   protected Set<String> removedPolicies;
-
-   /**
-    * Temporary storage for permissions which should be applied to object.
-    */
-   //   protected Map<String, Set<String>> permissions;
 
    protected Entry entry;
 
@@ -236,12 +216,13 @@ abstract class BaseObjectData implements ObjectData
          return parent;
       }
 
-      if (storage.getRepositoryInfo().getRootFolderId().equals(entry.getId()))
+      if (StorageImpl.ROOT_FOLDER_ID.equals(entry.getId()))
       {
          throw new ConstraintException("Unable get parent of root folder.");
       }
 
       Collection<Folder> parents = getParents();
+
       if (parents.size() > 1)
       {
          throw new ConstraintException("Object has more then one parent.");
@@ -538,6 +519,11 @@ abstract class BaseObjectData implements ObjectData
             LOG.debug("Property " + property.getId() + " is not updatable.");
          }
       }
+   }
+
+   public String toString()
+   {
+      return "type: " + getTypeId() + ", name: " + getName() + ",id: " + getObjectId();
    }
 
    private Property<?> getProperty(PropertyDefinition<?> definition)

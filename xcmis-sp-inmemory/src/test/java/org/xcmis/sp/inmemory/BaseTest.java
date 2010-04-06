@@ -19,13 +19,19 @@
 
 package org.xcmis.sp.inmemory;
 
-import com.sun.corba.se.impl.activation.RepositoryImpl;
 import junit.framework.TestCase;
 
 import org.exoplatform.services.log.LogConfigurator;
 import org.exoplatform.services.log.impl.Log4JConfigurator;
+import org.xcmis.spi.CMIS;
+import org.xcmis.spi.data.ContentStream;
+import org.xcmis.spi.data.Document;
+import org.xcmis.spi.data.Folder;
+import org.xcmis.spi.data.Policy;
+import org.xcmis.spi.model.PropertyDefinition;
+import org.xcmis.spi.model.VersioningState;
+import org.xcmis.spi.model.impl.StringProperty;
 
-import java.util.HashMap;
 import java.util.Properties;
 
 /**
@@ -34,20 +40,50 @@ import java.util.Properties;
  */
 public abstract class BaseTest extends TestCase
 {
-   protected Repository repository;
 
-   protected final String repositoryId = "cmis_simple";
+   protected StorageImpl storage;
+
+   protected Folder rootFolder;
 
    public void setUp() throws Exception
    {
       super.setUp();
-      HashMap<String, Object> properties = new HashMap<String, Object>();
-      properties.put("exo.cmis.changetoken.feature", false);
-      repository = new RepositoryImpl(new CMISRepositoryConfiguration(repositoryId, properties));
-      
       LogConfigurator lc = new Log4JConfigurator();
       Properties props = new Properties();
       props.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("conf/log4j.properties"));
       lc.configure(props);
+      storage = new StorageImpl();
+      rootFolder = (Folder)storage.getObject(StorageImpl.ROOT_FOLDER_ID);
+   }
+
+   protected Folder createFolder(Folder parent, String name, String type)
+   {
+      Folder folder = storage.createFolder(parent, type);
+      folder.setName(name);
+      storage.saveObject(folder);
+      return folder;
+   }
+
+   protected Document createDocument(Folder parent, String name, String type, ContentStream content,
+      VersioningState versioningState)
+   {
+      Document doc = storage.createDocument(parent, type, versioningState);
+      doc.setName(name);
+      doc.setContentStream(content);
+      storage.saveObject(doc);
+      return doc;
+   }
+
+   protected Policy createPolicy(String name, String type, String policyText)
+   {
+      Policy policy = storage.createPolicy(null, type);
+      policy.setName(name);
+
+      PropertyDefinition<?> defPolicyText = PropertyDefinitions.getPropertyDefinition("cmis:policy", CMIS.POLICY_TEXT);
+      policy.setProperty(new StringProperty(defPolicyText.getId(), defPolicyText.getQueryName(), defPolicyText
+         .getLocalName(), defPolicyText.getDisplayName(), policyText));
+
+      storage.saveObject(policy);
+      return policy;
    }
 }

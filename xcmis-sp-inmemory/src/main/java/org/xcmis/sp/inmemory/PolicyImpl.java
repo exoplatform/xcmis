@@ -19,11 +19,16 @@
 
 package org.xcmis.sp.inmemory;
 
+import org.xcmis.spi.CMIS;
+import org.xcmis.spi.ConstraintException;
+import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.data.Folder;
 import org.xcmis.spi.data.Policy;
 import org.xcmis.spi.model.TypeDefinition;
+
+import java.util.Calendar;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
@@ -35,31 +40,66 @@ public class PolicyImpl extends BaseObjectData implements Policy
    public PolicyImpl(Entry entry, TypeDefinition type, StorageImpl storage)
    {
       super(entry, type, storage);
-      // TODO Auto-generated constructor stub
    }
 
    public PolicyImpl(Folder parent, TypeDefinition type, StorageImpl storage)
    {
       super(parent, type, storage);
-      // TODO Auto-generated constructor stub
    }
 
-   @Override
    protected void save() throws StorageException
    {
-      // TODO Auto-generated method stub
+      String name = getName();
+      if (name == null || name.length() == 0)
+      {
+         throw new NameConstraintViolationException("Object name may noy be null or empty string.");
+      }
 
+      // TODO : check policies same names
+      if (getString(CMIS.POLICY_TEXT) == null)
+      {
+         throw new ConstraintException("Required property 'cmis:policyText' is not set.");
+      }
+
+      if (isNew())
+      {
+         String id = StorageImpl.generateId();
+
+         entry.setValue(CMIS.OBJECT_ID, //
+            new StringValue(id));
+         entry.setValue(CMIS.CREATED_BY, //
+            new StringValue(""));
+         entry.setValue(CMIS.CREATION_DATE, //
+            new DateValue(Calendar.getInstance()));
+
+         storage.policies.add(id);
+         storage.parents.put(id, StorageImpl.EMPTY_PARENTS);
+      }
+
+      entry.setValue(CMIS.LAST_MODIFIED_BY, //
+         new StringValue(""));
+      entry.setValue(CMIS.LAST_MODIFICATION_DATE, //
+         new DateValue(Calendar.getInstance()));
+      entry.setValue(CMIS.CHANGE_TOKEN, //
+         new StringValue(StorageImpl.generateId()));
+
+      storage.entries.put(entry.getId(), entry);
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public String getPolicyText()
    {
-      // TODO Auto-generated method stub
-      return null;
+      return getString(CMIS.POLICY_TEXT);
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public ContentStream getContentStream(String streamId)
    {
-      // TODO Auto-generated method stub
+      // no content or renditions for policy
       return null;
    }
 

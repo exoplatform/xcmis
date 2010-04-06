@@ -35,46 +35,47 @@ import java.util.Set;
 final class Entry
 {
 
-   private String id;
-
    private BaseType baseType;
 
-   private String type;
+   private String typeId;
 
    private Map<String, Value> values;
 
    private Map<String, Set<String>> permissions;
 
-   private Set<String> policies;
+   protected Set<String> policies;
 
-   public Entry(BaseType baseType, String type)
+   public Entry(BaseType baseType, String typeId)
    {
       this.baseType = baseType;
-      this.type = type;
+      this.typeId = typeId;
       this.values = new HashMap<String, Value>();
       this.values.put(CMIS.BASE_TYPE_ID, new StringValue(baseType.value()));
-      this.values.put(CMIS.OBJECT_TYPE_ID, new StringValue(type));
+      this.values.put(CMIS.OBJECT_TYPE_ID, new StringValue(typeId));
    }
 
-   /**
-    * Copy constructor. For creation copy of already existed entry.
-    *
-    * @param id entry id
-    * @param baseType base type id
-    * @param type type id
-    * @param values property values
-    * @param permissions permissions
-    * @param policies applied policies
-    */
-   public Entry(String id, BaseType baseType, String type, Map<String, Value> values,
-      Map<String, Set<String>> permissions, Set<String> policies)
+   private Entry()
    {
-      this.id = id;
-      this.baseType = baseType;
-      this.type = type;
-      this.values = values;
-      this.permissions = permissions;
-      this.policies = policies;
+   }
+
+   public Entry copy()
+   {
+      Entry e = new Entry();
+      e.baseType = baseType;
+      e.typeId = typeId;
+      if (values != null)
+      {
+         e.values = new HashMap<String, Value>(values);
+      }
+      if (permissions != null)
+      {
+         e.permissions = new HashMap<String, Set<String>>(permissions);
+      }
+      if (policies != null)
+      {
+         e.policies = new HashSet<String>(policies);
+      }
+      return e;
    }
 
    public void addPolicy(String policy)
@@ -93,7 +94,8 @@ final class Entry
 
    public String getId()
    {
-      return id;
+      Value value = values.get(CMIS.OBJECT_ID);
+      return value == null ? null : value.getStrings()[0];
    }
 
    public Map<String, Set<String>> getPermissions()
@@ -114,9 +116,9 @@ final class Entry
       return policies;
    }
 
-   public String getType()
+   public String getTypeId()
    {
-      return type;
+      return typeId;
    }
 
    public Value getValue(String id)
@@ -144,11 +146,6 @@ final class Entry
          return;
       }
       policies.remove(policy);
-   }
-
-   public void setId(String id)
-   {
-      this.id = id;
    }
 
    public void setPermissions(Map<String, Set<String>> permissions)
