@@ -21,6 +21,7 @@ package org.xcmis.sp.jcr.exo;
 
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.container.xml.ObjectParameter;
+import org.exoplatform.services.document.DocumentReaderService;
 import org.exoplatform.services.jcr.RepositoryService;
 import org.exoplatform.services.jcr.config.RepositoryConfigurationException;
 import org.exoplatform.services.jcr.core.CredentialsImpl;
@@ -115,6 +116,8 @@ public class StorageProviderImpl implements StorageProvider, Startable
 
    private RenditionManagerImpl renditionManager;
 
+   private final DocumentReaderService documentReaderService;
+
    private final Map<String, StorageConfiguration> storages = new HashMap<String, StorageConfiguration>();
 
    private final Map<String, SearchService> searchServices = new HashMap<String, SearchService>();
@@ -145,9 +148,11 @@ public class StorageProviderImpl implements StorageProvider, Startable
          }
       });
 
-   public StorageProviderImpl(RepositoryService repositoryService, InitParams initParams)
+   public StorageProviderImpl(RepositoryService repositoryService, InitParams initParams,
+      DocumentReaderService documentReaderService)
    {
       this.repositoryService = repositoryService;
+      this.documentReaderService = documentReaderService;
 
       if (initParams != null)
       {
@@ -378,11 +383,11 @@ public class StorageProviderImpl implements StorageProvider, Startable
             CmisSchemaTableResolver tableResolver =
                new CmisSchemaTableResolver(new ToStringNameConverter(), schema, storage);
 
-            IndexConfiguration indexConfiguration =
-               cmisRepositoryConfiguration.getIndexConfiguration();
+            IndexConfiguration indexConfiguration = cmisRepositoryConfiguration.getIndexConfiguration();
             indexConfiguration.setRootUuid(storage.getRepositoryInfo().getRootFolderId());
             //if list of root parents is empty it will be indexed as empty string
             indexConfiguration.setRootParentUuid("");
+            indexConfiguration.setDocumentReaderService(documentReaderService);
 
             //default invocation context
             InvocationContext invocationContext = new InvocationContext();
