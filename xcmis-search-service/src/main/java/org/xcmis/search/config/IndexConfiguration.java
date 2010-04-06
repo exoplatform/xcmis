@@ -18,9 +18,7 @@
  */
 package org.xcmis.search.config;
 
-import org.apache.tika.config.TikaConfig;
-import org.xcmis.search.lucene.index.IndexRecoverService;
-import org.xcmis.search.lucene.index.IndexRestoreService;
+import org.exoplatform.services.document.DocumentReaderService;
 
 /**
  *  Search service index configuration
@@ -31,18 +29,38 @@ public class IndexConfiguration
     * Path where index should be stored 
     */
    private String indexDir;
+
    /**
     * Parent uuid of root element 
     */
    private String rootParentUuid;
+
    /**
     * Uuid of root element
     */
    private String rootUuid;
+
    /**
-    * Path to the Tika configuration
+    * Text extraction service.
     */
-   private String tikaConfiguration;
+   private DocumentReaderService documentReaderService;
+
+   /**
+    * @return the documentReaderService
+    */
+   public DocumentReaderService getDocumentReaderService()
+   {
+      return documentReaderService;
+   }
+
+   /**
+    * @param documentReaderService the documentReaderService to set
+    */
+   public void setDocumentReaderService(DocumentReaderService documentReaderService)
+   {
+      this.documentReaderService = documentReaderService;
+   }
+
    /**
     * @return the indexDir
     */
@@ -50,6 +68,7 @@ public class IndexConfiguration
    {
       return indexDir;
    }
+
    /**
     * @return the rootParentUuid
     */
@@ -57,6 +76,7 @@ public class IndexConfiguration
    {
       return rootParentUuid;
    }
+
    /**
     * @return the rootUuid
     */
@@ -64,13 +84,7 @@ public class IndexConfiguration
    {
       return rootUuid;
    }
-   /**
-    * @return the tikaConfiguration
-    */
-   public String getTikaConfiguration()
-   {
-      return tikaConfiguration;
-   }
+
    /**
     * @param indexDir the indexDir to set
     */
@@ -78,6 +92,7 @@ public class IndexConfiguration
    {
       this.indexDir = indexDir;
    }
+
    /**
     * @param rootParentUuid the rootParentUuid to set
     */
@@ -85,19 +100,13 @@ public class IndexConfiguration
    {
       this.rootParentUuid = rootParentUuid;
    }
+
    /**
     * @param rootUuid the rootUuid to set
     */
    public void setRootUuid(String rootUuid)
    {
       this.rootUuid = rootUuid;
-   }
-   /**
-    * @param tikaConfiguration the tikaConfiguration to set
-    */
-   public void setTikaConfiguration(String tikaConfiguration)
-   {
-      this.tikaConfiguration = tikaConfiguration;
    }
 
 }

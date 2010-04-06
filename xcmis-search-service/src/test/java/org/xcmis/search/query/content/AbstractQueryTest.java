@@ -24,6 +24,7 @@ import static org.mockito.Mockito.mock;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.NotImplementedException;
+import org.exoplatform.services.document.DocumentReaderService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.junit.After;
@@ -43,8 +44,6 @@ import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.content.interceptors.ContentReaderInterceptor;
 import org.xcmis.search.lucene.LuceneSearchService;
 import org.xcmis.search.lucene.content.SchemaTableResolver;
-import org.xcmis.search.lucene.index.IndexRecoverService;
-import org.xcmis.search.lucene.index.IndexRestoreService;
 import org.xcmis.search.model.Query;
 import org.xcmis.search.query.QueryBuilder;
 import org.xcmis.search.result.ScoredRow;
@@ -176,6 +175,7 @@ public abstract class AbstractQueryTest
       indexConfuration.setIndexDir(tempDir.getAbsolutePath());
       indexConfuration.setRootParentUuid(testRootNode.getParentIdentifiers()[0]);
       indexConfuration.setRootUuid(testRootNode.getIdentifier());
+      indexConfuration.setDocumentReaderService(mock(DocumentReaderService.class));
 
       //search service configuration
       SearchServiceConfiguration configuration = new SearchServiceConfiguration();

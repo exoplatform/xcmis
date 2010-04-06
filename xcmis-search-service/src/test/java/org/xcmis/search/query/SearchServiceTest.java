@@ -24,6 +24,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
 import org.apache.commons.io.FileUtils;
+import org.exoplatform.services.document.DocumentReaderService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,8 +42,6 @@ import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.content.interceptors.ContentReaderInterceptor;
 import org.xcmis.search.lucene.LuceneSearchService;
 import org.xcmis.search.lucene.content.SchemaTableResolver;
-import org.xcmis.search.lucene.index.IndexRecoverService;
-import org.xcmis.search.lucene.index.IndexRestoreService;
 import org.xcmis.search.model.Query;
 import org.xcmis.search.result.ScoredRow;
 import org.xcmis.search.value.CastSystem;
@@ -118,6 +117,7 @@ public class SearchServiceTest
       indexConfuration.setIndexDir(tempDir.getAbsolutePath());
       indexConfuration.setRootParentUuid("rootParentUuid");
       indexConfuration.setRootUuid("rootUuid");
+      indexConfuration.setDocumentReaderService(mock(DocumentReaderService.class));
 
       //search service configuration
       SearchServiceConfiguration configuration = new SearchServiceConfiguration();
@@ -144,6 +144,7 @@ public class SearchServiceTest
       indexConfuration.setIndexDir(tempDir.getAbsolutePath());
       indexConfuration.setRootParentUuid("rootParentUuid");
       indexConfuration.setRootUuid("rootUuid");
+      indexConfuration.setDocumentReaderService(mock(DocumentReaderService.class));
 
       //search service configuration
       SearchServiceConfiguration configuration = new SearchServiceConfiguration();
@@ -178,6 +179,7 @@ public class SearchServiceTest
       indexConfuration.setIndexDir(tempDir.getAbsolutePath());
       indexConfuration.setRootParentUuid("rootParentUuid");
       indexConfuration.setRootUuid("rootUuid");
+      indexConfuration.setDocumentReaderService(mock(DocumentReaderService.class));
 
       //search service configuration
       SearchServiceConfiguration configuration = new SearchServiceConfiguration();

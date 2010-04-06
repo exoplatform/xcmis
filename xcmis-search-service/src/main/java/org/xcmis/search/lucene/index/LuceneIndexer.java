@@ -25,8 +25,10 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.NumberTools;
 import org.apache.lucene.document.Field.Index;
 import org.apache.lucene.document.Field.Store;
-import org.apache.tika.Tika;
-import org.apache.tika.metadata.Metadata;
+import org.exoplatform.services.document.DocumentReadException;
+import org.exoplatform.services.document.DocumentReader;
+import org.exoplatform.services.document.DocumentReaderService;
+import org.exoplatform.services.document.HandlerNotFoundException;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.search.config.IndexConfiguration;
@@ -46,12 +48,13 @@ import java.util.Collection;
  */
 public class LuceneIndexer implements ContentIndexer<Document>
 {
+
+   private final IndexConfiguration indexConfiguration;
+
    /**
     * Content extractor.
     */
-   private final Tika extractor;
-
-   private final IndexConfiguration indexConfiguration;
+   private DocumentReaderService documentReaderService;
 
    /**
     * Class logger.
@@ -61,10 +64,10 @@ public class LuceneIndexer implements ContentIndexer<Document>
    /**
     * @param extractor
     */
-   public LuceneIndexer(Tika extractor, IndexConfiguration indexConfiguration)
+   public LuceneIndexer(IndexConfiguration indexConfiguration)
    {
       super();
-      this.extractor = extractor;
+      this.documentReaderService = indexConfiguration.getDocumentReaderService();
       this.indexConfiguration = indexConfiguration;
    }
 
@@ -128,33 +131,61 @@ public class LuceneIndexer implements ContentIndexer<Document>
     */
    private void addBinaryProperty(final Document doc, String propName, BinaryValue data)
    {
-      if (data.getMimeType() != null)
+      try
       {
-         Metadata metadata = new Metadata();
-         metadata.set(Metadata.CONTENT_TYPE, data.getMimeType());
-         if (data.getEncoding() != null)
+         final DocumentReader dreader = documentReaderService.getDocumentReader(data.getMimeType());
+
+         if (dreader != null)
          {
-            metadata.set(Metadata.CONTENT_ENCODING, data.getEncoding());
-         }
-         InputStream stream = data.getValue();
-         try
-         {
+            final InputStream is = data.getValue();
+            String content = "";
+
             try
             {
-               doc.add(new Field(FieldNames.createFullTextFieldName(propName), extractor.parse(stream, metadata)));
-
+               if (data.getEncoding() != null)
+               {
+                  content = dreader.getContentAsText(is, data.getEncoding());
+               }
+               else
+               {
+                  content = dreader.getContentAsText(is);
+               }
+               final Field f =
+                  new Field(FieldNames.createFullTextFieldName(propName), content, Field.Store.NO,
+                     Field.Index.ANALYZED, Field.TermVector.NO);
+               doc.add(f);
             }
             finally
             {
-               stream.close();
+               if (is != null)
+               {
+                  is.close();
+               }
             }
          }
-         catch (IOException e)
+      }
+      catch (final HandlerNotFoundException e)
+      {
+         // no handler - no index
+         if (LOG.isDebugEnabled())
          {
-            if (LOG.isDebugEnabled())
-            {
-               LOG.warn("Binary value indexer IO error " + e, e);
-            }
+            LOG.warn("This content is not readable " + e);
+         }
+      }
+      catch (IOException e)
+      {
+         // no data - no index
+         if (LOG.isDebugEnabled())
+         {
+            LOG.warn("Binary value indexer IO error " + e, e);
+         }
+      }
+      catch (DocumentReadException e)
+      {
+         // no data - no index
+         if (LOG.isDebugEnabled())
+         {
+            LOG.warn("Binary value indexer IO error " + e, e);
          }
       }
    }

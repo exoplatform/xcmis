@@ -30,9 +30,6 @@ import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TopFieldDocs;
 import org.apache.lucene.search.BooleanClause.Occur;
-import org.apache.tika.Tika;
-import org.apache.tika.config.TikaConfig;
-import org.apache.tika.exception.TikaException;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.search.VisitException;
@@ -68,7 +65,6 @@ import org.xcmis.search.result.ScoredNodesImpl;
 import org.xcmis.search.result.ScoredRow;
 import org.xcmis.search.value.NameConverter;
 import org.xcmis.search.value.PathSplitter;
-import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -126,55 +122,31 @@ public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndex
    {
       super();
       Validate.notNull(serviceConfuguration.getTableResolver(),
-         "The serviceConfuguration.getTableResolver() argument may not be null");
+         "The TableResolver may not be null in SearchServiceConfiguration");
       Validate.notNull(serviceConfuguration.getNameConverter(),
-         "The serviceConfuguration.getNameConverter() argument may not be null");
+         "The NameConverter may not be null in SearchServiceConfiguration");
       Validate.notNull(serviceConfuguration.getPathSplitter(),
-         "The serviceConfuguration.getPathSplitter() argument may not be null");
+         "The PathSplitter may not be null in SearchServiceConfiguration");
       Validate.notNull(serviceConfuguration.getIndexConfuguration(),
-         "The serviceConfuguration.getTableResolver() argument may not be null");
+         "The TableResolver  argument may not be null in SearchServiceConfiguration");
       Validate.notNull(serviceConfuguration.getIndexConfuguration().getRootParentUuid(),
-         "The serviceConfuguration.getIndexConfuguration().getRootParentUuid() argument may not be null");
+         "The RootParentUuid  argument may not be null in IndexConfiguration");
       Validate.notNull(serviceConfuguration.getIndexConfuguration().getRootUuid(),
-         "The serviceConfuguration.getIndexConfuguration().getRootUuid() argument may not be null");
+         "The RootUuid may not be null in IndexConfiguration");
+      Validate.notNull(serviceConfuguration.getIndexConfuguration().getDocumentReaderService(),
+         "The DocumentReaderService may not be null in IndexConfiguration");
 
       this.tableResolver = serviceConfuguration.getTableResolver();
       this.nameConverter = serviceConfuguration.getNameConverter();
       this.pathSplitter = serviceConfuguration.getPathSplitter();
       this.indexConfuguration = serviceConfuguration.getIndexConfuguration();
 
-      this.nodeIndexer =
-         new LuceneIndexer(createExtractor(indexConfuguration.getTikaConfiguration()), indexConfuguration);
+      this.nodeIndexer = new LuceneIndexer(indexConfuguration);
 
    }
 
-   /**
-    * Create Tika from configuration
-    * 
-    * @return
-    * @throws IndexConfigurationException
-    */
-   private Tika createExtractor(String tikaConfiguration) throws IndexConfigurationException
-   {
-      try
-      {
-         return tikaConfiguration == null ? new Tika() : new Tika(new TikaConfig(tikaConfiguration));
-      }
-      catch (TikaException e)
-      {
-         throw new IndexConfigurationException(e.getLocalizedMessage(), e);
-      }
-      catch (IOException e)
-      {
-         throw new IndexConfigurationException(e.getLocalizedMessage(), e);
-      }
-      catch (SAXException e)
-      {
-         throw new IndexConfigurationException(e.getLocalizedMessage(), e);
-      }
-   }
-
-   public Query getConstrainQuery(Constraint constraint, Map<String, Object> bindVariablesValues) throws VisitException, IndexException
+   public Query getConstrainQuery(Constraint constraint, Map<String, Object> bindVariablesValues)
+      throws VisitException, IndexException
    {
       LuceneQueryBuilder luceneQueryBuilder =
          new LuceneQueryBuilder(getIndexReader(), nameConverter, pathSplitter, bindVariablesValues, indexConfuguration);

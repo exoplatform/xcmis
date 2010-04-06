@@ -42,12 +42,8 @@
       </dependency>
       <!-- Project specific -->
       <dependency>
-         <groupId>org.apache.tika</groupId>
-         <artifactId>tika-core</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.apache.tika</groupId>
-         <artifactId>tika-parsers</artifactId>
+         <groupId>org.exoplatform.core</groupId>
+         <artifactId>exo.core.component.document</artifactId>
       </dependency>
       <dependency>
          <groupId>commons-lang</groupId>
