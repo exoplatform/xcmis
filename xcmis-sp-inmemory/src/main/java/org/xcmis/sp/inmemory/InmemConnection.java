@@ -51,7 +51,6 @@ public class InmemConnection extends BaseConnection
 
    }
 
-   @Override
    public void close()
    {
       // TODO Auto-generated method stub
