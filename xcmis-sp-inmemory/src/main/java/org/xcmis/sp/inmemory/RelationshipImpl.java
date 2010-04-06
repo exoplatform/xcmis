@@ -19,52 +19,156 @@
 
 package org.xcmis.sp.inmemory;
 
+import org.xcmis.spi.CMIS;
+import org.xcmis.spi.ConstraintException;
+import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.data.Folder;
+import org.xcmis.spi.data.ObjectData;
 import org.xcmis.spi.data.Relationship;
 import org.xcmis.spi.model.TypeDefinition;
+
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-public class RelationshipImpl extends BaseObjectData implements Relationship
+class RelationshipImpl extends BaseObjectData implements Relationship
 {
+
+   protected ObjectData source;
+
+   protected ObjectData target;
 
    public RelationshipImpl(Entry entry, TypeDefinition type, StorageImpl storage)
    {
       super(entry, type, storage);
    }
 
-   public RelationshipImpl(Folder parent, TypeDefinition type, StorageImpl storage)
+   public RelationshipImpl(TypeDefinition type, ObjectData source, ObjectData target, StorageImpl storage)
    {
-      super(parent, type, storage);
+      super((Folder)null, type, storage);
+      this.source = source;
+      this.target = target;
+   }
+
+   public ContentStream getContentStream(String streamId)
+   {
+      // no content or renditions for relationship
+      return null;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   @Override
+   public Folder getParent() throws ConstraintException
+   {
+      return null;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   @Override
+   public Collection<Folder> getParents()
+   {
+      return Collections.emptyList();
+   }
+
+   public String getSourceId()
+   {
+      if (isNew())
+      {
+         return source.getObjectId();
+      }
+      return getString(CMIS.SOURCE_ID);
+   }
+
+   public String getTargetId()
+   {
+      if (isNew())
+      {
+         return target.getObjectId();
+      }
+      return getString(CMIS.TARGET_ID);
    }
 
    @Override
    protected void save() throws StorageException
    {
-      // TODO Auto-generated method stub
+      String name = getName();
+      if (name == null || name.length() == 0)
+      {
+         throw new NameConstraintViolationException("Object name may noy be null or empty string.");
+      }
 
+      // TODO : check relationship same names
+
+      String id;
+
+      if (isNew())
+      {
+         id = StorageImpl.generateId();
+
+         entry.setValue(CMIS.OBJECT_ID, //
+            new StringValue(id));
+         entry.setValue(CMIS.OBJECT_TYPE_ID, //
+            new StringValue(getTypeId()));
+         entry.setValue(CMIS.BASE_TYPE_ID, //
+            new StringValue(getBaseType().value()));
+         entry.setValue(CMIS.CREATED_BY, //
+            new StringValue(""));
+         entry.setValue(CMIS.CREATION_DATE, //
+            new DateValue(Calendar.getInstance()));
+         entry.setValue(CMIS.SOURCE_ID, //
+            new StringValue(source.getObjectId()));
+         entry.setValue(CMIS.TARGET_ID, //
+            new StringValue(target.getObjectId()));
+
+         Set<RelationshipInfo> sourceRelationships = storage.relationships.get(source.getObjectId());
+         if (sourceRelationships == null)
+         {
+            sourceRelationships = new CopyOnWriteArraySet<RelationshipInfo>();
+            storage.relationships.put(source.getObjectId(), sourceRelationships);
+         }
+         sourceRelationships.add(new RelationshipInfo(id, RelationshipInfo.SOURCE));
+
+         Set<RelationshipInfo> targetRelationships = storage.relationships.get(target.getObjectId());
+         if (targetRelationships == null)
+         {
+            targetRelationships = new CopyOnWriteArraySet<RelationshipInfo>();
+            storage.relationships.put(target.getObjectId(), targetRelationships);
+         }
+         targetRelationships.add(new RelationshipInfo(id, RelationshipInfo.TARGET));
+
+         storage.parents.put(id, StorageImpl.EMPTY_PARENTS);
+      }
+      else
+      {
+         id = getObjectId();
+      }
+
+      entry.setValue(CMIS.LAST_MODIFIED_BY, //
+         new StringValue(""));
+      entry.setValue(CMIS.LAST_MODIFICATION_DATE, //
+         new DateValue(Calendar.getInstance()));
+      entry.setValue(CMIS.CHANGE_TOKEN, //
+         new StringValue(StorageImpl.generateId()));
+
+      storage.properties.get(id).putAll(entry.getValues());
+      storage.policies.get(id).addAll(entry.getPolicies());
+      storage.permissions.get(id).putAll(entry.getPermissions());
    }
 
-   public String getSourceId()
+   protected void delete() throws ConstraintException, StorageException
    {
-      // TODO Auto-generated method stub
-      return null;
-   }
 
-   public String getTargetId()
-   {
-      // TODO Auto-generated method stub
-      return null;
    }
-
-   public ContentStream getContentStream(String streamId)
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
 }

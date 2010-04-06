@@ -27,7 +27,9 @@ import org.xcmis.spi.CMIS;
 import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.data.Document;
 import org.xcmis.spi.data.Folder;
+import org.xcmis.spi.data.ObjectData;
 import org.xcmis.spi.data.Policy;
+import org.xcmis.spi.data.Relationship;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.model.impl.StringProperty;
@@ -85,5 +87,13 @@ public abstract class BaseTest extends TestCase
 
       storage.saveObject(policy);
       return policy;
+   }
+
+   public Relationship createRelationship(String name, ObjectData source, ObjectData target, String typeId)
+   {
+      Relationship relationship = storage.createRelationship(source, target, typeId);
+      relationship.setName(name);
+      storage.saveObject(relationship);
+      return relationship;
    }
 }

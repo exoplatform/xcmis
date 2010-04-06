@@ -45,9 +45,9 @@ import javax.jcr.Session;
 class PolicyImpl extends BaseObjectData implements Policy
 {
 
-   public PolicyImpl(TypeDefinition type, Folder parent, Session session)
+   public PolicyImpl(TypeDefinition type, Session session)
    {
-      super(type, parent, session);
+      super(type, null, session);
    }
 
    public PolicyImpl(TypeDefinition type, Node node)

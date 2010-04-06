@@ -29,6 +29,7 @@ import org.xcmis.spi.data.Document;
 import org.xcmis.spi.data.Folder;
 import org.xcmis.spi.data.Policy;
 import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.VersioningState;
 
 import java.io.IOException;
@@ -47,9 +48,9 @@ class DocumentCopy extends DocumentImpl
 
    private final Document source;
 
-   public DocumentCopy(Document source, Folder parent, Session session, VersioningState versioningState)
+   public DocumentCopy(Document source, TypeDefinition type, Folder parent, Session session, VersioningState versioningState)
    {
-      super(source.getTypeDefinition(), parent, session, versioningState);
+      super(type, parent, session, versioningState);
       this.source = source;
    }
 

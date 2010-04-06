@@ -20,7 +20,7 @@
 package org.xcmis.sp.inmemory;
 
 import org.xcmis.spi.CMIS;
-import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.TypeDefinition;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -35,61 +35,44 @@ import java.util.Set;
 final class Entry
 {
 
-   private BaseType baseType;
-
-   private String typeId;
-
    private Map<String, Value> values;
 
    private Map<String, Set<String>> permissions;
 
-   protected Set<String> policies;
+   private Set<String> policies;
 
-   public Entry(BaseType baseType, String typeId)
+   public Entry()
    {
-      this.baseType = baseType;
-      this.typeId = typeId;
       this.values = new HashMap<String, Value>();
-      this.values.put(CMIS.BASE_TYPE_ID, new StringValue(baseType.value()));
-      this.values.put(CMIS.OBJECT_TYPE_ID, new StringValue(typeId));
+      this.policies = new HashSet<String>();
+      this.permissions = new HashMap<String, Set<String>>();
    }
 
-   private Entry()
+   public Entry(Map<String, Value> values, Map<String, Set<String>> permissions, Set<String> policies)
    {
+      this.values = values;
+      this.permissions = permissions;
+      this.policies = policies;
    }
 
    public Entry copy()
    {
       Entry e = new Entry();
-      e.baseType = baseType;
-      e.typeId = typeId;
-      if (values != null)
-      {
-         e.values = new HashMap<String, Value>(values);
-      }
-      if (permissions != null)
-      {
-         e.permissions = new HashMap<String, Set<String>>(permissions);
-      }
-      if (policies != null)
-      {
-         e.policies = new HashSet<String>(policies);
-      }
+      e.values = new HashMap<String, Value>(values);
+      e.permissions = new HashMap<String, Set<String>>(permissions);
+      e.policies = new HashSet<String>(policies);
       return e;
+   }
+
+   public Entry(Map<String, Value> values2, HashMap<String, Set<String>> hashMap, HashSet<String> hashSet,
+      TypeDefinition typeDefinition, StorageImpl storageImpl)
+   {
+      // TODO Auto-generated constructor stub
    }
 
    public void addPolicy(String policy)
    {
-      if (policies == null)
-      {
-         policies = new HashSet<String>();
-      }
       policies.add(policy);
-   }
-
-   public BaseType getBaseType()
-   {
-      return baseType;
    }
 
    public String getId()
@@ -100,25 +83,18 @@ final class Entry
 
    public Map<String, Set<String>> getPermissions()
    {
-      if (permissions == null)
-      {
-         permissions = new HashMap<String, Set<String>>();
-      }
       return permissions;
    }
 
    public Collection<String> getPolicies()
    {
-      if (policies == null)
-      {
-         policies = new HashSet<String>();
-      }
       return policies;
    }
 
    public String getTypeId()
    {
-      return typeId;
+      Value value = values.get(CMIS.OBJECT_TYPE_ID);
+      return value == null ? null : value.getStrings()[0];
    }
 
    public Value getValue(String id)
@@ -132,54 +108,27 @@ final class Entry
 
    public Map<String, Value> getValues()
    {
-      if (values == null)
-      {
-         values = new HashMap<String, Value>();
-      }
       return values;
    }
 
    public void removePolicy(String policy)
    {
-      if (policies == null)
-      {
-         return;
-      }
       policies.remove(policy);
-   }
-
-   public void setPermissions(Map<String, Set<String>> permissions)
-   {
-      if (this.permissions == null)
-      {
-         this.permissions = new HashMap<String, Set<String>>();
-      }
-      else
-      {
-         this.permissions.clear();
-      }
-      if (permissions != null)
-      {
-         this.permissions.putAll(permissions);
-      }
    }
 
    public void setValue(String id, Value value)
    {
-      if (values == null)
-      {
-         values = new HashMap<String, Value>();
-      }
       values.put(id, value);
    }
 
    public void setValues(Map<String, Value> values)
    {
-      if (this.values == null)
-      {
-         this.values = new HashMap<String, Value>();
-      }
       this.values.putAll(values);
+   }
+
+   public String toString()
+   {
+      return getId();
    }
 
 }

@@ -27,12 +27,16 @@ import org.xcmis.spi.StorageException;
 import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.data.Folder;
 import org.xcmis.spi.data.ObjectData;
+import org.xcmis.spi.data.Relationship;
 import org.xcmis.spi.impl.BaseItemsIterator;
+import org.xcmis.spi.model.RelationshipDirection;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.utils.CmisUtils;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -66,6 +70,7 @@ class FolderImpl extends BaseObjectData implements Folder
       }
       storage.children.get(getObjectId()).add(object.getObjectId());
       storage.parents.get(object.getObjectId()).add(getObjectId());
+      storage.unfiling.remove(object.getObjectId());
    }
 
    /**
@@ -86,6 +91,16 @@ class FolderImpl extends BaseObjectData implements Folder
       }
 
       return new BaseItemsIterator<ObjectData>(children);
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public ContentStream getContentStream(String streamId)
+   {
+      // TODO : renditions for Folder object.
+      // It may be XML or HTML representation direct child or full tree.
+      return null;
    }
 
    /**
@@ -131,62 +146,10 @@ class FolderImpl extends BaseObjectData implements Folder
       }
       storage.children.get(getObjectId()).remove(object.getObjectId());
       storage.parents.get(object.getObjectId()).remove(getObjectId());
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public ContentStream getContentStream(String streamId)
-   {
-      // TODO : renditions for Folder object.
-      // It may be XML or HTML representation direct child or full tree.
-      return null;
-   }
-
-   protected void save() throws StorageException
-   {
-      String name = getName();
-      if (name == null || name.length() == 0)
+      if (storage.parents.get(object.getObjectId()).size() == 0)
       {
-         throw new NameConstraintViolationException("Object name may noy be null or empty string.");
+         storage.unfiling.add(object.getObjectId());
       }
-
-      for (ItemsIterator<ObjectData> children = getParent().getChildren(null); children.hasNext();)
-      {
-         if (name.equals(children.next().getName()))
-         {
-            throw new NameConstraintViolationException("Object with name " + name + " already exists in parent folder.");
-         }
-      }
-
-      if (isNew())
-      {
-         String id = StorageImpl.generateId();
-
-         entry.setValue(CMIS.OBJECT_ID, //
-            new StringValue(id));
-         entry.setValue(CMIS.CREATED_BY, //
-            new StringValue(""));
-         entry.setValue(CMIS.CREATION_DATE, //
-            new DateValue(Calendar.getInstance()));
-
-         storage.children.get(parent.getObjectId()).add(id);
-
-         Set<String> parents = new CopyOnWriteArraySet<String>();
-         parents.add(parent.getObjectId());
-         storage.parents.put(id, parents);
-
-         storage.children.put(id, new CopyOnWriteArraySet<String>());
-      }
-
-      entry.setValue(CMIS.LAST_MODIFIED_BY, //
-         new StringValue(""));
-      entry.setValue(CMIS.LAST_MODIFICATION_DATE, //
-         new DateValue(Calendar.getInstance()));
-      entry.setValue(CMIS.CHANGE_TOKEN, //
-         new StringValue(StorageImpl.generateId()));
-
-      storage.entries.put(entry.getId(), entry);
    }
 
    private String calculatePath()
@@ -219,4 +182,99 @@ class FolderImpl extends BaseObjectData implements Folder
       return path.toString();
    }
 
+   protected void delete() throws ConstraintException, StorageException
+   {
+      if (isRoot())
+      {
+         throw new ConstraintException("Root folder can't be removed.");
+      }
+
+      if (hasChildren())
+      {
+         throw new ConstraintException("Failed delete object. Object " + getObjectId()
+            + " is Folder and contains one or more objects.");
+      }
+
+      ItemsIterator<Relationship> relationships = getRelationships(RelationshipDirection.EITHER, null, true);
+      if (relationships.hasNext())
+      {
+         throw new ConstraintException("Object can't be deleted cause to storage referential integrity. "
+            + "Object is source or target at least one Relationship.");
+      }
+
+      String objectId = getObjectId();
+      storage.properties.remove(objectId);
+      storage.policies.remove(objectId);
+      storage.permissions.remove(objectId);
+      for (String parent : storage.parents.get(objectId))
+      {
+         storage.children.get(parent).remove(objectId);
+      }
+      storage.parents.remove(objectId);
+      storage.children.remove(objectId);
+   }
+
+   @Override
+   protected void save() throws StorageException
+   {
+      String name = getName();
+      if (name == null || name.length() == 0)
+      {
+         throw new NameConstraintViolationException("Object name may noy be null or empty string.");
+      }
+
+      for (ItemsIterator<ObjectData> children = getParent().getChildren(null); children.hasNext();)
+      {
+         if (name.equals(children.next().getName()))
+         {
+            throw new NameConstraintViolationException("Object with name " + name + " already exists in parent folder.");
+         }
+      }
+
+      String id;
+
+      if (isNew())
+      {
+         id = StorageImpl.generateId();
+
+         entry.setValue(CMIS.OBJECT_ID, //
+            new StringValue(id));
+         entry.setValue(CMIS.OBJECT_TYPE_ID, //
+            new StringValue(getTypeId()));
+         entry.setValue(CMIS.BASE_TYPE_ID, //
+            new StringValue(getBaseType().value()));
+         entry.setValue(CMIS.CREATED_BY, //
+            new StringValue(""));
+         entry.setValue(CMIS.CREATION_DATE, //
+            new DateValue(Calendar.getInstance()));
+
+         storage.children.get(parent.getObjectId()).add(id);
+
+         Set<String> parents = new CopyOnWriteArraySet<String>();
+         parents.add(parent.getObjectId());
+         storage.parents.put(id, parents);
+
+         storage.children.put(id, new CopyOnWriteArraySet<String>());
+
+         storage.properties.put(id, new HashMap<String, Value>());
+         storage.policies.put(id, new HashSet<String>());
+         storage.permissions.put(id, new HashMap<String, Set<String>>());
+      }
+      else
+      {
+         id = getObjectId();
+      }
+
+      entry.setValue(CMIS.LAST_MODIFIED_BY, //
+         new StringValue(""));
+      entry.setValue(CMIS.LAST_MODIFICATION_DATE, //
+         new DateValue(Calendar.getInstance()));
+      entry.setValue(CMIS.CHANGE_TOKEN, //
+         new StringValue(StorageImpl.generateId()));
+
+      storage.properties.get(id).putAll(entry.getValues());
+      storage.policies.get(id).addAll(entry.getPolicies());
+      storage.permissions.get(id).putAll(entry.getPermissions());
+
+   }
 }

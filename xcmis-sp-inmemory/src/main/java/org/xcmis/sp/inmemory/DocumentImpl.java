@@ -22,6 +22,7 @@ package org.xcmis.sp.inmemory;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
+import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.VersioningException;
@@ -29,7 +30,10 @@ import org.xcmis.spi.data.BaseContentStream;
 import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.data.Document;
 import org.xcmis.spi.data.Folder;
+import org.xcmis.spi.data.ObjectData;
+import org.xcmis.spi.data.Relationship;
 import org.xcmis.spi.model.ContentStreamAllowed;
+import org.xcmis.spi.model.RelationshipDirection;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.VersioningState;
 
@@ -37,6 +41,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -83,8 +89,50 @@ class DocumentImpl extends BaseObjectData implements Document
 
    public Document checkout() throws ConstraintException, VersioningException, StorageException
    {
-      // TODO Auto-generated method stub
-      return null;
+      Entry pwc = new Entry();
+      pwc.setValues(entry.getValues());
+      String pwcId = StorageImpl.generateId();
+      pwc.setValue(CMIS.OBJECT_ID, //
+         new StringValue(pwcId));
+      pwc.setValue(CMIS.CREATED_BY, //
+         new StringValue(""));
+      pwc.setValue(CMIS.CREATION_DATE, //
+         new DateValue(Calendar.getInstance()));
+      pwc.setValue(CMIS.IS_LATEST_VERSION, //
+         new BooleanValue(true));
+      pwc.setValue(CMIS.IS_MAJOR_VERSION, //
+         new BooleanValue(false));
+      pwc.setValue(CMIS.VERSION_LABEL, //
+         new StringValue(pwcLabel));
+      pwc.setValue(CMIS.IS_VERSION_SERIES_CHECKED_OUT, //
+         new BooleanValue(true));
+      pwc.setValue(CMIS.VERSION_SERIES_CHECKED_OUT_ID, //
+         new StringValue(pwcId));
+      pwc.setValue(CMIS.VERSION_SERIES_CHECKED_OUT_BY, //
+         new StringValue(""));
+
+      storage.parents.put(pwcId, new HashSet<String>(storage.parents.get(getObjectId())));
+      storage.properties.put(pwcId, new HashMap<String, Value>(entry.getValues()));
+      storage.policies.put(pwcId, new HashSet<String>());
+      storage.permissions.put(pwcId, new HashMap<String, Set<String>>());
+      storage.versions.get(getVersionSeriesId()).add(pwcId);
+
+      byte[] content = storage.contents.get(getObjectId());
+      byte[] pwcContent;
+
+      if (content == EMPTY_CONTENT)
+      {
+         pwcContent = EMPTY_CONTENT;
+      }
+      else
+      {
+         pwcContent = new byte[content.length];
+         System.arraycopy(content, 0, pwcContent, 0, pwcContent.length);
+      }
+
+      storage.contents.put(pwcId, pwcContent);
+
+      return new DocumentImpl(pwc, storage.getTypeDefinition(getTypeId(), true), storage);
    }
 
    /**
@@ -243,7 +291,6 @@ class DocumentImpl extends BaseObjectData implements Document
       this.contentStream = contentStream;
    }
 
-   @Override
    protected void save() throws StorageException
    {
       String name = getName();
@@ -252,18 +299,36 @@ class DocumentImpl extends BaseObjectData implements Document
          throw new NameConstraintViolationException("Object name may noy be null or empty string.");
       }
 
+      if (parent != null)
+      {
+         for (ItemsIterator<ObjectData> iterator = parent.getChildren(null); iterator.hasNext();)
+         {
+            if (name.equals(iterator.next().getName()))
+            {
+               throw new NameConstraintViolationException("Object with name " + name
+                  + " already exists in parent folder.");
+            }
+         }
+      }
+
+      String id;
+
       if (isNew())
       {
-         String id = StorageImpl.generateId();
+         id = StorageImpl.generateId();
+         String vsId = StorageImpl.generateId();
          entry.setValue(CMIS.OBJECT_ID, //
             new StringValue(id));
-
+         entry.setValue(CMIS.OBJECT_TYPE_ID, //
+            new StringValue(getTypeId()));
+         entry.setValue(CMIS.BASE_TYPE_ID, //
+            new StringValue(getBaseType().value()));
          entry.setValue(CMIS.CREATED_BY, //
             new StringValue(""));
          entry.setValue(CMIS.CREATION_DATE, //
             new DateValue(Calendar.getInstance()));
          entry.setValue(CMIS.VERSION_SERIES_ID, //
-            new StringValue(StorageImpl.generateId()));
+            new StringValue(vsId));
          entry.setValue(CMIS.IS_LATEST_VERSION, //
             new BooleanValue(true));
          entry.setValue(CMIS.IS_MAJOR_VERSION, //
@@ -280,12 +345,32 @@ class DocumentImpl extends BaseObjectData implements Document
                new StringValue(""));
          }
 
-         storage.children.get(parent.getObjectId()).add(id);
+         if (parent != null)
+         {
+            storage.children.get(parent.getObjectId()).add(id);
 
-         Set<String> parents = new CopyOnWriteArraySet<String>();
-         parents.add(parent.getObjectId());
-         storage.parents.put(id, parents);
+            Set<String> parents = new CopyOnWriteArraySet<String>();
+            parents.add(parent.getObjectId());
+            storage.parents.put(id, parents);
+         }
+         else
+         {
+            storage.unfiling.add(id);
+            storage.parents.put(id, new CopyOnWriteArraySet<String>());
+         }
+
+         storage.properties.put(id, new HashMap<String, Value>());
+         storage.policies.put(id, new HashSet<String>());
+         storage.permissions.put(id, new HashMap<String, Set<String>>());
+         Set<String> versions = new CopyOnWriteArraySet<String>();
+         versions.add(id);
+         storage.versions.put(vsId, versions);
       }
+      else
+      {
+         id = getObjectId();
+      }
+
       entry.setValue(CMIS.LAST_MODIFIED_BY, //
          new StringValue(""));
       entry.setValue(CMIS.LAST_MODIFICATION_DATE, //
@@ -333,7 +418,32 @@ class DocumentImpl extends BaseObjectData implements Document
       {
          content = EMPTY_CONTENT;
       }
-      storage.contents.put(entry.getId(), content);
-      storage.entries.put(entry.getId(), entry);
+
+      storage.contents.put(id, content);
+      storage.properties.get(id).putAll(entry.getValues());
+      storage.policies.get(id).addAll(entry.getPolicies());
+      storage.permissions.get(id).putAll(entry.getPermissions());
+   }
+
+   protected void delete() throws ConstraintException, StorageException
+   {
+      ItemsIterator<Relationship> relationships = getRelationships(RelationshipDirection.EITHER, null, true);
+      if (relationships.hasNext())
+      {
+         throw new ConstraintException("Object can't be deleted cause to storage referential integrity. "
+            + "Object is source or target at least one Relationship.");
+      }
+
+      String objectId = getObjectId();
+      storage.properties.remove(objectId);
+      storage.policies.remove(objectId);
+      storage.permissions.remove(objectId);
+      storage.contents.remove(objectId);
+      for (String parent : storage.parents.get(objectId))
+      {
+         storage.children.get(parent).remove(objectId);
+      }
+      storage.parents.remove(objectId);
+      storage.unfiling.remove(objectId);
    }
 }

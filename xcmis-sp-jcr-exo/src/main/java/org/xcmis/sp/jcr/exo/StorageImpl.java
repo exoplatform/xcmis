@@ -442,7 +442,8 @@ public class StorageImpl implements Storage
             + " is not in list of allowed child type for folder " + folder.getObjectId());
       }
 
-      DocumentCopy copy = new DocumentCopy(source, folder, session, versioningState);
+      DocumentCopy copy =
+         new DocumentCopy(source, getTypeDefinition(source.getTypeId(), true), folder, session, versioningState);
 
       return copy;
    }
@@ -525,7 +526,7 @@ public class StorageImpl implements Storage
 
       // TODO : need raise exception if parent folder is provided ??
       // Do not use parent folder, policy is not fileable.
-      Policy policy = new PolicyImpl(typeDefinition, null, session);
+      Policy policy = new PolicyImpl(typeDefinition, session);
 
       return policy;
    }
@@ -817,8 +818,9 @@ public class StorageImpl implements Storage
 
    private DocumentVersion getDocumentVersion(Node node) throws RepositoryException
    {
-      TypeDefinition type = JcrTypeHelper.getTypeDefinition(
-         getNodeType(node.getProperty(JcrCMIS.JCR_FROZEN_PRIMARY_TYPE).getString()), true);
+      TypeDefinition type =
+         JcrTypeHelper.getTypeDefinition(getNodeType(node.getProperty(JcrCMIS.JCR_FROZEN_PRIMARY_TYPE).getString()),
+            true);
 
       return new DocumentVersion(type, node);
    }

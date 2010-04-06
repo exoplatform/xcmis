@@ -62,7 +62,6 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -99,7 +98,7 @@ abstract class BaseObjectData implements ObjectData
       this.parent = parent;
       this.type = type;
       this.storage = storage;
-      this.entry = new Entry(type.getBaseId(), type.getId());
+      this.entry = new Entry();
    }
 
    public void accept(CmisVisitor visitor)
@@ -251,7 +250,7 @@ abstract class BaseObjectData implements ObjectData
          return Collections.emptyList();
       }
 
-      Set<Folder> parents = new HashSet<Folder>();
+      List<Folder> parents = new ArrayList<Folder>();
       Set<String> parentIds = storage.parents.get(entry.getId());
 
       if (parentIds != null)
@@ -523,7 +522,7 @@ abstract class BaseObjectData implements ObjectData
 
    public String toString()
    {
-      return "type: " + getTypeId() + ", name: " + getName() + ",id: " + getObjectId();
+      return "type: " + getTypeId() + ", name: " + getName() + ", id: " + getObjectId();
    }
 
    private Property<?> getProperty(PropertyDefinition<?> definition)
@@ -696,6 +695,13 @@ abstract class BaseObjectData implements ObjectData
       return null;
    }
 
+   protected Entry getEntry()
+   {
+      return entry;
+   }
+
    protected abstract void save() throws StorageException;
+
+   protected abstract void delete() throws ConstraintException, StorageException;
 
 }
