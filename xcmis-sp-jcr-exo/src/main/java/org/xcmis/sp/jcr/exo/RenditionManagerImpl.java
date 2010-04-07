@@ -68,10 +68,13 @@ public class RenditionManagerImpl implements RenditionManager
             if (obj.getBaseType() == BaseType.DOCUMENT && obj.getContentStream(null) != null)
             {
                MimeType contentType = MimeType.fromString(((DocumentImpl)obj).getContentStreamMimeType());
+               if  (renditionProviders.containsKey(contentType)) 
+               {
                RenditionImpl rendition = new RenditionImpl();
                rendition.setStreamId(encode(contentType.toString()));
                rendition.setKind("cmis:thumbnail");
                return new RenditionIterator(rendition);
+               }
             }
             return CmisUtils.emptyItemsIterator();
          }
