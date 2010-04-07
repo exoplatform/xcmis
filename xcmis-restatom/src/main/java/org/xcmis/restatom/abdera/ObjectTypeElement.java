@@ -100,8 +100,8 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
    {
       CmisObjectImpl object = new CmisObjectImpl();
 
-      ObjectInfoImpl objectInfo = new ObjectInfoImpl();
-      object.setObjectInfo(objectInfo);
+//      ObjectInfoImpl objectInfo = new ObjectInfoImpl();
+//      object.setObjectInfo(objectInfo);
 
       // PROPERTIES
       FOMExtensibleElement propertiesElement = getExtension(AtomCMIS.PROPERTIES);
@@ -113,7 +113,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
          {
             Property<?> property = propertyElement.getProperty();
             properties.put(propertyElement.getProperty().getId(), property);
-            storeProperty(objectInfo, property);
+//            storeProperty(objectInfo, property);
          }
       }
 
