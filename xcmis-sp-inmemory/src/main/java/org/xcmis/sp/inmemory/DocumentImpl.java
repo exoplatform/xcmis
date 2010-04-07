@@ -80,10 +80,45 @@ class DocumentImpl extends BaseObjectData implements Document
 
    public void cancelCheckout() throws StorageException
    {
-      // TODO Auto-generated method stub
+      if (!type.isVersionable())
+      {
+         throw new ConstraintException("Object is not versionable.");
+      }
 
+      synchronized (storage)
+      {
+         String vsId = getVersionSeriesId();
+         String pwcId = storage.workingCopies.get(vsId);
+         if (pwcId == null)
+         {
+            return;
+         }
+
+         storage.properties.remove(pwcId);
+         storage.policies.remove(pwcId);
+         storage.permissions.remove(pwcId);
+         storage.contents.remove(pwcId);
+         for (String parent : storage.parents.get(pwcId))
+         {
+            storage.children.get(parent).remove(pwcId);
+         }
+         storage.parents.remove(pwcId);
+         storage.unfiled.remove(pwcId);
+         storage.workingCopies.remove(vsId);
+
+         for (Iterator<String> iterator = storage.versions.get(getVersionSeriesId()).iterator(); iterator.hasNext();)
+         {
+            String version = iterator.next();
+            Map<String, Value> props = storage.properties.get(version);
+            props.put(CMIS.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(false));
+            props.put(CMIS.VERSION_SERIES_CHECKED_OUT_ID, new StringValue());
+         }
+      }
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public Document checkin(boolean major, String checkinComment) throws ConstraintException, StorageException
    {
       if (!type.isVersionable())
@@ -126,6 +161,9 @@ class DocumentImpl extends BaseObjectData implements Document
       return this;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public Document checkout() throws ConstraintException, VersioningException, StorageException
    {
       if (isNew())
@@ -284,7 +322,7 @@ class DocumentImpl extends BaseObjectData implements Document
          return false;
       }
 
-      return storage.contents.get(getObjectId()) != null;
+      return storage.contents.get(getObjectId()) != EMPTY_CONTENT;
    }
 
    /**
@@ -358,14 +396,19 @@ class DocumentImpl extends BaseObjectData implements Document
       String name = getName();
       if (name == null || name.length() == 0)
       {
-         throw new NameConstraintViolationException("Object name may noy be null or empty string.");
+         throw new NameConstraintViolationException("Object name may not be null or empty string.");
       }
 
       if (parent != null)
       {
          for (ItemsIterator<ObjectData> iterator = parent.getChildren(null); iterator.hasNext();)
          {
-            if (name.equals(iterator.next().getName()))
+            ObjectData object = iterator.next();
+            if (object.getObjectId().equals(getObjectId()))
+            {
+               continue;
+            }
+            if (name.equals(object.getName()))
             {
                throw new NameConstraintViolationException("Object with name " + name
                   + " already exists in parent folder.");
@@ -415,8 +458,15 @@ class DocumentImpl extends BaseObjectData implements Document
          storage.policies.put(id, new CopyOnWriteArraySet<String>());
          storage.permissions.put(id, new ConcurrentHashMap<String, Set<String>>());
          List<String> versions = new CopyOnWriteArrayList<String>();
-         versions.add(id);
          storage.versions.put(vsId, versions);
+         if (versioningState != VersioningState.CHECKEDOUT)
+         {
+            versions.add(id);
+         }
+         else
+         {
+            storage.workingCopies.put(vsId, id);
+         }
       }
       else
       {
@@ -427,12 +477,11 @@ class DocumentImpl extends BaseObjectData implements Document
       entry.setValue(CMIS.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));
       entry.setValue(CMIS.CHANGE_TOKEN, new StringValue(StorageImpl.generateId()));
 
-      byte[] content;
-
       if (contentStream != null)
       {
          try
          {
+            byte[] content;
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             InputStream in = contentStream.getStream();
             if (in != null)
@@ -457,18 +506,19 @@ class DocumentImpl extends BaseObjectData implements Document
             {
                content = EMPTY_CONTENT;
             }
+
+            storage.contents.put(id, content);
          }
          catch (IOException e)
          {
             throw new CmisRuntimeException("Unable add content for document. " + e.getMessage(), e);
          }
       }
-      else
+      else if (isNew())
       {
-         content = EMPTY_CONTENT;
+         storage.contents.put(id, EMPTY_CONTENT);
       }
 
-      storage.contents.put(id, content);
       storage.properties.get(id).putAll(entry.getValues());
       storage.policies.get(id).addAll(entry.getPolicies());
       storage.permissions.get(id).putAll(entry.getPermissions());
@@ -483,18 +533,25 @@ class DocumentImpl extends BaseObjectData implements Document
             + "Object is source or target at least one Relationship.");
       }
 
-      String objectId = getObjectId();
-      String vsId = getVersionSeriesId();
-      storage.properties.remove(objectId);
-      storage.policies.remove(objectId);
-      storage.permissions.remove(objectId);
-      storage.contents.remove(objectId);
-      for (String parent : storage.parents.get(objectId))
+      if (isPWC())
       {
-         storage.children.get(parent).remove(objectId);
+         cancelCheckout();
       }
-      storage.parents.remove(objectId);
-      storage.unfiled.remove(objectId);
-      storage.versions.get(vsId).remove(objectId);
+      else
+      {
+         String objectId = getObjectId();
+         String vsId = getVersionSeriesId();
+         storage.properties.remove(objectId);
+         storage.policies.remove(objectId);
+         storage.permissions.remove(objectId);
+         storage.contents.remove(objectId);
+         for (String parent : storage.parents.get(objectId))
+         {
+            storage.children.get(parent).remove(objectId);
+         }
+         storage.parents.remove(objectId);
+         storage.unfiled.remove(objectId);
+         storage.versions.get(vsId).remove(objectId);
+      }
    }
 }

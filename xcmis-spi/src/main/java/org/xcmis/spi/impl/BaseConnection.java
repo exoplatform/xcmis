@@ -1351,7 +1351,7 @@ public abstract class BaseConnection implements Connection
          }
       }
 
-      ItemsIterator<ObjectData> iterator = storage.getCheckedOutDocuments(folder, orderBy);
+      ItemsIterator<Document> iterator = storage.getCheckedOutDocuments(folder, orderBy);
 
       try
       {

@@ -59,10 +59,10 @@
 
    <modules>
       <module>xcmis-spi</module>
-      <!--module>xcmis-sp-inmemory</module -->
       <module>xcmis-search-model</module>
       <module>xcmis-search-parser-cmis</module>
       <module>xcmis-search-service</module>
+      <module>xcmis-sp-inmemory</module>
       <module>xcmis-sp-jcr-exo</module>
       <module>xcmis-restatom</module>
       <module>xcmis-wssoap</module>

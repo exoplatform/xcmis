@@ -68,7 +68,7 @@ public interface Storage extends TypeManager
     *        and storage may ignore this parameter if it not able sort items
     * @return iterator over checked out objects
     */
-   ItemsIterator<ObjectData> getCheckedOutDocuments(ObjectData folder, String orderBy);
+   ItemsIterator<Document> getCheckedOutDocuments(ObjectData folder, String orderBy);
 
    /**
     * Create new instance of document with type <code>typeId</code> using

@@ -34,6 +34,7 @@ import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.model.impl.StringProperty;
 
+import java.util.HashMap;
 import java.util.Properties;
 
 /**
@@ -47,6 +48,8 @@ public abstract class BaseTest extends TestCase
 
    protected Folder rootFolder;
 
+   protected final String storageId = "inmem1";
+
    public void setUp() throws Exception
    {
       super.setUp();
@@ -54,7 +57,13 @@ public abstract class BaseTest extends TestCase
       Properties props = new Properties();
       props.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("conf/log4j.properties"));
       lc.configure(props);
-      storage = new StorageImpl();
+
+      HashMap<String, Object> properties = new HashMap<String, Object>();
+      properties.put("exo.cmis.changetoken.feature", false);
+      StorageConfiguration configuration = new StorageConfiguration(storageId, properties);
+
+      storage = new StorageImpl(configuration);
+
       rootFolder = (Folder)storage.getObject(StorageImpl.ROOT_FOLDER_ID);
    }
 

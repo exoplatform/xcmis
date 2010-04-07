@@ -39,17 +39,21 @@ import org.xcmis.spi.data.Relationship;
 import org.xcmis.spi.impl.BaseItemsIterator;
 import org.xcmis.spi.model.AllowableActions;
 import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.CapabilityRendition;
 import org.xcmis.spi.model.ChangeEvent;
 import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.Rendition;
+import org.xcmis.spi.model.RepositoryCapabilities;
 import org.xcmis.spi.model.RepositoryInfo;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.UnfileObject;
 import org.xcmis.spi.model.VersioningState;
+import org.xcmis.spi.model.impl.AllowableActionsImpl;
 import org.xcmis.spi.model.impl.TypeDefinitionImpl;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
+import org.xcmis.spi.utils.CmisUtils;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -102,12 +106,16 @@ public class StorageImpl implements Storage
 
    final Map<String, Set<String>> typeChildren;
 
+   private final  StorageConfiguration configuration;
+
    static final String ROOT_FOLDER_ID = "abcdef12-3456-7890-0987-654321fedcba";
 
    static final Set<String> EMPTY_PARENTS = Collections.emptySet();
 
-   public StorageImpl()
+   public StorageImpl(StorageConfiguration configuration)
    {
+      this.configuration = configuration;
+
       this.properties = new ConcurrentHashMap<String, Map<String, Value>>();
       this.children = new ConcurrentHashMap<String, Set<String>>();
       this.parents = new ConcurrentHashMap<String, Set<String>>();
@@ -178,10 +186,89 @@ public class StorageImpl implements Storage
       children.put(ROOT_FOLDER_ID, new CopyOnWriteArraySet<String>());
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public AllowableActions calculateAllowableActions(ObjectData object)
    {
-      // TODO Auto-generated method stub
-      return null;
+      AllowableActionsImpl actions = new AllowableActionsImpl();
+      TypeDefinition type = object.getTypeDefinition();
+
+      RepositoryCapabilities capabilities = getRepositoryInfo().getCapabilities();
+
+      boolean isCheckedout = type.getBaseId() == BaseType.DOCUMENT //
+         && type.isVersionable() //
+         && ((Document)object).isVersionSeriesCheckedOut();
+
+      actions.setCanGetProperties(true);
+
+      actions.setCanUpdateProperties(true); // TODO : need to check is it latest version ??
+
+      actions.setCanApplyACL(type.isControllableACL());
+
+      actions.setCanGetACL(type.isControllableACL());
+
+      actions.setCanApplyPolicy(type.isControllablePolicy());
+
+      actions.setCanGetAppliedPolicies(type.isControllablePolicy());
+
+      actions.setCanRemovePolicy(type.isControllablePolicy());
+
+      actions.setCanGetObjectParents(type.isFileable());
+
+      actions.setCanMoveObject(type.isFileable());
+
+      actions.setCanAddObjectToFolder(capabilities.isCapabilityMultifiling() //
+         && type.isFileable() //
+         && type.getBaseId() != BaseType.FOLDER);
+
+      actions.setCanRemoveObjectFromFolder(capabilities.isCapabilityUnfiling() //
+         && type.isFileable() //
+         && type.getBaseId() != BaseType.FOLDER);
+
+      actions.setCanGetDescendants(capabilities.isCapabilityGetDescendants() //
+         && type.getBaseId() == BaseType.FOLDER);
+
+      actions.setCanGetFolderTree(capabilities.isCapabilityGetFolderTree() //
+         && type.getBaseId() == BaseType.FOLDER);
+
+      actions.setCanCreateDocument(type.getBaseId() == BaseType.FOLDER);
+
+      actions.setCanCreateFolder(type.getBaseId() == BaseType.FOLDER);
+
+      actions.setCanDeleteTree(type.getBaseId() == BaseType.FOLDER);
+
+      actions.setCanGetChildren(type.getBaseId() == BaseType.FOLDER);
+
+      actions.setCanGetFolderParent(type.getBaseId() == BaseType.FOLDER);
+
+      actions.setCanGetContentStream(type.getBaseId() == BaseType.DOCUMENT //
+         && ((Document)object).hasContent());
+
+      actions.setCanSetContentStream(type.getBaseId() == BaseType.DOCUMENT //
+         && type.getContentStreamAllowed() != ContentStreamAllowed.NOT_ALLOWED);
+
+      actions.setCanDeleteContentStream(type.getBaseId() == BaseType.DOCUMENT //
+         && type.getContentStreamAllowed() != ContentStreamAllowed.REQUIRED);
+
+      actions.setCanGetAllVersions(type.getBaseId() == BaseType.DOCUMENT);
+
+      actions.setCanGetRenditions(capabilities.getCapabilityRenditions() == CapabilityRendition.READ);
+
+      actions.setCanCheckIn(isCheckedout);
+
+      actions.setCanCancelCheckOut(isCheckedout);
+
+      actions.setCanCheckOut(!isCheckedout);
+
+      actions.setCanGetObjectRelationships(type.getBaseId() != BaseType.RELATIONSHIP);
+
+      actions.setCanCreateRelationship(type.getBaseId() != BaseType.RELATIONSHIP);
+
+      // TODO : applied policy, not empty folders, not latest versions may not be delete.
+      actions.setCanDeleteObject(true);
+
+      return actions;
    }
 
    public Document createCopyOfDocument(Document source, Folder folder, VersioningState versioningState)
@@ -236,32 +323,89 @@ public class StorageImpl implements Storage
    public Collection<String> deleteTree(Folder folder, boolean deleteAllVersions, UnfileObject unfileObject,
       boolean continueOnFailure) throws UpdateConflictException
    {
-      // TODO Auto-generated method stub
-      return null;
+      // TODO : unfile & continueOnFailure
+
+      if (ROOT_FOLDER_ID.equals(folder.getObjectId()))
+      {
+         throw new ConstraintException("Unable delete root folder.");
+      }
+
+      System.out.println(folder.getPath());
+      for (ItemsIterator<ObjectData> iterator = folder.getChildren(null); iterator.hasNext();)
+      {
+         ObjectData object = iterator.next();
+         if (object.getBaseType() == BaseType.FOLDER)
+         {
+            deleteTree((Folder)object, deleteAllVersions, unfileObject, continueOnFailure);
+         }
+         else
+         {
+            deleteObject(object, false);
+         }
+      }
+
+      deleteObject(folder, false);
+
+      return Collections.emptyList();
    }
 
    public Collection<Document> getAllVersions(String versionSeriesId) throws ObjectNotFoundException
    {
-      // TODO Auto-generated method stub
-      return null;
+      List<Document> v = new ArrayList<Document>();
+      if (!workingCopies.containsKey(versionSeriesId) && !versions.containsKey(versionSeriesId))
+      {
+         throw new ObjectNotFoundException("Version series " + versionSeriesId + " does not exist.");
+      }
+      String pwc = workingCopies.get(versionSeriesId);
+      if (pwc != null)
+      {
+         v.add((Document)getObject(pwc));
+      }
+      for (String vId : versions.get(versionSeriesId))
+      {
+         v.add((Document)getObject(vId));
+      }
+      return v;
    }
 
    public ItemsIterator<ChangeEvent> getChangeLog(String changeLogToken) throws ConstraintException
    {
-      // TODO Auto-generated method stub
-      return null;
+      // TODO
+      return CmisUtils.emptyItemsIterator();
    }
 
-   public ItemsIterator<ObjectData> getCheckedOutDocuments(ObjectData folder, String orderBy)
+   /**
+    * {@inheritDoc}
+    */
+   public ItemsIterator<Document> getCheckedOutDocuments(ObjectData folder, String orderBy)
    {
-      // TODO Auto-generated method stub
-      return null;
+      List<Document> checkedOut = new ArrayList<Document>();
+
+      for (String pwcId : workingCopies.values())
+      {
+         Document pwc = (Document)getObject(pwcId);
+         if (folder != null)
+         {
+            for (Folder parent : pwc.getParents())
+            {
+               // TODO equals and hashCode for objects
+               if (parent.getObjectId().equals(folder.getObjectId()))
+               {
+                  checkedOut.add(pwc);
+               }
+            }
+         }
+         else
+         {
+            checkedOut.add(pwc);
+         }
+      }
+      return new BaseItemsIterator<Document>(checkedOut);
    }
 
    public String getId()
    {
-      // TODO Auto-generated method stub
-      return null;
+      return configuration.getId();
    }
 
    /**
@@ -347,14 +491,16 @@ public class StorageImpl implements Storage
 
    public ItemsIterator<Rendition> getRenditions(ObjectData object)
    {
-      // TODO Auto-generated method stub
-      return null;
+      // TODO
+      return CmisUtils.emptyItemsIterator();
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public RepositoryInfo getRepositoryInfo()
    {
-      // TODO Auto-generated method stub
-      return null;
+      return new RepositoryInfoImpl(getId());
    }
 
    /**
@@ -376,8 +522,8 @@ public class StorageImpl implements Storage
 
    public ItemsIterator<Result> query(Query query) throws InvalidArgumentException
    {
-      // TODO Auto-generated method stub
-      return null;
+      // TODO
+      return CmisUtils.emptyItemsIterator();
    }
 
    /**

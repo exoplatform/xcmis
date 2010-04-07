@@ -326,7 +326,7 @@ public class StorageTest extends BaseTest
 
       List<String> r = new ArrayList<String>();
       // Should be both documents
-      for (ItemsIterator<ObjectData> checkedOutDocs = storage.getCheckedOutDocuments(null, null); checkedOutDocs
+      for (ItemsIterator<Document> checkedOutDocs = storage.getCheckedOutDocuments(null, null); checkedOutDocs
          .hasNext();)
       {
          r.add(checkedOutDocs.next().getObjectId());
@@ -338,7 +338,7 @@ public class StorageTest extends BaseTest
       r.clear();
 
       // Should be only PWC "from" specified folder
-      for (ItemsIterator<ObjectData> checkedOutDocs = storage.getCheckedOutDocuments(folder, null); checkedOutDocs
+      for (ItemsIterator<Document> checkedOutDocs = storage.getCheckedOutDocuments(folder, null); checkedOutDocs
          .hasNext();)
       {
          r.add(checkedOutDocs.next().getObjectId());

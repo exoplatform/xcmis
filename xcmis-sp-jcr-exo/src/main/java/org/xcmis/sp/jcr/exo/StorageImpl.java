@@ -711,14 +711,14 @@ public class StorageImpl implements Storage
       throw new NotSupportedException("Changes log feature is not supported.");
    }
 
-   public ItemsIterator<ObjectData> getCheckedOutDocuments(ObjectData folder, String orderBy)
+   public ItemsIterator<Document> getCheckedOutDocuments(ObjectData folder, String orderBy)
    {
       try
       {
          Node workingCopies =
             (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_WORKING_COPIES);
 
-         List<ObjectData> checkedOut = new ArrayList<ObjectData>();
+         List<Document> checkedOut = new ArrayList<Document>();
 
          for (NodeIterator iterator = workingCopies.getNodes(); iterator.hasNext();)
          {
@@ -750,7 +750,7 @@ public class StorageImpl implements Storage
             }
          }
 
-         return new BaseItemsIterator<ObjectData>(checkedOut);
+         return new BaseItemsIterator<Document>(checkedOut);
       }
       catch (RepositoryException re)
       {
