@@ -42,7 +42,7 @@ public class PDFDocumentRenditionProvider implements RenditionProvider
    private static final String[] SUPPORTED_MEDIA_TYPES = new String[]{"application/pdf"};
    
    /** Can store renditions. */
-   private static final boolean CAN_STORE_RENDITIONS=  true;
+   private static final boolean CAN_STORE_RENDITIONS=  false;
 
    // TODO configurable maxHeigth & maxWidth 
    /** The max height. */

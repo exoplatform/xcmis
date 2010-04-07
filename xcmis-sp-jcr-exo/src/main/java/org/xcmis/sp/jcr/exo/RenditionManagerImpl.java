@@ -68,7 +68,8 @@ public class RenditionManagerImpl implements RenditionManager
             if (obj.getBaseType() == BaseType.DOCUMENT && obj.getContentStream(null) != null)
             {
                MimeType contentType = MimeType.fromString(((DocumentImpl)obj).getContentStreamMimeType());
-               if  (renditionProviders.containsKey(contentType)) 
+               RenditionProvider prov = renditionProviders.get(contentType);
+               if  (prov != null && !prov.canStoreRendition()) 
                {
                RenditionImpl rendition = new RenditionImpl();
                rendition.setStreamId(encode(contentType.toString()));
