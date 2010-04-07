@@ -36,7 +36,6 @@ import org.xcmis.search.SearchServiceException;
 import org.xcmis.search.config.IndexConfiguration;
 import org.xcmis.search.config.SearchServiceConfiguration;
 import org.xcmis.search.content.command.InvocationContext;
-import org.xcmis.search.lucene.LuceneSearchService;
 import org.xcmis.search.value.SlashSplitter;
 import org.xcmis.search.value.ToStringNameConverter;
 import org.xcmis.sp.jcr.exo.index.CmisContentReader;
@@ -369,8 +368,8 @@ public class StorageProviderImpl implements StorageProvider, Startable
                {
                   workspace.getObservationManager().addEventListener(
                      new UpdateListener(repository, cmisRepositoryConfiguration.getWorkspace(), renditionProviders),
-                     Event.NODE_ADDED | Event.PROPERTY_ADDED | Event.PROPERTY_CHANGED , "/",
-                     true, null, new String[]{JcrCMIS.NT_FILE, JcrCMIS.NT_RESOURCE}, false);
+                     Event.NODE_ADDED | Event.PROPERTY_ADDED | Event.PROPERTY_CHANGED, "/", true, null,
+                     new String[]{JcrCMIS.NT_FILE, JcrCMIS.NT_RESOURCE}, false);
                }
             }
             catch (Exception ex)
@@ -406,7 +405,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
             configuration.setTableResolver(tableResolver);
             configuration.setPathSplitter(new SlashSplitter());
 
-            LuceneSearchService searchService = new LuceneSearchService(configuration);
+            SearchService searchService = new SearchService(configuration);
             searchService.start();
 
             //attach listener to the created storage
