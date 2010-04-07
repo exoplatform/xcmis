@@ -19,12 +19,18 @@
 package org.xcmis.search.config;
 
 import org.exoplatform.services.document.DocumentReaderService;
+import org.xcmis.search.content.interceptors.QueryableIndexStorage;
 
 /**
  *  Search service index configuration
  */
 public class IndexConfiguration
 {
+   /**
+    * Default implementation of {@link QueryableIndexStorage}
+    */
+   public static final String DEFAULT_QUERYABLEINDEXSTORAGE = "org.xcmis.search.lucene.LuceneQueryableIndexStorage";
+
    /**
     * Path where index should be stored 
     */
@@ -39,6 +45,27 @@ public class IndexConfiguration
     * Uuid of root element
     */
    private String rootUuid;
+
+   /**
+    * Implementation of {@link QueryableIndexStorage}
+    */
+   private String queryableIndexStorage = DEFAULT_QUERYABLEINDEXSTORAGE;
+
+   /**
+    * @return the queryableIndexStorage
+    */
+   public String getQueryableIndexStorage()
+   {
+      return queryableIndexStorage;
+   }
+
+   /**
+    * @param queryableIndexStorage the queryableIndexStorage to set
+    */
+   public void setQueryableIndexStorage(String queryableIndexStorage)
+   {
+      this.queryableIndexStorage = queryableIndexStorage;
+   }
 
    /**
     * Text extraction service.

@@ -120,7 +120,7 @@ public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndex
     */
    public AbstractLuceneQueryableIndexStorage(SearchServiceConfiguration serviceConfuguration) throws IndexException
    {
-      super();
+      super(serviceConfuguration);
       Validate.notNull(serviceConfuguration.getTableResolver(),
          "The TableResolver may not be null in SearchServiceConfiguration");
       Validate.notNull(serviceConfuguration.getNameConverter(),

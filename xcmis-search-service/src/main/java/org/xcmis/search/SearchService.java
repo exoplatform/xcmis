@@ -27,6 +27,7 @@ import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.content.command.index.ModifyIndexCommand;
 import org.xcmis.search.content.command.query.ExecuteSelectorCommand;
 import org.xcmis.search.content.command.query.ProcessQueryCommand;
+import org.xcmis.search.content.interceptors.ContentReaderInterceptor;
 import org.xcmis.search.content.interceptors.InterceptorChain;
 import org.xcmis.search.content.interceptors.QueryProcessorInterceptor;
 import org.xcmis.search.content.interceptors.QueryableIndexStorage;
@@ -37,6 +38,8 @@ import org.xcmis.search.query.optimize.CriteriaBasedOptimizer;
 import org.xcmis.search.query.plan.SimplePlaner;
 import org.xcmis.search.result.ScoredRow;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -48,7 +51,7 @@ import java.util.Set;
  * Main entry point to the search service.
  * 
  */
-public abstract class SearchService implements Startable, ContentModificationListener, Searcher
+public class SearchService implements Startable, ContentModificationListener, Searcher
 {
 
    /**
@@ -208,7 +211,53 @@ public abstract class SearchService implements Startable, ContentModificationLis
     * @param interceptorChain
     * @throws SearchServiceException 
     */
-   protected abstract void addQueryableIndexStorageInterceptor(InterceptorChain interceptorChain)
-      throws SearchServiceException;
+   protected void addQueryableIndexStorageInterceptor(InterceptorChain interceptorChain) throws SearchServiceException
+   {
+      String className = configuration.getIndexConfuguration().getQueryableIndexStorage();
+      try
+      {
+         Class<?> queryableIndexStorageClass = Class.forName(className);
+         if (QueryableIndexStorage.class.isAssignableFrom(queryableIndexStorageClass))
+         {
 
+            Constructor<QueryableIndexStorage> constructor =
+               (Constructor<QueryableIndexStorage>)queryableIndexStorageClass.getConstructor(configuration.getClass());
+            QueryableIndexStorage queryableIndexStorage = constructor.newInstance(configuration);
+            interceptorChain.addBeforeInterceptor(queryableIndexStorage, ContentReaderInterceptor.class);
+         }
+         else
+         {
+            throw new SearchServiceException(className + "is no assignable from " + QueryableIndexStorage.class);
+         }
+      }
+      catch (ClassNotFoundException e)
+      {
+         throw new SearchServiceException(e.getLocalizedMessage(), e);
+      }
+      catch (SecurityException e)
+      {
+         throw new SearchServiceException(e.getLocalizedMessage(), e);
+      }
+      catch (NoSuchMethodException e)
+      {
+         throw new SearchServiceException(e.getLocalizedMessage(), e);
+      }
+      catch (IllegalArgumentException e)
+      {
+         throw new SearchServiceException(e.getLocalizedMessage(), e);
+      }
+      catch (InstantiationException e)
+      {
+         throw new SearchServiceException(e.getLocalizedMessage(), e);
+      }
+      catch (IllegalAccessException e)
+      {
+         throw new SearchServiceException(e.getLocalizedMessage(), e);
+      }
+      catch (InvocationTargetException e)
+      {
+         throw new SearchServiceException(e.getLocalizedMessage(), e);
+      }
+
+   }
 }

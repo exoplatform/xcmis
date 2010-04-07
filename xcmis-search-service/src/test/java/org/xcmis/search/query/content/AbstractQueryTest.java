@@ -42,7 +42,6 @@ import org.xcmis.search.content.InMemorySchema.Builder;
 import org.xcmis.search.content.Property.SimpleValue;
 import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.content.interceptors.ContentReaderInterceptor;
-import org.xcmis.search.lucene.LuceneSearchService;
 import org.xcmis.search.lucene.content.SchemaTableResolver;
 import org.xcmis.search.model.Query;
 import org.xcmis.search.query.QueryBuilder;
@@ -193,7 +192,7 @@ public abstract class AbstractQueryTest
 
       configuration.setDefaultInvocationContext(invocationContext);
 
-      searchService = new LuceneSearchService(configuration);
+      searchService = new SearchService(configuration);
       searchService.start();
 
       List<ContentEntry> contentEntries = new ArrayList<ContentEntry>();

@@ -18,6 +18,7 @@
  */
 package org.xcmis.search.content.interceptors;
 
+import org.xcmis.search.config.SearchServiceConfiguration;
 import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.content.command.index.ModifyIndexCommand;
 import org.xcmis.search.content.command.query.ExecuteSelectorCommand;
@@ -27,13 +28,25 @@ import org.xcmis.search.content.command.query.ExecuteSelectorCommand;
  */
 public abstract class QueryableIndexStorage extends CommandInterceptor
 {
+   /**
+    * Service configuration.
+    */
+   protected final SearchServiceConfiguration serviceConfuguration;
+
+   /**
+    * @param serviceConfuguration
+    */
+   public QueryableIndexStorage(SearchServiceConfiguration serviceConfuguration)
+   {
+      super();
+      this.serviceConfuguration = serviceConfuguration;
+   }
 
    /**
     * @see org.xcmis.search.content.interceptors.AbstractVisitor#visitModifyIndexCommand(org.xcmis.search.content.command.InvocationContext, org.xcmis.search.content.command.index.ModifyIndexCommand)
     */
    @Override
-   public abstract Object visitModifyIndexCommand(InvocationContext ctx,
-      ModifyIndexCommand command) throws Throwable;
+   public abstract Object visitModifyIndexCommand(InvocationContext ctx, ModifyIndexCommand command) throws Throwable;
 
    /**
     * @see org.xcmis.search.content.interceptors.AbstractVisitor#visitExecuteSelectorCommand(org.xcmis.search.content.command.InvocationContext, org.xcmis.search.content.command.query.ExecuteSelectorCommand)
