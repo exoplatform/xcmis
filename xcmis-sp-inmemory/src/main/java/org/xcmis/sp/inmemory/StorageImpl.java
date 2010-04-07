@@ -106,7 +106,7 @@ public class StorageImpl implements Storage
 
    final Map<String, Set<String>> typeChildren;
 
-   private final  StorageConfiguration configuration;
+   private final StorageConfiguration configuration;
 
    static final String ROOT_FOLDER_ID = "abcdef12-3456-7890-0987-654321fedcba";
 
@@ -616,16 +616,25 @@ public class StorageImpl implements Storage
    public ItemsIterator<TypeDefinition> getTypeChildren(String typeId, boolean includePropertyDefinitions)
       throws TypeNotFoundException, CmisRuntimeException
    {
-      if (types.get(typeId) == null)
+      List<TypeDefinition> types = new ArrayList<TypeDefinition>();
+      if (typeId == null)
       {
-         throw new TypeNotFoundException("Type " + typeId + " does not exists.");
+         for (String t : new String[]{"cmis:document", "cmis:folder", "cmis:policy", "cmis:relationship"})
+         {
+            types.add(getTypeDefinition(t, includePropertyDefinitions));
+         }
       }
-
-      Set<String> tc = typeChildren.get(typeId);
-      List<TypeDefinition> types = new ArrayList<TypeDefinition>(tc.size());
-      for (String t : tc)
+      else
       {
-         types.add(getTypeDefinition(t, includePropertyDefinitions));
+         if (this.types.get(typeId) == null)
+         {
+            throw new TypeNotFoundException("Type " + typeId + " does not exists.");
+         }
+
+         for (String t : typeChildren.get(typeId))
+         {
+            types.add(getTypeDefinition(t, includePropertyDefinitions));
+         }
       }
       return new BaseItemsIterator<TypeDefinition>(types);
    }
