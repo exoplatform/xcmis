@@ -73,12 +73,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.Principal;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.activation.MimeType;
 import javax.activation.MimeTypeParseException;
@@ -577,7 +577,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          updatePropertiesFromEntry(object, entry);
 
          Map<String, Property<?>> properties = object.getProperties();
-         Set<String> policyIds = (Set<String>)object.getPolicyIds();
+         Collection<String> policyIds = object.getPolicyIds();
          List<AccessControlEntry> acl = object.getACL();
          ContentStream contentStream = getContentStream(entry, request);
 
@@ -604,10 +604,13 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
             // validators in other forms of request.
             // ------------------------------------------
             // Method is PUT - use strong comparison.
+            CmisObject cmisObject = conn.getProperties(getId(request), true, CMIS.BASE_TYPE_ID);
+            BaseType baseType = cmisObject.getObjectInfo().getBaseType();
+
             ChangeTokenHolder changeTokenHolder = new ChangeTokenHolder();
             changeTokenHolder.setValue(request.getHeader(HttpHeaders.IF_MATCH));
             updatedId = conn.updateProperties(getId(request), changeTokenHolder, properties);
-            if (contentStream != null)
+            if (baseType == BaseType.DOCUMENT && contentStream != null)
             {
                updatedId = conn.setContentStream(getId(request), contentStream, changeTokenHolder, true);
             }
