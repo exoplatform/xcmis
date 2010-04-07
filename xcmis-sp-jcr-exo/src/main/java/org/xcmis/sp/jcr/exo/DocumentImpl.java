@@ -392,35 +392,19 @@ class DocumentImpl extends BaseObjectData implements Document
             doc.addMixin(JcrCMIS.MIX_VERSIONABLE);
          }
 
-         doc.setProperty(CMIS.OBJECT_TYPE_ID, //
-            type.getId());
-         doc.setProperty(CMIS.BASE_TYPE_ID, //
-            type.getBaseId().value());
-         doc.setProperty(CMIS.CREATED_BY, //
-            session.getUserID());
-         doc.setProperty(CMIS.CREATION_DATE, //
-            Calendar.getInstance());
-         doc.setProperty(CMIS.LAST_MODIFIED_BY, //
-            session.getUserID());
-         doc.setProperty(CMIS.LAST_MODIFICATION_DATE, //
-            Calendar.getInstance());
-         doc.setProperty(CMIS.VERSION_SERIES_ID, //
-            doc.getProperty(JcrCMIS.JCR_VERSION_HISTORY).getString());
-         doc.setProperty(CMIS.IS_LATEST_VERSION, //
-            true);
-         doc.setProperty(CMIS.IS_MAJOR_VERSION, //
-            versioningState == VersioningState.MAJOR);
-         doc.setProperty(CMIS.VERSION_LABEL, //
-            versioningState == VersioningState.CHECKEDOUT ? pwcLabel : latestLabel);
-         doc.setProperty(CMIS.IS_VERSION_SERIES_CHECKED_OUT, //
-            versioningState == VersioningState.CHECKEDOUT);
-         if (versioningState == VersioningState.CHECKEDOUT)
-         {
-            doc.setProperty(CMIS.VERSION_SERIES_CHECKED_OUT_ID, //
-               ((ExtendedNode)doc).getIdentifier());
-            doc.setProperty(CMIS.VERSION_SERIES_CHECKED_OUT_BY, //
-               session.getUserID());
-         }
+         doc.setProperty(CMIS.OBJECT_TYPE_ID, type.getId());
+         doc.setProperty(CMIS.BASE_TYPE_ID, type.getBaseId().value());
+         doc.setProperty(CMIS.CREATED_BY, session.getUserID());
+         doc.setProperty(CMIS.CREATION_DATE, Calendar.getInstance());
+         doc.setProperty(CMIS.LAST_MODIFIED_BY, session.getUserID());
+         doc.setProperty(CMIS.LAST_MODIFICATION_DATE, Calendar.getInstance());
+         doc.setProperty(CMIS.VERSION_SERIES_ID, doc.getProperty(JcrCMIS.JCR_VERSION_HISTORY).getString());
+         doc.setProperty(CMIS.IS_LATEST_VERSION, true);
+         doc.setProperty(CMIS.IS_MAJOR_VERSION, versioningState == VersioningState.MAJOR);
+
+         doc.setProperty(CMIS.VERSION_LABEL, latestLabel);
+
+         // TODO : support for checked-out initial state
 
          for (Property<?> property : properties.values())
          {
@@ -516,27 +500,23 @@ class DocumentImpl extends BaseObjectData implements Document
          data.hasNode(JcrCMIS.JCR_CONTENT) ? data.getNode(JcrCMIS.JCR_CONTENT) : data.addNode(JcrCMIS.JCR_CONTENT,
             JcrCMIS.NT_RESOURCE);
 
-      contentNode.setProperty(JcrCMIS.JCR_MIMETYPE, //
-         content == null ? "" : content.getMediaType());
+      contentNode.setProperty(JcrCMIS.JCR_MIMETYPE, content == null ? "" : content.getMediaType());
 
       // Re-count content length
-      long contentLength = contentNode.setProperty(JcrCMIS.JCR_DATA, //
-         content == null ? new ByteArrayInputStream(new byte[0]) : content.getStream()).getLength();
+      long contentLength =
+         contentNode.setProperty(JcrCMIS.JCR_DATA,
+            content == null ? new ByteArrayInputStream(new byte[0]) : content.getStream()).getLength();
 
-      contentNode.setProperty(JcrCMIS.JCR_LAST_MODIFIED, //
-         Calendar.getInstance());
+      contentNode.setProperty(JcrCMIS.JCR_LAST_MODIFIED, Calendar.getInstance());
 
       // Update CMIS properties
       if (content != null && !data.hasProperty(CMIS.CONTENT_STREAM_ID))
       {
          // If new node
-         data.setProperty(CMIS.CONTENT_STREAM_ID, //
-            ((ExtendedNode)contentNode).getIdentifier());
+         data.setProperty(CMIS.CONTENT_STREAM_ID, ((ExtendedNode)contentNode).getIdentifier());
       }
-      data.setProperty(CMIS.CONTENT_STREAM_LENGTH, //
-         contentLength);
-      data.setProperty(CMIS.CONTENT_STREAM_MIME_TYPE, //
-         content == null ? null : content.getMediaType());
+      data.setProperty(CMIS.CONTENT_STREAM_LENGTH, contentLength);
+      data.setProperty(CMIS.CONTENT_STREAM_MIME_TYPE, content == null ? null : content.getMediaType());
    }
 
    /**
