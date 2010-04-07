@@ -261,7 +261,7 @@ public class RepositoryInfoImpl implements RepositoryInfo, RepositoryCapabilitie
     */
    public String getProductName()
    {
-      return "xCMIS (eXo JCR SP)";
+      return "xCMIS (eXo InMemory SP)";
    }
 
    /**
@@ -356,7 +356,7 @@ public class RepositoryInfoImpl implements RepositoryInfo, RepositoryCapabilitie
     */
    public CapabilityQuery getCapabilityQuery()
    {
-      return CapabilityQuery.BOTHCOMBINED;
+      return CapabilityQuery.NONE;
    }
 
    /**
@@ -364,7 +364,7 @@ public class RepositoryInfoImpl implements RepositoryInfo, RepositoryCapabilitie
     */
    public CapabilityRendition getCapabilityRenditions()
    {
-      return CapabilityRendition.READ;
+      return CapabilityRendition.NONE;
    }
 
    /**
@@ -372,7 +372,7 @@ public class RepositoryInfoImpl implements RepositoryInfo, RepositoryCapabilitie
     */
    public boolean isCapabilityAllVersionsSearchable()
    {
-      return true;
+      return false;
    }
 
    /**
@@ -404,7 +404,7 @@ public class RepositoryInfoImpl implements RepositoryInfo, RepositoryCapabilitie
     */
    public boolean isCapabilityPWCSearchable()
    {
-      return true;
+      return false;
    }
 
    /**
