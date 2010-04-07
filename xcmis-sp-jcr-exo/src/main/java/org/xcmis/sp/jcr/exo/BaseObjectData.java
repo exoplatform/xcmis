@@ -1391,11 +1391,11 @@ abstract class BaseObjectData implements ObjectData
             List<Boolean> booleans = (List<Boolean>)property.getValues();
             if (booleans.size() == 0)
             {
-               data.setProperty(property.getLocalName(), (Boolean)null);
+               data.setProperty(/*property.getLocalName()*/property.getId(), (Boolean)null);
             }
             else if (booleans.size() == 1)
             {
-               data.setProperty(property.getLocalName(), booleans.get(0));
+               data.setProperty(/*property.getLocalName()*/property.getId(), booleans.get(0));
             }
             else
             {
@@ -1406,7 +1406,7 @@ abstract class BaseObjectData implements ObjectData
                   jcrValue[i] = new BooleanValue(booleans.get(i));
                }
 
-               data.setProperty(property.getLocalName(), jcrValue);
+               data.setProperty(/*property.getLocalName()*/property.getId(), jcrValue);
             }
          }
          else if (property.getType() == PropertyType.DATETIME)
@@ -1414,11 +1414,11 @@ abstract class BaseObjectData implements ObjectData
             List<Calendar> datetime = (List<Calendar>)property.getValues();
             if (datetime.size() == 0)
             {
-               data.setProperty(property.getLocalName(), (Calendar)null);
+               data.setProperty(/*property.getLocalName()*/property.getId(), (Calendar)null);
             }
             else if (datetime.size() == 1)
             {
-               data.setProperty(property.getLocalName(), datetime.get(0));
+               data.setProperty(/*property.getLocalName()*/property.getId(), datetime.get(0));
             }
             else
             {
@@ -1429,7 +1429,7 @@ abstract class BaseObjectData implements ObjectData
                   jcrValue[i] = new DateValue(datetime.get(i));
                }
 
-               data.setProperty(property.getLocalName(), jcrValue);
+               data.setProperty(/*property.getLocalName()*/property.getId(), jcrValue);
             }
          }
          else if (property.getType() == PropertyType.DECIMAL)
@@ -1437,11 +1437,11 @@ abstract class BaseObjectData implements ObjectData
             List<BigDecimal> doubles = (List<BigDecimal>)property.getValues();
             if (doubles.size() == 0)
             {
-               data.setProperty(property.getLocalName(), (Double)null);
+               data.setProperty(/*property.getLocalName()*/property.getId(), (Double)null);
             }
             else if (doubles.size() == 1)
             {
-               data.setProperty(property.getLocalName(), doubles.get(0).doubleValue());
+               data.setProperty(/*property.getLocalName()*/property.getId(), doubles.get(0).doubleValue());
             }
             else
             {
@@ -1452,7 +1452,7 @@ abstract class BaseObjectData implements ObjectData
                   jcrValue[i] = new DoubleValue(doubles.get(i).doubleValue());
                }
 
-               data.setProperty(property.getLocalName(), jcrValue);
+               data.setProperty(/*property.getLocalName()*/property.getId(), jcrValue);
             }
          }
          else if (property.getType() == PropertyType.INTEGER)
@@ -1460,11 +1460,11 @@ abstract class BaseObjectData implements ObjectData
             List<BigInteger> integers = (List<BigInteger>)property.getValues();
             if (integers.size() == 0)
             {
-               data.setProperty(property.getLocalName(), (Long)null);
+               data.setProperty(/*property.getLocalName()*/property.getId(), (Long)null);
             }
             else if (integers.size() == 1)
             {
-               data.setProperty(property.getLocalName(), integers.get(0).longValue());
+               data.setProperty(/*property.getLocalName()*/property.getId(), integers.get(0).longValue());
             }
             else
             {
@@ -1475,7 +1475,7 @@ abstract class BaseObjectData implements ObjectData
                   jcrValue[i] = new LongValue(integers.get(i).longValue());
                }
 
-               data.setProperty(property.getLocalName(), jcrValue);
+               data.setProperty(/*property.getLocalName()*/property.getId(), jcrValue);
             }
          }
          /*
@@ -1490,11 +1490,11 @@ abstract class BaseObjectData implements ObjectData
             List<String> text = (List<String>)property.getValues();
             if (text.size() == 0)
             {
-               data.setProperty(property.getLocalName(), (String)null);
+               data.setProperty(/*property.getLocalName()*/property.getId(), (String)null);
             }
             else if (text.size() == 1)
             {
-               data.setProperty(property.getLocalName(), text.get(0));
+               data.setProperty(/*property.getLocalName()*/property.getId(), text.get(0));
             }
             else
             {
@@ -1505,7 +1505,7 @@ abstract class BaseObjectData implements ObjectData
                   jcrValue[i] = new StringValue(text.get(i));
                }
 
-               data.setProperty(property.getLocalName(), jcrValue);
+               data.setProperty(/*property.getLocalName()*/property.getId(), jcrValue);
             }
          }
          else if (property.getType() == PropertyType.URI)
@@ -1513,11 +1513,11 @@ abstract class BaseObjectData implements ObjectData
             List<URI> uris = (List<URI>)property.getValues();
             if (uris.size() == 0)
             {
-               data.setProperty(property.getLocalName(), (String)null);
+               data.setProperty(/*property.getLocalName()*/property.getId(), (String)null);
             }
             else if (uris.size() == 1)
             {
-               data.setProperty(property.getLocalName(), uris.get(0).toString());
+               data.setProperty(/*property.getLocalName()*/property.getId(), uris.get(0).toString());
             }
             else
             {
@@ -1528,7 +1528,7 @@ abstract class BaseObjectData implements ObjectData
                   jcrValue[i] = new StringValue(uris.get(i).toString());
                }
 
-               data.setProperty(property.getLocalName(), jcrValue);
+               data.setProperty(/*property.getLocalName()*/property.getId(), jcrValue);
             }
          }
       }
