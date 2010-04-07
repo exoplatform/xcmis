@@ -30,6 +30,11 @@ public class StringValue extends Value
 
    private final String[] values;
 
+   public StringValue()
+   {
+      this.values = new String[0];
+   }
+
    public StringValue(String value)
    {
       this.values = new String[]{value};

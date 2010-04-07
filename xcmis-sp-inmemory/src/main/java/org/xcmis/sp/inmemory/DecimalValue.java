@@ -31,6 +31,11 @@ public class DecimalValue extends Value
 
    private final BigDecimal[] value;
 
+   public DecimalValue()
+   {
+      this.value = new BigDecimal[0];
+   }
+
    public DecimalValue(BigDecimal value)
    {
       this.value = new BigDecimal[]{value};

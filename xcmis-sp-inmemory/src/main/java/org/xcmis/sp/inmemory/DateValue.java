@@ -31,6 +31,11 @@ public class DateValue extends Value
 
    private final Calendar[] values;
 
+   public DateValue()
+   {
+      this.values = new Calendar[0];
+   }
+
    public DateValue(Calendar value)
    {
       this.values = new Calendar[]{value};

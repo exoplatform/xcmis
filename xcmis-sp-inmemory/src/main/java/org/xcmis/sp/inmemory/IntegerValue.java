@@ -31,6 +31,11 @@ public class IntegerValue extends Value
 
    private final BigInteger[] values;
 
+   public IntegerValue()
+   {
+      this.values = new BigInteger[0];
+   }
+
    public IntegerValue(BigInteger value)
    {
       this.values = new BigInteger[]{value};

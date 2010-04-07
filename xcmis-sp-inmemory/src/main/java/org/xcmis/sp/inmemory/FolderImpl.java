@@ -25,21 +25,22 @@ import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.data.ContentStream;
+import org.xcmis.spi.data.Document;
 import org.xcmis.spi.data.Folder;
 import org.xcmis.spi.data.ObjectData;
 import org.xcmis.spi.data.Relationship;
 import org.xcmis.spi.impl.BaseItemsIterator;
+import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.RelationshipDirection;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.utils.CmisUtils;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
@@ -70,7 +71,7 @@ class FolderImpl extends BaseObjectData implements Folder
       }
       storage.children.get(getObjectId()).add(object.getObjectId());
       storage.parents.get(object.getObjectId()).add(getObjectId());
-      storage.unfiling.remove(object.getObjectId());
+      storage.unfiled.remove(object.getObjectId());
    }
 
    /**
@@ -87,7 +88,12 @@ class FolderImpl extends BaseObjectData implements Folder
       List<ObjectData> children = new ArrayList<ObjectData>(childrenIds.size());
       for (String ch : childrenIds)
       {
-         children.add(storage.getObject(ch));
+         ObjectData object = storage.getObject(ch);
+         if (object.getBaseType() == BaseType.DOCUMENT && !((Document)object).isLatestVersion())
+         {
+            continue;
+         }
+         children.add(object);
       }
 
       return new BaseItemsIterator<ObjectData>(children);
@@ -148,7 +154,7 @@ class FolderImpl extends BaseObjectData implements Folder
       storage.parents.get(object.getObjectId()).remove(getObjectId());
       if (storage.parents.get(object.getObjectId()).size() == 0)
       {
-         storage.unfiling.add(object.getObjectId());
+         storage.unfiled.add(object.getObjectId());
       }
    }
 
@@ -214,7 +220,6 @@ class FolderImpl extends BaseObjectData implements Folder
       storage.children.remove(objectId);
    }
 
-   @Override
    protected void save() throws StorageException
    {
       String name = getName();
@@ -237,16 +242,11 @@ class FolderImpl extends BaseObjectData implements Folder
       {
          id = StorageImpl.generateId();
 
-         entry.setValue(CMIS.OBJECT_ID, //
-            new StringValue(id));
-         entry.setValue(CMIS.OBJECT_TYPE_ID, //
-            new StringValue(getTypeId()));
-         entry.setValue(CMIS.BASE_TYPE_ID, //
-            new StringValue(getBaseType().value()));
-         entry.setValue(CMIS.CREATED_BY, //
-            new StringValue(""));
-         entry.setValue(CMIS.CREATION_DATE, //
-            new DateValue(Calendar.getInstance()));
+         entry.setValue(CMIS.OBJECT_ID, new StringValue(id));
+         entry.setValue(CMIS.OBJECT_TYPE_ID, new StringValue(getTypeId()));
+         entry.setValue(CMIS.BASE_TYPE_ID, new StringValue(getBaseType().value()));
+         entry.setValue(CMIS.CREATED_BY, new StringValue());
+         entry.setValue(CMIS.CREATION_DATE, new DateValue(Calendar.getInstance()));
 
          storage.children.get(parent.getObjectId()).add(id);
 
@@ -256,21 +256,18 @@ class FolderImpl extends BaseObjectData implements Folder
 
          storage.children.put(id, new CopyOnWriteArraySet<String>());
 
-         storage.properties.put(id, new HashMap<String, Value>());
-         storage.policies.put(id, new HashSet<String>());
-         storage.permissions.put(id, new HashMap<String, Set<String>>());
+         storage.properties.put(id, new ConcurrentHashMap<String, Value>());
+         storage.policies.put(id, new CopyOnWriteArraySet<String>());
+         storage.permissions.put(id, new ConcurrentHashMap<String, Set<String>>());
       }
       else
       {
          id = getObjectId();
       }
 
-      entry.setValue(CMIS.LAST_MODIFIED_BY, //
-         new StringValue(""));
-      entry.setValue(CMIS.LAST_MODIFICATION_DATE, //
-         new DateValue(Calendar.getInstance()));
-      entry.setValue(CMIS.CHANGE_TOKEN, //
-         new StringValue(StorageImpl.generateId()));
+      entry.setValue(CMIS.LAST_MODIFIED_BY, new StringValue());
+      entry.setValue(CMIS.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));
+      entry.setValue(CMIS.CHANGE_TOKEN, new StringValue(StorageImpl.generateId()));
 
       storage.properties.get(id).putAll(entry.getValues());
       storage.policies.get(id).addAll(entry.getPolicies());

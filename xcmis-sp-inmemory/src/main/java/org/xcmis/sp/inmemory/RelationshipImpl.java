@@ -33,6 +33,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
@@ -117,50 +118,45 @@ class RelationshipImpl extends BaseObjectData implements Relationship
       {
          id = StorageImpl.generateId();
 
-         entry.setValue(CMIS.OBJECT_ID, //
-            new StringValue(id));
-         entry.setValue(CMIS.OBJECT_TYPE_ID, //
-            new StringValue(getTypeId()));
-         entry.setValue(CMIS.BASE_TYPE_ID, //
-            new StringValue(getBaseType().value()));
-         entry.setValue(CMIS.CREATED_BY, //
-            new StringValue(""));
-         entry.setValue(CMIS.CREATION_DATE, //
-            new DateValue(Calendar.getInstance()));
-         entry.setValue(CMIS.SOURCE_ID, //
-            new StringValue(source.getObjectId()));
-         entry.setValue(CMIS.TARGET_ID, //
-            new StringValue(target.getObjectId()));
+         entry.setValue(CMIS.OBJECT_ID, new StringValue(id));
+         entry.setValue(CMIS.OBJECT_TYPE_ID, new StringValue(getTypeId()));
+         entry.setValue(CMIS.BASE_TYPE_ID, new StringValue(getBaseType().value()));
+         entry.setValue(CMIS.CREATED_BY, new StringValue());
+         entry.setValue(CMIS.CREATION_DATE, new DateValue(Calendar.getInstance()));
+         entry.setValue(CMIS.SOURCE_ID, new StringValue(source.getObjectId()));
+         entry.setValue(CMIS.TARGET_ID, new StringValue(target.getObjectId()));
 
-         Set<RelationshipInfo> sourceRelationships = storage.relationships.get(source.getObjectId());
+         Set<String> sourceRelationships = storage.relationships.get(source.getObjectId());
          if (sourceRelationships == null)
          {
-            sourceRelationships = new CopyOnWriteArraySet<RelationshipInfo>();
+            sourceRelationships = new CopyOnWriteArraySet<String>();
             storage.relationships.put(source.getObjectId(), sourceRelationships);
          }
-         sourceRelationships.add(new RelationshipInfo(id, RelationshipInfo.SOURCE));
+         sourceRelationships.add(id);
 
-         Set<RelationshipInfo> targetRelationships = storage.relationships.get(target.getObjectId());
+         Set<String> targetRelationships = storage.relationships.get(target.getObjectId());
          if (targetRelationships == null)
          {
-            targetRelationships = new CopyOnWriteArraySet<RelationshipInfo>();
+            targetRelationships = new CopyOnWriteArraySet<String>();
             storage.relationships.put(target.getObjectId(), targetRelationships);
          }
-         targetRelationships.add(new RelationshipInfo(id, RelationshipInfo.TARGET));
+         targetRelationships.add(id);
 
          storage.parents.put(id, StorageImpl.EMPTY_PARENTS);
+
+         storage.properties.put(id, new ConcurrentHashMap<String, Value>());
+         storage.policies.put(id, new CopyOnWriteArraySet<String>());
+         storage.permissions.put(id, new ConcurrentHashMap<String, Set<String>>());
+
       }
       else
       {
          id = getObjectId();
       }
 
-      entry.setValue(CMIS.LAST_MODIFIED_BY, //
-         new StringValue(""));
-      entry.setValue(CMIS.LAST_MODIFICATION_DATE, //
-         new DateValue(Calendar.getInstance()));
-      entry.setValue(CMIS.CHANGE_TOKEN, //
-         new StringValue(StorageImpl.generateId()));
+      entry.setValue(CMIS.LAST_MODIFIED_BY, new StringValue());
+      entry.setValue(CMIS.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));
+      entry.setValue(CMIS.CHANGE_TOKEN, new StringValue(StorageImpl.generateId()));
 
       storage.properties.get(id).putAll(entry.getValues());
       storage.policies.get(id).addAll(entry.getPolicies());
@@ -169,6 +165,14 @@ class RelationshipImpl extends BaseObjectData implements Relationship
 
    protected void delete() throws ConstraintException, StorageException
    {
-
+      String objectId = getObjectId();
+      String sourceId = getSourceId();
+      String targetId = getTargetId();
+      storage.properties.remove(objectId);
+      storage.policies.remove(objectId);
+      storage.permissions.remove(objectId);
+      storage.parents.remove(objectId);
+      storage.relationships.get(sourceId).remove(objectId);
+      storage.relationships.get(targetId).remove(objectId);
    }
 }

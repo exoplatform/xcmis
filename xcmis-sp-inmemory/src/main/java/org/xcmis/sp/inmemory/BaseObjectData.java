@@ -215,7 +215,7 @@ abstract class BaseObjectData implements ObjectData
          return parent;
       }
 
-      if (StorageImpl.ROOT_FOLDER_ID.equals(entry.getId()))
+      if (StorageImpl.ROOT_FOLDER_ID.equals(getObjectId()))
       {
          throw new ConstraintException("Unable get parent of root folder.");
       }
@@ -251,7 +251,7 @@ abstract class BaseObjectData implements ObjectData
       }
 
       List<Folder> parents = new ArrayList<Folder>();
-      Set<String> parentIds = storage.parents.get(entry.getId());
+      Set<String> parentIds = storage.parents.get(getObjectId());
 
       if (parentIds != null)
       {
@@ -320,22 +320,22 @@ abstract class BaseObjectData implements ObjectData
          return CmisUtils.emptyItemsIterator();
       }
 
-      Set<RelationshipInfo> relationshipsInfo = storage.relationships.get(entry.getId());
-      if (relationshipsInfo == null)
+      Set<String> relationshipIds = storage.relationships.get(getObjectId());
+      if (relationshipIds == null)
       {
          return CmisUtils.emptyItemsIterator();
       }
 
       List<Relationship> relationships = new ArrayList<Relationship>();
-      for (RelationshipInfo info : relationshipsInfo)
+      for (String id : relationshipIds)
       {
+         Relationship r = (Relationship)storage.getObject(id);
          if (direction == RelationshipDirection.EITHER //
-            || (direction == RelationshipDirection.SOURCE && info.getDirection() == RelationshipInfo.SOURCE) //
-            || (direction == RelationshipDirection.TARGET && info.getDirection() == RelationshipInfo.TARGET))
+            || (direction == RelationshipDirection.SOURCE && r.getSourceId().equals(getObjectId())) //
+            || (direction == RelationshipDirection.TARGET && r.getTargetId().equals(getObjectId())))
          {
-            Relationship relationship = (Relationship)storage.getObject(info.getRelationshipId());
             // TODO filter by type.
-            relationships.add(relationship);
+            relationships.add(r);
          }
       }
 

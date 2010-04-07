@@ -30,6 +30,11 @@ public class BooleanValue extends Value
 
    private final Boolean[] values;
 
+   public BooleanValue()
+   {
+      this.values = new Boolean[0];
+   }
+
    public BooleanValue(Boolean value)
    {
       this.values = new Boolean[]{value};

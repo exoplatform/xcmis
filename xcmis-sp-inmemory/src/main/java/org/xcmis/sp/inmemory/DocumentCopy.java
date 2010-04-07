@@ -35,9 +35,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Calendar;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
@@ -77,38 +76,25 @@ class DocumentCopy extends DocumentImpl
       }
 
       String id = StorageImpl.generateId();
-      entry.setValue(CMIS.OBJECT_ID, //
-         new StringValue(id));
-      entry.setValue(CMIS.OBJECT_TYPE_ID, //
-         new StringValue(getTypeId()));
-      entry.setValue(CMIS.BASE_TYPE_ID, //
-         new StringValue(getBaseType().value()));
-      entry.setValue(CMIS.CREATED_BY, //
-         new StringValue(""));
-      entry.setValue(CMIS.CREATION_DATE, //
-         new DateValue(Calendar.getInstance()));
-      entry.setValue(CMIS.VERSION_SERIES_ID, //
-         new StringValue(StorageImpl.generateId()));
-      entry.setValue(CMIS.IS_LATEST_VERSION, //
-         new BooleanValue(true));
-      entry.setValue(CMIS.IS_MAJOR_VERSION, //
-         new BooleanValue(versioningState == VersioningState.MAJOR));
-      entry.setValue(CMIS.VERSION_LABEL, //
-         new StringValue(versioningState == VersioningState.CHECKEDOUT ? pwcLabel : latestLabel));
-      entry.setValue(CMIS.IS_VERSION_SERIES_CHECKED_OUT, //
+      entry.setValue(CMIS.OBJECT_ID, new StringValue(id));
+      entry.setValue(CMIS.OBJECT_TYPE_ID, new StringValue(getTypeId()));
+      entry.setValue(CMIS.BASE_TYPE_ID, new StringValue(getBaseType().value()));
+      entry.setValue(CMIS.CREATED_BY, new StringValue(""));
+      entry.setValue(CMIS.CREATION_DATE, new DateValue(Calendar.getInstance()));
+      entry.setValue(CMIS.VERSION_SERIES_ID, new StringValue(StorageImpl.generateId()));
+      entry.setValue(CMIS.IS_LATEST_VERSION, new BooleanValue(true));
+      entry.setValue(CMIS.IS_MAJOR_VERSION, new BooleanValue(versioningState == VersioningState.MAJOR));
+      entry.setValue(CMIS.VERSION_LABEL, new StringValue(versioningState == VersioningState.CHECKEDOUT ? pwcLabel
+         : latestLabel));
+      entry.setValue(CMIS.IS_VERSION_SERIES_CHECKED_OUT,
          new BooleanValue(versioningState == VersioningState.CHECKEDOUT));
-      entry.setValue(CMIS.LAST_MODIFIED_BY, //
-         new StringValue(""));
-      entry.setValue(CMIS.LAST_MODIFICATION_DATE, //
-         new DateValue(Calendar.getInstance()));
-      entry.setValue(CMIS.CHANGE_TOKEN, //
-         new StringValue(StorageImpl.generateId()));
+      entry.setValue(CMIS.LAST_MODIFIED_BY, new StringValue(""));
+      entry.setValue(CMIS.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));
+      entry.setValue(CMIS.CHANGE_TOKEN, new StringValue(StorageImpl.generateId()));
       if (versioningState == VersioningState.CHECKEDOUT)
       {
-         entry.setValue(CMIS.VERSION_SERIES_CHECKED_OUT_ID, //
-            new StringValue(id));
-         entry.setValue(CMIS.VERSION_SERIES_CHECKED_OUT_BY, //
-            new StringValue(""));
+         entry.setValue(CMIS.VERSION_SERIES_CHECKED_OUT_ID, new StringValue(id));
+         entry.setValue(CMIS.VERSION_SERIES_CHECKED_OUT_BY, new StringValue(""));
       }
 
       if (parent != null)
@@ -121,13 +107,13 @@ class DocumentCopy extends DocumentImpl
       }
       else
       {
-         storage.unfiling.add(id);
+         storage.unfiled.add(id);
          storage.parents.put(id, new CopyOnWriteArraySet<String>());
       }
 
-      storage.properties.put(id, new HashMap<String, Value>());
-      storage.policies.put(id, new HashSet<String>());
-      storage.permissions.put(id, new HashMap<String, Set<String>>());
+      storage.properties.put(id, new ConcurrentHashMap<String, Value>());
+      storage.policies.put(id, new CopyOnWriteArraySet<String>());
+      storage.permissions.put(id, new ConcurrentHashMap<String, Set<String>>());
 
       // TODO : copy the other properties from source.
 

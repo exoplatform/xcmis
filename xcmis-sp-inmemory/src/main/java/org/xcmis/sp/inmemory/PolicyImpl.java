@@ -34,10 +34,10 @@ import org.xcmis.spi.model.TypeDefinition;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
@@ -112,20 +112,15 @@ class PolicyImpl extends BaseObjectData implements Policy
       {
          id = StorageImpl.generateId();
 
-         entry.setValue(CMIS.OBJECT_ID, //
-            new StringValue(id));
-         entry.setValue(CMIS.OBJECT_TYPE_ID, //
-            new StringValue(getTypeId()));
-         entry.setValue(CMIS.BASE_TYPE_ID, //
-            new StringValue(getBaseType().value()));
-         entry.setValue(CMIS.CREATED_BY, //
-            new StringValue(""));
-         entry.setValue(CMIS.CREATION_DATE, //
-            new DateValue(Calendar.getInstance()));
+         entry.setValue(CMIS.OBJECT_ID, new StringValue(id));
+         entry.setValue(CMIS.OBJECT_TYPE_ID, new StringValue(getTypeId()));
+         entry.setValue(CMIS.BASE_TYPE_ID, new StringValue(getBaseType().value()));
+         entry.setValue(CMIS.CREATED_BY, new StringValue());
+         entry.setValue(CMIS.CREATION_DATE, new DateValue(Calendar.getInstance()));
 
-         storage.properties.put(id, new HashMap<String, Value>());
-         storage.policies.put(id, new HashSet<String>());
-         storage.permissions.put(id, new HashMap<String, Set<String>>());
+         storage.properties.put(id, new ConcurrentHashMap<String, Value>());
+         storage.policies.put(id, new CopyOnWriteArraySet<String>());
+         storage.permissions.put(id, new ConcurrentHashMap<String, Set<String>>());
 
          storage.parents.put(id, StorageImpl.EMPTY_PARENTS);
       }
@@ -134,12 +129,9 @@ class PolicyImpl extends BaseObjectData implements Policy
          id = getObjectId();
       }
 
-      entry.setValue(CMIS.LAST_MODIFIED_BY, //
-         new StringValue(""));
-      entry.setValue(CMIS.LAST_MODIFICATION_DATE, //
-         new DateValue(Calendar.getInstance()));
-      entry.setValue(CMIS.CHANGE_TOKEN, //
-         new StringValue(StorageImpl.generateId()));
+      entry.setValue(CMIS.LAST_MODIFIED_BY, new StringValue());
+      entry.setValue(CMIS.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));
+      entry.setValue(CMIS.CHANGE_TOKEN, new StringValue(StorageImpl.generateId()));
 
       storage.properties.get(id).putAll(entry.getValues());
       storage.policies.get(id).addAll(entry.getPolicies());

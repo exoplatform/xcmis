@@ -80,26 +80,23 @@ public class StorageImpl implements Storage
 
    final Map<String, Map<String, Value>> properties;
 
-   /** Map of id -> children IDs. */
+   final Map<String, byte[]> contents;
+
    final Map<String, Set<String>> children;
 
-   /** Map of id -> parent IDs, or null if unfiled. */
    final Map<String, Set<String>> parents;
 
-   /** Map of id -> versions. */
-   final Map<String, Set<String>> versions;
-
-   /** Unfiled objects set. */
-   final Set<String> unfiling;
-
-   /** Map of id -> content. */
-   final Map<String, byte[]> contents;
+   final Set<String> unfiled;
 
    final Map<String, Set<String>> policies;
 
-   final Map<String, Set<RelationshipInfo>> relationships;
-
    final Map<String, Map<String, Set<String>>> permissions;
+
+   final Map<String, Set<String>> relationships;
+
+   final Map<String, List<String>> versions;
+
+   final Map<String, String> workingCopies;
 
    final Map<String, TypeDefinitionImpl> types;
 
@@ -114,11 +111,18 @@ public class StorageImpl implements Storage
       this.properties = new ConcurrentHashMap<String, Map<String, Value>>();
       this.children = new ConcurrentHashMap<String, Set<String>>();
       this.parents = new ConcurrentHashMap<String, Set<String>>();
-      this.versions = new ConcurrentHashMap<String, Set<String>>();
-      this.unfiling = new HashSet<String>();
+
+      this.versions = new ConcurrentHashMap<String, List<String>>();
+      this.workingCopies = new ConcurrentHashMap<String, String>();
+
+      this.unfiled = new CopyOnWriteArraySet<String>();
+
       this.contents = new ConcurrentHashMap<String, byte[]>();
-      this.relationships = new ConcurrentHashMap<String, Set<RelationshipInfo>>();
+
+      this.relationships = new ConcurrentHashMap<String, Set<String>>();
+
       this.policies = new ConcurrentHashMap<String, Set<String>>();
+
       this.permissions = new ConcurrentHashMap<String, Map<String, Set<String>>>();
 
       this.types = new ConcurrentHashMap<String, TypeDefinitionImpl>();
@@ -149,7 +153,7 @@ public class StorageImpl implements Storage
       typeChildren.put("cmis:policy", new HashSet<String>());
       typeChildren.put("cmis:relationship", new HashSet<String>());
 
-      Map<String, Value> root = new HashMap<String, Value>();
+      Map<String, Value> root = new ConcurrentHashMap<String, Value>();
       root.put(CMIS.NAME, //
          new StringValue(""));
       root.put(CMIS.OBJECT_ID, //
@@ -275,17 +279,21 @@ public class StorageImpl implements Storage
       switch (baseType)
       {
          case DOCUMENT :
-            return new DocumentImpl(new Entry(values, new HashMap<String, Set<String>>(permissions.get(objectId)),
-               new HashSet<String>(policies.get(objectId))), getTypeDefinition(typeId, true), this);
+            return new DocumentImpl(new Entry(new HashMap<String, Value>(values), new HashMap<String, Set<String>>(
+               permissions.get(objectId)), new HashSet<String>(policies.get(objectId))),
+               getTypeDefinition(typeId, true), this);
          case FOLDER :
-            return new FolderImpl(new Entry(values, new HashMap<String, Set<String>>(permissions.get(objectId)),
-               new HashSet<String>(policies.get(objectId))), getTypeDefinition(typeId, true), this);
+            return new FolderImpl(new Entry(new HashMap<String, Value>(values), new HashMap<String, Set<String>>(
+               permissions.get(objectId)), new HashSet<String>(policies.get(objectId))),
+               getTypeDefinition(typeId, true), this);
          case POLICY :
-            return new PolicyImpl(new Entry(values, new HashMap<String, Set<String>>(permissions.get(objectId)),
-               new HashSet<String>(policies.get(objectId))), getTypeDefinition(typeId, true), this);
+            return new PolicyImpl(new Entry(new HashMap<String, Value>(values), new HashMap<String, Set<String>>(
+               permissions.get(objectId)), new HashSet<String>(policies.get(objectId))),
+               getTypeDefinition(typeId, true), this);
          case RELATIONSHIP :
-            return new RelationshipImpl(new Entry(values, new HashMap<String, Set<String>>(permissions.get(objectId)),
-               new HashSet<String>(policies.get(objectId))), getTypeDefinition(typeId, true), this);
+            return new RelationshipImpl(new Entry(new HashMap<String, Value>(values), new HashMap<String, Set<String>>(
+               permissions.get(objectId)), new HashSet<String>(policies.get(objectId))),
+               getTypeDefinition(typeId, true), this);
       }
       // Must never happen.
       throw new CmisRuntimeException("Unknown base type. ");

@@ -31,6 +31,11 @@ public class UriValue extends Value
 
    private final URI[] values;
 
+   public UriValue()
+   {
+      this.values = new URI[0];
+   }
+
    public UriValue(URI value)
    {
       this.values = new URI[]{value};

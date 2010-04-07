@@ -41,9 +41,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Calendar;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
@@ -83,56 +86,115 @@ class DocumentImpl extends BaseObjectData implements Document
 
    public Document checkin(boolean major, String checkinComment) throws ConstraintException, StorageException
    {
-      // TODO Auto-generated method stub
-      return null;
+      if (!type.isVersionable())
+      {
+         throw new ConstraintException("Object is not versionable.");
+      }
+
+      if (!isPWC())
+      {
+         throw new ConstraintException("Current object is not Private Working Copy.");
+      }
+
+      synchronized (storage)
+      {
+         String pwcId = getObjectId();
+         int i = 1;
+         for (Iterator<String> iterator = storage.versions.get(getVersionSeriesId()).iterator(); iterator.hasNext();)
+         {
+            String version = iterator.next();
+            Map<String, Value> props = storage.properties.get(version);
+            props.put(CMIS.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(false));
+            props.put(CMIS.VERSION_SERIES_CHECKED_OUT_ID, new StringValue());
+            props.put(CMIS.IS_LATEST_VERSION, new BooleanValue(false));
+            // update version labels
+            props.put(CMIS.VERSION_LABEL, new StringValue("" + i++));
+         }
+
+         entry.setValue(CMIS.IS_LATEST_VERSION, new BooleanValue(true));
+         entry.setValue(CMIS.VERSION_LABEL, new StringValue(latestLabel));
+         entry.setValue(CMIS.IS_MAJOR_VERSION, new BooleanValue(major));
+         if (checkinComment != null)
+         {
+            entry.setValue(CMIS.CHECKIN_COMMENT, new StringValue(checkinComment));
+         }
+         save();
+         storage.workingCopies.remove(getVersionSeriesId());
+         storage.versions.get(getVersionSeriesId()).add(pwcId);
+      }
+
+      return this;
    }
 
    public Document checkout() throws ConstraintException, VersioningException, StorageException
    {
-      Entry pwc = new Entry();
-      pwc.setValues(entry.getValues());
-      String pwcId = StorageImpl.generateId();
-      pwc.setValue(CMIS.OBJECT_ID, //
-         new StringValue(pwcId));
-      pwc.setValue(CMIS.CREATED_BY, //
-         new StringValue(""));
-      pwc.setValue(CMIS.CREATION_DATE, //
-         new DateValue(Calendar.getInstance()));
-      pwc.setValue(CMIS.IS_LATEST_VERSION, //
-         new BooleanValue(true));
-      pwc.setValue(CMIS.IS_MAJOR_VERSION, //
-         new BooleanValue(false));
-      pwc.setValue(CMIS.VERSION_LABEL, //
-         new StringValue(pwcLabel));
-      pwc.setValue(CMIS.IS_VERSION_SERIES_CHECKED_OUT, //
-         new BooleanValue(true));
-      pwc.setValue(CMIS.VERSION_SERIES_CHECKED_OUT_ID, //
-         new StringValue(pwcId));
-      pwc.setValue(CMIS.VERSION_SERIES_CHECKED_OUT_BY, //
-         new StringValue(""));
-
-      storage.parents.put(pwcId, new HashSet<String>(storage.parents.get(getObjectId())));
-      storage.properties.put(pwcId, new HashMap<String, Value>(entry.getValues()));
-      storage.policies.put(pwcId, new HashSet<String>());
-      storage.permissions.put(pwcId, new HashMap<String, Set<String>>());
-      storage.versions.get(getVersionSeriesId()).add(pwcId);
-
-      byte[] content = storage.contents.get(getObjectId());
-      byte[] pwcContent;
-
-      if (content == EMPTY_CONTENT)
+      if (isNew())
       {
-         pwcContent = EMPTY_CONTENT;
-      }
-      else
-      {
-         pwcContent = new byte[content.length];
-         System.arraycopy(content, 0, pwcContent, 0, pwcContent.length);
+         throw new UnsupportedOperationException("Unable checkout newly created Document.");
       }
 
-      storage.contents.put(pwcId, pwcContent);
+      if (!type.isVersionable())
+      {
+         throw new ConstraintException("Object is not versionable.");
+      }
 
-      return new DocumentImpl(pwc, storage.getTypeDefinition(getTypeId(), true), storage);
+      synchronized (storage)
+      {
+         if (storage.workingCopies.get(getVersionSeriesId()) != null)
+         {
+            throw new VersioningException("Version series already checked-out. "
+               + "Not allowed have more then one PWC for version series at a time.");
+         }
+
+         Entry pwc = new Entry();
+         pwc.setValues(entry.getValues());
+         String pwcId = StorageImpl.generateId();
+         pwc.setValue(CMIS.OBJECT_ID, new StringValue(pwcId));
+         pwc.setValue(CMIS.CREATED_BY, new StringValue());
+         pwc.setValue(CMIS.CREATION_DATE, new DateValue(Calendar.getInstance()));
+         pwc.setValue(CMIS.IS_LATEST_VERSION, new BooleanValue(false));
+         pwc.setValue(CMIS.IS_MAJOR_VERSION, new BooleanValue(false));
+         pwc.setValue(CMIS.VERSION_LABEL, new StringValue(pwcLabel));
+         pwc.setValue(CMIS.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(true));
+         pwc.setValue(CMIS.VERSION_SERIES_CHECKED_OUT_ID, new StringValue(pwcId));
+         pwc.setValue(CMIS.VERSION_SERIES_CHECKED_OUT_BY, new StringValue());
+
+         byte[] content = storage.contents.get(getObjectId());
+         byte[] pwcContent;
+
+         if (content == EMPTY_CONTENT)
+         {
+            pwcContent = EMPTY_CONTENT;
+         }
+         else
+         {
+            pwcContent = new byte[content.length];
+            System.arraycopy(content, 0, pwcContent, 0, pwcContent.length);
+         }
+
+         for (Iterator<String> iterator = storage.versions.get(getVersionSeriesId()).iterator(); iterator.hasNext();)
+         {
+            String version = iterator.next();
+            Map<String, Value> props = storage.properties.get(version);
+            props.put(CMIS.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(true));
+            props.put(CMIS.VERSION_SERIES_CHECKED_OUT_ID, new StringValue(pwcId));
+         }
+
+         storage.contents.put(pwcId, pwcContent);
+
+         for (String parent : storage.parents.get(getObjectId()))
+         {
+            storage.children.get(parent).add(pwcId);
+         }
+         storage.parents.put(pwcId, new CopyOnWriteArraySet<String>(storage.parents.get(getObjectId())));
+         storage.properties.put(pwcId, new ConcurrentHashMap<String, Value>(pwc.getValues()));
+         storage.policies.put(pwcId, new CopyOnWriteArraySet<String>());
+         storage.permissions.put(pwcId, new ConcurrentHashMap<String, Set<String>>());
+
+         storage.workingCopies.put(getVersionSeriesId(), pwcId);
+
+         return new DocumentImpl(pwc, storage.getTypeDefinition(getTypeId(), true), storage);
+      }
    }
 
    /**
@@ -145,7 +207,7 @@ class DocumentImpl extends BaseObjectData implements Document
          throw new UnsupportedOperationException("getContentStream");
       }
 
-      byte[] bytes = storage.contents.get(entry.getId());
+      byte[] bytes = storage.contents.get(getObjectId());
       if (bytes != null)
       {
          return new BaseContentStream(bytes, getName(), getString(CMIS.CONTENT_STREAM_FILE_NAME));
@@ -222,7 +284,7 @@ class DocumentImpl extends BaseObjectData implements Document
          return false;
       }
 
-      return storage.contents.get(entry.getId()) != null;
+      return storage.contents.get(getObjectId()) != null;
    }
 
    /**
@@ -261,7 +323,7 @@ class DocumentImpl extends BaseObjectData implements Document
          return false;
       }
 
-      return entry.getId().equals(getVersionSeriesCheckedOutId());
+      return getObjectId().equals(getVersionSeriesCheckedOutId());
    }
 
    /**
@@ -317,32 +379,22 @@ class DocumentImpl extends BaseObjectData implements Document
       {
          id = StorageImpl.generateId();
          String vsId = StorageImpl.generateId();
-         entry.setValue(CMIS.OBJECT_ID, //
-            new StringValue(id));
-         entry.setValue(CMIS.OBJECT_TYPE_ID, //
-            new StringValue(getTypeId()));
-         entry.setValue(CMIS.BASE_TYPE_ID, //
-            new StringValue(getBaseType().value()));
-         entry.setValue(CMIS.CREATED_BY, //
-            new StringValue(""));
-         entry.setValue(CMIS.CREATION_DATE, //
-            new DateValue(Calendar.getInstance()));
-         entry.setValue(CMIS.VERSION_SERIES_ID, //
-            new StringValue(vsId));
-         entry.setValue(CMIS.IS_LATEST_VERSION, //
-            new BooleanValue(true));
-         entry.setValue(CMIS.IS_MAJOR_VERSION, //
-            new BooleanValue(versioningState == VersioningState.MAJOR));
-         entry.setValue(CMIS.VERSION_LABEL, //
-            new StringValue(versioningState == VersioningState.CHECKEDOUT ? pwcLabel : latestLabel));
-         entry.setValue(CMIS.IS_VERSION_SERIES_CHECKED_OUT, //
-            new BooleanValue(versioningState == VersioningState.CHECKEDOUT));
+         entry.setValue(CMIS.OBJECT_ID, new StringValue(id));
+         entry.setValue(CMIS.OBJECT_TYPE_ID, new StringValue(getTypeId()));
+         entry.setValue(CMIS.BASE_TYPE_ID, new StringValue(getBaseType().value()));
+         entry.setValue(CMIS.CREATED_BY, new StringValue());
+         entry.setValue(CMIS.CREATION_DATE, new DateValue(Calendar.getInstance()));
+         entry.setValue(CMIS.VERSION_SERIES_ID, new StringValue(vsId));
+         entry.setValue(CMIS.IS_LATEST_VERSION, new BooleanValue(true));
+         entry.setValue(CMIS.IS_MAJOR_VERSION, new BooleanValue(versioningState == VersioningState.MAJOR));
+         entry.setValue(CMIS.VERSION_LABEL, new StringValue(versioningState == VersioningState.CHECKEDOUT ? pwcLabel
+            : latestLabel));
+         entry.setValue(CMIS.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(
+            versioningState == VersioningState.CHECKEDOUT));
          if (versioningState == VersioningState.CHECKEDOUT)
          {
-            entry.setValue(CMIS.VERSION_SERIES_CHECKED_OUT_ID, //
-               new StringValue(id));
-            entry.setValue(CMIS.VERSION_SERIES_CHECKED_OUT_BY, //
-               new StringValue(""));
+            entry.setValue(CMIS.VERSION_SERIES_CHECKED_OUT_ID, new StringValue(id));
+            entry.setValue(CMIS.VERSION_SERIES_CHECKED_OUT_BY, new StringValue());
          }
 
          if (parent != null)
@@ -355,14 +407,14 @@ class DocumentImpl extends BaseObjectData implements Document
          }
          else
          {
-            storage.unfiling.add(id);
+            storage.unfiled.add(id);
             storage.parents.put(id, new CopyOnWriteArraySet<String>());
          }
 
-         storage.properties.put(id, new HashMap<String, Value>());
-         storage.policies.put(id, new HashSet<String>());
-         storage.permissions.put(id, new HashMap<String, Set<String>>());
-         Set<String> versions = new CopyOnWriteArraySet<String>();
+         storage.properties.put(id, new ConcurrentHashMap<String, Value>());
+         storage.policies.put(id, new CopyOnWriteArraySet<String>());
+         storage.permissions.put(id, new ConcurrentHashMap<String, Set<String>>());
+         List<String> versions = new CopyOnWriteArrayList<String>();
          versions.add(id);
          storage.versions.put(vsId, versions);
       }
@@ -371,12 +423,9 @@ class DocumentImpl extends BaseObjectData implements Document
          id = getObjectId();
       }
 
-      entry.setValue(CMIS.LAST_MODIFIED_BY, //
-         new StringValue(""));
-      entry.setValue(CMIS.LAST_MODIFICATION_DATE, //
-         new DateValue(Calendar.getInstance()));
-      entry.setValue(CMIS.CHANGE_TOKEN, //
-         new StringValue(StorageImpl.generateId()));
+      entry.setValue(CMIS.LAST_MODIFIED_BY, new StringValue());
+      entry.setValue(CMIS.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));
+      entry.setValue(CMIS.CHANGE_TOKEN, new StringValue(StorageImpl.generateId()));
 
       byte[] content;
 
@@ -435,6 +484,7 @@ class DocumentImpl extends BaseObjectData implements Document
       }
 
       String objectId = getObjectId();
+      String vsId = getVersionSeriesId();
       storage.properties.remove(objectId);
       storage.policies.remove(objectId);
       storage.permissions.remove(objectId);
@@ -444,6 +494,7 @@ class DocumentImpl extends BaseObjectData implements Document
          storage.children.get(parent).remove(objectId);
       }
       storage.parents.remove(objectId);
-      storage.unfiling.remove(objectId);
+      storage.unfiled.remove(objectId);
+      storage.versions.get(vsId).remove(objectId);
    }
 }

@@ -20,7 +20,6 @@
 package org.xcmis.sp.inmemory;
 
 import org.xcmis.spi.CMIS;
-import org.xcmis.spi.model.TypeDefinition;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -35,11 +34,11 @@ import java.util.Set;
 final class Entry
 {
 
-   private Map<String, Value> values;
+   private final Map<String, Value> values;
 
-   private Map<String, Set<String>> permissions;
+   private final Map<String, Set<String>> permissions;
 
-   private Set<String> policies;
+   private final Set<String> policies;
 
    public Entry()
    {
@@ -53,21 +52,6 @@ final class Entry
       this.values = values;
       this.permissions = permissions;
       this.policies = policies;
-   }
-
-   public Entry copy()
-   {
-      Entry e = new Entry();
-      e.values = new HashMap<String, Value>(values);
-      e.permissions = new HashMap<String, Set<String>>(permissions);
-      e.policies = new HashSet<String>(policies);
-      return e;
-   }
-
-   public Entry(Map<String, Value> values2, HashMap<String, Set<String>> hashMap, HashSet<String> hashSet,
-      TypeDefinition typeDefinition, StorageImpl storageImpl)
-   {
-      // TODO Auto-generated constructor stub
    }
 
    public void addPolicy(String policy)
@@ -99,10 +83,6 @@ final class Entry
 
    public Value getValue(String id)
    {
-      if (values == null)
-      {
-         return null;
-      }
       return values.get(id);
    }
 
