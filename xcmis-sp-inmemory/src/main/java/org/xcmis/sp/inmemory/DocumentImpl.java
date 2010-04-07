@@ -40,6 +40,7 @@ import org.xcmis.spi.model.VersioningState;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
@@ -322,7 +323,7 @@ class DocumentImpl extends BaseObjectData implements Document
          return false;
       }
 
-      return storage.contents.get(getObjectId()) != EMPTY_CONTENT;
+      return storage.contents.get(getObjectId()).length != 0;
    }
 
    /**
@@ -500,10 +501,14 @@ class DocumentImpl extends BaseObjectData implements Document
                {
                   mediaType = "application/octet-stream";
                }
+
                entry.setValue(CMIS.CONTENT_STREAM_MIME_TYPE, new StringValue(mediaType));
+               entry.setValue(CMIS.CONTENT_STREAM_LENGTH, new IntegerValue(BigInteger.valueOf(content.length)));
             }
             else
             {
+               entry.setValue(CMIS.CONTENT_STREAM_MIME_TYPE, new StringValue(""));
+               entry.setValue(CMIS.CONTENT_STREAM_LENGTH, new IntegerValue(BigInteger.valueOf(0)));
                content = EMPTY_CONTENT;
             }
 
