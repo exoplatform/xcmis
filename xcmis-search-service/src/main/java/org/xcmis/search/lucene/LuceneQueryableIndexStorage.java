@@ -265,7 +265,16 @@ public class LuceneQueryableIndexStorage extends AbstractLuceneQueryableIndexSto
          Map<String, Document> documentBuffer = new HashMap<String, Document>();
          try
          {
-            restoreBranch(indexConfiguration.getRootUuid(), documentBuffer);
+            GetContentEntryCommand getCommand = new GetContentEntryCommand(indexConfiguration.getRootUuid());
+            final ContentEntry rootEntry = (ContentEntry)indexStorage.invokeNextInterceptor(null, getCommand);
+            if (rootEntry != null)
+            {
+               restoreBranch(rootEntry, documentBuffer);
+            }
+            else
+            {
+               LOG.warn("Root element with id " + indexConfiguration.getRootUuid() + " not found ");
+            }
             if (documentBuffer.size() > 0)
             {
                flash(documentBuffer);
@@ -285,43 +294,32 @@ public class LuceneQueryableIndexStorage extends AbstractLuceneQueryableIndexSto
        * @param documentBuffer
        * @throws Throwable
        */
-      private void restoreBranch(String branchUuid, Map<String, Document> documentBuffer) throws Throwable
+      private void restoreBranch(ContentEntry branchRoot, Map<String, Document> documentBuffer) throws Throwable
       {
          // add root.
-         GetContentEntryCommand getCommand = new GetContentEntryCommand(branchUuid);
-         final ContentEntry rootEntry = (ContentEntry)indexStorage.invokeNextInterceptor(null, getCommand);
-         if (rootEntry != null)
-         {
-            documentBuffer.put(branchUuid, nodeIndexer.createDocument(rootEntry));
-            if (checkFlush(documentBuffer))
-            {
-               flash(documentBuffer);
-            }
 
-            // add childs
-            GetChildEntriesCommand getChildCommand = new GetChildEntriesCommand(branchUuid);
-            Collection<ContentEntry> childEntries =
-               (Collection<ContentEntry>)indexStorage.invokeNextInterceptor(null, getChildCommand);
-            if (childEntries != null)
+         documentBuffer.put(branchRoot.getIdentifier(), nodeIndexer.createDocument(branchRoot));
+         if (checkFlush(documentBuffer))
+         {
+            flash(documentBuffer);
+         }
+
+         // add childs
+         GetChildEntriesCommand getChildCommand = new GetChildEntriesCommand(branchRoot.getIdentifier());
+         Collection<ContentEntry> childEntries =
+            (Collection<ContentEntry>)indexStorage.invokeNextInterceptor(null, getChildCommand);
+         if (childEntries != null)
+         {
+            for (ContentEntry contentEntry : childEntries)
             {
-               for (ContentEntry contentEntry : childEntries)
-               {
-                  documentBuffer.put(contentEntry.getIdentifier(), nodeIndexer.createDocument(contentEntry));
-                  if (checkFlush(documentBuffer))
-                  {
-                     flash(documentBuffer);
-                  }
-               }
-            }
-            else
-            {
-               LOG.warn("Child elements for element with id " + branchUuid + " is not found ");
+               restoreBranch(contentEntry, documentBuffer);
             }
          }
          else
          {
-            LOG.warn("Root element with id " + branchUuid + " not found ");
+            LOG.warn("Child elements for element with id " + branchRoot.getIdentifier() + " is not found ");
          }
+
       }
 
       /**
