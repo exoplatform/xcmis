@@ -111,6 +111,18 @@
 											</entry>
 										</map>
 									</field>
+
+                                                                         <field name="renditionProviders">
+										<collection type="java.util.ArrayList">
+											<value>
+											   <object type="org.xcmis.sp.jcr.exo.rendition.PDFDocumentRenditionProvider"></object>
+ 											</value>
+											<value>
+											   <object type="org.xcmis.sp.jcr.exo.rendition.ImageRenditionProvider"></object>
+ 											</value>
+
+										</collection>
+									</field>
 								</object>
 							</value>
 						</collection>

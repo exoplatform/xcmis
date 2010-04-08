@@ -18,7 +18,6 @@
  */
 package org.xcmis.sp.jcr.exo;
 
-
 import org.xcmis.sp.jcr.exo.rendition.RenditionContentStream;
 import org.xcmis.sp.jcr.exo.rendition.RenditionProvider;
 import org.xcmis.spi.ItemsIterator;
@@ -33,7 +32,6 @@ import org.xcmis.spi.utils.MimeType;
 
 import java.io.IOException;
 import java.util.Map;
-
 
 public class RenditionManagerImpl implements RenditionManager
 {
@@ -64,17 +62,16 @@ public class RenditionManagerImpl implements RenditionManager
          }
          else
          {
-            // TODO ???
             if (obj.getBaseType() == BaseType.DOCUMENT && obj.getContentStream(null) != null)
             {
                MimeType contentType = MimeType.fromString(((DocumentImpl)obj).getContentStreamMimeType());
                RenditionProvider prov = renditionProviders.get(contentType);
-               if  (prov != null && !prov.canStoreRendition()) 
+               if (prov != null && !prov.canStoreRendition())
                {
-               RenditionImpl rendition = new RenditionImpl();
-               rendition.setStreamId(encode(contentType.toString()));
-               rendition.setKind("cmis:thumbnail");
-               return new RenditionIterator(rendition);
+                  RenditionImpl rendition = new RenditionImpl();
+                  rendition.setStreamId(encode(contentType.toString()));
+                  rendition.setKind("cmis:thumbnail");
+                  return new RenditionIterator(rendition);
                }
             }
             return CmisUtils.emptyItemsIterator();

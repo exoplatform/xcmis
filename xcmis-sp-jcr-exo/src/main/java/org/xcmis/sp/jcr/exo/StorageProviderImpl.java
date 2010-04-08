@@ -112,7 +112,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
 
    private final RepositoryService repositoryService;
 
-   private RenditionManagerImpl renditionManager;
+   //private RenditionManagerImpl renditionManager;
 
    private final DocumentReaderService documentReaderService;
 
@@ -173,9 +173,6 @@ public class StorageProviderImpl implements StorageProvider, Startable
          LOG.error("Not found configuration for any storages.");
       }
 
-      addRenditionProvider(new ImageRenditionProvider()); /* TODO : add form configuration ?? */
-      addRenditionProvider(new PDFDocumentRenditionProvider()); /* TODO : add form configuration ?? */
-
    }
 
    /**
@@ -197,11 +194,16 @@ public class StorageProviderImpl implements StorageProvider, Startable
       {
          ManageableRepository repository = repositoryService.getRepository(repositoryId);
          Session session = repository.login(ws);
-
-         if (renditionManager == null)
+         renditionProviders.clear();
+         
+         if (configuration.getRenditionProviders() != null)
          {
-            renditionManager = new RenditionManagerImpl(renditionProviders);
+            for (Object prov : configuration.getRenditionProviders())
+            {
+               addRenditionProvider((RenditionProvider)prov);
+            }
          }
+         RenditionManagerImpl   renditionManager = new RenditionManagerImpl(renditionProviders);
 
          SearchService searchService = getSearchService(id);
          Storage storage = new QueryableStorage(session, configuration, renditionManager, searchService);
