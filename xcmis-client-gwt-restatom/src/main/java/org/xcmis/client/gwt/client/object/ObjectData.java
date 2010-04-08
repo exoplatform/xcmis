@@ -112,5 +112,6 @@ public class ObjectData
             object.getProperties().getId(CMIS.CMIS_TARGET_ID));
          entry.setObject(newObject);
       }
+      entry.getObject().setObjectInfo(objectInfo);
    }
 }
