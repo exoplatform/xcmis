@@ -22,7 +22,6 @@ package org.xcmis.client.gwt.client.marshallers;
 import org.xcmis.client.gwt.client.marshallers.builder.ObjectXMLBuilder;
 import org.xcmis.client.gwt.client.model.actions.ApplyACL;
 import org.xcmis.client.gwt.client.rest.Marshallable;
-
 /**
  * Created by The eXo Platform SAS.
  *	
@@ -47,7 +46,7 @@ public class ApplyACLMarshaller implements Marshallable
    
    /**
     * @see org.exoplatform.gwtframework.commons.rest.Marshallable#marshal()
-    * @return String
+    * @return String xml request
     */
    public String marshal()
    {

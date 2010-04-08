@@ -20,7 +20,10 @@
 package org.xcmis.client.gwt.client.model.actions;
 
 import org.xcmis.client.gwt.client.model.CmisExtensionType;
-import org.xcmis.client.gwt.client.model.property.CmisPropertiesType;
+import org.xcmis.client.gwt.client.model.property.CmisProperties;
+import org.xcmis.client.gwt.client.model.property.Property;
+
+import java.util.HashMap;
 
 /**
  * Created by The eXo Platform SAS.
@@ -50,7 +53,7 @@ public class UpdateProperties
    /**
     * Properties.
     */
-   protected CmisPropertiesType properties;
+   protected CmisProperties properties;
 
    /**
     * Extension.
@@ -133,11 +136,11 @@ public class UpdateProperties
     *     {@link CmisPropertiesType }
     *     
     */
-   public CmisPropertiesType getProperties()
+   public CmisProperties getProperties()
    {
       if (properties == null)
       {
-         properties = new CmisPropertiesType();
+         properties = new CmisProperties(new HashMap<String, Property<?>>());
       }
       return properties;
    }
@@ -145,7 +148,7 @@ public class UpdateProperties
    /**
    * @param value value
    */
-   public void setProperties(CmisPropertiesType value)
+   public void setProperties(CmisProperties value)
    {
       this.properties = value;
    }

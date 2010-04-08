@@ -19,7 +19,7 @@
 
 package org.xcmis.client.gwt.client.unmarshallers;
 
-import org.xcmis.client.gwt.client.model.restatom.CmisRepositories;
+import org.xcmis.client.gwt.client.model.repository.CmisRepositories;
 import org.xcmis.client.gwt.client.rest.Unmarshallable;
 import org.xcmis.client.gwt.client.unmarshallers.parser.RepositoriesParser;
 
@@ -57,8 +57,12 @@ public class RepositoriesUnmarshaller implements Unmarshallable
     */
    public void unmarshal(String body)
    {
+      try {
       Document doc = XMLParser.parse(body);
       repositories.setRepositories(RepositoriesParser.parse(doc));
+      } catch (Exception e){
+         e.printStackTrace();
+      }
    }
 
 }

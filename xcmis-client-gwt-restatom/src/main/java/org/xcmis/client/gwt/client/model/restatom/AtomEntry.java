@@ -19,7 +19,7 @@
 
 package org.xcmis.client.gwt.client.model.restatom;
 
-import org.xcmis.client.gwt.client.model.CmisObjectType;
+import org.xcmis.client.gwt.client.object.CmisObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +41,7 @@ public class AtomEntry
    /**
     * Object.
     */
-   private CmisObjectType object;
+   private CmisObject object;
 
    /**
     * Children.
@@ -53,7 +53,7 @@ public class AtomEntry
     * 
     * @return the object
     */
-   public CmisObjectType getObject()
+   public CmisObject getObject()
    {
       return object;
    }
@@ -80,7 +80,7 @@ public class AtomEntry
     * @param object
     *            the object to set
     */
-   public void setObject(CmisObjectType object)
+   public void setObject(CmisObject object)
    {
       this.object = object;
    }

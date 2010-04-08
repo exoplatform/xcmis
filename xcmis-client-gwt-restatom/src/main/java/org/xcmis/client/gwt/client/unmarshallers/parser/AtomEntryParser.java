@@ -19,8 +19,7 @@
 
 package org.xcmis.client.gwt.client.unmarshallers.parser;
 
-import org.xcmis.client.gwt.client.CmisNameSpace;
-import org.xcmis.client.gwt.client.model.CmisObjectType;
+import org.xcmis.client.gwt.client.CMIS;
 import org.xcmis.client.gwt.client.model.restatom.AtomAuthor;
 import org.xcmis.client.gwt.client.model.restatom.AtomContentType;
 import org.xcmis.client.gwt.client.model.restatom.AtomEntry;
@@ -46,7 +45,7 @@ public class AtomEntryParser
    {
       throw new UnsupportedOperationException(); // prevents calls from subclass
    }
-   
+
    /**
     * Parse entry xml document to {@link AtomEntry}.
     * 
@@ -61,12 +60,11 @@ public class AtomEntryParser
       for (int i = 0; i < nodeList.getLength(); i++)
       {
          Node item = nodeList.item(i);
-         if (item.getNodeName().equals(CmisNameSpace.CMISRA_OBJECT))
+         if (item.getNodeName().equals(CMIS.CMISRA_OBJECT))
          {
-            CmisObjectType cmisObject = ObjectParser.parse(item);
-            entry.setObject(cmisObject);
+            entry.setObject(ObjectParser.parse(item));
          }
-         else if (item.getNodeName().equals(CmisNameSpace.CMISRA_CHILDREN))
+         else if (item.getNodeName().equals(CMIS.CMISRA_CHILDREN))
          {
             childrenNode = item;
          }
@@ -90,7 +88,7 @@ public class AtomEntryParser
       {
          for (int i = 0; i < childrenNode.getChildNodes().getLength(); i++)
          {
-            if (childrenNode.getChildNodes().item(i).getNodeName().equals(CmisNameSpace.FEED))
+            if (childrenNode.getChildNodes().item(i).getNodeName().equals(CMIS.FEED))
             {
                childrenNode = childrenNode.getChildNodes().item(i);
             }
@@ -99,7 +97,7 @@ public class AtomEntryParser
          for (int i = 0; i < childrenNode.getChildNodes().getLength(); i++)
          {
             Node node = childrenNode.getChildNodes().item(i);
-            if (node.getNodeName().equals(CmisNameSpace.ENTRY))
+            if (node.getNodeName().equals(CMIS.ENTRY))
             {
                AtomEntry entry = new AtomEntry();
                parse(node, entry);
@@ -121,22 +119,22 @@ public class AtomEntryParser
       while ((i >= 0) && (nodeList.getLength() > 0))
       {
          Node item = nodeList.item(i);
-         if (item.getNodeName().equals(CmisNameSpace.ATOM_AUTHOR))
+         if (item.getNodeName().equals(CMIS.ATOM_AUTHOR))
          {
             AtomAuthor author = AtomAuthorParser.parse(item);
             entryInfo.setAuthor(author);
             item.getParentNode().removeChild(item);
          }
-         else if (item.getNodeName().equals(CmisNameSpace.ATOM_CONTENT))
+         else if (item.getNodeName().equals(CMIS.ATOM_CONTENT))
          {
             AtomContentType content = new AtomContentType();
             for (int k = 0; k < item.getAttributes().getLength(); k++)
             {
-               if (item.getAttributes().item(k).getNodeName().equals(CmisNameSpace.SOURCE))
+               if (item.getAttributes().item(k).getNodeName().equals(CMIS.SOURCE))
                {
                   content.setSource(item.getAttributes().item(k).getFirstChild().getNodeValue());
                }
-               else if (item.getAttributes().item(k).getNodeName().equals(CmisNameSpace.TYPE))
+               else if (item.getAttributes().item(k).getNodeName().equals(CMIS.TYPE))
                {
                   content.setType(item.getAttributes().item(k).getFirstChild().getNodeValue());
                }
@@ -144,13 +142,13 @@ public class AtomEntryParser
             entryInfo.setContent(content);
             item.getParentNode().removeChild(item);
          }
-         else if (item.getNodeName().equals(CmisNameSpace.ATOM_ID))
+         else if (item.getNodeName().equals(CMIS.ATOM_ID))
          {
             String nodeValue = item.getFirstChild().getNodeValue();
             entryInfo.setId(nodeValue);
             item.getParentNode().removeChild(item);
          }
-         else if (item.getNodeName().equals(CmisNameSpace.ATOM_SUMMARY))
+         else if (item.getNodeName().equals(CMIS.ATOM_SUMMARY))
          {
             if (item.getFirstChild() != null)
             {
@@ -163,25 +161,25 @@ public class AtomEntryParser
             }
             item.getParentNode().removeChild(item);
          }
-         else if (item.getNodeName().equals(CmisNameSpace.ATOM_TITLE))
+         else if (item.getNodeName().equals(CMIS.ATOM_TITLE))
          {
             String nodeValue = item.getFirstChild().getNodeValue();
             entryInfo.setTitle(nodeValue);
             item.getParentNode().removeChild(item);
          }
-         else if (item.getNodeName().equals(CmisNameSpace.ATOM_UPDATED))
+         else if (item.getNodeName().equals(CMIS.ATOM_UPDATED))
          {
             String nodeValue = item.getFirstChild().getNodeValue();
             entryInfo.setUpdated(DateUtil.parseDate(nodeValue));
             item.getParentNode().removeChild(item);
          }
-         else if (item.getNodeName().equals(CmisNameSpace.ATOM_PUBLISHED))
+         else if (item.getNodeName().equals(CMIS.ATOM_PUBLISHED))
          {
             String nodeValue = item.getFirstChild().getNodeValue();
             entryInfo.setPublished(DateUtil.parseDate(nodeValue));
             item.getParentNode().removeChild(item);
          }
-         else if (item.getNodeName().equals(CmisNameSpace.ATOM_LINK))
+         else if (item.getNodeName().equals(CMIS.ATOM_LINK))
          {
             entryInfo.getLinks().add(AtomLinkParser.parse(item));
             item.getParentNode().removeChild(item);

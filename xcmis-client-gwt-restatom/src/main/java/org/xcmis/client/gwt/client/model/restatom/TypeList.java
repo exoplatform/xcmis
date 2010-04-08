@@ -19,7 +19,7 @@
 
 package org.xcmis.client.gwt.client.model.restatom;
 
-import org.xcmis.client.gwt.client.model.type.CmisTypeDefinitionType;
+import org.xcmis.client.gwt.client.model.type.TypeDefinition;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,16 +36,16 @@ public class TypeList
    /**
     * Types.
     */
-   private List<CmisTypeDefinitionType> types;
+   private List<TypeDefinition> types;
 
    /**
     * @return List containing {@link CmisTypeDefinitionType}
     */
-   public List<CmisTypeDefinitionType> getTypes()
+   public List<TypeDefinition> getTypes()
    {
       if (types == null)
       {
-         types = new ArrayList<CmisTypeDefinitionType>();
+         types = new ArrayList<TypeDefinition>();
       }
       return types;
    }
@@ -53,7 +53,7 @@ public class TypeList
    /**
     * @param types types
     */
-   public void setTypes(List<CmisTypeDefinitionType> types)
+   public void setTypes(List<TypeDefinition> types)
    {
       this.types = types;
    }

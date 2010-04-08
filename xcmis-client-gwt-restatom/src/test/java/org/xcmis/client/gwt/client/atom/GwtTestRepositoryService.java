@@ -21,20 +21,20 @@ package org.xcmis.client.gwt.client.atom;
 
 import java.util.List;
 
-import org.xcmis.client.gwt.client.CmisNameSpace;
+import org.xcmis.client.gwt.client.CMIS;
 import org.xcmis.client.gwt.client.model.EnumCapabilityACL;
 import org.xcmis.client.gwt.client.model.EnumCapabilityChanges;
 import org.xcmis.client.gwt.client.model.EnumCapabilityContentStreamUpdates;
 import org.xcmis.client.gwt.client.model.EnumCapabilityJoin;
 import org.xcmis.client.gwt.client.model.EnumCapabilityQuery;
 import org.xcmis.client.gwt.client.model.EnumCapabilityRendition;
-import org.xcmis.client.gwt.client.model.property.CmisPropertyDateTimeDefinitionType;
-import org.xcmis.client.gwt.client.model.property.CmisPropertyIdDefinitionType;
-import org.xcmis.client.gwt.client.model.property.CmisPropertyStringDefinitionType;
+import org.xcmis.client.gwt.client.model.property.DateTimePropertyDefinition;
+import org.xcmis.client.gwt.client.model.property.IdPropertyDefinition;
+import org.xcmis.client.gwt.client.model.property.StringPropertyDefinition;
 import org.xcmis.client.gwt.client.model.repository.CmisRepositoryInfo;
 import org.xcmis.client.gwt.client.model.restatom.EnumCollectionType;
 import org.xcmis.client.gwt.client.model.restatom.TypeEntry;
-import org.xcmis.client.gwt.client.model.type.CmisTypeDefinitionType;
+import org.xcmis.client.gwt.client.model.type.TypeDefinition;
 import org.xcmis.client.gwt.client.unmarshallers.parser.RepositoriesParser;
 import org.xcmis.client.gwt.client.unmarshallers.parser.RepositoryInfoParser;
 import org.xcmis.client.gwt.client.unmarshallers.parser.TypeParser;
@@ -428,7 +428,7 @@ public class GwtTestRepositoryService extends GWTTestCase
    public void testGetRepositoryCapabilities()
    {
       Document doc = XMLParser.parse(repositoriesResponse);
-      Node repositoryNode = doc.getElementsByTagName(CmisNameSpace.WORKSPACE).item(0);
+      Node repositoryNode = doc.getElementsByTagName(CMIS.WORKSPACE).item(0);
 
       CmisRepositoryInfo repositoryInfo = new CmisRepositoryInfo();
       RepositoryInfoParser.parse(repositoryNode, repositoryInfo);
@@ -526,46 +526,44 @@ public class GwtTestRepositoryService extends GWTTestCase
    public void testGetTypesWithPropertyDefinition()
    {
       Document doc = XMLParser.parse(getTypeDefinitionIncludePropertyDefinition);
-      Node entryNode = doc.getElementsByTagName(CmisNameSpace.ENTRY).item(0);
+      Node entryNode = doc.getElementsByTagName(CMIS.ENTRY).item(0);
 
       TypeEntry typeEntry = new TypeEntry();
 
       TypeParser.getTypeEntry(entryNode, typeEntry);
-      assertEquals(11, typeEntry.getTypeCmisTypeDefinition().getPropertyDefinition().size());
+      assertEquals(11, typeEntry.getTypeCmisTypeDefinition().getPropertyDefinitions().size());
 
-      CmisPropertyIdDefinitionType propertyId =
-         (CmisPropertyIdDefinitionType)typeEntry.getTypeCmisTypeDefinition().getPropertyDefinition().get(0);
+      
+      IdPropertyDefinition propertyDefinition = (IdPropertyDefinition)typeEntry.getTypeCmisTypeDefinition().getPropertyDefinition(CMIS.CMIS_SOURCE_ID);
+      assertEquals("cmis:sourceId", propertyDefinition.getId());
+      assertEquals("id", propertyDefinition.getPropertyType().value());
+      assertEquals("single", propertyDefinition.getCardinality().value());
+      assertEquals("oncreate", propertyDefinition.getUpdatability().value());
+      assertEquals("cmis:sourceId", propertyDefinition.getQueryName());
+      assertEquals("cmis:sourceId", propertyDefinition.getDisplayName());
+      assertEquals("Relationship source ID.", propertyDefinition.getDescription());
+      assertFalse(propertyDefinition.isInherited());
+      assertTrue(propertyDefinition.isRequired());
+      assertTrue(propertyDefinition.isQueryable());
+      assertTrue(propertyDefinition.isOrderable());
+      assertFalse(propertyDefinition.isOpenChoice());
 
-      assertEquals("cmis:sourceId", propertyId.getId());
-      assertEquals("id", propertyId.getPropertyType().value());
-      assertEquals("single", propertyId.getCardinality().value());
-      assertEquals("oncreate", propertyId.getUpdatability().value());
-      assertEquals("cmis:sourceId", propertyId.getQueryName());
-      assertEquals("cmis:sourceId", propertyId.getDisplayName());
-      assertEquals("Relationship source ID.", propertyId.getDescription());
-      assertFalse(propertyId.isInherited());
-      assertTrue(propertyId.isRequired());
-      assertTrue(propertyId.isQueryable());
-      assertTrue(propertyId.isOrderable());
-      assertFalse(propertyId.isOpenChoice());
+      propertyDefinition = (IdPropertyDefinition)typeEntry.getTypeCmisTypeDefinition().getPropertyDefinition(CMIS.CMIS_TARGET_ID);
+      assertEquals("cmis:targetId", propertyDefinition.getId());
+      assertEquals("id", propertyDefinition.getPropertyType().value());
+      assertEquals("single", propertyDefinition.getCardinality().value());
+      assertEquals("oncreate", propertyDefinition.getUpdatability().value());
+      assertEquals("cmis:targetId", propertyDefinition.getQueryName());
+      assertEquals("cmis:targetId", propertyDefinition.getLocalName());
+      assertEquals("cmis:targetId", propertyDefinition.getDisplayName());
+      assertEquals("Relationship target ID.", propertyDefinition.getDescription());
+      assertFalse(propertyDefinition.isInherited());
+      assertTrue(propertyDefinition.isRequired());
+      assertTrue(propertyDefinition.isQueryable());
+      assertTrue(propertyDefinition.isOrderable());
+      assertFalse(propertyDefinition.isOpenChoice());
 
-      propertyId = (CmisPropertyIdDefinitionType)typeEntry.getTypeCmisTypeDefinition().getPropertyDefinition().get(1);
-      assertEquals("cmis:targetId", propertyId.getId());
-      assertEquals("id", propertyId.getPropertyType().value());
-      assertEquals("single", propertyId.getCardinality().value());
-      assertEquals("oncreate", propertyId.getUpdatability().value());
-      assertEquals("cmis:targetId", propertyId.getQueryName());
-      assertEquals("cmis:targetId", propertyId.getLocalName());
-      assertEquals("cmis:targetId", propertyId.getDisplayName());
-      assertEquals("Relationship target ID.", propertyId.getDescription());
-      assertFalse(propertyId.isInherited());
-      assertTrue(propertyId.isRequired());
-      assertTrue(propertyId.isQueryable());
-      assertTrue(propertyId.isOrderable());
-      assertFalse(propertyId.isOpenChoice());
-
-      CmisPropertyDateTimeDefinitionType propertyDate =
-         (CmisPropertyDateTimeDefinitionType)typeEntry.getTypeCmisTypeDefinition().getPropertyDefinition().get(2);
+      DateTimePropertyDefinition propertyDate = (DateTimePropertyDefinition)typeEntry.getTypeCmisTypeDefinition().getPropertyDefinition(CMIS.CMIS_LAST_MODIFICATION_DATE);
       assertEquals("cmis:lastModificationDate", propertyDate.getId());
       assertEquals("datetime", propertyDate.getPropertyType().value());
       assertEquals("single", propertyDate.getCardinality().value());
@@ -580,8 +578,7 @@ public class GwtTestRepositoryService extends GWTTestCase
       assertTrue(propertyDate.isOrderable());
       assertFalse(propertyDate.isOpenChoice());
 
-      CmisPropertyStringDefinitionType propertyString =
-         (CmisPropertyStringDefinitionType)typeEntry.getTypeCmisTypeDefinition().getPropertyDefinition().get(4);
+      StringPropertyDefinition propertyString = (StringPropertyDefinition)typeEntry.getTypeCmisTypeDefinition().getPropertyDefinition(CMIS.CMIS_NAME);
       assertEquals("cmis:name", propertyString.getId());
       assertEquals("string", propertyString.getPropertyType().value());
       assertEquals("single", propertyString.getCardinality().value());
@@ -590,15 +587,14 @@ public class GwtTestRepositoryService extends GWTTestCase
       assertEquals("cmis:name", propertyString.getLocalName());
       assertEquals("cmis:name", propertyString.getDisplayName());
       assertEquals("Object's name.", propertyString.getDescription());
-      assertEquals((Integer)65536, propertyString.getMaxLength());
+      assertEquals(new Long(65536), propertyString.getMaxLength());
       assertFalse(propertyString.isInherited());
       assertFalse(propertyString.isRequired());
       assertTrue(propertyString.isQueryable());
       assertTrue(propertyString.isOrderable());
       assertFalse(propertyString.isOpenChoice());
 
-      propertyString =
-         (CmisPropertyStringDefinitionType)typeEntry.getTypeCmisTypeDefinition().getPropertyDefinition().get(10);
+      propertyString = (StringPropertyDefinition)typeEntry.getTypeCmisTypeDefinition().getPropertyDefinition(CMIS.CMIS_CREATED_BY);
       assertEquals("cmis:createdBy", propertyString.getId());
       assertEquals("string", propertyString.getPropertyType().value());
       assertEquals("single", propertyString.getCardinality().value());
@@ -607,13 +603,12 @@ public class GwtTestRepositoryService extends GWTTestCase
       assertEquals("exo:owner", propertyString.getLocalName());
       assertEquals("cmis:createdBy", propertyString.getDisplayName());
       assertEquals("User's name who created this object.", propertyString.getDescription());
-      assertEquals((Integer)65536, propertyString.getMaxLength());
+      assertEquals(new Long(65536), propertyString.getMaxLength());
       assertFalse(propertyString.isInherited());
       assertFalse(propertyString.isRequired());
       assertTrue(propertyString.isQueryable());
       assertTrue(propertyString.isOrderable());
       assertFalse(propertyString.isOpenChoice());
-
    }
 
    public void testGetTypeDescendants()
@@ -679,10 +674,10 @@ public class GwtTestRepositoryService extends GWTTestCase
    public void testGetTypeList()
    {
       Document doc = XMLParser.parse(typeDescendantsResponse);
-      List<CmisTypeDefinitionType> types = TypeParser.getTypeList(doc);
+      List<TypeDefinition> types = TypeParser.getTypeList(doc);
       assertEquals(3, types.size());
       
-      CmisTypeDefinitionType type = types.get(0);
+      TypeDefinition type = types.get(0);
       assertEquals("webdav:folder", type.getId());
       assertEquals("webdav:folder", type.getLocalName());
       assertEquals("http://www.exoplatform.com/jcr/cmis/1.0", type.getLocalNamespace());
@@ -730,5 +725,4 @@ public class GwtTestRepositoryService extends GWTTestCase
       assertTrue(type.isControllablePolicy());
       assertFalse(type.isFulltextIndexed());
    }
-   
 }

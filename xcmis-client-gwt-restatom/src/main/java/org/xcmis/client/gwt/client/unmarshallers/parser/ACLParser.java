@@ -19,10 +19,10 @@
 
 package org.xcmis.client.gwt.client.unmarshallers.parser;
 
-import org.xcmis.client.gwt.client.CmisNameSpace;
-import org.xcmis.client.gwt.client.model.acl.CmisAccessControlEntryType;
-import org.xcmis.client.gwt.client.model.acl.CmisAccessControlListType;
-import org.xcmis.client.gwt.client.model.acl.CmisAccessControlPrincipalType;
+import org.xcmis.client.gwt.client.CMIS;
+import org.xcmis.client.gwt.client.model.acl.AccessControlEntry;
+import org.xcmis.client.gwt.client.model.acl.AccessControlList;
+import org.xcmis.client.gwt.client.model.acl.AccessControlPrincipal;
 
 import com.google.gwt.xml.client.Node;
 
@@ -45,17 +45,17 @@ public class ACLParser
    }
 
    /**
-    * Parse xml to get {@link CmisAccessControlListType}.
+    * Parse xml to get {@link AccessControlList}.
     * 
     * @param aclNode ACL node
     * @param acl ACL
     */
-   public static void parse(Node aclNode, CmisAccessControlListType acl)
+   public static void parse(Node aclNode, AccessControlList acl)
    {
       for (int i = 0; i < aclNode.getChildNodes().getLength(); i++)
       {
          Node node = aclNode.getChildNodes().item(i);
-         if (node.getNodeName().equals(CmisNameSpace.CMIS_PERMISSION))
+         if (node.getNodeName().equals(CMIS.CMIS_PERMISSION))
          {
             acl.getPermission().add(getACE(node));
          }
@@ -68,29 +68,29 @@ public class ACLParser
     * @param aceNode ACE node
     * @return {@link CmisAccessControlEntryType}
     */
-   public static CmisAccessControlEntryType getACE(Node aceNode)
+   public static AccessControlEntry getACE(Node aceNode)
    {
-      CmisAccessControlEntryType accessControlEntry = new CmisAccessControlEntryType();
+      AccessControlEntry accessControlEntry = new AccessControlEntry();
       for (int i = 0; i < aceNode.getChildNodes().getLength(); i++)
       {
          Node node = aceNode.getChildNodes().item(i);
-         if (node.getNodeName().equals(CmisNameSpace.CMIS_PERMISSION))
+         if (node.getNodeName().equals(CMIS.CMIS_PERMISSION))
          {
             String value = node.getFirstChild().getNodeValue();
-            accessControlEntry.getPermission().add(value);
+            accessControlEntry.getPermissions().add(value);
          }
-         else if (node.getNodeName().equals(CmisNameSpace.CMIS_DIRECT))
+         else if (node.getNodeName().equals(CMIS.CMIS_DIRECT))
          {
             String value = node.getFirstChild().getNodeValue();
             accessControlEntry.setDirect(Boolean.parseBoolean(value));
          }
-         else if (node.getNodeName().equals(CmisNameSpace.CMIS_PRINCIPAL))
+         else if (node.getNodeName().equals(CMIS.CMIS_PRINCIPAL))
          {
             Node childNode = node.getFirstChild();
-            if (childNode.getNodeName().equals(CmisNameSpace.CMIS_PRINCIPAL_ID))
+            if (childNode.getNodeName().equals(CMIS.CMIS_PRINCIPAL_ID))
             {
                String value = childNode.getFirstChild().getNodeValue();
-               CmisAccessControlPrincipalType principal = new CmisAccessControlPrincipalType();
+               AccessControlPrincipal principal = new AccessControlPrincipal();
                principal.setPrincipalId(value);
                accessControlEntry.setPrincipal(principal);
             }

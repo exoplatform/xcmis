@@ -48,7 +48,7 @@ public class MoveObjectMarshaller extends MoveObject implements Marshallable
    
    /**
     * @see org.exoplatform.gwtframework.commons.rest.Marshallable#marshal()
-    * @return String
+    * @return String xml request
     */
    public String marshal()
    {

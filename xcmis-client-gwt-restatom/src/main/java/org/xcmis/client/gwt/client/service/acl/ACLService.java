@@ -21,7 +21,7 @@ package org.xcmis.client.gwt.client.service.acl;
 
 import org.xcmis.client.gwt.client.CmisArguments;
 import org.xcmis.client.gwt.client.marshallers.ApplyACLMarshaller;
-import org.xcmis.client.gwt.client.model.acl.CmisAccessControlListType;
+import org.xcmis.client.gwt.client.model.acl.AccessControlList;
 import org.xcmis.client.gwt.client.model.actions.ApplyACL;
 import org.xcmis.client.gwt.client.rest.AsyncRequest;
 import org.xcmis.client.gwt.client.rest.AsyncRequestCallback;
@@ -83,7 +83,7 @@ public class ACLService
     */
    public void getACL(String url, boolean onlyBasicPermissions)
    {
-      CmisAccessControlListType accessControlListType = new CmisAccessControlListType();
+      AccessControlList accessControlListType = new AccessControlList();
       ACLReceivedEvent event = new ACLReceivedEvent(accessControlListType);
       ACLUnmarshaller unmarshaller = new ACLUnmarshaller(accessControlListType);
       AsyncRequestCallback callback = new AsyncRequestCallback(eventBus, unmarshaller, event);

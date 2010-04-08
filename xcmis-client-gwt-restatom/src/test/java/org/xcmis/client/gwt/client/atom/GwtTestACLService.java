@@ -19,9 +19,9 @@
 
 package org.xcmis.client.gwt.client.atom;
 
-import org.xcmis.client.gwt.client.CmisNameSpace;
-import org.xcmis.client.gwt.client.model.acl.CmisAccessControlEntryType;
-import org.xcmis.client.gwt.client.model.acl.CmisAccessControlListType;
+import org.xcmis.client.gwt.client.CMIS;
+import org.xcmis.client.gwt.client.model.acl.AccessControlEntry;
+import org.xcmis.client.gwt.client.model.acl.AccessControlList;
 import org.xcmis.client.gwt.client.unmarshallers.parser.ACLParser;
 
 import com.google.gwt.junit.client.GWTTestCase;
@@ -52,22 +52,20 @@ public class GwtTestACLService extends GWTTestCase
    public void testGetACL()
    {
       Document doc = XMLParser.parse(aclResponse);
-      CmisAccessControlListType accessControlList = new CmisAccessControlListType();
-      Node ACLNode = doc.getElementsByTagName(CmisNameSpace.ACL).item(0);
+      AccessControlList accessControlList = new AccessControlList();
+      Node ACLNode = doc.getElementsByTagName(CMIS.ACL).item(0);
       
       ACLParser.parse(ACLNode, accessControlList);
       
       assertEquals(2, accessControlList.getPermission().size());
-      CmisAccessControlEntryType accessControlEntry = accessControlList.getPermission().get(0);
-      assertEquals(1, accessControlEntry.getPermission().size());
-      assertEquals("cmis:all", accessControlEntry.getPermission().get(0));
+      AccessControlEntry accessControlEntry = accessControlList.getPermission().get(0);
+      assertEquals(1, accessControlEntry.getPermissions().size());
+      assertEquals("cmis:all", accessControlEntry.getPermissions().iterator().next());
       assertEquals("root", accessControlEntry.getPrincipal().getPrincipalId());
       assertTrue(accessControlEntry.isDirect());
       
       accessControlEntry = accessControlList.getPermission().get(1);
-      assertEquals(2, accessControlEntry.getPermission().size());
-      assertEquals("cmis:read", accessControlEntry.getPermission().get(0));
-      assertEquals("cmis:write", accessControlEntry.getPermission().get(1));
+      assertEquals(2, accessControlEntry.getPermissions().size());
       assertEquals("Makis", accessControlEntry.getPrincipal().getPrincipalId());
       assertTrue(accessControlEntry.isDirect());
    }

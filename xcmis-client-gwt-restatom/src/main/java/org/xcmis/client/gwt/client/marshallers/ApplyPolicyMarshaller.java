@@ -48,11 +48,10 @@ public class ApplyPolicyMarshaller implements Marshallable
 
    /**
     * @see org.exoplatform.gwt.commons.rest.Marshallable#marshal()
-    * @return String
+    * @return String xml request
     */
    public String marshal()
    {
       return ObjectXMLBuilder.applyPolicy(applyPolicy);
    }
-
 }

@@ -19,7 +19,7 @@
 
 package org.xcmis.client.gwt.client.unmarshallers.parser;
 
-import org.xcmis.client.gwt.client.CmisNameSpace;
+import org.xcmis.client.gwt.client.CMIS;
 import org.xcmis.client.gwt.client.model.repository.CmisRepositoryInfo;
 
 import com.google.gwt.xml.client.Node;
@@ -50,7 +50,7 @@ public class RepositoryInfoParser
    public static void parse(Node node, CmisRepositoryInfo repositoryInfo)
    {
       //Check whether it is repository information node, if not - return
-      if (!node.getNodeName().equals(CmisNameSpace.WORKSPACE))
+      if (!node.getNodeName().equals(CMIS.WORKSPACE))
       {
          return;
       }
@@ -59,7 +59,7 @@ public class RepositoryInfoParser
       Node repositoryInfoNode = null;
       for (int i = 0; i < items.getLength(); i++)
       {
-         if (items.item(i).getNodeName().equals(CmisNameSpace.CMIS_REPOSITORY_INFO))
+         if (items.item(i).getNodeName().equals(CMIS.CMIS_REPOSITORY_INFO))
          {
             repositoryInfoNode = items.item(i);
          }
@@ -70,30 +70,30 @@ public class RepositoryInfoParser
          for (int i = 0; i < repositoryInfoList.getLength(); i++)
          {
             Node item = repositoryInfoList.item(i);
-            if (item.getNodeName().equals(CmisNameSpace.CMIS_REPOSITORY_ID))
+            if (item.getNodeName().equals(CMIS.CMIS_REPOSITORY_ID))
             {
                repositoryInfo.setRepositoryId(item.getFirstChild().getNodeValue());
             }
-            else if (item.getNodeName().equals(CmisNameSpace.CMIS_REPOSITORY_NAME))
+            else if (item.getNodeName().equals(CMIS.CMIS_REPOSITORY_NAME))
             {
                repositoryInfo.setRepositoryName(item.getFirstChild().getNodeValue());
             }
 
-            else if (item.getNodeName().equals(CmisNameSpace.CMIS_THIN_CLIENT_URI))
+            else if (item.getNodeName().equals(CMIS.CMIS_THIN_CLIENT_URI))
             {
                if (item.getFirstChild() != null)
                {
                   repositoryInfo.setThinClientURI(item.getFirstChild().getNodeValue());
                }
             }
-            else if (item.getNodeName().equals(CmisNameSpace.CMIS_PRINCIPAL_ANYONE))
+            else if (item.getNodeName().equals(CMIS.CMIS_PRINCIPAL_ANYONE))
             {
                if (item.getFirstChild() != null)
                {
                   repositoryInfo.setPrincipalAnyone(item.getFirstChild().getNodeValue());
                }
             }
-            else if (item.getNodeName().equals(CmisNameSpace.CMIS_PRINCIPAL_ANONYMOUS))
+            else if (item.getNodeName().equals(CMIS.CMIS_PRINCIPAL_ANONYMOUS))
             {
                if (item.getFirstChild() != null)
                {
@@ -101,7 +101,7 @@ public class RepositoryInfoParser
                }
             }
 
-            else if (item.getNodeName().equals(CmisNameSpace.CMIS_LATEST_CHANGE_TOKEN))
+            else if (item.getNodeName().equals(CMIS.CMIS_LATEST_CHANGE_TOKEN))
             {
                if (item.getFirstChild() != null)
                {
@@ -109,34 +109,34 @@ public class RepositoryInfoParser
                }
             }
 
-            else if (item.getNodeName().equals(CmisNameSpace.CMIS_REPOSITORY_DESCRIPTION))
+            else if (item.getNodeName().equals(CMIS.CMIS_REPOSITORY_DESCRIPTION))
             {
                if (item.getFirstChild() != null)
                {
                   repositoryInfo.setRepositoryDescription(item.getFirstChild().getNodeValue());
                }
             }
-            else if (item.getNodeName().equals(CmisNameSpace.CMIS_VENDOR_NAME))
+            else if (item.getNodeName().equals(CMIS.CMIS_VENDOR_NAME))
             {
                repositoryInfo.setVendorName(item.getFirstChild().getNodeValue());
             }
-            else if (item.getNodeName().equals(CmisNameSpace.CMIS_PRODUCT_NAME))
+            else if (item.getNodeName().equals(CMIS.CMIS_PRODUCT_NAME))
             {
                repositoryInfo.setProductName(item.getFirstChild().getNodeValue());
             }
-            else if (item.getNodeName().equals(CmisNameSpace.CMIS_PRODUCT_VERSION))
+            else if (item.getNodeName().equals(CMIS.CMIS_PRODUCT_VERSION))
             {
                repositoryInfo.setProductVersion(item.getFirstChild().getNodeValue());
             }
-            else if (item.getNodeName().equals(CmisNameSpace.CMIS_ROOT_FOLDER_ID))
+            else if (item.getNodeName().equals(CMIS.CMIS_ROOT_FOLDER_ID))
             {
                repositoryInfo.setRootFolderId(item.getFirstChild().getNodeValue());
             }
-            else if (item.getNodeName().equals(CmisNameSpace.CMIS_CAPABILITIES))
+            else if (item.getNodeName().equals(CMIS.CMIS_CAPABILITIES))
             {
                repositoryInfo.setCapabilities(CapabilitiesParser.parse(item));
             }
-            else if (item.getNodeName().equals(CmisNameSpace.CMIS_VERSION_SUPPORTED))
+            else if (item.getNodeName().equals(CMIS.CMIS_VERSION_SUPPORTED))
             {
                repositoryInfo.setCmisVersionSupported(item.getFirstChild().getNodeValue());
             }

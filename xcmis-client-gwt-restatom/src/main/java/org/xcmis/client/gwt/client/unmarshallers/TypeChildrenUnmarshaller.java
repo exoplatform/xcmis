@@ -56,8 +56,12 @@ public class TypeChildrenUnmarshaller implements Unmarshallable
     */
    public void unmarshal(String body)
    {
+      try {
       Document doc = XMLParser.parse(body);
       typeCollection.setTypes(TypeParser.getTypes(doc));
+      } catch (Exception e){
+         e.printStackTrace();
+      }
    }
 
 }

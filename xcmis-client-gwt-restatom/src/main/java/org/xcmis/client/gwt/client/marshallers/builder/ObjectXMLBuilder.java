@@ -19,8 +19,9 @@
 
 package org.xcmis.client.gwt.client.marshallers.builder;
 
-import org.xcmis.client.gwt.client.CmisNameSpace;
-import org.xcmis.client.gwt.client.model.acl.CmisAccessControlEntryType;
+import org.xcmis.client.gwt.client.CMIS;
+import org.xcmis.client.gwt.client.model.EnumPropertyType;
+import org.xcmis.client.gwt.client.model.acl.AccessControlEntry;
 import org.xcmis.client.gwt.client.model.actions.ApplyACL;
 import org.xcmis.client.gwt.client.model.actions.ApplyPolicy;
 import org.xcmis.client.gwt.client.model.actions.CheckIn;
@@ -32,13 +33,8 @@ import org.xcmis.client.gwt.client.model.actions.CreateRelationship;
 import org.xcmis.client.gwt.client.model.actions.MoveObject;
 import org.xcmis.client.gwt.client.model.actions.RemovePolicy;
 import org.xcmis.client.gwt.client.model.actions.UpdateProperties;
-import org.xcmis.client.gwt.client.model.property.CmisProperty;
-import org.xcmis.client.gwt.client.model.property.CmisPropertyBoolean;
-import org.xcmis.client.gwt.client.model.property.CmisPropertyDateTime;
-import org.xcmis.client.gwt.client.model.property.CmisPropertyId;
-import org.xcmis.client.gwt.client.model.property.CmisPropertyInteger;
-import org.xcmis.client.gwt.client.model.property.CmisPropertyString;
-import org.xcmis.client.gwt.client.model.property.CmisPropertyUri;
+import org.xcmis.client.gwt.client.model.property.CmisProperties;
+import org.xcmis.client.gwt.client.model.property.Property;
 
 import java.util.List;
 
@@ -55,19 +51,21 @@ import com.google.gwt.xml.client.XMLParser;
 
 public class ObjectXMLBuilder
 {
-   
+
    /**
     * Constructor.
     */
    protected ObjectXMLBuilder()
    {
-      throw new UnsupportedOperationException(); // prevents calls from subclass
+      throw new UnsupportedOperationException(); // prevents calls from
+      // subclass
    }
 
    /**
     * Create document request.
     * 
-    * @param createDocument createDocument
+    * @param createDocument
+    *            createDocument
     * @return String
     */
    public static String createDocument(CreateDocument createDocument)
@@ -75,29 +73,22 @@ public class ObjectXMLBuilder
       Document doc = XMLParser.createDocument();
       Element entry = EntryXMLBuilder.createEntryElement(doc);
 
-      Element object = doc.createElement(CmisNameSpace.CMISRA_OBJECT);
-      Element properties = doc.createElement(CmisNameSpace.CMIS_PROPERTIES);
+      Element object = doc.createElement(CMIS.CMISRA_OBJECT);
+      Element properties = doc.createElement(CMIS.CMIS_PROPERTIES);
 
       // Get new document's name from its properties
-      String name = "";
-      for (CmisProperty property : createDocument.getProperties().getProperty())
-      {
-         if (property.getPropertyDefinitionId().equalsIgnoreCase(CmisNameSpace.CMIS_NAME))
-         {
-            CmisPropertyString propertyString = (CmisPropertyString)property;
-            name = propertyString.getValue().get(0);
-         }
-      }
 
-      createPropertiesElement(createDocument.getProperties().getProperty(), properties, doc);
+      String name = createDocument.getProperties().getString(CMIS.CMIS_NAME);
+
+      createPropertiesElement(createDocument.getProperties(), properties, doc);
       object.appendChild(properties);
 
       // Object name should also be pointed in title
-      Element title = doc.createElement(CmisNameSpace.TITLE);
+      Element title = doc.createElement(CMIS.TITLE);
       title.appendChild(doc.createTextNode(name));
-      Element summary = doc.createElement(CmisNameSpace.SUMMARY);
+      Element summary = doc.createElement(CMIS.SUMMARY);
       summary.appendChild(doc.createTextNode("Document creation"));
-      Element content = doc.createElement(CmisNameSpace.CONTENT);
+      Element content = doc.createElement(CMIS.CONTENT);
 
       entry.appendChild(title);
       entry.appendChild(content);
@@ -110,7 +101,8 @@ public class ObjectXMLBuilder
    /**
     * Create document from source request.
     * 
-    * @param createDocumentFromSource createDocumentFromSource
+    * @param createDocumentFromSource
+    *            createDocumentFromSource
     * @return String
     */
    public static String createDocumentFromSource(CreateDocumentFromSource createDocumentFromSource)
@@ -118,29 +110,21 @@ public class ObjectXMLBuilder
       Document doc = XMLParser.createDocument();
       Element entry = EntryXMLBuilder.createEntryElement(doc);
 
-      Element object = doc.createElement(CmisNameSpace.CMISRA_OBJECT);
-      Element properties = doc.createElement(CmisNameSpace.CMIS_PROPERTIES);
+      Element object = doc.createElement(CMIS.CMISRA_OBJECT);
+      Element properties = doc.createElement(CMIS.CMIS_PROPERTIES);
 
       // Get new document's name from its properties
-      String name = "";
-      for (CmisProperty property : createDocumentFromSource.getProperties().getProperty())
-      {
-         if (property.getPropertyDefinitionId().equalsIgnoreCase(CmisNameSpace.CMIS_NAME))
-         {
-            CmisPropertyString propertyString = (CmisPropertyString)property;
-            name = propertyString.getValue().get(0);
-         }
-      }
+      String name = createDocumentFromSource.getProperties().getString(CMIS.CMIS_NAME);
 
-      createPropertiesElement(createDocumentFromSource.getProperties().getProperty(), properties, doc);
+      createPropertiesElement(createDocumentFromSource.getProperties(), properties, doc);
       object.appendChild(properties);
 
       // Object name should also be pointed in title
-      Element title = doc.createElement(CmisNameSpace.TITLE);
+      Element title = doc.createElement(CMIS.TITLE);
       title.appendChild(doc.createTextNode(name));
-      Element summary = doc.createElement(CmisNameSpace.SUMMARY);
+      Element summary = doc.createElement(CMIS.SUMMARY);
       summary.appendChild(doc.createTextNode("Document from source creation"));
-      Element content = doc.createElement(CmisNameSpace.CONTENT);
+      Element content = doc.createElement(CMIS.CONTENT);
 
       entry.appendChild(title);
       entry.appendChild(content);
@@ -154,7 +138,8 @@ public class ObjectXMLBuilder
    /**
     * Create folder request.
     * 
-    * @param createFolder createFolder
+    * @param createFolder
+    *            createFolder
     * @return String
     */
    public static String createFolder(CreateFolder createFolder)
@@ -162,33 +147,24 @@ public class ObjectXMLBuilder
       Document doc = XMLParser.createDocument();
       Element entry = EntryXMLBuilder.createEntryElement(doc);
 
-      Element object = doc.createElement(CmisNameSpace.CMISRA_OBJECT);
-      Element properties = doc.createElement(CmisNameSpace.CMIS_PROPERTIES);
+      Element object = doc.createElement(CMIS.CMISRA_OBJECT);
+      Element properties = doc.createElement(CMIS.CMIS_PROPERTIES);
 
       // Get new folder's name from its properties
-      String name = "";
-      for (CmisProperty property : createFolder.getProperties().getProperty())
-      {
-         if (property.getPropertyDefinitionId().equalsIgnoreCase(CmisNameSpace.CMIS_NAME))
-         {
-            CmisPropertyString propertyString = (CmisPropertyString)property;
-            name = propertyString.getValue().get(0);
-         }
-      }
+      String name = createFolder.getProperties().getString(CMIS.CMIS_NAME);
 
       /* new folder's parent id element */
       Element parentId =
-         createPropertyElement(doc, CmisNameSpace.CMIS_PROPERTY_ID, CmisNameSpace.CMIS_PARENT_ID, createFolder
-            .getFolderId());
+         createPropertyElement(doc, CMIS.CMIS_PROPERTY_ID, CMIS.CMIS_PARENT_ID, createFolder.getFolderId());
       properties.appendChild(parentId);
 
-      createPropertiesElement(createFolder.getProperties().getProperty(), properties, doc);
+      createPropertiesElement(createFolder.getProperties(), properties, doc);
       object.appendChild(properties);
 
       /* Title must also contain the name of new folder */
-      Element title = doc.createElement(CmisNameSpace.TITLE);
+      Element title = doc.createElement(CMIS.TITLE);
       title.appendChild(doc.createTextNode(name));
-      Element summary = doc.createElement(CmisNameSpace.SUMMARY);
+      Element summary = doc.createElement(CMIS.SUMMARY);
       summary.appendChild(doc.createTextNode("Folder creation"));
 
       entry.appendChild(title);
@@ -201,7 +177,8 @@ public class ObjectXMLBuilder
    /**
     * Create policy request.
     * 
-    * @param createPolicy createPolicy
+    * @param createPolicy
+    *            createPolicy
     * @return String
     */
    public static String createPolicy(CreatePolicy createPolicy)
@@ -209,28 +186,20 @@ public class ObjectXMLBuilder
       Document doc = XMLParser.createDocument();
       Element entry = EntryXMLBuilder.createEntryElement(doc);
 
-      Element object = doc.createElement(CmisNameSpace.CMISRA_OBJECT);
-      Element properties = doc.createElement(CmisNameSpace.CMIS_PROPERTIES);
+      Element object = doc.createElement(CMIS.CMISRA_OBJECT);
+      Element properties = doc.createElement(CMIS.CMIS_PROPERTIES);
 
       // Get new policy's name from its properties
-      String name = "";
-      for (CmisProperty property : createPolicy.getProperties().getProperty())
-      {
-         if (property.getPropertyDefinitionId().equalsIgnoreCase(CmisNameSpace.CMIS_NAME))
-         {
-            CmisPropertyString propertyString = (CmisPropertyString)property;
-            name = propertyString.getValue().get(0);
-         }
-      }
+      String name = createPolicy.getProperties().getString(CMIS.CMIS_NAME);
 
-      createPropertiesElement(createPolicy.getProperties().getProperty(), properties, doc);
+      createPropertiesElement(createPolicy.getProperties(), properties, doc);
       object.appendChild(properties);
 
-      Element summary = doc.createElement(CmisNameSpace.SUMMARY);
+      Element summary = doc.createElement(CMIS.SUMMARY);
       summary.appendChild(doc.createTextNode("summary"));
 
       // Object name should also be pointed in title
-      Element title = doc.createElement(CmisNameSpace.TITLE);
+      Element title = doc.createElement(CMIS.TITLE);
       title.appendChild(doc.createTextNode(name));
       entry.appendChild(title);
       entry.appendChild(summary);
@@ -243,37 +212,30 @@ public class ObjectXMLBuilder
    /**
     * Create relationship request.
     * 
-    * @param createRelationship createRelationship
+    * @param createRelationship
+    *            createRelationship
     * @return String
     */
    public static String createRelationship(CreateRelationship createRelationship)
    {
       // Get new relationship's name from its properties
-      String name = "";
-      for (CmisProperty property : createRelationship.getProperties().getProperty())
-      {
-         if (property.getPropertyDefinitionId().equalsIgnoreCase(CmisNameSpace.CMIS_NAME))
-         {
-            CmisPropertyString propertyString = (CmisPropertyString)property;
-            name = propertyString.getValue().get(0);
-         }
-      }
+      String name = createRelationship.getProperties().getString(CMIS.CMIS_NAME);
 
       Document doc = XMLParser.createDocument();
       Element entry = EntryXMLBuilder.createEntryElement(doc);
       entry.setAttribute(EntryXMLBuilder.XMLNS_CMISM.getPrefix() + ":" + EntryXMLBuilder.XMLNS_CMISM.getLocalName(),
          EntryXMLBuilder.XMLNS_CMISM.getNamespaceURI());
 
-      Element object = doc.createElement(CmisNameSpace.CMISRA_OBJECT);
-      Element properties = doc.createElement(CmisNameSpace.CMIS_PROPERTIES);
+      Element object = doc.createElement(CMIS.CMISRA_OBJECT);
+      Element properties = doc.createElement(CMIS.CMIS_PROPERTIES);
 
-      createPropertiesElement(createRelationship.getProperties().getProperty(), properties, doc);
+      createPropertiesElement(createRelationship.getProperties(), properties, doc);
       object.appendChild(properties);
 
       // Object name should also be pointed in title
-      Element title = doc.createElement(CmisNameSpace.TITLE);
+      Element title = doc.createElement(CMIS.TITLE);
       title.appendChild(doc.createTextNode(name));
-      Element summary = doc.createElement(CmisNameSpace.SUMMARY);
+      Element summary = doc.createElement(CMIS.SUMMARY);
       summary.appendChild(doc.createTextNode("Realtionship creation"));
       entry.appendChild(title);
       entry.appendChild(summary);
@@ -285,24 +247,24 @@ public class ObjectXMLBuilder
    /**
     * Create remove policy request.
     * 
-    * @param removePolicy removePolicy
+    * @param removePolicy
+    *            removePolicy
     * @return String
     */
    public static String removePolicy(RemovePolicy removePolicy)
    {
       Document doc = XMLParser.createDocument();
       Element entry = EntryXMLBuilder.createEntryElement(doc);
-      Element object = doc.createElement(CmisNameSpace.CMISRA_OBJECT);
-      Element properties = doc.createElement(CmisNameSpace.CMIS_PROPERTIES);
+      Element object = doc.createElement(CMIS.CMISRA_OBJECT);
+      Element properties = doc.createElement(CMIS.CMIS_PROPERTIES);
 
       Element policyIdElement =
-         createPropertyElement(doc, CmisNameSpace.CMIS_PROPERTY_ID, CmisNameSpace.CMIS_OBJECT_ID, removePolicy
-            .getPolicyId());
+         createPropertyElement(doc, CMIS.CMIS_PROPERTY_ID, CMIS.CMIS_OBJECT_ID, removePolicy.getPolicyId());
       properties.appendChild(policyIdElement);
 
       object.appendChild(properties);
 
-      Element summary = doc.createElement(CmisNameSpace.SUMMARY);
+      Element summary = doc.createElement(CMIS.SUMMARY);
       summary.appendChild(doc.createTextNode("Remove policy"));
 
       entry.appendChild(summary);
@@ -315,7 +277,8 @@ public class ObjectXMLBuilder
    /**
     * Create update properties request.
     * 
-    * @param updateProperties updateProperties
+    * @param updateProperties
+    *            updateProperties
     * @return String
     */
    public static String updateProperties(UpdateProperties updateProperties)
@@ -323,31 +286,23 @@ public class ObjectXMLBuilder
       Document doc = XMLParser.createDocument();
       Element entry = EntryXMLBuilder.createEntryElement(doc);
 
-      Element object = doc.createElement(CmisNameSpace.CMISRA_OBJECT);
-      Element properties = doc.createElement(CmisNameSpace.CMIS_PROPERTIES);
+      Element object = doc.createElement(CMIS.CMISRA_OBJECT);
+      Element properties = doc.createElement(CMIS.CMIS_PROPERTIES);
 
-      String name = "";
+      String name = updateProperties.getProperties().getString(CMIS.CMIS_NAME);
 
-      for (CmisProperty property : updateProperties.getProperties().getProperty())
-      {
-         if (property.getPropertyDefinitionId().equals(CmisNameSpace.CMIS_NAME))
-         {
-            name = ((CmisPropertyString)property).getValue().get(0);
-         }
-      }
-
-      createPropertiesElement(updateProperties.getProperties().getProperty(), properties, doc);
+      createPropertiesElement(updateProperties.getProperties(), properties, doc);
 
       if (updateProperties.getChangeToken() != null && updateProperties.getChangeToken().length() > 0)
       {
          Element changeToken =
-            createPropertyElement(doc, CmisNameSpace.CMIS_PROPERTY_STRING, CmisNameSpace.CMIS_CHANGE_TOKEN,
-               updateProperties.getChangeToken());
+            createPropertyElement(doc, CMIS.CMIS_PROPERTY_STRING, CMIS.CMIS_CHANGE_TOKEN, updateProperties
+               .getChangeToken());
          properties.appendChild(changeToken);
       }
 
       object.appendChild(properties);
-      Element title = doc.createElement(CmisNameSpace.TITLE);
+      Element title = doc.createElement(CMIS.TITLE);
       title.appendChild(doc.createTextNode(name));
       entry.appendChild(title);
       entry.appendChild(object);
@@ -358,7 +313,8 @@ public class ObjectXMLBuilder
    /**
     * Create move object request.
     * 
-    * @param moveObject moveObject
+    * @param moveObject
+    *            moveObject
     * @return String
     */
    public static String moveItem(MoveObject moveObject)
@@ -366,11 +322,10 @@ public class ObjectXMLBuilder
       Document doc = XMLParser.createDocument();
       Element entry = EntryXMLBuilder.createEntryElement(doc);
 
-      Element object = doc.createElement(CmisNameSpace.CMISRA_OBJECT);
-      Element properties = doc.createElement(CmisNameSpace.CMIS_PROPERTIES);
+      Element object = doc.createElement(CMIS.CMISRA_OBJECT);
+      Element properties = doc.createElement(CMIS.CMIS_PROPERTIES);
       Element objectId =
-         createPropertyElement(doc, CmisNameSpace.CMIS_PROPERTY_ID, CmisNameSpace.CMIS_OBJECT_ID, moveObject
-            .getObjectId());
+         createPropertyElement(doc, CMIS.CMIS_PROPERTY_ID, CMIS.CMIS_OBJECT_ID, moveObject.getObjectId());
 
       properties.appendChild(objectId);
       object.appendChild(properties);
@@ -383,7 +338,8 @@ public class ObjectXMLBuilder
    /**
     * Create apply policy request.
     * 
-    * @param applyPolicy applyPolicy
+    * @param applyPolicy
+    *            applyPolicy
     * @return String
     */
    public static String applyPolicy(ApplyPolicy applyPolicy)
@@ -391,17 +347,16 @@ public class ObjectXMLBuilder
       Document doc = XMLParser.createDocument();
       Element entry = EntryXMLBuilder.createEntryElement(doc);
 
-      Element object = doc.createElement(CmisNameSpace.CMISRA_OBJECT);
-      Element properties = doc.createElement(CmisNameSpace.CMIS_PROPERTIES);
+      Element object = doc.createElement(CMIS.CMISRA_OBJECT);
+      Element properties = doc.createElement(CMIS.CMIS_PROPERTIES);
 
       Element policyIdElement =
-         createPropertyElement(doc, CmisNameSpace.CMIS_PROPERTY_ID, CmisNameSpace.CMIS_OBJECT_ID, applyPolicy
-            .getPolicyId());
+         createPropertyElement(doc, CMIS.CMIS_PROPERTY_ID, CMIS.CMIS_OBJECT_ID, applyPolicy.getPolicyId());
       properties.appendChild(policyIdElement);
 
       object.appendChild(properties);
 
-      Element summary = doc.createElement(CmisNameSpace.SUMMARY);
+      Element summary = doc.createElement(CMIS.SUMMARY);
       summary.appendChild(doc.createTextNode("Apply policy"));
 
       entry.appendChild(summary);
@@ -414,7 +369,8 @@ public class ObjectXMLBuilder
    /**
     * Create check in request.
     * 
-    * @param checkIn checkIn
+    * @param checkIn
+    *            checkIn
     * @return String
     */
    public static String checkin(CheckIn checkIn)
@@ -422,10 +378,10 @@ public class ObjectXMLBuilder
       Document doc = XMLParser.createDocument();
       Element entry = EntryXMLBuilder.createEntryElement(doc);
 
-      Element object = doc.createElement(CmisNameSpace.CMISRA_OBJECT);
-      Element properties = doc.createElement(CmisNameSpace.CMIS_PROPERTIES);
+      Element object = doc.createElement(CMIS.CMISRA_OBJECT);
+      Element properties = doc.createElement(CMIS.CMIS_PROPERTIES);
 
-      createPropertiesElement(checkIn.getProperties().getProperty(), properties, doc);
+      createPropertiesElement(checkIn.getProperties(), properties, doc);
       object.appendChild(properties);
       entry.appendChild(object);
       doc.appendChild(entry);
@@ -435,35 +391,36 @@ public class ObjectXMLBuilder
    /**
     * Create apply ACL request.
     * 
-    * @param applyACL applyACL
+    * @param applyACL
+    *            applyACL
     * @return String
     */
    public static String applyACL(ApplyACL applyACL)
    {
       Document doc = XMLParser.createDocument();
-      Element acl = doc.createElement(CmisNameSpace.CMIS_ACL);
+      Element acl = doc.createElement(CMIS.CMIS_ACL);
       acl.setAttribute("xmlns:cmis", EntryXMLBuilder.XMLNS_CMIS.getNamespaceURI());
       acl.setAttribute("xmlns:atom", EntryXMLBuilder.XMLNS_ATOM.getNamespaceURI());
       acl.setAttribute("xmlns:app", EntryXMLBuilder.XMLNS_APP.getNamespaceURI());
       acl.setAttribute("xmlns:cmism", EntryXMLBuilder.XMLNS_CMISM.getNamespaceURI());
       acl.setAttribute("xmlns:cmisra", EntryXMLBuilder.XMLNS_CMISRA.getNamespaceURI());
 
-      for (CmisAccessControlEntryType ace : applyACL.getAddACEs().getPermission())
+      for (AccessControlEntry ace : applyACL.getAddACEs().getPermission())
       {
-         Element aceElement = doc.createElement(CmisNameSpace.CMIS_PERMISSION);
-         Element directElement = doc.createElement(CmisNameSpace.CMIS_DIRECT);
+         Element aceElement = doc.createElement(CMIS.CMIS_PERMISSION);
+         Element directElement = doc.createElement(CMIS.CMIS_DIRECT);
          directElement.appendChild(doc.createTextNode(String.valueOf(ace.isDirect())));
 
-         Element principalElement = doc.createElement(CmisNameSpace.CMIS_PRINCIPAL);
-         Element principalIdElement = doc.createElement(CmisNameSpace.CMIS_PRINCIPAL_ID);
+         Element principalElement = doc.createElement(CMIS.CMIS_PRINCIPAL);
+         Element principalIdElement = doc.createElement(CMIS.CMIS_PRINCIPAL_ID);
          principalIdElement.appendChild(doc.createTextNode(ace.getPrincipal().getPrincipalId()));
          principalElement.appendChild(principalIdElement);
          aceElement.appendChild(principalElement);
          aceElement.appendChild(directElement);
 
-         for (String permission : ace.getPermission())
+         for (String permission : ace.getPermissions())
          {
-            Element permissionElement = doc.createElement(CmisNameSpace.CMIS_PERMISSION);
+            Element permissionElement = doc.createElement(CMIS.CMIS_PERMISSION);
             permissionElement.appendChild(doc.createTextNode(permission));
             aceElement.appendChild(permissionElement);
          }
@@ -476,87 +433,77 @@ public class ObjectXMLBuilder
    /**
     * Form properties elements from property list.
     * 
-    * @param properties properties
-    * @param propertiesElement propertiesElement
-    * @param doc doc
+    * @param properties
+    *            properties
+    * @param propertiesElement
+    *            propertiesElement
+    * @param doc
+    *            doc
     */
-   private static void createPropertiesElement(List<CmisProperty> properties, Element propertiesElement, Document doc)
+   private static void createPropertiesElement(CmisProperties properties, Element propertiesElement, Document doc)
    {
-      for (CmisProperty property : properties)
+      for (Property<?> property : properties.getProperties().values())
       {
-         if (property instanceof CmisPropertyString)
-         {
-            CmisPropertyString propertyString = (CmisPropertyString)property;
-            String value = propertyString.getValue().get(0);
-            Element propertyElement =
-               createPropertyElement(doc, CmisNameSpace.CMIS_PROPERTY_STRING, propertyString.getPropertyDefinitionId(),
-                  value);
-            propertiesElement.appendChild(propertyElement);
-         }
-         else if (property instanceof CmisPropertyInteger)
-         {
-            CmisPropertyInteger propertyInteger = (CmisPropertyInteger)property;
-            String value = String.valueOf(propertyInteger.getValue().get(0));
-            Element propertyElement =
-               createPropertyElement(doc, CmisNameSpace.CMIS_PROPERTY_INTEGER, propertyInteger
-                  .getPropertyDefinitionId(), value);
-            propertiesElement.appendChild(propertyElement);
-         }
-         else if (property instanceof CmisPropertyId)
-         {
-            CmisPropertyId propertyId = (CmisPropertyId)property;
-            String value = propertyId.getValue().get(0);
-            Element propertyElement =
-               createPropertyElement(doc, CmisNameSpace.CMIS_PROPERTY_ID, propertyId.getPropertyDefinitionId(), value);
-            propertiesElement.appendChild(propertyElement);
-         }
-         else if (property instanceof CmisPropertyBoolean)
-         {
-            CmisPropertyBoolean propertyBoolean = (CmisPropertyBoolean)property;
-            String value = String.valueOf(propertyBoolean.getValue().get(0));
-            Element propertyElement =
-               createPropertyElement(doc, CmisNameSpace.CMIS_PROPERTY_BOOLEAN, propertyBoolean
-                  .getPropertyDefinitionId(), value);
-            propertiesElement.appendChild(propertyElement);
-         }
-         else if (property instanceof CmisPropertyDateTime)
-         {
-            CmisPropertyDateTime propertyDateTime = (CmisPropertyDateTime)property;
-            String value = String.valueOf(propertyDateTime.getValue().get(0));
-            Element propertyElement =
-               createPropertyElement(doc, CmisNameSpace.CMIS_PROPERTY_DATE_TIME, propertyDateTime
-                  .getPropertyDefinitionId(), value);
-            propertiesElement.appendChild(propertyElement);
-         }
-         else if (property instanceof CmisPropertyUri)
-         {
-            CmisPropertyUri propertyUri = (CmisPropertyUri)property;
-            String value = propertyUri.getValue().get(0);
-            Element propertyElement =
-               createPropertyElement(doc, CmisNameSpace.CMIS_PROPERTY_URI, 
-                  propertyUri.getPropertyDefinitionId(), value);
-            propertiesElement.appendChild(propertyElement);
-         }
+         Element propertyElement =
+            createPropertyElement(doc, getPropertyNameByType(property.getType()), property.getId(), property
+               .getValues());
+         propertiesElement.appendChild(propertyElement);
+
       }
    }
 
    /**
-    * Creates property element of pointed type, with pointed name and value.
-    * 
-    * @param doc doc
+    * @param doc xml document
     * @param type type
     * @param name name
+    * @param values values
+    * @return {@link Element} property xml element
+    */
+   private static Element createPropertyElement(Document doc, String type, String name, List<?> values)
+   {
+      Element property = doc.createElement(type);
+      property.setAttribute(CMIS.PROPERTY_DEFINITION_ID, name);
+
+      if (values.size() > 0)
+      {
+         for (int i = 0; i < values.size(); i++)
+         {
+            Element valueElement = doc.createElement(CMIS.CMIS_VALUE);
+            valueElement.appendChild(doc.createTextNode(String.valueOf(values.get(i))));
+            property.appendChild(valueElement);
+         }
+      }
+      return property;
+   }
+
+  
+   /**
+    * @param doc xml document
+    * @param type property type
+    * @param name property name 
     * @param value value
-    * @return {@link Element}
+    * @return {@link Element} property xml element
     */
    private static Element createPropertyElement(Document doc, String type, String name, String value)
    {
       Element property = doc.createElement(type);
-      property.setAttribute(CmisNameSpace.PROPERTY_DEFINITION_ID, name);
-      Element valueElement = doc.createElement(CmisNameSpace.CMIS_VALUE);
+      property.setAttribute(CMIS.PROPERTY_DEFINITION_ID, name);
+      Element valueElement = doc.createElement(CMIS.CMIS_VALUE);
       valueElement.appendChild(doc.createTextNode(value));
       property.appendChild(valueElement);
       return property;
    }
 
+   
+   /**
+    * @param propertyType property type
+    * @return {@link String} property type (name of thee xml element)
+    */
+   private static String getPropertyNameByType(EnumPropertyType propertyType)
+   {
+      String type = propertyType.value();
+      String firstLetter = type.substring(0, 1).toUpperCase();
+      String tail = type.substring(1, type.length());
+      return CMIS.CMIS_PROPERTY + firstLetter + tail;
+   }
 }

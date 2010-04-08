@@ -19,15 +19,23 @@
 
 package org.xcmis.client.gwt.client.unmarshallers.parser;
 
-import org.xcmis.client.gwt.client.CmisNameSpace;
-import org.xcmis.client.gwt.client.model.property.CmisPropertiesType;
-import org.xcmis.client.gwt.client.model.property.CmisPropertyBoolean;
-import org.xcmis.client.gwt.client.model.property.CmisPropertyDateTime;
-import org.xcmis.client.gwt.client.model.property.CmisPropertyId;
-import org.xcmis.client.gwt.client.model.property.CmisPropertyInteger;
-import org.xcmis.client.gwt.client.model.property.CmisPropertyString;
-import org.xcmis.client.gwt.client.model.property.CmisPropertyUri;
+import org.xcmis.client.gwt.client.CMIS;
+import org.xcmis.client.gwt.client.model.property.BooleanProperty;
+import org.xcmis.client.gwt.client.model.property.DateTimeProperty;
+import org.xcmis.client.gwt.client.model.property.DecimalProperty;
+import org.xcmis.client.gwt.client.model.property.HtmlProperty;
+import org.xcmis.client.gwt.client.model.property.IdProperty;
+import org.xcmis.client.gwt.client.model.property.IntegerProperty;
+import org.xcmis.client.gwt.client.model.property.Property;
+import org.xcmis.client.gwt.client.model.property.StringProperty;
+import org.xcmis.client.gwt.client.model.property.UriProperty;
 import org.xcmis.client.gwt.client.model.util.DateUtil;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.xml.client.NamedNodeMap;
 import com.google.gwt.xml.client.Node;
@@ -36,10 +44,10 @@ import com.google.gwt.xml.client.NodeList;
 /**
  * 
  * Created by The eXo Platform SAS.
- *	
+ * 
  * @author <a href="mailto:zhulevaanna@gmail.com">Ann Zhuleva</a>
- * @version $Id:   ${date} ${time}
- *
+ * @version $Id: ${date} ${time}
+ * 
  */
 public class PropertiesParser
 {
@@ -49,187 +57,125 @@ public class PropertiesParser
     */
    protected PropertiesParser()
    {
-      throw new UnsupportedOperationException(); // prevents calls from subclass
+      throw new UnsupportedOperationException(); // prevents calls from
+      // subclass
    }
-
-   /**
-    * Property definition id.
-    */
-   private static String propertyDefinitionId = "";
-
-   /**
-    * Local name.
-    */
-   private static String localName = "";
-
-   /**
-    * Query name.
-    */
-   private static String queryName = "";
-
-   /**
-    * Display name.
-    */
-   private static String displayName = "";
 
    /**
     * Parse properties xml element to {@link CmisPropertiesType}.
     * 
-    * @param node node
+    * @param node
+    *            node
     * @return CmisPropertiesType CMIS properties type
     */
-   public static CmisPropertiesType parse(Node node)
+   public static Map<String, Property<?>> parse(Node node)
    {
-      CmisPropertiesType properties = new CmisPropertiesType();
+      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
 
       NodeList nodeList = node.getChildNodes();
 
-      //Go throw all properties
+      // Go throw all properties
       for (int i = 0; i < nodeList.getLength(); i++)
       {
          Node item = nodeList.item(i);
-         if (item.toString().trim().length() > 0)
+         
+         NamedNodeMap nodeListOfAttributes = item.getAttributes();
+         String propertyDefinitionId = (nodeListOfAttributes.getNamedItem(CMIS.PROPERTY_DEFINITION_ID)!= null) ? nodeListOfAttributes.getNamedItem(CMIS.PROPERTY_DEFINITION_ID).getFirstChild().getNodeValue() : null;
+         String localName = (nodeListOfAttributes.getNamedItem(CMIS.LOCAL_NAME)!= null) ? nodeListOfAttributes.getNamedItem(CMIS.LOCAL_NAME).getFirstChild().getNodeValue() : null;
+         String queryName = (nodeListOfAttributes.getNamedItem(CMIS.QUERY_NAME)!= null) ? nodeListOfAttributes.getNamedItem(CMIS.QUERY_NAME).getFirstChild().getNodeValue() : null;
+         String displayName = (nodeListOfAttributes.getNamedItem(CMIS.DISPLAY_NAME)!= null) ? nodeListOfAttributes.getNamedItem(CMIS.DISPLAY_NAME).getFirstChild().getNodeValue() : null;
+         
+         List<String> values = getValues(item);
+
+         if (item.getNodeName().equals(CMIS.CMIS_PROPERTY_STRING))
          {
-            //Keep property attributes temporary in fields
-            getPropertyAttributes(item);
+            StringProperty property =
+               new StringProperty(propertyDefinitionId, queryName, localName, displayName, values);
+            properties.put(propertyDefinitionId, property);
+         }
+         else if (item.getNodeName().equals(CMIS.CMIS_PROPERTY_BOOLEAN))
+         {
+            List<Boolean> booleanValues = new ArrayList<Boolean>();
+            for (String value : values)
+            {
+               booleanValues.add(Boolean.parseBoolean(value));
+            }
+            BooleanProperty property =
+               new BooleanProperty(propertyDefinitionId, queryName, localName, displayName, booleanValues);
+            properties.put(propertyDefinitionId, property);
+         }
+         else if (item.getNodeName().equals(CMIS.CMIS_PROPERTY_INTEGER))
+         {
+            List<Long> longValues = new ArrayList<Long>();
+            for (String value : values)
+            {
+               longValues.add(Long.parseLong(value));
+            }
+            IntegerProperty property =
+               new IntegerProperty(propertyDefinitionId, queryName, localName, displayName, longValues);
+            properties.put(propertyDefinitionId, property);
+         }
+         else if (item.getNodeName().equals(CMIS.CMIS_PROPERTY_URI))
+         {
+            UriProperty property = new UriProperty(propertyDefinitionId, queryName, localName, displayName, values);
+            properties.put(propertyDefinitionId, property);
+         }
+         else if (item.getNodeName().equals(CMIS.CMIS_PROPERTY_ID))
+         {
+            IdProperty property = new IdProperty(propertyDefinitionId, queryName, localName, displayName, values);
+            properties.put(propertyDefinitionId, property);
+         }
+         else if (item.getNodeName().equals(CMIS.CMIS_PROPERTY_DATE_TIME))
+         {
+            List<Date> dateValues = new ArrayList<Date>();
+            for (String value : values)
+            {
+               dateValues.add(DateUtil.parseDate(value));
+            }
+            DateTimeProperty property =
+               new DateTimeProperty(propertyDefinitionId, queryName, localName, displayName, dateValues);
+            properties.put(propertyDefinitionId, property);
+         }
+         else if (item.getNodeName().equals(CMIS.CMIS_PROPERTY_DECIMAL))
+         {
+            List<Double> doubleValues = new ArrayList<Double>();
+            for (String value : values)
+            {
+               doubleValues.add(Double.parseDouble(value));
+            }
 
-            String nodeValue = "";
-            // Getting each property value
-            NodeList listOfValues = item.getChildNodes();
-            if (listOfValues.getLength() == 1)
-            {
-               if (listOfValues.item(0).getFirstChild() == null)
-               {
-                  nodeValue = "";
-               }
-               else
-               {
-                  nodeValue = listOfValues.item(0).getFirstChild().getNodeValue();
-               }
-            }
-            if (item.getNodeName().equals(CmisNameSpace.CMIS_PROPERTY_STRING))
-            {
-               CmisPropertyString property = new CmisPropertyString();
-               property.setPropertyDefinitionId(propertyDefinitionId);
-               property.setLocalName(localName);
-               property.setQueryName(queryName);
-               property.setDisplayName(displayName);
-
-               for (int k = 0; k < listOfValues.getLength(); k++)
-               {
-                  if (listOfValues.item(k).getFirstChild() == null)
-                  {
-                     nodeValue = "";
-                  }
-                  else
-                  {
-                     nodeValue = listOfValues.item(k).getFirstChild().getNodeValue();
-                  }
-                  property.getValue().add(nodeValue);
-               }
-               properties.getProperty().add(property);
-            }
-            else if (item.getNodeName().equals(CmisNameSpace.CMIS_PROPERTY_BOOLEAN))
-            {
-               CmisPropertyBoolean property = new CmisPropertyBoolean();
-               property.setPropertyDefinitionId(propertyDefinitionId);
-               property.setLocalName(localName);
-               property.setQueryName(queryName);
-               property.setDisplayName(displayName);
-               property.getValue().add(Boolean.parseBoolean(nodeValue));
-               properties.getProperty().add(property);
-
-            }
-            else if (item.getNodeName().equals(CmisNameSpace.CMIS_PROPERTY_INTEGER))
-            {
-               CmisPropertyInteger property = new CmisPropertyInteger();
-               property.setPropertyDefinitionId(propertyDefinitionId);
-               property.setLocalName(localName);
-               property.setQueryName(queryName);
-               property.setDisplayName(displayName);
-               for (int k = 0; k < listOfValues.getLength(); k++)
-               {
-                  nodeValue = listOfValues.item(k).getFirstChild().getNodeValue();
-                  property.getValue().add(Integer.parseInt(nodeValue));
-               }
-               properties.getProperty().add(property);
-            }
-            else if (item.getNodeName().equals(CmisNameSpace.CMIS_PROPERTY_URI))
-            {
-               CmisPropertyUri property = new CmisPropertyUri();
-               property.setPropertyDefinitionId(propertyDefinitionId);
-               property.setLocalName(localName);
-               property.setQueryName(queryName);
-               property.setDisplayName(displayName);
-               for (int k = 0; k < listOfValues.getLength(); k++)
-               {
-                  nodeValue = listOfValues.item(k).getFirstChild().getNodeValue();
-                  property.getValue().add(nodeValue);
-               }
-               properties.getProperty().add(property);
-            }
-            else if (item.getNodeName().equals(CmisNameSpace.CMIS_PROPERTY_ID))
-            {
-               CmisPropertyId property = new CmisPropertyId();
-               property.setPropertyDefinitionId(propertyDefinitionId);
-               property.setLocalName(localName);
-               property.setQueryName(queryName);
-               property.setDisplayName(displayName);
-               property.getValue().add(nodeValue);
-               properties.getProperty().add(property);
-            }
-            else if (item.getNodeName().equals(CmisNameSpace.CMIS_PROPERTY_DATE_TIME))
-            {
-               CmisPropertyDateTime property = new CmisPropertyDateTime();
-               property.setPropertyDefinitionId(propertyDefinitionId);
-               property.setLocalName(localName);
-               property.setQueryName(queryName);
-               property.setDisplayName(displayName);
-               property.getValue().add(DateUtil.parseDate(nodeValue));
-               properties.getProperty().add(property);
-            }
+            DecimalProperty property =
+               new DecimalProperty(propertyDefinitionId, queryName, localName, displayName, Double.valueOf("1"));
+            properties.put(propertyDefinitionId, property);
+         }
+         else if (item.getNodeName().equals(CMIS.CMIS_PROPERTY_HTML))
+         {
+            HtmlProperty property = new HtmlProperty(propertyDefinitionId, queryName, localName, displayName, values);
+            properties.put(propertyDefinitionId, property);
          }
       }
       return properties;
    }
 
-   /**
-    * Get  propertyDefinitionId, localName,
-    * queryName, displayName from property xml element's attributes.
-    * 
-    * @param property property
-    */
-   private static void getPropertyAttributes(Node property)
+   private static List<String> getValues(Node property)
    {
-      String propertyDefinitionIdTmp = "";
-      String localNameTmp = "";
-      String queryNameTmp = "";
-      String displayNameTmp = "";
-
-      NamedNodeMap nodeListOfAttributes = property.getAttributes();
-      for (int j = 0; j < nodeListOfAttributes.getLength(); j++)
+      List<String> values = new ArrayList<String>();
+      NodeList nodeList = property.getChildNodes();
+      if (nodeList.getLength() < 0)
       {
-         if (nodeListOfAttributes.item(j).getNodeName().equals(CmisNameSpace.LOCAL_NAME))
+         return values;
+      }
+      for (int i = 0; i < nodeList.getLength(); i++)
+      {
+         Node valueNode = nodeList.item(i);
+         if (valueNode.getNodeName().equals(CMIS.CMIS_VALUE))
          {
-            localNameTmp = nodeListOfAttributes.item(j).getFirstChild().getNodeValue();
-         }
-         else if (nodeListOfAttributes.item(j).getNodeName().equals(CmisNameSpace.QUERY_NAME))
-         {
-            queryNameTmp = nodeListOfAttributes.item(j).getFirstChild().getNodeValue();
-         }
-         else if (nodeListOfAttributes.item(j).getNodeName().equals(CmisNameSpace.DISPLAY_NAME))
-         {
-            displayNameTmp = nodeListOfAttributes.item(j).getFirstChild().getNodeValue();
-         }
-         else if (nodeListOfAttributes.item(j).getNodeName().equals(CmisNameSpace.PROPERTY_DEFINITION_ID))
-         {
-            propertyDefinitionIdTmp = nodeListOfAttributes.item(j).getFirstChild().getNodeValue();
+            if (valueNode.getFirstChild() != null)
+            {
+               values.add(valueNode.getFirstChild().getNodeValue());
+            }
          }
       }
-
-      propertyDefinitionId = propertyDefinitionIdTmp;
-      localName = localNameTmp;
-      queryName = queryNameTmp;
-      displayName = displayNameTmp;
+      return values;
    }
 }

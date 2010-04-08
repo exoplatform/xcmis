@@ -19,7 +19,7 @@
 
 package org.xcmis.client.gwt.client.service.repository.event;
 
-import org.xcmis.client.gwt.client.model.restatom.CmisRepositories;
+import org.xcmis.client.gwt.client.model.repository.CmisRepositories;
 
 import com.google.gwt.event.shared.GwtEvent;
 

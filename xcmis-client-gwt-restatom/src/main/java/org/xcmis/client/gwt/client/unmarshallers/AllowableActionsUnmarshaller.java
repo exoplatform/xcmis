@@ -19,8 +19,8 @@
 
 package org.xcmis.client.gwt.client.unmarshallers;
 
-import org.xcmis.client.gwt.client.CmisNameSpace;
-import org.xcmis.client.gwt.client.model.CmisAllowableActionsType;
+import org.xcmis.client.gwt.client.CMIS;
+import org.xcmis.client.gwt.client.model.AllowableActions;
 import org.xcmis.client.gwt.client.rest.Unmarshallable;
 import org.xcmis.client.gwt.client.unmarshallers.parser.AllowableActionsParser;
 
@@ -41,12 +41,12 @@ public class AllowableActionsUnmarshaller implements Unmarshallable
    /**
     * Response for CmisAllowableActionsType.
     */
-   private CmisAllowableActionsType allowableActions;
+   private AllowableActions allowableActions;
 
    /**
     * @param allowableActions allowable actions
     */
-   public AllowableActionsUnmarshaller(CmisAllowableActionsType allowableActions)
+   public AllowableActionsUnmarshaller(AllowableActions allowableActions)
    {
       this.allowableActions = allowableActions;
    }
@@ -59,7 +59,7 @@ public class AllowableActionsUnmarshaller implements Unmarshallable
    public void unmarshal(String body)
    {
       Document doc = XMLParser.parse(body);
-      NodeList nodeList = doc.getElementsByTagName(CmisNameSpace.ALLOWABLE_ACTIONS);
+      NodeList nodeList = doc.getElementsByTagName(CMIS.ALLOWABLE_ACTIONS);
       if (nodeList != null && nodeList.getLength() > 0)
       {
          AllowableActionsParser.parse(nodeList.item(0), allowableActions);

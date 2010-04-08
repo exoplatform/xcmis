@@ -19,14 +19,9 @@
 
 package org.xcmis.client.gwt.client.atom;
 
-import org.xcmis.client.gwt.client.CmisNameSpace;
-import org.xcmis.client.gwt.client.model.CmisAllowableActionsType;
-import org.xcmis.client.gwt.client.model.property.CmisPropertiesType;
-import org.xcmis.client.gwt.client.model.property.CmisPropertyBoolean;
-import org.xcmis.client.gwt.client.model.property.CmisPropertyDateTime;
-import org.xcmis.client.gwt.client.model.property.CmisPropertyId;
-import org.xcmis.client.gwt.client.model.property.CmisPropertyInteger;
-import org.xcmis.client.gwt.client.model.property.CmisPropertyString;
+import org.xcmis.client.gwt.client.CMIS;
+import org.xcmis.client.gwt.client.model.AllowableActions;
+import org.xcmis.client.gwt.client.model.property.CmisProperties;
 import org.xcmis.client.gwt.client.unmarshallers.parser.AllowableActionsParser;
 import org.xcmis.client.gwt.client.unmarshallers.parser.PropertiesParser;
 
@@ -160,8 +155,8 @@ public class GwtTestObjectService extends GWTTestCase
    public void testGetAllowableActions()
    {
       Document doc = XMLParser.parse(allowableActionsResponse);
-      Node node = doc.getElementsByTagName(CmisNameSpace.ALLOWABLE_ACTIONS).item(0);
-      CmisAllowableActionsType allowableActions = new CmisAllowableActionsType();
+      Node node = doc.getElementsByTagName(CMIS.ALLOWABLE_ACTIONS).item(0);
+      AllowableActions allowableActions = new AllowableActions();
       AllowableActionsParser.parse(node, allowableActions);
       assertTrue(allowableActions.isCanDeleteObject());
       assertTrue(allowableActions.isCanUpdateProperties());
@@ -193,102 +188,31 @@ public class GwtTestObjectService extends GWTTestCase
    {
       Document doc = XMLParser.parse(propertiesResponse);
       Node node = doc.getElementsByTagName("properties").item(0);
-      CmisPropertiesType properties = PropertiesParser.parse(node);
-      assertEquals(23, properties.getProperty().size());
       
-      CmisPropertyId propertyId = (CmisPropertyId)properties.getProperty().get(0);
-      assertEquals("cmis:objectTypeId", propertyId.getPropertyDefinitionId());
-      assertEquals("cmis:document", propertyId.getValue().get(0));
+      CmisProperties properties = new CmisProperties(PropertiesParser.parse(node));
       
-      CmisPropertyString propertyString = (CmisPropertyString)properties.getProperty().get(1);
-      assertEquals("cmis:checkinComment", propertyString.getPropertyDefinitionId());
-      assertEquals(0, propertyString.getValue().size());
-      
-      CmisPropertyDateTime propertyDateTime = (CmisPropertyDateTime)properties.getProperty().get(2);
-      assertEquals("cmis:lastModificationDate", propertyDateTime.getPropertyDefinitionId());
-      
-      CmisPropertyBoolean propertyBoolean = (CmisPropertyBoolean)properties.getProperty().get(3);
-      assertEquals("cmis:isImmutable", propertyBoolean.getPropertyDefinitionId());
-      assertFalse(propertyBoolean.getValue().get(0));
-      
-      propertyString = (CmisPropertyString)properties.getProperty().get(4);
-      assertEquals("cmis:versionSeriesCheckedOutBy", propertyString.getPropertyDefinitionId());
-      assertEquals(0, propertyString.getValue().size());
-      
-      propertyString = (CmisPropertyString)properties.getProperty().get(5);
-      assertEquals("cmis:versionLabel", propertyString.getPropertyDefinitionId());
-      assertEquals("latest", propertyString.getValue().get(0));
-      
-      propertyBoolean = (CmisPropertyBoolean)properties.getProperty().get(6);
-      assertEquals("cmis:isLatestVersion", propertyBoolean.getPropertyDefinitionId());
-      assertTrue(propertyBoolean.getValue().get(0));
-      
-      propertyString = (CmisPropertyString)properties.getProperty().get(7);
-      assertEquals("cmis:createdBy", propertyString.getPropertyDefinitionId());
-      assertEquals("__anonim", propertyString.getValue().get(0));
-      
-      propertyId = (CmisPropertyId)properties.getProperty().get(8);
-      assertEquals("cmis:baseTypeId", propertyId.getPropertyDefinitionId());
-      assertEquals("cmis:document", propertyId.getValue().get(0));
-      
-      propertyString = (CmisPropertyString)properties.getProperty().get(9);
-      assertEquals("cmis:name", propertyString.getPropertyDefinitionId());
-      assertEquals("111", propertyString.getValue().get(0));
-      
-      propertyId = (CmisPropertyId)properties.getProperty().get(10);
-      assertEquals("cmis:contentStreamId", propertyId.getPropertyDefinitionId());
-      assertEquals("4c0ccf2bc0a8001d01aea545d8553156", propertyId.getValue().get(0));
-      
-      propertyString = (CmisPropertyString)properties.getProperty().get(11);
-      assertEquals("cmis:contentStreamFileName", propertyString.getPropertyDefinitionId());
-      assertEquals("111", propertyString.getValue().get(0));
-      
-      propertyString = (CmisPropertyString)properties.getProperty().get(12);
-      assertEquals("cmis:contentStreamMimeType", propertyString.getPropertyDefinitionId());
-      assertEquals("image/png", propertyString.getValue().get(0));
-      
-      propertyString = (CmisPropertyString)properties.getProperty().get(13);
-      assertEquals("cmis:changeToken", propertyString.getPropertyDefinitionId());
-      assertEquals("4c2118a6c0a8001d01e435f51aac3df4", propertyString.getValue().get(0));
-      
-      CmisPropertyInteger propertyInteger = (CmisPropertyInteger)properties.getProperty().get(14);
-      assertEquals("cmis:contentStreamLength", propertyInteger.getPropertyDefinitionId());
-      assertEquals("964", String.valueOf(propertyInteger.getValue().get(0)));
-      
-      propertyId = (CmisPropertyId)properties.getProperty().get(15);
-      assertEquals("cmis:versionSeriesCheckedOutId", propertyId.getPropertyDefinitionId());
-      assertEquals("", propertyId.getValue().get(0));
-      
-      propertyId = (CmisPropertyId)properties.getProperty().get(16);
-      assertEquals("cmis:versionSeriesId", propertyId.getPropertyDefinitionId());
-      assertEquals("4c0ccf2bc0a8001d007bf31a4afe9a65", propertyId.getValue().get(0));
-      
-      propertyId = (CmisPropertyId)properties.getProperty().get(17);
-      assertEquals("cmis:objectId", propertyId.getPropertyDefinitionId());
-      assertEquals("4c0ccf2bc0a8001d00b8232ccc2073b5", propertyId.getValue().get(0));
-      
-      propertyDateTime = (CmisPropertyDateTime)properties.getProperty().get(18);
-      assertEquals("cmis:creationDate", propertyDateTime.getPropertyDefinitionId());
-      
-      propertyBoolean = (CmisPropertyBoolean)properties.getProperty().get(19);
-      assertEquals("cmis:isMajorVersion", propertyBoolean.getPropertyDefinitionId());
-      assertTrue(propertyBoolean.getValue().get(0));
-      
-      propertyBoolean = (CmisPropertyBoolean)properties.getProperty().get(19);
-      assertEquals("cmis:isMajorVersion", propertyBoolean.getPropertyDefinitionId());
-      assertTrue(propertyBoolean.getValue().get(0));
-      
-      propertyBoolean = (CmisPropertyBoolean)properties.getProperty().get(20);
-      assertEquals("cmis:isVersionSeriesCheckedOut", propertyBoolean.getPropertyDefinitionId());
-      assertFalse(propertyBoolean.getValue().get(0));
-      
-      propertyString = (CmisPropertyString)properties.getProperty().get(21);
-      assertEquals("cmis:lastModifiedBy", propertyString.getPropertyDefinitionId());
-      assertEquals("__anonim", propertyString.getValue().get(0));
-      
-      propertyBoolean = (CmisPropertyBoolean)properties.getProperty().get(22);
-      assertEquals("cmis:isLatestMajorVersion", propertyBoolean.getPropertyDefinitionId());
-      assertTrue(propertyBoolean.getValue().get(0));
+      assertEquals(23, properties.getProperties().size());
+
+      assertTrue(properties.getBoolean(CMIS.CMIS_IS_LATEST_MAJOR_VERSION));
+      assertEquals("__anonim", properties.getString(CMIS.CMIS_LAST_MODIFIED_BY));
+      assertNull(properties.getString(CMIS.CMIS_CHECKIN_COMMENT));
+      assertFalse(properties.getBoolean(CMIS.CMIS_IS_IMMUTABLE));
+      assertNull(properties.getString(CMIS.CMIS_VERSION_SERIES_CHECKEDOUT_BY));
+      assertEquals("latest", properties.getString(CMIS.CMIS_VERSION_LABEL));
+      assertTrue(properties.getBoolean(CMIS.CMIS_IS_LATEST_VERSION));
+      assertEquals("__anonim", properties.getString(CMIS.CMIS_CREATED_BY));
+      assertEquals("cmis:document", properties.getId(CMIS.CMIS_BASE_TYPE_ID));
+      assertEquals("111", properties.getString(CMIS.CMIS_NAME));
+      assertEquals("4c0ccf2bc0a8001d01aea545d8553156", properties.getId(CMIS.CMIS_CONTENT_STREAM_ID));
+      assertEquals("111", properties.getString(CMIS.CMIS_CONTENT_STREAM_FILE_NAME));
+      assertEquals("image/png", properties.getString(CMIS.CMIS_CONTENT_STREAM_MIME_TYPE));
+      assertEquals("4c2118a6c0a8001d01e435f51aac3df4", properties.getString(CMIS.CMIS_CHANGE_TOKEN));
+      assertEquals("964", String.valueOf(properties.getInteger(CMIS.CMIS_CONTENT_STREAM_LENGTH)));
+      assertNull(properties.getId(CMIS.CMIS_VERSION_SERIES_CHECKEDOUT_ID));
+      assertEquals("4c0ccf2bc0a8001d007bf31a4afe9a65", properties.getId(CMIS.CMIS_VERSION_SERIES_ID));
+      assertEquals("4c0ccf2bc0a8001d00b8232ccc2073b5", properties.getId(CMIS.CMIS_OBJECT_ID));
+      assertTrue(properties.getBoolean(CMIS.CMIS_IS_MAJOR_VERSION));
+      assertFalse(properties.getBoolean(CMIS.CMIS_IS_VERSION_SERIES_CHECKEDOUT));
    }
    
 }

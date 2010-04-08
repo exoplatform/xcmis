@@ -26,6 +26,7 @@ import org.xcmis.client.gwt.client.unmarshallers.parser.FeedParser;
 
 import java.util.List;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.XMLParser;
 
@@ -58,8 +59,16 @@ public class EntryCollectionUnmarshaller implements Unmarshallable
     */
    public void unmarshal(String body)
    {
-      Document doc = XMLParser.parse(body);
-      List<AtomEntry> entries = FeedParser.parse(doc).getEntries();
-      entryCollection.setEntries(entries);
+      try
+      {
+         GWT.log("COLLECTION "+body, null);
+         Document doc = XMLParser.parse(body);
+         List<AtomEntry> entries = FeedParser.parse(doc).getEntries();
+         entryCollection.setEntries(entries);
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
    }
 }

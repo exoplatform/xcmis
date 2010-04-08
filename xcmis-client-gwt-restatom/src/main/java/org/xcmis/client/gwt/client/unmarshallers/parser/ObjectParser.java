@@ -19,10 +19,13 @@
 
 package org.xcmis.client.gwt.client.unmarshallers.parser;
 
-import org.xcmis.client.gwt.client.CmisNameSpace;
-import org.xcmis.client.gwt.client.model.CmisAllowableActionsType;
-import org.xcmis.client.gwt.client.model.CmisObjectType;
-import org.xcmis.client.gwt.client.model.property.CmisPropertiesType;
+import org.xcmis.client.gwt.client.CMIS;
+import org.xcmis.client.gwt.client.model.AllowableActions;
+import org.xcmis.client.gwt.client.model.property.Property;
+import org.xcmis.client.gwt.client.object.CmisObject;
+import org.xcmis.client.gwt.client.object.impl.CmisObjectImpl;
+
+import java.util.Map;
 
 import com.google.gwt.xml.client.Node;
 import com.google.gwt.xml.client.NodeList;
@@ -51,9 +54,9 @@ public class ObjectParser
     * @param objectNode object node
     * @return {@link CmisObjectType}
     */
-   public static CmisObjectType parse(Node objectNode)
+   public static CmisObject parse(Node objectNode)
    {
-      CmisObjectType cmisObjectType = new CmisObjectType();
+      CmisObjectImpl cmisObject = new CmisObjectImpl();
 
       // Getting properties and allowableActions separated
       NodeList nodeList = objectNode.getChildNodes();
@@ -61,19 +64,19 @@ public class ObjectParser
       {
          Node node = nodeList.item(i);
          //Found properties element to parse
-         if (node.getNodeName().equals(CmisNameSpace.CMIS_PROPERTIES))
+         if (node.getNodeName().equals(CMIS.CMIS_PROPERTIES))
          {
-            CmisPropertiesType cmisProperties = PropertiesParser.parse(node);
-            cmisObjectType.setProperties(cmisProperties);
+            Map<String, Property<?>> properties = PropertiesParser.parse(node);
+            cmisObject.getProperties().setProperties(properties);
          }
          //Found allowable action to parse
-         else if (node.getNodeName().equals(CmisNameSpace.CMIS_ALLOWABLE_ACTIONS))
+         else if (node.getNodeName().equals(CMIS.CMIS_ALLOWABLE_ACTIONS))
          {
-            CmisAllowableActionsType allowableActions = new CmisAllowableActionsType();
+            AllowableActions allowableActions = new AllowableActions();
             AllowableActionsParser.parse(node, allowableActions);
-            cmisObjectType.setAllowableActions(allowableActions);
+            cmisObject.setAllowableActions(allowableActions);
          }
       }
-      return cmisObjectType;
+      return cmisObject;
    }
 }

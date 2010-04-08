@@ -19,8 +19,8 @@
 
 package org.xcmis.client.gwt.client.unmarshallers.parser;
 
-import org.xcmis.client.gwt.client.CmisNameSpace;
-import org.xcmis.client.gwt.client.model.CmisAllowableActionsType;
+import org.xcmis.client.gwt.client.CMIS;
+import org.xcmis.client.gwt.client.model.AllowableActions;
 
 import com.google.gwt.xml.client.Node;
 import com.google.gwt.xml.client.NodeList;
@@ -48,7 +48,7 @@ public class AllowableActionsParser
     * @param response response
     * @param allowableActions allowable actions
     */
-   public static void parse(Node response, CmisAllowableActionsType allowableActions)
+   public static void parse(Node response, AllowableActions allowableActions)
    {
       // Getting all allowable actions' nodes in nodeList
       NodeList nodeList = response.getChildNodes();
@@ -59,119 +59,119 @@ public class AllowableActionsParser
          Boolean propertyValue = Boolean.parseBoolean(item.getFirstChild().getNodeValue());
          // Property name
          String propertyName = item.getNodeName();
-         if (propertyName.equals(CmisNameSpace.CMIS_CAN_DELETE_OBJECT))
+         if (propertyName.equals(CMIS.CMIS_CAN_DELETE_OBJECT))
          {
             allowableActions.setCanDeleteObject(propertyValue);
          }
-         else if (propertyName.equals(CmisNameSpace.CMIS_CAN_UPDATE_PROPERTIES))
+         else if (propertyName.equals(CMIS.CMIS_CAN_UPDATE_PROPERTIES))
          {
             allowableActions.setCanUpdateProperties(propertyValue);
          }
-         else if (propertyName.equals(CmisNameSpace.CMIS_CAN_GET_PROPERTIES))
+         else if (propertyName.equals(CMIS.CMIS_CAN_GET_PROPERTIES))
          {
             allowableActions.setCanGetProperties(propertyValue);
          }
-         else if (propertyName.equals(CmisNameSpace.CMIS_CAN_GET_OBJECT_RELATIONSHIPS))
+         else if (propertyName.equals(CMIS.CMIS_CAN_GET_OBJECT_RELATIONSHIPS))
          {
             allowableActions.setCanGetObjectRelationships(propertyValue);
          }
-         else if (propertyName.equals(CmisNameSpace.CMIS_CAN_GET_OBJECT_PARENTS))
+         else if (propertyName.equals(CMIS.CMIS_CAN_GET_OBJECT_PARENTS))
          {
             allowableActions.setCanGetObjectParents(propertyValue);
          }
-         else if (propertyName.equals(CmisNameSpace.CMIS_CAN_MOVE_OBJECT))
+         else if (propertyName.equals(CMIS.CMIS_CAN_MOVE_OBJECT))
          {
             allowableActions.setCanMoveObject(propertyValue);
          }
-         else if (propertyName.equals(CmisNameSpace.CMIS_CAN_DELETE_CONTENT_STREAM))
+         else if (propertyName.equals(CMIS.CMIS_CAN_DELETE_CONTENT_STREAM))
          {
             allowableActions.setCanDeleteContentStream(propertyValue);
          }
-         else if (propertyName.equals(CmisNameSpace.CMIS_CAN_CHECK_IN))
+         else if (propertyName.equals(CMIS.CMIS_CAN_CHECK_IN))
          {
             allowableActions.setCanCheckIn(propertyValue);
          }
-         else if (propertyName.equals(CmisNameSpace.CMIS_CAN_CHECK_OUT))
+         else if (propertyName.equals(CMIS.CMIS_CAN_CHECK_OUT))
          {
             allowableActions.setCanCheckOut(propertyValue);
          }
-         else if (propertyName.equals(CmisNameSpace.CMIS_CAN_CANCEL_CHECK_OUT))
+         else if (propertyName.equals(CMIS.CMIS_CAN_CANCEL_CHECK_OUT))
          {
             allowableActions.setCanCancelCheckOut(propertyValue);
          }
-         else if (propertyName.equals(CmisNameSpace.CMIS_CAN_APPLY_POLICY))
+         else if (propertyName.equals(CMIS.CMIS_CAN_APPLY_POLICY))
          {
             allowableActions.setCanApplyPolicy(propertyValue);
          }
-         else if (propertyName.equals(CmisNameSpace.CMIS_CAN_REMOVE_POLICY))
+         else if (propertyName.equals(CMIS.CMIS_CAN_REMOVE_POLICY))
          {
             allowableActions.setCanRemovePolicy(propertyValue);
          }
-         else if (propertyName.equals(CmisNameSpace.CMIS_CAN_CREATE_DOCUMENT))
+         else if (propertyName.equals(CMIS.CMIS_CAN_CREATE_DOCUMENT))
          {
             allowableActions.setCanCreateDocument(propertyValue);
          }
-         else if (propertyName.equals(CmisNameSpace.CMIS_CAN_GET_APPLIED_POLICIES))
+         else if (propertyName.equals(CMIS.CMIS_CAN_GET_APPLIED_POLICIES))
          {
             allowableActions.setCanGetAppliedPolicies(propertyValue);
          }
-         else if (propertyName.equals(CmisNameSpace.CMIS_CAN_GET_CONTENT_STREAM))
+         else if (propertyName.equals(CMIS.CMIS_CAN_GET_CONTENT_STREAM))
          {
             allowableActions.setCanGetContentStream(propertyValue);
          }
-         else if (propertyName.equals(CmisNameSpace.CMIS_CAN_REMOVE_OBJECT_FROM_FOLDER))
+         else if (propertyName.equals(CMIS.CMIS_CAN_REMOVE_OBJECT_FROM_FOLDER))
          {
             allowableActions.setCanRemoveObjectFromFolder(propertyValue);
          }
-         else if (propertyName.equals(CmisNameSpace.CMIS_CAN_ADD_OBJECT_TO_FOLDER))
+         else if (propertyName.equals(CMIS.CMIS_CAN_ADD_OBJECT_TO_FOLDER))
          {
             allowableActions.setCanAddObjectToFolder(propertyValue);
          }
-         else if (propertyName.equals(CmisNameSpace.CMIS_CAN_GET_ALL_VERSIONS))
+         else if (propertyName.equals(CMIS.CMIS_CAN_GET_ALL_VERSIONS))
          {
             allowableActions.setCanGetAllVersions(propertyValue);
          }
-         else if (propertyName.equals(CmisNameSpace.CMIS_CAN_SET_CONTENT_STREAM))
+         else if (propertyName.equals(CMIS.CMIS_CAN_SET_CONTENT_STREAM))
          {
             allowableActions.setCanSetContentStream(propertyValue);
          }
-         else if (propertyName.equals(CmisNameSpace.CMIS_CAN_GET_FOLDER_TREE))
+         else if (propertyName.equals(CMIS.CMIS_CAN_GET_FOLDER_TREE))
          {
             allowableActions.setCanGetFolderTree(propertyValue);
          }
-         else if (propertyName.equals(CmisNameSpace.CMIS_CAN_GET_FOLDER_PARENT))
+         else if (propertyName.equals(CMIS.CMIS_CAN_GET_FOLDER_PARENT))
          {
             allowableActions.setCanGetFolderParent(propertyValue);
          }
-         else if (propertyName.equals(CmisNameSpace.CMIS_CAN_GET_DESCENDANTS))
+         else if (propertyName.equals(CMIS.CMIS_CAN_GET_DESCENDANTS))
          {
             allowableActions.setCanGetDescendants(propertyValue);
          }
-         else if (propertyName.equals(CmisNameSpace.CMIS_CAN_GET_CHILDREN))
+         else if (propertyName.equals(CMIS.CMIS_CAN_GET_CHILDREN))
          {
             allowableActions.setCanGetChildren(propertyValue);
          }
-         else if (propertyName.equals(CmisNameSpace.CMIS_CAN_CREATE_FOLDER))
+         else if (propertyName.equals(CMIS.CMIS_CAN_CREATE_FOLDER))
          {
             allowableActions.setCanCreateFolder(propertyValue);
          }
-         else if (propertyName.equals(CmisNameSpace.CMIS_CAN_CREATE_RELATIONSHIP))
+         else if (propertyName.equals(CMIS.CMIS_CAN_CREATE_RELATIONSHIP))
          {
             allowableActions.setCanCreateRelationship(propertyValue);
          }
-         else if (propertyName.equals(CmisNameSpace.CMIS_CAN_GET_RENDITIONS))
+         else if (propertyName.equals(CMIS.CMIS_CAN_GET_RENDITIONS))
          {
             allowableActions.setCanGetRenditions(propertyValue);
          }
-         else if (propertyName.equals(CmisNameSpace.CMIS_CAN_GET_ACL))
+         else if (propertyName.equals(CMIS.CMIS_CAN_GET_ACL))
          {
             allowableActions.setCanGetACL(propertyValue);
          }
-         else if (propertyName.equals(CmisNameSpace.CMIS_CAN_APPLY_ACL))
+         else if (propertyName.equals(CMIS.CMIS_CAN_APPLY_ACL))
          {
             allowableActions.setCanApplyACL(propertyValue);
          }
-         else if (propertyName.equals(CmisNameSpace.CMIS_CAN_DELETE_TREE))
+         else if (propertyName.equals(CMIS.CMIS_CAN_DELETE_TREE))
          {
             allowableActions.setCanDeleteTree(propertyValue);
          }

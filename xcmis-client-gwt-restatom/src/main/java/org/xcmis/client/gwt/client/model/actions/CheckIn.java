@@ -21,10 +21,12 @@ package org.xcmis.client.gwt.client.model.actions;
 
 import org.xcmis.client.gwt.client.model.CmisContentStreamType;
 import org.xcmis.client.gwt.client.model.CmisExtensionType;
-import org.xcmis.client.gwt.client.model.acl.CmisAccessControlListType;
-import org.xcmis.client.gwt.client.model.property.CmisPropertiesType;
+import org.xcmis.client.gwt.client.model.acl.AccessControlList;
+import org.xcmis.client.gwt.client.model.property.CmisProperties;
+import org.xcmis.client.gwt.client.model.property.Property;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -53,7 +55,7 @@ public class CheckIn
    /**
     * Properties.
     */
-   protected CmisPropertiesType properties;
+   protected CmisProperties properties;
 
    /**
     * Content stream.
@@ -73,12 +75,12 @@ public class CheckIn
    /**
     * Add ACEs.
     */
-   protected CmisAccessControlListType addACEs;
+   protected AccessControlList addACEs;
 
    /**
     * Remove ACEs.
     */
-   protected CmisAccessControlListType removeACEs;
+   protected AccessControlList removeACEs;
 
    /**
     * Extension.
@@ -154,13 +156,13 @@ public class CheckIn
    }
 
    /**
-   * @return {@link CmisPropertiesType}
+   * @return {@link CmisProperties}
    */
-   public CmisPropertiesType getProperties()
+   public CmisProperties getProperties()
    {
       if (properties == null)
       {
-         properties = new CmisPropertiesType();
+         properties = new CmisProperties(new HashMap<String, Property<?>>());
       }
       return properties;
    }
@@ -168,7 +170,7 @@ public class CheckIn
    /**
    * @param value value
    */
-   public void setProperties(CmisPropertiesType value)
+   public void setProperties(CmisProperties value)
    {
       this.properties = value;
    }
@@ -218,9 +220,9 @@ public class CheckIn
    }
 
    /**
-   * @return {@link CmisAccessControlListType}
+   * @return {@link AccessControlList}
    */
-   public CmisAccessControlListType getAddACEs()
+   public AccessControlList getAddACEs()
    {
       return addACEs;
    }
@@ -228,15 +230,15 @@ public class CheckIn
    /**
    * @param value value
    */
-   public void setAddACEs(CmisAccessControlListType value)
+   public void setAddACEs(AccessControlList value)
    {
       this.addACEs = value;
    }
 
    /**
-   * @return {@link CmisAccessControlListType}
+   * @return {@link AccessControlList}
    */
-   public CmisAccessControlListType getRemoveACEs()
+   public AccessControlList getRemoveACEs()
    {
       return removeACEs;
    }
@@ -244,7 +246,7 @@ public class CheckIn
    /**
    * @param value value
    */
-   public void setRemoveACEs(CmisAccessControlListType value)
+   public void setRemoveACEs(AccessControlList value)
    {
       this.removeACEs = value;
    }

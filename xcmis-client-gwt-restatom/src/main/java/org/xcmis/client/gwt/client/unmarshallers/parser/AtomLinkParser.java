@@ -19,7 +19,7 @@
 
 package org.xcmis.client.gwt.client.unmarshallers.parser;
 
-import org.xcmis.client.gwt.client.CmisNameSpace;
+import org.xcmis.client.gwt.client.CMIS;
 import org.xcmis.client.gwt.client.model.restatom.AtomLink;
 import org.xcmis.client.gwt.client.model.restatom.EnumLinkRelation;
 
@@ -65,17 +65,17 @@ public class AtomLinkParser
          Node attribute = attributesList.item(j);
          String attributeValue = attribute.getFirstChild().getNodeValue();
          String attributeName = attribute.getNodeName();
-         if (attributeName.equals(CmisNameSpace.RELATION))
+         if (attributeName.equals(CMIS.RELATION))
          {
             rel = attributeValue;
             link.setRelation(EnumLinkRelation.fromValue(rel));
          }
-         else if (attributeName.equals(CmisNameSpace.HREF))
+         else if (attributeName.equals(CMIS.HREF))
          {
             href = URL.decodeComponent(attributeValue);
             link.setHref(href);
          }
-         else if (attributeName.equals(CmisNameSpace.TYPE))
+         else if (attributeName.equals(CMIS.TYPE))
          {
             type = attributeValue;
             link.setType(type);

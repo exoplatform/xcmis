@@ -19,7 +19,7 @@
 
 package org.xcmis.client.gwt.client.unmarshallers.parser;
 
-import org.xcmis.client.gwt.client.CmisNameSpace;
+import org.xcmis.client.gwt.client.CMIS;
 import org.xcmis.client.gwt.client.model.restatom.AtomAuthor;
 
 import com.google.gwt.xml.client.Node;
@@ -56,15 +56,15 @@ public class AtomAuthorParser
       {
          Node item = nodeList.item(i);
          String nodeValue = item.getFirstChild().getNodeValue();
-         if (item.getNodeName().equals(CmisNameSpace.ATOM_NAME))
+         if (item.getNodeName().equals(CMIS.ATOM_NAME))
          {
             author.setName(nodeValue);
          }
-         else if (item.getNodeName().equals(CmisNameSpace.ATOM_EMAIL))
+         else if (item.getNodeName().equals(CMIS.ATOM_EMAIL))
          {
             author.setEmail(nodeValue);
          }
-         else if (item.getNodeName().equals(CmisNameSpace.ATOM_URI))
+         else if (item.getNodeName().equals(CMIS.ATOM_URI))
          {
             author.setUri(nodeValue);
          }

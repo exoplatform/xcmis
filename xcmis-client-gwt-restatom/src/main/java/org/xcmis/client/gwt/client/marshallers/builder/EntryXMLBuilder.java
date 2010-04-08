@@ -19,10 +19,9 @@
 
 package org.xcmis.client.gwt.client.marshallers.builder;
 
-import org.xcmis.client.gwt.client.CmisNameSpace;
+import org.xcmis.client.gwt.client.CMIS;
 import org.xcmis.client.gwt.client.rest.QName;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Element;
 
@@ -88,7 +87,7 @@ public class EntryXMLBuilder
     */
    public static Element createEntryElement(Document doc)
    {
-      Element entry = doc.createElement(CmisNameSpace.ENTRY);
+      Element entry = doc.createElement(CMIS.ENTRY);
       //Set entry xml element attributes
       entry.setAttribute(XMLNS.getLocalName(), XMLNS.getNamespaceURI());
       entry.setAttribute(XMLNS_CMIS.getPrefix() + ":" + XMLNS_CMIS.getLocalName(), XMLNS_CMIS.getNamespaceURI());
@@ -108,10 +107,9 @@ public class EntryXMLBuilder
       String request = XML + document.toString().trim();
       if (request.indexOf(XMLNS.getNamespaceURI()) == -1)
       {
-         return request.replaceAll("<" + CmisNameSpace.ENTRY, "<" + CmisNameSpace.ENTRY + " " + XMLNS.getLocalName() + "=" + "\"" + XMLNS.getNamespaceURI() + "\" ");
+         return request.replaceAll("<" + CMIS.ENTRY, "<" + CMIS.ENTRY + " " 
+            + XMLNS.getLocalName() + "=" + "\"" + XMLNS.getNamespaceURI() + "\" ");
       }
-
-      GWT.log(request, null);
       return request;
    }
 

@@ -20,7 +20,7 @@
 package org.xcmis.client.gwt.client.model.repository;
 
 import org.xcmis.client.gwt.client.model.EnumBaseObjectTypeIds;
-import org.xcmis.client.gwt.client.model.acl.CmisACLCapabilityType;
+import org.xcmis.client.gwt.client.model.acl.ACLCapabilityType;
 import org.xcmis.client.gwt.client.model.restatom.EnumCollectionType;
 import org.xcmis.client.gwt.client.rest.QName;
 
@@ -84,7 +84,7 @@ public class CmisRepositoryInfo
    /**
     * ACL capability.
     */
-   protected CmisACLCapabilityType aclCapability;
+   protected ACLCapabilityType aclCapability;
 
    /**
     * CMIS version supported.
@@ -370,10 +370,10 @@ public class CmisRepositoryInfo
     * 
     * @return
     *     possible object is
-    *     {@link CmisACLCapabilityType }
+    *     {@link ACLCapabilityType }
     *     
     */
-   public CmisACLCapabilityType getAclCapability()
+   public ACLCapabilityType getAclCapability()
    {
       return aclCapability;
    }
@@ -383,10 +383,10 @@ public class CmisRepositoryInfo
     * 
     * @param value
     *     allowed object is
-    *     {@link CmisACLCapabilityType }
+    *     {@link ACLCapabilityType }
     *     
     */
-   public void setAclCapability(CmisACLCapabilityType value)
+   public void setAclCapability(ACLCapabilityType value)
    {
       this.aclCapability = value;
    }

@@ -19,7 +19,7 @@
 
 package org.xcmis.client.gwt.client.unmarshallers.parser;
 
-import org.xcmis.client.gwt.client.CmisNameSpace;
+import org.xcmis.client.gwt.client.CMIS;
 import org.xcmis.client.gwt.client.model.repository.CmisRepositoryInfo;
 
 import java.util.ArrayList;
@@ -58,7 +58,7 @@ public class RepositoriesParser
    public static List<CmisRepositoryInfo> parse(Document response)
    {
       List<CmisRepositoryInfo> repositoryInfoList = new ArrayList<CmisRepositoryInfo>();
-      NodeList nodeList = response.getElementsByTagName(CmisNameSpace.WORKSPACE);
+      NodeList nodeList = response.getElementsByTagName(CMIS.WORKSPACE);
       if (nodeList != null && nodeList.getLength() > 0)
       {
          for (int i = 0; i < nodeList.getLength(); i++)

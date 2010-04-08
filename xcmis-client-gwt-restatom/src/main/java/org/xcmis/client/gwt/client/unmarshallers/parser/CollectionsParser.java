@@ -19,7 +19,7 @@
 
 package org.xcmis.client.gwt.client.unmarshallers.parser;
 
-import org.xcmis.client.gwt.client.CmisNameSpace;
+import org.xcmis.client.gwt.client.CMIS;
 import org.xcmis.client.gwt.client.model.repository.CmisCollection;
 import org.xcmis.client.gwt.client.model.restatom.EnumCollectionType;
 
@@ -57,14 +57,14 @@ public class CollectionsParser
       for (int i = 0; i < node.getChildNodes().getLength(); i++)
       {
          Node collectionItem = node.getChildNodes().item(i);
-         if (collectionItem.getNodeName().equals(CmisNameSpace.COLLECTION))
+         if (collectionItem.getNodeName().equals(CMIS.COLLECTION))
          {
             CmisCollection collection = new CmisCollection();
             for (int j = 0; j < collectionItem.getAttributes().getLength(); j++)
             {
                Node attribute = collectionItem.getAttributes().item(j);
 
-               if (attribute.getNodeName().equals(CmisNameSpace.HREF))
+               if (attribute.getNodeName().equals(CMIS.HREF))
                {
                   collection.setHref(attribute.getNodeValue());
                }
@@ -72,7 +72,7 @@ public class CollectionsParser
             for (int j = 0; j < collectionItem.getChildNodes().getLength(); j++)
             {
                Node item = collectionItem.getChildNodes().item(j);
-               if (item.getNodeName().equals(CmisNameSpace.CMISRA_COLLECTION_TYPE))
+               if (item.getNodeName().equals(CMIS.CMISRA_COLLECTION_TYPE))
                {
                   collection.setType(EnumCollectionType.fromValue(item.getFirstChild().getNodeValue()));
                }

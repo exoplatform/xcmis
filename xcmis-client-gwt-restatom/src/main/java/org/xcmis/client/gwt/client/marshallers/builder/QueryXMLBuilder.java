@@ -19,7 +19,7 @@
 
 package org.xcmis.client.gwt.client.marshallers.builder;
 
-import org.xcmis.client.gwt.client.CmisNameSpace;
+import org.xcmis.client.gwt.client.CMIS;
 import org.xcmis.client.gwt.client.model.actions.Query;
 
 import com.google.gwt.core.client.GWT;
@@ -54,24 +54,24 @@ public class QueryXMLBuilder
    public static String query(Query query)
    {
       Document doc = XMLParser.createDocument();
-      Element entry = doc.createElement(CmisNameSpace.CMIS_QUERY);
+      Element entry = doc.createElement(CMIS.CMIS_QUERY);
       entry.setAttribute(EntryXMLBuilder.XMLNS.getLocalName(), EntryXMLBuilder.XMLNS.getNamespaceURI());
       entry.setAttribute(EntryXMLBuilder.XMLNS_CMIS.getPrefix() + ":" + EntryXMLBuilder.XMLNS_CMIS.getLocalName(),
          EntryXMLBuilder.XMLNS_CMIS.getNamespaceURI());
 
-      Element statement = doc.createElement(CmisNameSpace.CMIS_STATEMENT);
+      Element statement = doc.createElement(CMIS.CMIS_STATEMENT);
       statement.appendChild(doc.createTextNode(query.getStatement()));
 
-      Element searchAllVersions = doc.createElement(CmisNameSpace.CMIS_SEARCH_ALL_VERSIONS);
+      Element searchAllVersions = doc.createElement(CMIS.CMIS_SEARCH_ALL_VERSIONS);
       searchAllVersions.appendChild(doc.createTextNode(String.valueOf(query.getSearchAllVersions())));
 
-      Element maxItems = doc.createElement(CmisNameSpace.CMIS_MAX_ITEMS);
+      Element maxItems = doc.createElement(CMIS.CMIS_MAX_ITEMS);
       maxItems.appendChild(doc.createTextNode(String.valueOf(query.getMaxItems())));
 
-      Element returnAllowableActions = doc.createElement(CmisNameSpace.CMIS_RETURN_ALLOWABLE_ACTIONS);
+      Element returnAllowableActions = doc.createElement(CMIS.CMIS_RETURN_ALLOWABLE_ACTIONS);
       returnAllowableActions.appendChild(doc.createTextNode("true"));
 
-      Element skipCount = doc.createElement(CmisNameSpace.CMIS_SKIP_COUNT);
+      Element skipCount = doc.createElement(CMIS.CMIS_SKIP_COUNT);
       skipCount.appendChild(doc.createTextNode(String.valueOf(query.getSkipCount())));
 
       entry.appendChild(statement);

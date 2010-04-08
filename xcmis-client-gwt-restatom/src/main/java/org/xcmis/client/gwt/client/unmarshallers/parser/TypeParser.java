@@ -19,10 +19,11 @@
 
 package org.xcmis.client.gwt.client.unmarshallers.parser;
 
-import org.xcmis.client.gwt.client.CmisNameSpace;
+import org.xcmis.client.gwt.client.CMIS;
 import org.xcmis.client.gwt.client.model.EnumBaseObjectTypeIds;
+import org.xcmis.client.gwt.client.model.property.PropertyDefinition;
 import org.xcmis.client.gwt.client.model.restatom.TypeEntry;
-import org.xcmis.client.gwt.client.model.type.CmisTypeDefinitionType;
+import org.xcmis.client.gwt.client.model.type.TypeDefinition;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,10 +54,10 @@ public class TypeParser
     * @param response response
     * @return List containing {@link CmisTypeDefinitionType}
     */
-   public static List<CmisTypeDefinitionType> getTypeList(Document response)
+   public static List<TypeDefinition> getTypeList(Document response)
    {
-      List<CmisTypeDefinitionType> typeList = new ArrayList<CmisTypeDefinitionType>();
-      NodeList elementList = response.getElementsByTagName(CmisNameSpace.TYPE);
+      List<TypeDefinition> typeList = new ArrayList<TypeDefinition>();
+      NodeList elementList = response.getElementsByTagName(CMIS.TYPE);
 
       if (elementList != null && elementList.getLength() > 0)
       {
@@ -76,10 +77,10 @@ public class TypeParser
    public static List<TypeEntry> getTypes(Document response)
    {
       List<TypeEntry> types = new ArrayList<TypeEntry>();
-      NodeList feedInfoList = response.getElementsByTagName(CmisNameSpace.FEED).item(0).getChildNodes();
+      NodeList feedInfoList = response.getElementsByTagName(CMIS.FEED).item(0).getChildNodes();
       for (int i = 0; i < feedInfoList.getLength(); i++)
       {
-         if (feedInfoList.item(i).getNodeName().equals(CmisNameSpace.ENTRY))
+         if (feedInfoList.item(i).getNodeName().equals(CMIS.ENTRY))
          {
             TypeEntry typeEntry = new TypeEntry();
             getTypeEntry(feedInfoList.item(i), typeEntry);
@@ -105,11 +106,11 @@ public class TypeParser
       for (int j = 0; j < nodeList.getLength(); j++)
       {
          Node item = nodeList.item(j);
-         if (item.getNodeName().equals(CmisNameSpace.CMISRA_TYPE))
+         if (item.getNodeName().equals(CMIS.CMISRA_TYPE))
          {
             typeEntry.setTypeCmisTypeDefinition(getCmisTypeDefinitionType(item));
          }
-         else if (item.getNodeName().equals(CmisNameSpace.CMISRA_CHILDREN))
+         else if (item.getNodeName().equals(CMIS.CMISRA_CHILDREN))
          {
             children = item;
          }
@@ -131,7 +132,7 @@ public class TypeParser
       for (int i = 0; i < children.getLength(); i++)
       {
          Node child = children.item(i);
-         if (child.getNodeName().equals(CmisNameSpace.ENTRY))
+         if (child.getNodeName().equals(CMIS.ENTRY))
          {
             TypeEntry typeEntry = new TypeEntry();
             typeEntry.setLinks(AtomEntryParser.getEntryInfo(child.getChildNodes()).getLinks());
@@ -139,11 +140,11 @@ public class TypeParser
             for (int j = 0; j < child.getChildNodes().getLength(); j++)
             {
                Node typeItem = child.getChildNodes().item(j);
-               if (typeItem.getNodeName().equals(CmisNameSpace.CMISRA_TYPE))
+               if (typeItem.getNodeName().equals(CMIS.CMISRA_TYPE))
                {
                   typeEntry.setTypeCmisTypeDefinition(getCmisTypeDefinitionType(typeItem));
                }
-               else if (typeItem.getNodeName().equals(CmisNameSpace.CMISRA_CHILDREN))
+               else if (typeItem.getNodeName().equals(CMIS.CMISRA_CHILDREN))
                {
                   childChildren = typeItem.getChildNodes();
                }
@@ -163,9 +164,9 @@ public class TypeParser
     * @param node node
     * @return {@link CmisTypeDefinitionType}
     */
-   public static CmisTypeDefinitionType getCmisTypeDefinitionType(Node node)
+   public static TypeDefinition getCmisTypeDefinitionType(Node node)
    {
-      CmisTypeDefinitionType typeDefinitionType = new CmisTypeDefinitionType();
+      TypeDefinition typeDefinition = new TypeDefinition();
       NodeList entries = node.getChildNodes();
       for (int j = 0; j < entries.getLength(); j++)
       {
@@ -180,84 +181,81 @@ public class TypeParser
             value = item.getFirstChild().getNodeValue();
          }
 
-         if (item.getNodeName().equals(CmisNameSpace.CMIS_ID))
+         if (item.getNodeName().equals(CMIS.CMIS_ID))
          {
-            typeDefinitionType.setId(value);
+            typeDefinition.setId(value);
          }
-         else if (item.getNodeName().equals(CmisNameSpace.CMIS_QUERY_NAME))
+         else if (item.getNodeName().equals(CMIS.CMIS_QUERY_NAME))
          {
-            typeDefinitionType.setQueryName(value);
+            typeDefinition.setQueryName(value);
          }
-         else if (item.getNodeName().equals(CmisNameSpace.CMIS_DISPLAY_NAME))
+         else if (item.getNodeName().equals(CMIS.CMIS_DISPLAY_NAME))
          {
-            typeDefinitionType.setDisplayName(value);
+            typeDefinition.setDisplayName(value);
          }
-         else if (item.getNodeName().equals(CmisNameSpace.CMIS_LOCAL_NAME))
+         else if (item.getNodeName().equals(CMIS.CMIS_LOCAL_NAME))
          {
-            typeDefinitionType.setLocalName(value);
+            typeDefinition.setLocalName(value);
          }
-         else if (item.getNodeName().equals(CmisNameSpace.CMIS_LOCAL_NAMESPACE))
+         else if (item.getNodeName().equals(CMIS.CMIS_LOCAL_NAMESPACE))
          {
-            typeDefinitionType.setLocalNamespace(value);
-         }
-
-         else if (item.getNodeName().equals(CmisNameSpace.CMIS_BASE_ID))
-         {
-            typeDefinitionType.setBaseId(EnumBaseObjectTypeIds.fromValue(value));
+            typeDefinition.setLocalNamespace(value);
          }
 
-         else if (item.getNodeName().equals(CmisNameSpace.CMIS_PARENT_ID))
+         else if (item.getNodeName().equals(CMIS.CMIS_BASE_ID))
          {
-            typeDefinitionType.setParentId(value);
-         }
-         else if (item.getNodeName().equals(CmisNameSpace.CMIS_DESCRIPTION))
-         {
-            typeDefinitionType.setDescription(value);
-         }
-         else if (item.getNodeName().equals(CmisNameSpace.CMIS_FILEABLE))
-         {
-            typeDefinitionType.setFileable(Boolean.valueOf(value));
-         }
-         else if (item.getNodeName().equals(CmisNameSpace.CMIS_CREATABLE))
-         {
-            typeDefinitionType.setCreatable(Boolean.valueOf(value));
-         }
-         else if (item.getNodeName().equals(CmisNameSpace.CMIS_FULL_TEXT_INDEXED))
-         {
-            typeDefinitionType.setFulltextIndexed(Boolean.valueOf(value));
+            typeDefinition.setBaseId(EnumBaseObjectTypeIds.fromValue(value));
          }
 
-         else if (item.getNodeName().equals(CmisNameSpace.CMIS_QUERYABLE))
+         else if (item.getNodeName().equals(CMIS.CMIS_PARENT_ID))
          {
-            typeDefinitionType.setQueryable(Boolean.valueOf(value));
+            typeDefinition.setParentId(value);
+         }
+         else if (item.getNodeName().equals(CMIS.CMIS_DESCRIPTION))
+         {
+            typeDefinition.setDescription(value);
+         }
+         else if (item.getNodeName().equals(CMIS.CMIS_FILEABLE))
+         {
+            typeDefinition.setFileable(Boolean.valueOf(value));
+         }
+         else if (item.getNodeName().equals(CMIS.CMIS_CREATABLE))
+         {
+            typeDefinition.setCreatable(Boolean.valueOf(value));
+         }
+         else if (item.getNodeName().equals(CMIS.CMIS_FULL_TEXT_INDEXED))
+         {
+            typeDefinition.setFulltextIndexed(Boolean.valueOf(value));
          }
 
-         else if (item.getNodeName().equals(CmisNameSpace.CMIS_CONTROLLABLE_POLICY))
+         else if (item.getNodeName().equals(CMIS.CMIS_QUERYABLE))
          {
-            typeDefinitionType.setControllablePolicy(Boolean.valueOf(value));
+            typeDefinition.setQueryable(Boolean.valueOf(value));
          }
-         else if (item.getNodeName().equals(CmisNameSpace.CMIS_CONTROLLABLE_ACL))
+
+         else if (item.getNodeName().equals(CMIS.CMIS_CONTROLLABLE_POLICY))
          {
-            typeDefinitionType.setControllableACL(Boolean.valueOf(value));
+            typeDefinition.setControllablePolicy(Boolean.valueOf(value));
          }
-         else if (item.getNodeName().equals(CmisNameSpace.CMIS_INCLUDED_IN_SUPERTYPE_QUERY))
+         else if (item.getNodeName().equals(CMIS.CMIS_CONTROLLABLE_ACL))
          {
-            typeDefinitionType.setIncludedInSupertypeQuery(Boolean.valueOf(value));
+            typeDefinition.setControllableACL(Boolean.valueOf(value));
          }
-         else if ((item.getNodeName().equals(CmisNameSpace.CMIS_PROPERTY_ID_DEFINITION))
-            || (item.getNodeName().equals(CmisNameSpace.CMIS_PROPERTY_BOOLEAN_DEFINITION))
-            || (item.getNodeName().equals(CmisNameSpace.CMIS_PROPERTY_STRING_DEFINITION))
-            || (item.getNodeName().equals(CmisNameSpace.CMIS_PROPERTY_INTEGER_DEFINITION))
-            || (item.getNodeName().equals(CmisNameSpace.CMIS_PROPERTY_DECIMAL_DEFINITION))
-            || (item.getNodeName().equals(CmisNameSpace.CMIS_PROPERTY_DATETIME_DEFINITION)))
+         else if (item.getNodeName().equals(CMIS.CMIS_INCLUDED_IN_SUPERTYPE_QUERY))
          {
-            typeDefinitionType.getPropertyDefinition().add(PropertyDefinitionParser.parse(item));
+            typeDefinition.setIncludedInSupertypeQuery(Boolean.valueOf(value));
          }
-         else
+         else if ((item.getNodeName().equals(CMIS.CMIS_PROPERTY_ID_DEFINITION))
+            || (item.getNodeName().equals(CMIS.CMIS_PROPERTY_BOOLEAN_DEFINITION))
+            || (item.getNodeName().equals(CMIS.CMIS_PROPERTY_STRING_DEFINITION))
+            || (item.getNodeName().equals(CMIS.CMIS_PROPERTY_INTEGER_DEFINITION))
+            || (item.getNodeName().equals(CMIS.CMIS_PROPERTY_DECIMAL_DEFINITION))
+            || (item.getNodeName().equals(CMIS.CMIS_PROPERTY_DATETIME_DEFINITION)))
          {
-            typeDefinitionType.getAny().add(item);
+            PropertyDefinition<?> propertyDefinition = PropertyDefinitionParser.parse(item);
+            typeDefinition.getPropertyDefinitions().put(propertyDefinition.getId(), propertyDefinition);
          }
       }
-      return typeDefinitionType;
+      return typeDefinition;
    }
 }

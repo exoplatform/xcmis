@@ -19,7 +19,7 @@
 
 package org.xcmis.client.gwt.client.unmarshallers;
 
-import org.xcmis.client.gwt.client.CmisNameSpace;
+import org.xcmis.client.gwt.client.CMIS;
 import org.xcmis.client.gwt.client.model.restatom.TypeEntry;
 import org.xcmis.client.gwt.client.rest.Unmarshallable;
 import org.xcmis.client.gwt.client.unmarshallers.parser.TypeParser;
@@ -62,7 +62,7 @@ public class TypeDefinitionUnmarshaller implements Unmarshallable
    public void unmarshal(String body)
    {
       Document doc = XMLParser.parse(body);
-      NodeList nodeList = doc.getElementsByTagName(CmisNameSpace.ENTRY);
+      NodeList nodeList = doc.getElementsByTagName(CMIS.ENTRY);
       if (nodeList != null && nodeList.getLength() > 0)
       {
          Node entryNode = nodeList.item(0);

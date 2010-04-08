@@ -19,19 +19,30 @@
 
 package org.xcmis.client.gwt.client.unmarshallers.parser;
 
-import org.xcmis.client.gwt.client.CmisNameSpace;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.xcmis.client.gwt.client.CMIS;
+import org.xcmis.client.gwt.client.model.Choice;
 import org.xcmis.client.gwt.client.model.EnumCardinality;
 import org.xcmis.client.gwt.client.model.EnumPropertyType;
 import org.xcmis.client.gwt.client.model.EnumUpdatability;
-import org.xcmis.client.gwt.client.model.property.CmisPropertyBooleanDefinitionType;
-import org.xcmis.client.gwt.client.model.property.CmisPropertyDateTimeDefinitionType;
-import org.xcmis.client.gwt.client.model.property.CmisPropertyDecimalDefinitionType;
-import org.xcmis.client.gwt.client.model.property.CmisPropertyDefinitionType;
-import org.xcmis.client.gwt.client.model.property.CmisPropertyIdDefinitionType;
-import org.xcmis.client.gwt.client.model.property.CmisPropertyIntegerDefinitionType;
-import org.xcmis.client.gwt.client.model.property.CmisPropertyStringDefinitionType;
+import org.xcmis.client.gwt.client.model.Precision;
+import org.xcmis.client.gwt.client.model.property.BasePropertyDefinition;
+import org.xcmis.client.gwt.client.model.property.BooleanPropertyDefinition;
+import org.xcmis.client.gwt.client.model.property.DateTimePropertyDefinition;
+import org.xcmis.client.gwt.client.model.property.DecimalPropertyDefinition;
+import org.xcmis.client.gwt.client.model.property.HtmlPropertyDefinition;
+import org.xcmis.client.gwt.client.model.property.IdPropertyDefinition;
+import org.xcmis.client.gwt.client.model.property.IntegerPropertyDefinition;
+import org.xcmis.client.gwt.client.model.property.PropertyDefinition;
+import org.xcmis.client.gwt.client.model.property.StringPropertyDefinition;
+import org.xcmis.client.gwt.client.model.property.UriPropertyDefinition;
+import org.xcmis.client.gwt.client.model.util.DateUtil;
 
 import com.google.gwt.xml.client.Node;
+import com.google.gwt.xml.client.NodeList;
 
 /**
  * Created by The eXo Platform SAS.
@@ -42,6 +53,12 @@ import com.google.gwt.xml.client.Node;
  */
 public class PropertyDefinitionParser
 {
+   /**
+    * Property Definition
+    */
+   private static BasePropertyDefinition<?> propertyDefinition;
+   
+   private static List<Choice<?>> choices = new ArrayList<Choice<?>>();
 
    /**
     * Constructor.
@@ -58,17 +75,42 @@ public class PropertyDefinitionParser
     * @return {@link CmisPropertyBooleanDefinitionType}
     */
 
-   public static CmisPropertyDefinitionType parse(Node node)
+   public static PropertyDefinition<?> parse(Node node)
    {
-
-      CmisPropertyDefinitionType propertyDefinitionType = new CmisPropertyDefinitionType();
       String nodeName = node.getNodeName();
-
-      String precision = "";
-      String maxValue = "1024";
-      String minValue = "0";
-      String maxLength = "1024";
-
+      if (nodeName.equals(CMIS.CMIS_PROPERTY_BOOLEAN_DEFINITION))
+      {
+         propertyDefinition = new BooleanPropertyDefinition();
+      }
+      else if (nodeName.equals(CMIS.CMIS_PROPERTY_DATETIME_DEFINITION))
+      {
+         propertyDefinition = new DateTimePropertyDefinition();
+      }
+      else if (nodeName.equals(CMIS.CMIS_PROPERTY_DECIMAL_DEFINITION))
+      {
+         propertyDefinition = new DecimalPropertyDefinition();
+      }
+      else if (nodeName.equals(CMIS.CMIS_PROPERTY_HTML_DEFINITION))
+      {
+         propertyDefinition = new HtmlPropertyDefinition();
+      }
+      else if (nodeName.equals(CMIS.CMIS_PROPERTY_ID_DEFINITION))
+      {
+         propertyDefinition = new IdPropertyDefinition();
+      }
+      else if (nodeName.equals(CMIS.CMIS_PROPERTY_INTEGER_DEFINITION))
+      {
+         propertyDefinition = new IntegerPropertyDefinition();
+      }
+      else if (nodeName.equals(CMIS.CMIS_PROPERTY_STRING_DEFINITION))
+      {
+         propertyDefinition = new StringPropertyDefinition();
+      }
+      else if (nodeName.equals(CMIS.CMIS_PROPERTY_URI_DEFINITION))
+      {
+         propertyDefinition = new UriPropertyDefinition();
+      }
+      
       for (int i = 0; i < node.getChildNodes().getLength(); i++)
       {
          Node property = node.getChildNodes().item(i);
@@ -77,166 +119,270 @@ public class PropertyDefinitionParser
          {
             value = property.getFirstChild().getNodeValue();
          }
-         if (property.getNodeName().equals(CmisNameSpace.CMIS_ID))
+         if (property.getNodeName().equals(CMIS.CMIS_ID))
          {
-            propertyDefinitionType.setId(value);
+            propertyDefinition.setId(value);
          }
-         else if (property.getNodeName().equals(CmisNameSpace.CMIS_DESCRIPTION))
+         else if (property.getNodeName().equals(CMIS.CMIS_LOCAL_NAME))
          {
-            propertyDefinitionType.setDescription(value);
+            propertyDefinition.setLocalName(value);
          }
-         else if (property.getNodeName().equals(CmisNameSpace.CMIS_LOCAL_NAME))
+         else if (property.getNodeName().equals(CMIS.CMIS_LOCAL_NAMESPACE))
          {
-            propertyDefinitionType.setLocalName(value);
+            propertyDefinition.setLocalNamespace(value);
          }
-         else if (property.getNodeName().equals(CmisNameSpace.CMIS_LOCAL_NAMESPACE))
+         else if (property.getNodeName().equals(CMIS.CMIS_QUERY_NAME))
          {
-            propertyDefinitionType.setLocalNamespace(value);
+            propertyDefinition.setQueryName(value);
          }
-         else if (property.getNodeName().equals(CmisNameSpace.CMIS_DISPLAY_NAME))
+         else if (property.getNodeName().equals(CMIS.CMIS_DISPLAY_NAME))
          {
-            propertyDefinitionType.setDisplayName(value);
+            propertyDefinition.setDisplayName(value);
          }
-         else if (property.getNodeName().equals(CmisNameSpace.CMIS_QUERY_NAME))
+         else if (property.getNodeName().equals(CMIS.CMIS_DESCRIPTION))
          {
-            propertyDefinitionType.setQueryName(value);
+            propertyDefinition.setDescription(value);
          }
-         else if (property.getNodeName().equals(CmisNameSpace.CMIS_PROPERTY_TYPE))
+         else if (property.getNodeName().equals(CMIS.CMIS_CARDINALITY))
          {
-            propertyDefinitionType.setPropertyType(EnumPropertyType.fromValue(value));
+           propertyDefinition.setCardinality(EnumCardinality.fromValue(value));
          }
-         else if (property.getNodeName().equals(CmisNameSpace.CMIS_CARDINALITY))
+         else if (property.getNodeName().equals(CMIS.CMIS_UPDATABILITY))
          {
-            propertyDefinitionType.setCardinality(EnumCardinality.fromValue(value));
+            propertyDefinition.setUpdatability(EnumUpdatability.fromValue(value));
          }
-         else if (property.getNodeName().equals(CmisNameSpace.CMIS_UPDATABILITY))
+         else if (property.getNodeName().equals(CMIS.CMIS_INHERITED))
          {
-            propertyDefinitionType.setUpdatability(EnumUpdatability.fromValue(value));
+            propertyDefinition.setInherited(Boolean.parseBoolean(value));
          }
-         else if (property.getNodeName().equals(CmisNameSpace.CMIS_INHERITED))
+         else if (property.getNodeName().equals(CMIS.CMIS_REQUIRED))
          {
-            propertyDefinitionType.setInherited(Boolean.parseBoolean(value));
+            propertyDefinition.setRequired(Boolean.parseBoolean(value));
          }
-         else if (property.getNodeName().equals(CmisNameSpace.CMIS_REQUIRED))
+         else if (property.getNodeName().equals(CMIS.CMIS_QUERYABLE))
          {
-            propertyDefinitionType.setRequired(Boolean.parseBoolean(value));
+            propertyDefinition.setQueryable(Boolean.parseBoolean(value));
          }
-         else if (property.getNodeName().equals(CmisNameSpace.CMIS_QUERYABLE))
+         else if (property.getNodeName().equals(CMIS.CMIS_ORDERABLE))
          {
-            propertyDefinitionType.setQueryable(Boolean.parseBoolean(value));
+            propertyDefinition.setOrderable(Boolean.parseBoolean(value));
          }
-         else if (property.getNodeName().equals(CmisNameSpace.CMIS_ORDERABLE))
+         else if (property.getNodeName().equals(CMIS.CMIS_OPEN_CHOICE))
          {
-            propertyDefinitionType.setOrderable(Boolean.parseBoolean(value));
+            propertyDefinition.setOpenChoice(Boolean.parseBoolean(value));
          }
-         else if (property.getNodeName().equals(CmisNameSpace.CMIS_OPEN_CHOICE))
+         else if (property.getNodeName().equals(CMIS.CMIS_MIN_VALUE))
          {
-            propertyDefinitionType.setOpenChoice(Boolean.parseBoolean(value));
+            if (propertyDefinition.getPropertyType().equals(EnumPropertyType.INTEGER))
+            {
+               ((IntegerPropertyDefinition) propertyDefinition).setMinInteger(Long.valueOf(value));
+            }
+            else if (propertyDefinition.getPropertyType().equals(EnumPropertyType.DECIMAL))
+            {
+               ((DecimalPropertyDefinition) propertyDefinition).setMinDecimal(Double.valueOf(value));
+            }
          }
-         else if (property.getNodeName().equals(CmisNameSpace.CMIS_MIN_VALUE))
+         else if (property.getNodeName().equals(CMIS.CMIS_MAX_VALUE))
          {
-            minValue = value;
+            if (propertyDefinition.getPropertyType().equals(EnumPropertyType.INTEGER))
+            {
+               ((IntegerPropertyDefinition) propertyDefinition).setMaxInteger(Long.valueOf(value));
+            }
+            else if (propertyDefinition.getPropertyType().equals(EnumPropertyType.DECIMAL))
+            {
+               ((DecimalPropertyDefinition) propertyDefinition).setMaxDecimal(Double.valueOf(value));
+            }
          }
-         else if (property.getNodeName().equals(CmisNameSpace.CMIS_MAX_VALUE))
+         else if (property.getNodeName().equals(CMIS.CMIS_MAX_LENGHT))
          {
-            maxValue = value;
+            if (propertyDefinition.getPropertyType().equals(EnumPropertyType.STRING))
+            {
+               ((StringPropertyDefinition) propertyDefinition).setMaxLength(Long.parseLong(value));
+            }
          }
-         else if (property.getNodeName().equals(CmisNameSpace.CMIS_MAX_LENGHT))
+         else if (property.getNodeName().equals(CMIS.CMIS_PRECISION))
          {
-            maxLength = value;
+            Precision pr = Precision.fromValue(Integer.valueOf(value).intValue());
+            if (propertyDefinition.getPropertyType().equals(EnumPropertyType.DECIMAL))
+            {
+               ((DecimalPropertyDefinition) propertyDefinition).setPrecision(pr);
+            }
          }
-         else if (property.getNodeName().equals(CmisNameSpace.CMIS_PRECISION))
+         else if (property.getNodeName().equals(CMIS.CMIS_CHOICE))
          {
-            precision = value;
+            String choiceDisplayName = property.getAttributes().getNamedItem(CMIS.DISPLAY_NAME)
+               .getFirstChild().getNodeValue();
+            choices.add(parseChoice(choiceDisplayName, property.getChildNodes()));
+         }
+         else if (property.getNodeName().equals(CMIS.CMIS_DEFAULT_VALUE))
+         {
+            setDefaultValue(propertyDefinition, property.getChildNodes());
          }
       }
-
-      if (nodeName.equals(CmisNameSpace.CMIS_PROPERTY_ID_DEFINITION))
-      {
-         CmisPropertyIdDefinitionType cmisPropertyIdDefinitionType =
-            (CmisPropertyIdDefinitionType)setPropertyDefinitionTypeValues(new CmisPropertyIdDefinitionType(),
-               propertyDefinitionType);
-
-         return cmisPropertyIdDefinitionType;
-
-      }
-      else if (nodeName.equals(CmisNameSpace.CMIS_PROPERTY_BOOLEAN_DEFINITION))
-      {
-         CmisPropertyBooleanDefinitionType cmisBooleanDefinitionType =
-            (CmisPropertyBooleanDefinitionType)setPropertyDefinitionTypeValues(new CmisPropertyBooleanDefinitionType(),
-               propertyDefinitionType);
-
-         return cmisBooleanDefinitionType;
-
-      }
-      else if (nodeName.equals(CmisNameSpace.CMIS_PROPERTY_STRING_DEFINITION))
-      {
-         CmisPropertyStringDefinitionType cmisStringDefinitionType =
-            (CmisPropertyStringDefinitionType)setPropertyDefinitionTypeValues(new CmisPropertyStringDefinitionType(),
-               propertyDefinitionType);
-         cmisStringDefinitionType.setMaxLength(Integer.parseInt(maxLength));
-
-         return cmisStringDefinitionType;
-
-      }
-      else if (nodeName.equals(CmisNameSpace.CMIS_PROPERTY_INTEGER_DEFINITION))
-      {
-         CmisPropertyIntegerDefinitionType cmisIntegerDefinitionType =
-            (CmisPropertyIntegerDefinitionType)setPropertyDefinitionTypeValues(new CmisPropertyIntegerDefinitionType(),
-               propertyDefinitionType);
-         cmisIntegerDefinitionType.setMaxValue(Long.parseLong(maxValue));
-         cmisIntegerDefinitionType.setMinValue(Long.parseLong(minValue));
-
-         return cmisIntegerDefinitionType;
-
-      }
-      else if (nodeName.equals(CmisNameSpace.CMIS_PROPERTY_DECIMAL_DEFINITION))
-      {
-         CmisPropertyDecimalDefinitionType cmisDecimalDefinitionType =
-            (CmisPropertyDecimalDefinitionType)setPropertyDefinitionTypeValues(new CmisPropertyDecimalDefinitionType(),
-               propertyDefinitionType);
-         cmisDecimalDefinitionType.setMaxValue(Double.parseDouble(maxValue));
-         cmisDecimalDefinitionType.setMinValue(Double.parseDouble(minValue));
-         cmisDecimalDefinitionType.setPrecision(Integer.parseInt(precision));
-
-         return cmisDecimalDefinitionType;
-
-      }
-      else if (nodeName.equals(CmisNameSpace.CMIS_PROPERTY_DATETIME_DEFINITION))
-      {
-         return (CmisPropertyDateTimeDefinitionType)setPropertyDefinitionTypeValues(
-            new CmisPropertyDateTimeDefinitionType(), propertyDefinitionType);
-      }
-      else
-      {
-         return propertyDefinitionType;
-      }
+      
+      return propertyDefinition;
    }
-
+   
    /**
-    * @param updateableDefinitionType definitionType to update
-    * @param propertyDefinitionType propertyDefinitionType
+    * Parses default value node list and sets default value to propDefinition
     * 
-    * @return {@link CmisPropertyDefinitionType}
+    * @param propDefinition property definition
+    * @param children node list, which contains default values
     */
-   private static CmisPropertyDefinitionType setPropertyDefinitionTypeValues(
-      CmisPropertyDefinitionType updateableDefinitionType, CmisPropertyDefinitionType propertyDefinitionType)
+   private static void setDefaultValue(BasePropertyDefinition<?> propDefinition, 
+      NodeList children)
    {
-      updateableDefinitionType.setId(propertyDefinitionType.getId());
-      updateableDefinitionType.setDescription(propertyDefinitionType.getDescription());
-      updateableDefinitionType.setLocalName(propertyDefinitionType.getLocalName());
-      updateableDefinitionType.setLocalNamespace(propertyDefinitionType.getLocalNamespace());
-      updateableDefinitionType.setDisplayName(propertyDefinitionType.getDisplayName());
-      updateableDefinitionType.setQueryName(propertyDefinitionType.getQueryName());
-      updateableDefinitionType.setPropertyType(propertyDefinitionType.getPropertyType());
-      updateableDefinitionType.setCardinality(propertyDefinitionType.getCardinality());
-      updateableDefinitionType.setUpdatability(propertyDefinitionType.getUpdatability());
-      updateableDefinitionType.setInherited(propertyDefinitionType.isInherited());
-      updateableDefinitionType.setOpenChoice(propertyDefinitionType.isOpenChoice());
-      updateableDefinitionType.setRequired(propertyDefinitionType.isRequired());
-      updateableDefinitionType.setOrderable(propertyDefinitionType.isOrderable());
-      updateableDefinitionType.setQueryable(propertyDefinitionType.isQueryable());
-
-      return updateableDefinitionType;
+      List<String> stringValues = new ArrayList<String>();
+      for (int i = 0; i < children.getLength(); i++)
+      {
+         Node node = children.item(i);
+         if (node.getNodeName().equals(CMIS.CMIS_VALUE))
+            stringValues.add(node.getNodeValue());
+      }
+      if (propDefinition.getPropertyType().equals(EnumPropertyType.BOOLEAN))
+      {
+         Boolean[] arrayValues = new Boolean[stringValues.size()];
+         for (int i = 0; i < stringValues.size(); i++)
+         {
+            arrayValues[i] = Boolean.parseBoolean(stringValues.get(i));
+         }
+         ((BooleanPropertyDefinition)propDefinition).setDefaultValue(arrayValues);
+      }
+      else if (propDefinition.getPropertyType().equals(EnumPropertyType.DATETIME))
+      {
+         Date[] arrayValues = new Date[stringValues.size()];
+         for (int i = 0; i < stringValues.size(); i++)
+         {
+            arrayValues[i] = DateUtil.parseDate(stringValues.get(i));
+         }
+         ((DateTimePropertyDefinition)propDefinition).setDefaultValue(arrayValues);
+      }
+      else if (propDefinition.getPropertyType().equals(EnumPropertyType.DECIMAL))
+      {
+         Double[] arrayValues = new Double[stringValues.size()];
+         for (int i = 0; i < stringValues.size(); i++)
+         {
+            arrayValues[i] = Double.valueOf(stringValues.get(i));
+         }
+         ((DecimalPropertyDefinition)propDefinition).setDefaultValue(arrayValues);
+      }
+      else if (propDefinition.getPropertyType().equals(EnumPropertyType.HTML))
+      {
+         String[] arrayValues = new String[stringValues.size()];
+         for (int i = 0; i < stringValues.size(); i++)
+         {
+            arrayValues[i] = stringValues.get(i);
+         }
+         ((HtmlPropertyDefinition)propDefinition).setDefaultValue(arrayValues);
+      }
+      else if (propDefinition.getPropertyType().equals(EnumPropertyType.ID))
+      {
+         String[] arrayValues = new String[stringValues.size()];
+         for (int i = 0; i < stringValues.size(); i++)
+         {
+            arrayValues[i] = stringValues.get(i);
+         }
+         ((IdPropertyDefinition)propDefinition).setDefaultValue(arrayValues);
+      }
+      else if (propDefinition.getPropertyType().equals(EnumPropertyType.STRING))
+      {
+         String[] arrayValues = new String[stringValues.size()];
+         for (int i = 0; i < stringValues.size(); i++)
+         {
+            arrayValues[i] = stringValues.get(i);
+         }
+         ((StringPropertyDefinition)propDefinition).setDefaultValue(arrayValues);
+      }
+      else if (propDefinition.getPropertyType().equals(EnumPropertyType.URI))
+      {
+         String[] arrayValues = new String[stringValues.size()];
+         for (int i = 0; i < stringValues.size(); i++)
+         {
+            arrayValues[i] = stringValues.get(i);
+         }
+         ((UriPropertyDefinition)propDefinition).setDefaultValue(arrayValues);
+      }
+      else if (propDefinition.getPropertyType().equals(EnumPropertyType.INTEGER))
+      {
+         Long[] arrayValues = new Long[stringValues.size()];
+         for (int i = 0; i < stringValues.size(); i++)
+         {
+            arrayValues[i] = Long.valueOf(stringValues.get(i));
+         }
+         ((IntegerPropertyDefinition)propDefinition).setDefaultValue(arrayValues);
+      }
    }
+   
+   /**
+    * Parses choice node list and returns choice of required type.
+    * 
+    * @param displayName display name for choice
+    * @param children node list of children
+    * @param propertyType required property type
+    * 
+    * @return {@link Choice}
+    */
+   private static Choice<?> parseChoice(String displayName, NodeList children)
+   {
+      List<String> stringValues = new ArrayList<String>();
+      for (int i = 0; i < children.getLength(); i++)
+      {
+         Node node = children.item(i);
+         if (node.getNodeName().equals(CMIS.CMIS_VALUE))
+            stringValues.add(node.getFirstChild().getNodeValue());
+      }
+      
+      EnumPropertyType propertyType = propertyDefinition.getPropertyType();
+      
+      if (propertyType.equals(EnumPropertyType.BOOLEAN))
+      {
+         Boolean[] arrayValues = new Boolean[stringValues.size()];
+         for (int i = 0; i < stringValues.size(); i++)
+         {
+            arrayValues[i] = Boolean.parseBoolean(stringValues.get(i));
+         }
+         return new Choice<Boolean>(arrayValues, displayName);
+      }
+      else if (propertyType.equals(EnumPropertyType.DATETIME))
+      {
+         Date[] arrayValues = new Date[stringValues.size()];
+         for (int i = 0; i < stringValues.size(); i++)
+         {
+            arrayValues[i] = DateUtil.parseDate(stringValues.get(i));
+         }
+         return new Choice<Date>(arrayValues, displayName);
+      }
+      else if (propertyType.equals(EnumPropertyType.DECIMAL))
+      {
+         Double[] arrayValues = new Double[stringValues.size()];
+         for (int i = 0; i < stringValues.size(); i++)
+         {
+            arrayValues[i] = Double.valueOf(stringValues.get(i));
+         }
+         return new Choice<Double>(arrayValues, displayName);
+      }
+      else if (propertyType.equals(EnumPropertyType.HTML)
+               || propertyType.equals(EnumPropertyType.ID)
+               || propertyType.equals(EnumPropertyType.STRING)
+               || propertyType.equals(EnumPropertyType.URI))
+      {
+         String[] arrayValues = new String[stringValues.size()];
+         for (int i = 0; i < stringValues.size(); i++)
+         {
+            arrayValues[i] = stringValues.get(i);
+         }
+         return new Choice<String>(arrayValues, displayName);
+      }
+      else if (propertyType.equals(EnumPropertyType.INTEGER))
+      {
+         Long[] arrayValues = new Long[stringValues.size()];
+         for (int i = 0; i < stringValues.size(); i++)
+         {
+            arrayValues[i] = Long.valueOf(stringValues.get(i));
+         }
+         return new Choice<Long>(arrayValues, displayName);
+      }
+      return null;
+   }
+   
 }

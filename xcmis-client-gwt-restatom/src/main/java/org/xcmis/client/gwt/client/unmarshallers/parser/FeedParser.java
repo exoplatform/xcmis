@@ -19,7 +19,7 @@
 
 package org.xcmis.client.gwt.client.unmarshallers.parser;
 
-import org.xcmis.client.gwt.client.CmisNameSpace;
+import org.xcmis.client.gwt.client.CMIS;
 import org.xcmis.client.gwt.client.model.restatom.AtomAcceptType;
 import org.xcmis.client.gwt.client.model.restatom.AtomAuthor;
 import org.xcmis.client.gwt.client.model.restatom.AtomCollectionType;
@@ -61,7 +61,7 @@ public class FeedParser
    public static FeedType parse(Document response)
    {
       FeedType feed = new FeedType();
-      NodeList nodeList = response.getElementsByTagName(CmisNameSpace.FEED).item(0).getChildNodes();
+      NodeList nodeList = response.getElementsByTagName(CMIS.FEED).item(0).getChildNodes();
       FeedInfo feedInfo = getFeedInfo(nodeList);
       feed.setFeedInfo(feedInfo);
 
@@ -69,7 +69,7 @@ public class FeedParser
       {
          Node item = nodeList.item(i);
 
-         if (item.getNodeName().equals(CmisNameSpace.ATOM_ENTRY))
+         if (item.getNodeName().equals(CMIS.ATOM_ENTRY))
          {
             AtomEntry entry = new AtomEntry();
             AtomEntryParser.parse(item, entry);
@@ -92,37 +92,37 @@ public class FeedParser
       for (int i = 0; i < nodeList.getLength(); i++)
       {
          Node item = nodeList.item(i);
-         if (item.getNodeName().equals(CmisNameSpace.ATOM_TITLE))
+         if (item.getNodeName().equals(CMIS.ATOM_TITLE))
          {
             String nodeValue = item.getFirstChild().getNodeValue();
             feedInfo.setTitle(nodeValue);
          }
-         else if (item.getNodeName().equals(CmisNameSpace.ATOM_UPDATED))
+         else if (item.getNodeName().equals(CMIS.ATOM_UPDATED))
          {
             String nodeValue = item.getFirstChild().getNodeValue();
             feedInfo.setUpdated(DateUtil.parseDate(nodeValue));
          }
-         else if (item.getNodeName().equals(CmisNameSpace.ATOM_PUBLISHED))
+         else if (item.getNodeName().equals(CMIS.ATOM_PUBLISHED))
          {
             String nodeValue = item.getFirstChild().getNodeValue();
             feedInfo.setPublished(DateUtil.parseDate(nodeValue));
          }
-         else if (item.getNodeName().equals(CmisNameSpace.ATOM_UPDATED))
+         else if (item.getNodeName().equals(CMIS.ATOM_UPDATED))
          {
             String nodeValue = item.getFirstChild().getNodeValue();
             feedInfo.setUpdated(DateUtil.parseDate(nodeValue));
          }
-         else if (item.getNodeName().equals(CmisNameSpace.ATOM_AUTHOR))
+         else if (item.getNodeName().equals(CMIS.ATOM_AUTHOR))
          {
             AtomAuthor author = AtomAuthorParser.parse(item);
             feedInfo.setAuthor(author);
          }
-         else if (item.getNodeName().equals(CmisNameSpace.ATOM_ID))
+         else if (item.getNodeName().equals(CMIS.ATOM_ID))
          {
             String nodeValue = item.getFirstChild().getNodeValue();
             feedInfo.setId(nodeValue);
          }
-         else if (item.getNodeName().equals(CmisNameSpace.APP_COLLECTION))
+         else if (item.getNodeName().equals(CMIS.APP_COLLECTION))
          {
             AtomCollectionType collection = new AtomCollectionType();
             NodeList collectionNodes = item.getChildNodes();
@@ -132,12 +132,12 @@ public class FeedParser
             for (int j = 0; j < collectionNodes.getLength(); j++)
             {
                Node collectionNode = collectionNodes.item(j);
-               if (collectionNode.getNodeName().equals(CmisNameSpace.ATOM_TITLE))
+               if (collectionNode.getNodeName().equals(CMIS.ATOM_TITLE))
                {
                   String attribValue = collectionNode.getFirstChild().getNodeValue();
                   collection.setTittle(attribValue);
                }
-               else if (collectionNode.getNodeName().equals(CmisNameSpace.APP_ACCEPT))
+               else if (collectionNode.getNodeName().equals(CMIS.APP_ACCEPT))
                {
                   String attribValue = collectionNode.getFirstChild().getNodeValue();
                   AtomAcceptType accept = new AtomAcceptType();
@@ -146,7 +146,7 @@ public class FeedParser
                }
             }
          }
-         else if (item.getNodeName().equals(CmisNameSpace.ATOM_LINK))
+         else if (item.getNodeName().equals(CMIS.ATOM_LINK))
          {
             feedInfo.getLinks().add(AtomLinkParser.parse(item));
          }

@@ -21,12 +21,12 @@ package org.xcmis.client.gwt.client.service.repository;
 
 import org.xcmis.client.gwt.client.CmisArguments;
 import org.xcmis.client.gwt.client.marshallers.TypeDefinitionMarshaller;
+import org.xcmis.client.gwt.client.model.repository.CmisRepositories;
 import org.xcmis.client.gwt.client.model.repository.CmisRepositoryInfo;
-import org.xcmis.client.gwt.client.model.restatom.CmisRepositories;
 import org.xcmis.client.gwt.client.model.restatom.TypeCollection;
 import org.xcmis.client.gwt.client.model.restatom.TypeEntry;
 import org.xcmis.client.gwt.client.model.restatom.TypeList;
-import org.xcmis.client.gwt.client.model.type.CmisTypeDefinitionType;
+import org.xcmis.client.gwt.client.model.type.TypeDefinition;
 import org.xcmis.client.gwt.client.rest.AsyncRequest;
 import org.xcmis.client.gwt.client.rest.AsyncRequestCallback;
 import org.xcmis.client.gwt.client.rest.HTTPHeader;
@@ -214,7 +214,7 @@ public class RepositoryService
     * @param url url
     * @param type type
     */
-   public void addType(String url, CmisTypeDefinitionType createType)
+   public void addType(String url, TypeDefinition createType)
    {
       TypeEntry type = new TypeEntry();
       TypeCreatedEvent event = new TypeCreatedEvent(type);

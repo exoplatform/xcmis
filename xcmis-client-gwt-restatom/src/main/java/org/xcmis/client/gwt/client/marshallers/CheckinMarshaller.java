@@ -32,12 +32,12 @@ import org.xcmis.client.gwt.client.rest.Marshallable;
  */
 public class CheckinMarshaller implements Marshallable
 {
-   
+
    /**
     * Data for creating new version (check-in).
     */
    private CheckIn checkIn;
-   
+
    /**
     * @param checkIn checkin param
     */
@@ -45,10 +45,10 @@ public class CheckinMarshaller implements Marshallable
    {
       this.checkIn = checkIn;
    }
-   
+
    /**
     * @see org.exoplatform.gwtframework.commons.rest.Marshallable#marshal()
-    * @return String
+    * @return String xml request
     */
    public String marshal()
    {

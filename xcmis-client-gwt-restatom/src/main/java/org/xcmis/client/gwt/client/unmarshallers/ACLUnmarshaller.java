@@ -19,8 +19,8 @@
 
 package org.xcmis.client.gwt.client.unmarshallers;
 
-import org.xcmis.client.gwt.client.CmisNameSpace;
-import org.xcmis.client.gwt.client.model.acl.CmisAccessControlListType;
+import org.xcmis.client.gwt.client.CMIS;
+import org.xcmis.client.gwt.client.model.acl.AccessControlList;
 import org.xcmis.client.gwt.client.rest.Unmarshallable;
 import org.xcmis.client.gwt.client.unmarshallers.parser.ACLParser;
 
@@ -40,12 +40,12 @@ public class ACLUnmarshaller implements Unmarshallable
    /**
     * Data of the received ACL.
     */
-   private CmisAccessControlListType accessControlListType;
+   private AccessControlList accessControlListType;
 
    /**
     * @param accessControlListType access control list type
     */
-   public ACLUnmarshaller(CmisAccessControlListType accessControlListType)
+   public ACLUnmarshaller(AccessControlList accessControlListType)
    {
       this.accessControlListType = accessControlListType;
    }
@@ -58,7 +58,7 @@ public class ACLUnmarshaller implements Unmarshallable
    public void unmarshal(String body)
    {
       Document doc = XMLParser.parse(body);
-      NodeList nodeList = doc.getElementsByTagName(CmisNameSpace.ACL);
+      NodeList nodeList = doc.getElementsByTagName(CMIS.ACL);
 
       if (nodeList != null && nodeList.getLength() > 0)
       {

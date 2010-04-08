@@ -58,7 +58,11 @@ public class TypeListUnmarshaller implements Unmarshallable
     */
    public void unmarshal(String body)
    {
+      try {
       Document doc = XMLParser.parse(body);
       typeList.setTypes(TypeParser.getTypeList(doc));
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
    }
 }

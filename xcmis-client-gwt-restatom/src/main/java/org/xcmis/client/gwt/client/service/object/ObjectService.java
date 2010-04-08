@@ -27,7 +27,7 @@ import org.xcmis.client.gwt.client.marshallers.CreatePolicyMarshaller;
 import org.xcmis.client.gwt.client.marshallers.CreateRelationshipMarshaller;
 import org.xcmis.client.gwt.client.marshallers.MoveObjectMarshaller;
 import org.xcmis.client.gwt.client.marshallers.UpdatePropertiesMarshaller;
-import org.xcmis.client.gwt.client.model.CmisAllowableActionsType;
+import org.xcmis.client.gwt.client.model.AllowableActions;
 import org.xcmis.client.gwt.client.model.CmisContentStreamType;
 import org.xcmis.client.gwt.client.model.EnumIncludeRelationships;
 import org.xcmis.client.gwt.client.model.EnumUnfileObject;
@@ -220,7 +220,7 @@ public class ObjectService
     */
    public void getAllowableActions(String url)
    {
-      CmisAllowableActionsType allowableActions = new CmisAllowableActionsType();
+      AllowableActions allowableActions = new AllowableActions();
       AllowableActionsReceivedEvent event = new AllowableActionsReceivedEvent(allowableActions);
       AllowableActionsUnmarshaller unmarshaller = new AllowableActionsUnmarshaller(allowableActions);
       AsyncRequestCallback callback = new AsyncRequestCallback(eventBus, unmarshaller, event);

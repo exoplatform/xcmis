@@ -19,7 +19,7 @@
 
 package org.xcmis.client.gwt.client.unmarshallers.parser;
 
-import org.xcmis.client.gwt.client.CmisNameSpace;
+import org.xcmis.client.gwt.client.CMIS;
 import org.xcmis.client.gwt.client.model.EnumCapabilityACL;
 import org.xcmis.client.gwt.client.model.EnumCapabilityChanges;
 import org.xcmis.client.gwt.client.model.EnumCapabilityContentStreamUpdates;
@@ -63,61 +63,61 @@ public class CapabilitiesParser
       for (int j = 0; j < capabilityNodes.getLength(); j++)
       {
          Node capabNode = capabilityNodes.item(j);
-         if (capabNode.getNodeName().equals(CmisNameSpace.CMIS_CAPABILITY_MULTIFILING))
+         if (capabNode.getNodeName().equals(CMIS.CMIS_CAPABILITY_MULTIFILING))
          {
             capabilityTypes.setCapabilityMultifiling(Boolean.valueOf(capabNode.getFirstChild().getNodeValue()));
          }
-         else if (capabNode.getNodeName().equals(CmisNameSpace.CMIS_CAPABILITY_UNFILING))
+         else if (capabNode.getNodeName().equals(CMIS.CMIS_CAPABILITY_UNFILING))
          {
             capabilityTypes.setCapabilityUnfiling(Boolean.valueOf(capabNode.getFirstChild().getNodeValue()));
          }
-         else if (capabNode.getNodeName().equals(CmisNameSpace.CMIS_CAPABILITY_CONTENTSTREAM_UPDATABILITY))
+         else if (capabNode.getNodeName().equals(CMIS.CMIS_CAPABILITY_CONTENTSTREAM_UPDATABILITY))
          {
             capabilityTypes.setCapabilityContentStreamUpdatability(EnumCapabilityContentStreamUpdates
                .fromValue(capabNode.getFirstChild().getNodeValue()));
          }
-         else if (capabNode.getNodeName().equals(CmisNameSpace.CMIS_CAPABILITY_RENDITIONS))
+         else if (capabNode.getNodeName().equals(CMIS.CMIS_CAPABILITY_RENDITIONS))
          {
             capabilityTypes.setCapabilityRenditions(EnumCapabilityRendition.fromValue(capabNode.getFirstChild()
                .getNodeValue()));
          }
-         else if (capabNode.getNodeName().equals(CmisNameSpace.CMIS_CAPABILITY_GET_FOLDER_TREE))
+         else if (capabNode.getNodeName().equals(CMIS.CMIS_CAPABILITY_GET_FOLDER_TREE))
          {
             capabilityTypes.setCapabilityGetFolderTree(Boolean.valueOf(capabNode.getFirstChild().getNodeValue()));
          }
-         else if (capabNode.getNodeName().equals(CmisNameSpace.CMIS_CAPABILITY_GET_DESCENDANTS))
+         else if (capabNode.getNodeName().equals(CMIS.CMIS_CAPABILITY_GET_DESCENDANTS))
          {
             capabilityTypes.setCapabilityGetDescendants(Boolean.valueOf(capabNode.getFirstChild().getNodeValue()));
          }
-         else if (capabNode.getNodeName().equals(CmisNameSpace.CMIS_CAPABILITY_CONTENTSTREAM_UPDATABILITY))
+         else if (capabNode.getNodeName().equals(CMIS.CMIS_CAPABILITY_CONTENTSTREAM_UPDATABILITY))
          {
             capabilityTypes.setCapabilityContentStreamUpdatability(EnumCapabilityContentStreamUpdates
                .fromValue(capabNode.getFirstChild().getNodeValue()));
          }
-         else if (capabNode.getNodeName().equals(CmisNameSpace.CMIS_CAPABILITY_VERSION_SPECIFIC_FILING))
+         else if (capabNode.getNodeName().equals(CMIS.CMIS_CAPABILITY_VERSION_SPECIFIC_FILING))
          {
             capabilityTypes.setCapabilityVersionSpecificFiling(Boolean
                .valueOf(capabNode.getFirstChild().getNodeValue()));
          }
-         else if (capabNode.getNodeName().equals(CmisNameSpace.CMIS_CAPABILITY_PWC_UPDATEABLE))
+         else if (capabNode.getNodeName().equals(CMIS.CMIS_CAPABILITY_PWC_UPDATEABLE))
          {
             capabilityTypes.setCapabilityPWCUpdatable(Boolean.valueOf(capabNode.getFirstChild().getNodeValue()));
          }
-         else if (capabNode.getNodeName().equals(CmisNameSpace.CMIS_CAPABILITY_PWC_SEARCHABLE))
+         else if (capabNode.getNodeName().equals(CMIS.CMIS_CAPABILITY_PWC_SEARCHABLE))
          {
             capabilityTypes.setCapabilityPWCSearchable(Boolean.valueOf(capabNode.getFirstChild().getNodeValue()));
          }
-         else if (capabNode.getNodeName().equals(CmisNameSpace.CMIS_CAPABILITY_ALL_VERSION_SEARCHABLE))
+         else if (capabNode.getNodeName().equals(CMIS.CMIS_CAPABILITY_ALL_VERSION_SEARCHABLE))
          {
             capabilityTypes.setCapabilityAllVersionsSearchable(Boolean
                .valueOf(capabNode.getFirstChild().getNodeValue()));
          }
-         else if (capabNode.getNodeName().equals(CmisNameSpace.CMIS_CAPABILITY_CHANGES))
+         else if (capabNode.getNodeName().equals(CMIS.CMIS_CAPABILITY_CHANGES))
          {
             capabilityTypes.setCapabilityChanges(EnumCapabilityChanges.fromValue(capabNode.getFirstChild()
                .getNodeValue()));
          }
-         else if (capabNode.getNodeName().equals(CmisNameSpace.CMIS_CAPABILITY_QUERY))
+         else if (capabNode.getNodeName().equals(CMIS.CMIS_CAPABILITY_QUERY))
          {
             if (capabNode.getFirstChild() == null)
             {
@@ -129,11 +129,11 @@ public class CapabilitiesParser
                   .getNodeValue()));
             }
          }
-         else if (capabNode.getNodeName().equals(CmisNameSpace.CMIS_CAPABILITY_JOIN))
+         else if (capabNode.getNodeName().equals(CMIS.CMIS_CAPABILITY_JOIN))
          {
             capabilityTypes.setCapabilityJoin(EnumCapabilityJoin.fromValue(capabNode.getFirstChild().getNodeValue()));
          }
-         else if (capabNode.getNodeName().equals(CmisNameSpace.CMIS_CAPABILITY_ACL))
+         else if (capabNode.getNodeName().equals(CMIS.CMIS_CAPABILITY_ACL))
          {
             capabilityTypes.setCapabilityACL(EnumCapabilityACL.fromValue(capabNode.getFirstChild().getNodeValue()));
          }

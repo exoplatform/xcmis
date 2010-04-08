@@ -23,7 +23,6 @@ import org.xcmis.client.gwt.client.marshallers.builder.ObjectXMLBuilder;
 import org.xcmis.client.gwt.client.model.actions.CreatePolicy;
 import org.xcmis.client.gwt.client.rest.Marshallable;
 
-
 /**
  * Created by The eXo Platform SAS.
  *	
@@ -31,14 +30,14 @@ import org.xcmis.client.gwt.client.rest.Marshallable;
  * @version $Id:   ${date} ${time}
  *
  */
-public class CreatePolicyMarshaller  implements Marshallable
+public class CreatePolicyMarshaller implements Marshallable
 {
-   
+
    /**
     * Data for creating new policy.
     */
    private CreatePolicy createPolicy;
-   
+
    /**
     * @param createPolicy createPolicy
     */
@@ -46,10 +45,10 @@ public class CreatePolicyMarshaller  implements Marshallable
    {
       this.createPolicy = createPolicy;
    }
-   
+
    /**
     * @see org.exoplatform.gwt.commons.rest.Marshallable#marshal()
-    * @return String
+    * @return String xml request
     */
    public String marshal()
    {

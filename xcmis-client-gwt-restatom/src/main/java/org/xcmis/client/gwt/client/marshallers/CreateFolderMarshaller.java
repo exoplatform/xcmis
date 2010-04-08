@@ -23,7 +23,6 @@ import org.xcmis.client.gwt.client.marshallers.builder.ObjectXMLBuilder;
 import org.xcmis.client.gwt.client.model.actions.CreateFolder;
 import org.xcmis.client.gwt.client.rest.Marshallable;
 
-
 /**
  * Created by The eXo Platform SAS.
  * 
@@ -38,7 +37,7 @@ public class CreateFolderMarshaller implements Marshallable
     * Data for creating new folder.
     */
    private CreateFolder createFolder;
-   
+
    /**
     * @param createFolder createFolder
     */
@@ -46,10 +45,10 @@ public class CreateFolderMarshaller implements Marshallable
    {
       this.createFolder = createFolder;
    }
-   
+
    /**
     * @see org.exoplatform.gwtframework.commons.rest.Marshallable#marshal()
-    * @return String
+    * @return String xml request
     */
    public String marshal()
    {

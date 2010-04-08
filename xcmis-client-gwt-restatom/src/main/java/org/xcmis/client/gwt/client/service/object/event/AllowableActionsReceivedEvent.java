@@ -19,7 +19,7 @@
 
 package org.xcmis.client.gwt.client.service.object.event;
 
-import org.xcmis.client.gwt.client.model.CmisAllowableActionsType;
+import org.xcmis.client.gwt.client.model.AllowableActions;
 
 import com.google.gwt.event.shared.GwtEvent;
 
@@ -43,12 +43,12 @@ public class AllowableActionsReceivedEvent extends GwtEvent<AllowableActionsRece
    /**
     * Allowable actions.
     */
-   private CmisAllowableActionsType allowableActions;
+   private AllowableActions allowableActions;
 
    /**
     * @param allowableActions allowable actions
     */
-   public AllowableActionsReceivedEvent(CmisAllowableActionsType allowableActions)
+   public AllowableActionsReceivedEvent(AllowableActions allowableActions)
    {
       this.allowableActions = allowableActions;
    }
@@ -76,9 +76,9 @@ public class AllowableActionsReceivedEvent extends GwtEvent<AllowableActionsRece
    }
 
    /**
-    * @return {@link CmisAllowableActionsType}
+    * @return {@link AllowableActions}
     */
-   public CmisAllowableActionsType getAllowableActions()
+   public AllowableActions getAllowableActions()
    {
       return allowableActions;
    }

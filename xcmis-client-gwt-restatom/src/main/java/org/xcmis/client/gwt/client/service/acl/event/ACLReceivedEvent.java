@@ -19,7 +19,7 @@
 
 package org.xcmis.client.gwt.client.service.acl.event;
 
-import org.xcmis.client.gwt.client.model.acl.CmisAccessControlListType;
+import org.xcmis.client.gwt.client.model.acl.AccessControlList;
 
 import com.google.gwt.event.shared.GwtEvent;
 
@@ -40,16 +40,16 @@ public class ACLReceivedEvent extends GwtEvent<ACLReceivedHandler>
    public static final GwtEvent.Type<ACLReceivedHandler> TYPE = new GwtEvent.Type<ACLReceivedHandler>();
 
    /**
-    * Access control list type.
+    * Access control list
     */
-   private CmisAccessControlListType accessControlListType;
+   private AccessControlList accessControlList;
    
    /**
     * @param accessControlListType accessControlListType
     */
-   public ACLReceivedEvent(CmisAccessControlListType accessControlListType)
+   public ACLReceivedEvent(AccessControlList accessControlListType)
    {
-      this.accessControlListType = accessControlListType;
+      this.accessControlList = accessControlListType;
    }
    
    /**
@@ -75,10 +75,10 @@ public class ACLReceivedEvent extends GwtEvent<ACLReceivedHandler>
    }
 
    /**
-    * @return {@link CmisAccessControlListType}
+    * @return {@link AccessControlList}
     */
-   public CmisAccessControlListType getAccessControlListType()
+   public AccessControlList getAccessControlList()
    {
-      return accessControlListType;
+      return accessControlList;
    }
 }

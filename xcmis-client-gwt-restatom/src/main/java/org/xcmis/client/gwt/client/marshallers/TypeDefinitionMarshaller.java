@@ -20,7 +20,7 @@
 package org.xcmis.client.gwt.client.marshallers;
 
 import org.xcmis.client.gwt.client.marshallers.builder.TypeXMLBuilder;
-import org.xcmis.client.gwt.client.model.type.CmisTypeDefinitionType;
+import org.xcmis.client.gwt.client.model.type.TypeDefinition;
 import org.xcmis.client.gwt.client.rest.Marshallable;
 
 /**
@@ -33,23 +33,24 @@ public class TypeDefinitionMarshaller implements Marshallable
    /**
     * Data for creating new type with property definitions.
     */
-   private CmisTypeDefinitionType cmisTypeDefinition;
-   
+   private TypeDefinition typeDefinition;
+
+ 
    /**
-    * @param cmisTypeDefinition cmisTypeDefinition
+    * @param typeDefinition type definition
     */
-   public TypeDefinitionMarshaller(CmisTypeDefinitionType cmisTypeDefinition)
+   public TypeDefinitionMarshaller(TypeDefinition typeDefinition)
    {
-      this.cmisTypeDefinition = cmisTypeDefinition;
+      this.typeDefinition = typeDefinition;
    }
-   
+
    /**
     * @see org.exoplatform.gwt.commons.rest.Marshallable#marshal()
-    * @return String
+    * @return String xml request
     */
    public String marshal()
    {
-      return TypeXMLBuilder.createType(cmisTypeDefinition);
+      return TypeXMLBuilder.createType(typeDefinition);
    }
 
 }

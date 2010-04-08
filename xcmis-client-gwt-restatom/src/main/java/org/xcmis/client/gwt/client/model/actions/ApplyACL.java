@@ -21,7 +21,7 @@ package org.xcmis.client.gwt.client.model.actions;
 
 import org.xcmis.client.gwt.client.model.CmisExtensionType;
 import org.xcmis.client.gwt.client.model.EnumACLPropagation;
-import org.xcmis.client.gwt.client.model.acl.CmisAccessControlListType;
+import org.xcmis.client.gwt.client.model.acl.AccessControlList;
 
 /**
  * @author 
@@ -43,12 +43,12 @@ public class ApplyACL
    /**
     * Add ACEs.
     */
-   protected CmisAccessControlListType addACEs;
+   protected AccessControlList addACEs;
 
    /**
     * Remove ACEs.
     */
-   protected CmisAccessControlListType removeACEs;
+   protected AccessControlList removeACEs;
 
    /**
     * ACL propagation.
@@ -117,10 +117,10 @@ public class ApplyACL
     * 
     * @return
     *     possible object is
-    *     {@link CmisAccessControlListType }
+    *     {@link AccessControlList }
     *     
     */
-   public CmisAccessControlListType getAddACEs()
+   public AccessControlList getAddACEs()
    {
       return addACEs;
    }
@@ -130,10 +130,10 @@ public class ApplyACL
     * 
     * @param value
     *     allowed object is
-    *     {@link CmisAccessControlListType }
+    *     {@link AccessControlList }
     *     
     */
-   public void setAddACEs(CmisAccessControlListType value)
+   public void setAddACEs(AccessControlList value)
    {
       this.addACEs = value;
    }
@@ -143,10 +143,10 @@ public class ApplyACL
     * 
     * @return
     *     possible object is
-    *     {@link CmisAccessControlListType }
+    *     {@link AccessControlList }
     *     
     */
-   public CmisAccessControlListType getRemoveACEs()
+   public AccessControlList getRemoveACEs()
    {
       return removeACEs;
    }
@@ -156,10 +156,10 @@ public class ApplyACL
     * 
     * @param value
     *     allowed object is
-    *     {@link CmisAccessControlListType }
+    *     {@link AccessControlList }
     *     
     */
-   public void setRemoveACEs(CmisAccessControlListType value)
+   public void setRemoveACEs(AccessControlList value)
    {
       this.removeACEs = value;
    }

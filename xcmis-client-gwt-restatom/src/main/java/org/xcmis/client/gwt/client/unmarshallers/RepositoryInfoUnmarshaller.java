@@ -19,7 +19,7 @@
 
 package org.xcmis.client.gwt.client.unmarshallers;
 
-import org.xcmis.client.gwt.client.CmisNameSpace;
+import org.xcmis.client.gwt.client.CMIS;
 import org.xcmis.client.gwt.client.model.repository.CmisRepositoryInfo;
 import org.xcmis.client.gwt.client.rest.Unmarshallable;
 import org.xcmis.client.gwt.client.unmarshallers.parser.RepositoryInfoParser;
@@ -59,7 +59,7 @@ public class RepositoryInfoUnmarshaller implements Unmarshallable
    public void unmarshal(String body)
    {
       Document doc = XMLParser.parse(body);
-      NodeList nodeList = doc.getElementsByTagName(CmisNameSpace.WORKSPACE);
+      NodeList nodeList = doc.getElementsByTagName(CMIS.WORKSPACE);
       if (nodeList != null && nodeList.getLength() > 0)
       {
          Node repositoryNode = nodeList.item(0);
