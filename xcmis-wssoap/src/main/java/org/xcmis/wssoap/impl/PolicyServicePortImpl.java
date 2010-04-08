@@ -46,11 +46,11 @@ public class PolicyServicePortImpl implements PolicyServicePort
    private static final Log LOG = ExoLogger.getLogger(PolicyServicePortImpl.class);
 
    /** StorageProvider . */
-   private StorageProvider storageProvider;
+   private final StorageProvider storageProvider;
 
    /**
     * Constructs instance of <code>PolicyServicePortImpl</code> .
-    * 
+    *
     * @param policyService PolicyService
     */
    public PolicyServicePortImpl(StorageProvider storageProvider)
@@ -65,11 +65,13 @@ public class PolicyServicePortImpl implements PolicyServicePort
       java.lang.String objectId, CmisExtensionType extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation applyPolicy");
+      }
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = storageProvider.getConnection(repositoryId);
          conn.applyPolicy(policyId, objectId);
       }
       catch (Exception e)
@@ -91,11 +93,13 @@ public class PolicyServicePortImpl implements PolicyServicePort
       java.lang.String propertyFilter, CmisExtensionType extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation getAppliedPolicies");
+      }
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = storageProvider.getConnection(repositoryId);
          return TypeConverter.getListCmisObjectType(conn.getAppliedPolicies(objectId, true, propertyFilter));
       }
       catch (Exception e)
@@ -116,11 +120,13 @@ public class PolicyServicePortImpl implements PolicyServicePort
       java.lang.String objectId, CmisExtensionType extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation removePolicy");
+      }
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = storageProvider.getConnection(repositoryId);
          conn.removePolicy(policyId, objectId);
       }
       catch (Exception e)

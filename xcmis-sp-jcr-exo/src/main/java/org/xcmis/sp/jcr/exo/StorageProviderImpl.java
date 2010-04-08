@@ -29,7 +29,6 @@ import org.exoplatform.services.jcr.core.ManageableRepository;
 import org.exoplatform.services.jcr.ext.common.SessionProvider;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.exoplatform.services.security.ConversationState;
 import org.picocontainer.Startable;
 import org.xcmis.search.SearchService;
 import org.xcmis.search.SearchServiceException;
@@ -182,7 +181,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
    /**
     * {@inheritDoc}
     */
-   public Connection getConnection(String id, ConversationState conversation)
+   public Connection getConnection(String id)
    {
       StorageConfiguration configuration = storages.get(id);
 

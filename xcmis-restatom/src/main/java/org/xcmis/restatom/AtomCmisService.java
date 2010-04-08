@@ -116,7 +116,7 @@ public class AtomCmisService implements ResourceContainer
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = storageProvider.getConnection(repositoryId);
          RequestContext request = initRequestContext(repositoryId, httpRequest);
          Document doc = request.getDocument();
          List<AccessControlEntryTypeElement> listEl = doc.getRoot().getElements();
@@ -243,7 +243,7 @@ public class AtomCmisService implements ResourceContainer
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = storageProvider.getConnection(repositoryId);
          Boolean deleteAllVersions = true; // TODO
          conn.deleteTree(folderId, deleteAllVersions, unfileObject, continueOnFailure);
          return Response.noContent().build();
@@ -291,7 +291,7 @@ public class AtomCmisService implements ResourceContainer
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = storageProvider.getConnection(repositoryId);
          List<AccessControlEntry> list = conn.getACL(objectId, onlyBasicPermissions);
          FOMExtensibleElement accessControlListTypeElement =
             AbderaFactory.getInstance().getFactory().newElement(AtomCMIS.ACL);
@@ -325,7 +325,7 @@ public class AtomCmisService implements ResourceContainer
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = storageProvider.getConnection(repositoryId);
          AllowableActions result = conn.getAllowableActions(objectId);
          AllowableActionsElement el = AbderaFactory.getInstance().getFactory().newElement(AtomCMIS.ALLOWABLE_ACTIONS);
          el.build(result);
@@ -644,7 +644,7 @@ public class AtomCmisService implements ResourceContainer
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = storageProvider.getConnection(repositoryId);
          repoInfo = conn.getStorage().getRepositoryInfo();
       }
       catch (InvalidArgumentException iae)

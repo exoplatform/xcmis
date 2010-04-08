@@ -38,7 +38,7 @@ import java.math.BigInteger;
  * @version $Id: RelationshipServicePortImpl.java 2 2010-02-04 17:21:49Z andrew00x $
  */
 @javax.jws.WebService(// name = "RelationshipServicePort",
-serviceName = "RelationshipService", // 
+serviceName = "RelationshipService", //
 portName = "RelationshipServicePort", //
 targetNamespace = "http://docs.oasis-open.org/ns/cmis/ws/200908/", //
 wsdlLocation = "/wsdl/CMISWS-Service.wsdl" //,
@@ -51,11 +51,11 @@ public class RelationshipServicePortImpl implements RelationshipServicePort
    private static final Log LOG = ExoLogger.getLogger(RelationshipServicePortImpl.class);
 
    /** StorageProvider. */
-   private StorageProvider storageProvider;
+   private final StorageProvider storageProvider;
 
    /**
     * Constructs instance of <code>RelationshipServicePortImpl</code> .
-    * 
+    *
     * @param relationshipService RelationshipService
     */
    public RelationshipServicePortImpl(StorageProvider storageProvider)
@@ -78,12 +78,14 @@ public class RelationshipServicePortImpl implements RelationshipServicePort
       CmisExtensionType extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation getRelationships");
+      }
       Connection conn = null;
 
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = storageProvider.getConnection(repositoryId);
          return TypeConverter.getCmisObjectListType(conn.getObjectRelationships(
             objectId, //
             relationshipDirection == null ? RelationshipDirection.SOURCE : RelationshipDirection

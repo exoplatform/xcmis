@@ -56,11 +56,11 @@ public class VersioningServicePortImpl implements VersioningServicePort
    private static final Log LOG = ExoLogger.getLogger(VersioningServicePortImpl.class);
 
    /** StorageProvider. */
-   private StorageProvider storageProvider;
+   private final StorageProvider storageProvider;
 
    /**
     * Constructs instance of <code>VersioningServicePortImpl</code> .
-    * 
+    *
     * @param storageProvider StorageProvider
     */
    public VersioningServicePortImpl(StorageProvider storageProvider)
@@ -75,11 +75,13 @@ public class VersioningServicePortImpl implements VersioningServicePort
       throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation cancelCheckOut");
+      }
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = storageProvider.getConnection(repositoryId);
          conn.cancelCheckout(documentId);
          return new CmisExtensionType();
       }
@@ -109,16 +111,20 @@ public class VersioningServicePortImpl implements VersioningServicePort
       javax.xml.ws.Holder<CmisExtensionType> extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation checkIn");
+      }
       Connection conn = null;
       BaseContentStream cs = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = storageProvider.getConnection(repositoryId);
          if (contentStream != null)
+         {
             cs =
                new BaseContentStream(contentStream.getStream().getInputStream(), contentStream.getFilename(),
                   contentStream.getMimeType());
+         }
          String res = conn.checkin(documentId.value, //
             major == null ? true : major, // major as default
             TypeConverter.getPropertyMap(properties), //
@@ -150,11 +156,13 @@ public class VersioningServicePortImpl implements VersioningServicePort
       throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation checkOut");
+      }
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = storageProvider.getConnection(repositoryId);
          String res = conn.checkout(documentId.value);
          documentId.value = res;
          CmisExtensionType ext = new CmisExtensionType();
@@ -179,12 +187,14 @@ public class VersioningServicePortImpl implements VersioningServicePort
       Boolean includeAllowableActions, CmisExtensionType extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation getAllVersions");
+      }
       Connection conn = null;
       List<CmisObjectType> res = new ArrayList<CmisObjectType>();
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = storageProvider.getConnection(repositoryId);
          List<CmisObject> list = conn.getAllVersions(versionSeriesId, //
             includeAllowableActions == null ? false : includeAllowableActions, //
             true, propertyFilter);
@@ -221,7 +231,7 @@ public class VersioningServicePortImpl implements VersioningServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = storageProvider.getConnection(repositoryId);
          return TypeConverter.getCmisObjectType(conn.getObjectOfLatestVersion(versionSeriesId, //
             major == null ? false : major, //
             includeAllowableActions == null ? false : includeAllowableActions, //
@@ -250,11 +260,13 @@ public class VersioningServicePortImpl implements VersioningServicePort
       String filter, CmisExtensionType extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation getPropertiesOfLatestVersion");
+      }
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = storageProvider.getConnection(repositoryId);
          return TypeConverter.getCmisPropertiesType(conn.getPropertiesOfLatestVersion(objectId, //
             major == null ? false : major, //
             true, filter));

@@ -215,10 +215,10 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
 
    /**
     * Creates the error response.
-    * 
+    *
     * @param msg the msg
     * @param status the status
-    * 
+    *
     * @return the response context
     */
    protected ResponseContext createErrorResponse(String msg, int status)
@@ -229,10 +229,10 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
 
    /**
     * Creates the error response.
-    * 
+    *
     * @param t the t
     * @param status the status
-    * 
+    *
     * @return the response context
     */
    protected ResponseContext createErrorResponse(Throwable t, int status)
@@ -244,7 +244,7 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
 
    /**
     * Create link to object type description.
-    * 
+    *
     * @param id object type id
     * @param request request context
     * @return link to AtomPub Document that describes object type
@@ -272,7 +272,7 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
    /**
     * Create link to AtomPub Service Document contains the set of repositories
     * that are available.
-    * 
+    *
     * @param request the request context
     * @return link to AtomPub Service Document
     */
@@ -286,13 +286,13 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
 
    /**
     * To get Connection for provided repository Id within request.
-    * 
+    *
     * @param request the request context
     * @return the Connection to CMIS storage
     */
    protected Connection getConnection(RequestContext request)
    {
-      return storageProvider.getConnection(getRepositoryId(request), null);
+      return storageProvider.getConnection(getRepositoryId(request));
    }
 
    protected boolean getBooleanParameter(RequestContext request, String name, boolean defaultValue)

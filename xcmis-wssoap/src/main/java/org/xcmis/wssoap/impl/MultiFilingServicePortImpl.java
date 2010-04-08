@@ -45,11 +45,11 @@ public class MultiFilingServicePortImpl implements MultiFilingServicePort
    private static final Log LOG = ExoLogger.getLogger(MultiFilingServicePortImpl.class);
 
    /** StorageProvider . */
-   private StorageProvider storageProvider;
+   private final StorageProvider storageProvider;
 
    /**
     * Constructs instance of <code>MultiFilingServicePortImpl</code> .
-    * 
+    *
     * @param storageProvider StorageProvider
     */
    public MultiFilingServicePortImpl(StorageProvider storageProvider)
@@ -64,11 +64,13 @@ public class MultiFilingServicePortImpl implements MultiFilingServicePort
       Boolean allVersions, CmisExtensionType extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation addObjectToFolder");
+      }
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = storageProvider.getConnection(repositoryId);
          conn.addObjectToFolder(objectId, folderId, allVersions);
       }
       catch (Exception e)
@@ -90,11 +92,13 @@ public class MultiFilingServicePortImpl implements MultiFilingServicePort
       CmisExtensionType extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation removeObjectFromFolder");
+      }
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = storageProvider.getConnection(repositoryId);
          conn.removeObjectFromFolder(objectId, folderId);
       }
       catch (Exception e)

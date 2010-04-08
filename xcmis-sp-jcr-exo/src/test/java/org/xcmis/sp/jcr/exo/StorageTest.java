@@ -75,7 +75,7 @@ public class StorageTest extends BaseTest
    public void setUp() throws Exception
    {
       super.setUp();
-      storage = storageProvider.getConnection(cmisRepositoryId, null).getStorage();
+      storage = storageProvider.getConnection(cmisRepositoryId).getStorage();
       rootFolder = (Folder)storage.getObject(JcrCMIS.ROOT_FOLDER_ID);
    }
 

@@ -39,7 +39,7 @@ import java.util.Set;
 /**
  * Created by The eXo Platform SAS. <br/>
  * Date:
- * 
+ *
  * @author <a href="karpenko.sergiy@gmail.com">Karpenko Sergiy</a>
  * @version $Id: BaseQueryTest.java 2 2010-02-04 17:21:49Z andrew00x $
  */
@@ -54,7 +54,7 @@ public abstract class BaseQueryTest extends BaseTest
    public void setUp() throws Exception
    {
       super.setUp();
-      storage = storageProvider.getConnection(cmisRepositoryId, null).getStorage();
+      storage = storageProvider.getConnection(cmisRepositoryId).getStorage();
       rootFolder = (Folder)storage.getObject(JcrCMIS.ROOT_FOLDER_ID);
    }
 
@@ -78,7 +78,7 @@ public abstract class BaseQueryTest extends BaseTest
    //    * Query : Select all documents where long property not in set {15 , 20}.
    //    * <p>
    //    * Expected result: doc1
-   //    * 
+   //    *
    //    * @throws Exception if an unexpected error occurs
    //    */
    //   public void testNotINConstraint() throws Exception

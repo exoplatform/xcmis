@@ -23,7 +23,6 @@ import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.container.xml.ObjectParameter;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.exoplatform.services.security.ConversationState;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.StorageProvider;
@@ -101,7 +100,7 @@ public class StorageProviderImpl implements StorageProvider
       }
    }
 
-   public Connection getConnection(String storageId, ConversationState conversation)
+   public Connection getConnection(String storageId)
    {
       StorageImpl storage = storages.get(storageId);
       if (storage == null)

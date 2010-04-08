@@ -52,7 +52,7 @@ public class ACLServicePortImpl implements ACLServicePort
    private static final Log LOG = ExoLogger.getLogger(ACLServicePortImpl.class);
 
    /** StorageProvider. */
-   private StorageProvider storageProvider;
+   private final StorageProvider storageProvider;
 
    /**
     * Constructs instance of <code>ACLServicePortImpl</code>.
@@ -78,7 +78,7 @@ public class ACLServicePortImpl implements ACLServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = storageProvider.getConnection(repositoryId);
          conn.applyACL(objectId, //
             TypeConverter.convertAccessControlEntryList(addACEs.getPermission()), //
             TypeConverter.convertAccessControlEntryList(removeACEs.getPermission()), //
@@ -112,7 +112,7 @@ public class ACLServicePortImpl implements ACLServicePort
 
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = storageProvider.getConnection(repositoryId);
          List<AccessControlEntry> list =
             conn.getACL(objectId, onlyBasicPermissions == null ? true : onlyBasicPermissions);
          CmisAccessControlListType type = TypeConverter.getCmisAccessControlListType(list);

@@ -51,11 +51,11 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
    private static final Log LOG = ExoLogger.getLogger(DiscoveryServicePortImpl.class);
 
    /** StorageProvider. */
-   private StorageProvider storageProvider;
+   private final StorageProvider storageProvider;
 
    /**
     * Constructs instance of <code>DiscoveryServicePortImpl</code> .
-    * 
+    *
     * @param storageProvider StorageProvider
     */
    public DiscoveryServicePortImpl(StorageProvider storageProvider)
@@ -69,12 +69,14 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
    public QueryResponse query(Query parameters) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation query");
+      }
       Connection conn = null;
       try
       {
          String repositoryId = parameters.getRepositoryId();
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = storageProvider.getConnection(repositoryId);
          String statement = parameters.getStatement();
          boolean allVersions =
             parameters.getSearchAllVersions() == null || parameters.getSearchAllVersions().isNil() ? false : parameters
@@ -128,11 +130,13 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
       javax.xml.ws.Holder<CmisObjectListType> objects) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation getContentChanges");
+      }
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = storageProvider.getConnection(repositoryId);
          objects.value =
             TypeConverter.getCmisObjectListType(conn.getContentChanges(changeLogToken == null ? null
                : new ChangeLogTokenHolder(), //

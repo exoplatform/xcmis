@@ -1147,7 +1147,7 @@ public abstract class BaseConnection implements Connection
          includeRelationships = IncludeRelationships.NONE; // Default
       }
 
-      ItemsListImpl<CmisObject> cmisChildren = new ItemsListImpl<CmisObject>();
+      ItemsList<CmisObject> cmisChildren = new ItemsList<CmisObject>();
       for (int count = 0; iterator.hasNext() && (maxItems < 0 || count < maxItems); count++)
       {
          ObjectData chilData = iterator.next();
@@ -1317,7 +1317,7 @@ public abstract class BaseConnection implements Connection
                   includeRelationships, includePathSegments, includeObjectInfo, propertyFilter, renditionFilter) //
                : null;
 
-         tree.add(new ItemsTreeImpl<CmisObject>(container, subTree));
+         tree.add(new ItemsTree<CmisObject>(container, subTree));
       }
 
       return tree;
@@ -1372,7 +1372,7 @@ public abstract class BaseConnection implements Connection
          includeRelationships = IncludeRelationships.NONE; // Default.
       }
 
-      ItemsListImpl<CmisObject> checkedout = new ItemsListImpl<CmisObject>();
+      ItemsList<CmisObject> checkedout = new ItemsList<CmisObject>();
 
       for (int count = 0; iterator.hasNext() && (maxItems < 0 || count < maxItems); count++)
       {
@@ -1436,7 +1436,7 @@ public abstract class BaseConnection implements Connection
       }
 
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
-      ItemsListImpl<CmisObject> relationships = new ItemsListImpl<CmisObject>();
+      ItemsList<CmisObject> relationships = new ItemsList<CmisObject>();
 
       for (int count = 0; iterator.hasNext() && (maxItems < 0 || count < maxItems); count++)
       {
@@ -1484,7 +1484,7 @@ public abstract class BaseConnection implements Connection
          throw new InvalidArgumentException("skipCount parameter is greater then total number of argument");
       }
 
-      ItemsListImpl<TypeDefinition> typeChildren = new ItemsListImpl<TypeDefinition>();
+      ItemsList<TypeDefinition> typeChildren = new ItemsList<TypeDefinition>();
 
       for (int count = 0; iterator.hasNext() && (maxItems < 0 || count < maxItems); count++)
       {
@@ -1559,7 +1559,7 @@ public abstract class BaseConnection implements Connection
             ? getTypeDescendants(childType.getId(), depth != -1 ? depth - 1 : depth, includePropertyDefinition) //
             : null;
 
-         tree.add(new ItemsTreeImpl<TypeDefinition>(childType, subTree));
+         tree.add(new ItemsTree<TypeDefinition>(childType, subTree));
       }
 
       return tree;
@@ -1624,7 +1624,7 @@ public abstract class BaseConnection implements Connection
 
       RenditionFilter parsedRenditionFilter = new RenditionFilter(renditionFilter);
 
-      ItemsListImpl<CmisObject> list = new ItemsListImpl<CmisObject>();
+      ItemsList<CmisObject> list = new ItemsList<CmisObject>();
 
       for (int count = 0; iterator.hasNext() && (maxItems < 0 || count < maxItems); count++)
       {

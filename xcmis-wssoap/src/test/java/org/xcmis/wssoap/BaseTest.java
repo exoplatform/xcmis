@@ -83,7 +83,7 @@ public abstract class BaseTest extends TestCase
 
       storageProvider = (StorageProvider)container.getComponentInstanceOfType(StorageProvider.class);
 
-      conn = storageProvider.getConnection(repositoryId, state);
+      conn = storageProvider.getConnection(repositoryId);
 
       rootFolderId = conn.getStorage().getRepositoryInfo().getRootFolderId();
       try

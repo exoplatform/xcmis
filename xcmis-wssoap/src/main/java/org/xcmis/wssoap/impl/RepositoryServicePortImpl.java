@@ -55,7 +55,7 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
    private static final Log LOG = ExoLogger.getLogger(RepositoryServicePortImpl.class);
 
    /** StorageProvider. */
-   private StorageProvider storageProvider;
+   private final StorageProvider storageProvider;
 
    /**
     * Constructs instance of <code>RepositoryServicePortImpl</code> .
@@ -81,7 +81,7 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
       List<CmisRepositoryEntryType> res = new ArrayList<CmisRepositoryEntryType>();
       for (String storageId : entries)
       {
-         conn = storageProvider.getConnection(storageId, null);
+         conn = storageProvider.getConnection(storageId);
          RepositoryInfo repoInfo = conn.getStorage().getRepositoryInfo();
          CmisRepositoryEntryType type = new CmisRepositoryEntryType();
          type.setRepositoryId(repoInfo.getRepositoryId());
@@ -103,7 +103,7 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
          LOG.debug("Executing operation getRepositoryInfo");
       }
       Connection conn = null;
-      conn = storageProvider.getConnection(repositoryId, null);
+      conn = storageProvider.getConnection(repositoryId);
       return TypeConverter.getCmisRepositoryInfoType(conn.getStorage().getRepositoryInfo());
    }
 
@@ -124,7 +124,7 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = storageProvider.getConnection(repositoryId);
          return TypeConverter.getCmisTypeDefinitionListType(conn.getTypeChildren(typeId, //
             includePropertyDefinitions == null ? false : includePropertyDefinitions, //
             maxItems == null ? CMIS.MAX_ITEMS : maxItems.intValue(), //
@@ -155,7 +155,7 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = storageProvider.getConnection(repositoryId);
          return TypeConverter.getCmisTypeDefinitionType(conn.getTypeDefinition(typeId));
       }
       catch (Exception e)
@@ -182,7 +182,7 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = storageProvider.getConnection(repositoryId);
          return TypeConverter.getCmisTypeContainer(conn.getTypeDescendants(typeId, //
             depth == null ? 1 : depth.intValue(), //
             includePropertyDefinitions == null ? false : includePropertyDefinitions));

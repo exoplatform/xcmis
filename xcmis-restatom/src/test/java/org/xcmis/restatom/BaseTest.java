@@ -122,7 +122,7 @@ public abstract class BaseTest extends TestCase
       ConversationState state = new ConversationState(new Identity("root"));
       ConversationState.setCurrent(state);
 
-      conn = storageProvider.getConnection(cmisRepositoryId, state);
+      conn = storageProvider.getConnection(cmisRepositoryId);
 
       rootFolderId = conn.getStorage().getRepositoryInfo().getRootFolderId();
 
