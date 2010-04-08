@@ -25,7 +25,7 @@ package org.xcmis.client.gwt.client.object;
  * @version $Id:   ${date} ${time}
  *
  */
-public interface CmisDocument
+public interface CmisDocument extends CmisObject
 {
    /**
     * @return {@link Boolean} the latestVersion
