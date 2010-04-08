@@ -21,12 +21,12 @@ package org.xcmis.client.gwt.client.unmarshallers;
 
 import org.xcmis.client.gwt.client.model.restatom.AtomEntry;
 import org.xcmis.client.gwt.client.model.restatom.EntryCollection;
+import org.xcmis.client.gwt.client.object.ObjectData;
 import org.xcmis.client.gwt.client.rest.Unmarshallable;
 import org.xcmis.client.gwt.client.unmarshallers.parser.FeedParser;
 
 import java.util.List;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.XMLParser;
 
@@ -59,16 +59,9 @@ public class EntryCollectionUnmarshaller implements Unmarshallable
     */
    public void unmarshal(String body)
    {
-      try
-      {
-         GWT.log("COLLECTION "+body, null);
-         Document doc = XMLParser.parse(body);
-         List<AtomEntry> entries = FeedParser.parse(doc).getEntries();
-         entryCollection.setEntries(entries);
-      }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-      }
+      Document doc = XMLParser.parse(body);
+      List<AtomEntry> entries = FeedParser.parse(doc).getEntries();
+      ObjectData.extractData(entries);
+      entryCollection.setEntries(entries);
    }
 }
