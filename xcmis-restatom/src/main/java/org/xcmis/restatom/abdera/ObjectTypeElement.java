@@ -24,12 +24,10 @@ import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.apache.abdera.parser.stax.FOMExtensibleElement;
 import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.CMIS;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.AllowableActions;
-import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.ChangeInfo;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.Property;
@@ -42,7 +40,6 @@ import org.xcmis.spi.model.impl.DecimalProperty;
 import org.xcmis.spi.model.impl.HtmlProperty;
 import org.xcmis.spi.model.impl.IdProperty;
 import org.xcmis.spi.model.impl.IntegerProperty;
-import org.xcmis.spi.model.impl.ObjectInfoImpl;
 import org.xcmis.spi.model.impl.StringProperty;
 import org.xcmis.spi.model.impl.UriProperty;
 
@@ -139,6 +136,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
     * @param objectInfo
     * @param property
     */
+   /*
    private void storeProperty(ObjectInfoImpl objectInfo, Property<?> p)
    {
       String pId = p.getId();
@@ -224,6 +222,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
          objectInfo.setTargetId(((IdProperty)p).getValues().get(0));
       }
    }
+   */
 
    /**
     * Builds the element.

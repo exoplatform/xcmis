@@ -61,8 +61,9 @@ public class ProviderImpl extends AbstractProvider
 
    /**
     * Instantiates a new provider impl.
+    *
     * @param storageProvider TODO
-    * 
+    *
     */
    public ProviderImpl(StorageProvider storageProvider)
    {
@@ -82,19 +83,19 @@ public class ProviderImpl extends AbstractProvider
       resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+)/types(/)?([^/?]+)?(\\??.*)?", //
          TargetType.TYPE_COLLECTION, //
          "repoid", //
-         "slash", // No slash if 'typeid' is absent. 
+         "slash", // No slash if 'typeid' is absent.
          "typeid");
 
       resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+?)/typedescendants(/)?([^/?]+)?(\\??.*)?", //
          TargetType.TYPE_COLLECTION, //
          "repoid", //
-         "slash", // No slash if 'typeid' is absent. 
+         "slash", // No slash if 'typeid' is absent.
          "typeid");
 
-      resolver.setPattern("/cmisatom/([^/]+)/checkedout(/)?([^/?]+)?(\\??.*)?", //
+      //      resolver.setPattern("/cmisatom/([^/]+)/checkedout(/)?([^/?]+)?(\\??.*)?", //
+      resolver.setPattern("/cmisatom/([^/]+)/checkedout(\\??.*)?", //
          TargetType.TYPE_COLLECTION, //
          "repoid", //
-         "slash", // No slash if 'objectid' is absent. 
          "objectid");
 
       resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+)/children/([^/?]+)(\\??.*)?", //
@@ -122,7 +123,7 @@ public class ProviderImpl extends AbstractProvider
          "repoid", //
          "objectid");
 
-      resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+)/descendants/([^/?]+)(\\??.*)?", // 
+      resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+)/descendants/([^/?]+)(\\??.*)?", //
          TargetType.TYPE_COLLECTION, //
          "repoid", //
          "objectid");
@@ -168,7 +169,7 @@ public class ProviderImpl extends AbstractProvider
       wInfo.addCollection(new AllVersionsCollection(storageProvider));
       wInfo.addCollection(new QueryCollection(storageProvider));
       wInfo.addCollection(new PoliciesCollection(storageProvider));
-      // The other described patterns according collections by WorkspaceManagerImpl#getCollectionAdapter 
+      // The other described patterns according collections by WorkspaceManagerImpl#getCollectionAdapter
       manager = new WorkspaceManagerImpl();
       manager.addWorkspace(wInfo);
    }

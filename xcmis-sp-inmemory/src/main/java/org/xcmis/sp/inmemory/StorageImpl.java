@@ -19,6 +19,7 @@
 
 package org.xcmis.sp.inmemory;
 
+import org.xcmis.spi.BaseItemsIterator;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
@@ -36,7 +37,6 @@ import org.xcmis.spi.data.Folder;
 import org.xcmis.spi.data.ObjectData;
 import org.xcmis.spi.data.Policy;
 import org.xcmis.spi.data.Relationship;
-import org.xcmis.spi.impl.BaseItemsIterator;
 import org.xcmis.spi.model.AllowableActions;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.CapabilityRendition;

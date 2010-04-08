@@ -19,42 +19,40 @@
 
 package org.xcmis.sp.inmemory;
 
+import org.xcmis.spi.Connection;
 import org.xcmis.spi.Storage;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.data.ObjectData;
-import org.xcmis.spi.impl.BaseConnection;
 
 /**
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */
-public class InmemConnection extends BaseConnection
+public class InmemConnection extends Connection
 {
+
+   private boolean closed;
 
    public InmemConnection(Storage storage)
    {
       super(storage);
-      // TODO Auto-generated constructor stub
    }
 
-   @Override
    protected void checkConnection() throws IllegalStateException
    {
-      // TODO Auto-generated method stub
-
+      if (closed)
+      {
+         throw new IllegalStateException("Connection closed.");
+      }
    }
 
-   @Override
    protected void validateChangeToken(ObjectData object, String changeToken) throws UpdateConflictException
    {
-      // TODO Auto-generated method stub
-
    }
 
    public void close()
    {
-      // TODO Auto-generated method stub
-
+      closed = true;
    }
 
 }

@@ -46,7 +46,7 @@ import java.util.Calendar;
 
 /**
  * Collection of checked-out documents.
- * 
+ *
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id: CheckedOutCollection.java 216 2010-02-12 17:19:50Z andrew00x $
  */
@@ -56,7 +56,7 @@ public class CheckedOutCollection extends CmisObjectCollection
    /**
     * Instantiates a new checked out collection.
     * @param storageProvider TODO
-    * 
+    *
     */
    public CheckedOutCollection(StorageProvider storageProvider)
    {
@@ -194,7 +194,7 @@ public class CheckedOutCollection extends CmisObjectCollection
       }
       catch (ResponseContextException e1)
       {
-         // support when id sent directly 
+         // support when id sent directly
       }
       Connection conn = null;
       try

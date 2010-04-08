@@ -22,11 +22,11 @@ package org.xcmis.spi;
 /**
  * Holder for change token. This holder used by updates method for passing
  * change token from caller and getting back updated change token.
- * 
+ *
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  * @see Connection
  */
-public class ChangeTokenHolder extends AbstractHolder<String>
+public final class ChangeTokenHolder extends TokenHolder<String>
 {
 }

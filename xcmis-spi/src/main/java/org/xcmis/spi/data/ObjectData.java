@@ -19,13 +19,13 @@
 
 package org.xcmis.spi.data;
 
+import org.xcmis.spi.CmisVisitor;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.NotSupportedException;
 import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.Storage;
-import org.xcmis.spi.impl.CmisVisitor;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.Property;

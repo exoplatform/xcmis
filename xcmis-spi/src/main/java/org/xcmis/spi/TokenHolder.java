@@ -25,7 +25,7 @@ package org.xcmis.spi;
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-public abstract class AbstractHolder<T>
+public abstract class TokenHolder<T>
 {
 
    private T value;

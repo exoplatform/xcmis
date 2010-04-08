@@ -15,170 +15,422 @@ import java.util.Calendar;
  * {@link Connection#getObject(String, boolean, org.xcmis.spi.IncludeRelationships, boolean, boolean, boolean, String, String)}
  * . If this parameter is <code>true</code> caller if method must get additional
  * information about object, see {@link CmisObject#getObjectInfo()}.
- * 
+ *
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey
  *         Zavizionov</a>
  * @version $Id: ObjectInfo.java 34360 2009-07-22 23:58:59Z sunman $
  */
-public interface ObjectInfo
+public final class ObjectInfo
 {
+
+   // Common
+
+   private BaseType baseType;
+
+   private String typeId;
+
+   private String id;
+
+   private String name;
+
+   private String createdBy;
+
+   private Calendar creationDate;
+
+   private String lastModifiedBy;
+
+   private Calendar lastModificationDate;
+
+   private String changeToken;
+
+   // Folder
+
+   private String parentId;
+
+   // Document
+
+   private Boolean latestVersion;
+
+   private Boolean majorVersion;
+
+   private Boolean latestMajorVersion;
+
+   private String versionSeriesId;
+
+   private String versionSeriesCheckedOutId;
+
+   private String versionSeriesCheckedOutBy;
+
+   private String versionLabel;
+
+   private String contentStreamMimeType;
+
+   // Relationship
+
+   private String sourceId;
+
+   private String targetId;
+
+   public ObjectInfo()
+   {
+   }
+
+   // Common
+
+   public ObjectInfo(BaseType baseType, String typeId, String id, String name, String createdBy, Calendar creationDate,
+      String lastModifiedBy, Calendar lastModificationDate, String changeToken, String parentId, Boolean latestVersion,
+      Boolean majorVersion, Boolean latestMajorVersion, String versionSeriesId, String versionSeriesCheckedOutId,
+      String versionSeriesCheckedOutBy, String versionLabel, String contentStreamMimeType, String sourceId,
+      String targetId)
+   {
+      this.baseType = baseType;
+      this.typeId = typeId;
+      this.id = id;
+      this.name = name;
+      this.createdBy = createdBy;
+      this.creationDate = creationDate;
+      this.lastModifiedBy = lastModifiedBy;
+      this.lastModificationDate = lastModificationDate;
+      this.changeToken = changeToken;
+      this.parentId = parentId;
+      this.latestVersion = latestVersion;
+      this.majorVersion = majorVersion;
+      this.latestMajorVersion = latestMajorVersion;
+      this.versionSeriesId = versionSeriesId;
+      this.versionSeriesCheckedOutId = versionSeriesCheckedOutId;
+      this.versionSeriesCheckedOutBy = versionSeriesCheckedOutBy;
+      this.versionLabel = versionLabel;
+      this.contentStreamMimeType = contentStreamMimeType;
+      this.sourceId = sourceId;
+      this.targetId = targetId;
+   }
+
    // Common
    /**
     * Base object type.
-    * 
+    *
     * @return base type
     * @see BaseType
     */
-   BaseType getBaseType();
+   public BaseType getBaseType()
+   {
+      return baseType;
+   }
 
    /**
     * Object type id.
-    * 
+    *
     * @return type id
     */
-   String getTypeId();
+   public String getTypeId()
+   {
+      return typeId;
+   }
 
    /**
     * Property {@link CMIS#OBJECT_ID}.
-    * 
+    *
     * @return object id
     */
-   String getId();
+   public String getId()
+   {
+      return id;
+   }
 
    /**
     * Property {@link CMIS#NAME}.
-    * 
+    *
     * @return object name
     */
-   String getName();
+   public String getName()
+   {
+      return name;
+   }
 
    /**
     * Property {@link CMIS#CREATED_BY}.
-    * 
+    *
     * @return principal id whose created object
     */
-   String getCreatedBy();
+   public String getCreatedBy()
+   {
+      return createdBy;
+   }
 
    /**
     * Property {@link CMIS#CREATION_DATE}.
-    * 
+    *
     * @return creation date
     */
-   Calendar getCreationDate();
+   public Calendar getCreationDate()
+   {
+      return creationDate;
+   }
 
    /**
     * Property {@link CMIS#LAST_MODIFIED_BY}.
-    * 
+    *
     * @return principal id whose made last modification
     */
-   String getLastModifiedBy();
+   public String getLastModifiedBy()
+   {
+      return lastModifiedBy;
+   }
 
    /**
     * Property {@link CMIS#LAST_MODIFICATION_DATE}.
-    * 
+    *
     * @return last modification date
     */
-   Calendar getLastModificationDate();
+   public Calendar getLastModificationDate()
+   {
+      return lastModificationDate;
+   }
 
    /**
     * Property {@link CMIS#CHANGE_TOKEN}.
-    * 
+    *
     * @return change token property or <code>null</code> if change token feature
     *         is not supported
     */
-   String getChangeToken();
+   public String getChangeToken()
+   {
+      return changeToken;
+   }
 
    // Folder
 
    /**
     * Property {@link CMIS#PARENT_ID}.
-    * 
+    *
     * @return <code>null</code> for object with base type other then
     *         'cmis:folder'
     */
-   String getParentId();
+   public String getParentId()
+   {
+      return parentId;
+   }
 
    // Document
 
    /**
     * Property {@link CMIS#IS_LATEST_VERSION}.
-    * 
+    *
     * @return <code>null</code> for non-document object and always
     *         <code>true</code> versionable document. Not versionable document
     *         also has exactly one version
     */
-   Boolean isLatestVersion();
+   public Boolean isLatestVersion()
+   {
+      return latestVersion;
+   }
 
    /**
     * Property {@link CMIS#IS_MAJOR_VERSION}.
-    * 
+    *
     * @return <code>null</code> for non-document object not versionable document
     */
-   Boolean isMajorVersion();
+   public Boolean isMajorVersion()
+   {
+      return majorVersion;
+   }
 
    /**
     * Property {@link CMIS#IS_LATEST_MAJOR_VERSION}.
-    * 
+    *
     * @return <code>null</code> for non-document object or not versionable
     *         document
     */
-   Boolean isLatestMajorVersion();
+   public Boolean isLatestMajorVersion()
+   {
+      return latestMajorVersion;
+   }
 
    /**
     * Property {@link CMIS#VERSION_SERIES_ID}.
-    * 
+    *
     * @return <code>null</code> for non-document object
     */
-   String getVersionSeriesId();
+   public String getVersionSeriesId()
+   {
+      return versionSeriesId;
+   }
 
    /**
     * Property {@link CMIS#VERSION_SERIES_CHECKED_OUT_ID}.
-    * 
+    *
     * @return id of checked-out document if any. Always <code>null</code> for
     *         non-document object or not versionable document
     */
-   String getVersionSeriesCheckedOutId();
+   public String getVersionSeriesCheckedOutId()
+   {
+      return versionSeriesCheckedOutId;
+   }
 
    /**
     * Property {@link CMIS#VERSION_SERIES_CHECKED_OUT_BY}.
-    * 
+    *
     * @return principal id whose checked-out document if any. Always
     *         <code>null</code> for non-document object or not versionable
     *         document
     */
-   String getVersionSeriesCheckedOutBy();
+   public String getVersionSeriesCheckedOutBy()
+   {
+      return versionSeriesCheckedOutBy;
+   }
 
    /**
     * Property {@link CMIS#VERSION_LABEL}.
-    * 
+    *
     * @return <code>null</code> for non-document object
     */
-   String getVersionLabel();
+   public String getVersionLabel()
+   {
+      return versionLabel;
+   }
 
    /**
     * Property {@link CMIS#CONTENT_STREAM_MIME_TYPE}.
-    * 
+    *
     * @return <code>null</code> for non-document object or document without
     *         content
     */
-   String getContentStreamMimeType();
+   public String getContentStreamMimeType()
+   {
+      return contentStreamMimeType;
+   }
 
    // Relationship
 
    /**
     * Property {@link CMIS#SOURCE_ID}.
-    * 
+    *
     * @return <code>null</code> for objects with base type other then
     *         'cmis:relationship'
     */
-   String getSourceId();
+   public String getSourceId()
+   {
+      return sourceId;
+   }
 
    /**
     * Property {@link CMIS#TARGET_ID}.
-    * 
+    *
     * @return <code>null</code> for objects with base type other then
     *         'cmis:relationship'
     */
-   String getTargetId();
+   public String getTargetId()
+   {
+      return targetId;
+   }
 
+   // ------------------- Setters --------------------------
+
+   // Common
+
+   public void setBaseType(BaseType baseType)
+   {
+      this.baseType = baseType;
+   }
+
+   public void setTypeId(String typeId)
+   {
+      this.typeId = typeId;
+   }
+
+   public void setId(String id)
+   {
+      this.id = id;
+   }
+
+   public void setName(String name)
+   {
+      this.name = name;
+   }
+
+   public void setCreatedBy(String createdBy)
+   {
+      this.createdBy = createdBy;
+   }
+
+   public void setCreationDate(Calendar creationDate)
+   {
+      this.creationDate = creationDate;
+   }
+
+   public void setLastModifiedBy(String lastModifiedBy)
+   {
+      this.lastModifiedBy = lastModifiedBy;
+   }
+
+   public void setLastModificationDate(Calendar lastModificationDate)
+   {
+      this.lastModificationDate = lastModificationDate;
+   }
+
+   public void setChangeToken(String changeToken)
+   {
+      this.changeToken = changeToken;
+   }
+
+   // Folder
+
+   public void setParentId(String parentId)
+   {
+      this.parentId = parentId;
+   }
+
+   // Document
+
+   public void setLatestVersion(Boolean latestVersion)
+   {
+      this.latestVersion = latestVersion;
+   }
+
+   public void setMajorVersion(Boolean majorVersion)
+   {
+      this.majorVersion = majorVersion;
+   }
+
+   public void setLatestMajorVersion(Boolean latestMajorVersion)
+   {
+      this.latestMajorVersion = latestMajorVersion;
+   }
+
+   public void setVersionSeriesId(String versionSeriesId)
+   {
+      this.versionSeriesId = versionSeriesId;
+   }
+
+   public void setVersionSeriesCheckedOutId(String versionSeriesCheckedOutId)
+   {
+      this.versionSeriesCheckedOutId = versionSeriesCheckedOutId;
+   }
+
+   public void setVersionSeriesCheckedOutBy(String versionSeriesCheckedOutBy)
+   {
+      this.versionSeriesCheckedOutBy = versionSeriesCheckedOutBy;
+   }
+
+   public void setVersionLabel(String versionLabel)
+   {
+      this.versionLabel = versionLabel;
+   }
+
+   public void setContentStreamMimeType(String contentStreamMimeType)
+   {
+      this.contentStreamMimeType = contentStreamMimeType;
+   }
+
+   // Relationship
+
+   public void setSourceId(String sourceId)
+   {
+      this.sourceId = sourceId;
+   }
+
+   public void setTargetId(String targetId)
+   {
+      this.targetId = targetId;
+   }
 }

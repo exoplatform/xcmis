@@ -17,17 +17,15 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.xcmis.spi.impl;
+package org.xcmis.spi;
 
-import org.xcmis.spi.StorageException;
 import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.data.ObjectData;
 import org.xcmis.spi.model.Rendition;
-import org.xcmis.spi.ItemsIterator;
 
 /**
  * Manage object's renditions.
- * 
+ *
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id$
  */
@@ -36,8 +34,8 @@ public interface RenditionManager
 
    /**
     * Get all renditions of specified entry.
-    * 
-    * @param entry CMISEntry 
+    *
+    * @param entry CMISEntry
     * @return set of object renditions. If object has not renditions then empty
     *            iterator will be returned.
     * @throws StorageException if any other CMIS repository error occurs
@@ -46,11 +44,10 @@ public interface RenditionManager
 
    /**
     * Get rendition stream for objects with specified id.
-    * 
-    * @param streamId object id 
-    * @param ObjectData object id 
+    *
+    * @param streamId object id
+    * @param ObjectData object id
     * @return Renditions content stream
-    * 
     */
     ContentStream getStream(ObjectData obj, String streamId);
 }
