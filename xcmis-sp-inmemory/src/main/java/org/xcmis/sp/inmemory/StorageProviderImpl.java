@@ -23,6 +23,7 @@ import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.container.xml.ObjectParameter;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.picocontainer.Startable;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.StorageProvider;
@@ -33,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import javax.security.auth.login.LoginException;
 
@@ -40,8 +42,86 @@ import javax.security.auth.login.LoginException;
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-public class StorageProviderImpl implements StorageProvider
+public class StorageProviderImpl implements StorageProvider, Startable
 {
+
+   private static final Log LOG = ExoLogger.getLogger(StorageProviderImpl.class);
+
+   private final Map<String, StorageImpl> storages = new HashMap<String, StorageImpl>();
+
+   private final Map<String, StorageConfiguration> storagesConfig = new HashMap<String, StorageConfiguration>();
+
+   public StorageProviderImpl(InitParams initParams)
+   {
+      if (initParams != null)
+      {
+         ObjectParameter param = initParams.getObjectParam("configs");
+
+         if (param == null)
+         {
+            LOG.error("Init-params does not contain configuration for any CMIS repository.");
+         }
+
+         StorageProviderConfig confs = (StorageProviderConfig)param.getObject();
+
+         for (StorageConfiguration conf : confs.getConfigs())
+         {
+
+            storagesConfig.put(conf.getId(), conf);
+         }
+      }
+      else
+      {
+         LOG.error("Not found configuration for any storages.");
+      }
+   }
+
+   public Connection getConnection(String storageId)
+   {
+      StorageImpl storage = storages.get(storageId);
+      if (storage == null)
+      {
+         throw new InvalidArgumentException("CMIS repository " + storageId + " does not exists.");
+      }
+
+      return new InmemConnection(storage);
+   }
+
+   public Connection getConnection(String storageId, String user, String password) throws LoginException,
+      InvalidArgumentException
+   {
+      StorageImpl storage = storages.get(storageId);
+      if (storage == null)
+      {
+         throw new InvalidArgumentException("CMIS repository " + storageId + " does not exists.");
+      }
+
+      return new InmemConnection(storage);
+   }
+
+   public Set<String> getStorageIDs()
+   {
+      return Collections.unmodifiableSet(storages.keySet());
+   }
+
+   /**
+    * @see org.picocontainer.Startable#start()
+    */
+   public void start()
+   {
+      for (Entry<String, StorageConfiguration> configElement : storagesConfig.entrySet())
+      {
+         storages.put(configElement.getKey(), new StorageImpl(configElement.getValue()));
+      }
+   }
+
+   /**
+    * @see org.picocontainer.Startable#stop()
+    */
+   public void stop()
+   {
+
+   }
 
    public static class StorageProviderConfig
    {
@@ -70,57 +150,6 @@ public class StorageProviderImpl implements StorageProvider
       {
          this.configs = configs;
       }
-   }
-
-   private static final Log LOG = ExoLogger.getLogger(StorageProviderImpl.class);
-
-   private final Map<String, StorageImpl> storages = new HashMap<String, StorageImpl>();
-
-   public StorageProviderImpl(InitParams initParams)
-   {
-      if (initParams != null)
-      {
-         ObjectParameter param = initParams.getObjectParam("configs");
-
-         if (param == null)
-         {
-            LOG.error("Init-params does not contain configuration for any CMIS repository.");
-         }
-
-         StorageProviderConfig confs = (StorageProviderConfig)param.getObject();
-
-         for (StorageConfiguration conf : confs.getConfigs())
-         {
-            storages.put(conf.getId(), new StorageImpl(conf));
-         }
-      }
-      else
-      {
-         LOG.error("Not found configuration for any storages.");
-      }
-   }
-
-   public Connection getConnection(String storageId)
-   {
-      StorageImpl storage = storages.get(storageId);
-      if (storage == null)
-      {
-         throw new InvalidArgumentException("CMIS repository " + storageId + " does not exists.");
-      }
-
-      return new InmemConnection(storage);
-   }
-
-   public Connection getConnection(String storageId, String user, String password) throws LoginException,
-      InvalidArgumentException
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public Set<String> getStorageIDs()
-   {
-      return Collections.unmodifiableSet(storages.keySet());
    }
 
 }

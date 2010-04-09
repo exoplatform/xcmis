@@ -63,8 +63,7 @@ public abstract class BaseTest extends TestCase
       StorageConfiguration configuration = new StorageConfiguration(storageId, properties);
 
       storage = new StorageImpl(configuration);
-
-      rootFolder = (Folder)storage.getObject(StorageImpl.ROOT_FOLDER_ID);
+      rootFolder = (Folder)storage.getObject(storage.getRepositoryInfo().getRootFolderId());
    }
 
    protected Folder createFolder(Folder parent, String name, String type)

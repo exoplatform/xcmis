@@ -19,6 +19,40 @@
 
 package org.xcmis.sp.inmemory;
 
+import org.exoplatform.container.xml.InitParams;
+import org.exoplatform.services.document.DocumentReader;
+import org.exoplatform.services.document.DocumentReaderService;
+import org.exoplatform.services.document.HandlerNotFoundException;
+import org.exoplatform.services.document.impl.BaseDocumentReader;
+import org.exoplatform.services.document.impl.HTMLDocumentReader;
+import org.exoplatform.services.document.impl.MSExcelDocumentReader;
+import org.exoplatform.services.document.impl.MSOutlookDocumentReader;
+import org.exoplatform.services.document.impl.MSWordDocumentReader;
+import org.exoplatform.services.document.impl.PDFDocumentReader;
+import org.exoplatform.services.document.impl.PPTDocumentReader;
+import org.exoplatform.services.document.impl.TextPlainDocumentReader;
+import org.exoplatform.services.document.impl.XMLDocumentReader;
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
+import org.xcmis.search.InvalidQueryException;
+import org.xcmis.search.SearchService;
+import org.xcmis.search.SearchServiceException;
+import org.xcmis.search.Visitors;
+import org.xcmis.search.config.IndexConfiguration;
+import org.xcmis.search.config.SearchServiceConfiguration;
+import org.xcmis.search.content.command.InvocationContext;
+import org.xcmis.search.model.column.Column;
+import org.xcmis.search.model.source.SelectorName;
+import org.xcmis.search.parser.CmisQueryParser;
+import org.xcmis.search.parser.QueryParser;
+import org.xcmis.search.query.QueryExecutionException;
+import org.xcmis.search.result.ScoredRow;
+import org.xcmis.search.value.SlashSplitter;
+import org.xcmis.search.value.ToStringNameConverter;
+import org.xcmis.sp.inmemory.query.CmisContentReader;
+import org.xcmis.sp.inmemory.query.CmisSchema;
+import org.xcmis.sp.inmemory.query.CmisSchemaTableResolver;
+import org.xcmis.sp.inmemory.query.IndexListener;
 import org.xcmis.spi.BaseItemsIterator;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.CmisRuntimeException;
@@ -53,17 +87,22 @@ import org.xcmis.spi.model.impl.AllowableActionsImpl;
 import org.xcmis.spi.model.impl.TypeDefinitionImpl;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
+import org.xcmis.spi.query.Score;
 import org.xcmis.spi.utils.CmisUtils;
 
+import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.UUID;
@@ -76,6 +115,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  */
 public class StorageImpl implements Storage
 {
+   private static final Log LOG = ExoLogger.getLogger(StorageImpl.class);
 
    public static String generateId()
    {
@@ -106,7 +146,19 @@ public class StorageImpl implements Storage
 
    final Map<String, Set<String>> typeChildren;
 
+   /**
+    * Searching service.
+    */
+   private final SearchService searchService;
+
+   /**
+    * Cmis query parser.
+    */
+   private final QueryParser cmisQueryParser;
+
    private final StorageConfiguration configuration;
+
+   private final IndexListener indexListener;
 
    static final String ROOT_FOLDER_ID = "abcdef12-3456-7890-0987-654321fedcba";
 
@@ -184,6 +236,10 @@ public class StorageImpl implements Storage
       permissions.put(ROOT_FOLDER_ID, new HashMap<String, Set<String>>());
       parents.put(ROOT_FOLDER_ID, EMPTY_PARENTS);
       children.put(ROOT_FOLDER_ID, new CopyOnWriteArraySet<String>());
+
+      this.searchService = getInitializedSearchService();
+      this.indexListener = new IndexListener(this, searchService);
+      this.cmisQueryParser = new CmisQueryParser();
    }
 
    /**
@@ -317,7 +373,16 @@ public class StorageImpl implements Storage
    public void deleteObject(ObjectData object, boolean deleteAllVersions) throws ConstraintException,
       UpdateConflictException, StorageException
    {
+      String objectId = object.getObjectId();
+
       ((BaseObjectData)object).delete();
+
+      if (indexListener != null)
+      {
+         Set<String> removed = new HashSet<String>();
+         removed.add(objectId);
+         indexListener.removed(removed);
+      }
    }
 
    public Collection<String> deleteTree(Folder folder, boolean deleteAllVersions, UnfileObject unfileObject,
@@ -522,8 +587,28 @@ public class StorageImpl implements Storage
 
    public ItemsIterator<Result> query(Query query) throws InvalidArgumentException
    {
-      // TODO
-      return CmisUtils.emptyItemsIterator();
+      try
+      {
+         org.xcmis.search.model.Query qom = cmisQueryParser.parseQuery(query.getStatement());
+         List<ScoredRow> rows = searchService.execute(qom);
+         //check if needed default sorting
+         if (qom.getOrderings().size() == 0)
+         {
+
+            Set<SelectorName> selectorsReferencedBy = Visitors.getSelectorsReferencedBy(qom);
+            Collections.sort(rows, new DocumentOrderResultSorter(selectorsReferencedBy.iterator().next().getName(),
+               this));
+         }
+         return new QueryResultIterator(rows, qom);
+      }
+      catch (InvalidQueryException e)
+      {
+         throw new InvalidArgumentException(e.getLocalizedMessage(), e);
+      }
+      catch (QueryExecutionException e)
+      {
+         throw new CmisRuntimeException(e.getLocalizedMessage(), e);
+      }
    }
 
    /**
@@ -532,7 +617,19 @@ public class StorageImpl implements Storage
    public String saveObject(ObjectData object) throws StorageException, NameConstraintViolationException,
       UpdateConflictException
    {
+      boolean isNew = object.isNew();
       ((BaseObjectData)object).save();
+      if (indexListener != null)
+      {
+         if (isNew)
+         {
+            indexListener.created(object);
+         }
+         else
+         {
+            indexListener.updated(object);
+         }
+      }
       return object.getObjectId();
    }
 
@@ -693,6 +790,331 @@ public class StorageImpl implements Storage
       typeChildren.get(type.getParentId()).remove(typeId);
 
       PropertyDefinitions.removeAll(typeId);
+   }
+
+   private SearchService getInitializedSearchService()
+   {
+      CmisSchema schema = new CmisSchema(this);
+      CmisSchemaTableResolver tableResolver = new CmisSchemaTableResolver(new ToStringNameConverter(), schema, this);
+
+      IndexConfiguration indexConfiguration = new IndexConfiguration();
+      indexConfiguration.setQueryableIndexStorage("org.xcmis.search.lucene.InMemoryLuceneQueryableIndexStorage");
+      //indexConfiguration.setIndexDir("/tmp/dir/" + UUID.randomUUID().toString() + "/");
+      indexConfiguration.setRootUuid(this.getRepositoryInfo().getRootFolderId());
+      //if list of root parents is empty it will be indexed as empty string
+      indexConfiguration.setRootParentUuid("");
+      indexConfiguration.setDocumentReaderService(new PredefinedDocumentReaderSercice());
+
+      //default invocation context
+      InvocationContext invocationContext = new InvocationContext();
+      invocationContext.setNameConverter(new ToStringNameConverter());
+
+      invocationContext.setSchema(schema);
+      invocationContext.setPathSplitter(new SlashSplitter());
+
+      invocationContext.setTableResolver(tableResolver);
+
+      SearchServiceConfiguration searchConfiguration = new SearchServiceConfiguration();
+      searchConfiguration.setIndexConfiguration(indexConfiguration);
+      searchConfiguration.setContentReader(new CmisContentReader(this));
+      searchConfiguration.setNameConverter(new ToStringNameConverter());
+      searchConfiguration.setDefaultInvocationContext(invocationContext);
+      searchConfiguration.setTableResolver(tableResolver);
+      searchConfiguration.setPathSplitter(new SlashSplitter());
+
+      try
+      {
+         SearchService searchService = new SearchService(searchConfiguration);
+         searchService.start();
+         return searchService;
+         //attach listener to the created storage
+         //IndexListener indexListener = new IndexListener(this, searchService);
+         //storage.setIndexListener(indexListener);
+
+      }
+      catch (SearchServiceException e)
+      {
+         LOG.error("Unable to initialize storage. ", e);
+      }
+      return null;
+
+   }
+
+   public static class PredefinedDocumentReaderSercice implements DocumentReaderService
+   {
+      private Map<String, BaseDocumentReader> readers;
+
+      /**
+       * 
+       */
+      public PredefinedDocumentReaderSercice()
+      {
+         this.readers = new HashMap<String, BaseDocumentReader>();
+         this.readers.put("application/pdf", new PDFDocumentReader());
+         this.readers.put("application/msword", new MSWordDocumentReader());
+         this.readers.put("application/excel", new MSExcelDocumentReader());
+         this.readers.put("application/vnd.ms-outlook", new MSOutlookDocumentReader());
+         this.readers.put("application/ppt", new PPTDocumentReader());
+         this.readers.put("text/html", new HTMLDocumentReader(null));
+         this.readers.put("text/xml", new XMLDocumentReader());
+         this.readers.put("text/plain", new TextPlainDocumentReader(new InitParams()));
+      }
+
+      /**
+       * @see org.exoplatform.services.document.DocumentReaderService#getContentAsText(java.lang.String, java.io.InputStream)
+       */
+      public String getContentAsText(String mimeType, InputStream is) throws Exception
+      {
+         BaseDocumentReader reader = readers.get(mimeType.toLowerCase());
+         if (reader != null)
+         {
+            return reader.getContentAsText(is);
+         }
+         throw new Exception("Cannot handle the document type: " + mimeType);
+      }
+
+      /**
+       * @see org.exoplatform.services.document.DocumentReaderService#getDocumentReader(java.lang.String)
+       */
+      public DocumentReader getDocumentReader(String mimeType) throws HandlerNotFoundException
+      {
+         BaseDocumentReader reader = readers.get(mimeType.toLowerCase());
+         if (reader != null)
+         {
+            return reader;
+         }
+         else
+         {
+            throw new HandlerNotFoundException("No appropriate properties extractor for " + mimeType);
+         }
+
+      }
+
+   }
+
+   public static class DocumentOrderResultSorter implements Comparator<ScoredRow>
+   {
+
+      /** The selector name. */
+      private final String selectorName;
+
+      private final Map<String, ObjectData> itemCache;
+
+      private final Storage storage;
+
+      /**
+       * The Constructor.
+       *
+       * @param itemMgr the item mgr
+       * @param selectorName the selector name
+       */
+      public DocumentOrderResultSorter(final String selectorName, Storage storage)
+      {
+         this.selectorName = selectorName;
+         this.storage = storage;
+         this.itemCache = new HashMap<String, ObjectData>();
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public int compare(ScoredRow o1, ScoredRow o2)
+      {
+         if (o1.equals(o2))
+         {
+            return 0;
+         }
+         final String path1 = getPath(o1.getNodeIdentifer(selectorName));
+         final String path2 = getPath(o2.getNodeIdentifer(selectorName));
+         // TODO should be checked
+         if (path1 == null || path2 == null)
+         {
+            return 0;
+         }
+         return path1.compareTo(path2);
+      }
+
+      /**
+       * Return comparable location of the object
+       * @param identifer
+       * @return
+       */
+      public String getPath(String identifer)
+      {
+         ObjectData obj = itemCache.get(identifer);
+         if (obj == null)
+         {
+            obj = storage.getObject(identifer);
+            itemCache.put(identifer, obj);
+         }
+         if (obj.getBaseType() == BaseType.FOLDER)
+         {
+            if (((Folder)obj).isRoot())
+            {
+               return obj.getName();
+            }
+         }
+         Folder parent = obj.getParent();
+         if (parent == null)
+         {
+            return obj.getName();
+         }
+         return parent.getPath() + "/" + obj.getName();
+      }
+   }
+
+   /**
+    * Single row from query result.
+    */
+   public static class ResultImpl implements Result
+   {
+
+      private final String id;
+
+      private final String[] properties;
+
+      private final Score score;
+
+      public ResultImpl(String id, String[] properties, Score score)
+      {
+         this.id = id;
+         this.properties = properties;
+         this.score = score;
+      }
+
+      public String[] getPropertyNames()
+      {
+         return properties;
+      }
+
+      public String getObjectId()
+      {
+         return id;
+      }
+
+      public Score getScore()
+      {
+         return score;
+      }
+
+   }
+
+   /**
+    * Iterator over query result's.
+    */
+   private static class QueryResultIterator implements ItemsIterator<Result>
+   {
+
+      private final Iterator<ScoredRow> rows;
+
+      private final Set<SelectorName> selectors;
+
+      private final int size;
+
+      private final org.xcmis.search.model.Query qom;
+
+      private Result next;
+
+      public QueryResultIterator(List<ScoredRow> rows, org.xcmis.search.model.Query qom)
+      {
+         this.size = rows.size();
+         this.rows = rows.iterator();
+         this.selectors = Visitors.getSelectorsReferencedBy(qom);
+         this.qom = qom;
+         fetchNext();
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public boolean hasNext()
+      {
+         return next != null;
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public Result next()
+      {
+         if (next == null)
+         {
+            throw new NoSuchElementException();
+         }
+         Result r = next;
+         fetchNext();
+         return r;
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public void remove()
+      {
+         throw new UnsupportedOperationException("remove");
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public int size()
+      {
+         return size;
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public void skip(int skip) throws NoSuchElementException
+      {
+         while (skip-- > 0)
+         {
+            next();
+         }
+      }
+
+      /**
+       * To fetch next <code>Result</code>.
+       */
+      protected void fetchNext()
+      {
+         next = null;
+         while (next == null && rows.hasNext())
+         {
+            ScoredRow row = rows.next();
+            for (SelectorName selectorName : selectors)
+            {
+               String objectId = row.getNodeIdentifer(selectorName.getName());
+               List<String> properties = null;
+               Score score = null;
+               for (Column column : qom.getColumns())
+               {
+                  //TODO check
+                  if (true)
+                  {
+                     score = new Score(column.getColumnName(), BigDecimal.valueOf(row.getScore()));
+                  }
+                  else
+                  {
+                     if (selectorName.getName().equals(column.getSelectorName()))
+                     {
+                        if (column.getPropertyName() != null)
+                        {
+                           if (properties == null)
+                           {
+                              properties = new ArrayList<String>();
+                           }
+                           properties.add(column.getPropertyName());
+                        }
+                     }
+                  }
+               }
+               next = new ResultImpl(objectId, //
+                  properties == null ? null : properties.toArray(new String[properties.size()]), //
+                  score);
+            }
+         }
+      }
    }
 
 }
