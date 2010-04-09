@@ -18,6 +18,7 @@
  */
 package org.xcmis.search.lucene;
 
+import org.apache.commons.lang.Validate;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
@@ -71,6 +72,8 @@ public class LuceneQueryableIndexStorage extends AbstractLuceneQueryableIndexSto
    public LuceneQueryableIndexStorage(SearchServiceConfiguration serviceConfuguration) throws IndexException
    {
       super(serviceConfuguration);
+      Validate.notNull(serviceConfuguration.getIndexConfuguration().getIndexDir(),
+         "The IndexDir may not be null in IndexConfiguration");
       this.indexDataManager =
          new StartableIndexingService(serviceConfuguration.getIndexConfuguration(), new LuceneRecoverService(this,
             nodeIndexer), new LuceneRestoreService(this, nodeIndexer, serviceConfuguration.getIndexConfuguration()));
