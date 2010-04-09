@@ -249,7 +249,7 @@ class DocumentImpl extends BaseObjectData implements Document
       byte[] bytes = storage.contents.get(getObjectId());
       if (bytes != null)
       {
-         return new BaseContentStream(bytes, getName(), getString(CMIS.CONTENT_STREAM_FILE_NAME));
+         return new BaseContentStream(bytes, getName(), getString(CMIS.CONTENT_STREAM_MIME_TYPE));
       }
       return null;
    }

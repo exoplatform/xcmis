@@ -228,11 +228,17 @@ class FolderImpl extends BaseObjectData implements Folder
          throw new NameConstraintViolationException("Object name may noy be null or empty string.");
       }
 
-      for (ItemsIterator<ObjectData> children = getParent().getChildren(null); children.hasNext();)
+      for (ItemsIterator<ObjectData> iterator = getParent().getChildren(null); iterator.hasNext();)
       {
-         if (name.equals(children.next().getName()))
+         ObjectData object = iterator.next();
+         if (object.getObjectId().equals(getObjectId()))
          {
-            throw new NameConstraintViolationException("Object with name " + name + " already exists in parent folder.");
+            continue;
+         }
+         if (name.equals(object.getName()))
+         {
+            throw new NameConstraintViolationException("Object with name " + name
+               + " already exists in parent folder.");
          }
       }
 
