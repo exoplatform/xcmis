@@ -18,10 +18,13 @@
  */
 package org.xcmis.search.lucene.index;
 
+import org.apache.lucene.analysis.SimpleAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.MultiReader;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.RAMDirectory;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.search.config.IndexConfiguration;
@@ -31,6 +34,7 @@ import org.xcmis.search.lucene.index.merge.DocumentCountAggregatePolicy;
 import org.xcmis.search.lucene.index.merge.MaxCandidatsCountAggrigatePolicy;
 import org.xcmis.search.lucene.index.merge.PendingAggregatePolicy;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
@@ -249,11 +253,12 @@ public class CacheableIndexDataManager extends LocalIndexDataManagerProxy
    public IndexReader getIndexReader() throws IndexException
    {
 
-      synchronized (updateMonitor)
+      synchronized (memoryChains)
       {
-         IndexReader result = super.getIndexReader();
-         synchronized (memoryChains)
+         synchronized (updateMonitor)
          {
+            IndexReader result = super.getIndexReader();
+
             if (memoryChains.size() > 0)
             {
                final List<IndexReader> readers = new ArrayList<IndexReader>(memoryChains.size());
@@ -287,14 +292,27 @@ public class CacheableIndexDataManager extends LocalIndexDataManagerProxy
                {
                   throw new IndexReaderNotFoundException("No readers found");
                }
+
             }
+            if (result == null)
+            {
+               try
+               {
+                  RAMDirectory directory = new RAMDirectory();
+                  IndexWriter.MaxFieldLength fieldLength =
+                     new IndexWriter.MaxFieldLength(IndexWriter.DEFAULT_MAX_FIELD_LENGTH);
+                  IndexWriter iw = new IndexWriter(directory, new SimpleAnalyzer(), true, fieldLength);
+                  iw.close();
+                  result = IndexReader.open(directory);
+               }
+               catch (IOException e)
+               {
+                  throw new IndexException("Unable to initialize index: empty index ");
+               }
+
+            }
+            return result;
          }
-         if (result == null)
-         {
-            //TODO check this
-            throw new IndexReaderNotFoundException("No readers found");
-         }
-         return result;
       }
 
    }
