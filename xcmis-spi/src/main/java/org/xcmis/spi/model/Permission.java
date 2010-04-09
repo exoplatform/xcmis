@@ -23,7 +23,7 @@ package org.xcmis.spi.model;
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */
-public interface Permission
+public final class Permission
 {
 
    /** Basic CMIS permission. */
@@ -34,7 +34,7 @@ public interface Permission
       CMIS_WRITE("cmis:write"),
       /** Read permission. */
       CMIS_ALL("cmis:all");
-      
+
       private final String value;
 
       private BasicPermissions(String value)
@@ -52,7 +52,9 @@ public interface Permission
          for (BasicPermissions e : BasicPermissions.values())
          {
             if (e.value.equals(value))
+            {
                return e;
+            }
          }
          throw new IllegalArgumentException(value);
       }
@@ -65,14 +67,43 @@ public interface Permission
 
    }
 
+   private String permission;
+
+   private String description;
+
+   public Permission()
+   {
+   }
+
+   public Permission(String permission, String description)
+   {
+      this.permission = permission;
+      this.description = description;
+   }
+
    /**
     * @return permission name
     */
-   String getPermission();
+   public String getPermission()
+   {
+      return permission;
+   }
 
    /**
     * @return optional permission description
     */
-   String getDescription();
+   public String getDescription()
+   {
+      return description;
+   }
 
+   public void setPermission(String permission)
+   {
+      this.permission = permission;
+   }
+
+   public void setDescription(String description)
+   {
+      this.description = description;
+   }
 }

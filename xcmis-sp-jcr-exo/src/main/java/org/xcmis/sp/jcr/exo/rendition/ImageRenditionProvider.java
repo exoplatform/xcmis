@@ -20,7 +20,7 @@
 package org.xcmis.sp.jcr.exo.rendition;
 
 
-import org.xcmis.spi.data.ContentStream;
+import org.xcmis.spi.ContentStream;
 
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;

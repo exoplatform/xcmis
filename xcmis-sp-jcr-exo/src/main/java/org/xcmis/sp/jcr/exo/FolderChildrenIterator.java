@@ -23,7 +23,7 @@ import org.exoplatform.services.jcr.impl.core.NodeImpl;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.spi.ItemsIterator;
-import org.xcmis.spi.data.ObjectData;
+import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.TypeDefinition;
 

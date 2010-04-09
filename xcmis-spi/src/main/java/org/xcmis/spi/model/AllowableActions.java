@@ -23,64 +23,445 @@ package org.xcmis.spi.model;
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */
-public interface AllowableActions
+public class AllowableActions
 {
-   boolean isCanAddObjectToFolder();
+   private boolean canAddObjectToFolder;
 
-   boolean isCanApplyACL();
+   private boolean canApplyACL;
 
-   boolean isCanApplyPolicy();
+   private boolean canApplyPolicy;
 
-   boolean isCanCancelCheckOut();
+   private boolean canCancelCheckOut;
 
-   boolean isCanCheckIn();
+   private boolean canCheckIn;
 
-   boolean isCanCheckOut();
+   private boolean canCheckOut;
 
-   boolean isCanCreateDocument();
+   private boolean canCreateDocument;
 
-   boolean isCanCreateFolder();
+   private boolean canCreateFolder;
 
-   boolean isCanCreateRelationship();
+   private boolean canCreateRelationship;
 
-   boolean isCanDeleteContentStream();
+   private boolean canDeleteContentStream;
 
-   boolean isCanDeleteObject();
+   private boolean canDeleteObject;
 
-   boolean isCanDeleteTree();
+   private boolean canDeleteTree;
 
-   boolean isCanGetACL();
+   private boolean canGetACL;
 
-   boolean isCanGetAllVersions();
+   private boolean canGetAllVersions;
 
-   boolean isCanGetAppliedPolicies();
+   private boolean canGetAppliedPolicies;
 
-   boolean isCanGetChildren();
+   private boolean canGetChildren;
 
-   boolean isCanGetContentStream();
+   private boolean canGetContentStream;
 
-   boolean isCanGetDescendants();
+   private boolean canGetDescendants;
 
-   boolean isCanGetFolderParent();
+   private boolean canGetFolderParent;
 
-   boolean isCanGetFolderTree();
+   private boolean canGetFolderTree;
 
-   boolean isCanGetObjectParents();
+   private boolean canGetObjectParents;
 
-   boolean isCanGetObjectRelationships();
+   private boolean canGetObjectRelationships;
 
-   boolean isCanGetProperties();
+   private boolean canGetProperties;
 
-   boolean isCanGetRenditions();
+   private boolean canGetRenditions;
 
-   boolean isCanMoveObject();
+   private boolean canMoveObject;
 
-   boolean isCanRemoveObjectFromFolder();
+   private boolean canRemoveObjectFromFolder;
 
-   boolean isCanRemovePolicy();
+   private boolean canRemovePolicy;
 
-   boolean isCanSetContentStream();
+   private boolean canSetContentStream;
 
-   boolean isCanUpdateProperties();
+   private boolean canUpdateProperties;
+
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isCanAddObjectToFolder()
+   {
+      return canAddObjectToFolder;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isCanApplyACL()
+   {
+      return canApplyACL;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isCanApplyPolicy()
+   {
+      return canApplyPolicy;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isCanCancelCheckOut()
+   {
+      return canCancelCheckOut;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isCanCheckIn()
+   {
+      return canCheckIn;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isCanCheckOut()
+   {
+      return canCheckOut;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isCanCreateDocument()
+   {
+      return canCreateDocument;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isCanCreateFolder()
+   {
+      return canCreateFolder;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isCanCreateRelationship()
+   {
+      return canCreateRelationship;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isCanDeleteContentStream()
+   {
+      return canDeleteContentStream;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isCanDeleteObject()
+   {
+      return canDeleteObject;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isCanDeleteTree()
+   {
+      return canDeleteTree;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isCanGetACL()
+   {
+      return canGetACL;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isCanGetAllVersions()
+   {
+      return canGetAllVersions;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isCanGetAppliedPolicies()
+   {
+      return canGetAppliedPolicies;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isCanGetChildren()
+   {
+      return canGetChildren;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isCanGetContentStream()
+   {
+      return canGetContentStream;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isCanGetDescendants()
+   {
+      return canGetDescendants;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isCanGetFolderParent()
+   {
+      return canGetFolderParent;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isCanGetFolderTree()
+   {
+      return canGetFolderTree;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isCanGetObjectParents()
+   {
+      return canGetObjectParents;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isCanGetObjectRelationships()
+   {
+      return canGetObjectRelationships;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+
+   public boolean isCanGetProperties()
+   {
+      return canGetProperties;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isCanGetRenditions()
+   {
+      return canGetRenditions;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isCanMoveObject()
+   {
+      return canMoveObject;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+
+   public boolean isCanRemoveObjectFromFolder()
+   {
+      return canRemoveObjectFromFolder;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isCanRemovePolicy()
+   {
+      return canRemovePolicy;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isCanSetContentStream()
+   {
+      return canSetContentStream;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isCanUpdateProperties()
+   {
+      return canUpdateProperties;
+   }
+
+   // ---- setters
+
+   public void setCanAddObjectToFolder(boolean canAddObjectToFolder)
+   {
+      this.canAddObjectToFolder = canAddObjectToFolder;
+   }
+
+   public void setCanApplyACL(boolean canApplyACL)
+   {
+      this.canApplyACL = canApplyACL;
+   }
+
+   public void setCanApplyPolicy(boolean canApplyPolicy)
+   {
+      this.canApplyPolicy = canApplyPolicy;
+   }
+
+   public void setCanCancelCheckOut(boolean canCancelCheckOut)
+   {
+      this.canCancelCheckOut = canCancelCheckOut;
+   }
+
+   public void setCanCheckIn(boolean canCheckIn)
+   {
+      this.canCheckIn = canCheckIn;
+   }
+
+   public void setCanCheckOut(boolean canCheckOut)
+   {
+      this.canCheckOut = canCheckOut;
+   }
+
+   public void setCanCreateDocument(boolean canCreateDocument)
+   {
+      this.canCreateDocument = canCreateDocument;
+   }
+
+   public void setCanCreateFolder(boolean canCreateFolder)
+   {
+      this.canCreateFolder = canCreateFolder;
+   }
+
+   public void setCanCreateRelationship(boolean canCreateRelationship)
+   {
+      this.canCreateRelationship = canCreateRelationship;
+   }
+
+   public void setCanDeleteContentStream(boolean canDeleteContentStream)
+   {
+      this.canDeleteContentStream = canDeleteContentStream;
+   }
+
+   public void setCanDeleteObject(boolean canDeleteObject)
+   {
+      this.canDeleteObject = canDeleteObject;
+   }
+
+   public void setCanDeleteTree(boolean canDeleteTree)
+   {
+      this.canDeleteTree = canDeleteTree;
+   }
+
+   public void setCanGetACL(boolean canGetACL)
+   {
+      this.canGetACL = canGetACL;
+   }
+
+   public void setCanGetAllVersions(boolean canGetAllVersions)
+   {
+      this.canGetAllVersions = canGetAllVersions;
+   }
+
+   public void setCanGetAppliedPolicies(boolean canGetAppliedPolicies)
+   {
+      this.canGetAppliedPolicies = canGetAppliedPolicies;
+   }
+
+   public void setCanGetChildren(boolean canGetChildren)
+   {
+      this.canGetChildren = canGetChildren;
+   }
+
+   public void setCanGetContentStream(boolean canGetContentStream)
+   {
+      this.canGetContentStream = canGetContentStream;
+   }
+
+   public void setCanGetDescendants(boolean canGetDescendants)
+   {
+      this.canGetDescendants = canGetDescendants;
+   }
+
+   public void setCanGetFolderParent(boolean canGetFolderParent)
+   {
+      this.canGetFolderParent = canGetFolderParent;
+   }
+
+   public void setCanGetFolderTree(boolean canGetFolderTree)
+   {
+      this.canGetFolderTree = canGetFolderTree;
+   }
+
+   public void setCanGetObjectParents(boolean canGetObjectParents)
+   {
+      this.canGetObjectParents = canGetObjectParents;
+   }
+
+   public void setCanGetObjectRelationships(boolean canGetObjectRelationships)
+   {
+      this.canGetObjectRelationships = canGetObjectRelationships;
+   }
+
+   public void setCanGetProperties(boolean canGetProperties)
+   {
+      this.canGetProperties = canGetProperties;
+   }
+
+   public void setCanGetRenditions(boolean canGetRenditions)
+   {
+      this.canGetRenditions = canGetRenditions;
+   }
+
+   public void setCanMoveObject(boolean canMoveObject)
+   {
+      this.canMoveObject = canMoveObject;
+   }
+
+   public void setCanRemoveObjectFromFolder(boolean canRemoveObjectFromFolder)
+   {
+      this.canRemoveObjectFromFolder = canRemoveObjectFromFolder;
+   }
+
+   public void setCanRemovePolicy(boolean canRemovePolicy)
+   {
+      this.canRemovePolicy = canRemovePolicy;
+   }
+
+   public void setCanSetContentStream(boolean canSetContentStream)
+   {
+      this.canSetContentStream = canSetContentStream;
+   }
+
+   public void setCanUpdateProperties(boolean canUpdateProperties)
+   {
+      this.canUpdateProperties = canUpdateProperties;
+   }
 
 }

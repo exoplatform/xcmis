@@ -29,9 +29,9 @@ import org.xcmis.messaging.CmisContentStreamType;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.VersioningServicePort;
+import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.StorageProvider;
-import org.xcmis.spi.data.BaseContentStream;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.IncludeRelationships;
 

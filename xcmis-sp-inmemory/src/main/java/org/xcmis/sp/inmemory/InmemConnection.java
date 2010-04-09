@@ -20,9 +20,9 @@
 package org.xcmis.sp.inmemory;
 
 import org.xcmis.spi.Connection;
+import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.Storage;
 import org.xcmis.spi.UpdateConflictException;
-import org.xcmis.spi.data.ObjectData;
 
 /**
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>

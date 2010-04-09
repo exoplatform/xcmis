@@ -19,7 +19,6 @@
 
 package org.xcmis.spi;
 
-import org.xcmis.spi.data.ObjectData;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>

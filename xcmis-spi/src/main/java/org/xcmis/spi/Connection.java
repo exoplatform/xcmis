@@ -21,12 +21,6 @@ package org.xcmis.spi;
 
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.spi.data.ContentStream;
-import org.xcmis.spi.data.Document;
-import org.xcmis.spi.data.Folder;
-import org.xcmis.spi.data.ObjectData;
-import org.xcmis.spi.data.Policy;
-import org.xcmis.spi.data.Relationship;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.AccessControlPropagation;
 import org.xcmis.spi.model.AllowableActions;
@@ -45,7 +39,6 @@ import org.xcmis.spi.model.UnfileObject;
 import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.model.impl.CmisObjectImpl;
 import org.xcmis.spi.model.impl.DecimalProperty;
-import org.xcmis.spi.model.impl.ObjectParentImpl;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 import org.xcmis.spi.query.Score;
@@ -2054,7 +2047,7 @@ public abstract class Connection
                parsedPropertyFilter, parsedRenditionFilter);
 
          ObjectParent parentType =
-            new ObjectParentImpl(cmisParent, includeRelativePathSegment ? parent.getName() : null);
+            new ObjectParent(cmisParent, includeRelativePathSegment ? parent.getName() : null);
 
          cmisParents.add(parentType);
       }

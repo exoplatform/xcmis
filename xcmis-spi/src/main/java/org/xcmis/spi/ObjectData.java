@@ -17,15 +17,8 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.xcmis.spi.data;
+package org.xcmis.spi;
 
-import org.xcmis.spi.CmisVisitor;
-import org.xcmis.spi.ConstraintException;
-import org.xcmis.spi.ItemsIterator;
-import org.xcmis.spi.NameConstraintViolationException;
-import org.xcmis.spi.NotSupportedException;
-import org.xcmis.spi.PropertyFilter;
-import org.xcmis.spi.Storage;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.Property;

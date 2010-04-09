@@ -25,7 +25,6 @@ import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.apache.abdera.parser.stax.FOMExtensibleElement;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.spi.model.AccessControlEntry;
-import org.xcmis.spi.model.impl.AccessControlEntryImpl;
 
 import java.util.List;
 
@@ -99,7 +98,7 @@ public class AccessControlEntryTypeElement extends ExtensibleElementWrapper
    public AccessControlEntry getACE()
    {
 
-      AccessControlEntryImpl accessControlEntry = new AccessControlEntryImpl();
+      AccessControlEntry accessControlEntry = new AccessControlEntry();
 
       // PRINCIPAL
       FOMExtensibleElement principalElement = getExtension(AtomCMIS.PRINCIPAL);

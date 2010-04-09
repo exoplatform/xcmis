@@ -57,9 +57,9 @@ import org.xcmis.messaging.CmisObjectParentsType;
 import org.xcmis.messaging.CmisRepositoryEntryType;
 import org.xcmis.messaging.CmisTypeContainer;
 import org.xcmis.messaging.CmisTypeDefinitionListType;
+import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ItemsTree;
-import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.model.ACLCapability;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.AllowableActions;
@@ -76,7 +76,6 @@ import org.xcmis.spi.model.RepositoryCapabilities;
 import org.xcmis.spi.model.RepositoryInfo;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.Updatability;
-import org.xcmis.spi.model.impl.AccessControlEntryImpl;
 import org.xcmis.spi.model.impl.BooleanProperty;
 import org.xcmis.spi.model.impl.DateTimeProperty;
 import org.xcmis.spi.model.impl.DecimalProperty;
@@ -125,7 +124,7 @@ public class TypeConverter
 
    public static AccessControlEntry getAccessControlEntry(CmisAccessControlEntryType source)
    {
-      AccessControlEntryImpl res = new AccessControlEntryImpl();
+      AccessControlEntry res = new AccessControlEntry();
       res.getPermissions().addAll(source.getPermission());
       res.setPrincipal(source.getPrincipal().getPrincipalId());
       return res;

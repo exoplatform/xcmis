@@ -20,24 +20,60 @@
 package org.xcmis.spi.model;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Describes set user's permission.
- * 
+ *
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */
-public interface AccessControlEntry
+public final class AccessControlEntry
 {
 
-   /**
-    * @return user principal
-    */
-   String getPrincipal();
+   private String principal;
+
+   private Set<String> permissions;
+
+   public AccessControlEntry()
+   {
+   }
+
+   public AccessControlEntry(String principal, Set<String> permissions)
+   {
+      this.principal = principal;
+      this.permissions = permissions;
+   }
 
    /**
     * @return principal's permissions
     */
-   Collection<String> getPermissions();
+   public Collection<String> getPermissions()
+   {
+      if (permissions == null)
+      {
+         permissions = new HashSet<String>();
+      }
+      return permissions;
+   }
+
+   /**
+    * @return user principal
+    */
+   public String getPrincipal()
+   {
+      return principal;
+   }
+
+   public void setPrincipal(String principal)
+   {
+      this.principal = principal;
+   }
+
+   public String toString()
+   {
+      return "principal: " + principal + ", permissions: " + permissions;
+   }
 
 }

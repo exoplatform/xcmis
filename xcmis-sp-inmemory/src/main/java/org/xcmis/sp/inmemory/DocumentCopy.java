@@ -21,13 +21,13 @@ package org.xcmis.sp.inmemory;
 
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.CmisRuntimeException;
+import org.xcmis.spi.ContentStream;
+import org.xcmis.spi.Document;
+import org.xcmis.spi.Folder;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
+import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.data.ContentStream;
-import org.xcmis.spi.data.Document;
-import org.xcmis.spi.data.Folder;
-import org.xcmis.spi.data.ObjectData;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.VersioningState;
 

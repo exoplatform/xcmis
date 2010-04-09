@@ -19,12 +19,12 @@
 
 package org.xcmis.sp.inmemory.query;
 
+import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.ContentStream;
+import org.xcmis.spi.Document;
+import org.xcmis.spi.Folder;
 import org.xcmis.spi.ItemsIterator;
-import org.xcmis.spi.data.BaseContentStream;
-import org.xcmis.spi.data.ContentStream;
-import org.xcmis.spi.data.Document;
-import org.xcmis.spi.data.Folder;
 import org.xcmis.spi.model.UnfileObject;
 import org.xcmis.spi.model.impl.BooleanProperty;
 import org.xcmis.spi.model.impl.DecimalProperty;
@@ -39,7 +39,7 @@ import java.util.List;
 /**
  * Created by The eXo Platform SAS. <br/>
  * Date:
- * 
+ *
  * @author <a href="karpenko.sergiy@gmail.com">Karpenko Sergiy</a>
  * @version $Id: QueryUsecasesTest.java 27 2010-02-08 07:49:20Z andrew00x $
  */
@@ -95,7 +95,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * exo:Commander is Frank F. Borman, II or James A. Lovell, Jr.
     * <p>
     * Expected result: document2 and document3
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testAndOrConstraint() throws Exception
@@ -133,7 +133,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Select all documents that are in folder1.
     * <p>
     * Expected result: doc1
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testDocumentInFolderConstrain() throws Exception
@@ -175,7 +175,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Select all folders that are in folder1.
     * <p>
     * Expected result: folder3
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testFolderInFolderConstrain() throws Exception
@@ -215,7 +215,7 @@ public class QueryUsecasesTest extends BaseQueryTest
    //
    //   /**
    //    * Constraints with multi-valued properties is not supported.
-   //    * 
+   //    *
    //    * @throws Exception
    //    */
    //   // XXX temporary excluded
@@ -259,7 +259,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Select all documents where data contains "moon" word.
     * <p>
     * Expected result: document1 and document2
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testFulltextConstraint() throws Exception
@@ -296,7 +296,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * 'Vasya' }.
     * <p>
     * Expected result: document2 and document3
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testINConstraint() throws Exception
@@ -331,7 +331,7 @@ public class QueryUsecasesTest extends BaseQueryTest
    //    * document parentFolderName.
    //    * <p>
    //    * Expected result: doc1 and folder1
-   //    * 
+   //    *
    //    * @throws Exception if an unexpected error occurs
    //    */
    //   // XXX temporary excluded
@@ -374,7 +374,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Select all documents where prop begins with "ad".
     * <p>
     * Expected result: doc1, doc2
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testLIKEConstraint() throws Exception
@@ -406,7 +406,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Select all documents where prop like 'ad\\%min%'.
     * <p>
     * Expected result: doc1
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testLIKEConstraintEscapeSymbols() throws Exception
@@ -452,7 +452,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Select all documents that not contains "world" word.
     * <p>
     * Expected result: doc2
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testNOTConstraint() throws Exception
@@ -485,7 +485,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Select all documents where long property not in set {15 , 20}.
     * <p>
     * Expected result: doc1
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testNotINConstraint() throws Exception
@@ -516,7 +516,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * IN).
     * <p>
     * Expected result: doc2
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testNotNotINConstraint() throws Exception
@@ -546,7 +546,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Order by exo:Commander property value
     * <p>
     * Expected result: doc2
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testOrderByFieldDesc() throws Exception
@@ -587,7 +587,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * ascending.
     * <p>
     * Expected result: doc2, doc3, doc1
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testOrderByFieldAsk() throws Exception
@@ -628,7 +628,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * ascending.
     * <p>
     * Expected result: doc3, doc1, doc2
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testOrderByDefault() throws Exception
@@ -666,7 +666,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * ascending.
     * <p>
     * Expected result: doc3, doc1, doc2
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testOrderByScore() throws Exception
@@ -708,7 +708,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Select all documents that has "prop" property (IS NOT NULL).
     * <p>
     * Expected result: doc1
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testPropertyExistence() throws Exception
@@ -743,7 +743,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * search score .
     * <p>
     * Expected result: doc1 and doc2 score numbers.
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testScoreAsColumn() throws Exception
@@ -782,7 +782,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Select all documents that are in tree of folder1.
     * <p>
     * Expected result: doc1,doc2.
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testTreeConstrain() throws Exception
@@ -816,7 +816,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Select all documents property long not equal to 3.
     * <p>
     * Expected result: doc2.
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testNotEqualDecimal() throws Exception
@@ -857,7 +857,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Select all documents property long more than 5.
     * <p>
     * Expected result: doc2.
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testMoreThanDecimal() throws Exception
@@ -901,7 +901,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * "test word second".
     * <p>
     * Expected result: doc1.
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testNotEqualString() throws Exception
@@ -944,7 +944,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Select all documents that contains "here" word.
     * <p>
     * Expected result: doc2.
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testSimpleFulltext() throws Exception
@@ -988,7 +988,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * contain "check-word" word.
     * <p>
     * Expected result: doc1.
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testExtendedFulltext() throws Exception
@@ -1066,7 +1066,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Select all documents where boolprop equal to false.
     * <p>
     * Expected result: doc2.
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testBooleanConstraint() throws Exception
@@ -1104,7 +1104,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Select all documents where dateProp more than 2007-01-01.
     * <p>
     * Expected result: doc2.
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testDateConstraint() throws Exception
@@ -1136,7 +1136,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Select all CMIS_DOCUMENTS.
     * <p>
     * Expected result: document1 and document1
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testSimpleQuery() throws Exception
@@ -1159,7 +1159,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Select all documents where data contains "moon" word.
     * <p>
     * Expected result: document1 and document2
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testUpdateFulltextConstraint() throws Exception
@@ -1237,7 +1237,7 @@ public class QueryUsecasesTest extends BaseQueryTest
 
    /**
     * Create content for Apollo program.
-    * 
+    *
     * @param folder
     * @return
     * @throws Exception

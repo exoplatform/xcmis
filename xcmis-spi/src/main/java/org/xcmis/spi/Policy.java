@@ -17,44 +17,21 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.xcmis.spi.model.impl;
+package org.xcmis.spi;
 
-import org.xcmis.spi.model.CmisObject;
-import org.xcmis.spi.model.ObjectParent;
 
 /**
- * Simple plain implementation of {@link ObjectParent}.
- * 
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */
-public class ObjectParentImpl implements ObjectParent
+public interface Policy extends ObjectData
 {
 
-   private CmisObject parent;
-
-   private String relativePathSegment;
-
-   public ObjectParentImpl(CmisObject parent, String relativePathSegment)
-   {
-      this.parent = parent;
-      this.relativePathSegment = relativePathSegment;
-   }
-
    /**
-    * {@inheritDoc}
+    * Value of 'cmis:policyText' property.
+    * 
+    * @return 'cmis:policyText' property
     */
-   public CmisObject getObject()
-   {
-      return parent;
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public String getRelativePathSegment()
-   {
-      return relativePathSegment;
-   }
+   String getPolicyText();
 
 }

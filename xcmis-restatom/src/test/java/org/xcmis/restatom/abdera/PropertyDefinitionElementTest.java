@@ -25,10 +25,10 @@ import org.w3c.dom.Node;
 import org.xcmis.restatom.AbderaFactory;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.NamespaceResolver;
+import org.xcmis.spi.model.Choice;
 import org.xcmis.spi.model.Precision;
 import org.xcmis.spi.model.PropertyType;
 import org.xcmis.spi.model.Updatability;
-import org.xcmis.spi.model.impl.ChoiceImpl;
 import org.xcmis.spi.model.impl.PropertyDefinitionImpl;
 
 import java.io.ByteArrayInputStream;
@@ -65,11 +65,11 @@ public class PropertyDefinitionElementTest extends TestCase
 
       def.setPropertyType(PropertyType.BOOLEAN);
 
-      ChoiceImpl<Boolean> bc1 = new ChoiceImpl<Boolean>();
+      Choice<Boolean> bc1 = new Choice<Boolean>();
       bc1.setDisplayName("key1");
       bc1.setValues(new Boolean[]{true});
 
-      ChoiceImpl<Boolean> bc2 = new ChoiceImpl<Boolean>();
+      Choice<Boolean> bc2 = new Choice<Boolean>();
       bc2.setDisplayName("key2");
       bc2.setValues(new Boolean[]{true});
 
@@ -119,11 +119,11 @@ public class PropertyDefinitionElementTest extends TestCase
       addCommonAttributes(def);
       def.setPropertyType(PropertyType.DATETIME);
 
-      ChoiceImpl<Calendar> dtc1 = new ChoiceImpl<Calendar>();
+      Choice<Calendar> dtc1 = new Choice<Calendar>();
       dtc1.setDisplayName("key1");
       dtc1.setValues(new Calendar[]{Calendar.getInstance()});
 
-      ChoiceImpl<Calendar> dtc2 = new ChoiceImpl<Calendar>();
+      Choice<Calendar> dtc2 = new Choice<Calendar>();
       dtc2.setDisplayName("key2");
       dtc2.setValues(new Calendar[]{Calendar.getInstance()});
 
@@ -172,11 +172,11 @@ public class PropertyDefinitionElementTest extends TestCase
       def.setPropertyType(PropertyType.DECIMAL);
       def.setDecimalPrecision(Precision.Bit32);
 
-      ChoiceImpl<BigDecimal> d1 = new ChoiceImpl<BigDecimal>();
+      Choice<BigDecimal> d1 = new Choice<BigDecimal>();
       d1.setDisplayName("key1");
       d1.setValues(new BigDecimal[]{BigDecimal.ZERO});
 
-      ChoiceImpl<BigDecimal> d2 = new ChoiceImpl<BigDecimal>();
+      Choice<BigDecimal> d2 = new Choice<BigDecimal>();
       d2.setDisplayName("key2");
       d2.setValues(new BigDecimal[]{BigDecimal.ONE});
 
@@ -226,11 +226,11 @@ public class PropertyDefinitionElementTest extends TestCase
       addCommonAttributes(def);
       def.setPropertyType(PropertyType.ID);
 
-      ChoiceImpl<String> idc1 = new ChoiceImpl<String>();
+      Choice<String> idc1 = new Choice<String>();
       idc1.setDisplayName("key1");
       idc1.setValues(new String[]{"id1"});
 
-      ChoiceImpl<String> idc2 = new ChoiceImpl<String>();
+      Choice<String> idc2 = new Choice<String>();
       idc2.setDisplayName("key2");
       idc2.setValues(new String[]{"id2"});
 
@@ -281,11 +281,11 @@ public class PropertyDefinitionElementTest extends TestCase
       def.setMinInteger(BigInteger.valueOf(Long.MIN_VALUE));
       def.setMaxInteger(BigInteger.valueOf(Long.MAX_VALUE));
 
-      ChoiceImpl<BigInteger> ic1 = new ChoiceImpl<BigInteger>();
+      Choice<BigInteger> ic1 = new Choice<BigInteger>();
       ic1.setDisplayName("key1");
       ic1.setValues(new BigInteger[]{BigInteger.ONE});
 
-      ChoiceImpl<BigInteger> ic2 = new ChoiceImpl<BigInteger>();
+      Choice<BigInteger> ic2 = new Choice<BigInteger>();
       ic2.setDisplayName("key2");
       ic2.setValues(new BigInteger[]{BigInteger.ONE});
 
@@ -338,11 +338,11 @@ public class PropertyDefinitionElementTest extends TestCase
       def.setPropertyType(PropertyType.STRING);
       def.setMaxLength(Integer.valueOf(65536));
 
-      ChoiceImpl<String> sc1 = new ChoiceImpl<String>();
+      Choice<String> sc1 = new Choice<String>();
       sc1.setDisplayName("key1");
       sc1.setValues(new String[]{"string1"});
 
-      ChoiceImpl<String> sc2 = new ChoiceImpl<String>();
+      Choice<String> sc2 = new Choice<String>();
       sc2.setDisplayName("key2");
       sc2.setValues(new String[]{"string2"});
 
@@ -394,11 +394,11 @@ public class PropertyDefinitionElementTest extends TestCase
       addCommonAttributes(def);
       def.setPropertyType(PropertyType.URI);
 
-      ChoiceImpl<String> bc1 = new ChoiceImpl<String>();
+      Choice<String> bc1 = new Choice<String>();
       bc1.setDisplayName("key1");
       bc1.setValues(new String[]{"http://host1/a/b/c/d"});
 
-      ChoiceImpl<String> bc2 = new ChoiceImpl<String>();
+      Choice<String> bc2 = new Choice<String>();
       bc2.setDisplayName("key2");
       bc2.setValues(new String[]{"http://host2/a/b/c/d"});
 

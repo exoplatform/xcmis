@@ -24,7 +24,6 @@ import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.spi.model.Choice;
-import org.xcmis.spi.model.impl.ChoiceImpl;
 
 import java.util.List;
 
@@ -95,7 +94,7 @@ public class ChoiceStringElement extends ChoiceElement<Choice<String>>
    @Override
    public Choice<String> getChoice()
    {
-      ChoiceImpl<String> result = new ChoiceImpl<String>();
+      Choice<String> result = new Choice<String>();
       // VALUES
       List<Element> values = getExtensions(AtomCMIS.VALUE);
       if (values != null && values.size() > 0)

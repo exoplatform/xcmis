@@ -32,12 +32,12 @@ import org.xcmis.core.EnumVersioningState;
 import org.xcmis.messaging.CmisContentStreamType;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.soap.ObjectServicePort;
+import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ChangeTokenHolder;
 import org.xcmis.spi.ConstraintException;
+import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.data.BaseContentStream;
-import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.wssoap.impl.ObjectServicePortImpl;
 

@@ -19,8 +19,6 @@
 
 package org.xcmis.spi;
 
-import org.xcmis.spi.data.ContentStream;
-import org.xcmis.spi.data.ObjectData;
 import org.xcmis.spi.model.Rendition;
 
 /**

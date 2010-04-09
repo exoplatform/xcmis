@@ -19,38 +19,87 @@
 
 package org.xcmis.spi.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Indicates an explicit ordered set of single values allowed for the property.
- * 
+ *
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */
-public interface Choice<T>
+public class Choice<T>
 {
+
+   private T[] values;
+
+   private String displayName;
+
+   private List<Choice<T>> choices;
 
    /**
     * Display name of choice. It is used for presentation purpose.
-    * 
+    *
     * @return choice display name
     */
-   String getDisplayName();
+   public String getDisplayName()
+   {
+      return displayName;
+   }
+
+   public Choice(T[] values, String displayName)
+   {
+      this.values = values;
+      this.displayName = displayName;
+   }
+
+   public Choice()
+   {
+   }
 
    /**
     * Values of choice. One of it will be stored as value of property it
     * selected.
-    * 
+    *
     * @return choice values
     */
-   T[] getValues();
+   public T[] getValues()
+   {
+      return values;
+   }
 
    /**
     * Sub-choices of current choice.
-    * 
+    *
     * @return sub-choices. May give <code>null</code> or empty list if no
     *         sub-choices provided
     */
-   List<Choice<T>> getChoices();
+   public List<Choice<T>> getChoices()
+   {
+      if (choices == null)
+      {
+         choices = new ArrayList<Choice<T>>();
+      }
+      return choices;
+   }
 
+   /**
+    * Set choice values.
+    *
+    * @param values choice values
+    */
+   public void setValues(T[] values)
+   {
+      this.values = values;
+   }
+
+   /**
+    * Set choice display name.
+    *
+    * @param displayName display name
+    */
+   public void setDisplayName(String displayName)
+   {
+      this.displayName = displayName;
+   }
 }

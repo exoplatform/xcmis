@@ -17,12 +17,8 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.xcmis.spi.data;
+package org.xcmis.spi;
 
-import org.xcmis.spi.CMIS;
-import org.xcmis.spi.ConstraintException;
-import org.xcmis.spi.ItemsIterator;
-import org.xcmis.spi.NotSupportedException;
 
 /**
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>

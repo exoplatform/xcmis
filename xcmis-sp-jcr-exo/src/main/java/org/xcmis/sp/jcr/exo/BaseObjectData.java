@@ -35,16 +35,16 @@ import org.xcmis.spi.CMIS;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.CmisVisitor;
 import org.xcmis.spi.ConstraintException;
+import org.xcmis.spi.Document;
+import org.xcmis.spi.Folder;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
+import org.xcmis.spi.ObjectData;
+import org.xcmis.spi.Policy;
 import org.xcmis.spi.PropertyFilter;
+import org.xcmis.spi.Relationship;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.UpdateConflictException;
-import org.xcmis.spi.data.Document;
-import org.xcmis.spi.data.Folder;
-import org.xcmis.spi.data.ObjectData;
-import org.xcmis.spi.data.Policy;
-import org.xcmis.spi.data.Relationship;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.Property;
@@ -54,7 +54,6 @@ import org.xcmis.spi.model.RelationshipDirection;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.Updatability;
 import org.xcmis.spi.model.Permission.BasicPermissions;
-import org.xcmis.spi.model.impl.AccessControlEntryImpl;
 import org.xcmis.spi.model.impl.BooleanProperty;
 import org.xcmis.spi.model.impl.DateTimeProperty;
 import org.xcmis.spi.model.impl.DecimalProperty;
@@ -961,7 +960,7 @@ abstract class BaseObjectData implements ObjectData
 
          for (String principal : cache.keySet())
          {
-            AccessControlEntryImpl cmisACE = new AccessControlEntryImpl();
+            AccessControlEntry cmisACE = new AccessControlEntry();
             cmisACE.setPrincipal(principal);
 
             Set<String> values = cache.get(principal);

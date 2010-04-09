@@ -20,9 +20,8 @@
 package org.xcmis.spi.utils;
 
 import org.xcmis.spi.ItemsIterator;
-import org.xcmis.spi.data.ObjectData;
+import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.model.AccessControlEntry;
-import org.xcmis.spi.model.impl.AccessControlEntryImpl;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -100,7 +99,7 @@ public final class CmisUtils
       {
          for (Map.Entry<String, Set<String>> e : permissions.entrySet())
          {
-            AccessControlEntry ace = new AccessControlEntryImpl(e.getKey(), e.getValue());
+            AccessControlEntry ace = new AccessControlEntry(e.getKey(), e.getValue());
             acl.add(ace);
          }
       }

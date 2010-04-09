@@ -19,25 +19,39 @@
 
 package org.xcmis.spi.model;
 
-
 /**
  * Describe CMIS object parent.
- * 
+ *
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey
  *         Zavizionov</a>
  * @version $Id: CmisObjectParents.java 34360 2009-07-22 23:58:59Z sunman $
  */
-public interface ObjectParent
+public final class ObjectParent
 {
+
+   private CmisObject parent;
+
+   private String relativePathSegment;
+
+   public ObjectParent(CmisObject parent, String relativePathSegment)
+   {
+      this.parent = parent;
+      this.relativePathSegment = relativePathSegment;
+   }
 
    /**
     * @return object's parent
     */
-   CmisObject getObject();
+   public CmisObject getObject()
+   {
+      return parent;
+   }
 
    /**
     * @return relative path segment of the object for which parent was requested
     */
-   String getRelativePathSegment();
-
+   public String getRelativePathSegment()
+   {
+      return relativePathSegment;
+   }
 }

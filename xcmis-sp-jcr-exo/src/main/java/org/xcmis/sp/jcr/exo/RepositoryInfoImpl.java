@@ -36,8 +36,6 @@ import org.xcmis.spi.model.RepositoryCapabilities;
 import org.xcmis.spi.model.RepositoryInfo;
 import org.xcmis.spi.model.SupportedPermissions;
 import org.xcmis.spi.model.Permission.BasicPermissions;
-import org.xcmis.spi.model.impl.PermissionImpl;
-import org.xcmis.spi.model.impl.PermissionMappingImpl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -170,7 +168,7 @@ public class RepositoryInfoImpl implements RepositoryInfo, RepositoryCapabilitie
       List<Permission> p = new ArrayList<Permission>(4);
       for (BasicPermissions b : BasicPermissions.values())
       {
-         p.add(new PermissionImpl(b.value(), ""));
+         p.add(new Permission(b.value(), ""));
       }
 
       PERMISSIONS = Collections.unmodifiableList(p);
@@ -178,7 +176,7 @@ public class RepositoryInfoImpl implements RepositoryInfo, RepositoryCapabilitie
 
    private static PermissionMapping createMapping(String action, String... permissions)
    {
-      return new PermissionMappingImpl(action, Arrays.asList(permissions));
+      return new PermissionMapping(action, Arrays.asList(permissions));
    }
 
    //

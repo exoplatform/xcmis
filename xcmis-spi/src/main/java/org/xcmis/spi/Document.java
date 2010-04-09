@@ -17,13 +17,8 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.xcmis.spi.data;
+package org.xcmis.spi;
 
-import org.xcmis.spi.Connection;
-import org.xcmis.spi.ConstraintException;
-import org.xcmis.spi.StorageException;
-import org.xcmis.spi.UpdateConflictException;
-import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.model.TypeDefinition;
 
 /**

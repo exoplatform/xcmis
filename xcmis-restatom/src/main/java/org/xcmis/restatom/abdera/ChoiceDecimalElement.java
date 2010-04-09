@@ -24,7 +24,6 @@ import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.spi.model.Choice;
-import org.xcmis.spi.model.impl.ChoiceImpl;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -98,7 +97,7 @@ public class ChoiceDecimalElement extends ChoiceElement<Choice<BigDecimal>>
    @Override
    public Choice<BigDecimal> getChoice()
    {
-      ChoiceImpl<BigDecimal> result = new ChoiceImpl<BigDecimal>();
+      Choice<BigDecimal> result = new Choice<BigDecimal>();
       // VALUES
       List<Element> values = getExtensions(AtomCMIS.VALUE);
       if (values != null && values.size() > 0)

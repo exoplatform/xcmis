@@ -24,7 +24,6 @@ import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.spi.model.Choice;
-import org.xcmis.spi.model.impl.ChoiceImpl;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -96,7 +95,7 @@ public class ChoiceIntegerElement extends ChoiceElement<Choice<BigInteger>>
    @Override
    public Choice<BigInteger> getChoice()
    {
-      ChoiceImpl<BigInteger> result = new ChoiceImpl<BigInteger>();
+      Choice<BigInteger> result = new Choice<BigInteger>();
       // VALUES
       List<Element> values = getExtensions(AtomCMIS.VALUE);
       if (values != null && values.size() > 0)

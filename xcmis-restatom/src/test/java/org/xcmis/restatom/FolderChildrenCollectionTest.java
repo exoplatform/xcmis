@@ -24,11 +24,11 @@ import org.exoplatform.services.rest.impl.ContainerResponse;
 import org.exoplatform.services.rest.impl.MultivaluedMapImpl;
 import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
 import org.w3c.dom.NodeList;
+import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ConstraintException;
+import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.data.BaseContentStream;
-import org.xcmis.spi.data.ContentStream;
 import org.xcmis.spi.model.CmisObject;
 
 import java.io.ByteArrayInputStream;

@@ -17,20 +17,26 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.xcmis.spi.data;
+package org.xcmis.spi;
+
 
 /**
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */
-public interface Policy extends ObjectData
+public interface Relationship extends ObjectData
 {
 
    /**
-    * Value of 'cmis:policyText' property.
-    * 
-    * @return 'cmis:policyText' property
+    * @return id of source object of this relationship. This is shortcut to
+    *         'cmis:sourceId' property
     */
-   String getPolicyText();
+   String getSourceId();
+
+   /**
+    * @return id of target object of this relationship. This is shortcut to
+    *         'cmis:targetId' property
+    */
+   String getTargetId();
 
 }

@@ -24,10 +24,10 @@ import org.xcmis.search.content.command.read.GetChildEntriesCommand;
 import org.xcmis.search.content.command.read.GetContentEntryCommand;
 import org.xcmis.search.content.interceptors.ContentReaderInterceptor;
 import org.xcmis.sp.inmemory.query.IndexListener.ContentEntryAdapter;
+import org.xcmis.spi.Folder;
 import org.xcmis.spi.ItemsIterator;
+import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.Storage;
-import org.xcmis.spi.data.Folder;
-import org.xcmis.spi.data.ObjectData;
 
 import java.util.ArrayList;
 import java.util.List;

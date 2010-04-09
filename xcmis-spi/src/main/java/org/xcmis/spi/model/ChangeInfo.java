@@ -19,28 +19,69 @@
 
 package org.xcmis.spi.model;
 
-
 import java.util.Calendar;
 
 /**
  * Info about object changes.
- * 
+ *
  * @see CmisObject#getChangeInfo()
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */
-public interface ChangeInfo
+public final class ChangeInfo
 {
+
+   /** Change time. */
+   private Calendar changeTime;
+
+   /** Change type. */
+   private ChangeType changeType;
+
+   public ChangeInfo()
+   {
+   }
+
+   public ChangeInfo(Calendar changeTime, ChangeType changeType)
+   {
+      this.changeTime = changeTime;
+      this.changeType = changeType;
+   }
+
    /**
     * Get time of change.
-    * 
+    *
     * @return time of object change
     */
-   Calendar getChangeTime();
+   public Calendar getChangeTime()
+   {
+      return changeTime;
+   }
 
    /**
     * @return object change type
     */
-   ChangeType getChangeType();
+   public ChangeType getChangeType()
+   {
+      return changeType;
+   }
 
+   /**
+    * Set date of change.
+    *
+    * @param changeTime date of change
+    */
+   public void setChangeTime(Calendar changeTime)
+   {
+      this.changeTime = changeTime;
+   }
+
+   /**
+    * Set type of change.
+    *
+    * @param changeType change type
+    */
+   public void setChangeType(ChangeType changeType)
+   {
+      this.changeType = changeType;
+   }
 }

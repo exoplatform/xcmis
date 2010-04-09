@@ -19,7 +19,7 @@
 
 package org.xcmis.sp.jcr.exo.rendition;
 
-import org.xcmis.spi.data.ContentStream;
+import org.xcmis.spi.ContentStream;
 
 import java.io.IOException;
 

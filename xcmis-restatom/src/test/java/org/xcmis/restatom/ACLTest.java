@@ -25,7 +25,6 @@ import org.w3c.dom.NodeList;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.AccessControlPropagation;
 import org.xcmis.spi.model.Permission.BasicPermissions;
-import org.xcmis.spi.model.impl.AccessControlEntryImpl;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
@@ -48,12 +47,12 @@ public class ACLTest extends BaseTest
       String docId = createDocument(testFolderId, "doc1", null, null);
 
       List<AccessControlEntry> addACL = new ArrayList<AccessControlEntry>();
-      AccessControlEntryImpl entry1 = new AccessControlEntryImpl();
+      AccessControlEntry entry1 = new AccessControlEntry();
       entry1.setPrincipal("Makis");
       entry1.getPermissions().add(BasicPermissions.CMIS_WRITE.value());
 
       addACL.add(entry1);
-      AccessControlEntryImpl entry2 = new AccessControlEntryImpl();
+      AccessControlEntry entry2 = new AccessControlEntry();
       entry2.setPrincipal("root");
       entry2.getPermissions().add(BasicPermissions.CMIS_READ.value());
       entry2.getPermissions().add(BasicPermissions.CMIS_WRITE.value());

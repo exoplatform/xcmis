@@ -21,13 +21,13 @@ package org.xcmis.sp.jcr.exo;
 
 import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ConstraintException;
+import org.xcmis.spi.ContentStream;
+import org.xcmis.spi.Folder;
 import org.xcmis.spi.NameConstraintViolationException;
+import org.xcmis.spi.ObjectData;
+import org.xcmis.spi.Policy;
+import org.xcmis.spi.Relationship;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.data.ContentStream;
-import org.xcmis.spi.data.Folder;
-import org.xcmis.spi.data.ObjectData;
-import org.xcmis.spi.data.Policy;
-import org.xcmis.spi.data.Relationship;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.TypeDefinition;
 

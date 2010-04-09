@@ -19,12 +19,12 @@
 
 package org.xcmis.sp.jcr.exo.query;
 
+import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CMIS;
+import org.xcmis.spi.ContentStream;
+import org.xcmis.spi.Document;
+import org.xcmis.spi.Folder;
 import org.xcmis.spi.ItemsIterator;
-import org.xcmis.spi.data.BaseContentStream;
-import org.xcmis.spi.data.ContentStream;
-import org.xcmis.spi.data.Document;
-import org.xcmis.spi.data.Folder;
 import org.xcmis.spi.model.UnfileObject;
 import org.xcmis.spi.model.impl.BooleanProperty;
 import org.xcmis.spi.model.impl.DecimalProperty;

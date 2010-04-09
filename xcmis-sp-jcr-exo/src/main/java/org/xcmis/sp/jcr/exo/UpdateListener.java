@@ -25,9 +25,9 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.sp.jcr.exo.rendition.RenditionContentStream;
 import org.xcmis.sp.jcr.exo.rendition.RenditionProvider;
+import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CMIS;
-import org.xcmis.spi.data.BaseContentStream;
-import org.xcmis.spi.data.ContentStream;
+import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.utils.MimeType;
 
 import java.util.Map;
