@@ -29,14 +29,6 @@
          <artifactId>exo.jcr.component.ext</artifactId>
       </dependency>
       <dependency>
-         <groupId>org.antlr</groupId>
-         <artifactId>antlr-runtime</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.antlr</groupId>
-         <artifactId>gunit</artifactId>
-      </dependency>
-      <dependency>
          <groupId>hsqldb</groupId>
          <artifactId>hsqldb</artifactId>
       </dependency>
@@ -55,21 +47,4 @@
          <scope>test</scope>
       </dependency>
    </dependencies>
-<!-- 
-   <build>
-      <plugins>
-         <plugin>
-            <groupId>org.antlr</groupId>
-            <artifactId>antlr3-maven-plugin</artifactId>
-            <executions>
-               <execution>
-                  <goals>
-                     <goal>antlr</goal>
-                  </goals>
-               </execution>
-            </executions>
-         </plugin>
-      </plugins>
-   </build>
-   -->
 </project>
