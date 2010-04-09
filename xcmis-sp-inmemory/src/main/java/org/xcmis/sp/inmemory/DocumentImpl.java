@@ -418,8 +418,9 @@ class DocumentImpl extends BaseObjectData implements Document
       }
 
       String id;
+      boolean isNew = isNew();
 
-      if (isNew())
+      if (isNew)
       {
          id = StorageImpl.generateId();
          String vsId = StorageImpl.generateId();
@@ -519,10 +520,12 @@ class DocumentImpl extends BaseObjectData implements Document
             throw new CmisRuntimeException("Unable add content for document. " + e.getMessage(), e);
          }
       }
-      else if (isNew())
+      else if (isNew)
       {
          storage.contents.put(id, EMPTY_CONTENT);
       }
+
+      contentStream = null;
 
       storage.properties.get(id).putAll(entry.getValues());
       storage.policies.get(id).addAll(entry.getPolicies());
