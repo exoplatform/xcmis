@@ -18,6 +18,7 @@
  */
 package org.xcmis.search.lucene;
 
+import org.apache.lucene.analysis.SimpleAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.CorruptIndexException;
@@ -60,6 +61,26 @@ public class InMemoryLuceneQueryableIndexStorage extends AbstractLuceneQueryable
    {
       super(serviceConfuguration);
       this.ramDirectory = new RAMDirectory();
+      initDirectory();
+   }
+
+   /**
+    * @throws CorruptIndexException
+    * @throws LockObtainFailedException
+    * @throws IOException
+    */
+   private void initDirectory() throws IndexException
+   {
+      try
+      {
+         IndexWriter.MaxFieldLength fieldLength = new IndexWriter.MaxFieldLength(IndexWriter.DEFAULT_MAX_FIELD_LENGTH);
+         IndexWriter iw = new IndexWriter(ramDirectory, new SimpleAnalyzer(), true, fieldLength);
+         iw.close();
+      }
+      catch (IOException e)
+      {
+         throw new IndexException(e.getLocalizedMessage(), e);
+      }
    }
 
    /**
