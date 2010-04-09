@@ -25,8 +25,6 @@ import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
 import org.xcmis.spi.model.ChangeInfo;
-import org.xcmis.spi.model.ChangeType;
-import org.xcmis.spi.model.impl.ChangeInfoImpl;
 
 import java.util.Calendar;
 
@@ -70,7 +68,9 @@ public class ChangeEventTypeElement extends ExtensibleElementWrapper
       if (changeInfo != null)
       {
          if (changeInfo.getChangeType() != null)
+         {
             addSimpleExtension(AtomCMIS.CHANGE_TYPE, changeInfo.getChangeType().value());
+         }
          if (changeInfo.getChangeTime() != null)
          {
             Calendar v = changeInfo.getChangeTime();
@@ -79,15 +79,4 @@ public class ChangeEventTypeElement extends ExtensibleElementWrapper
       }
    }
 
-   public ChangeInfo getChangeInfo()
-   {
-      ChangeInfoImpl changeInfo = new ChangeInfoImpl();
-      String changeTypeString = getSimpleExtension(AtomCMIS.CHANGE_TYPE);
-      if (changeTypeString != null)
-         changeInfo.setChangeType(ChangeType.fromValue(changeTypeString));
-      String changeTimeString = getSimpleExtension(AtomCMIS.CHANGE_TIME);
-      if (changeTimeString != null)
-         changeInfo.setChangeTime(AtomUtils.parseCalendar(changeTimeString));
-      return changeInfo;
-   }
 }
