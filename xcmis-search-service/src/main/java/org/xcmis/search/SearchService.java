@@ -256,7 +256,7 @@ public class SearchService implements Startable, ContentModificationListener, Se
       }
       catch (InvocationTargetException e)
       {
-         throw new SearchServiceException(e.getLocalizedMessage(), e);
+         throw new SearchServiceException(e.getTargetException());
       }
 
    }
