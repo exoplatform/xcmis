@@ -120,7 +120,6 @@
 											<value>
 											   <object type="org.xcmis.sp.jcr.exo.rendition.ImageRenditionProvider"></object>
  											</value>
-
 										</collection>
 									</field>
 								</object>
