@@ -32,7 +32,6 @@ import org.xcmis.spi.model.Precision;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.PropertyType;
 import org.xcmis.spi.model.Updatability;
-import org.xcmis.spi.model.impl.PropertyDefinitionImpl;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -88,12 +87,12 @@ public class PropertyDefinitionTypeElement extends ExtensibleElementWrapper
          throw new InvalidArgumentException("Unable to parse Property Definition element. Unsupported property type: "
             + propertyTypeName);
       }
-      PropertyDefinitionImpl<?> propDef = null;
+      PropertyDefinition<?> propDef = null;
 
       switch (propertyType)
       {
          case BOOLEAN : {
-            PropertyDefinitionImpl<Boolean> defImpl = new PropertyDefinitionImpl<Boolean>();
+            PropertyDefinition<Boolean> defImpl = new PropertyDefinition<Boolean>();
             // DEFAULT VALUE
             FOMExtensibleElement defValueElement = getExtension(AtomCMIS.DEFAULT_VALUE);
             if (defValueElement != null)
@@ -118,7 +117,7 @@ public class PropertyDefinitionTypeElement extends ExtensibleElementWrapper
             break;
          }
          case DATETIME : {
-            PropertyDefinitionImpl<Calendar> defImpl = new PropertyDefinitionImpl<Calendar>();
+            PropertyDefinition<Calendar> defImpl = new PropertyDefinition<Calendar>();
             // DEFAULT VALUE
             FOMExtensibleElement defValueElement = getExtension(AtomCMIS.DEFAULT_VALUE);
             if (defValueElement != null)
@@ -145,7 +144,7 @@ public class PropertyDefinitionTypeElement extends ExtensibleElementWrapper
             break;
          }
          case DECIMAL : {
-            PropertyDefinitionImpl<BigDecimal> defImpl = new PropertyDefinitionImpl<BigDecimal>();
+            PropertyDefinition<BigDecimal> defImpl = new PropertyDefinition<BigDecimal>();
             // DEFAULT VALUE
             FOMExtensibleElement defValueElement = getExtension(AtomCMIS.DEFAULT_VALUE);
             if (defValueElement != null)
@@ -176,7 +175,7 @@ public class PropertyDefinitionTypeElement extends ExtensibleElementWrapper
             break;
          }
          case HTML : {
-            PropertyDefinitionImpl<String> defImpl = new PropertyDefinitionImpl<String>();
+            PropertyDefinition<String> defImpl = new PropertyDefinition<String>();
             // DEFAULT VALUE
             FOMExtensibleElement defValueElement = getExtension(AtomCMIS.DEFAULT_VALUE);
             if (defValueElement != null)
@@ -201,7 +200,7 @@ public class PropertyDefinitionTypeElement extends ExtensibleElementWrapper
             break;
          }
          case ID : {
-            PropertyDefinitionImpl<String> defImpl = new PropertyDefinitionImpl<String>();
+            PropertyDefinition<String> defImpl = new PropertyDefinition<String>();
             // DEFAULT VALUE
             FOMExtensibleElement defValueElement = getExtension(AtomCMIS.DEFAULT_VALUE);
             if (defValueElement != null)
@@ -226,7 +225,7 @@ public class PropertyDefinitionTypeElement extends ExtensibleElementWrapper
             break;
          }
          case STRING : {
-            PropertyDefinitionImpl<String> defImpl = new PropertyDefinitionImpl<String>();
+            PropertyDefinition<String> defImpl = new PropertyDefinition<String>();
             // DEFAULT VALUE
             FOMExtensibleElement defValueElement = getExtension(AtomCMIS.DEFAULT_VALUE);
             if (defValueElement != null)
@@ -253,7 +252,7 @@ public class PropertyDefinitionTypeElement extends ExtensibleElementWrapper
             break;
          }
          case INTEGER : {
-            PropertyDefinitionImpl<BigInteger> defImpl = new PropertyDefinitionImpl<BigInteger>();
+            PropertyDefinition<BigInteger> defImpl = new PropertyDefinition<BigInteger>();
             // DEFAULT VALUE
             FOMExtensibleElement defValueElement = getExtension(AtomCMIS.DEFAULT_VALUE);
             if (defValueElement != null)
@@ -282,7 +281,7 @@ public class PropertyDefinitionTypeElement extends ExtensibleElementWrapper
             break;
          }
          case URI : {
-            PropertyDefinitionImpl<String> defImpl = new PropertyDefinitionImpl<String>();
+            PropertyDefinition<String> defImpl = new PropertyDefinition<String>();
             // DEFAULT VALUE
             FOMExtensibleElement defValueElement = getExtension(AtomCMIS.DEFAULT_VALUE);
             if (defValueElement != null)
@@ -416,7 +415,7 @@ public class PropertyDefinitionTypeElement extends ExtensibleElementWrapper
          switch (propertyType)
          {
             case BOOLEAN : {
-               PropertyDefinitionImpl<Boolean> defImpl = (PropertyDefinitionImpl<Boolean>)propdef;
+               PropertyDefinition<Boolean> defImpl = (PropertyDefinition<Boolean>)propdef;
                // DEFAULT VALUE
                if (defImpl.getDefaultValue() != null && defImpl.getDefaultValue().length != 0)
                {
@@ -439,7 +438,7 @@ public class PropertyDefinitionTypeElement extends ExtensibleElementWrapper
                break;
             }
             case DATETIME : {
-               PropertyDefinitionImpl<Calendar> defImpl = (PropertyDefinitionImpl<Calendar>)propdef;
+               PropertyDefinition<Calendar> defImpl = (PropertyDefinition<Calendar>)propdef;
                // DEFAULT VALUE
                if (defImpl.getDefaultValue() != null && defImpl.getDefaultValue().length != 0)
                {
@@ -467,7 +466,7 @@ public class PropertyDefinitionTypeElement extends ExtensibleElementWrapper
                break;
             }
             case DECIMAL : {
-               PropertyDefinitionImpl<BigDecimal> defImpl = (PropertyDefinitionImpl<BigDecimal>)propdef;
+               PropertyDefinition<BigDecimal> defImpl = (PropertyDefinition<BigDecimal>)propdef;
                // DEFAULT VALUE
                if (defImpl.getDefaultValue() != null && defImpl.getDefaultValue().length != 0)
                {
@@ -506,7 +505,7 @@ public class PropertyDefinitionTypeElement extends ExtensibleElementWrapper
                break;
             }
             case HTML : {
-               PropertyDefinitionImpl<String> defImpl = (PropertyDefinitionImpl<String>)propdef;
+               PropertyDefinition<String> defImpl = (PropertyDefinition<String>)propdef;
                // DEFAULT VALUE
                if (defImpl.getDefaultValue() != null && defImpl.getDefaultValue().length != 0)
                {
@@ -529,7 +528,7 @@ public class PropertyDefinitionTypeElement extends ExtensibleElementWrapper
                break;
             }
             case ID : {
-               PropertyDefinitionImpl<String> defImpl = (PropertyDefinitionImpl<String>)propdef;
+               PropertyDefinition<String> defImpl = (PropertyDefinition<String>)propdef;
                // DEFAULT VALUE
                if (defImpl.getDefaultValue() != null && defImpl.getDefaultValue().length != 0)
                {
@@ -552,7 +551,7 @@ public class PropertyDefinitionTypeElement extends ExtensibleElementWrapper
                break;
             }
             case STRING : {
-               PropertyDefinitionImpl<String> defImpl = (PropertyDefinitionImpl<String>)propdef;
+               PropertyDefinition<String> defImpl = (PropertyDefinition<String>)propdef;
                // DEFAULT VALUE
                if (defImpl.getDefaultValue() != null && defImpl.getDefaultValue().length != 0)
                {
@@ -577,7 +576,7 @@ public class PropertyDefinitionTypeElement extends ExtensibleElementWrapper
                break;
             }
             case INTEGER : {
-               PropertyDefinitionImpl<BigInteger> defImpl = (PropertyDefinitionImpl<BigInteger>)propdef;
+               PropertyDefinition<BigInteger> defImpl = (PropertyDefinition<BigInteger>)propdef;
                // DEFAULT VALUE
                if (defImpl.getDefaultValue() != null && defImpl.getDefaultValue().length != 0)
                {
@@ -610,7 +609,7 @@ public class PropertyDefinitionTypeElement extends ExtensibleElementWrapper
                break;
             }
             case URI : {
-               PropertyDefinitionImpl<String> defImpl = (PropertyDefinitionImpl<String>)propdef;
+               PropertyDefinition<String> defImpl = (PropertyDefinition<String>)propdef;
                // DEFAULT VALUE
                if (defImpl.getDefaultValue() != null && defImpl.getDefaultValue().length != 0)
                {

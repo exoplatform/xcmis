@@ -27,7 +27,7 @@ import org.xcmis.messaging.Query;
 import org.xcmis.messaging.QueryResponse;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.DiscoveryServicePort;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ChangeLogTokenHolder;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.StorageProvider;
@@ -92,7 +92,7 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
             parameters.getRenditionFilter() == null || parameters.getRenditionFilter().isNil() ? null : parameters
                .getRenditionFilter().getValue();
          int maxItems =
-            parameters.getMaxItems() == null || parameters.getMaxItems().isNil() ? CMIS.MAX_ITEMS : parameters
+            parameters.getMaxItems() == null || parameters.getMaxItems().isNil() ? CmisConstants.MAX_ITEMS : parameters
                .getMaxItems().getValue().intValue();
          int skipCount =
             parameters.getSkipCount() == null || parameters.getSkipCount().isNil() ? 0 : parameters.getSkipCount()
@@ -144,7 +144,7 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
                propertyFilter, //
                includePolicyIds == null ? false : includePolicyIds, //
                includeACL == null ? false : includeACL, //
-               true, maxItems == null ? CMIS.MAX_ITEMS : maxItems.intValue()));
+               true, maxItems == null ? CmisConstants.MAX_ITEMS : maxItems.intValue()));
       }
       catch (Exception e)
       {

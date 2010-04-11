@@ -29,7 +29,7 @@ import org.apache.abdera.protocol.server.TargetType;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.abdera.ObjectTypeElement;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FilterNotValidException;
@@ -48,7 +48,6 @@ import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.VersioningState;
-import org.xcmis.spi.model.impl.CmisObjectImpl;
 import org.xcmis.spi.model.impl.IdProperty;
 
 import java.util.HashMap;
@@ -95,8 +94,8 @@ public class FolderChildrenCollection extends CmisObjectCollection
          String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS);
          throw new ResponseContextException(msg, 400);
       }
-      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CMIS.MAX_ITEMS);
-      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CMIS.SKIP_COUNT);
+      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CmisConstants.MAX_ITEMS);
+      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CmisConstants.SKIP_COUNT);
       boolean includePathSegments = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PATH_SEGMENT, false);
       // XXX At the moment get all properties from back-end. We need some of them for build correct feed.
       // Filter will be applied during build final Atom Document.
@@ -193,18 +192,18 @@ public class FolderChildrenCollection extends CmisObjectCollection
 
       ObjectTypeElement objectElement = entry.getFirstChild(AtomCMIS.OBJECT);
       boolean hasCMISElement = objectElement != null;
-      CmisObject object = hasCMISElement ? object = objectElement.getObject() : new CmisObjectImpl();
+      CmisObject object = hasCMISElement ? object = objectElement.getObject() : new CmisObject();
       updatePropertiesFromEntry(object, entry);
       if (hasCMISElement)
       {
          for (Property<?> p : object.getProperties().values())
          {
             String pName = p.getId();
-            if (CMIS.OBJECT_TYPE_ID.equals(pName))
+            if (CmisConstants.OBJECT_TYPE_ID.equals(pName))
             {
                typeId = ((IdProperty)p).getValues().get(0);
             }
-            else if (CMIS.OBJECT_ID.equals(pName))
+            else if (CmisConstants.OBJECT_ID.equals(pName))
             {
                id = ((IdProperty)p).getValues().get(0);
             }
@@ -213,9 +212,9 @@ public class FolderChildrenCollection extends CmisObjectCollection
       }
       else
       {
-         typeId = CMIS.DOCUMENT;
+         typeId = CmisConstants.DOCUMENT;
          IdProperty idProperty = new IdProperty();
-         idProperty.setId(CMIS.OBJECT_TYPE_ID);
+         idProperty.setId(CmisConstants.OBJECT_TYPE_ID);
          idProperty.getValues().add(typeId);
          object.getProperties().put(idProperty.getId(), idProperty);
       }
@@ -286,7 +285,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
          IncludeRelationships isIncludeRelationships = null;
          boolean isIncludePolicyIDs = false;
          String renditionFilter = null;
-         String propertyFilter = CMIS.WILDCARD;
+         String propertyFilter = CmisConstants.WILDCARD;
          boolean isIncludeAcl = false;
          newObject =
             conn.getObject(objectId, isIncludeAllowableActions, isIncludeRelationships, isIncludePolicyIDs,

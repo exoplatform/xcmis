@@ -1,6 +1,6 @@
 package org.xcmis.spi.model;
 
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.Connection;
 
 import java.util.Calendar;
@@ -128,7 +128,7 @@ public final class ObjectInfo
    }
 
    /**
-    * Property {@link CMIS#OBJECT_ID}.
+    * Property {@link CmisConstants#OBJECT_ID}.
     *
     * @return object id
     */
@@ -138,7 +138,7 @@ public final class ObjectInfo
    }
 
    /**
-    * Property {@link CMIS#NAME}.
+    * Property {@link CmisConstants#NAME}.
     *
     * @return object name
     */
@@ -148,7 +148,7 @@ public final class ObjectInfo
    }
 
    /**
-    * Property {@link CMIS#CREATED_BY}.
+    * Property {@link CmisConstants#CREATED_BY}.
     *
     * @return principal id whose created object
     */
@@ -158,7 +158,7 @@ public final class ObjectInfo
    }
 
    /**
-    * Property {@link CMIS#CREATION_DATE}.
+    * Property {@link CmisConstants#CREATION_DATE}.
     *
     * @return creation date
     */
@@ -168,7 +168,7 @@ public final class ObjectInfo
    }
 
    /**
-    * Property {@link CMIS#LAST_MODIFIED_BY}.
+    * Property {@link CmisConstants#LAST_MODIFIED_BY}.
     *
     * @return principal id whose made last modification
     */
@@ -178,7 +178,7 @@ public final class ObjectInfo
    }
 
    /**
-    * Property {@link CMIS#LAST_MODIFICATION_DATE}.
+    * Property {@link CmisConstants#LAST_MODIFICATION_DATE}.
     *
     * @return last modification date
     */
@@ -188,7 +188,7 @@ public final class ObjectInfo
    }
 
    /**
-    * Property {@link CMIS#CHANGE_TOKEN}.
+    * Property {@link CmisConstants#CHANGE_TOKEN}.
     *
     * @return change token property or <code>null</code> if change token feature
     *         is not supported
@@ -201,7 +201,7 @@ public final class ObjectInfo
    // Folder
 
    /**
-    * Property {@link CMIS#PARENT_ID}.
+    * Property {@link CmisConstants#PARENT_ID}.
     *
     * @return <code>null</code> for object with base type other then
     *         'cmis:folder'
@@ -214,7 +214,7 @@ public final class ObjectInfo
    // Document
 
    /**
-    * Property {@link CMIS#IS_LATEST_VERSION}.
+    * Property {@link CmisConstants#IS_LATEST_VERSION}.
     *
     * @return <code>null</code> for non-document object and always
     *         <code>true</code> versionable document. Not versionable document
@@ -226,7 +226,7 @@ public final class ObjectInfo
    }
 
    /**
-    * Property {@link CMIS#IS_MAJOR_VERSION}.
+    * Property {@link CmisConstants#IS_MAJOR_VERSION}.
     *
     * @return <code>null</code> for non-document object not versionable document
     */
@@ -236,7 +236,7 @@ public final class ObjectInfo
    }
 
    /**
-    * Property {@link CMIS#IS_LATEST_MAJOR_VERSION}.
+    * Property {@link CmisConstants#IS_LATEST_MAJOR_VERSION}.
     *
     * @return <code>null</code> for non-document object or not versionable
     *         document
@@ -247,7 +247,7 @@ public final class ObjectInfo
    }
 
    /**
-    * Property {@link CMIS#VERSION_SERIES_ID}.
+    * Property {@link CmisConstants#VERSION_SERIES_ID}.
     *
     * @return <code>null</code> for non-document object
     */
@@ -257,7 +257,7 @@ public final class ObjectInfo
    }
 
    /**
-    * Property {@link CMIS#VERSION_SERIES_CHECKED_OUT_ID}.
+    * Property {@link CmisConstants#VERSION_SERIES_CHECKED_OUT_ID}.
     *
     * @return id of checked-out document if any. Always <code>null</code> for
     *         non-document object or not versionable document
@@ -268,7 +268,7 @@ public final class ObjectInfo
    }
 
    /**
-    * Property {@link CMIS#VERSION_SERIES_CHECKED_OUT_BY}.
+    * Property {@link CmisConstants#VERSION_SERIES_CHECKED_OUT_BY}.
     *
     * @return principal id whose checked-out document if any. Always
     *         <code>null</code> for non-document object or not versionable
@@ -280,7 +280,7 @@ public final class ObjectInfo
    }
 
    /**
-    * Property {@link CMIS#VERSION_LABEL}.
+    * Property {@link CmisConstants#VERSION_LABEL}.
     *
     * @return <code>null</code> for non-document object
     */
@@ -290,7 +290,7 @@ public final class ObjectInfo
    }
 
    /**
-    * Property {@link CMIS#CONTENT_STREAM_MIME_TYPE}.
+    * Property {@link CmisConstants#CONTENT_STREAM_MIME_TYPE}.
     *
     * @return <code>null</code> for non-document object or document without
     *         content
@@ -303,7 +303,7 @@ public final class ObjectInfo
    // Relationship
 
    /**
-    * Property {@link CMIS#SOURCE_ID}.
+    * Property {@link CmisConstants#SOURCE_ID}.
     *
     * @return <code>null</code> for objects with base type other then
     *         'cmis:relationship'
@@ -314,7 +314,7 @@ public final class ObjectInfo
    }
 
    /**
-    * Property {@link CMIS#TARGET_ID}.
+    * Property {@link CmisConstants#TARGET_ID}.
     *
     * @return <code>null</code> for objects with base type other then
     *         'cmis:relationship'

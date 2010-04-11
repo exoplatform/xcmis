@@ -19,7 +19,7 @@
 
 package org.xcmis.restatom;
 
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 
 import javax.xml.namespace.QName;
 
@@ -27,7 +27,7 @@ import javax.xml.namespace.QName;
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id: AtomCMIS.java 211 2010-02-12 14:12:45Z alexey.zavizionov $
  */
-public interface AtomCMIS extends CMIS
+public interface AtomCMIS extends CmisConstants
 {
    /**
     * Value for &#64;javax.ws.rs.Path on JAX-RS service.

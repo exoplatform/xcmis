@@ -26,7 +26,7 @@ import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.messaging.CmisObjectListType;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.RelationshipServicePort;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.model.RelationshipDirection;
@@ -94,7 +94,7 @@ public class RelationshipServicePortImpl implements RelationshipServicePort
             includeSubRelationshipTypes == null ? false : includeSubRelationshipTypes, //
             includeAllowableActions == null ? false : includeAllowableActions, //
             true, propertyFilter, //
-            maxItems == null ? CMIS.MAX_ITEMS : maxItems.intValue(), //
+            maxItems == null ? CmisConstants.MAX_ITEMS : maxItems.intValue(), //
             skipCount == null ? 0 : skipCount.intValue() //
             ).getItems());
       }

@@ -21,7 +21,7 @@ package org.xcmis.restatom.abdera;
 
 import org.apache.abdera.util.AbstractExtensionFactory;
 import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.model.PropertyType;
 
 import java.util.HashMap;
@@ -44,7 +44,7 @@ public class CMISExtensionFactory extends AbstractExtensionFactory
     */
    public CMISExtensionFactory()
    {
-      super(CMIS.CMIS_NS_URI);
+      super(CmisConstants.CMIS_NS_URI);
       addImpl(AtomCMIS.REPOSITORY_INFO, RepositoryInfoTypeElement.class);
       addImpl(AtomCMIS.CAPABILITIES, RepositoryCapabilitiesTypeElement.class);
       addImpl(AtomCMIS.TYPE, TypeDefinitionTypeElement.class);

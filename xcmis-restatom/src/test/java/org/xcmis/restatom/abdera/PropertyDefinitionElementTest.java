@@ -27,9 +27,9 @@ import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.NamespaceResolver;
 import org.xcmis.spi.model.Choice;
 import org.xcmis.spi.model.Precision;
+import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.PropertyType;
 import org.xcmis.spi.model.Updatability;
-import org.xcmis.spi.model.impl.PropertyDefinitionImpl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -60,7 +60,7 @@ public class PropertyDefinitionElementTest extends TestCase
 
    public void testWriteBoolean() throws Exception
    {
-      PropertyDefinitionImpl<Boolean> def = new PropertyDefinitionImpl<Boolean>();
+      PropertyDefinition<Boolean> def = new PropertyDefinition<Boolean>();
       addCommonAttributes(def);
 
       def.setPropertyType(PropertyType.BOOLEAN);
@@ -115,7 +115,7 @@ public class PropertyDefinitionElementTest extends TestCase
 
    public void testWriteDateTime() throws Exception
    {
-      PropertyDefinitionImpl<Calendar> def = new PropertyDefinitionImpl<Calendar>();
+      PropertyDefinition<Calendar> def = new PropertyDefinition<Calendar>();
       addCommonAttributes(def);
       def.setPropertyType(PropertyType.DATETIME);
 
@@ -167,7 +167,7 @@ public class PropertyDefinitionElementTest extends TestCase
 
    public void testWriteDecimal() throws Exception
    {
-      PropertyDefinitionImpl<BigDecimal> def = new PropertyDefinitionImpl<BigDecimal>();
+      PropertyDefinition<BigDecimal> def = new PropertyDefinition<BigDecimal>();
       addCommonAttributes(def);
       def.setPropertyType(PropertyType.DECIMAL);
       def.setDecimalPrecision(Precision.Bit32);
@@ -222,7 +222,7 @@ public class PropertyDefinitionElementTest extends TestCase
 
    public void testWriteId() throws Exception
    {
-      PropertyDefinitionImpl<String> def = new PropertyDefinitionImpl<String>();
+      PropertyDefinition<String> def = new PropertyDefinition<String>();
       addCommonAttributes(def);
       def.setPropertyType(PropertyType.ID);
 
@@ -275,7 +275,7 @@ public class PropertyDefinitionElementTest extends TestCase
 
    public void testWriteInteger() throws Exception
    {
-      PropertyDefinitionImpl<BigInteger> def = new PropertyDefinitionImpl<BigInteger>();
+      PropertyDefinition<BigInteger> def = new PropertyDefinition<BigInteger>();
       addCommonAttributes(def);
       def.setPropertyType(PropertyType.INTEGER);
       def.setMinInteger(BigInteger.valueOf(Long.MIN_VALUE));
@@ -333,7 +333,7 @@ public class PropertyDefinitionElementTest extends TestCase
 
    public void testWriteString() throws Exception
    {
-      PropertyDefinitionImpl<String> def = new PropertyDefinitionImpl<String>();
+      PropertyDefinition<String> def = new PropertyDefinition<String>();
       addCommonAttributes(def);
       def.setPropertyType(PropertyType.STRING);
       def.setMaxLength(Integer.valueOf(65536));
@@ -390,7 +390,7 @@ public class PropertyDefinitionElementTest extends TestCase
 
    public void testWriteUri() throws Exception
    {
-      PropertyDefinitionImpl<String> def = new PropertyDefinitionImpl<String>();
+      PropertyDefinition<String> def = new PropertyDefinition<String>();
       addCommonAttributes(def);
       def.setPropertyType(PropertyType.URI);
 
@@ -441,7 +441,7 @@ public class PropertyDefinitionElementTest extends TestCase
       assertEquals("http://host2/a", r);
    }
 
-   private void addCommonAttributes(PropertyDefinitionImpl<?> def)
+   private void addCommonAttributes(PropertyDefinition<?> def)
    {
       def.setDescription("description");
       def.setDisplayName("displayName");

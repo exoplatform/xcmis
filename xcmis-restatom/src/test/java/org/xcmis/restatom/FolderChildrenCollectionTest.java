@@ -25,7 +25,7 @@ import org.exoplatform.services.rest.impl.MultivaluedMapImpl;
 import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
 import org.w3c.dom.NodeList;
 import org.xcmis.spi.BaseContentStream;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.ObjectNotFoundException;
@@ -71,7 +71,7 @@ public class FolderChildrenCollectionTest extends BaseTest
    public void testCreateDocument() throws Exception
    {
       String s = "<?xml version='1.0' encoding='utf-8'?>" //
-         + "<entry xmlns='http://www.w3.org/2005/Atom'" + " xmlns:cmis='" + CMIS.CMIS_NS_URI + "'" //
+         + "<entry xmlns='http://www.w3.org/2005/Atom'" + " xmlns:cmis='" + CmisConstants.CMIS_NS_URI + "'" //
          + " xmlns:cmisra='" + AtomCMIS.CMISRA_NS_URI + "'>" //
          + "<title>title</title><summary>summary</summary>" //
          + "<content type='text'>hello</content>" //
@@ -102,7 +102,7 @@ public class FolderChildrenCollectionTest extends BaseTest
    public void testCreateDocumentCmisContent() throws Exception
    {
       String s = "<?xml version='1.0' encoding='utf-8'?>" //
-         + "<entry xmlns='http://www.w3.org/2005/Atom'" + " xmlns:cmis='" + CMIS.CMIS_NS_URI + "'" //
+         + "<entry xmlns='http://www.w3.org/2005/Atom'" + " xmlns:cmis='" + CmisConstants.CMIS_NS_URI + "'" //
          + " xmlns:cmisra='" + AtomCMIS.CMISRA_NS_URI + "'>" //
          + "<title>title</title><summary>summary</summary>" //
          + "<cmisra:content>" //
@@ -140,7 +140,7 @@ public class FolderChildrenCollectionTest extends BaseTest
    public void testCreateFolder() throws Exception
    {
       String s = "<?xml version='1.0' encoding='utf-8'?>" //
-         + "<entry xmlns='http://www.w3.org/2005/Atom' xmlns:cmis='" + CMIS.CMIS_NS_URI + "' "//
+         + "<entry xmlns='http://www.w3.org/2005/Atom' xmlns:cmis='" + CmisConstants.CMIS_NS_URI + "' "//
          + " xmlns:cmisra='" + AtomCMIS.CMISRA_NS_URI + "'>" //
          + "<title>title</title><summary>summary</summary>" //
          + "<cmisra:object><cmis:properties>" //
@@ -359,7 +359,7 @@ public class FolderChildrenCollectionTest extends BaseTest
       String id = createDocument(testFolderId, "doc1", null, null);
 
       String s = "<?xml version='1.0' encoding='utf-8'?>" //
-         + "<entry xmlns='http://www.w3.org/2005/Atom'" + " xmlns:cmis='" + CMIS.CMIS_NS_URI + "'" //
+         + "<entry xmlns='http://www.w3.org/2005/Atom'" + " xmlns:cmis='" + CmisConstants.CMIS_NS_URI + "'" //
          + " xmlns:cmisra='" + AtomCMIS.CMISRA_NS_URI + "'>" //
          + "<title>title</title><summary>summary</summary>" //
          + "<cmisra:object><cmis:properties>" //
@@ -440,7 +440,7 @@ public class FolderChildrenCollectionTest extends BaseTest
    {
       String s = "<?xml version='1.0' encoding='utf-8'?>" //
          + "<entry xmlns='http://www.w3.org/2005/Atom'" //
-         + " xmlns:cmis='" + CMIS.CMIS_NS_URI + "'" //
+         + " xmlns:cmis='" + CmisConstants.CMIS_NS_URI + "'" //
          + " xmlns:cmisra='" + AtomCMIS.CMISRA_NS_URI + "'>" //
          + "<title>title</title><summary>summary</summary>" //
          + "<cmisra:object><cmis:properties>" //

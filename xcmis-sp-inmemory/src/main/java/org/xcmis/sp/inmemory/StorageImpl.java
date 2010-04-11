@@ -54,7 +54,7 @@ import org.xcmis.sp.inmemory.query.CmisSchema;
 import org.xcmis.sp.inmemory.query.CmisSchemaTableResolver;
 import org.xcmis.sp.inmemory.query.IndexListener;
 import org.xcmis.spi.BaseItemsIterator;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.Document;
@@ -83,7 +83,6 @@ import org.xcmis.spi.model.RepositoryInfo;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.UnfileObject;
 import org.xcmis.spi.model.VersioningState;
-import org.xcmis.spi.model.impl.TypeDefinitionImpl;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 import org.xcmis.spi.query.Score;
@@ -141,7 +140,7 @@ public class StorageImpl implements Storage
 
    final Map<String, String> workingCopies;
 
-   final Map<String, TypeDefinitionImpl> types;
+   final Map<String, TypeDefinition> types;
 
    final Map<String, Set<String>> typeChildren;
 
@@ -184,25 +183,25 @@ public class StorageImpl implements Storage
 
       this.permissions = new ConcurrentHashMap<String, Map<String, Set<String>>>();
 
-      this.types = new ConcurrentHashMap<String, TypeDefinitionImpl>();
+      this.types = new ConcurrentHashMap<String, TypeDefinition>();
 
       types.put("cmis:document", //
-         new TypeDefinitionImpl("cmis:document", BaseType.DOCUMENT, "cmis:document", "cmis:document", "", null,
+         new TypeDefinition("cmis:document", BaseType.DOCUMENT, "cmis:document", "cmis:document", "", null,
             "cmis:document", "Cmis Document Type", true, true, false /*no query support yet*/, false, false, true,
             true, true, null, null, ContentStreamAllowed.ALLOWED, null));
 
       types.put("cmis:folder", //
-         new TypeDefinitionImpl("cmis:folder", BaseType.FOLDER, "cmis:folder", "cmis:folder", "", null, "cmis:folder",
+         new TypeDefinition("cmis:folder", BaseType.FOLDER, "cmis:folder", "cmis:folder", "", null, "cmis:folder",
             "Cmis Folder type", true, true, false /*no query support yet*/, false, false, true, true, false, null,
             null, ContentStreamAllowed.NOT_ALLOWED, null));
 
       types.put("cmis:policy", //
-         new TypeDefinitionImpl("cmis:policy", BaseType.POLICY, "cmis:policy", "cmis:policy", "", null, "cmis:policy",
+         new TypeDefinition("cmis:policy", BaseType.POLICY, "cmis:policy", "cmis:policy", "", null, "cmis:policy",
             "Cmis Policy type", true, false, false /*no query support yet*/, false, false, true, true, false, null,
             null, ContentStreamAllowed.NOT_ALLOWED, null));
 
       types.put("cmis:relationship", //
-         new TypeDefinitionImpl("cmis:relationship", BaseType.RELATIONSHIP, "cmis:relationship", "cmis:relationship",
+         new TypeDefinition("cmis:relationship", BaseType.RELATIONSHIP, "cmis:relationship", "cmis:relationship",
             "", null, "cmis:relationship", "Cmis Relationship type.", true, false, false /*no query support yet*/,
             false, false, true, true, false, null, null, ContentStreamAllowed.NOT_ALLOWED, null));
 
@@ -213,21 +212,21 @@ public class StorageImpl implements Storage
       typeChildren.put("cmis:relationship", new HashSet<String>());
 
       Map<String, Value> root = new ConcurrentHashMap<String, Value>();
-      root.put(CMIS.NAME, //
+      root.put(CmisConstants.NAME, //
          new StringValue(""));
-      root.put(CMIS.OBJECT_ID, //
+      root.put(CmisConstants.OBJECT_ID, //
          new StringValue(ROOT_FOLDER_ID));
-      root.put(CMIS.OBJECT_TYPE_ID, //
+      root.put(CmisConstants.OBJECT_TYPE_ID, //
          new StringValue("cmis:folder"));
-      root.put(CMIS.BASE_TYPE_ID, //
+      root.put(CmisConstants.BASE_TYPE_ID, //
          new StringValue(BaseType.FOLDER.value()));
-      root.put(CMIS.CREATION_DATE, //
+      root.put(CmisConstants.CREATION_DATE, //
          new DateValue(Calendar.getInstance()));
-      root.put(CMIS.CREATED_BY, //
+      root.put(CmisConstants.CREATED_BY, //
          new StringValue("system"));
-      root.put(CMIS.LAST_MODIFICATION_DATE, //
+      root.put(CmisConstants.LAST_MODIFICATION_DATE, //
          new DateValue(Calendar.getInstance()));
-      root.put(CMIS.LAST_MODIFIED_BY, //
+      root.put(CmisConstants.LAST_MODIFIED_BY, //
          new StringValue("system"));
 
       properties.put(ROOT_FOLDER_ID, root);
@@ -482,8 +481,8 @@ public class StorageImpl implements Storage
       {
          throw new ObjectNotFoundException("Object " + objectId + "does not exists.");
       }
-      BaseType baseType = BaseType.fromValue(values.get(CMIS.BASE_TYPE_ID).getStrings()[0]);
-      String typeId = values.get(CMIS.OBJECT_TYPE_ID).getStrings()[0];
+      BaseType baseType = BaseType.fromValue(values.get(CmisConstants.BASE_TYPE_ID).getStrings()[0]);
+      String typeId = values.get(CmisConstants.OBJECT_TYPE_ID).getStrings()[0];
       switch (baseType)
       {
          case DOCUMENT :
@@ -660,10 +659,10 @@ public class StorageImpl implements Storage
          throw new InvalidArgumentException("Unable add root type. Parent type id must be specified");
       }
 
-      TypeDefinitionImpl superType;
+      TypeDefinition superType;
       try
       {
-         superType = (TypeDefinitionImpl)getTypeDefinition(type.getParentId(), true);
+         superType = getTypeDefinition(type.getParentId(), true);
       }
       catch (TypeNotFoundException e)
       {
@@ -698,7 +697,7 @@ public class StorageImpl implements Storage
          }
       }
 
-      types.put(type.getId(), (TypeDefinitionImpl)type);
+      types.put(type.getId(), type);
       typeChildren.get(superType.getId()).add(type.getId());
       typeChildren.put(type.getId(), new HashSet<String>());
       PropertyDefinitions.putAll(type.getId(), m);
@@ -741,13 +740,13 @@ public class StorageImpl implements Storage
    public TypeDefinition getTypeDefinition(String typeId, boolean includePropertyDefinition)
       throws TypeNotFoundException, CmisRuntimeException
    {
-      TypeDefinitionImpl type = types.get(typeId);
+      TypeDefinition type = types.get(typeId);
       if (type == null)
       {
          throw new TypeNotFoundException("Type " + typeId + " does not exists.");
       }
-      TypeDefinitionImpl copy =
-         new TypeDefinitionImpl(type.getId(), type.getBaseId(), type.getQueryName(), type.getLocalName(), type
+      TypeDefinition copy =
+         new TypeDefinition(type.getId(), type.getBaseId(), type.getQueryName(), type.getLocalName(), type
             .getLocalNamespace(), type.getParentId(), type.getDisplayName(), type.getDescription(), type.isCreatable(),
             type.isFileable(), type.isQueryable(), type.isFulltextIndexed(), type.isIncludedInSupertypeQuery(), type
                .isControllablePolicy(), type.isControllableACL(), type.isVersionable(), type.getAllowedSourceTypes(),
@@ -762,7 +761,7 @@ public class StorageImpl implements Storage
     */
    public void removeType(String typeId) throws TypeNotFoundException, StorageException, CmisRuntimeException
    {
-      TypeDefinitionImpl type = types.get(typeId);
+      TypeDefinition type = types.get(typeId);
       if (type == null)
       {
          throw new TypeNotFoundException("Type " + typeId + " does not exists.");
@@ -780,7 +779,7 @@ public class StorageImpl implements Storage
 
       for (Iterator<Map<String, Value>> iterator = properties.values().iterator(); iterator.hasNext();)
       {
-         if (typeId.equals(iterator.next().get(CMIS.OBJECT_TYPE_ID).getStrings()[0]))
+         if (typeId.equals(iterator.next().get(CmisConstants.OBJECT_TYPE_ID).getStrings()[0]))
          {
             throw new ConstraintException("Unable remove type definition if at least one object of this type exists.");
          }
@@ -841,7 +840,7 @@ public class StorageImpl implements Storage
 
    public static class PredefinedDocumentReaderSercice implements DocumentReaderService
    {
-      private Map<String, BaseDocumentReader> readers;
+      private final Map<String, BaseDocumentReader> readers;
 
       /**
        *

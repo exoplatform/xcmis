@@ -20,7 +20,7 @@
 package org.xcmis.sp.inmemory;
 
 import org.xcmis.spi.BaseItemsIterator;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.Document;
@@ -248,11 +248,11 @@ class FolderImpl extends BaseObjectData implements Folder
       {
          id = StorageImpl.generateId();
 
-         entry.setValue(CMIS.OBJECT_ID, new StringValue(id));
-         entry.setValue(CMIS.OBJECT_TYPE_ID, new StringValue(getTypeId()));
-         entry.setValue(CMIS.BASE_TYPE_ID, new StringValue(getBaseType().value()));
-         entry.setValue(CMIS.CREATED_BY, new StringValue());
-         entry.setValue(CMIS.CREATION_DATE, new DateValue(Calendar.getInstance()));
+         entry.setValue(CmisConstants.OBJECT_ID, new StringValue(id));
+         entry.setValue(CmisConstants.OBJECT_TYPE_ID, new StringValue(getTypeId()));
+         entry.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(getBaseType().value()));
+         entry.setValue(CmisConstants.CREATED_BY, new StringValue());
+         entry.setValue(CmisConstants.CREATION_DATE, new DateValue(Calendar.getInstance()));
 
          storage.children.get(parent.getObjectId()).add(id);
 
@@ -271,9 +271,9 @@ class FolderImpl extends BaseObjectData implements Folder
          id = getObjectId();
       }
 
-      entry.setValue(CMIS.LAST_MODIFIED_BY, new StringValue());
-      entry.setValue(CMIS.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));
-      entry.setValue(CMIS.CHANGE_TOKEN, new StringValue(StorageImpl.generateId()));
+      entry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue());
+      entry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));
+      entry.setValue(CmisConstants.CHANGE_TOKEN, new StringValue(StorageImpl.generateId()));
 
       storage.properties.get(id).putAll(entry.getValues());
       storage.policies.get(id).addAll(entry.getPolicies());

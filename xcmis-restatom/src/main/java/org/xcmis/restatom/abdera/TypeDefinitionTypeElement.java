@@ -28,7 +28,6 @@ import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.TypeDefinition;
-import org.xcmis.spi.model.impl.TypeDefinitionImpl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -102,7 +101,7 @@ public class TypeDefinitionTypeElement extends ExtensibleElementWrapper
          throw new InvalidArgumentException("Unable to parse Type Definition element. Unknown baseTypeId " + baseId);
       }
 
-      TypeDefinitionImpl type = new TypeDefinitionImpl();
+      TypeDefinition type = new TypeDefinition();
       switch (baseType)
       {
          case DOCUMENT :

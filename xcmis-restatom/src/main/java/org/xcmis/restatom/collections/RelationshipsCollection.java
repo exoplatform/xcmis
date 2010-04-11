@@ -29,7 +29,7 @@ import org.apache.abdera.protocol.server.TargetType;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.abdera.ObjectTypeElement;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FilterNotValidException;
@@ -112,15 +112,15 @@ public class RelationshipsCollection extends CmisObjectCollection
       for (Property<?> p : properties.values())
       {
          String pId = p.getId();
-         if (CMIS.OBJECT_TYPE_ID.equals(pId))
+         if (CmisConstants.OBJECT_TYPE_ID.equals(pId))
          {
             typeId = ((IdProperty)p).getValues().get(0);
          }
-         else if (CMIS.SOURCE_ID.equals(pId))
+         else if (CmisConstants.SOURCE_ID.equals(pId))
          {
             sourceId = ((IdProperty)p).getValues().get(0);
          }
-         else if (CMIS.TARGET_ID.equals(pId))
+         else if (CmisConstants.TARGET_ID.equals(pId))
          {
             targetId = ((IdProperty)p).getValues().get(0);
          }
@@ -150,7 +150,7 @@ public class RelationshipsCollection extends CmisObjectCollection
       {
          conn = getConnection(request);
          relationshipId = conn.createRelationship(properties, addACL, removeACL, policies);
-         relationship = conn.getProperties(relationshipId, true, CMIS.WILDCARD);
+         relationship = conn.getProperties(relationshipId, true, CmisConstants.WILDCARD);
       }
       catch (ConstraintException cve)
       {
@@ -209,8 +209,8 @@ public class RelationshipsCollection extends CmisObjectCollection
       String propertyFilter = null;
       boolean includeSubRelationship = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_SUB_RELATIONSHIP_TYPES, false);
       boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
-      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CMIS.MAX_ITEMS);
-      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CMIS.SKIP_COUNT);
+      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CmisConstants.MAX_ITEMS);
+      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CmisConstants.SKIP_COUNT);
       RelationshipDirection direction;
       try
       {

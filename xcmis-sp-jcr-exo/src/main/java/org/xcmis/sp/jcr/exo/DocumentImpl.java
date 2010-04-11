@@ -24,7 +24,7 @@ import org.exoplatform.services.jcr.core.ExtendedSession;
 import org.exoplatform.services.jcr.util.IdGenerator;
 import org.xcmis.sp.jcr.exo.rendition.RenditionContentStream;
 import org.xcmis.spi.BaseContentStream;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
@@ -205,7 +205,7 @@ class DocumentImpl extends BaseObjectData implements Document
          throw new UnsupportedOperationException("getContentStream");
       }
 
-      if (streamId == null || streamId.equals(getString(CMIS.CONTENT_STREAM_ID)))
+      if (streamId == null || streamId.equals(getString(CmisConstants.CONTENT_STREAM_ID)))
       {
          return getContentStream();
       }
@@ -243,7 +243,7 @@ class DocumentImpl extends BaseObjectData implements Document
     */
    public String getContentStreamMimeType()
    {
-      return getString(CMIS.CONTENT_STREAM_MIME_TYPE);
+      return getString(CmisConstants.CONTENT_STREAM_MIME_TYPE);
    }
 
    /**
@@ -251,7 +251,7 @@ class DocumentImpl extends BaseObjectData implements Document
     */
    public String getVersionLabel()
    {
-      return getString(CMIS.VERSION_LABEL);
+      return getString(CmisConstants.VERSION_LABEL);
    }
 
    /**
@@ -259,7 +259,7 @@ class DocumentImpl extends BaseObjectData implements Document
     */
    public String getVersionSeriesCheckedOutBy()
    {
-      return getString(CMIS.VERSION_SERIES_CHECKED_OUT_BY);
+      return getString(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY);
    }
 
    /**
@@ -267,7 +267,7 @@ class DocumentImpl extends BaseObjectData implements Document
     */
    public String getVersionSeriesCheckedOutId()
    {
-      return getString(CMIS.VERSION_SERIES_CHECKED_OUT_ID);
+      return getString(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID);
    }
 
    /**
@@ -275,7 +275,7 @@ class DocumentImpl extends BaseObjectData implements Document
     */
    public String getVersionSeriesId()
    {
-      return getString(CMIS.VERSION_SERIES_ID);
+      return getString(CmisConstants.VERSION_SERIES_ID);
    }
 
    /**
@@ -314,7 +314,7 @@ class DocumentImpl extends BaseObjectData implements Document
     */
    public boolean isLatestVersion()
    {
-      Boolean latest = getBoolean(CMIS.IS_LATEST_VERSION);
+      Boolean latest = getBoolean(CmisConstants.IS_LATEST_VERSION);
       return latest == null ? true : latest;
    }
 
@@ -323,7 +323,7 @@ class DocumentImpl extends BaseObjectData implements Document
     */
    public boolean isMajorVersion()
    {
-      Boolean major = getBoolean(CMIS.IS_MAJOR_VERSION);
+      Boolean major = getBoolean(CmisConstants.IS_MAJOR_VERSION);
       return major == null ? false : major;
    }
 
@@ -340,7 +340,7 @@ class DocumentImpl extends BaseObjectData implements Document
     */
    public boolean isVersionSeriesCheckedOut()
    {
-      Boolean checkout = getBoolean(CMIS.IS_VERSION_SERIES_CHECKED_OUT);
+      Boolean checkout = getBoolean(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT);
       return checkout == null ? false : checkout;
    }
 
@@ -392,17 +392,17 @@ class DocumentImpl extends BaseObjectData implements Document
             doc.addMixin(JcrCMIS.MIX_VERSIONABLE);
          }
 
-         doc.setProperty(CMIS.OBJECT_TYPE_ID, type.getId());
-         doc.setProperty(CMIS.BASE_TYPE_ID, type.getBaseId().value());
-         doc.setProperty(CMIS.CREATED_BY, session.getUserID());
-         doc.setProperty(CMIS.CREATION_DATE, Calendar.getInstance());
-         doc.setProperty(CMIS.LAST_MODIFIED_BY, session.getUserID());
-         doc.setProperty(CMIS.LAST_MODIFICATION_DATE, Calendar.getInstance());
-         doc.setProperty(CMIS.VERSION_SERIES_ID, doc.getProperty(JcrCMIS.JCR_VERSION_HISTORY).getString());
-         doc.setProperty(CMIS.IS_LATEST_VERSION, true);
-         doc.setProperty(CMIS.IS_MAJOR_VERSION, versioningState == VersioningState.MAJOR);
+         doc.setProperty(CmisConstants.OBJECT_TYPE_ID, type.getId());
+         doc.setProperty(CmisConstants.BASE_TYPE_ID, type.getBaseId().value());
+         doc.setProperty(CmisConstants.CREATED_BY, session.getUserID());
+         doc.setProperty(CmisConstants.CREATION_DATE, Calendar.getInstance());
+         doc.setProperty(CmisConstants.LAST_MODIFIED_BY, session.getUserID());
+         doc.setProperty(CmisConstants.LAST_MODIFICATION_DATE, Calendar.getInstance());
+         doc.setProperty(CmisConstants.VERSION_SERIES_ID, doc.getProperty(JcrCMIS.JCR_VERSION_HISTORY).getString());
+         doc.setProperty(CmisConstants.IS_LATEST_VERSION, true);
+         doc.setProperty(CmisConstants.IS_MAJOR_VERSION, versioningState == VersioningState.MAJOR);
 
-         doc.setProperty(CMIS.VERSION_LABEL, latestLabel);
+         doc.setProperty(CmisConstants.VERSION_LABEL, latestLabel);
 
          // TODO : support for checked-out initial state
 
@@ -510,13 +510,13 @@ class DocumentImpl extends BaseObjectData implements Document
       contentNode.setProperty(JcrCMIS.JCR_LAST_MODIFIED, Calendar.getInstance());
 
       // Update CMIS properties
-      if (content != null && !data.hasProperty(CMIS.CONTENT_STREAM_ID))
+      if (content != null && !data.hasProperty(CmisConstants.CONTENT_STREAM_ID))
       {
          // If new node
-         data.setProperty(CMIS.CONTENT_STREAM_ID, ((ExtendedNode)contentNode).getIdentifier());
+         data.setProperty(CmisConstants.CONTENT_STREAM_ID, ((ExtendedNode)contentNode).getIdentifier());
       }
-      data.setProperty(CMIS.CONTENT_STREAM_LENGTH, contentLength);
-      data.setProperty(CMIS.CONTENT_STREAM_MIME_TYPE, content == null ? null : content.getMediaType());
+      data.setProperty(CmisConstants.CONTENT_STREAM_LENGTH, contentLength);
+      data.setProperty(CmisConstants.CONTENT_STREAM_MIME_TYPE, content == null ? null : content.getMediaType());
    }
 
    /**

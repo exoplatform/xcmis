@@ -20,7 +20,7 @@
 package org.xcmis.sp.inmemory;
 
 import org.xcmis.spi.BaseContentStream;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
@@ -111,8 +111,8 @@ class DocumentImpl extends BaseObjectData implements Document
          {
             String version = iterator.next();
             Map<String, Value> props = storage.properties.get(version);
-            props.put(CMIS.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(false));
-            props.put(CMIS.VERSION_SERIES_CHECKED_OUT_ID, new StringValue());
+            props.put(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(false));
+            props.put(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue());
          }
       }
    }
@@ -140,19 +140,19 @@ class DocumentImpl extends BaseObjectData implements Document
          {
             String version = iterator.next();
             Map<String, Value> props = storage.properties.get(version);
-            props.put(CMIS.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(false));
-            props.put(CMIS.VERSION_SERIES_CHECKED_OUT_ID, new StringValue());
-            props.put(CMIS.IS_LATEST_VERSION, new BooleanValue(false));
+            props.put(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(false));
+            props.put(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue());
+            props.put(CmisConstants.IS_LATEST_VERSION, new BooleanValue(false));
             // update version labels
-            props.put(CMIS.VERSION_LABEL, new StringValue("" + i++));
+            props.put(CmisConstants.VERSION_LABEL, new StringValue("" + i++));
          }
 
-         entry.setValue(CMIS.IS_LATEST_VERSION, new BooleanValue(true));
-         entry.setValue(CMIS.VERSION_LABEL, new StringValue(latestLabel));
-         entry.setValue(CMIS.IS_MAJOR_VERSION, new BooleanValue(major));
+         entry.setValue(CmisConstants.IS_LATEST_VERSION, new BooleanValue(true));
+         entry.setValue(CmisConstants.VERSION_LABEL, new StringValue(latestLabel));
+         entry.setValue(CmisConstants.IS_MAJOR_VERSION, new BooleanValue(major));
          if (checkinComment != null)
          {
-            entry.setValue(CMIS.CHECKIN_COMMENT, new StringValue(checkinComment));
+            entry.setValue(CmisConstants.CHECKIN_COMMENT, new StringValue(checkinComment));
          }
          save();
          storage.workingCopies.remove(getVersionSeriesId());
@@ -188,15 +188,15 @@ class DocumentImpl extends BaseObjectData implements Document
          Entry pwc = new Entry();
          pwc.setValues(entry.getValues());
          String pwcId = StorageImpl.generateId();
-         pwc.setValue(CMIS.OBJECT_ID, new StringValue(pwcId));
-         pwc.setValue(CMIS.CREATED_BY, new StringValue());
-         pwc.setValue(CMIS.CREATION_DATE, new DateValue(Calendar.getInstance()));
-         pwc.setValue(CMIS.IS_LATEST_VERSION, new BooleanValue(false));
-         pwc.setValue(CMIS.IS_MAJOR_VERSION, new BooleanValue(false));
-         pwc.setValue(CMIS.VERSION_LABEL, new StringValue(pwcLabel));
-         pwc.setValue(CMIS.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(true));
-         pwc.setValue(CMIS.VERSION_SERIES_CHECKED_OUT_ID, new StringValue(pwcId));
-         pwc.setValue(CMIS.VERSION_SERIES_CHECKED_OUT_BY, new StringValue());
+         pwc.setValue(CmisConstants.OBJECT_ID, new StringValue(pwcId));
+         pwc.setValue(CmisConstants.CREATED_BY, new StringValue());
+         pwc.setValue(CmisConstants.CREATION_DATE, new DateValue(Calendar.getInstance()));
+         pwc.setValue(CmisConstants.IS_LATEST_VERSION, new BooleanValue(false));
+         pwc.setValue(CmisConstants.IS_MAJOR_VERSION, new BooleanValue(false));
+         pwc.setValue(CmisConstants.VERSION_LABEL, new StringValue(pwcLabel));
+         pwc.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(true));
+         pwc.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue(pwcId));
+         pwc.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, new StringValue());
 
          byte[] content = storage.contents.get(getObjectId());
          byte[] pwcContent;
@@ -215,8 +215,8 @@ class DocumentImpl extends BaseObjectData implements Document
          {
             String version = iterator.next();
             Map<String, Value> props = storage.properties.get(version);
-            props.put(CMIS.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(true));
-            props.put(CMIS.VERSION_SERIES_CHECKED_OUT_ID, new StringValue(pwcId));
+            props.put(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(true));
+            props.put(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue(pwcId));
          }
 
          storage.contents.put(pwcId, pwcContent);
@@ -249,7 +249,7 @@ class DocumentImpl extends BaseObjectData implements Document
       byte[] bytes = storage.contents.get(getObjectId());
       if (bytes != null)
       {
-         return new BaseContentStream(bytes, getName(), getString(CMIS.CONTENT_STREAM_MIME_TYPE));
+         return new BaseContentStream(bytes, getName(), getString(CmisConstants.CONTENT_STREAM_MIME_TYPE));
       }
       return null;
    }
@@ -264,7 +264,7 @@ class DocumentImpl extends BaseObjectData implements Document
          throw new UnsupportedOperationException("getContentStream");
       }
 
-      if (streamId == null || streamId.equals(getString(CMIS.CONTENT_STREAM_ID)))
+      if (streamId == null || streamId.equals(getString(CmisConstants.CONTENT_STREAM_ID)))
       {
          return getContentStream();
       }
@@ -278,7 +278,7 @@ class DocumentImpl extends BaseObjectData implements Document
     */
    public String getContentStreamMimeType()
    {
-      return getString(CMIS.CONTENT_STREAM_MIME_TYPE);
+      return getString(CmisConstants.CONTENT_STREAM_MIME_TYPE);
    }
 
    /**
@@ -286,7 +286,7 @@ class DocumentImpl extends BaseObjectData implements Document
     */
    public String getVersionLabel()
    {
-      return getString(CMIS.VERSION_LABEL);
+      return getString(CmisConstants.VERSION_LABEL);
    }
 
    /**
@@ -294,7 +294,7 @@ class DocumentImpl extends BaseObjectData implements Document
     */
    public String getVersionSeriesCheckedOutBy()
    {
-      return getString(CMIS.VERSION_SERIES_CHECKED_OUT_BY);
+      return getString(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY);
    }
 
    /**
@@ -302,7 +302,7 @@ class DocumentImpl extends BaseObjectData implements Document
     */
    public String getVersionSeriesCheckedOutId()
    {
-      return getString(CMIS.VERSION_SERIES_CHECKED_OUT_ID);
+      return getString(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID);
    }
 
    /**
@@ -310,7 +310,7 @@ class DocumentImpl extends BaseObjectData implements Document
     */
    public String getVersionSeriesId()
    {
-      return getString(CMIS.VERSION_SERIES_ID);
+      return getString(CmisConstants.VERSION_SERIES_ID);
    }
 
    /**
@@ -339,7 +339,7 @@ class DocumentImpl extends BaseObjectData implements Document
     */
    public boolean isLatestVersion()
    {
-      Boolean latest = getBoolean(CMIS.IS_LATEST_VERSION);
+      Boolean latest = getBoolean(CmisConstants.IS_LATEST_VERSION);
       return latest == null ? true : latest;
    }
 
@@ -348,7 +348,7 @@ class DocumentImpl extends BaseObjectData implements Document
     */
    public boolean isMajorVersion()
    {
-      Boolean major = getBoolean(CMIS.IS_MAJOR_VERSION);
+      Boolean major = getBoolean(CmisConstants.IS_MAJOR_VERSION);
       return major == null ? false : major;
    }
 
@@ -370,7 +370,7 @@ class DocumentImpl extends BaseObjectData implements Document
     */
    public boolean isVersionSeriesCheckedOut()
    {
-      Boolean checkout = getBoolean(CMIS.IS_VERSION_SERIES_CHECKED_OUT);
+      Boolean checkout = getBoolean(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT);
       return checkout == null ? false : checkout;
    }
 
@@ -424,22 +424,22 @@ class DocumentImpl extends BaseObjectData implements Document
       {
          id = StorageImpl.generateId();
          String vsId = StorageImpl.generateId();
-         entry.setValue(CMIS.OBJECT_ID, new StringValue(id));
-         entry.setValue(CMIS.OBJECT_TYPE_ID, new StringValue(getTypeId()));
-         entry.setValue(CMIS.BASE_TYPE_ID, new StringValue(getBaseType().value()));
-         entry.setValue(CMIS.CREATED_BY, new StringValue());
-         entry.setValue(CMIS.CREATION_DATE, new DateValue(Calendar.getInstance()));
-         entry.setValue(CMIS.VERSION_SERIES_ID, new StringValue(vsId));
-         entry.setValue(CMIS.IS_LATEST_VERSION, new BooleanValue(true));
-         entry.setValue(CMIS.IS_MAJOR_VERSION, new BooleanValue(versioningState == VersioningState.MAJOR));
-         entry.setValue(CMIS.VERSION_LABEL, new StringValue(versioningState == VersioningState.CHECKEDOUT ? pwcLabel
+         entry.setValue(CmisConstants.OBJECT_ID, new StringValue(id));
+         entry.setValue(CmisConstants.OBJECT_TYPE_ID, new StringValue(getTypeId()));
+         entry.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(getBaseType().value()));
+         entry.setValue(CmisConstants.CREATED_BY, new StringValue());
+         entry.setValue(CmisConstants.CREATION_DATE, new DateValue(Calendar.getInstance()));
+         entry.setValue(CmisConstants.VERSION_SERIES_ID, new StringValue(vsId));
+         entry.setValue(CmisConstants.IS_LATEST_VERSION, new BooleanValue(true));
+         entry.setValue(CmisConstants.IS_MAJOR_VERSION, new BooleanValue(versioningState == VersioningState.MAJOR));
+         entry.setValue(CmisConstants.VERSION_LABEL, new StringValue(versioningState == VersioningState.CHECKEDOUT ? pwcLabel
             : latestLabel));
-         entry.setValue(CMIS.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(
+         entry.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(
             versioningState == VersioningState.CHECKEDOUT));
          if (versioningState == VersioningState.CHECKEDOUT)
          {
-            entry.setValue(CMIS.VERSION_SERIES_CHECKED_OUT_ID, new StringValue(id));
-            entry.setValue(CMIS.VERSION_SERIES_CHECKED_OUT_BY, new StringValue());
+            entry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue(id));
+            entry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, new StringValue());
          }
 
          if (parent != null)
@@ -475,9 +475,9 @@ class DocumentImpl extends BaseObjectData implements Document
          id = getObjectId();
       }
 
-      entry.setValue(CMIS.LAST_MODIFIED_BY, new StringValue());
-      entry.setValue(CMIS.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));
-      entry.setValue(CMIS.CHANGE_TOKEN, new StringValue(StorageImpl.generateId()));
+      entry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue());
+      entry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));
+      entry.setValue(CmisConstants.CHANGE_TOKEN, new StringValue(StorageImpl.generateId()));
 
       if (contentStream != null)
       {
@@ -503,13 +503,13 @@ class DocumentImpl extends BaseObjectData implements Document
                   mediaType = "application/octet-stream";
                }
 
-               entry.setValue(CMIS.CONTENT_STREAM_MIME_TYPE, new StringValue(mediaType));
-               entry.setValue(CMIS.CONTENT_STREAM_LENGTH, new IntegerValue(BigInteger.valueOf(content.length)));
+               entry.setValue(CmisConstants.CONTENT_STREAM_MIME_TYPE, new StringValue(mediaType));
+               entry.setValue(CmisConstants.CONTENT_STREAM_LENGTH, new IntegerValue(BigInteger.valueOf(content.length)));
             }
             else
             {
-               entry.setValue(CMIS.CONTENT_STREAM_MIME_TYPE, new StringValue(""));
-               entry.setValue(CMIS.CONTENT_STREAM_LENGTH, new IntegerValue(BigInteger.valueOf(0)));
+               entry.setValue(CmisConstants.CONTENT_STREAM_MIME_TYPE, new StringValue(""));
+               entry.setValue(CmisConstants.CONTENT_STREAM_LENGTH, new IntegerValue(BigInteger.valueOf(0)));
                content = EMPTY_CONTENT;
             }
 

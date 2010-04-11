@@ -37,7 +37,6 @@ import org.xcmis.spi.model.Rendition;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.UnfileObject;
 import org.xcmis.spi.model.VersioningState;
-import org.xcmis.spi.model.impl.CmisObjectImpl;
 import org.xcmis.spi.model.impl.DecimalProperty;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
@@ -434,7 +433,7 @@ public abstract class Connection
       checkConnection();
 
       String typeId = null;
-      Property<?> typeProperty = properties.get(CMIS.OBJECT_TYPE_ID);
+      Property<?> typeProperty = properties.get(CmisConstants.OBJECT_TYPE_ID);
       if (typeProperty != null && typeProperty.getValues().size() > 0)
       {
          typeId = (String)typeProperty.getValues().get(0);
@@ -646,7 +645,7 @@ public abstract class Connection
       checkConnection();
 
       String typeId = null;
-      Property<?> typeProperty = properties.get(CMIS.OBJECT_TYPE_ID);
+      Property<?> typeProperty = properties.get(CmisConstants.OBJECT_TYPE_ID);
       if (typeProperty != null && typeProperty.getValues().size() > 0)
       {
          typeId = (String)typeProperty.getValues().get(0);
@@ -744,7 +743,7 @@ public abstract class Connection
       checkConnection();
 
       String typeId = null;
-      Property<?> typeProperty = properties.get(CMIS.OBJECT_TYPE_ID);
+      Property<?> typeProperty = properties.get(CmisConstants.OBJECT_TYPE_ID);
       if (typeProperty != null && typeProperty.getValues().size() > 0)
       {
          typeId = (String)typeProperty.getValues().get(0);
@@ -841,7 +840,7 @@ public abstract class Connection
       checkConnection();
 
       String typeId = null;
-      Property<?> typeProperty = properties.get(CMIS.OBJECT_TYPE_ID);
+      Property<?> typeProperty = properties.get(CmisConstants.OBJECT_TYPE_ID);
       if (typeProperty != null && typeProperty.getValues().size() > 0)
       {
          typeId = (String)typeProperty.getValues().get(0);
@@ -852,7 +851,7 @@ public abstract class Connection
       }
 
       String sourceId = null;
-      Property<?> sourceProperty = properties.get(CMIS.SOURCE_ID);
+      Property<?> sourceProperty = properties.get(CmisConstants.SOURCE_ID);
       if (sourceProperty != null && sourceProperty.getValues().size() > 0)
       {
          sourceId = (String)sourceProperty.getValues().get(0);
@@ -863,7 +862,7 @@ public abstract class Connection
       }
 
       String targetId = null;
-      Property<?> targetProperty = properties.get(CMIS.TARGET_ID);
+      Property<?> targetProperty = properties.get(CmisConstants.TARGET_ID);
       if (targetProperty != null && targetProperty.getValues().size() > 0)
       {
          targetId = (String)targetProperty.getValues().get(0);
@@ -2952,7 +2951,7 @@ public abstract class Connection
       IncludeRelationships includeRelationships, boolean includePolicyIds, boolean includeACL,
       boolean includeObjectInfo, PropertyFilter parsedPropertyFilter, RenditionFilter parsedRenditionFilter)
    {
-      CmisObjectImpl cmis = new CmisObjectImpl();
+      CmisObject cmis = new CmisObject();
 
       Map<String, Property<?>> properties = object.getSubset(parsedPropertyFilter);
       if (properties.size() != 0)

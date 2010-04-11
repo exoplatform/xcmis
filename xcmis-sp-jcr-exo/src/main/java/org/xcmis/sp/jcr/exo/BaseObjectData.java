@@ -31,9 +31,9 @@ import org.exoplatform.services.jcr.util.IdGenerator;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.spi.BaseItemsIterator;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
-import org.xcmis.spi.CmisVisitor;
+import org.xcmis.spi.ObjectDataVisitor;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.Document;
 import org.xcmis.spi.Folder;
@@ -180,7 +180,7 @@ abstract class BaseObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
-   public void accept(CmisVisitor visitor)
+   public void accept(ObjectDataVisitor visitor)
    {
       if (isNew())
       {
@@ -270,7 +270,7 @@ abstract class BaseObjectData implements ObjectData
       {
          return null;
       }
-      return getString(CMIS.CHANGE_TOKEN);
+      return getString(CmisConstants.CHANGE_TOKEN);
    }
 
    /**
@@ -282,7 +282,7 @@ abstract class BaseObjectData implements ObjectData
       {
          return null;
       }
-      return getString(CMIS.CREATED_BY);
+      return getString(CmisConstants.CREATED_BY);
    }
 
    /**
@@ -294,7 +294,7 @@ abstract class BaseObjectData implements ObjectData
       {
          return null;
       }
-      return getDate(CMIS.CREATION_DATE);
+      return getDate(CmisConstants.CREATION_DATE);
    }
 
    /**
@@ -306,7 +306,7 @@ abstract class BaseObjectData implements ObjectData
       {
          return null;
       }
-      return getDate(CMIS.LAST_MODIFICATION_DATE);
+      return getDate(CmisConstants.LAST_MODIFICATION_DATE);
    }
 
    /**
@@ -318,7 +318,7 @@ abstract class BaseObjectData implements ObjectData
       {
          return null;
       }
-      return getString(CMIS.LAST_MODIFIED_BY);
+      return getString(CmisConstants.LAST_MODIFIED_BY);
    }
 
    /**
@@ -525,10 +525,10 @@ abstract class BaseObjectData implements ObjectData
 
             String propName = prop.getName();
 
-            if ((direction == RelationshipDirection.EITHER && (propName.equals(CMIS.SOURCE_ID) || propName
-               .equals(CMIS.TARGET_ID))) //
-               || (direction == RelationshipDirection.SOURCE && propName.equals(CMIS.SOURCE_ID)) //
-               || (direction == RelationshipDirection.TARGET && propName.equals(CMIS.TARGET_ID)))
+            if ((direction == RelationshipDirection.EITHER && (propName.equals(CmisConstants.SOURCE_ID) || propName
+               .equals(CmisConstants.TARGET_ID))) //
+               || (direction == RelationshipDirection.SOURCE && propName.equals(CmisConstants.SOURCE_ID)) //
+               || (direction == RelationshipDirection.TARGET && propName.equals(CmisConstants.TARGET_ID)))
             {
 
                Node relNode = prop.getParent();
@@ -738,7 +738,7 @@ abstract class BaseObjectData implements ObjectData
          || (updatability == Updatability.WHENCHECKEDOUT && getBaseType() == BaseType.DOCUMENT && ((Document)this)
             .isPWC()))
       {
-         if (property.getId().equals(CMIS.NAME))
+         if (property.getId().equals(CmisConstants.NAME))
          {
             // Special property for JCR back-end.
             name = (String)property.getValues().get(0);
@@ -1044,27 +1044,27 @@ abstract class BaseObjectData implements ObjectData
                LOG.debug("Property " + definition.getId() + " is not set.");
             }
 
-            if (definition.getId().equals(CMIS.OBJECT_ID))
+            if (definition.getId().equals(CmisConstants.OBJECT_ID))
             {
                return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
                   definition.getDisplayName(), getObjectId());
             }
-            else if (definition.getId().equals(CMIS.NAME))
+            else if (definition.getId().equals(CmisConstants.NAME))
             {
                return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
                   definition.getDisplayName(), getName());
             }
-            else if (definition.getId().equals(CMIS.PATH))
+            else if (definition.getId().equals(CmisConstants.PATH))
             {
                return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
                   definition.getDisplayName(), node.getPath());
             }
-            else if (definition.getId().equals(CMIS.PARENT_ID) && node.getDepth() != 0)
+            else if (definition.getId().equals(CmisConstants.PARENT_ID) && node.getDepth() != 0)
             {
                return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
                   definition.getDisplayName(), ((ExtendedNode)node.getParent()).getIdentifier());
             }
-            else if (definition.getId().equals(CMIS.CONTENT_STREAM_FILE_NAME))
+            else if (definition.getId().equals(CmisConstants.CONTENT_STREAM_FILE_NAME))
             {
                if (((Document)this).hasContent())
                {
@@ -1605,11 +1605,11 @@ abstract class BaseObjectData implements ObjectData
                node = (Node)session.getItem(destPath);
             }
 
-            node.setProperty(CMIS.LAST_MODIFICATION_DATE,//
+            node.setProperty(CmisConstants.LAST_MODIFICATION_DATE,//
                Calendar.getInstance());
-            node.setProperty(CMIS.LAST_MODIFIED_BY, //
+            node.setProperty(CmisConstants.LAST_MODIFIED_BY, //
                node.getSession().getUserID());
-            node.setProperty(CMIS.CHANGE_TOKEN, //
+            node.setProperty(CmisConstants.CHANGE_TOKEN, //
                IdGenerator.generate());
 
             session.save();

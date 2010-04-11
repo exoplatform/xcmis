@@ -22,7 +22,7 @@ package org.xcmis.sp.jcr.exo;
 import org.exoplatform.services.jcr.core.ExtendedNode;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
@@ -328,17 +328,17 @@ class FolderImpl extends BaseObjectData implements Folder
             folder.addMixin(JcrCMIS.CMIS_MIX_FOLDER);
          }
 
-         folder.setProperty(CMIS.OBJECT_TYPE_ID, //
+         folder.setProperty(CmisConstants.OBJECT_TYPE_ID, //
             type.getId());
-         folder.setProperty(CMIS.BASE_TYPE_ID, //
+         folder.setProperty(CmisConstants.BASE_TYPE_ID, //
             type.getBaseId().value());
-         folder.setProperty(CMIS.CREATED_BY, //
+         folder.setProperty(CmisConstants.CREATED_BY, //
             session.getUserID());
-         folder.setProperty(CMIS.CREATION_DATE, //
+         folder.setProperty(CmisConstants.CREATION_DATE, //
             Calendar.getInstance());
-         folder.setProperty(CMIS.LAST_MODIFIED_BY, //
+         folder.setProperty(CmisConstants.LAST_MODIFIED_BY, //
             session.getUserID());
-         folder.setProperty(CMIS.LAST_MODIFICATION_DATE, //
+         folder.setProperty(CmisConstants.LAST_MODIFICATION_DATE, //
             Calendar.getInstance());
 
          for (Property<?> property : properties.values())

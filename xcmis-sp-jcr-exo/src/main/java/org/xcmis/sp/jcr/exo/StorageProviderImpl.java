@@ -41,10 +41,8 @@ import org.xcmis.sp.jcr.exo.index.CmisContentReader;
 import org.xcmis.sp.jcr.exo.index.CmisSchema;
 import org.xcmis.sp.jcr.exo.index.CmisSchemaTableResolver;
 import org.xcmis.sp.jcr.exo.index.IndexListener;
-import org.xcmis.sp.jcr.exo.rendition.ImageRenditionProvider;
-import org.xcmis.sp.jcr.exo.rendition.PDFDocumentRenditionProvider;
 import org.xcmis.sp.jcr.exo.rendition.RenditionProvider;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.InvalidArgumentException;
@@ -112,19 +110,19 @@ public class StorageProviderImpl implements StorageProvider, Startable
    {
       public int compare(MimeType m1, MimeType m2)
       {
-         if (m1.getType().equals(CMIS.WILDCARD) && !m2.getType().equals(CMIS.WILDCARD))
+         if (m1.getType().equals(CmisConstants.WILDCARD) && !m2.getType().equals(CmisConstants.WILDCARD))
          {
             return 1;
          }
-         if (!m1.getType().equals(CMIS.WILDCARD) && m2.getType().equals(CMIS.WILDCARD))
+         if (!m1.getType().equals(CmisConstants.WILDCARD) && m2.getType().equals(CmisConstants.WILDCARD))
          {
             return -1;
          }
-         if (m1.getSubType().equals(CMIS.WILDCARD) && !m2.getSubType().equals(CMIS.WILDCARD))
+         if (m1.getSubType().equals(CmisConstants.WILDCARD) && !m2.getSubType().equals(CmisConstants.WILDCARD))
          {
             return 1;
          }
-         if (!m1.getSubType().equals(CMIS.WILDCARD) && m2.getSubType().equals(CMIS.WILDCARD))
+         if (!m1.getSubType().equals(CmisConstants.WILDCARD) && m2.getSubType().equals(CmisConstants.WILDCARD))
          {
             return -1;
          }

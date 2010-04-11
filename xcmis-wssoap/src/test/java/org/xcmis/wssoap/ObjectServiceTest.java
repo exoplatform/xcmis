@@ -33,7 +33,7 @@ import org.xcmis.messaging.CmisContentStreamType;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.soap.ObjectServicePort;
 import org.xcmis.spi.BaseContentStream;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ChangeTokenHolder;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
@@ -72,11 +72,11 @@ public class ObjectServiceTest extends BaseTest
       CmisPropertiesType props = new CmisPropertiesType();
       // typeId
       CmisPropertyId propTypeId = new CmisPropertyId();
-      propTypeId.setPropertyDefinitionId(CMIS.OBJECT_TYPE_ID);
+      propTypeId.setPropertyDefinitionId(CmisConstants.OBJECT_TYPE_ID);
       propTypeId.getValue().add(EnumBaseObjectTypeIds.CMIS_DOCUMENT.value());
       // name
       CmisPropertyString propName = new CmisPropertyString();
-      propName.setPropertyDefinitionId(CMIS.NAME);
+      propName.setPropertyDefinitionId(CmisConstants.NAME);
       propName.getValue().add("document1");
 
       props.getProperty().add(propTypeId);
@@ -110,11 +110,11 @@ public class ObjectServiceTest extends BaseTest
       CmisPropertiesType props = new CmisPropertiesType();
       // typeId
       CmisPropertyId propTypeId = new CmisPropertyId();
-      propTypeId.setPropertyDefinitionId(CMIS.OBJECT_TYPE_ID);
+      propTypeId.setPropertyDefinitionId(CmisConstants.OBJECT_TYPE_ID);
       propTypeId.getValue().add(EnumBaseObjectTypeIds.CMIS_FOLDER.value());
       // name
       CmisPropertyString propName = new CmisPropertyString();
-      propName.setPropertyDefinitionId(CMIS.NAME);
+      propName.setPropertyDefinitionId(CmisConstants.NAME);
       propName.getValue().add("folder1");
 
       props.getProperty().add(propTypeId);
@@ -148,11 +148,11 @@ public class ObjectServiceTest extends BaseTest
 
       // typeId
       CmisPropertyId propTypeId = new CmisPropertyId();
-      propTypeId.setPropertyDefinitionId(CMIS.OBJECT_TYPE_ID);
+      propTypeId.setPropertyDefinitionId(CmisConstants.OBJECT_TYPE_ID);
       propTypeId.getValue().add(EnumBaseObjectTypeIds.CMIS_RELATIONSHIP.value());
       // name
       CmisPropertyString propName = new CmisPropertyString();
-      propName.setPropertyDefinitionId(CMIS.NAME);
+      propName.setPropertyDefinitionId(CmisConstants.NAME);
       propName.getValue().add("relation1");
       // sourceId
       CmisPropertyId sourceId = new CmisPropertyId();
@@ -194,18 +194,18 @@ public class ObjectServiceTest extends BaseTest
    {
       // typeId
       CmisPropertyId propTypeId = new CmisPropertyId();
-      propTypeId.setPropertyDefinitionId(CMIS.OBJECT_TYPE_ID);
-      propTypeId.setLocalName(CMIS.OBJECT_TYPE_ID);
+      propTypeId.setPropertyDefinitionId(CmisConstants.OBJECT_TYPE_ID);
+      propTypeId.setLocalName(CmisConstants.OBJECT_TYPE_ID);
       propTypeId.getValue().add(EnumBaseObjectTypeIds.CMIS_POLICY.value());
       // name
       CmisPropertyString propName = new CmisPropertyString();
-      propName.setPropertyDefinitionId(CMIS.NAME);
-      propName.setLocalName(CMIS.NAME);
+      propName.setPropertyDefinitionId(CmisConstants.NAME);
+      propName.setLocalName(CmisConstants.NAME);
       propName.getValue().add("policy1");
 
       CmisPropertyString propText = new CmisPropertyString();
-      propText.setPropertyDefinitionId(CMIS.POLICY_TEXT);
-      propText.setLocalName(CMIS.POLICY_TEXT);
+      propText.setPropertyDefinitionId(CmisConstants.POLICY_TEXT);
+      propText.setLocalName(CmisConstants.POLICY_TEXT);
       propText.getValue().add("policy23");
 
       CmisPropertiesType props = new CmisPropertiesType();

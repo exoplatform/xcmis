@@ -35,7 +35,7 @@ public class RenditionFilter
 {
 
    /** None filter to include all renditions. */
-   public static final String ANY_FILTER = CMIS.WILDCARD;
+   public static final String ANY_FILTER = CmisConstants.WILDCARD;
 
    /** None filter to exclude all renditions. */
    public static final String NONE_FILTER = "cmis:none";

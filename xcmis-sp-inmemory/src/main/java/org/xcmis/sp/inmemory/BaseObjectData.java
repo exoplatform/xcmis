@@ -22,9 +22,9 @@ package org.xcmis.sp.inmemory;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.spi.BaseItemsIterator;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
-import org.xcmis.spi.CmisVisitor;
+import org.xcmis.spi.ObjectDataVisitor;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.Document;
 import org.xcmis.spi.Folder;
@@ -101,7 +101,7 @@ abstract class BaseObjectData implements ObjectData
       this.entry = new Entry();
    }
 
-   public void accept(CmisVisitor visitor)
+   public void accept(ObjectDataVisitor visitor)
    {
       // TODO Auto-generated method stub
       throw new UnsupportedOperationException();
@@ -150,7 +150,7 @@ abstract class BaseObjectData implements ObjectData
     */
    public String getChangeToken()
    {
-      return getString(CMIS.CHANGE_TOKEN);
+      return getString(CmisConstants.CHANGE_TOKEN);
    }
 
    /**
@@ -158,7 +158,7 @@ abstract class BaseObjectData implements ObjectData
     */
    public String getCreatedBy()
    {
-      return getString(CMIS.CREATED_BY);
+      return getString(CmisConstants.CREATED_BY);
    }
 
    /**
@@ -166,7 +166,7 @@ abstract class BaseObjectData implements ObjectData
     */
    public Calendar getCreationDate()
    {
-      return getDate(CMIS.CREATION_DATE);
+      return getDate(CmisConstants.CREATION_DATE);
    }
 
    /**
@@ -174,7 +174,7 @@ abstract class BaseObjectData implements ObjectData
     */
    public Calendar getLastModificationDate()
    {
-      return getDate(CMIS.LAST_MODIFICATION_DATE);
+      return getDate(CmisConstants.LAST_MODIFICATION_DATE);
    }
 
    /**
@@ -182,7 +182,7 @@ abstract class BaseObjectData implements ObjectData
     */
    public String getLastModifiedBy()
    {
-      return getString(CMIS.LAST_MODIFIED_BY);
+      return getString(CmisConstants.LAST_MODIFIED_BY);
    }
 
    /**
@@ -190,7 +190,7 @@ abstract class BaseObjectData implements ObjectData
     */
    public String getName()
    {
-      return getString(CMIS.NAME);
+      return getString(CmisConstants.NAME);
    }
 
    /**
@@ -420,7 +420,7 @@ abstract class BaseObjectData implements ObjectData
          throw new NameConstraintViolationException("Invalid name '" + name + "'.");
       }
 
-      entry.setValue(CMIS.NAME, new StringValue(name));
+      entry.setValue(CmisConstants.NAME, new StringValue(name));
    }
 
    /**

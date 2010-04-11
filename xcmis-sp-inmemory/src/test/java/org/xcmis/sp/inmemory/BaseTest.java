@@ -23,7 +23,7 @@ import junit.framework.TestCase;
 
 import org.exoplatform.services.log.LogConfigurator;
 import org.exoplatform.services.log.impl.Log4JConfigurator;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.Document;
 import org.xcmis.spi.Folder;
@@ -89,7 +89,7 @@ public abstract class BaseTest extends TestCase
       Policy policy = storage.createPolicy(null, type);
       policy.setName(name);
 
-      PropertyDefinition<?> defPolicyText = PropertyDefinitions.getPropertyDefinition("cmis:policy", CMIS.POLICY_TEXT);
+      PropertyDefinition<?> defPolicyText = PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
       policy.setProperty(new StringProperty(defPolicyText.getId(), defPolicyText.getQueryName(), defPolicyText
          .getLocalName(), defPolicyText.getDisplayName(), policyText));
 

@@ -19,7 +19,7 @@
 
 package org.xcmis.spi.utils;
 
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
@@ -42,11 +42,11 @@ public class MimeType
    public MimeType(String type, String subType)
    {
       this.type =
-         type == null || type.length() == 0 ? CMIS.WILDCARD
-            : ((type = type.trim()).length() == 0 ? CMIS.WILDCARD : type.toLowerCase());
+         type == null || type.length() == 0 ? CmisConstants.WILDCARD
+            : ((type = type.trim()).length() == 0 ? CmisConstants.WILDCARD : type.toLowerCase());
       this.subType =
-         subType == null || subType.length() == 0 ? CMIS.WILDCARD
-            : ((subType = subType.trim()).length() == 0 ? CMIS.WILDCARD : subType.toLowerCase());
+         subType == null || subType.length() == 0 ? CmisConstants.WILDCARD
+            : ((subType = subType.trim()).length() == 0 ? CmisConstants.WILDCARD : subType.toLowerCase());
    }
 
    /**
@@ -111,9 +111,9 @@ public class MimeType
    {
       if (other == null)
          return false;
-      return type.equals(CMIS.WILDCARD) //
+      return type.equals(CmisConstants.WILDCARD) //
          || (type.equalsIgnoreCase(other.type) //
-         && (subType.equals(CMIS.WILDCARD) || subType.equalsIgnoreCase(other.subType)));
+         && (subType.equals(CmisConstants.WILDCARD) || subType.equalsIgnoreCase(other.subType)));
    }
 
    /**

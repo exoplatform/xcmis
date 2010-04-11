@@ -19,7 +19,7 @@
 
 package org.xcmis.sp.jcr.exo;
 
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.Folder;
@@ -118,7 +118,7 @@ class PolicyImpl extends BaseObjectData implements Policy
     */
    public String getPolicyText()
    {
-      return getString(CMIS.POLICY_TEXT);
+      return getString(CmisConstants.POLICY_TEXT);
    }
 
    /**
@@ -143,17 +143,17 @@ class PolicyImpl extends BaseObjectData implements Policy
 
          Node newPolicy = policiesStore.addNode(name, type.getLocalName());
 
-         newPolicy.setProperty(CMIS.OBJECT_TYPE_ID, //
+         newPolicy.setProperty(CmisConstants.OBJECT_TYPE_ID, //
             type.getId());
-         newPolicy.setProperty(CMIS.BASE_TYPE_ID, //
+         newPolicy.setProperty(CmisConstants.BASE_TYPE_ID, //
             type.getBaseId().value());
-         newPolicy.setProperty(CMIS.CREATED_BY, //
+         newPolicy.setProperty(CmisConstants.CREATED_BY, //
             session.getUserID());
-         newPolicy.setProperty(CMIS.CREATION_DATE, //
+         newPolicy.setProperty(CmisConstants.CREATION_DATE, //
             Calendar.getInstance());
-         newPolicy.setProperty(CMIS.LAST_MODIFIED_BY, //
+         newPolicy.setProperty(CmisConstants.LAST_MODIFIED_BY, //
             session.getUserID());
-         newPolicy.setProperty(CMIS.LAST_MODIFICATION_DATE, //
+         newPolicy.setProperty(CmisConstants.LAST_MODIFICATION_DATE, //
             Calendar.getInstance());
 
          for (Property<?> property : properties.values())

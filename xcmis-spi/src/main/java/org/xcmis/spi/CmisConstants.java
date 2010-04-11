@@ -26,7 +26,7 @@ import java.math.BigInteger;
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id: CMIS.java 260 2010-03-03 15:53:42Z andrew00x $
  */
-public interface CMIS
+public interface CmisConstants
 {
 
    String CMIS_PREFIX = "cmis";

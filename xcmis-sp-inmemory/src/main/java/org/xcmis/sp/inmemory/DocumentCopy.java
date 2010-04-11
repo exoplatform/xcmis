@@ -19,7 +19,7 @@
 
 package org.xcmis.sp.inmemory;
 
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.Document;
@@ -76,25 +76,25 @@ class DocumentCopy extends DocumentImpl
       }
 
       String id = StorageImpl.generateId();
-      entry.setValue(CMIS.OBJECT_ID, new StringValue(id));
-      entry.setValue(CMIS.OBJECT_TYPE_ID, new StringValue(getTypeId()));
-      entry.setValue(CMIS.BASE_TYPE_ID, new StringValue(getBaseType().value()));
-      entry.setValue(CMIS.CREATED_BY, new StringValue(""));
-      entry.setValue(CMIS.CREATION_DATE, new DateValue(Calendar.getInstance()));
-      entry.setValue(CMIS.VERSION_SERIES_ID, new StringValue(StorageImpl.generateId()));
-      entry.setValue(CMIS.IS_LATEST_VERSION, new BooleanValue(true));
-      entry.setValue(CMIS.IS_MAJOR_VERSION, new BooleanValue(versioningState == VersioningState.MAJOR));
-      entry.setValue(CMIS.VERSION_LABEL, new StringValue(versioningState == VersioningState.CHECKEDOUT ? pwcLabel
+      entry.setValue(CmisConstants.OBJECT_ID, new StringValue(id));
+      entry.setValue(CmisConstants.OBJECT_TYPE_ID, new StringValue(getTypeId()));
+      entry.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(getBaseType().value()));
+      entry.setValue(CmisConstants.CREATED_BY, new StringValue(""));
+      entry.setValue(CmisConstants.CREATION_DATE, new DateValue(Calendar.getInstance()));
+      entry.setValue(CmisConstants.VERSION_SERIES_ID, new StringValue(StorageImpl.generateId()));
+      entry.setValue(CmisConstants.IS_LATEST_VERSION, new BooleanValue(true));
+      entry.setValue(CmisConstants.IS_MAJOR_VERSION, new BooleanValue(versioningState == VersioningState.MAJOR));
+      entry.setValue(CmisConstants.VERSION_LABEL, new StringValue(versioningState == VersioningState.CHECKEDOUT ? pwcLabel
          : latestLabel));
-      entry.setValue(CMIS.IS_VERSION_SERIES_CHECKED_OUT,
+      entry.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT,
          new BooleanValue(versioningState == VersioningState.CHECKEDOUT));
-      entry.setValue(CMIS.LAST_MODIFIED_BY, new StringValue(""));
-      entry.setValue(CMIS.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));
-      entry.setValue(CMIS.CHANGE_TOKEN, new StringValue(StorageImpl.generateId()));
+      entry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue(""));
+      entry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));
+      entry.setValue(CmisConstants.CHANGE_TOKEN, new StringValue(StorageImpl.generateId()));
       if (versioningState == VersioningState.CHECKEDOUT)
       {
-         entry.setValue(CMIS.VERSION_SERIES_CHECKED_OUT_ID, new StringValue(id));
-         entry.setValue(CMIS.VERSION_SERIES_CHECKED_OUT_BY, new StringValue(""));
+         entry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue(id));
+         entry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, new StringValue(""));
       }
 
       if (parent != null)
@@ -143,7 +143,7 @@ class DocumentCopy extends DocumentImpl
                {
                   mediaType = "application/octet-stream";
                }
-               entry.setValue(CMIS.CONTENT_STREAM_MIME_TYPE, new StringValue(mediaType));
+               entry.setValue(CmisConstants.CONTENT_STREAM_MIME_TYPE, new StringValue(mediaType));
             }
             else
             {

@@ -30,7 +30,7 @@ import org.xcmis.messaging.CmisObjectListType;
 import org.xcmis.messaging.CmisObjectParentsType;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.NavigationServicePort;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.model.IncludeRelationships;
@@ -99,7 +99,7 @@ public class NavigationServicePortImpl implements NavigationServicePort
             true, propertyFilter, //
             renditionFilter, //
             orderBy, //
-            maxItems == null ? CMIS.MAX_ITEMS : maxItems.intValue(), //
+            maxItems == null ? CmisConstants.MAX_ITEMS : maxItems.intValue(), //
             skipCount == null ? 0 : skipCount.intValue()));
       }
       catch (Exception e)
@@ -144,7 +144,7 @@ public class NavigationServicePortImpl implements NavigationServicePort
             true, propertyFilter, //
             renditionFilter, //
             orderBy, //
-            maxItems == null ? CMIS.MAX_ITEMS : maxItems.intValue(), //
+            maxItems == null ? CmisConstants.MAX_ITEMS : maxItems.intValue(), //
             skipCount == null ? 0 : skipCount.intValue()));
 
       }

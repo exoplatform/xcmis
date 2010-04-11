@@ -28,7 +28,7 @@ import org.xcmis.messaging.CmisTypeContainer;
 import org.xcmis.messaging.CmisTypeDefinitionListType;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.RepositoryServicePort;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.model.RepositoryInfo;
@@ -127,7 +127,7 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
          conn = storageProvider.getConnection(repositoryId);
          return TypeConverter.getCmisTypeDefinitionListType(conn.getTypeChildren(typeId, //
             includePropertyDefinitions == null ? false : includePropertyDefinitions, //
-            maxItems == null ? CMIS.MAX_ITEMS : maxItems.intValue(), //
+            maxItems == null ? CmisConstants.MAX_ITEMS : maxItems.intValue(), //
             skipCount == null ? 0 : skipCount.intValue()));
       }
       catch (Exception e)

@@ -21,7 +21,7 @@ package org.xcmis.restatom;
 
 import org.exoplatform.services.rest.impl.ContainerResponse;
 import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.Property;
@@ -68,18 +68,18 @@ public class RelationshipsCollectionTest extends BaseTest
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
 
       Property<?> typeIdProperty =
-         new IdProperty(CMIS.OBJECT_TYPE_ID, CMIS.OBJECT_TYPE_ID, CMIS.OBJECT_TYPE_ID, CMIS.OBJECT_TYPE_ID,
+         new IdProperty(CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID,
             BaseType.RELATIONSHIP.value());
       Property<?> sourceIdProperty =
-         new IdProperty(CMIS.SOURCE_ID, CMIS.SOURCE_ID, CMIS.SOURCE_ID, CMIS.SOURCE_ID, sourceId);
+         new IdProperty(CmisConstants.SOURCE_ID, CmisConstants.SOURCE_ID, CmisConstants.SOURCE_ID, CmisConstants.SOURCE_ID, sourceId);
       Property<?> targetIdProperty =
-         new IdProperty(CMIS.TARGET_ID, CMIS.TARGET_ID, CMIS.TARGET_ID, CMIS.TARGET_ID, targetId);
-      Property<?> nameProperty = new StringProperty(CMIS.NAME, CMIS.NAME, CMIS.NAME, CMIS.NAME, "relation1");
+         new IdProperty(CmisConstants.TARGET_ID, CmisConstants.TARGET_ID, CmisConstants.TARGET_ID, CmisConstants.TARGET_ID, targetId);
+      Property<?> nameProperty = new StringProperty(CmisConstants.NAME, CmisConstants.NAME, CmisConstants.NAME, CmisConstants.NAME, "relation1");
 
-      properties.put(CMIS.OBJECT_TYPE_ID, typeIdProperty);
-      properties.put(CMIS.SOURCE_ID, sourceIdProperty);
-      properties.put(CMIS.TARGET_ID, targetIdProperty);
-      properties.put(CMIS.NAME, nameProperty);
+      properties.put(CmisConstants.OBJECT_TYPE_ID, typeIdProperty);
+      properties.put(CmisConstants.SOURCE_ID, sourceIdProperty);
+      properties.put(CmisConstants.TARGET_ID, targetIdProperty);
+      properties.put(CmisConstants.NAME, nameProperty);
 
       conn.createRelationship(properties, null, null, null);
 
@@ -119,7 +119,7 @@ public class RelationshipsCollectionTest extends BaseTest
       String targetId = createDocument(testFolderId, "doc2", null, null);
       String s = "<?xml version='1.0' encoding='utf-8'?>" //
          + "<entry xmlns='http://www.w3.org/2005/Atom'" //
-         + " xmlns:cmis='" + CMIS.CMIS_NS_URI + "'"//  
+         + " xmlns:cmis='" + CmisConstants.CMIS_NS_URI + "'"//  
          + " xmlns:cmism='http://docs.oasis-open.org/ns/cmis/messaging/200908/'" //
          + " xmlns:cmisra='http://docs.oasis-open.org/ns/cmis/restatom/200908/'>" //
          + "<title>title</title><summary>summary</summary>" //

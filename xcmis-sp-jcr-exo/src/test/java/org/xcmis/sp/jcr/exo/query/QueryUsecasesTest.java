@@ -20,7 +20,7 @@
 package org.xcmis.sp.jcr.exo.query;
 
 import org.xcmis.spi.BaseContentStream;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.Document;
 import org.xcmis.spi.Folder;
@@ -555,9 +555,9 @@ public class QueryUsecasesTest extends BaseQueryTest
 
       StringBuffer sql = new StringBuffer();
       sql.append("SELECT  ");
-      sql.append(CMIS.LAST_MODIFIED_BY + " as last , ");
-      sql.append(CMIS.OBJECT_ID + " , ");
-      sql.append(CMIS.LAST_MODIFICATION_DATE);
+      sql.append(CmisConstants.LAST_MODIFIED_BY + " as last , ");
+      sql.append(CmisConstants.OBJECT_ID + " , ");
+      sql.append(CmisConstants.LAST_MODIFICATION_DATE);
       sql.append(" FROM ");
       sql.append(NASA_DOCUMENT);
       sql.append(" ORDER BY ");
@@ -596,9 +596,9 @@ public class QueryUsecasesTest extends BaseQueryTest
 
       StringBuffer sql = new StringBuffer();
       sql.append("SELECT ");
-      sql.append(CMIS.LAST_MODIFIED_BY + ", ");
-      sql.append(CMIS.OBJECT_ID + ", ");
-      sql.append(CMIS.LAST_MODIFICATION_DATE);
+      sql.append(CmisConstants.LAST_MODIFIED_BY + ", ");
+      sql.append(CmisConstants.OBJECT_ID + ", ");
+      sql.append(CmisConstants.LAST_MODIFICATION_DATE);
       sql.append(" FROM ");
       sql.append(NASA_DOCUMENT);
       sql.append(" ORDER BY ");
@@ -637,9 +637,9 @@ public class QueryUsecasesTest extends BaseQueryTest
 
       StringBuffer sql = new StringBuffer();
       sql.append("SELECT ");
-      sql.append(CMIS.LAST_MODIFIED_BY + ", ");
-      sql.append(CMIS.OBJECT_ID + ", ");
-      sql.append(CMIS.LAST_MODIFICATION_DATE);
+      sql.append(CmisConstants.LAST_MODIFIED_BY + ", ");
+      sql.append(CmisConstants.OBJECT_ID + ", ");
+      sql.append(CmisConstants.LAST_MODIFICATION_DATE);
       sql.append(" FROM ");
       sql.append(NASA_DOCUMENT);
 
@@ -676,9 +676,9 @@ public class QueryUsecasesTest extends BaseQueryTest
       StringBuffer sql = new StringBuffer();
       sql.append("SELECT ");
       sql.append(" SCORE() AS scoreCol, ");
-      sql.append(CMIS.LAST_MODIFIED_BY + ", ");
-      sql.append(CMIS.OBJECT_ID + ", ");
-      sql.append(CMIS.LAST_MODIFICATION_DATE);
+      sql.append(CmisConstants.LAST_MODIFIED_BY + ", ");
+      sql.append(CmisConstants.OBJECT_ID + ", ");
+      sql.append(CmisConstants.LAST_MODIFICATION_DATE);
       sql.append(" FROM ");
       sql.append(NASA_DOCUMENT);
       sql.append(" WHERE CONTAINS(\"moon\") ");
@@ -750,7 +750,7 @@ public class QueryUsecasesTest extends BaseQueryTest
       List<Document> appolloContent = createNasaContent(testRoot);
 
       String statement =
-         "SELECT SCORE() AS scoreCol , " + CMIS.NAME + " AS id FROM " + NASA_DOCUMENT
+         "SELECT SCORE() AS scoreCol , " + CmisConstants.NAME + " AS id FROM " + NASA_DOCUMENT
             + " WHERE CONTAINS(\"hello OR world\") ORDER BY SCORE()";
 
       Query query = new Query(statement, true);

@@ -20,7 +20,7 @@
 package org.xcmis.sp.jcr.exo;
 
 import org.exoplatform.services.jcr.core.ExtendedNode;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.Document;
@@ -68,13 +68,13 @@ class PWC extends DocumentImpl
       {
          Node docNode = document.getNode();
 
-         docNode.setProperty(CMIS.IS_LATEST_VERSION, //
+         docNode.setProperty(CmisConstants.IS_LATEST_VERSION, //
             true);
-         docNode.setProperty(CMIS.IS_VERSION_SERIES_CHECKED_OUT, //
+         docNode.setProperty(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, //
             false);
-         docNode.setProperty(CMIS.VERSION_SERIES_CHECKED_OUT_ID, //
+         docNode.setProperty(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, //
             (String)null);
-         docNode.setProperty(CMIS.VERSION_SERIES_CHECKED_OUT_BY, //
+         docNode.setProperty(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, //
             (String)null);
 
          node.getParent().remove();
@@ -101,30 +101,30 @@ class PWC extends DocumentImpl
          docNode.checkin();
          docNode.checkout();
 
-         docNode.setProperty(CMIS.IS_LATEST_VERSION, //
+         docNode.setProperty(CmisConstants.IS_LATEST_VERSION, //
             true);
-         docNode.setProperty(CMIS.IS_VERSION_SERIES_CHECKED_OUT, //
+         docNode.setProperty(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, //
             false);
-         docNode.setProperty(CMIS.VERSION_SERIES_CHECKED_OUT_ID, //
+         docNode.setProperty(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, //
             (String)null);
-         docNode.setProperty(CMIS.VERSION_SERIES_CHECKED_OUT_BY, //
+         docNode.setProperty(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, //
             (String)null);
          // Update creation date & last modification date
          // to emulate creation new version.
-         docNode.setProperty(CMIS.CREATED_BY, //
+         docNode.setProperty(CmisConstants.CREATED_BY, //
             session.getUserID());
-         docNode.setProperty(CMIS.CREATION_DATE, //
+         docNode.setProperty(CmisConstants.CREATION_DATE, //
             Calendar.getInstance());
-         docNode.setProperty(CMIS.LAST_MODIFIED_BY, //
+         docNode.setProperty(CmisConstants.LAST_MODIFIED_BY, //
             session.getUserID());
-         docNode.setProperty(CMIS.LAST_MODIFICATION_DATE, //
+         docNode.setProperty(CmisConstants.LAST_MODIFICATION_DATE, //
             Calendar.getInstance());
          //
-         docNode.setProperty(CMIS.IS_MAJOR_VERSION, //
+         docNode.setProperty(CmisConstants.IS_MAJOR_VERSION, //
             major);
          if (checkinComment != null)
          {
-            docNode.setProperty(CMIS.CHECKIN_COMMENT, //
+            docNode.setProperty(CmisConstants.CHECKIN_COMMENT, //
                checkinComment);
          }
 
@@ -210,31 +210,31 @@ class PWC extends DocumentImpl
             pwc.addMixin(JcrCMIS.MIX_VERSIONABLE);
          }
 
-         pwc.setProperty(CMIS.OBJECT_TYPE_ID, //
+         pwc.setProperty(CmisConstants.OBJECT_TYPE_ID, //
             type.getId());
-         pwc.setProperty(CMIS.BASE_TYPE_ID, //
+         pwc.setProperty(CmisConstants.BASE_TYPE_ID, //
             type.getBaseId().value());
-         pwc.setProperty(CMIS.CREATED_BY, //
+         pwc.setProperty(CmisConstants.CREATED_BY, //
             session.getUserID());
-         pwc.setProperty(CMIS.CREATION_DATE, //
+         pwc.setProperty(CmisConstants.CREATION_DATE, //
             Calendar.getInstance());
-         pwc.setProperty(CMIS.LAST_MODIFIED_BY, //
+         pwc.setProperty(CmisConstants.LAST_MODIFIED_BY, //
             session.getUserID());
-         pwc.setProperty(CMIS.LAST_MODIFICATION_DATE, //
+         pwc.setProperty(CmisConstants.LAST_MODIFICATION_DATE, //
             Calendar.getInstance());
-         pwc.setProperty(CMIS.VERSION_SERIES_ID, //
+         pwc.setProperty(CmisConstants.VERSION_SERIES_ID, //
             document.getVersionSeriesId());
-         pwc.setProperty(CMIS.IS_LATEST_VERSION, //
+         pwc.setProperty(CmisConstants.IS_LATEST_VERSION, //
             true);
-         pwc.setProperty(CMIS.IS_MAJOR_VERSION, //
+         pwc.setProperty(CmisConstants.IS_MAJOR_VERSION, //
             false);
-         pwc.setProperty(CMIS.VERSION_LABEL, //
+         pwc.setProperty(CmisConstants.VERSION_LABEL, //
             pwcLabel);
-         pwc.setProperty(CMIS.IS_VERSION_SERIES_CHECKED_OUT, //
+         pwc.setProperty(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, //
             true);
-         pwc.setProperty(CMIS.VERSION_SERIES_CHECKED_OUT_ID, //
+         pwc.setProperty(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, //
             ((ExtendedNode)pwc).getIdentifier());
-         pwc.setProperty(CMIS.VERSION_SERIES_CHECKED_OUT_BY, //
+         pwc.setProperty(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, //
             session.getUserID());
 
          pwc.setProperty("xcmis:latestVersionId", //
@@ -254,13 +254,13 @@ class PWC extends DocumentImpl
 
          // Update source document.
          Node docNode = document.getNode();
-         docNode.setProperty(CMIS.IS_LATEST_VERSION, //
+         docNode.setProperty(CmisConstants.IS_LATEST_VERSION, //
             false);
-         docNode.setProperty(CMIS.IS_VERSION_SERIES_CHECKED_OUT, //
+         docNode.setProperty(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, //
             true);
-         docNode.setProperty(CMIS.VERSION_SERIES_CHECKED_OUT_ID, //
+         docNode.setProperty(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, //
             ((ExtendedNode)pwc).getIdentifier());
-         docNode.setProperty(CMIS.VERSION_SERIES_CHECKED_OUT_BY, //
+         docNode.setProperty(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, //
             session.getUserID());
 
          session.save();

@@ -19,7 +19,7 @@
 
 package org.xcmis.sp.jcr.exo;
 
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.Folder;
@@ -88,7 +88,7 @@ class RelationshipImpl extends BaseObjectData implements Relationship
       {
          return source.getObjectId();
       }
-      return getString(CMIS.SOURCE_ID);
+      return getString(CmisConstants.SOURCE_ID);
    }
 
    /**
@@ -100,7 +100,7 @@ class RelationshipImpl extends BaseObjectData implements Relationship
       {
          return target.getObjectId();
       }
-      return getString(CMIS.TARGET_ID);
+      return getString(CmisConstants.TARGET_ID);
    }
 
    /**
@@ -152,21 +152,21 @@ class RelationshipImpl extends BaseObjectData implements Relationship
 
          Node relationship = relationships.addNode(name, type.getLocalName());
 
-         relationship.setProperty(CMIS.OBJECT_TYPE_ID, //
+         relationship.setProperty(CmisConstants.OBJECT_TYPE_ID, //
             type.getId());
-         relationship.setProperty(CMIS.BASE_TYPE_ID, //
+         relationship.setProperty(CmisConstants.BASE_TYPE_ID, //
             type.getBaseId().value());
-         relationship.setProperty(CMIS.CREATED_BY, //
+         relationship.setProperty(CmisConstants.CREATED_BY, //
             session.getUserID());
-         relationship.setProperty(CMIS.CREATION_DATE, //
+         relationship.setProperty(CmisConstants.CREATION_DATE, //
             Calendar.getInstance());
-         relationship.setProperty(CMIS.LAST_MODIFIED_BY, //
+         relationship.setProperty(CmisConstants.LAST_MODIFIED_BY, //
             session.getUserID());
-         relationship.setProperty(CMIS.LAST_MODIFICATION_DATE, //
+         relationship.setProperty(CmisConstants.LAST_MODIFICATION_DATE, //
             Calendar.getInstance());
-         relationship.setProperty(CMIS.SOURCE_ID, //
+         relationship.setProperty(CmisConstants.SOURCE_ID, //
             ((BaseObjectData)source).getNode());
-         relationship.setProperty(CMIS.TARGET_ID, //
+         relationship.setProperty(CmisConstants.TARGET_ID, //
             ((BaseObjectData)target).getNode());
 
          for (Property<?> property : properties.values())

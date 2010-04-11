@@ -26,7 +26,7 @@ import org.xcmis.core.CmisPropertyId;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.messaging.CmisObjectListType;
 import org.xcmis.soap.VersioningServicePort;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.wssoap.impl.TypeConverter;
 import org.xcmis.wssoap.impl.VersioningServicePortImpl;
@@ -118,7 +118,7 @@ public class VersioningServiceTest extends BaseTest
       CmisObjectType pwc =
          TypeConverter.getCmisObjectType(conn.getObject(pwcId, false, IncludeRelationships.NONE, false, false, false,
             null, null));
-      CmisPropertyId versionSeriesIdProp = (CmisPropertyId)getProperty(pwc, CMIS.VERSION_SERIES_ID);
+      CmisPropertyId versionSeriesIdProp = (CmisPropertyId)getProperty(pwc, CmisConstants.VERSION_SERIES_ID);
       String versionSeriesId = versionSeriesIdProp.getValue().get(0);
       List<CmisObjectType> allVersions =
          TypeConverter.getListCmisObjectType(conn.getAllVersions(versionSeriesId, false, false, null));
@@ -149,7 +149,7 @@ public class VersioningServiceTest extends BaseTest
       CmisObjectType pwc =
          TypeConverter.getCmisObjectType(conn.getObject(pwcId, false, IncludeRelationships.NONE, false, false, false,
             null, null));
-      CmisPropertyId versionSeriesIdProp = (CmisPropertyId)getProperty(pwc, CMIS.VERSION_SERIES_ID);
+      CmisPropertyId versionSeriesIdProp = (CmisPropertyId)getProperty(pwc, CmisConstants.VERSION_SERIES_ID);
       String versionSeriesId = versionSeriesIdProp.getValue().get(0);
       conn.checkin(//
          pwcId, //
@@ -177,7 +177,7 @@ public class VersioningServiceTest extends BaseTest
       CmisObjectType pwc =
          TypeConverter.getCmisObjectType(conn.getObject(pwcId, false, IncludeRelationships.NONE, false, false, false,
             null, null));
-      CmisPropertyId versionSeriesIdProp = (CmisPropertyId)getProperty(pwc, CMIS.VERSION_SERIES_ID);
+      CmisPropertyId versionSeriesIdProp = (CmisPropertyId)getProperty(pwc, CmisConstants.VERSION_SERIES_ID);
       String versionSeriesId = versionSeriesIdProp.getValue().get(0);
 
       String lv = conn.checkin(//
@@ -195,7 +195,7 @@ public class VersioningServiceTest extends BaseTest
          repositoryId, //
          versionSeriesId, //
          false, //
-         CMIS.OBJECT_ID, //
+         CmisConstants.OBJECT_ID, //
          new CmisExtensionType() //
          );
       assertEquals(lv, ((CmisPropertyId)properties.getProperty().get(0)).getValue().get(0));

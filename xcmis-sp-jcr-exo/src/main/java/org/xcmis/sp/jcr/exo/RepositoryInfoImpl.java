@@ -20,7 +20,7 @@
 package org.xcmis.sp.jcr.exo;
 
 import org.exoplatform.services.jcr.access.SystemIdentity;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.model.ACLCapability;
 import org.xcmis.spi.model.AccessControlPropagation;
 import org.xcmis.spi.model.BaseType;
@@ -227,7 +227,7 @@ public class RepositoryInfoImpl implements RepositoryInfo, RepositoryCapabilitie
     */
    public String getCmisVersionSupported()
    {
-      return CMIS.SUPPORTED_VERSION;
+      return CmisConstants.SUPPORTED_VERSION;
    }
 
    /**

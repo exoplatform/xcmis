@@ -35,7 +35,7 @@ import org.xcmis.messaging.DeleteTreeResponse;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.ObjectServicePort;
 import org.xcmis.spi.BaseContentStream;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ChangeTokenHolder;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ContentStream;
@@ -576,7 +576,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
          conn = storageProvider.getConnection(repositoryId);
          return TypeConverter.getRenditionList(conn.getRenditions(objectId, //
             renditionFilter, //
-            maxItems == null ? CMIS.MAX_ITEMS : maxItems.intValue(), //
+            maxItems == null ? CmisConstants.MAX_ITEMS : maxItems.intValue(), //
             skipCount == null ? 0 : skipCount.intValue()));
       }
       catch (Exception e)

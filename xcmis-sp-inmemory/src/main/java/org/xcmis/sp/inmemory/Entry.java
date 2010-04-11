@@ -19,7 +19,7 @@
 
 package org.xcmis.sp.inmemory;
 
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -61,7 +61,7 @@ final class Entry
 
    public String getId()
    {
-      Value value = values.get(CMIS.OBJECT_ID);
+      Value value = values.get(CmisConstants.OBJECT_ID);
       return value == null ? null : value.getStrings()[0];
    }
 
@@ -77,7 +77,7 @@ final class Entry
 
    public String getTypeId()
    {
-      Value value = values.get(CMIS.OBJECT_TYPE_ID);
+      Value value = values.get(CmisConstants.OBJECT_TYPE_ID);
       return value == null ? null : value.getStrings()[0];
    }
 

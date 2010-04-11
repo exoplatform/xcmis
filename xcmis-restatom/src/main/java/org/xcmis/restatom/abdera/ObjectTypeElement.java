@@ -34,7 +34,6 @@ import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.PropertyType;
 import org.xcmis.spi.model.Rendition;
 import org.xcmis.spi.model.impl.BooleanProperty;
-import org.xcmis.spi.model.impl.CmisObjectImpl;
 import org.xcmis.spi.model.impl.DateTimeProperty;
 import org.xcmis.spi.model.impl.DecimalProperty;
 import org.xcmis.spi.model.impl.HtmlProperty;
@@ -95,7 +94,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
     */
    public CmisObject getObject()
    {
-      CmisObjectImpl object = new CmisObjectImpl();
+      CmisObject object = new CmisObject();
 
 //      ObjectInfoImpl objectInfo = new ObjectInfoImpl();
 //      object.setObjectInfo(objectInfo);
@@ -125,9 +124,6 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
       //      object.setObjectInfo(objectInfo)
       //      object.setPathSegment(pathSegment)
 
-      // XXX At the moment do not process other stuff from XML.
-      // Don't need this now. It is not clear from specification
-      // how to process (apply) policies.
       return object;
    }
 

@@ -32,10 +32,9 @@ import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.PropertyType;
+import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.Updatability;
 import org.xcmis.spi.model.VersioningState;
-import org.xcmis.spi.model.impl.PropertyDefinitionImpl;
-import org.xcmis.spi.model.impl.TypeDefinitionImpl;
 import org.xcmis.spi.query.Result;
 
 import java.util.HashMap;
@@ -64,48 +63,48 @@ public abstract class BaseQueryTest extends BaseTest
       super.setUp();
       Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
 
-      propertyDefinitions.put("cmis:booster-name", new PropertyDefinitionImpl("cmis:booster-name", "cmis:booster-name",
+      propertyDefinitions.put("cmis:booster-name", new PropertyDefinition("cmis:booster-name", "cmis:booster-name",
          "cmis:booster-name", null, "cmis:booster-name", "cmis:booster-name", PropertyType.STRING,
          Updatability.READWRITE, true, false, false, false, false, true, null, null));
 
-      propertyDefinitions.put("cmis:commander", new PropertyDefinitionImpl("cmis:commander", "cmis:commander",
+      propertyDefinitions.put("cmis:commander", new PropertyDefinition("cmis:commander", "cmis:commander",
          "cmis:commander", null, "cmis:commander", "cmis:commander", PropertyType.STRING, Updatability.READWRITE, true,
          false, false, false, false, true, null, null));
 
-      propertyDefinitions.put("cmis:command-module-pilot", new PropertyDefinitionImpl("cmis:command-module-pilot",
+      propertyDefinitions.put("cmis:command-module-pilot", new PropertyDefinition("cmis:command-module-pilot",
          "cmis:command-module-pilot", "cmis:command-module-pilot", null, "cmis:command-module-pilot",
          "cmis:command-module-pilot", PropertyType.STRING, Updatability.READWRITE, true, false, false, false, false,
          true, null, null));
-      propertyDefinitions.put("cmis:lunar-module-pilot", new PropertyDefinitionImpl("cmis:lunar-module-pilot",
+      propertyDefinitions.put("cmis:lunar-module-pilot", new PropertyDefinition("cmis:lunar-module-pilot",
          "cmis:lunar-module-pilot", "cmis:lunar-module-pilot", null, "cmis:lunar-module-pilot",
          "cmis:lunar-module-pilot", PropertyType.STRING, Updatability.READWRITE, true, false, false, false, false,
          true, null, null));
 
-      propertyDefinitions.put("cmis:booster-mass", new PropertyDefinitionImpl("cmis:booster-mass", "cmis:booster-mass",
+      propertyDefinitions.put("cmis:booster-mass", new PropertyDefinition("cmis:booster-mass", "cmis:booster-mass",
          "cmis:booster-mass", null, "cmis:booster-mass", "cmis:booster-mass", PropertyType.DECIMAL,
          Updatability.READWRITE, true, false, false, false, false, true, null, null));
 
-      propertyDefinitions.put("cmis:sample-returned", new PropertyDefinitionImpl("cmis:sample-returned",
+      propertyDefinitions.put("cmis:sample-returned", new PropertyDefinition("cmis:sample-returned",
          "cmis:sample-returned", "cmis:sample-returned", null, "cmis:sample-returned", "cmis:sample-returned",
          PropertyType.DECIMAL, Updatability.READWRITE, true, false, false, false, false, true, null, null));
 
-      propertyDefinitions.put("cmis:status", new PropertyDefinitionImpl("cmis:status", "cmis:status", "cmis:status",
+      propertyDefinitions.put("cmis:status", new PropertyDefinition("cmis:status", "cmis:status", "cmis:status",
          null, "cmis:status", "cmis:status", PropertyType.BOOLEAN, Updatability.READWRITE, true, false, false, false,
          false, true, null, null));
 
-      storage.addType(new TypeDefinitionImpl("cmis:nasa-mission", BaseType.DOCUMENT, "cmis:nasa-mission",
+      storage.addType(new TypeDefinition("cmis:nasa-mission", BaseType.DOCUMENT, "cmis:nasa-mission",
          "cmis:nasa-mission", "", "cmis:document", "cmis:nasa-mission", "Cmis Document Type", true, true, true, true,
          true, true, true, true, null, null, ContentStreamAllowed.ALLOWED, propertyDefinitions));
 
-      storage.addType(new TypeDefinitionImpl("cmis:article", BaseType.DOCUMENT, "cmis:article", "cmis:article", "",
+      storage.addType(new TypeDefinition("cmis:article", BaseType.DOCUMENT, "cmis:article", "cmis:article", "",
          "cmis:document", "cmis:article", "Cmis article", true, true, true, true, true, true, true, true, null, null,
          ContentStreamAllowed.ALLOWED, new HashMap<String, PropertyDefinition<?>>()));
 
-      storage.addType(new TypeDefinitionImpl("cmis:article-sports", BaseType.DOCUMENT, "cmis:article-sports",
+      storage.addType(new TypeDefinition("cmis:article-sports", BaseType.DOCUMENT, "cmis:article-sports",
          "cmis:article-sports", "", "cmis:article", "cmis:article-sports", "Cmis cmis:article-sports", true, true,
          true, true, true, true, true, true, null, null, ContentStreamAllowed.ALLOWED,
          new HashMap<String, PropertyDefinition<?>>()));
-      storage.addType(new TypeDefinitionImpl("cmis:article-animals", BaseType.DOCUMENT, "cmis:article-animals",
+      storage.addType(new TypeDefinition("cmis:article-animals", BaseType.DOCUMENT, "cmis:article-animals",
          "cmis:article-animals", "", "cmis:article", "cmis:article-animals", "Cmis cmis:article-animals", true, true,
          true, true, true, true, true, true, null, null, ContentStreamAllowed.ALLOWED,
          new HashMap<String, PropertyDefinition<?>>()));

@@ -30,7 +30,7 @@ import org.apache.abdera.protocol.server.context.EmptyResponseContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.abdera.ObjectTypeElement;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FilterNotValidException;
@@ -73,8 +73,8 @@ public class PoliciesCollection extends CmisObjectCollection
    {
       String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
 
-      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CMIS.MAX_ITEMS);
-      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CMIS.SKIP_COUNT);
+      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CmisConstants.MAX_ITEMS);
+      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CmisConstants.SKIP_COUNT);
 
       Connection conn = null;
       try
@@ -157,7 +157,7 @@ public class PoliciesCollection extends CmisObjectCollection
       for (Property<?> p : object.getProperties().values())
       {
          String pName = p.getId();
-         if (pName.equals(CMIS.OBJECT_ID))
+         if (pName.equals(CmisConstants.OBJECT_ID))
          {
             policyId = ((IdProperty)p).getValues().get(0);
          }
@@ -259,7 +259,7 @@ public class PoliciesCollection extends CmisObjectCollection
       for (Property<?> p : object.getProperties().values())
       {
          String pName = p.getId();
-         if (pName.equals(CMIS.OBJECT_ID))
+         if (pName.equals(CmisConstants.OBJECT_ID))
          {
             policyId = ((IdProperty)p).getValues().get(0);
          }

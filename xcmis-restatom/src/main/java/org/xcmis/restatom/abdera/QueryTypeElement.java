@@ -23,7 +23,7 @@ import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.query.Query;
@@ -86,7 +86,7 @@ public class QueryTypeElement extends ExtensibleElementWrapper
    public int getPageSize()
    {
       String tmp = getText(AtomCMIS.MAX_ITEMS);
-      return tmp == null ? CMIS.MAX_ITEMS : Integer.parseInt(tmp);
+      return tmp == null ? CmisConstants.MAX_ITEMS : Integer.parseInt(tmp);
    }
 
    /**

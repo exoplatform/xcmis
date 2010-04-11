@@ -20,7 +20,7 @@
 package org.xcmis.sp.jcr.exo;
 
 import org.exoplatform.services.jcr.core.ExtendedNode;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.Document;
 import org.xcmis.spi.Folder;
@@ -64,7 +64,7 @@ class DocumentCopy extends DocumentImpl
       {
          if (name == null)
          {
-            Property<?> nameProperty = properties.get(CMIS.NAME);
+            Property<?> nameProperty = properties.get(CmisConstants.NAME);
             if (nameProperty != null)
             {
                name = (String)nameProperty.getValues().get(0);
@@ -95,33 +95,33 @@ class DocumentCopy extends DocumentImpl
             doc.addMixin(JcrCMIS.MIX_VERSIONABLE);
          }
 
-         doc.setProperty(CMIS.OBJECT_TYPE_ID, //
+         doc.setProperty(CmisConstants.OBJECT_TYPE_ID, //
             type.getId());
-         doc.setProperty(CMIS.BASE_TYPE_ID, //
+         doc.setProperty(CmisConstants.BASE_TYPE_ID, //
             type.getBaseId().value());
-         doc.setProperty(CMIS.CREATED_BY, //
+         doc.setProperty(CmisConstants.CREATED_BY, //
             session.getUserID());
-         doc.setProperty(CMIS.CREATION_DATE, //
+         doc.setProperty(CmisConstants.CREATION_DATE, //
             Calendar.getInstance());
-         doc.setProperty(CMIS.LAST_MODIFIED_BY, //
+         doc.setProperty(CmisConstants.LAST_MODIFIED_BY, //
             session.getUserID());
-         doc.setProperty(CMIS.LAST_MODIFICATION_DATE, //
+         doc.setProperty(CmisConstants.LAST_MODIFICATION_DATE, //
             Calendar.getInstance());
-         doc.setProperty(CMIS.VERSION_SERIES_ID, //
+         doc.setProperty(CmisConstants.VERSION_SERIES_ID, //
             doc.getProperty(JcrCMIS.JCR_VERSION_HISTORY).getString());
-         doc.setProperty(CMIS.IS_LATEST_VERSION, //
+         doc.setProperty(CmisConstants.IS_LATEST_VERSION, //
             true);
-         doc.setProperty(CMIS.IS_MAJOR_VERSION, //
+         doc.setProperty(CmisConstants.IS_MAJOR_VERSION, //
             versioningState == VersioningState.MAJOR);
-         doc.setProperty(CMIS.VERSION_LABEL, //
+         doc.setProperty(CmisConstants.VERSION_LABEL, //
             versioningState == VersioningState.CHECKEDOUT ? pwcLabel : latestLabel);
-         doc.setProperty(CMIS.IS_VERSION_SERIES_CHECKED_OUT, //
+         doc.setProperty(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, //
             versioningState == VersioningState.CHECKEDOUT);
          if (versioningState == VersioningState.CHECKEDOUT)
          {
-            doc.setProperty(CMIS.VERSION_SERIES_CHECKED_OUT_ID, //
+            doc.setProperty(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, //
                ((ExtendedNode)doc).getIdentifier());
-            doc.setProperty(CMIS.VERSION_SERIES_CHECKED_OUT_BY, //
+            doc.setProperty(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, //
                session.getUserID());
          }
 

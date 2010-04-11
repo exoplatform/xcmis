@@ -21,7 +21,7 @@ package org.xcmis.restatom;
 
 import org.exoplatform.services.rest.impl.ContainerResponse;
 import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ObjectNotFoundException;
 
 import java.io.ByteArrayInputStream;
@@ -87,7 +87,7 @@ public class FolderDescendantsCollectionTest extends BaseTest
       assertEquals(204, resp.getStatus());
       try
       {
-         conn.getProperties(folder1, true, CMIS.WILDCARD);
+         conn.getProperties(folder1, true, CmisConstants.WILDCARD);
          fail("Folder tree should be removed.");
       }
       catch (ObjectNotFoundException onf)

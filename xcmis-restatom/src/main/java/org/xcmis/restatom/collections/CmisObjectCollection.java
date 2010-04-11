@@ -44,7 +44,7 @@ import org.xcmis.restatom.abdera.ObjectTypeElement;
 import org.xcmis.restatom.types.CmisContentType;
 import org.xcmis.restatom.types.EnumReturnVersion;
 import org.xcmis.spi.BaseContentStream;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ChangeTokenHolder;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
@@ -66,7 +66,6 @@ import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.Rendition;
 import org.xcmis.spi.model.RepositoryCapabilities;
-import org.xcmis.spi.model.impl.CmisObjectImpl;
 import org.xcmis.spi.model.impl.StringProperty;
 
 import java.io.IOException;
@@ -181,8 +180,8 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          String objectId = conn.deleteContentStream(getId(request), //
             changeTokenHolder // changeToken
             );
-         CmisObject object = conn.getProperties(objectId, true, CMIS.CHANGE_TOKEN);
-         Property<String> changeToken = (Property<String>)getProperty(object, CMIS.CHANGE_TOKEN);
+         CmisObject object = conn.getProperties(objectId, true, CmisConstants.CHANGE_TOKEN);
+         Property<String> changeToken = (Property<String>)getProperty(object, CmisConstants.CHANGE_TOKEN);
          // TODO : 204, is it correct ? It used by default when delete content of ATOM resource
          ResponseContext response = new EmptyResponseContext(204);
          if (changeToken != null && changeToken.getValues().size() > 0)
@@ -573,7 +572,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          conn = getConnection(request);
          ObjectTypeElement objectElement = entry.getFirstChild(AtomCMIS.OBJECT);
-         CmisObject object = objectElement != null ? object = objectElement.getObject() : new CmisObjectImpl();
+         CmisObject object = objectElement != null ? object = objectElement.getObject() : new CmisObject();
          updatePropertiesFromEntry(object, entry);
 
          Map<String, Property<?>> properties = object.getProperties();
@@ -604,7 +603,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
             // validators in other forms of request.
             // ------------------------------------------
             // Method is PUT - use strong comparison.
-            CmisObject cmisObject = conn.getProperties(getId(request), true, CMIS.BASE_TYPE_ID);
+            CmisObject cmisObject = conn.getProperties(getId(request), true, CmisConstants.BASE_TYPE_ID);
             BaseType baseType = cmisObject.getObjectInfo().getBaseType();
 
             ChangeTokenHolder changeTokenHolder = new ChangeTokenHolder();
@@ -617,7 +616,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
          }
 
-         CmisObject updated = conn.getProperties(updatedId, true, CMIS.WILDCARD);
+         CmisObject updated = conn.getProperties(updatedId, true, CmisConstants.WILDCARD);
          entry = request.getAbdera().getFactory().newEntry();
          addEntryDetails(request, entry, request.getResolvedUri(), updated);
          return buildGetEntryResponse(request, entry);
@@ -745,7 +744,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
             overwriteFlagParameter == null || overwriteFlagParameter.length() == 0 ? true : Boolean
                .parseBoolean(overwriteFlagParameter);
          String updatedId = conn.setContentStream(getId(request), content, changeTokenHolder, overwriteFlag);
-         CmisObject updated = conn.getProperties(updatedId, true, CMIS.CHANGE_TOKEN);
+         CmisObject updated = conn.getProperties(updatedId, true, CmisConstants.CHANGE_TOKEN);
          ResponseContext response = new EmptyResponseContext(201);
          String contentLink = getContentLink(getId(request), request);
          response.setHeader(HttpHeaders.CONTENT_LOCATION, contentLink);
@@ -1533,12 +1532,12 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       if (title != null)
       {
          // Should never be null, but check it to avoid overwriting existed cmis:name property.
-         StringProperty name = (StringProperty)getProperty(object, CMIS.NAME);
+         StringProperty name = (StringProperty)getProperty(object, CmisConstants.NAME);
          if (name == null)
          {
             name = new StringProperty();
-            name.setId(CMIS.NAME);
-            name.setLocalName(CMIS.NAME);
+            name.setId(CmisConstants.NAME);
+            name.setLocalName(CmisConstants.NAME);
             name.getValues().add(title);
             object.getProperties().put(name.getId(), name);
          }

@@ -24,7 +24,7 @@ import org.exoplatform.services.jcr.access.PermissionType;
 import org.exoplatform.services.jcr.core.ExtendedNode;
 import org.exoplatform.services.jcr.core.ExtendedSession;
 import org.xcmis.spi.BaseContentStream;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.Document;
@@ -180,7 +180,7 @@ public class StorageTest extends BaseTest
       assertFalse(document.isVersionSeriesCheckedOut());
       assertNull(document.getVersionSeriesCheckedOutId());
       assertNull(document.getVersionSeriesCheckedOutBy());
-      assertEquals("my comment", document.getProperty(CMIS.CHECKIN_COMMENT).getValues().get(0));
+      assertEquals("my comment", document.getProperty(CmisConstants.CHECKIN_COMMENT).getValues().get(0));
 
       // check content
       byte[] b = new byte[128];
@@ -387,9 +387,9 @@ public class StorageTest extends BaseTest
 
    public void testCreateDocument() throws Exception
    {
-      PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:document", CMIS.NAME);
+      PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:document", CmisConstants.NAME);
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-      properties.put(CMIS.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
+      properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
          .getDisplayName(), "createDocumentTest"));
 
       ContentStream cs =
@@ -477,9 +477,9 @@ public class StorageTest extends BaseTest
 
    public void testCreateFolder() throws Exception
    {
-      PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:folder", CMIS.NAME);
+      PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:folder", CmisConstants.NAME);
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-      properties.put(CMIS.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
+      properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
          .getDisplayName(), "createFolderTest"));
 
       Folder newFolder = storage.createFolder(rootFolder, "cmis:folder");
@@ -495,12 +495,12 @@ public class StorageTest extends BaseTest
    {
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
 
-      PropertyDefinition<?> defName = PropertyDefinitions.getPropertyDefinition("cmis:policy", CMIS.NAME);
-      properties.put(CMIS.NAME, new StringProperty(defName.getId(), defName.getQueryName(), defName.getLocalName(),
+      PropertyDefinition<?> defName = PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.NAME);
+      properties.put(CmisConstants.NAME, new StringProperty(defName.getId(), defName.getQueryName(), defName.getLocalName(),
          defName.getDisplayName(), "createPolicyTest"));
 
-      PropertyDefinition<?> defPolicyText = PropertyDefinitions.getPropertyDefinition("cmis:policy", CMIS.POLICY_TEXT);
-      properties.put(CMIS.POLICY_TEXT, new StringProperty(defPolicyText.getId(), defPolicyText.getQueryName(),
+      PropertyDefinition<?> defPolicyText = PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
+      properties.put(CmisConstants.POLICY_TEXT, new StringProperty(defPolicyText.getId(), defPolicyText.getQueryName(),
          defPolicyText.getLocalName(), defPolicyText.getDisplayName(), "simple policy"));
 
       ObjectData policy = storage.createPolicy(rootFolder, "cmis:policy");
@@ -521,8 +521,8 @@ public class StorageTest extends BaseTest
       ObjectData targetDoc = createDocument(rootFolder, "createRelationshipTarget", "cmis:document", null, null);
 
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-      PropertyDefinition<?> defName = PropertyDefinitions.getPropertyDefinition("cmis:relationship", CMIS.NAME);
-      properties.put(CMIS.NAME, new StringProperty(defName.getId(), defName.getQueryName(), defName.getLocalName(),
+      PropertyDefinition<?> defName = PropertyDefinitions.getPropertyDefinition("cmis:relationship", CmisConstants.NAME);
+      properties.put(CmisConstants.NAME, new StringProperty(defName.getId(), defName.getQueryName(), defName.getLocalName(),
          defName.getDisplayName(), "createRelationshipTest"));
 
       Relationship relationship = storage.createRelationship(sourceDoc, targetDoc, "cmis:relationship");
@@ -1082,7 +1082,7 @@ public class StorageTest extends BaseTest
       assertTrue(session.itemExists("/renameDocumentTest01"));
 
       assertEquals("renameDocumentTest01", document.getName());
-      assertEquals("renameDocumentTest01", document.getProperty(CMIS.CONTENT_STREAM_FILE_NAME).getValues().get(0));
+      assertEquals("renameDocumentTest01", document.getProperty(CmisConstants.CONTENT_STREAM_FILE_NAME).getValues().get(0));
    }
 
    public void testRenameFolder() throws Exception
@@ -1209,12 +1209,12 @@ public class StorageTest extends BaseTest
    {
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
 
-      PropertyDefinition<?> defName = PropertyDefinitions.getPropertyDefinition("cmis:policy", CMIS.NAME);
-      properties.put(CMIS.NAME, new StringProperty(defName.getId(), defName.getQueryName(), defName.getLocalName(),
+      PropertyDefinition<?> defName = PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.NAME);
+      properties.put(CmisConstants.NAME, new StringProperty(defName.getId(), defName.getQueryName(), defName.getLocalName(),
          defName.getDisplayName(), name));
 
-      PropertyDefinition<?> defPolicyText = PropertyDefinitions.getPropertyDefinition("cmis:policy", CMIS.POLICY_TEXT);
-      properties.put(CMIS.POLICY_TEXT, new StringProperty(defPolicyText.getId(), defPolicyText.getQueryName(),
+      PropertyDefinition<?> defPolicyText = PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
+      properties.put(CmisConstants.POLICY_TEXT, new StringProperty(defPolicyText.getId(), defPolicyText.getQueryName(),
          defPolicyText.getLocalName(), defPolicyText.getDisplayName(), policyText));
 
       Policy policy = storage.createPolicy(folder, typeId);

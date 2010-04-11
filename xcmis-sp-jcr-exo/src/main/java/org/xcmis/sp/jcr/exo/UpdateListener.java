@@ -26,7 +26,7 @@ import org.exoplatform.services.log.Log;
 import org.xcmis.sp.jcr.exo.rendition.RenditionContentStream;
 import org.xcmis.sp.jcr.exo.rendition.RenditionProvider;
 import org.xcmis.spi.BaseContentStream;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.utils.MimeType;
 
@@ -108,7 +108,7 @@ public class UpdateListener implements EventListener
                }
                content = new BaseContentStream(fileContent.getStream(), //
                   length, //
-                  node.getDepth() == 0 ? CMIS.ROOT_FOLDER_NAME : node.getName(), //
+                  node.getDepth() == 0 ? CmisConstants.ROOT_FOLDER_NAME : node.getName(), //
                   contentNode.getProperty(JcrCMIS.JCR_MIMETYPE).getString());
                
                if (content != null)

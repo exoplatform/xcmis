@@ -19,7 +19,7 @@
 
 package org.xcmis.sp.jcr.exo;
 
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 
 /**
  * Constants.
@@ -27,7 +27,7 @@ import org.xcmis.spi.CMIS;
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id$
  */
-public interface JcrCMIS extends CMIS
+public interface JcrCMIS extends CmisConstants
 {
 
    String EXO_CMIS_NS_URI = "http://www.exoplatform.com/jcr/cmis/1.0";

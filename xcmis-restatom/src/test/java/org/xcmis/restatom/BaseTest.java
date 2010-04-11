@@ -41,7 +41,7 @@ import org.exoplatform.services.test.mock.MockHttpServletRequest;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xcmis.restatom.abdera.CMISExtensionFactory;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.ItemsList;
@@ -128,12 +128,12 @@ public abstract class BaseTest extends TestCase
 
       Map<String, Property<?>> props = new HashMap<String, Property<?>>();
       IdProperty propId = new IdProperty();
-      propId.setId(CMIS.OBJECT_TYPE_ID);
-      propId.setLocalName(CMIS.OBJECT_TYPE_ID);
+      propId.setId(CmisConstants.OBJECT_TYPE_ID);
+      propId.setLocalName(CmisConstants.OBJECT_TYPE_ID);
       propId.getValues().add(BaseType.FOLDER.value());
       StringProperty propName = new StringProperty();
-      propName.setId(CMIS.NAME);
-      propName.setLocalName(CMIS.NAME);
+      propName.setId(CmisConstants.NAME);
+      propName.setLocalName(CmisConstants.NAME);
       propName.getValues().add(testFolderName);
       props.put(propId.getId(), propId);
       props.put(propName.getId(), propName);
@@ -305,16 +305,16 @@ public abstract class BaseTest extends TestCase
    {
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       // OBJECT_TYPE_ID
-      String typeId = CMIS.DOCUMENT;
+      String typeId = CmisConstants.DOCUMENT;
       IdProperty typeIdProperty = new IdProperty();
-      typeIdProperty.setId(CMIS.OBJECT_TYPE_ID);
-      typeIdProperty.setLocalName(CMIS.OBJECT_TYPE_ID);
+      typeIdProperty.setId(CmisConstants.OBJECT_TYPE_ID);
+      typeIdProperty.setLocalName(CmisConstants.OBJECT_TYPE_ID);
       typeIdProperty.getValues().add(typeId);
       properties.put(typeIdProperty.getId(), typeIdProperty);
       // NAME
       StringProperty nameProperty = new StringProperty();
-      nameProperty.setId(CMIS.NAME);
-      nameProperty.setLocalName(CMIS.NAME);
+      nameProperty.setId(CmisConstants.NAME);
+      nameProperty.setLocalName(CmisConstants.NAME);
       nameProperty.getValues().add(name);
       properties.put(nameProperty.getId(), nameProperty);
       // Create Document
@@ -326,16 +326,16 @@ public abstract class BaseTest extends TestCase
    {
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       // OBJECT_TYPE_ID
-      String typeId = CMIS.FOLDER;
+      String typeId = CmisConstants.FOLDER;
       IdProperty typeIdProperty = new IdProperty();
-      typeIdProperty.setId(CMIS.OBJECT_TYPE_ID);
-      typeIdProperty.setLocalName(CMIS.OBJECT_TYPE_ID);
+      typeIdProperty.setId(CmisConstants.OBJECT_TYPE_ID);
+      typeIdProperty.setLocalName(CmisConstants.OBJECT_TYPE_ID);
       typeIdProperty.getValues().add(typeId);
       properties.put(typeIdProperty.getId(), typeIdProperty);
       // NAME
       StringProperty nameProperty = new StringProperty();
-      nameProperty.setId(CMIS.NAME);
-      nameProperty.setLocalName(CMIS.NAME);
+      nameProperty.setId(CmisConstants.NAME);
+      nameProperty.setLocalName(CmisConstants.NAME);
       nameProperty.getValues().add(name);
       properties.put(nameProperty.getId(), nameProperty);
       // Create Folder
@@ -347,22 +347,22 @@ public abstract class BaseTest extends TestCase
    {
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       // OBJECT_TYPE_ID
-      String typeId = CMIS.POLICY;
+      String typeId = CmisConstants.POLICY;
       IdProperty typeIdProperty = new IdProperty();
-      typeIdProperty.setId(CMIS.OBJECT_TYPE_ID);
-      typeIdProperty.setLocalName(CMIS.OBJECT_TYPE_ID);
+      typeIdProperty.setId(CmisConstants.OBJECT_TYPE_ID);
+      typeIdProperty.setLocalName(CmisConstants.OBJECT_TYPE_ID);
       typeIdProperty.getValues().add(typeId);
       properties.put(typeIdProperty.getId(), typeIdProperty);
       // NAME
       StringProperty nameProperty = new StringProperty();
-      nameProperty.setId(CMIS.NAME);
-      nameProperty.setLocalName(CMIS.NAME);
+      nameProperty.setId(CmisConstants.NAME);
+      nameProperty.setLocalName(CmisConstants.NAME);
       nameProperty.getValues().add(name);
       properties.put(nameProperty.getId(), nameProperty);
       // POLICY_TEXT
       StringProperty policyTextProperty = new StringProperty();
-      policyTextProperty.setId(CMIS.POLICY_TEXT);
-      policyTextProperty.setLocalName(CMIS.POLICY_TEXT);
+      policyTextProperty.setId(CmisConstants.POLICY_TEXT);
+      policyTextProperty.setLocalName(CmisConstants.POLICY_TEXT);
       policyTextProperty.getValues().add(name);
       properties.put(policyTextProperty.getId(), policyTextProperty);
       // Create Folder
@@ -405,17 +405,17 @@ public abstract class BaseTest extends TestCase
 
    protected CmisObject getCmisObject(String objectId)
    {
-      return conn.getObject(objectId, false, null, false, false, true, CMIS.WILDCARD, null);
+      return conn.getObject(objectId, false, null, false, false, true, CmisConstants.WILDCARD, null);
    }
 
    protected List<ObjectParent> getParents(String id)
    {
-      return conn.getObjectParents(id, false, null, false, true, CMIS.WILDCARD, null);
+      return conn.getObjectParents(id, false, null, false, true, CmisConstants.WILDCARD, null);
    }
 
    protected ItemsList<CmisObject> getChildren(String folderId)
    {
-      return conn.getChildren(folderId, false, null, false, true, CMIS.WILDCARD, null, null, -1, 0);
+      return conn.getChildren(folderId, false, null, false, true, CmisConstants.WILDCARD, null, null, -1, 0);
    }
 
    protected Property<?> getProperty(CmisObject object, String propertyName)

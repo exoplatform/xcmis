@@ -19,7 +19,7 @@
 
 package org.xcmis.sp.inmemory;
 
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.Folder;
@@ -89,7 +89,7 @@ class RelationshipImpl extends BaseObjectData implements Relationship
       {
          return source.getObjectId();
       }
-      return getString(CMIS.SOURCE_ID);
+      return getString(CmisConstants.SOURCE_ID);
    }
 
    public String getTargetId()
@@ -98,7 +98,7 @@ class RelationshipImpl extends BaseObjectData implements Relationship
       {
          return target.getObjectId();
       }
-      return getString(CMIS.TARGET_ID);
+      return getString(CmisConstants.TARGET_ID);
    }
 
    @Override
@@ -118,13 +118,13 @@ class RelationshipImpl extends BaseObjectData implements Relationship
       {
          id = StorageImpl.generateId();
 
-         entry.setValue(CMIS.OBJECT_ID, new StringValue(id));
-         entry.setValue(CMIS.OBJECT_TYPE_ID, new StringValue(getTypeId()));
-         entry.setValue(CMIS.BASE_TYPE_ID, new StringValue(getBaseType().value()));
-         entry.setValue(CMIS.CREATED_BY, new StringValue());
-         entry.setValue(CMIS.CREATION_DATE, new DateValue(Calendar.getInstance()));
-         entry.setValue(CMIS.SOURCE_ID, new StringValue(source.getObjectId()));
-         entry.setValue(CMIS.TARGET_ID, new StringValue(target.getObjectId()));
+         entry.setValue(CmisConstants.OBJECT_ID, new StringValue(id));
+         entry.setValue(CmisConstants.OBJECT_TYPE_ID, new StringValue(getTypeId()));
+         entry.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(getBaseType().value()));
+         entry.setValue(CmisConstants.CREATED_BY, new StringValue());
+         entry.setValue(CmisConstants.CREATION_DATE, new DateValue(Calendar.getInstance()));
+         entry.setValue(CmisConstants.SOURCE_ID, new StringValue(source.getObjectId()));
+         entry.setValue(CmisConstants.TARGET_ID, new StringValue(target.getObjectId()));
 
          Set<String> sourceRelationships = storage.relationships.get(source.getObjectId());
          if (sourceRelationships == null)
@@ -154,9 +154,9 @@ class RelationshipImpl extends BaseObjectData implements Relationship
          id = getObjectId();
       }
 
-      entry.setValue(CMIS.LAST_MODIFIED_BY, new StringValue());
-      entry.setValue(CMIS.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));
-      entry.setValue(CMIS.CHANGE_TOKEN, new StringValue(StorageImpl.generateId()));
+      entry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue());
+      entry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));
+      entry.setValue(CmisConstants.CHANGE_TOKEN, new StringValue(StorageImpl.generateId()));
 
       storage.properties.get(id).putAll(entry.getValues());
       storage.policies.get(id).addAll(entry.getPolicies());

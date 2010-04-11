@@ -26,7 +26,7 @@ import org.apache.abdera.model.Feed;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
@@ -113,7 +113,7 @@ public class ParentsCollection extends CmisObjectCollection
          conn = getConnection(request);
          String objectId = getId(request);
          CmisObject object =
-            conn.getObject(objectId, false, IncludeRelationships.NONE, false, false, true, CMIS.BASE_TYPE_ID, null);
+            conn.getObject(objectId, false, IncludeRelationships.NONE, false, false, true, CmisConstants.BASE_TYPE_ID, null);
 
          switch (getBaseObjectType(object))
          {

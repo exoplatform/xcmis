@@ -29,7 +29,7 @@ import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsTree;
@@ -77,7 +77,7 @@ public class TypesDescendantsCollection extends CmisTypeCollection
       String typeId = request.getTarget().getParameter(AtomCMIS.PARAM_TYPE_ID);
       boolean includePropertyDefinitions =
          getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PROPERTY_DEFINITIONS, false);
-      int depth = getIntegerParameter(request, AtomCMIS.PARAM_DEPTH, CMIS.DEPTH);
+      int depth = getIntegerParameter(request, AtomCMIS.PARAM_DEPTH, CmisConstants.DEPTH);
       Connection conn = null;
       try
       {

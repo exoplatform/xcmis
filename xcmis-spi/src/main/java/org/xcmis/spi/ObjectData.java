@@ -38,7 +38,7 @@ import java.util.Map;
 public interface ObjectData
 {
 
-   void accept(CmisVisitor visitor);
+   void accept(ObjectDataVisitor visitor);
 
    // ACL
 
@@ -46,7 +46,7 @@ public interface ObjectData
     * Set new ACL for object. New ACL overwrite existed one. If ACL capability
     * is not supported then this method must throw {@link NotSupportedException}
     * .
-    * 
+    *
     * @param acl ACL that should replace currently applied ACL
     * @throws ConstraintException if current object is not controllable by ACL,
     *         see {@link TypeDefinition#isControllableACL()}.
@@ -56,7 +56,7 @@ public interface ObjectData
    /**
     * Get ACL currently applied to object. If ACL capability is not supported
     * then this method must throw {@link NotSupportedException}.
-    * 
+    *
     * @param onlyBasicPermissions if <code>true</code> then only CMIS basic
     *        permissions {@link BasicPermissions} must be returned if
     *        <code>false</code> then basic permissions and repository specific
@@ -73,7 +73,7 @@ public interface ObjectData
    /**
     * Applied specified policy to the current object. If Policy object type is
     * not supported then this method must throw {@link NotSupportedException}.
-    * 
+    *
     * @param policy policy to be applied
     * @throws ConstraintException if current object is not controllable by
     *         Policy, see {@link TypeDefinition#isControllablePolicy()}.
@@ -83,7 +83,7 @@ public interface ObjectData
    /**
     * Get policies applied to the current object. If Policy object type is not
     * supported then this method must throw {@link NotSupportedException}.
-    * 
+    *
     * @return applied Policies. If there is no policies applied to object or if
     *         object is not controllable by policy then empty list must be
     *         returned, never <code>null</code>
@@ -94,7 +94,7 @@ public interface ObjectData
     * Remove specified policy from object. This method must not remove Policy
     * object itself. If Policy object type is not supported then this method
     * must throw {@link NotSupportedException}.
-    * 
+    *
     * @param policy policy object
     * @throws ConstraintException if current object is not controllable by
     *         Policy, see {@link TypeDefinition#isControllablePolicy()}.
@@ -119,42 +119,42 @@ public interface ObjectData
 
    /**
     * Shortcut to 'cmis:changeToken' property.
-    * 
+    *
     * @return 'cmis:changeToken' property
     */
    String getChangeToken();
 
    /**
     * Shortcut to 'cmis:createdBy' property.
-    * 
+    *
     * @return 'cmis:createdBy' property
     */
    String getCreatedBy();
 
    /**
     * Shortcut to 'cmis:creationDate' property.
-    * 
+    *
     * @return 'cmis:creationDate' property
     */
    Calendar getCreationDate();
 
    /**
     * Shortcut to 'cmis:lastModifiedBy' property.
-    * 
+    *
     * @return 'cmis:lastModifiedBy' property
     */
    String getLastModifiedBy();
 
    /**
     * Shortcut to 'cmis:lastModificationDate' property.
-    * 
+    *
     * @return 'cmis:lastModificationDate' property
     */
    Calendar getLastModificationDate();
 
    /**
     * Shortcut to 'cmis:name' property.
-    * 
+    *
     * @return 'cmis:name' property
     */
    String getName();
@@ -162,14 +162,14 @@ public interface ObjectData
    /**
     * Shortcut to 'cmis:objectId' property. This method always return
     * <code>null</code> for newly created unsaved objects. See {@link #isNew()}.
-    * 
+    *
     * @return 'cmis:objectId' property
     */
    String getObjectId();
 
    /**
     * Get object parent.
-    * 
+    *
     * @return parent of current object
     * @throws ConstraintException if object has more then one parent or if
     *         current object is root folder
@@ -179,14 +179,14 @@ public interface ObjectData
    /**
     * Get collections of parent folders. It may contains exactly one object for
     * single-filed and empty collection for unfiled object or root folder.
-    * 
+    *
     * @return collection of object's parents
     */
    Collection<Folder> getParents();
 
    /**
     * Objects relationships.
-    * 
+    *
     * @param direction relationship's direction.
     * @param type relationship type. If
     *        <code>includeSubRelationshipTypes == true</code> then all
@@ -215,7 +215,7 @@ public interface ObjectData
 
    /**
     * Shortcut setter for 'cmis:name' property.
-    * 
+    *
     * @throws NameConstraintViolationException if <i>cmis:name</i> specified in
     *         properties throws conflict
     */
@@ -236,7 +236,7 @@ public interface ObjectData
 
    /**
     * Get subset of properties accepted by {@link PropertyFilter}
-    * 
+    *
     * @param filter property filter
     * @return subset of properties
     */
@@ -248,7 +248,7 @@ public interface ObjectData
     * list for property value {@link Property#getValues()} minds the property
     * will be in 'value not set' state. If property is required then
     * {@link ConstraintException} will be thrown.
-    * 
+    *
     * @param property new property
     * @throws ConstraintException if value of the property violates the
     *         min/max/required/length constraints specified in the property
@@ -266,7 +266,7 @@ public interface ObjectData
     * {@link Property#getValues()} minds the property will be in 'value not set'
     * state. If property is required then {@link ConstraintException} will be
     * thrown.
-    * 
+    *
     * @param properties new set of properties
     * @throws ConstraintException if value of any of the properties violates the
     *         min/max/required/length constraints specified in the property
@@ -283,7 +283,7 @@ public interface ObjectData
     * stream. If object has type other then Document and
     * <code>streamId == null</code> then this method return <code>null</code>.
     * For Document objects default content stream will be returned.
-    * 
+    *
     * @param streamId content stream id
     * @return content stream or <code>null</code>
     */
@@ -291,7 +291,7 @@ public interface ObjectData
 
    //   /**
    //    * Save updated object or newly created object.
-   //    * 
+   //    *
    //    * @throws StorageException if changes can't be saved cause storage internal
    //    *         errors
    //    * @throws NameConstraintViolationException if updated name (property

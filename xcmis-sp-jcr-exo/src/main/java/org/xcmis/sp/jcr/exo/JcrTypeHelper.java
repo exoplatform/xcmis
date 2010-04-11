@@ -19,7 +19,7 @@
 
 package org.xcmis.sp.jcr.exo;
 
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.DateResolution;
@@ -28,8 +28,6 @@ import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.PropertyType;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.Updatability;
-import org.xcmis.spi.model.impl.PropertyDefinitionImpl;
-import org.xcmis.spi.model.impl.TypeDefinitionImpl;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -131,7 +129,7 @@ class JcrTypeHelper
     */
    protected static TypeDefinition getDocumentDefinition(NodeType nt, boolean includePropertyDefinition)
    {
-      TypeDefinitionImpl def = new TypeDefinitionImpl();
+      TypeDefinition def = new TypeDefinition();
       String localTypeName = nt.getName();
       String typeId = getCmisTypeId(localTypeName);
       def.setBaseId(BaseType.DOCUMENT);
@@ -185,7 +183,7 @@ class JcrTypeHelper
     */
    protected static TypeDefinition getFolderDefinition(NodeType nt, boolean includePropertyDefinition)
    {
-      TypeDefinitionImpl def = new TypeDefinitionImpl();
+      TypeDefinition def = new TypeDefinition();
       String localTypeName = nt.getName();
       String typeId = getCmisTypeId(localTypeName);
       def.setBaseId(BaseType.FOLDER);
@@ -237,7 +235,7 @@ class JcrTypeHelper
     */
    protected static TypeDefinition getPolicyDefinition(NodeType nt, boolean includePropertyDefinition)
    {
-      TypeDefinitionImpl def = new TypeDefinitionImpl();
+      TypeDefinition def = new TypeDefinition();
       String localTypeName = nt.getName();
       String typeId = getCmisTypeId(localTypeName);
       def.setBaseId(BaseType.POLICY);
@@ -289,7 +287,7 @@ class JcrTypeHelper
     */
    protected static TypeDefinition getRelationshipDefinition(NodeType nt, boolean includePropertyDefinition)
    {
-      TypeDefinitionImpl def = new TypeDefinitionImpl();
+      TypeDefinition def = new TypeDefinition();
       String localTypeName = nt.getName();
       String typeId = getCmisTypeId(localTypeName);
       def.setBaseId(BaseType.RELATIONSHIP);
@@ -364,8 +362,8 @@ class JcrTypeHelper
                {
 
                   case javax.jcr.PropertyType.BOOLEAN :
-                     PropertyDefinitionImpl<Boolean> boolDef =
-                        new PropertyDefinitionImpl<Boolean>(pdName, pdName, pdName, null, pdName, null,
+                     PropertyDefinition<Boolean> boolDef =
+                        new PropertyDefinition<Boolean>(pdName, pdName, pdName, null, pdName, null,
                            PropertyType.BOOLEAN, jcrPropertyDef.isProtected() ? Updatability.READONLY
                               : Updatability.READWRITE, false, jcrPropertyDef.isMandatory(), true, true, null,
                            jcrPropertyDef.isMultiple(), null, null);
@@ -374,8 +372,8 @@ class JcrTypeHelper
                      break;
 
                   case javax.jcr.PropertyType.DATE :
-                     PropertyDefinitionImpl<Calendar> dateDef =
-                        new PropertyDefinitionImpl<Calendar>(pdName, pdName, pdName, null, pdName, null,
+                     PropertyDefinition<Calendar> dateDef =
+                        new PropertyDefinition<Calendar>(pdName, pdName, pdName, null, pdName, null,
                            PropertyType.DATETIME, jcrPropertyDef.isProtected() ? Updatability.READONLY
                               : Updatability.READWRITE, false, jcrPropertyDef.isMandatory(), true, true, null,
                            jcrPropertyDef.isMultiple(), null, null);
@@ -385,46 +383,42 @@ class JcrTypeHelper
                      break;
 
                   case javax.jcr.PropertyType.DOUBLE :
-                     PropertyDefinitionImpl<BigDecimal> decimalDef =
-                        new PropertyDefinitionImpl<BigDecimal>(pdName, pdName, pdName, null, pdName, null,
+                     PropertyDefinition<BigDecimal> decimalDef =
+                        new PropertyDefinition<BigDecimal>(pdName, pdName, pdName, null, pdName, null,
                            PropertyType.DECIMAL, jcrPropertyDef.isProtected() ? Updatability.READONLY
                               : Updatability.READWRITE, false, jcrPropertyDef.isMandatory(), true, true, null,
                            jcrPropertyDef.isMultiple(), null, null);
 
                      decimalDef.setDecimalPrecision(Precision.Bit32);
-                     decimalDef.setMaxDecimal(CMIS.MAX_DECIMAL_VALUE);
-                     decimalDef.setMinDecimal(CMIS.MIN_DECIMAL_VALUE);
+                     decimalDef.setMaxDecimal(CmisConstants.MAX_DECIMAL_VALUE);
+                     decimalDef.setMinDecimal(CmisConstants.MIN_DECIMAL_VALUE);
                      cmisPropDef = decimalDef;
                      break;
 
                   case javax.jcr.PropertyType.LONG :
-                     PropertyDefinitionImpl<BigInteger> integerDef =
-                        new PropertyDefinitionImpl<BigInteger>(pdName, pdName, pdName, null, pdName, null,
+                     PropertyDefinition<BigInteger> integerDef =
+                        new PropertyDefinition<BigInteger>(pdName, pdName, pdName, null, pdName, null,
                            PropertyType.INTEGER, jcrPropertyDef.isProtected() ? Updatability.READONLY
                               : Updatability.READWRITE, false, jcrPropertyDef.isMandatory(), true, true, null,
                            jcrPropertyDef.isMultiple(), null, null);
 
-                     integerDef.setMaxInteger(CMIS.MAX_INTEGER_VALUE);
-                     integerDef.setMinInteger(CMIS.MIN_INTEGER_VALUE);
+                     integerDef.setMaxInteger(CmisConstants.MAX_INTEGER_VALUE);
+                     integerDef.setMinInteger(CmisConstants.MIN_INTEGER_VALUE);
                      cmisPropDef = integerDef;
                      break;
 
                   case javax.jcr.PropertyType.NAME : // TODO
-                     //                     CmisPropertyIdDefinitionType idDef = new CmisPropertyIdDefinitionType();
-                     //                     idDef.setPropertyType(EnumPropertyType.ID);
-                     //                     cmisPropDef = idDef;
-                     //                     break;
                   case javax.jcr.PropertyType.REFERENCE :
                   case javax.jcr.PropertyType.STRING :
                   case javax.jcr.PropertyType.PATH :
                   case javax.jcr.PropertyType.BINARY :
                   case javax.jcr.PropertyType.UNDEFINED :
-                     PropertyDefinitionImpl<String> stringDef =
-                        new PropertyDefinitionImpl<String>(pdName, pdName, pdName, null, pdName, null,
+                     PropertyDefinition<String> stringDef =
+                        new PropertyDefinition<String>(pdName, pdName, pdName, null, pdName, null,
                            PropertyType.STRING, jcrPropertyDef.isProtected() ? Updatability.READONLY
                               : Updatability.READWRITE, false, jcrPropertyDef.isMandatory(), true, true, null,
                            jcrPropertyDef.isMultiple(), null, null);
-                     stringDef.setMaxLength(CMIS.MAX_STRING_LENGTH);
+                     stringDef.setMaxLength(CmisConstants.MAX_STRING_LENGTH);
                      cmisPropDef = stringDef;
                      break;
 
@@ -433,7 +427,8 @@ class JcrTypeHelper
             }
          }
       }
-      ((TypeDefinitionImpl)typeDefinition).setPropertyDefinitions(pd);
+
+      typeDefinition.setPropertyDefinitions(pd);
    }
 
 }

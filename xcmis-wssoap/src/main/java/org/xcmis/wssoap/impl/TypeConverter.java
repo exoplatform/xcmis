@@ -82,10 +82,8 @@ import org.xcmis.spi.model.impl.DecimalProperty;
 import org.xcmis.spi.model.impl.HtmlProperty;
 import org.xcmis.spi.model.impl.IdProperty;
 import org.xcmis.spi.model.impl.IntegerProperty;
-import org.xcmis.spi.model.impl.PropertyDefinitionImpl;
 import org.xcmis.spi.model.impl.RenditionImpl;
 import org.xcmis.spi.model.impl.StringProperty;
-import org.xcmis.spi.model.impl.TypeDefinitionImpl;
 import org.xcmis.spi.model.impl.UriProperty;
 import org.xcmis.spi.utils.CmisUtils;
 
@@ -466,8 +464,8 @@ public class TypeConverter
 
    public static TypeDefinition getTypeDefinition(CmisTypeDefinitionType source)
    {
-      TypeDefinitionImpl result =
-         new TypeDefinitionImpl(source.getId(), BaseType.fromValue(source.getBaseId().value()), source.getQueryName(),
+      TypeDefinition result =
+         new TypeDefinition(source.getId(), BaseType.fromValue(source.getBaseId().value()), source.getQueryName(),
             source.getLocalName(), source.getLocalNamespace(), source.getParentId(), source.getDisplayName(), source
                .getDescription(), source.isCreatable(), source.isFileable(), source.isQueryable(), source
                .isFulltextIndexed(), source.isIncludedInSupertypeQuery(), source.isControllablePolicy(), source
@@ -484,7 +482,7 @@ public class TypeConverter
       Map<String, PropertyDefinition<?>> result = new HashMap<String, PropertyDefinition<?>>();
       for (CmisPropertyDefinitionType one : source)
       {
-         result.put(one.getId(), new PropertyDefinitionImpl(one.getId(), one.getQueryName(), one.getLocalName(), one
+         result.put(one.getId(), new PropertyDefinition(one.getId(), one.getQueryName(), one.getLocalName(), one
             .getLocalNamespace(), one.getDisplayName(), one.getDescription(), PropertyType.fromValue(one
             .getPropertyType().value()), Updatability.fromValue(one.getUpdatability().value()), one.isInherited(), one
             .isRequired(), one.isQueryable(), one.isOrderable(), one.isOpenChoice(), false, null, null));

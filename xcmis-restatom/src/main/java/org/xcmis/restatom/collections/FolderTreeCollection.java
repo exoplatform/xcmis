@@ -26,7 +26,7 @@ import org.apache.abdera.model.Feed;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsTree;
@@ -89,7 +89,7 @@ public class FolderTreeCollection extends FolderDescentantsCollection
          String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS);
          throw new ResponseContextException(msg, 400);
       }
-      int depth = getIntegerParameter(request, AtomCMIS.PARAM_DEPTH, CMIS.DEPTH);
+      int depth = getIntegerParameter(request, AtomCMIS.PARAM_DEPTH, CmisConstants.DEPTH);
       Connection conn = null;
       try
       {
