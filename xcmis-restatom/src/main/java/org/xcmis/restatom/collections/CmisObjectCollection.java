@@ -44,8 +44,8 @@ import org.xcmis.restatom.abdera.ObjectTypeElement;
 import org.xcmis.restatom.types.CmisContentType;
 import org.xcmis.restatom.types.EnumReturnVersion;
 import org.xcmis.spi.BaseContentStream;
-import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ChangeTokenHolder;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentAlreadyExistsException;
@@ -681,7 +681,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          // TODO : is correct ?
          ChangeTokenHolder changeTokenHolder = new ChangeTokenHolder();
          changeTokenHolder.setValue(request.getHeader(HttpHeaders.IF_MATCH));
-         boolean overwriteFlag = getBooleanParameter(request, AtomCMIS.PARAM_OVERWRITE_FLAG, false);
+         boolean overwriteFlag = getBooleanParameter(request, AtomCMIS.PARAM_OVERWRITE_FLAG, true);
          conn.setContentStream(getId(request), content, changeTokenHolder, overwriteFlag);
       }
       catch (IOException ioe)
