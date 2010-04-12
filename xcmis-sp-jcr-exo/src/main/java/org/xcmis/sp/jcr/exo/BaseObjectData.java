@@ -33,13 +33,13 @@ import org.exoplatform.services.log.Log;
 import org.xcmis.spi.BaseItemsIterator;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
-import org.xcmis.spi.ObjectDataVisitor;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectData;
+import org.xcmis.spi.ObjectDataVisitor;
 import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.RelationshipData;
@@ -429,7 +429,8 @@ abstract class BaseObjectData implements ObjectData
             if (link.isNodeType("nt:linkedFile"))
             {
                Node parent = link.getParent();
-               parents.add(new FolderDataImpl(JcrTypeHelper.getTypeDefinition(parent.getPrimaryNodeType(), true), parent));
+               parents.add(new FolderDataImpl(JcrTypeHelper.getTypeDefinition(parent.getPrimaryNodeType(), true),
+                  parent));
             }
          }
          if (!node.getParent().isNodeType("xcmis:unfiledObject"))
@@ -1003,7 +1004,8 @@ abstract class BaseObjectData implements ObjectData
                if (pol.getPrimaryNodeType().isNodeType(JcrCMIS.CMIS_NT_POLICY))
                {
                   boolean added =
-                     policies.add(new PolicyDataImpl(JcrTypeHelper.getTypeDefinition(pol.getPrimaryNodeType(), true), pol));
+                     policies.add(new PolicyDataImpl(JcrTypeHelper.getTypeDefinition(pol.getPrimaryNodeType(), true),
+                        pol));
 
                   if (LOG.isDebugEnabled() && added)
                   {
@@ -1032,7 +1034,8 @@ abstract class BaseObjectData implements ObjectData
       {
          try
          {
-            javax.jcr.Property jcrProperty = node.getProperty(definition.getLocalName());
+            javax.jcr.Property jcrProperty = node.getProperty(definition.getId());
+            //            javax.jcr.Property jcrProperty = node.getProperty(definition.getLocalName());
 
             return createProperty(definition, //
                definition.isMultivalued() ? jcrProperty.getValues() : new Value[]{jcrProperty.getValue()});
@@ -1048,6 +1051,16 @@ abstract class BaseObjectData implements ObjectData
             {
                return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
                   definition.getDisplayName(), getObjectId());
+            }
+            else if (definition.getId().equals(CmisConstants.OBJECT_TYPE_ID))
+            {
+               return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
+                  definition.getDisplayName(), type.getId());
+            }
+            else if (definition.getId().equals(CmisConstants.BASE_TYPE_ID))
+            {
+               return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
+                  definition.getDisplayName(), type.getBaseId().value());
             }
             else if (definition.getId().equals(CmisConstants.NAME))
             {
