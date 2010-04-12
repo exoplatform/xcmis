@@ -94,9 +94,10 @@
       </init-params>
    </component>
 
-   <!--   <component>-->
-   <!--      <type>org.xcmis.sp.jcr.exo.index.IndexListenerFactory</type>-->
-   <!--   </component>-->
+   <component>
+      <key>org.exoplatform.services.document.DocumentReaderService</key>
+      <type>org.xcmis.spi.utils.CmisDocumentReaderSercice</type>
+   </component>
 
    <!-- Storage Provider -->
    <component>
