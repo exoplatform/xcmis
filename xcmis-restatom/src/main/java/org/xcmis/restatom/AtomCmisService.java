@@ -710,7 +710,7 @@ public class AtomCmisService implements ResourceContainer
          .append("includePolicyIds={includePolicyIds}&") //
          .append("includeRelationships={includeRelationships}&") //
          .append("includeACL={includeACL}&") //
-         .append("renditionFilter={includeACL}").toString());
+         .append("renditionFilter={renditionFilter}").toString());
       objectById.setType(AtomCMIS.URITEMPLATE_OBJECTBYID);
       UriTemplateTypeElement objectByIdElement = ws.addExtension(AtomCMIS.URITEMPLATE);
       objectByIdElement.build(objectById);
@@ -720,13 +720,13 @@ public class AtomCmisService implements ResourceContainer
       objectByPath.setMediatype(AtomCMIS.MEDIATYPE_ATOM_ENTRY);
       objectByPath.setTemplate(new StringBuilder() //
          .append(repoPath) //
-         .append("/objectbypath/{objectpath}?")//
+         .append("/objectbypath/{path}?")//
          .append("filter={filter}&")//
          .append("includeAllowableActions={includeAllowableActions}&")//
          .append("includePolicyIds={includePolicyIds}&")//
          .append("includeRelationships={includeRelationships}&")//
          .append("includeACL={includeACL}&") //
-         .append("renditionFilter={includeACL}").toString());
+         .append("renditionFilter={renditionFilter}").toString());
       objectByPath.setType(AtomCMIS.URITEMPLATE_OBJECTBYPATH);
       UriTemplateTypeElement folderByPathElement = ws.addExtension(AtomCMIS.URITEMPLATE);
       folderByPathElement.build(objectByPath);

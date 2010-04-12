@@ -584,7 +584,8 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          String updatedId = null;
          if (checkin)
          {
-            boolean major = getBooleanParameter(request, AtomCMIS.PARAM_MAJOR, false);
+            // If 'checkin' param is TRUE, execute checkin() service.
+            boolean major = getBooleanParameter(request, AtomCMIS.PARAM_MAJOR, true);
             String checkinComment = request.getParameter(AtomCMIS.PARAM_CHECKIN_COMMENT);
             // TODO : ACEs for removing. Not clear from specification how to
             // pass (obtain) ACEs for adding and removing from one object.
@@ -594,6 +595,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          }
          else
          {
+            // If 'checkin' param is FALSE, execute updateProperties() service.
             // TODO : is correct to use 'if-match' header?
             // Get 'if-match' header as is, according to HTTP specification :
             // http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html#sec13.3.3

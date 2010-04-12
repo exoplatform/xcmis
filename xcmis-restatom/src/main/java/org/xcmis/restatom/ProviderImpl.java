@@ -139,9 +139,10 @@ public class ProviderImpl extends AbstractProvider
          "repoid", //
          "objectid");
 
-      resolver.setPattern("/cmisatom/([^/]+)/query(\\??.*)?", //
+      resolver.setPattern("/cmisatom/([^/]+)/query(/)?(\\??.*)?", //
          TargetType.TYPE_COLLECTION, //
-         "repoid"); //
+         "repoid",//
+         "slash"); // Slash.
 
       resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+)/file/([^/?]+)(\\??.*)?", //
          TargetType.TYPE_MEDIA, //

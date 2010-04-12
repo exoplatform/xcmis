@@ -29,7 +29,6 @@ import java.util.List;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
 /**
@@ -84,7 +83,7 @@ public class RepositoryServiceTest extends BaseTest
       validateWorkspaceElement(workspace);
    }
 
-   public void _testCapability() throws Exception
+   public void testCapability() throws Exception
    {
 
       String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/";
@@ -104,44 +103,50 @@ public class RepositoryServiceTest extends BaseTest
 
       String capabilities = "/app:service/app:workspace/cmisra:repositoryInfo/cmis:capabilities";
 
-      String r = (String)xp.evaluate(capabilities + "/cmis:capabilityACL", xmlDoc, XPathConstants.STRING);
-      assertEquals("manage", r);
-      r = (String)xp.evaluate(capabilities + "/cmis:capabilityAllVersionsSearchable", xmlDoc, XPathConstants.STRING);
-      assertEquals("true", r);
-      r = (String)xp.evaluate(capabilities + "/cmis:capabilityChanges", xmlDoc, XPathConstants.STRING);
-      assertEquals("none", r);
-      r =
-         (String)xp.evaluate(capabilities + "/cmis:capabilityContentStreamUpdatability", xmlDoc, XPathConstants.STRING);
-      assertEquals("anytime", r);
-      r = (String)xp.evaluate(capabilities + "/cmis:capabilityGetDescendants", xmlDoc, XPathConstants.STRING);
-      assertEquals("true", r);
-      r = (String)xp.evaluate(capabilities + "/cmis:capabilityGetFolderTree", xmlDoc, XPathConstants.STRING);
-      assertEquals("true", r);
-      r = (String)xp.evaluate(capabilities + "/cmis:capabilityMultifiling", xmlDoc, XPathConstants.STRING);
-      assertEquals("true", r);
-      r = (String)xp.evaluate(capabilities + "/cmis:capabilityPWCSearchable", xmlDoc, XPathConstants.STRING);
-      assertEquals("true", r);
-      r = (String)xp.evaluate(capabilities + "/cmis:capabilityPWCUpdateable", xmlDoc, XPathConstants.STRING);
-      assertEquals("true", r);
-      r = (String)xp.evaluate(capabilities + "/cmis:capabilityQuery", xmlDoc, XPathConstants.STRING);
-      assertEquals("bothcombined", r);
-      r = (String)xp.evaluate(capabilities + "/cmis:capabilityRenditions", xmlDoc, XPathConstants.STRING);
-      assertEquals("read", r);
-      r = (String)xp.evaluate(capabilities + "/cmis:capabilityUnfiling", xmlDoc, XPathConstants.STRING);
-      assertEquals("true", r);
-      r = (String)xp.evaluate(capabilities + "/cmis:capabilityVersionSpecificFiling", xmlDoc, XPathConstants.STRING);
-      assertEquals("false", r);
-      r = (String)xp.evaluate(capabilities + "/cmis:capabilityJoin", xmlDoc, XPathConstants.STRING);
-      assertEquals("none", r);
+      org.w3c.dom.Node capabilitiesNode = getNode(capabilities, xmlDoc);
+
+      assertTrue("Not found xml element " + "cmis:capabilityACL", hasElementValue("cmis:capabilityACL",
+         capabilitiesNode));
+      assertTrue("Not found xml element " + "cmis:capabilityAllVersionsSearchable", hasElementValue(
+         "cmis:capabilityAllVersionsSearchable", capabilitiesNode));
+      assertTrue("Not found xml element " + "cmis:capabilityChanges", hasElementValue("cmis:capabilityChanges",
+         capabilitiesNode));
+      assertTrue("Not found xml element " + "cmis:capabilityContentStreamUpdatability", hasElementValue(
+         "cmis:capabilityContentStreamUpdatability", capabilitiesNode));
+      assertTrue("Not found xml element " + "cmis:capabilityGetDescendants", hasElementValue(
+         "cmis:capabilityGetDescendants", capabilitiesNode));
+      assertTrue("Not found xml element " + "cmis:capabilityGetFolderTree", hasElementValue(
+         "cmis:capabilityGetFolderTree", capabilitiesNode));
+      assertTrue("Not found xml element " + "cmis:capabilityMultifiling", hasElementValue("cmis:capabilityMultifiling",
+         capabilitiesNode));
+      assertTrue("Not found xml element " + "cmis:capabilityPWCSearchable", hasElementValue(
+         "cmis:capabilityPWCSearchable", capabilitiesNode));
+      assertTrue("Not found xml element " + "cmis:capabilityPWCUpdateable", hasElementValue(
+         "cmis:capabilityPWCUpdateable", capabilitiesNode));
+      assertTrue("Not found xml element " + "cmis:capabilityQuery", hasElementValue("cmis:capabilityQuery",
+         capabilitiesNode));
+      assertTrue("Not found xml element " + "cmis:capabilityRenditions", hasElementValue("cmis:capabilityRenditions",
+         capabilitiesNode));
+      assertTrue("Not found xml element " + "cmis:capabilityUnfiling", hasElementValue("cmis:capabilityUnfiling",
+         capabilitiesNode));
+      assertTrue("Not found xml element " + "cmis:capabilityVersionSpecificFiling", hasElementValue(
+         "cmis:capabilityVersionSpecificFiling", capabilitiesNode));
+      assertTrue("Not found xml element " + "cmis:capabilityJoin", hasElementValue("cmis:capabilityJoin",
+         capabilitiesNode));
+
    }
 
    private void validateWorkspaceElement(org.w3c.dom.Node workspace) throws Exception
    {
-      assertTrue(hasElementValue("atom:title", workspace));
-      assertTrue(hasElementValue("cmisra:repositoryInfo", workspace));
-      assertTrue(hasElementValue("cmisra:repositoryInfo/cmis:repositoryId", workspace));
-      assertTrue(hasElementValue("cmisra:repositoryInfo/cmis:cmisVersionSupported", workspace));
-      assertTrue(hasElementValue("cmisra:repositoryInfo/cmis:capabilities", workspace));
+      assertTrue("Not found xml element " + "atom:title", hasElementValue("atom:title", workspace));
+      assertTrue("Not found xml element " + "cmisra:repositoryInfo",
+         hasElementValue("cmisra:repositoryInfo", workspace));
+      assertTrue("Not found xml element " + "cmisra:repositoryInfo/cmis:repositoryId", hasElementValue(
+         "cmisra:repositoryInfo/cmis:repositoryId", workspace));
+      assertTrue("Not found xml element " + "cmisra:repositoryInfo/cmis:cmisVersionSupported", hasElementValue(
+         "cmisra:repositoryInfo/cmis:cmisVersionSupported", workspace));
+      assertTrue("Not found xml element " + "cmisra:repositoryInfo/cmis:capabilities", hasElementValue(
+         "cmisra:repositoryInfo/cmis:capabilities", workspace));
 
       NodeList templates = getNodeSet("cmisra:uritemplate", workspace);
       int length = templates.getLength();
