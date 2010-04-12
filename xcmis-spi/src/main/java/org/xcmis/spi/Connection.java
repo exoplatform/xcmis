@@ -2953,7 +2953,7 @@ public abstract class Connection
    {
       CmisObject cmis = new CmisObject();
 
-      Map<String, Property<?>> properties = object.getSubset(parsedPropertyFilter);
+      Map<String, Property<?>> properties = object.getProperties(parsedPropertyFilter);
       if (properties.size() != 0)
       {
          cmis.getProperties().putAll(properties);

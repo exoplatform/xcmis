@@ -19,6 +19,7 @@
 
 package org.xcmis.sp.jcr.exo;
 
+import org.exoplatform.services.jcr.access.SystemIdentity;
 import org.exoplatform.services.jcr.core.ExtendedNode;
 import org.exoplatform.services.jcr.core.ExtendedSession;
 import org.exoplatform.services.jcr.core.nodetype.ExtendedNodeTypeManager;
@@ -28,6 +29,7 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.sp.jcr.exo.index.IndexListener;
 import org.xcmis.spi.BaseItemsIterator;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.DocumentData;
@@ -46,27 +48,40 @@ import org.xcmis.spi.StorageException;
 import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.VersioningException;
+import org.xcmis.spi.model.ACLCapability;
+import org.xcmis.spi.model.AccessControlPropagation;
 import org.xcmis.spi.model.AllowableActions;
 import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.CapabilityACL;
+import org.xcmis.spi.model.CapabilityChanges;
+import org.xcmis.spi.model.CapabilityContentStreamUpdatable;
+import org.xcmis.spi.model.CapabilityJoin;
+import org.xcmis.spi.model.CapabilityQuery;
 import org.xcmis.spi.model.CapabilityRendition;
 import org.xcmis.spi.model.ChangeEvent;
 import org.xcmis.spi.model.ContentStreamAllowed;
+import org.xcmis.spi.model.Permission;
+import org.xcmis.spi.model.PermissionMapping;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.Rendition;
 import org.xcmis.spi.model.RepositoryCapabilities;
 import org.xcmis.spi.model.RepositoryInfo;
+import org.xcmis.spi.model.SupportedPermissions;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.UnfileObject;
 import org.xcmis.spi.model.Updatability;
 import org.xcmis.spi.model.VersioningState;
+import org.xcmis.spi.model.Permission.BasicPermissions;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -122,6 +137,8 @@ public class StorageImpl implements Storage
    private RenditionManager renditionManager;
 
    private IndexListener indexListener;
+
+   private RepositoryInfo repositoryInfo;
 
    public StorageImpl(Session session, StorageConfiguration configuration)
    {
@@ -888,7 +905,96 @@ public class StorageImpl implements Storage
     */
    public RepositoryInfo getRepositoryInfo()
    {
-      return new RepositoryInfoImpl(configuration.getId());
+      if (repositoryInfo == null)
+      {
+         List<PermissionMapping> permissionMapping = new ArrayList<PermissionMapping>(34);
+
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_GET_DESCENDENTS_FOLDER, Arrays
+            .asList(BasicPermissions.CMIS_READ.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_GET_CHILDREN_FOLDER, Arrays
+            .asList(BasicPermissions.CMIS_READ.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_GET_PARENTS_FOLDER, Arrays
+            .asList(BasicPermissions.CMIS_READ.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_GET_FOLDER_PARENT_OBJECT, Arrays
+            .asList(BasicPermissions.CMIS_READ.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_CREATE_DOCUMENT_FOLDER, Arrays
+            .asList(BasicPermissions.CMIS_READ.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_CREATE_FOLDER_FOLDER, Arrays
+            .asList(BasicPermissions.CMIS_READ.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_CREATE_RELATIONSHIP_SOURCE, Arrays
+            .asList(BasicPermissions.CMIS_READ.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_CREATE_RELATIONSHIP_TARGET, Arrays
+            .asList(BasicPermissions.CMIS_READ.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_GET_PROPERTIES_OBJECT, Arrays
+            .asList(BasicPermissions.CMIS_READ.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_VIEW_CONTENT_OBJECT, Arrays
+            .asList(BasicPermissions.CMIS_READ.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_UPDATE_PROPERTIES_OBJECT, Arrays
+            .asList(BasicPermissions.CMIS_WRITE.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_MOVE_OBJECT, Arrays
+            .asList(BasicPermissions.CMIS_WRITE.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_MOVE_TARGET, Arrays
+            .asList(BasicPermissions.CMIS_READ.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_MOVE_SOURCE, Arrays
+            .asList(BasicPermissions.CMIS_READ.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_DELETE_OBJECT, Arrays
+            .asList(BasicPermissions.CMIS_WRITE.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_DELETE_TREE_FOLDER, Arrays
+            .asList(BasicPermissions.CMIS_WRITE.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_SET_CONTENT_DOCUMENT, Arrays
+            .asList(BasicPermissions.CMIS_WRITE.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_DELETE_CONTENT_DOCUMENT, Arrays
+            .asList(BasicPermissions.CMIS_WRITE.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_ADD_TO_FOLDER_OBJECT, Arrays
+            .asList(BasicPermissions.CMIS_READ.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_ADD_TO_FOLDER_FOLDER, Arrays
+            .asList(BasicPermissions.CMIS_READ.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_REMOVE_FROM_FOLDER_OBJECT, Arrays
+            .asList(BasicPermissions.CMIS_READ.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_REMOVE_FROM_FOLDER_FOLDER, Arrays
+            .asList(BasicPermissions.CMIS_READ.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_CHECKOUT_DOCUMENT, Arrays
+            .asList(BasicPermissions.CMIS_WRITE.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_CANCEL_CHECKOUT_DOCUMENT, Arrays
+            .asList(BasicPermissions.CMIS_WRITE.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_CHECKIN_DOCUMENT, Arrays
+            .asList(BasicPermissions.CMIS_WRITE.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_GET_ALL_VERSIONS_VERSION_SERIES, Arrays
+            .asList(BasicPermissions.CMIS_READ.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_GET_OBJECT_RELATIONSHIPS_OBJECT, Arrays
+            .asList(BasicPermissions.CMIS_READ.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_ADD_POLICY_OBJECT, Arrays
+            .asList(BasicPermissions.CMIS_WRITE.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_ADD_POLICY_POLICY, Arrays
+            .asList(BasicPermissions.CMIS_READ.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_REMOVE_POLICY_OBJECT, Arrays
+            .asList(BasicPermissions.CMIS_WRITE.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_REMOVE_POLICY_POLICY, Arrays
+            .asList(BasicPermissions.CMIS_READ.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_GET_APPLIED_POLICIES_OBJECT, Arrays
+            .asList(BasicPermissions.CMIS_READ.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_GET_ACL_OBJECT, Arrays
+            .asList(BasicPermissions.CMIS_READ.value())));
+         permissionMapping.add(new PermissionMapping(PermissionMapping.CAN_APPLY_ACL_OBJECT, Arrays
+            .asList(BasicPermissions.CMIS_WRITE.value())));
+
+         List<Permission> permissions = new ArrayList<Permission>(4);
+         for (BasicPermissions b : BasicPermissions.values())
+         {
+            permissions.add(new Permission(b.value(), ""));
+         }
+
+         repositoryInfo =
+            new RepositoryInfo(getId(), getId(), JcrCMIS.ROOT_FOLDER_ID, CmisConstants.SUPPORTED_VERSION,
+               new RepositoryCapabilities(CapabilityACL.MANAGE, CapabilityChanges.NONE,
+                  CapabilityContentStreamUpdatable.ANYTIME, CapabilityJoin.NONE, CapabilityQuery.BOTHCOMBINED,
+                  CapabilityRendition.READ, false, true, true, true, false, true, true, false), new ACLCapability(
+                  Collections.unmodifiableList(permissionMapping), Collections.unmodifiableList(permissions),
+                  AccessControlPropagation.OBJECTONLY, SupportedPermissions.BASIC), SystemIdentity.ANONIM,
+               SystemIdentity.ANY, null, null, true, null, "eXo Platform", "xCMIS (eXo JCR SP)", "1.0-Beta02", null);
+      }
+
+      return repositoryInfo;
    }
 
    /**

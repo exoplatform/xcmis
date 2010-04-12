@@ -240,7 +240,7 @@ public interface ObjectData
     * @param filter property filter
     * @return subset of properties
     */
-   Map<String, Property<?>> getSubset(PropertyFilter filter);
+   Map<String, Property<?>> getProperties(PropertyFilter filter);
 
    /**
     * Set or update property. Changes may be updated immediately or after

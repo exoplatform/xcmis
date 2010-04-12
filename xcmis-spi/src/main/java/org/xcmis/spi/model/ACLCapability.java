@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2010 eXo Platform SAS.
  *
  * This is free software; you can redistribute it and/or modify it
@@ -19,36 +19,54 @@
 
 package org.xcmis.spi.model;
 
-
 import java.util.List;
 
 /**
- * Repository ACL capability.
- * 
- * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
+ * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */
-public interface ACLCapability
+public class ACLCapability
 {
-   /**
-    * @return mapping performed actions to required permissions
-    * @see PermissionMapping
-    */
-   List<PermissionMapping> getMapping();
 
-   /**
-    * @return set of supported permissions
-    */
-   List<Permission> getPermissions();
+   private List<PermissionMapping> permissionMapping;
 
-   /**
-    * @return how ACL propagated in object hierarchy
-    */
-   AccessControlPropagation getPropagation();
+   private List<Permission> permissions;
 
-   /**
-    * @return kind of supported permissions
-    */
-   SupportedPermissions getSupportedPermissions();
+   private AccessControlPropagation propagation;
+
+   private SupportedPermissions supportedPermissions;
+
+   public ACLCapability(List<PermissionMapping> permissionMapping, List<Permission> permissions,
+      AccessControlPropagation propagation, SupportedPermissions supportedPermissions)
+   {
+      this.permissionMapping = permissionMapping;
+      this.permissions = permissions;
+      this.propagation = propagation;
+      this.supportedPermissions = supportedPermissions;
+   }
+
+   public ACLCapability()
+   {
+   }
+
+   public List<PermissionMapping> getMapping()
+   {
+      return permissionMapping;
+   }
+
+   public List<Permission> getPermissions()
+   {
+      return permissions;
+   }
+
+   public AccessControlPropagation getPropagation()
+   {
+      return propagation;
+   }
+
+   public SupportedPermissions getSupportedPermissions()
+   {
+      return supportedPermissions;
+   }
 
 }

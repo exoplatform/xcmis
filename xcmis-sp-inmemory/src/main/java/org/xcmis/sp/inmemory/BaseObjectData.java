@@ -24,13 +24,13 @@ import org.exoplatform.services.log.Log;
 import org.xcmis.spi.BaseItemsIterator;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
-import org.xcmis.spi.ObjectDataVisitor;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectData;
+import org.xcmis.spi.ObjectDataVisitor;
 import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.RelationshipData;
@@ -345,7 +345,7 @@ abstract class BaseObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
-   public Map<String, Property<?>> getSubset(PropertyFilter filter)
+   public Map<String, Property<?>> getProperties(PropertyFilter filter)
    {
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       for (PropertyDefinition<?> definition : type.getPropertyDefinitions())

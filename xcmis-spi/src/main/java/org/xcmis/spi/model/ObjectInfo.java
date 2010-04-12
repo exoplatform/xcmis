@@ -75,8 +75,6 @@ public final class ObjectInfo
    {
    }
 
-   // Common
-
    public ObjectInfo(BaseType baseType, String typeId, String id, String name, String createdBy, Calendar creationDate,
       String lastModifiedBy, Calendar lastModificationDate, String changeToken, String parentId, Boolean latestVersion,
       Boolean majorVersion, Boolean latestMajorVersion, String versionSeriesId, String versionSeriesCheckedOutId,

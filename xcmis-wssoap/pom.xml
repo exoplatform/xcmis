@@ -1,21 +1,21 @@
 <project>
-   <modelVersion>4.0.0</modelVersion>
-   <parent>
-      <groupId>org.xcmis</groupId>
-      <artifactId>xcmis-parent</artifactId>
-      <version>1.0-SNAPSHOT</version>
-   </parent>
-   <artifactId>xcmis-wssoap</artifactId>
-   <name>xCMIS :: SOAP :: Binding</name>
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.xcmis</groupId>
+		<artifactId>xcmis-parent</artifactId>
+		<version>1.0-SNAPSHOT</version>
+	</parent>
+	<artifactId>xcmis-wssoap</artifactId>
+	<name>xCMIS :: SOAP :: Binding</name>
 
-   <dependencies>
-      
-       <dependency>
-         <groupId>org.xcmis</groupId>
-         <artifactId>xcmis-spi</artifactId>
-         <scope>compile</scope>
-      </dependency>
-<!--
+	<dependencies>
+
+		<dependency>
+			<groupId>org.xcmis</groupId>
+			<artifactId>xcmis-spi</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<!--
       <dependency>
          <groupId>org.xcmis</groupId>
          <artifactId>xcmis-sp-inmemory</artifactId>
@@ -23,75 +23,75 @@
       </dependency>
       -->
 
-      <dependency>
-         <groupId>org.xcmis</groupId>
-         <artifactId>xcmis-sp-jcr-exo</artifactId>
-         <scope>test</scope>
-         <exclusions>
-            <exclusion>
-               <groupId>dom4j</groupId>
-               <artifactId>dom4j</artifactId>
-            </exclusion>
-         </exclusions>
-      </dependency>
+		<dependency>
+			<groupId>org.xcmis</groupId>
+			<artifactId>xcmis-sp-jcr-exo</artifactId>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>dom4j</groupId>
+					<artifactId>dom4j</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 
-      <!-- CXF dependencies -->
-      <dependency>
-         <groupId>org.apache.cxf</groupId>
-         <artifactId>cxf-rt-transports-http</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.apache.cxf</groupId>
-         <artifactId>cxf-rt-frontend-jaxws</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.apache.cxf</groupId>
-         <artifactId>cxf-rt-transports-http-jetty</artifactId>
-         <exclusions>
-            <exclusion>
-               <groupId>org.slf4j</groupId>
-               <artifactId>slf4j-jdk14</artifactId>
-            </exclusion>
-         </exclusions>
-      </dependency>
-      <dependency>
-         <groupId>org.apache.cxf</groupId>
-         <artifactId>cxf-rt-frontend-simple</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.apache.cxf</groupId>
-         <artifactId>cxf-rt-databinding-jaxb</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.apache.cxf</groupId>
-         <artifactId>cxf-tools-java2ws</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.apache.cxf</groupId>
-         <artifactId>cxf-rt-transports-local</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.mortbay.jetty</groupId>
-         <artifactId>jetty</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>stax</groupId>
-         <artifactId>stax-api</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>wsdl4j</groupId>
-         <artifactId>wsdl4j</artifactId>
-      </dependency>
+		<!-- CXF dependencies -->
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-transports-http</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-frontend-jaxws</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-transports-http-jetty</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-jdk14</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-frontend-simple</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-databinding-jaxb</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-tools-java2ws</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-transports-local</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.mortbay.jetty</groupId>
+			<artifactId>jetty</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>stax</groupId>
+			<artifactId>stax-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>wsdl4j</groupId>
+			<artifactId>wsdl4j</artifactId>
+		</dependency>
 
-      <dependency>
-         <groupId>jdom</groupId>
-         <artifactId>jdom</artifactId>
-      </dependency>
+		<dependency>
+			<groupId>jdom</groupId>
+			<artifactId>jdom</artifactId>
+		</dependency>
 
-   </dependencies>
-   <build>
-      <plugins>
-                           <plugin>
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
 				<groupId>org.jvnet.jaxb2.maven2</groupId>
 				<artifactId>maven-jaxb2-plugin</artifactId>
 				<version>0.6.2</version>
@@ -112,53 +112,53 @@
 								<include>CMIS-Messaging.xsd</include>
 								<include>CMIS-RestAtom.xsd</include>
 							</schemaIncludes>
-					            <verbose>true</verbose>
+							<verbose>false</verbose>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
 
-         <plugin>
-            <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-codegen-plugin</artifactId>
-            <executions>
-               <execution>
-                  <id>generate sources</id>
-                  <phase>generate-sources</phase>
-                  <configuration>
-                     <sourceRoot>${basedir}/target/generated-sources/</sourceRoot>
-                     <wsdlOptions>
-                        <wsdlOption>
-                           <wsdl>${basedir}/src/main/resources/wsdl/CMISWS-Service.wsdl</wsdl>
-                           <extraargs>
-                              <extraarg>-validate</extraarg>
-                              <extraarg>-b</extraarg>
-                              <extraarg>${basedir}/src/main/resources/wsdl/binding.xml</extraarg>
-                              <extraarg>-p</extraarg>
-                              <extraarg>org.xcmis.soap</extraarg>
-                              <extraarg>-nexclude</extraarg>
-                              <extraarg>http://docs.oasis-open.org/ns/cmis/core/200908/=org.xcmis.core</extraarg>
-                              <extraarg>-nexclude</extraarg>
-                              <extraarg>http://docs.oasis-open.org/ns/cmis/messaging/200908/=org.xcmis.messaging</extraarg>
-                           </extraargs>
-                        </wsdlOption>
-                     </wsdlOptions>
-                  </configuration>
-                  <goals>
-                     <goal>wsdl2java</goal>
-                  </goals>
-               </execution>
-            </executions>
-         </plugin>
-         <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <configuration>
-               <argLine>-Xms150m -Xmx150m</argLine>
-               <testFailureIgnore>false</testFailureIgnore>
-               <skip>false</skip>
-            </configuration>
-         </plugin>
-      </plugins>
-   </build>
+			<plugin>
+				<groupId>org.apache.cxf</groupId>
+				<artifactId>cxf-codegen-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>generate sources</id>
+						<phase>generate-sources</phase>
+						<configuration>
+							<sourceRoot>${basedir}/target/generated-sources/</sourceRoot>
+							<wsdlOptions>
+								<wsdlOption>
+									<wsdl>${basedir}/src/main/resources/wsdl/CMISWS-Service.wsdl</wsdl>
+									<extraargs>
+										<extraarg>-validate</extraarg>
+										<extraarg>-b</extraarg>
+										<extraarg>${basedir}/src/main/resources/wsdl/binding.xml</extraarg>
+										<extraarg>-p</extraarg>
+										<extraarg>org.xcmis.soap</extraarg>
+										<extraarg>-nexclude</extraarg>
+										<extraarg>http://docs.oasis-open.org/ns/cmis/core/200908/=org.xcmis.core</extraarg>
+										<extraarg>-nexclude</extraarg>
+										<extraarg>http://docs.oasis-open.org/ns/cmis/messaging/200908/=org.xcmis.messaging</extraarg>
+									</extraargs>
+								</wsdlOption>
+							</wsdlOptions>
+						</configuration>
+						<goals>
+							<goal>wsdl2java</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<argLine>-Xms150m -Xmx150m</argLine>
+					<testFailureIgnore>false</testFailureIgnore>
+					<skip>false</skip>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

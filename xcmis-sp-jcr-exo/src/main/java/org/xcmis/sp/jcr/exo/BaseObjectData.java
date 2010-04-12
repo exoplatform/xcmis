@@ -560,7 +560,7 @@ abstract class BaseObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
-   public Map<String, Property<?>> getSubset(PropertyFilter filter)
+   public Map<String, Property<?>> getProperties(PropertyFilter filter)
    {
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       for (PropertyDefinition<?> def : type.getPropertyDefinitions())

@@ -34,7 +34,7 @@ import javax.xml.xpath.XPathFactory;
 
 /**
  * Created by The eXo Platform SAS .
- * 
+ *
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com.ua">Alexey
  *         Zavizionov</a>
  * @version $Id: RepositoryServiceTest.java 2734 2009-08-19 15:42:18Z andrew00x
@@ -84,7 +84,7 @@ public class RepositoryServiceTest extends BaseTest
       validateWorkspaceElement(workspace);
    }
 
-   public void testCapability() throws Exception
+   public void _testCapability() throws Exception
    {
 
       String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/";
