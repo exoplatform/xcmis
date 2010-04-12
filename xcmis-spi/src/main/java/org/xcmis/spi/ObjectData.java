@@ -78,7 +78,7 @@ public interface ObjectData
     * @throws ConstraintException if current object is not controllable by
     *         Policy, see {@link TypeDefinition#isControllablePolicy()}.
     */
-   void applyPolicy(Policy policy) throws ConstraintException;
+   void applyPolicy(PolicyData policy) throws ConstraintException;
 
    /**
     * Get policies applied to the current object. If Policy object type is not
@@ -88,7 +88,7 @@ public interface ObjectData
     *         object is not controllable by policy then empty list must be
     *         returned, never <code>null</code>
     */
-   Collection<Policy> getPolicies();
+   Collection<PolicyData> getPolicies();
 
    /**
     * Remove specified policy from object. This method must not remove Policy
@@ -99,15 +99,15 @@ public interface ObjectData
     * @throws ConstraintException if current object is not controllable by
     *         Policy, see {@link TypeDefinition#isControllablePolicy()}.
     */
-   void removePolicy(Policy policy) throws ConstraintException;
+   void removePolicy(PolicyData policy) throws ConstraintException;
 
    //
 
    /**
     * @return <code>true</code> if current object is newly created and was not
     *         persisted yet. If may be created via
-    *         {@link Storage#createDocument(Folder, String, org.xcmis.spi.VersioningState)}
-    *         , {@link Storage#createFolder(Folder, String)}, etc.
+    *         {@link Storage#createDocument(FolderData, String, org.xcmis.spi.VersioningState)}
+    *         , {@link Storage#createFolder(FolderData, String)}, etc.
     */
    boolean isNew();
 
@@ -174,7 +174,7 @@ public interface ObjectData
     * @throws ConstraintException if object has more then one parent or if
     *         current object is root folder
     */
-   Folder getParent() throws ConstraintException;
+   FolderData getParent() throws ConstraintException;
 
    /**
     * Get collections of parent folders. It may contains exactly one object for
@@ -182,7 +182,7 @@ public interface ObjectData
     *
     * @return collection of object's parents
     */
-   Collection<Folder> getParents();
+   Collection<FolderData> getParents();
 
    /**
     * Objects relationships.
@@ -200,7 +200,7 @@ public interface ObjectData
     *         {@link ItemsIterator} must be returned, never <code>null</code>
     * @see RelationshipDirection
     */
-   ItemsIterator<Relationship> getRelationships(RelationshipDirection direction, TypeDefinition type,
+   ItemsIterator<RelationshipData> getRelationships(RelationshipDirection direction, TypeDefinition type,
       boolean includeSubRelationshipTypes);
 
    /**

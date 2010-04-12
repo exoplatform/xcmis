@@ -22,8 +22,8 @@ package org.xcmis.sp.inmemory;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ContentStream;
-import org.xcmis.spi.Document;
-import org.xcmis.spi.Folder;
+import org.xcmis.spi.DocumentData;
+import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectData;
@@ -43,12 +43,12 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-class DocumentCopy extends DocumentImpl
+class DocumentCopy extends DocumentDataImpl
 {
 
-   private final Document source;
+   private final DocumentData source;
 
-   public DocumentCopy(Document source, Folder parent, TypeDefinition type, VersioningState versioningState,
+   public DocumentCopy(DocumentData source, FolderData parent, TypeDefinition type, VersioningState versioningState,
       StorageImpl storage)
    {
       super(parent, type, versioningState, storage);

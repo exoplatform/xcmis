@@ -31,11 +31,11 @@ import org.xcmis.search.content.Property.ContentValue;
 import org.xcmis.search.content.Property.SimpleValue;
 import org.xcmis.search.value.PropertyType;
 import org.xcmis.spi.ContentStream;
-import org.xcmis.spi.Document;
-import org.xcmis.spi.Folder;
+import org.xcmis.spi.DocumentData;
+import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ObjectData;
-import org.xcmis.spi.Policy;
-import org.xcmis.spi.Relationship;
+import org.xcmis.spi.PolicyData;
+import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.Storage;
 
 import java.io.IOException;
@@ -140,13 +140,13 @@ public class IndexListener
             switch (objectData.getBaseType())
             {
                case DOCUMENT :
-                  return createFromDocument((Document)objectData);
+                  return createFromDocument((DocumentData)objectData);
                case FOLDER :
-                  return createFromFolder((Folder)objectData);
+                  return createFromFolder((FolderData)objectData);
                case POLICY :
-                  return createFromPolicy((Policy)objectData);
+                  return createFromPolicy((PolicyData)objectData);
                case RELATIONSHIP :
-                  return createFromRelationship((Relationship)objectData);
+                  return createFromRelationship((RelationshipData)objectData);
                default :
                   throw new UnsupportedOperationException(objectData.getBaseType().toString()
                      + " is not supported for indexing");
@@ -159,7 +159,7 @@ public class IndexListener
        * @param objectData
        * @return
        */
-      private ContentEntry createFromRelationship(Relationship objectData)
+      private ContentEntry createFromRelationship(RelationshipData objectData)
       {
          MockContentEntry mockEntry = fillCommonInformation(objectData);
          //mark parent of root as parent
@@ -172,7 +172,7 @@ public class IndexListener
        * @param objectData
        * @return
        */
-      private ContentEntry createFromPolicy(Policy objectData)
+      private ContentEntry createFromPolicy(PolicyData objectData)
       {
          MockContentEntry mockEntry = fillCommonInformation(objectData);
          //mark parent of root as parent
@@ -187,7 +187,7 @@ public class IndexListener
          contentEntry.tableNames.add(objectData.getTypeDefinition().getQueryName());
          contentEntry.identifier = objectData.getObjectId();
          contentEntry.name = objectData.getName();
-         for (Folder folder : objectData.getParents())
+         for (FolderData folder : objectData.getParents())
          {
             contentEntry.parentIdentifiers.add(folder.getObjectId());
          }
@@ -214,11 +214,11 @@ public class IndexListener
       }
 
       /**
-       * Convert {@link Folder} to {@link ContentEntry}.
+       * Convert {@link FolderData} to {@link ContentEntry}.
        * @param objectData
        * @return
        */
-      private ContentEntry createFromFolder(Folder objectData)
+      private ContentEntry createFromFolder(FolderData objectData)
       {
          MockContentEntry mockEntry = fillCommonInformation(objectData);
          return new ContentEntry(mockEntry.name, mockEntry.getTableNames(), mockEntry.identifier, mockEntry
@@ -226,12 +226,12 @@ public class IndexListener
       }
 
       /**
-       * Convert {@link Document} to {@link ContentEntry}.
+       * Convert {@link DocumentData} to {@link ContentEntry}.
        * @param objectData
        * @return
        * @throws IOException
        */
-      private ContentEntry createFromDocument(Document objectData) throws IOException
+      private ContentEntry createFromDocument(DocumentData objectData) throws IOException
       {
          MockContentEntry mockEntry = fillCommonInformation(objectData);
          ContentStream cs = objectData.getContentStream();

@@ -111,7 +111,7 @@ public abstract class Connection
          throw new ConstraintException("Object " + objectId + " is not fileable.");
       }
 
-      ((Folder)folder).addObject(object);
+      ((FolderData)folder).addObject(object);
 
    }
 
@@ -209,7 +209,7 @@ public abstract class Connection
       {
          throw new InvalidArgumentException("Object " + policy.getObjectId() + " is not a Policy object.");
       }
-      object.applyPolicy((Policy)policy);
+      object.applyPolicy((PolicyData)policy);
 
       storage.saveObject(object);
    }
@@ -240,7 +240,7 @@ public abstract class Connection
       // cancelCheckedOut may be invoked on any object in version series.
       // In other way 'cmis:versionSeriesCheckedOutId' may not reflect
       // current PWC id.
-      ((Document)document).cancelCheckout();
+      ((DocumentData)document).cancelCheckout();
    }
 
    /**
@@ -287,7 +287,7 @@ public abstract class Connection
          throw new InvalidArgumentException("Object " + documentId + " is not a Document object.");
       }
 
-      if (!((Document)pwc).isPWC())
+      if (!((DocumentData)pwc).isPWC())
       {
          throw new VersioningException("Object " + documentId + " is not Private Working Copy.");
       }
@@ -299,7 +299,7 @@ public abstract class Connection
 
       if (content != null)
       {
-         ((Document)pwc).setContentStream(content);
+         ((DocumentData)pwc).setContentStream(content);
       }
 
       if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
@@ -312,7 +312,7 @@ public abstract class Connection
          applyPolicies(pwc, policies);
       }
 
-      Document version = ((Document)pwc).checkin(major, checkinComment);
+      DocumentData version = ((DocumentData)pwc).checkin(major, checkinComment);
 
       return version.getObjectId();
    }
@@ -342,7 +342,7 @@ public abstract class Connection
          throw new InvalidArgumentException("Object " + documentId + " is not a Document object.");
       }
 
-      Document pwc = ((Document)document).checkout();
+      DocumentData pwc = ((DocumentData)document).checkout();
 
       return pwc.getObjectId();
    }
@@ -462,7 +462,7 @@ public abstract class Connection
          versioningState = VersioningState.MAJOR;
       }
 
-      Document newDocument = storage.createDocument((Folder)folder, typeId, versioningState);
+      DocumentData newDocument = storage.createDocument((FolderData)folder, typeId, versioningState);
 
       newDocument.setProperties(properties);
 
@@ -566,7 +566,7 @@ public abstract class Connection
          throw new ConstraintException("Unfiling capability is not supported, parent folder must be provided.");
       }
 
-      Document newDocument = storage.createCopyOfDocument((Document)source, (Folder)folder, versioningState);
+      DocumentData newDocument = storage.createCopyOfDocument((DocumentData)source, (FolderData)folder, versioningState);
 
       if (properties != null)
       {
@@ -666,7 +666,7 @@ public abstract class Connection
          throw new InvalidArgumentException("Object " + folderId + " is not a Folder object.");
       }
 
-      ObjectData newFolder = storage.createFolder((Folder)folder, typeId);
+      ObjectData newFolder = storage.createFolder((FolderData)folder, typeId);
 
       newFolder.setProperties(properties);
 
@@ -767,7 +767,7 @@ public abstract class Connection
          throw new ConstraintException("Unfiling capability is not supported, parent folder must be provided.");
       }
 
-      ObjectData newPolicy = storage.createPolicy((Folder)folder, typeId);
+      ObjectData newPolicy = storage.createPolicy((FolderData)folder, typeId);
 
       newPolicy.setProperties(properties);
 
@@ -936,7 +936,7 @@ public abstract class Connection
       // Validate change token, object may be already updated.
       validateChangeToken(document, changeTokenHolder.getValue());
 
-      ((Document)document).setContentStream(null);
+      ((DocumentData)document).setContentStream(null);
 
       storage.saveObject(document);
 
@@ -1020,7 +1020,7 @@ public abstract class Connection
          throw new ConstraintException("Failed delete tree. Object " + folderId + " is not a Folder.");
       }
 
-      if (((Folder)folder).isRoot())
+      if (((FolderData)folder).isRoot())
       {
          throw new ConstraintException("Root folder can't be removed.");
       }
@@ -1043,7 +1043,7 @@ public abstract class Connection
       // TODO : Check unfiling capability if 'unfileObject' is other then 'DELETE'
 
       Collection<String> failedDelete =
-         storage.deleteTree((Folder)folder, deleteAllVersions, unfileObject, continueOnFailure);
+         storage.deleteTree((FolderData)folder, deleteAllVersions, unfileObject, continueOnFailure);
 
       return failedDelete;
    }
@@ -1116,7 +1116,7 @@ public abstract class Connection
    {
       checkConnection();
 
-      Collection<Document> versions = storage.getAllVersions(versionSeriesId);
+      Collection<DocumentData> versions = storage.getAllVersions(versionSeriesId);
 
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
       List<CmisObject> cmisVersions = new ArrayList<CmisObject>();
@@ -1158,7 +1158,7 @@ public abstract class Connection
       ObjectData object = storage.getObject(objectId);
 
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
-      Collection<Policy> policies = object.getPolicies();
+      Collection<PolicyData> policies = object.getPolicies();
       List<CmisObject> policyIDs = new ArrayList<CmisObject>(policies.size());
       for (ObjectData policy : policies)
       {
@@ -1255,7 +1255,7 @@ public abstract class Connection
          }
       }
 
-      ItemsIterator<Document> iterator = storage.getCheckedOutDocuments(folder, orderBy);
+      ItemsIterator<DocumentData> iterator = storage.getCheckedOutDocuments(folder, orderBy);
 
       try
       {
@@ -1374,7 +1374,7 @@ public abstract class Connection
       }
 
       /* TODO : orderBy in some more usable form */
-      ItemsIterator<ObjectData> iterator = ((Folder)folder).getChildren(orderBy);
+      ItemsIterator<ObjectData> iterator = ((FolderData)folder).getChildren(orderBy);
       try
       {
          if (skipCount > 0)
@@ -1492,7 +1492,7 @@ public abstract class Connection
       }
       else
       {
-         contentStream = ((Document)object).getContentStream();
+         contentStream = ((DocumentData)object).getContentStream();
       }
 
       if (contentStream == null)
@@ -1610,7 +1610,7 @@ public abstract class Connection
          throw new InvalidArgumentException("Object " + folderId + " is not a Folder.");
       }
 
-      if (((Folder)folder).isRoot())
+      if (((FolderData)folder).isRoot())
       {
          throw new InvalidArgumentException("Can't get parent of root folder.");
       }
@@ -1914,7 +1914,7 @@ public abstract class Connection
    {
       checkConnection();
 
-      Collection<Document> versions = storage.getAllVersions(versionSeriesId);
+      Collection<DocumentData> versions = storage.getAllVersions(versionSeriesId);
 
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
       RenditionFilter parsedRenditionFilter = new RenditionFilter(renditionFilter);
@@ -1934,7 +1934,7 @@ public abstract class Connection
       // Storage#getAllVersions(versionSeriesId) return sorted by
       // 'cmis:creationDate' descending. Latest version is version with latest
       // 'cmis:lastModificationDate'.
-      List<Document> v = new ArrayList<Document>(versions);
+      List<DocumentData> v = new ArrayList<DocumentData>(versions);
       Collections.sort(v, CmisUtils.versionComparator);
 
       if (!major)
@@ -1943,7 +1943,7 @@ public abstract class Connection
             parsedPropertyFilter, parsedRenditionFilter);
       }
 
-      for (Document document : v)
+      for (DocumentData document : v)
       {
          if (document.isMajorVersion())
          {
@@ -2028,7 +2028,7 @@ public abstract class Connection
             + " that is not fileable");
       }
 
-      Collection<Folder> parents = object.getParents();
+      Collection<FolderData> parents = object.getParents();
 
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
       RenditionFilter parsedRenditionFilter = new RenditionFilter(renditionFilter);
@@ -2106,7 +2106,7 @@ public abstract class Connection
 
       ObjectData object = storage.getObject(objectId);
 
-      ItemsIterator<Relationship> iterator = object.getRelationships(direction, type, includeSubRelationshipTypes);
+      ItemsIterator<RelationshipData> iterator = object.getRelationships(direction, type, includeSubRelationshipTypes);
 
       try
       {
@@ -2470,7 +2470,7 @@ public abstract class Connection
             + objectId);
       }
 
-      ObjectData movedObject = storage.moveObject(object, (Folder)target, (Folder)source);
+      ObjectData movedObject = storage.moveObject(object, (FolderData)target, (FolderData)source);
 
       return movedObject.getObjectId();
    }
@@ -2638,7 +2638,7 @@ public abstract class Connection
             throw new InvalidArgumentException("Object " + folderId + " is not a Folder object.");
          }
 
-         ((Folder)folder).removeObject(object);
+         ((FolderData)folder).removeObject(object);
       }
       else
       {
@@ -2669,7 +2669,7 @@ public abstract class Connection
          throw new InvalidArgumentException("Object " + policyId + " is not a Policy object.");
       }
 
-      object.removePolicy((Policy)policyData);
+      object.removePolicy((PolicyData)policyData);
 
       storage.saveObject(object);
    }
@@ -2745,7 +2745,7 @@ public abstract class Connection
          throw new InvalidArgumentException("Object " + documentId + " is not Document.");
       }
 
-      if (!overwriteFlag && ((Document)document).hasContent())
+      if (!overwriteFlag && ((DocumentData)document).hasContent())
       {
          throw new ContentAlreadyExistsException("Document already has content stream and 'overwriteFlag' is false.");
       }
@@ -2753,7 +2753,7 @@ public abstract class Connection
       // Validate change token, object may be already updated.
       validateChangeToken(document, changeTokenHolder.getValue());
 
-      ((Document)document).setContentStream(content);
+      ((DocumentData)document).setContentStream(content);
 
       storage.saveObject(document);
 
@@ -2874,7 +2874,7 @@ public abstract class Connection
          {
             throw new InvalidArgumentException("Object " + policyID + " is not a Policy object.");
          }
-         object.applyPolicy((Policy)policy);
+         object.applyPolicy((PolicyData)policy);
       }
    }
 
@@ -2894,7 +2894,7 @@ public abstract class Connection
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
       RenditionFilter parsedRenditionFilter = new RenditionFilter(renditionFilter);
 
-      for (ItemsIterator<ObjectData> children = ((Folder)folder).getChildren(null); children.hasNext();)
+      for (ItemsIterator<ObjectData> children = ((FolderData)folder).getChildren(null); children.hasNext();)
       {
          ObjectData child = children.next();
 
@@ -2983,9 +2983,9 @@ public abstract class Connection
          }
          if (direction != null)
          {
-            for (ItemsIterator<Relationship> iter = object.getRelationships(direction, null, true); iter.hasNext();)
+            for (ItemsIterator<RelationshipData> iter = object.getRelationships(direction, null, true); iter.hasNext();)
             {
-               Relationship next = iter.next();
+               RelationshipData next = iter.next();
                cmis.getRelationship().add(
                   getCmisObject(next, false, includeRelationships, false, false, includeObjectInfo, PropertyFilter.ALL,
                      RenditionFilter.NONE));
@@ -2994,7 +2994,7 @@ public abstract class Connection
       }
       if (includePolicyIds)
       {
-         for (Iterator<Policy> iter = object.getPolicies().iterator(); iter.hasNext();)
+         for (Iterator<PolicyData> iter = object.getPolicies().iterator(); iter.hasNext();)
          {
             cmis.getPolicyIds().add(iter.next().getObjectId());
          }
@@ -3036,11 +3036,11 @@ public abstract class Connection
          objectInfo.setChangeToken(object.getChangeToken());
          if (baseType == BaseType.FOLDER)
          {
-            objectInfo.setParentId(((Folder)object).isRoot() ? null : object.getParent().getObjectId());
+            objectInfo.setParentId(((FolderData)object).isRoot() ? null : object.getParent().getObjectId());
          }
          else if (baseType == BaseType.DOCUMENT)
          {
-            Document doc = (Document)object;
+            DocumentData doc = (DocumentData)object;
             objectInfo.setLatestVersion(doc.isLatestVersion());
             objectInfo.setMajorVersion(doc.isMajorVersion());
             objectInfo.setLatestMajorVersion(doc.isLatestMajorVersion());
@@ -3052,7 +3052,7 @@ public abstract class Connection
          }
          else if (baseType == BaseType.RELATIONSHIP)
          {
-            Relationship rel = (Relationship)object;
+            RelationshipData rel = (RelationshipData)object;
             objectInfo.setSourceId(rel.getSourceId());
             objectInfo.setTargetId(rel.getTargetId());
          }

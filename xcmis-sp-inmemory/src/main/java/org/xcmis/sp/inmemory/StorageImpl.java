@@ -44,15 +44,15 @@ import org.xcmis.spi.BaseItemsIterator;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
-import org.xcmis.spi.Document;
-import org.xcmis.spi.Folder;
+import org.xcmis.spi.DocumentData;
+import org.xcmis.spi.FolderData;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.Policy;
-import org.xcmis.spi.Relationship;
+import org.xcmis.spi.PolicyData;
+import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.Storage;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.TypeNotFoundException;
@@ -239,7 +239,7 @@ public class StorageImpl implements Storage
 
       boolean isCheckedout = type.getBaseId() == BaseType.DOCUMENT //
          && type.isVersionable() //
-         && ((Document)object).isVersionSeriesCheckedOut();
+         && ((DocumentData)object).isVersionSeriesCheckedOut();
 
       actions.setCanGetProperties(true);
 
@@ -284,7 +284,7 @@ public class StorageImpl implements Storage
       actions.setCanGetFolderParent(type.getBaseId() == BaseType.FOLDER);
 
       actions.setCanGetContentStream(type.getBaseId() == BaseType.DOCUMENT //
-         && ((Document)object).hasContent());
+         && ((DocumentData)object).hasContent());
 
       actions.setCanSetContentStream(type.getBaseId() == BaseType.DOCUMENT //
          && type.getContentStreamAllowed() != ContentStreamAllowed.NOT_ALLOWED);
@@ -312,7 +312,7 @@ public class StorageImpl implements Storage
       return actions;
    }
 
-   public Document createCopyOfDocument(Document source, Folder folder, VersioningState versioningState)
+   public DocumentData createCopyOfDocument(DocumentData source, FolderData folder, VersioningState versioningState)
       throws ConstraintException, StorageException
    {
       return new DocumentCopy(source, folder, getTypeDefinition(source.getTypeId(), true), versioningState, this);
@@ -321,35 +321,35 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public Document createDocument(Folder folder, String typeId, VersioningState versioningState)
+   public DocumentData createDocument(FolderData folder, String typeId, VersioningState versioningState)
       throws ConstraintException
    {
-      return new DocumentImpl(folder, getTypeDefinition(typeId, true), versioningState, this);
+      return new DocumentDataImpl(folder, getTypeDefinition(typeId, true), versioningState, this);
    }
 
    /**
     * {@inheritDoc}
     */
-   public Folder createFolder(Folder folder, String typeId) throws ConstraintException
+   public FolderData createFolder(FolderData folder, String typeId) throws ConstraintException
    {
-      return new FolderImpl(folder, getTypeDefinition(typeId, true), this);
+      return new FolderDataImpl(folder, getTypeDefinition(typeId, true), this);
    }
 
    /**
     * {@inheritDoc}
     */
-   public Policy createPolicy(Folder folder, String typeId) throws ConstraintException
+   public PolicyData createPolicy(FolderData folder, String typeId) throws ConstraintException
    {
-      return new PolicyImpl(getTypeDefinition(typeId, true), this);
+      return new PolicyDataImpl(getTypeDefinition(typeId, true), this);
    }
 
    /**
     * {@inheritDoc}
     */
-   public Relationship createRelationship(ObjectData source, ObjectData target, String typeId)
+   public RelationshipData createRelationship(ObjectData source, ObjectData target, String typeId)
       throws ConstraintException
    {
-      return new RelationshipImpl(getTypeDefinition(typeId, true), source, target, this);
+      return new RelationshipDataImpl(getTypeDefinition(typeId, true), source, target, this);
    }
 
    /**
@@ -370,7 +370,7 @@ public class StorageImpl implements Storage
       }
    }
 
-   public Collection<String> deleteTree(Folder folder, boolean deleteAllVersions, UnfileObject unfileObject,
+   public Collection<String> deleteTree(FolderData folder, boolean deleteAllVersions, UnfileObject unfileObject,
       boolean continueOnFailure) throws UpdateConflictException
    {
       // TODO : unfile & continueOnFailure
@@ -386,7 +386,7 @@ public class StorageImpl implements Storage
          ObjectData object = iterator.next();
          if (object.getBaseType() == BaseType.FOLDER)
          {
-            deleteTree((Folder)object, deleteAllVersions, unfileObject, continueOnFailure);
+            deleteTree((FolderData)object, deleteAllVersions, unfileObject, continueOnFailure);
          }
          else
          {
@@ -399,9 +399,9 @@ public class StorageImpl implements Storage
       return Collections.emptyList();
    }
 
-   public Collection<Document> getAllVersions(String versionSeriesId) throws ObjectNotFoundException
+   public Collection<DocumentData> getAllVersions(String versionSeriesId) throws ObjectNotFoundException
    {
-      List<Document> v = new ArrayList<Document>();
+      List<DocumentData> v = new ArrayList<DocumentData>();
       if (!workingCopies.containsKey(versionSeriesId) && !versions.containsKey(versionSeriesId))
       {
          throw new ObjectNotFoundException("Version series " + versionSeriesId + " does not exist.");
@@ -409,11 +409,11 @@ public class StorageImpl implements Storage
       String pwc = workingCopies.get(versionSeriesId);
       if (pwc != null)
       {
-         v.add((Document)getObject(pwc));
+         v.add((DocumentData)getObject(pwc));
       }
       for (String vId : versions.get(versionSeriesId))
       {
-         v.add((Document)getObject(vId));
+         v.add((DocumentData)getObject(vId));
       }
       return v;
    }
@@ -427,16 +427,16 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public ItemsIterator<Document> getCheckedOutDocuments(ObjectData folder, String orderBy)
+   public ItemsIterator<DocumentData> getCheckedOutDocuments(ObjectData folder, String orderBy)
    {
-      List<Document> checkedOut = new ArrayList<Document>();
+      List<DocumentData> checkedOut = new ArrayList<DocumentData>();
 
       for (String pwcId : workingCopies.values())
       {
-         Document pwc = (Document)getObject(pwcId);
+         DocumentData pwc = (DocumentData)getObject(pwcId);
          if (folder != null)
          {
-            for (Folder parent : pwc.getParents())
+            for (FolderData parent : pwc.getParents())
             {
                // TODO equals and hashCode for objects
                if (parent.getObjectId().equals(folder.getObjectId()))
@@ -450,7 +450,7 @@ public class StorageImpl implements Storage
             checkedOut.add(pwc);
          }
       }
-      return new BaseItemsIterator<Document>(checkedOut);
+      return new BaseItemsIterator<DocumentData>(checkedOut);
    }
 
    public String getId()
@@ -473,19 +473,19 @@ public class StorageImpl implements Storage
       switch (baseType)
       {
          case DOCUMENT :
-            return new DocumentImpl(new Entry(new HashMap<String, Value>(values), new HashMap<String, Set<String>>(
+            return new DocumentDataImpl(new Entry(new HashMap<String, Value>(values), new HashMap<String, Set<String>>(
                permissions.get(objectId)), new HashSet<String>(policies.get(objectId))),
                getTypeDefinition(typeId, true), this);
          case FOLDER :
-            return new FolderImpl(new Entry(new HashMap<String, Value>(values), new HashMap<String, Set<String>>(
+            return new FolderDataImpl(new Entry(new HashMap<String, Value>(values), new HashMap<String, Set<String>>(
                permissions.get(objectId)), new HashSet<String>(policies.get(objectId))),
                getTypeDefinition(typeId, true), this);
          case POLICY :
-            return new PolicyImpl(new Entry(new HashMap<String, Value>(values), new HashMap<String, Set<String>>(
+            return new PolicyDataImpl(new Entry(new HashMap<String, Value>(values), new HashMap<String, Set<String>>(
                permissions.get(objectId)), new HashSet<String>(policies.get(objectId))),
                getTypeDefinition(typeId, true), this);
          case RELATIONSHIP :
-            return new RelationshipImpl(new Entry(new HashMap<String, Value>(values), new HashMap<String, Set<String>>(
+            return new RelationshipDataImpl(new Entry(new HashMap<String, Value>(values), new HashMap<String, Set<String>>(
                permissions.get(objectId)), new HashSet<String>(policies.get(objectId))),
                getTypeDefinition(typeId, true), this);
       }
@@ -556,7 +556,7 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public ObjectData moveObject(ObjectData object, Folder target, Folder source) throws ConstraintException,
+   public ObjectData moveObject(ObjectData object, FolderData target, FolderData source) throws ConstraintException,
       InvalidArgumentException, UpdateConflictException, VersioningException, NameConstraintViolationException,
       StorageException
    {
@@ -882,12 +882,12 @@ public class StorageImpl implements Storage
          }
          if (obj.getBaseType() == BaseType.FOLDER)
          {
-            if (((Folder)obj).isRoot())
+            if (((FolderData)obj).isRoot())
             {
                return obj.getName();
             }
          }
-         Folder parent = obj.getParent();
+         FolderData parent = obj.getParent();
          if (parent == null)
          {
             return obj.getName();

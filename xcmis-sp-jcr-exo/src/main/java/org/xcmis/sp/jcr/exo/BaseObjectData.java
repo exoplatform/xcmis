@@ -35,14 +35,14 @@ import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ObjectDataVisitor;
 import org.xcmis.spi.ConstraintException;
-import org.xcmis.spi.Document;
-import org.xcmis.spi.Folder;
+import org.xcmis.spi.DocumentData;
+import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectData;
-import org.xcmis.spi.Policy;
+import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.PropertyFilter;
-import org.xcmis.spi.Relationship;
+import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.model.AccessControlEntry;
@@ -116,7 +116,7 @@ abstract class BaseObjectData implements ObjectData
     * Temporary storage for policies applied to object. For newly created all
     * policies will be stored in here before calling {@link #save()}.
     */
-   protected Set<Policy> policies;
+   protected Set<PolicyData> policies;
 
    /**
     * Temporary storage for ACL applied to object. For newly created all ACL
@@ -127,7 +127,7 @@ abstract class BaseObjectData implements ObjectData
    /**
     * Parent folder id for newly created fileable objects.
     */
-   protected FolderImpl parent;
+   protected FolderDataImpl parent;
 
    /**
     * Back-end JCR node, it is <code>null</code> for newly created object.
@@ -149,10 +149,10 @@ abstract class BaseObjectData implements ObjectData
     * @param parent parent folder
     * @param session JCR session
     */
-   public BaseObjectData(TypeDefinition type, Folder parent, Session session)
+   public BaseObjectData(TypeDefinition type, FolderData parent, Session session)
    {
       this.type = type;
-      this.parent = (FolderImpl)parent;
+      this.parent = (FolderDataImpl)parent;
       this.session = session;
       this.node = null;
    }
@@ -192,7 +192,7 @@ abstract class BaseObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
-   public void applyPolicy(Policy policy) throws ConstraintException
+   public void applyPolicy(PolicyData policy) throws ConstraintException
    {
       if (!type.isControllablePolicy())
       {
@@ -208,7 +208,7 @@ abstract class BaseObjectData implements ObjectData
       {
          if (policies == null)
          {
-            policies = new HashSet<Policy>();
+            policies = new HashSet<PolicyData>();
          }
          policies.add(policy);
       }
@@ -364,7 +364,7 @@ abstract class BaseObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
-   public Folder getParent() throws ConstraintException
+   public FolderData getParent() throws ConstraintException
    {
       if (isNew())
       {
@@ -378,7 +378,7 @@ abstract class BaseObjectData implements ObjectData
             throw new ConstraintException("Unable get parent of root folder.");
          }
 
-         Collection<Folder> parents = getParents();
+         Collection<FolderData> parents = getParents();
          if (parents.size() > 1)
          {
             throw new ConstraintException("Object has more then one parent.");
@@ -401,13 +401,13 @@ abstract class BaseObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
-   public Collection<Folder> getParents()
+   public Collection<FolderData> getParents()
    {
       if (isNew())
       {
          if (parent != null)
          {
-            List<Folder> parents = new ArrayList<Folder>(1);
+            List<FolderData> parents = new ArrayList<FolderData>(1);
             parents.add(parent);
             return parents;
          }
@@ -422,20 +422,20 @@ abstract class BaseObjectData implements ObjectData
             return Collections.emptyList();
          }
 
-         Set<Folder> parents = new HashSet<Folder>();
+         Set<FolderData> parents = new HashSet<FolderData>();
          for (PropertyIterator iterator = node.getReferences(); iterator.hasNext();)
          {
             Node link = iterator.nextProperty().getParent();
             if (link.isNodeType("nt:linkedFile"))
             {
                Node parent = link.getParent();
-               parents.add(new FolderImpl(JcrTypeHelper.getTypeDefinition(parent.getPrimaryNodeType(), true), parent));
+               parents.add(new FolderDataImpl(JcrTypeHelper.getTypeDefinition(parent.getPrimaryNodeType(), true), parent));
             }
          }
          if (!node.getParent().isNodeType("xcmis:unfiledObject"))
          {
             Node parent = node.getParent();
-            parents.add(new FolderImpl(JcrTypeHelper.getTypeDefinition(parent.getPrimaryNodeType(), true), parent));
+            parents.add(new FolderDataImpl(JcrTypeHelper.getTypeDefinition(parent.getPrimaryNodeType(), true), parent));
          }
          return parents;
       }
@@ -448,7 +448,7 @@ abstract class BaseObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
-   public Collection<Policy> getPolicies()
+   public Collection<PolicyData> getPolicies()
    {
       if (!type.isControllablePolicy())
       {
@@ -506,7 +506,7 @@ abstract class BaseObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
-   public ItemsIterator<Relationship> getRelationships(RelationshipDirection direction, TypeDefinition type,
+   public ItemsIterator<RelationshipData> getRelationships(RelationshipDirection direction, TypeDefinition type,
       boolean includeSubRelationshipTypes)
    {
       if (isNew())
@@ -517,7 +517,7 @@ abstract class BaseObjectData implements ObjectData
       try
       {
          // Can met one relationship twice if object has relation to it self.
-         Set<Relationship> cache = new HashSet<Relationship>();
+         Set<RelationshipData> cache = new HashSet<RelationshipData>();
 
          for (PropertyIterator iter = node.getReferences(); iter.hasNext();)
          {
@@ -538,8 +538,8 @@ abstract class BaseObjectData implements ObjectData
                if (nodeType.getName().equals(type.getLocalName()) //
                   || (includeSubRelationshipTypes && nodeType.isNodeType(type.getLocalName())))
                {
-                  RelationshipImpl relationship =
-                     new RelationshipImpl(JcrTypeHelper.getTypeDefinition(nodeType, true), relNode);
+                  RelationshipDataImpl relationship =
+                     new RelationshipDataImpl(JcrTypeHelper.getTypeDefinition(nodeType, true), relNode);
                   boolean added = cache.add(relationship);
                   if (LOG.isDebugEnabled() && added)
                   {
@@ -548,7 +548,7 @@ abstract class BaseObjectData implements ObjectData
                }
             }
          }
-         return new BaseItemsIterator<Relationship>(cache);
+         return new BaseItemsIterator<RelationshipData>(cache);
       }
       catch (RepositoryException re)
       {
@@ -602,7 +602,7 @@ abstract class BaseObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
-   public void removePolicy(Policy policy) throws ConstraintException
+   public void removePolicy(PolicyData policy) throws ConstraintException
    {
       if (!type.isControllablePolicy())
       {
@@ -613,7 +613,7 @@ abstract class BaseObjectData implements ObjectData
       {
          // If not saved yet simply remove from temporary storage
          // TODO override equals & hashCode for CMIS objects classes
-         for (Iterator<Policy> policyIterator = policies.iterator(); policyIterator.hasNext();)
+         for (Iterator<PolicyData> policyIterator = policies.iterator(); policyIterator.hasNext();)
          {
             if (policyIterator.next().getObjectId().equals(policy.getObjectId()))
             {
@@ -735,7 +735,7 @@ abstract class BaseObjectData implements ObjectData
       Updatability updatability = definition.getUpdatability();
       if (updatability == Updatability.READWRITE //
          || (updatability == Updatability.ONCREATE && isNew()) //
-         || (updatability == Updatability.WHENCHECKEDOUT && getBaseType() == BaseType.DOCUMENT && ((Document)this)
+         || (updatability == Updatability.WHENCHECKEDOUT && getBaseType() == BaseType.DOCUMENT && ((DocumentData)this)
             .isPWC()))
       {
          if (property.getId().equals(CmisConstants.NAME))
@@ -987,9 +987,9 @@ abstract class BaseObjectData implements ObjectData
       return Collections.emptyList();
    }
 
-   private Collection<Policy> getAppliedPolicies() throws RepositoryException
+   private Collection<PolicyData> getAppliedPolicies() throws RepositoryException
    {
-      Set<Policy> policies = new HashSet<Policy>();
+      Set<PolicyData> policies = new HashSet<PolicyData>();
 
       for (PropertyIterator iter = node.getProperties(); iter.hasNext();)
       {
@@ -1003,7 +1003,7 @@ abstract class BaseObjectData implements ObjectData
                if (pol.getPrimaryNodeType().isNodeType(JcrCMIS.CMIS_NT_POLICY))
                {
                   boolean added =
-                     policies.add(new PolicyImpl(JcrTypeHelper.getTypeDefinition(pol.getPrimaryNodeType(), true), pol));
+                     policies.add(new PolicyDataImpl(JcrTypeHelper.getTypeDefinition(pol.getPrimaryNodeType(), true), pol));
 
                   if (LOG.isDebugEnabled() && added)
                   {
@@ -1066,7 +1066,7 @@ abstract class BaseObjectData implements ObjectData
             }
             else if (definition.getId().equals(CmisConstants.CONTENT_STREAM_FILE_NAME))
             {
-               if (((Document)this).hasContent())
+               if (((DocumentData)this).hasContent())
                {
                   return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
                      definition.getDisplayName(), getName());
@@ -1086,12 +1086,12 @@ abstract class BaseObjectData implements ObjectData
       }
    }
 
-   protected void applyPolicy(Node data, Policy policy) throws RepositoryException
+   protected void applyPolicy(Node data, PolicyData policy) throws RepositoryException
    {
       String policyId = policy.getObjectId();
       if (!data.hasProperty(policyId))
       {
-         data.setProperty(policyId, ((PolicyImpl)policy).getNode());
+         data.setProperty(policyId, ((PolicyDataImpl)policy).getNode());
       }
    }
 

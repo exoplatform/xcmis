@@ -26,14 +26,14 @@ import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ObjectDataVisitor;
 import org.xcmis.spi.ConstraintException;
-import org.xcmis.spi.Document;
-import org.xcmis.spi.Folder;
+import org.xcmis.spi.DocumentData;
+import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectData;
-import org.xcmis.spi.Policy;
+import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.PropertyFilter;
-import org.xcmis.spi.Relationship;
+import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.BaseType;
@@ -82,7 +82,7 @@ abstract class BaseObjectData implements ObjectData
    /**
     * Parent folder id for newly created fileable objects.
     */
-   protected Folder parent;
+   protected FolderData parent;
 
    protected Entry entry;
 
@@ -93,7 +93,7 @@ abstract class BaseObjectData implements ObjectData
       this.storage = storage;
    }
 
-   public BaseObjectData(Folder parent, TypeDefinition type, StorageImpl storage)
+   public BaseObjectData(FolderData parent, TypeDefinition type, StorageImpl storage)
    {
       this.parent = parent;
       this.type = type;
@@ -110,7 +110,7 @@ abstract class BaseObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
-   public void applyPolicy(Policy policy) throws ConstraintException
+   public void applyPolicy(PolicyData policy) throws ConstraintException
    {
       if (!type.isControllablePolicy())
       {
@@ -208,7 +208,7 @@ abstract class BaseObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
-   public Folder getParent() throws ConstraintException
+   public FolderData getParent() throws ConstraintException
    {
       if (isNew())
       {
@@ -220,7 +220,7 @@ abstract class BaseObjectData implements ObjectData
          throw new ConstraintException("Unable get parent of root folder.");
       }
 
-      Collection<Folder> parents = getParents();
+      Collection<FolderData> parents = getParents();
 
       if (parents.size() > 1)
       {
@@ -236,13 +236,13 @@ abstract class BaseObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
-   public Collection<Folder> getParents()
+   public Collection<FolderData> getParents()
    {
       if (isNew())
       {
          if (parent != null)
          {
-            List<Folder> parents = new ArrayList<Folder>(1);
+            List<FolderData> parents = new ArrayList<FolderData>(1);
             parents.add(parent);
             return parents;
          }
@@ -250,14 +250,14 @@ abstract class BaseObjectData implements ObjectData
          return Collections.emptyList();
       }
 
-      List<Folder> parents = new ArrayList<Folder>();
+      List<FolderData> parents = new ArrayList<FolderData>();
       Set<String> parentIds = storage.parents.get(getObjectId());
 
       if (parentIds != null)
       {
          for (String id : parentIds)
          {
-            parents.add((Folder)storage.getObject(id));
+            parents.add((FolderData)storage.getObject(id));
          }
       }
 
@@ -267,17 +267,17 @@ abstract class BaseObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
-   public Collection<Policy> getPolicies()
+   public Collection<PolicyData> getPolicies()
    {
       if (!type.isControllablePolicy())
       {
          return Collections.emptyList();
       }
 
-      List<Policy> policies = new ArrayList<Policy>();
+      List<PolicyData> policies = new ArrayList<PolicyData>();
       for (String id : entry.getPolicies())
       {
-         policies.add((Policy)storage.getObject(id));
+         policies.add((PolicyData)storage.getObject(id));
       }
       return policies;
    }
@@ -311,7 +311,7 @@ abstract class BaseObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
-   public ItemsIterator<Relationship> getRelationships(RelationshipDirection direction, TypeDefinition type,
+   public ItemsIterator<RelationshipData> getRelationships(RelationshipDirection direction, TypeDefinition type,
       boolean includeSubRelationshipTypes)
    {
       if (isNew())
@@ -326,10 +326,10 @@ abstract class BaseObjectData implements ObjectData
          return CmisUtils.emptyItemsIterator();
       }
 
-      List<Relationship> relationships = new ArrayList<Relationship>();
+      List<RelationshipData> relationships = new ArrayList<RelationshipData>();
       for (String id : relationshipIds)
       {
-         Relationship r = (Relationship)storage.getObject(id);
+         RelationshipData r = (RelationshipData)storage.getObject(id);
          if (direction == RelationshipDirection.EITHER //
             || (direction == RelationshipDirection.SOURCE && r.getSourceId().equals(getObjectId())) //
             || (direction == RelationshipDirection.TARGET && r.getTargetId().equals(getObjectId())))
@@ -339,7 +339,7 @@ abstract class BaseObjectData implements ObjectData
          }
       }
 
-      return new BaseItemsIterator<Relationship>(relationships);
+      return new BaseItemsIterator<RelationshipData>(relationships);
    }
 
    /**
@@ -388,7 +388,7 @@ abstract class BaseObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
-   public void removePolicy(Policy policy) throws ConstraintException
+   public void removePolicy(PolicyData policy) throws ConstraintException
    {
       if (!type.isControllablePolicy())
       {
@@ -475,7 +475,7 @@ abstract class BaseObjectData implements ObjectData
       Updatability updatability = definition.getUpdatability();
       if (updatability == Updatability.READWRITE //
          || (updatability == Updatability.ONCREATE && isNew()) //
-         || (updatability == Updatability.WHENCHECKEDOUT && getBaseType() == BaseType.DOCUMENT && ((Document)this)
+         || (updatability == Updatability.WHENCHECKEDOUT && getBaseType() == BaseType.DOCUMENT && ((DocumentData)this)
             .isPWC()))
       {
          if (property.getType() == PropertyType.BOOLEAN)

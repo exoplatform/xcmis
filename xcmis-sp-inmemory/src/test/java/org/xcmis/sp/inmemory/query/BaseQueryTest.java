@@ -24,8 +24,8 @@ import org.exoplatform.services.log.Log;
 import org.xcmis.sp.inmemory.BaseTest;
 import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.ContentStream;
-import org.xcmis.spi.Document;
-import org.xcmis.spi.Folder;
+import org.xcmis.spi.DocumentData;
+import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.model.BaseType;
@@ -110,14 +110,14 @@ public abstract class BaseQueryTest extends BaseTest
          new HashMap<String, PropertyDefinition<?>>()));
    }
 
-   protected Document createDocument(Folder folder, String name, String typeId, byte[] content, String mimeType)
+   protected DocumentData createDocument(FolderData folder, String name, String typeId, byte[] content, String mimeType)
       throws Exception
    {
 
       return createDocument(folder, name, typeId, new BaseContentStream(content, null, mimeType), null);
    }
 
-   protected Document createDocument(Folder folder, String name, String typeId, ContentStream content,
+   protected DocumentData createDocument(FolderData folder, String name, String typeId, ContentStream content,
       VersioningState versioningState)
 
    /**
@@ -157,7 +157,7 @@ public abstract class BaseQueryTest extends BaseTest
    //      checkResult(result, new Document[]{doc1});
    //   }
    {
-      Document document =
+      DocumentData document =
          storage.createDocument(folder, typeId, versioningState == null ? VersioningState.MAJOR : versioningState);
       document.setName(name);
       document.setContentStream(content);
@@ -166,9 +166,9 @@ public abstract class BaseQueryTest extends BaseTest
       return document;
    }
 
-   protected Folder createFolder(Folder folder, String name, String typeId)
+   protected FolderData createFolder(FolderData folder, String name, String typeId)
    {
-      Folder newFolder = storage.createFolder(folder, typeId);
+      FolderData newFolder = storage.createFolder(folder, typeId);
       newFolder.setName(name);
       storage.saveObject(newFolder);
       return newFolder;

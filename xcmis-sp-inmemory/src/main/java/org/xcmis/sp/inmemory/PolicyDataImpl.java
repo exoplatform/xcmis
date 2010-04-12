@@ -22,11 +22,11 @@ package org.xcmis.sp.inmemory;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
-import org.xcmis.spi.Folder;
+import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
-import org.xcmis.spi.Policy;
-import org.xcmis.spi.Relationship;
+import org.xcmis.spi.PolicyData;
+import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.model.RelationshipDirection;
 import org.xcmis.spi.model.TypeDefinition;
@@ -43,17 +43,17 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-class PolicyImpl extends BaseObjectData implements Policy
+class PolicyDataImpl extends BaseObjectData implements PolicyData
 {
 
-   public PolicyImpl(Entry entry, TypeDefinition type, StorageImpl storage)
+   public PolicyDataImpl(Entry entry, TypeDefinition type, StorageImpl storage)
    {
       super(entry, type, storage);
    }
 
-   public PolicyImpl(TypeDefinition type, StorageImpl storage)
+   public PolicyDataImpl(TypeDefinition type, StorageImpl storage)
    {
-      super((Folder)null, type, storage);
+      super((FolderData)null, type, storage);
    }
 
    /**
@@ -69,7 +69,7 @@ class PolicyImpl extends BaseObjectData implements Policy
     * {@inheritDoc}
     */
    @Override
-   public Folder getParent() throws ConstraintException
+   public FolderData getParent() throws ConstraintException
    {
       return null;
    }
@@ -78,7 +78,7 @@ class PolicyImpl extends BaseObjectData implements Policy
     * {@inheritDoc}
     */
    @Override
-   public Collection<Folder> getParents()
+   public Collection<FolderData> getParents()
    {
       return Collections.emptyList();
    }
@@ -150,7 +150,7 @@ class PolicyImpl extends BaseObjectData implements Policy
          }
       }
 
-      ItemsIterator<Relationship> relationships = getRelationships(RelationshipDirection.EITHER, null, true);
+      ItemsIterator<RelationshipData> relationships = getRelationships(RelationshipDirection.EITHER, null, true);
       if (relationships.hasNext())
       {
          throw new ConstraintException("Object can't be deleted cause to storage referential integrity. "

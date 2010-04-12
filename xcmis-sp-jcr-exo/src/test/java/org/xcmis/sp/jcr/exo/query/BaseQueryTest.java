@@ -25,8 +25,8 @@ import org.xcmis.sp.jcr.exo.BaseTest;
 import org.xcmis.sp.jcr.exo.JcrCMIS;
 import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.ContentStream;
-import org.xcmis.spi.Document;
-import org.xcmis.spi.Folder;
+import org.xcmis.spi.DocumentData;
+import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.Storage;
@@ -49,23 +49,23 @@ public abstract class BaseQueryTest extends BaseTest
 
    protected Storage storage;
 
-   protected Folder rootFolder;
+   protected FolderData rootFolder;
 
    public void setUp() throws Exception
    {
       super.setUp();
       storage = storageProvider.getConnection(cmisRepositoryId).getStorage();
-      rootFolder = (Folder)storage.getObject(JcrCMIS.ROOT_FOLDER_ID);
+      rootFolder = (FolderData)storage.getObject(JcrCMIS.ROOT_FOLDER_ID);
    }
 
-   protected Document createDocument(Folder folder, String name, String typeId, byte[] content, String mimeType)
+   protected DocumentData createDocument(FolderData folder, String name, String typeId, byte[] content, String mimeType)
       throws Exception
    {
 
       return createDocument(folder, name, typeId, new BaseContentStream(content, null, mimeType), null);
    }
 
-   protected Document createDocument(Folder folder, String name, String typeId, ContentStream content,
+   protected DocumentData createDocument(FolderData folder, String name, String typeId, ContentStream content,
       VersioningState versioningState) throws Exception//   /**
    //    * Test NOT IN constraint.
    //    * <p>
@@ -103,7 +103,7 @@ public abstract class BaseQueryTest extends BaseTest
    //      checkResult(result, new Document[]{doc1});
    //   }
    {
-      Document document =
+      DocumentData document =
          storage.createDocument(folder, typeId, versioningState == null ? VersioningState.MAJOR : versioningState);
       document.setName(name);
       document.setContentStream(content);
@@ -112,9 +112,9 @@ public abstract class BaseQueryTest extends BaseTest
       return document;
    }
 
-   protected Folder createFolder(Folder folder, String name, String typeId) throws Exception
+   protected FolderData createFolder(FolderData folder, String name, String typeId) throws Exception
    {
-      Folder newFolder = storage.createFolder(folder, typeId);
+      FolderData newFolder = storage.createFolder(folder, typeId);
       newFolder.setName(name);
       storage.saveObject(newFolder);
       //      newFolder.save();

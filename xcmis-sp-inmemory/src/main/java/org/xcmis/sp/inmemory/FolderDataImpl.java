@@ -23,12 +23,12 @@ import org.xcmis.spi.BaseItemsIterator;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
-import org.xcmis.spi.Document;
-import org.xcmis.spi.Folder;
+import org.xcmis.spi.DocumentData;
+import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectData;
-import org.xcmis.spi.Relationship;
+import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.RelationshipDirection;
@@ -47,15 +47,15 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-class FolderImpl extends BaseObjectData implements Folder
+class FolderDataImpl extends BaseObjectData implements FolderData
 {
 
-   public FolderImpl(Entry entry, TypeDefinition type, StorageImpl storage)
+   public FolderDataImpl(Entry entry, TypeDefinition type, StorageImpl storage)
    {
       super(entry, type, storage);
    }
 
-   public FolderImpl(Folder parent, TypeDefinition type, StorageImpl storage)
+   public FolderDataImpl(FolderData parent, TypeDefinition type, StorageImpl storage)
    {
       super(parent, type, storage);
    }
@@ -89,7 +89,7 @@ class FolderImpl extends BaseObjectData implements Folder
       for (String ch : childrenIds)
       {
          ObjectData object = storage.getObject(ch);
-         if (object.getBaseType() == BaseType.DOCUMENT && !((Document)object).isLatestVersion())
+         if (object.getBaseType() == BaseType.DOCUMENT && !((DocumentData)object).isLatestVersion())
          {
             continue;
          }
@@ -168,7 +168,7 @@ class FolderImpl extends BaseObjectData implements Folder
       LinkedList<String> pathSegms = new LinkedList<String>();
       pathSegms.add(getName());
 
-      Folder parent = getParent();
+      FolderData parent = getParent();
       while (!parent.isRoot())
       {
          pathSegms.addFirst(parent.getName());
@@ -201,7 +201,7 @@ class FolderImpl extends BaseObjectData implements Folder
             + " is Folder and contains one or more objects.");
       }
 
-      ItemsIterator<Relationship> relationships = getRelationships(RelationshipDirection.EITHER, null, true);
+      ItemsIterator<RelationshipData> relationships = getRelationships(RelationshipDirection.EITHER, null, true);
       if (relationships.hasNext())
       {
          throw new ConstraintException("Object can't be deleted cause to storage referential integrity. "

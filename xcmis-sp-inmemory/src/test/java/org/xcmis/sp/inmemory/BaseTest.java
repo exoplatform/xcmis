@@ -25,11 +25,11 @@ import org.exoplatform.services.log.LogConfigurator;
 import org.exoplatform.services.log.impl.Log4JConfigurator;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ContentStream;
-import org.xcmis.spi.Document;
-import org.xcmis.spi.Folder;
+import org.xcmis.spi.DocumentData;
+import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ObjectData;
-import org.xcmis.spi.Policy;
-import org.xcmis.spi.Relationship;
+import org.xcmis.spi.PolicyData;
+import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.model.impl.StringProperty;
@@ -46,7 +46,7 @@ public abstract class BaseTest extends TestCase
 
    protected StorageImpl storage;
 
-   protected Folder rootFolder;
+   protected FolderData rootFolder;
 
    protected final String storageId = "inmem1";
 
@@ -63,30 +63,30 @@ public abstract class BaseTest extends TestCase
       StorageConfiguration configuration = new StorageConfiguration(storageId, properties);
 
       storage = new StorageImpl(configuration);
-      rootFolder = (Folder)storage.getObject(storage.getRepositoryInfo().getRootFolderId());
+      rootFolder = (FolderData)storage.getObject(storage.getRepositoryInfo().getRootFolderId());
    }
 
-   protected Folder createFolder(Folder parent, String name, String type)
+   protected FolderData createFolder(FolderData parent, String name, String type)
    {
-      Folder folder = storage.createFolder(parent, type);
+      FolderData folder = storage.createFolder(parent, type);
       folder.setName(name);
       storage.saveObject(folder);
       return folder;
    }
 
-   protected Document createDocument(Folder parent, String name, String type, ContentStream content,
+   protected DocumentData createDocument(FolderData parent, String name, String type, ContentStream content,
       VersioningState versioningState)
    {
-      Document doc = storage.createDocument(parent, type, versioningState);
+      DocumentData doc = storage.createDocument(parent, type, versioningState);
       doc.setName(name);
       doc.setContentStream(content);
       storage.saveObject(doc);
       return doc;
    }
 
-   protected Policy createPolicy(String name, String type, String policyText)
+   protected PolicyData createPolicy(String name, String type, String policyText)
    {
-      Policy policy = storage.createPolicy(null, type);
+      PolicyData policy = storage.createPolicy(null, type);
       policy.setName(name);
 
       PropertyDefinition<?> defPolicyText = PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
@@ -97,9 +97,9 @@ public abstract class BaseTest extends TestCase
       return policy;
    }
 
-   public Relationship createRelationship(String name, ObjectData source, ObjectData target, String typeId)
+   public RelationshipData createRelationship(String name, ObjectData source, ObjectData target, String typeId)
    {
-      Relationship relationship = storage.createRelationship(source, target, typeId);
+      RelationshipData relationship = storage.createRelationship(source, target, typeId);
       relationship.setName(name);
       storage.saveObject(relationship);
       return relationship;

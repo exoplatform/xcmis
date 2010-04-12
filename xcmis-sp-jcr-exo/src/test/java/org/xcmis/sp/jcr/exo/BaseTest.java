@@ -33,7 +33,7 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.security.ConversationState;
 import org.exoplatform.services.security.Identity;
-import org.xcmis.spi.Document;
+import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.model.impl.StringProperty;
 
@@ -190,7 +190,7 @@ public abstract class BaseTest extends TestCase
       super.tearDown();
    }
 
-   protected void setProperty(Document doc, String propertyName, String propertyValue) throws RepositoryException
+   protected void setProperty(DocumentData doc, String propertyName, String propertyValue) throws RepositoryException
    {
       ((BaseObjectData)doc).setProperty(((BaseObjectData)doc).node, new StringProperty(propertyName, propertyName,
          propertyName, propertyName, propertyValue));

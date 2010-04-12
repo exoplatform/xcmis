@@ -63,7 +63,7 @@ public interface Storage extends TypeManager
     *        and storage may ignore this parameter if it not able sort items
     * @return iterator over checked out objects
     */
-   ItemsIterator<Document> getCheckedOutDocuments(ObjectData folder, String orderBy);
+   ItemsIterator<DocumentData> getCheckedOutDocuments(ObjectData folder, String orderBy);
 
    /**
     * Create new instance of document with type <code>typeId</code> using
@@ -87,7 +87,7 @@ public interface Storage extends TypeManager
     *         Document</li>
     *         <li><code>typeId</code> is not in the list of
     *         AllowedChildObjectTypeIds of the <code>folder</code> (method
-    *         {@link Folder#isAllowedChildType(String)} returns
+    *         {@link FolderData#isAllowedChildType(String)} returns
     *         <code>false</code> for <code>typeId</code>)</li>
     *         <li>versionable attribute of the object type definition is
     *         <code>false</code> and a value of the versioningState parameter is
@@ -98,7 +98,7 @@ public interface Storage extends TypeManager
     *         </ul>
     * @see VersioningState
     */
-   Document createDocument(Folder folder, String typeId, VersioningState versioningState) throws ConstraintException;
+   DocumentData createDocument(FolderData folder, String typeId, VersioningState versioningState) throws ConstraintException;
 
    /**
     * Create new document as copy of the given <code>source</code> document and
@@ -121,7 +121,7 @@ public interface Storage extends TypeManager
     *         Document</li>
     *         <li><code>typeId</code> is not in the list of
     *         AllowedChildObjectTypeIds of the <code>folder</code> (method
-    *         {@link Folder#isAllowedChildType(String)} returns
+    *         {@link FolderData#isAllowedChildType(String)} returns
     *         <code>false</code> for <code>typeId</code>)</li>
     *         <li>versionable attribute of the object type definition is
     *         <code>false</code> and a value of the versioningState parameter is
@@ -134,7 +134,7 @@ public interface Storage extends TypeManager
     *         internal problem
     * @see VersioningState
     */
-   Document createCopyOfDocument(Document source, Folder folder, VersioningState versioningState)
+   DocumentData createCopyOfDocument(DocumentData source, FolderData folder, VersioningState versioningState)
       throws ConstraintException, StorageException;
 
    /**
@@ -152,11 +152,11 @@ public interface Storage extends TypeManager
     *         </li>
     *         <li><code>typeId</code> is not in the list of
     *         AllowedChildObjectTypeIds of the <code>folder</code> (method
-    *         {@link Folder#isAllowedChildType(String)} returns
+    *         {@link FolderData#isAllowedChildType(String)} returns
     *         <code>false</code> for <code>typeId</code>)</li>
     *         </ul>
     */
-   Folder createFolder(Folder folder, String typeId) throws ConstraintException;
+   FolderData createFolder(FolderData folder, String typeId) throws ConstraintException;
 
    /**
     * Create new instance of policy with type <code>typeId</code> using
@@ -176,11 +176,11 @@ public interface Storage extends TypeManager
     *         </li>
     *         <li><code>typeId</code> is not in the list of
     *         AllowedChildObjectTypeIds of the <code>folder</code> (method
-    *         {@link Folder#isAllowedChildType(String)} returns
+    *         {@link FolderData#isAllowedChildType(String)} returns
     *         <code>false</code> for <code>typeId</code>)</li>
     *         </ul>
     */
-   Policy createPolicy(Folder folder, String typeId) throws ConstraintException;
+   PolicyData createPolicy(FolderData folder, String typeId) throws ConstraintException;
 
    /**
     * Create new instance of relationship for specified <code>source</code> and
@@ -202,13 +202,13 @@ public interface Storage extends TypeManager
     *         AllowedTargetTypes specified by the object type definition</li>
     *         </ul>
     */
-   Relationship createRelationship(ObjectData source, ObjectData target, String typeId) throws ConstraintException;
+   RelationshipData createRelationship(ObjectData source, ObjectData target, String typeId) throws ConstraintException;
 
    /**
     * Delete specified object. If multi-filed object is deleted then it is
     * removed from all folders it is filed in. If specified object is private
     * working copy the deletion object is the same as to cancel checkout
-    * operation. See {@link Document#cancelCheckout()}.
+    * operation. See {@link DocumentData#cancelCheckout()}.
     *
     * @param object object to be deleted
     * @param deleteAllVersions if <code>false</code> then delete only the object
@@ -252,7 +252,7 @@ public interface Storage extends TypeManager
     * @throws UpdateConflictException if object that is no longer current (as
     *         determined by the storage)
     */
-   Collection<String> deleteTree(Folder folder, boolean deleteAllVersions, UnfileObject unfileObject,
+   Collection<String> deleteTree(FolderData folder, boolean deleteAllVersions, UnfileObject unfileObject,
       boolean continueOnFailure) throws UpdateConflictException;
 
    /**
@@ -346,7 +346,7 @@ public interface Storage extends TypeManager
     * @throws StorageException if object can not be moved (save changes) cause
     *         to storage internal problem
     */
-   ObjectData moveObject(ObjectData object, Folder target, Folder source) throws ConstraintException,
+   ObjectData moveObject(ObjectData object, FolderData target, FolderData source) throws ConstraintException,
       InvalidArgumentException, UpdateConflictException, VersioningException, NameConstraintViolationException,
       StorageException;
 
@@ -376,6 +376,6 @@ public interface Storage extends TypeManager
     * @throws ObjectNotFoundException if version series with
     *         <code>versionSeriesId</code> does not exists
     */
-   Collection<Document> getAllVersions(String versionSeriesId) throws ObjectNotFoundException;
+   Collection<DocumentData> getAllVersions(String versionSeriesId) throws ObjectNotFoundException;
 
 }

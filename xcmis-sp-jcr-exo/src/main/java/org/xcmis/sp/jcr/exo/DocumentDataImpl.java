@@ -28,10 +28,10 @@ import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
-import org.xcmis.spi.Document;
-import org.xcmis.spi.Folder;
+import org.xcmis.spi.DocumentData;
+import org.xcmis.spi.FolderData;
 import org.xcmis.spi.NameConstraintViolationException;
-import org.xcmis.spi.Policy;
+import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.VersioningException;
@@ -55,7 +55,7 @@ import javax.jcr.Session;
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-class DocumentImpl extends BaseObjectData implements Document
+class DocumentDataImpl extends BaseObjectData implements DocumentData
 {
 
    static String latestLabel = "latest";
@@ -68,19 +68,19 @@ class DocumentImpl extends BaseObjectData implements Document
 
    private RenditionManager renditionManager;
 
-   public DocumentImpl(TypeDefinition type, Folder parent, Session session, VersioningState versioningState)
+   public DocumentDataImpl(TypeDefinition type, FolderData parent, Session session, VersioningState versioningState)
    {
       super(type, parent, session);
       this.versioningState = versioningState;
    }
 
-   public DocumentImpl(TypeDefinition type, Node node)
+   public DocumentDataImpl(TypeDefinition type, Node node)
    {
       super(type, node);
       versioningState = null; // no sense for not newly created Document
    }
 
-   public DocumentImpl(TypeDefinition type, Node node, RenditionManager manager)
+   public DocumentDataImpl(TypeDefinition type, Node node, RenditionManager manager)
    {
       super(type, node);
       versioningState = null; // no sense for not newly created Document
@@ -127,7 +127,7 @@ class DocumentImpl extends BaseObjectData implements Document
     * {@inheritDoc}
     */
    // Will be overridden in PWC
-   public Document checkin(boolean major, String checkinComment) throws ConstraintException, StorageException
+   public DocumentData checkin(boolean major, String checkinComment) throws ConstraintException, StorageException
    {
       if (!type.isVersionable())
       {
@@ -140,7 +140,7 @@ class DocumentImpl extends BaseObjectData implements Document
    /**
     * {@inheritDoc}
     */
-   public Document checkout() throws ConstraintException, VersioningException, StorageException
+   public DocumentData checkout() throws ConstraintException, VersioningException, StorageException
    {
       if (isNew())
       {
@@ -422,7 +422,7 @@ class DocumentImpl extends BaseObjectData implements Document
 
          if (policies != null && policies.size() > 0)
          {
-            for (Policy policy : policies)
+            for (PolicyData policy : policies)
             {
                applyPolicy(doc, policy);
             }

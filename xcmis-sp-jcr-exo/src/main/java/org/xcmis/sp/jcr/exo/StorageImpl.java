@@ -30,16 +30,16 @@ import org.xcmis.sp.jcr.exo.index.IndexListener;
 import org.xcmis.spi.BaseItemsIterator;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
-import org.xcmis.spi.Document;
-import org.xcmis.spi.Folder;
+import org.xcmis.spi.DocumentData;
+import org.xcmis.spi.FolderData;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.NotSupportedException;
 import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.Policy;
-import org.xcmis.spi.Relationship;
+import org.xcmis.spi.PolicyData;
+import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.Storage;
 import org.xcmis.spi.StorageException;
@@ -335,7 +335,7 @@ public class StorageImpl implements Storage
 
       boolean isCheckedout = type.getBaseId() == BaseType.DOCUMENT //
          && type.isVersionable() //
-         && ((Document)object).isVersionSeriesCheckedOut();
+         && ((DocumentData)object).isVersionSeriesCheckedOut();
 
       actions.setCanGetProperties(true);
 
@@ -380,7 +380,7 @@ public class StorageImpl implements Storage
       actions.setCanGetFolderParent(type.getBaseId() == BaseType.FOLDER);
 
       actions.setCanGetContentStream(type.getBaseId() == BaseType.DOCUMENT //
-         && ((Document)object).hasContent());
+         && ((DocumentData)object).hasContent());
 
       actions.setCanSetContentStream(type.getBaseId() == BaseType.DOCUMENT //
          && type.getContentStreamAllowed() != ContentStreamAllowed.NOT_ALLOWED);
@@ -411,7 +411,7 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public Document createCopyOfDocument(Document source, Folder folder, VersioningState versioningState)
+   public DocumentData createCopyOfDocument(DocumentData source, FolderData folder, VersioningState versioningState)
       throws ConstraintException, StorageException
    {
       // TODO : remove when implement unfiling feature.
@@ -450,7 +450,7 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public Document createDocument(Folder folder, String typeId, VersioningState versioningState)
+   public DocumentData createDocument(FolderData folder, String typeId, VersioningState versioningState)
       throws ConstraintException
    {
       if (folder != null)
@@ -473,7 +473,7 @@ public class StorageImpl implements Storage
          throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Document.");
       }
 
-      Document document = new DocumentImpl(typeDefinition, folder, session, versioningState);
+      DocumentData document = new DocumentDataImpl(typeDefinition, folder, session, versioningState);
 
       return document;
    }
@@ -481,7 +481,7 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public Folder createFolder(Folder folder, String typeId) throws ConstraintException
+   public FolderData createFolder(FolderData folder, String typeId) throws ConstraintException
    {
       if (folder == null)
       {
@@ -506,7 +506,7 @@ public class StorageImpl implements Storage
          throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Folder.");
       }
 
-      Folder newFolder = new FolderImpl(typeDefinition, folder, session);
+      FolderData newFolder = new FolderDataImpl(typeDefinition, folder, session);
 
       return newFolder;
    }
@@ -514,7 +514,7 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public Policy createPolicy(Folder folder, String typeId) throws ConstraintException
+   public PolicyData createPolicy(FolderData folder, String typeId) throws ConstraintException
    {
       TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
 
@@ -525,7 +525,7 @@ public class StorageImpl implements Storage
 
       // TODO : need raise exception if parent folder is provided ??
       // Do not use parent folder, policy is not fileable.
-      Policy policy = new PolicyImpl(typeDefinition, session);
+      PolicyData policy = new PolicyDataImpl(typeDefinition, session);
 
       return policy;
    }
@@ -533,7 +533,7 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public Relationship createRelationship(ObjectData source, ObjectData target, String typeId)
+   public RelationshipData createRelationship(ObjectData source, ObjectData target, String typeId)
       throws ConstraintException
    {
       if (source.isNew())
@@ -553,7 +553,7 @@ public class StorageImpl implements Storage
          throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Relationship.");
       }
 
-      Relationship relationship = new RelationshipImpl(typeDefinition, source, target, session);
+      RelationshipData relationship = new RelationshipDataImpl(typeDefinition, source, target, session);
 
       return relationship;
    }
@@ -590,7 +590,7 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public Collection<String> deleteTree(Folder folder, boolean deleteAllVersions, UnfileObject unfileObject,
+   public Collection<String> deleteTree(FolderData folder, boolean deleteAllVersions, UnfileObject unfileObject,
       boolean continueOnFailure) throws UpdateConflictException
    {
       if (!deleteAllVersions)
@@ -606,7 +606,7 @@ public class StorageImpl implements Storage
 
       try
       {
-         v.visit(((FolderImpl)folder).getNode());
+         v.visit(((FolderDataImpl)folder).getNode());
 
          for (String id : v.getDeleteLinks())
          {
@@ -668,13 +668,13 @@ public class StorageImpl implements Storage
       return failedToDelete;
    }
 
-   public Collection<Document> getAllVersions(String versionSeriesId) throws ObjectNotFoundException
+   public Collection<DocumentData> getAllVersions(String versionSeriesId) throws ObjectNotFoundException
    {
       try
       {
          Node node = ((ExtendedSession)session).getNodeByIdentifier(versionSeriesId);
          VersionHistory vh = ((VersionHistory)node);
-         LinkedList<Document> versions = new LinkedList<Document>();
+         LinkedList<DocumentData> versions = new LinkedList<DocumentData>();
          VersionIterator iterator = vh.getAllVersions();
          iterator.next(); // skip jcr:rootVersion
          while (iterator.hasNext())
@@ -682,7 +682,7 @@ public class StorageImpl implements Storage
             Version v = iterator.nextVersion();
             versions.addFirst(getDocumentVersion(v.getNode(JcrCMIS.JCR_FROZEN_NODE)));
          }
-         Document latest = (Document)getObject(vh.getVersionableUUID());
+         DocumentData latest = (DocumentData)getObject(vh.getVersionableUUID());
          versions.addFirst(latest);
          String pwcId = latest.getVersionSeriesCheckedOutId();
          if (pwcId != null)
@@ -710,14 +710,14 @@ public class StorageImpl implements Storage
       throw new NotSupportedException("Changes log feature is not supported.");
    }
 
-   public ItemsIterator<Document> getCheckedOutDocuments(ObjectData folder, String orderBy)
+   public ItemsIterator<DocumentData> getCheckedOutDocuments(ObjectData folder, String orderBy)
    {
       try
       {
          Node workingCopies =
             (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_WORKING_COPIES);
 
-         List<Document> checkedOut = new ArrayList<Document>();
+         List<DocumentData> checkedOut = new ArrayList<DocumentData>();
 
          for (NodeIterator iterator = workingCopies.getNodes(); iterator.hasNext();)
          {
@@ -731,10 +731,10 @@ public class StorageImpl implements Storage
             Node node = wc.getNodes().nextNode();
             TypeDefinition type = JcrTypeHelper.getTypeDefinition(node.getPrimaryNodeType(), true);
             String latestVersion = node.getProperty("xcmis:latestVersionId").getString();
-            PWC pwc = new PWC(type, node, (Document)getObject(latestVersion));
+            PWC pwc = new PWC(type, node, (DocumentData)getObject(latestVersion));
             if (folder != null)
             {
-               for (Folder parent : pwc.getParents())
+               for (FolderData parent : pwc.getParents())
                {
                   // TODO equals and hashCode for objects
                   if (parent.getObjectId().equals(folder.getObjectId()))
@@ -749,7 +749,7 @@ public class StorageImpl implements Storage
             }
          }
 
-         return new BaseItemsIterator<Document>(checkedOut);
+         return new BaseItemsIterator<DocumentData>(checkedOut);
       }
       catch (RepositoryException re)
       {
@@ -785,21 +785,21 @@ public class StorageImpl implements Storage
             {
                // TODO get smarter (simpler)
                String latestVersion = node.getProperty("xcmis:latestVersionId").getString();
-               return new PWC(type, node, (Document)getObject(latestVersion));
+               return new PWC(type, node, (DocumentData)getObject(latestVersion));
             }
-            return new DocumentImpl(type, node, renditionManager);
+            return new DocumentDataImpl(type, node, renditionManager);
          }
          else if (type.getBaseId() == BaseType.FOLDER)
          {
-            return new FolderImpl(type, node);
+            return new FolderDataImpl(type, node);
          }
          else if (type.getBaseId() == BaseType.POLICY)
          {
-            return new PolicyImpl(type, node);
+            return new PolicyDataImpl(type, node);
          }
          else if (type.getBaseId() == BaseType.RELATIONSHIP)
          {
-            return new RelationshipImpl(type, node);
+            return new RelationshipDataImpl(type, node);
          }
 
          // Must never happen.
@@ -843,19 +843,19 @@ public class StorageImpl implements Storage
 
          if (type.getBaseId() == BaseType.DOCUMENT)
          {
-            return new DocumentImpl(type, node, renditionManager);
+            return new DocumentDataImpl(type, node, renditionManager);
          }
          else if (type.getBaseId() == BaseType.FOLDER)
          {
-            return new FolderImpl(type, node);
+            return new FolderDataImpl(type, node);
          }
          else if (type.getBaseId() == BaseType.POLICY)
          {
-            return new PolicyImpl(type, node);
+            return new PolicyDataImpl(type, node);
          }
          else if (type.getBaseId() == BaseType.RELATIONSHIP)
          {
-            return new RelationshipImpl(type, node);
+            return new RelationshipDataImpl(type, node);
          }
 
          // Must never happen.
@@ -953,7 +953,7 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public ObjectData moveObject(ObjectData object, Folder target, Folder source) throws ConstraintException,
+   public ObjectData moveObject(ObjectData object, FolderData target, FolderData source) throws ConstraintException,
       InvalidArgumentException, UpdateConflictException, VersioningException, NameConstraintViolationException,
       StorageException
    {

@@ -22,10 +22,10 @@ package org.xcmis.sp.inmemory;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
-import org.xcmis.spi.Folder;
+import org.xcmis.spi.FolderData;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectData;
-import org.xcmis.spi.Relationship;
+import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.model.TypeDefinition;
 
@@ -40,21 +40,21 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-class RelationshipImpl extends BaseObjectData implements Relationship
+class RelationshipDataImpl extends BaseObjectData implements RelationshipData
 {
 
    protected ObjectData source;
 
    protected ObjectData target;
 
-   public RelationshipImpl(Entry entry, TypeDefinition type, StorageImpl storage)
+   public RelationshipDataImpl(Entry entry, TypeDefinition type, StorageImpl storage)
    {
       super(entry, type, storage);
    }
 
-   public RelationshipImpl(TypeDefinition type, ObjectData source, ObjectData target, StorageImpl storage)
+   public RelationshipDataImpl(TypeDefinition type, ObjectData source, ObjectData target, StorageImpl storage)
    {
-      super((Folder)null, type, storage);
+      super((FolderData)null, type, storage);
       this.source = source;
       this.target = target;
    }
@@ -69,7 +69,7 @@ class RelationshipImpl extends BaseObjectData implements Relationship
     * {@inheritDoc}
     */
    @Override
-   public Folder getParent() throws ConstraintException
+   public FolderData getParent() throws ConstraintException
    {
       return null;
    }
@@ -78,7 +78,7 @@ class RelationshipImpl extends BaseObjectData implements Relationship
     * {@inheritDoc}
     */
    @Override
-   public Collection<Folder> getParents()
+   public Collection<FolderData> getParents()
    {
       return Collections.emptyList();
    }

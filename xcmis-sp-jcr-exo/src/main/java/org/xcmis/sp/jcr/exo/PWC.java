@@ -23,8 +23,8 @@ import org.exoplatform.services.jcr.core.ExtendedNode;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
-import org.xcmis.spi.Document;
-import org.xcmis.spi.Folder;
+import org.xcmis.spi.DocumentData;
+import org.xcmis.spi.FolderData;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.model.TypeDefinition;
@@ -41,21 +41,21 @@ import javax.jcr.Session;
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */
-class PWC extends DocumentImpl
+class PWC extends DocumentDataImpl
 {
    /** Latest version of document. */
-   private final DocumentImpl document;
+   private final DocumentDataImpl document;
 
-   public PWC(Document document, Session session)
+   public PWC(DocumentData document, Session session)
    {
       super(document.getTypeDefinition(), null, session, null);
-      this.document = (DocumentImpl)document;
+      this.document = (DocumentDataImpl)document;
    }
 
-   public PWC(TypeDefinition type, Node node, Document document)
+   public PWC(TypeDefinition type, Node node, DocumentData document)
    {
       super(type, node);
-      this.document = (DocumentImpl)document;
+      this.document = (DocumentDataImpl)document;
    }
 
    /**
@@ -92,7 +92,7 @@ class PWC extends DocumentImpl
     * {@inheritDoc}
     */
    @Override
-   public Document checkin(boolean major, String checkinComment) throws ConstraintException, StorageException
+   public DocumentData checkin(boolean major, String checkinComment) throws ConstraintException, StorageException
    {
       try
       {
@@ -164,7 +164,7 @@ class PWC extends DocumentImpl
     * {@inheritDoc}
     */
    @Override
-   public Folder getParent() throws ConstraintException
+   public FolderData getParent() throws ConstraintException
    {
       return document.getParent();
    }
@@ -173,7 +173,7 @@ class PWC extends DocumentImpl
     * {@inheritDoc}
     */
    @Override
-   public Collection<Folder> getParents()
+   public Collection<FolderData> getParents()
    {
       return document.getParents();
    }

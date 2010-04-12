@@ -22,11 +22,11 @@ package org.xcmis.sp.jcr.exo;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
-import org.xcmis.spi.Folder;
+import org.xcmis.spi.FolderData;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectData;
-import org.xcmis.spi.Policy;
-import org.xcmis.spi.Relationship;
+import org.xcmis.spi.PolicyData;
+import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.TypeDefinition;
@@ -43,7 +43,7 @@ import javax.jcr.Session;
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-class RelationshipImpl extends BaseObjectData implements Relationship
+class RelationshipDataImpl extends BaseObjectData implements RelationshipData
 {
 
    protected ObjectData source;
@@ -59,7 +59,7 @@ class RelationshipImpl extends BaseObjectData implements Relationship
     * @param name name
     * @see StorageImpl#createRelationship(ObjectData, ObjectData, String)
     */
-   public RelationshipImpl(TypeDefinition type, ObjectData source, ObjectData target, Session session)
+   public RelationshipDataImpl(TypeDefinition type, ObjectData source, ObjectData target, Session session)
    {
       super(type, null, session);
       this.source = source;
@@ -74,7 +74,7 @@ class RelationshipImpl extends BaseObjectData implements Relationship
     * @see StorageImpl#getObject(String)
     * @see StorageImpl#getObjectByPath(String)
     */
-   public RelationshipImpl(TypeDefinition type, Node node)
+   public RelationshipDataImpl(TypeDefinition type, Node node)
    {
       super(type, node);
    }
@@ -115,7 +115,7 @@ class RelationshipImpl extends BaseObjectData implements Relationship
     * {@inheritDoc}
     */
    @Override
-   public Folder getParent() throws ConstraintException
+   public FolderData getParent() throws ConstraintException
    {
       return null;
    }
@@ -124,7 +124,7 @@ class RelationshipImpl extends BaseObjectData implements Relationship
     * {@inheritDoc}
     */
    @Override
-   public Collection<Folder> getParents()
+   public Collection<FolderData> getParents()
    {
       return Collections.emptyList();
    }
@@ -176,7 +176,7 @@ class RelationshipImpl extends BaseObjectData implements Relationship
 
          if (policies != null && policies.size() > 0)
          {
-            for (Policy policy : policies)
+            for (PolicyData policy : policies)
             {
                applyPolicy(relationship, policy);
             }

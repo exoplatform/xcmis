@@ -153,11 +153,11 @@ class FolderChildrenIterator implements ItemsIterator<ObjectData>
 
             if (type.getBaseId() == BaseType.DOCUMENT)
             {
-               next = new DocumentImpl(type, node);
+               next = new DocumentDataImpl(type, node);
             }
             else if (type.getBaseId() == BaseType.FOLDER)
             {
-               next = new FolderImpl(type, node);
+               next = new FolderDataImpl(type, node);
             }
 
          }

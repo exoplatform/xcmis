@@ -26,12 +26,12 @@ import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
-import org.xcmis.spi.Folder;
+import org.xcmis.spi.FolderData;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectData;
-import org.xcmis.spi.Policy;
+import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.TypeDefinition;
@@ -49,17 +49,17 @@ import javax.jcr.Session;
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-class FolderImpl extends BaseObjectData implements Folder
+class FolderDataImpl extends BaseObjectData implements FolderData
 {
 
-   private static final Log LOG = ExoLogger.getLogger(FolderImpl.class);
+   private static final Log LOG = ExoLogger.getLogger(FolderDataImpl.class);
 
-   public FolderImpl(TypeDefinition type, Folder parent, Session session)
+   public FolderDataImpl(TypeDefinition type, FolderData parent, Session session)
    {
       super(type, parent, session);
    }
 
-   public FolderImpl(TypeDefinition type, Node node)
+   public FolderDataImpl(TypeDefinition type, Node node)
    {
       super(type, node);
    }
@@ -348,7 +348,7 @@ class FolderImpl extends BaseObjectData implements Folder
 
          if (policies != null && policies.size() > 0)
          {
-            for (Policy policy : policies)
+            for (PolicyData policy : policies)
             {
                applyPolicy(folder, policy);
             }

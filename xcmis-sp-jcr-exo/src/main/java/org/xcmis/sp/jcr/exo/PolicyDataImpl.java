@@ -22,9 +22,9 @@ package org.xcmis.sp.jcr.exo;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
-import org.xcmis.spi.Folder;
+import org.xcmis.spi.FolderData;
 import org.xcmis.spi.NameConstraintViolationException;
-import org.xcmis.spi.Policy;
+import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.TypeDefinition;
@@ -42,15 +42,15 @@ import javax.jcr.Session;
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-class PolicyImpl extends BaseObjectData implements Policy
+class PolicyDataImpl extends BaseObjectData implements PolicyData
 {
 
-   public PolicyImpl(TypeDefinition type, Session session)
+   public PolicyDataImpl(TypeDefinition type, Session session)
    {
       super(type, null, session);
    }
 
-   public PolicyImpl(TypeDefinition type, Node node)
+   public PolicyDataImpl(TypeDefinition type, Node node)
    {
       super(type, node);
    }
@@ -99,7 +99,7 @@ class PolicyImpl extends BaseObjectData implements Policy
     * {@inheritDoc}
     */
    @Override
-   public Folder getParent() throws ConstraintException
+   public FolderData getParent() throws ConstraintException
    {
       return null;
    }
@@ -108,7 +108,7 @@ class PolicyImpl extends BaseObjectData implements Policy
     * {@inheritDoc}
     */
    @Override
-   public Collection<Folder> getParents()
+   public Collection<FolderData> getParents()
    {
       return Collections.emptyList();
    }
@@ -163,7 +163,7 @@ class PolicyImpl extends BaseObjectData implements Policy
 
          if (policies != null && policies.size() > 0)
          {
-            for (Policy policy : policies)
+            for (PolicyData policy : policies)
             {
                applyPolicy(newPolicy, policy);
             }

@@ -22,10 +22,10 @@ package org.xcmis.sp.jcr.exo;
 import org.exoplatform.services.jcr.core.ExtendedNode;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
-import org.xcmis.spi.Document;
-import org.xcmis.spi.Folder;
+import org.xcmis.spi.DocumentData;
+import org.xcmis.spi.FolderData;
 import org.xcmis.spi.NameConstraintViolationException;
-import org.xcmis.spi.Policy;
+import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.model.Property;
@@ -43,12 +43,12 @@ import javax.jcr.Session;
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-class DocumentCopy extends DocumentImpl
+class DocumentCopy extends DocumentDataImpl
 {
 
-   private final Document source;
+   private final DocumentData source;
 
-   public DocumentCopy(Document source, TypeDefinition type, Folder parent, Session session, VersioningState versioningState)
+   public DocumentCopy(DocumentData source, TypeDefinition type, FolderData parent, Session session, VersioningState versioningState)
    {
       super(type, parent, session, versioningState);
       this.source = source;
@@ -144,7 +144,7 @@ class DocumentCopy extends DocumentImpl
 
          if (policies != null && policies.size() > 0)
          {
-            for (Policy policy : policies)
+            for (PolicyData policy : policies)
             {
                applyPolicy(doc, policy);
             }

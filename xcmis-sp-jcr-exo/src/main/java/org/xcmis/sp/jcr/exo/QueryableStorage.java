@@ -28,7 +28,7 @@ import org.xcmis.search.parser.QueryParser;
 import org.xcmis.search.query.QueryExecutionException;
 import org.xcmis.search.result.ScoredRow;
 import org.xcmis.spi.CmisRuntimeException;
-import org.xcmis.spi.Folder;
+import org.xcmis.spi.FolderData;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.ObjectData;
@@ -330,12 +330,12 @@ public class QueryableStorage extends StorageImpl
          }
          if (obj.getBaseType() == BaseType.FOLDER)
          {
-            if (((Folder)obj).isRoot())
+            if (((FolderData)obj).isRoot())
             {
                return obj.getName();
             }
          }
-         Folder parent = obj.getParent();
+         FolderData parent = obj.getParent();
          if (parent == null)
          {
             return obj.getName();

@@ -23,12 +23,12 @@ import org.exoplatform.services.jcr.core.ExtendedSession;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
-import org.xcmis.spi.Document;
-import org.xcmis.spi.Folder;
+import org.xcmis.spi.DocumentData;
+import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
-import org.xcmis.spi.Policy;
-import org.xcmis.spi.Relationship;
+import org.xcmis.spi.PolicyData;
+import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.VersioningException;
@@ -52,11 +52,11 @@ import javax.jcr.version.VersionHistory;
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */
-public class DocumentVersion extends DocumentImpl
+public class DocumentVersion extends DocumentDataImpl
 {
 
    /** Latest version of document. */
-   private Document document;
+   private DocumentData document;
 
    public DocumentVersion(TypeDefinition type, Node node)
    {
@@ -68,7 +68,7 @@ public class DocumentVersion extends DocumentImpl
     * {@inheritDoc}
     */
    @Override
-   public void applyPolicy(Policy policy) throws ConstraintException
+   public void applyPolicy(PolicyData policy) throws ConstraintException
    {
       throw new ConstraintException("Not supported for non current version of document.");
    }
@@ -86,7 +86,7 @@ public class DocumentVersion extends DocumentImpl
     * {@inheritDoc}
     */
    @Override
-   public Document checkin(boolean major, String checkinComment) throws ConstraintException, StorageException
+   public DocumentData checkin(boolean major, String checkinComment) throws ConstraintException, StorageException
    {
       throw new VersioningException("Not supported for non current version of document.");
    }
@@ -95,7 +95,7 @@ public class DocumentVersion extends DocumentImpl
     * {@inheritDoc}
     */
    @Override
-   public Document checkout() throws ConstraintException, VersioningException, StorageException
+   public DocumentData checkout() throws ConstraintException, VersioningException, StorageException
    {
       throw new VersioningException("Not supported for non current version of document.");
    }
@@ -122,7 +122,7 @@ public class DocumentVersion extends DocumentImpl
     * {@inheritDoc}
     */
    @Override
-   public Folder getParent() throws ConstraintException
+   public FolderData getParent() throws ConstraintException
    {
       return getLatestVersion().getParent();
    }
@@ -131,7 +131,7 @@ public class DocumentVersion extends DocumentImpl
     * {@inheritDoc}
     */
    @Override
-   public Collection<Folder> getParents()
+   public Collection<FolderData> getParents()
    {
       return getLatestVersion().getParents();
    }
@@ -140,7 +140,7 @@ public class DocumentVersion extends DocumentImpl
     * {@inheritDoc}
     */
    @Override
-   public Collection<Policy> getPolicies()
+   public Collection<PolicyData> getPolicies()
    {
       return Collections.emptyList();
    }
@@ -149,7 +149,7 @@ public class DocumentVersion extends DocumentImpl
     * {@inheritDoc}
     */
    @Override
-   public ItemsIterator<Relationship> getRelationships(RelationshipDirection direction, TypeDefinition type,
+   public ItemsIterator<RelationshipData> getRelationships(RelationshipDirection direction, TypeDefinition type,
       boolean includeSubRelationshipTypes)
    {
       return CmisUtils.emptyItemsIterator();
@@ -199,7 +199,7 @@ public class DocumentVersion extends DocumentImpl
    }
 
    @Override
-   public void removePolicy(Policy policy) throws ConstraintException
+   public void removePolicy(PolicyData policy) throws ConstraintException
    {
       throw new ConstraintException("Not supported for non current version of document.");
    }
@@ -250,7 +250,7 @@ public class DocumentVersion extends DocumentImpl
       throw new VersioningException("Not supported for non current version of document.");
    }
 
-   private Document getLatestVersion()
+   private DocumentData getLatestVersion()
    {
       if (document == null)
       {
@@ -259,7 +259,7 @@ public class DocumentVersion extends DocumentImpl
             Version version = (Version)node.getParent();
             VersionHistory versionHistory = version.getContainingHistory();
             Node latest = ((ExtendedSession)session).getNodeByIdentifier(versionHistory.getVersionableUUID());
-            document = new DocumentImpl(JcrTypeHelper.getTypeDefinition(latest.getPrimaryNodeType(), true), latest);
+            document = new DocumentDataImpl(JcrTypeHelper.getTypeDefinition(latest.getPrimaryNodeType(), true), latest);
          }
          catch (RepositoryException re)
          {

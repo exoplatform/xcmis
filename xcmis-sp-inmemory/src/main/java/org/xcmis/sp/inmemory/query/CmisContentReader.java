@@ -24,7 +24,7 @@ import org.xcmis.search.content.command.read.GetChildEntriesCommand;
 import org.xcmis.search.content.command.read.GetContentEntryCommand;
 import org.xcmis.search.content.interceptors.ContentReaderInterceptor;
 import org.xcmis.sp.inmemory.query.IndexListener.ContentEntryAdapter;
-import org.xcmis.spi.Folder;
+import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.Storage;
@@ -61,9 +61,9 @@ public class CmisContentReader extends ContentReaderInterceptor
    {
       List<ContentEntry> childs = new ArrayList<ContentEntry>();
       ObjectData parent = storage.getObject(command.getParentUuid());
-      if (parent instanceof Folder)
+      if (parent instanceof FolderData)
       {
-         ItemsIterator<ObjectData> childDatas = ((Folder)parent).getChildren(null);
+         ItemsIterator<ObjectData> childDatas = ((FolderData)parent).getChildren(null);
          while (childDatas.hasNext())
          {
             childs.add(contentEntryAdapter.createEntry(childDatas.next()));

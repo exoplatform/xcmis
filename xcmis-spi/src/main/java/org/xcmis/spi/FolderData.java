@@ -24,7 +24,7 @@ package org.xcmis.spi;
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */
-public interface Folder extends ObjectData
+public interface FolderData extends ObjectData
 {
 
    /**

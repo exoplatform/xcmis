@@ -24,12 +24,12 @@ import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
-import org.xcmis.spi.Document;
-import org.xcmis.spi.Folder;
+import org.xcmis.spi.DocumentData;
+import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectData;
-import org.xcmis.spi.Relationship;
+import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.model.ContentStreamAllowed;
@@ -54,7 +54,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-class DocumentImpl extends BaseObjectData implements Document
+class DocumentDataImpl extends BaseObjectData implements DocumentData
 {
 
    static String latestLabel = "latest";
@@ -67,13 +67,13 @@ class DocumentImpl extends BaseObjectData implements Document
 
    protected final VersioningState versioningState;
 
-   public DocumentImpl(Entry entry, TypeDefinition type, StorageImpl storage)
+   public DocumentDataImpl(Entry entry, TypeDefinition type, StorageImpl storage)
    {
       super(entry, type, storage);
       this.versioningState = null;
    }
 
-   public DocumentImpl(Folder parent, TypeDefinition type, VersioningState versioningState, StorageImpl storage)
+   public DocumentDataImpl(FolderData parent, TypeDefinition type, VersioningState versioningState, StorageImpl storage)
    {
       super(parent, type, storage);
       this.versioningState = versioningState;
@@ -120,7 +120,7 @@ class DocumentImpl extends BaseObjectData implements Document
    /**
     * {@inheritDoc}
     */
-   public Document checkin(boolean major, String checkinComment) throws ConstraintException, StorageException
+   public DocumentData checkin(boolean major, String checkinComment) throws ConstraintException, StorageException
    {
       if (!type.isVersionable())
       {
@@ -165,7 +165,7 @@ class DocumentImpl extends BaseObjectData implements Document
    /**
     * {@inheritDoc}
     */
-   public Document checkout() throws ConstraintException, VersioningException, StorageException
+   public DocumentData checkout() throws ConstraintException, VersioningException, StorageException
    {
       if (isNew())
       {
@@ -232,7 +232,7 @@ class DocumentImpl extends BaseObjectData implements Document
 
          storage.workingCopies.put(getVersionSeriesId(), pwcId);
 
-         return new DocumentImpl(pwc, storage.getTypeDefinition(getTypeId(), true), storage);
+         return new DocumentDataImpl(pwc, storage.getTypeDefinition(getTypeId(), true), storage);
       }
    }
 
@@ -534,7 +534,7 @@ class DocumentImpl extends BaseObjectData implements Document
 
    protected void delete() throws ConstraintException, StorageException
    {
-      ItemsIterator<Relationship> relationships = getRelationships(RelationshipDirection.EITHER, null, true);
+      ItemsIterator<RelationshipData> relationships = getRelationships(RelationshipDirection.EITHER, null, true);
       if (relationships.hasNext())
       {
          throw new ConstraintException("Object can't be deleted cause to storage referential integrity. "

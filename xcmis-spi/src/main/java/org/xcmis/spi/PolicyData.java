@@ -24,7 +24,7 @@ package org.xcmis.spi;
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */
-public interface Policy extends ObjectData
+public interface PolicyData extends ObjectData
 {
 
    /**
