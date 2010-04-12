@@ -68,7 +68,9 @@
       <module>xcmis-restatom</module>
       <module>xcmis-wssoap</module>
       <module>xcmis-server-war</module>
-  </modules>
+      <module>xcmis-client-gwt-restatom</module>
+      <module>xcmis-client-gwt-restatom-sample</module>
+   </modules>
 
    <repositories>
       <repository>
@@ -423,16 +425,9 @@
             <version>1.0</version>
          </dependency>
          <dependency>
-            <!-- <groupId>org.apache.pdfbox</groupId> -->
-            <groupId>pdfbox</groupId>
+            <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
-            <!-- <version>0.8.0-incubating</version> -->
-            <version>0.7.3</version>
-         </dependency>
-         <dependency>
-            <groupId>org.fontbox</groupId>
-            <artifactId>fontbox</artifactId>
-            <version>0.1.0</version>
+            <version>1.1.0</version>
          </dependency>
          <dependency>
             <groupId>org.apache.shindig</groupId>
