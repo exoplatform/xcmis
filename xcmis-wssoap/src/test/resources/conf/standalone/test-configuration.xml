@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.exoplaform.org/xml/ns/kernel_1_0.xsd http://www.exoplaform.org/xml/ns/kernel_1_0.xsd" xmlns="http://www.exoplaform.org/xml/ns/kernel_1_0.xsd">
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.exoplaform.org/xml/ns/kernel_1_0.xsd http://www.exoplaform.org/xml/ns/kernel_1_0.xsd"
+   xmlns="http://www.exoplaform.org/xml/ns/kernel_1_0.xsd">
 
    <component>
       <key>org.exoplatform.services.log.LogConfigurationInitializer</key>
@@ -28,7 +29,11 @@
          </properties-param>
       </init-params>
    </component>
-
+   
+   <component>
+      <key>org.exoplatform.services.document.DocumentReaderService</key>
+      <type>org.xcmis.spi.utils.CmisDocumentReaderSercice</type>
+   </component>
 
    <!-- JCR components -->
    <component>
@@ -97,7 +102,7 @@
    </component>
 
 
-<!-- Storage Provider -->
+   <!-- Storage Provider -->
    <component>
       <type>org.xcmis.sp.jcr.exo.StorageProviderImpl</type>
       <init-params>
@@ -117,13 +122,13 @@
                            <field name="workspace">
                               <string>ws1</string>
                            </field>
-                            <field name="indexConfiguration">
-				<object type="org.xcmis.search.config.IndexConfiguration">
-			 	<field name="indexDir">
-				<string>target/temp/index/db1/ws1</string>
-			        </field>
-				</object>
-				</field>
+                           <field name="indexConfiguration">
+                              <object type="org.xcmis.search.config.IndexConfiguration">
+                                 <field name="indexDir">
+                                    <string>target/temp/index/db1/ws1</string>
+                                 </field>
+                              </object>
+                           </field>
                            <field name="properties">
                               <map type="java.util.HashMap">
                                  <entry>
@@ -145,7 +150,7 @@
       </init-params>
    </component>
 
-<component>
+   <component>
       <type>org.exoplatform.services.jcr.ext.app.ThreadLocalSessionProviderService</type>
    </component>
 
