@@ -23,6 +23,12 @@
       <dependency>
          <groupId>org.exoplatform.jcr</groupId>
          <artifactId>exo.jcr.component.core</artifactId>
+         <exclusions>
+            <exclusion>
+               <groupId>pdfbox</groupId>
+               <artifactId>pdfbox</artifactId>
+            </exclusion>
+         </exclusions>
       </dependency>
       <dependency>
          <groupId>org.exoplatform.jcr</groupId>
@@ -33,13 +39,9 @@
          <artifactId>hsqldb</artifactId>
       </dependency>
       <dependency>
-         <!--      <groupId>org.apache.pdfbox</groupId>-->
-         <groupId>pdfbox</groupId>
+         <groupId>org.apache.pdfbox</groupId>
          <artifactId>pdfbox</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.fontbox</groupId>
-         <artifactId>fontbox</artifactId>
+         <version>1.1.0</version>
       </dependency>
       <dependency>
          <groupId>commons-io</groupId>
