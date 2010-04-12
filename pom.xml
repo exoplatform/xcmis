@@ -60,7 +60,6 @@
 
    <modules>
       <module>xcmis-spi</module>
-      <module>xcmis-document-reader</module>
       <module>xcmis-search-model</module>
       <module>xcmis-search-parser-cmis</module>
       <module>xcmis-search-service</module>
