@@ -39,8 +39,9 @@ public class CheckedOutCollectionTest extends BaseTest
    public void testCheckOut() throws Exception
    {
       String docId = createDocument(testFolderId, "doc1", null, null);
-      
-      assertNull("Should be no checkedout document.", getCmisObject(docId).getObjectInfo().getVersionSeriesCheckedOutId());
+
+      assertNull("Should be no checkedout document.", getCmisObject(docId).getObjectInfo()
+         .getVersionSeriesCheckedOutId());
       String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/checkedout/" + docId;
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
       ContainerResponse response = service("POST", requestURI, "http://localhost:8080/rest", null, null, writer);
@@ -65,7 +66,7 @@ public class CheckedOutCollectionTest extends BaseTest
       String doc2Id = createDocument(testFolderId, "doc2", null, null);
       String pwc2 = conn.checkout(doc2Id);
 
-      String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/checkedout/";
+      String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/checkedout";
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
       ContainerResponse response = service("GET", requestURI, "http://localhost:8080/rest", null, null, writer);
 
