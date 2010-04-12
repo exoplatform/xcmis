@@ -19,19 +19,6 @@
 
 package org.xcmis.sp.inmemory;
 
-import org.exoplatform.container.xml.InitParams;
-import org.exoplatform.services.document.DocumentReader;
-import org.exoplatform.services.document.DocumentReaderService;
-import org.exoplatform.services.document.HandlerNotFoundException;
-import org.exoplatform.services.document.impl.BaseDocumentReader;
-import org.exoplatform.services.document.impl.HTMLDocumentReader;
-import org.exoplatform.services.document.impl.MSExcelDocumentReader;
-import org.exoplatform.services.document.impl.MSOutlookDocumentReader;
-import org.exoplatform.services.document.impl.MSWordDocumentReader;
-import org.exoplatform.services.document.impl.PDFDocumentReader;
-import org.exoplatform.services.document.impl.PPTDocumentReader;
-import org.exoplatform.services.document.impl.TextPlainDocumentReader;
-import org.exoplatform.services.document.impl.XMLDocumentReader;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.search.InvalidQueryException;
@@ -86,9 +73,9 @@ import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 import org.xcmis.spi.query.Score;
+import org.xcmis.spi.utils.CmisDocumentReaderSercice;
 import org.xcmis.spi.utils.CmisUtils;
 
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -201,9 +188,9 @@ public class StorageImpl implements Storage
             null, ContentStreamAllowed.NOT_ALLOWED, null));
 
       types.put("cmis:relationship", //
-         new TypeDefinition("cmis:relationship", BaseType.RELATIONSHIP, "cmis:relationship", "cmis:relationship",
-            "", null, "cmis:relationship", "Cmis Relationship type.", true, false, false /*no query support yet*/,
-            false, false, true, true, false, null, null, ContentStreamAllowed.NOT_ALLOWED, null));
+         new TypeDefinition("cmis:relationship", BaseType.RELATIONSHIP, "cmis:relationship", "cmis:relationship", "",
+            null, "cmis:relationship", "Cmis Relationship type.", true, false, false /*no query support yet*/, false,
+            false, true, true, false, null, null, ContentStreamAllowed.NOT_ALLOWED, null));
 
       typeChildren = new ConcurrentHashMap<String, Set<String>>();
       typeChildren.put("cmis:document", new HashSet<String>());
@@ -801,7 +788,7 @@ public class StorageImpl implements Storage
       indexConfiguration.setRootUuid(this.getRepositoryInfo().getRootFolderId());
       //if list of root parents is empty it will be indexed as empty string
       indexConfiguration.setRootParentUuid("");
-      indexConfiguration.setDocumentReaderService(new PredefinedDocumentReaderSercice());
+      indexConfiguration.setDocumentReaderService(new CmisDocumentReaderSercice());
 
       //default invocation context
       InvocationContext invocationContext = new InvocationContext();
@@ -835,58 +822,6 @@ public class StorageImpl implements Storage
          LOG.error("Unable to initialize storage. ", e);
       }
       return null;
-
-   }
-
-   public static class PredefinedDocumentReaderSercice implements DocumentReaderService
-   {
-      private final Map<String, BaseDocumentReader> readers;
-
-      /**
-       *
-       */
-      public PredefinedDocumentReaderSercice()
-      {
-         this.readers = new HashMap<String, BaseDocumentReader>();
-         this.readers.put("application/pdf", new PDFDocumentReader());
-         this.readers.put("application/msword", new MSWordDocumentReader());
-         this.readers.put("application/excel", new MSExcelDocumentReader());
-         this.readers.put("application/vnd.ms-outlook", new MSOutlookDocumentReader());
-         this.readers.put("application/ppt", new PPTDocumentReader());
-         this.readers.put("text/html", new HTMLDocumentReader(null));
-         this.readers.put("text/xml", new XMLDocumentReader());
-         this.readers.put("text/plain", new TextPlainDocumentReader(new InitParams()));
-      }
-
-      /**
-       * @see org.exoplatform.services.document.DocumentReaderService#getContentAsText(java.lang.String, java.io.InputStream)
-       */
-      public String getContentAsText(String mimeType, InputStream is) throws Exception
-      {
-         BaseDocumentReader reader = readers.get(mimeType.toLowerCase());
-         if (reader != null)
-         {
-            return reader.getContentAsText(is);
-         }
-         throw new Exception("Cannot handle the document type: " + mimeType);
-      }
-
-      /**
-       * @see org.exoplatform.services.document.DocumentReaderService#getDocumentReader(java.lang.String)
-       */
-      public DocumentReader getDocumentReader(String mimeType) throws HandlerNotFoundException
-      {
-         BaseDocumentReader reader = readers.get(mimeType.toLowerCase());
-         if (reader != null)
-         {
-            return reader;
-         }
-         else
-         {
-            throw new HandlerNotFoundException("No appropriate properties extractor for " + mimeType);
-         }
-
-      }
 
    }
 
