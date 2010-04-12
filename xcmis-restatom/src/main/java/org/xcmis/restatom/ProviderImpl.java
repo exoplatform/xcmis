@@ -70,8 +70,9 @@ public class ProviderImpl extends AbstractProvider
       targetBuilder = new TemplateTargetBuilder();
       targetBuilder.setTemplate(TargetType.ENTRY, "{target_base}/cmisatom/{repoid}/{atomdoctype}/{id}");
       targetBuilder.setTemplate(TargetType.SERVICE, "{target_base}/cmisatom/{repoid}");
-      targetBuilder.setTemplate("feed",
-         "{target_base}/cmisatom/{repoid}/{atomdoctype}/{id}{-opt|?|maxItems,skipCount}{-join|&|maxItems,skipCount}");
+      targetBuilder
+         .setTemplate("feed",
+            "{target_base}/cmisatom/{repoid}/{atomdoctype}/{id}{-opt|?|q,maxItems,skipCount}{-join|&|q,maxItems,skipCount}");
 
       resolver = new RegexTargetResolver();
 
@@ -92,10 +93,10 @@ public class ProviderImpl extends AbstractProvider
          "slash", // No slash if 'typeid' is absent.
          "typeid");
 
-      //      resolver.setPattern("/cmisatom/([^/]+)/checkedout(/)?([^/?]+)?(\\??.*)?", //
-      resolver.setPattern("/cmisatom/([^/]+)/checkedout(\\??.*)?", //
+      resolver.setPattern("/cmisatom/([^/]+)/checkedout(/)?([^/?]+)?(\\??.*)?", //
          TargetType.TYPE_COLLECTION, //
          "repoid", //
+         "slash", // No slash if 'typeid' is absent.
          "objectid");
 
       resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+)/children/([^/?]+)(\\??.*)?", //
@@ -177,6 +178,7 @@ public class ProviderImpl extends AbstractProvider
    /**
     * {@inheritDoc}
     */
+   @Override
    protected TargetBuilder getTargetBuilder(RequestContext request)
    {
       return targetBuilder;
@@ -185,6 +187,7 @@ public class ProviderImpl extends AbstractProvider
    /**
     * {@inheritDoc}
     */
+   @Override
    protected Resolver<Target> getTargetResolver(RequestContext request)
    {
       return resolver;
@@ -193,6 +196,7 @@ public class ProviderImpl extends AbstractProvider
    /**
     * {@inheritDoc}
     */
+   @Override
    public WorkspaceManager getWorkspaceManager(RequestContext request)
    {
       return manager;

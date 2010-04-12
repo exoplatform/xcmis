@@ -709,38 +709,43 @@ public class AtomCmisService implements ResourceContainer
          .append("includeAllowableActions={includeAllowableActions}&") //
          .append("includePolicyIds={includePolicyIds}&") //
          .append("includeRelationships={includeRelationships}&") //
-         .append("includeACL={includeACL}").toString());
+         .append("includeACL={includeACL}&") //
+         .append("renditionFilter={includeACL}").toString());
       objectById.setType(AtomCMIS.URITEMPLATE_OBJECTBYID);
       UriTemplateTypeElement objectByIdElement = ws.addExtension(AtomCMIS.URITEMPLATE);
       objectByIdElement.build(objectById);
 
       // objectbypath template
-      CmisUriTemplateType folderByPath = new CmisUriTemplateType();
-      folderByPath.setMediatype(AtomCMIS.MEDIATYPE_ATOM_ENTRY);
-      folderByPath.setTemplate(new StringBuilder() //
+      CmisUriTemplateType objectByPath = new CmisUriTemplateType();
+      objectByPath.setMediatype(AtomCMIS.MEDIATYPE_ATOM_ENTRY);
+      objectByPath.setTemplate(new StringBuilder() //
          .append(repoPath) //
          .append("/objectbypath/{objectpath}?")//
          .append("filter={filter}&")//
          .append("includeAllowableActions={includeAllowableActions}&")//
          .append("includePolicyIds={includePolicyIds}&")//
          .append("includeRelationships={includeRelationships}&")//
-         .append("includeACL={includeACL}").toString());
-      folderByPath.setType(AtomCMIS.URITEMPLATE_OBJECTBYPATH);
+         .append("includeACL={includeACL}&") //
+         .append("renditionFilter={includeACL}").toString());
+      objectByPath.setType(AtomCMIS.URITEMPLATE_OBJECTBYPATH);
       UriTemplateTypeElement folderByPathElement = ws.addExtension(AtomCMIS.URITEMPLATE);
-      folderByPathElement.build(folderByPath);
+      folderByPathElement.build(objectByPath);
 
-      //      // query template
-      //      CmisUriTemplateType query = new CmisUriTemplateType();
-      //      query.setMediatype(AtomCMIS.MEDIATYPE_ATOM_FEED);
-      //      query.setTemplate(repoPath + "/query?"//
-      //         + "q={q}&"//
-      //         + "searchAllVersions={searchAllVersions}&"//
-      //         + "maxItems={maxItems}&skipCount={skipCount}&"//
-      //         + "includeAllowableActions={includeAllowableActions}=&"//
-      //         + "includeRelationships={includeRelationships}");
-      //      query.setType(AtomCMIS.URITEMPLATE_QUERY);
-      //      UriTemplateTypeElement queryElement = ws.addExtension(AtomCMIS.URITEMPLATE);
-      //      queryElement.build(query);
+      // query template
+      CmisUriTemplateType query = new CmisUriTemplateType();
+      query.setMediatype(AtomCMIS.MEDIATYPE_ATOM_FEED);
+      query.setTemplate(new StringBuilder() //
+         .append(repoPath) //
+         .append("/query?")//
+         .append("q={q}&")//
+         .append("searchAllVersions={searchAllVersions}&") //
+         .append("maxItems={maxItems}&") //
+         .append("skipCount={skipCount}&") //
+         .append("includeAllowableActions={includeAllowableActions}=&")//
+         .append("includeRelationships={includeRelationships}").toString());
+      query.setType(AtomCMIS.URITEMPLATE_QUERY);
+      UriTemplateTypeElement queryElement = ws.addExtension(AtomCMIS.URITEMPLATE);
+      queryElement.build(query);
 
       // typebyid template
       CmisUriTemplateType typeById = new CmisUriTemplateType();
