@@ -128,15 +128,15 @@ public class RelationshipsCollection extends CmisObjectCollection
 
       if (typeId == null)
       {
-         return createErrorResponse("ObjectTypeId is not specified.", 400);
+         return createErrorResponse("The cmis:objectTypeId is not specified.", 400);
       }
       if (sourceId == null)
       {
-         return createErrorResponse("Source id is not specified.", 400);
+         return createErrorResponse("The cmis:sourceId is not specified.", 400);
       }
       if (targetId == null)
       {
-         return createErrorResponse("Traget id is not specified.", 400);
+         return createErrorResponse("The cmis:targetId is not specified.", 400);
       }
 
       List<AccessControlEntry> addACL = null;
@@ -207,7 +207,8 @@ public class RelationshipsCollection extends CmisObjectCollection
       // Filter will be applied during build final Atom Document.
       //      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
       String propertyFilter = null;
-      boolean includeSubRelationship = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_SUB_RELATIONSHIP_TYPES, false);
+      boolean includeSubRelationship =
+         getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_SUB_RELATIONSHIP_TYPES, false);
       boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
       int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CmisConstants.MAX_ITEMS);
       int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CmisConstants.SKIP_COUNT);

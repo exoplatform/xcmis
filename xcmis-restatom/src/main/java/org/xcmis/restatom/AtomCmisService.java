@@ -445,7 +445,7 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @GET
-   @Path("{repositoryId}/objectbypath/{path:.*}")
+   @Path("{repositoryId}/objectbypath")
    @Produces("application/atom+xml;type=entry")
    public Response getObjectByPath(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId)
@@ -720,7 +720,8 @@ public class AtomCmisService implements ResourceContainer
       objectByPath.setMediatype(AtomCMIS.MEDIATYPE_ATOM_ENTRY);
       objectByPath.setTemplate(new StringBuilder() //
          .append(repoPath) //
-         .append("/objectbypath/{path}?")//
+         .append("/objectbypath?")//
+         .append("path={path}&")//
          .append("filter={filter}&")//
          .append("includeAllowableActions={includeAllowableActions}&")//
          .append("includePolicyIds={includePolicyIds}&")//

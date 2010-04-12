@@ -333,8 +333,8 @@ public class FolderChildrenCollectionTest extends BaseTest
    public void testGetObjectByPath() throws Exception
    {
       String docId = createDocument(testFolderId, "doc1", null, null);
-      String requestURI =
-         "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/objectbypath/" + testFolderName + "/doc1";
+      String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/objectbypath" + "?path=%2FtestRoot%2Fdoc1";
+      
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
 
       ContainerResponse resp = service("GET", requestURI, "http://localhost:8080/rest", null, null, writer);

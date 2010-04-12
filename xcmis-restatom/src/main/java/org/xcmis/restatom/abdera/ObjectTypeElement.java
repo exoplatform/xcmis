@@ -96,8 +96,8 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
    {
       CmisObject object = new CmisObject();
 
-//      ObjectInfoImpl objectInfo = new ObjectInfoImpl();
-//      object.setObjectInfo(objectInfo);
+      //      ObjectInfoImpl objectInfo = new ObjectInfoImpl();
+      //      object.setObjectInfo(objectInfo);
 
       // PROPERTIES
       FOMExtensibleElement propertiesElement = getExtension(AtomCMIS.PROPERTIES);
@@ -109,7 +109,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
          {
             Property<?> property = propertyElement.getProperty();
             properties.put(propertyElement.getProperty().getId(), property);
-//            storeProperty(objectInfo, property);
+            //            storeProperty(objectInfo, property);
          }
       }
 
@@ -234,7 +234,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
          // Plugin miss namespace when create entry for updating. Namespace for prefix 'cmisra'
          // declared in entry tag. But this tag is overwritten in plugin and has no namespace
          // declaration any more.
-         setAttributeValue("xmlns:cmisra", "http://docs.oasis-open.org/ns/cmis/restatom/200908/");
+         setAttributeValue("xmlns:" + AtomCMIS.CMISRA_PREFIX, AtomCMIS.CMISRA_NS_URI);
 
          // PROPERTIES
          Map<String, Property<?>> properties = objectType.getProperties();
@@ -325,9 +325,9 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
 
          // acl
          List<AccessControlEntry> accessControlList = objectType.getACL();
-         if (accessControlList != null && accessControlList.size() > 0)
+         if (accessControlList != null)
          {
-            ExtensibleElementWrapper accessControlListTypeElement = addExtension(AtomCMIS.ACL);
+            FOMExtensibleElement accessControlListTypeElement = addExtension(AtomCMIS.ACL);
             for (AccessControlEntry element : accessControlList)
             {
                AccessControlEntryTypeElement ace = accessControlListTypeElement.addExtension(AtomCMIS.PERMISSION);
@@ -340,9 +340,9 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
 
          // policyIds
          Collection<String> policyIds = objectType.getPolicyIds();
-         if (policyIds != null && policyIds.size() > 0)
+         if (policyIds != null)
          {
-            ExtensibleElementWrapper listOfIdsTypeTypeElement = addExtension(AtomCMIS.POLICY_IDS);
+            FOMExtensibleElement listOfIdsTypeTypeElement = addExtension(AtomCMIS.POLICY_IDS);
             for (Element element : listOfIdsTypeTypeElement)
             {
                listOfIdsTypeTypeElement.addSimpleExtension(AtomCMIS.ID, element.getText());
@@ -351,7 +351,7 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
 
          // rendition
          List<Rendition> listRendition = objectType.getRenditions();
-         if (listRendition != null && listRendition.size() > 0)
+         if (listRendition != null)
          {
             RenditionTypeElement renditionElement = addExtension(AtomCMIS.RENDITION);
             for (Rendition rendition : listRendition)
