@@ -109,7 +109,7 @@
          <object-param>
             <name>configs</name>
             <object type="org.xcmis.sp.jcr.exo.StorageProviderImpl$StorageProviderConfig">
-               <field name="configs">
+               <field name="storages">
                   <collection type="java.util.ArrayList">
                      <value>
                         <object type="org.xcmis.sp.jcr.exo.StorageConfiguration">

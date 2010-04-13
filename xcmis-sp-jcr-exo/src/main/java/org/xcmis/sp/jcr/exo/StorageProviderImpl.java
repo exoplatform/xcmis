@@ -83,26 +83,26 @@ public class StorageProviderImpl implements StorageProvider, Startable
       /**
        * The list of storages configuration.
        */
-      private List<StorageConfiguration> configs;
+      private List<StorageConfiguration> storages;
 
       /**
        * @return the list of storages configuration
        */
-      public List<StorageConfiguration> getConfigs()
+      public List<StorageConfiguration> getStorages()
       {
-         if (configs == null)
+         if (storages == null)
          {
-            configs = new ArrayList<StorageConfiguration>();
+            storages = new ArrayList<StorageConfiguration>();
          }
-         return configs;
+         return storages;
       }
 
       /**
        * @param configs the list of storages configuration
        */
-      public void setConfigs(List<StorageConfiguration> configs)
+      public void setStorages(List<StorageConfiguration> storages)
       {
-         this.configs = configs;
+         this.storages = storages;
       }
    }
 
@@ -136,7 +136,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
 
    private final DocumentReaderService documentReaderService;
 
-   private final Map<String, StorageConfiguration> storages = new HashMap<String, StorageConfiguration>();
+   private final Map<String, StorageConfiguration> storageConfigs = new HashMap<String, StorageConfiguration>();
 
    private final Map<String, SearchService> searchServices = new HashMap<String, SearchService>();
 
@@ -157,9 +157,9 @@ public class StorageProviderImpl implements StorageProvider, Startable
 
          StorageProviderConfig confs = (StorageProviderConfig)param.getObject();
 
-         for (StorageConfiguration conf : confs.getConfigs())
+         for (StorageConfiguration conf : confs.getStorages())
          {
-            storages.put(conf.getId(), conf);
+            storageConfigs.put(conf.getId(), conf);
          }
       }
       else
@@ -174,7 +174,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
     */
    public Connection getConnection(String id)
    {
-      StorageConfiguration configuration = storages.get(id);
+      StorageConfiguration configuration = storageConfigs.get(id);
 
       if (configuration == null)
       {
@@ -229,7 +229,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
    public Connection getConnection(String id, String user, String password) throws LoginException,
       InvalidArgumentException
    {
-      StorageConfiguration configuration = storages.get(id);
+      StorageConfiguration configuration = storageConfigs.get(id);
 
       if (configuration == null)
       {
@@ -280,7 +280,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
     */
    public Set<String> getStorageIDs()
    {
-      return Collections.unmodifiableSet(storages.keySet());
+      return Collections.unmodifiableSet(storageConfigs.keySet());
    }
 
    /**
@@ -292,7 +292,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
 
       try
       {
-         for (Entry<String, StorageConfiguration> entry : storages.entrySet())
+         for (Entry<String, StorageConfiguration> entry : storageConfigs.entrySet())
          {
             StorageConfiguration cmisRepositoryConfiguration = entry.getValue();
             ManageableRepository repository =
@@ -461,6 +461,6 @@ public class StorageProviderImpl implements StorageProvider, Startable
 
    public StorageConfiguration getStorageConfiguration(String id)
    {
-      return storages.get(id);
+      return storageConfigs.get(id);
    }
 }

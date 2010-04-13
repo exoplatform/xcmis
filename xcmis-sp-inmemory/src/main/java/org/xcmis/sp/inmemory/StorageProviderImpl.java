@@ -47,7 +47,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
 
    private static final Log LOG = ExoLogger.getLogger(StorageProviderImpl.class);
 
-   private final Map<String, StorageImpl> storages = new HashMap<String, StorageImpl>();
+   private final Map<String, StorageImpl> storageImpls = new HashMap<String, StorageImpl>();
 
    private final Map<String, StorageConfiguration> storagesConfig = new HashMap<String, StorageConfiguration>();
 
@@ -64,7 +64,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
 
          StorageProviderConfig confs = (StorageProviderConfig)param.getObject();
 
-         for (StorageConfiguration conf : confs.getConfigs())
+         for (StorageConfiguration conf : confs.getStorages())
          {
 
             storagesConfig.put(conf.getId(), conf);
@@ -78,7 +78,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
 
    public Connection getConnection(String storageId)
    {
-      StorageImpl storage = storages.get(storageId);
+      StorageImpl storage = storageImpls.get(storageId);
       if (storage == null)
       {
          throw new InvalidArgumentException("CMIS repository " + storageId + " does not exists.");
@@ -90,7 +90,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
    public Connection getConnection(String storageId, String user, String password) throws LoginException,
       InvalidArgumentException
    {
-      StorageImpl storage = storages.get(storageId);
+      StorageImpl storage = storageImpls.get(storageId);
       if (storage == null)
       {
          throw new InvalidArgumentException("CMIS repository " + storageId + " does not exists.");
@@ -101,7 +101,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
 
    public Set<String> getStorageIDs()
    {
-      return Collections.unmodifiableSet(storages.keySet());
+      return Collections.unmodifiableSet(storageImpls.keySet());
    }
 
    /**
@@ -111,7 +111,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
    {
       for (Entry<String, StorageConfiguration> configElement : storagesConfig.entrySet())
       {
-         storages.put(configElement.getKey(), new StorageImpl(configElement.getValue()));
+         storageImpls.put(configElement.getKey(), new StorageImpl(configElement.getValue()));
       }
    }
 
@@ -129,26 +129,26 @@ public class StorageProviderImpl implements StorageProvider, Startable
       /**
        * The list of storages configuration.
        */
-      private List<StorageConfiguration> configs;
+      private List<StorageConfiguration> storages;
 
       /**
        * @return the list of storages configuration
        */
-      public List<StorageConfiguration> getConfigs()
+      public List<StorageConfiguration> getStorages()
       {
-         if (configs == null)
+         if (storages == null)
          {
-            configs = new ArrayList<StorageConfiguration>();
+            storages = new ArrayList<StorageConfiguration>();
          }
-         return configs;
+         return storages;
       }
 
       /**
        * @param configs the list of storages configuration
        */
-      public void setConfigs(List<StorageConfiguration> configs)
+      public void setStorages(List<StorageConfiguration> storages)
       {
-         this.configs = configs;
+         this.storages = storages;
       }
    }
 
