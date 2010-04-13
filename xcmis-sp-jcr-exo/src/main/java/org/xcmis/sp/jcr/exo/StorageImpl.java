@@ -428,18 +428,20 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public DocumentData copyDocument(DocumentData source, FolderData folder, VersioningState versioningState)
+   public DocumentData copyDocument(DocumentData source, FolderData parent, VersioningState versioningState)
       throws ConstraintException, StorageException
    {
-      // TODO : remove when implement unfiling feature.
-      if (folder == null)
+      if (parent != null)
       {
-         throw new NotSupportedException("Unfiling capability is not supported.");
-      }
-
-      if (folder.isNew())
-      {
-         throw new CmisRuntimeException("Unable create document in newly created folder.");
+         if (parent.isNew())
+         {
+            throw new CmisRuntimeException("Unable create document in newly created folder.");
+         }
+         if (!parent.isAllowedChildType(source.getTypeId()))
+         {
+            throw new ConstraintException("Type " + source.getTypeId()
+               + " is not in list of allowed child type for folder " + parent.getObjectId());
+         }
       }
 
       if (source.isNew())
@@ -452,14 +454,8 @@ public class StorageImpl implements Storage
          throw new ConstraintException("Source object has type whose base type is not Document.");
       }
 
-      if (!folder.isAllowedChildType(source.getTypeId()))
-      {
-         throw new ConstraintException("Type " + source.getTypeId()
-            + " is not in list of allowed child type for folder " + folder.getObjectId());
-      }
-
       DocumentCopy copy =
-         new DocumentCopy(source, getTypeDefinition(source.getTypeId(), true), folder, session, versioningState);
+         new DocumentCopy(source, getTypeDefinition(source.getTypeId(), true), parent, session, versioningState);
 
       return copy;
    }
@@ -467,19 +463,19 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public DocumentData createDocument(FolderData folder, String typeId, VersioningState versioningState)
+   public DocumentData createDocument(FolderData parent, String typeId, VersioningState versioningState)
       throws ConstraintException
    {
-      if (folder != null)
+      if (parent != null)
       {
-         if (folder.isNew())
+         if (parent.isNew())
          {
             throw new CmisRuntimeException("Unable create document in newly created folder.");
          }
-         if (!folder.isAllowedChildType(typeId))
+         if (!parent.isAllowedChildType(typeId))
          {
             throw new ConstraintException("Type " + typeId + " is not in list of allowed child type for folder "
-               + folder.getObjectId());
+               + parent.getObjectId());
          }
       }
 
@@ -490,7 +486,7 @@ public class StorageImpl implements Storage
          throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Document.");
       }
 
-      DocumentData document = new DocumentDataImpl(typeDefinition, folder, session, versioningState);
+      DocumentData document = new DocumentDataImpl(typeDefinition, parent, session, versioningState);
 
       return document;
    }
@@ -498,22 +494,22 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public FolderData createFolder(FolderData folder, String typeId) throws ConstraintException
+   public FolderData createFolder(FolderData parent, String typeId) throws ConstraintException
    {
-      if (folder == null)
+      if (parent == null)
       {
          throw new ConstraintException("Parent folder must be provided.");
       }
 
-      if (folder.isNew())
+      if (parent.isNew())
       {
          throw new CmisRuntimeException("Unable create child folder in newly created folder.");
       }
 
-      if (!folder.isAllowedChildType(typeId))
+      if (!parent.isAllowedChildType(typeId))
       {
          throw new ConstraintException("Type " + typeId + " is not in list of allowed child type for folder "
-            + folder.getObjectId());
+            + parent.getObjectId());
       }
 
       TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
@@ -523,7 +519,7 @@ public class StorageImpl implements Storage
          throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Folder.");
       }
 
-      FolderData newFolder = new FolderDataImpl(typeDefinition, folder, session);
+      FolderData newFolder = new FolderDataImpl(typeDefinition, parent, session);
 
       return newFolder;
    }
@@ -531,7 +527,7 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public PolicyData createPolicy(FolderData folder, String typeId) throws ConstraintException
+   public PolicyData createPolicy(FolderData parent, String typeId) throws ConstraintException
    {
       TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
 

@@ -412,35 +412,111 @@ public class StorageImpl implements Storage
       return actions;
    }
 
-   public DocumentData copyDocument(DocumentData source, FolderData folder, VersioningState versioningState)
+   /**
+    * {@inheritDoc}
+    */
+   public DocumentData copyDocument(DocumentData source, FolderData parent, VersioningState versioningState)
       throws ConstraintException, StorageException
    {
-      return new DocumentCopy(source, folder, getTypeDefinition(source.getTypeId(), true), versioningState, this);
+      if (parent != null)
+      {
+         if (parent.isNew())
+         {
+            throw new CmisRuntimeException("Unable create document in newly created folder.");
+         }
+         if (!parent.isAllowedChildType(source.getTypeId()))
+         {
+            throw new ConstraintException("Type " + source.getTypeId()
+               + " is not in list of allowed child type for folder " + parent.getObjectId());
+         }
+      }
+
+      if (source.isNew())
+      {
+         throw new CmisRuntimeException("Unable use newly created document as source.");
+      }
+
+      if (source.getBaseType() != BaseType.DOCUMENT)
+      {
+         throw new ConstraintException("Source object has type whose base type is not Document.");
+      }
+
+      return new DocumentCopy(source, parent, getTypeDefinition(source.getTypeId(), true), versioningState, this);
    }
 
    /**
     * {@inheritDoc}
     */
-   public DocumentData createDocument(FolderData folder, String typeId, VersioningState versioningState)
+   public DocumentData createDocument(FolderData parent, String typeId, VersioningState versioningState)
       throws ConstraintException
    {
-      return new DocumentDataImpl(folder, getTypeDefinition(typeId, true), versioningState, this);
+      if (parent != null)
+      {
+         if (parent.isNew())
+         {
+            throw new CmisRuntimeException("Unable create document in newly created folder.");
+         }
+         if (!parent.isAllowedChildType(typeId))
+         {
+            throw new ConstraintException("Type " + typeId + " is not in list of allowed child type for folder "
+               + parent.getObjectId());
+         }
+      }
+
+      TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
+
+      if (typeDefinition.getBaseId() != BaseType.DOCUMENT)
+      {
+         throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Document.");
+      }
+
+      return new DocumentDataImpl(parent, typeDefinition, versioningState, this);
    }
 
    /**
     * {@inheritDoc}
     */
-   public FolderData createFolder(FolderData folder, String typeId) throws ConstraintException
+   public FolderData createFolder(FolderData parent, String typeId) throws ConstraintException
    {
-      return new FolderDataImpl(folder, getTypeDefinition(typeId, true), this);
+      if (parent == null)
+      {
+         throw new ConstraintException("Parent folder must be provided.");
+      }
+
+      if (parent.isNew())
+      {
+         throw new CmisRuntimeException("Unable create child folder in newly created folder.");
+      }
+
+      if (!parent.isAllowedChildType(typeId))
+      {
+         throw new ConstraintException("Type " + typeId + " is not in list of allowed child type for folder "
+            + parent.getObjectId());
+      }
+
+      TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
+
+      if (typeDefinition.getBaseId() != BaseType.FOLDER)
+      {
+         throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Folder.");
+      }
+
+      return new FolderDataImpl(parent, typeDefinition, this);
    }
 
    /**
     * {@inheritDoc}
     */
-   public PolicyData createPolicy(FolderData folder, String typeId) throws ConstraintException
+   public PolicyData createPolicy(FolderData parent, String typeId) throws ConstraintException
    {
-      return new PolicyDataImpl(getTypeDefinition(typeId, true), this);
+      TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
+
+      if (typeDefinition.getBaseId() != BaseType.POLICY)
+      {
+         throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Policy.");
+      }
+
+      return new PolicyDataImpl(typeDefinition, this);
    }
 
    /**
@@ -449,6 +525,23 @@ public class StorageImpl implements Storage
    public RelationshipData createRelationship(ObjectData source, ObjectData target, String typeId)
       throws ConstraintException
    {
+      if (source.isNew())
+      {
+         throw new CmisRuntimeException("Unable use newly created object as relationship source.");
+      }
+
+      if (target.isNew())
+      {
+         throw new CmisRuntimeException("Unable use newly created object as relationship target.");
+      }
+
+      TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
+
+      if (typeDefinition.getBaseId() != BaseType.RELATIONSHIP)
+      {
+         throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Relationship.");
+      }
+
       return new RelationshipDataImpl(getTypeDefinition(typeId, true), source, target, this);
    }
 

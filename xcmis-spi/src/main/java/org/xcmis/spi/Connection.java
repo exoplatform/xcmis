@@ -2045,8 +2045,7 @@ public abstract class Connection
             getCmisObject(parent, includeAllowableActions, includeRelationships, false, false, includeObjectInfo,
                parsedPropertyFilter, parsedRenditionFilter);
 
-         ObjectParent parentType =
-            new ObjectParent(cmisParent, includeRelativePathSegment ? parent.getName() : null);
+         ObjectParent parentType = new ObjectParent(cmisParent, includeRelativePathSegment ? parent.getName() : null);
 
          cmisParents.add(parentType);
       }
@@ -2450,7 +2449,16 @@ public abstract class Connection
          throw new InvalidArgumentException("Object " + targetFolderId + " is not a Folder object.");
       }
 
-      ObjectData source = storage.getObject(sourceFolderId);
+      ObjectData source = null;
+      try
+      {
+         source = storage.getObject(sourceFolderId);
+      }
+      catch (ObjectNotFoundException e)
+      {
+         throw new InvalidArgumentException("Object " + sourceFolderId + " does not exists.");
+      }
+
       if (source.getBaseType() != BaseType.FOLDER)
       {
          throw new InvalidArgumentException("Object " + sourceFolderId + " is not a Folder object.");

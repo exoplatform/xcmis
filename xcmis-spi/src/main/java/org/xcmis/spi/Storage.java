@@ -74,7 +74,7 @@ public interface Storage extends TypeManager
     * <code>null</code>). To save this document method {@link ObjectData#save()}
     * must be used.
     *
-    * @param folder parent folder or <code>null</code> if document should be
+    * @param parent parent folder or <code>null</code> if document should be
     *        created in unfiling state
     * @param typeId type id
     * @param versioningState versioning state
@@ -98,7 +98,7 @@ public interface Storage extends TypeManager
     *         </ul>
     * @see VersioningState
     */
-   DocumentData createDocument(FolderData folder, String typeId, VersioningState versioningState) throws ConstraintException;
+   DocumentData createDocument(FolderData parent, String typeId, VersioningState versioningState) throws ConstraintException;
 
    /**
     * Create new document as copy of the given <code>source</code> document and
@@ -111,7 +111,7 @@ public interface Storage extends TypeManager
     * {@link ObjectData#save()}.
     *
     * @param source source document
-    * @param folder parent folder or <code>null</code> if document should be
+    * @param parent parent folder or <code>null</code> if document should be
     *        created in unfiling state
     * @param versioningState versioning state
     * @return new instance of document
@@ -134,7 +134,7 @@ public interface Storage extends TypeManager
     *         internal problem
     * @see VersioningState
     */
-   DocumentData copyDocument(DocumentData source, FolderData folder, VersioningState versioningState)
+   DocumentData copyDocument(DocumentData source, FolderData parent, VersioningState versioningState)
       throws ConstraintException, StorageException;
 
    /**
@@ -143,7 +143,7 @@ public interface Storage extends TypeManager
     * (method {@link ObjectData#getObjectId()} returns <code>null</code>). To
     * save this folder method {@link ObjectData#save()} must be used.
     *
-    * @param folder parent folder
+    * @param parent parent folder
     * @param typeId type id
     * @return new unsaved instance of folder
     * @throws ConstraintException if any of following condition are met:
@@ -156,7 +156,7 @@ public interface Storage extends TypeManager
     *         <code>false</code> for <code>typeId</code>)</li>
     *         </ul>
     */
-   FolderData createFolder(FolderData folder, String typeId) throws ConstraintException;
+   FolderData createFolder(FolderData parent, String typeId) throws ConstraintException;
 
    /**
     * Create new instance of policy with type <code>typeId</code> using
@@ -165,7 +165,7 @@ public interface Storage extends TypeManager
     * (method {@link ObjectData#getObjectId()} returns <code>null</code>). To
     * save this policy method {@link ObjectData#save()} must be used.
     *
-    * @param folder parent folder
+    * @param parent parent folder
     * @param typeId type id
     * @return new unsaved instance of policy
     * @throws ConstraintException if any of following condition are met:
@@ -180,7 +180,7 @@ public interface Storage extends TypeManager
     *         <code>false</code> for <code>typeId</code>)</li>
     *         </ul>
     */
-   PolicyData createPolicy(FolderData folder, String typeId) throws ConstraintException;
+   PolicyData createPolicy(FolderData parent, String typeId) throws ConstraintException;
 
    /**
     * Create new instance of relationship for specified <code>source</code> and
