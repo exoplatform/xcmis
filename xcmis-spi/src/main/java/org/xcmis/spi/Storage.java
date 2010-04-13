@@ -257,7 +257,7 @@ public interface Storage extends TypeManager
 
    /**
     * Remove non-folder fileable object from all folder where in which it is
-    * currently filed. This method never remove object itself.
+    * currently filed. This method never remove object itself .
     *
     * @param object object
     */
