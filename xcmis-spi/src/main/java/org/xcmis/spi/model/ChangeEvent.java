@@ -19,47 +19,92 @@
 
 package org.xcmis.spi.model;
 
-
 import java.util.Calendar;
 import java.util.List;
 
 /**
+ * Representation of a single action that occurred to an object. Each
+ * {@link ChangeEvent} must contains following information:
+ * <ul>
+ * <li>objectId: The ObjectId of the object to which the change occurred.</li>
+ * <li>changeType: Type of the change {@link ChangeType}.</li>
+ * <li>properties: Additionally, for events of changeType "updated",
+ * <code>ChangeEvent</code> optionally may include the new values of properties
+ * on the object (if any).</li>
+ * </ul>
+ *
+ * @see RepositoryCapabilities#getCapabilityChanges()
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: ChangeEvent.java 316 2010-03-09 15:20:28Z andrew00x $
  */
-public interface ChangeEvent
+public final class ChangeEvent
 {
+
+   private String logToken;
+
+   private String objectId;
+
+   private ChangeType changeType;
+
+   private Calendar date;
+
+   private List<Property<?>> properties;
+
+   public ChangeEvent(String logToken, String objectId, ChangeType changeType, Calendar date,
+      List<Property<?>> properties)
+   {
+      this.logToken = logToken;
+      this.objectId = objectId;
+      this.changeType = changeType;
+      this.date = date;
+      this.properties = properties;
+   }
 
    /**
     * Get change log token. It is unique identifier of change.
-    * 
+    *
     * @return change log token
     */
-   String getLogToken();
+   public String getLogToken()
+   {
+      return logToken;
+   }
 
    /**
     * @return id of changed object
     */
-   String getObjectId();
+   public String getObjectId()
+   {
+      return objectId;
+   }
 
    /**
     * @return type of changes
     * @see ChangeType
     */
-   ChangeType getType();
+   public ChangeType getType()
+   {
+      return changeType;
+   }
 
    /**
     * Time of change to the object.
-    * 
+    *
     * @return time of change or <code>null</code> if this info is unavailable
     */
-   Calendar getDate();
+   public Calendar getDate()
+   {
+      return date;
+   }
 
    /**
     * For events of changeType "updated", list may optionally include the new
     * values of properties on the object.
-    * 
+    *
     * @return updated properties or <code>null</code>
     */
-   List<Property<?>> getProperties();
+   public List<Property<?>> getProperties()
+   {
+      return properties;
+   }
 }

@@ -26,7 +26,6 @@ import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.Rendition;
-import org.xcmis.spi.model.impl.RenditionImpl;
 import org.xcmis.spi.utils.CmisUtils;
 import org.xcmis.spi.utils.MimeType;
 
@@ -68,7 +67,7 @@ public class RenditionManagerImpl implements RenditionManager
                RenditionProvider prov = renditionProviders.get(contentType);
                if (prov != null && !prov.canStoreRendition())
                {
-                  RenditionImpl rendition = new RenditionImpl();
+                  Rendition rendition = new Rendition();
                   rendition.setStreamId(encode(contentType.toString()));
                   rendition.setKind("cmis:thumbnail");
                   return new RenditionIterator(rendition);

@@ -23,7 +23,6 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.model.Rendition;
-import org.xcmis.spi.model.impl.RenditionImpl;
 
 import java.util.NoSuchElementException;
 
@@ -141,7 +140,7 @@ class RenditionIterator implements ItemsIterator<Rendition>
          {
             if (node.isNodeType(JcrCMIS.CMIS_NT_RENDITION))
             {
-               RenditionImpl rendition = new RenditionImpl();
+               Rendition rendition = new Rendition();
                rendition.setStreamId(node.getName());
                rendition.setKind(node.getProperty(JcrCMIS.CMIS_RENDITION_KIND).getString());
                rendition.setMimeType(node.getProperty(JcrCMIS.CMIS_RENDITION_MIME_TYPE).getString());

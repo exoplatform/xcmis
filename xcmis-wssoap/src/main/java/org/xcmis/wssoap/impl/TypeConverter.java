@@ -82,7 +82,6 @@ import org.xcmis.spi.model.impl.DecimalProperty;
 import org.xcmis.spi.model.impl.HtmlProperty;
 import org.xcmis.spi.model.impl.IdProperty;
 import org.xcmis.spi.model.impl.IntegerProperty;
-import org.xcmis.spi.model.impl.RenditionImpl;
 import org.xcmis.spi.model.impl.StringProperty;
 import org.xcmis.spi.model.impl.UriProperty;
 import org.xcmis.spi.utils.CmisUtils;
@@ -520,7 +519,7 @@ public class TypeConverter
 
    public static Rendition getCmisRenditionType(CmisRenditionType source)
    {
-      RenditionImpl result = new RenditionImpl();
+      Rendition result = new Rendition();
       result.setHeight(source.getHeight().intValue());
       result.setKind(source.getKind());
       result.setLength(source.getLength().intValue());

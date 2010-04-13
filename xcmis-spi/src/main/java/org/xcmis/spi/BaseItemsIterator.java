@@ -19,8 +19,6 @@
 
 package org.xcmis.spi;
 
-
-
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -28,8 +26,8 @@ import java.util.NoSuchElementException;
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id: BaseItemsIterator.java 316 2010-03-09 15:20:28Z andrew00x $
- * 
- * @param <T> 
+ *
+ * @param <T>
  */
 public class BaseItemsIterator<T> implements ItemsIterator<T>
 {
@@ -87,7 +85,9 @@ public class BaseItemsIterator<T> implements ItemsIterator<T>
    public void skip(int skip) throws NoSuchElementException
    {
       while (skip-- > 0)
+      {
          iter.next();
+      }
    }
 
 }

@@ -21,71 +21,170 @@ package org.xcmis.spi.model;
 
 /**
  * CMIS rendition.
- * 
+ *
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */
-public interface Rendition
+public class Rendition
 {
+
+   private String streamId;
+
+   private String kind;
+
+   private String mimeType;
+
+   private long length;
+
+   private int height;
+
+   private int width;
+
+   private String title;
+
+   private String renditionDocumentId;
+
+   public Rendition(String streamId, String kind, String mimeType, long length, int height, int width, String title,
+      String renditionDocumentId)
+   {
+      this.streamId = streamId;
+      this.kind = kind;
+      this.mimeType = mimeType;
+      this.length = length;
+      this.height = height;
+      this.width = width;
+      this.title = title;
+      this.renditionDocumentId = renditionDocumentId;
+   }
+
+   public Rendition()
+   {
+   }
 
    /**
     * Identifies the rendition stream ID.
-    * 
+    *
     * @return rendition stream ID
     */
-   String getStreamId();
+   public String getStreamId()
+   {
+      return streamId;
+   }
+
+   /**
+    * A categorization String associated with the rendition.
+    *
+    * @return rendition kind
+    */
+   public String getKind()
+   {
+      return kind;
+   }
 
    /**
     * The mime-type of the rendition stream.
-    * 
+    *
     * @return rendition stream mime-type
     */
-   String getMimeType();
+   public String getMimeType()
+   {
+      return mimeType;
+   }
 
    /**
     * @return length of the rendition stream in bytes. This attribute is
     *         optional
     */
-   long getLength();
+   public long getLength()
+   {
+      return length;
+   }
 
    /**
-    * A categorization String associated with the rendition.
-    * 
-    * @return rendition kind
+    * Typically used for 'image' renditions (expressed as pixels). Should be
+    * provided if kind of rendition is 'cmis:thumbnail'.
+    *
+    * @return rendition height
     */
-   String getKind();
+   public int getHeight()
+   {
+      return height;
+   }
+
+   /**
+    * Typically used for 'image' renditions (expressed as pixels). Should be
+    * provided if kind of rendition is 'cmis:thumbnail'.
+    *
+    * @return rendition weight
+    */
+   public int getWidth()
+   {
+      return width;
+   }
 
    /**
     * Optional human readable information about the rendition.
-    * 
+    *
     * @return rendition title or <code>null</code> if not provided
     */
-   String getTitle();
-
-   /**
-    * Typically used for 'image' renditions (expressed as pixels). Should be
-    * provided if kind of rendition is 'cmis:thumbnail'.
-    * 
-    * @return rendition height
-    */
-   int getHeight();
-
-   /**
-    * Typically used for 'image' renditions (expressed as pixels). Should be
-    * provided if kind of rendition is 'cmis:thumbnail'.
-    * 
-    * @return rendition weight
-    */
-   int getWidth();
+   public String getTitle()
+   {
+      return title;
+   }
 
    /**
     * If specified, then the rendition can also be accessed as a document object
     * in the CMIS services. If not set, then the rendition can only be accessed
     * via the rendition services.
-    * 
+    *
     * @return rendition document ID or <code>null</code> if rendition is not
     *         provided as separate document
     */
-   String getRenditionDocumentId();
+   public String getRenditionDocumentId()
+   {
+      return renditionDocumentId;
+   }
+
+   // --- Setters
+
+   public void setStreamId(String streamId)
+   {
+      this.streamId = streamId;
+   }
+
+   public void setKind(String kind)
+   {
+      this.kind = kind;
+   }
+
+   public void setMimeType(String mimeType)
+   {
+      this.mimeType = mimeType;
+   }
+
+   public void setLength(long length)
+   {
+      this.length = length;
+   }
+
+   public void setHeight(int height)
+   {
+      this.height = height;
+   }
+
+   public void setWidth(int width)
+   {
+      this.width = width;
+   }
+
+   public void setTitle(String title)
+   {
+      this.title = title;
+   }
+
+   public void setRenditionDocumentId(String renditionDocumentId)
+   {
+      this.renditionDocumentId = renditionDocumentId;
+   }
 
 }

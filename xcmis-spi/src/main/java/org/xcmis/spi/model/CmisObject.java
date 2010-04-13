@@ -179,6 +179,8 @@ public class CmisObject
       return exactACL;
    }
 
+   // ------------------- setters ------------------
+
    public void setAllowableActions(AllowableActions allowableActions)
    {
       this.allowableActions = allowableActions;
