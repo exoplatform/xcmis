@@ -25,7 +25,6 @@ import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.apache.abdera.parser.stax.FOMExtensibleElement;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.spi.InvalidArgumentException;
-import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.AllowableActions;
 import org.xcmis.spi.model.ChangeInfo;
@@ -96,9 +95,6 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
    {
       CmisObject object = new CmisObject();
 
-      //      ObjectInfoImpl objectInfo = new ObjectInfoImpl();
-      //      object.setObjectInfo(objectInfo);
-
       // PROPERTIES
       FOMExtensibleElement propertiesElement = getExtension(AtomCMIS.PROPERTIES);
       if (propertiesElement != null)
@@ -109,124 +105,18 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
          {
             Property<?> property = propertyElement.getProperty();
             properties.put(propertyElement.getProperty().getId(), property);
-            //            storeProperty(objectInfo, property);
          }
       }
-
-      // TODO
-      //      object.getACL()
-      //      object.getPolicyIds()
-      //      object.getRelationship()
-      //      object.getRenditions()
-      //      object.setAllowableActions(allowableActions)
-      //      object.setChangeInfo(changeInfo)
-      //      object.setExactACL(exactACL)
-      //      object.setObjectInfo(objectInfo)
-      //      object.setPathSegment(pathSegment)
 
       return object;
    }
 
    /**
-    * Store property as concrete field to the provided ObjectInfo.
-    * @param objectInfo
-    * @param property
-    */
-   /*
-   private void storeProperty(ObjectInfoImpl objectInfo, Property<?> p)
-   {
-      String pId = p.getId();
-
-      if (CMIS.NAME.equals(pId))
-      {
-         objectInfo.setName(((StringProperty)p).getValues().get(0));
-      }
-      else if (CMIS.OBJECT_ID.equals(pId))
-      {
-         objectInfo.setId(((IdProperty)p).getValues().get(0));
-      }
-      else if (CMIS.BASE_TYPE_ID.equals(pId))
-      {
-         objectInfo.setBaseType(BaseType.fromValue((((IdProperty)p).getValues().get(0))));
-      }
-      else if (CMIS.OBJECT_TYPE_ID.equals(pId))
-      {
-         objectInfo.setTypeId(((IdProperty)p).getValues().get(0));
-      }
-      else if (CMIS.CREATED_BY.equals(pId))
-      {
-         objectInfo.setCreatedBy(((IdProperty)p).getValues().get(0));
-      }
-      else if (CMIS.CREATION_DATE.equals(pId))
-      {
-         objectInfo.setCreationDate(((DateTimeProperty)p).getValues().get(0));
-      }
-      else if (CMIS.LAST_MODIFIED_BY.equals(pId))
-      {
-         objectInfo.setLastModifiedBy(((StringProperty)p).getValues().get(0));
-      }
-      else if (CMIS.LAST_MODIFICATION_DATE.equals(pId))
-      {
-         objectInfo.setLastModificationDate(((DateTimeProperty)p).getValues().get(0));
-      }
-      else if (CMIS.CHANGE_TOKEN.equals(pId))
-      {
-         objectInfo.setChangeToken(((StringProperty)p).getValues().get(0));
-      }
-      else if (CMIS.PARENT_ID.equals(pId))
-      {
-         objectInfo.setParentId(((IdProperty)p).getValues().get(0));
-      }
-      else if (CMIS.IS_LATEST_VERSION.equals(pId))
-      {
-         objectInfo.setLatestVersion(((BooleanProperty)p).getValues().get(0));
-      }
-      else if (CMIS.IS_MAJOR_VERSION.equals(pId))
-      {
-         objectInfo.setMajorVersion(((BooleanProperty)p).getValues().get(0));
-      }
-      else if (CMIS.IS_LATEST_MAJOR_VERSION.equals(pId))
-      {
-         objectInfo.setLatestMajorVersion(((BooleanProperty)p).getValues().get(0));
-      }
-      else if (CMIS.VERSION_LABEL.equals(pId))
-      {
-         objectInfo.setVersionLabel(((StringProperty)p).getValues().get(0));
-      }
-      else if (CMIS.VERSION_SERIES_ID.equals(pId))
-      {
-         objectInfo.setVersionSeriesId(((IdProperty)p).getValues().get(0));
-      }
-      else if (CMIS.VERSION_SERIES_CHECKED_OUT_ID.equals(pId))
-      {
-         objectInfo.setVersionSeriesCheckedOutId(((StringProperty)p).getValues().get(0));
-      }
-      else if (CMIS.VERSION_SERIES_CHECKED_OUT_BY.equals(pId))
-      {
-         objectInfo.setVersionSeriesCheckedOutBy(((StringProperty)p).getValues().get(0));
-      }
-      else if (CMIS.CONTENT_STREAM_MIME_TYPE.equals(pId))
-      {
-         objectInfo.setContentStreamMimeType(((StringProperty)p).getValues().get(0));
-      }
-      else if (CMIS.SOURCE_ID.equals(pId))
-      {
-         objectInfo.setSourceId(((IdProperty)p).getValues().get(0));
-      }
-      else if (CMIS.TARGET_ID.equals(pId))
-      {
-         objectInfo.setTargetId(((IdProperty)p).getValues().get(0));
-      }
-   }
-   */
-
-   /**
     * Builds the element.
     *
     * @param objectType the object type
-    * @param filter the filter
     */
-   public void build(CmisObject objectType, PropertyFilter filter)
+   public void build(CmisObject objectType)
    {
       if (objectType != null)
       {
@@ -362,13 +252,4 @@ public class ObjectTypeElement extends ExtensibleElementWrapper
       }
    }
 
-   /**
-    * Builds the element.
-    *
-    * @param objectType the object type
-    */
-   public void build(CmisObject objectType)
-   {
-      build(objectType, null);
-   }
 }

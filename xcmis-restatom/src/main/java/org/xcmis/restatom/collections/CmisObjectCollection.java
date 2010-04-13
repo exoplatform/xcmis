@@ -54,7 +54,6 @@ import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.StreamNotSupportedException;
@@ -1017,7 +1016,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       String filter = request.getParameter(AtomCMIS.PARAM_FILTER);
       try
       {
-         objectElement.build(object, new PropertyFilter(filter));
+         objectElement.build(object);
       }
       catch (FilterNotValidException fe)
       {

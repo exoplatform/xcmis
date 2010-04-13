@@ -229,11 +229,12 @@ public class FolderChildrenCollection extends CmisObjectCollection
          {
             if (sourceFolderId == null)
             {
+               // If not specified the 'sourceFolderId', addObjectToFolder will be performed.
                conn.addObjectToFolder(id, targetFolderId, false);
             }
             else
             {
-               // move object
+               // If specified the 'sourceFolderId' moveObject will be performed.
                objectId = conn.moveObject(id, targetFolderId, sourceFolderId);
             }
          }

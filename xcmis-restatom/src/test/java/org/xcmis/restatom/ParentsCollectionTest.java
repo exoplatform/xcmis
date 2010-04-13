@@ -90,7 +90,7 @@ public class ParentsCollectionTest extends BaseTest
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
       ContainerResponse resp = service("GET", requestURI, "http://localhost:8080/rest", null, null, writer);
 
-//      printBody(writer.getBody());
+      //      printBody(writer.getBody());
 
       assertEquals(200, resp.getStatus());
 
@@ -110,6 +110,6 @@ public class ParentsCollectionTest extends BaseTest
       org.w3c.dom.Node xmlEntry = getNode("atom:entry", xmlFeed);
       validateObjectEntry(xmlEntry, "cmis:folder");
 
-      assertEquals(testFolderName, getStringElement("cmisra:relativePathSegment", xmlEntry));
+      assertEquals("doc1", getStringElement("cmisra:relativePathSegment", xmlEntry));
    }
 }

@@ -58,6 +58,7 @@ public class FolderTreeCollection extends FolderDescentantsCollection
    /**
     * {@inheritDoc}
     */
+   @Override
    public String getTitle(RequestContext request)
    {
       return "Folder Tree";
@@ -114,7 +115,7 @@ public class FolderTreeCollection extends FolderDescentantsCollection
                   Element pathSegment = e.addExtension(AtomCMIS.PATH_SEGMENT);
                   pathSegment.setText(oifContainer.getContainer().getPathSegment());
                }
-               if (oifContainer.getChildren().size() > 0)
+               if (oifContainer.getChildren() != null && oifContainer.getChildren().size() > 0)
                {
                   addChildren(e, oifContainer.getChildren(), feedIri, request);
                }

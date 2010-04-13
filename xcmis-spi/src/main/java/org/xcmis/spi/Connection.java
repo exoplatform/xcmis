@@ -2045,7 +2045,7 @@ public abstract class Connection
             getCmisObject(parent, includeAllowableActions, includeRelationships, false, false, includeObjectInfo,
                parsedPropertyFilter, parsedRenditionFilter);
 
-         ObjectParent parentType = new ObjectParent(cmisParent, includeRelativePathSegment ? parent.getName() : null);
+         ObjectParent parentType = new ObjectParent(cmisParent, includeRelativePathSegment ? object.getName() : null);
 
          cmisParents.add(parentType);
       }

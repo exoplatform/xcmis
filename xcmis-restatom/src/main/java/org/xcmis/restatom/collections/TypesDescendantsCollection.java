@@ -181,7 +181,7 @@ public class TypesDescendantsCollection extends CmisTypeCollection
       {
          Entry ch = entry.getFactory().newEntry(childrenElement);
          addEntryDetails(request, ch, feedIri, (TypeDefinition)typeContainer.getContainer());
-         if (typeContainer.getChildren().size() > 0)
+         if (typeContainer.getChildren() != null && typeContainer.getChildren().size() > 0)
          {
             addChildren(ch, typeContainer.getChildren(), feedIri, request);
          }
@@ -191,6 +191,7 @@ public class TypesDescendantsCollection extends CmisTypeCollection
    /**
     * {@inheritDoc}
     */
+   @Override
    public String getTitle(RequestContext request)
    {
       return "Type Descendants";

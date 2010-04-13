@@ -133,6 +133,7 @@ public class FolderDescentantsCollection extends CmisObjectCollection
    /**
     * {@inheritDoc}
     */
+   @Override
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
       boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
@@ -181,7 +182,7 @@ public class FolderDescentantsCollection extends CmisObjectCollection
                   Element pathSegment = e.addExtension(AtomCMIS.PATH_SEGMENT);
                   pathSegment.setText(oifContainer.getContainer().getPathSegment());
                }
-               if (oifContainer.getChildren().size() > 0)
+               if (oifContainer.getChildren() != null && oifContainer.getChildren().size() > 0)
                {
                   addChildren(e, oifContainer.getChildren(), feedIri, request);
                }
