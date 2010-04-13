@@ -566,7 +566,7 @@ public abstract class Connection
          throw new ConstraintException("Unfiling capability is not supported, parent folder must be provided.");
       }
 
-      DocumentData newDocument = storage.createCopyOfDocument((DocumentData)source, (FolderData)folder, versioningState);
+      DocumentData newDocument = storage.copyDocument((DocumentData)source, (FolderData)folder, versioningState);
 
       if (properties != null)
       {

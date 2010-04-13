@@ -428,7 +428,7 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public DocumentData createCopyOfDocument(DocumentData source, FolderData folder, VersioningState versioningState)
+   public DocumentData copyDocument(DocumentData source, FolderData folder, VersioningState versioningState)
       throws ConstraintException, StorageException
    {
       // TODO : remove when implement unfiling feature.

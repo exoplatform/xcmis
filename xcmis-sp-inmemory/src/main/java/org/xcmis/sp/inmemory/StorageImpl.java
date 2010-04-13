@@ -412,7 +412,7 @@ public class StorageImpl implements Storage
       return actions;
    }
 
-   public DocumentData createCopyOfDocument(DocumentData source, FolderData folder, VersioningState versioningState)
+   public DocumentData copyDocument(DocumentData source, FolderData folder, VersioningState versioningState)
       throws ConstraintException, StorageException
    {
       return new DocumentCopy(source, folder, getTypeDefinition(source.getTypeId(), true), versioningState, this);

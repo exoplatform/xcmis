@@ -438,7 +438,7 @@ public class StorageTest extends BaseTest
       ContentStream cs = new BaseContentStream("to be or not to be".getBytes(), null, "text/plain");
       DocumentData document = createDocument(rootFolder, "createDocumentSource", "cmis:document", cs, null);
 
-      DocumentData documentCopy = storage.createCopyOfDocument(document, rootFolder, VersioningState.MINOR);
+      DocumentData documentCopy = storage.copyDocument(document, rootFolder, VersioningState.MINOR);
       documentCopy.setName("createDocumentSourceCopy");
       storage.saveObject(documentCopy);
 

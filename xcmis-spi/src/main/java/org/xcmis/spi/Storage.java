@@ -134,7 +134,7 @@ public interface Storage extends TypeManager
     *         internal problem
     * @see VersioningState
     */
-   DocumentData createCopyOfDocument(DocumentData source, FolderData folder, VersioningState versioningState)
+   DocumentData copyDocument(DocumentData source, FolderData folder, VersioningState versioningState)
       throws ConstraintException, StorageException;
 
    /**
