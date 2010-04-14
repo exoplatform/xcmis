@@ -40,7 +40,7 @@ public class ImageRenditionProvider implements RenditionProvider
 {
 
    /** The String[] SUPPORTED_MIEDIA_TYPES. */
-   private static final String[] SUPPORTED_MIEDIA_TYPES = ImageIO.getReaderMIMETypes();
+   private static final String[] SUPPORTED_MEDIA_TYPES = ImageIO.getReaderMIMETypes();
 
    /** Can store renditions. */
    private static final boolean CAN_STORE_RENDITIONS=  true;
@@ -87,7 +87,7 @@ public class ImageRenditionProvider implements RenditionProvider
     */
    public String[] getSupportedMediaType()
    {
-      return SUPPORTED_MIEDIA_TYPES;
+      return SUPPORTED_MEDIA_TYPES;
    }
 
    /**
