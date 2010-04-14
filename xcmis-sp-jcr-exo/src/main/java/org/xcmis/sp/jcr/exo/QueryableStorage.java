@@ -210,7 +210,7 @@ public class QueryableStorage extends StorageImpl
                for (Column column : qom.getColumns())
                {
                   //TODO check
-                  if (true)
+                  if (column.isFunction())
                   {
                      score = new Score(column.getColumnName(), BigDecimal.valueOf(row.getScore()));
                   }
