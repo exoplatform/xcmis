@@ -63,6 +63,7 @@
       <module>xcmis-search-model</module>
       <module>xcmis-search-parser-cmis</module>
       <module>xcmis-search-service</module>
+      <module>xcmis-renditions</module>
       <module>xcmis-sp-inmemory</module>
       <module>xcmis-sp-jcr-exo</module>
       <module>xcmis-restatom</module>
@@ -148,6 +149,11 @@
          <dependency>
             <groupId>org.xcmis</groupId>
             <artifactId>xcmis-search-service</artifactId>
+            <version>${project.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>org.xcmis</groupId>
+            <artifactId>xcmis-renditions</artifactId>
             <version>${project.version}</version>
          </dependency>
          <dependency>

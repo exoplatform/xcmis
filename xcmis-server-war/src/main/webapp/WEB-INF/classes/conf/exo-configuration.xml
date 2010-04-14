@@ -90,10 +90,10 @@
 									<field name="renditionProviders">
 										<collection type="java.util.ArrayList">
 											<value>
-												<object type="org.xcmis.sp.jcr.exo.rendition.PDFDocumentRenditionProvider"></object>
+												<object type="org.xcmis.renditions.impl.PDFDocumentRenditionProvider"></object>
 											</value>
 											<value>
-												<object type="org.xcmis.sp.jcr.exo.rendition.ImageRenditionProvider"></object>
+												<object type="org.xcmis.renditions.impl.ImageRenditionProvider"></object>
 											</value>
 										</collection>
 									</field>
