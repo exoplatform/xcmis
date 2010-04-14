@@ -573,7 +573,6 @@ public class StorageImpl implements Storage
          throw new ConstraintException("Unable delete root folder.");
       }
 
-      System.out.println(folder.getPath());
       for (ItemsIterator<ObjectData> iterator = folder.getChildren(null); iterator.hasNext();)
       {
          ObjectData object = iterator.next();
@@ -1218,7 +1217,7 @@ public class StorageImpl implements Storage
                for (Column column : qom.getColumns())
                {
                   //TODO check
-                  if (true)
+                  if (column.isFunction())
                   {
                      score = new Score(column.getColumnName(), BigDecimal.valueOf(row.getScore()));
                   }
