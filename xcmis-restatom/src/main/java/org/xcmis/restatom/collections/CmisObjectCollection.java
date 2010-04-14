@@ -55,7 +55,6 @@ import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.StreamNotSupportedException;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.model.AccessControlEntry;
@@ -105,9 +104,9 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
     * Instantiates a new cmis object collection.
     * @param storageProvider TODO
     */
-   public CmisObjectCollection(StorageProvider storageProvider)
+   public CmisObjectCollection(/*StorageProvider storageProvider*/)
    {
-      super(storageProvider);
+      super(/*storageProvider*/);
    }
 
    /**

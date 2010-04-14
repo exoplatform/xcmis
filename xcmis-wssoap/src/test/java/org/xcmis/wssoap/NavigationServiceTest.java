@@ -50,7 +50,8 @@ public class NavigationServiceTest extends BaseTest
    public void setUp() throws Exception
    {
       super.setUp();
-      server = complexDeployService(SERVICE_ADDRESS, new NavigationServicePortImpl(storageProvider), null, null, true);
+      server =
+         complexDeployService(SERVICE_ADDRESS, new NavigationServicePortImpl(/*storageProvider*/), null, null, true);
       port = getNavigationService(SERVICE_ADDRESS);
       assertNotNull(server);
       assertNotNull(port);
@@ -59,7 +60,9 @@ public class NavigationServiceTest extends BaseTest
    public void testGetChilren() throws Exception
    {
       for (int i = 0; i < 3; i++)
+      {
          createDocument(testFolderId, "doc" + i);
+      }
 
       CmisObjectInFolderListType children = port.getChildren(//
          repositoryId, //
@@ -88,7 +91,9 @@ public class NavigationServiceTest extends BaseTest
    {
       String id = testFolderId;
       for (int i = 0; i < 3; i++)
+      {
          id = createFolder(id, "folder" + i);
+      }
 
       List<CmisObjectInFolderContainerType> resp2 =
          port.getDescendants(repositoryId, testFolderId, BigInteger.valueOf(3), null, false,
@@ -104,7 +109,7 @@ public class NavigationServiceTest extends BaseTest
          id, //
          null, // Property filter
          false, // Allowable actions
-         EnumIncludeRelationships.NONE, // 
+         EnumIncludeRelationships.NONE, //
          null, // Rendition filter
          true, // Include relative path segments
          null // Extension

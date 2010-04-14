@@ -25,8 +25,8 @@ import org.xcmis.core.CmisObjectType;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.PolicyServicePort;
+import org.xcmis.spi.CmisStorageInitializer;
 import org.xcmis.spi.Connection;
-import org.xcmis.spi.StorageProvider;
 
 /**
  * @author <a href="mailto:max.shaposhnik@exoplatform.com">Max Shaposhnik</a>
@@ -46,16 +46,16 @@ public class PolicyServicePortImpl implements PolicyServicePort
    private static final Log LOG = ExoLogger.getLogger(PolicyServicePortImpl.class);
 
    /** StorageProvider . */
-   private final StorageProvider storageProvider;
+   //   private final StorageProvider storageProvider;
 
    /**
     * Constructs instance of <code>PolicyServicePortImpl</code> .
     *
     * @param policyService PolicyService
     */
-   public PolicyServicePortImpl(StorageProvider storageProvider)
+   public PolicyServicePortImpl(/*StorageProvider storageProvider*/)
    {
-      this.storageProvider = storageProvider;
+      //      this.storageProvider = storageProvider;
    }
 
    /**
@@ -71,7 +71,9 @@ public class PolicyServicePortImpl implements PolicyServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId);
+         //         conn = storageProvider.getConnection(repositoryId);
+         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+
          conn.applyPolicy(policyId, objectId);
       }
       catch (Exception e)
@@ -81,7 +83,10 @@ public class PolicyServicePortImpl implements PolicyServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
       return new CmisExtensionType();
    }
@@ -99,7 +104,9 @@ public class PolicyServicePortImpl implements PolicyServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId);
+         //         conn = storageProvider.getConnection(repositoryId);
+         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+
          return TypeConverter.getListCmisObjectType(conn.getAppliedPolicies(objectId, true, propertyFilter));
       }
       catch (Exception e)
@@ -109,7 +116,10 @@ public class PolicyServicePortImpl implements PolicyServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -126,7 +136,9 @@ public class PolicyServicePortImpl implements PolicyServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId);
+         //         conn = storageProvider.getConnection(repositoryId);
+         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+
          conn.removePolicy(policyId, objectId);
       }
       catch (Exception e)
@@ -136,7 +148,10 @@ public class PolicyServicePortImpl implements PolicyServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
       return new CmisExtensionType();
    }

@@ -52,7 +52,8 @@ public class VersioningServiceTest extends BaseTest
    public void setUp() throws Exception
    {
       super.setUp();
-      server = complexDeployService(SERVICE_ADDRESS, new VersioningServicePortImpl(storageProvider), null, null, true);
+      server =
+         complexDeployService(SERVICE_ADDRESS, new VersioningServicePortImpl(/*storageProvider*/), null, null, true);
       port = getVersioningService(SERVICE_ADDRESS);
       assertNotNull(server);
       assertNotNull(port);

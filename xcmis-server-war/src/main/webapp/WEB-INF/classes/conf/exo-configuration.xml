@@ -26,16 +26,20 @@
 				<property name="log4j.appender.file.layout" value="org.apache.log4j.PatternLayout" />
 				<property name="log4j.appender.file.layout.ConversionPattern" value="%d{dd.MM.yyyy HH:mm:ss} *%-5p* [%t] %c{1}: %m (%F, line %L) %n" />
 				<!-- property name="log4j.category.jcr.FileCleaner" value="DEBUG" / -->
-                                <property name="log4j.category.org.apache.pdfbox" value="WARN"/>
+				<property name="log4j.category.org.apache.pdfbox" value="WARN" />
 			</properties-param>
 		</init-params>
 	</component>
-	
+
+	<component>
+		<type>org.xcmis.spi.deploy.ExoContainerCmisStorageInitializer</type>
+	</component>
+
 	<component>
 		<key>org.exoplatform.services.document.DocumentReaderService</key>
 		<type>org.xcmis.spi.utils.CmisDocumentReaderSercice</type>
 	</component>
-	
+
 	<component>
 		<key>org.exoplatform.services.jcr.config.RepositoryServiceConfiguration</key>
 		<type>org.exoplatform.services.jcr.impl.config.RepositoryServiceConfigurationImpl</type>
@@ -48,7 +52,7 @@
 		</init-params>
 	</component>
 
-	<!-- Storage Provider -->
+	<!-- Storage Provider JCR -->
 	<component>
 		<type>org.xcmis.sp.jcr.exo.StorageProviderImpl</type>
 		<init-params>
@@ -96,6 +100,43 @@
 												<object type="org.xcmis.renditions.impl.ImageRenditionProvider"></object>
 											</value>
 										</collection>
+									</field>
+								</object>
+							</value>
+						</collection>
+					</field>
+				</object>
+			</object-param>
+		</init-params>
+	</component>
+
+   <!-- Storage Provider InMemory -->
+	<component>
+		<type>org.xcmis.sp.inmemory.StorageProviderImpl</type>
+		<init-params>
+			<object-param>
+				<name>configs</name>
+				<object type="org.xcmis.sp.inmemory.StorageProviderImpl$StorageProviderConfig">
+					<field name="storages">
+						<collection type="java.util.ArrayList">
+							<value>
+								<object type="org.xcmis.sp.inmemory.StorageConfiguration">
+									<field name="id">
+										<!-- ID of CMIS repository -->
+										<string>cmis-inmem1</string>
+									</field>
+									<field name="properties">
+										<map type="java.util.HashMap">
+											<entry>
+												<key>
+													<string>exo.cmis.changetoken.feature</string>
+												</key>
+												<value>
+													<!-- Enable/Disable change token feature. -->
+													<boolean>false</boolean>
+												</value>
+											</entry>
+										</map>
 									</field>
 								</object>
 							</value>

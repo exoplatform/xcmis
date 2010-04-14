@@ -37,7 +37,6 @@ import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.StreamNotSupportedException;
 import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.UpdateConflictException;
@@ -66,11 +65,12 @@ public class FolderChildrenCollection extends CmisObjectCollection
 
    /**
     * Instantiates a new folder children collection.
+    *
     * @param storageProvider TODO
     */
-   public FolderChildrenCollection(StorageProvider storageProvider)
+   public FolderChildrenCollection(/*StorageProvider storageProvider*/)
    {
-      super(storageProvider);
+      super(/*storageProvider*/);
       setHref("/children");
    }
 

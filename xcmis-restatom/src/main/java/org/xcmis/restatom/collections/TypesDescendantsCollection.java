@@ -35,7 +35,6 @@ import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.model.TypeDefinition;
 
 import java.util.Calendar;
@@ -52,9 +51,9 @@ public class TypesDescendantsCollection extends CmisTypeCollection
     * @param storageProvider TODO
     * @param repositoryService the repository service
     */
-   public TypesDescendantsCollection(StorageProvider storageProvider)
+   public TypesDescendantsCollection(/*StorageProvider storageProvider*/)
    {
-      super(storageProvider);
+      super(/*storageProvider*/);
       setHref("/typedescendants");
    }
 
@@ -141,12 +140,12 @@ public class TypesDescendantsCollection extends CmisTypeCollection
 
    /**
     * Adds the children.
-    * 
+    *
     * @param entry the entry
     * @param children the children
     * @param feedIri the feed iri
     * @param request the request
-    * 
+    *
     * @throws ResponseContextException the response context exception
     */
    protected void addChildren(Entry entry, List children, IRI feedIri, RequestContext request)

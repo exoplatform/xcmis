@@ -32,7 +32,6 @@ import org.xcmis.restatom.abdera.QueryTypeElement;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.model.CmisObject;
 
 import java.io.IOException;
@@ -49,9 +48,9 @@ public class QueryCollection extends CmisObjectCollection
     * Instantiates a new query collection.
     * @param storageProvider TODO
     */
-   public QueryCollection(StorageProvider storageProvider)
+   public QueryCollection(/*StorageProvider storageProvider*/)
    {
-      super(storageProvider);
+      super(/*storageProvider*/);
       setHref("/query");
    }
 
@@ -72,7 +71,9 @@ public class QueryCollection extends CmisObjectCollection
       ResponseContext rc = super.buildGetFeedResponse(feed);
       // spec. says need 201 instead 200
       if (rc.getStatus() == 200)
+      {
          rc.setStatus(201);
+      }
       return rc;
    }
 
@@ -114,7 +115,9 @@ public class QueryCollection extends CmisObjectCollection
       finally
       {
          if (conn != null)
+         {
             conn.close();
+         }
       }
    }
 

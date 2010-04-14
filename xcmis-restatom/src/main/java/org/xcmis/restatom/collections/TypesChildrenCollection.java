@@ -32,7 +32,6 @@ import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.model.TypeDefinition;
 
 import java.util.Calendar;
@@ -52,9 +51,9 @@ public class TypesChildrenCollection extends CmisTypeCollection
     * Instantiates a new types children collection.
     * @param storageProvider TODO
     */
-   public TypesChildrenCollection(StorageProvider storageProvider)
+   public TypesChildrenCollection(/*StorageProvider storageProvider*/)
    {
-      super(storageProvider);
+      super(/*storageProvider*/);
       setHref("/types");
    }
 

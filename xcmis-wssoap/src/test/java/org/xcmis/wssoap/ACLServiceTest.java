@@ -61,7 +61,7 @@ public class ACLServiceTest extends BaseTest
       super.setUp();
       ArrayList<AbstractPhaseInterceptor<?>> in = new ArrayList<AbstractPhaseInterceptor<?>>();
       in.add(new IdentityInterceptor());
-      server = complexDeployService(SERVICE_ADDRESS, new ACLServicePortImpl(storageProvider), in, null, true);
+      server = complexDeployService(SERVICE_ADDRESS, new ACLServicePortImpl(/*storageProvider*/), in, null, true);
       port = getAccessControlService(SERVICE_ADDRESS);
       assertNotNull(server);
       assertNotNull(port);

@@ -27,15 +27,16 @@ import org.xcmis.messaging.Query;
 import org.xcmis.messaging.QueryResponse;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.DiscoveryServicePort;
-import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ChangeLogTokenHolder;
+import org.xcmis.spi.CmisConstants;
+import org.xcmis.spi.CmisStorageInitializer;
 import org.xcmis.spi.Connection;
-import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.model.IncludeRelationships;
 
 /**
  * @author <a href="mailto:max.shaposhnik@exoplatform.com">Max Shaposhnik</a>
- * @version $Id: DiscoveryServicePortImpl.java 2 2010-02-04 17:21:49Z andrew00x $
+ * @version $Id: DiscoveryServicePortImpl.java 2 2010-02-04 17:21:49Z andrew00x
+ *          $
  */
 @javax.jws.WebService(// name = "DiscoveryServicePort",
 serviceName = "DiscoveryService", //
@@ -51,16 +52,16 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
    private static final Log LOG = ExoLogger.getLogger(DiscoveryServicePortImpl.class);
 
    /** StorageProvider. */
-   private final StorageProvider storageProvider;
+   //   private final StorageProvider storageProvider;
 
    /**
     * Constructs instance of <code>DiscoveryServicePortImpl</code> .
     *
     * @param storageProvider StorageProvider
     */
-   public DiscoveryServicePortImpl(StorageProvider storageProvider)
+   public DiscoveryServicePortImpl(/*StorageProvider storageProvider*/)
    {
-      this.storageProvider = storageProvider;
+      //      this.storageProvider = storageProvider;
    }
 
    /**
@@ -76,7 +77,9 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
       try
       {
          String repositoryId = parameters.getRepositoryId();
-         conn = storageProvider.getConnection(repositoryId);
+         //         conn = storageProvider.getConnection(repositoryId);
+         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+
          String statement = parameters.getStatement();
          boolean allVersions =
             parameters.getSearchAllVersions() == null || parameters.getSearchAllVersions().isNil() ? false : parameters
@@ -112,7 +115,10 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -136,7 +142,9 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId);
+         //         conn = storageProvider.getConnection(repositoryId);
+         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+
          objects.value =
             TypeConverter.getCmisObjectListType(conn.getContentChanges(changeLogToken == null ? null
                : new ChangeLogTokenHolder(), //
@@ -153,7 +161,10 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 }

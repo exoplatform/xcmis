@@ -37,7 +37,6 @@ import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.IncludeRelationships;
@@ -58,9 +57,9 @@ public class CheckedOutCollection extends CmisObjectCollection
     * @param storageProvider TODO
     *
     */
-   public CheckedOutCollection(StorageProvider storageProvider)
+   public CheckedOutCollection(/*StorageProvider storageProvider*/)
    {
-      super(storageProvider);
+      super(/*storageProvider*/);
       setHref("/checkedout");
    }
 

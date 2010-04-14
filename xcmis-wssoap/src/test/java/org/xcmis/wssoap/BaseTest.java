@@ -43,9 +43,9 @@ import org.xcmis.core.CmisPropertyString;
 import org.xcmis.core.EnumBaseObjectTypeIds;
 import org.xcmis.core.EnumPropertiesRelationship;
 import org.xcmis.spi.CmisConstants;
+import org.xcmis.spi.CmisStorageInitializer;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ItemsList;
-import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.VersioningState;
@@ -63,7 +63,7 @@ public abstract class BaseTest extends TestCase
 
    protected StandaloneContainer container;
 
-   protected StorageProvider storageProvider;
+   //   protected StorageProvider storageProvider;
 
    protected Connection conn;
 
@@ -81,9 +81,10 @@ public abstract class BaseTest extends TestCase
       ConversationState state = new ConversationState(new Identity("root"));
       ConversationState.setCurrent(state);
 
-      storageProvider = (StorageProvider)container.getComponentInstanceOfType(StorageProvider.class);
+      //      storageProvider = (StorageProvider)container.getComponentInstanceOfType(StorageProvider.class);
 
-      conn = storageProvider.getConnection(repositoryId);
+      //      conn = storageProvider.getConnection(repositoryId);
+      conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
 
       rootFolderId = conn.getStorage().getRepositoryInfo().getRootFolderId();
       try
@@ -104,7 +105,7 @@ public abstract class BaseTest extends TestCase
     * @param address string service address
     * @param object service object
     * @param inInterceptors List<AbstractPhaseInterceptor> in interceptors
-    * @param outInterceptors  List<AbstractPhaseInterceptor> out interceptorss
+    * @param outInterceptors List<AbstractPhaseInterceptor> out interceptorss
     * @param wrapped boolean
     * @return server instance
     */

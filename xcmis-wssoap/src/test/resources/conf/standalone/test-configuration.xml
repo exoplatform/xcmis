@@ -31,6 +31,10 @@
    </component>
    
    <component>
+      <type>org.xcmis.spi.deploy.ExoContainerCmisStorageInitializer</type>
+   </component>
+
+   <component>
       <key>org.exoplatform.services.document.DocumentReaderService</key>
       <type>org.xcmis.spi.utils.CmisDocumentReaderSercice</type>
    </component>

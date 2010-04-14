@@ -27,8 +27,8 @@ import org.xcmis.messaging.CmisACLType;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.soap.ACLServicePort;
 import org.xcmis.soap.CmisException;
+import org.xcmis.spi.CmisStorageInitializer;
 import org.xcmis.spi.Connection;
-import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.AccessControlPropagation;
 
@@ -52,16 +52,16 @@ public class ACLServicePortImpl implements ACLServicePort
    private static final Log LOG = ExoLogger.getLogger(ACLServicePortImpl.class);
 
    /** StorageProvider. */
-   private final StorageProvider storageProvider;
+   //   private final StorageProvider storageProvider;
 
    /**
     * Constructs instance of <code>ACLServicePortImpl</code>.
     *
     * @param storageProvider StorageProvider
     */
-   public ACLServicePortImpl(StorageProvider storageProvider)
+   public ACLServicePortImpl(/*StorageProvider storageProvider*/)
    {
-      this.storageProvider = storageProvider;
+      //      this.storageProvider = storageProvider;
    }
 
    /**
@@ -78,7 +78,8 @@ public class ACLServicePortImpl implements ACLServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId);
+         //         conn = storageProvider.getConnection(repositoryId);
+         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
          conn.applyACL(objectId, //
             TypeConverter.convertAccessControlEntryList(addACEs.getPermission()), //
             TypeConverter.convertAccessControlEntryList(removeACEs.getPermission()), //
@@ -94,7 +95,10 @@ public class ACLServicePortImpl implements ACLServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -112,7 +116,9 @@ public class ACLServicePortImpl implements ACLServicePort
 
       try
       {
-         conn = storageProvider.getConnection(repositoryId);
+         //         conn = storageProvider.getConnection(repositoryId);
+         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+
          List<AccessControlEntry> list =
             conn.getACL(objectId, onlyBasicPermissions == null ? true : onlyBasicPermissions);
          CmisAccessControlListType type = TypeConverter.getCmisAccessControlListType(list);
@@ -127,7 +133,10 @@ public class ACLServicePortImpl implements ACLServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 

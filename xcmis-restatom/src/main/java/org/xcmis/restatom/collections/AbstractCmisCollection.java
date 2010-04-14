@@ -37,8 +37,8 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.ProviderImpl;
+import org.xcmis.spi.CmisStorageInitializer;
 import org.xcmis.spi.Connection;
-import org.xcmis.spi.StorageProvider;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -57,15 +57,16 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
    private static final Log LOG = ExoLogger.getLogger(AbstractCmisCollection.class);
 
    /** The Storage provider */
-   protected StorageProvider storageProvider;
+   //   protected StorageProvider storageProvider;
 
    /**
     * Instantiates a new abstract cmis collection.
+    *
     * @param storageProvider TODO
     */
-   public AbstractCmisCollection(StorageProvider storageProvider)
+   public AbstractCmisCollection(/*StorageProvider storageProvider*/)
    {
-      this.storageProvider = storageProvider;
+      //      this.storageProvider = storageProvider;
    }
 
    /**
@@ -117,7 +118,7 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
     * @param maxItems max items in each response
     * @param skipCount number of skipped results from the begin of set
     * @param total total number items in result set. If total number is unknown
-    *           then this parameter must be set as -1.
+    *        then this parameter must be set as -1.
     * @param hasMore true if has more items in result set false otherwise
     * @param request request context
     */
@@ -261,6 +262,7 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
 
    /**
     * Get id of CMIS repository.
+    *
     * @param request RequestContext
     * @return repositoryId string
     */
@@ -292,7 +294,8 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
     */
    protected Connection getConnection(RequestContext request)
    {
-      return storageProvider.getConnection(getRepositoryId(request));
+      //      return storageProvider.getConnection(getRepositoryId(request));
+      return CmisStorageInitializer.getInstance().getConnection(getRepositoryId(request));
    }
 
    protected boolean getBooleanParameter(RequestContext request, String name, boolean defaultValue)

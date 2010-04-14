@@ -37,7 +37,6 @@ import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.Property;
@@ -59,9 +58,9 @@ public class PoliciesCollection extends CmisObjectCollection
     * Instantiates a new policies collection.
     * @param storageProvider TODO
     */
-   public PoliciesCollection(StorageProvider storageProvider)
+   public PoliciesCollection(/*StorageProvider storageProvider*/)
    {
-      super(storageProvider);
+      super(/*storageProvider*/);
       setHref("/policies");
    }
 

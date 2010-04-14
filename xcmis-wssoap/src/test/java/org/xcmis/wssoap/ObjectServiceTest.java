@@ -33,8 +33,8 @@ import org.xcmis.messaging.CmisContentStreamType;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.soap.ObjectServicePort;
 import org.xcmis.spi.BaseContentStream;
-import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ChangeTokenHolder;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.ObjectNotFoundException;
@@ -61,7 +61,7 @@ public class ObjectServiceTest extends BaseTest
    public void setUp() throws Exception
    {
       super.setUp();
-      server = complexDeployService(SERVICE_ADDRESS, new ObjectServicePortImpl(storageProvider), null, null, true);
+      server = complexDeployService(SERVICE_ADDRESS, new ObjectServicePortImpl(/*storageProvider*/), null, null, true);
       port = getObjectService(SERVICE_ADDRESS);
       assertNotNull(server);
       assertNotNull(port);
@@ -293,7 +293,7 @@ public class ObjectServiceTest extends BaseTest
       String id = createDocument(testFolderId, "doc1");
       CmisObjectType obj = port.getObject(//
          repositoryId, //
-         id, // 
+         id, //
          null, // Property filter
          false, // Allowable actions
          EnumIncludeRelationships.NONE, //
@@ -334,11 +334,11 @@ public class ObjectServiceTest extends BaseTest
          repositoryId, //
          hId, //
          targetId, // Target folder
-         testFolderId, // Source folder 
+         testFolderId, // Source folder
          new Holder<CmisExtensionType>() // Extension
          );
       assertEquals(id, hId.value);
-      // Check it is moved. 
+      // Check it is moved.
       CmisObjectType moved = port.getObjectByPath(//
          repositoryId, //
          "/testFolder/folder1/doc1234", // 'testFolder' is root folder for test
@@ -380,7 +380,7 @@ public class ObjectServiceTest extends BaseTest
 
    /**
     * Get object service.
-    * 
+    *
     * @return TicketOrderService
     */
    private ObjectServicePort getObjectService(String address)

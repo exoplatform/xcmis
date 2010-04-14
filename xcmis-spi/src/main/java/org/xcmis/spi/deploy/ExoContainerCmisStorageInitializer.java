@@ -1,4 +1,5 @@
 package org.xcmis.spi.deploy;
+
 /*
  * Copyright (C) 2010 eXo Platform SAS.
  *
@@ -17,30 +18,50 @@ package org.xcmis.spi.deploy;
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-import org.xcmis.spi.CmisService;
+import org.exoplatform.container.ExoContainer;
+import org.exoplatform.container.ExoContainerContext;
+import org.picocontainer.Startable;
+import org.xcmis.spi.CmisStorageInitializer;
 import org.xcmis.spi.StorageProvider;
+
+import java.util.List;
+
+
 /**
  * @version $Id:$
  */
-public class SingletonCmisService extends CmisService {
-  
-  static private CmisService instance = null; 
-  
-  public static CmisService setInstance(CmisService inst)
-  {
-    if(instance == null)
-     instance = inst;
-    return instance;
-  }
-  
-  public static CmisService getInstance()
-  {
-    return instance;
-  }
-  
-  public final void addStorage(String id, StorageProvider storageProvider) 
-  {
-    this.storageProviders.put(id, storageProvider);
-  }
+public class ExoContainerCmisStorageInitializer extends CmisStorageInitializer implements Startable
+{
+
+   @SuppressWarnings("unchecked")
+   public ExoContainerCmisStorageInitializer(ExoContainerContext containerContext)
+   {
+      ExoContainer container = containerContext.getContainer();
+
+      List<StorageProvider> sps = container.getComponentInstancesOfType(StorageProvider.class);
+
+      for (StorageProvider sp : sps)
+      {
+         for (String id : sp.getStorageIDs())
+         {
+            addStorage(id, sp);
+         }
+      }
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public void start()
+   {
+      setInstance(this);
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public void stop()
+   {
+   }
 
 }

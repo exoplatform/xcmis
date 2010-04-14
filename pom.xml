@@ -163,6 +163,11 @@
          </dependency>
          <dependency>
             <groupId>org.xcmis</groupId>
+            <artifactId>xcmis-sp-inmemory</artifactId>
+            <version>${project.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>org.xcmis</groupId>
             <artifactId>xcmis-restatom</artifactId>
             <version>${project.version}</version>
          </dependency>

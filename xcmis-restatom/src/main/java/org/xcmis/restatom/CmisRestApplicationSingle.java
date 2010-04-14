@@ -37,11 +37,11 @@ public class CmisRestApplicationSingle extends Application
 
    /**
     * Instantiates a new cmis rest application single.
-    * 
+    *
     */
    public CmisRestApplicationSingle()
    {
-      singleton.add(new AtomCmisService(null));
+      singleton.add(new AtomCmisService());
       singleton.add(new AbderaResponseEntityProvider());
       singleton.add(new AbderaElementEntityProvider());
    }

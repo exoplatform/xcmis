@@ -34,7 +34,6 @@ import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.IncludeRelationships;
 
@@ -52,9 +51,9 @@ public class FolderDescentantsCollection extends CmisObjectCollection
     * Instantiates a new folder descentants collection.
     * @param storageProvider TODO
     */
-   public FolderDescentantsCollection(StorageProvider storageProvider)
+   public FolderDescentantsCollection(/*StorageProvider storageProvider*/)
    {
-      super(storageProvider);
+      super(/*storageProvider*/);
       setHref("/descendants");
    }
 
@@ -78,7 +77,7 @@ public class FolderDescentantsCollection extends CmisObjectCollection
 
    /**
     * Recursively discovery all levels.
-    * 
+    *
     * @param entry current parent entry
     * @param children children
     * @param feedIri root level feed IRI

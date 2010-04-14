@@ -32,7 +32,6 @@ import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.ObjectParent;
@@ -49,11 +48,11 @@ public class ParentsCollection extends CmisObjectCollection
    /**
     * Instantiates a new parents collection.
     * @param storageProvider TODO
-    * 
+    *
     */
-   public ParentsCollection(StorageProvider storageProvider)
+   public ParentsCollection(/*StorageProvider storageProvider*/)
    {
-      super(storageProvider);
+      super(/*storageProvider*/);
       setHref("/parents");
    }
 
@@ -76,7 +75,7 @@ public class ParentsCollection extends CmisObjectCollection
 
    /**
     * Adds the feed details.
-    * 
+    *
     * @param feed the feed
     * @param request the request
     * @throws ResponseContextException the response context exception

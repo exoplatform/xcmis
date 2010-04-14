@@ -42,10 +42,10 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xcmis.restatom.abdera.CMISExtensionFactory;
 import org.xcmis.spi.CmisConstants;
+import org.xcmis.spi.CmisStorageInitializer;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.ItemsList;
-import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.ObjectParent;
@@ -94,7 +94,7 @@ public abstract class BaseTest extends TestCase
 
    protected XPath xp;
 
-   protected StorageProvider storageProvider;
+   //   protected StorageProvider storageProvider;
 
    protected Connection conn;
 
@@ -113,7 +113,7 @@ public abstract class BaseTest extends TestCase
       container = StandaloneContainer.getInstance();
       requestHandler = (RequestHandlerImpl)container.getComponentInstanceOfType(RequestHandlerImpl.class);
 
-      storageProvider = (StorageProvider)container.getComponentInstanceOfType(StorageProvider.class);
+      //      storageProvider = (StorageProvider)container.getComponentInstanceOfType(StorageProvider.class);
 
       Abdera abdera = new Abdera();
       factory = abdera.getFactory();
@@ -122,7 +122,8 @@ public abstract class BaseTest extends TestCase
       ConversationState state = new ConversationState(new Identity("root"));
       ConversationState.setCurrent(state);
 
-      conn = storageProvider.getConnection(cmisRepositoryId);
+      //      conn = storageProvider.getConnection(cmisRepositoryId);
+      conn = CmisStorageInitializer.getInstance().getConnection(cmisRepositoryId);
 
       rootFolderId = conn.getStorage().getRepositoryInfo().getRootFolderId();
 

@@ -32,7 +32,6 @@ import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.IncludeRelationships;
 
@@ -49,9 +48,9 @@ public class FolderTreeCollection extends FolderDescentantsCollection
     * Instantiates a new folder tree collection.
     * @param storageProvider TODO
     */
-   public FolderTreeCollection(StorageProvider storageProvider)
+   public FolderTreeCollection(/*StorageProvider storageProvider*/)
    {
-      super(storageProvider);
+      super(/*storageProvider*/);
       setHref("/foldertree");
    }
 

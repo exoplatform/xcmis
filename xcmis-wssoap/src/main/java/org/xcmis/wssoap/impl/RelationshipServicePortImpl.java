@@ -27,15 +27,16 @@ import org.xcmis.messaging.CmisObjectListType;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.RelationshipServicePort;
 import org.xcmis.spi.CmisConstants;
+import org.xcmis.spi.CmisStorageInitializer;
 import org.xcmis.spi.Connection;
-import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.model.RelationshipDirection;
 
 import java.math.BigInteger;
 
 /**
  * @author <a href="mailto:max.shaposhnik@exoplatform.com">Max Shaposhnik</a>
- * @version $Id: RelationshipServicePortImpl.java 2 2010-02-04 17:21:49Z andrew00x $
+ * @version $Id: RelationshipServicePortImpl.java 2 2010-02-04 17:21:49Z
+ *          andrew00x $
  */
 @javax.jws.WebService(// name = "RelationshipServicePort",
 serviceName = "RelationshipService", //
@@ -51,16 +52,16 @@ public class RelationshipServicePortImpl implements RelationshipServicePort
    private static final Log LOG = ExoLogger.getLogger(RelationshipServicePortImpl.class);
 
    /** StorageProvider. */
-   private final StorageProvider storageProvider;
+   //   private final StorageProvider storageProvider;
 
    /**
     * Constructs instance of <code>RelationshipServicePortImpl</code> .
     *
     * @param relationshipService RelationshipService
     */
-   public RelationshipServicePortImpl(StorageProvider storageProvider)
+   public RelationshipServicePortImpl(/*StorageProvider storageProvider*/)
    {
-      this.storageProvider = storageProvider;
+      //      this.storageProvider = storageProvider;
    }
 
    /**
@@ -85,7 +86,9 @@ public class RelationshipServicePortImpl implements RelationshipServicePort
 
       try
       {
-         conn = storageProvider.getConnection(repositoryId);
+//         conn = storageProvider.getConnection(repositoryId);
+         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+
          return TypeConverter.getCmisObjectListType(conn.getObjectRelationships(
             objectId, //
             relationshipDirection == null ? RelationshipDirection.SOURCE : RelationshipDirection
@@ -105,7 +108,10 @@ public class RelationshipServicePortImpl implements RelationshipServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 }

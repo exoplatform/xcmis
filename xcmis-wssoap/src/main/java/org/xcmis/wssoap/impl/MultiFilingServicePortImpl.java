@@ -24,12 +24,13 @@ import org.exoplatform.services.log.Log;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.MultiFilingServicePort;
+import org.xcmis.spi.CmisStorageInitializer;
 import org.xcmis.spi.Connection;
-import org.xcmis.spi.StorageProvider;
 
 /**
  * @author <a href="mailto:max.shaposhnik@exoplatform.com">Max Shaposhnik</a>
- * @version $Id: MultiFilingServicePortImpl.java 2 2010-02-04 17:21:49Z andrew00x $
+ * @version $Id: MultiFilingServicePortImpl.java 2 2010-02-04 17:21:49Z
+ *          andrew00x $
  */
 @javax.jws.WebService(// name = "MultiFilingServicePort",
 serviceName = "MultiFilingService", //
@@ -45,16 +46,16 @@ public class MultiFilingServicePortImpl implements MultiFilingServicePort
    private static final Log LOG = ExoLogger.getLogger(MultiFilingServicePortImpl.class);
 
    /** StorageProvider . */
-   private final StorageProvider storageProvider;
+   //   private final StorageProvider storageProvider;
 
    /**
     * Constructs instance of <code>MultiFilingServicePortImpl</code> .
     *
     * @param storageProvider StorageProvider
     */
-   public MultiFilingServicePortImpl(StorageProvider storageProvider)
+   public MultiFilingServicePortImpl(/*StorageProvider storageProvider*/)
    {
-      this.storageProvider = storageProvider;
+      //      this.storageProvider = storageProvider;
    }
 
    /**
@@ -70,7 +71,9 @@ public class MultiFilingServicePortImpl implements MultiFilingServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId);
+         //         conn = storageProvider.getConnection(repositoryId);
+         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+
          conn.addObjectToFolder(objectId, folderId, allVersions);
       }
       catch (Exception e)
@@ -80,7 +83,10 @@ public class MultiFilingServicePortImpl implements MultiFilingServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
       return new CmisExtensionType();
    }
@@ -98,7 +104,9 @@ public class MultiFilingServicePortImpl implements MultiFilingServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId);
+         //         conn = storageProvider.getConnection(repositoryId);
+         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+
          conn.removeObjectFromFolder(objectId, folderId);
       }
       catch (Exception e)
@@ -108,7 +116,10 @@ public class MultiFilingServicePortImpl implements MultiFilingServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
       return new CmisExtensionType();
    }

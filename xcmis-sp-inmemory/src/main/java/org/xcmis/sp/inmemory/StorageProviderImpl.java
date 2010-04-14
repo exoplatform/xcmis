@@ -101,7 +101,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
 
    public Set<String> getStorageIDs()
    {
-      return Collections.unmodifiableSet(storageImpls.keySet());
+      return Collections.unmodifiableSet(storagesConfig.keySet());
    }
 
    /**

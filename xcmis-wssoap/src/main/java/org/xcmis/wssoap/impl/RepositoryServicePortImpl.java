@@ -29,8 +29,8 @@ import org.xcmis.messaging.CmisTypeDefinitionListType;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.RepositoryServicePort;
 import org.xcmis.spi.CmisConstants;
+import org.xcmis.spi.CmisStorageInitializer;
 import org.xcmis.spi.Connection;
-import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.model.RepositoryInfo;
 
 import java.math.BigInteger;
@@ -40,7 +40,8 @@ import java.util.Set;
 
 /**
  * @author <a href="mailto:max.shaposhnik@exoplatform.com">Max Shaposhnik</a>
- * @version $Id: RepositoryServicePortImpl.java 2 2010-02-04 17:21:49Z andrew00x $
+ * @version $Id: RepositoryServicePortImpl.java 2 2010-02-04 17:21:49Z andrew00x
+ *          $
  */
 @javax.jws.WebService(// name = "RepositoryServicePort",
 serviceName = "RepositoryService", //
@@ -55,16 +56,16 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
    private static final Log LOG = ExoLogger.getLogger(RepositoryServicePortImpl.class);
 
    /** StorageProvider. */
-   private final StorageProvider storageProvider;
+   //   private final StorageProvider storageProvider;
 
    /**
     * Constructs instance of <code>RepositoryServicePortImpl</code> .
     *
     * @param repoService RepositoryService
     */
-   public RepositoryServicePortImpl(StorageProvider storageProvider)
+   public RepositoryServicePortImpl(/*StorageProvider storageProvider*/)
    {
-      this.storageProvider = storageProvider;
+      //      this.storageProvider = storageProvider;
    }
 
    /**
@@ -76,20 +77,39 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
       {
          LOG.debug("Executing operation getRepositories");
       }
+      //      Set<String> entries = storageProvider.getStorageIDs();
+      Set<String> entries = CmisStorageInitializer.getInstance().getStorageIDs();
+
       Connection conn = null;
-      Set<String> entries = storageProvider.getStorageIDs();
-      List<CmisRepositoryEntryType> res = new ArrayList<CmisRepositoryEntryType>();
-      for (String storageId : entries)
+
+      try
       {
-         conn = storageProvider.getConnection(storageId);
-         RepositoryInfo repoInfo = conn.getStorage().getRepositoryInfo();
-         CmisRepositoryEntryType type = new CmisRepositoryEntryType();
-         type.setRepositoryId(repoInfo.getRepositoryId());
-         type.setRepositoryName(repoInfo.getRepositoryName());
-         res.add(type);
+         List<CmisRepositoryEntryType> res = new ArrayList<CmisRepositoryEntryType>();
+         for (String storageId : entries)
+         {
+            //         conn = storageProvider.getConnection(storageId);
+            conn = CmisStorageInitializer.getInstance().getConnection(storageId);
+
+            RepositoryInfo repoInfo = conn.getStorage().getRepositoryInfo();
+            CmisRepositoryEntryType type = new CmisRepositoryEntryType();
+            type.setRepositoryId(repoInfo.getRepositoryId());
+            type.setRepositoryName(repoInfo.getRepositoryName());
+            res.add(type);
+         }
+         return res;
       }
-      conn.close();
-      return res;
+      catch (Exception e)
+      {
+         LOG.error("Get type children error: " + e.getMessage(), e);
+         throw ExceptionFactory.generateException(e);
+      }
+      finally
+      {
+         if (conn != null)
+         {
+            conn.close();
+         }
+      }
    }
 
    /**
@@ -103,7 +123,9 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
          LOG.debug("Executing operation getRepositoryInfo");
       }
       Connection conn = null;
-      conn = storageProvider.getConnection(repositoryId);
+      //      conn = storageProvider.getConnection(repositoryId);
+      conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+
       return TypeConverter.getCmisRepositoryInfoType(conn.getStorage().getRepositoryInfo());
    }
 
@@ -124,7 +146,9 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId);
+         //         conn = storageProvider.getConnection(repositoryId);
+         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+
          return TypeConverter.getCmisTypeDefinitionListType(conn.getTypeChildren(typeId, //
             includePropertyDefinitions == null ? false : includePropertyDefinitions, //
             maxItems == null ? CmisConstants.MAX_ITEMS : maxItems.intValue(), //
@@ -137,7 +161,10 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
 
    }
@@ -155,7 +182,9 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId);
+         //         conn = storageProvider.getConnection(repositoryId);
+         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+
          return TypeConverter.getCmisTypeDefinitionType(conn.getTypeDefinition(typeId));
       }
       catch (Exception e)
@@ -165,7 +194,10 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -182,7 +214,9 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId);
+         //         conn = storageProvider.getConnection(repositoryId);
+         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+
          return TypeConverter.getCmisTypeContainer(conn.getTypeDescendants(typeId, //
             depth == null ? 1 : depth.intValue(), //
             includePropertyDefinitions == null ? false : includePropertyDefinitions));
@@ -194,7 +228,10 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 

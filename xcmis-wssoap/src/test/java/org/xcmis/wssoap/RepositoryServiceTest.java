@@ -58,7 +58,8 @@ public class RepositoryServiceTest extends BaseTest
    public void setUp() throws Exception
    {
       super.setUp();
-      server = complexDeployService(SERVICE_ADDRESS, new RepositoryServicePortImpl(storageProvider), null, null, true);
+      server =
+         complexDeployService(SERVICE_ADDRESS, new RepositoryServicePortImpl(/*storageProvider*/), null, null, true);
       port = getRepositoryService(SERVICE_ADDRESS);
       assertNotNull(server);
       assertNotNull(port);
