@@ -541,6 +541,7 @@
                <include>**/*.pdf</include>
                <include>**/*.xls</include>
                <include>**/*.ppt</include>
+               <include>**/*.jpg</include>
             </includes>
          </testResource>
       </testResources>
