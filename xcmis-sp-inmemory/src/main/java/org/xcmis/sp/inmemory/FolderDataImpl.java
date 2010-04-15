@@ -275,8 +275,6 @@ class FolderDataImpl extends BaseObjectData implements FolderData
       entry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));
       entry.setValue(CmisConstants.CHANGE_TOKEN, new StringValue(StorageImpl.generateId()));
 
-      entry.setValue(CmisConstants.PATH, new StringValue(calculatePath()));
-
       storage.properties.get(id).putAll(entry.getValues());
       storage.policies.get(id).addAll(entry.getPolicies());
       storage.permissions.get(id).putAll(entry.getPermissions());

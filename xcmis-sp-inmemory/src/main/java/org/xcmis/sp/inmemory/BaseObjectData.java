@@ -529,6 +529,12 @@ abstract class BaseObjectData implements ObjectData
    {
       // Check in updates for properties.
       Value value = entry.getValue(definition.getId());
+      if (value == null && CmisConstants.PATH.equals(definition.getId()) && type.getBaseId() == BaseType.FOLDER)
+      {
+         value = new StringValue(((FolderData)this).getPath());
+         // TODO check other virtual property
+      }
+
       return createProperty(definition, value);
    }
 
