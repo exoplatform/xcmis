@@ -37,35 +37,14 @@ public class Choice<T>
 
    private List<Choice<T>> choices;
 
-   /**
-    * Display name of choice. It is used for presentation purpose.
-    *
-    * @return choice display name
-    */
-   public String getDisplayName()
+   public Choice()
    {
-      return displayName;
    }
 
    public Choice(T[] values, String displayName)
    {
       this.values = values;
       this.displayName = displayName;
-   }
-
-   public Choice()
-   {
-   }
-
-   /**
-    * Values of choice. One of it will be stored as value of property it
-    * selected.
-    *
-    * @return choice values
-    */
-   public T[] getValues()
-   {
-      return values;
    }
 
    /**
@@ -84,13 +63,24 @@ public class Choice<T>
    }
 
    /**
-    * Set choice values.
+    * Display name of choice. It is used for presentation purpose.
     *
-    * @param values choice values
+    * @return choice display name
     */
-   public void setValues(T[] values)
+   public String getDisplayName()
    {
-      this.values = values;
+      return displayName;
+   }
+
+   /**
+    * Values of choice. One of it will be stored as value of property it
+    * selected.
+    *
+    * @return choice values
+    */
+   public T[] getValues()
+   {
+      return values;
    }
 
    /**
@@ -101,5 +91,15 @@ public class Choice<T>
    public void setDisplayName(String displayName)
    {
       this.displayName = displayName;
+   }
+
+   /**
+    * Set choice values.
+    *
+    * @param values choice values
+    */
+   public void setValues(T[] values)
+   {
+      this.values = values;
    }
 }
