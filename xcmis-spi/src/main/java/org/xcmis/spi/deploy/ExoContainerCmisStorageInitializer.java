@@ -33,11 +33,21 @@ import java.util.List;
 public class ExoContainerCmisStorageInitializer extends CmisStorageInitializer implements Startable
 {
 
-   @SuppressWarnings("unchecked")
+   private final ExoContainerContext containerContext;
+
    public ExoContainerCmisStorageInitializer(ExoContainerContext containerContext)
+   {
+      this.containerContext = containerContext;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public void start()
    {
       ExoContainer container = containerContext.getContainer();
 
+      @SuppressWarnings("unchecked")
       List<StorageProvider> sps = container.getComponentInstancesOfType(StorageProvider.class);
 
       for (StorageProvider sp : sps)
@@ -47,13 +57,7 @@ public class ExoContainerCmisStorageInitializer extends CmisStorageInitializer i
             addStorage(id, sp);
          }
       }
-   }
 
-   /**
-    * {@inheritDoc}
-    */
-   public void start()
-   {
       setInstance(this);
    }
 
