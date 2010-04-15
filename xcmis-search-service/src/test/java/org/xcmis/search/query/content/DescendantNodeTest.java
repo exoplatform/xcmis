@@ -16,66 +16,64 @@
  */
 package org.xcmis.search.query.content;
 
-import org.junit.Ignore;
+import org.junit.Test;
+import org.xcmis.search.InvalidQueryException;
+import org.xcmis.search.SearchServiceException;
+import org.xcmis.search.model.Query;
 
 /**
  * <code>DescendantNodeTest</code> contains test cases related to QOM
  * DescendantNode constraints.
  */
-@Ignore
 public class DescendantNodeTest extends AbstractQOMTest
 {
+   @Test
+   public void testDescendantNode() throws SearchServiceException, InvalidQueryException
+   {
+      Node n = testRootNode.addNode(nodeName1, testNodeType);
+      save(testRootNode);
+
+      Query query = qf.from(testNodeType + " AS s").where().isBelowPath("s", testRootNode.getPath()).end().query();
+      checkQOM(query, "s", new Node[]{n});
+   }
+
+   @Test
+   public void testDescendantNodes() throws SearchServiceException, InvalidQueryException
+   {
+      Node n1 = testRootNode.addNode(nodeName1, testNodeType);
+      Node n2 = testRootNode.addNode(nodeName2, testNodeType);
+      Node n21 = n2.addNode(nodeName1, testNodeType);
+      save(testRootNode);
+
+      Query query = qf.from(testNodeType + " AS s").where().isBelowPath("s", testRootNode.getPath()).end().query();
+
+      checkQOM(query, "s", new Node[]{n1, n2, n21});
+   }
+
+   @Test
+   public void testPathDoesNotExist() throws SearchServiceException, InvalidQueryException
+   {
+      Query query =
+         qf.from(testNodeType + " AS s").where().isBelowPath("s", testRootNode.getPath() + "/" + nodeName1).end()
+            .query();
+
+      checkQOM(query, "s", new Node[]{});
+   }
+
+   @Test
+   public void testDescendantNodesDoNotMatchSelector() throws SearchServiceException, InvalidQueryException
+   {
+      testRootNode.addNode(nodeName1, testNodeType);
+      save(testRootNode);
+
+      Query query =
+         qf.from(testNodeType2 + " AS s").where().isBelowPath("s", testRootNode.getPath() + "/" + nodeName1).end()
+            .query();
+
+      checkQOM(query, "s", new Node[]{});
+   }
    //
-   //    public void testDescendantNode() throws RepositoryException {
-   //        Node n = testRootNode.addNode(nodeName1, testNodeType);
-   //        superuser.save();
-   //
-   //        QueryObjectModel qom = qf.createQuery(qf.selector(testNodeType, "s"),
-   //                qf.descendantNode("s", testRoot), null, null);
-   //        checkQOM(qom, new Node[]{n});
-   //    }
-   //
-   //    public void testDescendantNodes() throws RepositoryException {
-   //        Node n1 = testRootNode.addNode(nodeName1, testNodeType);
-   //        Node n2 = testRootNode.addNode(nodeName2, testNodeType);
-   //        Node n21 = n2.addNode(nodeName1, testNodeType);
-   //        superuser.save();
-   //
-   //        QueryObjectModel qom = qf.createQuery(qf.selector(testNodeType, "s"),
-   //                qf.descendantNode("s", testRoot), null, null);
-   //        checkQOM(qom, new Node[]{n1, n2, n21});
-   //    }
-   //
-   //    public void testPathDoesNotExist() throws RepositoryException {
-   //        QueryObjectModel qom = qf.createQuery(qf.selector(testNodeType, "s"),
-   //                qf.descendantNode("s", testRoot + "/" + nodeName1),
-   //                null, null);
-   //        checkQOM(qom, new Node[]{});
-   //    }
-   //
-   //    public void testDescendantNodesDoNotMatchSelector()
-   //            throws RepositoryException, NotExecutableException {
-   //        testRootNode.addNode(nodeName1, testNodeType);
-   //        superuser.save();
-   //
-   //        NodeTypeManager ntMgr = superuser.getWorkspace().getNodeTypeManager();
-   //        NodeTypeIterator it = ntMgr.getPrimaryNodeTypes();
-   //        NodeType testNt = ntMgr.getNodeType(testNodeType);
-   //        while (it.hasNext()) {
-   //            NodeType nt = it.nextNodeType();
-   //            if (!testNt.isNodeType(nt.getName())) {
-   //                // perform test
-   //                QueryObjectModel qom = qf.createQuery(qf.selector(nt.getName(), "s"),
-   //                        qf.descendantNode("s", testRoot), null, null);
-   //                checkQOM(qom, new Node[]{});
-   //                return;
-   //            }
-   //        }
-   //        throw new NotExecutableException("No suitable node type found to " +
-   //                "perform test against '" + testNodeType + "' nodes");
-   //    }
-   //
-   //    public void testRelativePath() throws RepositoryException {
+   //    public void testRelativePath()  {
    //        try {
    //            Query q = qf.createQuery(qf.selector(testNodeType, "s"),
    //                    qf.descendantNode("s", testPath), null, null);
@@ -94,7 +92,7 @@ public class DescendantNodeTest extends AbstractQOMTest
    //        }
    //    }
    //
-   //    public void testSyntacticallyInvalidPath() throws RepositoryException {
+   //    public void testSyntacticallyInvalidPath()  {
    //        String invalidPath = testRoot + "/" + nodeName1 + "[";
    //        try {
    //            Query q = qf.createQuery(qf.selector(testNodeType, "s"),
@@ -114,7 +112,7 @@ public class DescendantNodeTest extends AbstractQOMTest
    //        }
    //    }
    //
-   //    public void testNotASelectorName() throws RepositoryException {
+   //    public void testNotASelectorName()  {
    //        try {
    //            Query q = qf.createQuery(qf.selector(testNodeType, "s"),
    //                    qf.descendantNode("x", testRoot), null, null);

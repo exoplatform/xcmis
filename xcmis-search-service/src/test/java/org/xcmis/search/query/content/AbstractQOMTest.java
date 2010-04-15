@@ -16,7 +16,12 @@
  */
 package org.xcmis.search.query.content;
 
+import org.xcmis.search.InvalidQueryException;
 import org.xcmis.search.model.Query;
+import org.xcmis.search.query.QueryExecutionException;
+import org.xcmis.search.result.ScoredRow;
+
+import java.util.List;
 
 /**
  * <code>AbstractQOMTest</code> is a base class for test cases on the JQOM.
@@ -101,23 +106,26 @@ public abstract class AbstractQOMTest extends AbstractQueryTest
    //      checkResult(qm.createQuery(qom.getStatement(), Query.JCR_SQL2).execute(), nodes);
    //   }
    //
-   //   /**
-   //    * Checks the query object model by executing it directly and matching the
-   //    * result against the given <code>nodes</code>. Then the QOM is executed
-   //    * again using {@link QueryObjectModel#getStatement()} with
-   //    * {@link Query#JCR_SQL2}.
-   //    *
-   //    * @param qom           the query object model to check.
-   //    * @param selectorNames the selector names of the qom.
-   //    * @param nodes         the result nodes.
-   //    * @throws RepositoryException if an error occurs while executing the
-   //    *                             query.
-   //    */
-   //   protected void checkQOM(QueryObjectModel qom, String[] selectorNames, Node[][] nodes) throws RepositoryException
-   //   {
-   //      checkResult(qom.execute(), selectorNames, nodes);
-   //      checkResult(qm.createQuery(qom.getStatement(), Query.JCR_SQL2).execute(), selectorNames, nodes);
-   //   }
+   /**
+    * Checks the query object model by executing it directly and matching the
+    * result against the given <code>nodes</code>. 
+   
+    *
+    * @param qom           the query object model to check.
+    * @param selectorNames the selector names of the qom.
+    * @param nodes         the result nodes.
+    * @throws InvalidQueryException 
+    * @throws QueryExecutionException 
+    * @throws RepositoryException if an error occurs while executing the
+    *                             query.
+    */
+   protected void checkQOM(Query query, String selectorName, Node[] nodes) throws QueryExecutionException,
+      InvalidQueryException
+   {
+      List<ScoredRow> result = searchService.execute(query);
+      checkResult(result, selectorName, nodes);
+   }
+
    //
    //   protected void checkResult(QueryResult result, String[] selectorNames, Node[][] nodes) throws RepositoryException
    //   {

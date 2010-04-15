@@ -42,6 +42,7 @@ import org.xcmis.search.content.InMemorySchema.Builder;
 import org.xcmis.search.content.Property.SimpleValue;
 import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.content.interceptors.ContentReaderInterceptor;
+import org.xcmis.search.lucene.InMemoryLuceneQueryableIndexStorage;
 import org.xcmis.search.lucene.content.SchemaTableResolver;
 import org.xcmis.search.model.Query;
 import org.xcmis.search.query.QueryBuilder;
@@ -125,19 +126,27 @@ public abstract class AbstractQueryTest
 
    protected String testNodeType = "testNodeType";
 
+   protected String testNodeType2 = "testNodeType2";
+
    protected String nodeName1 = "nodeName1";
 
    protected String nodeName2 = "nodeName2";
 
+   protected String nodeName3 = "nodeName3";
+
    protected String propertyName1 = "propertyName1";
 
    protected String propertyName2 = "propertyName2";
+
+   protected String propertyName4 = "propertyName4";
 
    private File tempDir;
 
    private Schema schema;
 
    protected SearchService searchService;
+
+   private String testRoot;
 
    /**
     * Set-up the configuration values used for the test. Per default retrieves
@@ -158,12 +167,14 @@ public abstract class AbstractQueryTest
       Builder schemaBuilder = InMemorySchema.createBuilder();
       schema =
          schemaBuilder.addTable(rootNodeType, propertyName1, propertyName2).addTable(testNodeType, propertyName1,
-            propertyName2).build();
+            propertyName2).addTable(testNodeType2, propertyName4).build();
       qf = new QueryBuilder(mock(CastSystem.class));
 
       testRootNode =
          new Node(null, "", new String[]{rootNodeType}, UUID.randomUUID().toString(),
             new String[]{Node.ROOT_PARENT_UUID}, new Property[0]);
+
+      //testRoot = testRootNode.getPath();
 
       //value
       NameConverter<String> nameConverter = new ToStringNameConverter();
@@ -175,6 +186,7 @@ public abstract class AbstractQueryTest
       indexConfuration.setRootParentUuid(testRootNode.getParentIdentifiers()[0]);
       indexConfuration.setRootUuid(testRootNode.getIdentifier());
       indexConfuration.setDocumentReaderService(mock(DocumentReaderService.class));
+      indexConfuration.setQueryableIndexStorage(InMemoryLuceneQueryableIndexStorage.class.getName());
 
       //search service configuration
       SearchServiceConfiguration configuration = new SearchServiceConfiguration();

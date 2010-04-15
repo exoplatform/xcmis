@@ -38,7 +38,7 @@ public class AndConstraintTest extends AbstractQueryTest
       n1.setProperty(propertyName2, "bar");
       Node n2 = testRootNode.addNode(nodeName2, testNodeType);
       n2.setProperty(propertyName2, "bar");
-      save(n1);
+      save(testRootNode);
 
       Query query =
          qf.from(testNodeType + " AS s").where().isChild("s", testRootNode.getPath()).and().hasProperty("s",
