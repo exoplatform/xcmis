@@ -69,7 +69,6 @@ import org.xcmis.spi.model.RepositoryInfo;
 import org.xcmis.spi.model.SupportedPermissions;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.UnfileObject;
-import org.xcmis.spi.model.Updatability;
 import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.model.Permission.BasicPermissions;
 import org.xcmis.spi.query.Query;
@@ -217,25 +216,19 @@ public class StorageImpl implements Storage
          nodeTypeValue.setPrimaryItemName("");
 
          List<PropertyDefinitionValue> jcrPropDefintions = null;
-         if (type.getPropertyDefinitions().size() > 0)
+         if (type.getPropertyDefinitions() != null && type.getPropertyDefinitions().size() > 0)
          {
             jcrPropDefintions = new ArrayList<PropertyDefinitionValue>();
 
             for (PropertyDefinition<?> propDef : type.getPropertyDefinitions())
             {
-               PropertyDefinitionValue jcrPropDef = new PropertyDefinitionValue();
-               jcrPropDef.setMandatory(propDef.isRequired());
-               jcrPropDef.setMultiple(propDef.isMultivalued());
-               jcrPropDef.setName(propDef.getId());
-               jcrPropDef.setOnVersion(OnParentVersionAction.COPY);
-               jcrPropDef.setReadOnly(propDef.getUpdatability() != null
-                  && propDef.getUpdatability() == Updatability.READONLY);
-
                if (propDef.getPropertyType() == null)
                {
                   String msg = "Property Type required.";
                   throw new InvalidArgumentException(msg);
                }
+
+               PropertyDefinitionValue jcrPropDef = new PropertyDefinitionValue();
 
                List<String> defaultValues = null;
 
@@ -322,8 +315,19 @@ public class StorageImpl implements Storage
                   jcrPropDef.setAutoCreate(false);
                }
 
-               jcrPropDefintions.add(jcrPropDef);
+               jcrPropDef.setMandatory(propDef.isRequired());
+               jcrPropDef.setMultiple(propDef.isMultivalued());
+               jcrPropDef.setName(propDef.getId());
+               jcrPropDef.setOnVersion(OnParentVersionAction.COPY);
 
+               //               jcrPropDef.setReadOnly(propDef.getUpdatability() != null
+               //                  && propDef.getUpdatability() == Updatability.READONLY);
+
+               // TODO May not set read-only for property definition at JCR level.
+               // In this case can't update property through JCR API.
+               jcrPropDef.setReadOnly(false);
+
+               jcrPropDefintions.add(jcrPropDef);
             }
 
             nodeTypeValue.setDeclaredPropertyDefinitionValues(jcrPropDefintions);

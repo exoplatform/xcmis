@@ -23,21 +23,22 @@ import org.xcmis.spi.CmisConstants;
 
 /**
  * Constants.
- * 
+ *
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id$
  */
 public interface JcrCMIS extends CmisConstants
 {
 
-   String EXO_CMIS_NS_URI = "http://www.exoplatform.com/jcr/cmis/1.0";
-   
+   //   String EXO_CMIS_NS_URI = "http://www.exoplatform.com/jcr/cmis/1.0";
+   String EXO_CMIS_NS_URI = "";
+
    // --- CMIS node-types ---
 
    String CMIS_MIX_OBJECT = "cmis:object";
 
    String CMIS_MIX_DOCUMENT = "cmis:document";
-   
+
    String CMIS_MIX_FOLDER = "cmis:folder";
 
    String CMIS_NT_RELATIONSHIP = "cmis:relationship";
@@ -45,13 +46,13 @@ public interface JcrCMIS extends CmisConstants
    String CMIS_NT_POLICY = "cmis:policy";
 
    String CMIS_NT_RENDITION = "xcmis:rendition";
-   
+
    String CMIS_SYSTEM_NODETYPE = "xcmis:system";
-   
+
    String ROOT_FOLDER_ID = org.exoplatform.services.jcr.impl.Constants.ROOT_UUID;
-   
+
    // --- Renditions ---
-   
+
    String CMIS_RENDITION_STREAM = "xcmis:renditionStream";
 
    String CMIS_RENDITION_MIME_TYPE = "xcmis:renditionMimeType";
@@ -61,7 +62,7 @@ public interface JcrCMIS extends CmisConstants
    String CMIS_RENDITION_HEIGHT = "xcmis:renditionHeight";
 
    String CMIS_RENDITION_WIDTH = "xcmis:renditionWidth";
-   
+
    // JCR stuff
 
    String NT_FROZEN_NODE = "nt:frozenNode";
@@ -83,7 +84,7 @@ public interface JcrCMIS extends CmisConstants
    String JCR_CONTENT = "jcr:content";
 
    String JCR_CREATED = "jcr:created";
-   
+
    String JCR_VERSION_HISTORY = "jcr:versionHistory";
 
    String JCR_FROZEN_NODE = "jcr:frozenNode";
