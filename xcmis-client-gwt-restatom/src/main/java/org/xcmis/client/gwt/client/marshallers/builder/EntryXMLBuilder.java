@@ -41,7 +41,7 @@ public class EntryXMLBuilder
    {
       throw new UnsupportedOperationException(); // prevents calls from subclass
    }
-   
+
    /**
     * XML.
     */
@@ -107,8 +107,8 @@ public class EntryXMLBuilder
       String request = XML + document.toString().trim();
       if (request.indexOf(XMLNS.getNamespaceURI()) == -1)
       {
-         return request.replaceAll("<" + CMIS.ENTRY, "<" + CMIS.ENTRY + " " 
-            + XMLNS.getLocalName() + "=" + "\"" + XMLNS.getNamespaceURI() + "\" ");
+         return request.replaceAll("<" + CMIS.ENTRY, "<" + CMIS.ENTRY + " " + XMLNS.getLocalName() + "=" + "\""
+            + XMLNS.getNamespaceURI() + "\" ");
       }
       return request;
    }

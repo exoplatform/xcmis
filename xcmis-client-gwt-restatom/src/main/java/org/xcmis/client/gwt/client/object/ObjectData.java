@@ -48,19 +48,16 @@ public class ObjectData
       }
    }
 
-
    /**
     * @param entry entry
     */
    public static void extractData(AtomEntry entry)
    {
       CmisObject object = entry.getObject();
-      
-      ObjectInfo objectInfo = new ObjectInfo();
 
-      EnumBaseObjectTypeIds baseTypeId =
-         EnumBaseObjectTypeIds.fromValue(object.getProperties().getId(CMIS.CMIS_BASE_TYPE_ID));
-      objectInfo.setBaseType(baseTypeId);
+      ObjectInfo objectInfo = new ObjectInfo();
+      String baseTypeId = object.getProperties().getId(CMIS.CMIS_BASE_TYPE_ID);
+      objectInfo.setBaseType(EnumBaseObjectTypeIds.fromValue(baseTypeId));
       objectInfo.setTypeId(object.getProperties().getId(CMIS.CMIS_OBJECT_TYPE_ID));
       objectInfo.setId(object.getProperties().getId(CMIS.CMIS_OBJECT_ID));
       objectInfo.setName(object.getProperties().getString(CMIS.CMIS_NAME));
@@ -71,45 +68,43 @@ public class ObjectData
       objectInfo.setChangeToken(object.getProperties().getString(CMIS.CMIS_CHANGE_TOKEN));
 
       // Object is  cmis:folder - create instance of Folder
-      if (baseTypeId.equals(EnumBaseObjectTypeIds.CMIS_FOLDER))
+      if (baseTypeId != null && objectInfo.getBaseType().equals(EnumBaseObjectTypeIds.CMIS_FOLDER))
       {
          CmisFolderImpl newObject = new CmisFolderImpl(object, object.getProperties().getId(CMIS.CMIS_PARENT_ID));
          entry.setObject(newObject);
       }
       // Object is cmis:document - create instance of Document
-      else if (baseTypeId.equals(EnumBaseObjectTypeIds.CMIS_DOCUMENT))
+      else if (baseTypeId != null && objectInfo.getBaseType().equals(EnumBaseObjectTypeIds.CMIS_DOCUMENT))
       {
          CmisDocumentImpl newObject = new CmisDocumentImpl(object);
          newObject.setLatestVersion(object.getProperties().getBoolean(CMIS.CMIS_IS_LATEST_VERSION));
          newObject.setMajorVersion(object.getProperties().getBoolean(CMIS.CMIS_IS_MAJOR_VERSION));
-         newObject.setLatestMajorVersion(object.getProperties()
-            .getBoolean(CMIS.CMIS_IS_LATEST_MAJOR_VERSION));
-         newObject.setVersionSeriesCheckedOut(object.getProperties().getBoolean(
-            CMIS.CMIS_IS_VERSION_SERIES_CHECKEDOUT));
-         newObject.setVersionSeriesId(object.getProperties().getString(CMIS.CMIS_VERSION_SERIES_ID));
-         newObject.setVersionSeriesCheckedOutId(object.getProperties().getString(
-            CMIS.CMIS_VERSION_SERIES_CHECKEDOUT_ID));
-         newObject.setVersionSeriesCheckedOutBy(object.getProperties().getString(
-            CMIS.CMIS_VERSION_SERIES_CHECKEDOUT_BY));
-         newObject.setVersionLabel(object.getProperties().getString(CMIS.CMIS_VERSION_LABEL));
-         newObject.setContentStreamMimeType(object.getProperties().getString(
-            CMIS.CMIS_CONTENT_STREAM_MIME_TYPE));
+         newObject.setLatestMajorVersion(object.getProperties().getBoolean(CMIS.CMIS_IS_LATEST_MAJOR_VERSION));
          newObject
-            .setContentStreamLenght(object.getProperties().getInteger(CMIS.CMIS_CONTENT_STREAM_LENGTH));
+            .setVersionSeriesCheckedOut(object.getProperties().getBoolean(CMIS.CMIS_IS_VERSION_SERIES_CHECKEDOUT));
+         newObject.setVersionSeriesId(object.getProperties().getString(CMIS.CMIS_VERSION_SERIES_ID));
+         newObject.setVersionSeriesCheckedOutId(object.getProperties()
+            .getString(CMIS.CMIS_VERSION_SERIES_CHECKEDOUT_ID));
+         newObject.setVersionSeriesCheckedOutBy(object.getProperties()
+            .getString(CMIS.CMIS_VERSION_SERIES_CHECKEDOUT_BY));
+         newObject.setVersionLabel(object.getProperties().getString(CMIS.CMIS_VERSION_LABEL));
+         newObject.setContentStreamMimeType(object.getProperties().getString(CMIS.CMIS_CONTENT_STREAM_MIME_TYPE));
+         newObject.setContentStreamLenght(object.getProperties().getInteger(CMIS.CMIS_CONTENT_STREAM_LENGTH));
          entry.setObject(newObject);
-         
+
       }
       //Object is policy - create instance of Policy
-      else if ((baseTypeId.equals(EnumBaseObjectTypeIds.CMIS_POLICY)))
+      else if ((baseTypeId != null && objectInfo.getBaseType().equals(EnumBaseObjectTypeIds.CMIS_POLICY)))
       {
          CmisPolicyImpl newObject = new CmisPolicyImpl(object, object.getProperties().getString(CMIS.CMIS_POLICY_TEXT));
          entry.setObject(newObject);
       }
-    //Object is policy - create instance of Relationship
-      else if ((baseTypeId.equals(EnumBaseObjectTypeIds.CMIS_RELATIONSHIP)))
+      //Object is policy - create instance of Relationship
+      else if ((baseTypeId != null && objectInfo.getBaseType().equals(EnumBaseObjectTypeIds.CMIS_RELATIONSHIP)))
       {
-         CmisRelationshipImpl newObject = new CmisRelationshipImpl(object,object.getProperties().getId(CMIS.CMIS_SOURCE_ID),
-            object.getProperties().getId(CMIS.CMIS_TARGET_ID));
+         CmisRelationshipImpl newObject =
+            new CmisRelationshipImpl(object, object.getProperties().getId(CMIS.CMIS_SOURCE_ID), object.getProperties()
+               .getId(CMIS.CMIS_TARGET_ID));
          entry.setObject(newObject);
       }
       entry.getObject().setObjectInfo(objectInfo);

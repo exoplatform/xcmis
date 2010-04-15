@@ -302,9 +302,14 @@ public class ObjectXMLBuilder
       }
 
       object.appendChild(properties);
-      Element title = doc.createElement(CMIS.TITLE);
-      title.appendChild(doc.createTextNode(name));
-      entry.appendChild(title);
+
+      if (name != null && name.length() > 0)
+      {
+         Element title = doc.createElement(CMIS.TITLE);
+         title.appendChild(doc.createTextNode(name));
+         entry.appendChild(title);
+      }
+
       entry.appendChild(object);
       doc.appendChild(entry);
       return EntryXMLBuilder.createStringRequest(doc);
@@ -476,7 +481,6 @@ public class ObjectXMLBuilder
       return property;
    }
 
-  
    /**
     * @param doc xml document
     * @param type property type
@@ -494,7 +498,6 @@ public class ObjectXMLBuilder
       return property;
    }
 
-   
    /**
     * @param propertyType property type
     * @return {@link String} property type (name of thee xml element)

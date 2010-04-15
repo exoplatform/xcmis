@@ -119,6 +119,8 @@ public class AtomEntryParser
       while ((i >= 0) && (nodeList.getLength() > 0))
       {
          Node item = nodeList.item(i);
+         String value = (item.getFirstChild() == null) ? "" : item.getFirstChild().getNodeValue();
+
          if (item.getNodeName().equals(CMIS.ATOM_AUTHOR))
          {
             AtomAuthor author = AtomAuthorParser.parse(item);
@@ -144,39 +146,27 @@ public class AtomEntryParser
          }
          else if (item.getNodeName().equals(CMIS.ATOM_ID))
          {
-            String nodeValue = item.getFirstChild().getNodeValue();
-            entryInfo.setId(nodeValue);
+            entryInfo.setId(value);
             item.getParentNode().removeChild(item);
          }
          else if (item.getNodeName().equals(CMIS.ATOM_SUMMARY))
          {
-            if (item.getFirstChild() != null)
-            {
-               String nodeValue = item.getFirstChild().getNodeValue();
-               entryInfo.setSummary(nodeValue);
-            }
-            else
-            {
-               entryInfo.setSummary("");
-            }
+            entryInfo.setSummary(value);
             item.getParentNode().removeChild(item);
          }
          else if (item.getNodeName().equals(CMIS.ATOM_TITLE))
          {
-            String nodeValue = item.getFirstChild().getNodeValue();
-            entryInfo.setTitle(nodeValue);
+            entryInfo.setTitle(value);
             item.getParentNode().removeChild(item);
          }
          else if (item.getNodeName().equals(CMIS.ATOM_UPDATED))
          {
-            String nodeValue = item.getFirstChild().getNodeValue();
-            entryInfo.setUpdated(DateUtil.parseDate(nodeValue));
+            entryInfo.setUpdated(DateUtil.parseDate(value));
             item.getParentNode().removeChild(item);
          }
          else if (item.getNodeName().equals(CMIS.ATOM_PUBLISHED))
          {
-            String nodeValue = item.getFirstChild().getNodeValue();
-            entryInfo.setPublished(DateUtil.parseDate(nodeValue));
+            entryInfo.setPublished(DateUtil.parseDate(value));
             item.getParentNode().removeChild(item);
          }
          else if (item.getNodeName().equals(CMIS.ATOM_LINK))
