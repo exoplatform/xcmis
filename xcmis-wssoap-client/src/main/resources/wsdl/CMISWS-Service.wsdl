@@ -1147,7 +1147,7 @@
 	<service name="RepositoryService">
 		<port name="RepositoryServicePort" binding="cmisw:RepositoryServicePortBinding">
 			<soap:address
-				location="http://cmis/services/RepositoryService.RepositoryServicePort" />
+				location="http://xcmis.org:8083/xcmis/cmisws/RepositoryService/RepositoryServicePort" />
 		</port>
 	</service>
 	<service name="VersioningService">
