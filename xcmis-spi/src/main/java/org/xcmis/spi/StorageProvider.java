@@ -66,4 +66,10 @@ public interface StorageProvider
    // TODO : short info about storages, e.g. CmisRepositoryEntryType
    Set<String> getStorageIDs();
 
+   /**
+    * Adds rendition provider.
+    *
+    * @param object rendition provider
+    */
+   void addRenditionProvider(Object params);
 }

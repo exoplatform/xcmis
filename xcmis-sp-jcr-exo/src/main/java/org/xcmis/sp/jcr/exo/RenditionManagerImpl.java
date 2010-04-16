@@ -18,8 +18,8 @@
  */
 package org.xcmis.sp.jcr.exo;
 
-import org.xcmis.renditions.RenditionContentStream;
-import org.xcmis.renditions.RenditionProvider;
+import org.xcmis.spi.RenditionContentStream;
+import org.xcmis.spi.RenditionProvider;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.RenditionManager;

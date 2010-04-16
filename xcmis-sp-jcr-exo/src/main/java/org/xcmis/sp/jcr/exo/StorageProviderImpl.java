@@ -43,7 +43,7 @@ import org.xcmis.sp.jcr.exo.index.CmisContentReader;
 import org.xcmis.sp.jcr.exo.index.CmisSchema;
 import org.xcmis.sp.jcr.exo.index.CmisSchemaTableResolver;
 import org.xcmis.sp.jcr.exo.index.IndexListener;
-import org.xcmis.renditions.RenditionProvider;
+import org.xcmis.spi.RenditionProvider;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.Connection;
@@ -189,10 +189,10 @@ public class StorageProviderImpl implements StorageProvider, Startable
             storageConfigs.put(conf.getId(), conf);
          }
 
-         if (confs.getRenditionProviders() != null)
-         {
-            addRenditionProviders(confs.getRenditionProviders());
-         }
+//         if (confs.getRenditionProviders() != null)
+//         {
+//            addRenditionProviders(confs.getRenditionProviders());
+//         }
       }
       else
       {
@@ -469,15 +469,12 @@ public class StorageProviderImpl implements StorageProvider, Startable
       return storageConfigs.get(id);
    }
 
-   private void addRenditionProviders(List<Object> params)
+   public void addRenditionProvider(Object prov)
    {
-      for (Object prov : params)
-      {
          for (String mimeType : ((RenditionProvider)prov).getSupportedMediaType())
          {
             renditionProviders.put(MimeType.fromString(mimeType), (RenditionProvider)prov);
          }
-      }
-
+     
    }
 }

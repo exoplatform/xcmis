@@ -122,6 +122,13 @@ public class StorageProviderImpl implements StorageProvider, Startable
    {
 
    }
+   
+   /**
+    *@override 
+    */
+   public void addRenditionProvider(Object prov){
+      
+   }
 
    public static class StorageProviderConfig
    {

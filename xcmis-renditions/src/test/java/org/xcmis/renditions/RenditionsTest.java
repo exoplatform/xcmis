@@ -19,7 +19,7 @@
 
 package org.xcmis.renditions;
 
-import org.xcmis.renditions.RenditionContentStream;
+import org.xcmis.spi.RenditionContentStream;
 import org.xcmis.renditions.impl.PDFDocumentRenditionProvider;
 import org.xcmis.renditions.impl.ImageRenditionProvider;
 import org.xcmis.spi.BaseContentStream;

@@ -20,12 +20,17 @@ package org.xcmis.spi.deploy;
  */
 import org.exoplatform.container.ExoContainer;
 import org.exoplatform.container.ExoContainerContext;
+import org.exoplatform.container.xml.InitParams;
+import org.exoplatform.container.xml.ValuesParam;
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
 import org.picocontainer.Startable;
 import org.xcmis.spi.CmisStorageInitializer;
 import org.xcmis.spi.StorageProvider;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-
 
 /**
  * @version $Id:$
@@ -35,9 +40,26 @@ public class ExoContainerCmisStorageInitializer extends CmisStorageInitializer i
 
    private final ExoContainerContext containerContext;
 
-   public ExoContainerCmisStorageInitializer(ExoContainerContext containerContext)
+   private List<String> providers = new ArrayList<String>();
+   
+   private static final Log LOG = ExoLogger.getLogger(ExoContainerCmisStorageInitializer.class);
+
+   public ExoContainerCmisStorageInitializer(ExoContainerContext containerContext, InitParams initParams)
    {
       this.containerContext = containerContext;
+
+      if (initParams != null)
+      {
+         Iterator<ValuesParam> vparams = initParams.getValuesParamIterator();
+         while (vparams.hasNext())
+         {
+            ValuesParam next = vparams.next();
+            if (next.getName().equalsIgnoreCase("renditionProviders"))
+            {
+               this.providers.addAll(next.getValues());
+            }
+         }
+      }
    }
 
    /**
@@ -52,6 +74,17 @@ public class ExoContainerCmisStorageInitializer extends CmisStorageInitializer i
 
       for (StorageProvider sp : sps)
       {
+            for (String prov : providers)
+            {
+               try
+               {
+                  sp.addRenditionProvider(Class.forName(prov).newInstance());
+               }
+               catch (Exception e)
+               {
+                  LOG.error("Cannot instatiate rendition provider instance: ", e);
+               }
+            }
          for (String id : sp.getStorageIDs())
          {
             addStorage(id, sp);

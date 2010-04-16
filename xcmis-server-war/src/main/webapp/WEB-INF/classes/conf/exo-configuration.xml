@@ -33,6 +33,14 @@
 
 	<component>
 		<type>org.xcmis.spi.deploy.ExoContainerCmisStorageInitializer</type>
+                 <init-params>
+			<values-param>
+				<name>renditionProviders</name>
+				<description>Redition providers classes.</description>
+				<value>org.xcmis.renditions.impl.PDFDocumentRenditionProvider</value>
+				<value>org.xcmis.renditions.impl.ImageRenditionProvider</value>
+			</values-param>
+		</init-params>
 	</component>
 
 	<component>
@@ -95,16 +103,6 @@
 							</value>
 						</collection>
 					</field>
-                                        <field name="renditionProviders">
-                                           <collection type="java.util.ArrayList">
-                                               <value>
-                                                 <object type="org.xcmis.renditions.impl.PDFDocumentRenditionProvider"></object>
-                                               </value>
-                                               <value>
-                                                 <object type="org.xcmis.renditions.impl.ImageRenditionProvider"></object>
-                                               </value>
-                                           </collection>
-                                       </field>
 				</object>
 			</object-param>
 		</init-params>

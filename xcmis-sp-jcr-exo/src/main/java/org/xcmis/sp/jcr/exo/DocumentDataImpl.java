@@ -22,7 +22,7 @@ package org.xcmis.sp.jcr.exo;
 import org.exoplatform.services.jcr.core.ExtendedNode;
 import org.exoplatform.services.jcr.core.ExtendedSession;
 import org.exoplatform.services.jcr.util.IdGenerator;
-import org.xcmis.renditions.RenditionContentStream;
+import org.xcmis.spi.RenditionContentStream;
 import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;

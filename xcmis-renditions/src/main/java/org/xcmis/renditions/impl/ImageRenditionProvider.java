@@ -19,8 +19,8 @@
 
 package org.xcmis.renditions.impl;
 
-import org.xcmis.renditions.RenditionContentStream;
-import org.xcmis.renditions.RenditionProvider;
+import org.xcmis.spi.RenditionContentStream;
+import org.xcmis.spi.RenditionProvider;
 import org.xcmis.spi.ContentStream;
 
 import java.awt.Graphics2D;
