@@ -40,8 +40,6 @@ public class ExoContainerCmisStorageInitializer extends CmisStorageInitializer i
 
    private final ExoContainerContext containerContext;
 
-   private List<String> providers = new ArrayList<String>();
-   
    private static final Log LOG = ExoLogger.getLogger(ExoContainerCmisStorageInitializer.class);
 
    public ExoContainerCmisStorageInitializer(ExoContainerContext containerContext, InitParams initParams)
@@ -74,17 +72,17 @@ public class ExoContainerCmisStorageInitializer extends CmisStorageInitializer i
 
       for (StorageProvider sp : sps)
       {
-            for (String prov : providers)
+         for (String prov : providers)
+         {
+            try
             {
-               try
-               {
-                  sp.addRenditionProvider(Class.forName(prov).newInstance());
-               }
-               catch (Exception e)
-               {
-                  LOG.error("Cannot instatiate rendition provider instance: ", e);
-               }
+               sp.addRenditionProvider(Class.forName(prov).newInstance());
             }
+            catch (Exception e)
+            {
+               LOG.error("Cannot instatiate rendition provider instance: ", e);
+            }
+         }
          for (String id : sp.getStorageIDs())
          {
             addStorage(id, sp);

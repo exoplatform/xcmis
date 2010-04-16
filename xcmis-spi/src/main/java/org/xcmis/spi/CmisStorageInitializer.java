@@ -19,8 +19,10 @@
 
 package org.xcmis.spi;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -33,6 +35,8 @@ public class CmisStorageInitializer
 {
 
    private static AtomicReference<CmisStorageInitializer> service = new AtomicReference<CmisStorageInitializer>();
+
+   protected List<String> providers = new ArrayList<String>();
 
    public static CmisStorageInitializer getInstance()
    {
@@ -93,5 +97,17 @@ public class CmisStorageInitializer
    public final Set<String> getStorageIDs()
    {
       return Collections.unmodifiableSet(storageProviders.keySet());
+   }
+
+   /**
+    * Adds an extra rendition provider .
+    *
+    * @param provider string FQN of provider to add.
+    * 
+    */
+   public void addRenditionProvider(String provider)
+   {
+      if (provider != null)
+         this.providers.add(provider);
    }
 }
