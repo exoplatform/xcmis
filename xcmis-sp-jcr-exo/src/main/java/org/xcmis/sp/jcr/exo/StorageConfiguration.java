@@ -49,9 +49,6 @@ public class StorageConfiguration
    /** Additional properties. */
    private Map<String, Object> properties;
 
-   /** Additional properties. */
-   private List<Object> renditionProviders;
-
    /**
     * Get repository id.
     *
@@ -84,17 +81,6 @@ public class StorageConfiguration
          properties = new HashMap<String, Object>();
       }
       return properties;
-   }
-
-   /**
-    * Get renditionProviders.
-    *
-    * @return renditionProviders .
-    */
-
-   public List<Object> getRenditionProviders()
-   {
-      return renditionProviders;
    }
 
    /**
@@ -166,15 +152,4 @@ public class StorageConfiguration
    {
       this.workspace = workspace;
    }
-
-   /**
-    * Set rendition providers.
-    *
-    * @param renditionProviders list renditionProviders
-    */
-   public void setRenditionProviders(List<Object> renditionProviders)
-   {
-      this.renditionProviders = renditionProviders;
-   }
-
 }

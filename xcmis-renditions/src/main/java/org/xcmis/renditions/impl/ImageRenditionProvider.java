@@ -19,7 +19,6 @@
 
 package org.xcmis.renditions.impl;
 
-
 import org.xcmis.renditions.RenditionContentStream;
 import org.xcmis.renditions.RenditionProvider;
 import org.xcmis.spi.ContentStream;
@@ -43,9 +42,8 @@ public class ImageRenditionProvider implements RenditionProvider
    private static final String[] SUPPORTED_MEDIA_TYPES = ImageIO.getReaderMIMETypes();
 
    /** Can store renditions. */
-   private static final boolean CAN_STORE_RENDITIONS=  true;
+   private static final boolean CAN_STORE_RENDITIONS = true;
 
-   
    // TODO configurable maxHeigth & maxWidth 
    /** The max height. */
    private int maxHeight = 100;
@@ -57,14 +55,13 @@ public class ImageRenditionProvider implements RenditionProvider
     * {@inheritDoc}
     */
    public RenditionContentStream getRenditionStream(ContentStream stream) throws IOException
-      /*org.xcmis.spi.RepositoryException*/
    {
       BufferedImage image = ImageIO.read(stream.getStream());
       // Determine scale and be sure both width and height are not greater the max
       int scale = (int)Math.max(//
          Math.floor((image.getHeight() / maxHeight) + 1.0d), // 
          Math.floor((image.getWidth() / maxWidth) + 1.0d) //
-      );
+         );
       int height = image.getHeight() / scale;
       int width = image.getWidth() / scale;
       BufferedImage scaledImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -93,7 +90,8 @@ public class ImageRenditionProvider implements RenditionProvider
    /**
     * {@inheritDoc}
     */
-   public boolean canStoreRendition() {
+   public boolean canStoreRendition()
+   {
       return CAN_STORE_RENDITIONS;
    }
 

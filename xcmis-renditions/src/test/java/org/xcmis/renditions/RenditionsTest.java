@@ -17,7 +17,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.xcmis.renditions; 
+package org.xcmis.renditions;
 
 import org.xcmis.renditions.RenditionContentStream;
 import org.xcmis.renditions.impl.PDFDocumentRenditionProvider;
@@ -27,50 +27,61 @@ import org.xcmis.spi.BaseContentStream;
 import junit.framework.TestCase;
 import java.io.InputStream;
 
+public class RenditionsTest extends TestCase
+{
 
-
-public class RenditionsTest extends TestCase {
-   
    private String pdfname = "081111.pdf";
+
    private String jpgname = "test.jpg";
+
    private String kind = "cmis:thumbnail";
-   
+
    @Override
-   public void setUp() throws Exception{
+   public void setUp() throws Exception
+   {
    }
-   
-   public void testPDF(){
-      try {
-      InputStream pdf =   Thread.currentThread().getContextClassLoader().getResourceAsStream(pdfname);
-      PDFDocumentRenditionProvider prov = new PDFDocumentRenditionProvider();
-      BaseContentStream stream = new BaseContentStream(pdf, pdfname, "application/pdf");
-      RenditionContentStream out = prov.getRenditionStream(stream);
-      assertNotNull(out);
-      assertNotNull(out.getStream());
-      assertEquals(kind, out.getKind());
-      pdf.close();
-      } catch (java.io.IOException ex){
+
+   public void testPDF()
+   {
+      try
+      {
+         InputStream pdf = Thread.currentThread().getContextClassLoader().getResourceAsStream(pdfname);
+         PDFDocumentRenditionProvider prov = new PDFDocumentRenditionProvider();
+         BaseContentStream stream = new BaseContentStream(pdf, pdfname, "application/pdf");
+         RenditionContentStream out = prov.getRenditionStream(stream);
+         assertNotNull(out);
+         assertNotNull(out.getStream());
+         assertEquals(kind, out.getKind());
+         pdf.close();
+      }
+      catch (java.io.IOException ex)
+      {
          fail();
       }
    }
-   
-   public void testJPG(){
-      try {
-      InputStream jpg = getClass().getResource("/" + jpgname).openStream();
-      ImageRenditionProvider prov = new ImageRenditionProvider();
-      BaseContentStream stream = new BaseContentStream(jpg, jpgname, "image/jpg");
-      RenditionContentStream out = prov.getRenditionStream(stream);
-      assertNotNull(out);
-      assertNotNull(out.getStream());
-      assertEquals(kind, out.getKind());
-      jpg.close();
-      } catch (java.io.IOException ex){
+
+   public void testJPG()
+   {
+      try
+      {
+         InputStream jpg = getClass().getResource("/" + jpgname).openStream();
+         ImageRenditionProvider prov = new ImageRenditionProvider();
+         BaseContentStream stream = new BaseContentStream(jpg, jpgname, "image/jpg");
+         RenditionContentStream out = prov.getRenditionStream(stream);
+         assertNotNull(out);
+         assertNotNull(out.getStream());
+         assertEquals(kind, out.getKind());
+         jpg.close();
+      }
+      catch (java.io.IOException ex)
+      {
          fail();
       }
    }
-   
+
    @Override
-   protected void tearDown() throws Exception{
-     super.tearDown();    
+   protected void tearDown() throws Exception
+   {
+      super.tearDown();
    }
 }

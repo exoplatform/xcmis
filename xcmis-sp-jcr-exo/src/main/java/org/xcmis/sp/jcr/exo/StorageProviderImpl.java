@@ -21,6 +21,8 @@ package org.xcmis.sp.jcr.exo;
 
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.container.xml.ObjectParameter;
+import org.exoplatform.container.xml.ValueParam;
+import org.exoplatform.container.xml.ValuesParam;
 import org.exoplatform.services.document.DocumentReaderService;
 import org.exoplatform.services.jcr.RepositoryService;
 import org.exoplatform.services.jcr.config.RepositoryConfigurationException;
@@ -85,6 +87,9 @@ public class StorageProviderImpl implements StorageProvider, Startable
        */
       private List<StorageConfiguration> storages;
 
+      /** Rendition providers. */
+      private List<Object> renditionProviders;
+
       /**
        * @return the list of storages configuration
        */
@@ -98,35 +103,32 @@ public class StorageProviderImpl implements StorageProvider, Startable
       }
 
       /**
+       * Get renditionProviders.
+       *
+       * @return renditionProviders .
+       */
+
+      public List<Object> getRenditionProviders()
+      {
+         return renditionProviders;
+      }
+
+      /**
        * @param configs the list of storages configuration
        */
       public void setStorages(List<StorageConfiguration> storages)
       {
          this.storages = storages;
       }
-   }
 
-   private class MimeComparator implements Comparator<MimeType>
-   {
-      public int compare(MimeType m1, MimeType m2)
+      /**
+       * Set rendition providers.
+       *
+       * @param renditionProviders list renditionProviders
+       */
+      public void setRenditionProviders(List<Object> renditionProviders)
       {
-         if (m1.getType().equals(CmisConstants.WILDCARD) && !m2.getType().equals(CmisConstants.WILDCARD))
-         {
-            return 1;
-         }
-         if (!m1.getType().equals(CmisConstants.WILDCARD) && m2.getType().equals(CmisConstants.WILDCARD))
-         {
-            return -1;
-         }
-         if (m1.getSubType().equals(CmisConstants.WILDCARD) && !m2.getSubType().equals(CmisConstants.WILDCARD))
-         {
-            return 1;
-         }
-         if (!m1.getSubType().equals(CmisConstants.WILDCARD) && m2.getSubType().equals(CmisConstants.WILDCARD))
-         {
-            return -1;
-         }
-         return m1.toString().compareToIgnoreCase(m2.toString());
+         this.renditionProviders = renditionProviders;
       }
    }
 
@@ -139,6 +141,31 @@ public class StorageProviderImpl implements StorageProvider, Startable
    private final Map<String, StorageConfiguration> storageConfigs = new HashMap<String, StorageConfiguration>();
 
    private final Map<String, SearchService> searchServices = new HashMap<String, SearchService>();
+
+   Map<MimeType, RenditionProvider> renditionProviders =
+      new TreeMap<MimeType, RenditionProvider>(new Comparator<MimeType>()
+      {
+         public int compare(MimeType m1, MimeType m2)
+         {
+            if (m1.getType().equals(CmisConstants.WILDCARD) && !m2.getType().equals(CmisConstants.WILDCARD))
+            {
+               return 1;
+            }
+            if (!m1.getType().equals(CmisConstants.WILDCARD) && m2.getType().equals(CmisConstants.WILDCARD))
+            {
+               return -1;
+            }
+            if (m1.getSubType().equals(CmisConstants.WILDCARD) && !m2.getSubType().equals(CmisConstants.WILDCARD))
+            {
+               return 1;
+            }
+            if (!m1.getSubType().equals(CmisConstants.WILDCARD) && m2.getSubType().equals(CmisConstants.WILDCARD))
+            {
+               return -1;
+            }
+            return m1.toString().compareToIgnoreCase(m2.toString());
+         }
+      });
 
    public StorageProviderImpl(RepositoryService repositoryService, InitParams initParams,
       DocumentReaderService documentReaderService)
@@ -160,6 +187,11 @@ public class StorageProviderImpl implements StorageProvider, Startable
          for (StorageConfiguration conf : confs.getStorages())
          {
             storageConfigs.put(conf.getId(), conf);
+         }
+
+         if (confs.getRenditionProviders() != null)
+         {
+            addRenditionProviders(confs.getRenditionProviders());
          }
       }
       else
@@ -188,19 +220,6 @@ public class StorageProviderImpl implements StorageProvider, Startable
       {
          ManageableRepository repository = repositoryService.getRepository(repositoryId);
          Session session = repository.login(ws);
-         Map<MimeType, RenditionProvider> renditionProviders =
-            new TreeMap<MimeType, RenditionProvider>(new MimeComparator());
-
-         if (configuration.getRenditionProviders() != null)
-         {
-            for (Object prov : configuration.getRenditionProviders())
-            {
-               for (String mimeType : ((RenditionProvider)prov).getSupportedMediaType())
-               {
-                  renditionProviders.put(MimeType.fromString(mimeType), (RenditionProvider)prov);
-               }
-            }
-         }
          RenditionManagerImpl renditionManager = new RenditionManagerImpl(renditionProviders);
 
          SearchService searchService = getSearchService(id);
@@ -365,20 +384,6 @@ public class StorageProviderImpl implements StorageProvider, Startable
 
                if (!exist)
                {
-
-                  Map<MimeType, RenditionProvider> renditionProviders =
-                     new TreeMap<MimeType, RenditionProvider>(new MimeComparator());
-
-                  if (cmisRepositoryConfiguration.getRenditionProviders() != null)
-                  {
-                     for (Object prov : cmisRepositoryConfiguration.getRenditionProviders())
-                     {
-                        for (String mimeType : ((RenditionProvider)prov).getSupportedMediaType())
-                        {
-                           renditionProviders.put(MimeType.fromString(mimeType), (RenditionProvider)prov);
-                        }
-                     }
-                  }
                   workspace.getObservationManager().addEventListener(
                      new UpdateListener(repository, cmisRepositoryConfiguration.getWorkspace(), renditionProviders),
                      Event.NODE_ADDED | Event.PROPERTY_ADDED | Event.PROPERTY_CHANGED, "/", true, null,
@@ -462,5 +467,17 @@ public class StorageProviderImpl implements StorageProvider, Startable
    public StorageConfiguration getStorageConfiguration(String id)
    {
       return storageConfigs.get(id);
+   }
+
+   private void addRenditionProviders(List<Object> params)
+   {
+      for (Object prov : params)
+      {
+         for (String mimeType : ((RenditionProvider)prov).getSupportedMediaType())
+         {
+            renditionProviders.put(MimeType.fromString(mimeType), (RenditionProvider)prov);
+         }
+      }
+
    }
 }

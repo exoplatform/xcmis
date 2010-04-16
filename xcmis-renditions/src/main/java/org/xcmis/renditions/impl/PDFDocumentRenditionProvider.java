@@ -19,7 +19,6 @@
 
 package org.xcmis.renditions.impl;
 
-
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.xcmis.renditions.RenditionContentStream;
@@ -43,9 +42,9 @@ public class PDFDocumentRenditionProvider implements RenditionProvider
 
    /** The String[] SUPPORTED_MEDIA_TYPES. */
    private static final String[] SUPPORTED_MEDIA_TYPES = new String[]{"application/pdf"};
-   
+
    /** Can store renditions. */
-   private static final boolean CAN_STORE_RENDITIONS=  false;
+   private static final boolean CAN_STORE_RENDITIONS = false;
 
    // TODO configurable maxHeigth & maxWidth 
    /** The max height. */
@@ -69,7 +68,7 @@ public class PDFDocumentRenditionProvider implements RenditionProvider
          int scale = (int)Math.max(//
             Math.floor((image.getHeight() / maxHeight) + 1.0d), // 
             Math.floor((image.getWidth() / maxWidth) + 1.0d) //
-         );
+            );
          int height = image.getHeight() / scale;
          int width = image.getWidth() / scale;
          BufferedImage scaledImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -104,7 +103,8 @@ public class PDFDocumentRenditionProvider implements RenditionProvider
    /**
     * {@inheritDoc}
     */
-   public boolean canStoreRendition() {
+   public boolean canStoreRendition()
+   {
       return CAN_STORE_RENDITIONS;
    }
 
