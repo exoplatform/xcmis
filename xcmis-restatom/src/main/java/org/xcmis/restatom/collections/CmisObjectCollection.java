@@ -1469,7 +1469,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
     *
     * @param object object
     * @param propertyName property name
-    * @return property or null if property does not exists
+    * @return property or null if property does not exist
     */
    protected Property<?> getProperty(CmisObject object, String propertyName)
    {
