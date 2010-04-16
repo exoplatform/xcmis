@@ -31,6 +31,11 @@ import java.util.List;
 public class EntryCollection
 {
    /**
+    * Feed information
+    */
+   private FeedInfo feedInfo;
+   
+   /**
     * Entries.
     */
    private List<AtomEntry> entries = new ArrayList<AtomEntry>();
@@ -49,6 +54,22 @@ public class EntryCollection
    public void setEntries(List<AtomEntry> items)
    {
       this.entries = items;
+   }
+
+   /**
+    * @return the feedInfo
+    */
+   public FeedInfo getFeedInfo()
+   {
+      return feedInfo;
+   }
+
+   /**
+    * @param feedInfo the feedInfo to set
+    */
+   public void setFeedInfo(FeedInfo feedInfo)
+   {
+      this.feedInfo = feedInfo;
    }
    
 }

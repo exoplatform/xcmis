@@ -504,9 +504,16 @@ public class ObjectXMLBuilder
     */
    private static String getPropertyNameByType(EnumPropertyType propertyType)
    {
-      String type = propertyType.value();
-      String firstLetter = type.substring(0, 1).toUpperCase();
-      String tail = type.substring(1, type.length());
-      return CMIS.CMIS_PROPERTY + firstLetter + tail;
+      if (propertyType.equals(EnumPropertyType.DATETIME))
+      {
+         return CMIS.CMIS_PROPERTY_DATE_TIME;
+      }
+      else
+      {
+         String type = propertyType.value();
+         String firstLetter = type.substring(0, 1).toUpperCase();
+         String tail = type.substring(1, type.length());
+         return CMIS.CMIS_PROPERTY + firstLetter + tail;
+      }
    }
 }

@@ -106,15 +106,13 @@ public class NavigationService
     * On success response received, NextPageReceivedEvent event is fired.
     * 
     * @param url url
-    * @param maxItems maxItems
-    * @param skipCount skipCount
     * @param filter filter
     * @param includeRelationships includeRelationships
     * @param renditionFilter renditionFilter
     * @param includeAllowableActions includeAllowableActions
     * @param includePathSegment includePathSegment
     */
-   public void getNextPage(String url, int maxItems, int skipCount, String filter,
+   public void getNextPage(String url, String filter,
       EnumIncludeRelationships includeRelationships, String renditionFilter, boolean includeAllowableActions,
       boolean includePathSegment)
    {
@@ -123,8 +121,6 @@ public class NavigationService
       EntryCollectionUnmarshaller unmarshaller = new EntryCollectionUnmarshaller(entryCollection);
 
       String params = "";
-      params += (maxItems < 0) ? "" : CmisArguments.MAX_ITEMS + "=" + maxItems + "&";
-      params += (skipCount < 0) ? "" : CmisArguments.SKIP_COUNT + "=" + skipCount + "&";
       params += (filter == null || filter.length() <= 0) ? "" : CmisArguments.FILTER + "=" + filter + "&";
       params += CmisArguments.INCLUDE_RELATIONSHIPS + "=" + includeRelationships.value() + "&";
       params +=
@@ -132,10 +128,9 @@ public class NavigationService
             + renditionFilter + "&";
       params += CmisArguments.INCLUDE_ALLOWABLE_ACTIONS + "=" + includeAllowableActions + "&";
       params += CmisArguments.INCLUDE_PATH_SEGMENT + "=" + includePathSegment + "&";
-      params += (skipCount < 0) ? "" : CmisArguments.SKIP_COUNT + "=" + skipCount;
 
       AsyncRequestCallback callback = new AsyncRequestCallback(eventBus, unmarshaller, event);
-      AsyncRequest.build(RequestBuilder.GET, url + "?" + params).send(callback);
+      AsyncRequest.build(RequestBuilder.GET, url + "&" + params).send(callback);
    }
 
    /**

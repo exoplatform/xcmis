@@ -25,6 +25,7 @@ import org.xcmis.client.gwt.client.object.ObjectData;
 import org.xcmis.client.gwt.client.rest.Unmarshallable;
 import org.xcmis.client.gwt.client.unmarshallers.parser.AtomEntryParser;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Node;
 import com.google.gwt.xml.client.NodeList;
@@ -59,6 +60,7 @@ public class EntryUnmarshaller implements Unmarshallable
     */
    public void unmarshal(String body)
    {
+      GWT.log("Entry " + body, null);
       Document doc = XMLParser.parse(body);
       NodeList nodeList = doc.getElementsByTagName(CMIS.ENTRY);
       if (nodeList != null && nodeList.getLength() > 0)

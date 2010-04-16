@@ -66,12 +66,7 @@ public enum EnumPropertyType
    /**
     * URI.
     */
-   URI("uri"), 
-   
-   /**
-    * XML.
-    */
-   XML("xml");
+   URI("uri");
    
    /**
     * Value.

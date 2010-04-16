@@ -23,6 +23,7 @@ import org.xcmis.client.gwt.client.model.restatom.TypeCollection;
 import org.xcmis.client.gwt.client.rest.Unmarshallable;
 import org.xcmis.client.gwt.client.unmarshallers.parser.TypeParser;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.XMLParser;
 
@@ -56,12 +57,9 @@ public class TypeChildrenUnmarshaller implements Unmarshallable
     */
    public void unmarshal(String body)
    {
-      try {
+      GWT.log("Type Childr. "+body, null);
       Document doc = XMLParser.parse(body);
       typeCollection.setTypes(TypeParser.getTypes(doc));
-      } catch (Exception e){
-         e.printStackTrace();
-      }
    }
 
 }
