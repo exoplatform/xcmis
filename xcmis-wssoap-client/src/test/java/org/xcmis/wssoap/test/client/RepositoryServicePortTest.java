@@ -72,6 +72,7 @@ public class RepositoryServicePortTest extends TestCase
       {
          System.out.println("Expected exception: cmisException has occurred.");
          System.out.println(e.toString());
+         fail(e.getMessage());
       }
    }
 
@@ -91,6 +92,7 @@ public class RepositoryServicePortTest extends TestCase
       {
          System.out.println("Expected exception: cmisException has occurred.");
          System.out.println(e.toString());
+         fail(e.getMessage());
       }
    }
 
@@ -116,6 +118,7 @@ public class RepositoryServicePortTest extends TestCase
       {
          System.out.println("Expected exception: cmisException has occurred.");
          System.out.println(e.toString());
+         fail(e.getMessage());
       }
    }
 
@@ -140,6 +143,7 @@ public class RepositoryServicePortTest extends TestCase
       {
          System.out.println("Expected exception: cmisException has occurred.");
          System.out.println(e.toString());
+         fail(e.getMessage());
       }
    }
 
@@ -161,7 +165,8 @@ public class RepositoryServicePortTest extends TestCase
       {
          System.out.println("Expected exception: cmisException has occurred.");
          System.out.println(e.toString());
+         fail(e.getMessage());
       }
-
    }
+   
 }
