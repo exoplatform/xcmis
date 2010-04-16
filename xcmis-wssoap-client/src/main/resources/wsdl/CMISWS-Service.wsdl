@@ -1113,52 +1113,52 @@
 	<service name="DiscoveryService">
 		<port name="DiscoveryServicePort" binding="cmisw:DiscoveryServicePortBinding">
 			<soap:address
-				location="http://cmis/services/DiscoveryService.DiscoveryServicePort" />
+				location="http://localhost:8080/xcmis/cmisws/DiscoveryService/DiscoveryServicePort" />
 		</port>
 	</service>
 	<service name="MultiFilingService">
 		<port name="MultiFilingServicePort" binding="cmisw:MultiFilingServicePortBinding">
 			<soap:address
-				location="http://cmis/services/MultiFilingService.MultiFilingServicePort" />
+				location="http://localhost:8080/xcmis/cmisws/MultiFilingService/MultiFilingServicePort" />
 		</port>
 	</service>
 	<service name="NavigationService">
 		<port name="NavigationServicePort" binding="cmisw:NavigationServicePortBinding">
 			<soap:address
-				location="http://cmis/services/NavigationService.NavigationServicePort" />
+				location="http://localhost:8080/xcmis/cmisws/NavigationService/NavigationServicePort" />
 		</port>
 	</service>
 	<service name="ObjectService">
 		<port name="ObjectServicePort" binding="cmisw:ObjectServicePortBinding">
-			<soap:address location="http://cmis/services/ObjectService.ObjectServicePort" />
+			<soap:address location="http://localhost:8080/xcmis/cmisws/ObjectService/ObjectServicePort" />
 		</port>
 	</service>
 	<service name="PolicyService">
 		<port name="PolicyServicePort" binding="cmisw:PolicyServicePortBinding">
-			<soap:address location="http://cmis/services/PolicyService.PolicyServicePort" />
+			<soap:address location="http://localhost:8080/xcmis/cmisws/PolicyService/PolicyServicePort" />
 		</port>
 	</service>
 	<service name="RelationshipService">
 		<port name="RelationshipServicePort" binding="cmisw:RelationshipServicePortBinding">
 			<soap:address
-				location="http://cmis/services/RelationshipService.RelationshipServicePort" />
+				location="http://localhost:8080/xcmis/cmisws/RelationshipService/RelationshipServicePort" />
 		</port>
 	</service>
 	<service name="RepositoryService">
 		<port name="RepositoryServicePort" binding="cmisw:RepositoryServicePortBinding">
 			<soap:address
-				location="http://xcmis.org:8083/xcmis/cmisws/RepositoryService/RepositoryServicePort" />
+				location="http://localhost:8080/xcmis/cmisws/RepositoryService/RepositoryServicePort" />
 		</port>
 	</service>
 	<service name="VersioningService">
 		<port name="VersioningServicePort" binding="cmisw:VersioningServicePortBinding">
 			<soap:address
-				location="http://cmis/services/VersioningService.VersioningServicePort" />
+				location="http://localhost:8080/xcmis/cmisws/VersioningService/VersioningServicePort" />
 		</port>
 	</service>
 	<service name="ACLService">
 		<port name="ACLServicePort" binding="cmisw:ACLServicePortBinding">
-			<soap:address location="http://cmis/services/ACLService.ACLServicePort" />
+			<soap:address location="http://localhost:8080/xcmis/cmisws/ACLService/AccessControlServicePort" />
 		</port>
 	</service>
 
