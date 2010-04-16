@@ -496,10 +496,11 @@ public class StorageTest extends BaseTest
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
 
       PropertyDefinition<?> defName = PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.NAME);
-      properties.put(CmisConstants.NAME, new StringProperty(defName.getId(), defName.getQueryName(), defName.getLocalName(),
-         defName.getDisplayName(), "createPolicyTest"));
+      properties.put(CmisConstants.NAME, new StringProperty(defName.getId(), defName.getQueryName(), defName
+         .getLocalName(), defName.getDisplayName(), "createPolicyTest"));
 
-      PropertyDefinition<?> defPolicyText = PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
+      PropertyDefinition<?> defPolicyText =
+         PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
       properties.put(CmisConstants.POLICY_TEXT, new StringProperty(defPolicyText.getId(), defPolicyText.getQueryName(),
          defPolicyText.getLocalName(), defPolicyText.getDisplayName(), "simple policy"));
 
@@ -521,9 +522,10 @@ public class StorageTest extends BaseTest
       ObjectData targetDoc = createDocument(rootFolder, "createRelationshipTarget", "cmis:document", null, null);
 
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-      PropertyDefinition<?> defName = PropertyDefinitions.getPropertyDefinition("cmis:relationship", CmisConstants.NAME);
-      properties.put(CmisConstants.NAME, new StringProperty(defName.getId(), defName.getQueryName(), defName.getLocalName(),
-         defName.getDisplayName(), "createRelationshipTest"));
+      PropertyDefinition<?> defName =
+         PropertyDefinitions.getPropertyDefinition("cmis:relationship", CmisConstants.NAME);
+      properties.put(CmisConstants.NAME, new StringProperty(defName.getId(), defName.getQueryName(), defName
+         .getLocalName(), defName.getDisplayName(), "createRelationshipTest"));
 
       RelationshipData relationship = storage.createRelationship(sourceDoc, targetDoc, "cmis:relationship");
       relationship.setProperties(properties);
@@ -1068,8 +1070,8 @@ public class StorageTest extends BaseTest
          assertTrue("Folder " + f.getObjectId() + " must be in parents list.", expectedParents
             .contains(f.getObjectId()));
       }
-      System.out
-         .println(" StorageTest.testMultifiling > new location: " + ((DocumentDataImpl)document).getNode().getPath());
+      System.out.println(" StorageTest.testMultifiling > new location: "
+         + ((DocumentDataImpl)document).getNode().getPath());
    }
 
    public void testRenameDocument() throws Exception
@@ -1082,7 +1084,8 @@ public class StorageTest extends BaseTest
       assertTrue(session.itemExists("/renameDocumentTest01"));
 
       assertEquals("renameDocumentTest01", document.getName());
-      assertEquals("renameDocumentTest01", document.getProperty(CmisConstants.CONTENT_STREAM_FILE_NAME).getValues().get(0));
+      assertEquals("renameDocumentTest01", document.getProperty(CmisConstants.CONTENT_STREAM_FILE_NAME).getValues()
+         .get(0));
    }
 
    public void testRenameFolder() throws Exception
@@ -1210,10 +1213,11 @@ public class StorageTest extends BaseTest
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
 
       PropertyDefinition<?> defName = PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.NAME);
-      properties.put(CmisConstants.NAME, new StringProperty(defName.getId(), defName.getQueryName(), defName.getLocalName(),
-         defName.getDisplayName(), name));
+      properties.put(CmisConstants.NAME, new StringProperty(defName.getId(), defName.getQueryName(), defName
+         .getLocalName(), defName.getDisplayName(), name));
 
-      PropertyDefinition<?> defPolicyText = PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
+      PropertyDefinition<?> defPolicyText =
+         PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
       properties.put(CmisConstants.POLICY_TEXT, new StringProperty(defPolicyText.getId(), defPolicyText.getQueryName(),
          defPolicyText.getLocalName(), defPolicyText.getDisplayName(), policyText));
 
@@ -1223,4 +1227,28 @@ public class StorageTest extends BaseTest
 
       return policy;
    }
+
+   //   public void testCreateAiim() throws Exception
+   //   {
+   //      createAiimDocument(rootFolder, "aiim01", null);
+   //   }
+   //
+   //   protected DocumentData createAiimDocument(FolderData folder, String name, ContentStream content) throws Exception
+   //   {
+   //      DocumentData document = storage.createDocument(folder, "aiim_2010demo", VersioningState.MAJOR);
+   //      document.setName(name);
+   //      document.setProperty(new StringProperty("aiim_Ioinc", "aiim_Ioinc", "aiim_Ioinc", "aiim_Ioinc",
+   //         "Consultation Note 11488-4"));
+   //      document.setProperty(new StringProperty("aiim_procedure", "aiim_procedure", "aiim_procedure", "aiim_procedure",
+   //         "Cystoscopy 24139008"));
+   //
+   //      document.setContentStream(content);
+   //      storage.saveObject(document);
+   //      for (Map.Entry<String, Property<?>> p : document.getProperties().entrySet())
+   //      {
+   //         System.out.println(p.getKey()+ ": " + p.getValue().getValues());
+   //      }
+   //      return document;
+   //   }
+
 }

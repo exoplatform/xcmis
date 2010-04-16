@@ -1398,6 +1398,9 @@ abstract class BaseObjectData implements ObjectData
 
       try
       {
+         // TODO : do not check twice
+         boolean multivalued = type.getPropertyDefinition(property.getId()).isMultivalued();
+
          if (property.getType() == PropertyType.BOOLEAN)
          {
             List<Boolean> booleans = (List<Boolean>)property.getValues();
@@ -1405,7 +1408,7 @@ abstract class BaseObjectData implements ObjectData
             {
                data.setProperty(/*property.getLocalName()*/property.getId(), (Boolean)null);
             }
-            else if (booleans.size() == 1)
+            else if (/*booleans.size() == 1 && */!multivalued)
             {
                data.setProperty(/*property.getLocalName()*/property.getId(), booleans.get(0));
             }
@@ -1428,7 +1431,7 @@ abstract class BaseObjectData implements ObjectData
             {
                data.setProperty(/*property.getLocalName()*/property.getId(), (Calendar)null);
             }
-            else if (datetime.size() == 1)
+            else if (/*datetime.size() == 1*/!multivalued)
             {
                data.setProperty(/*property.getLocalName()*/property.getId(), datetime.get(0));
             }
@@ -1451,7 +1454,7 @@ abstract class BaseObjectData implements ObjectData
             {
                data.setProperty(/*property.getLocalName()*/property.getId(), (Double)null);
             }
-            else if (doubles.size() == 1)
+            else if (/*doubles.size() == 1*/!multivalued)
             {
                data.setProperty(/*property.getLocalName()*/property.getId(), doubles.get(0).doubleValue());
             }
@@ -1474,7 +1477,7 @@ abstract class BaseObjectData implements ObjectData
             {
                data.setProperty(/*property.getLocalName()*/property.getId(), (Long)null);
             }
-            else if (integers.size() == 1)
+            else if (/*integers.size() == 1*/!multivalued)
             {
                data.setProperty(/*property.getLocalName()*/property.getId(), integers.get(0).longValue());
             }
@@ -1504,7 +1507,7 @@ abstract class BaseObjectData implements ObjectData
             {
                data.setProperty(/*property.getLocalName()*/property.getId(), (String)null);
             }
-            else if (text.size() == 1)
+            else if (/*text.size() == 1*/!multivalued)
             {
                data.setProperty(/*property.getLocalName()*/property.getId(), text.get(0));
             }
@@ -1527,7 +1530,7 @@ abstract class BaseObjectData implements ObjectData
             {
                data.setProperty(/*property.getLocalName()*/property.getId(), (String)null);
             }
-            else if (uris.size() == 1)
+            else if (/*uris.size() == 1*/!multivalued)
             {
                data.setProperty(/*property.getLocalName()*/property.getId(), uris.get(0).toString());
             }
