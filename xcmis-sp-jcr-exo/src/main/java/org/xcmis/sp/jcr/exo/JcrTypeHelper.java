@@ -22,6 +22,7 @@ package org.xcmis.sp.jcr.exo;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.Choice;
 import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.DateResolution;
 import org.xcmis.spi.model.Precision;
@@ -32,9 +33,11 @@ import org.xcmis.spi.model.Updatability;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -374,7 +377,6 @@ class JcrTypeHelper
          if (!knownIds.contains(pdName))
          {
             PropertyDefinition<?> cmisPropDef = null;
-            // TODO : default values.
             switch (jcrPropertyDef.getRequiredType())
             {
 
@@ -442,10 +444,47 @@ class JcrTypeHelper
                case javax.jcr.PropertyType.BINARY :
                case javax.jcr.PropertyType.UNDEFINED : {
                   Value[] jcrDefaultValues = jcrPropertyDef.getDefaultValues();
+                  List<Choice<String>> choices = null;
+                  Boolean openChoice = null;
+                  if (javax.jcr.PropertyType.STRING == jcrPropertyDef.getRequiredType())
+                  {
+                     String[] vc = jcrPropertyDef.getValueConstraints();
+                     if (vc != null && vc.length > 0)
+                     {
+                        openChoice = false;
+                        choices = new ArrayList<Choice<String>>();
+                        if (jcrPropertyDef.isMultiple())
+                        {
+                           List<String> vals = new ArrayList<String>();
+                           for (String chVal : vc)
+                           {
+                              if (".*".equals(chVal))
+                              {
+                                 openChoice = true;
+                                 continue;
+                              }
+                              vals.add(chVal);
+                           }
+                           choices.add(new Choice<String>(vals.toArray(new String[vals.size()]), ""));
+                        }
+                        else
+                        {
+                           for (String chVal : vc)
+                           {
+                              if (".*".equals(chVal))
+                              {
+                                 openChoice = true;
+                                 continue;
+                              }
+                              choices.add(new Choice<String>(new String[]{chVal}, ""));
+                           }
+                        }
+                     }
+                  }
                   PropertyDefinition<String> stringDef =
                      new PropertyDefinition<String>(pdName, pdName, pdName, null, pdName, null, PropertyType.STRING,
                         jcrPropertyDef.isProtected() ? Updatability.READONLY : Updatability.READWRITE, false,
-                        jcrPropertyDef.isMandatory(), true, true, null, jcrPropertyDef.isMultiple(), null,
+                        jcrPropertyDef.isMandatory(), true, true, openChoice, jcrPropertyDef.isMultiple(), choices,
                         jcrDefaultValues != null ? createDefaultValues(jcrDefaultValues,
                            new String[jcrDefaultValues.length]) : null);
                   stringDef.setMaxLength(CmisConstants.MAX_STRING_LENGTH);
