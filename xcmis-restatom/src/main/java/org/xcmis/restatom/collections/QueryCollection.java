@@ -130,23 +130,12 @@ public class QueryCollection extends CmisObjectCollection
          }
          catch (org.apache.abdera.parser.ParseException e)
          {
-            //            Message: Content is not allowed in prolog. (AbstractCmisCollection.java, line 241) 
-            //            org.apache.abdera.parser.ParseException: javax.xml.stream.XMLStreamException: ParseError at [row,col]:[1,1]
-            //            Message: Content is not allowed in prolog.
-            //               at org.apache.abdera.parser.stax.FOMBuilder.next(FOMBuilder.java:260)
-            //               at org.apache.abdera.parser.stax.FOMBuilder.getFomDocument(FOMBuilder.java:333)
-            //               at org.apache.abdera.parser.stax.FOMParser.getDocument(FOMParser.java:72)
-            //               at org.apache.abdera.parser.stax.FOMParser.parse(FOMParser.java:207)
-            //               at org.apache.abdera.parser.stax.FOMParser.parse(FOMParser.java:121)
-            //               at org.apache.abdera.protocol.server.context.AbstractRequestContext.getDocument(AbstractRequestContext.java:131)
-            //               at org.apache.abdera.protocol.server.context.AbstractRequestContext.getDocument(AbstractRequestContext.java:104)
-            //               at org.apache.abdera.protocol.server.context.AbstractRequestContext.getDocument(AbstractRequestContext.java:89)
-            //               at org.xcmis.restatom.collections.QueryCollection.addFeedDetails(QueryCollection.java:143)
+            // Message: Content is not allowed in prolog.
          }
 
          if (doc == null)
          {
-            // if it was GET method request
+            // if it is GET method request
             q = request.getParameter("q");
             try
             {
@@ -161,7 +150,7 @@ public class QueryCollection extends CmisObjectCollection
          }
          else
          {
-            // if it was POST method request
+            // if it is POST method request
             QueryTypeElement queryElement = (QueryTypeElement)doc.getRoot();
             if (queryElement != null)
             {
