@@ -47,13 +47,13 @@ import org.xcmis.spi.StorageException;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.Permission.BasicPermissions;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.PropertyType;
 import org.xcmis.spi.model.RelationshipDirection;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.Updatability;
-import org.xcmis.spi.model.Permission.BasicPermissions;
 import org.xcmis.spi.model.impl.BooleanProperty;
 import org.xcmis.spi.model.impl.DateTimeProperty;
 import org.xcmis.spi.model.impl.DecimalProperty;
@@ -1406,7 +1406,7 @@ abstract class BaseObjectData implements ObjectData
             List<Boolean> booleans = (List<Boolean>)property.getValues();
             if (booleans.size() == 0)
             {
-               data.setProperty(/*property.getLocalName()*/property.getId(), (Boolean)null);
+               data.setProperty(/*property.getLocalName()*/property.getId(), (Value)null);
             }
             else if (/*booleans.size() == 1 && */!multivalued)
             {
@@ -1429,7 +1429,7 @@ abstract class BaseObjectData implements ObjectData
             List<Calendar> datetime = (List<Calendar>)property.getValues();
             if (datetime.size() == 0)
             {
-               data.setProperty(/*property.getLocalName()*/property.getId(), (Calendar)null);
+               data.setProperty(/*property.getLocalName()*/property.getId(), (Value)null);
             }
             else if (/*datetime.size() == 1*/!multivalued)
             {
@@ -1452,7 +1452,7 @@ abstract class BaseObjectData implements ObjectData
             List<BigDecimal> doubles = (List<BigDecimal>)property.getValues();
             if (doubles.size() == 0)
             {
-               data.setProperty(/*property.getLocalName()*/property.getId(), (Double)null);
+               data.setProperty(/*property.getLocalName()*/property.getId(), (Value)null);
             }
             else if (/*doubles.size() == 1*/!multivalued)
             {
@@ -1475,7 +1475,7 @@ abstract class BaseObjectData implements ObjectData
             List<BigInteger> integers = (List<BigInteger>)property.getValues();
             if (integers.size() == 0)
             {
-               data.setProperty(/*property.getLocalName()*/property.getId(), (Long)null);
+               data.setProperty(/*property.getLocalName()*/property.getId(), (Value)null);
             }
             else if (/*integers.size() == 1*/!multivalued)
             {
@@ -1505,7 +1505,7 @@ abstract class BaseObjectData implements ObjectData
             List<String> text = (List<String>)property.getValues();
             if (text.size() == 0)
             {
-               data.setProperty(/*property.getLocalName()*/property.getId(), (String)null);
+               data.setProperty(/*property.getLocalName()*/property.getId(), (Value)null);
             }
             else if (/*text.size() == 1*/!multivalued)
             {
@@ -1528,7 +1528,7 @@ abstract class BaseObjectData implements ObjectData
             List<URI> uris = (List<URI>)property.getValues();
             if (uris.size() == 0)
             {
-               data.setProperty(/*property.getLocalName()*/property.getId(), (String)null);
+               data.setProperty(/*property.getLocalName()*/property.getId(), (Value)null);
             }
             else if (/*uris.size() == 1*/!multivalued)
             {
