@@ -102,12 +102,14 @@ public class CmisStorageInitializer
    /**
     * Adds an extra rendition provider .
     *
-    * @param provider string FQN of provider to add.
+    * @param provider String FQN of provider to add.
     * 
     */
    public void addRenditionProvider(String provider)
    {
       if (provider != null)
+      {
          this.providers.add(provider);
+      }
    }
 }
