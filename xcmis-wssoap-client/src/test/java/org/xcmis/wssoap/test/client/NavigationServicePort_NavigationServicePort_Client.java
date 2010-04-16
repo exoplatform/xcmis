@@ -62,7 +62,7 @@ public final class NavigationServicePort_NavigationServicePort_Client {
         {
         System.out.println("Invoking getObjectParents...");
         java.lang.String _getObjectParents_repositoryId = "cmis1";
-        java.lang.String _getObjectParents_objectId = "06779ed5c0a8004900b9726e58afca6e";
+        java.lang.String _getObjectParents_objectId = "06779ed5c0a8004900b9726e58afca6e";//TODO subject to change;
         java.lang.String _getObjectParents_filter = "*";
         java.lang.Boolean _getObjectParents_includeAllowableActions = Boolean.TRUE;
         org.xcmis.soap.client.EnumIncludeRelationships _getObjectParents_includeRelationships = null;
@@ -120,9 +120,7 @@ public final class NavigationServicePort_NavigationServicePort_Client {
             java.util.List<org.xcmis.soap.client.CmisObjectInFolderContainerType> _getDescendants__return = port.getDescendants(_getDescendants_repositoryId, _getDescendants_folderId, _getDescendants_depth, _getDescendants_filter, _getDescendants_includeAllowableActions, _getDescendants_includeRelationships, _getDescendants_renditionFilter, _getDescendants_includePathSegment, _getDescendants_extension);
             System.out.println("getDescendants.result=" + _getDescendants__return);
             for (org.xcmis.soap.client.CmisObjectInFolderContainerType one :_getDescendants__return){
-               for (CmisProperty pr : one.getObjectInFolder().getObject().getProperties().getProperty()){
-                  System.out.println(pr.getDisplayName());
-               }
+            System.out.println("Prop size: " + one.getObjectInFolder().getObject().getProperties().getProperty().size());
             }
 
         } catch (CmisException e) { 
@@ -169,7 +167,7 @@ public final class NavigationServicePort_NavigationServicePort_Client {
         try {
             org.xcmis.soap.client.CmisObjectInFolderListType _getChildren__return = port.getChildren(_getChildren_repositoryId, _getChildren_folderId, _getChildren_filter, _getChildren_orderBy, _getChildren_includeAllowableActions, _getChildren_includeRelationships, _getChildren_renditionFilter, _getChildren_includePathSegment, _getChildren_maxItems, _getChildren_skipCount, _getChildren_extension);
             System.out.println("getChildren.result=" + _getChildren__return);
-            System.out.println(_getChildren__return.getObjects().size());
+            System.out.println("Getchildler size: " + _getChildren__return.getObjects().size());
 
         } catch (CmisException e) { 
             System.out.println("Expected exception: cmisException has occurred.");
@@ -179,15 +177,14 @@ public final class NavigationServicePort_NavigationServicePort_Client {
         {
         System.out.println("Invoking getFolderParent...");
         java.lang.String _getFolderParent_repositoryId = "cmis1";
-        java.lang.String _getFolderParent_folderId = "073a731dc0a8004900b88d292dcfe590";
+        java.lang.String _getFolderParent_folderId = "073a731dc0a8004900b88d292dcfe590"; //TODO subject to change;
         java.lang.String _getFolderParent_filter = "*";
         org.xcmis.soap.client.CmisExtensionType _getFolderParent_extension = null;
         try {
             org.xcmis.soap.client.CmisObjectType _getFolderParent__return = port.getFolderParent(_getFolderParent_repositoryId, _getFolderParent_folderId, _getFolderParent_filter, _getFolderParent_extension);
             System.out.println("getFolderParent.result=" + _getFolderParent__return);
-            for (CmisProperty pr : _getFolderParent__return.getProperties().getProperty()){
-               System.out.println(pr.getDisplayName());
-            }
+            System.out.println ("Props size: " + _getFolderParent__return.getProperties().getProperty().size());
+             
         } catch (CmisException e) { 
             System.out.println("Expected exception: cmisException has occurred.");
             System.out.println(e.toString());
