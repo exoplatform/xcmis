@@ -93,4 +93,75 @@ public class RepositoryServicePortTest extends TestCase
          System.out.println(e.toString());
       }
    }
+
+   public void testGetTypeChildren() throws Exception
+   {
+      System.out.println("Invoking getTypeChildren...");
+      java.lang.String _getTypeChildren_repositoryId = "cmis1";
+      java.lang.String _getTypeChildren_typeId = "cmis:folder";
+      java.lang.Boolean _getTypeChildren_includePropertyDefinitions = Boolean.TRUE;
+      java.math.BigInteger _getTypeChildren_maxItems = new java.math.BigInteger("10");
+      java.math.BigInteger _getTypeChildren_skipCount = new java.math.BigInteger("0");
+      org.xcmis.soap.client.CmisExtensionType _getTypeChildren_extension = null;
+      try
+      {
+         org.xcmis.soap.client.CmisTypeDefinitionListType _getTypeChildren__return =
+            port.getTypeChildren(_getTypeChildren_repositoryId, _getTypeChildren_typeId,
+               _getTypeChildren_includePropertyDefinitions, _getTypeChildren_maxItems, _getTypeChildren_skipCount,
+               _getTypeChildren_extension);
+         System.out.println("getTypeChildren.result=" + _getTypeChildren__return);
+
+      }
+      catch (CmisException e)
+      {
+         System.out.println("Expected exception: cmisException has occurred.");
+         System.out.println(e.toString());
+      }
+   }
+
+   public void testGetTypeDescendants() throws Exception
+   {
+      java.lang.String _getTypeDescendants_repositoryId = "cmis1";
+      java.lang.String _getTypeDescendants_typeId = "cmis:folder";
+      java.math.BigInteger _getTypeDescendants_depth = new java.math.BigInteger("10");
+      java.lang.Boolean _getTypeDescendants_includePropertyDefinitions = Boolean.TRUE;
+      org.xcmis.soap.client.CmisExtensionType _getTypeDescendants_extension = null;
+      try
+      {
+         java.util.List<org.xcmis.soap.client.CmisTypeContainer> _getTypeDescendants__return =
+            port
+               .getTypeDescendants(_getTypeDescendants_repositoryId, _getTypeDescendants_typeId,
+                  _getTypeDescendants_depth, _getTypeDescendants_includePropertyDefinitions,
+                  _getTypeDescendants_extension);
+         System.out.println("getTypeDescendants.result=" + _getTypeDescendants__return);
+
+      }
+      catch (CmisException e)
+      {
+         System.out.println("Expected exception: cmisException has occurred.");
+         System.out.println(e.toString());
+      }
+   }
+
+   public void testGetTypeDefinition() throws Exception
+   {
+      System.out.println("Invoking getTypeDefinition...");
+      java.lang.String _getTypeDefinition_repositoryId = "cmis1";
+      java.lang.String _getTypeDefinition_typeId = "cmis:folder";
+      org.xcmis.soap.client.CmisExtensionType _getTypeDefinition_extension = null;
+      try
+      {
+         org.xcmis.soap.client.CmisTypeDefinitionType _getTypeDefinition__return =
+            port.getTypeDefinition(_getTypeDefinition_repositoryId, _getTypeDefinition_typeId,
+               _getTypeDefinition_extension);
+         System.out.println("getTypeDefinition.result=" + _getTypeDefinition__return);
+
+      }
+      catch (CmisException e)
+      {
+         System.out.println("Expected exception: cmisException has occurred.");
+         System.out.println(e.toString());
+      }
+
+   }
 }
