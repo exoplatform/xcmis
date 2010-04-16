@@ -335,7 +335,7 @@ public class PropertyDefinitionTypeElement extends ExtensibleElementWrapper
       String cardinality = getSimpleExtension(AtomCMIS.CARDINALITY);
       try
       {
-         propDef.setMultivalued(cardinality == null ? false : Boolean.parseBoolean(cardinality));
+         propDef.setMultivalued("multi".equalsIgnoreCase(cardinality) ? true : false);
       }
       catch (IllegalArgumentException e)
       {
