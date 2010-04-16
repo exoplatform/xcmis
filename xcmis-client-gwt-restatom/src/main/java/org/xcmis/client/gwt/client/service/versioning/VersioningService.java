@@ -74,7 +74,7 @@ public class VersioningService
       CheckoutReceivedEvent event = new CheckoutReceivedEvent(document);
       EntryUnmarshaller unmarshaller = new EntryUnmarshaller(document);
       AsyncRequestCallback callback = new AsyncRequestCallback(eventBus, unmarshaller, event);
-      AsyncRequest.build(RequestBuilder.POST, url + "?" + "objectid" + "=" + objectId).send(callback);
+      AsyncRequest.build(RequestBuilder.POST, url + "/" + objectId).send(callback);
    }
 
    /**
