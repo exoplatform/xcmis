@@ -70,7 +70,6 @@
       <module>xcmis-wssoap</module>
       <module>xcmis-server-war</module>
       <module>xcmis-client-gwt-restatom</module>
-      <module>xcmis-client-gwt-restatom-sample</module>
    </modules>
 
    <repositories>
