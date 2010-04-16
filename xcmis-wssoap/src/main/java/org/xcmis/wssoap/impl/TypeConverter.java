@@ -45,6 +45,11 @@ import org.xcmis.core.CmisTypeDefinitionType;
 import org.xcmis.core.EnumACLPropagation;
 import org.xcmis.core.EnumBaseObjectTypeIds;
 import org.xcmis.core.EnumCapabilityACL;
+import org.xcmis.core.EnumCapabilityChanges;
+import org.xcmis.core.EnumCapabilityContentStreamUpdates;
+import org.xcmis.core.EnumCapabilityJoin;
+import org.xcmis.core.EnumCapabilityQuery;
+import org.xcmis.core.EnumCapabilityRendition;
 import org.xcmis.core.EnumSupportedPermissions;
 import org.xcmis.core.EnumTypeOfChanges;
 import org.xcmis.messaging.CmisContentStreamType;
@@ -494,6 +499,19 @@ public class TypeConverter
    {
       CmisRepositoryCapabilitiesType result = new CmisRepositoryCapabilitiesType();
       result.setCapabilityACL(EnumCapabilityACL.fromValue(source.getCapabilityACL().value()));
+      result.setCapabilityAllVersionsSearchable(source.isCapabilityAllVersionsSearchable());
+      result.setCapabilityChanges(EnumCapabilityChanges.fromValue(source.getCapabilityChanges().value()));
+      result.setCapabilityContentStreamUpdatability(EnumCapabilityContentStreamUpdates.fromValue(source.getCapabilityContentStreamUpdatable().value()));
+      result.setCapabilityGetDescendants(source.isCapabilityGetDescendants());
+      result.setCapabilityGetFolderTree(source.isCapabilityGetFolderTree());
+      result.setCapabilityJoin(EnumCapabilityJoin.fromValue(source.getCapabilityJoin().value()));
+      result.setCapabilityMultifiling(source.isCapabilityMultifiling());
+      result.setCapabilityPWCSearchable(source.isCapabilityPWCSearchable());
+      result.setCapabilityPWCUpdatable(source.isCapabilityPWCUpdatable());
+      result.setCapabilityQuery(EnumCapabilityQuery.fromValue(source.getCapabilityQuery().value()));
+      result.setCapabilityRenditions(EnumCapabilityRendition.fromValue(source.getCapabilityRenditions().value()));
+      result.setCapabilityUnfiling(source.isCapabilityUnfiling());
+      result.setCapabilityVersionSpecificFiling(source.isCapabilityVersionSpecificFiling());
       return result;
    }
 
