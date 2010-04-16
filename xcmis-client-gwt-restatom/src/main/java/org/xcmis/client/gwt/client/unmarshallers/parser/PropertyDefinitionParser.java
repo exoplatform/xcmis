@@ -57,7 +57,7 @@ public class PropertyDefinitionParser
     * Property Definition
     */
    private static BasePropertyDefinition<?> propertyDefinition;
-   
+
    private static List<Choice<?>> choices = new ArrayList<Choice<?>>();
 
    /**
@@ -110,7 +110,7 @@ public class PropertyDefinitionParser
       {
          propertyDefinition = new UriPropertyDefinition();
       }
-      
+
       for (int i = 0; i < node.getChildNodes().getLength(); i++)
       {
          Node property = node.getChildNodes().item(i);
@@ -145,7 +145,7 @@ public class PropertyDefinitionParser
          }
          else if (property.getNodeName().equals(CMIS.CMIS_CARDINALITY))
          {
-           propertyDefinition.setCardinality(EnumCardinality.fromValue(value));
+            propertyDefinition.setCardinality(EnumCardinality.fromValue(value));
          }
          else if (property.getNodeName().equals(CMIS.CMIS_UPDATABILITY))
          {
@@ -175,29 +175,29 @@ public class PropertyDefinitionParser
          {
             if (propertyDefinition.getPropertyType().equals(EnumPropertyType.INTEGER))
             {
-               ((IntegerPropertyDefinition) propertyDefinition).setMinInteger(Long.valueOf(value));
+               ((IntegerPropertyDefinition)propertyDefinition).setMinInteger(Long.valueOf(value));
             }
             else if (propertyDefinition.getPropertyType().equals(EnumPropertyType.DECIMAL))
             {
-               ((DecimalPropertyDefinition) propertyDefinition).setMinDecimal(Double.valueOf(value));
+               ((DecimalPropertyDefinition)propertyDefinition).setMinDecimal(Double.valueOf(value));
             }
          }
          else if (property.getNodeName().equals(CMIS.CMIS_MAX_VALUE))
          {
             if (propertyDefinition.getPropertyType().equals(EnumPropertyType.INTEGER))
             {
-               ((IntegerPropertyDefinition) propertyDefinition).setMaxInteger(Long.valueOf(value));
+               ((IntegerPropertyDefinition)propertyDefinition).setMaxInteger(Long.valueOf(value));
             }
             else if (propertyDefinition.getPropertyType().equals(EnumPropertyType.DECIMAL))
             {
-               ((DecimalPropertyDefinition) propertyDefinition).setMaxDecimal(Double.valueOf(value));
+               ((DecimalPropertyDefinition)propertyDefinition).setMaxDecimal(Double.valueOf(value));
             }
          }
          else if (property.getNodeName().equals(CMIS.CMIS_MAX_LENGHT))
          {
             if (propertyDefinition.getPropertyType().equals(EnumPropertyType.STRING))
             {
-               ((StringPropertyDefinition) propertyDefinition).setMaxLength(Long.parseLong(value));
+               ((StringPropertyDefinition)propertyDefinition).setMaxLength(Long.parseLong(value));
             }
          }
          else if (property.getNodeName().equals(CMIS.CMIS_PRECISION))
@@ -205,13 +205,13 @@ public class PropertyDefinitionParser
             Precision pr = Precision.fromValue(Integer.valueOf(value).intValue());
             if (propertyDefinition.getPropertyType().equals(EnumPropertyType.DECIMAL))
             {
-               ((DecimalPropertyDefinition) propertyDefinition).setPrecision(pr);
+               ((DecimalPropertyDefinition)propertyDefinition).setPrecision(pr);
             }
          }
          else if (property.getNodeName().equals(CMIS.CMIS_CHOICE))
          {
-            String choiceDisplayName = property.getAttributes().getNamedItem(CMIS.DISPLAY_NAME)
-               .getFirstChild().getNodeValue();
+            Node displayName = property.getAttributes().getNamedItem(CMIS.DISPLAY_NAME);
+            String choiceDisplayName = (displayName == null) ? "" : displayName.getNodeValue();
             choices.add(parseChoice(choiceDisplayName, property.getChildNodes()));
          }
          else if (property.getNodeName().equals(CMIS.CMIS_DEFAULT_VALUE))
@@ -219,25 +219,24 @@ public class PropertyDefinitionParser
             setDefaultValue(propertyDefinition, property.getChildNodes());
          }
       }
-      
+
       return propertyDefinition;
    }
-   
+
    /**
     * Parses default value node list and sets default value to propDefinition
     * 
     * @param propertyDefinition property definition
     * @param children node list, which contains default values
     */
-   private static void setDefaultValue(BasePropertyDefinition<?> propertyDefinition, 
-      NodeList children)
+   private static void setDefaultValue(BasePropertyDefinition<?> propertyDefinition, NodeList children)
    {
       List<String> stringValues = new ArrayList<String>();
       for (int i = 0; i < children.getLength(); i++)
       {
          Node node = children.item(i);
          if (node.getNodeName().equals(CMIS.CMIS_VALUE))
-            stringValues.add((node.getFirstChild() == null)? null: node.getFirstChild().getNodeValue());
+            stringValues.add((node.getFirstChild() == null) ? null : node.getFirstChild().getNodeValue());
       }
       if (propertyDefinition.getPropertyType().equals(EnumPropertyType.BOOLEAN))
       {
@@ -312,7 +311,7 @@ public class PropertyDefinitionParser
          ((IntegerPropertyDefinition)propertyDefinition).setDefaultValue(arrayValues);
       }
    }
-   
+
    /**
     * Parses choice node list and returns choice of required type.
     * 
@@ -329,11 +328,11 @@ public class PropertyDefinitionParser
       {
          Node node = children.item(i);
          if (node.getNodeName().equals(CMIS.CMIS_VALUE))
-            stringValues.add((node.getFirstChild() == null)? null : node.getFirstChild().getNodeValue());
+            stringValues.add((node.getFirstChild() == null) ? null : node.getFirstChild().getNodeValue());
       }
-      
+
       EnumPropertyType propertyType = propertyDefinition.getPropertyType();
-      
+
       if (propertyType.equals(EnumPropertyType.BOOLEAN))
       {
          Boolean[] arrayValues = new Boolean[stringValues.size()];
@@ -361,10 +360,8 @@ public class PropertyDefinitionParser
          }
          return new Choice<Double>(arrayValues, displayName);
       }
-      else if (propertyType.equals(EnumPropertyType.HTML)
-               || propertyType.equals(EnumPropertyType.ID)
-               || propertyType.equals(EnumPropertyType.STRING)
-               || propertyType.equals(EnumPropertyType.URI))
+      else if (propertyType.equals(EnumPropertyType.HTML) || propertyType.equals(EnumPropertyType.ID)
+         || propertyType.equals(EnumPropertyType.STRING) || propertyType.equals(EnumPropertyType.URI))
       {
          String[] arrayValues = new String[stringValues.size()];
          for (int i = 0; i < stringValues.size(); i++)
@@ -384,5 +381,5 @@ public class PropertyDefinitionParser
       }
       return null;
    }
-   
+
 }
