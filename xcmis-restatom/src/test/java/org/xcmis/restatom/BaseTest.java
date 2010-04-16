@@ -608,7 +608,7 @@ public abstract class BaseTest extends TestCase
       assertTrue("Not found 'cmis:fulltextIndexed' element", hasElementValue("cmis:fulltextIndexed", xmlType));
       assertTrue("Not found 'cmis:includedInSupertypeQuery' element", hasElementValue("cmis:includedInSupertypeQuery",
          xmlType));
-      assertTrue("Not found 'cmis:controllable' element", hasElementValue("cmis:controllable", xmlType));
+      assertTrue("Not found 'cmis:controllableACL' element", hasElementValue("cmis:controllableACL", xmlType));
       assertTrue("Not found 'cmis:controllablePolicy' element", hasElementValue("cmis:controllablePolicy", xmlType));
 
       String baseId = getStringElement("cmis:baseId", xmlType);

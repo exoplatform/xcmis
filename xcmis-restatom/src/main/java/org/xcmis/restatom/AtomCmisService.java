@@ -549,6 +549,18 @@ public class AtomCmisService implements ResourceContainer
    @Path("{repositoryId}/query")
    public Response query(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
    {
+      RequestContext request = initRequestContext(repositoryId, httpRequest);
+      ResponseContext abderaResponse = getCollection(request).getFeed(request);
+      ResponseBuilder builder = Response.status(abderaResponse.getStatus() == 200 ? 201 : abderaResponse.getStatus());
+      copyAbderaHeaders(builder, abderaResponse);
+      builder.header(HttpHeaders.CACHE_CONTROL, "no-cache");
+      return builder.entity(abderaResponse).build();
+   }
+
+   @GET
+   @Path("{repositoryId}/query")
+   public Response queryGET(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
+   {
       return getFeed(repositoryId, httpRequest);
    }
 

@@ -173,7 +173,7 @@ public interface AtomCMIS extends CmisConstants
 
    QName PRINCIPAL_ANYONE = new QName(CMIS_NS_URI, "principalAnyone", CMIS_PREFIX);
 
-   QName CONTROLLABLE = new QName(CMIS_NS_URI, "controllable", CMIS_PREFIX);
+   QName CONTROLLABLE_ACL = new QName(CMIS_NS_URI, "controllableACL", CMIS_PREFIX);
 
    QName CONTROLLABLE_POLICY = new QName(CMIS_NS_URI, "controllablePolicy", CMIS_PREFIX);
 

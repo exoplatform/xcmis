@@ -150,7 +150,7 @@ public class TypeDefinitionTypeElement extends ExtensibleElementWrapper
       type.setIncludedInSupertypeQuery(Boolean.parseBoolean(getSimpleExtension(AtomCMIS.INCLUDED_IN_SUPERTYPE_QUERY)));
 
       type.setControllablePolicy(Boolean.parseBoolean(getSimpleExtension(AtomCMIS.CONTROLLABLE_POLICY)));
-      type.setControllableACL(Boolean.parseBoolean(getSimpleExtension(AtomCMIS.CONTROLLABLE)));
+      type.setControllableACL(Boolean.parseBoolean(getSimpleExtension(AtomCMIS.CONTROLLABLE_ACL)));
 
       //Property definitions
       Map<String, PropertyDefinition<?>> propDefs = getPropertyDefinitions();
@@ -193,7 +193,7 @@ public class TypeDefinitionTypeElement extends ExtensibleElementWrapper
 
          /* controllable */
          addSimpleExtension(AtomCMIS.CONTROLLABLE_POLICY, Boolean.toString(type.isControllablePolicy()));
-         addSimpleExtension(AtomCMIS.CONTROLLABLE, Boolean.toString(type.isControllableACL()));
+         addSimpleExtension(AtomCMIS.CONTROLLABLE_ACL, Boolean.toString(type.isControllableACL()));
 
          switch (type.getBaseId())
          {
