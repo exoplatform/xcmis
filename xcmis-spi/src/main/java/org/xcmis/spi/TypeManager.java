@@ -49,7 +49,7 @@ public interface TypeManager
     * @param includePropertyDefinition if <code>true</code> property definition
     *        should be included
     * @return type definition
-    * @throws TypeNotFoundException if type <code>typeId</code> does not exists
+    * @throws TypeNotFoundException if type <code>typeId</code> does not exist
     * @throws CmisRuntimeException if any others errors occur
     */
    TypeDefinition getTypeDefinition(String typeId, boolean includePropertyDefinition)

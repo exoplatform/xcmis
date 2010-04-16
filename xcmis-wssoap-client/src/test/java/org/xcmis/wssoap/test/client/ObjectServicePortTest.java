@@ -261,7 +261,7 @@ public class ObjectServicePortTest extends TestCase
    public void testGetProperties() throws Exception
    {
       System.out.println("Invoking getProperties...");
-      java.lang.String _getProperties_objectId = createDocument("documentForGetProperties"+ System.nanoTime());
+      java.lang.String _getProperties_objectId = createDocument("documentForGetProperties" + System.nanoTime());
       java.lang.String _getProperties_filter = "*";
       org.xcmis.soap.client.CmisExtensionType _getProperties_extension = null;
       try
@@ -269,13 +269,8 @@ public class ObjectServicePortTest extends TestCase
          org.xcmis.soap.client.CmisPropertiesType _getProperties__return =
             port.getProperties(repositoryId, _getProperties_objectId, _getProperties_filter, _getProperties_extension);
          System.out.println("getProperties.result=" + _getProperties__return);
-         List<CmisProperty> list =  _getProperties__return.getProperty();
-         for (CmisProperty cmisProperty : list)
-         {
-            System.out
-               .println("     ObjectServicePortTest.testGetProperties cmisProperty.getPropertyDefinitionId() = "
-                  + cmisProperty.getPropertyDefinitionId());
-         }
+         List<CmisProperty> list = _getProperties__return.getProperty();
+         System.out.println("_getProperties__return.getProperty() list = " + list);
       }
       catch (CmisException e)
       {

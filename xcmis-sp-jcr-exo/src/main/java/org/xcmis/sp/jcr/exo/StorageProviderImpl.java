@@ -210,7 +210,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
 
       if (configuration == null)
       {
-         throw new InvalidArgumentException("CMIS repository " + id + " does not exists.");
+         throw new InvalidArgumentException("CMIS repository '" + id + "' does not exist.");
       }
 
       String repositoryId = configuration.getRepository();
@@ -252,7 +252,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
 
       if (configuration == null)
       {
-         throw new InvalidArgumentException("CMIS repository " + id + " does not exists.");
+         throw new InvalidArgumentException("CMIS repository '" + id + "' does not exist.");
       }
 
       String repositoryId = configuration.getRepository();

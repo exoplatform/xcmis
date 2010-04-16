@@ -596,7 +596,7 @@ public class StorageImpl implements Storage
       List<DocumentData> v = new ArrayList<DocumentData>();
       if (!workingCopies.containsKey(versionSeriesId) && !versions.containsKey(versionSeriesId))
       {
-         throw new ObjectNotFoundException("Version series " + versionSeriesId + " does not exist.");
+         throw new ObjectNotFoundException("Version series '" + versionSeriesId + "' does not exist.");
       }
       String pwc = workingCopies.get(versionSeriesId);
       if (pwc != null)
@@ -658,7 +658,7 @@ public class StorageImpl implements Storage
       Map<String, Value> values = properties.get(objectId);
       if (values == null)
       {
-         throw new ObjectNotFoundException("Object " + objectId + "does not exists.");
+         throw new ObjectNotFoundException("Object '" + objectId + "' does not exist.");
       }
       BaseType baseType = BaseType.fromValue(values.get(CmisConstants.BASE_TYPE_ID).getStrings()[0]);
       String typeId = values.get(CmisConstants.OBJECT_TYPE_ID).getStrings()[0];
@@ -846,7 +846,7 @@ public class StorageImpl implements Storage
       }
       catch (TypeNotFoundException e)
       {
-         throw new InvalidArgumentException("Specified parent type " + type.getParentId() + " does not exists.");
+         throw new InvalidArgumentException("Specified parent type '" + type.getParentId() + "' does not exist.");
       }
       // Check new type does not use known property IDs.
       if (type.getPropertyDefinitions() != null)
@@ -903,7 +903,7 @@ public class StorageImpl implements Storage
       {
          if (this.types.get(typeId) == null)
          {
-            throw new TypeNotFoundException("Type " + typeId + " does not exists.");
+            throw new TypeNotFoundException("Type '" + typeId + "' does not exist.");
          }
 
          for (String t : typeChildren.get(typeId))
@@ -923,7 +923,7 @@ public class StorageImpl implements Storage
       TypeDefinition type = types.get(typeId);
       if (type == null)
       {
-         throw new TypeNotFoundException("Type " + typeId + " does not exists.");
+         throw new TypeNotFoundException("Type '" + typeId + "' does not exist.");
       }
       TypeDefinition copy =
          new TypeDefinition(type.getId(), type.getBaseId(), type.getQueryName(), type.getLocalName(), type
@@ -944,7 +944,7 @@ public class StorageImpl implements Storage
       TypeDefinition type = types.get(typeId);
       if (type == null)
       {
-         throw new TypeNotFoundException("Type " + typeId + " does not exists.");
+         throw new TypeNotFoundException("Type '" + typeId + "' does not exist.");
       }
 
       if (type.getParentId() == null)

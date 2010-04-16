@@ -711,7 +711,7 @@ public class StorageImpl implements Storage
       }
       catch (ItemNotFoundException infe)
       {
-         throw new ObjectNotFoundException("Version series " + versionSeriesId + " does not exist.");
+         throw new ObjectNotFoundException("Version series '" + versionSeriesId + "' does not exist.");
       }
       catch (javax.jcr.RepositoryException re)
       {
@@ -824,7 +824,7 @@ public class StorageImpl implements Storage
       }
       catch (ItemNotFoundException nfe)
       {
-         throw new ObjectNotFoundException("Object " + objectId + " does not exists.");
+         throw new ObjectNotFoundException("Object '" + objectId + "' does not exist.");
       }
       catch (RepositoryException re)
       {
@@ -851,7 +851,7 @@ public class StorageImpl implements Storage
          Item item = session.getItem(path);
          if (!item.isNode())
          {
-            throw new ObjectNotFoundException("Object " + path + " does not exists.");
+            throw new ObjectNotFoundException("Object '" + path + "' does not exist.");
          }
 
          Node node = (Node)item;
@@ -880,7 +880,7 @@ public class StorageImpl implements Storage
       }
       catch (ItemNotFoundException nfe)
       {
-         throw new ObjectNotFoundException("Object  " + path + " does not exists.");
+         throw new ObjectNotFoundException("Object  '" + path + "' does not exist.");
       }
       catch (RepositoryException re)
       {
@@ -1127,7 +1127,7 @@ public class StorageImpl implements Storage
     */
    public void removeType(String typeId) throws TypeNotFoundException, StorageException, CmisRuntimeException
    {
-      // Throws exceptions if type with specified 'typeId' does not exists or is unsupported by CMIS.
+      // Throws exceptions if type with specified 'typeId' does not exist or is unsupported by CMIS.
       getTypeDefinition(typeId, false);
       try
       {

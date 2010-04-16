@@ -127,7 +127,7 @@ public abstract class Connection
     *         <li>Base type is not specified or is one of optional type that is
     *         not supported by storage, see
     *         {@link CmisTypeDefinitionType#getBaseId()}</li>
-    *         <li>Parent type is not specified or does not exists, see
+    *         <li>Parent type is not specified or does not exist, see
     *         {@link CmisTypeDefinitionType#getParentId()}</li>
     *         <li>New type has at least one property definitions that has
     *         unsupported type, invalid id, so on</li>
@@ -1818,7 +1818,7 @@ public abstract class Connection
     *        </ul>
     * @return retrieval object
     * @throws ObjectNotFoundException if object with specified <code>path</code>
-    *         does not exists
+    *         does not exist
     * @throws FilterNotValidException if <code>propertyFilter</code> has invalid
     *         syntax or contains at least one property name that is not in
     *         object's property definition or <code>renditionFilter</code> has
@@ -1899,7 +1899,7 @@ public abstract class Connection
     *        </ul>
     * @return object of latest version in version series
     * @throws ObjectNotFoundException if Version Series with id
-    *         <code>versionSeriesId</code> does not exists or the input
+    *         <code>versionSeriesId</code> does not exist or the input
     *         parameter <code>major</code> is <code>true</code> and the Version
     *         Series contains no major versions.
     * @throws FilterNotValidException if <code>propertyFilter</code> has invalid
@@ -2195,7 +2195,7 @@ public abstract class Connection
     * @return CMIS object that contains properties of latest version of object
     *         in version series
     * @throws ObjectNotFoundException if Version Series with id
-    *         <code>versionSeriesId</code> does not exists or the input
+    *         <code>versionSeriesId</code> does not exist or the input
     *         parameter <code>major</code> is <code>true</code> and the Version
     *         Series contains no major versions.
     * @throws FilterNotValidException if <code>propertyFilter</code> has invalid
@@ -2244,7 +2244,7 @@ public abstract class Connection
     * @param skipCount skip specified number of objects in response
     * @return object's renditions
     * @throws ObjectNotFoundException if object with specified
-    *         <code>objectId</code> does not exists
+    *         <code>objectId</code> does not exist
     * @throws FilterNotValidException if <code>renditionFilter</code> has
     *         invalid syntax or contains at least one unknown rendition
     */
@@ -2456,7 +2456,7 @@ public abstract class Connection
       }
       catch (ObjectNotFoundException e)
       {
-         throw new InvalidArgumentException("Object " + sourceFolderId + " does not exists.");
+         throw new InvalidArgumentException("Object '" + sourceFolderId + "' does not exist.");
       }
 
       if (source.getBaseType() != BaseType.FOLDER)

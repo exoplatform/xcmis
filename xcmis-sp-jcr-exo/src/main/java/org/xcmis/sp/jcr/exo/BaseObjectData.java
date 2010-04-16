@@ -1132,7 +1132,7 @@ abstract class BaseObjectData implements ObjectData
       }
       catch (PathNotFoundException pe)
       {
-         // does not exists
+         // does not exist
          return null;
       }
       catch (RepositoryException re)
@@ -1160,7 +1160,7 @@ abstract class BaseObjectData implements ObjectData
       }
       catch (PathNotFoundException pe)
       {
-         // does not exists
+         // does not exist
          return null;
       }
       catch (RepositoryException re)
@@ -1182,7 +1182,7 @@ abstract class BaseObjectData implements ObjectData
       }
       catch (PathNotFoundException pe)
       {
-         // does not exists
+         // does not exist
          return null;
       }
       catch (RepositoryException re)
@@ -1210,7 +1210,7 @@ abstract class BaseObjectData implements ObjectData
       }
       catch (PathNotFoundException pe)
       {
-         // does not exists
+         // does not exist
          return null;
       }
       catch (RepositoryException re)
@@ -1232,7 +1232,7 @@ abstract class BaseObjectData implements ObjectData
       }
       catch (PathNotFoundException pe)
       {
-         // does not exists
+         // does not exist
          return null;
       }
       catch (RepositoryException re)
@@ -1260,7 +1260,7 @@ abstract class BaseObjectData implements ObjectData
       }
       catch (PathNotFoundException pe)
       {
-         // does not exists
+         // does not exist
          return null;
       }
       catch (RepositoryException re)
@@ -1282,7 +1282,7 @@ abstract class BaseObjectData implements ObjectData
       }
       catch (PathNotFoundException pe)
       {
-         // does not exists
+         // does not exist
          return null;
       }
       catch (RepositoryException re)
@@ -1310,7 +1310,7 @@ abstract class BaseObjectData implements ObjectData
       }
       catch (PathNotFoundException pe)
       {
-         // does not exists
+         // does not exist
          return null;
       }
       catch (RepositoryException re)
@@ -1332,7 +1332,7 @@ abstract class BaseObjectData implements ObjectData
       }
       catch (PathNotFoundException pe)
       {
-         // does not exists
+         // does not exist
          return null;
       }
       catch (RepositoryException re)
@@ -1360,7 +1360,7 @@ abstract class BaseObjectData implements ObjectData
       }
       catch (PathNotFoundException pe)
       {
-         // does not exists
+         // does not exist
          return null;
       }
       catch (RepositoryException re)

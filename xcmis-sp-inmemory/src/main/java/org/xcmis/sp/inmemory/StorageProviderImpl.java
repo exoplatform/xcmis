@@ -81,7 +81,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
       StorageImpl storage = storageImpls.get(storageId);
       if (storage == null)
       {
-         throw new InvalidArgumentException("CMIS repository " + storageId + " does not exists.");
+         throw new InvalidArgumentException("CMIS repository '" + storageId + "' does not exist.");
       }
 
       return new InmemConnection(storage);
@@ -93,7 +93,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
       StorageImpl storage = storageImpls.get(storageId);
       if (storage == null)
       {
-         throw new InvalidArgumentException("CMIS repository " + storageId + " does not exists.");
+         throw new InvalidArgumentException("CMIS repository '" + storageId + "' does not exist.");
       }
 
       return new InmemConnection(storage);

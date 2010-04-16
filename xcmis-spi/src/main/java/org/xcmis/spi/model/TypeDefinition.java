@@ -335,7 +335,7 @@ public class TypeDefinition
     * @return property definition or <code>null</code> if type was retrieved
     *         with parameter 'includePropertyDefintions' as <code>false</code>,
     *         see {@link Connection#getTypeDefinition(String, boolean)} or if
-    *         property definition with specified ID does not exists
+    *         property definition with specified ID does not exist.
     */
    public PropertyDefinition<?> getPropertyDefinition(String id)
    {

@@ -374,7 +374,7 @@ public interface Storage extends TypeManager
     * @param versionSeriesId id of version series
     * @return document versions
     * @throws ObjectNotFoundException if version series with
-    *         <code>versionSeriesId</code> does not exists
+    *         <code>versionSeriesId</code> does not exist
     */
    Collection<DocumentData> getAllVersions(String versionSeriesId) throws ObjectNotFoundException;
 

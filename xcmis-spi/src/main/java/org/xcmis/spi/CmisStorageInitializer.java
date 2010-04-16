@@ -82,7 +82,7 @@ public class CmisStorageInitializer
       StorageProvider storageProvider = storageProviders.get(storageId);
       if (storageProvider == null)
       {
-         throw new InvalidArgumentException("Storage " + storageId + " does not exists.");
+         throw new InvalidArgumentException("Storage '" + storageId + "' does not exist.");
       }
       return storageProvider.getConnection(storageId);
    }
