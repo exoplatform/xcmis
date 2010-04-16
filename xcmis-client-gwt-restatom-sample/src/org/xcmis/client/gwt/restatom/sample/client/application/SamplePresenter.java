@@ -62,7 +62,9 @@ import com.google.gwt.user.client.Window;
 public class SamplePresenter implements RepositoriesReceivedHandler, ChildrenReceivedHandler, FolderCreatedHandler,
    DocumentCreatedHandler
 {
-   private String url = "/xcmis/rest/cmisatom";
+//   private String url = "/rest/cmisatom";
+   
+   private String url = "http://xcmis.org/rest/cmisatom";
    
    private RepositoryService repositoryService;
    

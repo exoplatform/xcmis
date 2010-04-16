@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+"http://java.sun.com/dtd/web-app_2_3.dtd">
+
+<web-app>
+
+   <display-name>xCMIS Application: REST</display-name>
+    <context-param>
+    <param-name>ws.rs.scan.components</param-name>
+    <param-value>true</param-value>
+    </context-param>
+
+  <listener>
+    <listener-class>org.everrest.core.servlet.RestInitializedListener</listener-class>
+  </listener>
+  <servlet>
+    <servlet-name>RestServlet</servlet-name>
+    <servlet-class>org.everrest.core.servlet.StandaloneRestServlet</servlet-class>
+  </servlet>
+
+   <servlet-mapping>
+      <servlet-name>RestServlet</servlet-name>
+      <url-pattern>/rest/*</url-pattern>
+   </servlet-mapping>
+
+
+</web-app>
