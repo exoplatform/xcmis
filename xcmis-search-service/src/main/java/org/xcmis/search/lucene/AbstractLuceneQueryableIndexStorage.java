@@ -304,7 +304,8 @@ public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndex
       @Override
       public void visit(FullTextSearchScore node) throws VisitException
       {
-         sortField = new SortField(null, SortField.SCORE, order == Order.DESCENDING);
+         //By default result sorted score descendant
+         sortField = new SortField(null, SortField.SCORE, order == Order.ASCENDING);
       }
 
       /**
