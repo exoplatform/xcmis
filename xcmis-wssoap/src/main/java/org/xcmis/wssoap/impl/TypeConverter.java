@@ -18,26 +18,41 @@
  */
 package org.xcmis.wssoap.impl;
 
-
 import org.xcmis.core.CmisACLCapabilityType;
 import org.xcmis.core.CmisAccessControlEntryType;
 import org.xcmis.core.CmisAccessControlListType;
 import org.xcmis.core.CmisAccessControlPrincipalType;
 import org.xcmis.core.CmisAllowableActionsType;
 import org.xcmis.core.CmisChangeEventType;
+import org.xcmis.core.CmisChoiceBoolean;
+import org.xcmis.core.CmisChoiceDateTime;
+import org.xcmis.core.CmisChoiceDecimal;
+import org.xcmis.core.CmisChoiceHtml;
+import org.xcmis.core.CmisChoiceId;
+import org.xcmis.core.CmisChoiceInteger;
+import org.xcmis.core.CmisChoiceString;
+import org.xcmis.core.CmisChoiceUri;
 import org.xcmis.core.CmisListOfIdsType;
 import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.CmisPropertiesType;
 import org.xcmis.core.CmisProperty;
 import org.xcmis.core.CmisPropertyBoolean;
+import org.xcmis.core.CmisPropertyBooleanDefinitionType;
 import org.xcmis.core.CmisPropertyDateTime;
+import org.xcmis.core.CmisPropertyDateTimeDefinitionType;
 import org.xcmis.core.CmisPropertyDecimal;
+import org.xcmis.core.CmisPropertyDecimalDefinitionType;
 import org.xcmis.core.CmisPropertyDefinitionType;
 import org.xcmis.core.CmisPropertyHtml;
+import org.xcmis.core.CmisPropertyHtmlDefinitionType;
 import org.xcmis.core.CmisPropertyId;
+import org.xcmis.core.CmisPropertyIdDefinitionType;
 import org.xcmis.core.CmisPropertyInteger;
+import org.xcmis.core.CmisPropertyIntegerDefinitionType;
 import org.xcmis.core.CmisPropertyString;
+import org.xcmis.core.CmisPropertyStringDefinitionType;
 import org.xcmis.core.CmisPropertyUri;
+import org.xcmis.core.CmisPropertyUriDefinitionType;
 import org.xcmis.core.CmisRenditionType;
 import org.xcmis.core.CmisRepositoryCapabilitiesType;
 import org.xcmis.core.CmisRepositoryInfoType;
@@ -50,8 +65,11 @@ import org.xcmis.core.EnumCapabilityContentStreamUpdates;
 import org.xcmis.core.EnumCapabilityJoin;
 import org.xcmis.core.EnumCapabilityQuery;
 import org.xcmis.core.EnumCapabilityRendition;
+import org.xcmis.core.EnumCardinality;
+import org.xcmis.core.EnumPropertyType;
 import org.xcmis.core.EnumSupportedPermissions;
 import org.xcmis.core.EnumTypeOfChanges;
+import org.xcmis.core.EnumUpdatability;
 import org.xcmis.messaging.CmisContentStreamType;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.messaging.CmisObjectInFolderContainerType;
@@ -70,6 +88,7 @@ import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.AllowableActions;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.ChangeInfo;
+import org.xcmis.spi.model.Choice;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.ObjectParent;
@@ -99,6 +118,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -200,6 +220,10 @@ public class TypeConverter
 
    public static Map<String, Property<?>> getPropertyMap(CmisPropertiesType input)
    {
+      if (input == null)
+      {
+         return null;
+      }
       Map<String, Property<?>> result = new HashMap<String, Property<?>>();
       for (CmisProperty source : input.getProperty())
       {
@@ -412,7 +436,10 @@ public class TypeConverter
          {
             for (ItemsTree<CmisObject> d : one.getChildren())
             {
-               containerType.getChildren().addAll(getCmisObjectInFolderContainerType(d.getChildren()));
+               if (d != null)
+               {
+                  containerType.getChildren().addAll(getCmisObjectInFolderContainerType(d.getChildren()));
+               }
             }
          }
          result.add(containerType);
@@ -463,6 +490,421 @@ public class TypeConverter
       result.setParentId(source.getParentId());
       result.setQueryable(source.isQueryable());
       result.setQueryName(source.getQueryName());
+      result.getPropertyDefinition().addAll(getCmisPropertyDefintitions(source.getPropertyDefinitions()));
+      return result;
+   }
+
+   public static CmisChoiceBoolean getCmisChoiceBoolean(Choice<Boolean> source)
+   {
+      CmisChoiceBoolean cmisChoice = new CmisChoiceBoolean();
+      cmisChoice.setDisplayName(source.getDisplayName());
+      if (source.getValues() != null)
+      {
+         for (Boolean v : source.getValues())
+         {
+            cmisChoice.getValue().add(v);
+         }
+      }
+      if (source.getChoices() != null && source.getChoices().size() > 0)
+      {
+         for (Choice<Boolean> c : source.getChoices())
+         {
+            cmisChoice.getChoice().add(getCmisChoiceBoolean(c));
+         }
+      }
+      return cmisChoice;
+   }
+
+   public static CmisChoiceDateTime getCmisChoiceDateTime(Choice<Calendar> source)
+   {
+      CmisChoiceDateTime cmisChoice = new CmisChoiceDateTime();
+      cmisChoice.setDisplayName(source.getDisplayName());
+      if (source.getValues() != null)
+      {
+         for (Calendar v : source.getValues())
+         {
+            cmisChoice.getValue().add(CmisUtils.fromCalendar(v));
+         }
+      }
+      if (source.getChoices() != null && source.getChoices().size() > 0)
+      {
+         for (Choice<Calendar> c : source.getChoices())
+         {
+            cmisChoice.getChoice().add(getCmisChoiceDateTime(c));
+         }
+      }
+      return cmisChoice;
+   }
+
+   public static CmisChoiceDecimal getCmisChoiceDecimal(Choice<BigDecimal> source)
+   {
+      CmisChoiceDecimal cmisChoice = new CmisChoiceDecimal();
+      cmisChoice.setDisplayName(source.getDisplayName());
+      if (source.getValues() != null)
+      {
+         for (BigDecimal v : source.getValues())
+         {
+            cmisChoice.getValue().add(v);
+         }
+      }
+      if (source.getChoices() != null && source.getChoices().size() > 0)
+      {
+         for (Choice<BigDecimal> c : source.getChoices())
+         {
+            cmisChoice.getChoice().add(getCmisChoiceDecimal(c));
+         }
+      }
+      return cmisChoice;
+   }
+
+   public static CmisChoiceHtml getCmisChoiceHtml(Choice<String> source)
+   {
+      CmisChoiceHtml cmisChoice = new CmisChoiceHtml();
+      cmisChoice.setDisplayName(source.getDisplayName());
+      if (source.getValues() != null)
+      {
+         for (String v : source.getValues())
+         {
+            cmisChoice.getValue().add(v);
+         }
+      }
+      if (source.getChoices() != null && source.getChoices().size() > 0)
+      {
+         for (Choice<String> c : source.getChoices())
+         {
+            cmisChoice.getChoice().add(getCmisChoiceHtml(c));
+         }
+      }
+      return cmisChoice;
+   }
+
+   public static CmisChoiceId getCmisChoiceId(Choice<String> source)
+   {
+      CmisChoiceId cmisChoice = new CmisChoiceId();
+      cmisChoice.setDisplayName(source.getDisplayName());
+      if (source.getValues() != null)
+      {
+         for (String v : source.getValues())
+         {
+            cmisChoice.getValue().add(v);
+         }
+      }
+      if (source.getChoices() != null && source.getChoices().size() > 0)
+      {
+         for (Choice<String> c : source.getChoices())
+         {
+            cmisChoice.getChoice().add(getCmisChoiceId(c));
+         }
+      }
+      return cmisChoice;
+   }
+
+   public static CmisChoiceInteger getCmisChoiceInteger(Choice<BigInteger> source)
+   {
+      CmisChoiceInteger cmisChoice = new CmisChoiceInteger();
+      cmisChoice.setDisplayName(source.getDisplayName());
+      if (source.getValues() != null)
+      {
+         for (BigInteger v : source.getValues())
+         {
+            cmisChoice.getValue().add(v);
+         }
+      }
+      if (source.getChoices() != null && source.getChoices().size() > 0)
+      {
+         for (Choice<BigInteger> c : source.getChoices())
+         {
+            cmisChoice.getChoice().add(getCmisChoiceInteger(c));
+         }
+      }
+      return cmisChoice;
+   }
+
+   public static CmisChoiceString getCmisChoiceString(Choice<String> source)
+   {
+      CmisChoiceString cmisChoice = new CmisChoiceString();
+      cmisChoice.setDisplayName(source.getDisplayName());
+      if (source.getValues() != null)
+      {
+         for (String v : source.getValues())
+         {
+            cmisChoice.getValue().add(v);
+         }
+      }
+      if (source.getChoices() != null && source.getChoices().size() > 0)
+      {
+         for (Choice<String> c : source.getChoices())
+         {
+            cmisChoice.getChoice().add(getCmisChoiceString(c));
+         }
+      }
+      return cmisChoice;
+   }
+
+   public static CmisChoiceUri getCmisChoiceUri(Choice<URI> source)
+   {
+      CmisChoiceUri cmisChoice = new CmisChoiceUri();
+      cmisChoice.setDisplayName(source.getDisplayName());
+      if (source.getValues() != null)
+      {
+         for (URI v : source.getValues())
+         {
+            cmisChoice.getValue().add(v.toASCIIString());
+         }
+      }
+      if (source.getChoices() != null && source.getChoices().size() > 0)
+      {
+         for (Choice<URI> c : source.getChoices())
+         {
+            cmisChoice.getChoice().add(getCmisChoiceUri(c));
+         }
+      }
+      return cmisChoice;
+   }
+
+   @SuppressWarnings("unchecked")
+   public static List<CmisPropertyDefinitionType> getCmisPropertyDefintitions(Collection<PropertyDefinition<?>> source)
+   {
+      if (source == null)
+      {
+         return Collections.emptyList();
+      }
+
+      List<CmisPropertyDefinitionType> result = new ArrayList<CmisPropertyDefinitionType>();
+      for (PropertyDefinition<?> definition : source)
+      {
+
+         CmisPropertyDefinitionType cmisPropertyDefinition = null;
+
+         switch (definition.getPropertyType())
+         {
+            case BOOLEAN :
+               CmisPropertyBooleanDefinitionType bool = new CmisPropertyBooleanDefinitionType();
+               if (definition.getChoices() != null && definition.getChoices().size() > 0)
+               {
+                  for (Choice<?> c : definition.getChoices())
+                  {
+                     bool.getChoice().add(getCmisChoiceBoolean((Choice<Boolean>)c));
+                  }
+               }
+               if (definition.getDefaultValue() != null && definition.getDefaultValue().length > 0)
+               {
+                  CmisPropertyBoolean def = new CmisPropertyBoolean();
+                  def.setDisplayName(definition.getDisplayName());
+                  def.setLocalName(definition.getLocalName());
+                  def.setPropertyDefinitionId(definition.getId());
+                  def.setQueryName(definition.getQueryName());
+
+                  for (Object o : definition.getDefaultValue())
+                  {
+                     def.getValue().add((Boolean)o);
+                  }
+                  bool.setDefaultValue(def);
+               }
+               cmisPropertyDefinition = bool;
+               break;
+            case DATETIME :
+               CmisPropertyDateTimeDefinitionType date = new CmisPropertyDateTimeDefinitionType();
+               if (definition.getChoices() != null && definition.getChoices().size() > 0)
+               {
+                  for (Choice<?> c : definition.getChoices())
+                  {
+                     date.getChoice().add(getCmisChoiceDateTime((Choice<Calendar>)c));
+                  }
+               }
+               if (definition.getDefaultValue() != null && definition.getDefaultValue().length > 0)
+               {
+                  CmisPropertyDateTime def = new CmisPropertyDateTime();
+                  def.setDisplayName(definition.getDisplayName());
+                  def.setLocalName(definition.getLocalName());
+                  def.setPropertyDefinitionId(definition.getId());
+                  def.setQueryName(definition.getQueryName());
+
+                  for (Object o : definition.getDefaultValue())
+                  {
+                     def.getValue().add(CmisUtils.fromCalendar((Calendar)o));
+                  }
+                  date.setDefaultValue(def);
+               }
+               cmisPropertyDefinition = date;
+               break;
+            case DECIMAL :
+               CmisPropertyDecimalDefinitionType decimal = new CmisPropertyDecimalDefinitionType();
+               if (definition.getChoices() != null && definition.getChoices().size() > 0)
+               {
+                  for (Choice<?> c : definition.getChoices())
+                  {
+                     decimal.getChoice().add(getCmisChoiceDecimal((Choice<BigDecimal>)c));
+                  }
+               }
+               if (definition.getDefaultValue() != null && definition.getDefaultValue().length > 0)
+               {
+                  CmisPropertyDecimal def = new CmisPropertyDecimal();
+                  def.setDisplayName(definition.getDisplayName());
+                  def.setLocalName(definition.getLocalName());
+                  def.setPropertyDefinitionId(definition.getId());
+                  def.setQueryName(definition.getQueryName());
+
+                  for (Object o : definition.getDefaultValue())
+                  {
+                     def.getValue().add((BigDecimal)o);
+                  }
+                  decimal.setDefaultValue(def);
+               }
+
+               decimal.setMaxValue(definition.getMaxDecimal());
+               decimal.setMinValue(definition.getMinDecimal());
+               cmisPropertyDefinition = decimal;
+               break;
+            case HTML :
+               CmisPropertyHtmlDefinitionType html = new CmisPropertyHtmlDefinitionType();
+               if (definition.getChoices() != null && definition.getChoices().size() > 0)
+               {
+                  for (Choice<?> c : definition.getChoices())
+                  {
+                     html.getChoice().add(getCmisChoiceHtml((Choice<String>)c));
+                  }
+               }
+               if (definition.getDefaultValue() != null && definition.getDefaultValue().length > 0)
+               {
+                  CmisPropertyHtml def = new CmisPropertyHtml();
+                  def.setDisplayName(definition.getDisplayName());
+                  def.setLocalName(definition.getLocalName());
+                  def.setPropertyDefinitionId(definition.getId());
+                  def.setQueryName(definition.getQueryName());
+
+                  for (Object o : definition.getDefaultValue())
+                  {
+                     def.getValue().add((String)o);
+                  }
+                  html.setDefaultValue(def);
+               }
+               cmisPropertyDefinition = html;
+               break;
+            case ID :
+               CmisPropertyIdDefinitionType id = new CmisPropertyIdDefinitionType();
+               if (definition.getChoices() != null && definition.getChoices().size() > 0)
+               {
+                  for (Choice<?> c : definition.getChoices())
+                  {
+                     id.getChoice().add(getCmisChoiceId((Choice<String>)c));
+                  }
+               }
+               if (definition.getDefaultValue() != null && definition.getDefaultValue().length > 0)
+               {
+                  CmisPropertyId def = new CmisPropertyId();
+                  def.setDisplayName(definition.getDisplayName());
+                  def.setLocalName(definition.getLocalName());
+                  def.setPropertyDefinitionId(definition.getId());
+                  def.setQueryName(definition.getQueryName());
+
+                  for (Object o : definition.getDefaultValue())
+                  {
+                     def.getValue().add((String)o);
+                  }
+                  id.setDefaultValue(def);
+               }
+               cmisPropertyDefinition = id;
+               break;
+            case INTEGER :
+               CmisPropertyIntegerDefinitionType integ = new CmisPropertyIntegerDefinitionType();
+               if (definition.getChoices() != null && definition.getChoices().size() > 0)
+               {
+                  for (Choice<?> c : definition.getChoices())
+                  {
+                     integ.getChoice().add(getCmisChoiceInteger((Choice<BigInteger>)c));
+                  }
+               }
+               if (definition.getDefaultValue() != null && definition.getDefaultValue().length > 0)
+               {
+                  CmisPropertyInteger def = new CmisPropertyInteger();
+                  def.setDisplayName(definition.getDisplayName());
+                  def.setLocalName(definition.getLocalName());
+                  def.setPropertyDefinitionId(definition.getId());
+                  def.setQueryName(definition.getQueryName());
+
+                  for (Object o : definition.getDefaultValue())
+                  {
+                     def.getValue().add((BigInteger)o);
+                  }
+                  integ.setDefaultValue(def);
+               }
+
+               integ.setMaxValue(definition.getMaxInteger());
+               integ.setMinValue(definition.getMinInteger());
+               cmisPropertyDefinition = integ;
+               break;
+            case STRING :
+               CmisPropertyStringDefinitionType str = new CmisPropertyStringDefinitionType();
+               if (definition.getChoices() != null && definition.getChoices().size() > 0)
+               {
+                  for (Choice<?> c : definition.getChoices())
+                  {
+                     str.getChoice().add(getCmisChoiceString((Choice<String>)c));
+                  }
+               }
+               if (definition.getDefaultValue() != null && definition.getDefaultValue().length > 0)
+               {
+                  CmisPropertyString def = new CmisPropertyString();
+                  def.setDisplayName(definition.getDisplayName());
+                  def.setLocalName(definition.getLocalName());
+                  def.setPropertyDefinitionId(definition.getId());
+                  def.setQueryName(definition.getQueryName());
+
+                  for (Object o : definition.getDefaultValue())
+                  {
+                     def.getValue().add((String)o);
+                  }
+                  str.setDefaultValue(def);
+               }
+               str.setMaxLength(BigInteger.valueOf(definition.getMaxLength()));
+               cmisPropertyDefinition = str;
+               break;
+            case URI :
+               CmisPropertyUriDefinitionType uri = new CmisPropertyUriDefinitionType();
+               if (definition.getChoices() != null && definition.getChoices().size() > 0)
+               {
+                  for (Choice<?> c : definition.getChoices())
+                  {
+                     uri.getChoice().add(getCmisChoiceUri((Choice<URI>)c));
+                  }
+               }
+               if (definition.getDefaultValue() != null && definition.getDefaultValue().length > 0)
+               {
+                  CmisPropertyUri def = new CmisPropertyUri();
+                  def.setDisplayName(definition.getDisplayName());
+                  def.setLocalName(definition.getLocalName());
+                  def.setPropertyDefinitionId(definition.getId());
+                  def.setQueryName(definition.getQueryName());
+
+                  for (Object o : definition.getDefaultValue())
+                  {
+                     def.getValue().add((String)o);
+                  }
+                  uri.setDefaultValue(def);
+               }
+               cmisPropertyDefinition = uri;
+               break;
+         }
+
+         cmisPropertyDefinition.setCardinality(definition.isMultivalued() ? EnumCardinality.MULTI
+            : EnumCardinality.SINGLE);
+         cmisPropertyDefinition.setDescription(definition.getDescription());
+         cmisPropertyDefinition.setDisplayName(definition.getDisplayName());
+         cmisPropertyDefinition.setId(definition.getId());
+         cmisPropertyDefinition.setInherited(definition.getInherited());
+         cmisPropertyDefinition.setLocalName(definition.getLocalName());
+         cmisPropertyDefinition.setLocalNamespace(definition.getLocalNamespace());
+         cmisPropertyDefinition.setOpenChoice(definition.isOpenChoice());
+         cmisPropertyDefinition.setOrderable(definition.isOrderable());
+         cmisPropertyDefinition.setPropertyType(EnumPropertyType.fromValue(definition.getPropertyType().value()));
+         cmisPropertyDefinition.setQueryable(definition.isQueryable());
+         cmisPropertyDefinition.setQueryName(definition.getQueryName());
+         cmisPropertyDefinition.setRequired(definition.isRequired());
+         cmisPropertyDefinition.setUpdatability(EnumUpdatability.fromValue(definition.getUpdatability().value()));
+
+         result.add(cmisPropertyDefinition);
+      }
       return result;
    }
 
@@ -501,7 +943,8 @@ public class TypeConverter
       result.setCapabilityACL(EnumCapabilityACL.fromValue(source.getCapabilityACL().value()));
       result.setCapabilityAllVersionsSearchable(source.isCapabilityAllVersionsSearchable());
       result.setCapabilityChanges(EnumCapabilityChanges.fromValue(source.getCapabilityChanges().value()));
-      result.setCapabilityContentStreamUpdatability(EnumCapabilityContentStreamUpdates.fromValue(source.getCapabilityContentStreamUpdatable().value()));
+      result.setCapabilityContentStreamUpdatability(EnumCapabilityContentStreamUpdates.fromValue(source
+         .getCapabilityContentStreamUpdatable().value()));
       result.setCapabilityGetDescendants(source.isCapabilityGetDescendants());
       result.setCapabilityGetFolderTree(source.isCapabilityGetFolderTree());
       result.setCapabilityJoin(EnumCapabilityJoin.fromValue(source.getCapabilityJoin().value()));
