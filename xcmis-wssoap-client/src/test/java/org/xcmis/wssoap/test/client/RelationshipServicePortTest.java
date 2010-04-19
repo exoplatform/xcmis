@@ -55,8 +55,19 @@ public final class RelationshipServicePortTest extends BaseTest
    public void testGetObjectRelationships()
    {
       System.out.println("Invoking getObjectRelationships...");
+      
+      String source = "";
+      String target = "";
+      try {
+         source = createDocument("test811", rootFolderId);
+         target = createDocument("test812", rootFolderId);
+         createRelationship(source, target);
+      } catch(Exception ex) {
+         fail(ex.getMessage());
+      }
+      
       java.lang.String _getObjectRelationships_repositoryId = cmisRepositoryId;
-      java.lang.String _getObjectRelationships_objectId = "06779ed5c0a8004900b9726e58afca6e"; //TODO subject to change
+      java.lang.String _getObjectRelationships_objectId = source;
       java.lang.Boolean _getObjectRelationships_includeSubRelationshipTypes = Boolean.TRUE;
       EnumRelationshipDirection _getObjectRelationships_relationshipDirection = EnumRelationshipDirection.EITHER;
       java.lang.String _getObjectRelationships_typeId = "";
@@ -81,6 +92,10 @@ public final class RelationshipServicePortTest extends BaseTest
          System.out.println("Expected exception: cmisException has occurred.");
          System.out.println(e.toString());
          fail();
+      }
+      finally {
+         deleteObject(source);
+         deleteObject(target);
       }
    }
 }

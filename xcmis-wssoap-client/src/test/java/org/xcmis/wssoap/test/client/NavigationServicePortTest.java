@@ -39,7 +39,7 @@ public final class NavigationServicePortTest extends BaseTest
       nav_port = ss.getNavigationServicePort();
       ((BindingProvider)nav_port).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, "root");
       ((BindingProvider)nav_port).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, "exo");
-       super.setUp();
+      super.setUp();
    }
 
    public void testGetObjectParents()
@@ -47,9 +47,12 @@ public final class NavigationServicePortTest extends BaseTest
       System.out.println("Invoking getObjectParents...");
       java.lang.String _getObjectParents_repositoryId = cmisRepositoryId;
       java.lang.String _getObjectParents_objectId = "";
-      try {
-       _getObjectParents_objectId = createDocument("test123", rootFolderId);
-      } catch (Exception e){
+      try
+      {
+         _getObjectParents_objectId = createDocument("test123", rootFolderId);
+      }
+      catch (Exception e)
+      {
          fail(e.getMessage());
       }
       java.lang.String _getObjectParents_filter = "*";
@@ -61,10 +64,10 @@ public final class NavigationServicePortTest extends BaseTest
       try
       {
          java.util.List<org.xcmis.soap.client.CmisObjectParentsType> _getObjectParents__return =
-            nav_port.getObjectParents(_getObjectParents_repositoryId, _getObjectParents_objectId, _getObjectParents_filter,
-               _getObjectParents_includeAllowableActions, _getObjectParents_includeRelationships,
-               _getObjectParents_renditionFilter, _getObjectParents_includeRelativePathSegment,
-               _getObjectParents_extension);
+            nav_port.getObjectParents(_getObjectParents_repositoryId, _getObjectParents_objectId,
+               _getObjectParents_filter, _getObjectParents_includeAllowableActions,
+               _getObjectParents_includeRelationships, _getObjectParents_renditionFilter,
+               _getObjectParents_includeRelativePathSegment, _getObjectParents_extension);
          System.out.println("getObjectParents.result=" + _getObjectParents__return);
          for (org.xcmis.soap.client.CmisObjectParentsType one : _getObjectParents__return)
          {
@@ -77,6 +80,10 @@ public final class NavigationServicePortTest extends BaseTest
          System.out.println("Expected exception: cmisException has occurred.");
          System.out.println(ex.toString());
          fail();
+      }
+      finally
+      {
+         deleteObject(_getObjectParents_objectId);
       }
    }
 
@@ -114,10 +121,15 @@ public final class NavigationServicePortTest extends BaseTest
    public void testGetDescendants()
    {
       System.out.println("Invoking getDescendants...");
-      try {
-      createDocument("test1234", rootFolderId);
-      createFolder("11133", rootFolderId);
-      } catch (Exception e){
+      String doc1 = "";
+      String fold1 = "";
+      try
+      {
+         doc1 = createDocument("test1234", rootFolderId);
+         fold1 = createFolder("11133", rootFolderId);
+      }
+      catch (Exception e)
+      {
          fail(e.getMessage());
       }
       java.lang.String _getDescendants_repositoryId = cmisRepositoryId;
@@ -148,6 +160,11 @@ public final class NavigationServicePortTest extends BaseTest
          System.out.println("Expected exception: cmisException has occurred.");
          System.out.println(ex.toString());
          fail();
+      }
+      finally
+      {
+         deleteObject(doc1);
+         deleteObject(fold1);
       }
    }
 
@@ -222,9 +239,12 @@ public final class NavigationServicePortTest extends BaseTest
       System.out.println("Invoking getFolderParent...");
       java.lang.String _getFolderParent_repositoryId = cmisRepositoryId;
       java.lang.String _getFolderParent_folderId = "";
-      try {
-         _getFolderParent_folderId  = createFolder("1113", rootFolderId);
-      } catch (Exception e ){
+      try
+      {
+         _getFolderParent_folderId = createFolder("1113", rootFolderId);
+      }
+      catch (Exception e)
+      {
          e.printStackTrace();
          fail(e.getMessage());
       }
@@ -244,6 +264,10 @@ public final class NavigationServicePortTest extends BaseTest
          System.out.println("Expected exception: cmisException has occurred.");
          System.out.println(ex.toString());
          fail();
+      }
+      finally
+      {
+          deleteObject(_getFolderParent_folderId);
       }
    }
 

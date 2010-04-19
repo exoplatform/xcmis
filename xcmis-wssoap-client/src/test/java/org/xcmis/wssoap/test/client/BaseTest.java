@@ -111,6 +111,57 @@ public abstract class BaseTest extends TestCase
          return null;
       }
    }
+   
+   public void createRelationship(String sourceObjectId,String targetObjectId) throws Exception
+   {
+      String relationshipId = null;
+
+      org.xcmis.soap.client.CmisPropertiesType _createRelationship_properties = new CmisPropertiesType();
+      // typeId
+      CmisPropertyId propTypeId = new CmisPropertyId();
+      propTypeId.setPropertyDefinitionId(CmisConstants.OBJECT_TYPE_ID);
+      propTypeId.getValue().add(EnumBaseObjectTypeIds.CMIS_RELATIONSHIP.value());
+      // name
+      CmisPropertyString propName = new CmisPropertyString();
+      propName.setPropertyDefinitionId(CmisConstants.NAME);
+      propName.getValue().add("testCreateRelationship_relation1_" + System.nanoTime());
+      // SOURCE_ID
+      CmisPropertyId propSourceId = new CmisPropertyId();
+      propSourceId.setPropertyDefinitionId(CmisConstants.SOURCE_ID);
+      propSourceId.getValue().add(sourceObjectId);
+      // TARGET_ID
+      CmisPropertyId propTargetId = new CmisPropertyId();
+      propTargetId.setPropertyDefinitionId(CmisConstants.TARGET_ID);
+      propTargetId.getValue().add(targetObjectId);
+      // fill the _createDocument_properties
+      _createRelationship_properties.getProperty().add(propTypeId);
+      _createRelationship_properties.getProperty().add(propName);
+      _createRelationship_properties.getProperty().add(propSourceId);
+      _createRelationship_properties.getProperty().add(propTargetId);
+
+      java.util.List<java.lang.String> _createRelationship_policies = null;
+      org.xcmis.soap.client.CmisAccessControlListType _createRelationship_addACEs = null;
+      org.xcmis.soap.client.CmisAccessControlListType _createRelationship_removeACEs = null;
+      org.xcmis.soap.client.CmisExtensionType _createRelationship_extensionVal = null;
+      javax.xml.ws.Holder<org.xcmis.soap.client.CmisExtensionType> _createRelationship_extension =
+         new javax.xml.ws.Holder<org.xcmis.soap.client.CmisExtensionType>(_createRelationship_extensionVal);
+      javax.xml.ws.Holder<java.lang.String> _createRelationship_objectId = new javax.xml.ws.Holder<java.lang.String>();
+      try
+      {
+         object_port.createRelationship(cmisRepositoryId, _createRelationship_properties, _createRelationship_policies,
+            _createRelationship_addACEs, _createRelationship_removeACEs, _createRelationship_extension,
+            _createRelationship_objectId);
+
+         System.out.println("createRelationship._createRelationship_extension=" + _createRelationship_extension.value);
+         System.out.println("createRelationship._createRelationship_objectId=" + _createRelationship_objectId.value);
+         relationshipId = _createRelationship_objectId.value;
+      }
+      catch (CmisException e)
+      {
+         System.out.println("Expected exception: cmisException has occurred.");
+         System.out.println(e.toString());
+      }
+   }
 
    protected void deleteObject(String objectId)
    {
