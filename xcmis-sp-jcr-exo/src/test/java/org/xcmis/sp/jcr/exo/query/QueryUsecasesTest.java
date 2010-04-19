@@ -46,24 +46,6 @@ import java.util.List;
 public class QueryUsecasesTest extends BaseQueryTest
 {
 
-   private final static String CONTENT_TYPE = "text/plain";
-
-   private final static String NASA_DOCUMENT = "cmis:nasa-mission";
-
-   private final static String PROPERTY_BOOSTER = "cmis:booster-name";
-
-   private final static String PROPERTY_COMMANDER = "cmis:commander";
-
-   private final static String PROPERTY_COMMAND_MODULE_PILOT = "cmis:command-module-pilot";
-
-   private final static String PROPERTY_LUNAR_MODULE_PILOT = "cmis:lunar-module-pilot";
-
-   private final static String PROPERTY_BOOSTER_MASS = "cmis:booster-mass";
-
-   private final static String PROPERTY_SAMPLE_RETURNED = "cmis:sample-returned";
-
-   private final static String PROPERTY_STATUS = "cmis:status";
-
    private FolderData testRoot;
 
    /**
@@ -688,9 +670,9 @@ public class QueryUsecasesTest extends BaseQueryTest
 
       Query query = new Query(statement, true);
       ItemsIterator<Result> result = storage.query(query);
-      // Apollo 13 (2)
       // Apollo 8 (1)
-      checkResultOrder(result, new DocumentData[]{appolloContent.get(2), appolloContent.get(1)});
+      // Apollo 13 (2)
+      checkResultOrder(result, new DocumentData[]{appolloContent.get(1), appolloContent.get(2)});
 
    }
 
@@ -1277,10 +1259,12 @@ public class QueryUsecasesTest extends BaseQueryTest
    {
       // create data
 
-      DocumentData doc1 = createDocument(testRoot, "node1", "cmis:article-sports", "hello world".getBytes(), "text/plain");
+      DocumentData doc1 =
+         createDocument(testRoot, "node1", "cmis:article-sports", "hello world".getBytes(), "text/plain");
       storage.saveObject(doc1);
 
-      DocumentData doc2 = createDocument(testRoot, "node2", "cmis:article-animals", "hello world".getBytes(), "text/plain");
+      DocumentData doc2 =
+         createDocument(testRoot, "node2", "cmis:article-animals", "hello world".getBytes(), "text/plain");
       storage.saveObject(doc2);
 
       String stat = "SELECT * FROM cmis:article WHERE IN_FOLDER( '" + testRoot.getObjectId() + "')";
