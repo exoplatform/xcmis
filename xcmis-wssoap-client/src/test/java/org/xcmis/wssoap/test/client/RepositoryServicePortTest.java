@@ -96,7 +96,7 @@ public class RepositoryServicePortTest extends BaseTest
    public void testGetTypeChildren() throws Exception
    {
       System.out.println("Invoking getTypeChildren...");
-      java.lang.String _getTypeChildren_typeId = "cmis:folder";
+      java.lang.String _getTypeChildren_typeId = "cmis:document";
       java.lang.Boolean _getTypeChildren_includePropertyDefinitions = Boolean.TRUE;
       java.math.BigInteger _getTypeChildren_maxItems = new java.math.BigInteger("10");
       java.math.BigInteger _getTypeChildren_skipCount = new java.math.BigInteger("0");
