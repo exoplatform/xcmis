@@ -33,28 +33,29 @@ import junit.framework.TestCase;
  * 
  */
 
-public final class RelationshipServicePortTest extends TestCase
+public final class RelationshipServicePortTest extends BaseTest
 {
 
-   private static final QName SERVICE_NAME =
+   private static final QName REL_SERVICE_NAME =
       new QName("http://docs.oasis-open.org/ns/cmis/ws/200908/", "RelationshipService");
 
-   RelationshipServicePort port;
+   RelationshipServicePort rel_port;
 
    public  void setUp() throws Exception
    {
       URL wsdlURL = RelationshipService.WSDL_LOCATION;
 
-      RelationshipService ss = new RelationshipService(wsdlURL, SERVICE_NAME);
-      port = ss.getRelationshipServicePort();
-      ((BindingProvider)port).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, "root");
-      ((BindingProvider)port).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, "exo");
+      RelationshipService ss = new RelationshipService(wsdlURL, REL_SERVICE_NAME);
+      rel_port = ss.getRelationshipServicePort();
+      ((BindingProvider)rel_port).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, "root");
+      ((BindingProvider)rel_port).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, "exo");
+      super.setUp();
    }
 
    public void testGetObjectRelationships()
    {
       System.out.println("Invoking getObjectRelationships...");
-      java.lang.String _getObjectRelationships_repositoryId = "cmis1";
+      java.lang.String _getObjectRelationships_repositoryId = cmisRepositoryId;
       java.lang.String _getObjectRelationships_objectId = "06779ed5c0a8004900b9726e58afca6e"; //TODO subject to change
       java.lang.Boolean _getObjectRelationships_includeSubRelationshipTypes = Boolean.TRUE;
       EnumRelationshipDirection _getObjectRelationships_relationshipDirection = EnumRelationshipDirection.EITHER;
@@ -67,7 +68,7 @@ public final class RelationshipServicePortTest extends TestCase
       try
       {
          org.xcmis.soap.client.CmisObjectListType _getObjectRelationships__return =
-            port.getObjectRelationships(_getObjectRelationships_repositoryId, _getObjectRelationships_objectId,
+            rel_port.getObjectRelationships(_getObjectRelationships_repositoryId, _getObjectRelationships_objectId,
                _getObjectRelationships_includeSubRelationshipTypes, _getObjectRelationships_relationshipDirection,
                _getObjectRelationships_typeId, _getObjectRelationships_filter,
                _getObjectRelationships_includeAllowableActions, _getObjectRelationships_maxItems,
