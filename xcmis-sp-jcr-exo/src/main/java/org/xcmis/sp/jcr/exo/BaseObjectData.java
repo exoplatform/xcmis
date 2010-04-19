@@ -47,13 +47,13 @@ import org.xcmis.spi.StorageException;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.BaseType;
-import org.xcmis.spi.model.Permission.BasicPermissions;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.PropertyType;
 import org.xcmis.spi.model.RelationshipDirection;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.Updatability;
+import org.xcmis.spi.model.Permission.BasicPermissions;
 import org.xcmis.spi.model.impl.BooleanProperty;
 import org.xcmis.spi.model.impl.DateTimeProperty;
 import org.xcmis.spi.model.impl.DecimalProperty;
@@ -170,6 +170,10 @@ abstract class BaseObjectData implements ObjectData
       try
       {
          this.session = node.getSession();
+         if (!node.isCheckedOut())
+         {
+            node.checkout();
+         }
       }
       catch (RepositoryException re)
       {
