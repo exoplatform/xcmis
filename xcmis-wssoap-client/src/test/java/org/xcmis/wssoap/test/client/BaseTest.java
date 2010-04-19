@@ -52,10 +52,7 @@ public abstract class BaseTest extends TestCase
 
    protected final String password = "exo";
 
-   protected static final QName OBJECT_SERVICE_NAME =
-      new QName("http://docs.oasis-open.org/ns/cmis/ws/200908/", "ObjectService");
-
-   protected ObjectServicePort port;
+   protected ObjectServicePort object_port;
 
    /**
     * @see junit.framework.TestCase#setUp()
@@ -63,11 +60,12 @@ public abstract class BaseTest extends TestCase
    @Override
    protected void setUp() throws Exception
    {
+      QName OBJECT_SERVICE_NAME = new QName("http://docs.oasis-open.org/ns/cmis/ws/200908/", "ObjectService");
       URL wsdlURL = ObjectService.WSDL_LOCATION;
       ObjectService ss = new ObjectService(wsdlURL, OBJECT_SERVICE_NAME);
-      port = ss.getObjectServicePort();
-      ((BindingProvider)port).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, username);
-      ((BindingProvider)port).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, password);
+      object_port = ss.getObjectServicePort();
+      ((BindingProvider)object_port).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, username);
+      ((BindingProvider)object_port).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, password);
    }
 
    protected String createDocument(String name) throws Exception
@@ -100,7 +98,7 @@ public abstract class BaseTest extends TestCase
       javax.xml.ws.Holder<java.lang.String> _createDocument_objectId = new javax.xml.ws.Holder<java.lang.String>();
       try
       {
-         port.createDocument(cmisRepositoryId, _createDocument_properties, _createDocument_folderId,
+         object_port.createDocument(cmisRepositoryId, _createDocument_properties, _createDocument_folderId,
             _createDocument_contentStream, _createDocument_versioningState, _createDocument_policies,
             _createDocument_addACEs, _createDocument_removeACEs, _createDocument_extension, _createDocument_objectId);
          return _createDocument_objectId.value;
@@ -120,7 +118,7 @@ public abstract class BaseTest extends TestCase
       try
       {
          org.xcmis.soap.client.CmisExtensionType _deleteObject__return =
-            port.deleteObject(cmisRepositoryId, objectId, _deleteObject_allVersions, _deleteObject_extension);
+            object_port.deleteObject(cmisRepositoryId, objectId, _deleteObject_allVersions, _deleteObject_extension);
          System.out.println("deleteObject.result=" + _deleteObject__return);
 
       }
@@ -144,7 +142,7 @@ public abstract class BaseTest extends TestCase
       try
       {
          org.xcmis.soap.client.CmisObjectType _getObject__return =
-            port.getObject(cmisRepositoryId, _getObject_objectId, _getObject_filter,
+            object_port.getObject(cmisRepositoryId, _getObject_objectId, _getObject_filter,
                _getObject_includeAllowableActions, _getObject_includeRelationships, _getObject_renditionFilter,
                _getObject_includePolicyIds, _getObject_includeACL, _getObject_extension);
          System.out.println("getObject.result=" + _getObject__return);
@@ -184,8 +182,9 @@ public abstract class BaseTest extends TestCase
       javax.xml.ws.Holder<java.lang.String> _createFolder_objectId = new javax.xml.ws.Holder<java.lang.String>();
       try
       {
-         port.createFolder(cmisRepositoryId, _createFolder_properties, _createFolder_folderId, _createFolder_policies,
-            _createFolder_addACEs, _createFolder_removeACEs, _createFolder_extension, _createFolder_objectId);
+         object_port.createFolder(cmisRepositoryId, _createFolder_properties, _createFolder_folderId,
+            _createFolder_policies, _createFolder_addACEs, _createFolder_removeACEs, _createFolder_extension,
+            _createFolder_objectId);
          resultFolderId = _createFolder_objectId.value;
          assertTrue(hasObject(resultFolderId));
          return resultFolderId;
