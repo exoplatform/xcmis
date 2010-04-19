@@ -47,13 +47,13 @@ import org.xcmis.spi.StorageException;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.Permission.BasicPermissions;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.PropertyType;
 import org.xcmis.spi.model.RelationshipDirection;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.Updatability;
-import org.xcmis.spi.model.Permission.BasicPermissions;
 import org.xcmis.spi.model.impl.BooleanProperty;
 import org.xcmis.spi.model.impl.DateTimeProperty;
 import org.xcmis.spi.model.impl.DecimalProperty;
@@ -727,11 +727,21 @@ abstract class BaseObjectData implements ObjectData
          throw new ConstraintException("Required property " + property.getId() + " can't be removed.");
       }
 
-      for (Object v : property.getValues())
+      //      for (Object v : property.getValues())
+      //      {
+      //         if (v == null)
+      //         {
+      //            throw new ConstraintException("Null value not allowed. List must not contains null items.");
+      //         }
+      //      }
+
+      // Do not store nulls
+      for (Iterator<?> i = property.getValues().iterator(); i.hasNext();)
       {
+         Object v = i.next();
          if (v == null)
          {
-            throw new ConstraintException("Null value not allowed. List must not contains null items.");
+            i.remove();
          }
       }
 
@@ -1101,8 +1111,8 @@ abstract class BaseObjectData implements ObjectData
          }
          else if (definition.getId().equals(CmisConstants.VERSION_SERIES_ID))
          {
-            return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
-               definition.getDisplayName(), ((DocumentData)this).getVersionSeriesId());
+            return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(), definition
+               .getDisplayName(), ((DocumentData)this).getVersionSeriesId());
          }
          else if (definition.getId().equals(CmisConstants.VERSION_LABEL))
          {

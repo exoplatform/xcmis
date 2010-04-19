@@ -1092,13 +1092,16 @@ public class TypeConverter
       List<URI> result = new ArrayList<URI>();
       for (String one : values)
       {
-         try
+         if (one != null)
          {
-            result.add(new URI(one));
-         }
-         catch (URISyntaxException e)
-         {
-            e.printStackTrace();
+            try
+            {
+               result.add(new URI(one));
+            }
+            catch (URISyntaxException e)
+            {
+               e.printStackTrace();
+            }
          }
       }
       return result;
@@ -1109,7 +1112,10 @@ public class TypeConverter
       List<Calendar> result = new ArrayList<Calendar>();
       for (XMLGregorianCalendar one : source)
       {
-         result.add(one.toGregorianCalendar());
+         if (one != null)
+         {
+            result.add(one.toGregorianCalendar());
+         }
       }
       return result;
    }
