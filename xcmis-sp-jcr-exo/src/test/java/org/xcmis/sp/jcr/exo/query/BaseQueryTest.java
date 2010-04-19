@@ -47,6 +47,24 @@ public abstract class BaseQueryTest extends BaseTest
 {
    private static final Log LOG = ExoLogger.getLogger(BaseQueryTest.class.getName());
 
+   protected final static String CONTENT_TYPE = "text/plain";
+
+   protected final static String NASA_DOCUMENT = "cmis:nasa-mission";
+
+   protected final static String PROPERTY_BOOSTER = "cmis:booster-name";
+
+   protected final static String PROPERTY_COMMANDER = "cmis:commander";
+
+   protected final static String PROPERTY_COMMAND_MODULE_PILOT = "cmis:command-module-pilot";
+
+   protected final static String PROPERTY_LUNAR_MODULE_PILOT = "cmis:lunar-module-pilot";
+
+   protected final static String PROPERTY_BOOSTER_MASS = "cmis:booster-mass";
+
+   protected final static String PROPERTY_SAMPLE_RETURNED = "cmis:sample-returned";
+
+   protected final static String PROPERTY_STATUS = "cmis:status";
+
    protected Storage storage;
 
    protected FolderData rootFolder;
