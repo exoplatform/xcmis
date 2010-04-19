@@ -51,9 +51,9 @@ public class UpdateListener implements EventListener
    private final String workspace;
 
    private final Repository repository;
-   
+
    SessionProvider prov = null;
-   
+
    Session session = null;
 
    /**
@@ -75,7 +75,7 @@ public class UpdateListener implements EventListener
     */
    public void onEvent(EventIterator eventIterator)
    {
-      
+
       try
       {
          while (eventIterator.hasNext())
@@ -84,60 +84,59 @@ public class UpdateListener implements EventListener
             String path = event.getPath();
             if (path.contains("xcmis:system"))
                return;
-            
+
             if (event.getPath().endsWith("jcr:content") || event.getPath().endsWith("jcr:data"))
             {
                if (prov == null)
                   prov = SessionProvider.createSystemProvider();
                if (session == null)
-              session = prov.getSession(workspace, (ManageableRepository)repository);
+                  session = prov.getSession(workspace, (ManageableRepository)repository);
 
                Node node = null;
                Item item = session.getItem(path);
-               if (item.isNode()){
-                   node = session.getItem(path).getParent();
-               }else {
-                 node = session.getItem(path).getParent().getParent(); 
+               if (item.isNode())
+               {
+                  node = session.getItem(path).getParent();
+               }
+               else
+               {
+                  node = session.getItem(path).getParent().getParent();
                }
                ContentStream content;
                Node contentNode = node.getNode(JcrCMIS.JCR_CONTENT);
                Property fileContent = contentNode.getProperty(JcrCMIS.JCR_DATA);
                int length = fileContent.getStream().available();
-               if (length == 0) {
+               if (length == 0)
+               {
                   return; // No content, but node has empty stream.
                }
                content = new BaseContentStream(fileContent.getStream(), //
                   length, //
                   node.getDepth() == 0 ? CmisConstants.ROOT_FOLDER_NAME : node.getName(), //
                   contentNode.getProperty(JcrCMIS.JCR_MIMETYPE).getString());
-               
-               if (content != null)
+
+               int count = 0;
+               for (Map.Entry<MimeType, RenditionProvider> e : renditionProviders.entrySet())
                {
-                  int count = 0;
-                  for (Map.Entry<MimeType, RenditionProvider> e : renditionProviders.entrySet())
+                  if (e.getKey().match(MimeType.fromString(content.getMediaType())))
                   {
-                     if (e.getKey().match(MimeType.fromString(content.getMediaType())))
+                     RenditionProvider renditionProvider = e.getValue();
+                     if (renditionProvider.canStoreRendition())
                      {
-                        RenditionProvider renditionProvider = e.getValue();
-                        if (renditionProvider.canStoreRendition())
-                        {
-                           RenditionContentStream renditionContentStream = renditionProvider.getRenditionStream(content);
-                           String id =  IdGenerator.generate();
-                           Node rendition =
-                              node.addNode(id, JcrCMIS.CMIS_NT_RENDITION);
-                           rendition.setProperty(JcrCMIS.CMIS_RENDITION_STREAM, renditionContentStream.getStream());
-                           rendition.setProperty(JcrCMIS.CMIS_RENDITION_MIME_TYPE, renditionContentStream
-                              .getMediaType());
-                           rendition.setProperty(JcrCMIS.CMIS_RENDITION_KIND, renditionContentStream.getKind());
-                           rendition.setProperty(JcrCMIS.CMIS_RENDITION_HEIGHT, renditionContentStream.getHeight());
-                           rendition.setProperty(JcrCMIS.CMIS_RENDITION_WIDTH, renditionContentStream.getWidth());
-                           count++;
-                        }
+                        RenditionContentStream renditionContentStream = renditionProvider.getRenditionStream(content);
+                        String id = IdGenerator.generate();
+                        Node rendition = node.addNode(id, JcrCMIS.CMIS_NT_RENDITION);
+                        rendition.setProperty(JcrCMIS.CMIS_RENDITION_STREAM, renditionContentStream.getStream());
+                        rendition.setProperty(JcrCMIS.CMIS_RENDITION_MIME_TYPE, renditionContentStream.getMediaType());
+                        rendition.setProperty(JcrCMIS.CMIS_RENDITION_KIND, renditionContentStream.getKind());
+                        rendition.setProperty(JcrCMIS.CMIS_RENDITION_HEIGHT, renditionContentStream.getHeight());
+                        rendition.setProperty(JcrCMIS.CMIS_RENDITION_WIDTH, renditionContentStream.getWidth());
+                        count++;
                      }
-                     if (count > 0)
-                   {
-                      node.save();
-                   }
+                  }
+                  if (count > 0)
+                  {
+                     node.save();
                   }
                }
             }
