@@ -689,9 +689,9 @@ public class QueryUsecasesTest extends BaseQueryTest
 
       Query query = new Query(statement, true);
       ItemsIterator<Result> result = storage.query(query);
-      // Apollo 13 (2)
       // Apollo 8 (1)
-      checkResultOrder(result, new DocumentData[]{appolloContent.get(2), appolloContent.get(1)});
+      // Apollo 13 (2)
+      checkResultOrder(result, new DocumentData[]{appolloContent.get(1), appolloContent.get(2)});
 
    }
 
@@ -1278,10 +1278,12 @@ public class QueryUsecasesTest extends BaseQueryTest
    {
       // create data
 
-      DocumentData doc1 = createDocument(testRoot, "node1", "cmis:article-sports", "hello world".getBytes(), "text/plain");
+      DocumentData doc1 =
+         createDocument(testRoot, "node1", "cmis:article-sports", "hello world".getBytes(), "text/plain");
       storage.saveObject(doc1);
 
-      DocumentData doc2 = createDocument(testRoot, "node2", "cmis:article-animals", "hello world".getBytes(), "text/plain");
+      DocumentData doc2 =
+         createDocument(testRoot, "node2", "cmis:article-animals", "hello world".getBytes(), "text/plain");
       storage.saveObject(doc2);
 
       String stat = "SELECT * FROM cmis:article WHERE IN_FOLDER( '" + testRoot.getObjectId() + "')";
