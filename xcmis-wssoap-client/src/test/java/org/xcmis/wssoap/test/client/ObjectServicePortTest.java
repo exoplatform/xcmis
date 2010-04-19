@@ -74,7 +74,8 @@ public class ObjectServicePortTest extends BaseTest
    public void testGetObject() throws Exception
    {
       System.out.println("Invoking getObject...");
-      java.lang.String _getObject_objectId = createDocument("testGetObject_document_" + System.nanoTime(), rootFolderId);
+      java.lang.String _getObject_objectId =
+         createDocument("testGetObject_document_" + System.nanoTime(), rootFolderId);
       java.lang.String _getObject_filter = "*";
       java.lang.Boolean _getObject_includeAllowableActions = Boolean.TRUE;
       org.xcmis.soap.client.EnumIncludeRelationships _getObject_includeRelationships = null;
@@ -270,7 +271,8 @@ public class ObjectServicePortTest extends BaseTest
    public void testGetProperties() throws Exception
    {
       System.out.println("Invoking getProperties...");
-      java.lang.String _getProperties_objectId = createDocument("testGetProperties_document_" + System.nanoTime(), rootFolderId);
+      java.lang.String _getProperties_objectId =
+         createDocument("testGetProperties_document_" + System.nanoTime(), rootFolderId);
       java.lang.String _getProperties_filter = "*";
       org.xcmis.soap.client.CmisExtensionType _getProperties_extension = null;
       try
@@ -320,7 +322,8 @@ public class ObjectServicePortTest extends BaseTest
    public void testGetContentStream() throws Exception
    {
       System.out.println("Invoking getContentStream...");
-      java.lang.String _getContentStream_objectId = createDocument("testGetContentStream_" + System.nanoTime(), rootFolderId);
+      java.lang.String _getContentStream_objectId =
+         createDocument("testGetContentStream_" + System.nanoTime(), rootFolderId);
       java.lang.String _getContentStream_streamId = null;
       java.math.BigInteger _getContentStream_offset = new java.math.BigInteger("0");
       java.math.BigInteger _getContentStream_length = new java.math.BigInteger("10");
@@ -348,7 +351,8 @@ public class ObjectServicePortTest extends BaseTest
    public void testGetAllowableActions() throws Exception
    {
       System.out.println("Invoking getAllowableActions...");
-      java.lang.String _getAllowableActions_objectId = createDocument("testGetAllowableActions_" + System.nanoTime(), rootFolderId);
+      java.lang.String _getAllowableActions_objectId =
+         createDocument("testGetAllowableActions_" + System.nanoTime(), rootFolderId);
       org.xcmis.soap.client.CmisExtensionType _getAllowableActions_extension = null;
       try
       {
@@ -496,11 +500,13 @@ public class ObjectServicePortTest extends BaseTest
    public void testMoveObject() throws Exception
    {
       System.out.println("Invoking moveObject...");
-      java.lang.String _moveObject_objectIdVal = createDocument("testMoveObject_document_" + System.nanoTime(), rootFolderId);
+
+      java.lang.String _moveObject_targetFolderId = createFolder("moveObject_targetFolderId" + System.nanoTime(), rootFolderId);
+      java.lang.String _moveObject_sourceFolderId = createFolder("moveObject_sourceFolderId" + System.nanoTime(), rootFolderId);
+      java.lang.String _moveObject_objectIdVal =
+         createDocument("testMoveObject_document_" + System.nanoTime(), _moveObject_sourceFolderId);
       javax.xml.ws.Holder<java.lang.String> _moveObject_objectId =
          new javax.xml.ws.Holder<java.lang.String>(_moveObject_objectIdVal);
-      java.lang.String _moveObject_targetFolderId = createFolder("moveObject_targetFolderId" + System.nanoTime());
-      java.lang.String _moveObject_sourceFolderId = createFolder("moveObject_sourceFolderId" + System.nanoTime());
       org.xcmis.soap.client.CmisExtensionType _moveObject_extensionVal = null;
       javax.xml.ws.Holder<org.xcmis.soap.client.CmisExtensionType> _moveObject_extension =
          new javax.xml.ws.Holder<org.xcmis.soap.client.CmisExtensionType>(_moveObject_extensionVal);
@@ -521,13 +527,17 @@ public class ObjectServicePortTest extends BaseTest
       finally
       {
          deleteObject(_moveObject_objectIdVal);
+         deleteObject(_moveObject_sourceFolderId);
+         deleteObject(_moveObject_targetFolderId);
       }
    }
 
    public void testDeleteTree() throws Exception
    {
       System.out.println("Invoking deleteTree...");
-      java.lang.String _deleteTree_folderId = "";
+      java.lang.String _deleteTree_folderId = createFolder("testDeleteTree_folder_" + System.nanoTime(), rootFolderId);
+      createFolder("testDeleteTree_folder_" + System.nanoTime(), _deleteTree_folderId);
+      createFolder("testDeleteTree_folder_" + System.nanoTime(), _deleteTree_folderId);
       java.lang.Boolean _deleteTree_allVersions = null;
       org.xcmis.soap.client.EnumUnfileObject _deleteTree_unfileObjects = null;
       java.lang.Boolean _deleteTree_continueOnFailure = null;
@@ -538,7 +548,7 @@ public class ObjectServicePortTest extends BaseTest
             object_port.deleteTree(cmisRepositoryId, _deleteTree_folderId, _deleteTree_allVersions,
                _deleteTree_unfileObjects, _deleteTree_continueOnFailure, _deleteTree_extension);
          System.out.println("deleteTree.result=" + _deleteTree__return);
-
+         assertFalse(hasObject(_deleteTree_folderId));
       }
       catch (CmisException e)
       {

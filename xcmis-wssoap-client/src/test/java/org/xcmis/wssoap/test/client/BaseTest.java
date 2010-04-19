@@ -85,7 +85,8 @@ public abstract class BaseTest extends TestCase
 
       java.lang.String _createDocument_folderId = folderName;
       org.xcmis.soap.client.CmisContentStreamType _createDocument_contentStream = new CmisContentStreamType();
-      _createDocument_contentStream.setStream(new DataHandler(new String("Content from name:" + documentName), "text/plain"));
+      _createDocument_contentStream.setStream(new DataHandler(new String("Content from name:" + documentName),
+         "text/plain"));
       _createDocument_contentStream.setMimeType("text/plain");
 
       org.xcmis.soap.client.EnumVersioningState _createDocument_versioningState = null;
@@ -155,7 +156,7 @@ public abstract class BaseTest extends TestCase
 
    }
 
-   protected String createFolder(String folderName) throws Exception
+   protected String createFolder(String folderName, String folderParent) throws Exception
    {
       String resultFolderId = null;
 
@@ -172,7 +173,6 @@ public abstract class BaseTest extends TestCase
       _createFolder_properties.getProperty().add(propTypeId);
       _createFolder_properties.getProperty().add(propName);
 
-      java.lang.String _createFolder_folderId = rootFolderId;
       java.util.List<java.lang.String> _createFolder_policies = null;
       org.xcmis.soap.client.CmisAccessControlListType _createFolder_addACEs = null;
       org.xcmis.soap.client.CmisAccessControlListType _createFolder_removeACEs = null;
@@ -182,9 +182,8 @@ public abstract class BaseTest extends TestCase
       javax.xml.ws.Holder<java.lang.String> _createFolder_objectId = new javax.xml.ws.Holder<java.lang.String>();
       try
       {
-         object_port.createFolder(cmisRepositoryId, _createFolder_properties, _createFolder_folderId,
-            _createFolder_policies, _createFolder_addACEs, _createFolder_removeACEs, _createFolder_extension,
-            _createFolder_objectId);
+         object_port.createFolder(cmisRepositoryId, _createFolder_properties, folderParent, _createFolder_policies,
+            _createFolder_addACEs, _createFolder_removeACEs, _createFolder_extension, _createFolder_objectId);
          resultFolderId = _createFolder_objectId.value;
          assertTrue(hasObject(resultFolderId));
          return resultFolderId;
