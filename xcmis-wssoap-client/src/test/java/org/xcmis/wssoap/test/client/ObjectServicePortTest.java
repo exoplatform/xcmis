@@ -74,7 +74,7 @@ public class ObjectServicePortTest extends BaseTest
    public void testGetObject() throws Exception
    {
       System.out.println("Invoking getObject...");
-      java.lang.String _getObject_objectId = createDocument("testGetObject_document_" + System.nanoTime());
+      java.lang.String _getObject_objectId = createDocument("testGetObject_document_" + System.nanoTime(), rootFolderId);
       java.lang.String _getObject_filter = "*";
       java.lang.Boolean _getObject_includeAllowableActions = Boolean.TRUE;
       org.xcmis.soap.client.EnumIncludeRelationships _getObject_includeRelationships = null;
@@ -222,12 +222,12 @@ public class ObjectServicePortTest extends BaseTest
       // SOURCE_ID
       CmisPropertyId propSourceId = new CmisPropertyId();
       propSourceId.setPropertyDefinitionId(CmisConstants.SOURCE_ID);
-      String sourceObjectId = createDocument("testCreateRelationship_source_" + System.nanoTime());
+      String sourceObjectId = createDocument("testCreateRelationship_source_" + System.nanoTime(), rootFolderId);
       propSourceId.getValue().add(sourceObjectId);
       // TARGET_ID
       CmisPropertyId propTargetId = new CmisPropertyId();
       propTargetId.setPropertyDefinitionId(CmisConstants.TARGET_ID);
-      String targetObjectId = createDocument("testCreateRelationship_target_" + System.nanoTime());
+      String targetObjectId = createDocument("testCreateRelationship_target_" + System.nanoTime(), rootFolderId);
       propTargetId.getValue().add(targetObjectId);
       // fill the _createDocument_properties
       _createRelationship_properties.getProperty().add(propTypeId);
@@ -270,7 +270,7 @@ public class ObjectServicePortTest extends BaseTest
    public void testGetProperties() throws Exception
    {
       System.out.println("Invoking getProperties...");
-      java.lang.String _getProperties_objectId = createDocument("testGetProperties_document_" + System.nanoTime());
+      java.lang.String _getProperties_objectId = createDocument("testGetProperties_document_" + System.nanoTime(), rootFolderId);
       java.lang.String _getProperties_filter = "*";
       org.xcmis.soap.client.CmisExtensionType _getProperties_extension = null;
       try
@@ -297,7 +297,7 @@ public class ObjectServicePortTest extends BaseTest
    public void testDeleteObject() throws Exception
    {
       System.out.println("Invoking deleteObject...");
-      java.lang.String _deleteObject_objectId = createDocument("testDeleteObject_" + System.nanoTime());
+      java.lang.String _deleteObject_objectId = createDocument("testDeleteObject_" + System.nanoTime(), rootFolderId);
       java.lang.Boolean _deleteObject_allVersions = null;
       org.xcmis.soap.client.CmisExtensionType _deleteObject_extension = null;
       try
@@ -320,7 +320,7 @@ public class ObjectServicePortTest extends BaseTest
    public void testGetContentStream() throws Exception
    {
       System.out.println("Invoking getContentStream...");
-      java.lang.String _getContentStream_objectId = createDocument("testGetContentStream_" + System.nanoTime());
+      java.lang.String _getContentStream_objectId = createDocument("testGetContentStream_" + System.nanoTime(), rootFolderId);
       java.lang.String _getContentStream_streamId = null;
       java.math.BigInteger _getContentStream_offset = new java.math.BigInteger("0");
       java.math.BigInteger _getContentStream_length = new java.math.BigInteger("10");
@@ -348,7 +348,7 @@ public class ObjectServicePortTest extends BaseTest
    public void testGetAllowableActions() throws Exception
    {
       System.out.println("Invoking getAllowableActions...");
-      java.lang.String _getAllowableActions_objectId = createDocument("testGetAllowableActions_" + System.nanoTime());
+      java.lang.String _getAllowableActions_objectId = createDocument("testGetAllowableActions_" + System.nanoTime(), rootFolderId);
       org.xcmis.soap.client.CmisExtensionType _getAllowableActions_extension = null;
       try
       {
@@ -373,7 +373,7 @@ public class ObjectServicePortTest extends BaseTest
    {
       System.out.println("Invoking deleteContentStream...");
       java.lang.String _deleteContentStream_objectIdVal =
-         createDocument("testDeleteContentStream_" + System.nanoTime());
+         createDocument("testDeleteContentStream_" + System.nanoTime(), rootFolderId);
       javax.xml.ws.Holder<java.lang.String> _deleteContentStream_objectId =
          new javax.xml.ws.Holder<java.lang.String>(_deleteContentStream_objectIdVal);
       java.lang.String _deleteContentStream_changeTokenVal = "";
@@ -409,7 +409,7 @@ public class ObjectServicePortTest extends BaseTest
    {
       System.out.println("Invoking createDocumentFromSource...");
       java.lang.String _createDocumentFromSource_sourceId =
-         createDocument("testCreateDocumentFromSource_document_" + System.nanoTime());;
+         createDocument("testCreateDocumentFromSource_document_" + System.nanoTime(), rootFolderId);
       org.xcmis.soap.client.CmisPropertiesType _createDocumentFromSource_properties = new CmisPropertiesType();
       // typeId
       CmisPropertyId propTypeId = new CmisPropertyId();
@@ -462,7 +462,7 @@ public class ObjectServicePortTest extends BaseTest
    {
       System.out.println("Invoking updateProperties...");
       java.lang.String _updateProperties_objectIdVal =
-         createDocument("testUpdateProperties_document_" + System.nanoTime());;
+         createDocument("testUpdateProperties_document_" + System.nanoTime(), rootFolderId);
       javax.xml.ws.Holder<java.lang.String> _updateProperties_objectId =
          new javax.xml.ws.Holder<java.lang.String>(_updateProperties_objectIdVal);
       java.lang.String _updateProperties_changeTokenVal = "";
@@ -496,11 +496,11 @@ public class ObjectServicePortTest extends BaseTest
    public void testMoveObject() throws Exception
    {
       System.out.println("Invoking moveObject...");
-      java.lang.String _moveObject_objectIdVal = createDocument("testMoveObject_document_" + System.nanoTime());;
+      java.lang.String _moveObject_objectIdVal = createDocument("testMoveObject_document_" + System.nanoTime(), rootFolderId);
       javax.xml.ws.Holder<java.lang.String> _moveObject_objectId =
          new javax.xml.ws.Holder<java.lang.String>(_moveObject_objectIdVal);
-      java.lang.String _moveObject_targetFolderId = "";
-      java.lang.String _moveObject_sourceFolderId = "";
+      java.lang.String _moveObject_targetFolderId = createFolder("moveObject_targetFolderId" + System.nanoTime());
+      java.lang.String _moveObject_sourceFolderId = createFolder("moveObject_sourceFolderId" + System.nanoTime());
       org.xcmis.soap.client.CmisExtensionType _moveObject_extensionVal = null;
       javax.xml.ws.Holder<org.xcmis.soap.client.CmisExtensionType> _moveObject_extension =
          new javax.xml.ws.Holder<org.xcmis.soap.client.CmisExtensionType>(_moveObject_extensionVal);

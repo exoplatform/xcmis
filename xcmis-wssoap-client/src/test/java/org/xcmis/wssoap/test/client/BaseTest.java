@@ -68,7 +68,7 @@ public abstract class BaseTest extends TestCase
       ((BindingProvider)object_port).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, password);
    }
 
-   protected String createDocument(String name) throws Exception
+   protected String createDocument(String documentName, String folderName) throws Exception
    {
       org.xcmis.soap.client.CmisPropertiesType _createDocument_properties = new CmisPropertiesType();
       // typeId
@@ -78,14 +78,14 @@ public abstract class BaseTest extends TestCase
       // name
       CmisPropertyString propName = new CmisPropertyString();
       propName.setPropertyDefinitionId(CmisConstants.NAME);
-      propName.getValue().add(name);
+      propName.getValue().add(documentName);
       // fill the _createDocument_properties
       _createDocument_properties.getProperty().add(propTypeId);
       _createDocument_properties.getProperty().add(propName);
 
-      java.lang.String _createDocument_folderId = rootFolderId;
+      java.lang.String _createDocument_folderId = folderName;
       org.xcmis.soap.client.CmisContentStreamType _createDocument_contentStream = new CmisContentStreamType();
-      _createDocument_contentStream.setStream(new DataHandler(new String("Content from name:" + name), "text/plain"));
+      _createDocument_contentStream.setStream(new DataHandler(new String("Content from name:" + documentName), "text/plain"));
       _createDocument_contentStream.setMimeType("text/plain");
 
       org.xcmis.soap.client.EnumVersioningState _createDocument_versioningState = null;
@@ -155,7 +155,7 @@ public abstract class BaseTest extends TestCase
 
    }
 
-   protected String createFolder() throws Exception
+   protected String createFolder(String folderName) throws Exception
    {
       String resultFolderId = null;
 
@@ -167,7 +167,7 @@ public abstract class BaseTest extends TestCase
       // name
       CmisPropertyString propName = new CmisPropertyString();
       propName.setPropertyDefinitionId(CmisConstants.NAME);
-      propName.getValue().add("testCreateFolder_folder1_" + System.nanoTime());
+      propName.getValue().add(folderName);
       // fill the _createDocument_properties
       _createFolder_properties.getProperty().add(propTypeId);
       _createFolder_properties.getProperty().add(propName);
