@@ -22,7 +22,6 @@ package org.xcmis.sp.jcr.exo;
 import org.exoplatform.services.jcr.core.ExtendedNode;
 import org.exoplatform.services.jcr.core.ExtendedSession;
 import org.exoplatform.services.jcr.util.IdGenerator;
-import org.xcmis.spi.RenditionContentStream;
 import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
@@ -32,6 +31,7 @@ import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.PolicyData;
+import org.xcmis.spi.RenditionContentStream;
 import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.VersioningException;
@@ -244,6 +244,14 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
    public String getContentStreamMimeType()
    {
       return getString(CmisConstants.CONTENT_STREAM_MIME_TYPE);
+   }
+
+   /**
+    * @return length of content in bytes
+    */
+   protected Long getContentStreamLength()
+   {
+      return getLong(CmisConstants.CONTENT_STREAM_LENGTH);
    }
 
    /**

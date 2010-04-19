@@ -153,11 +153,25 @@ class FolderChildrenIterator implements ItemsIterator<ObjectData>
 
             if (type.getBaseId() == BaseType.DOCUMENT)
             {
-               next = new DocumentDataImpl(type, node);
+               if (!node.isNodeType(JcrCMIS.CMIS_MIX_DOCUMENT))
+               {
+                  next = new JcrFile(type, node, null);
+               }
+               else
+               {
+                  next = new DocumentDataImpl(type, node);
+               }
             }
             else if (type.getBaseId() == BaseType.FOLDER)
             {
-               next = new FolderDataImpl(type, node);
+               if (!node.isNodeType(JcrCMIS.CMIS_MIX_FOLDER))
+               {
+                  next = new JcrFolder(type, node);
+               }
+               else
+               {
+                  next = new FolderDataImpl(type, node);
+               }
             }
 
          }

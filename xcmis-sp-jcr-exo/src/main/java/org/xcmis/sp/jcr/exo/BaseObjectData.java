@@ -1032,6 +1032,80 @@ abstract class BaseObjectData implements ObjectData
       }
       try
       {
+         // Check known prepared shortcut for properties.
+         // Some properties may be virtual relating to JCR, it minds they
+         // are not stored in JCR as properties but may be calculated in
+         // some way.
+         if (definition.getId().equals(CmisConstants.OBJECT_ID))
+         {
+            return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(), definition
+               .getDisplayName(), getObjectId());
+         }
+         else if (definition.getId().equals(CmisConstants.OBJECT_TYPE_ID))
+         {
+            return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(), definition
+               .getDisplayName(), getTypeId());
+         }
+         else if (definition.getId().equals(CmisConstants.BASE_TYPE_ID))
+         {
+            return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(), definition
+               .getDisplayName(), getBaseType().value());
+         }
+         else if (definition.getId().equals(CmisConstants.NAME))
+         {
+            return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
+               definition.getDisplayName(), getName());
+         }
+         else if (definition.getId().equals(CmisConstants.CREATION_DATE))
+         {
+            return new DateTimeProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
+               definition.getDisplayName(), getCreationDate());
+         }
+         else if (definition.getId().equals(CmisConstants.PATH))
+         {
+            return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
+               definition.getDisplayName(), ((FolderData)this).getPath());
+         }
+         else if (definition.getId().equals(CmisConstants.PARENT_ID) && node.getDepth() != 0)
+         {
+            return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(), definition
+               .getDisplayName(), getParent().getObjectId());
+         }
+         else if (definition.getId().equals(CmisConstants.CONTENT_STREAM_FILE_NAME))
+         {
+            if (((DocumentData)this).hasContent())
+            {
+               return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
+                  definition.getDisplayName(), getName());
+            }
+         }
+         else if (definition.getId().equals(CmisConstants.CONTENT_STREAM_MIME_TYPE))
+         {
+            if (((DocumentData)this).hasContent())
+            {
+               return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
+                  definition.getDisplayName(), ((DocumentData)this).getContentStreamMimeType());
+            }
+         }
+         else if (definition.getId().equals(CmisConstants.CONTENT_STREAM_LENGTH))
+         {
+            if (((DocumentData)this).hasContent())
+            {
+               return new IntegerProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
+                  definition.getDisplayName(), BigInteger.valueOf(((DocumentDataImpl)this).getContentStreamLength()));
+            }
+         }
+         else if (definition.getId().equals(CmisConstants.VERSION_SERIES_ID))
+         {
+            return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
+               definition.getDisplayName(), ((DocumentData)this).getVersionSeriesId());
+         }
+         else if (definition.getId().equals(CmisConstants.VERSION_LABEL))
+         {
+            return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
+               definition.getDisplayName(), ((DocumentData)this).getVersionLabel());
+         }
+
          try
          {
             javax.jcr.Property jcrProperty = node.getProperty(definition.getId());
@@ -1045,45 +1119,6 @@ abstract class BaseObjectData implements ObjectData
             if (LOG.isDebugEnabled())
             {
                LOG.debug("Property " + definition.getId() + " is not set.");
-            }
-
-            if (definition.getId().equals(CmisConstants.OBJECT_ID))
-            {
-               return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
-                  definition.getDisplayName(), getObjectId());
-            }
-            else if (definition.getId().equals(CmisConstants.OBJECT_TYPE_ID))
-            {
-               return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
-                  definition.getDisplayName(), type.getId());
-            }
-            else if (definition.getId().equals(CmisConstants.BASE_TYPE_ID))
-            {
-               return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
-                  definition.getDisplayName(), type.getBaseId().value());
-            }
-            else if (definition.getId().equals(CmisConstants.NAME))
-            {
-               return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
-                  definition.getDisplayName(), getName());
-            }
-            else if (definition.getId().equals(CmisConstants.PATH))
-            {
-               return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
-                  definition.getDisplayName(), node.getPath());
-            }
-            else if (definition.getId().equals(CmisConstants.PARENT_ID) && node.getDepth() != 0)
-            {
-               return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
-                  definition.getDisplayName(), ((ExtendedNode)node.getParent()).getIdentifier());
-            }
-            else if (definition.getId().equals(CmisConstants.CONTENT_STREAM_FILE_NAME))
-            {
-               if (((DocumentData)this).hasContent())
-               {
-                  return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
-                     definition.getDisplayName(), getName());
-               }
             }
 
             // TODO : need more virtual properties ??
@@ -1621,12 +1656,9 @@ abstract class BaseObjectData implements ObjectData
                node = (Node)session.getItem(destPath);
             }
 
-            node.setProperty(CmisConstants.LAST_MODIFICATION_DATE,//
-               Calendar.getInstance());
-            node.setProperty(CmisConstants.LAST_MODIFIED_BY, //
-               node.getSession().getUserID());
-            node.setProperty(CmisConstants.CHANGE_TOKEN, //
-               IdGenerator.generate());
+            node.setProperty(CmisConstants.LAST_MODIFICATION_DATE, Calendar.getInstance());
+            node.setProperty(CmisConstants.LAST_MODIFIED_BY, node.getSession().getUserID());
+            node.setProperty(CmisConstants.CHANGE_TOKEN, IdGenerator.generate());
 
             session.save();
          }

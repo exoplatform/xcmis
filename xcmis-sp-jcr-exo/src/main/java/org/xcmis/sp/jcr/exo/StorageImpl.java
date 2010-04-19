@@ -61,6 +61,7 @@ import org.xcmis.spi.model.CapabilityRendition;
 import org.xcmis.spi.model.ChangeEvent;
 import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.Permission;
+import org.xcmis.spi.model.Permission.BasicPermissions;
 import org.xcmis.spi.model.PermissionMapping;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.Rendition;
@@ -70,7 +71,6 @@ import org.xcmis.spi.model.SupportedPermissions;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.UnfileObject;
 import org.xcmis.spi.model.VersioningState;
-import org.xcmis.spi.model.Permission.BasicPermissions;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 
@@ -107,7 +107,8 @@ import javax.jcr.version.VersionIterator;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: StorageImpl.java 804 2010-04-16 16:48:59Z
+ *          alexey.zavizionov@gmail.com $
  */
 public class StorageImpl implements Storage
 {
@@ -798,6 +799,10 @@ public class StorageImpl implements Storage
 
          if (type.getBaseId() == BaseType.DOCUMENT)
          {
+            if (!node.isNodeType(JcrCMIS.CMIS_MIX_DOCUMENT))
+            {
+               return new JcrFile(type, node, renditionManager);
+            }
             if (node.getParent().isNodeType("xcmis:workingCopy"))
             {
                // TODO get smarter (simpler)
@@ -808,6 +813,10 @@ public class StorageImpl implements Storage
          }
          else if (type.getBaseId() == BaseType.FOLDER)
          {
+            if (!node.isNodeType(JcrCMIS.CMIS_MIX_FOLDER))
+            {
+               return new JcrFolder(type, node);
+            }
             return new FolderDataImpl(type, node);
          }
          else if (type.getBaseId() == BaseType.POLICY)
@@ -860,10 +869,18 @@ public class StorageImpl implements Storage
 
          if (type.getBaseId() == BaseType.DOCUMENT)
          {
+            if (!node.isNodeType(JcrCMIS.CMIS_MIX_DOCUMENT))
+            {
+               return new JcrFile(type, node, renditionManager);
+            }
             return new DocumentDataImpl(type, node, renditionManager);
          }
          else if (type.getBaseId() == BaseType.FOLDER)
          {
+            if (!node.isNodeType(JcrCMIS.CMIS_MIX_FOLDER))
+            {
+               return new JcrFolder(type, node);
+            }
             return new FolderDataImpl(type, node);
          }
          else if (type.getBaseId() == BaseType.POLICY)
