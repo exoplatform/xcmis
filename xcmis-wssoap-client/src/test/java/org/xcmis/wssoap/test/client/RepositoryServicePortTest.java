@@ -38,7 +38,7 @@ public class RepositoryServicePortTest extends BaseTest
    private static final QName REPOSITORY_SERVICE_NAME =
       new QName("http://docs.oasis-open.org/ns/cmis/ws/200908/", "RepositoryService");
 
-   private RepositoryServicePort port;
+   private RepositoryServicePort repository_port;
 
    /**
     * @see junit.framework.TestCase#setUp()
@@ -48,9 +48,10 @@ public class RepositoryServicePortTest extends BaseTest
    {
       URL wsdlURL = RepositoryService.WSDL_LOCATION;
       RepositoryService ss = new RepositoryService(wsdlURL, REPOSITORY_SERVICE_NAME);
-      port = ss.getRepositoryServicePort();
-      ((BindingProvider)port).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, username);
-      ((BindingProvider)port).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, password);
+      repository_port = ss.getRepositoryServicePort();
+      ((BindingProvider)repository_port).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, username);
+      ((BindingProvider)repository_port).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, password);
+      super.setUp();
    }
 
    public void testGetRepositoryInfo() throws Exception
@@ -60,7 +61,7 @@ public class RepositoryServicePortTest extends BaseTest
       try
       {
          org.xcmis.soap.client.CmisRepositoryInfoType _getRepositoryInfo__return =
-            port.getRepositoryInfo(cmisRepositoryId, _getRepositoryInfo_extension);
+            repository_port.getRepositoryInfo(cmisRepositoryId, _getRepositoryInfo_extension);
          System.out.println("getRepositoryInfo.result=" + _getRepositoryInfo__return);
 
       }
@@ -80,7 +81,7 @@ public class RepositoryServicePortTest extends BaseTest
       try
       {
          java.util.List<org.xcmis.soap.client.CmisRepositoryEntryType> _getRepositories__return =
-            port.getRepositories(_getRepositories_extension);
+            repository_port.getRepositories(_getRepositories_extension);
          System.out.println("getRepositories.result=" + _getRepositories__return);
 
       }
@@ -103,7 +104,7 @@ public class RepositoryServicePortTest extends BaseTest
       try
       {
          org.xcmis.soap.client.CmisTypeDefinitionListType _getTypeChildren__return =
-            port.getTypeChildren(cmisRepositoryId, _getTypeChildren_typeId,
+            repository_port.getTypeChildren(cmisRepositoryId, _getTypeChildren_typeId,
                _getTypeChildren_includePropertyDefinitions, _getTypeChildren_maxItems, _getTypeChildren_skipCount,
                _getTypeChildren_extension);
          System.out.println("getTypeChildren.result=" + _getTypeChildren__return);
@@ -126,7 +127,7 @@ public class RepositoryServicePortTest extends BaseTest
       try
       {
          java.util.List<org.xcmis.soap.client.CmisTypeContainer> _getTypeDescendants__return =
-            port
+            repository_port
                .getTypeDescendants(cmisRepositoryId, _getTypeDescendants_typeId,
                   _getTypeDescendants_depth, _getTypeDescendants_includePropertyDefinitions,
                   _getTypeDescendants_extension);
@@ -149,7 +150,7 @@ public class RepositoryServicePortTest extends BaseTest
       try
       {
          org.xcmis.soap.client.CmisTypeDefinitionType _getTypeDefinition__return =
-            port.getTypeDefinition(cmisRepositoryId, _getTypeDefinition_typeId,
+            repository_port.getTypeDefinition(cmisRepositoryId, _getTypeDefinition_typeId,
                _getTypeDefinition_extension);
          System.out.println("getTypeDefinition.result=" + _getTypeDefinition__return);
 

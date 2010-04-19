@@ -54,13 +54,15 @@ public abstract class BaseTest extends TestCase
 
    protected ObjectServicePort object_port;
 
+   private static final QName OBJECT_SERVICE_NAME =
+      new QName("http://docs.oasis-open.org/ns/cmis/ws/200908/", "ObjectService");
+
    /**
     * @see junit.framework.TestCase#setUp()
     */
    @Override
    protected void setUp() throws Exception
    {
-      QName OBJECT_SERVICE_NAME = new QName("http://docs.oasis-open.org/ns/cmis/ws/200908/", "ObjectService");
       URL wsdlURL = ObjectService.WSDL_LOCATION;
       ObjectService ss = new ObjectService(wsdlURL, OBJECT_SERVICE_NAME);
       object_port = ss.getObjectServicePort();
@@ -111,12 +113,10 @@ public abstract class BaseTest extends TestCase
          return null;
       }
    }
-   
-   public void createRelationship(String sourceObjectId,String targetObjectId) throws Exception
-   {
-      String relationshipId = null;
 
-      org.xcmis.soap.client.CmisPropertiesType _createRelationship_properties = new CmisPropertiesType();
+   protected String createRelationship(String sourceObjectId,String targetObjectId) throws Exception
+   {
+            org.xcmis.soap.client.CmisPropertiesType _createRelationship_properties = new CmisPropertiesType();
       // typeId
       CmisPropertyId propTypeId = new CmisPropertyId();
       propTypeId.setPropertyDefinitionId(CmisConstants.OBJECT_TYPE_ID);
@@ -124,7 +124,7 @@ public abstract class BaseTest extends TestCase
       // name
       CmisPropertyString propName = new CmisPropertyString();
       propName.setPropertyDefinitionId(CmisConstants.NAME);
-      propName.getValue().add("testCreateRelationship_relation1_" + System.nanoTime());
+      propName.getValue().add("createRelationship_relation1_" + System.nanoTime());
       // SOURCE_ID
       CmisPropertyId propSourceId = new CmisPropertyId();
       propSourceId.setPropertyDefinitionId(CmisConstants.SOURCE_ID);
@@ -152,14 +152,19 @@ public abstract class BaseTest extends TestCase
             _createRelationship_addACEs, _createRelationship_removeACEs, _createRelationship_extension,
             _createRelationship_objectId);
 
-         System.out.println("createRelationship._createRelationship_extension=" + _createRelationship_extension.value);
-         System.out.println("createRelationship._createRelationship_objectId=" + _createRelationship_objectId.value);
-         relationshipId = _createRelationship_objectId.value;
+         System.out.println("createRelationship._createRelationship_extension="
+            + _createRelationship_extension.value);
+         System.out.println("createRelationship._createRelationship_objectId="
+            + _createRelationship_objectId.value);
+         assertTrue(hasObject(_createRelationship_objectId.value));
+         return _createRelationship_objectId.value;
       }
       catch (CmisException e)
       {
          System.out.println("Expected exception: cmisException has occurred.");
          System.out.println(e.toString());
+         fail(e.getMessage());
+         return null;
       }
    }
 

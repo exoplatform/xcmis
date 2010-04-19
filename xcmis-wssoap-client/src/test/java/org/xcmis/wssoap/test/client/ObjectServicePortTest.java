@@ -561,9 +561,9 @@ public class ObjectServicePortTest extends BaseTest
    public void testGetRenditions() throws Exception
    {
       System.out.println("Invoking getRenditions...");
-      java.lang.String _getRenditions_objectId = "";
-      java.lang.String _getRenditions_renditionFilter = "";
-      java.math.BigInteger _getRenditions_maxItems = new java.math.BigInteger("0");
+      java.lang.String _getRenditions_objectId = createDocument("testGetRenditions_document_" + System.nanoTime(), rootFolderId);
+      java.lang.String _getRenditions_renditionFilter = RenditionFilter.ANY_FILTER;
+      java.math.BigInteger _getRenditions_maxItems = new java.math.BigInteger("10");
       java.math.BigInteger _getRenditions_skipCount = new java.math.BigInteger("0");
       org.xcmis.soap.client.CmisExtensionType _getRenditions_extension = null;
       try
@@ -580,12 +580,18 @@ public class ObjectServicePortTest extends BaseTest
          System.out.println(e.toString());
          fail(e.getMessage());
       }
+      finally
+      {
+         deleteObject(_getRenditions_objectId);
+      }
    }
 
    public void testGetObjectByPath() throws Exception
    {
       System.out.println("Invoking getObjectByPath...");
-      java.lang.String _getObjectByPath_path = "";
+      String documentName = "testGetObjectByPath_document_" + System.nanoTime();
+      String documentId = createDocument(documentName, rootFolderId);
+      java.lang.String _getObjectByPath_path = "/" + documentName;
       java.lang.String _getObjectByPath_filter = "";
       java.lang.Boolean _getObjectByPath_includeAllowableActions = null;
       org.xcmis.soap.client.EnumIncludeRelationships _getObjectByPath_includeRelationships = null;
@@ -609,19 +615,25 @@ public class ObjectServicePortTest extends BaseTest
          System.out.println(e.toString());
          fail(e.getMessage());
       }
+      finally
+      {
+         deleteObject(documentId);
+      }
    }
 
    public void testSetContentStream() throws Exception
    {
       System.out.println("Invoking setContentStream...");
-      java.lang.String _setContentStream_objectIdVal = "";
+      java.lang.String _setContentStream_objectIdVal = createDocument("testSetContentStream_document_" + System.nanoTime(), rootFolderId);
       javax.xml.ws.Holder<java.lang.String> _setContentStream_objectId =
          new javax.xml.ws.Holder<java.lang.String>(_setContentStream_objectIdVal);
       java.lang.Boolean _setContentStream_overwriteFlag = null;
       java.lang.String _setContentStream_changeTokenVal = "";
       javax.xml.ws.Holder<java.lang.String> _setContentStream_changeToken =
          new javax.xml.ws.Holder<java.lang.String>(_setContentStream_changeTokenVal);
-      org.xcmis.soap.client.CmisContentStreamType _setContentStream_contentStream = null;
+      org.xcmis.soap.client.CmisContentStreamType _setContentStream_contentStream = new CmisContentStreamType();
+      _setContentStream_contentStream.setStream(new DataHandler(new String("Hello xCMIS  rewrited !!!"), "text/plain"));
+      _setContentStream_contentStream.setMimeType("text/plain");
       org.xcmis.soap.client.CmisExtensionType _setContentStream_extensionVal = null;
       javax.xml.ws.Holder<org.xcmis.soap.client.CmisExtensionType> _setContentStream_extension =
          new javax.xml.ws.Holder<org.xcmis.soap.client.CmisExtensionType>(_setContentStream_extensionVal);
@@ -639,6 +651,10 @@ public class ObjectServicePortTest extends BaseTest
          System.out.println("Expected exception: cmisException has occurred.");
          System.out.println(e.toString());
          fail(e.getMessage());
+      }
+      finally
+      {
+         deleteObject(_setContentStream_objectIdVal);
       }
    }
 

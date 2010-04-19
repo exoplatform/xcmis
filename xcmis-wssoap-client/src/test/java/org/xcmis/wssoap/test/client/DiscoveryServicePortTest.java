@@ -18,8 +18,6 @@
  */
 package org.xcmis.wssoap.test.client;
 
-import junit.framework.TestCase;
-
 import org.xcmis.soap.client.CmisException;
 import org.xcmis.soap.client.DiscoveryService;
 import org.xcmis.soap.client.DiscoveryServicePort;
@@ -41,7 +39,7 @@ public class DiscoveryServicePortTest extends BaseTest
    private static final QName DISCOVERY_SERVICE_NAME =
       new QName("http://docs.oasis-open.org/ns/cmis/ws/200908/", "DiscoveryService");
 
-   private DiscoveryServicePort port;
+   private DiscoveryServicePort discovery_port;
 
    /**
     * @see junit.framework.TestCase#setUp()
@@ -52,10 +50,10 @@ public class DiscoveryServicePortTest extends BaseTest
       URL wsdlURL = RepositoryService.WSDL_LOCATION;
 
       DiscoveryService ss = new DiscoveryService(wsdlURL, DISCOVERY_SERVICE_NAME);
-      port = ss.getDiscoveryServicePort();
-
-      ((BindingProvider)port).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, username);
-      ((BindingProvider)port).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, password);
+      discovery_port = ss.getDiscoveryServicePort();
+      ((BindingProvider)discovery_port).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, username);
+      ((BindingProvider)discovery_port).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, password);
+      super.setUp();
    }
 
    //TODO getContentChanges is not implemented feature.
@@ -69,13 +67,13 @@ public class DiscoveryServicePortTest extends BaseTest
       java.lang.String _getContentChanges_filter = "*";
       java.lang.Boolean _getContentChanges_includePolicyIds = false;
       java.lang.Boolean _getContentChanges_includeACL = false;
-      java.math.BigInteger _getContentChanges_maxItems = new java.math.BigInteger("0");
+      java.math.BigInteger _getContentChanges_maxItems = new java.math.BigInteger("10");
       org.xcmis.soap.client.CmisExtensionType _getContentChanges_extension = null;
       javax.xml.ws.Holder<org.xcmis.soap.client.CmisObjectListType> _getContentChanges_objects =
          new javax.xml.ws.Holder<org.xcmis.soap.client.CmisObjectListType>();
       try
       {
-         port.getContentChanges(cmisRepositoryId, _getContentChanges_changeLogToken,
+         discovery_port.getContentChanges(cmisRepositoryId, _getContentChanges_changeLogToken,
             _getContentChanges_includeProperties, _getContentChanges_filter, _getContentChanges_includePolicyIds,
             _getContentChanges_includeACL, _getContentChanges_maxItems, _getContentChanges_extension,
             _getContentChanges_objects);
@@ -88,6 +86,7 @@ public class DiscoveryServicePortTest extends BaseTest
       {
          System.out.println("Expected exception: cmisException has occurred.");
          System.out.println(e.toString());
+         fail(e.getMessage());
       }
    }
 
@@ -100,7 +99,7 @@ public class DiscoveryServicePortTest extends BaseTest
 
       try
       {
-         org.xcmis.soap.client.QueryResponse _query__return = port.query(_query_parameters);
+         org.xcmis.soap.client.QueryResponse _query__return = discovery_port.query(_query_parameters);
          System.out.println("query.result=" + _query__return);
 
       }
@@ -109,6 +108,7 @@ public class DiscoveryServicePortTest extends BaseTest
          System.out.println("Expected exception: cmisException has occurred.");
          System.out.println(e.toString());
          e.printStackTrace();
+         fail(e.getMessage());
       }
    }
 }
