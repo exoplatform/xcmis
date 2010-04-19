@@ -48,7 +48,7 @@ public final class NavigationServicePortTest extends BaseTest
       java.lang.String _getObjectParents_repositoryId = cmisRepositoryId;
       java.lang.String _getObjectParents_objectId = "";
       try {
-       _getObjectParents_objectId = createDocument("test123");
+       _getObjectParents_objectId = createDocument("test123", rootFolderId);
       } catch (Exception e){
          fail(e.getMessage());
       }
@@ -115,8 +115,8 @@ public final class NavigationServicePortTest extends BaseTest
    {
       System.out.println("Invoking getDescendants...");
       try {
-      createDocument("test1234");
-      createFolder();
+      createDocument("test1234", rootFolderId);
+      createFolder("11133");
       } catch (Exception e){
          fail(e.getMessage());
       }
@@ -223,7 +223,7 @@ public final class NavigationServicePortTest extends BaseTest
       java.lang.String _getFolderParent_repositoryId = cmisRepositoryId;
       java.lang.String _getFolderParent_folderId = "";
       try {
-         _getFolderParent_folderId  = createFolder();
+         _getFolderParent_folderId  = createFolder("1113");
       } catch (Exception e ){
          e.printStackTrace();
          fail(e.getMessage());
