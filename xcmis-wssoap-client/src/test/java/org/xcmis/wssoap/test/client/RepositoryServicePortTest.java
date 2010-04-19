@@ -18,8 +18,6 @@
  */
 package org.xcmis.wssoap.test.client;
 
-import junit.framework.TestCase;
-
 import org.xcmis.soap.client.CmisException;
 import org.xcmis.soap.client.RepositoryService;
 import org.xcmis.soap.client.RepositoryServicePort;
@@ -34,10 +32,10 @@ import javax.xml.ws.BindingProvider;
  * @version $Id: exo-jboss-codetemplates.xml 34360 2009-07-22 23:58:59Z ksm $
  *
  */
-public class RepositoryServicePortTest extends TestCase
+public class RepositoryServicePortTest extends BaseTest
 {
 
-   private static final QName SERVICE_NAME =
+   private static final QName REPOSITORY_SERVICE_NAME =
       new QName("http://docs.oasis-open.org/ns/cmis/ws/200908/", "RepositoryService");
 
    private RepositoryServicePort port;
@@ -49,22 +47,20 @@ public class RepositoryServicePortTest extends TestCase
    protected void setUp() throws Exception
    {
       URL wsdlURL = RepositoryService.WSDL_LOCATION;
-
-      RepositoryService ss = new RepositoryService(wsdlURL, SERVICE_NAME);
+      RepositoryService ss = new RepositoryService(wsdlURL, REPOSITORY_SERVICE_NAME);
       port = ss.getRepositoryServicePort();
-      ((BindingProvider)port).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, "root");
-      ((BindingProvider)port).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, "exo");
+      ((BindingProvider)port).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, username);
+      ((BindingProvider)port).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, password);
    }
 
    public void testGetRepositoryInfo() throws Exception
    {
       System.out.println("Invoking getRepositoryInfo...");
-      java.lang.String _getRepositoryInfo_repositoryId = "cmis1";
       org.xcmis.soap.client.CmisExtensionType _getRepositoryInfo_extension = null;
       try
       {
          org.xcmis.soap.client.CmisRepositoryInfoType _getRepositoryInfo__return =
-            port.getRepositoryInfo(_getRepositoryInfo_repositoryId, _getRepositoryInfo_extension);
+            port.getRepositoryInfo(cmisRepositoryId, _getRepositoryInfo_extension);
          System.out.println("getRepositoryInfo.result=" + _getRepositoryInfo__return);
 
       }
@@ -99,7 +95,6 @@ public class RepositoryServicePortTest extends TestCase
    public void testGetTypeChildren() throws Exception
    {
       System.out.println("Invoking getTypeChildren...");
-      java.lang.String _getTypeChildren_repositoryId = "cmis1";
       java.lang.String _getTypeChildren_typeId = "cmis:folder";
       java.lang.Boolean _getTypeChildren_includePropertyDefinitions = Boolean.TRUE;
       java.math.BigInteger _getTypeChildren_maxItems = new java.math.BigInteger("10");
@@ -108,7 +103,7 @@ public class RepositoryServicePortTest extends TestCase
       try
       {
          org.xcmis.soap.client.CmisTypeDefinitionListType _getTypeChildren__return =
-            port.getTypeChildren(_getTypeChildren_repositoryId, _getTypeChildren_typeId,
+            port.getTypeChildren(cmisRepositoryId, _getTypeChildren_typeId,
                _getTypeChildren_includePropertyDefinitions, _getTypeChildren_maxItems, _getTypeChildren_skipCount,
                _getTypeChildren_extension);
          System.out.println("getTypeChildren.result=" + _getTypeChildren__return);
@@ -124,7 +119,6 @@ public class RepositoryServicePortTest extends TestCase
 
    public void testGetTypeDescendants() throws Exception
    {
-      java.lang.String _getTypeDescendants_repositoryId = "cmis1";
       java.lang.String _getTypeDescendants_typeId = "cmis:folder";
       java.math.BigInteger _getTypeDescendants_depth = new java.math.BigInteger("10");
       java.lang.Boolean _getTypeDescendants_includePropertyDefinitions = Boolean.TRUE;
@@ -133,7 +127,7 @@ public class RepositoryServicePortTest extends TestCase
       {
          java.util.List<org.xcmis.soap.client.CmisTypeContainer> _getTypeDescendants__return =
             port
-               .getTypeDescendants(_getTypeDescendants_repositoryId, _getTypeDescendants_typeId,
+               .getTypeDescendants(cmisRepositoryId, _getTypeDescendants_typeId,
                   _getTypeDescendants_depth, _getTypeDescendants_includePropertyDefinitions,
                   _getTypeDescendants_extension);
          System.out.println("getTypeDescendants.result=" + _getTypeDescendants__return);
@@ -150,13 +144,12 @@ public class RepositoryServicePortTest extends TestCase
    public void testGetTypeDefinition() throws Exception
    {
       System.out.println("Invoking getTypeDefinition...");
-      java.lang.String _getTypeDefinition_repositoryId = "cmis1";
       java.lang.String _getTypeDefinition_typeId = "cmis:folder";
       org.xcmis.soap.client.CmisExtensionType _getTypeDefinition_extension = null;
       try
       {
          org.xcmis.soap.client.CmisTypeDefinitionType _getTypeDefinition__return =
-            port.getTypeDefinition(_getTypeDefinition_repositoryId, _getTypeDefinition_typeId,
+            port.getTypeDefinition(cmisRepositoryId, _getTypeDefinition_typeId,
                _getTypeDefinition_extension);
          System.out.println("getTypeDefinition.result=" + _getTypeDefinition__return);
 
@@ -168,5 +161,5 @@ public class RepositoryServicePortTest extends TestCase
          fail(e.getMessage());
       }
    }
-   
+
 }

@@ -1,7 +1,5 @@
 package org.xcmis.wssoap.test.client;
 
-import junit.framework.TestCase;
-
 import org.xcmis.soap.client.CmisContentStreamType;
 import org.xcmis.soap.client.CmisException;
 import org.xcmis.soap.client.CmisPropertiesType;
@@ -21,19 +19,13 @@ import javax.activation.DataHandler;
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
 
-public class ObjectServicePortTest extends TestCase
+public class ObjectServicePortTest extends BaseTest
 {
 
-   private static final QName SERVICE_NAME =
+   private static final QName OBJECT_SERVICE_NAME =
       new QName("http://docs.oasis-open.org/ns/cmis/ws/200908/", "ObjectService");
 
    private ObjectServicePort port;
-
-   private String repositoryId = "cmis1";
-
-   private String rootFolderId = "00exo0jcr0root0uuid0000000000000";
-
-   private String _createDocument_objectId_value;
 
    /**
     * @see junit.framework.TestCase#setUp()
@@ -42,11 +34,10 @@ public class ObjectServicePortTest extends TestCase
    protected void setUp() throws Exception
    {
       URL wsdlURL = ObjectService.WSDL_LOCATION;
-
-      ObjectService ss = new ObjectService(wsdlURL, SERVICE_NAME);
+      ObjectService ss = new ObjectService(wsdlURL, OBJECT_SERVICE_NAME);
       port = ss.getObjectServicePort();
-      ((BindingProvider)port).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, "root");
-      ((BindingProvider)port).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, "exo");
+      ((BindingProvider)port).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, username);
+      ((BindingProvider)port).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, password);
    }
 
    public void testCreateDocument() throws Exception
@@ -80,13 +71,12 @@ public class ObjectServicePortTest extends TestCase
       javax.xml.ws.Holder<java.lang.String> _createDocument_objectId = new javax.xml.ws.Holder<java.lang.String>();
       try
       {
-         port.createDocument(repositoryId, _createDocument_properties, _createDocument_folderId,
+         port.createDocument(cmisRepositoryId, _createDocument_properties, _createDocument_folderId,
             _createDocument_contentStream, _createDocument_versioningState, _createDocument_policies,
             _createDocument_addACEs, _createDocument_removeACEs, _createDocument_extension, _createDocument_objectId);
 
          System.out.println("createDocument._createDocument_extension=" + _createDocument_extension.value);
          System.out.println("createDocument._createDocument_objectId=" + _createDocument_objectId.value);
-         _createDocument_objectId_value = _createDocument_objectId.value;
       }
       catch (CmisException e)
       {
@@ -110,9 +100,9 @@ public class ObjectServicePortTest extends TestCase
       try
       {
          org.xcmis.soap.client.CmisObjectType _getObject__return =
-            port.getObject(repositoryId, _getObject_objectId, _getObject_filter, _getObject_includeAllowableActions,
-               _getObject_includeRelationships, _getObject_renditionFilter, _getObject_includePolicyIds,
-               _getObject_includeACL, _getObject_extension);
+            port.getObject(cmisRepositoryId, _getObject_objectId, _getObject_filter,
+               _getObject_includeAllowableActions, _getObject_includeRelationships, _getObject_renditionFilter,
+               _getObject_includePolicyIds, _getObject_includeACL, _getObject_extension);
          System.out.println("getObject.result=" + _getObject__return);
       }
       catch (CmisException e)
@@ -149,7 +139,7 @@ public class ObjectServicePortTest extends TestCase
       javax.xml.ws.Holder<java.lang.String> _createFolder_objectId = new javax.xml.ws.Holder<java.lang.String>();
       try
       {
-         port.createFolder(repositoryId, _createFolder_properties, _createFolder_folderId, _createFolder_policies,
+         port.createFolder(cmisRepositoryId, _createFolder_properties, _createFolder_folderId, _createFolder_policies,
             _createFolder_addACEs, _createFolder_removeACEs, _createFolder_extension, _createFolder_objectId);
 
          System.out.println("createFolder._createFolder_extension=" + _createFolder_extension.value);
@@ -194,7 +184,7 @@ public class ObjectServicePortTest extends TestCase
       javax.xml.ws.Holder<java.lang.String> _createPolicy_objectId = new javax.xml.ws.Holder<java.lang.String>();
       try
       {
-         port.createPolicy(repositoryId, _createPolicy_properties, _createPolicy_folderId, _createPolicy_policies,
+         port.createPolicy(cmisRepositoryId, _createPolicy_properties, _createPolicy_folderId, _createPolicy_policies,
             _createPolicy_addACEs, _createPolicy_removeACEs, _createPolicy_extension, _createPolicy_objectId);
 
          System.out.println("createPolicy._createPolicy_extension=" + _createPolicy_extension.value);
@@ -220,11 +210,11 @@ public class ObjectServicePortTest extends TestCase
       CmisPropertyString propName = new CmisPropertyString();
       propName.setPropertyDefinitionId(CmisConstants.NAME);
       propName.getValue().add("relation1" + System.nanoTime());
-      // name
+      // SOURCE_ID
       CmisPropertyId propSourceId = new CmisPropertyId();
       propSourceId.setPropertyDefinitionId(CmisConstants.SOURCE_ID);
       propSourceId.getValue().add(createDocument("source" + System.nanoTime()));
-      // name
+      // TARGET_ID
       CmisPropertyId propTargetId = new CmisPropertyId();
       propTargetId.setPropertyDefinitionId(CmisConstants.TARGET_ID);
       propTargetId.getValue().add(createDocument("target" + System.nanoTime()));
@@ -243,7 +233,7 @@ public class ObjectServicePortTest extends TestCase
       javax.xml.ws.Holder<java.lang.String> _createRelationship_objectId = new javax.xml.ws.Holder<java.lang.String>();
       try
       {
-         port.createRelationship(repositoryId, _createRelationship_properties, _createRelationship_policies,
+         port.createRelationship(cmisRepositoryId, _createRelationship_properties, _createRelationship_policies,
             _createRelationship_addACEs, _createRelationship_removeACEs, _createRelationship_extension,
             _createRelationship_objectId);
 
@@ -267,7 +257,8 @@ public class ObjectServicePortTest extends TestCase
       try
       {
          org.xcmis.soap.client.CmisPropertiesType _getProperties__return =
-            port.getProperties(repositoryId, _getProperties_objectId, _getProperties_filter, _getProperties_extension);
+            port.getProperties(cmisRepositoryId, _getProperties_objectId, _getProperties_filter,
+               _getProperties_extension);
          System.out.println("getProperties.result=" + _getProperties__return);
          List<CmisProperty> list = _getProperties__return.getProperty();
          System.out.println("_getProperties__return.getProperty() list = " + list);
@@ -291,7 +282,7 @@ public class ObjectServicePortTest extends TestCase
       try
       {
          org.xcmis.soap.client.CmisContentStreamType _getContentStream__return =
-            port.getContentStream(repositoryId, _getContentStream_objectId, _getContentStream_streamId,
+            port.getContentStream(cmisRepositoryId, _getContentStream_objectId, _getContentStream_streamId,
                _getContentStream_offset, _getContentStream_length, _getContentStream_extension);
          System.out.println("getContentStream.result=" + _getContentStream__return);
 
@@ -312,7 +303,7 @@ public class ObjectServicePortTest extends TestCase
       try
       {
          org.xcmis.soap.client.CmisAllowableActionsType _getAllowableActions__return =
-            port.getAllowableActions(repositoryId, _getAllowableActions_objectId, _getAllowableActions_extension);
+            port.getAllowableActions(cmisRepositoryId, _getAllowableActions_objectId, _getAllowableActions_extension);
          System.out.println("getAllowableActions.result=" + _getAllowableActions__return);
       }
       catch (CmisException e)
@@ -337,7 +328,7 @@ public class ObjectServicePortTest extends TestCase
          new javax.xml.ws.Holder<org.xcmis.soap.client.CmisExtensionType>(_deleteContentStream_extensionVal);
       try
       {
-         port.deleteContentStream(repositoryId, _deleteContentStream_objectId, _deleteContentStream_changeToken,
+         port.deleteContentStream(cmisRepositoryId, _deleteContentStream_objectId, _deleteContentStream_changeToken,
             _deleteContentStream_extension);
 
          System.out.println("deleteContentStream._deleteContentStream_objectId=" + _deleteContentStream_objectId.value);
@@ -363,7 +354,8 @@ public class ObjectServicePortTest extends TestCase
       try
       {
          org.xcmis.soap.client.CmisExtensionType _deleteObject__return =
-            port.deleteObject(repositoryId, _deleteObject_objectId, _deleteObject_allVersions, _deleteObject_extension);
+            port.deleteObject(cmisRepositoryId, _deleteObject_objectId, _deleteObject_allVersions,
+               _deleteObject_extension);
          System.out.println("deleteObject.result=" + _deleteObject__return);
 
       }
@@ -392,7 +384,7 @@ public class ObjectServicePortTest extends TestCase
          new javax.xml.ws.Holder<java.lang.String>();
       try
       {
-         port.createDocumentFromSource(repositoryId, _createDocumentFromSource_sourceId,
+         port.createDocumentFromSource(cmisRepositoryId, _createDocumentFromSource_sourceId,
             _createDocumentFromSource_properties, _createDocumentFromSource_folderId,
             _createDocumentFromSource_versioningState, _createDocumentFromSource_policies,
             _createDocumentFromSource_addACEs, _createDocumentFromSource_removeACEs,
@@ -426,7 +418,7 @@ public class ObjectServicePortTest extends TestCase
          new javax.xml.ws.Holder<org.xcmis.soap.client.CmisExtensionType>(_updateProperties_extensionVal);
       try
       {
-         port.updateProperties(repositoryId, _updateProperties_objectId, _updateProperties_changeToken,
+         port.updateProperties(cmisRepositoryId, _updateProperties_objectId, _updateProperties_changeToken,
             _updateProperties_properties, _updateProperties_extension);
 
          System.out.println("updateProperties._updateProperties_objectId=" + _updateProperties_objectId.value);
@@ -454,8 +446,8 @@ public class ObjectServicePortTest extends TestCase
          new javax.xml.ws.Holder<org.xcmis.soap.client.CmisExtensionType>(_moveObject_extensionVal);
       try
       {
-         port.moveObject(repositoryId, _moveObject_objectId, _moveObject_targetFolderId, _moveObject_sourceFolderId,
-            _moveObject_extension);
+         port.moveObject(cmisRepositoryId, _moveObject_objectId, _moveObject_targetFolderId,
+            _moveObject_sourceFolderId, _moveObject_extension);
 
          System.out.println("moveObject._moveObject_objectId=" + _moveObject_objectId.value);
          System.out.println("moveObject._moveObject_extension=" + _moveObject_extension.value);
@@ -479,7 +471,7 @@ public class ObjectServicePortTest extends TestCase
       try
       {
          org.xcmis.soap.client.DeleteTreeResponse.FailedToDelete _deleteTree__return =
-            port.deleteTree(repositoryId, _deleteTree_folderId, _deleteTree_allVersions, _deleteTree_unfileObjects,
+            port.deleteTree(cmisRepositoryId, _deleteTree_folderId, _deleteTree_allVersions, _deleteTree_unfileObjects,
                _deleteTree_continueOnFailure, _deleteTree_extension);
          System.out.println("deleteTree.result=" + _deleteTree__return);
 
@@ -503,7 +495,7 @@ public class ObjectServicePortTest extends TestCase
       try
       {
          java.util.List<org.xcmis.soap.client.CmisRenditionType> _getRenditions__return =
-            port.getRenditions(repositoryId, _getRenditions_objectId, _getRenditions_renditionFilter,
+            port.getRenditions(cmisRepositoryId, _getRenditions_objectId, _getRenditions_renditionFilter,
                _getRenditions_maxItems, _getRenditions_skipCount, _getRenditions_extension);
          System.out.println("getRenditions.result=" + _getRenditions__return);
 
@@ -530,7 +522,7 @@ public class ObjectServicePortTest extends TestCase
       try
       {
          org.xcmis.soap.client.CmisObjectType _getObjectByPath__return =
-            port.getObjectByPath(repositoryId, _getObjectByPath_path, _getObjectByPath_filter,
+            port.getObjectByPath(cmisRepositoryId, _getObjectByPath_path, _getObjectByPath_filter,
                _getObjectByPath_includeAllowableActions, _getObjectByPath_includeRelationships,
                _getObjectByPath_renditionFilter, _getObjectByPath_includePolicyIds, _getObjectByPath_includeACL,
                _getObjectByPath_extension);
@@ -561,7 +553,7 @@ public class ObjectServicePortTest extends TestCase
          new javax.xml.ws.Holder<org.xcmis.soap.client.CmisExtensionType>(_setContentStream_extensionVal);
       try
       {
-         port.setContentStream(repositoryId, _setContentStream_objectId, _setContentStream_overwriteFlag,
+         port.setContentStream(cmisRepositoryId, _setContentStream_objectId, _setContentStream_overwriteFlag,
             _setContentStream_changeToken, _setContentStream_contentStream, _setContentStream_extension);
 
          System.out.println("setContentStream._setContentStream_objectId=" + _setContentStream_objectId.value);
@@ -606,7 +598,7 @@ public class ObjectServicePortTest extends TestCase
       javax.xml.ws.Holder<java.lang.String> _createDocument_objectId = new javax.xml.ws.Holder<java.lang.String>();
       try
       {
-         port.createDocument(repositoryId, _createDocument_properties, _createDocument_folderId,
+         port.createDocument(cmisRepositoryId, _createDocument_properties, _createDocument_folderId,
             _createDocument_contentStream, _createDocument_versioningState, _createDocument_policies,
             _createDocument_addACEs, _createDocument_removeACEs, _createDocument_extension, _createDocument_objectId);
          return _createDocument_objectId.value;

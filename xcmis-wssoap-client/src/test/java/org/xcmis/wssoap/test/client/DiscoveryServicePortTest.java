@@ -35,10 +35,10 @@ import javax.xml.ws.BindingProvider;
  * @version $Id: exo-jboss-codetemplates.xml 34360 2009-07-22 23:58:59Z ksm $
  *
  */
-public class DiscoveryServicePortTest extends TestCase
+public class DiscoveryServicePortTest extends BaseTest
 {
 
-   private static final QName SERVICE_NAME =
+   private static final QName DISCOVERY_SERVICE_NAME =
       new QName("http://docs.oasis-open.org/ns/cmis/ws/200908/", "DiscoveryService");
 
    private DiscoveryServicePort port;
@@ -51,18 +51,17 @@ public class DiscoveryServicePortTest extends TestCase
    {
       URL wsdlURL = RepositoryService.WSDL_LOCATION;
 
-      DiscoveryService ss = new DiscoveryService(wsdlURL, SERVICE_NAME);
+      DiscoveryService ss = new DiscoveryService(wsdlURL, DISCOVERY_SERVICE_NAME);
       port = ss.getDiscoveryServicePort();
 
-      ((BindingProvider)port).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, "root");
-      ((BindingProvider)port).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, "exo");
+      ((BindingProvider)port).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, username);
+      ((BindingProvider)port).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, password);
    }
 
    //TODO getContentChanges is not implemented feature.
    public void testGetContentChanges() throws Exception
    {
       System.out.println("Invoking getContentChanges...");
-      java.lang.String _getContentChanges_repositoryId = "cmis1";
       java.lang.String _getContentChanges_changeLogTokenVal = "*";
       javax.xml.ws.Holder<java.lang.String> _getContentChanges_changeLogToken =
          new javax.xml.ws.Holder<java.lang.String>(_getContentChanges_changeLogTokenVal);
@@ -76,7 +75,7 @@ public class DiscoveryServicePortTest extends TestCase
          new javax.xml.ws.Holder<org.xcmis.soap.client.CmisObjectListType>();
       try
       {
-         port.getContentChanges(_getContentChanges_repositoryId, _getContentChanges_changeLogToken,
+         port.getContentChanges(cmisRepositoryId, _getContentChanges_changeLogToken,
             _getContentChanges_includeProperties, _getContentChanges_filter, _getContentChanges_includePolicyIds,
             _getContentChanges_includeACL, _getContentChanges_maxItems, _getContentChanges_extension,
             _getContentChanges_objects);
@@ -97,7 +96,7 @@ public class DiscoveryServicePortTest extends TestCase
       System.out.println("Invoking query...");
       org.xcmis.soap.client.Query _query_parameters = new org.xcmis.soap.client.Query();
       _query_parameters.setStatement("SELECT * FROM cmis:folder");
-      _query_parameters.setRepositoryId("cmis1");
+      _query_parameters.setRepositoryId(cmisRepositoryId);
 
       try
       {
