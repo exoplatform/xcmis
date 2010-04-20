@@ -300,17 +300,15 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
 
    protected boolean getBooleanParameter(RequestContext request, String name, boolean defaultValue)
    {
-      Boolean result;
       String param = request.getParameter(name);
       if (param != null && param.length() > 0)
       {
-         result = Boolean.parseBoolean(param);
+         return Boolean.parseBoolean(param);
       }
       else
       {
-         result = defaultValue;
+         return defaultValue;
       }
-      return result;
    }
 
    protected Integer getIntegerParameter(RequestContext request, String name, Integer defaultValue)
