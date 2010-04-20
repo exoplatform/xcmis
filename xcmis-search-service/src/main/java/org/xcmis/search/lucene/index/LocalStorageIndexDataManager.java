@@ -263,7 +263,7 @@ public class LocalStorageIndexDataManager implements LuceneIndexDataManager, Ind
 
             if (changes.getRemovedDocuments().size() > 0)
             {
-               log.error(changes.getRemovedDocuments().size());
+               log.error("Unable to remove item's with id's " + changes.getRemovedDocuments() + " from index");
             }
 
          }
