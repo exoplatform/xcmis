@@ -134,7 +134,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 public class TypeConverter
 {
 
-   public static List<AccessControlEntry> convertAccessControlEntryList(List<CmisAccessControlEntryType> source)
+   public static List<AccessControlEntry> getAccessControlEntryList(List<CmisAccessControlEntryType> source)
    {
       List<AccessControlEntry> res = new ArrayList<AccessControlEntry>();
       for (CmisAccessControlEntryType one : source)
@@ -152,7 +152,7 @@ public class TypeConverter
       return res;
    }
 
-   public static CmisACLCapabilityType getAclCapabilityType(ACLCapability source)
+   public static CmisACLCapabilityType getCmisAclCapabilityType(ACLCapability source)
    {
       CmisACLCapabilityType result = new CmisACLCapabilityType();
       result.setPropagation(EnumACLPropagation.fromValue(source.getPropagation().value()));
@@ -160,7 +160,7 @@ public class TypeConverter
       return result;
    }
 
-   public static CmisAllowableActionsType getAllowableActionsType(AllowableActions source)
+   public static CmisAllowableActionsType getCmisAllowableActionsType(AllowableActions source)
    {
       CmisAllowableActionsType result = new CmisAllowableActionsType();
       result.setCanAddObjectToFolder(source.isCanAddObjectToFolder());
@@ -205,7 +205,7 @@ public class TypeConverter
       return result;
    }
 
-   public static List<AccessControlEntry> getCmisListAccessControlEntry(CmisAccessControlListType source)
+   public static List<AccessControlEntry> getListAccessControlEntry(CmisAccessControlListType source)
    {
       List<AccessControlEntry> result = new ArrayList<AccessControlEntry>();
       if (source != null && source.getPermission().size() > 0)
@@ -242,7 +242,7 @@ public class TypeConverter
          {
             result.put(source.getPropertyDefinitionId(), new DateTimeProperty(source.getPropertyDefinitionId(), source
                .getQueryName(), source.getLocalName(), source.getDisplayName(),
-               getCalendar(((CmisPropertyDateTime)source).getValue())));
+               getCalendarList(((CmisPropertyDateTime)source).getValue())));
          }
          else if (source instanceof CmisPropertyId)
          {
@@ -258,7 +258,7 @@ public class TypeConverter
          else if (source instanceof CmisPropertyUri)
          {
             result.put(source.getPropertyDefinitionId(), new UriProperty(source.getPropertyDefinitionId(), source
-               .getQueryName(), source.getLocalName(), source.getDisplayName(), getURI(((CmisPropertyUri)source)
+               .getQueryName(), source.getLocalName(), source.getDisplayName(), getURIList(((CmisPropertyUri)source)
                .getValue())));
          }
          else if (source instanceof CmisPropertyBoolean)
@@ -310,11 +310,11 @@ public class TypeConverter
       result.setAcl(getCmisAccessControlListType(object.getACL()));
       if (object.getAllowableActions() != null)
       {
-         result.setAllowableActions(getAllowableActionsType(object.getAllowableActions()));
+         result.setAllowableActions(getCmisAllowableActionsType(object.getAllowableActions()));
       }
       if (object.getChangeInfo() != null)
       {
-         result.setChangeEventInfo(getChangeEventType(object.getChangeInfo()));
+         result.setChangeEventInfo(getCmisChangeEventType(object.getChangeInfo()));
       }
       result.setExactACL(object.isExactACL());
       result.setPolicyIds(getCmisListOfIdsType(object.getPolicyIds()));
@@ -324,7 +324,7 @@ public class TypeConverter
    public static CmisRepositoryInfoType getCmisRepositoryInfoType(RepositoryInfo source)
    {
       CmisRepositoryInfoType result = new CmisRepositoryInfoType();
-      result.setAclCapability(getAclCapabilityType(source.getAclCapability()));
+      result.setAclCapability(getCmisAclCapabilityType(source.getAclCapability()));
       result.setCapabilities(getCmisRepositoryCapabilitiesType(source.getCapabilities()));
       result.setChangesIncomplete(source.isChangesIncomplete());
       result.setCmisVersionSupported(source.getCmisVersionSupported());
@@ -370,7 +370,7 @@ public class TypeConverter
       return result;
    }
 
-   public static List<CmisObjectType> getListCmisObjectType(List<CmisObject> source)
+   public static List<CmisObjectType> getCmisObjectTypeList(List<CmisObject> source)
    {
       List<CmisObjectType> result = new ArrayList<CmisObjectType>();
       for (CmisObject one : source)
@@ -403,7 +403,7 @@ public class TypeConverter
       return result;
    }
 
-   public static List<CmisTypeContainer> getCmisTypeContainer(List<ItemsTree<TypeDefinition>> source)
+   public static List<CmisTypeContainer> getCmisTypeContainerList(List<ItemsTree<TypeDefinition>> source)
    {
       List<CmisTypeContainer> result = new ArrayList<CmisTypeContainer>();
       for (ItemsTree<TypeDefinition> one : source)
@@ -415,7 +415,7 @@ public class TypeConverter
          {
             for (ItemsTree<TypeDefinition> d : one.getChildren())
             {
-               containerType.getChildren().addAll(getCmisTypeContainer(d.getChildren()));
+               containerType.getChildren().addAll(getCmisTypeContainerList(d.getChildren()));
             }
          }
          result.add(containerType);
@@ -423,7 +423,7 @@ public class TypeConverter
       return result;
    }
 
-   public static List<CmisObjectInFolderContainerType> getCmisObjectInFolderContainerType(
+   public static List<CmisObjectInFolderContainerType> getCmisObjectInFolderContainerTypeList(
       List<ItemsTree<CmisObject>> source)
    {
       List<CmisObjectInFolderContainerType> result = new ArrayList<CmisObjectInFolderContainerType>();
@@ -438,7 +438,7 @@ public class TypeConverter
             {
                if (d != null)
                {
-                  containerType.getChildren().addAll(getCmisObjectInFolderContainerType(d.getChildren()));
+                  containerType.getChildren().addAll(getCmisObjectInFolderContainerTypeList(d.getChildren()));
                }
             }
          }
@@ -490,7 +490,7 @@ public class TypeConverter
       result.setParentId(source.getParentId());
       result.setQueryable(source.isQueryable());
       result.setQueryName(source.getQueryName());
-      result.getPropertyDefinition().addAll(getCmisPropertyDefintitions(source.getPropertyDefinitions()));
+      result.getPropertyDefinition().addAll(getCmisPropertyDefintitionTypeList(source.getPropertyDefinitions()));
       return result;
    }
 
@@ -663,7 +663,7 @@ public class TypeConverter
    }
 
    @SuppressWarnings("unchecked")
-   public static List<CmisPropertyDefinitionType> getCmisPropertyDefintitions(Collection<PropertyDefinition<?>> source)
+   public static List<CmisPropertyDefinitionType> getCmisPropertyDefintitionTypeList(Collection<PropertyDefinition<?>> source)
    {
       if (source == null)
       {
@@ -968,7 +968,7 @@ public class TypeConverter
       return result;
    }
 
-   public static List<CmisRenditionType> getRenditionList(List<Rendition> source)
+   public static List<CmisRenditionType> getCmisRenditionTypeList(List<Rendition> source)
    {
       List<CmisRenditionType> result = new ArrayList<CmisRenditionType>();
       for (Rendition one : source)
@@ -978,7 +978,7 @@ public class TypeConverter
       return result;
    }
 
-   public static Rendition getCmisRenditionType(CmisRenditionType source)
+   public static Rendition getRendition(CmisRenditionType source)
    {
       Rendition result = new Rendition();
       result.setHeight(source.getHeight().intValue());
@@ -1006,7 +1006,7 @@ public class TypeConverter
       return result;
    }
 
-   public static CmisChangeEventType getChangeEventType(ChangeInfo source)
+   public static CmisChangeEventType getCmisChangeEventType(ChangeInfo source)
    {
       CmisChangeEventType result = new CmisChangeEventType();
       Calendar cal = source.getChangeTime();
@@ -1087,7 +1087,7 @@ public class TypeConverter
       return result;
    }
 
-   public static List<URI> getURI(List<String> values)
+   public static List<URI> getURIList(List<String> values)
    {
       List<URI> result = new ArrayList<URI>();
       for (String one : values)
@@ -1107,7 +1107,7 @@ public class TypeConverter
       return result;
    }
 
-   public static List<Calendar> getCalendar(List<XMLGregorianCalendar> source)
+   public static List<Calendar> getCalendarList(List<XMLGregorianCalendar> source)
    {
       List<Calendar> result = new ArrayList<Calendar>();
       for (XMLGregorianCalendar one : source)

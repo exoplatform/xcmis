@@ -122,7 +122,7 @@ public class VersioningServiceTest extends BaseTest
       CmisPropertyId versionSeriesIdProp = (CmisPropertyId)getProperty(pwc, CmisConstants.VERSION_SERIES_ID);
       String versionSeriesId = versionSeriesIdProp.getValue().get(0);
       List<CmisObjectType> allVersions =
-         TypeConverter.getListCmisObjectType(conn.getAllVersions(versionSeriesId, false, false, null));
+         TypeConverter.getCmisObjectTypeList(conn.getAllVersions(versionSeriesId, false, false, null));
       //      assertEquals(1, allVersions.size());
       assertEquals(2, allVersions.size());
       port.checkIn(//
@@ -137,7 +137,7 @@ public class VersioningServiceTest extends BaseTest
          null, // Remove ACL
          new Holder<CmisExtensionType>() // Extensions
          );
-      allVersions = TypeConverter.getListCmisObjectType(conn.getAllVersions(versionSeriesId, false, false, null));
+      allVersions = TypeConverter.getCmisObjectTypeList(conn.getAllVersions(versionSeriesId, false, false, null));
       assertEquals(2, allVersions.size());
       conn.deleteObject(id, true);
    }

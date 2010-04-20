@@ -193,7 +193,7 @@ public class NavigationServicePortImpl implements NavigationServicePort
          //         conn = storageProvider.getConnection(repositoryId);
          conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
 
-         return TypeConverter.getCmisObjectInFolderContainerType(conn.getDescendants(folderId, //
+         return TypeConverter.getCmisObjectInFolderContainerTypeList(conn.getDescendants(folderId, //
             depth == null ? 1 : depth.intValue(), //
             includeAllowableActions == null ? false : includeAllowableActions, //
             includeRelationships == null ? IncludeRelationships.NONE : IncludeRelationships
@@ -271,7 +271,7 @@ public class NavigationServicePortImpl implements NavigationServicePort
          //         conn = storageProvider.getConnection(repositoryId);
          conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
 
-         return TypeConverter.getCmisObjectInFolderContainerType(conn.getFolderTree(folderId, //
+         return TypeConverter.getCmisObjectInFolderContainerTypeList(conn.getFolderTree(folderId, //
             depth == null ? 1 : depth.intValue(), //
             includeAllowableActions == null ? false : includeAllowableActions, //
             includeRelationships == null ? IncludeRelationships.NONE : IncludeRelationships

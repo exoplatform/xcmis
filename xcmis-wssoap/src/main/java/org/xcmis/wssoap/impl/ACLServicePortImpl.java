@@ -81,8 +81,8 @@ public class ACLServicePortImpl implements ACLServicePort
          //         conn = storageProvider.getConnection(repositoryId);
          conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
          conn.applyACL(objectId, //
-            TypeConverter.convertAccessControlEntryList(addACEs.getPermission()), //
-            TypeConverter.convertAccessControlEntryList(removeACEs.getPermission()), //
+            TypeConverter.getAccessControlEntryList(addACEs.getPermission()), //
+            TypeConverter.getAccessControlEntryList(removeACEs.getPermission()), //
             aclPropagation == null ? AccessControlPropagation.REPOSITORYDETERMINED : AccessControlPropagation
                .fromValue(aclPropagation.value()));
          CmisACLType res = new CmisACLType();

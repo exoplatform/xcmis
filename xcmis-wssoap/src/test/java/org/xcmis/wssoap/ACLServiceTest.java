@@ -150,8 +150,8 @@ public class ACLServiceTest extends BaseTest
       entry1.getPermission().add(EnumBasicPermissions.CMIS_READ.value());
       entry1.getPermission().add(EnumBasicPermissions.CMIS_WRITE.value());
       addACL.getPermission().add(entry1);
-      conn.applyACL(docId, TypeConverter.getCmisListAccessControlEntry(addACL), TypeConverter
-         .getCmisListAccessControlEntry(removeACL), AccessControlPropagation.REPOSITORYDETERMINED);
+      conn.applyACL(docId, TypeConverter.getListAccessControlEntry(addACL), TypeConverter
+         .getListAccessControlEntry(removeACL), AccessControlPropagation.REPOSITORYDETERMINED);
       CmisACLType resp = port.getACL(repositoryId, docId, false, new CmisExtensionType());
       assertNotNull(resp);
       CmisAccessControlListType acl = resp.getACL();

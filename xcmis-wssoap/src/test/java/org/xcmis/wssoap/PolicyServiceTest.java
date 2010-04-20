@@ -55,10 +55,10 @@ public class PolicyServiceTest extends BaseTest
    {
       String docId = createDocument(testFolderId, "doc1");
       String policyId = createPolicy(testFolderId, "policy1", "Test policy text");
-      List<CmisObjectType> policies = TypeConverter.getListCmisObjectType(conn.getAppliedPolicies(docId, false, null));
+      List<CmisObjectType> policies = TypeConverter.getCmisObjectTypeList(conn.getAppliedPolicies(docId, false, null));
       assertEquals(0, policies.size());
       port.applyPolicy(repositoryId, policyId, docId, new CmisExtensionType());
-      policies = TypeConverter.getListCmisObjectType(conn.getAppliedPolicies(docId, false, null));
+      policies = TypeConverter.getCmisObjectTypeList(conn.getAppliedPolicies(docId, false, null));
       assertEquals(1, policies.size());
       assertEquals(policyId, getObjectId(policies.get(0)));
       conn.removePolicy(policyId, docId);
@@ -70,10 +70,10 @@ public class PolicyServiceTest extends BaseTest
       String docId = createDocument(testFolderId, "doc1");
       String policyId = createPolicy(testFolderId, "policy1", "Test policy text");
       conn.applyPolicy(policyId, docId);
-      List<CmisObjectType> policies = TypeConverter.getListCmisObjectType(conn.getAppliedPolicies(docId, false, null));
+      List<CmisObjectType> policies = TypeConverter.getCmisObjectTypeList(conn.getAppliedPolicies(docId, false, null));
       assertEquals(1, policies.size());
       port.removePolicy(repositoryId, policyId, docId, new CmisExtensionType());
-      policies = TypeConverter.getListCmisObjectType(conn.getAppliedPolicies(docId, false, null));
+      policies = TypeConverter.getCmisObjectTypeList(conn.getAppliedPolicies(docId, false, null));
       assertEquals(0, policies.size());
       conn.deleteObject(policyId, true);
    }

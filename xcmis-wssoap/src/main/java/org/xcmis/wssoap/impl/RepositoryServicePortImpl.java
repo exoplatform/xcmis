@@ -217,7 +217,7 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
          //         conn = storageProvider.getConnection(repositoryId);
          conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
 
-         return TypeConverter.getCmisTypeContainer(conn.getTypeDescendants(typeId, //
+         return TypeConverter.getCmisTypeContainerList(conn.getTypeDescendants(typeId, //
             depth == null ? 1 : depth.intValue(), //
             includePropertyDefinitions == null ? false : includePropertyDefinitions));
       }

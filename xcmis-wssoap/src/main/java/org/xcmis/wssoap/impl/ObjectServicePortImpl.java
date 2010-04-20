@@ -114,8 +114,8 @@ public class ObjectServicePortImpl implements ObjectServicePort
             conn.createDocument(folderId, //
                TypeConverter.getPropertyMap(properties), //
                cs, //
-               TypeConverter.getCmisListAccessControlEntry(addACEs), //
-               TypeConverter.getCmisListAccessControlEntry(removeACEs), //
+               TypeConverter.getListAccessControlEntry(addACEs), //
+               TypeConverter.getListAccessControlEntry(removeACEs), //
                policies, versioningState == null ? VersioningState.MAJOR : VersioningState.fromValue(versioningState
                   .value()) //
                );
@@ -162,8 +162,8 @@ public class ObjectServicePortImpl implements ObjectServicePort
             conn.createDocumentFromSource(sourceId, //
                folderId, //
                TypeConverter.getPropertyMap(properties), //
-               TypeConverter.getCmisListAccessControlEntry(addACEs), //
-               TypeConverter.getCmisListAccessControlEntry(removeACEs), //
+               TypeConverter.getListAccessControlEntry(addACEs), //
+               TypeConverter.getListAccessControlEntry(removeACEs), //
                policies, versioningState == null ? VersioningState.MAJOR : VersioningState.fromValue(versioningState
                   .value()) //
                );
@@ -207,8 +207,8 @@ public class ObjectServicePortImpl implements ObjectServicePort
 
          objectId.value =
             conn.createFolder(folderId, TypeConverter.getPropertyMap(properties), TypeConverter
-               .getCmisListAccessControlEntry(addACEs), //
-               TypeConverter.getCmisListAccessControlEntry(removeACEs), //
+               .getListAccessControlEntry(addACEs), //
+               TypeConverter.getListAccessControlEntry(removeACEs), //
                policies);
       }
       catch (Exception e)
@@ -249,8 +249,8 @@ public class ObjectServicePortImpl implements ObjectServicePort
 
          objectId.value =
             conn.createPolicy(folderId, TypeConverter.getPropertyMap(properties), TypeConverter
-               .getCmisListAccessControlEntry(addACEs), //
-               TypeConverter.getCmisListAccessControlEntry(removeACEs), policies);
+               .getListAccessControlEntry(addACEs), //
+               TypeConverter.getListAccessControlEntry(removeACEs), policies);
       }
       catch (Exception e)
       {
@@ -289,8 +289,8 @@ public class ObjectServicePortImpl implements ObjectServicePort
 
          objectId.value =
             conn.createRelationship(TypeConverter.getPropertyMap(properties), TypeConverter
-               .getCmisListAccessControlEntry(addACEs), //
-               TypeConverter.getCmisListAccessControlEntry(removeACEs), policies);
+               .getListAccessControlEntry(addACEs), //
+               TypeConverter.getListAccessControlEntry(removeACEs), policies);
       }
       catch (Exception e)
       {
@@ -434,7 +434,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
          //         conn = storageProvider.getConnection(repositoryId);
          conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
 
-         return TypeConverter.getAllowableActionsType(conn.getAllowableActions(objectId));
+         return TypeConverter.getCmisAllowableActionsType(conn.getAllowableActions(objectId));
       }
       catch (Exception e)
       {
@@ -641,7 +641,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
          //         conn = storageProvider.getConnection(repositoryId);
          conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
 
-         return TypeConverter.getRenditionList(conn.getRenditions(objectId, //
+         return TypeConverter.getCmisRenditionTypeList(conn.getRenditions(objectId, //
             renditionFilter, //
             maxItems == null ? CmisConstants.MAX_ITEMS : maxItems.intValue(), //
             skipCount == null ? 0 : skipCount.intValue()));

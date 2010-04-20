@@ -138,8 +138,8 @@ public class VersioningServicePortImpl implements VersioningServicePort
             TypeConverter.getPropertyMap(properties), //
             cs, //
             checkinComment, //
-            TypeConverter.getCmisListAccessControlEntry(addACEs), //
-            TypeConverter.getCmisListAccessControlEntry(removeACEs), //
+            TypeConverter.getListAccessControlEntry(addACEs), //
+            TypeConverter.getListAccessControlEntry(removeACEs), //
             policies);
          documentId.value = res;
          CmisExtensionType ext = new CmisExtensionType();
