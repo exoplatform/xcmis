@@ -20,6 +20,7 @@
 package org.xcmis.sp.jcr.exo;
 
 import org.exoplatform.services.jcr.core.ExtendedNode;
+import org.xcmis.sp.jcr.exo.index.IndexListener;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.DocumentData;
@@ -48,9 +49,10 @@ class DocumentCopy extends DocumentDataImpl
 
    private final DocumentData source;
 
-   public DocumentCopy(DocumentData source, TypeDefinition type, FolderData parent, Session session, VersioningState versioningState)
+   public DocumentCopy(DocumentData source, TypeDefinition type, FolderData parent, Session session,
+      VersioningState versioningState, IndexListener indexListener)
    {
-      super(type, parent, session, versioningState);
+      super(type, parent, session, versioningState, indexListener);
       this.source = source;
    }
 

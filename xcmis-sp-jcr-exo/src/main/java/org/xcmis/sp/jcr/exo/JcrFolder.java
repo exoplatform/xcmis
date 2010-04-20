@@ -19,6 +19,7 @@
 
 package org.xcmis.sp.jcr.exo;
 
+import org.xcmis.sp.jcr.exo.index.IndexListener;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.StorageException;
@@ -37,9 +38,9 @@ import javax.jcr.RepositoryException;
 class JcrFolder extends FolderDataImpl
 {
 
-   public JcrFolder(TypeDefinition type, Node node)
+   public JcrFolder(TypeDefinition type, Node node, IndexListener indexListener)
    {
-      super(type, node);
+      super(type, node, indexListener);
    }
 
    /**
@@ -50,7 +51,7 @@ class JcrFolder extends FolderDataImpl
    {
       try
       {
-         if(node.isNodeType(JcrCMIS.NT_FOLDER))
+         if (node.isNodeType(JcrCMIS.NT_FOLDER))
          {
             return node.getProperty(JcrCMIS.JCR_CREATED).getDate();
          }

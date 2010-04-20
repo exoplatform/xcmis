@@ -31,6 +31,7 @@ import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.Storage;
 import org.xcmis.spi.model.VersioningState;
+import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 
 import java.util.HashSet;
@@ -187,6 +188,14 @@ public abstract class BaseQueryTest extends BaseTest
       checkResults(expectedPaths, resultPaths);
    }
 
+   protected void checkResult(String statement, ObjectData[] nodes)
+   {
+      Query query = new Query(statement, true);
+
+      ItemsIterator<Result> result = storage.query(query);
+      checkResult(result, nodes);
+   }
+
    protected void checkResult(ItemsIterator<Result> result, ObjectData[] nodes)
    {
       // collect rows
@@ -216,7 +225,7 @@ public abstract class BaseQueryTest extends BaseTest
          String id = next.getObjectId();
          resultPaths.add(id);
          ObjectData object = storage.getObject(id);
-         LOG.debug("id:=" + id + " path:=" + object.getParent().getPath() + "/" + object.getName());
+         //LOG.debug("id:=" + id + " path:=" + object.getParent().getPath() + "/" + object.getName());
       }
 
       checkResults(expectedPaths, resultPaths);

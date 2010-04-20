@@ -19,6 +19,7 @@
 
 package org.xcmis.sp.jcr.exo;
 
+import org.xcmis.sp.jcr.exo.index.IndexListener;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
@@ -44,9 +45,9 @@ import javax.jcr.RepositoryException;
 class JcrFile extends DocumentDataImpl
 {
 
-   public JcrFile(TypeDefinition type, Node node, RenditionManager manager)
+   public JcrFile(TypeDefinition type, Node node, RenditionManager manager, IndexListener indexListener)
    {
-      super(type, node, manager);
+      super(type, node, manager, indexListener);
       try
       {
          if (type.isVersionable() && this.node.canAddMixin(JcrCMIS.MIX_VERSIONABLE))

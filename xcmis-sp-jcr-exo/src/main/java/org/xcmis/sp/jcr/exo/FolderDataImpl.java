@@ -22,6 +22,7 @@ package org.xcmis.sp.jcr.exo;
 import org.exoplatform.services.jcr.core.ExtendedNode;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.xcmis.sp.jcr.exo.index.IndexListener;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
@@ -54,14 +55,14 @@ class FolderDataImpl extends BaseObjectData implements FolderData
 
    private static final Log LOG = ExoLogger.getLogger(FolderDataImpl.class);
 
-   public FolderDataImpl(TypeDefinition type, FolderData parent, Session session)
+   public FolderDataImpl(TypeDefinition type, FolderData parent, Session session, IndexListener indexListener)
    {
-      super(type, parent, session);
+      super(type, parent, session, indexListener);
    }
 
-   public FolderDataImpl(TypeDefinition type, Node node)
+   public FolderDataImpl(TypeDefinition type, Node node, IndexListener indexListener)
    {
-      super(type, node);
+      super(type, node, indexListener);
    }
 
    /**
@@ -99,6 +100,7 @@ class FolderDataImpl extends BaseObjectData implements FolderData
          }
 
          session.save();
+         indexListener.updated(object);
       }
       catch (RepositoryException re)
       {
@@ -123,7 +125,7 @@ class FolderDataImpl extends BaseObjectData implements FolderData
 
       try
       {
-         return new FolderChildrenIterator(node.getNodes());
+         return new FolderChildrenIterator(node.getNodes(), indexListener);
       }
       catch (RepositoryException re)
       {
@@ -270,8 +272,8 @@ class FolderDataImpl extends BaseObjectData implements FolderData
 
             // Move object node from current folder.
             session.move(data.getPath(), destPath);
-
             data = (Node)session.getItem(destPath);
+
          }
          else
          {
@@ -289,6 +291,7 @@ class FolderDataImpl extends BaseObjectData implements FolderData
          }
 
          session.save();
+         indexListener.updated(object);
       }
       catch (PathNotFoundException pe)
       {

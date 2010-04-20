@@ -61,7 +61,6 @@ import org.xcmis.spi.model.CapabilityRendition;
 import org.xcmis.spi.model.ChangeEvent;
 import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.Permission;
-import org.xcmis.spi.model.Permission.BasicPermissions;
 import org.xcmis.spi.model.PermissionMapping;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.Rendition;
@@ -71,6 +70,7 @@ import org.xcmis.spi.model.SupportedPermissions;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.UnfileObject;
 import org.xcmis.spi.model.VersioningState;
+import org.xcmis.spi.model.Permission.BasicPermissions;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 
@@ -460,7 +460,8 @@ public class StorageImpl implements Storage
       }
 
       DocumentCopy copy =
-         new DocumentCopy(source, getTypeDefinition(source.getTypeId(), true), parent, session, versioningState);
+         new DocumentCopy(source, getTypeDefinition(source.getTypeId(), true), parent, session, versioningState,
+            indexListener);
 
       return copy;
    }
@@ -491,7 +492,7 @@ public class StorageImpl implements Storage
          throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Document.");
       }
 
-      DocumentData document = new DocumentDataImpl(typeDefinition, parent, session, versioningState);
+      DocumentData document = new DocumentDataImpl(typeDefinition, parent, session, versioningState, indexListener);
 
       return document;
    }
@@ -524,7 +525,7 @@ public class StorageImpl implements Storage
          throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Folder.");
       }
 
-      FolderData newFolder = new FolderDataImpl(typeDefinition, parent, session);
+      FolderData newFolder = new FolderDataImpl(typeDefinition, parent, session, indexListener);
 
       return newFolder;
    }
@@ -543,7 +544,7 @@ public class StorageImpl implements Storage
 
       // TODO : need raise exception if parent folder is provided ??
       // Do not use parent folder, policy is not fileable.
-      PolicyData policy = new PolicyDataImpl(typeDefinition, session);
+      PolicyData policy = new PolicyDataImpl(typeDefinition, session, indexListener);
 
       return policy;
    }
@@ -571,7 +572,7 @@ public class StorageImpl implements Storage
          throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Relationship.");
       }
 
-      RelationshipData relationship = new RelationshipDataImpl(typeDefinition, source, target, session);
+      RelationshipData relationship = new RelationshipDataImpl(typeDefinition, source, target, session, indexListener);
 
       return relationship;
    }
@@ -749,7 +750,7 @@ public class StorageImpl implements Storage
             Node node = wc.getNodes().nextNode();
             TypeDefinition type = JcrTypeHelper.getTypeDefinition(node.getPrimaryNodeType(), true);
             String latestVersion = node.getProperty("xcmis:latestVersionId").getString();
-            PWC pwc = new PWC(type, node, (DocumentData)getObject(latestVersion));
+            PWC pwc = new PWC(type, node, (DocumentData)getObject(latestVersion), indexListener);
             if (folder != null)
             {
                for (FolderData parent : pwc.getParents())
@@ -801,31 +802,31 @@ public class StorageImpl implements Storage
          {
             if (!node.isNodeType(JcrCMIS.CMIS_MIX_DOCUMENT))
             {
-               return new JcrFile(type, node, renditionManager);
+               return new JcrFile(type, node, renditionManager, indexListener);
             }
             if (node.getParent().isNodeType("xcmis:workingCopy"))
             {
                // TODO get smarter (simpler)
                String latestVersion = node.getProperty("xcmis:latestVersionId").getString();
-               return new PWC(type, node, (DocumentData)getObject(latestVersion));
+               return new PWC(type, node, (DocumentData)getObject(latestVersion), indexListener);
             }
-            return new DocumentDataImpl(type, node, renditionManager);
+            return new DocumentDataImpl(type, node, renditionManager, indexListener);
          }
          else if (type.getBaseId() == BaseType.FOLDER)
          {
             if (!node.isNodeType(JcrCMIS.CMIS_MIX_FOLDER))
             {
-               return new JcrFolder(type, node);
+               return new JcrFolder(type, node, indexListener);
             }
-            return new FolderDataImpl(type, node);
+            return new FolderDataImpl(type, node, indexListener);
          }
          else if (type.getBaseId() == BaseType.POLICY)
          {
-            return new PolicyDataImpl(type, node);
+            return new PolicyDataImpl(type, node, indexListener);
          }
          else if (type.getBaseId() == BaseType.RELATIONSHIP)
          {
-            return new RelationshipDataImpl(type, node);
+            return new RelationshipDataImpl(type, node, indexListener);
          }
 
          // Must never happen.
@@ -847,7 +848,7 @@ public class StorageImpl implements Storage
          JcrTypeHelper.getTypeDefinition(getNodeType(node.getProperty(JcrCMIS.JCR_FROZEN_PRIMARY_TYPE).getString()),
             true);
 
-      return new DocumentVersion(type, node);
+      return new DocumentVersion(type, node, indexListener);
    }
 
    /**
@@ -871,25 +872,25 @@ public class StorageImpl implements Storage
          {
             if (!node.isNodeType(JcrCMIS.CMIS_MIX_DOCUMENT))
             {
-               return new JcrFile(type, node, renditionManager);
+               return new JcrFile(type, node, renditionManager, indexListener);
             }
-            return new DocumentDataImpl(type, node, renditionManager);
+            return new DocumentDataImpl(type, node, renditionManager, indexListener);
          }
          else if (type.getBaseId() == BaseType.FOLDER)
          {
             if (!node.isNodeType(JcrCMIS.CMIS_MIX_FOLDER))
             {
-               return new JcrFolder(type, node);
+               return new JcrFolder(type, node, indexListener);
             }
-            return new FolderDataImpl(type, node);
+            return new FolderDataImpl(type, node, indexListener);
          }
          else if (type.getBaseId() == BaseType.POLICY)
          {
-            return new PolicyDataImpl(type, node);
+            return new PolicyDataImpl(type, node, indexListener);
          }
          else if (type.getBaseId() == BaseType.RELATIONSHIP)
          {
-            return new RelationshipDataImpl(type, node);
+            return new RelationshipDataImpl(type, node, indexListener);
          }
 
          // Must never happen.

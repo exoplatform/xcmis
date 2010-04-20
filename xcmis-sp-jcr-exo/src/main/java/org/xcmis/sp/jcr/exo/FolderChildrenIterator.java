@@ -22,6 +22,7 @@ package org.xcmis.sp.jcr.exo;
 import org.exoplatform.services.jcr.impl.core.NodeImpl;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.xcmis.sp.jcr.exo.index.IndexListener;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.model.BaseType;
@@ -61,12 +62,15 @@ class FolderChildrenIterator implements ItemsIterator<ObjectData>
    /** Next CMIS item instance. */
    protected ObjectData next;
 
+   private final IndexListener indexListener;
+
    /**
     * @param iter back-end NodeIterator
     */
-   public FolderChildrenIterator(NodeIterator iter)
+   public FolderChildrenIterator(NodeIterator iter, IndexListener indexListener)
    {
       this.iter = iter;
+      this.indexListener = indexListener;
       fetchNext();
    }
 
@@ -155,22 +159,22 @@ class FolderChildrenIterator implements ItemsIterator<ObjectData>
             {
                if (!node.isNodeType(JcrCMIS.CMIS_MIX_DOCUMENT))
                {
-                  next = new JcrFile(type, node, null);
+                  next = new JcrFile(type, node, null, indexListener);
                }
                else
                {
-                  next = new DocumentDataImpl(type, node);
+                  next = new DocumentDataImpl(type, node, indexListener);
                }
             }
             else if (type.getBaseId() == BaseType.FOLDER)
             {
                if (!node.isNodeType(JcrCMIS.CMIS_MIX_FOLDER))
                {
-                  next = new JcrFolder(type, node);
+                  next = new JcrFolder(type, node, indexListener);
                }
                else
                {
-                  next = new FolderDataImpl(type, node);
+                  next = new FolderDataImpl(type, node, indexListener);
                }
             }
 

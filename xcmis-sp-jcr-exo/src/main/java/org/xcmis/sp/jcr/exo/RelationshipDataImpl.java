@@ -19,6 +19,7 @@
 
 package org.xcmis.sp.jcr.exo;
 
+import org.xcmis.sp.jcr.exo.index.IndexListener;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
@@ -59,9 +60,10 @@ class RelationshipDataImpl extends BaseObjectData implements RelationshipData
     * @param name name
     * @see StorageImpl#createRelationship(ObjectData, ObjectData, String)
     */
-   public RelationshipDataImpl(TypeDefinition type, ObjectData source, ObjectData target, Session session)
+   public RelationshipDataImpl(TypeDefinition type, ObjectData source, ObjectData target, Session session,
+      IndexListener indexListener)
    {
-      super(type, null, session);
+      super(type, null, session, indexListener);
       this.source = source;
       this.target = target;
    }
@@ -74,9 +76,9 @@ class RelationshipDataImpl extends BaseObjectData implements RelationshipData
     * @see StorageImpl#getObject(String)
     * @see StorageImpl#getObjectByPath(String)
     */
-   public RelationshipDataImpl(TypeDefinition type, Node node)
+   public RelationshipDataImpl(TypeDefinition type, Node node, IndexListener indexListener)
    {
-      super(type, node);
+      super(type, node, indexListener);
    }
 
    /**

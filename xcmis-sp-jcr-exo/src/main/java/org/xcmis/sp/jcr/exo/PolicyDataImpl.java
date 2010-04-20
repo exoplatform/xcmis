@@ -19,6 +19,7 @@
 
 package org.xcmis.sp.jcr.exo;
 
+import org.xcmis.sp.jcr.exo.index.IndexListener;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
@@ -45,14 +46,14 @@ import javax.jcr.Session;
 class PolicyDataImpl extends BaseObjectData implements PolicyData
 {
 
-   public PolicyDataImpl(TypeDefinition type, Session session)
+   public PolicyDataImpl(TypeDefinition type, Session session, IndexListener indexListener)
    {
-      super(type, null, session);
+      super(type, null, session, indexListener);
    }
 
-   public PolicyDataImpl(TypeDefinition type, Node node)
+   public PolicyDataImpl(TypeDefinition type, Node node, IndexListener indexListener)
    {
-      super(type, node);
+      super(type, node, indexListener);
    }
 
    /**

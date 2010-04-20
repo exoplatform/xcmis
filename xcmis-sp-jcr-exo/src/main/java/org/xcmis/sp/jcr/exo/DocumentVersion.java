@@ -20,6 +20,7 @@
 package org.xcmis.sp.jcr.exo;
 
 import org.exoplatform.services.jcr.core.ExtendedSession;
+import org.xcmis.sp.jcr.exo.index.IndexListener;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
@@ -58,10 +59,10 @@ public class DocumentVersion extends DocumentDataImpl
    /** Latest version of document. */
    private DocumentData document;
 
-   public DocumentVersion(TypeDefinition type, Node node)
+   public DocumentVersion(TypeDefinition type, Node node, IndexListener indexListener)
    {
 
-      super(type, node /*frozen node*/);
+      super(type, node /*frozen node*/, indexListener);
    }
 
    /**
@@ -259,7 +260,9 @@ public class DocumentVersion extends DocumentDataImpl
             Version version = (Version)node.getParent();
             VersionHistory versionHistory = version.getContainingHistory();
             Node latest = ((ExtendedSession)session).getNodeByIdentifier(versionHistory.getVersionableUUID());
-            document = new DocumentDataImpl(JcrTypeHelper.getTypeDefinition(latest.getPrimaryNodeType(), true), latest);
+            document =
+               new DocumentDataImpl(JcrTypeHelper.getTypeDefinition(latest.getPrimaryNodeType(), true), latest,
+                  indexListener);
          }
          catch (RepositoryException re)
          {

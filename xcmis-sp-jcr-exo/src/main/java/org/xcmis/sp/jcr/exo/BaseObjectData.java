@@ -30,6 +30,7 @@ import org.exoplatform.services.jcr.impl.core.value.StringValue;
 import org.exoplatform.services.jcr.util.IdGenerator;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.xcmis.sp.jcr.exo.index.IndexListener;
 import org.xcmis.spi.BaseItemsIterator;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
@@ -141,6 +142,8 @@ abstract class BaseObjectData implements ObjectData
     */
    protected String name;
 
+   protected final IndexListener indexListener;
+
    /**
     * Create new unsaved instance of CMIS object. This object should be saved,
     * {@link #save()}.
@@ -149,9 +152,10 @@ abstract class BaseObjectData implements ObjectData
     * @param parent parent folder
     * @param session JCR session
     */
-   public BaseObjectData(TypeDefinition type, FolderData parent, Session session)
+   public BaseObjectData(TypeDefinition type, FolderData parent, Session session, IndexListener indexListener)
    {
       this.type = type;
+      this.indexListener = indexListener;
       this.parent = (FolderDataImpl)parent;
       this.session = session;
       this.node = null;
@@ -163,10 +167,11 @@ abstract class BaseObjectData implements ObjectData
     * @param type object's type
     * @param node back-end JCR node
     */
-   public BaseObjectData(TypeDefinition type, Node node)
+   public BaseObjectData(TypeDefinition type, Node node, IndexListener indexListener)
    {
       this.type = type;
       this.node = node;
+      this.indexListener = indexListener;
       try
       {
          this.session = node.getSession();
@@ -434,13 +439,14 @@ abstract class BaseObjectData implements ObjectData
             {
                Node parent = link.getParent();
                parents.add(new FolderDataImpl(JcrTypeHelper.getTypeDefinition(parent.getPrimaryNodeType(), true),
-                  parent));
+                  parent, indexListener));
             }
          }
          if (!node.getParent().isNodeType("xcmis:unfiledObject"))
          {
             Node parent = node.getParent();
-            parents.add(new FolderDataImpl(JcrTypeHelper.getTypeDefinition(parent.getPrimaryNodeType(), true), parent));
+            parents.add(new FolderDataImpl(JcrTypeHelper.getTypeDefinition(parent.getPrimaryNodeType(), true), parent,
+               indexListener));
          }
          return parents;
       }
@@ -544,7 +550,7 @@ abstract class BaseObjectData implements ObjectData
                   || (includeSubRelationshipTypes && nodeType.isNodeType(type.getLocalName())))
                {
                   RelationshipDataImpl relationship =
-                     new RelationshipDataImpl(JcrTypeHelper.getTypeDefinition(nodeType, true), relNode);
+                     new RelationshipDataImpl(JcrTypeHelper.getTypeDefinition(nodeType, true), relNode, indexListener);
                   boolean added = cache.add(relationship);
                   if (LOG.isDebugEnabled() && added)
                   {
@@ -1019,7 +1025,7 @@ abstract class BaseObjectData implements ObjectData
                {
                   boolean added =
                      policies.add(new PolicyDataImpl(JcrTypeHelper.getTypeDefinition(pol.getPrimaryNodeType(), true),
-                        pol));
+                        pol, indexListener));
 
                   if (LOG.isDebugEnabled() && added)
                   {

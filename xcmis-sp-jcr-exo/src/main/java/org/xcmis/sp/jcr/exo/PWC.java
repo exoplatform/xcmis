@@ -20,6 +20,7 @@
 package org.xcmis.sp.jcr.exo;
 
 import org.exoplatform.services.jcr.core.ExtendedNode;
+import org.xcmis.sp.jcr.exo.index.IndexListener;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
@@ -78,15 +79,15 @@ class PWC extends DocumentDataImpl
    /** Latest version of document. */
    private final DocumentDataImpl document;
 
-   public PWC(DocumentData document, Session session)
+   public PWC(DocumentData document, Session session, IndexListener indexListener)
    {
-      super(document.getTypeDefinition(), null, session, null);
+      super(document.getTypeDefinition(), null, session, null, indexListener);
       this.document = (DocumentDataImpl)document;
    }
 
-   public PWC(TypeDefinition type, Node node, DocumentData document)
+   public PWC(TypeDefinition type, Node node, DocumentData document, IndexListener indexListener)
    {
-      super(type, node);
+      super(type, node, indexListener);
       this.document = (DocumentDataImpl)document;
    }
 

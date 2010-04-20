@@ -22,6 +22,7 @@ package org.xcmis.sp.jcr.exo;
 import org.exoplatform.services.jcr.core.ExtendedNode;
 import org.exoplatform.services.jcr.core.ExtendedSession;
 import org.exoplatform.services.jcr.util.IdGenerator;
+import org.xcmis.sp.jcr.exo.index.IndexListener;
 import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
@@ -68,21 +69,22 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
 
    private RenditionManager renditionManager;
 
-   public DocumentDataImpl(TypeDefinition type, FolderData parent, Session session, VersioningState versioningState)
+   public DocumentDataImpl(TypeDefinition type, FolderData parent, Session session, VersioningState versioningState,
+      IndexListener indexListener)
    {
-      super(type, parent, session);
+      super(type, parent, session, indexListener);
       this.versioningState = versioningState;
    }
 
-   public DocumentDataImpl(TypeDefinition type, Node node)
+   public DocumentDataImpl(TypeDefinition type, Node node, IndexListener indexListener)
    {
-      super(type, node);
+      super(type, node, indexListener);
       versioningState = null; // no sense for not newly created Document
    }
 
-   public DocumentDataImpl(TypeDefinition type, Node node, RenditionManager manager)
+   public DocumentDataImpl(TypeDefinition type, Node node, RenditionManager manager, IndexListener indexListener)
    {
-      super(type, node);
+      super(type, node, indexListener);
       versioningState = null; // no sense for not newly created Document
       this.renditionManager = manager;
    }
@@ -110,7 +112,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
       try
       {
          Node pwcNode = ((ExtendedSession)session).getNodeByIdentifier(getVersionSeriesCheckedOutId());
-         PWC pwc = new PWC(type, pwcNode, this);
+         PWC pwc = new PWC(type, pwcNode, this, indexListener);
          pwc.delete();
       }
       catch (ItemNotFoundException e)
@@ -158,7 +160,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
             + "Not allowed have more then one PWC for version series at a time.");
       }
 
-      PWC pwc = new PWC(this, session);
+      PWC pwc = new PWC(this, session, indexListener);
       pwc.save();
       return pwc;
    }
