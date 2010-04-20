@@ -77,7 +77,6 @@ public class IndexListener
 
    public void created(ObjectData object)
    {
-
       //LOG.info(object.getObjectId() + " " + object.getParent().getPath() + "/" + object.getName());
       try
       {
@@ -95,18 +94,20 @@ public class IndexListener
 
    public void removed(Set<String> removed)
    {
+      //LOG.info(removed);
       try
       {
          searchService.update(Collections.EMPTY_LIST, removed);
       }
       catch (IndexModificationException e)
       {
-         LOG.error(e.getLocalizedMessage(), e);
+         LOG.error(e.getLocalizedMessage());
       }
    }
 
    public void updated(ObjectData object)
    {
+      //LOG.info(object.getObjectId() + " " + object.getParent().getPath() + "/" + object.getName());
       try
       {
          searchService.update(contentEntryAdapter.createEntry(object), object.getObjectId());
