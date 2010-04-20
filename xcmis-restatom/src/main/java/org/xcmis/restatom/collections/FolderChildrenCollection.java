@@ -122,6 +122,10 @@ public class FolderChildrenCollection extends CmisObjectCollection
                numItems.setText(Integer.toString(list.getNumItems()));
             }
 
+            //          // add cmisra:hasMoreItems
+            //          Element hasMoreItems = feed.addExtension(AtomCMIS.HAS_MORE_ITEMS);
+            //          hasMoreItems.setText(Boolean.toString(list.isHasMoreItems()));
+
             for (CmisObject oif : list.getItems())
             {
                Entry e = feed.addEntry();

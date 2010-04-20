@@ -233,9 +233,16 @@ public class RelationshipsCollection extends CmisObjectCollection
                true, propertyFilter, maxItems, skipCount);
          if (list.getItems().size() > 0)
          {
-            // add cmisra:numItems
-            Element numItems = feed.addExtension(AtomCMIS.NUM_ITEMS);
-            numItems.setText(Integer.toString(list.getNumItems()));
+            if (list.getNumItems() != -1)
+            {
+               // add cmisra:numItems
+               Element numItems = feed.addExtension(AtomCMIS.NUM_ITEMS);
+               numItems.setText(Integer.toString(list.getNumItems()));
+            }
+
+            //          // add cmisra:hasMoreItems
+            //          Element hasMoreItems = feed.addExtension(AtomCMIS.HAS_MORE_ITEMS);
+            //          hasMoreItems.setText(Boolean.toString(list.isHasMoreItems()));
 
             //Paging links
             addPageLinks(objectId, feed, "relationships", maxItems, skipCount, list.getNumItems(), list

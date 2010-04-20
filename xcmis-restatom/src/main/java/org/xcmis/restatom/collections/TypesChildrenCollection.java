@@ -63,7 +63,8 @@ public class TypesChildrenCollection extends CmisTypeCollection
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
       String typeId = request.getTarget().getParameter(AtomCMIS.PARAM_TYPE_ID);
-      boolean includePropertyDefinitions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PROPERTY_DEFINITIONS, false);
+      boolean includePropertyDefinitions =
+         getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PROPERTY_DEFINITIONS, false);
       int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CmisConstants.MAX_ITEMS);
       int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CmisConstants.SKIP_COUNT);
       Connection conn = null;

@@ -109,6 +109,11 @@ public class CheckedOutCollection extends CmisObjectCollection
                Element numItems = feed.addExtension(AtomCMIS.NUM_ITEMS);
                numItems.setText(Integer.toString(list.getNumItems()));
             }
+
+            //            // add cmisra:hasMoreItems
+            //            Element hasMoreItems = feed.addExtension(AtomCMIS.HAS_MORE_ITEMS);
+            //            hasMoreItems.setText(Boolean.toString(list.isHasMoreItems()));
+
             for (CmisObject object : list.getItems())
             {
                Entry e = feed.addEntry();

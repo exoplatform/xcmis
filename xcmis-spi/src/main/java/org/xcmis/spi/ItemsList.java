@@ -39,25 +39,21 @@ public final class ItemsList<T>
 
    private List<T> list;
 
-   public ItemsList(List<T> list)
-   {
-      this.list = list;
-   }
-
+   /**
+    * Default constructor.
+    */
    public ItemsList()
    {
    }
 
    /**
-    * @return total number of items. It is not need to be equals to number of
-    *         items in current list {@link #getItems()}. It may be equals to
-    *         number of items in current list only if this list contains all
-    *         requested items and no more pages available. This method must
-    *         return -1 if total number of items in unknown.
+    * Constructor.
+    * 
+    * @param list the list of items.
     */
-   public int getNumItems()
+   public ItemsList(List<T> list)
    {
-      return numItems;
+      this.list = list;
    }
 
    /**
@@ -73,16 +69,28 @@ public final class ItemsList<T>
    }
 
    /**
-    * @return <code>false</code> if this is last sub-set of items in paging
+    * @return total number of items. It is not need to be equals to number of
+    *         items in current list {@link #getItems()}. It may be equals to
+    *         number of items in current list only if this list contains all
+    *         requested items and no more pages available. This method must
+    *         return -1 if total number of items in unknown.
     */
-   public boolean isHasMoreItems()
+   public int getNumItems()
    {
-      return hasMoreItems;
+      return numItems;
    }
 
    public void setNumItems(int numItems)
    {
       this.numItems = numItems;
+   }
+
+   /**
+    * @return <code>false</code> if this is last sub-set of items in paging
+    */
+   public boolean isHasMoreItems()
+   {
+      return hasMoreItems;
    }
 
    public void setHasMoreItems(boolean hasMoreItems)

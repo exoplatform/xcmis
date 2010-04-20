@@ -394,6 +394,8 @@ public interface AtomCMIS extends CmisConstants
 
    QName LATEST_CHANGE_LOG_TOKEN = new QName(CMIS_NS_URI, "latestChangeLogToken", CMIS_PREFIX);
 
+   //   QName HAS_MORE_ITEMS = new QName(CMISRA_NS_URI, "hasMoreItems", CMISRA_PREFIX);
+
    String PARAM_ORDER_BY = "orderBy";
 
    String PARAM_CHILD_TYPES = "childTypes";
@@ -549,5 +551,5 @@ public interface AtomCMIS extends CmisConstants
    String URITEMPLATE_TYPEBYID = "typebyid";
 
    String CONTENT_DISPOSITION_HEADER = "Content-Disposition";
-   
+
 }
