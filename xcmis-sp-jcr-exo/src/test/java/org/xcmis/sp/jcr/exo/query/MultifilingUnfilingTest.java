@@ -70,7 +70,7 @@ public class MultifilingUnfilingTest extends BaseQueryTest
       storage.deleteTree(testRoot, true, null, true);
    }
 
-   public void testRemoveFromMultipleParents() throws Exception
+   public void _testRemoveFromMultipleParents() throws Exception
    {
 
       FolderData folder1 = createFolder(testRoot, "multifilingFolderTest1", "cmis:folder");
@@ -87,9 +87,10 @@ public class MultifilingUnfilingTest extends BaseQueryTest
 
       checkResult("SELECT * FROM " + NASA_DOCUMENT + " WHERE IN_TREE('" + folder2.getObjectId() + "')",
          new ObjectData[]{});
+      storage.deleteTree(testRoot, true, null, true);
    }
 
-   public void testRemoveFromLastParent() throws Exception
+   public void _testRemoveFromLastParent() throws Exception
    {
 
       FolderData folder1 = createFolder(testRoot, "multifilingFolderTest1", "cmis:folder");
@@ -112,5 +113,6 @@ public class MultifilingUnfilingTest extends BaseQueryTest
 
       checkResult("SELECT * FROM " + NASA_DOCUMENT + " WHERE IN_TREE('" + testRoot.getObjectId() + "')",
          new ObjectData[]{});
+      storage.deleteTree(testRoot, true, null, true);
    }
 }
