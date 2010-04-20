@@ -32,6 +32,7 @@ import org.exoplatform.services.log.Log;
 import org.xcmis.search.Startable;
 import org.xcmis.search.config.IndexConfiguration;
 import org.xcmis.search.config.IndexConfigurationException;
+import org.xcmis.search.content.IndexModificationException;
 import org.xcmis.search.lucene.index.merge.IndexAggregator;
 
 import java.io.IOException;
@@ -263,7 +264,8 @@ public class LocalStorageIndexDataManager implements LuceneIndexDataManager, Ind
 
             if (changes.getRemovedDocuments().size() > 0)
             {
-               log.error("Unable to remove item's with id's " + changes.getRemovedDocuments() + " from index");
+               throw new IndexModificationException("Unable to remove item's with id's "
+                  + changes.getRemovedDocuments() + " from index");
             }
 
          }
