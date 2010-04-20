@@ -119,7 +119,7 @@ public class FolderChildrenCollectionTest extends BaseTest
 
       ContainerResponse resp = service("POST", requestURI, "http://localhost:8080/rest", null, s.getBytes(), writer);
 
-      //            printBody(writer.getBody());
+      //      printBody(writer.getBody());
       assertEquals(201, resp.getStatus());
 
       assertNotNull(resp.getHttpHeaders().getFirst(HttpHeaders.LOCATION));
@@ -154,6 +154,7 @@ public class FolderChildrenCollectionTest extends BaseTest
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
 
       ContainerResponse resp = service("POST", requestURI, "http://localhost:8080/rest", null, s.getBytes(), writer);
+
       //                  printBody(writer.getBody());
       assertEquals(201, resp.getStatus());
 
@@ -218,7 +219,7 @@ public class FolderChildrenCollectionTest extends BaseTest
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
       ContainerResponse resp = service("GET", requestURI, "http://localhost:8080/rest", null, null, writer);
 
-      //            printBody(writer.getBody());
+      //          printBody(writer.getBody());
       assertEquals(200, resp.getStatus());
 
       DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
@@ -333,8 +334,9 @@ public class FolderChildrenCollectionTest extends BaseTest
    public void testGetObjectByPath() throws Exception
    {
       String docId = createDocument(testFolderId, "doc1", null, null);
-      String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/objectbypath" + "?path=%2FtestRoot%2Fdoc1";
-      
+      String requestURI =
+         "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/objectbypath" + "?path=%2FtestRoot%2Fdoc1";
+
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
 
       ContainerResponse resp = service("GET", requestURI, "http://localhost:8080/rest", null, null, writer);
@@ -377,7 +379,6 @@ public class FolderChildrenCollectionTest extends BaseTest
       ContainerResponse resp = service("POST", requestURI, "http://localhost:8080/rest", null, s.getBytes(), writer);
 
       //      printBody(writer.getBody());
-
       assertEquals(201, resp.getStatus());
 
       assertNotNull(resp.getHttpHeaders().getFirst(HttpHeaders.LOCATION));
@@ -425,8 +426,8 @@ public class FolderChildrenCollectionTest extends BaseTest
          + "--abcdef--\r\n");
       w.flush();
       byte[] data = out.toByteArray();
-
       //            printBody(data);
+
       ContainerResponse resp = service("POST", requestURI, "http://localhost:8080/rest", headers, data);
       assertEquals(201, resp.getStatus());
       byte[] b = new byte[128];

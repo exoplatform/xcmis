@@ -75,7 +75,6 @@ import javax.xml.xpath.XPathFactory;
  */
 public abstract class BaseTest extends TestCase
 {
-
    protected final Log LOG = ExoLogger.getLogger(BaseTest.class);
 
    protected final String cmisRepositoryId = "cmis1";
@@ -102,7 +101,6 @@ public abstract class BaseTest extends TestCase
       MultivaluedMap<String, String> headers, byte[] data) throws Exception
    {
       return service(method, requestURI, baseURI, headers, data, new DummyContainerResponseWriter());
-
    }
 
    @Override
@@ -151,10 +149,15 @@ public abstract class BaseTest extends TestCase
       container = null;
       requestHandler = null;
       factory = null;
+      clearRepository();
+      super.tearDown();
+   }
 
-      // TODO to remove this "if" statement when it was fixed for JCR storage
+   private void clearRepository()
+   {
       try
       {
+         // TODO to remove this "if" statement when it was fixed for JCR storage
          if (conn.getCheckedOutDocs(rootFolderId, false, null, true, null, null, null, -1, 0) != null)
          {
             for (Iterator<CmisObject> iter =
@@ -192,8 +195,6 @@ public abstract class BaseTest extends TestCase
       {
          //e.printStackTrace();
       }
-      /////////////////////////////////////////////////////////////////////////////////
-      super.tearDown();
    }
 
    private void deleteObject(CmisObject obj)

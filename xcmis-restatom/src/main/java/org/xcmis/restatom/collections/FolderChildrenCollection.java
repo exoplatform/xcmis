@@ -231,6 +231,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
             {
                // If not specified the 'sourceFolderId', addObjectToFolder will be performed.
                conn.addObjectToFolder(id, targetFolderId, false);
+               objectId = id;
             }
             else
             {
@@ -279,8 +280,12 @@ public class FolderChildrenCollection extends CmisObjectCollection
             {
                objectId = conn.createPolicy(getId(request), object.getProperties(), addACL, removeACL, policies);
             }
-
+            else
+            {
+               objectId = conn.createRelationship(object.getProperties(), addACL, removeACL, policies);
+            }
          }
+
          // TODO do we need to fill the perameters ?
          boolean isIncludeAllowableActions = false;
          IncludeRelationships isIncludeRelationships = null;
@@ -288,6 +293,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
          String renditionFilter = null;
          String propertyFilter = CmisConstants.WILDCARD;
          boolean isIncludeAcl = false;
+
          newObject =
             conn.getObject(objectId, isIncludeAllowableActions, isIncludeRelationships, isIncludePolicyIDs,
                isIncludeAcl, true, propertyFilter, renditionFilter);
