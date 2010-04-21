@@ -57,6 +57,8 @@ public interface JcrCMIS extends CmisConstants
 
    String CMIS_RENDITION_MIME_TYPE = "xcmis:renditionMimeType";
 
+   String CMIS_RENDITION_ENCODING = "xcmis:renditionEncoding";
+
    String CMIS_RENDITION_KIND = "xcmis:renditionKind";
 
    String CMIS_RENDITION_HEIGHT = "xcmis:renditionHeight";
@@ -96,6 +98,8 @@ public interface JcrCMIS extends CmisConstants
    String JCR_LAST_MODIFIED = "jcr:lastModified";
 
    String JCR_MIMETYPE = "jcr:mimeType";
+
+   String JCR_ENCODING = "jcr:encoding";
 
    String EXO_PRIVILEGABLE = "exo:privilegeable";
 

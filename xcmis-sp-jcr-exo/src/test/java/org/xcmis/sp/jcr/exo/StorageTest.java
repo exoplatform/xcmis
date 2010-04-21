@@ -43,6 +43,7 @@ import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.UnfileObject;
 import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.model.impl.StringProperty;
+import org.xcmis.spi.utils.MimeType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -117,7 +118,7 @@ public class StorageTest extends BaseTest
    {
       DocumentData document =
          createDocument(rootFolder, "checkoutTest", "cmis:document", new BaseContentStream("checkout test".getBytes(),
-            null, "text/plain"), null);
+            null, new MimeType("text", "plain")), null);
 
       DocumentData pwc = document.checkout();
 
@@ -138,7 +139,7 @@ public class StorageTest extends BaseTest
    {
       DocumentData document =
          createDocument(rootFolder, "checkoutTest", "cmis:document", new BaseContentStream("checkout test".getBytes(),
-            null, "text/plain"), null);
+            null, new MimeType("text", "plain")), null);
 
       document.checkout();
       try
@@ -157,14 +158,15 @@ public class StorageTest extends BaseTest
    {
       DocumentData document =
          createDocument(rootFolder, "checkinTest", "cmis:document", new BaseContentStream("checkin test".getBytes(),
-            null, "text/plain"), null);
+            null, new MimeType("text", "plain")), null);
       DocumentData pwc = document.checkout();
       String pwcId = pwc.getObjectId();
 
       // Get PWC from storage
       pwc = (DocumentData)storage.getObject(pwcId);
 
-      pwc.setContentStream(new BaseContentStream("checkin test. content updated".getBytes(), null, "text/plain"));
+      pwc.setContentStream(new BaseContentStream("checkin test. content updated".getBytes(), null, new MimeType("text",
+         "plain")));
       pwc.checkin(true, "my comment");
 
       try
@@ -192,7 +194,7 @@ public class StorageTest extends BaseTest
    {
       DocumentData document =
          createDocument(rootFolder, "cancelCheckoutDocumentTest", "cmis:document", new BaseContentStream(
-            "cancel checkout test".getBytes(), null, "text/plain"), null);
+            "cancel checkout test".getBytes(), null, new MimeType("text", "plain")), null);
       DocumentData pwc = document.checkout();
       String pwcId = pwc.getObjectId();
 
@@ -218,7 +220,7 @@ public class StorageTest extends BaseTest
    {
       DocumentData document =
          createDocument(rootFolder, "cancelCheckoutPWCTest", "cmis:document", new BaseContentStream(
-            "cancel checkout test".getBytes(), null, "text/plain"), null);
+            "cancel checkout test".getBytes(), null, new MimeType("text", "plain")), null);
 
       DocumentData pwc = document.checkout();
       String pwcId = pwc.getObjectId();
@@ -248,7 +250,7 @@ public class StorageTest extends BaseTest
    {
       DocumentData document =
          createDocument(rootFolder, "deletePWCTest", "cmis:document", new BaseContentStream("delete PWC test"
-            .getBytes(), null, "text/plain"), null);
+            .getBytes(), null, new MimeType("text", "plain")), null);
 
       DocumentData pwc = document.checkout();
       String pwcId = pwc.getObjectId();
@@ -393,7 +395,8 @@ public class StorageTest extends BaseTest
          .getDisplayName(), "createDocumentTest"));
 
       ContentStream cs =
-         new BaseContentStream("to be or not to be".getBytes(), /*"createDocumentTest"*/null, "text/plain");
+         new BaseContentStream("to be or not to be".getBytes(), /*"createDocumentTest"*/null, new MimeType("text",
+            "plain"));
       DocumentData document = storage.createDocument(rootFolder, "cmis:document", VersioningState.MAJOR);
       document.setProperties(properties);
       //      document.setName("createDocumentTest");
@@ -435,7 +438,7 @@ public class StorageTest extends BaseTest
 
    public void testCreateDocumentFromSource() throws Exception
    {
-      ContentStream cs = new BaseContentStream("to be or not to be".getBytes(), null, "text/plain");
+      ContentStream cs = new BaseContentStream("to be or not to be".getBytes(), null, new MimeType("text", "plain"));
       DocumentData document = createDocument(rootFolder, "createDocumentSource", "cmis:document", cs, null);
 
       DocumentData documentCopy = storage.copyDocument(document, rootFolder, VersioningState.MINOR);
@@ -539,7 +542,7 @@ public class StorageTest extends BaseTest
 
    public void testDeleteContent() throws Exception
    {
-      ContentStream cs = new BaseContentStream("to be or not to be".getBytes(), null, "text/plain");
+      ContentStream cs = new BaseContentStream("to be or not to be".getBytes(), null, new MimeType("text", "plain"));
       DocumentData document = createDocument(rootFolder, "removeContentTest", "cmis:document", cs, null);
       Node documentNode = (Node)session.getItem("/removeContentTest");
       assertEquals("to be or not to be", documentNode.getProperty("jcr:content/jcr:data").getString());
@@ -1076,7 +1079,7 @@ public class StorageTest extends BaseTest
 
    public void testRenameDocument() throws Exception
    {
-      ContentStream cs = new BaseContentStream("to be or not to be".getBytes(), null, "text/plain");
+      ContentStream cs = new BaseContentStream("to be or not to be".getBytes(), null, new MimeType("text", "plain"));
       DocumentData document = createDocument(rootFolder, "renameDocumentTest", "cmis:document", cs, null);
       document.setName("renameDocumentTest01");
       storage.saveObject(document);
@@ -1108,7 +1111,7 @@ public class StorageTest extends BaseTest
       assertEquals("", documentNode.getProperty("jcr:content/jcr:data").getString());
       assertEquals("", documentNode.getProperty("jcr:content/jcr:mimeType").getString());
 
-      ContentStream cs = new BaseContentStream("to be or not to be".getBytes(), null, "text/plain");
+      ContentStream cs = new BaseContentStream("to be or not to be".getBytes(), null, new MimeType("text", "plain"));
       document.setContentStream(cs);
       storage.saveObject(document);
 

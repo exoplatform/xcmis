@@ -792,7 +792,7 @@ public class StorageImpl implements Storage
       try
       {
          Node node = ((ExtendedSession)session).getNodeByIdentifier(objectId);
-         if (node.isNodeType(JcrCMIS.JCR_FROZEN_NODE))
+         if (node.isNodeType(JcrCMIS.NT_FROZEN_NODE))
          {
             return getDocumentVersion(node);
          }

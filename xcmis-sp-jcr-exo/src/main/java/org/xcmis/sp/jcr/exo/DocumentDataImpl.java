@@ -40,6 +40,7 @@ import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.VersioningState;
+import org.xcmis.spi.utils.MimeType;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -51,6 +52,7 @@ import javax.jcr.PathNotFoundException;
 import javax.jcr.PropertyIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.jcr.Value;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
@@ -187,9 +189,14 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
             return null;
          }
 
-         return new BaseContentStream(contentNode.getProperty(JcrCMIS.JCR_DATA).getStream(), //
-            contentLength, getName(), //
-            contentNode.getProperty(JcrCMIS.JCR_MIMETYPE).getString());
+         MimeType mimeType = MimeType.fromString(contentNode.getProperty(JcrCMIS.JCR_MIMETYPE).getString());
+         if (contentNode.hasProperty(JcrCMIS.JCR_ENCODING))
+         {
+            mimeType.getParameters().put(CmisConstants.CHARSET,
+               contentNode.getProperty(JcrCMIS.JCR_ENCODING).getString());
+         }
+         return new BaseContentStream(contentNode.getProperty(JcrCMIS.JCR_DATA).getStream(), contentLength, getName(),
+            mimeType);
       }
       catch (RepositoryException re)
       {
@@ -217,10 +224,15 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
       {
          rendition = node.getNode(streamId);
          javax.jcr.Property renditionContent = rendition.getProperty(JcrCMIS.CMIS_RENDITION_STREAM);
+         MimeType mimeType = MimeType.fromString(rendition.getProperty(JcrCMIS.JCR_MIMETYPE).getString());
+         if (rendition.hasProperty(JcrCMIS.CMIS_RENDITION_ENCODING))
+         {
+            mimeType.getParameters().put(CmisConstants.CHARSET,
+               rendition.getProperty(JcrCMIS.CMIS_RENDITION_ENCODING).getString());
+         }
 
-         return new RenditionContentStream(renditionContent.getStream(), renditionContent.getLength(), null, rendition
-            .getProperty(JcrCMIS.CMIS_RENDITION_MIME_TYPE).getString(), rendition.getProperty(
-            JcrCMIS.CMIS_RENDITION_KIND).getString());
+         return new RenditionContentStream(renditionContent.getStream(), renditionContent.getLength(), null, mimeType,
+            rendition.getProperty(JcrCMIS.CMIS_RENDITION_KIND).getString());
       }
       catch (PathNotFoundException pnfe)
       {
@@ -253,7 +265,19 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
     */
    protected Long getContentStreamLength()
    {
-      return getLong(CmisConstants.CONTENT_STREAM_LENGTH);
+      Long length = getLong(CmisConstants.CONTENT_STREAM_LENGTH);
+      if (length != null)
+      {
+         return length;
+      }
+      try
+      {
+         return node.getProperty("jcr:content/jcr:data").getLength();
+      }
+      catch (RepositoryException re)
+      {
+         throw new CmisRuntimeException("Unable get content stream length. " + re.getMessage(), re);
+      }
    }
 
    /**
@@ -510,23 +534,43 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
          data.hasNode(JcrCMIS.JCR_CONTENT) ? data.getNode(JcrCMIS.JCR_CONTENT) : data.addNode(JcrCMIS.JCR_CONTENT,
             JcrCMIS.NT_RESOURCE);
 
-      contentNode.setProperty(JcrCMIS.JCR_MIMETYPE, content == null ? "" : content.getMediaType());
-
-      // Re-count content length
-      long contentLength =
-         contentNode.setProperty(JcrCMIS.JCR_DATA,
-            content == null ? new ByteArrayInputStream(new byte[0]) : content.getStream()).getLength();
-
-      contentNode.setProperty(JcrCMIS.JCR_LAST_MODIFIED, Calendar.getInstance());
-
-      // Update CMIS properties
-      if (content != null && !data.hasProperty(CmisConstants.CONTENT_STREAM_ID))
+      if (content != null)
       {
-         // If new node
-         data.setProperty(CmisConstants.CONTENT_STREAM_ID, ((ExtendedNode)contentNode).getIdentifier());
+         MimeType mediaType = content.getMediaType();
+         contentNode.setProperty(JcrCMIS.JCR_MIMETYPE, mediaType.getBaseType());
+         if (mediaType.getParameter(CmisConstants.CHARSET) != null)
+         {
+            contentNode.setProperty(JcrCMIS.JCR_ENCODING, mediaType.getParameter(CmisConstants.CHARSET));
+         }
+
+         // Re-count content length
+         long contentLength = contentNode.setProperty(JcrCMIS.JCR_DATA, content.getStream()).getLength();
+
+         contentNode.setProperty(JcrCMIS.JCR_LAST_MODIFIED, Calendar.getInstance());
+
+         // Update CMIS properties
+         if (!data.hasProperty(CmisConstants.CONTENT_STREAM_ID))
+         {
+            // If new node
+            data.setProperty(CmisConstants.CONTENT_STREAM_ID, ((ExtendedNode)contentNode).getIdentifier());
+         }
+         data.setProperty(CmisConstants.CONTENT_STREAM_LENGTH, contentLength);
+         data.setProperty(CmisConstants.CONTENT_STREAM_MIME_TYPE, mediaType.getBaseType());
       }
-      data.setProperty(CmisConstants.CONTENT_STREAM_LENGTH, contentLength);
-      data.setProperty(CmisConstants.CONTENT_STREAM_MIME_TYPE, content == null ? null : content.getMediaType());
+      else
+      {
+         contentNode.setProperty(JcrCMIS.JCR_MIMETYPE, "");
+         contentNode.setProperty(JcrCMIS.JCR_ENCODING, (Value)null);
+
+         contentNode.setProperty(JcrCMIS.JCR_DATA, new ByteArrayInputStream(new byte[0]));
+
+         contentNode.setProperty(JcrCMIS.JCR_LAST_MODIFIED, Calendar.getInstance());
+
+         // Update CMIS properties
+         data.setProperty(CmisConstants.CONTENT_STREAM_ID, (Value)null);
+         data.setProperty(CmisConstants.CONTENT_STREAM_LENGTH, 0);
+         data.setProperty(CmisConstants.CONTENT_STREAM_MIME_TYPE, (Value)null);
+      }
    }
 
    /**

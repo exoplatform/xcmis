@@ -23,11 +23,11 @@ import org.exoplatform.services.jcr.ext.common.SessionProvider;
 import org.exoplatform.services.jcr.util.IdGenerator;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.spi.RenditionContentStream;
-import org.xcmis.spi.RenditionProvider;
 import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ContentStream;
+import org.xcmis.spi.RenditionContentStream;
+import org.xcmis.spi.RenditionProvider;
 import org.xcmis.spi.utils.MimeType;
 
 import java.util.Map;
@@ -58,7 +58,7 @@ public class UpdateListener implements EventListener
 
    /**
     * Instantiates a new update listener.
-    * 
+    *
     * @param repository the repository
     * @param workspace the workspace
     * @param renditionProviders the rendition providers
@@ -83,14 +83,20 @@ public class UpdateListener implements EventListener
             Event event = eventIterator.nextEvent();
             String path = event.getPath();
             if (path.contains("xcmis:system"))
+            {
                return;
+            }
 
             if (event.getPath().endsWith("jcr:content") || event.getPath().endsWith("jcr:data"))
             {
                if (prov == null)
+               {
                   prov = SessionProvider.createSystemProvider();
+               }
                if (session == null)
+               {
                   session = prov.getSession(workspace, (ManageableRepository)repository);
+               }
 
                Node node = null;
                Item item = session.getItem(path);
@@ -102,7 +108,7 @@ public class UpdateListener implements EventListener
                {
                   node = session.getItem(path).getParent().getParent();
                }
-               ContentStream content;
+
                Node contentNode = node.getNode(JcrCMIS.JCR_CONTENT);
                Property fileContent = contentNode.getProperty(JcrCMIS.JCR_DATA);
                int length = fileContent.getStream().available();
@@ -110,15 +116,19 @@ public class UpdateListener implements EventListener
                {
                   return; // No content, but node has empty stream.
                }
-               content = new BaseContentStream(fileContent.getStream(), //
-                  length, //
-                  node.getDepth() == 0 ? CmisConstants.ROOT_FOLDER_NAME : node.getName(), //
-                  contentNode.getProperty(JcrCMIS.JCR_MIMETYPE).getString());
+
+               MimeType mimeType = MimeType.fromString(contentNode.getProperty(JcrCMIS.JCR_MIMETYPE).getString());
+               if (contentNode.hasProperty(JcrCMIS.JCR_ENCODING))
+               {
+                  mimeType.getParameters().put(CmisConstants.CHARSET, contentNode.getProperty(JcrCMIS.JCR_ENCODING).getString());
+               }
+
+               ContentStream content = new BaseContentStream(fileContent.getStream(), length, null, mimeType);
 
                int count = 0;
                for (Map.Entry<MimeType, RenditionProvider> e : renditionProviders.entrySet())
                {
-                  if (e.getKey().match(MimeType.fromString(content.getMediaType())))
+                  if (e.getKey().match(content.getMediaType()))
                   {
                      RenditionProvider renditionProvider = e.getValue();
                      if (renditionProvider.canStoreRendition())
@@ -127,7 +137,10 @@ public class UpdateListener implements EventListener
                         String id = IdGenerator.generate();
                         Node rendition = node.addNode(id, JcrCMIS.CMIS_NT_RENDITION);
                         rendition.setProperty(JcrCMIS.CMIS_RENDITION_STREAM, renditionContentStream.getStream());
-                        rendition.setProperty(JcrCMIS.CMIS_RENDITION_MIME_TYPE, renditionContentStream.getMediaType());
+                        rendition.setProperty(JcrCMIS.CMIS_RENDITION_MIME_TYPE, renditionContentStream.getMediaType()
+                           .getBaseType());
+                        rendition.setProperty(JcrCMIS.CMIS_RENDITION_ENCODING, renditionContentStream.getMediaType()
+                           .getParameter(CmisConstants.CHARSET));
                         rendition.setProperty(JcrCMIS.CMIS_RENDITION_KIND, renditionContentStream.getKind());
                         rendition.setProperty(JcrCMIS.CMIS_RENDITION_HEIGHT, renditionContentStream.getHeight());
                         rendition.setProperty(JcrCMIS.CMIS_RENDITION_WIDTH, renditionContentStream.getWidth());

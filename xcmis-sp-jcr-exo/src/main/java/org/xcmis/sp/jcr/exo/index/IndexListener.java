@@ -30,6 +30,7 @@ import org.xcmis.search.content.Property.BinaryValue;
 import org.xcmis.search.content.Property.ContentValue;
 import org.xcmis.search.content.Property.SimpleValue;
 import org.xcmis.search.value.PropertyType;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
@@ -123,13 +124,14 @@ public class IndexListener
    }
 
    /**
-    * Adapt changes produced by CMIS SPI to {@link ContentEntry}
-    * acceptable for {@link SearchService}
+    * Adapt changes produced by CMIS SPI to {@link ContentEntry} acceptable for
+    * {@link SearchService}
     */
    public static class ContentEntryAdapter
    {
       /**
        * Convert {@link ObjectData} to {@link ContentEntry}.
+       *
        * @param objectData
        * @return
        * @throws IOException
@@ -216,6 +218,7 @@ public class IndexListener
 
       /**
        * Convert {@link FolderData} to {@link ContentEntry}.
+       *
        * @param objectData
        * @return
        */
@@ -228,6 +231,7 @@ public class IndexListener
 
       /**
        * Convert {@link DocumentData} to {@link ContentEntry}.
+       *
        * @param objectData
        * @return
        * @throws IOException
@@ -239,7 +243,8 @@ public class IndexListener
          if (cs != null)
          {
             List<ContentValue<InputStream>> vals = new ArrayList<ContentValue<InputStream>>(1);
-            vals.add(new BinaryValue(cs.getStream(), cs.getMediaType(), null, cs.length()));
+            vals.add(new BinaryValue(cs.getStream(), cs.getMediaType().getBaseType(), cs.getMediaType().getParameter(
+               CmisConstants.CHARSET), cs.length()));
             //TODO add constant for property name content
             mockEntry.properties.add(new Property<InputStream>(PropertyType.BINARY, "content", vals));
          }
@@ -251,7 +256,7 @@ public class IndexListener
    private static class MockContentEntry
    {
       /**
-       *  List of table names which identifies this content
+       * List of table names which identifies this content
        */
       List<String> tableNames;
 
@@ -266,7 +271,7 @@ public class IndexListener
       List<String> parentIdentifiers;
 
       /**
-       *  Entry identifier.
+       * Entry identifier.
        */
       String identifier;
 

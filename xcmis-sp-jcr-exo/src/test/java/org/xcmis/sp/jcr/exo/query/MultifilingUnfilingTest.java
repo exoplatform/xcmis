@@ -21,9 +21,11 @@ package org.xcmis.sp.jcr.exo.query;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ObjectData;
+import org.xcmis.spi.utils.MimeType;
 
 /**
- * @author <a href="mailto:Sergey.Kabashnyuk@exoplatform.org">Sergey Kabashnyuk</a>
+ * @author <a href="mailto:Sergey.Kabashnyuk@exoplatform.org">Sergey
+ *         Kabashnyuk</a>
  * @version $Id: exo-jboss-codetemplates.xml 34360 2009-07-22 23:58:59Z ksm $
  *
  */
@@ -50,7 +52,8 @@ public class MultifilingUnfilingTest extends BaseQueryTest
       FolderData folder2 = createFolder(testRoot, "multifilingFolderTest2", "cmis:folder");
       FolderData folder3 = createFolder(testRoot, "multifilingFolderTest3", "cmis:folder");
 
-      DocumentData doc1 = createDocument(folder1, "node1", NASA_DOCUMENT, "helloworld".getBytes(), "text/plain");
+      DocumentData doc1 =
+         createDocument(folder1, "node1", NASA_DOCUMENT, "helloworld".getBytes(), new MimeType("plain", "text"));
       //check singe parent.
       checkResult("SELECT * FROM " + NASA_DOCUMENT + " WHERE IN_TREE('" + folder1.getObjectId() + "')",
          new ObjectData[]{doc1});
@@ -77,7 +80,8 @@ public class MultifilingUnfilingTest extends BaseQueryTest
       FolderData folder2 = createFolder(testRoot, "multifilingFolderTest2", "cmis:folder");
       FolderData folder3 = createFolder(testRoot, "multifilingFolderTest3", "cmis:folder");
 
-      DocumentData doc1 = createDocument(folder1, "node1", NASA_DOCUMENT, "helloworld".getBytes(), "text/plain");
+      DocumentData doc1 =
+         createDocument(folder1, "node1", NASA_DOCUMENT, "helloworld".getBytes(), new MimeType("plain", "text"));
       folder2.addObject(doc1);
       folder3.addObject(doc1);
       assertEquals(3, doc1.getParents().size());
@@ -97,7 +101,8 @@ public class MultifilingUnfilingTest extends BaseQueryTest
       FolderData folder2 = createFolder(testRoot, "multifilingFolderTest2", "cmis:folder");
       FolderData folder3 = createFolder(testRoot, "multifilingFolderTest3", "cmis:folder");
 
-      DocumentData doc1 = createDocument(folder1, "node1", NASA_DOCUMENT, "helloworld".getBytes(), "text/plain");
+      DocumentData doc1 =
+         createDocument(folder1, "node1", NASA_DOCUMENT, "helloworld".getBytes(), new MimeType("plain", "text"));
       folder2.addObject(doc1);
       folder3.addObject(doc1);
       assertEquals(3, doc1.getParents().size());

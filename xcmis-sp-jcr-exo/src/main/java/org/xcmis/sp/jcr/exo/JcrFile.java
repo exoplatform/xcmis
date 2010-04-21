@@ -19,7 +19,9 @@
 
 package org.xcmis.sp.jcr.exo;
 
+
 import org.xcmis.sp.jcr.exo.index.IndexListener;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
@@ -30,6 +32,7 @@ import org.xcmis.spi.StorageException;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.utils.MimeType;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -37,6 +40,7 @@ import java.util.Calendar;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
+import javax.jcr.Value;
 
 /**
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
@@ -138,12 +142,23 @@ class JcrFile extends DocumentDataImpl
       // jcr:content
       Node contentNode = data.getNode(JcrCMIS.JCR_CONTENT);
 
-      contentNode.setProperty(JcrCMIS.JCR_MIMETYPE, content == null ? "" : content.getMediaType());
-
-      contentNode.setProperty(JcrCMIS.JCR_DATA, content == null ? new ByteArrayInputStream(new byte[0]) : content
-         .getStream());
-
-      contentNode.setProperty(JcrCMIS.JCR_LAST_MODIFIED, Calendar.getInstance());
+      if (content != null)
+      {
+         MimeType mediaType = content.getMediaType();
+         contentNode.setProperty(JcrCMIS.JCR_MIMETYPE, mediaType.getBaseType());
+         if (mediaType.getParameter(CmisConstants.CHARSET) != null)
+         {
+            contentNode.setProperty(JcrCMIS.JCR_ENCODING, mediaType.getParameter(CmisConstants.CHARSET));
+         }
+         contentNode.setProperty(JcrCMIS.JCR_DATA, content.getStream()).getLength();
+         contentNode.setProperty(JcrCMIS.JCR_LAST_MODIFIED, Calendar.getInstance());
+      }
+      else
+      {
+         contentNode.setProperty(JcrCMIS.JCR_MIMETYPE, "");
+         contentNode.setProperty(JcrCMIS.JCR_ENCODING, (Value)null);
+         contentNode.setProperty(JcrCMIS.JCR_DATA, new ByteArrayInputStream(new byte[0]));
+      }
 
    }
 
@@ -163,21 +178,21 @@ class JcrFile extends DocumentDataImpl
       }
    }
 
-   /**
-    * {@inheritDoc}
-    */
-   @Override
-   protected Long getContentStreamLength()
-   {
-      try
-      {
-         return node.getProperty("jcr:content/jcr:data").getLength();
-      }
-      catch (RepositoryException re)
-      {
-         throw new CmisRuntimeException("Unable get content stream length. " + re.getMessage(), re);
-      }
-   }
+   //   /**
+   //    * {@inheritDoc}
+   //    */
+   //   @Override
+   //   protected Long getContentStreamLength()
+   //   {
+   //      try
+   //      {
+   //         return node.getProperty("jcr:content/jcr:data").getLength();
+   //      }
+   //      catch (RepositoryException re)
+   //      {
+   //         throw new CmisRuntimeException("Unable get content stream length. " + re.getMessage(), re);
+   //      }
+   //   }
 
    /**
     * {@inheritDoc}

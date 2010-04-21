@@ -33,6 +33,7 @@ import org.xcmis.spi.Storage;
 import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
+import org.xcmis.spi.utils.MimeType;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -47,8 +48,6 @@ import java.util.Set;
 public abstract class BaseQueryTest extends BaseTest
 {
    private static final Log LOG = ExoLogger.getLogger(BaseQueryTest.class.getName());
-
-   protected final static String CONTENT_TYPE = "text/plain";
 
    protected final static String NASA_DOCUMENT = "cmis:nasa-mission";
 
@@ -77,7 +76,7 @@ public abstract class BaseQueryTest extends BaseTest
       rootFolder = (FolderData)storage.getObject(JcrCMIS.ROOT_FOLDER_ID);
    }
 
-   protected DocumentData createDocument(FolderData folder, String name, String typeId, byte[] content, String mimeType)
+   protected DocumentData createDocument(FolderData folder, String name, String typeId, byte[] content, MimeType mimeType)
       throws Exception
    {
 

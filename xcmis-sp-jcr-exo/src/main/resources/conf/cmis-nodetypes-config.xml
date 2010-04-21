@@ -142,6 +142,9 @@
 			<propertyDefinition name="xcmis:renditionMimeType" requiredType="String" autoCreated="false" mandatory="true" onParentVersion="COPY" protected="false" multiple="false">
 				<valueConstraints />
 			</propertyDefinition>
+         <propertyDefinition name="xcmis:renditionEncoding" requiredType="String" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
+            <valueConstraints />
+         </propertyDefinition>
 			<propertyDefinition name="xcmis:renditionKind" requiredType="String" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
 				<valueConstraints />
 			</propertyDefinition>
