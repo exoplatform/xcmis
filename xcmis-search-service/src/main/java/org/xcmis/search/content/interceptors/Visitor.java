@@ -25,6 +25,7 @@ import org.xcmis.search.content.command.query.ExecuteSelectorCommand;
 import org.xcmis.search.content.command.query.ProcessQueryCommand;
 import org.xcmis.search.content.command.read.GetChildEntriesCommand;
 import org.xcmis.search.content.command.read.GetContentEntryCommand;
+import org.xcmis.search.content.command.read.GetUnfiledEntriesCommand;
 import org.xcmis.search.content.command.tx.CommitCommand;
 import org.xcmis.search.content.command.tx.RollBackCommand;
 
@@ -100,4 +101,11 @@ public interface Visitor
     * @throws Throwable
     */
    Object visitProcessQueryCommand(InvocationContext ctx, ProcessQueryCommand command) throws Throwable;
+
+   /**
+    * @param ctx
+    * @param getUnfilledEntriesCommand
+    * @return
+    */
+   Object visitGetUnfiledEntriesCommand(InvocationContext ctx, GetUnfiledEntriesCommand command) throws Throwable;
 }

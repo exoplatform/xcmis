@@ -21,6 +21,7 @@ package org.xcmis.search.content.interceptors;
 import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.content.command.read.GetChildEntriesCommand;
 import org.xcmis.search.content.command.read.GetContentEntryCommand;
+import org.xcmis.search.content.command.read.GetUnfiledEntriesCommand;
 
 /**
  * Abstract class that interpret only read-only operation's.
@@ -40,6 +41,13 @@ public abstract class ContentReaderInterceptor extends CommandInterceptor
     */
    @Override
    public abstract Object visitGetContentEntryCommand(InvocationContext ctx, GetContentEntryCommand command)
+      throws Throwable;
+
+   /**
+    * @see org.xcmis.search.content.interceptors.AbstractVisitor#visitGetUnfilledEntriesCommand(org.xcmis.search.content.command.InvocationContext, org.xcmis.search.content.command.read.GetUnfilledEntriesCommand)
+    */
+   @Override
+   public abstract Object visitGetUnfiledEntriesCommand(InvocationContext ctx, GetUnfiledEntriesCommand command)
       throws Throwable;
 
 }

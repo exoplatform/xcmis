@@ -25,6 +25,7 @@ import org.xcmis.search.content.command.query.ExecuteSelectorCommand;
 import org.xcmis.search.content.command.query.ProcessQueryCommand;
 import org.xcmis.search.content.command.read.GetChildEntriesCommand;
 import org.xcmis.search.content.command.read.GetContentEntryCommand;
+import org.xcmis.search.content.command.read.GetUnfiledEntriesCommand;
 import org.xcmis.search.content.command.tx.CommitCommand;
 import org.xcmis.search.content.command.tx.RollBackCommand;
 
@@ -64,6 +65,15 @@ public class AbstractVisitor implements Visitor
     * @see org.xcmis.search.content.interceptors.Visitor#visitGetContentEntryCommand(org.xcmis.search.content.command.InvocationContext, org.xcmis.search.content.command.read.GetContentEntryCommand)
     */
    public Object visitGetContentEntryCommand(InvocationContext ctx, GetContentEntryCommand command) throws Throwable
+   {
+      return handleDefault(ctx, command);
+   }
+
+   /**
+    * @see org.xcmis.search.content.interceptors.Visitor#visitGetUnfilledEntriesCommand(org.xcmis.search.content.command.InvocationContext, org.xcmis.search.content.command.read.GetUnfilledEntriesCommand)
+    */
+   public Object visitGetUnfiledEntriesCommand(InvocationContext ctx, GetUnfiledEntriesCommand command)
+      throws Throwable
    {
       return handleDefault(ctx, command);
    }
