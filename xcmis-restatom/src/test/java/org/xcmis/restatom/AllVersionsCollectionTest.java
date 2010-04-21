@@ -25,6 +25,7 @@ import org.w3c.dom.NodeList;
 import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.model.CmisObject;
+import org.xcmis.spi.utils.MimeType;
 
 import java.io.ByteArrayInputStream;
 
@@ -32,7 +33,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id: AllVersionsCollectionTest.java 2 2010-02-04 17:21:49Z andrew00x $
+ * @version $Id: AllVersionsCollectionTest.java 2 2010-02-04 17:21:49Z andrew00x
+ *          $
  */
 public class AllVersionsCollectionTest extends BaseTest
 {
@@ -87,7 +89,8 @@ public class AllVersionsCollectionTest extends BaseTest
       CmisObject doc = getCmisObject(docId);
       String versionSeriesId = doc.getObjectInfo().getVersionSeriesId();
 
-      ContentStream data = new BaseContentStream("test".getBytes("UTF-8"), "test", "text/plain");
+      ContentStream data =
+         new BaseContentStream("test".getBytes("UTF-8"), "test", MimeType.fromString("text/plain;charset=UTF-8"));
       conn.checkin(docIdPWC, true, null, data, "checkin comment", null, null, null);
 
       // One source document and new version in version series.

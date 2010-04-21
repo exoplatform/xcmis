@@ -75,12 +75,13 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.activation.MimeType;
-import javax.activation.MimeTypeParseException;
+import javax.activation.MimeTypeParameterList;
 import javax.ws.rs.core.HttpHeaders;
 
 /**
@@ -102,6 +103,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Instantiates a new cmis object collection.
+    *
     * @param storageProvider TODO
     */
    public CmisObjectCollection(/*StorageProvider storageProvider*/)
@@ -483,7 +485,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
                      return new EmptyResponseContext(200);
          */
          ResponseContext response = new MediaResponseContext(content.getStream(), 200);
-         response.setContentType(content.getMediaType());
+         response.setContentType(content.getMediaType().toString());
          response.setContentLength(content.length());
          response.setHeader(AtomCMIS.CONTENT_DISPOSITION_HEADER, //
             "attachment; filename=\"" + content.getFileName() + "\"");
@@ -679,7 +681,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       try
       {
          conn = getConnection(request);
-         ContentStream content = new BaseContentStream(inputStream, null, contentType.getBaseType());
+         ContentStream content = new BaseContentStream(inputStream, null, convertMimeType(contentType));
          // TODO : is correct ?
          ChangeTokenHolder changeTokenHolder = new ChangeTokenHolder();
          changeTokenHolder.setValue(request.getHeader(HttpHeaders.IF_MATCH));
@@ -734,17 +736,14 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       try
       {
          conn = getConnection(request);
-         ContentStream content = new BaseContentStream(request.getInputStream(), //
-            null, //
-            request.getContentType() == null ? "application/octet-stream" : request.getContentType().getBaseType());
+
+         ContentStream content =
+            new BaseContentStream(request.getInputStream(), null, convertMimeType(request.getContentType()));
 
          // TODO : is correct ?
          ChangeTokenHolder changeTokenHolder = new ChangeTokenHolder();
          changeTokenHolder.setValue(request.getHeader(HttpHeaders.IF_MATCH));
-         String overwriteFlagParameter = request.getParameter(AtomCMIS.PARAM_OVERWRITE_FLAG);
-         boolean overwriteFlag =
-            overwriteFlagParameter == null || overwriteFlagParameter.length() == 0 ? true : Boolean
-               .parseBoolean(overwriteFlagParameter);
+         boolean overwriteFlag = getBooleanParameter(request, AtomCMIS.PARAM_OVERWRITE_FLAG, true);
          String updatedId = conn.setContentStream(getId(request), content, changeTokenHolder, overwriteFlag);
          CmisObject updated = conn.getProperties(updatedId, true, CmisConstants.CHANGE_TOKEN);
          ResponseContext response = new EmptyResponseContext(201);
@@ -1026,6 +1025,22 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       return self;
    }
 
+   protected org.xcmis.spi.utils.MimeType convertMimeType(MimeType aMimeType)
+   {
+      if (aMimeType == null)
+      {
+         return new org.xcmis.spi.utils.MimeType();
+      }
+      MimeTypeParameterList aParameters = aMimeType.getParameters();
+      Map<String, String> paremeters = new HashMap<String, String>();
+      for (Enumeration<String> names = aParameters.getNames(); names.hasMoreElements();)
+      {
+         String name = names.nextElement();
+         paremeters.put(name, aParameters.get(name));
+      }
+      return new org.xcmis.spi.utils.MimeType(aMimeType.getPrimaryType(), aMimeType.getSubType(), paremeters);
+   }
+
    /**
     * {@inheritDoc}
     */
@@ -1171,7 +1186,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
     * @param entry source entry
     * @param request request context
     * @return content stream as <code>ContentStream</code> or null if there is
-    *            no 'content' in entry
+    *         no 'content' in entry
     * @throws IOException if any i/o error occurs
     * @throws ResponseContextException other errors
     */
@@ -1189,7 +1204,8 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          {
             data = Base64.decodeBase64(base64.getBytes());
          }
-         contentStream = new BaseContentStream(data, null, content.getMediatype());
+         contentStream =
+            new BaseContentStream(data, null, org.xcmis.spi.utils.MimeType.fromString(content.getMediatype()));
       }
       else
       {
@@ -1223,13 +1239,9 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
                      int status = response.getStatusCode();
                      if (200 == status)
                      {
-                        String mediaType = null;
-                        String ct = response.getHeader("Content-Type");
-                        if (ct != null)
-                        {
-                           mediaType = new MimeType(ct).getBaseType();
-                        }
-                        contentStream = new BaseContentStream(response.getInputStream(), null, mediaType);
+                        contentStream =
+                           new BaseContentStream(response.getInputStream(), null, org.xcmis.spi.utils.MimeType
+                              .fromString(response.getHeader("Content-Type")));
                      }
                      else
                      {
@@ -1242,36 +1254,32 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
                   {
                      throw new ResponseContextException(createErrorResponse(ce, 500));
                   }
-                  catch (MimeTypeParseException mte)
-                  {
-                     throw new ResponseContextException(createErrorResponse(mte, 500));
-                  }
                }
             }
             else
             {
                Type contentType = content.getContentType();
-               String mediaType;
+               org.xcmis.spi.utils.MimeType mediaType;
                if (contentType == Type.XML || contentType == Type.XHTML || contentType == Type.HTML
                   || contentType == Type.TEXT)
                {
                   switch (contentType)
                   {
                      case XHTML :
-                        mediaType = "application/xhtml+xml";
+                        mediaType = new org.xcmis.spi.utils.MimeType("application", "xhtml+xml");
                         break;
                      case HTML :
-                        mediaType = "text/html";
+                        mediaType = new org.xcmis.spi.utils.MimeType("text", "html");
                         break;
                      case TEXT :
-                        mediaType = "text/plain";
+                        mediaType = new org.xcmis.spi.utils.MimeType("text", "plain");
                         break;
                      case XML :
-                        mediaType = content.getMimeType().getBaseType();
+                        mediaType = convertMimeType(content.getMimeType());
                         break;
                      default :
                         // Must never happen.
-                        mediaType = null;
+                        mediaType = new org.xcmis.spi.utils.MimeType();
                   }
 
                   byte[] data;
@@ -1291,9 +1299,9 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
                }
                else
                {
-                  //                  mediaType = content.getMimeType().toString();
-                  mediaType = content.getMimeType().getBaseType();
-                  contentStream = new BaseContentStream(content.getDataHandler().getInputStream(), null, mediaType);
+                  contentStream =
+                     new BaseContentStream(content.getDataHandler().getInputStream(), null, convertMimeType(content
+                        .getMimeType()));
                }
             }
          }
@@ -1321,14 +1329,14 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    }
 
    /**
-    * Get link to AtomPub document that describes folder's descendants.
-    * If repository does not support capability 'getDescendants' this method will
+    * Get link to AtomPub document that describes folder's descendants. If
+    * repository does not support capability 'getDescendants' this method will
     * return null.
     *
     * @param id folder id
     * @param request request context
-    * @return link to AtomPub document that describes folder's descendants or null
-    *            if capability 'getDescendants' is not supported.
+    * @return link to AtomPub document that describes folder's descendants or
+    *         null if capability 'getDescendants' is not supported.
     */
    protected String getDescendantsLink(String id, RequestContext request)
    {
@@ -1358,14 +1366,13 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    }
 
    /**
-    * Get link to AtomPub document that describes folder's tree.
-    * If repository does not support capability 'getFolderTree' this method will
-    * return null.
+    * Get link to AtomPub document that describes folder's tree. If repository
+    * does not support capability 'getFolderTree' this method will return null.
     *
     * @param id folder id
     * @param request request context
-    * @return link to AtomPub document that describes folder's tree or null
-    *            if capability 'getFolderTree' is not supported.
+    * @return link to AtomPub document that describes folder's tree or null if
+    *         capability 'getFolderTree' is not supported.
     */
    protected String getFolderTreeLink(String id, RequestContext request)
    {
@@ -1418,7 +1425,8 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
     *
     * @param id object id
     * @param request request context
-    * @return link to AtomPub Document that describes object with <code>id</code>
+    * @return link to AtomPub Document that describes object with
+    *         <code>id</code>
     */
    protected String getObjectLink(String id, RequestContext request)
    {
@@ -1527,10 +1535,9 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    }
 
    /**
-    * From specification (1.0-cd06), section 3.5.2 Entries.
-    * When POSTing an Atom Document, the Atom elements MUST take precedence over
-    * the corresponding writable CMIS property.
-    * For example, atom:title will overwrite cmis:name.
+    * From specification (1.0-cd06), section 3.5.2 Entries. When POSTing an Atom
+    * Document, the Atom elements MUST take precedence over the corresponding
+    * writable CMIS property. For example, atom:title will overwrite cmis:name.
     *
     * @param object CMIS object
     * @param entry entry that delivered CMIS object.
