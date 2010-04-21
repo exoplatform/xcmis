@@ -224,7 +224,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
       {
          rendition = node.getNode(streamId);
          javax.jcr.Property renditionContent = rendition.getProperty(JcrCMIS.CMIS_RENDITION_STREAM);
-         MimeType mimeType = MimeType.fromString(rendition.getProperty(JcrCMIS.JCR_MIMETYPE).getString());
+         MimeType mimeType = MimeType.fromString(rendition.getProperty(JcrCMIS.CMIS_RENDITION_MIME_TYPE).getString());
          if (rendition.hasProperty(JcrCMIS.CMIS_RENDITION_ENCODING))
          {
             mimeType.getParameters().put(CmisConstants.CHARSET,
