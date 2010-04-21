@@ -19,7 +19,7 @@
 
 package org.xcmis.spi;
 
-import org.xcmis.spi.BaseContentStream;
+import org.xcmis.spi.utils.MimeType;
 
 import java.io.InputStream;
 
@@ -45,7 +45,7 @@ public class RenditionContentStream extends BaseContentStream
     * @param mediaType media type of content
     * @param kind rendition's kind
     */
-   public RenditionContentStream(byte[] bytes, String fileName, String mediaType, String kind)
+   public RenditionContentStream(byte[] bytes, String fileName, MimeType mediaType, String kind)
    {
       super(bytes, fileName, mediaType);
       this.kind = kind;
@@ -58,7 +58,7 @@ public class RenditionContentStream extends BaseContentStream
     * @param mediaType media type of content
     * @param kind rendition's kind
     */
-   public RenditionContentStream(InputStream in, long length, String fileName, String mediaType, String kind)
+   public RenditionContentStream(InputStream in, long length, String fileName, MimeType mediaType, String kind)
    {
       super(in, length, fileName, mediaType);
       this.kind = kind;
@@ -70,7 +70,7 @@ public class RenditionContentStream extends BaseContentStream
     * @param mediaType media type of content
     * @param kind rendition's kind
     */
-   public RenditionContentStream(InputStream in, String fileName, String mediaType, String kind)
+   public RenditionContentStream(InputStream in, String fileName, MimeType mediaType, String kind)
    {
       super(in, fileName, mediaType);
       this.kind = kind;
@@ -79,9 +79,9 @@ public class RenditionContentStream extends BaseContentStream
    /**
     * Get rendition height. It should provider height of thumbnail if rendition
     * type is 'cmis:thumbnail'.
-    *  
-    * @return rendition height or -1 if not able to determine height or rendition
-    *         kind is not 'cmis:thumbnail
+    *
+    * @return rendition height or -1 if not able to determine height or
+    *         rendition kind is not 'cmis:thumbnail
     */
    public int getHeight()
    {
@@ -90,7 +90,7 @@ public class RenditionContentStream extends BaseContentStream
 
    /**
     * Get rendition kind. At the moment just one expected kind 'cmis:thumbnail'.
-    * 
+    *
     * @return rendition kind
     */
    public String getKind()
@@ -101,7 +101,7 @@ public class RenditionContentStream extends BaseContentStream
    /**
     * Get rendition width. It should provider width of thumbnail if rendition
     * type is 'cmis:thumbnail'.
-    *  
+    *
     * @return rendition width or -1 if not able to determine width or rendition
     *         kind is not 'cmis:thumbnail
     */
@@ -112,7 +112,7 @@ public class RenditionContentStream extends BaseContentStream
 
    /**
     * Set height or rendition.
-    * 
+    *
     * @param height rendition height
     */
    public void setHeight(int height)
@@ -122,7 +122,7 @@ public class RenditionContentStream extends BaseContentStream
 
    /**
     * Set width or rendition.
-    * 
+    *
     * @param width rendition width
     */
    public void setWidth(int width)

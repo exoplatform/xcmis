@@ -19,6 +19,8 @@
 
 package org.xcmis.spi;
 
+import org.xcmis.spi.utils.MimeType;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,7 +38,7 @@ public class BaseContentStream implements ContentStream
    private final String fileName;
 
    /** Media type of stream. */
-   private final String mediaType;
+   private final MimeType mediaType;
 
    /** Content length. */
    private long length;
@@ -46,7 +48,7 @@ public class BaseContentStream implements ContentStream
     * @param fileName name of content file
     * @param mediaType media type of content
     */
-   public BaseContentStream(byte[] bytes, String fileName, String mediaType)
+   public BaseContentStream(byte[] bytes, String fileName, MimeType mediaType)
    {
       this(new ByteArrayInputStream(bytes), bytes.length, fileName, mediaType);
    }
@@ -57,7 +59,7 @@ public class BaseContentStream implements ContentStream
     * @param length content length. Must be -1 if content length is unknown.
     * @param mediaType media type of content
     */
-   public BaseContentStream(InputStream in, long length, String fileName, String mediaType)
+   public BaseContentStream(InputStream in, long length, String fileName, MimeType mediaType)
    {
       this.in = in;
       this.fileName = fileName;
@@ -70,7 +72,7 @@ public class BaseContentStream implements ContentStream
     * @param fileName name of content file
     * @param mediaType media type of content
     */
-   public BaseContentStream(InputStream in, String fileName, String mediaType)
+   public BaseContentStream(InputStream in, String fileName, MimeType mediaType)
    {
       this(in, -1, fileName, mediaType);
    }
@@ -86,7 +88,7 @@ public class BaseContentStream implements ContentStream
    /**
     * {@inheritDoc}
     */
-   public String getMediaType()
+   public MimeType getMediaType()
    {
       return mediaType;
    }

@@ -121,6 +121,8 @@ public interface CmisConstants
 
    String ALLOWED_CHILD_OBJECT_TYPE_IDS = "cmis:allowedChildObjectTypeIds";
 
+   String CHARSET = "charset";
+
    Integer SKIP_COUNT = Integer.valueOf(0);
 
    Integer DEPTH = Integer.valueOf(1);
