@@ -827,13 +827,9 @@ public class StorageImpl implements Storage
    /**
     * @see org.xcmis.spi.Storage#getUnfiledObjects()
     */
-   public ItemsIterator<ObjectData> getUnfiledObjects() throws StorageException
+   public Iterator<String> getUnfiledObjectsId() throws StorageException
    {
-      if (unfiled.size() > 0)
-      {
-         return new LazyDocumentIterator(this, unfiled.iterator());
-      }
-      return CmisUtils.emptyItemsIterator();
+      return unfiled.iterator();
    }
 
    public String addType(TypeDefinition type) throws StorageException, CmisRuntimeException

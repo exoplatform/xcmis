@@ -22,6 +22,7 @@ import org.xcmis.search.content.ContentEntry;
 import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.content.command.read.GetChildEntriesCommand;
 import org.xcmis.search.content.command.read.GetContentEntryCommand;
+import org.xcmis.search.content.command.read.GetUnfiledEntriesCommand;
 import org.xcmis.search.content.interceptors.ContentReaderInterceptor;
 import org.xcmis.sp.inmemory.query.IndexListener.ContentEntryAdapter;
 import org.xcmis.spi.FolderData;
@@ -83,6 +84,16 @@ public class CmisContentReader extends ContentReaderInterceptor
 
       ObjectData entry = storage.getObject(command.getEntryUuid());
       return contentEntryAdapter.createEntry(entry);
+   }
+
+   /**
+    * @see org.xcmis.search.content.interceptors.ContentReaderInterceptor#visitGetUnfilledEntriesCommand(org.xcmis.search.content.command.InvocationContext, org.xcmis.search.content.command.read.GetUnfilledEntriesCommand)
+    */
+   @Override
+   public Object visitGetUnfiledEntriesCommand(InvocationContext ctx, GetUnfiledEntriesCommand command)
+      throws Throwable
+   {
+      return null;
    }
 
 }
