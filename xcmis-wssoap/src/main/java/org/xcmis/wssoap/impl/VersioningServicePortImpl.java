@@ -34,6 +34,7 @@ import org.xcmis.spi.CmisStorageInitializer;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.IncludeRelationships;
+import org.xcmis.spi.utils.MimeType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -130,8 +131,8 @@ public class VersioningServicePortImpl implements VersioningServicePort
          if (contentStream != null)
          {
             cs =
-               new BaseContentStream(contentStream.getStream().getInputStream(), contentStream.getFilename(),
-                  contentStream.getMimeType());
+               new BaseContentStream(contentStream.getStream().getInputStream(), contentStream.getFilename(), MimeType
+                  .fromString(contentStream.getMimeType()));
          }
          String res = conn.checkin(documentId.value, //
             major == null ? true : major, // major as default

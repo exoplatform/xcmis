@@ -39,6 +39,7 @@ import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.model.IncludeRelationships;
+import org.xcmis.spi.utils.MimeType;
 import org.xcmis.wssoap.impl.ObjectServicePortImpl;
 
 import javax.activation.DataHandler;
@@ -238,7 +239,8 @@ public class ObjectServiceTest extends BaseTest
    {
       String docId = createDocument(testFolderId, "doc1");
       String content = "<?xml version='1.0' encoding='UTF-8'?>";
-      ContentStream stream = new BaseContentStream(content.getBytes(), "test", "text/xml");
+      ContentStream stream =
+         new BaseContentStream(content.getBytes(), "test", MimeType.fromString("text/xml;charset=UTF-8"));
       String updated = conn.setContentStream(//
          docId, //
          stream, //

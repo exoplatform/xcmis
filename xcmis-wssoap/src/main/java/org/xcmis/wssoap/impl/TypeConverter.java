@@ -460,10 +460,10 @@ public class TypeConverter
       CmisContentStreamType result = new CmisContentStreamType();
       result.setFilename(source.getFileName());
       result.setLength(BigInteger.valueOf(source.length()));
-      result.setMimeType(source.getMediaType());
+      result.setMimeType(source.getMediaType().toString());
       try
       {
-         result.setStream(new DataHandler(new ByteArrayDataSource(source.getStream(), source.getMediaType())));
+         result.setStream(new DataHandler(new ByteArrayDataSource(source.getStream(), source.getMediaType().toString())));
       }
       catch (IOException e)
       {

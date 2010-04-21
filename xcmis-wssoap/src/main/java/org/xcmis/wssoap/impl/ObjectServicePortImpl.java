@@ -43,6 +43,7 @@ import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.UnfileObject;
 import org.xcmis.spi.model.VersioningState;
+import org.xcmis.spi.utils.MimeType;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -107,8 +108,8 @@ public class ObjectServicePortImpl implements ObjectServicePort
          if (contentStream != null)
          {
             cs =
-               new BaseContentStream(contentStream.getStream().getInputStream(), contentStream.getFilename(),
-                  contentStream.getMimeType());
+               new BaseContentStream(contentStream.getStream().getInputStream(), contentStream.getFilename(), MimeType
+                  .fromString(contentStream.getMimeType()));
          }
          objectId.value =
             conn.createDocument(folderId, //
@@ -477,12 +478,13 @@ public class ObjectServicePortImpl implements ObjectServicePort
             length != null ? length.longValue() : -1);
 
          stream.setFilename(cs.getFileName());
-         stream.setMimeType(cs.getMediaType());
+         String mediaType = cs.getMediaType().toString();
+         stream.setMimeType(mediaType);
          if (cs.length() != -1)
          {
             stream.setLength(BigInteger.valueOf(cs.length()));
          }
-         stream.setStream(new DataHandler(cs.getStream(), cs.getMediaType()));
+         stream.setStream(new DataHandler(cs.getStream(), mediaType));
          return stream;
       }
       catch (Exception e)
@@ -715,9 +717,9 @@ public class ObjectServicePortImpl implements ObjectServicePort
          ContentStream cs = null;
          if (contentStream != null)
          {
-            cs = new BaseContentStream(contentStream.getStream().getInputStream(), //
-               contentStream.getFilename(), //
-               contentStream.getMimeType());
+            cs =
+               new BaseContentStream(contentStream.getStream().getInputStream(), contentStream.getFilename(), MimeType
+                  .fromString(contentStream.getMimeType()));
          }
 
          ChangeTokenHolder hold = new ChangeTokenHolder();
