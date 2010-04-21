@@ -152,6 +152,14 @@ class FolderChildrenIterator implements ItemsIterator<ObjectData>
             {
                node = node.getProperty("jcr:content").getNode();
             }
+            else if (node.isNodeType("xcmis:unfiledObject"))
+            {
+               NodeIterator child = node.getNodes();
+               if (child.hasNext())
+               {
+                  node = child.nextNode();
+               }
+            }
 
             TypeDefinition type = JcrTypeHelper.getTypeDefinition(node.getPrimaryNodeType(), true);
 
@@ -177,7 +185,6 @@ class FolderChildrenIterator implements ItemsIterator<ObjectData>
                   next = new FolderDataImpl(type, node, indexListener);
                }
             }
-
          }
          catch (NotSupportedNodeTypeException iae)
          {
@@ -194,5 +201,4 @@ class FolderChildrenIterator implements ItemsIterator<ObjectData>
          }
       }
    }
-
 }

@@ -1167,6 +1167,22 @@ public class StorageImpl implements Storage
    }
 
    /**
+    * @see org.xcmis.spi.Storage#getUnfiledObjects()
+    */
+   public ItemsIterator<ObjectData> getUnfiledObjects() throws StorageException
+   {
+      try
+      {
+         Node unfiledStore = (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_UNFILED);
+         return new FolderChildrenIterator(unfiledStore.getNodes(), indexListener);
+      }
+      catch (RepositoryException e)
+      {
+         throw new StorageException("Unable unfiled objects. " + e.getMessage(), e);
+      }
+   }
+
+   /**
     * Get the level of hierarchy.
     *
     * @param discovered the node type
@@ -1324,7 +1340,5 @@ public class StorageImpl implements Storage
       {
          return moveMapping;
       }
-
    }
-
 }

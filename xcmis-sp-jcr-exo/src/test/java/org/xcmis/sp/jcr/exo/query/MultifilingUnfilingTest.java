@@ -91,6 +91,13 @@ public class MultifilingUnfilingTest extends BaseQueryTest
 
       checkResult("SELECT * FROM " + NASA_DOCUMENT + " WHERE IN_TREE('" + folder2.getObjectId() + "')",
          new ObjectData[]{});
+      checkResult("SELECT * FROM " + NASA_DOCUMENT + " WHERE IN_TREE('" + folder3.getObjectId() + "')",
+         new ObjectData[]{doc1});
+      checkResult("SELECT * FROM " + NASA_DOCUMENT + " WHERE IN_TREE('" + folder1.getObjectId() + "')",
+         new ObjectData[]{doc1});
+      checkResult("SELECT * FROM " + NASA_DOCUMENT + " WHERE IN_TREE('" + testRoot.getObjectId() + "')",
+         new ObjectData[]{doc1});
+
       storage.deleteTree(testRoot, true, null, true);
    }
 
@@ -118,6 +125,7 @@ public class MultifilingUnfilingTest extends BaseQueryTest
 
       checkResult("SELECT * FROM " + NASA_DOCUMENT + " WHERE IN_TREE('" + testRoot.getObjectId() + "')",
          new ObjectData[]{});
+
       storage.deleteObject(doc1, true);
       storage.deleteTree(testRoot, true, null, true);
    }
