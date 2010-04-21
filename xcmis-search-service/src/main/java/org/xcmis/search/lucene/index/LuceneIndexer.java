@@ -133,33 +133,36 @@ public class LuceneIndexer implements ContentIndexer<Document>
    {
       try
       {
-         final DocumentReader dreader = documentReaderService.getDocumentReader(data.getMimeType());
-
-         if (dreader != null)
+         if (data.getMimeType() != null)
          {
-            final InputStream is = data.getValue();
-            String content = "";
+            final DocumentReader dreader = documentReaderService.getDocumentReader(data.getMimeType());
 
-            try
+            if (dreader != null)
             {
-               if (data.getEncoding() != null)
+               final InputStream is = data.getValue();
+               String content = "";
+
+               try
                {
-                  content = dreader.getContentAsText(is, data.getEncoding());
+                  if (data.getEncoding() != null)
+                  {
+                     content = dreader.getContentAsText(is, data.getEncoding());
+                  }
+                  else
+                  {
+                     content = dreader.getContentAsText(is);
+                  }
+                  final Field f =
+                     new Field(FieldNames.createFullTextFieldName(propName), content, Field.Store.NO,
+                        Field.Index.ANALYZED, Field.TermVector.NO);
+                  doc.add(f);
                }
-               else
+               finally
                {
-                  content = dreader.getContentAsText(is);
-               }
-               final Field f =
-                  new Field(FieldNames.createFullTextFieldName(propName), content, Field.Store.NO,
-                     Field.Index.ANALYZED, Field.TermVector.NO);
-               doc.add(f);
-            }
-            finally
-            {
-               if (is != null)
-               {
-                  is.close();
+                  if (is != null)
+                  {
+                     is.close();
+                  }
                }
             }
          }
