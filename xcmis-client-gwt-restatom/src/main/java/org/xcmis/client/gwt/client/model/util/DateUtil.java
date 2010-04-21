@@ -146,5 +146,10 @@ public class DateUtil
          return null;
       }
    }
+   
+   public static String getDate(Date date){
+      DateTimeFormat dateFormat = DateTimeFormat.getFormat(Z_FORMAT_FULL_PATTERN);
+      return dateFormat.format(date);
+   }
 
 }

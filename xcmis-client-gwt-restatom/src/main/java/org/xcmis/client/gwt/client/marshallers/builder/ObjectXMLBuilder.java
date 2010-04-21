@@ -34,8 +34,11 @@ import org.xcmis.client.gwt.client.model.actions.MoveObject;
 import org.xcmis.client.gwt.client.model.actions.RemovePolicy;
 import org.xcmis.client.gwt.client.model.actions.UpdateProperties;
 import org.xcmis.client.gwt.client.model.property.CmisProperties;
+import org.xcmis.client.gwt.client.model.property.DateTimeProperty;
 import org.xcmis.client.gwt.client.model.property.Property;
+import org.xcmis.client.gwt.client.model.util.DateUtil;
 
+import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.xml.client.Document;
@@ -449,11 +452,19 @@ public class ObjectXMLBuilder
    {
       for (Property<?> property : properties.getProperties().values())
       {
-         Element propertyElement =
-            createPropertyElement(doc, getPropertyNameByType(property.getType()), property.getId(), property
-               .getValues());
-         propertiesElement.appendChild(propertyElement);
-
+         if (property instanceof DateTimeProperty)
+         {
+            Element propertyElement =
+               createDateTimePropertyElement(doc, property.getId(), ((DateTimeProperty)property).getValues());
+            propertiesElement.appendChild(propertyElement);
+         }
+         else
+         {
+            Element propertyElement =
+               createPropertyElement(doc, getPropertyNameByType(property.getType()), property.getId(), property
+                  .getValues());
+            propertiesElement.appendChild(propertyElement);
+         }
       }
    }
 
@@ -475,6 +486,23 @@ public class ObjectXMLBuilder
          {
             Element valueElement = doc.createElement(CMIS.CMIS_VALUE);
             valueElement.appendChild(doc.createTextNode(String.valueOf(values.get(i))));
+            property.appendChild(valueElement);
+         }
+      }
+      return property;
+   }
+
+   private static Element createDateTimePropertyElement(Document doc, String name, List<Date> values)
+   {
+      Element property = doc.createElement(CMIS.CMIS_PROPERTY_DATE_TIME);
+      property.setAttribute(CMIS.PROPERTY_DEFINITION_ID, name);
+
+      if (values.size() > 0)
+      {
+         for (int i = 0; i < values.size(); i++)
+         {
+            Element valueElement = doc.createElement(CMIS.CMIS_VALUE);
+            valueElement.appendChild(doc.createTextNode(DateUtil.getDate(values.get(i))));
             property.appendChild(valueElement);
          }
       }
@@ -504,16 +532,9 @@ public class ObjectXMLBuilder
     */
    private static String getPropertyNameByType(EnumPropertyType propertyType)
    {
-      if (propertyType.equals(EnumPropertyType.DATETIME))
-      {
-         return CMIS.CMIS_PROPERTY_DATE_TIME;
-      }
-      else
-      {
-         String type = propertyType.value();
-         String firstLetter = type.substring(0, 1).toUpperCase();
-         String tail = type.substring(1, type.length());
-         return CMIS.CMIS_PROPERTY + firstLetter + tail;
-      }
+      String type = propertyType.value();
+      String firstLetter = type.substring(0, 1).toUpperCase();
+      String tail = type.substring(1, type.length());
+      return CMIS.CMIS_PROPERTY + firstLetter + tail;
    }
 }
