@@ -29,6 +29,7 @@ import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 
 import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
@@ -380,10 +381,10 @@ public interface Storage extends TypeManager
    Collection<DocumentData> getAllVersions(String versionSeriesId) throws ObjectNotFoundException;
 
    /**
-    * Collection of all unfilled documents.
+    * Iterator of all unfilled documents identifiers
     * 
-    * @return Collection of documents.
+    * @return Iterator of all unfilled documents identifiers.
     * @throws StorageException
     */
-   ItemsIterator<ObjectData> getUnfiledObjects() throws StorageException;
+   Iterator<String> getUnfiledObjectsId() throws StorageException;
 }
