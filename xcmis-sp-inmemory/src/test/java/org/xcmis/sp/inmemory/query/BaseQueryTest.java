@@ -36,6 +36,7 @@ import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.Updatability;
 import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.query.Result;
+import org.xcmis.spi.utils.MimeType;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -110,7 +111,7 @@ public abstract class BaseQueryTest extends BaseTest
          new HashMap<String, PropertyDefinition<?>>()));
    }
 
-   protected DocumentData createDocument(FolderData folder, String name, String typeId, byte[] content, String mimeType)
+   protected DocumentData createDocument(FolderData folder, String name, String typeId, byte[] content, MimeType mimeType)
       throws Exception
    {
 

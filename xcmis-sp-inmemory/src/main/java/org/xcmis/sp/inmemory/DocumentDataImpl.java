@@ -36,6 +36,7 @@ import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.RelationshipDirection;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.VersioningState;
+import org.xcmis.spi.utils.MimeType;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -249,7 +250,13 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
       byte[] bytes = storage.contents.get(getObjectId());
       if (bytes != null)
       {
-         return new BaseContentStream(bytes, getName(), getString(CmisConstants.CONTENT_STREAM_MIME_TYPE));
+         MimeType mimeType = MimeType.fromString(getString(CmisConstants.CONTENT_STREAM_MIME_TYPE));
+         String charset = getString(CmisConstants.CHARSET);
+         if (charset != null)
+         {
+            mimeType.getParameters().put(CmisConstants.CHARSET, charset);
+         }
+         return new BaseContentStream(bytes, getName(), mimeType);
       }
       return null;
    }
@@ -432,8 +439,8 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
          entry.setValue(CmisConstants.VERSION_SERIES_ID, new StringValue(vsId));
          entry.setValue(CmisConstants.IS_LATEST_VERSION, new BooleanValue(true));
          entry.setValue(CmisConstants.IS_MAJOR_VERSION, new BooleanValue(versioningState == VersioningState.MAJOR));
-         entry.setValue(CmisConstants.VERSION_LABEL, new StringValue(versioningState == VersioningState.CHECKEDOUT ? pwcLabel
-            : latestLabel));
+         entry.setValue(CmisConstants.VERSION_LABEL, new StringValue(versioningState == VersioningState.CHECKEDOUT
+            ? pwcLabel : latestLabel));
          entry.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(
             versioningState == VersioningState.CHECKEDOUT));
          if (versioningState == VersioningState.CHECKEDOUT)
@@ -497,14 +504,16 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
 
                content = bout.toByteArray();
 
-               String mediaType = contentStream.getMediaType();
-               if (mediaType == null)
-               {
-                  mediaType = "application/octet-stream";
-               }
+               MimeType mimeType = contentStream.getMediaType();
 
-               entry.setValue(CmisConstants.CONTENT_STREAM_MIME_TYPE, new StringValue(mediaType));
-               entry.setValue(CmisConstants.CONTENT_STREAM_LENGTH, new IntegerValue(BigInteger.valueOf(content.length)));
+               entry.setValue(CmisConstants.CONTENT_STREAM_MIME_TYPE, new StringValue(mimeType.getBaseType()));
+               String charset = mimeType.getParameter(CmisConstants.CHARSET);
+               if (charset != null)
+               {
+                  entry.setValue(CmisConstants.CHARSET, new StringValue(charset));
+               }
+               entry
+                  .setValue(CmisConstants.CONTENT_STREAM_LENGTH, new IntegerValue(BigInteger.valueOf(content.length)));
             }
             else
             {

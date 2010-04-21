@@ -30,10 +30,12 @@ import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.VersioningState;
+import org.xcmis.spi.utils.MimeType;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.util.Calendar;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -138,15 +140,19 @@ class DocumentCopy extends DocumentDataImpl
 
                content = bout.toByteArray();
 
-               String mediaType = contentStream.getMediaType();
-               if (mediaType == null)
+               MimeType mimeType = contentStream.getMediaType();
+
+               entry.setValue(CmisConstants.CONTENT_STREAM_MIME_TYPE, new StringValue(mimeType.getBaseType()));
+               String charset = mimeType.getParameter(CmisConstants.CHARSET);
+               if (charset != null)
                {
-                  mediaType = "application/octet-stream";
+                  entry.setValue(CmisConstants.CHARSET, new StringValue(charset));
                }
-               entry.setValue(CmisConstants.CONTENT_STREAM_MIME_TYPE, new StringValue(mediaType));
             }
             else
             {
+               entry.setValue(CmisConstants.CONTENT_STREAM_MIME_TYPE, new StringValue(""));
+               entry.setValue(CmisConstants.CONTENT_STREAM_LENGTH, new IntegerValue(BigInteger.valueOf(0)));
                content = EMPTY_CONTENT;
             }
          }
