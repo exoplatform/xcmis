@@ -98,7 +98,8 @@ public interface Storage extends TypeManager
     *         </ul>
     * @see VersioningState
     */
-   DocumentData createDocument(FolderData parent, String typeId, VersioningState versioningState) throws ConstraintException;
+   DocumentData createDocument(FolderData parent, String typeId, VersioningState versioningState)
+      throws ConstraintException;
 
    /**
     * Create new document as copy of the given <code>source</code> document and
@@ -378,4 +379,11 @@ public interface Storage extends TypeManager
     */
    Collection<DocumentData> getAllVersions(String versionSeriesId) throws ObjectNotFoundException;
 
+   /**
+    * Collection of all unfilled documents.
+    * 
+    * @return Collection of documents.
+    * @throws StorageException
+    */
+   ItemsIterator<ObjectData> getUnfiledObjects() throws StorageException;
 }
