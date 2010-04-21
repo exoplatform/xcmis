@@ -19,9 +19,10 @@
 
 package org.xcmis.renditions.impl;
 
+import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.RenditionContentStream;
 import org.xcmis.spi.RenditionProvider;
-import org.xcmis.spi.ContentStream;
+import org.xcmis.spi.utils.MimeType;
 
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -44,7 +45,7 @@ public class ImageRenditionProvider implements RenditionProvider
    /** Can store renditions. */
    private static final boolean CAN_STORE_RENDITIONS = true;
 
-   // TODO configurable maxHeigth & maxWidth 
+   // TODO configurable maxHeigth & maxWidth
    /** The max height. */
    private int maxHeight = 100;
 
@@ -59,7 +60,7 @@ public class ImageRenditionProvider implements RenditionProvider
       BufferedImage image = ImageIO.read(stream.getStream());
       // Determine scale and be sure both width and height are not greater the max
       int scale = (int)Math.max(//
-         Math.floor((image.getHeight() / maxHeight) + 1.0d), // 
+         Math.floor((image.getHeight() / maxHeight) + 1.0d), //
          Math.floor((image.getWidth() / maxWidth) + 1.0d) //
          );
       int height = image.getHeight() / scale;
@@ -73,7 +74,7 @@ public class ImageRenditionProvider implements RenditionProvider
       ByteArrayOutputStream out = new ByteArrayOutputStream();
       ImageIO.write(scaledImage, "png", out);
       RenditionContentStream renditionStream =
-         new RenditionContentStream(out.toByteArray(), null, "image/png", "cmis:thumbnail");
+         new RenditionContentStream(out.toByteArray(), null, new MimeType("image", "png"), "cmis:thumbnail");
       renditionStream.setHeight(height);
       renditionStream.setWidth(width);
       return renditionStream;

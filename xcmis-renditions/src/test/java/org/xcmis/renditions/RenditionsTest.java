@@ -19,12 +19,14 @@
 
 package org.xcmis.renditions;
 
-import org.xcmis.spi.RenditionContentStream;
-import org.xcmis.renditions.impl.PDFDocumentRenditionProvider;
-import org.xcmis.renditions.impl.ImageRenditionProvider;
-import org.xcmis.spi.BaseContentStream;
-
 import junit.framework.TestCase;
+
+import org.xcmis.renditions.impl.ImageRenditionProvider;
+import org.xcmis.renditions.impl.PDFDocumentRenditionProvider;
+import org.xcmis.spi.BaseContentStream;
+import org.xcmis.spi.RenditionContentStream;
+import org.xcmis.spi.utils.MimeType;
+
 import java.io.InputStream;
 
 public class RenditionsTest extends TestCase
@@ -47,7 +49,7 @@ public class RenditionsTest extends TestCase
       {
          InputStream pdf = Thread.currentThread().getContextClassLoader().getResourceAsStream(pdfname);
          PDFDocumentRenditionProvider prov = new PDFDocumentRenditionProvider();
-         BaseContentStream stream = new BaseContentStream(pdf, pdfname, "application/pdf");
+         BaseContentStream stream = new BaseContentStream(pdf, pdfname, new MimeType("application", "pdf"));
          RenditionContentStream out = prov.getRenditionStream(stream);
          assertNotNull(out);
          assertNotNull(out.getStream());
@@ -66,7 +68,7 @@ public class RenditionsTest extends TestCase
       {
          InputStream jpg = getClass().getResource("/" + jpgname).openStream();
          ImageRenditionProvider prov = new ImageRenditionProvider();
-         BaseContentStream stream = new BaseContentStream(jpg, jpgname, "image/jpg");
+         BaseContentStream stream = new BaseContentStream(jpg, jpgname, new MimeType("image","jpg"));
          RenditionContentStream out = prov.getRenditionStream(stream);
          assertNotNull(out);
          assertNotNull(out.getStream());

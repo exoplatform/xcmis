@@ -21,9 +21,10 @@ package org.xcmis.renditions.impl;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
+import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.RenditionContentStream;
 import org.xcmis.spi.RenditionProvider;
-import org.xcmis.spi.ContentStream;
+import org.xcmis.spi.utils.MimeType;
 
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -35,7 +36,8 @@ import javax.imageio.ImageIO;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: PDFDocumentRenditionProvider.java 774 2010-04-16 11:56:20Z
+ *          ur3cma $
  */
 public class PDFDocumentRenditionProvider implements RenditionProvider
 {
@@ -46,7 +48,7 @@ public class PDFDocumentRenditionProvider implements RenditionProvider
    /** Can store renditions. */
    private static final boolean CAN_STORE_RENDITIONS = false;
 
-   // TODO configurable maxHeigth & maxWidth 
+   // TODO configurable maxHeigth & maxWidth
    /** The max height. */
    private int maxHeight = 100;
 
@@ -66,7 +68,7 @@ public class PDFDocumentRenditionProvider implements RenditionProvider
          BufferedImage image = page.convertToImage();
          // Determine scale and be sure both width and height are not greater the max
          int scale = (int)Math.max(//
-            Math.floor((image.getHeight() / maxHeight) + 1.0d), // 
+            Math.floor((image.getHeight() / maxHeight) + 1.0d), //
             Math.floor((image.getWidth() / maxWidth) + 1.0d) //
             );
          int height = image.getHeight() / scale;
@@ -80,7 +82,7 @@ public class PDFDocumentRenditionProvider implements RenditionProvider
          ByteArrayOutputStream out = new ByteArrayOutputStream();
          ImageIO.write(scaledImage, "png", out);
          RenditionContentStream renditionStream =
-            new RenditionContentStream(out.toByteArray(), null, "image/png", "cmis:thumbnail");
+            new RenditionContentStream(out.toByteArray(), null, new MimeType("image", " png"), "cmis:thumbnail");
          renditionStream.setHeight(height);
          renditionStream.setWidth(width);
          return renditionStream;
@@ -88,7 +90,9 @@ public class PDFDocumentRenditionProvider implements RenditionProvider
       finally
       {
          if (pdf != null)
+         {
             pdf.close();
+         }
       }
    }
 
