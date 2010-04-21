@@ -1139,7 +1139,7 @@ public class StorageTest extends BaseTest
 
    public void testUnfiling() throws Exception
    {
-      assertEquals(0, getSize(storage.getUnfiledObjects()));
+      assertEquals(0, getSize(storage.getUnfiledObjectsId()));
       DocumentData document = createDocument(rootFolder, "unfilingDocumentTest", "cmis:document", null, null);
       assertTrue(rootFolder.getChildren(null).hasNext());
       rootFolder.removeObject(document);
@@ -1151,10 +1151,10 @@ public class StorageTest extends BaseTest
       assertEquals(0, parents.size());
       storage.getObject(document.getObjectId());
 
-      assertEquals(1, getSize(storage.getUnfiledObjects()));
+      assertEquals(1, getSize(storage.getUnfiledObjectsId()));
    }
 
-   private int getSize(ItemsIterator<ObjectData> iterator)
+   private int getSize(Iterator<String> iterator)
    {
       int result = 0;
 

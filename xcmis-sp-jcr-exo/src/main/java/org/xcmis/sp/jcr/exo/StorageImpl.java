@@ -83,6 +83,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -1169,12 +1170,51 @@ public class StorageImpl implements Storage
    /**
     * @see org.xcmis.spi.Storage#getUnfiledObjects()
     */
-   public ItemsIterator<ObjectData> getUnfiledObjects() throws StorageException
+   public Iterator<String> getUnfiledObjectsId() throws StorageException
    {
       try
       {
          Node unfiledStore = (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_UNFILED);
-         return new FolderChildrenIterator(unfiledStore.getNodes(), indexListener);
+         final NodeIterator nodes = unfiledStore.getNodes();
+
+         return new Iterator<String>()
+         {
+
+            public boolean hasNext()
+            {
+               return nodes.hasNext();
+            }
+
+            public String next()
+            {
+               Node nextNode = nodes.nextNode();
+               if (nextNode != null)
+               {
+                  NodeIterator etries;
+                  try
+                  {
+                     etries = nextNode.getNodes();
+                     if (etries.hasNext())
+                     {
+                        return ((ExtendedNode)etries.nextNode()).getIdentifier();
+                     }
+                  }
+                  catch (RepositoryException e)
+                  {
+                     throw new CmisRuntimeException(e.getLocalizedMessage(), e);
+                  }
+
+               }
+               return null;
+            }
+
+            public void remove()
+            {
+               throw new UnsupportedOperationException();
+
+            }
+         };
+
       }
       catch (RepositoryException e)
       {
