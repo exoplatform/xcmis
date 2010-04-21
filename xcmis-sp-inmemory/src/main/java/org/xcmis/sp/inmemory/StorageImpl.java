@@ -824,6 +824,18 @@ public class StorageImpl implements Storage
       parents.clear();
    }
 
+   /**
+    * @see org.xcmis.spi.Storage#getUnfiledObjects()
+    */
+   public ItemsIterator<ObjectData> getUnfiledObjects() throws StorageException
+   {
+      if (unfiled.size() > 0)
+      {
+         return new LazyDocumentIterator(this, unfiled.iterator());
+      }
+      return CmisUtils.emptyItemsIterator();
+   }
+
    public String addType(TypeDefinition type) throws StorageException, CmisRuntimeException
    {
       if (types.get(type.getId()) != null)
@@ -1244,4 +1256,71 @@ public class StorageImpl implements Storage
       }
    }
 
+   public static class LazyDocumentIterator implements ItemsIterator<ObjectData>
+   {
+      private final Storage storage;
+
+      private final Iterator<String> documentIds;
+
+      /**
+       * @param storage
+       * @param documentIds
+       */
+      public LazyDocumentIterator(Storage storage, Iterator<String> documentIds)
+      {
+         super();
+         this.storage = storage;
+         this.documentIds = documentIds;
+      }
+
+      /**
+       * @see java.util.Iterator#hasNext()
+       */
+      public boolean hasNext()
+      {
+         return documentIds.hasNext();
+      }
+
+      /**
+       * @see java.util.Iterator#next()
+       */
+      public DocumentData next()
+      {
+         return (DocumentData)storage.getObject(documentIds.next());
+      }
+
+      /**
+       * @see java.util.Iterator#remove()
+       */
+      public void remove()
+      {
+         throw new UnsupportedOperationException();
+      }
+
+      /**
+       * @see org.xcmis.spi.ItemsIterator#size()
+       */
+      public int size()
+      {
+
+         return -1;
+      }
+
+      /**
+       * @see org.xcmis.spi.ItemsIterator#skip(int)
+       */
+      public void skip(int skip) throws NoSuchElementException
+      {
+         while (skip-- > 0)
+         {
+            if (!documentIds.hasNext())
+            {
+               throw new NoSuchElementException();
+            }
+            documentIds.next();
+         }
+
+      }
+
+   }
 }
