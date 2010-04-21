@@ -22,31 +22,10 @@ import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.content.interceptors.Visitor;
 
 /**
- *  Add node command
+ * Get unfiled entries command
  */
 public class GetUnfiledEntriesCommand implements AbstractReadDataCommand
 {
-   /**
-    * Parent content entry unique identifier.
-    */
-   private final String parentUuid;
-
-   /**
-    * @param parentUuid
-    */
-   public GetUnfiledEntriesCommand(String parentUuid)
-   {
-      super();
-      this.parentUuid = parentUuid;
-   }
-
-   /**
-    * @return the parentUuid
-    */
-   public String getParentUuid()
-   {
-      return parentUuid;
-   }
 
    /**
     * @see org.exoplatform.services.jcr.impl.storage.command.JcrCommand#acceptVisitor(org.exoplatform.services.jcr.impl.storage.command.JcrInvocationContext, org.jboss.cache.commands.Visitor)

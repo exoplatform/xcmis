@@ -24,6 +24,7 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.search.config.IndexConfiguration;
 import org.xcmis.search.config.IndexConfigurationException;
+import org.xcmis.search.lucene.IndexRecoveryTool;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,7 +53,7 @@ public class StartableIndexingService extends LuceneIndexingService
    private final File indexDir;
 
    /** The index restore service. */
-   private final IndexRestoreService indexRestoreService;
+   private final IndexRecoveryTool indexRecoveryTool;
 
    /** Is started flag. */
    private boolean isStarted = false;
@@ -65,11 +66,11 @@ public class StartableIndexingService extends LuceneIndexingService
     * @throws IndexConfigurationException
     * @throws IndexException
     */
-   public StartableIndexingService(IndexConfiguration configuration, IndexRecoverService recoverService,
-      IndexRestoreService indexRestoreService) throws IndexConfigurationException, IndexException
+   public StartableIndexingService(IndexConfiguration configuration, IndexRecoveryTool indexRecoveryTool)
+      throws IndexConfigurationException, IndexException
    {
-      super(configuration, recoverService);
-      this.indexRestoreService = indexRestoreService;
+      super(configuration, indexRecoveryTool);
+      this.indexRecoveryTool = indexRecoveryTool;
       this.indexDir = new File(configuration.getIndexDir());
       if (!indexDir.exists() && !indexDir.mkdirs())
       {
@@ -190,7 +191,7 @@ public class StartableIndexingService extends LuceneIndexingService
       // clean persisted index
       softCleanIndex();
 
-      indexRestoreService.restoreIndex(this);
+      indexRecoveryTool.recoverAll();
 
       if (!flag.delete())
       {

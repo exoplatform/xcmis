@@ -23,6 +23,7 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.search.config.IndexConfiguration;
 import org.xcmis.search.config.IndexConfigurationException;
+import org.xcmis.search.lucene.IndexRecoveryTool;
 
 import java.io.File;
 import java.util.HashSet;
@@ -45,15 +46,15 @@ public class TransactionableIndexDataManager extends CacheableIndexDataManager
     */
    private final Log log = ExoLogger.getLogger(TransactionableIndexDataManager.class);
 
-   private final IndexRecoverService recoverService;
+   private final IndexRecoveryTool indexRecoveryTool;
 
    private final FSIndexTransactionService transactionService;
 
-   public TransactionableIndexDataManager(IndexConfiguration indexConfuguration, IndexRecoverService recoverService)
+   public TransactionableIndexDataManager(IndexConfiguration indexConfuguration, IndexRecoveryTool indexRecoveryTool)
       throws IndexException, IndexConfigurationException
    {
       super(indexConfuguration);
-      this.recoverService = recoverService;
+      this.indexRecoveryTool = indexRecoveryTool;
 
       final File indexDir = new File(indexConfuguration.getIndexDir());
 
@@ -123,7 +124,7 @@ public class TransactionableIndexDataManager extends CacheableIndexDataManager
             compromisedUuids.addAll(compositeTransactionLog.getRemovedList());
 
             // start recovering process
-            this.recoverService.recover(compromisedUuids);
+            indexRecoveryTool.recover(compromisedUuids.iterator());
             //clear old logs
             for (TransactionLog transactionLog : logs)
             {

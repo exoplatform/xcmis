@@ -31,6 +31,7 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.search.config.IndexConfiguration;
 import org.xcmis.search.config.IndexConfigurationException;
+import org.xcmis.search.lucene.IndexRecoveryTool;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -45,21 +46,20 @@ import java.util.Set;
 public class LuceneIndexingService extends TransactionableIndexDataManager
 {
 
+   /**
+    * @param indexConfuguration
+    * @param indexRecoveryTool
+    * @throws IndexException
+    * @throws IndexConfigurationException
+    */
+   public LuceneIndexingService(IndexConfiguration indexConfuguration, IndexRecoveryTool indexRecoveryTool)
+      throws IndexException, IndexConfigurationException
+   {
+      super(indexConfuguration, indexRecoveryTool);
+   }
+
    /** Class logger. */
    private static final Log LOG = ExoLogger.getLogger(LuceneIndexingService.class);
-
-   /**
-    * 
-    * @param configuration
-    * @throws IndexConfigurationException
-    * @throws IndexException
-    */
-   public LuceneIndexingService(IndexConfiguration configuration, IndexRecoverService recoverService)
-      throws IndexConfigurationException, IndexException
-   {
-      super(configuration, recoverService);
-
-   }
 
    /**
     * {@inheritDoc}
