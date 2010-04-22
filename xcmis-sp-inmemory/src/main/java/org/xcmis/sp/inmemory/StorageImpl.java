@@ -285,7 +285,7 @@ public class StorageImpl implements Storage
                CapabilityRendition.NONE, false, true, true, true, false, true, true, false), new ACLCapability(
                Collections.unmodifiableList(permissionMapping), Collections.unmodifiableList(supportedPermissions),
                AccessControlPropagation.OBJECTONLY, SupportedPermissions.BASIC), "anonymous", "any", null, null, true,
-            null, "eXo Platform", "xCMIS (eXo InMemory SP)", "1.0-Beta02", null);
+            null, "eXo", "xCMIS (eXo InMemory SP)", "1.0", null);
 
       types.put("cmis:document", //
          new TypeDefinition("cmis:document", BaseType.DOCUMENT, "cmis:document", "cmis:document", "", null,
