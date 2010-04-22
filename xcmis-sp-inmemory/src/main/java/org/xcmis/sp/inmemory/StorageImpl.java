@@ -148,16 +148,16 @@ public class StorageImpl implements Storage
    /**
     * Searching service.
     */
-   private final SearchService searchService;
+   final SearchService searchService;
 
    /**
     * Cmis query parser.
     */
-   private final QueryParser cmisQueryParser;
+   final QueryParser cmisQueryParser;
 
    private final StorageConfiguration configuration;
 
-   private final IndexListener indexListener;
+   final IndexListener indexListener;
 
    static final String ROOT_FOLDER_ID = "abcdef12-3456-7890-0987-654321fedcba";
 

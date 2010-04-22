@@ -35,6 +35,7 @@ import org.xcmis.spi.model.PropertyType;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.Updatability;
 import org.xcmis.spi.model.VersioningState;
+import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 import org.xcmis.spi.utils.MimeType;
 
@@ -53,6 +54,22 @@ import java.util.Set;
 public abstract class BaseQueryTest extends BaseTest
 {
    private static final Log LOG = ExoLogger.getLogger(BaseQueryTest.class.getName());
+
+   protected final static String NASA_DOCUMENT = "cmis:nasa-mission";
+
+   protected final static String PROPERTY_BOOSTER = "cmis:booster-name";
+
+   protected final static String PROPERTY_COMMANDER = "cmis:commander";
+
+   protected final static String PROPERTY_COMMAND_MODULE_PILOT = "cmis:command-module-pilot";
+
+   protected final static String PROPERTY_LUNAR_MODULE_PILOT = "cmis:lunar-module-pilot";
+
+   protected final static String PROPERTY_BOOSTER_MASS = "cmis:booster-mass";
+
+   protected final static String PROPERTY_SAMPLE_RETURNED = "cmis:sample-returned";
+
+   protected final static String PROPERTY_STATUS = "cmis:status";
 
    /**
     * @see org.xcmis.sp.inmemory.BaseTest#setUp()
@@ -89,9 +106,9 @@ public abstract class BaseQueryTest extends BaseTest
          "cmis:sample-returned", "cmis:sample-returned", null, "cmis:sample-returned", "cmis:sample-returned",
          PropertyType.DECIMAL, Updatability.READWRITE, true, false, false, false, false, true, null, null));
 
-      propertyDefinitions.put("cmis:status", new PropertyDefinition("cmis:status", "cmis:status", "cmis:status",
-         null, "cmis:status", "cmis:status", PropertyType.BOOLEAN, Updatability.READWRITE, true, false, false, false,
-         false, true, null, null));
+      propertyDefinitions.put("cmis:status", new PropertyDefinition("cmis:status", "cmis:status", "cmis:status", null,
+         "cmis:status", "cmis:status", PropertyType.BOOLEAN, Updatability.READWRITE, true, false, false, false, false,
+         true, null, null));
 
       storage.addType(new TypeDefinition("cmis:nasa-mission", BaseType.DOCUMENT, "cmis:nasa-mission",
          "cmis:nasa-mission", "", "cmis:document", "cmis:nasa-mission", "Cmis Document Type", true, true, true, true,
@@ -111,8 +128,8 @@ public abstract class BaseQueryTest extends BaseTest
          new HashMap<String, PropertyDefinition<?>>()));
    }
 
-   protected DocumentData createDocument(FolderData folder, String name, String typeId, byte[] content, MimeType mimeType)
-      throws Exception
+   protected DocumentData createDocument(FolderData folder, String name, String typeId, byte[] content,
+      MimeType mimeType) throws Exception
    {
 
       return createDocument(folder, name, typeId, new BaseContentStream(content, null, mimeType), null);
@@ -162,7 +179,7 @@ public abstract class BaseQueryTest extends BaseTest
          storage.createDocument(folder, typeId, versioningState == null ? VersioningState.MAJOR : versioningState);
       document.setName(name);
       document.setContentStream(content);
-      // storage.saveObject(document);
+      storage.saveObject(document);
       //document.save();
       return document;
    }
@@ -252,10 +269,18 @@ public abstract class BaseQueryTest extends BaseTest
          String id = next.getObjectId();
          resultPaths.add(id);
          ObjectData object = storage.getObject(id);
-         LOG.debug("id:=" + id + " path:=" + object.getParent().getPath() + "/" + object.getName());
+         //LOG.debug("id:=" + id + " path:=" + object.getParent().getPath() + "/" + object.getName());
       }
 
       checkResults(expectedPaths, resultPaths);
+   }
+
+   protected void checkResult(String statement, ObjectData[] nodes)
+   {
+      Query query = new Query(statement, true);
+
+      ItemsIterator<Result> result = storage.query(query);
+      checkResult(result, nodes);
    }
 
    protected void checkResultOrder(ItemsIterator<Result> result, ObjectData[] nodes)

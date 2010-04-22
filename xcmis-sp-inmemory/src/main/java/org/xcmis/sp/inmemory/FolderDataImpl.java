@@ -72,6 +72,7 @@ class FolderDataImpl extends BaseObjectData implements FolderData
       storage.children.get(getObjectId()).add(object.getObjectId());
       storage.parents.get(object.getObjectId()).add(getObjectId());
       storage.unfiled.remove(object.getObjectId());
+      storage.indexListener.updated(object);
    }
 
    /**
@@ -156,6 +157,7 @@ class FolderDataImpl extends BaseObjectData implements FolderData
       {
          storage.unfiled.add(object.getObjectId());
       }
+      storage.indexListener.updated(object);
    }
 
    private String calculatePath()
@@ -237,8 +239,7 @@ class FolderDataImpl extends BaseObjectData implements FolderData
          }
          if (name.equals(object.getName()))
          {
-            throw new NameConstraintViolationException("Object with name " + name
-               + " already exists in parent folder.");
+            throw new NameConstraintViolationException("Object with name " + name + " already exists in parent folder.");
          }
       }
 

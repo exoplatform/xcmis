@@ -20,9 +20,16 @@ package org.xcmis.sp.inmemory;
 
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
+import org.xcmis.spi.ItemsIterator;
+import org.xcmis.spi.ObjectData;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author <a href="mailto:Sergey.Kabashnyuk@exoplatform.org">Sergey Kabashnyuk</a>
@@ -31,6 +38,73 @@ import java.util.Iterator;
  */
 public class StorageTest extends BaseTest
 {
+
+   public void testMultifiledChild() throws Exception
+   {
+      DocumentData document = createDocument(rootFolder, "multifiledChildTest", "cmis:document", null, null);
+      FolderData folder1 = createFolder(rootFolder, "multifiledChildFolderTest01", "cmis:folder");
+      DocumentData child1 = createDocument(folder1, "child1", "cmis:document", null, null);
+
+      List<String> chs = new ArrayList<String>();
+      for (ItemsIterator<ObjectData> children = folder1.getChildren(null); children.hasNext();)
+      {
+         chs.add(children.next().getObjectId());
+      }
+      assertEquals(1, chs.size());
+
+      folder1.addObject(document);
+
+      chs.clear();
+      for (ItemsIterator<ObjectData> children = folder1.getChildren(null); children.hasNext();)
+      {
+         chs.add(children.next().getObjectId());
+      }
+
+      assertEquals(2, chs.size());
+   }
+
+   public void testMultifiling() throws Exception
+   {
+      DocumentData document = createDocument(rootFolder, "multifilingDocumentTest", "cmis:document", null, null);
+      FolderData folder1 = createFolder(rootFolder, "multifilingFolderTest1", "cmis:folder");
+      FolderData folder2 = createFolder(rootFolder, "multifilingFolderTest2", "cmis:folder");
+      FolderData folder3 = createFolder(rootFolder, "multifilingFolderTest3", "cmis:folder");
+      FolderData folder4 = createFolder(rootFolder, "multifilingFolderTest4", "cmis:folder");
+      folder1.addObject(document);
+      folder2.addObject(document);
+      folder3.addObject(document);
+      folder4.addObject(document);
+
+      Set<String> expectedParents =
+         new HashSet<String>(Arrays.asList(rootFolder.getObjectId(), folder1.getObjectId(), folder2.getObjectId(),
+            folder3.getObjectId(), folder4.getObjectId()));
+      Collection<FolderData> parents = document.getParents();
+
+      assertEquals(expectedParents.size(), parents.size());
+      for (FolderData f : parents)
+      {
+         assertTrue("Folder " + f.getObjectId() + " must be in parents list.", expectedParents
+            .contains(f.getObjectId()));
+      }
+
+      // remove from three folders and check parents again
+      folder1.removeObject(document);
+      folder3.removeObject(document);
+      rootFolder.removeObject(document);
+      expectedParents = new HashSet<String>(Arrays.asList(folder2.getObjectId(), folder4.getObjectId()));
+
+      parents = document.getParents();
+
+      assertEquals(expectedParents.size(), parents.size());
+      for (FolderData f : parents)
+      {
+         assertTrue("Folder " + f.getObjectId() + " must be in parents list.", expectedParents
+            .contains(f.getObjectId()));
+      }
+      //      System.out.println(" StorageTest.testMultifiling > new location: "
+      //         + ((DocumentDataImpl)document).getNode().getPath());
+   }
+
    public void testUnfiling() throws Exception
    {
       assertEquals(0, getSize(storage.getUnfiledObjectsId()));
