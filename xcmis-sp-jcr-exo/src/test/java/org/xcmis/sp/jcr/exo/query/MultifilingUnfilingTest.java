@@ -129,4 +129,23 @@ public class MultifilingUnfilingTest extends BaseQueryTest
       storage.deleteObject(doc1, true);
       storage.deleteTree(testRoot, true, null, true);
    }
+
+   public void testSearchUnfiled() throws Exception
+   {
+      checkResult("SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"helloworld\")", new ObjectData[]{});
+      DocumentData doc1 =
+         createDocument(testRoot, "node1", NASA_DOCUMENT, "helloworld".getBytes(), new MimeType("text", "plain"));
+
+      checkResult("SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"helloworld\")", new ObjectData[]{doc1});
+
+      testRoot.removeObject(doc1);
+      //check if document have no parents
+      assertEquals(0, doc1.getParents().size());
+      //check if we can find document
+      checkResult("SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"helloworld\")", new ObjectData[]{doc1});
+
+      storage.deleteObject(doc1, true);
+      storage.deleteTree(testRoot, true, null, true);
+   }
+
 }
