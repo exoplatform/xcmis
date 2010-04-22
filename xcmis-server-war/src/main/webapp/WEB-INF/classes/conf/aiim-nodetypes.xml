@@ -9,7 +9,7 @@
 			</propertyDefinition>
 			<propertyDefinition name="aiim_effective_time" requiredType="Date" autoCreated="false" mandatory="false" onParentVersion="COPY" protected="false" multiple="false">
 			</propertyDefinition>
-			<propertyDefinition name="aiim_Ioinc" requiredType="String" autoCreated="false" mandatory="true" onParentVersion="COPY" protected="false" multiple="false">
+			<propertyDefinition name="aiim_loinc" requiredType="String" autoCreated="false" mandatory="true" onParentVersion="COPY" protected="false" multiple="false">
 				<valueConstraints>
 					<valueConstraint>Advance Directive 42348-3</valueConstraint>
 					<valueConstraint>Consultation Note 11488-4</valueConstraint>
