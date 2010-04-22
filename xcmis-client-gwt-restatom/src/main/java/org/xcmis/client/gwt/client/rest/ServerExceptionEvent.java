@@ -32,6 +32,9 @@ import com.google.gwt.event.shared.GwtEvent;
 public abstract class ServerExceptionEvent<H extends EventHandler> extends GwtEvent<H>
 {
 
+   /**
+    * @param exception
+    */
    public abstract void setException(Throwable exception);
 
 }

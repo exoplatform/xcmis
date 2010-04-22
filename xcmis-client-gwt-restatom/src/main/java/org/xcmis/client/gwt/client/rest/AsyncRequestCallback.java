@@ -89,7 +89,8 @@ public class AsyncRequestCallback implements RequestCallback
 
    public void onError(Request request, Throwable exception)
    {
-      if (Loader.getInstance() != null){
+      if (Loader.getInstance() != null)
+      {
          Loader.getInstance().hide();
       }
       fireEvent(new ExceptionThrownEvent(exception));
@@ -97,7 +98,8 @@ public class AsyncRequestCallback implements RequestCallback
 
    public void onResponseReceived(Request request, Response response)
    {
-      if (Loader.getInstance() != null){
+      if (Loader.getInstance() != null)
+      {
          Loader.getInstance().hide();
       }
 

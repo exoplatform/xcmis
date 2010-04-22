@@ -32,6 +32,7 @@ import org.xcmis.client.gwt.client.rest.AsyncRequestCallback;
 import org.xcmis.client.gwt.client.rest.HTTPHeader;
 import org.xcmis.client.gwt.client.rest.HTTPMethod;
 import org.xcmis.client.gwt.client.service.repository.event.BaseTypesReceivedEvent;
+import org.xcmis.client.gwt.client.service.repository.event.RepositoriesFailedEvent;
 import org.xcmis.client.gwt.client.service.repository.event.RepositoriesReceivedEvent;
 import org.xcmis.client.gwt.client.service.repository.event.RepositoryInfoReceivedEvent;
 import org.xcmis.client.gwt.client.service.repository.event.TypeChildrenReceivedEvent;
@@ -83,8 +84,9 @@ public class RepositoryService
    {
       CmisRepositories cmisService = new CmisRepositories();
       RepositoriesReceivedEvent event = new RepositoriesReceivedEvent(cmisService);
+      RepositoriesFailedEvent failEvent = new RepositoriesFailedEvent(url);
       RepositoriesUnmarshaller unmarshaller = new RepositoriesUnmarshaller(cmisService);
-      AsyncRequestCallback callback = new AsyncRequestCallback(eventBus, unmarshaller, event);
+      AsyncRequestCallback callback = new AsyncRequestCallback(eventBus, unmarshaller, event, failEvent);
       AsyncRequest.build(RequestBuilder.GET, url).send(callback);
    }
 
