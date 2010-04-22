@@ -131,6 +131,7 @@ public abstract class Connection
     *         {@link CmisTypeDefinitionType#getParentId()}</li>
     *         <li>New type has at least one property definitions that has
     *         unsupported type, invalid id, so on</li>
+    *         </ul>
     * @throws StorageException if type can't be added (save changes) cause to
     *         storage internal problem
     */
@@ -270,8 +271,6 @@ public abstract class Connection
     *         stream
     * @throws IOException if any i/o error occurs when try to set document's
     *         content stream
-    * @throws StorageException if newly version of Document can't be saved in
-    *         storage cause to its internal problem
     */
    public String checkin(String documentId, boolean major, Map<String, Property<?>> properties, ContentStream content,
       String checkinComment, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
@@ -961,6 +960,8 @@ public abstract class Connection
     *         more children
     * @throws UpdateConflictException if object that is no longer current (as
     *         determined by the storage)
+    * @throws VersioningException if object can not be removed cause to
+    *         versioning  conflict
     * @throws StorageException if object can not be removed cause to storage
     *         internal problem
     */
@@ -2357,7 +2358,7 @@ public abstract class Connection
 
    /**
     * Get type definition for type <code>typeId</code> include property
-    * definition, see {@link #getTypeDefinition(String, boolean)}
+    * definition, see {@link #getTypeDefinition(String, boolean)}.
     *
     * @param typeId type Id
     * @return type definition

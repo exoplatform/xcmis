@@ -269,6 +269,7 @@ public interface Storage extends TypeManager
     * Save updated object or newly created object.
     *
     * @param object object to be saved
+    * @return  object id String
     * @throws StorageException if changes can't be saved cause storage internal
     *         errors
     * @throws NameConstraintViolationException if updated name (property
@@ -381,10 +382,10 @@ public interface Storage extends TypeManager
    Collection<DocumentData> getAllVersions(String versionSeriesId) throws ObjectNotFoundException;
 
    /**
-    * Iterator of all unfilled documents identifiers
+    * Iterator of all unfilled documents identifiers.
     * 
     * @return Iterator of all unfilled documents identifiers.
-    * @throws StorageException
+    * @throws StorageException if any storage error occurs
     */
    Iterator<String> getUnfiledObjectsId() throws StorageException;
 }

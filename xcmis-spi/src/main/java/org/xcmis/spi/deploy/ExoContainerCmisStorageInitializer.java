@@ -28,7 +28,6 @@ import org.picocontainer.Startable;
 import org.xcmis.spi.CmisStorageInitializer;
 import org.xcmis.spi.StorageProvider;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 

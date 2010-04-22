@@ -19,8 +19,6 @@
 
 package org.xcmis.spi;
 
-import org.xcmis.spi.ContentStream;
-
 import java.io.IOException;
 
 /**
@@ -33,7 +31,7 @@ public interface RenditionProvider
    /**
     * Create rendition for specified entry.
     * 
-    * @param entry source entry
+    * @param stream ContentStream
     * @return newly created rendition stream
     * @throws IOException if any i/o error occurs
     */

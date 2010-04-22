@@ -73,6 +73,8 @@ public class CmisPDFDocumentReader extends BaseDocumentReader
     * 
     * @param is an input stream with .pdf file content.
     * @return The string only with text from file content.
+    * @throws IOException when an I\O error occurs
+    * @throws DocumentReadException if some document reading error
     */
    public String getContentAsText(InputStream is) throws IOException, DocumentReadException
    {
@@ -182,7 +184,7 @@ public class CmisPDFDocumentReader extends BaseDocumentReader
     * @param metadata XML as byte array
     * @return extracted properties
     * @throws DocumentReadException
-    * @throws Exception if extracting fails
+    * @throws DocumentReadException if extracting fails
     */
    protected Properties getPropertiesFromMetadata(byte[] metadata) throws IOException, DocumentReadException
    {
@@ -235,7 +237,7 @@ public class CmisPDFDocumentReader extends BaseDocumentReader
     * 
     * @param Pdf Info hash set
     * @return Extracted properties
-    * @throws Exception if extracting fails
+    * @throws IOException if extracting fails
     */
    @SuppressWarnings("unchecked")
    protected Properties getPropertiesFromInfo(HashMap info) throws IOException

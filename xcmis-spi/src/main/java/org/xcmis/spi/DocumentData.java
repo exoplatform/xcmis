@@ -129,11 +129,11 @@ public interface DocumentData extends ObjectData
    void cancelCheckout() throws StorageException;
 
    /**
-    * Set private working copy as latest (current) version of
+    * Set private working copy as latest (current) version of.
     * 
-    * @param major
-    * @param checkinComment
-    * @return
+    * @param major is major
+    * @param checkinComment check-in comment
+    * @return DocumentData document
     * @throws ConstraintException if the object is not versionable
     * @throws StorageException if newly version of Document can't be saved in
     *         storage cause to its internal problem

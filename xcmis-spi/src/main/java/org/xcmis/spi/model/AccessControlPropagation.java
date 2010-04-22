@@ -19,13 +19,13 @@
 
 package org.xcmis.spi.model;
 
-
 /**
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */
-public enum AccessControlPropagation {
-   
+public enum AccessControlPropagation 
+{
+
    REPOSITORYDETERMINED("repositorydetermined"), // 
    OBJECTONLY("objectonly"), //
    PROPAGATE("propagate");
@@ -51,7 +51,7 @@ public enum AccessControlPropagation {
       }
       throw new IllegalArgumentException(value);
    }
-   
+
    @Override
    public String toString()
    {

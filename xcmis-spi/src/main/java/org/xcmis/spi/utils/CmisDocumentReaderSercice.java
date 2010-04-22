@@ -50,7 +50,7 @@ public class CmisDocumentReaderSercice implements DocumentReaderService
    private Map<String, BaseDocumentReader> readers;
 
    /**
-    * 
+    * Instantiates a new cmis document reader sercice.
     */
    public CmisDocumentReaderSercice()
    {
@@ -98,7 +98,7 @@ public class CmisDocumentReaderSercice implements DocumentReaderService
    }
 
    /**
-    * @param plugin
+    * @param plugin ComponentPlugin
     */
    public void addDocumentReader(ComponentPlugin plugin)
    {

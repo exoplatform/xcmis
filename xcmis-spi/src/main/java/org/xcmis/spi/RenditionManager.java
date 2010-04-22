@@ -33,7 +33,7 @@ public interface RenditionManager
    /**
     * Get all renditions of specified entry.
     *
-    * @param entry CMISEntry
+    * @param object ObjectData
     * @return set of object renditions. If object has not renditions then empty
     *            iterator will be returned.
     * @throws StorageException if any other CMIS repository error occurs
@@ -43,8 +43,8 @@ public interface RenditionManager
    /**
     * Get rendition stream for objects with specified id.
     *
-    * @param streamId object id
-    * @param ObjectData object id
+    * @param streamId stream id
+    * @param ObjectData object
     * @return Renditions content stream
     */
     ContentStream getStream(ObjectData obj, String streamId);

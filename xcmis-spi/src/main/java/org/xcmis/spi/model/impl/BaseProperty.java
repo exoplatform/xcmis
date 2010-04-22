@@ -122,7 +122,7 @@ public abstract class BaseProperty<T> implements Property<T>
    /**
     * Setter for displayName.
     * 
-    * @param displayName
+    * @param displayName String display name
     */
    public void setDisplayName(String displayName)
    {
@@ -132,7 +132,7 @@ public abstract class BaseProperty<T> implements Property<T>
    /**
     * Setter for id.
     * 
-    * @param id
+    * @param id String property id
     */
    public void setId(String id)
    {
@@ -142,7 +142,7 @@ public abstract class BaseProperty<T> implements Property<T>
    /**
     * Setter for localName.
     * 
-    * @param localName
+    * @param localName String local name
     */
    public void setLocalName(String localName)
    {
@@ -152,7 +152,7 @@ public abstract class BaseProperty<T> implements Property<T>
    /**
     * Setter for queryName.
     * 
-    * @param queryName
+    * @param queryName String query name
     */
    public void setQueryName(String queryName)
    {

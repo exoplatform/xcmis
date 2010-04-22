@@ -69,7 +69,7 @@ public interface StorageProvider
    /**
     * Adds rendition provider.
     *
-    * @param object rendition provider
+    * @param params rendition provider object
     */
    void addRenditionProvider(Object params);
 }
