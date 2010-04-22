@@ -66,6 +66,7 @@ class FolderChildrenIterator implements ItemsIterator<ObjectData>
 
    /**
     * @param iter back-end NodeIterator
+    * @param indexListener the index listener
     */
    public FolderChildrenIterator(NodeIterator iter, IndexListener indexListener)
    {

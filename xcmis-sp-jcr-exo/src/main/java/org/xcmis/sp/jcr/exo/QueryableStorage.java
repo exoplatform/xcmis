@@ -69,7 +69,7 @@ public class QueryableStorage extends StorageImpl
    /**
     * @param session Session
     * @param configuration StorageConfiguration
-    * @parem searchService SearchService
+    * @param searchService the search service
     */
    public QueryableStorage(Session session, StorageConfiguration configuration, SearchService searchService)
    {
@@ -83,6 +83,7 @@ public class QueryableStorage extends StorageImpl
     * @param session Session
     * @param configuration StorageConfiguration
     * @param renditionManager RenditionManagerImpl
+    * @param searchService the search service
     */
    public QueryableStorage(Session session, StorageConfiguration configuration, RenditionManagerImpl renditionManager,
       SearchService searchService)
@@ -288,8 +289,8 @@ public class QueryableStorage extends StorageImpl
       /**
        * The Constructor.
        *
-       * @param itemMgr the item mgr
-       * @param selectorName the selector name
+       * @param selectorName String selector name
+       * @param storage the storage
        */
       public DocumentOrderResultSorter(final String selectorName, Storage storage)
       {

@@ -57,7 +57,7 @@ class RelationshipDataImpl extends BaseObjectData implements RelationshipData
     * @param type type definition
     * @param source source of relationship
     * @param target target of relationship
-    * @param name name
+    * @param session session
     * @see StorageImpl#createRelationship(ObjectData, ObjectData, String)
     */
    public RelationshipDataImpl(TypeDefinition type, ObjectData source, ObjectData target, Session session,
@@ -73,6 +73,7 @@ class RelationshipDataImpl extends BaseObjectData implements RelationshipData
     *
     * @param type type definition
     * @param node back-end JCR node
+    * @param indexListener inde listener
     * @see StorageImpl#getObject(String)
     * @see StorageImpl#getObjectByPath(String)
     */

@@ -62,7 +62,7 @@ class RenditionIterator implements ItemsIterator<Rendition>
    /**
     * Create RenditionIterator instance with elready defined element.
     *
-    * @param iter the node iterator
+    * @param type Rendition
     */
    public RenditionIterator(Rendition type)
    {
