@@ -93,35 +93,6 @@ public class CmisContentReader extends ContentReaderInterceptor
    public Object visitGetUnfiledEntriesCommand(InvocationContext ctx, GetUnfiledEntriesCommand command)
       throws Throwable
    {
-      return null;
+      return storage.getUnfiledObjectsId();
    }
-   //      final ItemsIterator<ObjectData> unfilledObjects = storage.getUnfiledObjects();
-   //      return new Iterator<ContentEntry>()
-   //      {
-   //
-   //         public boolean hasNext()
-   //         {
-   //
-   //            return unfilledObjects.hasNext();
-   //         }
-   //
-   //         public ContentEntry next()
-   //         {
-   //            try
-   //            {
-   //               return contentEntryAdapter.createEntry(unfilledObjects.next());
-   //            }
-   //            catch (IOException e)
-   //            {
-   //               throw new CmisRuntimeException(e.getLocalizedMessage(), e);
-   //            }
-   //         }
-   //
-   //         public void remove()
-   //         {
-   //            throw new UnsupportedOperationException();
-   //         }
-   //      };
-   //   }
-
 }
