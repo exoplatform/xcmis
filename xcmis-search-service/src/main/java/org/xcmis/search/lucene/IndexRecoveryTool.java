@@ -32,7 +32,6 @@ import org.xcmis.search.lucene.index.IndexTransactionException;
 import org.xcmis.search.lucene.index.LuceneIndexTransaction;
 import org.xcmis.search.lucene.index.LuceneIndexer;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -140,20 +139,6 @@ public class IndexRecoveryTool
       catch (Throwable e)
       {
          throw new IndexException(e.getLocalizedMessage(), e);
-      }
-      finally
-      {
-         try
-         {
-            if (reader != null)
-            {
-               reader.close();
-            }
-         }
-         catch (IOException e)
-         {
-            throw new IndexException(e.getLocalizedMessage(), e);
-         }
       }
    }
 
