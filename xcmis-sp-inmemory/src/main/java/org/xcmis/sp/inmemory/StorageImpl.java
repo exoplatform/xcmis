@@ -108,7 +108,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: StorageImpl.java 804 2010-04-16 16:48:59Z
+ *          alexey.zavizionov@gmail.com $
  */
 public class StorageImpl implements Storage
 {
@@ -163,9 +164,23 @@ public class StorageImpl implements Storage
 
    static final Set<String> EMPTY_PARENTS = Collections.emptySet();
 
+   private final long maxStorageMemSize;
+
+   private final int maxItemsNumber;
+
    public StorageImpl(StorageConfiguration configuration)
    {
       this.configuration = configuration;
+
+      this.maxStorageMemSize =
+         configuration.getProperties().get(StorageConfiguration.MAX_STORAGE_MEM_SIZE) == null
+            ? StorageConfiguration.DEFAULT_MAX_STORAGE_MEM_SIZE : StorageConfiguration.parseNumber(
+               (String)configuration.getProperties().get(StorageConfiguration.MAX_STORAGE_MEM_SIZE)).longValue();
+
+      this.maxItemsNumber =
+         configuration.getProperties().get(StorageConfiguration.MAX_ITEMS_NUMBER) == null
+            ? StorageConfiguration.DEFAULT_MAX_STORAGE_NUMBER_ITEMS : StorageConfiguration.parseNumber(
+               (String)configuration.getProperties().get(StorageConfiguration.MAX_ITEMS_NUMBER)).intValue();
 
       this.properties = new ConcurrentHashMap<String, Map<String, Value>>();
       this.children = new ConcurrentHashMap<String, Set<String>>();
@@ -795,6 +810,8 @@ public class StorageImpl implements Storage
    public String saveObject(ObjectData object) throws StorageException, NameConstraintViolationException,
       UpdateConflictException
    {
+      validateMaxItemsNumber(object);
+
       boolean isNew = object.isNew();
       ((BaseObjectData)object).save();
       if (indexListener != null)
@@ -976,6 +993,38 @@ public class StorageImpl implements Storage
       typeChildren.get(type.getParentId()).remove(typeId);
 
       PropertyDefinitions.removeAll(typeId);
+   }
+
+   void validateMaxItemsNumber(ObjectData object)
+   {
+      if (object.isNew())
+      {
+         if (properties.size() > maxItemsNumber)
+         {
+            throw new CmisRuntimeException("Unable add new object in storage. Max number '" + maxItemsNumber
+               + "' of items is reached."
+               + " Increase or set storage configuration property 'org.xcmis.inmemory.maxitems'.");
+         }
+      }
+   }
+
+   void validateMemSize(byte[] content)
+   {
+      if (content == null || content.length == 0)
+      {
+         return;
+      }
+      long size = 0;
+      for (byte[] c : contents.values())
+      {
+         size += c.length;
+      }
+      if ((size + content.length) > maxStorageMemSize)
+      {
+         throw new CmisRuntimeException("Unable add new object in storage. Max allowed memory size '"
+            + maxStorageMemSize + "' bytes is reached."
+            + " Increase or set storage configuration property 'org.xcmis.inmemory.maxmem'.");
+      }
    }
 
    private SearchService getInitializedSearchService()

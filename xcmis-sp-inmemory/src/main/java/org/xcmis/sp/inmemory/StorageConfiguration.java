@@ -34,6 +34,14 @@ public class StorageConfiguration
    /** Additional properties. */
    private Map<String, Object> properties;
 
+   public static String MAX_STORAGE_MEM_SIZE = "org.xcmis.inmemory.maxmem";
+
+   public static String MAX_ITEMS_NUMBER = "org.xcmis.inmemory.maxitems";
+
+   public static int DEFAULT_MAX_STORAGE_MEM_SIZE = 104857600; // 100MB
+
+   public static int DEFAULT_MAX_STORAGE_NUMBER_ITEMS = 100;
+
    public StorageConfiguration()
    {
    }
@@ -86,4 +94,45 @@ public class StorageConfiguration
       this.properties = properties;
    }
 
+   public static Double parseNumber(String text)
+   {
+      text = text.toUpperCase();
+
+      if (text.endsWith("K"))
+      {
+         return Double.valueOf(text.substring(0, text.length() - 1)) * 1024d;
+      }
+      else if (text.endsWith("KB"))
+      {
+         return Double.valueOf(text.substring(0, text.length() - 2)) * 1024d;
+      }
+      else if (text.endsWith("M"))
+      {
+         return Double.valueOf(text.substring(0, text.length() - 1)) * 1048576d; // 1024 * 1024
+      }
+      else if (text.endsWith("MB"))
+      {
+         return Double.valueOf(text.substring(0, text.length() - 2)) * 1048576d; // 1024 * 1024
+      }
+      else if (text.endsWith("G"))
+      {
+         return Double.valueOf(text.substring(0, text.length() - 1)) * 1073741824d; // 1024 * 1024 * 1024
+      }
+      else if (text.endsWith("GB"))
+      {
+         return Double.valueOf(text.substring(0, text.length() - 2)) * 1073741824d; // 1024 * 1024 * 1024
+      }
+      else if (text.endsWith("T"))
+      {
+         return Double.valueOf(text.substring(0, text.length() - 1)) * 1099511627776d; // 1024 * 1024 * 1024 * 1024
+      }
+      else if (text.endsWith("TB"))
+      {
+         return Double.valueOf(text.substring(0, text.length() - 2)) * 1099511627776d; // 1024 * 1024 * 1024 * 1024
+      }
+      else
+      {
+         return Double.valueOf(text);
+      }
+   }
 }

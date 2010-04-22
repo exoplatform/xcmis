@@ -200,6 +200,10 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
          pwc.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, new StringValue());
 
          byte[] content = storage.contents.get(getObjectId());
+
+         // check is max memory size reached
+         storage.validateMemSize(content);
+
          byte[] pwcContent;
 
          if (content == EMPTY_CONTENT)
@@ -248,7 +252,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
       }
 
       byte[] bytes = storage.contents.get(getObjectId());
-      if (bytes != null)
+      if (bytes != null && bytes.length > 0)
       {
          MimeType mimeType = MimeType.fromString(getString(CmisConstants.CONTENT_STREAM_MIME_TYPE));
          String charset = getString(CmisConstants.CHARSET);
@@ -425,12 +429,13 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
       }
 
       String id;
+      String vsId;
       boolean isNew = isNew();
 
       if (isNew)
       {
          id = StorageImpl.generateId();
-         String vsId = StorageImpl.generateId();
+         vsId = StorageImpl.generateId();
          entry.setValue(CmisConstants.OBJECT_ID, new StringValue(id));
          entry.setValue(CmisConstants.OBJECT_TYPE_ID, new StringValue(getTypeId()));
          entry.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(getBaseType().value()));
@@ -448,49 +453,23 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
             entry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue(id));
             entry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, new StringValue());
          }
-
-         if (parent != null)
-         {
-            storage.children.get(parent.getObjectId()).add(id);
-
-            Set<String> parents = new CopyOnWriteArraySet<String>();
-            parents.add(parent.getObjectId());
-            storage.parents.put(id, parents);
-         }
-         else
-         {
-            storage.unfiled.add(id);
-            storage.parents.put(id, new CopyOnWriteArraySet<String>());
-         }
-
-         storage.properties.put(id, new ConcurrentHashMap<String, Value>());
-         storage.policies.put(id, new CopyOnWriteArraySet<String>());
-         storage.permissions.put(id, new ConcurrentHashMap<String, Set<String>>());
-         List<String> versions = new CopyOnWriteArrayList<String>();
-         storage.versions.put(vsId, versions);
-         if (versioningState != VersioningState.CHECKEDOUT)
-         {
-            versions.add(id);
-         }
-         else
-         {
-            storage.workingCopies.put(vsId, id);
-         }
       }
       else
       {
          id = getObjectId();
+         vsId = getVersionSeriesId();
       }
 
       entry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue());
       entry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));
       entry.setValue(CmisConstants.CHANGE_TOKEN, new StringValue(StorageImpl.generateId()));
 
+      byte[] content = null;
+
       if (contentStream != null)
       {
          try
          {
-            byte[] content;
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             InputStream in = contentStream.getStream();
             if (in != null)
@@ -522,7 +501,6 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
                content = EMPTY_CONTENT;
             }
 
-            storage.contents.put(id, content);
          }
          catch (IOException e)
          {
@@ -531,14 +509,56 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
       }
       else if (isNew)
       {
-         storage.contents.put(id, EMPTY_CONTENT);
+         content = EMPTY_CONTENT;
       }
 
-      contentStream = null;
+      // check is max memory size reached
+      if (content != null)
+      {
+         storage.validateMemSize(content);
+      }
+
+      if (isNew)
+      {
+         if (parent != null)
+         {
+            storage.children.get(parent.getObjectId()).add(id);
+
+            Set<String> parents = new CopyOnWriteArraySet<String>();
+            parents.add(parent.getObjectId());
+            storage.parents.put(id, parents);
+         }
+         else
+         {
+            storage.unfiled.add(id);
+            storage.parents.put(id, new CopyOnWriteArraySet<String>());
+         }
+
+         storage.properties.put(id, new ConcurrentHashMap<String, Value>());
+         storage.policies.put(id, new CopyOnWriteArraySet<String>());
+         storage.permissions.put(id, new ConcurrentHashMap<String, Set<String>>());
+         List<String> versions = new CopyOnWriteArrayList<String>();
+         storage.versions.put(vsId, versions);
+         if (versioningState != VersioningState.CHECKEDOUT)
+         {
+            versions.add(id);
+         }
+         else
+         {
+            storage.workingCopies.put(vsId, id);
+         }
+      }
+
+      if (content != null)
+      {
+         storage.contents.put(id, content);
+      }
 
       storage.properties.get(id).putAll(entry.getValues());
       storage.policies.get(id).addAll(entry.getPolicies());
       storage.permissions.get(id).putAll(entry.getPermissions());
+
+      contentStream = null;
    }
 
    protected void delete() throws ConstraintException, StorageException

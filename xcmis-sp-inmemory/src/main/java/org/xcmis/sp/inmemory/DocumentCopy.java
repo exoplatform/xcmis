@@ -86,10 +86,10 @@ class DocumentCopy extends DocumentDataImpl
       entry.setValue(CmisConstants.VERSION_SERIES_ID, new StringValue(StorageImpl.generateId()));
       entry.setValue(CmisConstants.IS_LATEST_VERSION, new BooleanValue(true));
       entry.setValue(CmisConstants.IS_MAJOR_VERSION, new BooleanValue(versioningState == VersioningState.MAJOR));
-      entry.setValue(CmisConstants.VERSION_LABEL, new StringValue(versioningState == VersioningState.CHECKEDOUT ? pwcLabel
-         : latestLabel));
-      entry.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT,
-         new BooleanValue(versioningState == VersioningState.CHECKEDOUT));
+      entry.setValue(CmisConstants.VERSION_LABEL, new StringValue(versioningState == VersioningState.CHECKEDOUT
+         ? pwcLabel : latestLabel));
+      entry.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(
+         versioningState == VersioningState.CHECKEDOUT));
       entry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue(""));
       entry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));
       entry.setValue(CmisConstants.CHANGE_TOKEN, new StringValue(StorageImpl.generateId()));
@@ -98,24 +98,6 @@ class DocumentCopy extends DocumentDataImpl
          entry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue(id));
          entry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, new StringValue(""));
       }
-
-      if (parent != null)
-      {
-         storage.children.get(parent.getObjectId()).add(id);
-
-         Set<String> parents = new CopyOnWriteArraySet<String>();
-         parents.add(parent.getObjectId());
-         storage.parents.put(id, parents);
-      }
-      else
-      {
-         storage.unfiled.add(id);
-         storage.parents.put(id, new CopyOnWriteArraySet<String>());
-      }
-
-      storage.properties.put(id, new ConcurrentHashMap<String, Value>());
-      storage.policies.put(id, new CopyOnWriteArraySet<String>());
-      storage.permissions.put(id, new ConcurrentHashMap<String, Set<String>>());
 
       // TODO : copy the other properties from source.
 
@@ -165,6 +147,27 @@ class DocumentCopy extends DocumentDataImpl
       {
          content = EMPTY_CONTENT;
       }
+
+      // check is max memory size reached
+      storage.validateMemSize(content);
+
+      if (parent != null)
+      {
+         storage.children.get(parent.getObjectId()).add(id);
+
+         Set<String> parents = new CopyOnWriteArraySet<String>();
+         parents.add(parent.getObjectId());
+         storage.parents.put(id, parents);
+      }
+      else
+      {
+         storage.unfiled.add(id);
+         storage.parents.put(id, new CopyOnWriteArraySet<String>());
+      }
+
+      storage.properties.put(id, new ConcurrentHashMap<String, Value>());
+      storage.policies.put(id, new CopyOnWriteArraySet<String>());
+      storage.permissions.put(id, new ConcurrentHashMap<String, Set<String>>());
 
       storage.contents.put(id, content);
       storage.properties.get(id).putAll(entry.getValues());
