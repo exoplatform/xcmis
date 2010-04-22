@@ -62,8 +62,6 @@ import com.google.gwt.user.client.Window;
 public class SamplePresenter implements RepositoriesReceivedHandler, ChildrenReceivedHandler, FolderCreatedHandler,
    DocumentCreatedHandler
 {
-//   private String url = "/rest/cmisatom";
-   
    private String url = "http://xcmis.org/rest/cmisatom";
    
    private RepositoryService repositoryService;
@@ -287,8 +285,7 @@ public class SamplePresenter implements RepositoriesReceivedHandler, ChildrenRec
 
       if (baseObjectTypeIds.equals(EnumBaseObjectTypeIds.CMIS_FOLDER))
       {
-         /* If object is folder get http://docs.oasis-open.org/ns/cmis/link/200908/foldertree relation */
-         relation = EnumLinkRelation.CMIS_FOLDERTREE;
+         relation = EnumLinkRelation.DOWN;
       }
       else if (baseObjectTypeIds.equals(EnumBaseObjectTypeIds.CMIS_DOCUMENT))
       {
