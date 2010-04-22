@@ -431,7 +431,7 @@ public class FolderChildrenCollectionTest extends BaseTest
       assertEquals(201, resp.getStatus());
       byte[] b = new byte[128];
       ContentStream docStream = conn.getContentStream(docId, null, -1, -1);
-      System.out.println(docStream.getMediaType());
+      //      System.out.println(docStream.getMediaType());
       int r = docStream.getStream().read(b);
       assertEquals("тест", new String(b, 0, r, docStream.getMediaType().getParameter("charset")));
    }

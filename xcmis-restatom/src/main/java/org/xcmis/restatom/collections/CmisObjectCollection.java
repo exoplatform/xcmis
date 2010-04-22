@@ -22,10 +22,8 @@ package org.xcmis.restatom.collections;
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.i18n.iri.IRI;
 import org.apache.abdera.model.Content;
-import org.apache.abdera.model.DateTime;
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
-import org.apache.abdera.model.IRIElement;
 import org.apache.abdera.model.Link;
 import org.apache.abdera.model.Person;
 import org.apache.abdera.model.Content.Type;
@@ -66,8 +64,6 @@ import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.Rendition;
 import org.xcmis.spi.model.RepositoryCapabilities;
-import org.xcmis.spi.model.impl.DateTimeProperty;
-import org.xcmis.spi.model.impl.IdProperty;
 import org.xcmis.spi.model.impl.StringProperty;
 
 import java.io.IOException;
@@ -1291,7 +1287,14 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
                   }
                   else
                   {
-                     data = content.getValue().getBytes("UTF-8");
+                     String charset = mediaType.getParameter(CmisConstants.CHARSET);
+                     if (charset == null)
+                     {
+                        // workaround
+                        mediaType.getParameters().put(CmisConstants.CHARSET, "UTF-8");
+                     }
+                     data = content.getValue().getBytes(charset == null ? "UTF-8" : charset);
+
                   }
 
                   contentStream = new BaseContentStream(data, null, mediaType);
@@ -1564,26 +1567,26 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
             prop.getValues().add(title);
          }
       }
-//      // atom:id SHOULD be derived from cmis:objectId. 
-//      IRIElement idElement = entry.getIdElement();
-//      String id = idElement != null ? idElement.getValue().Text() : null;
-//      if (id != null && id.length() > 0)
-//      {
-//         IdProperty prop = (IdProperty)getProperty(object, CmisConstants.OBJECT_ID);
-//         if (prop == null)
-//         {
-//            prop = new IdProperty();
-//            prop.setId(CmisConstants.OBJECT_ID);
-//            prop.setLocalName(CmisConstants.OBJECT_ID);
-//            prop.getValues().add(id);
-//            object.getProperties().put(prop.getId(), prop);
-//         }
-//         else
-//         {
-//            prop.getValues().clear();
-//            prop.getValues().add(id);
-//         }
-//      }
+      //      // atom:id SHOULD be derived from cmis:objectId.
+      //      IRIElement idElement = entry.getIdElement();
+      //      String id = idElement != null ? idElement.getValue().Text() : null;
+      //      if (id != null && id.length() > 0)
+      //      {
+      //         IdProperty prop = (IdProperty)getProperty(object, CmisConstants.OBJECT_ID);
+      //         if (prop == null)
+      //         {
+      //            prop = new IdProperty();
+      //            prop.setId(CmisConstants.OBJECT_ID);
+      //            prop.setLocalName(CmisConstants.OBJECT_ID);
+      //            prop.getValues().add(id);
+      //            object.getProperties().put(prop.getId(), prop);
+      //         }
+      //         else
+      //         {
+      //            prop.getValues().clear();
+      //            prop.getValues().add(id);
+      //         }
+      //      }
       // atom:author/atom:name MUST be cmis:createdBy
       String author = entry.getAuthor() != null ? entry.getAuthor().getName() : null;
       if (author != null && author.length() > 0)
