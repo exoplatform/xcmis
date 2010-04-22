@@ -146,8 +146,6 @@ public interface DocumentData extends ObjectData
     * 
     * @return PWC
     * @throws ConstraintException if the object is not versionable
-    * @throws UpdateConflictException if update an object that is no longer
-    *         current
     * @throws VersioningException if object is not latest version of document
     *         version and it is not supported to checked-out other then latest
     *         version

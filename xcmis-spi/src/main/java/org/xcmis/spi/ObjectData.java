@@ -216,6 +216,7 @@ public interface ObjectData
    /**
     * Shortcut setter for 'cmis:name' property.
     *
+    *@param name String name
     * @throws NameConstraintViolationException if <i>cmis:name</i> specified in
     *         properties throws conflict
     */
@@ -235,7 +236,7 @@ public interface ObjectData
    Map<String, Property<?>> getProperties();
 
    /**
-    * Get subset of properties accepted by {@link PropertyFilter}
+    * Get subset of properties accepted by {@link PropertyFilter}.
     *
     * @param filter property filter
     * @return subset of properties
@@ -253,8 +254,6 @@ public interface ObjectData
     * @throws ConstraintException if value of the property violates the
     *         min/max/required/length constraints specified in the property
     *         definition in the object type
-    * @throws NameConstraintViolationException if <i>cmis:name</i> specified in
-    *         properties throws conflict
     */
    void setProperty(Property<?> property) throws ConstraintException;
 

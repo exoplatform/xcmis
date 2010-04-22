@@ -33,7 +33,7 @@ public interface RenditionManager
    /**
     * Get all renditions of specified entry.
     *
-    * @param object ObjectData
+    * @param obj ObjectData
     * @return set of object renditions. If object has not renditions then empty
     *            iterator will be returned.
     * @throws StorageException if any other CMIS repository error occurs
