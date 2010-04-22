@@ -52,7 +52,7 @@ import java.util.Set;
 import javax.jcr.Session;
 
 /**
- * {@link Storage} with implemented Storage.query(Query query)  method
+ * {@link Storage} with implemented Storage.query(Query query)  method.
  */
 public class QueryableStorage extends StorageImpl
 {
@@ -67,8 +67,9 @@ public class QueryableStorage extends StorageImpl
    private final QueryParser cmisQueryParser;
 
    /**
-    * @param session
-    * @param configuration
+    * @param session Session
+    * @param configuration StorageConfiguration
+    * @parem searchService SearchService
     */
    public QueryableStorage(Session session, StorageConfiguration configuration, SearchService searchService)
    {
@@ -78,9 +79,10 @@ public class QueryableStorage extends StorageImpl
    }
 
    /**
-    * @param session
-    * @param configuration
-    * @param renditionManager
+    * Constructor.
+    * @param session Session
+    * @param configuration StorageConfiguration
+    * @param renditionManager RenditionManagerImpl
     */
    public QueryableStorage(Session session, StorageConfiguration configuration, RenditionManagerImpl renditionManager,
       SearchService searchService)
@@ -316,9 +318,9 @@ public class QueryableStorage extends StorageImpl
       }
 
       /**
-       * Return comparable location of the object
-       * @param identifer
-       * @return
+       * Return comparable location of the object.
+       * @param identifer String
+       * @return path String
        */
       public String getPath(String identifer)
       {

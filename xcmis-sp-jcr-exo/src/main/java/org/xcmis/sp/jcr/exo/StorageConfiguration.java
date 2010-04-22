@@ -22,7 +22,6 @@ package org.xcmis.sp.jcr.exo;
 import org.xcmis.search.config.IndexConfiguration;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**

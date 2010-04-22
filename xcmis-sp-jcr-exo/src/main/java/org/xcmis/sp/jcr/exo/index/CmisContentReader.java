@@ -45,7 +45,8 @@ public class CmisContentReader extends ContentReaderInterceptor
    private final ContentEntryAdapter contentEntryAdapter;
 
    /**
-    * @param storage
+    * Constructor.
+    * @param storage Storage
     */
    public CmisContentReader(Storage storage)
    {

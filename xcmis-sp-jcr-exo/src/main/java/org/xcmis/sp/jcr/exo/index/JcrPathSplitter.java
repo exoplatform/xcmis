@@ -43,6 +43,7 @@ public class JcrPathSplitter implements PathSplitter<String>
 
    /**
     * 
+    * @param locationFactory LocationFactory
     */
    public JcrPathSplitter(LocationFactory locationFactory)
    {

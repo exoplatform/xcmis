@@ -38,8 +38,10 @@ public class CmisSchemaTableResolver extends SchemaTableResolver
    private final TypeManager typeManager;
 
    /**
-    * @param nameConverter
-    * @param schema
+    *  Instantiates new instance of CmisSchemaTableResolver.
+    * @param nameConverter NameConverter
+    * @param schema Schema
+    * @param typeManager TypeManager
     */
    public CmisSchemaTableResolver(NameConverter nameConverter, Schema schema, TypeManager typeManager)
    {

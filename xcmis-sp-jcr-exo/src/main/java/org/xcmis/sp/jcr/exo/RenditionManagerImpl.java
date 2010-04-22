@@ -32,15 +32,18 @@ import org.xcmis.spi.utils.MimeType;
 import java.io.IOException;
 import java.util.Map;
 
+/**
+ * CMIS rendition manager.
+ *
+ * @author <a href="mailto:max.shaposhnik@exoplatform.com">Max Shaposhnik</a>
+ * @version $Id$
+ */
 public class RenditionManagerImpl implements RenditionManager
 {
 
    /** The streams map. */
 
    private final Map<MimeType, RenditionProvider> renditionProviders;
-
-   /** Logger. */
-   //   private static final Log LOG = ExoLogger.getLogger(RenditionManagerImpl.class);
 
    public RenditionManagerImpl(Map<MimeType, RenditionProvider> renditionProviders)
    {
@@ -113,6 +116,12 @@ public class RenditionManagerImpl implements RenditionManager
       return null;
    }
 
+   /**
+    * Encode string into hex-string.
+    * 
+    * @param in the input string
+    * @return the string hex-sequence
+    */
    private static String encode(String in)
    {
       StringBuffer out = new StringBuffer();
@@ -123,6 +132,12 @@ public class RenditionManagerImpl implements RenditionManager
       return out.toString();
    }
 
+   /**
+    * Decode string from hex-string.
+    * 
+    * @param in the input string
+    * @return string output
+    */
    private static String decode(String in)
    {
       StringBuffer out = new StringBuffer();

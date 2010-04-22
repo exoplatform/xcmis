@@ -56,7 +56,8 @@ public class CmisSchema implements Schema
    private final TypeManager typeManager;
 
    /**
-    * @param storage
+    * Constructor.
+    * @param typeManager TypeManager
     */
    public CmisSchema(TypeManager typeManager)
    {
@@ -84,9 +85,9 @@ public class CmisSchema implements Schema
       private final TypeDefinition typeDefinition;
 
       /**
+       * Instantiates new instance of CmisTableDefinition. 
        * @param typeDefinition
-       * @param typeId
-       * @param typeManager
+       * @param name SelectorName
        */
       public CmisTableDefinition(SelectorName name, TypeDefinition typeDefinition)
       {

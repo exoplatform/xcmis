@@ -21,8 +21,6 @@ package org.xcmis.sp.jcr.exo;
 
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.container.xml.ObjectParameter;
-import org.exoplatform.container.xml.ValueParam;
-import org.exoplatform.container.xml.ValuesParam;
 import org.exoplatform.services.document.DocumentReaderService;
 import org.exoplatform.services.jcr.RepositoryService;
 import org.exoplatform.services.jcr.config.RepositoryConfigurationException;
@@ -114,7 +112,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
       }
 
       /**
-       * @param configs the list of storages configuration
+       * @param storages the list of storages configuration
        */
       public void setStorages(List<StorageConfiguration> storages)
       {
@@ -285,7 +283,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
    }
 
    /**
-    *
+    * Gets the search service. 
     * @return instance of {@link SearchService}
     * @throws SearchServiceException
     */

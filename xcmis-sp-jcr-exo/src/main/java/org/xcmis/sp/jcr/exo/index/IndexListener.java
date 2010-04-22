@@ -62,7 +62,7 @@ public class IndexListener
    private final SearchService searchService;
 
    /**
-    * Content storage
+    * Content storage.
     */
    private final Storage storage;
 
@@ -124,7 +124,7 @@ public class IndexListener
    }
 
    /**
-    * Adapt changes produced by CMIS SPI to {@link ContentEntry} acceptable for
+    * Adapt changes produced by CMIS SPI to {@link ContentEntry} acceptable for.
     * {@link SearchService}
     */
    public static class ContentEntryAdapter
@@ -132,8 +132,8 @@ public class IndexListener
       /**
        * Convert {@link ObjectData} to {@link ContentEntry}.
        *
-       * @param objectData
-       * @return
+       * @param objectData ObjectData
+       * @return contentEntry ContentEntry
        * @throws IOException
        */
       public ContentEntry createEntry(ObjectData objectData) throws IOException
@@ -160,7 +160,7 @@ public class IndexListener
 
       /**
        * @param objectData
-       * @return
+       * @return ContentEntry ContentEntry;
        */
       private ContentEntry createFromRelationship(RelationshipData objectData)
       {
@@ -172,8 +172,8 @@ public class IndexListener
       }
 
       /**
-       * @param objectData
-       * @return
+       * @param objectData PolicyData
+       * @return contentEntry ContentEntry
        */
       private ContentEntry createFromPolicy(PolicyData objectData)
       {
@@ -219,8 +219,8 @@ public class IndexListener
       /**
        * Convert {@link FolderData} to {@link ContentEntry}.
        *
-       * @param objectData
-       * @return
+       * @param objectData FolderData
+       * @return contentEntry ContentEntry
        */
       private ContentEntry createFromFolder(FolderData objectData)
       {
@@ -233,7 +233,7 @@ public class IndexListener
        * Convert {@link DocumentData} to {@link ContentEntry}.
        *
        * @param objectData
-       * @return
+       * @return contentEntry ContentEntry.
        * @throws IOException
        */
       private ContentEntry createFromDocument(DocumentData objectData) throws IOException
@@ -256,7 +256,7 @@ public class IndexListener
    private static class MockContentEntry
    {
       /**
-       * List of table names which identifies this content
+       * List of table names which identifies this content.
        */
       List<String> tableNames;
 
@@ -266,7 +266,7 @@ public class IndexListener
       String name;
 
       /**
-       * List of parent entry identifiers
+       * List of parent entry identifiers.
        */
       List<String> parentIdentifiers;
 
@@ -276,7 +276,7 @@ public class IndexListener
       String identifier;
 
       /**
-       * List of entry properties
+       * List of entry properties.
        */
       List<Property> properties;
 
