@@ -1010,7 +1010,7 @@ public class StorageImpl implements Storage
                   CapabilityRendition.READ, false, true, true, true, false, true, true, false), new ACLCapability(
                   Collections.unmodifiableList(permissionMapping), Collections.unmodifiableList(permissions),
                   AccessControlPropagation.OBJECTONLY, SupportedPermissions.BASIC), SystemIdentity.ANONIM,
-               SystemIdentity.ANY, null, null, true, null, "eXo Platform", "xCMIS (eXo JCR SP)", "1.0-Beta02", null);
+               SystemIdentity.ANY, null, null, true, null, "eXo", "xCMIS (eXo JCR SP)", "1.0", null);
       }
 
       return repositoryInfo;
