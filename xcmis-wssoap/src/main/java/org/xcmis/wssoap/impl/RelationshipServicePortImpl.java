@@ -51,17 +51,12 @@ public class RelationshipServicePortImpl implements RelationshipServicePort
    /** Logger. */
    private static final Log LOG = ExoLogger.getLogger(RelationshipServicePortImpl.class);
 
-   /** StorageProvider. */
-   //   private final StorageProvider storageProvider;
-
    /**
     * Constructs instance of <code>RelationshipServicePortImpl</code> .
     *
-    * @param relationshipService RelationshipService
     */
-   public RelationshipServicePortImpl(/*StorageProvider storageProvider*/)
+   public RelationshipServicePortImpl()
    {
-      //      this.storageProvider = storageProvider;
    }
 
    /**
@@ -86,7 +81,6 @@ public class RelationshipServicePortImpl implements RelationshipServicePort
 
       try
       {
-//         conn = storageProvider.getConnection(repositoryId);
          conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
 
          return TypeConverter.getCmisObjectListType(conn.getObjectRelationships(

@@ -58,17 +58,12 @@ public class NavigationServicePortImpl implements NavigationServicePort
    /** Logger. */
    private static final Log LOG = ExoLogger.getLogger(NavigationServicePortImpl.class);
 
-   /** StorageProvider. */
-   //   private final StorageProvider storageProvider;
-
    /**
     * Constructs instance of <code>NavigationServicePortImpl</code> .
     *
-    * @param storageProvider StorageProvider
     */
-   public NavigationServicePortImpl(/*StorageProvider storageProvider*/)
+   public NavigationServicePortImpl()
    {
-      //      this.storageProvider = storageProvider;
    }
 
    /**
@@ -92,7 +87,6 @@ public class NavigationServicePortImpl implements NavigationServicePort
       Connection conn = null;
       try
       {
-         //         conn = storageProvider.getConnection(repositoryId);
          conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
 
          return TypeConverter.getCmisObjectListType(conn.getCheckedOutDocs(folderId, //
@@ -141,7 +135,6 @@ public class NavigationServicePortImpl implements NavigationServicePort
       Connection conn = null;
       try
       {
-         //         conn = storageProvider.getConnection(repositoryId);
          conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
 
          return TypeConverter.getCmisObjectInFolderListType(conn.getChildren(folderId, //
@@ -190,7 +183,6 @@ public class NavigationServicePortImpl implements NavigationServicePort
       Connection conn = null;
       try
       {
-         //         conn = storageProvider.getConnection(repositoryId);
          conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
 
          return TypeConverter.getCmisObjectInFolderContainerTypeList(conn.getDescendants(folderId, //
@@ -229,7 +221,6 @@ public class NavigationServicePortImpl implements NavigationServicePort
       Connection conn = null;
       try
       {
-         //         conn = storageProvider.getConnection(repositoryId);
          conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
 
          return TypeConverter.getCmisObjectType(conn.getFolderParent(folderId, true, propertyFilter));
@@ -268,7 +259,6 @@ public class NavigationServicePortImpl implements NavigationServicePort
       Connection conn = null;
       try
       {
-         //         conn = storageProvider.getConnection(repositoryId);
          conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
 
          return TypeConverter.getCmisObjectInFolderContainerTypeList(conn.getFolderTree(folderId, //
@@ -313,7 +303,6 @@ public class NavigationServicePortImpl implements NavigationServicePort
       Connection conn = null;
       try
       {
-         //         conn = storageProvider.getConnection(repositoryId);
          conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
 
          List<CmisObjectParentsType> res = new ArrayList<CmisObjectParentsType>();

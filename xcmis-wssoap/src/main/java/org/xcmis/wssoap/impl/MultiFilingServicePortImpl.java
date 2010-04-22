@@ -45,17 +45,12 @@ public class MultiFilingServicePortImpl implements MultiFilingServicePort
    /** Logger. */
    private static final Log LOG = ExoLogger.getLogger(MultiFilingServicePortImpl.class);
 
-   /** StorageProvider . */
-   //   private final StorageProvider storageProvider;
-
    /**
     * Constructs instance of <code>MultiFilingServicePortImpl</code> .
     *
-    * @param storageProvider StorageProvider
     */
-   public MultiFilingServicePortImpl(/*StorageProvider storageProvider*/)
+   public MultiFilingServicePortImpl()
    {
-      //      this.storageProvider = storageProvider;
    }
 
    /**
@@ -71,7 +66,6 @@ public class MultiFilingServicePortImpl implements MultiFilingServicePort
       Connection conn = null;
       try
       {
-         //         conn = storageProvider.getConnection(repositoryId);
          conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
 
          conn.addObjectToFolder(objectId, folderId, allVersions);
@@ -104,7 +98,6 @@ public class MultiFilingServicePortImpl implements MultiFilingServicePort
       Connection conn = null;
       try
       {
-         //         conn = storageProvider.getConnection(repositoryId);
          conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
 
          conn.removeObjectFromFolder(objectId, folderId);

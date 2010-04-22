@@ -45,17 +45,13 @@ public class PolicyServicePortImpl implements PolicyServicePort
    /** Logger. */
    private static final Log LOG = ExoLogger.getLogger(PolicyServicePortImpl.class);
 
-   /** StorageProvider . */
-   //   private final StorageProvider storageProvider;
-
    /**
     * Constructs instance of <code>PolicyServicePortImpl</code> .
     *
     * @param policyService PolicyService
     */
-   public PolicyServicePortImpl(/*StorageProvider storageProvider*/)
+   public PolicyServicePortImpl()
    {
-      //      this.storageProvider = storageProvider;
    }
 
    /**
@@ -71,7 +67,6 @@ public class PolicyServicePortImpl implements PolicyServicePort
       Connection conn = null;
       try
       {
-         //         conn = storageProvider.getConnection(repositoryId);
          conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
 
          conn.applyPolicy(policyId, objectId);
@@ -104,7 +99,6 @@ public class PolicyServicePortImpl implements PolicyServicePort
       Connection conn = null;
       try
       {
-         //         conn = storageProvider.getConnection(repositoryId);
          conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
 
          return TypeConverter.getCmisObjectTypeList(conn.getAppliedPolicies(objectId, true, propertyFilter));
@@ -136,7 +130,6 @@ public class PolicyServicePortImpl implements PolicyServicePort
       Connection conn = null;
       try
       {
-         //         conn = storageProvider.getConnection(repositoryId);
          conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
 
          conn.removePolicy(policyId, objectId);

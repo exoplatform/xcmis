@@ -51,17 +51,12 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
    /** Logger. */
    private static final Log LOG = ExoLogger.getLogger(DiscoveryServicePortImpl.class);
 
-   /** StorageProvider. */
-   //   private final StorageProvider storageProvider;
-
    /**
     * Constructs instance of <code>DiscoveryServicePortImpl</code> .
     *
-    * @param storageProvider StorageProvider
     */
-   public DiscoveryServicePortImpl(/*StorageProvider storageProvider*/)
+   public DiscoveryServicePortImpl()
    {
-      //      this.storageProvider = storageProvider;
    }
 
    /**
@@ -77,7 +72,6 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
       try
       {
          String repositoryId = parameters.getRepositoryId();
-         //         conn = storageProvider.getConnection(repositoryId);
          conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
 
          String statement = parameters.getStatement();
@@ -142,7 +136,6 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
       Connection conn = null;
       try
       {
-         //         conn = storageProvider.getConnection(repositoryId);
          conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
 
          objects.value =
