@@ -202,10 +202,7 @@ public class RelationshipsCollection extends CmisObjectCollection
 
       String objectId = getId(request);
       String typeId = request.getParameter(AtomCMIS.PARAM_TYPE_ID);
-      // XXX At the moment get all properties from back-end. We need some of them for build correct feed.
-      // Filter will be applied during build final Atom Document.
-      //      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
-      String propertyFilter = null;
+      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
       boolean includeSubRelationship =
          getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_SUB_RELATIONSHIP_TYPES, false);
       boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);

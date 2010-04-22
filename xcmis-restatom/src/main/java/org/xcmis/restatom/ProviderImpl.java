@@ -92,11 +92,10 @@ public class ProviderImpl extends AbstractProvider
          "slash", // No slash if 'typeid' is absent.
          "typeid");
 
-      resolver.setPattern("/cmisatom/([^/]+)/checkedout(/)?([^/?]+)?(\\??.*)?", //
+      resolver.setPattern("/cmisatom/([^/]+)/checkedout(/)?(\\??.*)?", //
          TargetType.TYPE_COLLECTION, //
          "repoid", //
-         "slash", // No slash if 'typeid' is absent.
-         "objectid");
+         "slash"); // Slash.
 
       resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+)/children/([^/?]+)(\\??.*)?", //
          TargetType.TYPE_COLLECTION, //

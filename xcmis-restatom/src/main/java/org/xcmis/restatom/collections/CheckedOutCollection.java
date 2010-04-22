@@ -29,6 +29,7 @@ import org.apache.abdera.protocol.server.ResponseContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
+import org.xcmis.restatom.abdera.ObjectTypeElement;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
@@ -40,6 +41,8 @@ import org.xcmis.spi.StorageException;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.IncludeRelationships;
+import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.impl.IdProperty;
 
 import java.util.Calendar;
 
@@ -70,10 +73,7 @@ public class CheckedOutCollection extends CmisObjectCollection
    {
       boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
       String orderBy = request.getParameter(AtomCMIS.PARAM_ORDER_BY);
-      // XXX At the moment get all properties from back-end. We need some of them for build correct feed.
-      // Filter will be applied during build final Atom Document.
-      //      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
-      String propertyFilter = null;
+      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
       String renditionFilter = request.getParameter(AtomCMIS.PARAM_RENDITION_FILTER);
       IncludeRelationships includeRelationships;
       try
@@ -94,8 +94,7 @@ public class CheckedOutCollection extends CmisObjectCollection
       try
       {
          conn = getConnection(request);
-         // NOTE : Not use method getId(request) here. It may gives incorrect id.
-         String folderId = request.getTarget().getParameter("objectid");
+         String folderId = getId(request);
          ItemsList<CmisObject> list =
             conn.getCheckedOutDocs(folderId, includeAllowableActions, includeRelationships, true, propertyFilter,
                renditionFilter, orderBy, maxItems, skipCount);
@@ -165,10 +164,11 @@ public class CheckedOutCollection extends CmisObjectCollection
    @Override
    public String getId(RequestContext request)
    {
+      // SHOULD use ONLY for GET method request.
       // XXX Not use this method for getting id of folder from which checked-out
       // must be retrieved. Folder identifier may be absent but it is not allowed
       // for Abdera.
-      String id = super.getId(request);
+      String id = request.getParameter("folderId");
       if (id != null)
       {
          return id;
@@ -191,21 +191,39 @@ public class CheckedOutCollection extends CmisObjectCollection
    @Override
    public ResponseContext postEntry(RequestContext request)
    {
-      String id = null;
+      Entry entry;
       try
       {
-         id = getEntryFromRequest(request).getId().toString();
+         entry = getEntryFromRequest(request);
       }
-      catch (ResponseContextException e1)
+      catch (ResponseContextException rce)
       {
-         // support when id sent directly
+         return rce.getResponseContext();
       }
+
+      ObjectTypeElement objectElement = entry.getFirstChild(AtomCMIS.OBJECT);
+      boolean hasCMISElement = objectElement != null;
+      CmisObject object = hasCMISElement ? object = objectElement.getObject() : new CmisObject();
+      updatePropertiesFromEntry(object, entry);
+      String id = null;
+      if (hasCMISElement)
+      {
+         for (Property<?> p : object.getProperties().values())
+         {
+            String pName = p.getId();
+            if (CmisConstants.OBJECT_ID.equals(pName))
+            {
+               id = ((IdProperty)p).getValues().get(0);
+            }
+         }
+      }
+
       Connection conn = null;
       try
       {
          conn = getConnection(request);
-         String pwcId = conn.checkout(id == null ? getId(request) : id);
-         Entry entry = request.getAbdera().getFactory().newEntry();
+         String pwcId = conn.checkout(id);
+         entry = request.getAbdera().getFactory().newEntry();
          try
          {
             addEntryDetails(request, entry, request.getResolvedUri(), getEntry(pwcId, request));

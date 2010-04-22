@@ -86,11 +86,7 @@ public class ParentsCollection extends CmisObjectCollection
       boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
       boolean includeRelativePathSegment =
          getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_RELATIVE_PATH_SEGMENT, false);
-
-      // XXX At the moment get all properties from back-end. We need some of them for build correct feed.
-      // Filter will be applied during build final Atom Document.
-      //      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
-      String propertyFilter = null;
+      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
       String renditionFilter = request.getParameter(AtomCMIS.PARAM_RENDITION_FILTER);
       IncludeRelationships includeRelationships;
       try
@@ -112,7 +108,8 @@ public class ParentsCollection extends CmisObjectCollection
          conn = getConnection(request);
          String objectId = getId(request);
          CmisObject object =
-            conn.getObject(objectId, false, IncludeRelationships.NONE, false, false, true, CmisConstants.BASE_TYPE_ID, null);
+            conn.getObject(objectId, false, IncludeRelationships.NONE, false, false, true, CmisConstants.BASE_TYPE_ID,
+               null);
 
          switch (getBaseObjectType(object))
          {

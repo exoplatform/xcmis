@@ -137,10 +137,7 @@ public class FolderDescentantsCollection extends CmisObjectCollection
    {
       boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
       boolean includePathSegments = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PATH_SEGMENT, false);
-      // XXX At the moment get all properties from back-end. We need some of them for build correct feed.
-      // Filter will be applied during build final Atom Document.
-      //      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
-      String propertyFilter = null;
+      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
       String renditionFilter = request.getParameter(AtomCMIS.PARAM_RENDITION_FILTER);
       IncludeRelationships includeRelationships;
       try

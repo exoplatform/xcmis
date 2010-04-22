@@ -166,7 +166,8 @@ public class TypesChildrenCollectionTest extends BaseTest
       String req = "<?xml version='1.0' encoding='utf-8'?>" //
          + "<entry xmlns='http://www.w3.org/2005/Atom'" //
          + " xmlns:cmis='" + CmisConstants.CMIS_NS_URI + "'" //
-         + " xmlns:cmisra='" + AtomCMIS.CMISRA_NS_URI + "'>" + "<id>cmis:folder1</id>"//
+         + " xmlns:cmisra='" + AtomCMIS.CMISRA_NS_URI + "'>"//
+         + "<id>cmis:folder1</id>"//
          + "<cmisra:type xmlns:cmis=\"http://docs.oasis-open.org/ns/cmis/core/200908/\">"//
          + "<cmis:id>cmis:folder1</cmis:id>"//
          + "<cmis:baseId>cmis:folder</cmis:baseId>"//

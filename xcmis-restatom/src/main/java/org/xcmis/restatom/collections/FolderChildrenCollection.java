@@ -97,10 +97,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
       int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CmisConstants.MAX_ITEMS);
       int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CmisConstants.SKIP_COUNT);
       boolean includePathSegments = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PATH_SEGMENT, false);
-      // XXX At the moment get all properties from back-end. We need some of them for build correct feed.
-      // Filter will be applied during build final Atom Document.
-      //      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
-      String propertyFilter = null;
+      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
       String renditionFilter = request.getParameter(AtomCMIS.PARAM_RENDITION_FILTER);
       String orderBy = request.getParameter(AtomCMIS.PARAM_ORDER_BY);
       Connection conn = null;

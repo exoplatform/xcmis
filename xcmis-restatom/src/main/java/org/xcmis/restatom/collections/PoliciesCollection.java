@@ -71,7 +71,6 @@ public class PoliciesCollection extends CmisObjectCollection
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
       String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
-
       int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CmisConstants.MAX_ITEMS);
       int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CmisConstants.SKIP_COUNT);
 
@@ -138,6 +137,7 @@ public class PoliciesCollection extends CmisObjectCollection
    {
       Entry entry;
       String objectId;
+
       try
       {
          entry = getEntryFromRequest(request);
@@ -149,16 +149,19 @@ public class PoliciesCollection extends CmisObjectCollection
       }
 
       ObjectTypeElement objectElement = entry.getFirstChild(AtomCMIS.OBJECT);
-      CmisObject object = objectElement.getObject();
-
+      boolean hasCMISElement = objectElement != null;
+      CmisObject object = hasCMISElement ? object = objectElement.getObject() : new CmisObject();
+      updatePropertiesFromEntry(object, entry);
       String policyId = null;
-
-      for (Property<?> p : object.getProperties().values())
+      if (hasCMISElement)
       {
-         String pName = p.getId();
-         if (pName.equals(CmisConstants.OBJECT_ID))
+         for (Property<?> p : object.getProperties().values())
          {
-            policyId = ((IdProperty)p).getValues().get(0);
+            String pName = p.getId();
+            if (CmisConstants.OBJECT_ID.equals(pName))
+            {
+               policyId = ((IdProperty)p).getValues().get(0);
+            }
          }
       }
 

@@ -22,8 +22,10 @@ package org.xcmis.restatom.collections;
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.i18n.iri.IRI;
 import org.apache.abdera.model.Content;
+import org.apache.abdera.model.DateTime;
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
+import org.apache.abdera.model.IRIElement;
 import org.apache.abdera.model.Link;
 import org.apache.abdera.model.Person;
 import org.apache.abdera.model.Content.Type;
@@ -64,6 +66,8 @@ import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.Rendition;
 import org.xcmis.spi.model.RepositoryCapabilities;
+import org.xcmis.spi.model.impl.DateTimeProperty;
+import org.xcmis.spi.model.impl.IdProperty;
 import org.xcmis.spi.model.impl.StringProperty;
 
 import java.io.IOException;
@@ -328,10 +332,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    public CmisObject getEntry(String id, RequestContext request) throws ResponseContextException
    {
       boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
-      // XXX At the moment get all properties from back-end. We need some of them for build correct feed.
-      // Filter will be applied during build final Atom Document.
-      //      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
-      String propertyFilter = null;
+      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
       boolean includePolicies = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_POLICY_IDS, false);
       boolean includeACL = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ACL, false);
       String renditionFilter = request.getParameter(AtomCMIS.PARAM_RENDITION_FILTER);
@@ -1010,8 +1011,6 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
       ObjectTypeElement objectElement = new ObjectTypeElement(request.getAbdera().getFactory(), AtomCMIS.OBJECT);
 
-      // Apply property filter for serialized object.
-      String filter = request.getParameter(AtomCMIS.PARAM_FILTER);
       try
       {
          objectElement.build(object);
@@ -1544,26 +1543,126 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
     */
    protected void updatePropertiesFromEntry(CmisObject object, Entry entry)
    {
+      // SPEC.: 3.5.2 Entries
+      // 5522 atom:title MUST be the cmis:name property
       String title = entry.getTitle();
-      if (title != null)
+      if (title != null && title.length() > 0)
       {
          // Should never be null, but check it to avoid overwriting existed cmis:name property.
-         StringProperty name = (StringProperty)getProperty(object, CmisConstants.NAME);
-         if (name == null)
+         StringProperty prop = (StringProperty)getProperty(object, CmisConstants.NAME);
+         if (prop == null)
          {
-            name = new StringProperty();
-            name.setId(CmisConstants.NAME);
-            name.setLocalName(CmisConstants.NAME);
-            name.getValues().add(title);
-            object.getProperties().put(name.getId(), name);
+            prop = new StringProperty();
+            prop.setId(CmisConstants.NAME);
+            prop.setLocalName(CmisConstants.NAME);
+            prop.getValues().add(title);
+            object.getProperties().put(prop.getId(), prop);
          }
          else
          {
-            name.getValues().clear();
-            name.getValues().add(title);
+            prop.getValues().clear();
+            prop.getValues().add(title);
          }
       }
-      // TODO : check about other properties.
+      // 5529 atom:id SHOULD be derived from cmis:objectId. 
+      IRIElement idElement = entry.getIdElement();
+      String id = idElement != null ? idElement.getText() : null;
+      if (id != null && id.length() > 0)
+      {
+         IdProperty prop = (IdProperty)getProperty(object, CmisConstants.OBJECT_ID);
+         if (prop == null)
+         {
+            prop = new IdProperty();
+            prop.setId(CmisConstants.OBJECT_ID);
+            prop.setLocalName(CmisConstants.OBJECT_ID);
+            prop.getValues().add(id);
+            object.getProperties().put(prop.getId(), prop);
+         }
+         else
+         {
+            prop.getValues().clear();
+            prop.getValues().add(id);
+         }
+      }
+      // 5523 app:edited MUST be cmis:lastModificationDate
+      DateTime editedElement = entry.getEditedElement();
+      Calendar edited = editedElement != null ? editedElement.getCalendar() : null;
+      if (edited != null)
+      {
+         DateTimeProperty prop = (DateTimeProperty)getProperty(object, CmisConstants.LAST_MODIFICATION_DATE);
+         if (prop == null)
+         {
+            prop = new DateTimeProperty();
+            prop.setId(CmisConstants.LAST_MODIFICATION_DATE);
+            prop.setLocalName(CmisConstants.LAST_MODIFICATION_DATE);
+            prop.getValues().add(edited);
+            object.getProperties().put(prop.getId(), prop);
+         }
+         else
+         {
+            prop.getValues().clear();
+            prop.getValues().add(edited);
+         }
+      }
+      // 5524 atom:updated MUST be cmis:lastModificationDate 
+      DateTime updatedElement = entry.getUpdatedElement();
+      Calendar updated = updatedElement != null ? updatedElement.getCalendar() : null;
+      if (updated != null)
+      {
+         DateTimeProperty prop = (DateTimeProperty)getProperty(object, CmisConstants.LAST_MODIFICATION_DATE);
+         if (prop == null)
+         {
+            prop = new DateTimeProperty();
+            prop.setId(CmisConstants.LAST_MODIFICATION_DATE);
+            prop.setLocalName(CmisConstants.LAST_MODIFICATION_DATE);
+            prop.getValues().add(updated);
+            object.getProperties().put(prop.getId(), prop);
+         }
+         else
+         {
+            prop.getValues().clear();
+            prop.getValues().add(updated);
+         }
+      }
+      // 5525 atom:published MUST be cmis:creationDate
+      DateTime publishedElement = entry.getPublishedElement();
+      Calendar published = publishedElement != null ? publishedElement.getCalendar() : null;
+      if (published != null)
+      {
+         DateTimeProperty prop = (DateTimeProperty)getProperty(object, CmisConstants.CREATION_DATE);
+         if (prop == null)
+         {
+            prop = new DateTimeProperty();
+            prop.setId(CmisConstants.CREATION_DATE);
+            prop.setLocalName(CmisConstants.CREATION_DATE);
+            prop.getValues().add(published);
+            object.getProperties().put(prop.getId(), prop);
+         }
+         else
+         {
+            prop.getValues().clear();
+            prop.getValues().add(published);
+         }
+      }
+      // 5526 atom:author/atom:name MUST be cmis:createdBy
+      String author = entry.getAuthor() != null ? entry.getAuthor().getName() : null;
+      if (author != null && author.length() > 0)
+      {
+         StringProperty prop = (StringProperty)getProperty(object, CmisConstants.CREATED_BY);
+         if (prop == null)
+         {
+            prop = new StringProperty();
+            prop.setId(CmisConstants.CREATED_BY);
+            prop.setLocalName(CmisConstants.CREATED_BY);
+            prop.getValues().add(author);
+            object.getProperties().put(prop.getId(), prop);
+         }
+         else
+         {
+            prop.getValues().clear();
+            prop.getValues().add(author);
+         }
+      }
    }
 
 }

@@ -88,26 +88,24 @@ public class PoliciesCollectionTest extends BaseTest
 
    public void testApplyPolicy() throws Exception
    {
-      String s =
-         "<?xml version='1.0' encoding='UTF-8' standalone='yes'?>" //
-            + "<atom:entry xmlns:app='http://www.w3.org/2007/app' " //
-            + " xmlns:atom='http://www.w3.org/2005/Atom' "//  
-            + " xmlns:cmis='http://docs.oasis-open.org/ns/cmis/core/200908/'" //
-            + " xmlns:cmism='http://docs.oasis-open.org/ns/cmis/messaging/200908/'" //
-            + " xmlns:cmisra='http://docs.oasis-open.org/ns/cmis/restatom/200908/'>" //
-            + "<atom:author><atom:name>Makis</atom:name></atom:author>" //
-            + "<atom:content src='http://cmisexample.oasis-open.org/rep1/"
-            + policyId
-            + "' />" //
-            + "<atom:id>urn:uuid:" + policyId + "</atom:id>"
-            + "<atom:title type='text'>Security Policy</atom:title>"
-            + "<atom:updated>2009-11-26T11:49:00.212-02:00</atom:updated>" + "<cmisra:object>"
-            + "<cmis:properties>"
-            + "<cmis:propertyId localName='rep-cmis:objectId' propertyDefinitionId='cmis:objectId'>"
-            + "<cmis:value>"
-            + policyId + "</cmis:value>" + "</cmis:propertyId>" + "</cmis:properties>"
-            + "</cmisra:object>"
-            + "</atom:entry>";
+      String s = "<?xml version='1.0' encoding='UTF-8' standalone='yes'?>" //
+         + "<atom:entry xmlns:app='http://www.w3.org/2007/app' " //
+         + " xmlns:atom='http://www.w3.org/2005/Atom' "//  
+         + " xmlns:cmis='http://docs.oasis-open.org/ns/cmis/core/200908/'" //
+         + " xmlns:cmism='http://docs.oasis-open.org/ns/cmis/messaging/200908/'" //
+         + " xmlns:cmisra='http://docs.oasis-open.org/ns/cmis/restatom/200908/'>" //
+         + "<atom:author><atom:name>Makis</atom:name></atom:author>" //
+         + "<atom:content src='http://cmisexample.oasis-open.org/rep1/" + policyId + "' />" //
+         + "<atom:id>" + policyId + "</atom:id>" //
+         + "<atom:title type='text'>Security Policy</atom:title>" // 
+         + "<atom:updated>2009-11-26T11:49:00.212-02:00</atom:updated>" //
+         + "<cmisra:object>" //
+         + "<cmis:properties>" //
+         + "<cmis:propertyId localName='rep-cmis:objectId' propertyDefinitionId='cmis:objectId'>" //
+         + "<cmis:value>" + policyId + "</cmis:value>" //
+         + "</cmis:propertyId>" + "</cmis:properties>" //
+         + "</cmisra:object>" //
+         + "</atom:entry>";
 
       String requestURI = "http://localhost:8080/rest" //
          + "/cmisatom/" //

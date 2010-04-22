@@ -165,7 +165,7 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @POST
-   @Path("{repositoryId}/checkedout{rubbish:(/)?}{documentId:.*}")
+   @Path("{repositoryId}/checkedout")
    public Response checkOut(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
       throws Exception
    {
@@ -399,7 +399,7 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @GET
-   @Path("{repositoryId}/checkedout{rubbish:(/)?}{folderId:.*}")
+   @Path("{repositoryId}/checkedout")
    public Response getCheckedOut(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
    {
       return getFeed(repositoryId, httpRequest);
