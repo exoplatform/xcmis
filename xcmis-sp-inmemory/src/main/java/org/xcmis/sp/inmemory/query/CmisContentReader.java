@@ -93,7 +93,7 @@ public class CmisContentReader extends ContentReaderInterceptor
    public Object visitGetUnfiledEntriesCommand(InvocationContext ctx, GetUnfiledEntriesCommand command)
       throws Throwable
    {
-      return null;
+      return storage.getUnfiledObjectsId();
    }
 
 }
