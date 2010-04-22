@@ -1544,7 +1544,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    protected void updatePropertiesFromEntry(CmisObject object, Entry entry)
    {
       // SPEC.: 3.5.2 Entries
-      // 5522 atom:title MUST be the cmis:name property
+      // atom:title MUST be the cmis:name property
       String title = entry.getTitle();
       if (title != null && title.length() > 0)
       {
@@ -1564,87 +1564,27 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
             prop.getValues().add(title);
          }
       }
-      // 5529 atom:id SHOULD be derived from cmis:objectId. 
-      IRIElement idElement = entry.getIdElement();
-      String id = idElement != null ? idElement.getText() : null;
-      if (id != null && id.length() > 0)
-      {
-         IdProperty prop = (IdProperty)getProperty(object, CmisConstants.OBJECT_ID);
-         if (prop == null)
-         {
-            prop = new IdProperty();
-            prop.setId(CmisConstants.OBJECT_ID);
-            prop.setLocalName(CmisConstants.OBJECT_ID);
-            prop.getValues().add(id);
-            object.getProperties().put(prop.getId(), prop);
-         }
-         else
-         {
-            prop.getValues().clear();
-            prop.getValues().add(id);
-         }
-      }
-      // 5523 app:edited MUST be cmis:lastModificationDate
-      DateTime editedElement = entry.getEditedElement();
-      Calendar edited = editedElement != null ? editedElement.getCalendar() : null;
-      if (edited != null)
-      {
-         DateTimeProperty prop = (DateTimeProperty)getProperty(object, CmisConstants.LAST_MODIFICATION_DATE);
-         if (prop == null)
-         {
-            prop = new DateTimeProperty();
-            prop.setId(CmisConstants.LAST_MODIFICATION_DATE);
-            prop.setLocalName(CmisConstants.LAST_MODIFICATION_DATE);
-            prop.getValues().add(edited);
-            object.getProperties().put(prop.getId(), prop);
-         }
-         else
-         {
-            prop.getValues().clear();
-            prop.getValues().add(edited);
-         }
-      }
-      // 5524 atom:updated MUST be cmis:lastModificationDate 
-      DateTime updatedElement = entry.getUpdatedElement();
-      Calendar updated = updatedElement != null ? updatedElement.getCalendar() : null;
-      if (updated != null)
-      {
-         DateTimeProperty prop = (DateTimeProperty)getProperty(object, CmisConstants.LAST_MODIFICATION_DATE);
-         if (prop == null)
-         {
-            prop = new DateTimeProperty();
-            prop.setId(CmisConstants.LAST_MODIFICATION_DATE);
-            prop.setLocalName(CmisConstants.LAST_MODIFICATION_DATE);
-            prop.getValues().add(updated);
-            object.getProperties().put(prop.getId(), prop);
-         }
-         else
-         {
-            prop.getValues().clear();
-            prop.getValues().add(updated);
-         }
-      }
-      // 5525 atom:published MUST be cmis:creationDate
-      DateTime publishedElement = entry.getPublishedElement();
-      Calendar published = publishedElement != null ? publishedElement.getCalendar() : null;
-      if (published != null)
-      {
-         DateTimeProperty prop = (DateTimeProperty)getProperty(object, CmisConstants.CREATION_DATE);
-         if (prop == null)
-         {
-            prop = new DateTimeProperty();
-            prop.setId(CmisConstants.CREATION_DATE);
-            prop.setLocalName(CmisConstants.CREATION_DATE);
-            prop.getValues().add(published);
-            object.getProperties().put(prop.getId(), prop);
-         }
-         else
-         {
-            prop.getValues().clear();
-            prop.getValues().add(published);
-         }
-      }
-      // 5526 atom:author/atom:name MUST be cmis:createdBy
+//      // atom:id SHOULD be derived from cmis:objectId. 
+//      IRIElement idElement = entry.getIdElement();
+//      String id = idElement != null ? idElement.getValue().Text() : null;
+//      if (id != null && id.length() > 0)
+//      {
+//         IdProperty prop = (IdProperty)getProperty(object, CmisConstants.OBJECT_ID);
+//         if (prop == null)
+//         {
+//            prop = new IdProperty();
+//            prop.setId(CmisConstants.OBJECT_ID);
+//            prop.setLocalName(CmisConstants.OBJECT_ID);
+//            prop.getValues().add(id);
+//            object.getProperties().put(prop.getId(), prop);
+//         }
+//         else
+//         {
+//            prop.getValues().clear();
+//            prop.getValues().add(id);
+//         }
+//      }
+      // atom:author/atom:name MUST be cmis:createdBy
       String author = entry.getAuthor() != null ? entry.getAuthor().getName() : null;
       if (author != null && author.length() > 0)
       {
