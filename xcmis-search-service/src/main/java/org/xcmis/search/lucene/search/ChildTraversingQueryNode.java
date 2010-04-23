@@ -143,7 +143,6 @@ public class ChildTraversingQueryNode extends Query
    /**
     * Scorer for ChildTraversingQuery.
     * 
-    * @author sj
     */
    private class ChildTraversingQueryNodeScorer extends Scorer
    {
@@ -321,7 +320,6 @@ public class ChildTraversingQueryNode extends Query
    /**
     * Weight for ChildTraversingQuery.
     * 
-    * @author sj
     */
    private class ChildTraversingQueryNodeWeight implements Weight
    {
