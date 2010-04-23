@@ -1,24 +1,18 @@
 /*
- * ModeShape (http://www.modeshape.org) See the COPYRIGHT.txt file distributed
- * with this work for information regarding copyright ownership. Some portions
- * may be licensed to Red Hat, Inc. under one or more contributor license
- * agreements. See the AUTHORS.txt file in the distribution for a full listing
- * of individual contributors.
- * 
- * ModeShape is free software. Unless otherwise indicated, all code in ModeShape
- * is licensed to you under the terms of the GNU Lesser General Public License
- * as published by the Free Software Foundation; either version 2.1 of the
- * License, or (at your option) any later version.
- * 
- * ModeShape is distributed in the hope that it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
- * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with this software; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA, or see the FSF
- * site: http://www.fsf.org.
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 package org.xcmis.search.model;
 
@@ -149,8 +143,9 @@ public class QueryTest
       constraint = new PropertyExistence(selector("selector1"), "jcr:uuid");
       orderings = Collections.singletonList(new Ordering(new NodeName(selector("selector1")), Order.ASCENDING));
       query = new Query(source, constraint, orderings, columns, limits);
-      assertThat(Visitors.readable(query),
-      is("SELECT selector1.* FROM nt:unstructured WHERE selector1.jcr:uuid IS NOT NULL ORDER BY NAME(selector1) ASC"));
+      assertThat(
+         Visitors.readable(query),
+         is("SELECT selector1.* FROM nt:unstructured WHERE selector1.jcr:uuid IS NOT NULL ORDER BY NAME(selector1) ASC"));
    }
 
    @Test
@@ -159,8 +154,7 @@ public class QueryTest
       source = new Selector(selector("nt:unstructured"));
       columns = Collections.singletonList(new Column(selector("selector1")));
       constraint = new PropertyExistence(selector("selector1"), "jcr:uuid");
-      orderings = Collections.singletonList(new Ordering(new
-      NodeName(selector("selector1")), Order.ASCENDING));
+      orderings = Collections.singletonList(new Ordering(new NodeName(selector("selector1")), Order.ASCENDING));
       limits = new Limit(10, 100);
       query = new Query(source, constraint, orderings, columns, limits);
       assertThat(
@@ -174,11 +168,10 @@ public class QueryTest
       source = new Selector(selector("nt:unstructured"));
       columns = Collections.emptyList();
       constraint = new PropertyExistence(selector("selector1"), "jcr:uuid");
-      orderings = Collections.singletonList(new Ordering(new
-      NodeName(selector("selector1")), Order.ASCENDING));
+      orderings = Collections.singletonList(new Ordering(new NodeName(selector("selector1")), Order.ASCENDING));
       query = new Query(source, constraint, orderings, columns, limits);
       assertThat(Visitors.readable(query),
-      is("SELECT * FROM nt:unstructured WHERE selector1.jcr:uuid IS NOT NULL ORDER BY NAME(selector1) ASC"));
+         is("SELECT * FROM nt:unstructured WHERE selector1.jcr:uuid IS NOT NULL ORDER BY NAME(selector1) ASC"));
    }
 
    @Test
@@ -190,7 +183,7 @@ public class QueryTest
       orderings = Collections.emptyList();
       query = new Query(source, constraint, orderings, columns, limits);
       assertThat(Visitors.readable(query),
-      is("SELECT selector1.* FROM nt:unstructured WHERE selector1.jcr:uuid IS NOT NULL"));
+         is("SELECT selector1.* FROM nt:unstructured WHERE selector1.jcr:uuid IS NOT NULL"));
    }
 
    @Test
@@ -199,11 +192,9 @@ public class QueryTest
       source = new Selector(selector("nt:unstructured"));
       columns = Collections.singletonList(new Column(selector("selector1")));
       constraint = null;
-      orderings = Collections.singletonList(new Ordering(new
-      NodeName(selector("selector1")), Order.ASCENDING));
+      orderings = Collections.singletonList(new Ordering(new NodeName(selector("selector1")), Order.ASCENDING));
       query = new Query(source, constraint, orderings, columns, limits);
-      assertThat(Visitors.readable(query),
-      is("SELECT selector1.* FROM nt:unstructured ORDER BY NAME(selector1) ASC"));
+      assertThat(Visitors.readable(query), is("SELECT selector1.* FROM nt:unstructured ORDER BY NAME(selector1) ASC"));
    }
 
    @Test
