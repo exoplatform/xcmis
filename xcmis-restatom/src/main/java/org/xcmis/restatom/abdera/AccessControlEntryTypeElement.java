@@ -61,7 +61,7 @@ public class AccessControlEntryTypeElement extends ExtensibleElementWrapper
    /**
     * Builds the element.
     *
-    * @param value the AccessControlEntry
+    * @param accessControlEntry the AccessControlEntry
     */
    public void build(AccessControlEntry accessControlEntry)
    {
