@@ -20,7 +20,7 @@ package org.xcmis.wssoap.test.client;
 
 /**
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey Zavizionov</a>
- * @version $Id: $
+ * @version $Id$
  *
  */
 public class E
