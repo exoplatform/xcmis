@@ -46,7 +46,7 @@ public class SearchServiceConfiguration
    private NameConverter nameConverter;
 
    /**
-    * Split path  string to names
+    * Split path  string to names.
     */
    private PathSplitter pathSplitter;
 
@@ -72,7 +72,7 @@ public class SearchServiceConfiguration
    }
 
    /**
-    * Default invocation context;
+    * Default invocation context.
     */
    private InvocationContext defaultInvocationContext;
 

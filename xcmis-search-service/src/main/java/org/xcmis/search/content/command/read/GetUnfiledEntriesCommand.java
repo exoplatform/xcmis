@@ -22,7 +22,7 @@ import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.content.interceptors.Visitor;
 
 /**
- * Get unfiled entries command
+ * Get unfiled entries command.
  */
 public class GetUnfiledEntriesCommand implements AbstractReadDataCommand
 {

@@ -74,7 +74,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Base implementation of Lucene based {@link QueryableIndexStorage}
+ * Base implementation of Lucene based {@link QueryableIndexStorage}.
  * 
  */
 public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndexStorage
@@ -96,7 +96,7 @@ public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndex
    protected final NameConverter nameConverter;
 
    /**
-    * Split path string to names
+    * Split path string to names.
     */
    protected final PathSplitter pathSplitter;
 

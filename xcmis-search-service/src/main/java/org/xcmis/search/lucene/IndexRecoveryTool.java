@@ -55,14 +55,14 @@ public class IndexRecoveryTool
    public static final int BUFFER_MAX_SIZE = 1000;
 
    /**
-    * Convert {@link ContentEntry} to {@link Document}
+    * Convert {@link ContentEntry} to {@link Document}.
     */
    private final LuceneIndexer nodeIndexer;
 
    private final LuceneQueryableIndexStorage indexStorage;
 
    /**
-    * Configuration of index
+    * Configuration of index.
     */
    private final IndexConfiguration indexConfiguration;
 

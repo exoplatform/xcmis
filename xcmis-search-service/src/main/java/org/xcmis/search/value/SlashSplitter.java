@@ -21,7 +21,7 @@ package org.xcmis.search.value;
 import org.apache.commons.lang.StringUtils;
 
 /**
- * Split path by <b>Slash</>
+ * Split path by <b>Slash</>.
  */
 public class SlashSplitter implements PathSplitter<String>
 

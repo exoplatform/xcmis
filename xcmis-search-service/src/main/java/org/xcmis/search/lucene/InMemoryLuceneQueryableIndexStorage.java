@@ -40,7 +40,7 @@ import java.util.Map.Entry;
 
 /**
  * @author <a href="mailto:Sergey.Kabashnyuk@gmail.com">Sergey Kabashnyuk</a>
- * @version $Id: exo-jboss-codetemplates.xml 34360 2009-07-22 23:58:59Z
+ * @version $Id: InMemoryLuceneQueryableIndexStorage.java 34360 2009-07-22 23:58:59Z
  *          aheritier $
  * 
  */
@@ -65,9 +65,7 @@ public class InMemoryLuceneQueryableIndexStorage extends AbstractLuceneQueryable
    }
 
    /**
-    * @throws CorruptIndexException
-    * @throws LockObtainFailedException
-    * @throws IOException
+    * @throws IndexException
     */
    private void initDirectory() throws IndexException
    {
@@ -114,6 +112,7 @@ public class InMemoryLuceneQueryableIndexStorage extends AbstractLuceneQueryable
    }
 
    /**
+    * @throws IndexException
     * @see org.xcmis.search.lucene.AbstractLuceneQueryableIndexStorage#save(org.xcmis.search.lucene.index.LuceneIndexTransaction)
     */
    @Override

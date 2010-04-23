@@ -26,17 +26,17 @@ import org.apache.commons.lang.Validate;
 public class ContentEntry
 {
    /**
-    *  an array of table names which identifies this content
+    *  an array of table names which identifies this content.
     */
    private final String[] tableNames;
 
    /**
-    * Name of the entry
+    * Name of the entry.
     */
    private final String name;
 
    /**
-    * An array of parent entry identifiers
+    * An array of parent entry identifiers.
     */
    private final String[] parentIdentifiers;
 
@@ -46,7 +46,7 @@ public class ContentEntry
    private final String identifier;
 
    /**
-    * An array of entry properties
+    * An array of entry properties.
     */
    private final Property[] properties;
 

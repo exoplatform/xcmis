@@ -23,7 +23,7 @@ import org.xcmis.search.model.ordering.Ordering;
 
 /**
  * @author <a href="mailto:Sergey.Kabashnyuk@gmail.com">Sergey Kabashnyuk</a>
- * @version $Id: exo-jboss-codetemplates.xml 34027 2009-07-15 23:26:43Z
+ * @version $Id: FullTextSearchScoreResultSorter.java 34027 2009-07-15 23:26:43Z
  *          aheritier $
  */
 public class FullTextSearchScoreResultSorter implements ResultSorter

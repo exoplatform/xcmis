@@ -22,7 +22,7 @@ import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.content.interceptors.Visitor;
 
 /**
- * Roll back transaction 
+ * Roll back transaction.
  */
 public class RollBackCommand implements AbstractTransactionCommand
 {

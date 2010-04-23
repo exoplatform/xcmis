@@ -62,12 +62,12 @@ public class SearchService implements Startable, ContentModificationListener, Se
    private final InterceptorChain interceptorChain;
 
    /**
-    * Default invocation context;
+    * Default invocation context.
     */
    private InvocationContext defaultInvocationContext;
 
    /**
-    * @param configuration
+    * @param configuration SearchServiceConfiguration
     * @throws SearchServiceException 
     */
    public SearchService(SearchServiceConfiguration configuration) throws SearchServiceException
@@ -86,8 +86,8 @@ public class SearchService implements Startable, ContentModificationListener, Se
    }
 
    /**
-    * Execute query
-    * @param query
+    * Execute query.
+    * @param query Query
     * @return
     * @throws InvalidQueryException
     */
@@ -102,11 +102,11 @@ public class SearchService implements Startable, ContentModificationListener, Se
    }
 
    /**
-    * Execute query
+    * Execute query.
     * 
-    * @param query
-    * @param type
-    * @return
+    * @param query Query
+    * @param bindVariablesValues Map<String, Object>
+    * @return List<ScoredRow>
     * @throws InvalidQueryException
     */
    public List<ScoredRow> execute(Query query, Map<String, Object> bindVariablesValues) throws InvalidQueryException,
@@ -208,8 +208,8 @@ public class SearchService implements Startable, ContentModificationListener, Se
     * Add interceptors that handle {@link ModifyIndexCommand} and
     * {@link ExecuteSelectorCommand}
     * 
-    * @param interceptorChain
-    * @throws SearchServiceException 
+    * @param interceptorChain InterceptorChain
+    * @throws SearchServiceException if error occurs
     */
    protected void addQueryableIndexStorageInterceptor(InterceptorChain interceptorChain) throws SearchServiceException
    {

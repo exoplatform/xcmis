@@ -69,9 +69,6 @@ public class InMemorySchema implements Schema
        * @param columnNames
        *           the names of the columns.
        * @return this builder, for convenience in method chaining; never null
-       * @throws IllegalArgumentException
-       *            if the table name is null or empty, any column name is null
-       *            or empty, or if no column names are given
        */
       public Builder addTable(String name, String... columnNames)
       {
@@ -102,10 +99,6 @@ public class InMemorySchema implements Schema
        * @param types
        *           the types for the columns
        * @return this builder, for convenience in method chaining; never null
-       * @throws IllegalArgumentException
-       *            if the table name is null or empty, any column name is null
-       *            or empty, if no column names are given, or if the number of
-       *            types does not match the number of columns
        */
       public Builder addTable(String name, String[] columnNames, String[] types)
       {
@@ -138,10 +131,6 @@ public class InMemorySchema implements Schema
        * @param type
        *           the type for the column
        * @return this builder, for convenience in method chaining; never null
-       * @throws IllegalArgumentException
-       *            if the table name is null or empty, any column name is null
-       *            or empty, if no column names are given, or if the number of
-       *            types does not match the number of columns
        */
       public Builder addColumn(String tableName, String columnName, String type)
       {
@@ -167,9 +156,6 @@ public class InMemorySchema implements Schema
        *           true if the column should be full-text searchable, or false
        *           if not
        * @return this builder, for convenience in method chaining; never null
-       * @throws IllegalArgumentException
-       *            if the table name is null or empty, the column name is null
-       *            or empty, or if the property type is null
        */
       public Builder addColumn(String tableName, String columnName, String type, boolean fullTextSearchable)
       {
@@ -201,9 +187,6 @@ public class InMemorySchema implements Schema
        * @param columnName
        *           the names of the column
        * @return this builder, for convenience in method chaining; never null
-       * @throws IllegalArgumentException
-       *            if the table name is null or empty or if the column name is
-       *            null or empty
        */
       public Builder makeSearchable(String tableName, String columnName)
       {
@@ -240,10 +223,6 @@ public class InMemorySchema implements Schema
        * columns) as they exist at the moment this method is called.
        * 
        * @return the new Schema; never null
-       * @throws InvalidQueryException
-       * @throws InvalidQueryException
-       *            if any of the view definitions is invalid and cannot be
-       *            resolved
        */
       public Schema build()
       {

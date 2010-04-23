@@ -37,7 +37,7 @@ import org.xcmis.search.lucene.index.StartableIndexingService;
 import java.io.IOException;
 
 /**
- * Lucene persisted implementation of {@link QueryableIndexStorage}
+ * Lucene persisted implementation of {@link QueryableIndexStorage}.
  * 
  */
 public class LuceneQueryableIndexStorage extends AbstractLuceneQueryableIndexStorage
@@ -52,7 +52,6 @@ public class LuceneQueryableIndexStorage extends AbstractLuceneQueryableIndexSto
    /**
     * @param indexConfuguration
     * @throws IndexException
-    * @throws IndexConfigurationException
     * @throws org.xcmis.search.lucene.index.IndexException
     */
    public LuceneQueryableIndexStorage(SearchServiceConfiguration serviceConfuguration) throws IndexException

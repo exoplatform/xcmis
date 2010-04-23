@@ -31,9 +31,8 @@ public interface ContentModificationListener
    /**
     * Notify listener about changes in content.
     * 
-    * @param changes - added content
-    * @param removedEntries - removed content
-    * @param invocationContext
+    * @param addedEntry - added content
+    * @param removedEntry - removed content
     * @throws IndexModificationException
     */
    void update(ContentEntry addedEntry, String removedEntry) throws IndexModificationException;
@@ -41,20 +40,18 @@ public interface ContentModificationListener
    /**
     * Notify listener about changes in content.
     * 
-    * @param changes - added content
+    * @param addedEntries - added content
     * @param removedEntries - removed content
-    * @param invocationContext
     * @throws IndexModificationException
     */
    void update(List<ContentEntry> addedEntries, Set<String> removedEntries, InvocationContext invocationContext)
       throws IndexModificationException;
 
    /**
-    * Notify listener about changes in content with default {@link InvocationContext}
+    * Notify listener about changes in content with default {@link InvocationContext}.
     * 
-    * @param changes - added content
+    * @param addedEntries - added content
     * @param removedEntries - removed content
-    * @param invocationContext
     * @throws IndexModificationException
     */
    void update(List<ContentEntry> addedEntries, Set<String> removedEntries) throws IndexModificationException;

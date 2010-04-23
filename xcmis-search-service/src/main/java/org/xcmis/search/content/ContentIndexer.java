@@ -24,7 +24,7 @@ package org.xcmis.search.content;
 public interface ContentIndexer<D>
 {
    /**
-    * Convert changes to a suitable format for the index
+    * Convert changes to a suitable format for the index.
     * @param changes
     * @return index transaction
     */

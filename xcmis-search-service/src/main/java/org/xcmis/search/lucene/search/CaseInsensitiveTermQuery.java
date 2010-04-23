@@ -35,9 +35,8 @@ import java.io.IOException;
  */
 public class CaseInsensitiveTermQuery extends MultiTermQuery
 {
-   /**
-    * 
-    */
+   
+   /** The serialVersionUID. */
    private static final long serialVersionUID = 8733959357848332771L;
 
    /**

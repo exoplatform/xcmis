@@ -21,7 +21,7 @@ package org.xcmis.search.content;
 import org.xcmis.search.content.Schema.Column;
 
 /**
- * In memory column definition   
+ * In memory column definition.
  */
 public class InMemoryColumn implements Column
 {

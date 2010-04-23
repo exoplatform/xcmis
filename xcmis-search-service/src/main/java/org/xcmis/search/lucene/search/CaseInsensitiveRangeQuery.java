@@ -39,9 +39,8 @@ import java.io.IOException;
  */
 public class CaseInsensitiveRangeQuery extends RangeQuery
 {
-   /**
-    * 
-    */
+   
+   /** The serialVersionUID. */
    private static final long serialVersionUID = 3351256558561558491L;
 
    /**

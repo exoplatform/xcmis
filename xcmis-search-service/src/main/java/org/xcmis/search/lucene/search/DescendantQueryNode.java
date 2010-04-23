@@ -44,9 +44,8 @@ import java.util.Set;
  */
 public class DescendantQueryNode extends Query
 {
-   /**
-    * 
-    */
+   
+   /** The serialVersionUID. */
    private static final long serialVersionUID = -6151493594236655389L;
 
    /**

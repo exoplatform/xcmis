@@ -33,9 +33,7 @@ public class SearchContentRequest implements Serializable
 
    private Throwable error;
 
-   /**
-    * 
-    */
+   /** The serialVersionUID. */
    private static final long serialVersionUID = 1L;
 
    /**
@@ -44,8 +42,6 @@ public class SearchContentRequest implements Serializable
     * @param error
     *           the error to be associated with this request, or null if this
     *           request is to have no error
-    * @throws IllegalStateException
-    *            if the request is frozen
     */
    public void setError(Throwable error)
    {
@@ -53,7 +49,7 @@ public class SearchContentRequest implements Serializable
    }
 
    /**
-    * Return whether there is an error associated with this request
+    * Return whether there is an error associated with this request.
     * 
     * @return true if there is an error, or false otherwise
     */

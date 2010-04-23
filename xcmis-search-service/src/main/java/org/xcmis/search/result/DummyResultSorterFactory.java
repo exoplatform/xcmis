@@ -22,7 +22,7 @@ package org.xcmis.search.result;
 
 /**
  * @author <a href="mailto:Sergey.Kabashnyuk@gmail.com">Sergey Kabashnyuk</a>
- * @version $Id: exo-jboss-codetemplates.xml 34027 2009-07-15 23:26:43Z
+ * @version $Id: DummyResultSorterFactory.java 34027 2009-07-15 23:26:43Z
  *          aheritier $
  */
 public class DummyResultSorterFactory extends AbstractResultSorterFactory

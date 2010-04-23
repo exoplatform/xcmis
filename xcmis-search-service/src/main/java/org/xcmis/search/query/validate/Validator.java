@@ -89,7 +89,7 @@ public class Validator extends AbstractModelVisitor
    }
 
    /**
-    * Check if selector exists in list of selectors
+    * Check if selector exists in list of selectors.
     * @param selectorName
     * @return 
     */
@@ -109,7 +109,7 @@ public class Validator extends AbstractModelVisitor
    }
 
    /**
-    * Check if selector exists in list of selectors
+    * Check if selector exists in list of selectors.
     * @param selectorName
     */
    public Schema.Column checkTableAndColumnExistance(SelectorName selectorName, String propertyName,

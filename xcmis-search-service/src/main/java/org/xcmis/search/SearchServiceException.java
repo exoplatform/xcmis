@@ -24,13 +24,11 @@ package org.xcmis.search;
 public class SearchServiceException extends Exception
 {
 
-   /**
-    * 
-    */
+   /** The  serialVersionUID. */
    private static final long serialVersionUID = 5595901452426227420L;
 
    /**
-    * 
+    * Constructor.
     */
    public SearchServiceException()
    {
@@ -38,7 +36,7 @@ public class SearchServiceException extends Exception
    }
 
    /**
-    * @param message
+    * @param message String message
     */
    public SearchServiceException(String message)
    {
@@ -47,7 +45,7 @@ public class SearchServiceException extends Exception
    }
 
    /**
-    * @param cause
+    * @param cause Throwable cause
     */
    public SearchServiceException(Throwable cause)
    {
@@ -56,8 +54,8 @@ public class SearchServiceException extends Exception
    }
 
    /**
-    * @param message
-    * @param cause
+    * @param message String message
+    * @param cause Throwable cause
     */
    public SearchServiceException(String message, Throwable cause)
    {

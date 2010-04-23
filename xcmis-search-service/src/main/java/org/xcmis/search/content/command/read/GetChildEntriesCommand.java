@@ -22,7 +22,7 @@ import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.content.interceptors.Visitor;
 
 /**
- *  Add node command
+ *  Get child entries command.
  */
 public class GetChildEntriesCommand implements AbstractReadDataCommand
 {

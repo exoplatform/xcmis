@@ -27,27 +27,27 @@ import org.xcmis.search.content.interceptors.QueryableIndexStorage;
 public class IndexConfiguration
 {
    /**
-    * Default implementation of {@link QueryableIndexStorage}
+    * Default implementation of {@link QueryableIndexStorage}.
     */
    public static final String DEFAULT_QUERYABLEINDEXSTORAGE = "org.xcmis.search.lucene.LuceneQueryableIndexStorage";
 
    /**
-    * Path where index should be stored 
+    * Path where index should be stored. 
     */
    private String indexDir;
 
    /**
-    * Parent uuid of root element 
+    * Parent uuid of root element. 
     */
    private String rootParentUuid;
 
    /**
-    * Uuid of root element
+    * Uuid of root element.
     */
    private String rootUuid;
 
    /**
-    * Implementation of {@link QueryableIndexStorage}
+    * Implementation of {@link QueryableIndexStorage}.
     */
    private String queryableIndexStorage = DEFAULT_QUERYABLEINDEXSTORAGE;
 
