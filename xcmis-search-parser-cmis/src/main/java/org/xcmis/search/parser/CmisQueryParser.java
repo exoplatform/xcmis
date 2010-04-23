@@ -31,7 +31,7 @@ import org.xcmis.search.model.Query;
 import org.xcmis.search.parser.QueryParser;
 
 /**
- * Parser for Cmis SQL
+ * Parser for Cmis SQL.
  */
 public class CmisQueryParser implements QueryParser
 {
