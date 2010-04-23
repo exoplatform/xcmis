@@ -24,14 +24,14 @@ import java.util.Map;
 
 /**
  * @author <a href="mailto:Sergey.Kabashnyuk@gmail.com">Sergey Kabashnyuk</a>
- * @version $Id: exo-jboss-codetemplates.xml 34360 2009-07-22 23:58:59Z aheritier $
+ * @version $Id: JoinType.java 34360 2009-07-22 23:58:59Z aheritier $
  *
  */
 public enum JoinType {
-   INNER("INNER JOIN"), LEFT_OUTER("LEFT OUTER JOIN"), RIGHT_OUTER("RIGHT OUTER JOIN")
+   INNER("INNER JOIN"), LEFT_OUTER("LEFT OUTER JOIN"), RIGHT_OUTER("RIGHT OUTER JOIN");
    //, FULL_OUTER("FULL OUTER JOIN")
    //, CROSS(      "CROSS JOIN")
-   ;
+  // ;
 
    private static final Map<String, JoinType> TYPE_BY_SYMBOL;
    static
@@ -76,9 +76,9 @@ public enum JoinType {
     */
    public boolean isOuter()
    {
-      return this.equals(LEFT_OUTER) || this.equals(RIGHT_OUTER)
+      return this.equals(LEFT_OUTER) || this.equals(RIGHT_OUTER);
       //|| this.equals(FULL_OUTER) 
-      ;
+      //;
    }
 
    /**

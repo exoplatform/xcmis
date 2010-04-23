@@ -27,7 +27,7 @@ import org.xcmis.search.Visitors;
 import org.xcmis.search.model.source.SelectorName;
 
 /**
- * A constraint requiring that the selected node is a child of the node reachable by the supplied absolute path
+ * A constraint requiring that the selected node is a child of the node reachable by the supplied absolute path.
  */
 
 public class ChildNode extends Constraint

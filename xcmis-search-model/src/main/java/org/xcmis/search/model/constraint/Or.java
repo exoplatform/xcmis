@@ -47,8 +47,6 @@ public class Or extends Constraint
     *           the left constraint
     * @param right
     *           the right constraint
-    * @throws IllegalArgumentException
-    *            if the left or right constraints are null
     */
    public Or(Constraint left, Constraint right)
    {

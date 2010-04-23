@@ -49,9 +49,6 @@ public abstract class DynamicOperand implements QueryElement
     * 
     * @param selectorNames
     *           the selector names
-    * @throws IllegalArgumentException
-    *            if the name list is null or empty, or if any of the values are
-    *            null
     */
    protected DynamicOperand(Collection<SelectorName> selectorNames)
    {
@@ -69,8 +66,6 @@ public abstract class DynamicOperand implements QueryElement
     * 
     * @param operand
     *           the operand defining the selector names
-    * @throws IllegalArgumentException
-    *            if the operand is null
     */
    protected DynamicOperand(DynamicOperand operand)
    {
@@ -83,8 +78,6 @@ public abstract class DynamicOperand implements QueryElement
     * 
     * @param operands
     *           the operands defining the selector names
-    * @throws IllegalArgumentException
-    *            if the operand is null
     */
    protected DynamicOperand(DynamicOperand... operands)
    {
@@ -107,8 +100,6 @@ public abstract class DynamicOperand implements QueryElement
     * 
     * @param operands
     *           the operands defining the selector names
-    * @throws IllegalArgumentException
-    *            if the operand is null
     */
    protected DynamicOperand(Iterable<? extends DynamicOperand> operands)
    {
@@ -135,9 +126,6 @@ public abstract class DynamicOperand implements QueryElement
     * 
     * @param selectorNames
     *           the selector names
-    * @throws IllegalArgumentException
-    *            if the selector names array is null or empty, or if any of the
-    *            values are null
     */
    protected DynamicOperand(SelectorName... selectorNames)
    {

@@ -37,7 +37,7 @@ public interface QueryParser
    /**
     * Parse the supplied query from a string representation into a {@link Query}.
     * 
-    * @param query the query in string form; may not be null
+    * @param statement in string form; may not be null
     * @return the query command
     * @throws InvalidQueryException if the supplied query can be parsed but is invalid
     */

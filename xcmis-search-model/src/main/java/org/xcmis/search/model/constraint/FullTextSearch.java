@@ -140,7 +140,7 @@ public class FullTextSearch extends Constraint
    }
 
    /**
-    * Get the name of the selector that is to be searched
+    * Get the name of the selector that is to be searched.
     * 
     * @return the selector name; never null
     */

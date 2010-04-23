@@ -20,6 +20,9 @@ package org.xcmis.search;
 
 /**
  * Query invalid exception.
+ * @author <a href="mailto:Sergey.Kabashnyuk@exoplatform.org">Sergey Kabashnyuk</a>
+ * @version $Id: InvalidQueryException.java 34360 2009-07-22 23:58:59Z ksm $
+ *
  */
 public class InvalidQueryException extends Exception
 {
@@ -38,7 +41,7 @@ public class InvalidQueryException extends Exception
    }
 
    /**
-    * @param message
+    * @param message String message
     */
    public InvalidQueryException(String message)
    {
@@ -47,7 +50,7 @@ public class InvalidQueryException extends Exception
    }
 
    /**
-    * @param cause
+    * @param cause Throwable
     */
    public InvalidQueryException(Throwable cause)
    {
@@ -56,8 +59,8 @@ public class InvalidQueryException extends Exception
    }
 
    /**
-    * @param message
-    * @param cause
+    * @param message String message
+    * @param cause Throwable
     */
    public InvalidQueryException(String message, Throwable cause)
    {

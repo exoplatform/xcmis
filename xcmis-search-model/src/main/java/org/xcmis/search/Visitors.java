@@ -56,7 +56,7 @@ import java.util.Set;
 
 /**
  * @author <a href="mailto:Sergey.Kabashnyuk@exoplatform.org">Sergey Kabashnyuk</a>
- * @version $Id: exo-jboss-codetemplates.xml 34360 2009-07-22 23:58:59Z ksm $
+ * @version $Id: Visitors.java 34360 2009-07-22 23:58:59Z ksm $
  *
  */
 public class Visitors
@@ -71,7 +71,7 @@ public class Visitors
     * @param strategyVisitor the visitor that is to be called for each visited objects, but that does <i>not</i> call
     *        {@link Visitable#accept(Visitor)}
     * @return the strategy visitor, allowing the caller to easily invoke operations on the visitor after visitation has completed
-    * @throws VisitException 
+    * @throws VisitException if exception occurs
     */
    public static <StrategyVisitor extends QueryObjectModelVisitor> StrategyVisitor visitAll(QueryElement visitable,
       StrategyVisitor strategyVisitor) throws VisitException
@@ -87,11 +87,10 @@ public class Visitors
     * Visit the supplied {@link QueryElement object} using the supplied {@link QueryObjectModelVisitor}, which must be responsible for navigation as
     * well as any business logic.
     * 
-    * @param <GeneralVisitor> the type of visitor
     * @param visitable the top-level object to be visited
     * @param visitor the visitor that is to be used
     * @return the visitor, allowing the caller to easily invoke operations on the visitor after visitation has completed
-    * @throws VisitException 
+    * @throws VisitException if exception occurs
     */
    public static <GeneralVisitor extends QueryObjectModelVisitor> GeneralVisitor visit(QueryElement visitable,
       GeneralVisitor visitor) throws VisitException
@@ -582,7 +581,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(And)
        */
@@ -596,7 +595,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(BindVariableName)
        */
@@ -608,7 +607,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(ChildNode)
        */
@@ -620,7 +619,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(ChildNodeJoinCondition)
        */
@@ -632,7 +631,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(Column)
        */
@@ -644,7 +643,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(Comparison)
        */
@@ -658,7 +657,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(DescendantNode)
        */
@@ -670,7 +669,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(DescendantNodeJoinCondition)
        */
@@ -682,7 +681,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(EquiJoinCondition)
        */
@@ -694,7 +693,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(FullTextSearch)
        */
@@ -706,7 +705,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(FullTextSearchScore)
        */
@@ -718,7 +717,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(Join)
        */
@@ -733,7 +732,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(Length)
        */
@@ -745,7 +744,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(Limit)
        */
@@ -757,7 +756,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(Literal)
        */
@@ -769,7 +768,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(LowerCase)
        */
@@ -782,7 +781,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(NodeDepth)
        */
@@ -794,7 +793,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(NodeLocalName)
        */
@@ -818,7 +817,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see {@link QueryObjectModelVisitor#visit(Not)}Not)
        */
@@ -831,7 +830,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(Or)
        */
@@ -845,7 +844,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(Ordering)
        */
@@ -858,7 +857,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(PropertyExistence)
        */
@@ -870,7 +869,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(PropertyValue)
        */
@@ -882,7 +881,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(Query)
        */
@@ -898,7 +897,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(SameNode)
        */
@@ -910,7 +909,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(SameNodeJoinCondition)
        */
@@ -922,7 +921,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(UpperCase)
        */
@@ -934,7 +933,7 @@ public class Visitors
       }
 
       /**
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * @see org.xcmis.search.QueryObjectModelVisitor#visit(org.xcmis.search.model.source.Selector)
        */
       public void visit(Selector selector) throws VisitException
@@ -999,7 +998,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(And)
        */
@@ -1083,7 +1082,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(Comparison)
        */
@@ -1161,7 +1160,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(Join)
        */
@@ -1181,7 +1180,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(Length)
        */
@@ -1229,7 +1228,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(LowerCase)
        */
@@ -1286,7 +1285,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(Not)
        */
@@ -1300,7 +1299,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(Or)
        */
@@ -1315,7 +1314,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(Ordering)
        */
@@ -1347,7 +1346,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(Query)
        */
@@ -1433,7 +1432,7 @@ public class Visitors
 
       /**
        * {@inheritDoc}
-       * @throws VisitException 
+       * @throws VisitException if exception occurs
        * 
        * @see QueryObjectModelVisitor#visit(UpperCase)
        */

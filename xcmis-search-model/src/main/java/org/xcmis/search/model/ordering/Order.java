@@ -23,51 +23,57 @@
  */
 package org.xcmis.search.model.ordering;
 
-
 /**
+ * Created by The eXo Platform SAS.
  * 
+ * @author <a href="mailto:Sergey.Kabashnyuk@gmail.com">Sergey Kabashnyuk</a>
+ * @version $Id: Order.java 2 2010-02-04 17:21:49Z andrew00x $
  */
 public enum Order {
-    ASCENDING("ASC"),
-    DESCENDING("DESC");
+   ASCENDING("ASC"), DESCENDING("DESC");
 
-    private final String symbol;
+   private final String symbol;
 
-    private Order( String symbol ) {
-        this.symbol = symbol;
-    }
+   private Order(String symbol)
+   {
+      this.symbol = symbol;
+   }
 
-    /**
-     * Get the symbolic representation of the order
-     * 
-     * @return the symbolic representation; never null
-     */
-    public String getSymbol() {
-        return symbol;
-    }
+   /**
+    * Get the symbolic representation of the order.
+    * 
+    * @return the symbolic representation; never null
+    */
+   public String getSymbol()
+   {
+      return symbol;
+   }
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @see java.lang.Enum#toString()
-     */
-    @Override
-    public String toString() {
-        return symbol;
-    }
+   /**
+    * {@inheritDoc}
+    * 
+    * @see java.lang.Enum#toString()
+    */
+   @Override
+   public String toString()
+   {
+      return symbol;
+   }
 
-    /**
-     * Attempt to find the Order given a symbol. The matching is done independent of case.
-     * 
-     * @param symbol the symbol
-     * @return the Order having the supplied symbol, or null if there is no Order with the supplied symbol
-     * @throws IllegalArgumentException if the symbol is null
-     */
-    public static Order forSymbol( String symbol ) {
-        if (ASCENDING.getSymbol().equalsIgnoreCase(symbol)) return ASCENDING;
-        if (DESCENDING.getSymbol().equalsIgnoreCase(symbol)) return DESCENDING;
-        return null;
-    }
+   /**
+    * Attempt to find the Order given a symbol. The matching is done independent of case.
+    * 
+    * @param symbol the symbol
+    * @return the Order having the supplied symbol, or null if there is no Order with the supplied symbol
+    * @throws IllegalArgumentException if the symbol is null
+    */
+   public static Order forSymbol(String symbol)
+   {
+      if (ASCENDING.getSymbol().equalsIgnoreCase(symbol))
+         return ASCENDING;
+      if (DESCENDING.getSymbol().equalsIgnoreCase(symbol))
+         return DESCENDING;
+      return null;
+   }
 
-   
 }

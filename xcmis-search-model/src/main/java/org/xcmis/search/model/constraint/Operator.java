@@ -80,7 +80,7 @@ public enum Operator {
    }
 
    /**
-    * Get the symbol for this operator
+    * Get the symbol for this operator.
     * 
     * @return the symbolic representation; never null
     */
@@ -133,8 +133,6 @@ public enum Operator {
     *           the symbol
     * @return the Operator having the supplied symbol, or null if there is no
     *         Operator with the supplied symbol
-    * @throws IllegalArgumentException
-    *            if the symbol is null
     */
    public static Operator forSymbol(String symbol)
    {

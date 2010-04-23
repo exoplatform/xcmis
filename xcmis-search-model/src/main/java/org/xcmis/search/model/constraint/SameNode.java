@@ -28,7 +28,7 @@ import org.xcmis.search.model.source.SelectorName;
 
 /**
  * A constraint requiring that the selected node is reachable by the supplied
- * absolute path
+ * absolute path.
  */
 
 public class SameNode extends Constraint
@@ -49,8 +49,6 @@ public class SameNode extends Constraint
     *           the name of the selector
     * @param path
     *           the absolute path
-    * @throws IllegalArgumentException
-    *            if the selector name or path are null
     */
    public SameNode(SelectorName selectorName, String path)
    {
@@ -103,7 +101,7 @@ public class SameNode extends Constraint
    }
 
    /**
-    * Get the absolute path for the node
+    * Get the absolute path for the node.
     * 
     * @return the absolute path; never null
     */

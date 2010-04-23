@@ -37,7 +37,9 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * 
+ * @author <a href="mailto:Sergey.Kabashnyuk@exoplatform.org">Sergey Kabashnyuk</a>
+ * @version $Id: Query.java 34360 2009-07-22 23:58:59Z ksm $
+ *
  */
 
 public class Query implements QueryElement, Serializable
