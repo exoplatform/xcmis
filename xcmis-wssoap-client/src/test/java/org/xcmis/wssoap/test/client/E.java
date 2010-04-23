@@ -20,7 +20,7 @@ package org.xcmis.wssoap.test.client;
 
 /**
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey Zavizionov</a>
- * @version $Id: E.java 34360 2009-07-22 23:58:59Z aheritier $
+ * @version $Id: $
  *
  */
 public class E
