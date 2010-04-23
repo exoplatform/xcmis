@@ -56,11 +56,10 @@ public class PoliciesCollection extends CmisObjectCollection
 
    /**
     * Instantiates a new policies collection.
-    * @param storageProvider TODO
     */
-   public PoliciesCollection(/*StorageProvider storageProvider*/)
+   public PoliciesCollection()
    {
-      super(/*storageProvider*/);
+      super();
       setHref("/policies");
    }
 

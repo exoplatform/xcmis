@@ -48,12 +48,10 @@ public class TypesDescendantsCollection extends CmisTypeCollection
 {
    /**
     * Instantiates a new types descendants collection.
-    * @param storageProvider TODO
-    * @param repositoryService the repository service
     */
-   public TypesDescendantsCollection(/*StorageProvider storageProvider*/)
+   public TypesDescendantsCollection()
    {
-      super(/*storageProvider*/);
+      super();
       setHref("/typedescendants");
    }
 

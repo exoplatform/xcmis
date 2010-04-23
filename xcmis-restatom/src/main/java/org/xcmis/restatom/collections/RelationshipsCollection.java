@@ -57,11 +57,10 @@ public class RelationshipsCollection extends CmisObjectCollection
 
    /**
     * Instantiates a new relationships collection.
-    * @param storageProvider TODO
     */
-   public RelationshipsCollection(/*StorageProvider storageProvider*/)
+   public RelationshipsCollection()
    {
-      super(/*storageProvider*/);
+      super();
       setHref("/relationships");
    }
 

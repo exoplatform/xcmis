@@ -84,7 +84,8 @@ public class PropertyIdElement extends PropertyElement<IdProperty>
       processPropertyElement(id);
       if (getElements() != null && getElements().size() > 0)
       {
-         for (Element el : getElements()) {
+         for (Element el : getElements())
+         {
             id.getValues().add(el.getText());
          }
       }

@@ -47,12 +47,10 @@ public class ParentsCollection extends CmisObjectCollection
 
    /**
     * Instantiates a new parents collection.
-    * @param storageProvider TODO
-    *
     */
-   public ParentsCollection(/*StorageProvider storageProvider*/)
+   public ParentsCollection()
    {
-      super(/*storageProvider*/);
+      super();
       setHref("/parents");
    }
 

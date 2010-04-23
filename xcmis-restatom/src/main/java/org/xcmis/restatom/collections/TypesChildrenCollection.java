@@ -49,11 +49,10 @@ public class TypesChildrenCollection extends CmisTypeCollection
 
    /**
     * Instantiates a new types children collection.
-    * @param storageProvider TODO
     */
-   public TypesChildrenCollection(/*StorageProvider storageProvider*/)
+   public TypesChildrenCollection()
    {
-      super(/*storageProvider*/);
+      super();
       setHref("/types");
    }
 

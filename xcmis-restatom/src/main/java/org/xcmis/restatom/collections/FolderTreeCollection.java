@@ -46,11 +46,10 @@ public class FolderTreeCollection extends FolderDescentantsCollection
 
    /**
     * Instantiates a new folder tree collection.
-    * @param storageProvider TODO
     */
-   public FolderTreeCollection(/*StorageProvider storageProvider*/)
+   public FolderTreeCollection()
    {
-      super(/*storageProvider*/);
+      super();
       setHref("/foldertree");
    }
 

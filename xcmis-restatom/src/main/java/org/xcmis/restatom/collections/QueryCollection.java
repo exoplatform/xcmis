@@ -57,11 +57,10 @@ public class QueryCollection extends CmisObjectCollection
 
    /**
     * Instantiates a new query collection.
-    * @param storageProvider TODO
     */
-   public QueryCollection(/*StorageProvider storageProvider*/)
+   public QueryCollection()
    {
-      super(/*storageProvider*/);
+      super();
       setHref("/query");
    }
 
