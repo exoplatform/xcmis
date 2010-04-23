@@ -25,5 +25,6 @@ package org.xcmis.wssoap.test.client;
  */
 public class A
 {
+   
 
 }
