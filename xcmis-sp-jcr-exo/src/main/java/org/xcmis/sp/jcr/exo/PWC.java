@@ -66,6 +66,7 @@ class PWC extends DocumentDataImpl
       checkinCheckoutSkip.add(CmisConstants.IS_MAJOR_VERSION);
       checkinCheckoutSkip.add(CmisConstants.IS_LATEST_MAJOR_VERSION);
       checkinCheckoutSkip.add(CmisConstants.VERSION_LABEL);
+      checkinCheckoutSkip.add(CmisConstants.CHECKIN_COMMENT);
       checkinCheckoutSkip.add(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT);
       checkinCheckoutSkip.add(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID);
       checkinCheckoutSkip.add(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY);
@@ -138,13 +139,29 @@ class PWC extends DocumentDataImpl
          // to emulate creation new version.
          docNode.setProperty(CmisConstants.CREATED_BY, session.getUserID());
          docNode.setProperty(CmisConstants.CREATION_DATE, Calendar.getInstance());
-         docNode.setProperty(CmisConstants.LAST_MODIFIED_BY, session.getUserID());
-         docNode.setProperty(CmisConstants.LAST_MODIFICATION_DATE, Calendar.getInstance());
+//         docNode.setProperty(CmisConstants.LAST_MODIFIED_BY, session.getUserID());
+//         docNode.setProperty(CmisConstants.LAST_MODIFICATION_DATE, Calendar.getInstance());
          //
          docNode.setProperty(CmisConstants.IS_MAJOR_VERSION, major);
          if (checkinComment != null)
          {
             docNode.setProperty(CmisConstants.CHECKIN_COMMENT, checkinComment);
+         }
+
+         // Copy the other properties from document.
+         for (PropertyDefinition<?> def : type.getPropertyDefinitions())
+         {
+            String pId = def.getId();
+            if (!checkinCheckoutSkip.contains(pId))
+            {
+               setProperty(docNode, getProperty(pId));
+            }
+         }
+
+         String name = getName();
+         if (!document.getName().equals(name))
+         {
+            document.setName(name);
          }
 
          try
@@ -158,9 +175,10 @@ class PWC extends DocumentDataImpl
             throw new CmisRuntimeException("Unable copy content for new document. " + ioe.getMessage(), ioe);
          }
 
+         // document.save() will save this change
          node.getParent().remove();
 
-         session.save();
+         document.save();
 
          return document;
       }

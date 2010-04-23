@@ -190,6 +190,44 @@ public class StorageTest extends BaseTest
       assertEquals("checkin test. content updated", new String(b, 0, r));
    }
 
+   public void testCheckInRename() throws Exception
+   {
+      DocumentData document =
+         createDocument(rootFolder, "checkinTestRename", "cmis:document", new BaseContentStream("checkin test"
+            .getBytes(), null, new MimeType("text", "plain")), null);
+      DocumentData pwc = document.checkout();
+      String pwcId = pwc.getObjectId();
+
+      // update
+      pwc = (DocumentData)storage.getObject(pwcId);
+      pwc.setContentStream(new BaseContentStream("checkin test. content updated".getBytes(), null, new MimeType("text",
+         "plain")));
+      pwc.setName("checkinTestRename_NewName");
+
+      pwc.checkin(true, "my comment");
+
+      try
+      {
+         storage.getObject(pwcId);
+         fail("PWC must be removed.");
+      }
+      catch (ObjectNotFoundException e)
+      {
+         // OK
+      }
+
+      assertFalse(document.isVersionSeriesCheckedOut());
+      assertNull(document.getVersionSeriesCheckedOutId());
+      assertNull(document.getVersionSeriesCheckedOutBy());
+      assertEquals("my comment", document.getProperty(CmisConstants.CHECKIN_COMMENT).getValues().get(0));
+
+      assertEquals("checkinTestRename_NewName", document.getName());
+      // check content
+      byte[] b = new byte[128];
+      int r = document.getContentStream().getStream().read(b);
+      assertEquals("checkin test. content updated", new String(b, 0, r));
+   }
+
    public void testCancelCheckOutDocument() throws Exception
    {
       DocumentData document =
