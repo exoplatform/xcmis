@@ -328,7 +328,7 @@ public class QueryableStorage extends StorageImpl
          ObjectData obj = itemCache.get(identifer);
          if (obj == null)
          {
-            obj = storage.getObject(identifer);
+            obj = storage.getObjectById(identifer);
             itemCache.put(identifer, obj);
          }
          if (obj.getBaseType() == BaseType.FOLDER)

@@ -268,7 +268,7 @@ public abstract class BaseQueryTest extends BaseTest
          Result next = result.next();
          String id = next.getObjectId();
          resultPaths.add(id);
-         ObjectData object = storage.getObject(id);
+         ObjectData object = storage.getObjectById(id);
          //LOG.debug("id:=" + id + " path:=" + object.getParent().getPath() + "/" + object.getName());
       }
 
@@ -335,7 +335,7 @@ public abstract class BaseQueryTest extends BaseTest
 
    private String getProperty(String objectId, String propertyId) throws Exception
    {
-      ObjectData entry = storage.getObject(objectId);
+      ObjectData entry = storage.getObjectById(objectId);
       return entry.getProperty(propertyId).toString();
    }
 

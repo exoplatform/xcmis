@@ -27,7 +27,7 @@ import org.xcmis.messaging.CmisACLType;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.soap.ACLServicePort;
 import org.xcmis.soap.CmisException;
-import org.xcmis.spi.CmisStorageInitializer;
+import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.AccessControlPropagation;
@@ -73,7 +73,7 @@ public class ACLServicePortImpl implements ACLServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
          conn.applyACL(objectId, //
             TypeConverter.getAccessControlEntryList(addACEs.getPermission()), //
             TypeConverter.getAccessControlEntryList(removeACEs.getPermission()), //
@@ -110,7 +110,7 @@ public class ACLServicePortImpl implements ACLServicePort
 
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          List<AccessControlEntry> list =
             conn.getACL(objectId, onlyBasicPermissions == null ? true : onlyBasicPermissions);

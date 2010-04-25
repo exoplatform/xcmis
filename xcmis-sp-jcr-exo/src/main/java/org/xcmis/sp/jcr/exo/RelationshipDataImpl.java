@@ -74,7 +74,7 @@ class RelationshipDataImpl extends BaseObjectData implements RelationshipData
     * @param type type definition
     * @param node back-end JCR node
     * @param indexListener inde listener
-    * @see StorageImpl#getObject(String)
+    * @see StorageImpl#getObjectById(String)
     * @see StorageImpl#getObjectByPath(String)
     */
    public RelationshipDataImpl(TypeDefinition type, Node node, IndexListener indexListener)

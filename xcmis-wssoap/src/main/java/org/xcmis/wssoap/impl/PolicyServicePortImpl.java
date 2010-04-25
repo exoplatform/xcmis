@@ -25,7 +25,7 @@ import org.xcmis.core.CmisObjectType;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.PolicyServicePort;
-import org.xcmis.spi.CmisStorageInitializer;
+import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
 
 /**
@@ -67,7 +67,7 @@ public class PolicyServicePortImpl implements PolicyServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          conn.applyPolicy(policyId, objectId);
       }
@@ -99,7 +99,7 @@ public class PolicyServicePortImpl implements PolicyServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          return TypeConverter.getCmisObjectTypeList(conn.getAppliedPolicies(objectId, true, propertyFilter));
       }
@@ -130,7 +130,7 @@ public class PolicyServicePortImpl implements PolicyServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          conn.removePolicy(policyId, objectId);
       }

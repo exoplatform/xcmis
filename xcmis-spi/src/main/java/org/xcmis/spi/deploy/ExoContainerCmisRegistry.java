@@ -25,7 +25,7 @@ import org.exoplatform.container.xml.ValuesParam;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.picocontainer.Startable;
-import org.xcmis.spi.CmisStorageInitializer;
+import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.StorageProvider;
 
 import java.util.Iterator;
@@ -34,14 +34,14 @@ import java.util.List;
 /**
  * @version $Id:$
  */
-public class ExoContainerCmisStorageInitializer extends CmisStorageInitializer implements Startable
+public class ExoContainerCmisRegistry extends CmisRegistry implements Startable
 {
 
    private final ExoContainerContext containerContext;
 
-   private static final Log LOG = ExoLogger.getLogger(ExoContainerCmisStorageInitializer.class);
+   private static final Log LOG = ExoLogger.getLogger(ExoContainerCmisRegistry.class);
 
-   public ExoContainerCmisStorageInitializer(ExoContainerContext containerContext, InitParams initParams)
+   public ExoContainerCmisRegistry(ExoContainerContext containerContext, InitParams initParams)
    {
       this.containerContext = containerContext;
 

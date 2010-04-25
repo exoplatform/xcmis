@@ -31,32 +31,32 @@ import java.util.concurrent.atomic.AtomicReference;
  * @version $Id:$
  */
 
-public class CmisStorageInitializer
+public class CmisRegistry
 {
 
-   private static AtomicReference<CmisStorageInitializer> service = new AtomicReference<CmisStorageInitializer>();
+   private static AtomicReference<CmisRegistry> service = new AtomicReference<CmisRegistry>();
 
    protected List<String> providers = new ArrayList<String>();
 
-   public static CmisStorageInitializer getInstance()
+   public static CmisRegistry getInstance()
    {
-      CmisStorageInitializer s = service.get();
+      CmisRegistry s = service.get();
       if (s == null)
       {
-         service.compareAndSet(null, new CmisStorageInitializer());
+         service.compareAndSet(null, new CmisRegistry());
          s = service.get();
       }
       return s;
    }
 
-   public static void setInstance(CmisStorageInitializer inst)
+   public static void setInstance(CmisRegistry inst)
    {
       service.set(inst);
    }
 
    protected Map<String, StorageProvider> storageProviders;
 
-   protected CmisStorageInitializer()
+   protected CmisRegistry()
    {
       this.storageProviders = new HashMap<String, StorageProvider>();
    }

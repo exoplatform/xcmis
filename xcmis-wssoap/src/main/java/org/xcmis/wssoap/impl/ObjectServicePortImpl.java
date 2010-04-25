@@ -37,7 +37,7 @@ import org.xcmis.soap.ObjectServicePort;
 import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.ChangeTokenHolder;
 import org.xcmis.spi.CmisConstants;
-import org.xcmis.spi.CmisStorageInitializer;
+import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.model.IncludeRelationships;
@@ -97,7 +97,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          if (contentStream != null)
          {
@@ -150,7 +150,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          objectId.value =
             conn.createDocumentFromSource(sourceId, //
@@ -196,7 +196,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          objectId.value =
             conn.createFolder(folderId, TypeConverter.getPropertyMap(properties), TypeConverter
@@ -237,7 +237,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          objectId.value =
             conn.createPolicy(folderId, TypeConverter.getPropertyMap(properties), TypeConverter
@@ -276,7 +276,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          objectId.value =
             conn.createRelationship(TypeConverter.getPropertyMap(properties), TypeConverter
@@ -310,7 +310,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          ChangeTokenHolder hold = new ChangeTokenHolder();
          if (changeToken != null)
@@ -347,7 +347,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          conn.deleteObject(objectId, allVersions);
       }
@@ -383,7 +383,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          DeleteTreeResponse.FailedToDelete failed = new DeleteTreeResponse.FailedToDelete();
          failed.getObjectIds().addAll(conn.deleteTree(folderId, //
@@ -419,7 +419,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          return TypeConverter.getCmisAllowableActionsType(conn.getAllowableActions(objectId));
       }
@@ -454,7 +454,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          CmisContentStreamType stream = new CmisContentStreamType();
          ContentStream cs = conn.getContentStream(objectId, //
@@ -506,7 +506,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          return TypeConverter.getCmisObjectType(conn.getObject(objectId, //
             includeAllowableActions == null ? false : includeAllowableActions, //
@@ -552,7 +552,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          return TypeConverter.getCmisObjectType(conn.getObjectByPath(path, //
             includeAllowableActions == null ? false : includeAllowableActions, //
@@ -591,7 +591,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          return TypeConverter.getCmisPropertiesType(conn.getProperties(objectId, true, propertyFilter));
       }
@@ -622,7 +622,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          return TypeConverter.getCmisRenditionTypeList(conn.getRenditions(objectId, //
             renditionFilter, //
@@ -656,7 +656,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          objectId.value = conn.moveObject(objectId.value, targetFolderId, sourceFolderId);
       }
@@ -691,7 +691,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          ContentStream cs = null;
          if (contentStream != null)
@@ -742,7 +742,7 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          ChangeTokenHolder hold = new ChangeTokenHolder();
          if (changeToken != null)

@@ -37,7 +37,7 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.ProviderImpl;
-import org.xcmis.spi.CmisStorageInitializer;
+import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
 
 import java.util.Date;
@@ -295,7 +295,7 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
    protected Connection getConnection(RequestContext request)
    {
       //      return storageProvider.getConnection(getRepositoryId(request));
-      return CmisStorageInitializer.getInstance().getConnection(getRepositoryId(request));
+      return CmisRegistry.getInstance().getConnection(getRepositoryId(request));
    }
 
    protected boolean getBooleanParameter(RequestContext request, String name, boolean defaultValue)

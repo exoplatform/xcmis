@@ -27,7 +27,7 @@ import org.xcmis.messaging.CmisObjectListType;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.RelationshipServicePort;
 import org.xcmis.spi.CmisConstants;
-import org.xcmis.spi.CmisStorageInitializer;
+import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.model.RelationshipDirection;
 
@@ -81,7 +81,7 @@ public class RelationshipServicePortImpl implements RelationshipServicePort
 
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          return TypeConverter.getCmisObjectListType(conn.getObjectRelationships(
             objectId, //

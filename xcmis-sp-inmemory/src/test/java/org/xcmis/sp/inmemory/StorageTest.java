@@ -115,7 +115,7 @@ public class StorageTest extends BaseTest
 
       Collection<FolderData> parents = document.getParents();
       assertEquals(0, parents.size());
-      storage.getObject(document.getObjectId());
+      storage.getObjectById(document.getObjectId());
 
       assertEquals(1, getSize(storage.getUnfiledObjectsId()));
    }

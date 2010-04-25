@@ -87,18 +87,6 @@ public class StorageProviderImpl implements StorageProvider, Startable
       return new InmemConnection(storage);
    }
 
-   public Connection getConnection(String storageId, String user, String password) throws LoginException,
-      InvalidArgumentException
-   {
-      StorageImpl storage = storageImpls.get(storageId);
-      if (storage == null)
-      {
-         throw new InvalidArgumentException("CMIS repository '" + storageId + "' does not exist.");
-      }
-
-      return new InmemConnection(storage);
-   }
-
    public Set<String> getStorageIDs()
    {
       return Collections.unmodifiableSet(storagesConfig.keySet());

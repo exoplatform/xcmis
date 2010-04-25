@@ -24,7 +24,7 @@ import org.exoplatform.services.log.Log;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.MultiFilingServicePort;
-import org.xcmis.spi.CmisStorageInitializer;
+import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
 
 /**
@@ -66,7 +66,7 @@ public class MultiFilingServicePortImpl implements MultiFilingServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          conn.addObjectToFolder(objectId, folderId, allVersions);
       }
@@ -98,7 +98,7 @@ public class MultiFilingServicePortImpl implements MultiFilingServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          conn.removeObjectFromFolder(objectId, folderId);
       }

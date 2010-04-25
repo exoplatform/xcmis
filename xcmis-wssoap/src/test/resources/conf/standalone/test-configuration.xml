@@ -31,7 +31,7 @@
    </component>
    
    <component>
-      <type>org.xcmis.spi.deploy.ExoContainerCmisStorageInitializer</type>
+      <type>org.xcmis.spi.deploy.ExoContainerCmisRegistry</type>
    </component>
 
    <component>

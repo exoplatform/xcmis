@@ -43,7 +43,7 @@ import org.xcmis.core.CmisPropertyString;
 import org.xcmis.core.EnumBaseObjectTypeIds;
 import org.xcmis.core.EnumPropertiesRelationship;
 import org.xcmis.spi.CmisConstants;
-import org.xcmis.spi.CmisStorageInitializer;
+import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.model.BaseType;
@@ -84,7 +84,7 @@ public abstract class BaseTest extends TestCase
       //      storageProvider = (StorageProvider)container.getComponentInstanceOfType(StorageProvider.class);
 
       //      conn = storageProvider.getConnection(repositoryId);
-      conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+      conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
       rootFolderId = conn.getStorage().getRepositoryInfo().getRootFolderId();
       try

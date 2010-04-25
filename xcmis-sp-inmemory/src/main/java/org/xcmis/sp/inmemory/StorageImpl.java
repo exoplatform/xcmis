@@ -616,11 +616,11 @@ public class StorageImpl implements Storage
       String pwc = workingCopies.get(versionSeriesId);
       if (pwc != null)
       {
-         v.add((DocumentData)getObject(pwc));
+         v.add((DocumentData)getObjectById(pwc));
       }
       for (String vId : versions.get(versionSeriesId))
       {
-         v.add((DocumentData)getObject(vId));
+         v.add((DocumentData)getObjectById(vId));
       }
       return v;
    }
@@ -640,7 +640,7 @@ public class StorageImpl implements Storage
 
       for (String pwcId : workingCopies.values())
       {
-         DocumentData pwc = (DocumentData)getObject(pwcId);
+         DocumentData pwc = (DocumentData)getObjectById(pwcId);
          if (folder != null)
          {
             for (FolderData parent : pwc.getParents())
@@ -668,7 +668,7 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public ObjectData getObject(String objectId) throws ObjectNotFoundException
+   public ObjectData getObjectById(String objectId) throws ObjectNotFoundException
    {
       Map<String, Value> values = properties.get(objectId);
       if (values == null)
@@ -728,7 +728,7 @@ public class StorageImpl implements Storage
          {
             for (String id : childrenIds)
             {
-               ObjectData seg = getObject(id);
+               ObjectData seg = getObjectById(id);
                String name = seg.getName();
                if ((BaseType.FOLDER == seg.getBaseType() || !tokenizer.hasMoreElements()) && segName.equals(name))
                {
@@ -744,7 +744,7 @@ public class StorageImpl implements Storage
       {
          throw new ObjectNotFoundException("Path '" + path + "' not found.");
       }
-      return getObject(point);
+      return getObjectById(point);
    }
 
    public ItemsIterator<Rendition> getRenditions(ObjectData object)
@@ -775,7 +775,7 @@ public class StorageImpl implements Storage
       children.get(targetId).add(objectid);
       parents.get(object.getObjectId()).remove(sourceId);
       parents.get(object.getObjectId()).add(targetId);
-      return getObject(objectid);
+      return getObjectById(objectid);
    }
 
    public ItemsIterator<Result> query(Query query) throws InvalidArgumentException
@@ -1128,7 +1128,7 @@ public class StorageImpl implements Storage
          ObjectData obj = itemCache.get(identifer);
          if (obj == null)
          {
-            obj = storage.getObject(identifer);
+            obj = storage.getObjectById(identifer);
             itemCache.put(identifer, obj);
          }
          if (obj.getBaseType() == BaseType.FOLDER)
@@ -1331,7 +1331,7 @@ public class StorageImpl implements Storage
        */
       public DocumentData next()
       {
-         return (DocumentData)storage.getObject(documentIds.next());
+         return (DocumentData)storage.getObjectById(documentIds.next());
       }
 
       /**

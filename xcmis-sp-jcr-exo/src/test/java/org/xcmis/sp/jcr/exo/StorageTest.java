@@ -76,7 +76,7 @@ public class StorageTest extends BaseTest
    {
       super.setUp();
       storage = storageProvider.getConnection(cmisRepositoryId).getStorage();
-      rootFolder = (FolderData)storage.getObject(JcrCMIS.ROOT_FOLDER_ID);
+      rootFolder = (FolderData)storage.getObjectById(JcrCMIS.ROOT_FOLDER_ID);
    }
 
    public void testApplyACL() throws Exception
@@ -163,7 +163,7 @@ public class StorageTest extends BaseTest
       String pwcId = pwc.getObjectId();
 
       // Get PWC from storage
-      pwc = (DocumentData)storage.getObject(pwcId);
+      pwc = (DocumentData)storage.getObjectById(pwcId);
 
       pwc.setContentStream(new BaseContentStream("checkin test. content updated".getBytes(), null, new MimeType("text",
          "plain")));
@@ -171,7 +171,7 @@ public class StorageTest extends BaseTest
 
       try
       {
-         storage.getObject(pwcId);
+         storage.getObjectById(pwcId);
          fail("PWC must be removed.");
       }
       catch (ObjectNotFoundException e)
@@ -199,7 +199,7 @@ public class StorageTest extends BaseTest
       String pwcId = pwc.getObjectId();
 
       // update
-      pwc = (DocumentData)storage.getObject(pwcId);
+      pwc = (DocumentData)storage.getObjectById(pwcId);
       pwc.setContentStream(new BaseContentStream("checkin test. content updated".getBytes(), null, new MimeType("text",
          "plain")));
       pwc.setName("checkinTestRename_NewName");
@@ -208,7 +208,7 @@ public class StorageTest extends BaseTest
 
       try
       {
-         storage.getObject(pwcId);
+         storage.getObjectById(pwcId);
          fail("PWC must be removed.");
       }
       catch (ObjectNotFoundException e)
@@ -241,7 +241,7 @@ public class StorageTest extends BaseTest
 
       try
       {
-         storage.getObject(pwcId);
+         storage.getObjectById(pwcId);
          fail("PWC must be removed.");
       }
       catch (ObjectNotFoundException e)
@@ -264,14 +264,14 @@ public class StorageTest extends BaseTest
       String pwcId = pwc.getObjectId();
 
       // Get PWC from storage
-      pwc = (DocumentData)storage.getObject(pwcId);
+      pwc = (DocumentData)storage.getObjectById(pwcId);
 
       // Call cancel checkout on PWC.
       pwc.cancelCheckout();
 
       try
       {
-         storage.getObject(pwcId);
+         storage.getObjectById(pwcId);
          fail("PWC must be removed.");
       }
       catch (ObjectNotFoundException e)
@@ -294,14 +294,14 @@ public class StorageTest extends BaseTest
       String pwcId = pwc.getObjectId();
 
       // Get PWC from storage
-      pwc = (DocumentData)storage.getObject(pwcId);
+      pwc = (DocumentData)storage.getObjectById(pwcId);
 
       // Delete PWC.
       storage.deleteObject(pwc, true);
 
       try
       {
-         storage.getObject(pwcId);
+         storage.getObjectById(pwcId);
          fail("PWC mus be removed.");
       }
       catch (ObjectNotFoundException e)
@@ -762,7 +762,7 @@ public class StorageTest extends BaseTest
 
       try
       {
-         doc1 = (DocumentData)storage.getObject(doc1Id);
+         doc1 = (DocumentData)storage.getObjectById(doc1Id);
          fail(doc1 + " must be deleted.");
       }
       catch (ObjectNotFoundException e)
@@ -771,7 +771,7 @@ public class StorageTest extends BaseTest
       }
       try
       {
-         doc2 = (DocumentData)storage.getObject(doc2Id);
+         doc2 = (DocumentData)storage.getObjectById(doc2Id);
          fail(doc2 + " must be deleted.");
       }
       catch (ObjectNotFoundException e)
@@ -780,7 +780,7 @@ public class StorageTest extends BaseTest
       }
       try
       {
-         doc3 = (DocumentData)storage.getObject(doc3Id);
+         doc3 = (DocumentData)storage.getObjectById(doc3Id);
          fail(doc3 + " must be deleted.");
       }
       catch (ObjectNotFoundException e)
@@ -789,7 +789,7 @@ public class StorageTest extends BaseTest
       }
       try
       {
-         doc4 = (DocumentData)storage.getObject(doc4Id);
+         doc4 = (DocumentData)storage.getObjectById(doc4Id);
          fail(doc4 + " must be deleted.");
       }
       catch (ObjectNotFoundException e)
@@ -853,11 +853,11 @@ public class StorageTest extends BaseTest
       //          | |_doc2
       //          |_doc1
 
-      doc1 = (DocumentData)storage.getObject(doc1Id);
-      doc2 = (DocumentData)storage.getObject(doc2Id);
+      doc1 = (DocumentData)storage.getObjectById(doc1Id);
+      doc2 = (DocumentData)storage.getObjectById(doc2Id);
       try
       {
-         doc3 = (DocumentData)storage.getObject(doc3Id);
+         doc3 = (DocumentData)storage.getObjectById(doc3Id);
          fail(doc3 + " must be deleted.");
       }
       catch (ObjectNotFoundException e)
@@ -866,7 +866,7 @@ public class StorageTest extends BaseTest
       }
       try
       {
-         doc4 = (DocumentData)storage.getObject(doc4Id);
+         doc4 = (DocumentData)storage.getObjectById(doc4Id);
          fail(doc3 + " must be deleted.");
       }
       catch (ObjectNotFoundException e)
@@ -940,10 +940,10 @@ public class StorageTest extends BaseTest
       // doc3 <unfiled>
       // doc4 <unfiled>
 
-      doc1 = (DocumentData)storage.getObject(doc1Id);
-      doc2 = (DocumentData)storage.getObject(doc2Id);
-      doc3 = (DocumentData)storage.getObject(doc3Id);
-      doc4 = (DocumentData)storage.getObject(doc4Id);
+      doc1 = (DocumentData)storage.getObjectById(doc1Id);
+      doc2 = (DocumentData)storage.getObjectById(doc2Id);
+      doc3 = (DocumentData)storage.getObjectById(doc3Id);
+      doc4 = (DocumentData)storage.getObjectById(doc4Id);
 
       Collection<FolderData> doc1Parents = doc1.getParents();
       assertEquals(1, doc1Parents.size());
@@ -1187,7 +1187,7 @@ public class StorageTest extends BaseTest
 
       Collection<FolderData> parents = document.getParents();
       assertEquals(0, parents.size());
-      storage.getObject(document.getObjectId());
+      storage.getObjectById(document.getObjectId());
 
       assertEquals(1, getSize(storage.getUnfiledObjectsId()));
    }

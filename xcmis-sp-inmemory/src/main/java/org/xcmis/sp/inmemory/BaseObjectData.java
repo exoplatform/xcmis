@@ -257,7 +257,7 @@ abstract class BaseObjectData implements ObjectData
       {
          for (String id : parentIds)
          {
-            parents.add((FolderData)storage.getObject(id));
+            parents.add((FolderData)storage.getObjectById(id));
          }
       }
 
@@ -277,7 +277,7 @@ abstract class BaseObjectData implements ObjectData
       List<PolicyData> policies = new ArrayList<PolicyData>();
       for (String id : entry.getPolicies())
       {
-         policies.add((PolicyData)storage.getObject(id));
+         policies.add((PolicyData)storage.getObjectById(id));
       }
       return policies;
    }
@@ -329,7 +329,7 @@ abstract class BaseObjectData implements ObjectData
       List<RelationshipData> relationships = new ArrayList<RelationshipData>();
       for (String id : relationshipIds)
       {
-         RelationshipData r = (RelationshipData)storage.getObject(id);
+         RelationshipData r = (RelationshipData)storage.getObjectById(id);
          if (direction == RelationshipDirection.EITHER //
             || (direction == RelationshipDirection.SOURCE && r.getSourceId().equals(getObjectId())) //
             || (direction == RelationshipDirection.TARGET && r.getTargetId().equals(getObjectId())))

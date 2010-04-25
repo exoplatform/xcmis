@@ -62,7 +62,7 @@ public class CmisContentReader extends ContentReaderInterceptor
    public Object visitChildEntriesCommand(InvocationContext ctx, GetChildEntriesCommand command) throws Throwable
    {
       List<ContentEntry> childs = new ArrayList<ContentEntry>();
-      ObjectData parent = storage.getObject(command.getParentUuid());
+      ObjectData parent = storage.getObjectById(command.getParentUuid());
       if (parent instanceof FolderData)
       {
          ItemsIterator<ObjectData> childDatas = ((FolderData)parent).getChildren(null);
@@ -83,7 +83,7 @@ public class CmisContentReader extends ContentReaderInterceptor
    public Object visitGetContentEntryCommand(InvocationContext ctx, GetContentEntryCommand command) throws Throwable
    {
 
-      ObjectData entry = storage.getObject(command.getEntryUuid());
+      ObjectData entry = storage.getObjectById(command.getEntryUuid());
       return contentEntryAdapter.createEntry(entry);
    }
 

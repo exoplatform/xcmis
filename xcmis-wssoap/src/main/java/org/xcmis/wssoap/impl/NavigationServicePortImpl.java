@@ -31,7 +31,7 @@ import org.xcmis.messaging.CmisObjectParentsType;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.NavigationServicePort;
 import org.xcmis.spi.CmisConstants;
-import org.xcmis.spi.CmisStorageInitializer;
+import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.ObjectParent;
@@ -87,7 +87,7 @@ public class NavigationServicePortImpl implements NavigationServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          return TypeConverter.getCmisObjectListType(conn.getCheckedOutDocs(folderId, //
             includeAllowableActions == null ? false : includeAllowableActions, //
@@ -135,7 +135,7 @@ public class NavigationServicePortImpl implements NavigationServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          return TypeConverter.getCmisObjectInFolderListType(conn.getChildren(folderId, //
             includeAllowableActions == null ? false : includeAllowableActions, //
@@ -183,7 +183,7 @@ public class NavigationServicePortImpl implements NavigationServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          return TypeConverter.getCmisObjectInFolderContainerTypeList(conn.getDescendants(folderId, //
             depth == null ? 1 : depth.intValue(), //
@@ -221,7 +221,7 @@ public class NavigationServicePortImpl implements NavigationServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          return TypeConverter.getCmisObjectType(conn.getFolderParent(folderId, true, propertyFilter));
       }
@@ -259,7 +259,7 @@ public class NavigationServicePortImpl implements NavigationServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          return TypeConverter.getCmisObjectInFolderContainerTypeList(conn.getFolderTree(folderId, //
             depth == null ? 1 : depth.intValue(), //
@@ -303,7 +303,7 @@ public class NavigationServicePortImpl implements NavigationServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          List<CmisObjectParentsType> res = new ArrayList<CmisObjectParentsType>();
          List<ObjectParent> out =

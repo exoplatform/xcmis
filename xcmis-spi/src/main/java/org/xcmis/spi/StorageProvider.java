@@ -21,8 +21,6 @@ package org.xcmis.spi;
 
 import java.util.Set;
 
-import javax.security.auth.login.LoginException;
-
 /**
  * Provide access to all available CMIS storages.
  *
@@ -31,21 +29,6 @@ import javax.security.auth.login.LoginException;
  */
 public interface StorageProvider
 {
-
-   /**
-    * Get storage with specified id.
-    *
-    * @param storageId storage id
-    * @param user user name
-    * @param password user password
-    * @return connection
-    * @throws LoginException if parameters <code>user</code> or
-    *         <code>password</code> in invalid
-    * @throws InvalidArgumentException if storage with <code>id</code> does not
-    *         exists
-    */
-   Connection getConnection(String storageId, String user, String password) throws LoginException,
-      InvalidArgumentException;
 
    /**
     * Create new connection for user. This method may be used for anonymous user

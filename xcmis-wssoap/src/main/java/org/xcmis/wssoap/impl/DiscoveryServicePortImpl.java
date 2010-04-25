@@ -29,7 +29,7 @@ import org.xcmis.soap.CmisException;
 import org.xcmis.soap.DiscoveryServicePort;
 import org.xcmis.spi.ChangeLogTokenHolder;
 import org.xcmis.spi.CmisConstants;
-import org.xcmis.spi.CmisStorageInitializer;
+import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.model.IncludeRelationships;
 
@@ -72,7 +72,7 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
       try
       {
          String repositoryId = parameters.getRepositoryId();
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          String statement = parameters.getStatement();
          boolean allVersions =
@@ -136,7 +136,7 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          objects.value =
             TypeConverter.getCmisObjectListType(conn.getContentChanges(changeLogToken == null ? null

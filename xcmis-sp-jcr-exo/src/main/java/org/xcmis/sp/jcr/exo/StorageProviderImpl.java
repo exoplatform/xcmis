@@ -243,45 +243,6 @@ public class StorageProviderImpl implements StorageProvider, Startable
       }
    }
 
-   public Connection getConnection(String id, String user, String password) throws LoginException,
-      InvalidArgumentException
-   {
-      StorageConfiguration configuration = storageConfigs.get(id);
-
-      if (configuration == null)
-      {
-         throw new InvalidArgumentException("CMIS repository '" + id + "' does not exist.");
-      }
-
-      String repositoryId = configuration.getRepository();
-      String ws = configuration.getWorkspace();
-
-      try
-      {
-         ManageableRepository repository = repositoryService.getRepository(repositoryId);
-         Credentials credentials = new CredentialsImpl(user, password.toCharArray());
-         Session session = repository.login(credentials, ws);
-         SearchService searchService = getSearchService(id);
-         Storage storage = new QueryableStorage(session, configuration, searchService);
-         IndexListener indexListener = new IndexListener(storage, searchService);
-         //TODO make this method public
-         ((StorageImpl)storage).setIndexListener(indexListener);
-         return new JcrConnection(storage);
-      }
-      catch (RepositoryException re)
-      {
-         throw new CmisRuntimeException("Unable get CMIS repository " + id + ". " + re.getMessage(), re);
-      }
-      catch (RepositoryConfigurationException rce)
-      {
-         throw new CmisRuntimeException("Unable get CMIS repository " + id + ". " + rce.getMessage(), rce);
-      }
-      catch (SearchServiceException rce)
-      {
-         throw new CmisRuntimeException("Unable get CMIS repository " + id + ". " + rce.getMessage(), rce);
-      }
-   }
-
    /**
     * Gets the search service. 
     * @return instance of {@link SearchService}

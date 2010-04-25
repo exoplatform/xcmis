@@ -40,7 +40,7 @@ import org.xcmis.restatom.abdera.AllowableActionsElement;
 import org.xcmis.restatom.abdera.RepositoryInfoTypeElement;
 import org.xcmis.restatom.abdera.UriTemplateTypeElement;
 import org.xcmis.restatom.types.CmisUriTemplateType;
-import org.xcmis.spi.CmisStorageInitializer;
+import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
@@ -118,7 +118,7 @@ public class AtomCmisService implements ResourceContainer
       try
       {
          //         conn = storageProvider.getConnection(repositoryId);
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          RequestContext request = initRequestContext(repositoryId, httpRequest);
          Document doc = request.getDocument();
@@ -247,7 +247,7 @@ public class AtomCmisService implements ResourceContainer
       try
       {
          //         conn = storageProvider.getConnection(repositoryId);
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          Boolean deleteAllVersions = true; // TODO
          conn.deleteTree(folderId, deleteAllVersions, unfileObject, continueOnFailure);
@@ -297,7 +297,7 @@ public class AtomCmisService implements ResourceContainer
       try
       {
          //         conn = storageProvider.getConnection(repositoryId);
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          List<AccessControlEntry> list = conn.getACL(objectId, onlyBasicPermissions);
          FOMExtensibleElement accessControlListTypeElement =
@@ -333,7 +333,7 @@ public class AtomCmisService implements ResourceContainer
       try
       {
          //         conn = storageProvider.getConnection(repositoryId);
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          AllowableActions result = conn.getAllowableActions(objectId);
          AllowableActionsElement el = AbderaFactory.getInstance().getFactory().newElement(AtomCMIS.ALLOWABLE_ACTIONS);
@@ -491,7 +491,7 @@ public class AtomCmisService implements ResourceContainer
    public Response getRepositories(@Context HttpServletRequest httpRequest, @Context UriInfo uriInfo)
    {
       //      Set<String> entries = storageProvider.getStorageIDs();
-      Set<String> entries = CmisStorageInitializer.getInstance().getStorageIDs();
+      Set<String> entries = CmisRegistry.getInstance().getStorageIDs();
 
       Service service = AbderaFactory.getInstance().getFactory().newService();
       service.declareNS(AtomCMIS.CMISRA_NS_URI, AtomCMIS.CMISRA_PREFIX);
@@ -668,7 +668,7 @@ public class AtomCmisService implements ResourceContainer
       try
       {
          //         conn = storageProvider.getConnection(repositoryId);
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          repoInfo = conn.getStorage().getRepositoryInfo();
       }

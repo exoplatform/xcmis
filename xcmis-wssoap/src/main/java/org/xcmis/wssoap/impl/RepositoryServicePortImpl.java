@@ -29,7 +29,7 @@ import org.xcmis.messaging.CmisTypeDefinitionListType;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.RepositoryServicePort;
 import org.xcmis.spi.CmisConstants;
-import org.xcmis.spi.CmisStorageInitializer;
+import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.model.RepositoryInfo;
 
@@ -72,7 +72,7 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
       {
          LOG.debug("Executing operation getRepositories");
       }
-      Set<String> entries = CmisStorageInitializer.getInstance().getStorageIDs();
+      Set<String> entries = CmisRegistry.getInstance().getStorageIDs();
 
       Connection conn = null;
 
@@ -81,7 +81,7 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
          List<CmisRepositoryEntryType> res = new ArrayList<CmisRepositoryEntryType>();
          for (String storageId : entries)
          {
-            conn = CmisStorageInitializer.getInstance().getConnection(storageId);
+            conn = CmisRegistry.getInstance().getConnection(storageId);
 
             RepositoryInfo repoInfo = conn.getStorage().getRepositoryInfo();
             CmisRepositoryEntryType type = new CmisRepositoryEntryType();
@@ -116,7 +116,7 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
          LOG.debug("Executing operation getRepositoryInfo");
       }
       Connection conn = null;
-      conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+      conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
       return TypeConverter.getCmisRepositoryInfoType(conn.getStorage().getRepositoryInfo());
    }
@@ -138,7 +138,7 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          return TypeConverter.getCmisTypeDefinitionListType(conn.getTypeChildren(typeId, //
             includePropertyDefinitions == null ? false : includePropertyDefinitions, //
@@ -173,7 +173,7 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          return TypeConverter.getCmisTypeDefinitionType(conn.getTypeDefinition(typeId));
       }
@@ -204,7 +204,7 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          return TypeConverter.getCmisTypeContainerList(conn.getTypeDescendants(typeId, //
             depth == null ? 1 : depth.intValue(), //

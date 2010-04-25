@@ -30,7 +30,7 @@ import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.VersioningServicePort;
 import org.xcmis.spi.BaseContentStream;
-import org.xcmis.spi.CmisStorageInitializer;
+import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.IncludeRelationships;
@@ -79,7 +79,7 @@ public class VersioningServicePortImpl implements VersioningServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          conn.cancelCheckout(documentId);
          return new CmisExtensionType();
@@ -120,7 +120,7 @@ public class VersioningServicePortImpl implements VersioningServicePort
       BaseContentStream cs = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          if (contentStream != null)
          {
@@ -168,7 +168,7 @@ public class VersioningServicePortImpl implements VersioningServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          String res = conn.checkout(documentId.value);
          documentId.value = res;
@@ -204,7 +204,7 @@ public class VersioningServicePortImpl implements VersioningServicePort
       List<CmisObjectType> res = new ArrayList<CmisObjectType>();
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          List<CmisObject> list = conn.getAllVersions(versionSeriesId, //
             includeAllowableActions == null ? false : includeAllowableActions, //
@@ -245,7 +245,7 @@ public class VersioningServicePortImpl implements VersioningServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          return TypeConverter.getCmisObjectType(conn.getObjectOfLatestVersion(versionSeriesId, //
             major == null ? false : major, //
@@ -284,7 +284,7 @@ public class VersioningServicePortImpl implements VersioningServicePort
       Connection conn = null;
       try
       {
-         conn = CmisStorageInitializer.getInstance().getConnection(repositoryId);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          return TypeConverter.getCmisPropertiesType(conn.getPropertiesOfLatestVersion(objectId, //
             major == null ? false : major, //

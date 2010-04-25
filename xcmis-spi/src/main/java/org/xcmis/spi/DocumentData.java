@@ -29,63 +29,63 @@ public interface DocumentData extends ObjectData
 {
    /**
     * Shortcut to 'cmis:versionLabel' property.
-    * 
+    *
     * @return 'cmis:versionLabel' property
     */
    String getVersionLabel();
 
    /**
     * Shortcut to 'cmis:versionSeriesCheckedOutBy' property.
-    * 
+    *
     * @return 'cmis:versionSeriesCheckedOutBy' property
     */
    String getVersionSeriesCheckedOutBy();
 
    /**
     * Shortcut to 'cmis:versionSeriesCheckedOutId' property.
-    * 
+    *
     * @return 'cmis:versionSeriesCheckedOutId' property
     */
    String getVersionSeriesCheckedOutId();
 
    /**
     * Shortcut to 'cmis:versionSeriesId' property.
-    * 
+    *
     * @return 'cmis:versionSeriesId' property
     */
    String getVersionSeriesId();
 
    /**
     * Shortcut to 'cmis:isLatestMajorVersion' property.
-    * 
+    *
     * @return 'cmis:isLatestMajorVersion' property
     */
    boolean isLatestMajorVersion();
 
    /**
     * Shortcut to 'cmis:isLatestVersion' property.
-    * 
+    *
     * @return 'cmis:isLatestVersion' property
     */
    boolean isLatestVersion();
 
    /**
     * Shortcut to 'cmis:isMajorVersion' property.
-    * 
+    *
     * @return 'cmis:isMajorVersion' property
     */
    boolean isMajorVersion();
 
    /**
     * Shortcut to 'cmis:isVersionSeriesCheckedOut' property.
-    * 
+    *
     * @return 'cmis:isVersionSeriesCheckedOut' property
     */
    boolean isVersionSeriesCheckedOut();
 
    /**
     * Shortcut to 'cmis:contentStreamMimeType' property.
-    * 
+    *
     * @return 'cmis:contentStreamMimeType' property or <code>null</code> if
     *         document has not content
     */
@@ -95,7 +95,7 @@ public interface DocumentData extends ObjectData
 
    /**
     * Get document content stream.
-    * 
+    *
     * @return content stream or <code>null</code> if document has not content
     */
    ContentStream getContentStream();
@@ -103,7 +103,7 @@ public interface DocumentData extends ObjectData
    /**
     * Set content stream to document. If <code>contentStream</code> is
     * <code>null</code> then existed content of this document will be removed.
-    * 
+    *
     * @param contentStream {@link ContentStream} or <code>null</code>
     * @throws ConstraintException if document type definition attribute
     *         {@link TypeDefinition#getContentStreamAllowed()} is 'notallowed'
@@ -116,21 +116,21 @@ public interface DocumentData extends ObjectData
 
    /**
     * Check does current document has content or not.
-    * 
+    *
     * @return <code>true</code> if has content and <code>false</code> if not
     */
    boolean hasContent();
 
    /**
     * Discard checkout operation. See {@link Connection#cancelCheckout(String)}.
-    * 
+    *
     * @throws StorageException if any storage error occurs
     */
    void cancelCheckout() throws StorageException;
 
    /**
     * Set private working copy as latest (current) version of.
-    * 
+    *
     * @param major is major
     * @param checkinComment check-in comment
     * @return DocumentData document
@@ -143,7 +143,7 @@ public interface DocumentData extends ObjectData
    /**
     * Create PWC from this document. Properties and content (optionally) of this
     * document copied to PWC.
-    * 
+    *
     * @return PWC
     * @throws ConstraintException if the object is not versionable
     * @throws VersioningException if object is not latest version of document

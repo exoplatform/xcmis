@@ -89,7 +89,7 @@ class FolderDataImpl extends BaseObjectData implements FolderData
       List<ObjectData> children = new ArrayList<ObjectData>(childrenIds.size());
       for (String ch : childrenIds)
       {
-         ObjectData object = storage.getObject(ch);
+         ObjectData object = storage.getObjectById(ch);
          if (object.getBaseType() == BaseType.DOCUMENT && !((DocumentData)object).isLatestVersion())
          {
             continue;

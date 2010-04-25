@@ -42,7 +42,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xcmis.restatom.abdera.CMISExtensionFactory;
 import org.xcmis.spi.CmisConstants;
-import org.xcmis.spi.CmisStorageInitializer;
+import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.ItemsList;
@@ -121,7 +121,7 @@ public abstract class BaseTest extends TestCase
       ConversationState.setCurrent(state);
 
       //      conn = storageProvider.getConnection(cmisRepositoryId);
-      conn = CmisStorageInitializer.getInstance().getConnection(cmisRepositoryId);
+      conn = CmisRegistry.getInstance().getConnection(cmisRepositoryId);
 
       rootFolderId = conn.getStorage().getRepositoryInfo().getRootFolderId();
 

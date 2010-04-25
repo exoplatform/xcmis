@@ -315,7 +315,7 @@ public interface Storage extends TypeManager
     * @return object
     * @throws ObjectNotFoundException if object with specified ID was not found
     */
-   ObjectData getObject(String objectId) throws ObjectNotFoundException;
+   ObjectData getObjectById(String objectId) throws ObjectNotFoundException;
 
    /**
     * Get object by path.

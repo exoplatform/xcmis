@@ -702,12 +702,12 @@ public class StorageImpl implements Storage
             Version v = iterator.nextVersion();
             versions.addFirst(getDocumentVersion(v.getNode(JcrCMIS.JCR_FROZEN_NODE)));
          }
-         DocumentData latest = (DocumentData)getObject(vh.getVersionableUUID());
+         DocumentData latest = (DocumentData)getObjectById(vh.getVersionableUUID());
          versions.addFirst(latest);
          String pwcId = latest.getVersionSeriesCheckedOutId();
          if (pwcId != null)
          {
-            PWC pwc = (PWC)getObject(pwcId);
+            PWC pwc = (PWC)getObjectById(pwcId);
             versions.addFirst(pwc);
          }
          return versions;
@@ -751,7 +751,7 @@ public class StorageImpl implements Storage
             Node node = wc.getNodes().nextNode();
             TypeDefinition type = JcrTypeHelper.getTypeDefinition(node.getPrimaryNodeType(), true);
             String latestVersion = node.getProperty("xcmis:latestVersionId").getString();
-            PWC pwc = new PWC(type, node, (DocumentData)getObject(latestVersion), indexListener);
+            PWC pwc = new PWC(type, node, (DocumentData)getObjectById(latestVersion), indexListener);
             if (folder != null)
             {
                for (FolderData parent : pwc.getParents())
@@ -788,7 +788,7 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public ObjectData getObject(String objectId) throws ObjectNotFoundException
+   public ObjectData getObjectById(String objectId) throws ObjectNotFoundException
    {
       try
       {
@@ -809,7 +809,7 @@ public class StorageImpl implements Storage
             {
                // TODO get smarter (simpler)
                String latestVersion = node.getProperty("xcmis:latestVersionId").getString();
-               return new PWC(type, node, (DocumentData)getObject(latestVersion), indexListener);
+               return new PWC(type, node, (DocumentData)getObjectById(latestVersion), indexListener);
             }
             return new DocumentDataImpl(type, node, renditionManager, indexListener);
          }

@@ -98,8 +98,8 @@ public abstract class Connection
          throw new NotSupportedException("Multi-filing is not supported.");
       }
 
-      ObjectData object = storage.getObject(objectId);
-      ObjectData folder = storage.getObject(folderId);
+      ObjectData object = storage.getObjectById(objectId);
+      ObjectData folder = storage.getObjectById(folderId);
 
       if (folder.getBaseType() != BaseType.FOLDER)
       {
@@ -184,7 +184,7 @@ public abstract class Connection
       checkConnection();
 
       // TODO: check ACL propagation.
-      ObjectData object = storage.getObject(objectId);
+      ObjectData object = storage.getObjectById(objectId);
       applyACL(object, addACL, removeACL);
 
       storage.saveObject(object);
@@ -204,8 +204,8 @@ public abstract class Connection
    {
       checkConnection();
 
-      ObjectData object = storage.getObject(objectId);
-      ObjectData policy = storage.getObject(policyId);
+      ObjectData object = storage.getObjectById(objectId);
+      ObjectData policy = storage.getObjectById(policyId);
       if (policy.getBaseType() != BaseType.POLICY)
       {
          throw new InvalidArgumentException("Object " + policy.getObjectId() + " is not a Policy object.");
@@ -233,7 +233,7 @@ public abstract class Connection
    {
       checkConnection();
 
-      ObjectData document = storage.getObject(documentId);
+      ObjectData document = storage.getObjectById(documentId);
       if (document.getBaseType() != BaseType.DOCUMENT)
       {
          throw new InvalidArgumentException("Object " + documentId + " is not a Document object.");
@@ -279,7 +279,7 @@ public abstract class Connection
    {
       checkConnection();
 
-      ObjectData pwc = storage.getObject(documentId);
+      ObjectData pwc = storage.getObjectById(documentId);
 
       if (pwc.getBaseType() != BaseType.DOCUMENT)
       {
@@ -334,7 +334,7 @@ public abstract class Connection
    {
       checkConnection();
 
-      ObjectData document = storage.getObject(documentId);
+      ObjectData document = storage.getObjectById(documentId);
 
       if (document.getBaseType() != BaseType.DOCUMENT)
       {
@@ -445,7 +445,7 @@ public abstract class Connection
       ObjectData folder = null;
       if (folderId != null)
       {
-         folder = storage.getObject(folderId);
+         folder = storage.getObjectById(folderId);
          if (folder.getBaseType() != BaseType.FOLDER)
          {
             throw new InvalidArgumentException("Object " + folderId + " is not a Folder object.");
@@ -544,7 +544,7 @@ public abstract class Connection
    {
       checkConnection();
 
-      ObjectData source = storage.getObject(sourceId);
+      ObjectData source = storage.getObjectById(sourceId);
 
       if (source.getBaseType() != BaseType.DOCUMENT)
       {
@@ -554,7 +554,7 @@ public abstract class Connection
       ObjectData folder = null;
       if (folderId != null)
       {
-         folder = storage.getObject(folderId);
+         folder = storage.getObjectById(folderId);
          if (folder.getBaseType() != BaseType.FOLDER)
          {
             throw new InvalidArgumentException("Object " + folderId + " is not a Folder object.");
@@ -659,7 +659,7 @@ public abstract class Connection
          throw new ConstraintException("Parent folder id is not specified.");
       }
 
-      ObjectData folder = storage.getObject(folderId);
+      ObjectData folder = storage.getObjectById(folderId);
       if (folder.getBaseType() != BaseType.FOLDER)
       {
          throw new InvalidArgumentException("Object " + folderId + " is not a Folder object.");
@@ -755,7 +755,7 @@ public abstract class Connection
       ObjectData folder = null;
       if (folderId != null)
       {
-         folder = storage.getObject(folderId);
+         folder = storage.getObjectById(folderId);
          if (folder.getBaseType() != BaseType.FOLDER)
          {
             throw new InvalidArgumentException("Object " + folderId + " is not a Folder object.");
@@ -872,7 +872,7 @@ public abstract class Connection
       }
 
       ObjectData newRelationship =
-         storage.createRelationship(storage.getObject(sourceId), storage.getObject(targetId), typeId);
+         storage.createRelationship(storage.getObjectById(sourceId), storage.getObjectById(targetId), typeId);
 
       newRelationship.setProperties(properties);
 
@@ -925,7 +925,7 @@ public abstract class Connection
 
       checkConnection();
 
-      ObjectData document = storage.getObject(documentId);
+      ObjectData document = storage.getObjectById(documentId);
 
       if (document.getBaseType() != BaseType.DOCUMENT)
       {
@@ -970,7 +970,7 @@ public abstract class Connection
    {
       checkConnection();
 
-      ObjectData object = storage.getObject(objectId);
+      ObjectData object = storage.getObjectById(objectId);
 
       if (deleteAllVersions == null)
       {
@@ -1014,7 +1014,7 @@ public abstract class Connection
    {
       checkConnection();
 
-      ObjectData folder = storage.getObject(folderId);
+      ObjectData folder = storage.getObjectById(folderId);
 
       if (folder.getBaseType() != BaseType.FOLDER)
       {
@@ -1068,7 +1068,7 @@ public abstract class Connection
          throw new NotSupportedException("ACL capability is not supported.");
       }
 
-      ObjectData object = storage.getObject(objectId);
+      ObjectData object = storage.getObjectById(objectId);
 
       List<AccessControlEntry> acl = object.getACL(onlyBasicPermissions);
 
@@ -1086,7 +1086,7 @@ public abstract class Connection
    public AllowableActions getAllowableActions(String objectId) throws ObjectNotFoundException
    {
       checkConnection();
-      ObjectData object = storage.getObject(objectId);
+      ObjectData object = storage.getObjectById(objectId);
       return storage.calculateAllowableActions(object);
    }
 
@@ -1156,7 +1156,7 @@ public abstract class Connection
    {
       checkConnection();
 
-      ObjectData object = storage.getObject(objectId);
+      ObjectData object = storage.getObjectById(objectId);
 
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
       Collection<PolicyData> policies = object.getPolicies();
@@ -1247,7 +1247,7 @@ public abstract class Connection
 
       if (folderId != null)
       {
-         folder = storage.getObject(folderId);
+         folder = storage.getObjectById(folderId);
 
          if (folder.getBaseType() != BaseType.FOLDER)
          {
@@ -1368,7 +1368,7 @@ public abstract class Connection
          throw new InvalidArgumentException("skipCount parameter is negative.");
       }
 
-      ObjectData folder = storage.getObject(folderId);
+      ObjectData folder = storage.getObjectById(folderId);
       if (folder.getBaseType() != BaseType.FOLDER)
       {
          throw new InvalidArgumentException("Can't get children. Object " + folderId + " is not a Folder.");
@@ -1484,7 +1484,7 @@ public abstract class Connection
    {
       checkConnection();
 
-      ObjectData object = storage.getObject(objectId);
+      ObjectData object = storage.getObjectById(objectId);
       ContentStream contentStream = null;
 
       if (streamId != null)
@@ -1605,7 +1605,7 @@ public abstract class Connection
    {
       checkConnection();
 
-      ObjectData folder = storage.getObject(folderId);
+      ObjectData folder = storage.getObjectById(folderId);
       if (folder.getBaseType() != BaseType.FOLDER)
       {
          throw new InvalidArgumentException("Object " + folderId + " is not a Folder.");
@@ -1766,7 +1766,7 @@ public abstract class Connection
          includeRelationships = IncludeRelationships.NONE;
       }
 
-      ObjectData objectData = storage.getObject(objectId);
+      ObjectData objectData = storage.getObjectById(objectId);
       CmisObject cmisObject =
          getCmisObject(objectData, includeAllowableActions, includeRelationships, includePolicyIDs, includeAcl,
             includeObjectInfo, parsedPropertyFilter, parsedRenditionFilter);
@@ -2019,7 +2019,7 @@ public abstract class Connection
    {
       checkConnection();
 
-      ObjectData object = storage.getObject(objectId);
+      ObjectData object = storage.getObjectById(objectId);
 
       String typeId = object.getTypeId();
       TypeDefinition typeDefinition = getTypeDefinition(typeId, false);
@@ -2104,7 +2104,7 @@ public abstract class Connection
          throw new InvalidArgumentException("Type " + typeId + " is not Relationship type.");
       }
 
-      ObjectData object = storage.getObject(objectId);
+      ObjectData object = storage.getObjectById(objectId);
 
       ItemsIterator<RelationshipData> iterator = object.getRelationships(direction, type, includeSubRelationshipTypes);
 
@@ -2165,7 +2165,7 @@ public abstract class Connection
    {
       checkConnection();
 
-      ObjectData object = storage.getObject(objectId);
+      ObjectData object = storage.getObjectById(objectId);
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
 
       CmisObject cmis =
@@ -2264,7 +2264,7 @@ public abstract class Connection
          throw new InvalidArgumentException("skipCount parameter is negative.");
       }
 
-      ObjectData objectData = storage.getObject(objectId);
+      ObjectData objectData = storage.getObjectById(objectId);
 
       ItemsIterator<Rendition> iterator = storage.getRenditions(objectData);
 
@@ -2442,9 +2442,9 @@ public abstract class Connection
    {
       checkConnection();
 
-      ObjectData object = storage.getObject(objectId);
+      ObjectData object = storage.getObjectById(objectId);
 
-      ObjectData target = storage.getObject(targetFolderId);
+      ObjectData target = storage.getObjectById(targetFolderId);
       if (target.getBaseType() != BaseType.FOLDER)
       {
          throw new InvalidArgumentException("Object " + targetFolderId + " is not a Folder object.");
@@ -2453,7 +2453,7 @@ public abstract class Connection
       ObjectData source = null;
       try
       {
-         source = storage.getObject(sourceFolderId);
+         source = storage.getObjectById(sourceFolderId);
       }
       catch (ObjectNotFoundException e)
       {
@@ -2588,7 +2588,7 @@ public abstract class Connection
          ObjectData data = null;
          try
          {
-            data = storage.getObject(result.getObjectId());
+            data = storage.getObjectById(result.getObjectId());
          }
          catch (ObjectNotFoundException e)
          {
@@ -2637,10 +2637,10 @@ public abstract class Connection
          throw new NotSupportedException("Unfiling is not supported.");
       }
 
-      ObjectData object = storage.getObject(objectId);
+      ObjectData object = storage.getObjectById(objectId);
       if (folderId != null)
       {
-         ObjectData folder = storage.getObject(folderId);
+         ObjectData folder = storage.getObjectById(folderId);
 
          if (folder.getBaseType() != BaseType.FOLDER)
          {
@@ -2670,8 +2670,8 @@ public abstract class Connection
    {
       checkConnection();
 
-      ObjectData object = storage.getObject(objectId);
-      ObjectData policyData = storage.getObject(policyId);
+      ObjectData object = storage.getObjectById(objectId);
+      ObjectData policyData = storage.getObjectById(policyId);
 
       if (policyData.getBaseType() != BaseType.POLICY)
       {
@@ -2747,7 +2747,7 @@ public abstract class Connection
 
       checkConnection();
 
-      ObjectData document = storage.getObject(documentId);
+      ObjectData document = storage.getObjectById(documentId);
 
       if (document.getBaseType() != BaseType.DOCUMENT)
       {
@@ -2821,7 +2821,7 @@ public abstract class Connection
 
       checkConnection();
 
-      ObjectData object = storage.getObject(objectId);
+      ObjectData object = storage.getObjectById(objectId);
 
       // Validate change token, object may be already updated.
       validateChangeToken(object, changeTokenHolder.getValue());
@@ -2878,7 +2878,7 @@ public abstract class Connection
 
       for (String policyID : policies)
       {
-         ObjectData policy = storage.getObject(policyID);
+         ObjectData policy = storage.getObjectById(policyID);
          if (policy.getBaseType() != BaseType.POLICY)
          {
             throw new InvalidArgumentException("Object " + policyID + " is not a Policy object.");
@@ -2892,7 +2892,7 @@ public abstract class Connection
       boolean includeObjectInfo, String propertyFilter, String renditionFilter) throws ObjectNotFoundException,
       InvalidArgumentException, FilterNotValidException
    {
-      ObjectData folder = storage.getObject(folderId);
+      ObjectData folder = storage.getObjectById(folderId);
 
       if (folder.getBaseType() != BaseType.FOLDER)
       {
