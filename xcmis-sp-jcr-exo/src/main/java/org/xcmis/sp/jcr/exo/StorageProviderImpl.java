@@ -85,9 +85,6 @@ public class StorageProviderImpl implements StorageProvider, Startable
        */
       private List<StorageConfiguration> storages;
 
-      /** Rendition providers. */
-      private List<Object> renditionProviders;
-
       /**
        * @return the list of storages configuration
        */
@@ -101,32 +98,11 @@ public class StorageProviderImpl implements StorageProvider, Startable
       }
 
       /**
-       * Get renditionProviders.
-       *
-       * @return renditionProviders .
-       */
-
-      public List<Object> getRenditionProviders()
-      {
-         return renditionProviders;
-      }
-
-      /**
        * @param storages the list of storages configuration
        */
       public void setStorages(List<StorageConfiguration> storages)
       {
          this.storages = storages;
-      }
-
-      /**
-       * Set rendition providers.
-       *
-       * @param renditionProviders list renditionProviders
-       */
-      public void setRenditionProviders(List<Object> renditionProviders)
-      {
-         this.renditionProviders = renditionProviders;
       }
    }
 
@@ -186,11 +162,6 @@ public class StorageProviderImpl implements StorageProvider, Startable
          {
             storageConfigs.put(conf.getId(), conf);
          }
-
-//         if (confs.getRenditionProviders() != null)
-//         {
-//            addRenditionProviders(confs.getRenditionProviders());
-//         }
       }
       else
       {
