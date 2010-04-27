@@ -25,6 +25,9 @@ import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsIterator;
+import org.xcmis.spi.model.CapabilityJoin;
+import org.xcmis.spi.model.CapabilityQuery;
+import org.xcmis.spi.model.RepositoryCapabilities;
 import org.xcmis.spi.model.UnfileObject;
 import org.xcmis.spi.model.impl.BooleanProperty;
 import org.xcmis.spi.model.impl.DecimalProperty;
@@ -75,6 +78,15 @@ public class QueryUsecasesTest extends BaseQueryTest
       testRoot = createFolder(rootFolder, "QueryUsecasesTest", "cmis:folder");
       // create data
 
+   }
+
+   public void testSearchCapabilities() throws Exception
+   {
+      RepositoryCapabilities repCapabilities = storage.getRepositoryInfo().getCapabilities();
+      assertEquals(CapabilityQuery.BOTHCOMBINED, repCapabilities.getCapabilityQuery());
+      assertEquals(CapabilityJoin.NONE, repCapabilities.getCapabilityJoin());
+      assertFalse(repCapabilities.isCapabilityPWCSearchable());
+      assertFalse(repCapabilities.isCapabilityAllVersionsSearchable());
    }
 
    /**

@@ -21,9 +21,6 @@ package org.xcmis.sp.inmemory.query;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ObjectData;
-import org.xcmis.spi.model.CapabilityJoin;
-import org.xcmis.spi.model.CapabilityQuery;
-import org.xcmis.spi.model.RepositoryCapabilities;
 import org.xcmis.spi.utils.MimeType;
 
 /**
@@ -46,15 +43,6 @@ public class MultifilingUnfilingTest extends BaseQueryTest
       testRoot = createFolder(rootFolder, "QueryUsecasesTest", "cmis:folder");
       // create data
 
-   }
-
-   public void testSearchCapabilities() throws Exception
-   {
-      RepositoryCapabilities repCapabilities = storage.getRepositoryInfo().getCapabilities();
-      assertEquals(CapabilityQuery.BOTHCOMBINED, repCapabilities.getCapabilityQuery());
-      assertEquals(CapabilityJoin.NONE, repCapabilities.getCapabilityJoin());
-      assertFalse(repCapabilities.isCapabilityPWCSearchable());
-      assertFalse(repCapabilities.isCapabilityAllVersionsSearchable());
    }
 
    public void testAddMultipleParents() throws Exception
