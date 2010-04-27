@@ -34,6 +34,7 @@ import org.xcmis.core.CmisChoiceString;
 import org.xcmis.core.CmisChoiceUri;
 import org.xcmis.core.CmisListOfIdsType;
 import org.xcmis.core.CmisObjectType;
+import org.xcmis.core.CmisPermissionMapping;
 import org.xcmis.core.CmisPropertiesType;
 import org.xcmis.core.CmisProperty;
 import org.xcmis.core.CmisPropertyBoolean;
@@ -58,6 +59,7 @@ import org.xcmis.core.CmisRepositoryCapabilitiesType;
 import org.xcmis.core.CmisRepositoryInfoType;
 import org.xcmis.core.CmisTypeDefinitionType;
 import org.xcmis.core.EnumACLPropagation;
+import org.xcmis.core.EnumAllowableActionsKey;
 import org.xcmis.core.EnumBaseObjectTypeIds;
 import org.xcmis.core.EnumCapabilityACL;
 import org.xcmis.core.EnumCapabilityChanges;
@@ -92,6 +94,7 @@ import org.xcmis.spi.model.Choice;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.ObjectParent;
+import org.xcmis.spi.model.PermissionMapping;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.PropertyType;
@@ -157,6 +160,13 @@ public class TypeConverter
       CmisACLCapabilityType result = new CmisACLCapabilityType();
       result.setPropagation(EnumACLPropagation.fromValue(source.getPropagation().value()));
       result.setSupportedPermissions(EnumSupportedPermissions.fromValue(source.getSupportedPermissions().value()));
+      if (source.getMapping() != null)
+      {
+         for (PermissionMapping one : source.getMapping())
+         {
+            result.getMapping().add(getCmisPermissionMapping(one));
+         }
+      }
       return result;
    }
 
@@ -463,7 +473,8 @@ public class TypeConverter
       result.setMimeType(source.getMediaType().toString());
       try
       {
-         result.setStream(new DataHandler(new ByteArrayDataSource(source.getStream(), source.getMediaType().toString())));
+         result
+            .setStream(new DataHandler(new ByteArrayDataSource(source.getStream(), source.getMediaType().toString())));
       }
       catch (IOException e)
       {
@@ -663,7 +674,8 @@ public class TypeConverter
    }
 
    @SuppressWarnings("unchecked")
-   public static List<CmisPropertyDefinitionType> getCmisPropertyDefintitionTypeList(Collection<PropertyDefinition<?>> source)
+   public static List<CmisPropertyDefinitionType> getCmisPropertyDefintitionTypeList(
+      Collection<PropertyDefinition<?>> source)
    {
       if (source == null)
       {
@@ -1012,6 +1024,18 @@ public class TypeConverter
       Calendar cal = source.getChangeTime();
       result.setChangeTime(CmisUtils.fromCalendar(cal));
       result.setChangeType(EnumTypeOfChanges.fromValue(source.getChangeType().value()));
+      return result;
+   }
+
+   public static CmisPermissionMapping getCmisPermissionMapping(PermissionMapping source)
+   {
+      CmisPermissionMapping result = new CmisPermissionMapping();
+      result.setKey(EnumAllowableActionsKey.fromValue(source.getKey()));
+      if (source.getPermissions() != null)
+         for (String one : source.getPermissions())
+         {
+            result.getPermission().add(one);
+         }
       return result;
    }
 
