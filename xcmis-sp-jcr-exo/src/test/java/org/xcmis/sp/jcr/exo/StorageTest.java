@@ -650,12 +650,16 @@ public class StorageTest extends BaseTest
       assertFalse(session.itemExists("/deleteMultifiledTest"));
    }
 
-   //   public void testDeleteUnfiledDocument() throws Exception
-   //   {
-   //      DocumentData document = createDocument(rootFolder, "deleteUnfiledTest", "cmis:document", null, null);
-   //      rootFolder.removeObject(document);
-   //      assertEquals(0, document.getParents().size());
-   //   }
+   public void testDeleteUnfiledDocument() throws Exception
+   {
+      DocumentData document = createDocument(rootFolder, "deleteUnfiledTest", "cmis:document", null, null);
+      rootFolder.removeObject(document);
+      assertEquals(0, document.getParents().size());
+      assertTrue(root.getNode("xcmis:system/xcmis:unfileStore").getNodes().hasNext());
+      storage.deleteObject(document, true);
+      // wrapper node must be removed
+      assertFalse(root.getNode("xcmis:system/xcmis:unfileStore").getNodes().hasNext());
+   }
 
    public void testDeleteObjectWithRelationship() throws Exception
    {
