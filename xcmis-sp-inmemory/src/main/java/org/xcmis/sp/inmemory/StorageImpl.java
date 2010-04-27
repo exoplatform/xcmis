@@ -283,7 +283,7 @@ public class StorageImpl implements Storage
       repositoryInfo =
          new RepositoryInfo(getId(), getId(), ROOT_FOLDER_ID, CmisConstants.SUPPORTED_VERSION,
             new RepositoryCapabilities(CapabilityACL.MANAGE, CapabilityChanges.NONE,
-               CapabilityContentStreamUpdatable.ANYTIME, CapabilityJoin.NONE, CapabilityQuery.NONE,
+               CapabilityContentStreamUpdatable.ANYTIME, CapabilityJoin.NONE, CapabilityQuery.BOTHCOMBINED,
                CapabilityRendition.NONE, false, true, true, true, false, true, true, false), new ACLCapability(
                permissionMapping, Collections.unmodifiableList(supportedPermissions),
                AccessControlPropagation.OBJECTONLY, SupportedPermissions.BASIC), "anonymous", "any", null, null, true,

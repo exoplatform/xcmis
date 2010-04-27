@@ -21,6 +21,9 @@ package org.xcmis.sp.inmemory.query;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ObjectData;
+import org.xcmis.spi.model.CapabilityJoin;
+import org.xcmis.spi.model.CapabilityQuery;
+import org.xcmis.spi.model.RepositoryCapabilities;
 import org.xcmis.spi.utils.MimeType;
 
 /**
@@ -45,6 +48,15 @@ public class MultifilingUnfilingTest extends BaseQueryTest
 
    }
 
+   public void testSearchCapabilities() throws Exception
+   {
+      RepositoryCapabilities repCapabilities = storage.getRepositoryInfo().getCapabilities();
+      assertEquals(CapabilityQuery.BOTHCOMBINED, repCapabilities.getCapabilityQuery());
+      assertEquals(CapabilityJoin.NONE, repCapabilities.getCapabilityJoin());
+      assertFalse(repCapabilities.isCapabilityPWCSearchable());
+      assertFalse(repCapabilities.isCapabilityAllVersionsSearchable());
+   }
+
    public void testAddMultipleParents() throws Exception
    {
 
@@ -54,7 +66,7 @@ public class MultifilingUnfilingTest extends BaseQueryTest
 
       DocumentData doc1 =
          createDocument(folder1, "node1", NASA_DOCUMENT, "helloworld".getBytes(), new MimeType("plain", "text"));
-      //check singe parent.
+      //check single parent.
       checkResult("SELECT * FROM " + NASA_DOCUMENT + " WHERE IN_TREE('" + folder1.getObjectId() + "')",
          new ObjectData[]{doc1});
       checkResult("SELECT * FROM " + NASA_DOCUMENT + " WHERE IN_TREE('" + folder2.getObjectId() + "')",
