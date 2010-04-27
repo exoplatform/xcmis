@@ -54,7 +54,8 @@ public class MultifilingUnfilingTest extends BaseQueryTest
 
       DocumentData doc1 =
          createDocument(folder1, "node1", NASA_DOCUMENT, "helloworld".getBytes(), new MimeType("plain", "text"));
-      //check singe parent.
+
+      //check what document can be found only in one folder
       checkResult("SELECT * FROM " + NASA_DOCUMENT + " WHERE IN_TREE('" + folder1.getObjectId() + "')",
          new ObjectData[]{doc1});
       checkResult("SELECT * FROM " + NASA_DOCUMENT + " WHERE IN_TREE('" + folder2.getObjectId() + "')",
@@ -91,6 +92,7 @@ public class MultifilingUnfilingTest extends BaseQueryTest
 
       checkResult("SELECT * FROM " + NASA_DOCUMENT + " WHERE IN_TREE('" + folder2.getObjectId() + "')",
          new ObjectData[]{});
+
       checkResult("SELECT * FROM " + NASA_DOCUMENT + " WHERE IN_TREE('" + folder3.getObjectId() + "')",
          new ObjectData[]{doc1});
       checkResult("SELECT * FROM " + NASA_DOCUMENT + " WHERE IN_TREE('" + folder1.getObjectId() + "')",
