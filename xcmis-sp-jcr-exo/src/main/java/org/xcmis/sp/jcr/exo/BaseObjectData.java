@@ -1621,7 +1621,15 @@ abstract class BaseObjectData implements ObjectData
 
       try
       {
-         node.remove();
+         if (getBaseType() == BaseType.DOCUMENT && getParents().size() == 0)
+         {
+            // unfiled document
+            node.getParent().remove();
+         }
+         else
+         {
+            node.remove();
+         }
          session.save();
       }
       catch (javax.jcr.ReferentialIntegrityException rie)

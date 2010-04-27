@@ -650,6 +650,13 @@ public class StorageTest extends BaseTest
       assertFalse(session.itemExists("/deleteMultifiledTest"));
    }
 
+   //   public void testDeleteUnfiledDocument() throws Exception
+   //   {
+   //      DocumentData document = createDocument(rootFolder, "deleteUnfiledTest", "cmis:document", null, null);
+   //      rootFolder.removeObject(document);
+   //      assertEquals(0, document.getParents().size());
+   //   }
+
    public void testDeleteObjectWithRelationship() throws Exception
    {
       ObjectData sourceDoc =
