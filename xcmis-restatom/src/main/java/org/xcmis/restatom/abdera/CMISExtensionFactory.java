@@ -72,7 +72,6 @@ public class CMISExtensionFactory extends AbstractExtensionFactory
       addImpl(AtomCMIS.ALLOWABLE_ACTIONS, AllowableActionsElement.class);
       addImpl(AtomCMIS.QUERY, QueryTypeElement.class);
       addImpl(AtomCMIS.CHANGE_EVENT_INFO, ChangeEventTypeElement.class);
-      addImpl(AtomCMIS.PERMISSIONS, PermissionDefinitionElement.class);
       addImpl(AtomCMIS.MAPPING, PermissionMappingElement.class);
       addImpl(AtomCMIS.ACL_CAPABILITY, ACLCapabilityTypeElement.class);
       addImpl(AtomCMIS.RENDITION, RenditionTypeElement.class);

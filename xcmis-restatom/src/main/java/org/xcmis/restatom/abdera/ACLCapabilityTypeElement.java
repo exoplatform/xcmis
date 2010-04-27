@@ -27,13 +27,16 @@ import org.xcmis.spi.model.ACLCapability;
 import org.xcmis.spi.model.Permission;
 import org.xcmis.spi.model.PermissionMapping;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id: ACLCapabilityTypeElement.java 2 2010-02-04 17:21:49Z andrew00x $
+ * @version $Id: ACLCapabilityTypeElement.java 2 2010-02-04 17:21:49Z andrew00x
+ *          $
  */
 public class ACLCapabilityTypeElement extends ExtensibleElementWrapper
 {
@@ -87,13 +90,17 @@ public class ACLCapabilityTypeElement extends ExtensibleElementWrapper
             }
          }
 
-         List<PermissionMapping> listPermissionMapping = aclCapability.getMapping();
-         if (listPermissionMapping != null && listPermissionMapping.size() > 0)
+         PermissionMapping permissionMapping = aclCapability.getMapping();
+         if (permissionMapping != null && permissionMapping.getAll().size() > 0)
          {
-            for (PermissionMapping permissionMapping : listPermissionMapping)
+            for (Map.Entry<String, Collection<String>> e : permissionMapping.getAll().entrySet())
             {
-               PermissionMappingElement permissionMappingElement = addExtension(AtomCMIS.MAPPING);
-               permissionMappingElement.build(permissionMapping);
+               if (e.getValue() != null && e.getValue().size() > 0)
+               {
+                  PermissionMappingElement me = addExtension(AtomCMIS.MAPPING);
+                  me.build(e.getKey(), e.getValue());
+
+               }
             }
          }
       }

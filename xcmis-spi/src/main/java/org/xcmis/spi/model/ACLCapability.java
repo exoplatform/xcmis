@@ -28,7 +28,7 @@ import java.util.List;
 public class ACLCapability
 {
 
-   private List<PermissionMapping> permissionMapping;
+   private PermissionMapping permissionMapping;
 
    private List<Permission> permissions;
 
@@ -36,7 +36,7 @@ public class ACLCapability
 
    private SupportedPermissions supportedPermissions;
 
-   public ACLCapability(List<PermissionMapping> permissionMapping, List<Permission> permissions,
+   public ACLCapability(PermissionMapping permissionMapping, List<Permission> permissions,
       AccessControlPropagation propagation, SupportedPermissions supportedPermissions)
    {
       this.permissionMapping = permissionMapping;
@@ -49,7 +49,7 @@ public class ACLCapability
    {
    }
 
-   public List<PermissionMapping> getMapping()
+   public PermissionMapping getMapping()
    {
       return permissionMapping;
    }

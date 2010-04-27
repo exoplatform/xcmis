@@ -22,22 +22,36 @@ import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.ObjectData;
+import org.xcmis.spi.model.AccessControlEntry;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 /**
- * @author <a href="mailto:Sergey.Kabashnyuk@exoplatform.org">Sergey Kabashnyuk</a>
+ * @author <a href="mailto:Sergey.Kabashnyuk@exoplatform.org">Sergey
+ *         Kabashnyuk</a>
  * @version $Id: exo-jboss-codetemplates.xml 34360 2009-07-22 23:58:59Z ksm $
  *
  */
 public class StorageTest extends BaseTest
 {
+
+   public void testAddAcl() throws Exception
+   {
+      DocumentData document = createDocument(rootFolder, "aclTest", "cmis:document", null, null);
+      String id = document.getObjectId();
+      document.setACL(Collections.singletonList(new AccessControlEntry("root", new HashSet<String>(Arrays.asList(
+         "cmis:read", "cmis:write")))));
+      storage.saveObject(document);
+      document = (DocumentData)storage.getObjectById(id);
+      System.out.println(document.getACL(true));
+   }
 
    public void testMultifiledChild() throws Exception
    {

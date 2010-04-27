@@ -19,13 +19,26 @@
 
 package org.xcmis.spi.model;
 
+import org.xcmis.spi.CmisRuntimeException;
+
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Mapping of actions that can be performed to required permissions.
+ * Mapping of actions that can be performed to required permissions. Mapping
+ * table contains key-permissions pairs. Because several allowable actions may
+ * require permissions on more than one object – for example, moving a document
+ * from one folder to another may require permissions on the document and each
+ * of the folders – the mapping table is defined in terms of permission "keys",
+ * where each key combines the name of the allowable action as the object for
+ * which the principal needs the required permission. For example – the
+ * "canMoveObject.Source" key indicates the permissions that the principal must
+ * have on the "source folder" to move an object from that folder into another
+ * folder. Permissions represented as set of one or more permissions that the
+ * principal must have to be allowed to perform action.
  *
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
@@ -35,11 +48,13 @@ public final class PermissionMapping
 
    public static final String CAN_GET_DESCENDENTS_FOLDER = "canGetDescendents.Folder";
 
+   public static final String CAN_GET_FOLDER_TREE_FOLDER = "canGetFolderTree.Folder";
+
    public static final String CAN_GET_CHILDREN_FOLDER = "canGetChildren.Folder";
 
-   public static final String CAN_GET_PARENTS_FOLDER = "canGetParents.Folder";
+   public static final String CAN_GET_OBJECT_PARENTS_OBJECT = "canGetObjectParents.Object";
 
-   public static final String CAN_GET_FOLDER_PARENT_OBJECT = "canGetFolderParent.Object";
+   public static final String CAN_GET_FOLDER_PARENT_FOLDER = "canGetFolderParent.Folder";
 
    public static final String CAN_CREATE_DOCUMENT_FOLDER = "canCreateDocument.Folder";
 
@@ -51,31 +66,35 @@ public final class PermissionMapping
 
    public static final String CAN_GET_PROPERTIES_OBJECT = "canGetProperties.Object";
 
-   public static final String CAN_VIEW_CONTENT_OBJECT = "canViewContent.Object";
+   public static final String CAN_GET_CONTENT_STREAM_OBJECT = "canGetContentStream.Object";
 
    public static final String CAN_UPDATE_PROPERTIES_OBJECT = "canUpdateProperties.Object";
 
-   public static final String CAN_MOVE_OBJECT = "canMove.Object";
+   public static final String CAN_MOVE_OBJECT_OBJECT = "canMoveObject.Object";
 
-   public static final String CAN_MOVE_TARGET = "canMove.Target";
+   public static final String CAN_MOVE_OBJECT_TARGET = "canMoveObject.Target";
 
-   public static final String CAN_MOVE_SOURCE = "canMove.Source";
+   public static final String CAN_MOVE_OBJECT_SOURCE = "canMoveObject.Source";
 
    public static final String CAN_DELETE_OBJECT = "canDelete.Object";
 
+   public static final String CAN_DELETE_FOLDER = "canDelete.Folder";
+
    public static final String CAN_DELETE_TREE_FOLDER = "canDeleteTree.Folder";
 
-   public static final String CAN_SET_CONTENT_DOCUMENT = "canSetContent.Document";
+   public static final String CAN_SET_CONTENT_DOCUMENT = "canSetContentStream.Document";
 
-   public static final String CAN_DELETE_CONTENT_DOCUMENT = "canDeleteContent.Document";
+   public static final String CAN_DELETE_CONTENT_DOCUMENT = "canDeleteContentStream.Document";
+
+   public static final String CAN_GET_RENDITIONS_OBJECT = "canRenditions.Object";
 
    public static final String CAN_ADD_TO_FOLDER_OBJECT = "canAddToFolder.Object";
 
    public static final String CAN_ADD_TO_FOLDER_FOLDER = "canAddToFolder.Folder";
 
-   public static final String CAN_REMOVE_FROM_FOLDER_OBJECT = "canRemoveFromFolder.Object";
+   public static final String CAN_REMOVE_OBJECT_FROM_FOLDER_OBJECT = "canRemoveObjectFromFolder.Object";
 
-   public static final String CAN_REMOVE_FROM_FOLDER_FOLDER = "canRemoveFromFolder.Folder";
+   public static final String CAN_REMOVE_OBJECT_FROM_FOLDER_FOLDER = "canRemoveObjectFromFolder.Folder";
 
    public static final String CAN_CHECKOUT_DOCUMENT = "canCheckout.Document";
 
@@ -83,7 +102,7 @@ public final class PermissionMapping
 
    public static final String CAN_CHECKIN_DOCUMENT = "canCheckin.Document";
 
-   public static final String CAN_GET_ALL_VERSIONS_VERSION_SERIES = "canGetAllVersions.VersionSeries";
+   public static final String CAN_GET_ALL_VERSIONS_DOCUMENT = "canGetAllVersions.Document";
 
    public static final String CAN_GET_OBJECT_RELATIONSHIPS_OBJECT = "canGetObjectRelationships.Object";
 
@@ -101,36 +120,59 @@ public final class PermissionMapping
 
    public static final String CAN_APPLY_ACL_OBJECT = "canApplyACL.Object";
 
-   private String key;
+   public static final Collection<String> DEFAULT_KEYS =
+      Collections.unmodifiableCollection(Arrays.asList(CAN_GET_DESCENDENTS_FOLDER, CAN_GET_FOLDER_TREE_FOLDER,
+         CAN_GET_CHILDREN_FOLDER, CAN_GET_OBJECT_PARENTS_OBJECT, CAN_GET_FOLDER_PARENT_FOLDER,
+         CAN_CREATE_DOCUMENT_FOLDER, CAN_CREATE_FOLDER_FOLDER, CAN_CREATE_RELATIONSHIP_SOURCE,
+         CAN_CREATE_RELATIONSHIP_TARGET, CAN_GET_PROPERTIES_OBJECT, CAN_GET_CONTENT_STREAM_OBJECT,
+         CAN_UPDATE_PROPERTIES_OBJECT, CAN_MOVE_OBJECT_OBJECT, CAN_MOVE_OBJECT_TARGET, CAN_MOVE_OBJECT_SOURCE,
+         CAN_DELETE_OBJECT, CAN_DELETE_FOLDER, CAN_DELETE_TREE_FOLDER, CAN_SET_CONTENT_DOCUMENT,
+         CAN_DELETE_CONTENT_DOCUMENT, CAN_GET_RENDITIONS_OBJECT, CAN_ADD_TO_FOLDER_OBJECT, CAN_ADD_TO_FOLDER_FOLDER,
+         CAN_REMOVE_OBJECT_FROM_FOLDER_OBJECT, CAN_REMOVE_OBJECT_FROM_FOLDER_FOLDER, CAN_CHECKOUT_DOCUMENT,
+         CAN_CANCEL_CHECKOUT_DOCUMENT, CAN_CHECKIN_DOCUMENT, CAN_GET_ALL_VERSIONS_DOCUMENT,
+         CAN_GET_OBJECT_RELATIONSHIPS_OBJECT, CAN_ADD_POLICY_OBJECT, CAN_ADD_POLICY_POLICY, CAN_REMOVE_POLICY_OBJECT,
+         CAN_REMOVE_POLICY_POLICY, CAN_GET_APPLIED_POLICIES_OBJECT, CAN_GET_ACL_OBJECT, CAN_APPLY_ACL_OBJECT));
 
-   private Set<String> permissions;
+   private final Map<String, Collection<String>> all = new HashMap<String, Collection<String>>();
 
-   public PermissionMapping(String key, Collection<String> permissions)
+   public PermissionMapping(Map<String, Collection<String>> map)
    {
-      this.key = key;
+      if (map == null)
+      {
+         throw new CmisRuntimeException("Pemission mapping may not be null.");
+      }
+      all.putAll(map);
+   }
+
+   public PermissionMapping()
+   {
+   }
+
+   /**
+    * @param key permission key
+    * @param permissions set of permission needed
+    */
+   public void put(String key, Collection<String> permissions)
+   {
+      all.put(key, permissions);
+   }
+
+   /**
+    * @param key permission key
+    * @return set of permission needed to perform action
+    */
+   public Collection<String> getPermissions(String key)
+   {
+      Collection<String> permissions = all.get(key);
       if (permissions != null)
       {
-         this.permissions = new HashSet<String>(permissions);
+         return Collections.unmodifiableCollection(permissions);
       }
+      return null;
    }
 
-   /**
-    * @return actionName action name, by default expected to one of CAN_... .
-    */
-   public String getKey()
+   public Map<String, Collection<String>> getAll()
    {
-      return key;
-   }
-
-   /**
-    * @return set of permission needed to perform action {@link #getKey()}
-    */
-   public Collection<String> getPermissions()
-   {
-      if (permissions == null)
-      {
-         return Collections.emptyList();
-      }
-      return Collections.unmodifiableSet(permissions);
+      return Collections.unmodifiableMap(all);
    }
 }

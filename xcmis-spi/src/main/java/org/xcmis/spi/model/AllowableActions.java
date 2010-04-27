@@ -19,449 +19,614 @@
 
 package org.xcmis.spi.model;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */
 public class AllowableActions
 {
-   private boolean canAddObjectToFolder;
 
-   private boolean canApplyACL;
+   public static final String CAN_GET_DESCENDENTS = "canGetDescendents";
 
-   private boolean canApplyPolicy;
+   public static final String CAN_GET_FOLDER_TREE = "canGetFolderTree";
 
-   private boolean canCancelCheckOut;
+   public static final String CAN_GET_CHILDREN = "canGetChildren";
 
-   private boolean canCheckIn;
+   public static final String CAN_GET_OBJECT_PARENTS = "canGetObjectParents";
 
-   private boolean canCheckOut;
+   public static final String CAN_GET_FOLDER_PARENT = "canGetFolderParent";
 
-   private boolean canCreateDocument;
+   public static final String CAN_CREATE_DOCUMENT = "canCreateDocument";
 
-   private boolean canCreateFolder;
+   public static final String CAN_CREATE_FOLDER = "canCreateFolder";
 
-   private boolean canCreateRelationship;
+   public static final String CAN_CREATE_RELATIONSHIP = "canCreateRelationship";
 
-   private boolean canDeleteContentStream;
+   public static final String CAN_GET_PROPERTIES = "canGetProperties";
 
-   private boolean canDeleteObject;
+   public static final String CAN_GET_CONTENT_STREAM = "canGetContentStream";
 
-   private boolean canDeleteTree;
+   public static final String CAN_UPDATE_PROPERTIES = "canUpdateProperties";
 
-   private boolean canGetACL;
+   public static final String CAN_MOVE_OBJECT = "canMoveObject";
 
-   private boolean canGetAllVersions;
+   public static final String CAN_DELETE = "canDelete";
 
-   private boolean canGetAppliedPolicies;
+   public static final String CAN_DELETE_TREE = "canDeleteTree";
 
-   private boolean canGetChildren;
+   public static final String CAN_SET_CONTENT_STREAM = "canSetContentStream";
 
-   private boolean canGetContentStream;
+   public static final String CAN_DELETE_CONTENT_STREAM = "canDeleteContentStream";
 
-   private boolean canGetDescendants;
+   public static final String CAN_GET_RENDITIONS = "canRenditions";
 
-   private boolean canGetFolderParent;
+   public static final String CAN_ADD_TO_FOLDER = "canAddToFolder";
 
-   private boolean canGetFolderTree;
+   public static final String CAN_REMOVE_OBJECT_FROM_FOLDER = "canRemoveObjectFromFolder";
 
-   private boolean canGetObjectParents;
+   public static final String CAN_CHECKOUT = "canCheckout";
 
-   private boolean canGetObjectRelationships;
+   public static final String CAN_CANCEL_CHECKOUT = "canCancelCheckout";
 
-   private boolean canGetProperties;
+   public static final String CAN_CHECKIN = "canCheckin";
 
-   private boolean canGetRenditions;
+   public static final String CAN_GET_ALL_VERSIONS = "canGetAllVersions";
 
-   private boolean canMoveObject;
+   public static final String CAN_GET_OBJECT_RELATIONSHIPS = "canGetObjectRelationships";
 
-   private boolean canRemoveObjectFromFolder;
+   public static final String CAN_ADD_POLICY = "canAddPolicy";
 
-   private boolean canRemovePolicy;
+   public static final String CAN_REMOVE_POLICY = "canRemovePolicy";
 
-   private boolean canSetContentStream;
+   public static final String CAN_GET_APPLIED_POLICIES = "canGetAppliedPolicies";
 
-   private boolean canUpdateProperties;
+   public static final String CAN_GET_ACL = "canGetACL";
+
+   public static final String CAN_APPLY_ACL = "canApplyACL";
+
+   public static final Collection<String> DEFAULT =
+      Collections.unmodifiableCollection(Arrays.asList(CAN_GET_DESCENDENTS, CAN_GET_FOLDER_TREE, CAN_GET_CHILDREN,
+         CAN_GET_OBJECT_PARENTS, CAN_GET_FOLDER_PARENT, CAN_CREATE_DOCUMENT, CAN_CREATE_FOLDER,
+         CAN_CREATE_RELATIONSHIP, CAN_GET_PROPERTIES, CAN_GET_CONTENT_STREAM, CAN_UPDATE_PROPERTIES, CAN_MOVE_OBJECT,
+         CAN_DELETE, CAN_DELETE_TREE, CAN_SET_CONTENT_STREAM, CAN_DELETE_CONTENT_STREAM, CAN_GET_RENDITIONS,
+         CAN_ADD_TO_FOLDER, CAN_REMOVE_OBJECT_FROM_FOLDER, CAN_CHECKOUT, CAN_CANCEL_CHECKOUT, CAN_CHECKIN,
+         CAN_GET_ALL_VERSIONS, CAN_GET_OBJECT_RELATIONSHIPS, CAN_ADD_POLICY, CAN_REMOVE_POLICY,
+         CAN_GET_APPLIED_POLICIES, CAN_GET_ACL, CAN_APPLY_ACL));
+
+   private final Set<String> actions = new HashSet<String>();
 
    /**
-    * {@inheritDoc}
+    * Add <code>action</code> in allowed actions list.
+    *
+    * @param action action to be add in list
     */
+   public void addAction(String action)
+   {
+      actions.add(action);
+   }
+
+   /**
+    * Check is <code>action</code> is in allowed actions list.
+    *
+    * @param action action
+    * @return <code>true</code> if <code>action</code> is allowed and
+    *         <code>false</code> otherwise
+    */
+   public boolean isActionAllowed(String action)
+   {
+      return actions.contains(action);
+   }
+
    public boolean isCanAddObjectToFolder()
    {
-      return canAddObjectToFolder;
+      return isActionAllowed(CAN_ADD_TO_FOLDER);
    }
 
-   /**
-    * {@inheritDoc}
-    */
    public boolean isCanApplyACL()
    {
-      return canApplyACL;
+      return isActionAllowed(CAN_APPLY_ACL);
    }
 
-   /**
-    * {@inheritDoc}
-    */
    public boolean isCanApplyPolicy()
    {
-      return canApplyPolicy;
+      return isActionAllowed(CAN_ADD_POLICY);
    }
 
-   /**
-    * {@inheritDoc}
-    */
    public boolean isCanCancelCheckOut()
    {
-      return canCancelCheckOut;
+      return isActionAllowed(CAN_CANCEL_CHECKOUT);
    }
 
-   /**
-    * {@inheritDoc}
-    */
    public boolean isCanCheckIn()
    {
-      return canCheckIn;
+      return isActionAllowed(CAN_CHECKIN);
    }
 
-   /**
-    * {@inheritDoc}
-    */
    public boolean isCanCheckOut()
    {
-      return canCheckOut;
+      return isActionAllowed(CAN_CHECKOUT);
    }
 
-   /**
-    * {@inheritDoc}
-    */
    public boolean isCanCreateDocument()
    {
-      return canCreateDocument;
+      return isActionAllowed(CAN_CREATE_DOCUMENT);
    }
 
-   /**
-    * {@inheritDoc}
-    */
    public boolean isCanCreateFolder()
    {
-      return canCreateFolder;
+      return isActionAllowed(CAN_CREATE_FOLDER);
    }
 
-   /**
-    * {@inheritDoc}
-    */
    public boolean isCanCreateRelationship()
    {
-      return canCreateRelationship;
+      return isActionAllowed(CAN_CREATE_RELATIONSHIP);
    }
 
-   /**
-    * {@inheritDoc}
-    */
    public boolean isCanDeleteContentStream()
    {
-      return canDeleteContentStream;
+      return isActionAllowed(CAN_DELETE_CONTENT_STREAM);
    }
 
-   /**
-    * {@inheritDoc}
-    */
    public boolean isCanDeleteObject()
    {
-      return canDeleteObject;
+      return isActionAllowed(CAN_DELETE);
    }
 
-   /**
-    * {@inheritDoc}
-    */
    public boolean isCanDeleteTree()
    {
-      return canDeleteTree;
+      return isActionAllowed(CAN_DELETE_TREE);
    }
 
-   /**
-    * {@inheritDoc}
-    */
    public boolean isCanGetACL()
    {
-      return canGetACL;
+      return isActionAllowed(CAN_GET_ACL);
    }
 
-   /**
-    * {@inheritDoc}
-    */
    public boolean isCanGetAllVersions()
    {
-      return canGetAllVersions;
+      return isActionAllowed(CAN_GET_ALL_VERSIONS);
    }
 
-   /**
-    * {@inheritDoc}
-    */
    public boolean isCanGetAppliedPolicies()
    {
-      return canGetAppliedPolicies;
+      return isActionAllowed(CAN_GET_APPLIED_POLICIES);
    }
 
-   /**
-    * {@inheritDoc}
-    */
    public boolean isCanGetChildren()
    {
-      return canGetChildren;
+      return isActionAllowed(CAN_GET_CHILDREN);
    }
 
-   /**
-    * {@inheritDoc}
-    */
    public boolean isCanGetContentStream()
    {
-      return canGetContentStream;
+      return isActionAllowed(CAN_GET_CONTENT_STREAM);
    }
 
-   /**
-    * {@inheritDoc}
-    */
    public boolean isCanGetDescendants()
    {
-      return canGetDescendants;
+      return isActionAllowed(CAN_GET_DESCENDENTS);
    }
 
-   /**
-    * {@inheritDoc}
-    */
    public boolean isCanGetFolderParent()
    {
-      return canGetFolderParent;
+      return isActionAllowed(CAN_GET_FOLDER_PARENT);
    }
 
-   /**
-    * {@inheritDoc}
-    */
    public boolean isCanGetFolderTree()
    {
-      return canGetFolderTree;
+      return isActionAllowed(CAN_GET_FOLDER_TREE);
    }
 
-   /**
-    * {@inheritDoc}
-    */
    public boolean isCanGetObjectParents()
    {
-      return canGetObjectParents;
+      return isActionAllowed(CAN_GET_OBJECT_PARENTS);
    }
 
-   /**
-    * {@inheritDoc}
-    */
    public boolean isCanGetObjectRelationships()
    {
-      return canGetObjectRelationships;
+      return isActionAllowed(CAN_GET_OBJECT_RELATIONSHIPS);
    }
-
-   /**
-    * {@inheritDoc}
-    */
 
    public boolean isCanGetProperties()
    {
-      return canGetProperties;
+      return isActionAllowed(CAN_GET_PROPERTIES);
    }
 
-   /**
-    * {@inheritDoc}
-    */
    public boolean isCanGetRenditions()
    {
-      return canGetRenditions;
+      return isActionAllowed(CAN_GET_RENDITIONS);
    }
 
-   /**
-    * {@inheritDoc}
-    */
    public boolean isCanMoveObject()
    {
-      return canMoveObject;
+      return isActionAllowed(CAN_MOVE_OBJECT);
    }
-
-   /**
-    * {@inheritDoc}
-    */
 
    public boolean isCanRemoveObjectFromFolder()
    {
-      return canRemoveObjectFromFolder;
+      return isActionAllowed(CAN_REMOVE_OBJECT_FROM_FOLDER);
    }
 
-   /**
-    * {@inheritDoc}
-    */
    public boolean isCanRemovePolicy()
    {
-      return canRemovePolicy;
+      return isActionAllowed(CAN_REMOVE_POLICY);
    }
 
-   /**
-    * {@inheritDoc}
-    */
    public boolean isCanSetContentStream()
    {
-      return canSetContentStream;
+      return isActionAllowed(CAN_SET_CONTENT_STREAM);
+   }
+
+   public boolean isCanUpdateProperties()
+   {
+      return isActionAllowed(CAN_UPDATE_PROPERTIES);
    }
 
    /**
-    * {@inheritDoc}
+    * Remove <code>action</code> from allowed actions list.
+    *
+    * @param action action to be removed from the list
     */
-   public boolean isCanUpdateProperties()
+   public void removeAction(String action)
    {
-      return canUpdateProperties;
+      actions.remove(action);
    }
-
-   // ---- setters
 
    public void setCanAddObjectToFolder(boolean canAddObjectToFolder)
    {
-      this.canAddObjectToFolder = canAddObjectToFolder;
+      if (canAddObjectToFolder)
+      {
+         addAction(CAN_ADD_TO_FOLDER);
+      }
+      else
+      {
+         removeAction(CAN_ADD_TO_FOLDER);
+      }
    }
 
    public void setCanApplyACL(boolean canApplyACL)
    {
-      this.canApplyACL = canApplyACL;
+      if (canApplyACL)
+      {
+         addAction(CAN_APPLY_ACL);
+      }
+      else
+      {
+         removeAction(CAN_APPLY_ACL);
+      }
    }
 
    public void setCanApplyPolicy(boolean canApplyPolicy)
    {
-      this.canApplyPolicy = canApplyPolicy;
+      if (canApplyPolicy)
+      {
+         addAction(CAN_ADD_POLICY);
+      }
+      else
+      {
+         removeAction(CAN_ADD_POLICY);
+      }
    }
 
    public void setCanCancelCheckOut(boolean canCancelCheckOut)
    {
-      this.canCancelCheckOut = canCancelCheckOut;
+      if (canCancelCheckOut)
+      {
+         addAction(CAN_CANCEL_CHECKOUT);
+      }
+      else
+      {
+         removeAction(CAN_CANCEL_CHECKOUT);
+      }
    }
 
    public void setCanCheckIn(boolean canCheckIn)
    {
-      this.canCheckIn = canCheckIn;
+      if (canCheckIn)
+      {
+         addAction(CAN_CHECKIN);
+      }
+      else
+      {
+         removeAction(CAN_CHECKIN);
+      }
    }
 
    public void setCanCheckOut(boolean canCheckOut)
    {
-      this.canCheckOut = canCheckOut;
+      if (canCheckOut)
+      {
+         addAction(CAN_CHECKOUT);
+      }
+      else
+      {
+         removeAction(CAN_CHECKOUT);
+      }
    }
 
    public void setCanCreateDocument(boolean canCreateDocument)
    {
-      this.canCreateDocument = canCreateDocument;
+      if (canCreateDocument)
+      {
+         addAction(CAN_CREATE_DOCUMENT);
+      }
+      else
+      {
+         removeAction(CAN_CREATE_DOCUMENT);
+      }
+
    }
 
    public void setCanCreateFolder(boolean canCreateFolder)
    {
-      this.canCreateFolder = canCreateFolder;
+      if (canCreateFolder)
+      {
+         addAction(CAN_CREATE_FOLDER);
+      }
+      else
+      {
+         removeAction(CAN_CREATE_FOLDER);
+      }
+
    }
 
    public void setCanCreateRelationship(boolean canCreateRelationship)
    {
-      this.canCreateRelationship = canCreateRelationship;
+      if (canCreateRelationship)
+      {
+         addAction(CAN_CREATE_RELATIONSHIP);
+      }
+      else
+      {
+         removeAction(CAN_CREATE_RELATIONSHIP);
+      }
+
    }
 
    public void setCanDeleteContentStream(boolean canDeleteContentStream)
    {
-      this.canDeleteContentStream = canDeleteContentStream;
+      if (canDeleteContentStream)
+      {
+         addAction(CAN_DELETE_CONTENT_STREAM);
+      }
+      else
+      {
+         removeAction(CAN_DELETE_CONTENT_STREAM);
+      }
    }
 
    public void setCanDeleteObject(boolean canDeleteObject)
    {
-      this.canDeleteObject = canDeleteObject;
+      if (canDeleteObject)
+      {
+         addAction(CAN_DELETE);
+      }
+      else
+      {
+         removeAction(CAN_DELETE);
+      }
    }
 
    public void setCanDeleteTree(boolean canDeleteTree)
    {
-      this.canDeleteTree = canDeleteTree;
+      if (canDeleteTree)
+      {
+         addAction(CAN_DELETE_TREE);
+      }
+      else
+      {
+         removeAction(CAN_DELETE_TREE);
+      }
    }
 
    public void setCanGetACL(boolean canGetACL)
    {
-      this.canGetACL = canGetACL;
+      if (canGetACL)
+      {
+         addAction(CAN_GET_ACL);
+      }
+      else
+      {
+         removeAction(CAN_GET_ACL);
+      }
    }
 
    public void setCanGetAllVersions(boolean canGetAllVersions)
    {
-      this.canGetAllVersions = canGetAllVersions;
+      if (canGetAllVersions)
+      {
+         addAction(CAN_GET_ALL_VERSIONS);
+      }
+      else
+      {
+         removeAction(CAN_GET_ALL_VERSIONS);
+      }
    }
 
    public void setCanGetAppliedPolicies(boolean canGetAppliedPolicies)
    {
-      this.canGetAppliedPolicies = canGetAppliedPolicies;
+      if (canGetAppliedPolicies)
+      {
+         addAction(CAN_GET_APPLIED_POLICIES);
+      }
+      else
+      {
+         removeAction(CAN_GET_APPLIED_POLICIES);
+      }
    }
 
    public void setCanGetChildren(boolean canGetChildren)
    {
-      this.canGetChildren = canGetChildren;
+      if (canGetChildren)
+      {
+         addAction(CAN_GET_CHILDREN);
+      }
+      else
+      {
+         removeAction(CAN_GET_CHILDREN);
+      }
    }
 
    public void setCanGetContentStream(boolean canGetContentStream)
    {
-      this.canGetContentStream = canGetContentStream;
+      if (canGetContentStream)
+      {
+         addAction(CAN_GET_CONTENT_STREAM);
+      }
+      else
+      {
+         removeAction(CAN_GET_CONTENT_STREAM);
+      }
    }
 
    public void setCanGetDescendants(boolean canGetDescendants)
    {
-      this.canGetDescendants = canGetDescendants;
+      if (canGetDescendants)
+      {
+         addAction(CAN_GET_DESCENDENTS);
+      }
+      else
+      {
+         removeAction(CAN_GET_DESCENDENTS);
+      }
    }
 
    public void setCanGetFolderParent(boolean canGetFolderParent)
    {
-      this.canGetFolderParent = canGetFolderParent;
+      if (canGetFolderParent)
+      {
+         addAction(CAN_GET_FOLDER_PARENT);
+      }
+      else
+      {
+         removeAction(CAN_GET_FOLDER_PARENT);
+      }
    }
 
    public void setCanGetFolderTree(boolean canGetFolderTree)
    {
-      this.canGetFolderTree = canGetFolderTree;
+      if (canGetFolderTree)
+      {
+         addAction(CAN_GET_FOLDER_TREE);
+      }
+      else
+      {
+         removeAction(CAN_GET_FOLDER_TREE);
+      }
    }
 
    public void setCanGetObjectParents(boolean canGetObjectParents)
    {
-      this.canGetObjectParents = canGetObjectParents;
+      if (canGetObjectParents)
+      {
+         addAction(CAN_GET_OBJECT_PARENTS);
+      }
+      else
+      {
+         removeAction(CAN_GET_OBJECT_PARENTS);
+      }
    }
 
    public void setCanGetObjectRelationships(boolean canGetObjectRelationships)
    {
-      this.canGetObjectRelationships = canGetObjectRelationships;
+      if (canGetObjectRelationships)
+      {
+         addAction(CAN_GET_OBJECT_RELATIONSHIPS);
+      }
+      else
+      {
+         removeAction(CAN_GET_OBJECT_RELATIONSHIPS);
+      }
    }
 
    public void setCanGetProperties(boolean canGetProperties)
    {
-      this.canGetProperties = canGetProperties;
+      if (canGetProperties)
+      {
+         addAction(CAN_GET_PROPERTIES);
+      }
+      else
+      {
+         removeAction(CAN_GET_PROPERTIES);
+      }
    }
 
    public void setCanGetRenditions(boolean canGetRenditions)
    {
-      this.canGetRenditions = canGetRenditions;
+      if (canGetRenditions)
+      {
+         addAction(CAN_GET_RENDITIONS);
+      }
+      else
+      {
+         removeAction(CAN_GET_RENDITIONS);
+      }
    }
 
    public void setCanMoveObject(boolean canMoveObject)
    {
-      this.canMoveObject = canMoveObject;
+      if (canMoveObject)
+      {
+         addAction(CAN_MOVE_OBJECT);
+      }
+      else
+      {
+         removeAction(CAN_MOVE_OBJECT);
+      }
    }
 
    public void setCanRemoveObjectFromFolder(boolean canRemoveObjectFromFolder)
    {
-      this.canRemoveObjectFromFolder = canRemoveObjectFromFolder;
+      if (canRemoveObjectFromFolder)
+      {
+         addAction(CAN_REMOVE_OBJECT_FROM_FOLDER);
+      }
+      else
+      {
+         removeAction(CAN_REMOVE_OBJECT_FROM_FOLDER);
+      }
    }
 
    public void setCanRemovePolicy(boolean canRemovePolicy)
    {
-      this.canRemovePolicy = canRemovePolicy;
+      if (canRemovePolicy)
+      {
+         addAction(CAN_REMOVE_POLICY);
+      }
+      else
+      {
+         removeAction(CAN_REMOVE_POLICY);
+      }
    }
 
    public void setCanSetContentStream(boolean canSetContentStream)
    {
-      this.canSetContentStream = canSetContentStream;
+      if (canSetContentStream)
+      {
+         addAction(CAN_SET_CONTENT_STREAM);
+      }
+      else
+      {
+         removeAction(CAN_SET_CONTENT_STREAM);
+      }
    }
 
    public void setCanUpdateProperties(boolean canUpdateProperties)
    {
-      this.canUpdateProperties = canUpdateProperties;
+      if (canUpdateProperties)
+      {
+         addAction(CAN_UPDATE_PROPERTIES);
+      }
+      else
+      {
+         removeAction(CAN_UPDATE_PROPERTIES);
+      }
    }
 
 }
