@@ -162,10 +162,7 @@ public class TypeConverter
       result.setSupportedPermissions(EnumSupportedPermissions.fromValue(source.getSupportedPermissions().value()));
       if (source.getMapping() != null)
       {
-         for (PermissionMapping one : source.getMapping())
-         {
-            result.getMapping().add(getCmisPermissionMapping(one));
-         }
+            result.getMapping().addAll(getCmisPermissionMappingList(source.getMapping()));
       }
       return result;
    }
@@ -1027,15 +1024,19 @@ public class TypeConverter
       return result;
    }
 
-   public static CmisPermissionMapping getCmisPermissionMapping(PermissionMapping source)
+   public static List<CmisPermissionMapping> getCmisPermissionMappingList(PermissionMapping source)
    {
-      CmisPermissionMapping result = new CmisPermissionMapping();
-      result.setKey(EnumAllowableActionsKey.fromValue(source.getKey()));
-      if (source.getPermissions() != null)
-         for (String one : source.getPermissions())
+      List<CmisPermissionMapping> result = new ArrayList<CmisPermissionMapping>();
+      for (Map.Entry<String, Collection<String>> e : source.getAll().entrySet())
+      {
+         CmisPermissionMapping one = new CmisPermissionMapping();
+         if (e.getValue() != null && e.getValue().size() > 0)
          {
-            result.getPermission().add(one);
+            one.setKey(EnumAllowableActionsKey.fromValue(e.getKey()));
+            one.getPermission().addAll(e.getValue());
+            result.add(one);
          }
+      }
       return result;
    }
 
