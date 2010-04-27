@@ -308,7 +308,7 @@ public class UnfiledCollection extends CmisObjectCollection
     */
    public String getId(RequestContext request)
    {
-      return "";
+      return "cmis:unfiled:" + getRepositoryId(request);
    }
 
 }

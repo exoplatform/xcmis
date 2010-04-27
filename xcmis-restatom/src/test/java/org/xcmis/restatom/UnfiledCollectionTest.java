@@ -20,6 +20,7 @@ package org.xcmis.restatom;
 
 import org.exoplatform.services.rest.impl.ContainerResponse;
 import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
+import org.w3c.dom.NodeList;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ObjectData;
 
@@ -102,12 +103,11 @@ public class UnfiledCollectionTest extends BaseTest
       assertTrue(hasLink(AtomCMIS.LINK_SERVICE, xmlFeed));
       assertTrue(hasLink(AtomCMIS.LINK_FIRST, xmlFeed));
 
-      //      assertEquals(1, Integer.parseInt(getStringElement("cmisra:numItems", xmlFeed)));
-      //
-      //      NodeList entries = getNodeSet("atom:entry", xmlFeed);
-      //      int length = entries.getLength();
-      //      assertEquals(1, length);
+      NodeList entries = getNodeSet("atom:entry", xmlFeed);
+      int length = entries.getLength();
+      assertEquals(1, length);
 
+      conn.deleteObject(doc1Id, null);
    }
 
 }
