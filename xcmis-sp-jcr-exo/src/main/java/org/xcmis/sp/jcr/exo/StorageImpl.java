@@ -87,6 +87,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import javax.jcr.Item;
@@ -1187,9 +1188,10 @@ public class StorageImpl implements Storage
 
             public String next()
             {
-               Node nextNode = nodes.nextNode();
-               if (nextNode != null)
+               if (nodes.hasNext())
                {
+                  //get wrapper
+                  Node nextNode = nodes.nextNode();
                   NodeIterator etries;
                   try
                   {
@@ -1198,14 +1200,15 @@ public class StorageImpl implements Storage
                      {
                         return ((ExtendedNode)etries.nextNode()).getIdentifier();
                      }
+                     throw new CmisRuntimeException("Unfiled node object not found for wrapper object "
+                        + nextNode.getPath());
                   }
                   catch (RepositoryException e)
                   {
                      throw new CmisRuntimeException(e.getLocalizedMessage(), e);
                   }
-
                }
-               return null;
+               throw new NoSuchElementException();
             }
 
             public void remove()
