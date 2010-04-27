@@ -1039,7 +1039,7 @@ public class TypeConverter
             } catch (IllegalArgumentException ex){
                continue;
                // TODO:  Permission mapping keys described in spec does not coresponds with xml schema, so some keys are causing error
-               // when try to do EnumAllowableActionsKey.fromValue(e.getKey()), e.g canRenditions.Object is presint in spen but not in cmis-core.xsd;
+               // when try to do EnumAllowableActionsKey.fromValue(e.getKey()), e.g canRenditions.Object is present in spen but not in cmis-core.xsd;
             }
          }
       }
