@@ -41,6 +41,7 @@ import org.xcmis.restatom.collections.QueryCollection;
 import org.xcmis.restatom.collections.RelationshipsCollection;
 import org.xcmis.restatom.collections.TypesChildrenCollection;
 import org.xcmis.restatom.collections.TypesDescendantsCollection;
+import org.xcmis.restatom.collections.UnfiledCollection;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
@@ -157,6 +158,11 @@ public class ProviderImpl extends AbstractProvider
          "objectid", //
          "streamid");
 
+      resolver.setPattern("/cmisatom/([^/]+)/unfiled(/)?(\\??.*)?", //
+         TargetType.TYPE_COLLECTION, //
+         "repoid", //
+         "slash"); // Slash.
+      
       SimpleWorkspaceInfo wInfo = new SimpleWorkspaceInfo();
       //      wInfo.addCollection(new FolderChildrenCollection(storageProvider));
       //      wInfo.addCollection(new ParentsCollection(storageProvider));
@@ -181,6 +187,7 @@ public class ProviderImpl extends AbstractProvider
       wInfo.addCollection(new AllVersionsCollection());
       wInfo.addCollection(new QueryCollection());
       wInfo.addCollection(new PoliciesCollection());
+      wInfo.addCollection(new UnfiledCollection());
 
       // The other described patterns according collections by WorkspaceManagerImpl#getCollectionAdapter
       manager = new WorkspaceManagerImpl();

@@ -92,7 +92,7 @@ public class AtomCmisService implements ResourceContainer
 {
 
    /** The provider. */
-      protected ProviderImpl provider;
+   protected ProviderImpl provider;
 
    /** The storage provider. */
    //   protected StorageProvider storageProvider;
@@ -660,6 +660,21 @@ public class AtomCmisService implements ResourceContainer
       }
    }
 
+   @POST
+   @Path("{repositoryId}/unfiled")
+   public Response unfile(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
+      throws Exception
+   {
+      return createItem(repositoryId, httpRequest);
+   }
+
+   @GET
+   @Path("{repositoryId}/unfiled")
+   public Response getUnfiled(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
+   {
+      return getFeed(repositoryId, httpRequest);
+   }
+
    protected Workspace addCmisRepository(HttpServletRequest httpRequest, Service service, String repositoryId,
       URI baseUri)
    {
@@ -712,6 +727,10 @@ public class AtomCmisService implements ResourceContainer
          {
             collectionType = AtomCMIS.COLLECTION_TYPE_QUERY;
          }
+         else if (href.equals("/unfiled"))
+         {
+            collectionType = AtomCMIS.COLLECTION_TYPE_UNFILED;
+         }
 
          if (collectionType != null)
          {
@@ -719,10 +738,6 @@ public class AtomCmisService implements ResourceContainer
             collection.addSimpleExtension(AtomCMIS.COLLECTION_TYPE, collectionType);
          }
       }
-
-      // XXX : Does not support 'Unfiling' but need add it.
-      org.apache.abdera.model.Collection collection = ws.addCollection("Unfiled collection", repoPath + "/unfiled");
-      collection.addSimpleExtension(AtomCMIS.COLLECTION_TYPE, AtomCMIS.COLLECTION_TYPE_UNFILED);
 
       // objectbyid template
       CmisUriTemplateType objectById = new CmisUriTemplateType();
@@ -844,7 +859,6 @@ public class AtomCmisService implements ResourceContainer
    {
       return new ServletRequestContext(provider, httpRequest)
       {
-
          @Override
          public String getTargetPath()
          {
@@ -852,7 +866,6 @@ public class AtomCmisService implements ResourceContainer
             String bpath = getTargetBasePath();
             return uri.substring(bpath.length());
          }
-
       };
    }
 
