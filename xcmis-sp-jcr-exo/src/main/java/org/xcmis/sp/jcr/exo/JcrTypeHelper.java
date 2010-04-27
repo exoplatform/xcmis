@@ -265,7 +265,7 @@ class JcrTypeHelper
       def.setFileable(false);
       def.setFulltextIndexed(false);
       def.setId(typeId);
-      def.setIncludedInSupertypeQuery(true);
+      def.setIncludedInSupertypeQuery(false);
       def.setLocalName(localTypeName);
       def.setLocalNamespace(JcrCMIS.EXO_CMIS_NS_URI);
       if (typeId.equals(BaseType.POLICY.value()))

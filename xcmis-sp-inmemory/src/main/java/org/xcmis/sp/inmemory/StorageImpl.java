@@ -291,22 +291,22 @@ public class StorageImpl implements Storage
 
       types.put("cmis:document", //
          new TypeDefinition("cmis:document", BaseType.DOCUMENT, "cmis:document", "cmis:document", "", null,
-            "cmis:document", "Cmis Document Type", true, true, false /*no query support yet*/, false, false, true,
-            true, true, null, null, ContentStreamAllowed.ALLOWED, null));
+            "cmis:document", "Cmis Document Type", true, true, true, true, true, true, true, true, null, null,
+            ContentStreamAllowed.ALLOWED, null));
 
       types.put("cmis:folder", //
          new TypeDefinition("cmis:folder", BaseType.FOLDER, "cmis:folder", "cmis:folder", "", null, "cmis:folder",
-            "Cmis Folder type", true, true, false /*no query support yet*/, false, false, true, true, false, null,
-            null, ContentStreamAllowed.NOT_ALLOWED, null));
+            "Cmis Folder type", true, true, true, false, true, true, true, false, null, null,
+            ContentStreamAllowed.NOT_ALLOWED, null));
 
       types.put("cmis:policy", //
          new TypeDefinition("cmis:policy", BaseType.POLICY, "cmis:policy", "cmis:policy", "", null, "cmis:policy",
-            "Cmis Policy type", true, false, false /*no query support yet*/, false, false, true, true, false, null,
-            null, ContentStreamAllowed.NOT_ALLOWED, null));
+            "Cmis Policy type", true, false, false /*no query support*/, false, false, true, true, false, null, null,
+            ContentStreamAllowed.NOT_ALLOWED, null));
 
       types.put("cmis:relationship", //
          new TypeDefinition("cmis:relationship", BaseType.RELATIONSHIP, "cmis:relationship", "cmis:relationship", "",
-            null, "cmis:relationship", "Cmis Relationship type.", true, false, false /*no query support yet*/, false,
+            null, "cmis:relationship", "Cmis Relationship type.", true, false, false /*no query support*/, false,
             false, true, true, false, null, null, ContentStreamAllowed.NOT_ALLOWED, null));
 
       typeChildren = new ConcurrentHashMap<String, Set<String>>();
