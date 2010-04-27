@@ -21,7 +21,9 @@ package org.xcmis.client.gwt.client.service.versioning;
 
 import org.xcmis.client.gwt.client.CmisArguments;
 import org.xcmis.client.gwt.client.marshallers.CheckinMarshaller;
+import org.xcmis.client.gwt.client.marshallers.CheckoutMarshaller;
 import org.xcmis.client.gwt.client.model.actions.CheckIn;
+import org.xcmis.client.gwt.client.model.actions.CheckOut;
 import org.xcmis.client.gwt.client.model.restatom.AtomEntry;
 import org.xcmis.client.gwt.client.model.restatom.EntryCollection;
 import org.xcmis.client.gwt.client.rest.AsyncRequest;
@@ -72,9 +74,12 @@ public class VersioningService
    {
       AtomEntry document = new AtomEntry();
       CheckoutReceivedEvent event = new CheckoutReceivedEvent(document);
+      CheckOut checkOut = new CheckOut();
+      checkOut.setObjectId(objectId);
+      CheckoutMarshaller marshaller = new CheckoutMarshaller(checkOut);
       EntryUnmarshaller unmarshaller = new EntryUnmarshaller(document);
       AsyncRequestCallback callback = new AsyncRequestCallback(eventBus, unmarshaller, event);
-      AsyncRequest.build(RequestBuilder.POST, url + "/" + objectId).send(callback);
+      AsyncRequest.build(RequestBuilder.POST, url).data(marshaller).send(callback);
    }
 
    /**

@@ -332,9 +332,10 @@ public class ObjectService
       ObjectMovedEvent event = new ObjectMovedEvent(entry);
       EntryUnmarshaller unmarshaller = new EntryUnmarshaller(entry);
       MoveObjectMarshaller marshaller = new MoveObjectMarshaller(moveObject);
-
+      String param = (moveObject.getSourceFolderId() == null)? "" : CmisArguments.SOURCE_FOLDER_ID + "="+moveObject.getSourceFolderId();
+      
       AsyncRequestCallback callback = new AsyncRequestCallback(eventBus, unmarshaller, event);
-      AsyncRequest.build(RequestBuilder.POST, url).data(marshaller).send(callback);
+      AsyncRequest.build(RequestBuilder.POST, url+"?"+param).data(marshaller).send(callback);
    }
 
    /**

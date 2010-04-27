@@ -277,9 +277,8 @@ public class NavigationService
       CheckedOutReceivedEvent event = new CheckedOutReceivedEvent(entryCollection);
       EntryCollectionUnmarshaller unmarshaller = new EntryCollectionUnmarshaller(entryCollection);
 
-      url += (folderId == null || folderId.length() < 0) ? "" : "/" + folderId;
-
       String params = "";
+      params += (folderId == null || folderId.length() < 0) ? "" : CmisArguments.FOLDER_ID + "=" + folderId + "&";
       params += (maxItems < 0) ? "" : CmisArguments.MAX_ITEMS + "=" + maxItems + "&";
       params += (skipCount < 0) ? "" : CmisArguments.SKIP_COUNT + "=" + skipCount + "&";
       params += (filter == null || filter.length() <= 0) ? "" : CmisArguments.FILTER + "=" + filter + "&";

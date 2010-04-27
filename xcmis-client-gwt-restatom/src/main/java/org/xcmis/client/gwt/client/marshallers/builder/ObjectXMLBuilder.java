@@ -25,6 +25,7 @@ import org.xcmis.client.gwt.client.model.acl.AccessControlEntry;
 import org.xcmis.client.gwt.client.model.actions.ApplyACL;
 import org.xcmis.client.gwt.client.model.actions.ApplyPolicy;
 import org.xcmis.client.gwt.client.model.actions.CheckIn;
+import org.xcmis.client.gwt.client.model.actions.CheckOut;
 import org.xcmis.client.gwt.client.model.actions.CreateDocument;
 import org.xcmis.client.gwt.client.model.actions.CreateDocumentFromSource;
 import org.xcmis.client.gwt.client.model.actions.CreateFolder;
@@ -325,7 +326,7 @@ public class ObjectXMLBuilder
     *            moveObject
     * @return String
     */
-   public static String moveItem(MoveObject moveObject)
+   public static String moveObject(MoveObject moveObject)
    {
       Document doc = XMLParser.createDocument();
       Element entry = EntryXMLBuilder.createEntryElement(doc);
@@ -390,6 +391,28 @@ public class ObjectXMLBuilder
       Element properties = doc.createElement(CMIS.CMIS_PROPERTIES);
 
       createPropertiesElement(checkIn.getProperties(), properties, doc);
+      object.appendChild(properties);
+      entry.appendChild(object);
+      doc.appendChild(entry);
+      return EntryXMLBuilder.createStringRequest(doc);
+   }
+   
+
+   /**
+    * Create check out request.
+    * 
+    * @param checkout checkout
+    * @return {@link String} checkout request
+    */
+   public static String checkout(CheckOut checkout)
+   {
+      Document doc = XMLParser.createDocument();
+      Element entry = EntryXMLBuilder.createEntryElement(doc);
+
+      Element object = doc.createElement(CMIS.CMISRA_OBJECT);
+      Element properties = doc.createElement(CMIS.CMIS_PROPERTIES);
+      Element objectIdElement = createPropertyElement(doc, CMIS.CMIS_PROPERTY_ID, CMIS.CMIS_OBJECT_ID, checkout.getObjectId());
+      properties.appendChild(objectIdElement);
       object.appendChild(properties);
       entry.appendChild(object);
       doc.appendChild(entry);

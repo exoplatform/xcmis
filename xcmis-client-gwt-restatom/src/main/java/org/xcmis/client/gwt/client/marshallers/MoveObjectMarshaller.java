@@ -52,7 +52,7 @@ public class MoveObjectMarshaller extends MoveObject implements Marshallable
     */
    public String marshal()
    {
-      return ObjectXMLBuilder.moveItem(moveObject);
+      return ObjectXMLBuilder.moveObject(moveObject);
    }
 
 }
