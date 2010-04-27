@@ -87,7 +87,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
 
 import javax.jcr.Item;
@@ -791,6 +790,10 @@ public class StorageImpl implements Storage
     */
    public ObjectData getObjectById(String objectId) throws ObjectNotFoundException
    {
+      if (objectId == null)
+      {
+         throw new CmisRuntimeException("Object id may not be null.");
+      }
       try
       {
          Node node = ((ExtendedSession)session).getNodeByIdentifier(objectId);
@@ -858,6 +861,10 @@ public class StorageImpl implements Storage
     */
    public ObjectData getObjectByPath(String path) throws ObjectNotFoundException
    {
+      if (path == null)
+      {
+         throw new CmisRuntimeException("Object path may not be null.");
+      }
       try
       {
          Item item = session.getItem(path);
