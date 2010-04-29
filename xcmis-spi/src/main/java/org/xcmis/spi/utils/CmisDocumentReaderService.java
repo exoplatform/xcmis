@@ -42,17 +42,17 @@ import java.util.Map;
 /**
  * Implementation of {@link DocumentReaderService} with predefined parsers.
  */
-public class CmisDocumentReaderSercice implements DocumentReaderService
+public class CmisDocumentReaderService implements DocumentReaderService
 {
 
-   private static final Log LOG = ExoLogger.getLogger(CmisDocumentReaderSercice.class);
+   private static final Log LOG = ExoLogger.getLogger(CmisDocumentReaderService.class);
 
    private Map<String, BaseDocumentReader> readers;
 
    /**
     * Instantiates a new cmis document reader sercice.
     */
-   public CmisDocumentReaderSercice()
+   public CmisDocumentReaderService()
    {
       this.readers = new HashMap<String, BaseDocumentReader>();
       addDocumentReader(new CmisPDFDocumentReader());
