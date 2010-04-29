@@ -56,7 +56,6 @@
                   <description>Node types configuration file</description>
                   <value>jar:/conf/cmis-nodetypes-config.xml</value>
                   <value>jar:/conf/test/test-cmis-nodetypes-config.xml</value>
-                  <value>jar:/conf/test/aiim-nodetypes.xml</value>
                </values-param>
             </init-params>
          </component-plugin>
