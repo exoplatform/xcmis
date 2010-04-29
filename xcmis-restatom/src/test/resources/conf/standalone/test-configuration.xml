@@ -99,7 +99,7 @@
 
    <component>
       <key>org.exoplatform.services.document.DocumentReaderService</key>
-      <type>org.xcmis.spi.utils.CmisDocumentReaderSercice</type>
+      <type>org.xcmis.spi.utils.CmisDocumentReaderService</type>
    </component>
 
    <!-- Storage Provider -->

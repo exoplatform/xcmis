@@ -41,7 +41,7 @@ public class TestPDFDocumentReader extends TestCase
 
    public void setUp() throws Exception
    {
-      service_ = new CmisDocumentReaderSercice();
+      service_ = new CmisDocumentReaderService();
    }
 
    public void testGetContentAsString() throws Exception

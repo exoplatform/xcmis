@@ -8,7 +8,7 @@
    </parent>
 
    <artifactId>xcmis-server-gateinext-war</artifactId>
-   <name>xCMIS :: Server GateIn Ext WAR</name>
+   <name>xCMIS :: Server :: GateIn Ext WAR</name>
    <description>xCMIS Server GateIn Ext WAR</description>
 
    <packaging>war</packaging>

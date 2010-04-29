@@ -1,108 +1,111 @@
-<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.exoplaform.org/xml/ns/kernel_1_1.xsd
-http://www.exoplaform.org/xml/ns/kernel_1_1.xsd" xmlns="http://www.exoplaform.org/xml/ns/kernel_1_1.xsd">
-	<component>
-		<type>org.xcmis.spi.deploy.ExoContainerCmisRegistry</type>
-                 <init-params>
-			<values-param>
-				<name>renditionProviders</name>
-				<description>Redition providers classes.</description>
-				<value>org.xcmis.renditions.impl.PDFDocumentRenditionProvider</value>
-				<value>org.xcmis.renditions.impl.ImageRenditionProvider</value>
-			</values-param>
-		</init-params>
-	</component>
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://www.exoplaform.org/xml/ns/kernel_1_1.xsd
+http://www.exoplaform.org/xml/ns/kernel_1_1.xsd"
+   xmlns="http://www.exoplaform.org/xml/ns/kernel_1_1.xsd">
 
-	<component>
-		<key>org.exoplatform.services.document.DocumentReaderService</key>
-		<type>org.xcmis.spi.utils.CmisDocumentReaderSercice</type>
-	</component>
+   <component>
+      <type>org.xcmis.spi.deploy.ExoContainerCmisRegistry</type>
+      <init-params>
+         <values-param>
+            <name>renditionProviders</name>
+            <description>Redition providers classes.</description>
+            <value>org.xcmis.renditions.impl.PDFDocumentRenditionProvider</value>
+            <value>org.xcmis.renditions.impl.ImageRenditionProvider</value>
+         </values-param>
+      </init-params>
+   </component>
 
-	<!-- Storage Provider JCR -->
-	<component>
-		<type>org.xcmis.sp.jcr.exo.StorageProviderImpl</type>
-		<init-params>
-			<object-param>
-				<name>configs</name>
-				<object type="org.xcmis.sp.jcr.exo.StorageProviderImpl$StorageProviderConfig">
-					<field name="storages">
-						<collection type="java.util.ArrayList">
-							<value>
-								<object type="org.xcmis.sp.jcr.exo.StorageConfiguration">
-									<field name="id">
-										<string>cmis1</string>
-									</field>
-									<field name="repository">
-										<string>repository</string>
-									</field>
-									<field name="workspace">
-										<string>cmis</string>
-									</field>
-									<field name="indexConfiguration">
-										<object type="org.xcmis.search.config.IndexConfiguration">
-											<field name="indexDir">
-												<string>../temp/index/db1/ws1</string>
-											</field>
-										</object>
-									</field>
-									<field name="properties">
-										<map type="java.util.HashMap">
-											<entry>
-												<key>
-													<string>exo.cmis.changetoken.feature</string>
-												</key>
-												<value>
-													<boolean>false</boolean>
-												</value>
-											</entry>
-										</map>
-									</field>
-								</object>
-							</value>
-						</collection>
-					</field>
-				</object>
-			</object-param>
-		</init-params>
-	</component>
+   <component>
+      <key>org.exoplatform.services.document.DocumentReaderService</key>
+      <type>org.xcmis.spi.utils.CmisDocumentReaderService</type>
+   </component>
+
+   <!-- Storage Provider JCR -->
+   <component>
+      <type>org.xcmis.sp.jcr.exo.StorageProviderImpl</type>
+      <init-params>
+         <object-param>
+            <name>configs</name>
+            <object type="org.xcmis.sp.jcr.exo.StorageProviderImpl$StorageProviderConfig">
+               <field name="storages">
+                  <collection type="java.util.ArrayList">
+                     <value>
+                        <object type="org.xcmis.sp.jcr.exo.StorageConfiguration">
+                           <field name="id">
+                              <string>cmis1</string>
+                           </field>
+                           <field name="repository">
+                              <string>repository</string>
+                           </field>
+                           <field name="workspace">
+                              <string>cmis</string>
+                           </field>
+                           <field name="indexConfiguration">
+                              <object type="org.xcmis.search.config.IndexConfiguration">
+                                 <field name="indexDir">
+                                    <string>../temp/index/db1/ws1</string>
+                                 </field>
+                              </object>
+                           </field>
+                           <field name="properties">
+                              <map type="java.util.HashMap">
+                                 <entry>
+                                    <key>
+                                       <string>exo.cmis.changetoken.feature</string>
+                                    </key>
+                                    <value>
+                                       <boolean>false</boolean>
+                                    </value>
+                                 </entry>
+                              </map>
+                           </field>
+                        </object>
+                     </value>
+                  </collection>
+               </field>
+            </object>
+         </object-param>
+      </init-params>
+   </component>
 
    <!-- Storage Provider InMemory -->
-	<component>
-		<type>org.xcmis.sp.inmemory.StorageProviderImpl</type>
-		<init-params>
-			<object-param>
-				<name>configs</name>
-				<object type="org.xcmis.sp.inmemory.StorageProviderImpl$StorageProviderConfig">
-					<field name="storages">
-						<collection type="java.util.ArrayList">
-							<value>
-								<object type="org.xcmis.sp.inmemory.StorageConfiguration">
-									<field name="id">
-										<!-- ID of CMIS repository -->
-										<string>cmis-inmem1</string>
-									</field>
-									<field name="properties">
-										<map type="java.util.HashMap">
-											<entry>
-												<key>
-													<string>exo.cmis.changetoken.feature</string>
-												</key>
-												<value>
-													<!-- Enable/Disable change token feature. -->
-													<boolean>false</boolean>
-												</value>
-											</entry>
-										</map>
-									</field>
-								</object>
-							</value>
-						</collection>
-					</field>
-				</object>
-			</object-param>
-		</init-params>
-	</component>
+<!--
+   <component>
+      <type>org.xcmis.sp.inmemory.StorageProviderImpl</type>
+      <init-params>
+         <object-param>
+            <name>configs</name>
+            <object type="org.xcmis.sp.inmemory.StorageProviderImpl$StorageProviderConfig">
+               <field name="storages">
+                  <collection type="java.util.ArrayList">
+                     <value>
+                        <object type="org.xcmis.sp.inmemory.StorageConfiguration">
+                           <field name="id">
+                              <string>cmis-inmem1</string>
+                           </field>
+                           <field name="properties">
+                              <map type="java.util.HashMap">
+                                 <entry>
+                                    <key>
+                                       <string>exo.cmis.changetoken.feature</string>
+                                    </key>
+                                    <value>
+                                       <boolean>false</boolean>
+                                    </value>
+                                 </entry>
+                              </map>
+                           </field>
+                        </object>
+                     </value>
+                  </collection>
+               </field>
+            </object>
+         </object-param>
+      </init-params>
+   </component>
+-->
 
-
+<!--
    <external-component-plugins>
       <target-component>org.exoplatform.services.jcr.RepositoryService</target-component>
       <component-plugin>
@@ -125,6 +128,7 @@ http://www.exoplaform.org/xml/ns/kernel_1_1.xsd" xmlns="http://www.exoplaform.or
          </init-params>
       </component-plugin>
    </external-component-plugins>
+-->
 
    <external-component-plugins>
       <target-component>org.exoplatform.services.naming.InitialContextInitializer</target-component>

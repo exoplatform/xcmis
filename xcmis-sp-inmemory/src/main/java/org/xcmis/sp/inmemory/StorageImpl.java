@@ -84,7 +84,7 @@ import org.xcmis.spi.model.Permission.BasicPermissions;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 import org.xcmis.spi.query.Score;
-import org.xcmis.spi.utils.CmisDocumentReaderSercice;
+import org.xcmis.spi.utils.CmisDocumentReaderService;
 import org.xcmis.spi.utils.CmisUtils;
 
 import java.math.BigDecimal;
@@ -1041,7 +1041,7 @@ public class StorageImpl implements Storage
       indexConfiguration.setRootUuid(this.getRepositoryInfo().getRootFolderId());
       //if list of root parents is empty it will be indexed as empty string
       indexConfiguration.setRootParentUuid("");
-      indexConfiguration.setDocumentReaderService(new CmisDocumentReaderSercice());
+      indexConfiguration.setDocumentReaderService(new CmisDocumentReaderService());
 
       //default invocation context
       InvocationContext invocationContext = new InvocationContext();
