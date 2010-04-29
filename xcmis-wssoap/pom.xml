@@ -5,11 +5,12 @@
 		<artifactId>xcmis-parent</artifactId>
 		<version>1.0-SNAPSHOT</version>
 	</parent>
+
 	<artifactId>xcmis-wssoap</artifactId>
-	<name>xCMIS :: SOAP :: Binding</name>
+        <packaging>jar</packaging>
+	<name>xCMIS :: SOAP Binding</name>
 
 	<dependencies>
-
 		<dependency>
 			<groupId>org.xcmis</groupId>
 			<artifactId>xcmis-spi</artifactId>
@@ -22,7 +23,6 @@
          <scope>test</scope>
       </dependency>
       -->
-
 		<dependency>
 			<groupId>org.xcmis</groupId>
 			<artifactId>xcmis-sp-jcr-exo</artifactId>

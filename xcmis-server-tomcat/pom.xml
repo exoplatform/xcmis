@@ -7,8 +7,7 @@
    </parent>
 
    <artifactId>xcmis-server-tomcat</artifactId>
-   <name>xCMIS :: Server Tomcat</name>
-   <description>xCMIS Server Tomcat</description>
+   <name>xCMIS :: Server :: Tomcat</name>
 
    <dependencies>
       <dependency>

@@ -50,29 +50,6 @@ http://www.exoplaform.org/xml/ns/kernel_1_1.xsd" xmlns="http://www.exoplaform.or
    </component>
 
    <external-component-plugins>
-      <target-component>org.exoplatform.services.jcr.RepositoryService</target-component>
-      <component-plugin>
-         <name>register.listener</name>
-         <set-method>addPlugin</set-method>
-         <type>org.exoplatform.services.jcr.impl.RepositoryChangesListenerRegisterPlugin</type>
-         <init-params>
-            <value-param>
-               <name>repository-name</name>
-               <value>repository</value>
-            </value-param>
-            <value-param>
-               <name>workspaces</name>
-               <value>cmis</value>
-            </value-param>
-            <value-param>
-               <name>component-class-name</name>
-               <value>org.xcmis.sp.jcr.exo.query.index.StartableJcrIndexingService</value>
-            </value-param>
-         </init-params>
-      </component-plugin>
-   </external-component-plugins>
-
-   <external-component-plugins>
       <target-component>org.exoplatform.services.naming.InitialContextInitializer</target-component>
       <component-plugin>
          <name>bind.datasource</name>

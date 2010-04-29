@@ -12,10 +12,7 @@
 
    <artifactId>xcmis-search-parser-cmis</artifactId>
    <packaging>jar</packaging>
-   <version>1.0-SNAPSHOT</version>
-   <name>xCMIS :: Search :: Parser :: CMIS</name>
-   <url>http://www.exoplatform.org</url>
-   <description>eXo Search Service</description>
+   <name>xCMIS :: Search :: Parser CMIS</name>
 
    <dependencies>
       <dependency>
@@ -28,7 +25,7 @@
          <groupId>org.xcmis</groupId>
          <artifactId>xcmis-search-model</artifactId>
       </dependency>
-      
+
       <!-- Time parsing -->
       <dependency>
          <groupId>org.exoplatform.kernel</groupId>
@@ -38,7 +35,6 @@
       <dependency>
          <groupId>junit</groupId>
          <artifactId>junit</artifactId>
-         <version>4.8.1</version>
          <scope>test</scope>
       </dependency>
 

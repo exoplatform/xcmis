@@ -5,8 +5,10 @@
 		<artifactId>xcmis-parent</artifactId>
 		<version>1.0-SNAPSHOT</version>
 	</parent>
+
 	<artifactId>xcmis-wssoap-client</artifactId>
-	<name>xCMIS :: SOAP :: Binding</name>
+   <packaging>jar</packaging>
+	<name>xCMIS :: SOAP :: Client Binding as JUnit Tests</name>
 
 	<dependencies>
 

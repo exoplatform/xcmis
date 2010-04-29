@@ -8,10 +8,8 @@
    </parent>
 
    <artifactId>xcmis-server-war</artifactId>
-   <name>xCMIS :: Server WAR</name>
-   <description>xCMIS Server WAR</description>
-
    <packaging>war</packaging>
+   <name>xCMIS :: Server :: WAR</name>
 
    <dependencies>
 

@@ -8,6 +8,7 @@
    </parent>
 
    <artifactId>xcmis-sp-inmemory</artifactId>
+   <packaging>jar</packaging>
    <name>xCMIS :: SP :: InMemory</name>
 
    <dependencies>

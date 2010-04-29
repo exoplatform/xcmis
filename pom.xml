@@ -51,7 +51,15 @@
       <!-- Will be an entry in the POM in the future -->
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
+      <!-- Third party versions -->
       <shindig.version>1.1-BETA5-incubating</shindig.version>
+      <gwt.version>1.7.0</gwt.version>
+      <cxf.version>2.1.2</cxf.version>
+      <lucene.version>2.4.1</lucene.version>
+      <junit.version>4.8.1</junit.version>
+      <abdera.version>0.4.0-incubating</abdera.version>
+
+
    </properties>
 
    <prerequisites>
@@ -69,6 +77,7 @@
       <module>xcmis-restatom</module>
       <module>xcmis-wssoap</module>
       <module>xcmis-server-war</module>
+      <module>xcmis-server-gateinext-war</module>
       <module>xcmis-client-gwt-restatom</module>
    </modules>
 
@@ -260,76 +269,76 @@
             <artifactId>exo.ws.testframework</artifactId>
             <version>${org.exoplatform.ws.version}</version>
          </dependency>
-         <!-- Third part dependencies -->
+         <!-- Third party dependencies -->
          <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>3.8.2</version>
+            <version>${junit.version}</version>
          </dependency>
          <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-core</artifactId>
-            <version>2.4.1</version>
+            <version>${lucene.version}</version>
          </dependency>
          <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-spellchecker</artifactId>
-            <version>2.4.1</version>
+            <version>${lucene.version}</version>
          </dependency>
          <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-memory</artifactId>
-            <version>2.4.1</version>
+            <version>${lucene.version}</version>
          </dependency>
          <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-regex</artifactId>
-            <version>2.4.1</version>
+            <version>${lucene.version}</version>
          </dependency>
          <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-transports-http</artifactId>
-            <version>2.1.2</version>
+            <version>${cxf.version}</version>
          </dependency>
          <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-frontend-jaxws</artifactId>
-            <version>2.1.2</version>
+            <version>${cxf.version}</version>
          </dependency>
          <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-transports-http-jetty</artifactId>
-            <version>2.1.2</version>
+            <version>${cxf.version}</version>
          </dependency>
          <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-frontend-simple</artifactId>
-            <version>2.1.2</version>
+            <version>${cxf.version}</version>
          </dependency>
          <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-databinding-aegis</artifactId>
-            <version>2.1.2</version>
+            <version>${cxf.version}</version>
          </dependency>
          <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-databinding-jaxb</artifactId>
-            <version>2.1.2</version>
+            <version>${cxf.version}</version>
          </dependency>
          <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-databinding-xmlbeans</artifactId>
-            <version>2.1.2</version>
+            <version>${cxf.version}</version>
          </dependency>
          <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-tools-java2ws</artifactId>
-            <version>2.1.2</version>
+            <version>${cxf.version}</version>
          </dependency>
          <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-transports-local</artifactId>
-            <version>2.1.2</version>
+            <version>${cxf.version}</version>
          </dependency>
          <dependency>
             <groupId>org.slf4j</groupId>
@@ -372,12 +381,12 @@
          <dependency>
             <groupId>org.apache.abdera</groupId>
             <artifactId>abdera-server</artifactId>
-            <version>0.4.0-incubating</version>
+            <version>${abdera.version}</version>
          </dependency>
          <dependency>
             <groupId>org.apache.abdera</groupId>
             <artifactId>abdera-client</artifactId>
-            <version>0.4.0-incubating</version>
+            <version>${abdera.version}</version>
          </dependency>
          <dependency>
             <groupId>hsqldb</groupId>
@@ -469,7 +478,22 @@
             <artifactId>guice-jmx</artifactId>
             <version>2.0</version>
          </dependency>
-      </dependencies>
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-servlet</artifactId>
+			<version>${gwt.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-user</artifactId>
+			<version>${gwt.version}</version>
+		</dependency>
+      <dependency>
+         <groupId>org.mockito</groupId>
+         <artifactId>mockito-all</artifactId>
+         <version>1.8.2</version>
+      </dependency>
+    </dependencies>
    </dependencyManagement>
 
    <build>
