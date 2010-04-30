@@ -18,8 +18,17 @@
  */
 package org.xcmis.sp.jcr.exo.index;
 
+import static org.xcmis.search.model.constraint.Operator.EQUAL_TO;
+import static org.xcmis.search.model.constraint.Operator.GREATER_THAN;
+import static org.xcmis.search.model.constraint.Operator.GREATER_THAN_OR_EQUAL_TO;
+import static org.xcmis.search.model.constraint.Operator.LESS_THAN;
+import static org.xcmis.search.model.constraint.Operator.LESS_THAN_OR_EQUAL_TO;
+import static org.xcmis.search.model.constraint.Operator.LIKE;
+import static org.xcmis.search.model.constraint.Operator.NOT_EQUAL_TO;
+
 import org.xcmis.search.content.InMemoryColumn;
 import org.xcmis.search.content.Schema;
+import org.xcmis.search.model.constraint.Operator;
 import org.xcmis.search.model.source.SelectorName;
 import org.xcmis.search.value.PropertyType;
 import org.xcmis.spi.TypeManager;
@@ -40,6 +49,8 @@ import java.util.Map;
 public class CmisSchema implements Schema
 {
    public static Map<org.xcmis.spi.model.PropertyType, PropertyType> PROPERTY_TYPES_MAP;
+
+   public static Map<org.xcmis.spi.model.PropertyType, Operator[]> AVAILABLE_QUERY_OPERATORS;
    static
    {
       PROPERTY_TYPES_MAP = new HashMap<org.xcmis.spi.model.PropertyType, PropertyType>();
@@ -51,6 +62,22 @@ public class CmisSchema implements Schema
       PROPERTY_TYPES_MAP.put(org.xcmis.spi.model.PropertyType.HTML, PropertyType.STRING);
       PROPERTY_TYPES_MAP.put(org.xcmis.spi.model.PropertyType.STRING, PropertyType.STRING);
       PROPERTY_TYPES_MAP.put(org.xcmis.spi.model.PropertyType.URI, PropertyType.STRING);
+
+      AVAILABLE_QUERY_OPERATORS = new HashMap<org.xcmis.spi.model.PropertyType, Operator[]>();
+      AVAILABLE_QUERY_OPERATORS.put(org.xcmis.spi.model.PropertyType.BOOLEAN, new Operator[]{EQUAL_TO});
+      AVAILABLE_QUERY_OPERATORS.put(org.xcmis.spi.model.PropertyType.ID, new Operator[]{EQUAL_TO, NOT_EQUAL_TO});
+      AVAILABLE_QUERY_OPERATORS.put(org.xcmis.spi.model.PropertyType.INTEGER, new Operator[]{EQUAL_TO, GREATER_THAN,
+         GREATER_THAN_OR_EQUAL_TO, LESS_THAN, LESS_THAN_OR_EQUAL_TO, NOT_EQUAL_TO});
+      AVAILABLE_QUERY_OPERATORS.put(org.xcmis.spi.model.PropertyType.DATETIME, new Operator[]{EQUAL_TO, GREATER_THAN,
+         GREATER_THAN_OR_EQUAL_TO, LESS_THAN, LESS_THAN_OR_EQUAL_TO, NOT_EQUAL_TO});
+      AVAILABLE_QUERY_OPERATORS.put(org.xcmis.spi.model.PropertyType.DECIMAL, new Operator[]{EQUAL_TO, GREATER_THAN,
+         GREATER_THAN_OR_EQUAL_TO, LESS_THAN, LESS_THAN_OR_EQUAL_TO, NOT_EQUAL_TO});
+      AVAILABLE_QUERY_OPERATORS.put(org.xcmis.spi.model.PropertyType.HTML, new Operator[]{EQUAL_TO, GREATER_THAN, LIKE,
+         NOT_EQUAL_TO});
+      AVAILABLE_QUERY_OPERATORS.put(org.xcmis.spi.model.PropertyType.STRING, new Operator[]{EQUAL_TO, GREATER_THAN,
+         LIKE, NOT_EQUAL_TO});
+      AVAILABLE_QUERY_OPERATORS.put(org.xcmis.spi.model.PropertyType.URI, new Operator[]{EQUAL_TO, NOT_EQUAL_TO, LIKE});
+
    }
 
    private final TypeManager typeManager;
@@ -104,8 +131,9 @@ public class CmisSchema implements Schema
          PropertyDefinition<?> propertyDefinition = typeDefinition.getPropertyDefinition(name);
          if (propertyDefinition != null)
          {
-            return new InMemoryColumn(name, PROPERTY_TYPES_MAP.get(propertyDefinition.getPropertyType()).toString(),
-               true);
+            org.xcmis.spi.model.PropertyType propertyType = propertyDefinition.getPropertyType();
+            return new InMemoryColumn(name, PROPERTY_TYPES_MAP.get(propertyType).toString(), true,
+               AVAILABLE_QUERY_OPERATORS.get(propertyType));
          }
          return null;
       }
@@ -119,8 +147,9 @@ public class CmisSchema implements Schema
          List<Column> result = new ArrayList<Column>(props.size());
          for (PropertyDefinition<?> propertyDefinition : props)
          {
-            result.add(new InMemoryColumn(propertyDefinition.getQueryName(), PROPERTY_TYPES_MAP.get(
-               propertyDefinition.getPropertyType()).toString(), true));
+            org.xcmis.spi.model.PropertyType propertyType = propertyDefinition.getPropertyType();
+            result.add(new InMemoryColumn(propertyDefinition.getQueryName(), PROPERTY_TYPES_MAP.get(propertyType)
+               .toString(), true, AVAILABLE_QUERY_OPERATORS.get(propertyType)));
          }
 
          return result;
@@ -135,8 +164,9 @@ public class CmisSchema implements Schema
          Map<String, Column> result = new HashMap<String, Column>(props.size());
          for (PropertyDefinition<?> propertyDefinition : props)
          {
+            org.xcmis.spi.model.PropertyType propertyType = propertyDefinition.getPropertyType();
             result.put(propertyDefinition.getQueryName(), new InMemoryColumn(propertyDefinition.getQueryName(),
-               PROPERTY_TYPES_MAP.get(propertyDefinition.getPropertyType()).toString(), true));
+               PROPERTY_TYPES_MAP.get(propertyType).toString(), true, AVAILABLE_QUERY_OPERATORS.get(propertyType)));
          }
 
          return result;
