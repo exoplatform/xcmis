@@ -36,6 +36,16 @@ public enum Operator {
 
    private static final Map<String, Operator> OPERATORS_BY_SYMBOL;
    
+   public static final Operator[] ALL =
+      new Operator[]{
+         EQUAL_TO,
+         GREATER_THAN,
+         GREATER_THAN_OR_EQUAL_TO,
+         LESS_THAN,
+         LESS_THAN_OR_EQUAL_TO,
+         LIKE,
+         NOT_EQUAL_TO};
+   
    static
    {
       Map<String, Operator> opsBySymbol = new HashMap<String, Operator>();
