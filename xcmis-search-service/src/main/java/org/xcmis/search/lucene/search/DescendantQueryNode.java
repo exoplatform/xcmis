@@ -44,20 +44,18 @@ import java.util.Set;
  */
 public class DescendantQueryNode extends Query
 {
-   
+
    /** The serialVersionUID. */
    private static final long serialVersionUID = -6151493594236655389L;
 
    /**
     * Class logger.
     */
-   private final Log log = ExoLogger.getLogger(getClass().getName());
+   private final static Log log = ExoLogger.getLogger(ChildTraversingQueryNode.class);
 
    private final Query context;
 
    private final Query parentQuery;
-
-   // private Scorer parentScorer;
 
    private final int childDepth;
 

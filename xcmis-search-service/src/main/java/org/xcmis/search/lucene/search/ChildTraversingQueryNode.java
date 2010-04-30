@@ -53,7 +53,7 @@ public class ChildTraversingQueryNode extends Query
    /**
     * Class logger.
     */
-   private final Log log = ExoLogger.getLogger("jcr.ChildTraversingQueryNode");
+   private final static Log log = ExoLogger.getLogger(ChildTraversingQueryNode.class);
 
    /**
     * Query what return parent node.

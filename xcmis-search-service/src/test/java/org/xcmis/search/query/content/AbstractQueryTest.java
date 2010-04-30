@@ -29,7 +29,6 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.junit.After;
 import org.junit.Before;
-import org.omg.CORBA.portable.ValueFactory;
 import org.xcmis.search.SearchService;
 import org.xcmis.search.config.IndexConfiguration;
 import org.xcmis.search.config.SearchServiceConfiguration;
@@ -45,6 +44,7 @@ import org.xcmis.search.content.interceptors.ContentReaderInterceptor;
 import org.xcmis.search.lucene.InMemoryLuceneQueryableIndexStorage;
 import org.xcmis.search.lucene.content.SchemaTableResolver;
 import org.xcmis.search.model.Query;
+import org.xcmis.search.model.constraint.Operator;
 import org.xcmis.search.query.QueryBuilder;
 import org.xcmis.search.result.ScoredRow;
 import org.xcmis.search.value.CastSystem;
@@ -111,11 +111,6 @@ public abstract class AbstractQueryTest
    protected QueryBuilder qf;
 
    /**
-    * The value factory for creating literals for the query object model.
-    */
-   protected ValueFactory vf;
-
-   /**
     * The query manager for {@link #superuser}
     */
    protected SearchService qm;
@@ -166,12 +161,10 @@ public abstract class AbstractQueryTest
 
       Builder schemaBuilder = InMemorySchema.createBuilder();
       schema =
-         schemaBuilder
-          .addTable(rootNodeType, propertyName1, propertyName2)
-          .addTable(testNodeType, new String[]{propertyName4})
-          .addColumn(testNodeType, propertyName1, "String",true)
-          .addColumn(testNodeType, propertyName2, "String",true)
-          .addTable(testNodeType2, propertyName4).build();
+         schemaBuilder.addTable(rootNodeType, propertyName1, propertyName2).addTable(testNodeType,
+            new String[]{propertyName4}).addColumn(testNodeType, propertyName1, "String", true, Operator.ALL)
+            .addColumn(testNodeType, propertyName2, "String", true, Operator.ALL)
+            .addTable(testNodeType2, propertyName4).build();
       qf = new QueryBuilder(mock(CastSystem.class));
 
       testRootNode =
@@ -230,7 +223,6 @@ public abstract class AbstractQueryTest
 
       qm = null;
       qf = null;
-      vf = null;
 
    }
 

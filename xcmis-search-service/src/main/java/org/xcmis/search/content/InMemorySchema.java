@@ -19,8 +19,8 @@
 package org.xcmis.search.content;
 
 import org.apache.commons.lang.Validate;
-import org.xcmis.search.InvalidQueryException;
 import org.xcmis.search.model.Query;
+import org.xcmis.search.model.constraint.Operator;
 import org.xcmis.search.model.source.SelectorName;
 
 import java.util.ArrayList;
@@ -138,7 +138,7 @@ public class InMemorySchema implements Schema
          Validate.notEmpty(columnName, " columnName may not be empty");
          Validate.notNull(type, " type may not be null");
 
-         return addColumn(tableName, columnName, type, InMemoryColumn.DEFAULT_FULL_TEXT_SEARCHABLE);
+         return addColumn(tableName, columnName, type, InMemoryColumn.DEFAULT_FULL_TEXT_SEARCHABLE, Operator.ALL);
       }
 
       /**
@@ -157,7 +157,8 @@ public class InMemorySchema implements Schema
        *           if not
        * @return this builder, for convenience in method chaining; never null
        */
-      public Builder addColumn(String tableName, String columnName, String type, boolean fullTextSearchable)
+      public Builder addColumn(String tableName, String columnName, String type, boolean fullTextSearchable,
+         Operator[] availableQueryOperators)
       {
          Validate.notEmpty(tableName, " tableName may not be empty");
          Validate.notEmpty(columnName, " columnName may not be empty");
@@ -168,12 +169,12 @@ public class InMemorySchema implements Schema
          if (existing == null)
          {
             List<Column> columns = new ArrayList<Column>();
-            columns.add(new InMemoryColumn(columnName, type, fullTextSearchable));
+            columns.add(new InMemoryColumn(columnName, type, fullTextSearchable, availableQueryOperators));
             table = new InMemoryTable(selector, columns);
          }
          else
          {
-            table = existing.withColumn(columnName, type, fullTextSearchable);
+            table = existing.withColumn(columnName, type, fullTextSearchable, availableQueryOperators);
          }
          tables.put(table.getName(), table);
          return this;
@@ -199,7 +200,7 @@ public class InMemorySchema implements Schema
          {
             List<Column> columns = new ArrayList<Column>();
             // TODO default type
-            columns.add(new InMemoryColumn(columnName, "String", true));
+            columns.add(new InMemoryColumn(columnName, "String", true, Operator.ALL));
             table = new InMemoryTable(selector, columns);
          }
          else
@@ -211,7 +212,7 @@ public class InMemorySchema implements Schema
             {
                type = column.getPropertyType();
             }
-            table = existing.withColumn(columnName, type, true);
+            table = existing.withColumn(columnName, type, true, column.getAvailableQueryOperators());
          }
          tables.put(table.getName(), table);
          return this;

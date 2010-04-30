@@ -35,14 +35,14 @@ import java.io.IOException;
  */
 public class CaseInsensitiveTermQuery extends MultiTermQuery
 {
-   
+
    /** The serialVersionUID. */
    private static final long serialVersionUID = 8733959357848332771L;
 
    /**
     * Class logger.
     */
-   private final Log log = ExoLogger.getLogger(getClass().getName());
+   private final static Log log = ExoLogger.getLogger(CaseInsensitiveTermQuery.class);
 
    public CaseInsensitiveTermQuery(Term term)
    {
