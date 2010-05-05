@@ -60,7 +60,7 @@ public class ExecuteSelectorCommand implements VisitableCommand
       List<Ordering> orderings, Map<String, Object> bindVariablesValues)
    {
       Validate.notNull(name, "The name argument may not be null");
-      Validate.notNull(alias, "The alias argument may not be null");
+      //alias can be null
       Validate.notNull(orderings, "The orderings argument may not be null");
       Validate.notNull(bindVariablesValues, "The bindVariablesValues argument may not be null");
       this.alias = alias;

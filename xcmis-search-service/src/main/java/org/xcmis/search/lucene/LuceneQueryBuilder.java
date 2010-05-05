@@ -444,7 +444,7 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
       Validate.isTrue(queryBuilderStack.peek() instanceof Operator, "Stack should contains comparation operator ");
       Operator operator = (Operator)queryBuilderStack.pop();
 
-      Validate.isTrue(queryBuilderStack.peek() instanceof Long, "Stack should contains long value. But found "
+      Validate.isTrue(queryBuilderStack.peek() instanceof Long, "Invalid literal type, should be long. But found "
          + queryBuilderStack.peek().getClass().getCanonicalName());
 
       Long staticLongValue = (Long)queryBuilderStack.pop();
@@ -813,7 +813,7 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
       Validate.isTrue(queryBuilderStack.peek() instanceof Operator, "Stack should contains comparation operator ");
       Operator operator = (Operator)queryBuilderStack.pop();
       Object staticValue = queryBuilderStack.peek();
-      Validate.isTrue((staticValue instanceof String || staticValue instanceof Double
+      Validate.isTrue((staticValue instanceof String || staticValue instanceof Double || staticValue instanceof Long
          || staticValue instanceof Calendar || staticValue instanceof Boolean),
          "Stack should contains static value. But found " + queryBuilderStack.peek().getClass().getCanonicalName());
       staticValue = queryBuilderStack.pop();
@@ -828,6 +828,10 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
       else if (staticValue instanceof Double)
       {
          staticStingValue = ExtendedNumberTools.doubleToString((Double)staticValue);
+      }
+      else if (staticValue instanceof Long)
+      {
+         staticStingValue = NumberTools.longToString((Long)staticValue);
       }
       else if (staticValue instanceof Calendar)
       {
