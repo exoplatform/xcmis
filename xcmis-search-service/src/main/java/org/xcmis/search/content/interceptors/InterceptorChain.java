@@ -49,152 +49,6 @@ public class InterceptorChain implements Startable
       this.firstInChain = first;
    }
 
-   void printChainInfo()
-   {
-      if (log.isDebugEnabled())
-      {
-         log.debug("Interceptor chain is: " + toString());
-      }
-   }
-
-   /**
-    * Inserts the given interceptor at the specified position in the chain (o based indexing).
-    *
-    * @throws IllegalArgumentException if the position is invalid (e.g. 5 and there are only 2 interceptors in the chain)
-    */
-   public synchronized void addInterceptor(CommandInterceptor interceptor, int position)
-   {
-      if (position == 0)
-      {
-         interceptor.setNext(firstInChain);
-         firstInChain = interceptor;
-         return;
-      }
-      if (firstInChain == null)
-      {
-         return;
-      }
-      CommandInterceptor it = firstInChain;
-      int index = 0;
-      while (it != null)
-      {
-         if (++index == position)
-         {
-            interceptor.setNext(it.getNext());
-            it.setNext(interceptor);
-            return;
-         }
-         it = it.getNext();
-      }
-      throw new IllegalArgumentException("Invalid index: " + index + " !");
-   }
-
-   /**
-    * Removes the interceptor at the given postion.
-    *
-    * @throws IllegalArgumentException if the position is invalid (e.g. 5 and there are only 2 interceptors in the chain)
-    */
-   public synchronized void removeInterceptor(int position)
-   {
-      if (firstInChain == null)
-      {
-         return;
-      }
-      if (position == 0)
-      {
-         firstInChain = firstInChain.getNext();
-         return;
-      }
-      CommandInterceptor it = firstInChain;
-      int index = 0;
-      while (it != null)
-      {
-         if (++index == position)
-         {
-            if (it.getNext() == null)
-            {
-               return; //nothing to remove
-            }
-            it.setNext(it.getNext().getNext());
-            return;
-         }
-         it = it.getNext();
-      }
-      throw new IllegalArgumentException("Invalid position: " + position + " !");
-   }
-
-   /**
-    * Returns the number of interceptors in the chain.
-    */
-   public int size()
-   {
-      int size = 0;
-      CommandInterceptor it = firstInChain;
-      while (it != null)
-      {
-         size++;
-         it = it.getNext();
-      }
-      return size;
-
-   }
-
-   public String getInterceptorDetails()
-   {
-      StringBuilder sb = new StringBuilder("Interceptor chain: \n");
-      int count = 0;
-      for (CommandInterceptor i : asList())
-      {
-         count++;
-         sb.append("   ").append(count).append(". ").append(i).append("\n");
-      }
-      return sb.toString();
-   }
-
-   /**
-   * Returns an unmofiable list with all the interceptors in sequence.
-   * If first in chain is null an empty list is returned.
-   */
-   public List<CommandInterceptor> asList()
-   {
-      if (firstInChain == null)
-      {
-         return Collections.emptyList();
-      }
-
-      List<CommandInterceptor> retval = new LinkedList<CommandInterceptor>();
-      CommandInterceptor tmp = firstInChain;
-      do
-      {
-         retval.add(tmp);
-         tmp = tmp.getNext();
-      }
-      while (tmp != null);
-      return Collections.unmodifiableList(retval);
-   }
-
-   /**
-    * Removes all the occurences of supplied interceptor type from the chain.
-    */
-   public synchronized void removeInterceptor(Class<? extends CommandInterceptor> clazz)
-   {
-      if (firstInChain.getClass() == clazz)
-      {
-         firstInChain = firstInChain.getNext();
-      }
-      CommandInterceptor it = firstInChain.getNext();
-      CommandInterceptor prevIt = firstInChain;
-      while (it != null)
-      {
-         if (it.getClass() == clazz)
-         {
-            prevIt.setNext(it.getNext());
-         }
-         prevIt = it;
-         it = it.getNext();
-      }
-   }
-
    /**
     * Adds a new interceptor in list after an interceptor of a given type.
     *
@@ -247,6 +101,38 @@ public class InterceptorChain implements Startable
    }
 
    /**
+    * Inserts the given interceptor at the specified position in the chain (o based indexing).
+    *
+    * @throws IllegalArgumentException if the position is invalid (e.g. 5 and there are only 2 interceptors in the chain)
+    */
+   public synchronized void addInterceptor(CommandInterceptor interceptor, int position)
+   {
+      if (position == 0)
+      {
+         interceptor.setNext(firstInChain);
+         firstInChain = interceptor;
+         return;
+      }
+      if (firstInChain == null)
+      {
+         return;
+      }
+      CommandInterceptor it = firstInChain;
+      int index = 0;
+      while (it != null)
+      {
+         if (++index == position)
+         {
+            interceptor.setNext(it.getNext());
+            it.setNext(interceptor);
+            return;
+         }
+         it = it.getNext();
+      }
+      throw new IllegalArgumentException("Invalid index: " + index + " !");
+   }
+
+   /**
     * Appends at the end.
     */
    public void appendIntereceptor(CommandInterceptor ci)
@@ -262,22 +148,42 @@ public class InterceptorChain implements Startable
    }
 
    /**
-    * Walks the command through the interceptor chain. The received ctx is being passed in.
-    * @throws Throwable 
-    */
-   @SuppressWarnings("deprecation")
-   public Object invoke(InvocationContext ctx, VisitableCommand command) throws Throwable
+   * Returns an unmofiable list with all the interceptors in sequence.
+   * If first in chain is null an empty list is returned.
+   */
+   public List<CommandInterceptor> asList()
    {
-      //ctx.setCommand(command);
-      try
+      if (firstInChain == null)
       {
-         return command.acceptVisitor(ctx, firstInChain);
+         return Collections.emptyList();
       }
-      catch (InterruptedException ie)
+
+      List<CommandInterceptor> retval = new LinkedList<CommandInterceptor>();
+      CommandInterceptor tmp = firstInChain;
+      do
       {
-         Thread.currentThread().interrupt();
-         return null;
+         retval.add(tmp);
+         tmp = tmp.getNext();
       }
+      while (tmp != null);
+      return Collections.unmodifiableList(retval);
+   }
+
+   /**
+    * Checks whether the chain contains the supplied interceptor instance.
+    */
+   public boolean containsInstance(CommandInterceptor interceptor)
+   {
+      CommandInterceptor it = firstInChain;
+      while (it != null)
+      {
+         if (it == interceptor)
+         {
+            return true;
+         }
+         it = it.getNext();
+      }
+      return false;
    }
 
    /**
@@ -288,14 +194,16 @@ public class InterceptorChain implements Startable
       return firstInChain;
    }
 
-   /**
-    * Mainly used by unit tests to replace the interceptor chain with the starting point passed in.
-    *
-    * @param interceptor interceptor to be used as the first interceptor in the chain.
-    */
-   public void setFirstInChain(CommandInterceptor interceptor)
+   public String getInterceptorDetails()
    {
-      this.firstInChain = interceptor;
+      StringBuilder sb = new StringBuilder("Interceptor chain: \n");
+      int count = 0;
+      for (CommandInterceptor i : asList())
+      {
+         count++;
+         sb.append("   ").append(count).append(". ").append(i).append("\n");
+      }
+      return sb.toString();
    }
 
    /**
@@ -334,20 +242,104 @@ public class InterceptorChain implements Startable
    }
 
    /**
-    * Checks whether the chain contains the supplied interceptor instance.
+    * Walks the command through the interceptor chain. The received ctx is being passed in.
+    * @throws Throwable 
     */
-   public boolean containsInstance(CommandInterceptor interceptor)
+   @SuppressWarnings("deprecation")
+   public Object invoke(InvocationContext ctx, VisitableCommand command) throws Throwable
    {
-      CommandInterceptor it = firstInChain;
+      //ctx.setCommand(command);
+      try
+      {
+         return command.acceptVisitor(ctx, firstInChain);
+      }
+      catch (InterruptedException ie)
+      {
+         Thread.currentThread().interrupt();
+         return null;
+      }
+   }
+
+   /**
+    * Removes all the occurences of supplied interceptor type from the chain.
+    */
+   public synchronized void removeInterceptor(Class<? extends CommandInterceptor> clazz)
+   {
+      if (firstInChain.getClass() == clazz)
+      {
+         firstInChain = firstInChain.getNext();
+      }
+      CommandInterceptor it = firstInChain.getNext();
+      CommandInterceptor prevIt = firstInChain;
       while (it != null)
       {
-         if (it == interceptor)
+         if (it.getClass() == clazz)
          {
-            return true;
+            prevIt.setNext(it.getNext());
+         }
+         prevIt = it;
+         it = it.getNext();
+      }
+   }
+
+   /**
+    * Removes the interceptor at the given postion.
+    *
+    * @throws IllegalArgumentException if the position is invalid (e.g. 5 and there are only 2 interceptors in the chain)
+    */
+   public synchronized void removeInterceptor(int position)
+   {
+      if (firstInChain == null)
+      {
+         return;
+      }
+      if (position == 0)
+      {
+         firstInChain = firstInChain.getNext();
+         return;
+      }
+      CommandInterceptor it = firstInChain;
+      int index = 0;
+      while (it != null)
+      {
+         if (++index == position)
+         {
+            if (it.getNext() == null)
+            {
+               return; //nothing to remove
+            }
+            it.setNext(it.getNext().getNext());
+            return;
          }
          it = it.getNext();
       }
-      return false;
+      throw new IllegalArgumentException("Invalid position: " + position + " !");
+   }
+
+   /**
+    * Mainly used by unit tests to replace the interceptor chain with the starting point passed in.
+    *
+    * @param interceptor interceptor to be used as the first interceptor in the chain.
+    */
+   public void setFirstInChain(CommandInterceptor interceptor)
+   {
+      this.firstInChain = interceptor;
+   }
+
+   /**
+    * Returns the number of interceptors in the chain.
+    */
+   public int size()
+   {
+      int size = 0;
+      CommandInterceptor it = firstInChain;
+      while (it != null)
+      {
+         size++;
+         it = it.getNext();
+      }
+      return size;
+
    }
 
    /**
@@ -369,6 +361,14 @@ public class InterceptorChain implements Startable
       for (CommandInterceptor interceptor : asList())
       {
          interceptor.stop();
+      }
+   }
+
+   void printChainInfo()
+   {
+      if (log.isDebugEnabled())
+      {
+         log.debug("Interceptor chain is: " + toString());
       }
    }
 

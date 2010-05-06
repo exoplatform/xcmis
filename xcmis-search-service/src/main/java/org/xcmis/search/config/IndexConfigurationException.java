@@ -35,10 +35,22 @@ public class IndexConfigurationException extends IndexException
    /**
     * 
     */
+   private static final long serialVersionUID = -3029464014145259931L;
+
+   /**
+    * 
+    */
    public IndexConfigurationException()
    {
       super();
-      // TODO Auto-generated constructor stub
+   }
+
+   /**
+    * @param message
+    */
+   public IndexConfigurationException(String message)
+   {
+      super(message);
    }
 
    /**
@@ -48,16 +60,6 @@ public class IndexConfigurationException extends IndexException
    public IndexConfigurationException(String message, Throwable cause)
    {
       super(message, cause);
-      // TODO Auto-generated constructor stub
-   }
-
-   /**
-    * @param message
-    */
-   public IndexConfigurationException(String message)
-   {
-      super(message);
-      // TODO Auto-generated constructor stub
    }
 
    /**
@@ -66,12 +68,6 @@ public class IndexConfigurationException extends IndexException
    public IndexConfigurationException(Throwable cause)
    {
       super(cause);
-      // TODO Auto-generated constructor stub
    }
-
-   /**
-    * 
-    */
-   private static final long serialVersionUID = -3029464014145259931L;
 
 }

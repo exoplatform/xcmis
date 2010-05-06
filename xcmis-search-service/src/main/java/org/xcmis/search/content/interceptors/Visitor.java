@@ -26,8 +26,6 @@ import org.xcmis.search.content.command.query.ProcessQueryCommand;
 import org.xcmis.search.content.command.read.GetChildEntriesCommand;
 import org.xcmis.search.content.command.read.GetContentEntryCommand;
 import org.xcmis.search.content.command.read.GetUnfiledEntriesCommand;
-import org.xcmis.search.content.command.tx.CommitCommand;
-import org.xcmis.search.content.command.tx.RollBackCommand;
 
 /**
  * This interface is the core of search service, where each
@@ -45,19 +43,6 @@ public interface Visitor
     * @return
     */
    Object visitModifyIndexCommand(InvocationContext ctx, ModifyIndexCommand command) throws Throwable;
-
-   /**
-    * Visits a CommitCommand.
-    * 
-    * @param ctx
-    *           invocation context
-    * @param command
-    *           command to visit
-    * @return response from the visit
-    * @throws Throwable
-    *            in the event of problems.
-    */
-   Object visitCommitCommand(InvocationContext ctx, CommitCommand command) throws Throwable;
 
    /**
     * @param ctx
@@ -80,19 +65,6 @@ public interface Visitor
     * @return
     */
    Object visitGetContentEntryCommand(InvocationContext ctx, GetContentEntryCommand command) throws Throwable;
-
-   /**
-    * Visits a RollBackCommand.
-    * 
-    * @param ctx
-    *           invocation context
-    * @param command
-    *           command to visit
-    * @return response from the visit
-    * @throws Throwable
-    *            in the event of problems.
-    */
-   Object visitRollBackCommand(InvocationContext ctx, RollBackCommand command) throws Throwable;
 
    /**
     * @param ctx

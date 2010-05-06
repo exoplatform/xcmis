@@ -51,36 +51,19 @@ public class DescendantQueryNode extends Query
    /**
     * Class logger.
     */
-   private final static Log log = ExoLogger.getLogger(ChildTraversingQueryNode.class);
+   private final static Log log = ExoLogger.getLogger(DescendantQueryNode.class);
 
    private final Query context;
 
    private final Query parentQuery;
 
-   private final int childDepth;
-
-   public DescendantQueryNode(Query parentQuery, int childDepth)
-   {
-      this(null, parentQuery, childDepth);
-   }
-
    /**
     * 
     */
-   public DescendantQueryNode(Query query, Query parentQuery)
-   {
-      this(query, parentQuery, 0);
-   }
-
-   /**
-    * 
-    */
-   private DescendantQueryNode(Query context, Query parentQuery, int childDepth)
+   public DescendantQueryNode(Query context, Query parentQuery)
    {
       this.context = context;
       this.parentQuery = parentQuery;
-      this.childDepth = childDepth;
-
    }
 
    @Override
@@ -103,7 +86,7 @@ public class DescendantQueryNode extends Query
       {
          return this;
       }
-      return new DescendantQueryNode(cQuery, pQuery, childDepth);
+      return new DescendantQueryNode(cQuery, pQuery);
    }
 
    @Override
@@ -223,8 +206,6 @@ public class DescendantQueryNode extends Query
 
       private final Searcher searcher;
 
-      // private Scorer parentScorer;
-
       public DescendantQueryNodeWeight(Searcher searcher)
       {
          this.searcher = searcher;
@@ -252,8 +233,6 @@ public class DescendantQueryNode extends Query
       public Scorer scorer(IndexReader reader) throws IOException
       {
          Scorer parentScorer = parentQuery.weight(searcher).scorer(reader);
-         // eturn new DescendantSelfAxisScorer(searcher.getSimilarity(), reader,
-         // resolver);
          return new DescendantQueryNodeScorer(searcher, parentScorer, reader);
       }
 

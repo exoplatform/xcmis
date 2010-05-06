@@ -56,22 +56,6 @@ public class SearchServiceConfiguration
    private IndexConfiguration indexConfiguration;
 
    /**
-    * @return the defaultInvocationContext
-    */
-   public InvocationContext getDefaultInvocationContext()
-   {
-      return defaultInvocationContext;
-   }
-
-   /**
-    * @param defaultInvocationContext the defaultInvocationContext to set
-    */
-   public void setDefaultInvocationContext(InvocationContext defaultInvocationContext)
-   {
-      this.defaultInvocationContext = defaultInvocationContext;
-   }
-
-   /**
     * Default invocation context.
     */
    private InvocationContext defaultInvocationContext;
@@ -79,6 +63,14 @@ public class SearchServiceConfiguration
    public ContentReaderInterceptor getContentReader()
    {
       return contentReader;
+   }
+
+   /**
+    * @return the defaultInvocationContext
+    */
+   public InvocationContext getDefaultInvocationContext()
+   {
+      return defaultInvocationContext;
    }
 
    /**
@@ -119,6 +111,14 @@ public class SearchServiceConfiguration
    public void setContentReader(ContentReaderInterceptor contentReader)
    {
       this.contentReader = contentReader;
+   }
+
+   /**
+    * @param defaultInvocationContext the defaultInvocationContext to set
+    */
+   public void setDefaultInvocationContext(InvocationContext defaultInvocationContext)
+   {
+      this.defaultInvocationContext = defaultInvocationContext;
    }
 
    /**
