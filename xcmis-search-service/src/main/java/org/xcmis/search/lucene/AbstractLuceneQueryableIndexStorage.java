@@ -61,7 +61,6 @@ import org.xcmis.search.model.operand.PropertyValue;
 import org.xcmis.search.model.operand.UpperCase;
 import org.xcmis.search.model.ordering.Order;
 import org.xcmis.search.model.ordering.Ordering;
-import org.xcmis.search.result.ScoredNodesImpl;
 import org.xcmis.search.result.ScoredRow;
 import org.xcmis.search.value.NameConverter;
 import org.xcmis.search.value.PathSplitter;
@@ -198,7 +197,7 @@ public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndex
                // get identifiers
                final Document doc = searcher.doc(topDocs.scoreDocs[i].doc, new UUIDFieldSelector());
                final String id = doc.get(FieldNames.UUID);
-               resultNodes.add(new ScoredNodesImpl(command.getAlias().getName(), id, topDocs.scoreDocs[i].score));
+               resultNodes.add(new ScoredRow(command.getAlias().getName(), id, topDocs.scoreDocs[i].score));
             }
          }
       }

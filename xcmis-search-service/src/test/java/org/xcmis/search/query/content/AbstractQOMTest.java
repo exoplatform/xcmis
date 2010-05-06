@@ -57,7 +57,7 @@ public abstract class AbstractQOMTest extends AbstractQueryTest
    //      throws RepositoryException
    //   {
    //      // collect rows
-   //      List expectedPaths = new ArrayList();
+   //      List expectedPaths = new ArrayLisScoredt();
    //      log.println("expected:");
    //      for (int i = 0; i < nodes.length; i++)
    //      {

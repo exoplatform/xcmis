@@ -67,14 +67,14 @@ public class FullTextSearchScoreTest extends AbstractQOMTest
       }
 
    }
+
    //TODO implement fullTextSearchScore
    //@Test
    public void testConstraint() throws QueryExecutionException, InvalidQueryException
    {
       Query query =
          qf.from(testNodeType + " AS s").where().search("s", "'fox'").and().fullTextSearchScore("s").isGreaterThan()
-            .literal(Double.MIN_VALUE)
-            .end().orderBy().descending().fullTextSearchScore("s").end().query();
+            .literal(Double.MIN_VALUE).end().orderBy().descending().fullTextSearchScore("s").end().query();
 
       List<ScoredRow> result = searchService.execute(query);
       double previousScore = Double.NaN;
