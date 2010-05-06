@@ -132,8 +132,8 @@ public class CmisSchema implements Schema
          if (propertyDefinition != null)
          {
             org.xcmis.spi.model.PropertyType propertyType = propertyDefinition.getPropertyType();
-            return new InMemoryColumn(name, PROPERTY_TYPES_MAP.get(propertyType).toString(), true,
-               AVAILABLE_QUERY_OPERATORS.get(propertyType));
+            return new InMemoryColumn(name, PROPERTY_TYPES_MAP.get(propertyType), true, AVAILABLE_QUERY_OPERATORS
+               .get(propertyType));
          }
          return null;
       }
@@ -148,8 +148,8 @@ public class CmisSchema implements Schema
          for (PropertyDefinition<?> propertyDefinition : props)
          {
             org.xcmis.spi.model.PropertyType propertyType = propertyDefinition.getPropertyType();
-            result.add(new InMemoryColumn(propertyDefinition.getQueryName(), PROPERTY_TYPES_MAP.get(propertyType)
-               .toString(), true, AVAILABLE_QUERY_OPERATORS.get(propertyType)));
+            result.add(new InMemoryColumn(propertyDefinition.getQueryName(), PROPERTY_TYPES_MAP.get(propertyType),
+               true, AVAILABLE_QUERY_OPERATORS.get(propertyType)));
          }
 
          return result;
@@ -166,7 +166,7 @@ public class CmisSchema implements Schema
          {
             org.xcmis.spi.model.PropertyType propertyType = propertyDefinition.getPropertyType();
             result.put(propertyDefinition.getQueryName(), new InMemoryColumn(propertyDefinition.getQueryName(),
-               PROPERTY_TYPES_MAP.get(propertyType).toString(), true, AVAILABLE_QUERY_OPERATORS.get(propertyType)));
+               PROPERTY_TYPES_MAP.get(propertyType), true, AVAILABLE_QUERY_OPERATORS.get(propertyType)));
          }
 
          return result;
