@@ -22,6 +22,7 @@ import org.xcmis.search.content.Schema.Column;
 import org.xcmis.search.content.Schema.Table;
 import org.xcmis.search.model.constraint.Operator;
 import org.xcmis.search.model.source.SelectorName;
+import org.xcmis.search.value.PropertyType;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -106,14 +107,14 @@ public class InMemoryTable implements Table
       return name;
    }
 
-   public InMemoryTable withColumn(String name, String type)
+   public InMemoryTable withColumn(String name, PropertyType type)
    {
       List<Column> newColumns = new LinkedList<Column>(columns);
       newColumns.add(new InMemoryColumn(name, type));
       return new InMemoryTable(getName(), newColumns);
    }
 
-   public InMemoryTable withColumn(String name, String type, boolean fullTextSearchable,
+   public InMemoryTable withColumn(String name, PropertyType type, boolean fullTextSearchable,
       Operator[] availableQueryOperators)
    {
       List<Column> newColumns = new LinkedList<Column>(columns);

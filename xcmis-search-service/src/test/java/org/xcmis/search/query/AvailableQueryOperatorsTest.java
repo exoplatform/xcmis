@@ -55,6 +55,7 @@ import org.xcmis.search.query.QueryBuilder.ComparisonBuilder;
 import org.xcmis.search.query.QueryBuilder.ConstraintBuilder;
 import org.xcmis.search.value.CastSystem;
 import org.xcmis.search.value.NameConverter;
+import org.xcmis.search.value.PropertyType;
 import org.xcmis.search.value.SlashSplitter;
 import org.xcmis.search.value.ToStringNameConverter;
 
@@ -66,7 +67,7 @@ import java.util.UUID;
 /**
  * @author <a href="mailto:Sergey.Kabashnyuk@exoplatform.org">Sergey Kabashnyuk</a>
  * @version $Id: exo-jboss-codetemplates.xml 34360 2009-07-22 23:58:59Z ksm $
- *
+ *"String"
  */
 public class AvailableQueryOperatorsTest
 {
@@ -92,29 +93,37 @@ public class AvailableQueryOperatorsTest
       schemaBuilder = InMemorySchema.createBuilder();
 
       schema =
-         schemaBuilder.addTable(TABLE_NAME, "column1")//
-            .addColumn(TABLE_NAME, "booleanColumn", "String", true, new Operator[]{EQUAL_TO})//
-            .addColumn(TABLE_NAME, "idColumn", "String", true, new Operator[]{EQUAL_TO, NOT_EQUAL_TO})//
-            .addColumn(TABLE_NAME, "integerColumn", "String", true, new Operator[]{EQUAL_TO, GREATER_THAN, //
-               GREATER_THAN_OR_EQUAL_TO, LESS_THAN, LESS_THAN_OR_EQUAL_TO, NOT_EQUAL_TO})//
-            .addColumn(TABLE_NAME,
+         schemaBuilder
+            .addTable(TABLE_NAME, "column1")
+            //
+            .addColumn(TABLE_NAME, "booleanColumn", PropertyType.STRING, true, new Operator[]{EQUAL_TO})
+            //
+            .addColumn(TABLE_NAME, "idColumn", PropertyType.STRING, true, new Operator[]{EQUAL_TO, NOT_EQUAL_TO})
+            //
+            .addColumn(TABLE_NAME, "integerColumn", PropertyType.STRING, true, new Operator[]{EQUAL_TO, GREATER_THAN, //
+               GREATER_THAN_OR_EQUAL_TO, LESS_THAN, LESS_THAN_OR_EQUAL_TO, NOT_EQUAL_TO})
+            //
+            .addColumn(
+               TABLE_NAME,
                "dateTimeColumn",
-               "String",
-               true,//
+               PropertyType.STRING,
+               true,
                new Operator[]{EQUAL_TO, GREATER_THAN, GREATER_THAN_OR_EQUAL_TO, LESS_THAN, LESS_THAN_OR_EQUAL_TO,
-                  NOT_EQUAL_TO})//
+                  NOT_EQUAL_TO})
             .addColumn(
                TABLE_NAME,
                "decimalColumn",
-               "String",
+               PropertyType.STRING,
                true,
                new Operator[]{EQUAL_TO, GREATER_THAN, GREATER_THAN_OR_EQUAL_TO, LESS_THAN, LESS_THAN_OR_EQUAL_TO,
-                  NOT_EQUAL_TO})//
-            .addColumn(TABLE_NAME, "htmlColumn", "String", true,
-               new Operator[]{EQUAL_TO, GREATER_THAN, LIKE, NOT_EQUAL_TO})//
-            .addColumn(TABLE_NAME, "stringColumn", "String", true,
-               new Operator[]{EQUAL_TO, GREATER_THAN, LIKE, NOT_EQUAL_TO})//
-            .addColumn(TABLE_NAME, "uriColumn", "String", true, new Operator[]{EQUAL_TO, NOT_EQUAL_TO, LIKE}).build();
+                  NOT_EQUAL_TO})
+            .addColumn(TABLE_NAME, "htmlColumn", PropertyType.STRING, true,
+               new Operator[]{EQUAL_TO, GREATER_THAN, LIKE, NOT_EQUAL_TO})
+            .addColumn(TABLE_NAME, "stringColumn", PropertyType.STRING, true,
+               new Operator[]{EQUAL_TO, GREATER_THAN, LIKE, NOT_EQUAL_TO})
+
+            .addColumn(TABLE_NAME, "uriColumn", PropertyType.STRING, true, new Operator[]{EQUAL_TO, NOT_EQUAL_TO, LIKE})
+            .build();
 
       tempDir = new File(System.getProperty("java.io.tmpdir"), "search-service");
       if (tempDir.exists())

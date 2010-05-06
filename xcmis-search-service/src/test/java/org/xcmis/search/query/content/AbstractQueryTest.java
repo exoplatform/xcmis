@@ -162,9 +162,9 @@ public abstract class AbstractQueryTest
       Builder schemaBuilder = InMemorySchema.createBuilder();
       schema =
          schemaBuilder.addTable(rootNodeType, propertyName1, propertyName2).addTable(testNodeType,
-            new String[]{propertyName4}).addColumn(testNodeType, propertyName1, "String", true, Operator.ALL)
-            .addColumn(testNodeType, propertyName2, "String", true, Operator.ALL)
-            .addTable(testNodeType2, propertyName4).build();
+            new String[]{propertyName4})
+            .addColumn(testNodeType, propertyName1, PropertyType.STRING, true, Operator.ALL).addColumn(testNodeType,
+               propertyName2, PropertyType.STRING, true, Operator.ALL).addTable(testNodeType2, propertyName4).build();
       qf = new QueryBuilder(mock(CastSystem.class));
 
       testRootNode =

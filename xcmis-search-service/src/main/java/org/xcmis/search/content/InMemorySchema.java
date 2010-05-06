@@ -22,6 +22,7 @@ import org.apache.commons.lang.Validate;
 import org.xcmis.search.model.Query;
 import org.xcmis.search.model.constraint.Operator;
 import org.xcmis.search.model.source.SelectorName;
+import org.xcmis.search.value.PropertyType;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -80,7 +81,7 @@ public class InMemorySchema implements Schema
          {
             Validate.notEmpty(columnName, "columnName[" + (i++) + "] may not be empty");;
             // TODO default type
-            columns.add(new InMemoryColumn(columnName, "String"));
+            columns.add(new InMemoryColumn(columnName, PropertyType.STRING));
          }
          InMemoryTable table = new InMemoryTable(new SelectorName(name), columns);
          tables.put(table.getName(), table);
@@ -100,7 +101,7 @@ public class InMemorySchema implements Schema
        *           the types for the columns
        * @return this builder, for convenience in method chaining; never null
        */
-      public Builder addTable(String name, String[] columnNames, String[] types)
+      public Builder addTable(String name, String[] columnNames, PropertyType[] types)
       {
          Validate.notEmpty(name, " name may not be empty");
          Validate.notEmpty(columnNames, " columnNames may not be empty");
@@ -132,7 +133,7 @@ public class InMemorySchema implements Schema
        *           the type for the column
        * @return this builder, for convenience in method chaining; never null
        */
-      public Builder addColumn(String tableName, String columnName, String type)
+      public Builder addColumn(String tableName, String columnName, PropertyType type)
       {
          Validate.notEmpty(tableName, " tableName may not be empty");
          Validate.notEmpty(columnName, " columnName may not be empty");
@@ -157,7 +158,7 @@ public class InMemorySchema implements Schema
        *           if not
        * @return this builder, for convenience in method chaining; never null
        */
-      public Builder addColumn(String tableName, String columnName, String type, boolean fullTextSearchable,
+      public Builder addColumn(String tableName, String columnName, PropertyType type, boolean fullTextSearchable,
          Operator[] availableQueryOperators)
       {
          Validate.notEmpty(tableName, " tableName may not be empty");
@@ -200,14 +201,14 @@ public class InMemorySchema implements Schema
          {
             List<Column> columns = new ArrayList<Column>();
             // TODO default type
-            columns.add(new InMemoryColumn(columnName, "String", true, Operator.ALL));
+            columns.add(new InMemoryColumn(columnName, PropertyType.STRING, true, Operator.ALL));
             table = new InMemoryTable(selector, columns);
          }
          else
          {
             Column column = existing.getColumn(columnName);
             // TODO default type
-            String type = "String";
+            PropertyType type = PropertyType.STRING;
             if (column != null)
             {
                type = column.getPropertyType();
