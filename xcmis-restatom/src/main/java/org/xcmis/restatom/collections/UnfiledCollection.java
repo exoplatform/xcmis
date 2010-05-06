@@ -77,7 +77,6 @@ public class UnfiledCollection extends CmisObjectCollection
    /**
     * {@inheritDoc}
     */
-   @Override
    public String getTitle(RequestContext request)
    {
       return "Unfiled collection";
