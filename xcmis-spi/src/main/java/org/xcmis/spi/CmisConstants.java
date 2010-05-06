@@ -47,8 +47,14 @@ public interface CmisConstants
 
    String RELATIONSHIP = "cmis:relationship";
 
-   // TODO need have configurable ?
-   int MAX_ITEMS = 10;
+   /* Paging */
+   // int MAX_ITEMS = 10;
+   int MAX_ITEMS = Integer.MAX_VALUE;
+
+   int SKIP_COUNT = 0;
+
+   /* Default depth parameter */
+   int DEPTH = -1;
 
    /* 2^16 */
    int MAX_STRING_LENGTH = 65536;
@@ -122,9 +128,5 @@ public interface CmisConstants
    String ALLOWED_CHILD_OBJECT_TYPE_IDS = "cmis:allowedChildObjectTypeIds";
 
    String CHARSET = "charset";
-
-   Integer SKIP_COUNT = Integer.valueOf(0);
-
-   Integer DEPTH = Integer.valueOf(1);
 
 }
