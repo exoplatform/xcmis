@@ -41,6 +41,7 @@ public class RenditionsTest extends TestCase
    @Override
    public void setUp() throws Exception
    {
+      super.setUp();
    }
 
    public void testPDF()
@@ -68,7 +69,7 @@ public class RenditionsTest extends TestCase
       {
          InputStream jpg = getClass().getResource("/" + jpgname).openStream();
          ImageRenditionProvider prov = new ImageRenditionProvider();
-         BaseContentStream stream = new BaseContentStream(jpg, jpgname, new MimeType("image","jpg"));
+         BaseContentStream stream = new BaseContentStream(jpg, jpgname, new MimeType("image", "jpg"));
          RenditionContentStream out = prov.getRenditionStream(stream);
          assertNotNull(out);
          assertNotNull(out.getStream());
