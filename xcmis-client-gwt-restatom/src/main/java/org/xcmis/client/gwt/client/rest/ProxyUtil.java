@@ -32,20 +32,26 @@ import com.google.gwt.user.client.Window.Location;
 public class ProxyUtil
 {
 
+   /**
+    * @return {@link String} proxy service context
+    */
    private static native String getProxyServiceContext() /*-{
-          return $wnd.proxyServiceContext;
-       }-*/;
+        return $wnd.proxyServiceContext;
+     }-*/;
 
+   /**
+    * @return {@link String} current host
+    */
    private static String getCurrentHost()
    {
-//      String moduleBaseURL = GWT.getModuleBaseURL();
-//      String currentHost = moduleBaseURL.substring(0, moduleBaseURL.indexOf("//") + 2);
-//      moduleBaseURL = moduleBaseURL.substring(moduleBaseURL.indexOf("//") + 2);
-//      currentHost += moduleBaseURL.substring(0, moduleBaseURL.indexOf("/"));
       String currentHost = Location.getProtocol() + "//" + Location.getHost();
       return currentHost;
    }
 
+   /**
+    * @param url url
+    * @return {@link String} full url
+    */
    public static String getCheckedURL(String url)
    {
       String proxyServiceContext = getProxyServiceContext();
@@ -60,18 +66,11 @@ public class ProxyUtil
       }
 
       String currentHost = getCurrentHost();
-      System.out.println("current host [" + currentHost + "]");
-
       if (url.startsWith(currentHost))
       {
          return url;
       }
-      
-      
-
-      String proxyURL = proxyServiceContext + "?url=" + URL.encodeComponent(url);
-      System.out.println("proxy url: " + proxyURL);
-      return proxyURL;
+      return proxyServiceContext + "?url=" + URL.encodeComponent(url);
    }
 
 }

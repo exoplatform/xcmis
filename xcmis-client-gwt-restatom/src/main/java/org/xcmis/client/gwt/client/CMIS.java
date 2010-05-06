@@ -781,6 +781,11 @@ public class CMIS
    public static final String CMIS_REPOSITORY_NAME = CMIS_PREFIX + "repositoryName";
 
    /**
+    * CMIS resolution for date time property definition.
+    */
+   public static final String CMIS_RESOLUTION = CMIS_PREFIX + "resolution";
+   
+   /**
     * CMIS repository relationship.
     */
    public static final String CMIS_REPOSITORY_RELATIONSHIP = CMIS_PREFIX + "repositoryRelationship";
