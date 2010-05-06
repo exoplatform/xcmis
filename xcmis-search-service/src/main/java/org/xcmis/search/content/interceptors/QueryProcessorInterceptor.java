@@ -29,7 +29,7 @@ import org.xcmis.search.model.constraint.Constraint;
 import org.xcmis.search.model.ordering.Ordering;
 import org.xcmis.search.query.QueryExecutionContext;
 import org.xcmis.search.query.QueryExecutionExceptions;
-import org.xcmis.search.query.QueryResults.Statistics;
+import org.xcmis.search.query.Statistics;
 import org.xcmis.search.query.plan.Optimizer;
 import org.xcmis.search.query.plan.QueryExecutionPlan;
 import org.xcmis.search.query.plan.QueryExecutionPlaner;
@@ -39,7 +39,6 @@ import org.xcmis.search.query.plan.QueryExecutionPlan.ProjectExecutionPlan;
 import org.xcmis.search.query.plan.QueryExecutionPlan.SelectorExecutionPlan;
 import org.xcmis.search.query.plan.QueryExecutionPlan.SortExecutionPlan;
 import org.xcmis.search.query.plan.QueryExecutionPlan.WhereExecutionPlan;
-import org.xcmis.search.query.request.QueryProcessor;
 import org.xcmis.search.result.ScoredRow;
 
 import java.util.ArrayList;
