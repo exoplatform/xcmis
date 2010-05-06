@@ -28,6 +28,7 @@ import org.xcmis.sp.jcr.exo.index.IndexListener.ContentEntryAdapter;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.ObjectData;
+import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.Storage;
 
 import java.util.ArrayList;
@@ -83,7 +84,15 @@ public class CmisContentReader extends ContentReaderInterceptor
    public Object visitGetContentEntryCommand(InvocationContext ctx, GetContentEntryCommand command) throws Throwable
    {
 
-      ObjectData entry = storage.getObjectById(command.getEntryUuid());
+      ObjectData entry;
+      try
+      {
+         entry = storage.getObjectById(command.getEntryUuid());
+      }
+      catch (ObjectNotFoundException e)
+      {
+         return null;
+      }
       return contentEntryAdapter.createEntry(entry);
    }
 
