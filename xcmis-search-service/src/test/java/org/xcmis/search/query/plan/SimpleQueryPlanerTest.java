@@ -85,14 +85,6 @@ public class SimpleQueryPlanerTest
       print = false;
    }
 
-   protected void print(QueryExecutionPlan2 plan)
-   {
-      if (print)
-      {
-         System.out.println(plan);
-      }
-   }
-
    protected SelectorName selector(String name)
    {
       return new SelectorName(name);

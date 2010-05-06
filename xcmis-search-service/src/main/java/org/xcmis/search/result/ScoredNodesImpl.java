@@ -42,13 +42,6 @@ public class ScoredNodesImpl implements ScoredRow
 
    private final float score;
 
-   public ScoredNodesImpl(float score)
-   {
-      super();
-      this.nodesMap = new LinkedHashMap<String, String>();
-      this.score = score;
-   }
-
    /**
     * @param nodesMap
     * @param score
