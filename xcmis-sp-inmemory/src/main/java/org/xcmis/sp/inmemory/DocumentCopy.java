@@ -98,17 +98,15 @@ class DocumentCopy extends DocumentDataImpl
          entry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue(id));
          entry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, new StringValue(""));
       }
-
-      // TODO : copy the other properties from source.
-
-      ContentStream contentStream = source.getContentStream();
-
       byte[] content;
-
-      if (contentStream != null)
+      // TODO : copy the other properties from source.
+      try
       {
-         try
+         ContentStream contentStream = source.getContentStream();
+
+         if (contentStream != null)
          {
+
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             InputStream in = contentStream.getStream();
             if (in != null)
@@ -138,16 +136,15 @@ class DocumentCopy extends DocumentDataImpl
                content = EMPTY_CONTENT;
             }
          }
-         catch (IOException e)
+         else
          {
-            throw new CmisRuntimeException("Unable add content for document. " + e.getMessage(), e);
+            content = EMPTY_CONTENT;
          }
       }
-      else
+      catch (IOException e)
       {
-         content = EMPTY_CONTENT;
+         throw new CmisRuntimeException("Unable add content for document. " + e.getMessage(), e);
       }
-
       // check is max memory size reached
       storage.validateMemSize(content);
 
