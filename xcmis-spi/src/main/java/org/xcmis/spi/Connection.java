@@ -1478,9 +1478,10 @@ public abstract class Connection
     *         <code>objectId</code> does not exist
     * @throws ConstraintException if the object specified by objectId does NOT
     *         have a content stream or rendition stream
+    * @throws IOException if an I/O error occurs
     */
    public ContentStream getContentStream(String objectId, String streamId, long offset, long length)
-      throws ObjectNotFoundException, ConstraintException
+      throws ObjectNotFoundException, ConstraintException, IOException
    {
       checkConnection();
 

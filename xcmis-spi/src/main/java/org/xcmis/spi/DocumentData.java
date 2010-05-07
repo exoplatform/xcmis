@@ -21,6 +21,8 @@ package org.xcmis.spi;
 
 import org.xcmis.spi.model.TypeDefinition;
 
+import java.io.IOException;
+
 /**
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
@@ -95,10 +97,10 @@ public interface DocumentData extends ObjectData
 
    /**
     * Get document content stream.
-    *
+    * @throws IOException if an I/O error occurs
     * @return content stream or <code>null</code> if document has not content
     */
-   ContentStream getContentStream();
+   ContentStream getContentStream() throws IOException;
 
    /**
     * Set content stream to document. If <code>contentStream</code> is
