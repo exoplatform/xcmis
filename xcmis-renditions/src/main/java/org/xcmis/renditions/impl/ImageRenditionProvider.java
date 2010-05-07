@@ -42,9 +42,6 @@ public class ImageRenditionProvider implements RenditionProvider
    /** The String[] SUPPORTED_MIEDIA_TYPES. */
    private static final String[] SUPPORTED_MEDIA_TYPES = ImageIO.getReaderMIMETypes();
 
-   /** Can store renditions. */
-   private static final boolean CAN_STORE_RENDITIONS = true;
-
    // TODO configurable maxHeigth & maxWidth
    /** The max height. */
    private int maxHeight = 100;
@@ -87,13 +84,4 @@ public class ImageRenditionProvider implements RenditionProvider
    {
       return SUPPORTED_MEDIA_TYPES;
    }
-
-   /**
-    * {@inheritDoc}
-    */
-   public boolean canStoreRendition()
-   {
-      return CAN_STORE_RENDITIONS;
-   }
-
 }

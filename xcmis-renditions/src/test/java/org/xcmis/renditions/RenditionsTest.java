@@ -44,24 +44,24 @@ public class RenditionsTest extends TestCase
       super.setUp();
    }
 
-   public void testPDF()
-   {
-      try
-      {
-         InputStream pdf = Thread.currentThread().getContextClassLoader().getResourceAsStream(pdfname);
-         PDFDocumentRenditionProvider prov = new PDFDocumentRenditionProvider();
-         BaseContentStream stream = new BaseContentStream(pdf, pdfname, new MimeType("application", "pdf"));
-         RenditionContentStream out = prov.getRenditionStream(stream);
-         assertNotNull(out);
-         assertNotNull(out.getStream());
-         assertEquals(kind, out.getKind());
-         pdf.close();
-      }
-      catch (java.io.IOException ex)
-      {
-         fail();
-      }
-   }
+//   public void testPDF()
+//   {
+//      try
+//      {
+//         InputStream pdf = Thread.currentThread().getContextClassLoader().getResourceAsStream(pdfname);
+//         PDFDocumentRenditionProvider prov = new PDFDocumentRenditionProvider();
+//         BaseContentStream stream = new BaseContentStream(pdf, pdfname, new MimeType("application", "pdf"));
+//         RenditionContentStream out = prov.getRenditionStream(stream);
+//         assertNotNull(out);
+//         assertNotNull(out.getStream());
+//         assertEquals(kind, out.getKind());
+//         pdf.close();
+//      }
+//      catch (java.io.IOException ex)
+//      {
+//         fail();
+//      }
+//   }
 
    public void testJPG()
    {
