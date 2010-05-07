@@ -26,6 +26,7 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.picocontainer.Startable;
 import org.xcmis.spi.CmisRegistry;
+import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.StorageProvider;
 
 import java.util.Iterator;
@@ -68,26 +69,17 @@ public class ExoContainerCmisRegistry extends CmisRegistry implements Startable
 
       @SuppressWarnings("unchecked")
       List<StorageProvider> sps = container.getComponentInstancesOfType(StorageProvider.class);
+      RenditionManager manager = RenditionManager.getInstance();
+      manager.addRenditionProviders(providers);
 
       for (StorageProvider sp : sps)
       {
-         for (String prov : providers)
-         {
-            try
-            {
-               sp.addRenditionProvider(Class.forName(prov).newInstance());
-            }
-            catch (Exception e)
-            {
-               LOG.error("Cannot instatiate rendition provider instance: ", e);
-            }
-         }
+
          for (String id : sp.getStorageIDs())
          {
             addStorage(id, sp);
          }
       }
-
       setInstance(this);
    }
 
