@@ -94,6 +94,8 @@ public class AtomCmisService implements ResourceContainer
    /** The provider. */
    protected ProviderImpl provider;
 
+   /** The storage provider. */
+
    /**
     * Instantiates a new atom cmis service.
     */
@@ -103,10 +105,8 @@ public class AtomCmisService implements ResourceContainer
       provider.init(AbderaFactory.getInstance(), new HashMap<String, String>());
    }
 
-   @SuppressWarnings("unchecked")
    @PUT
-   //   @Path("{repositoryId}/addacl/{objectId}")
-   @Path("{repositoryId}/addacl/{objectId:.+}")
+   @Path("{repositoryId}/addacl/{objectId}")
    @Produces("application/cmisacl+xml")
    public Response addACL(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId,
       @PathParam("objectId") String objectId)
@@ -153,8 +153,7 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @POST
-   // @Path("{repositoryId}/policies/{objectId}")
-   @Path("{repositoryId}/policies/{objectId:.+}")
+   @Path("{repositoryId}/policies/{objectId}")
    @Produces("application/atom+xml;type=entry")
    public Response applyPolicy(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
    {
@@ -170,8 +169,7 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @POST
-   // @Path("{repositoryId}/children/{folderId}")
-   @Path("{repositoryId}/children/{folderId:.+}")
+   @Path("{repositoryId}/children/{folderId}")
    @Produces("application/atom+xml;type=entry")
    public Response createChild(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
    {
@@ -179,8 +177,7 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @POST
-   // @Path("{repositoryId}/object/{folderId}")
-   @Path("{repositoryId}/object/{folderId:.+}")
+   @Path("{repositoryId}/object/{folderId}")
    @Produces("application/atom+xml;type=entry")
    public Response createChildObj(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId)
@@ -190,8 +187,7 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @POST
-   // @Path("{repositoryId}/relationships/{objectId}")
-   @Path("{repositoryId}/relationships/{objectId:.+}")
+   @Path("{repositoryId}/relationships/{objectId}")
    @Produces("application/atom+xml;type=entry")
    public Response createRelationship(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId)
@@ -200,8 +196,7 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @DELETE
-   // @Path("{repositoryId}/file/{objectId}")
-   @Path("{repositoryId}/file/{objectId:.+}")
+   @Path("{repositoryId}/file/{objectId}")
    public Response deleteContentStream(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId)
    {
@@ -211,16 +206,14 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @DELETE
-   // @Path("{repositoryId}/object/{objectId}")
-   @Path("{repositoryId}/object/{objectId:.+}")
+   @Path("{repositoryId}/object/{objectId}")
    public Response deleteObject(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
    {
       return deleteItem(repositoryId, httpRequest);
    }
 
    @DELETE
-   // @Path("{repositoryId}/foldertree/{folderId}")
-   @Path("{repositoryId}/foldertree/{folderId:.+}")
+   @Path("{repositoryId}/foldertree/{folderId}")
    public Response deleteFolderTree(@PathParam("repositoryId") String repositoryId,
       @PathParam("folderId") String folderId, @QueryParam("unfileObject") String unfileNonfolderObjects,
       @DefaultValue("false") @QueryParam("continueOnFailure") boolean continueOnFailure)
@@ -229,8 +222,7 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @DELETE
-   // @Path("{repositoryId}/descendants/{folderId}")
-   @Path("{repositoryId}/descendants/{folderId:.+}")
+   @Path("{repositoryId}/descendants/{folderId}")
    public Response deleteDescendants(@PathParam("repositoryId") String repositoryId,
       @PathParam("folderId") String folderId, @QueryParam("unfileObject") String unfileNonfolderObjects,
       @DefaultValue("false") @QueryParam("continueOnFailure") boolean continueOnFailure)
@@ -250,7 +242,6 @@ public class AtomCmisService implements ResourceContainer
       Connection conn = null;
       try
       {
-         //         conn = storageProvider.getConnection(repositoryId);
          conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          Boolean deleteAllVersions = true; // TODO
@@ -292,8 +283,7 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @GET
-   // @Path("{repositoryId}/objacl/{objectId}")
-   @Path("{repositoryId}/objacl/{objectId:.+}")
+   @Path("{repositoryId}/objacl/{objectId}")
    @Produces("application/cmisacl+xml")
    public Response getACL(@PathParam("repositoryId") String repositoryId, @PathParam("objectId") String objectId,
       @DefaultValue("true") @QueryParam("onlyBasicPermissions") boolean onlyBasicPermissions)
@@ -301,7 +291,6 @@ public class AtomCmisService implements ResourceContainer
       Connection conn = null;
       try
       {
-         //         conn = storageProvider.getConnection(repositoryId);
          conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          List<AccessControlEntry> list = conn.getACL(objectId, onlyBasicPermissions);
@@ -329,8 +318,7 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @GET
-   // @Path("{repositoryId}/allowableactions/{objectId}")
-   @Path("{repositoryId}/allowableactions/{objectId:.+}")
+   @Path("{repositoryId}/allowableactions/{objectId}")
    @Produces("application/atom+xml;type=allowableActions")
    public Response getAllowableActions(@PathParam("repositoryId") String repositoryId,
       @PathParam("objectId") String objectId)
@@ -338,7 +326,6 @@ public class AtomCmisService implements ResourceContainer
       Connection conn = null;
       try
       {
-         //         conn = storageProvider.getConnection(repositoryId);
          conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          AllowableActions result = conn.getAllowableActions(objectId);
@@ -388,7 +375,8 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @GET
-   @Path("{repositoryId}/versions/{versionSeriesId}")
+   // @Path("{repositoryId}/versions/{versionSeriesId}")
+   @Path("{repositoryId}/versions/{versionSeriesId:.+}")
    @Produces("application/atom+xml;type=entry")
    public Response getAllVersions(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId)
@@ -397,8 +385,7 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @GET
-   // @Path("{repositoryId}/policies/{objectId}")
-   @Path("{repositoryId}/policies/{objectId:.+}")
+   @Path("{repositoryId}/policies/{objectId}")
    public Response getAppliedPolicies(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId)
    {
@@ -413,8 +400,7 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @GET
-   // @Path("{repositoryId}/children/{folderId}")
-   @Path("{repositoryId}/children/{folderId:.+}")
+   @Path("{repositoryId}/children/{folderId}")
    @Produces("application/atom+xml;type=feed")
    public Response getChildren(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
    {
@@ -422,8 +408,7 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @GET
-   // @Path("{repositoryId}/file/{documentId}")
-   @Path("{repositoryId}/file/{documentId:.+}")
+   @Path("{repositoryId}/file/{documentId}")
    public Response getContentStream(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId)
    {
@@ -438,8 +423,7 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @GET
-   // @Path("{repositoryId}/descendants/{folderId}")
-   @Path("{repositoryId}/descendants/{folderId:.+}")
+   @Path("{repositoryId}/descendants/{folderId}")
    @Produces("application/cmistree+xml")
    public Response getDescendants(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId)
@@ -448,8 +432,7 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @GET
-   // @Path("{repositoryId}/foldertree/{folderId}")
-   @Path("{repositoryId}/foldertree/{folderId:.+}")
+   @Path("{repositoryId}/foldertree/{folderId}")
    @Produces("application/atom+xml;type=feed")
    public Response getFolderTree(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
    {
@@ -457,8 +440,7 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @GET
-   // @Path("{repositoryId}/object/{objectId}")
-   @Path("{repositoryId}/object/{objectId:.+}")
+   @Path("{repositoryId}/object/{objectId}")
    @Produces("application/atom+xml;type=entry")
    public Response getObjectById(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
    {
@@ -475,8 +457,7 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @GET
-   //   @Path("{repositoryId}/parents/{objectId}")
-   @Path("{repositoryId}/parents/{objectId:.+}")
+   @Path("{repositoryId}/parents/{objectId}")
    public Response getObjectParents(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId)
    {
@@ -484,8 +465,7 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @GET
-   // @Path("{repositoryId}/relationships/{objectId}")
-   @Path("{repositoryId}/relationships/{objectId:.+}")
+   @Path("{repositoryId}/relationships/{objectId}")
    @Produces("application/atom+xml;type=entry")
    public Response getRelationships(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId)
@@ -494,8 +474,7 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @GET
-   // @Path("{repositoryId}/alternate/{documentId}/{streamId}")
-   @Path("{repositoryId}/alternate/{documentId:.+}/{streamId}")
+   @Path("{repositoryId}/alternate/{documentId}/{streamId}")
    public Response getRendition(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId, @PathParam("documentId") String documentId)
    {
@@ -579,16 +558,14 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @DELETE
-   // @Path("{repositoryId}/policies/{objectId}")
-   @Path("{repositoryId}/policies/{objectId:.+}")
+   @Path("{repositoryId}/policies/{objectId}")
    public Response removePolicy(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
    {
       return deleteItem(repositoryId, httpRequest);
    }
 
    @PUT
-   // @Path("{repositoryId}/file/{objectId}")
-   @Path("{repositoryId}/file/{objectId:.+}")
+   @Path("{repositoryId}/file/{objectId}")
    public Response setContentStream(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId)
    {
@@ -601,8 +578,7 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @POST
-   // @Path("{repositoryId}/file/{objectId}")
-   @Path("{repositoryId}/file/{objectId:.+}")
+   @Path("{repositoryId}/file/{objectId}")
    @Consumes("multipart/form-data")
    @SuppressWarnings("unchecked")
    public Response setContentStream(@Context HttpServletRequest httpRequest,
@@ -651,8 +627,7 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @PUT
-   // @Path("{repositoryId}/object/{objectId}")
-   @Path("{repositoryId}/object/{objectId:.+}")
+   @Path("{repositoryId}/object/{objectId}")
    @Produces("application/atom+xml;type=entry")
    public Response updateProperties(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId)
@@ -700,7 +675,6 @@ public class AtomCmisService implements ResourceContainer
       Connection conn = null;
       try
       {
-         //         conn = storageProvider.getConnection(repositoryId);
          conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          repoInfo = conn.getStorage().getRepositoryInfo();

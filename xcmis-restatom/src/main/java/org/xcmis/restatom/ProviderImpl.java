@@ -108,7 +108,7 @@ public class ProviderImpl extends AbstractProvider
          "repoid", //
          "objectid");
 
-      resolver.setPattern("/cmisatom/([^/]+?)/objectbypath(.?)*", //
+      resolver.setPattern("/cmisatom/([^/]+?)/objectbypath(/)?(\\??.*)?", //
          TargetType.TYPE_ENTRY, //
          "repoid");
 
@@ -162,7 +162,7 @@ public class ProviderImpl extends AbstractProvider
          TargetType.TYPE_COLLECTION, //
          "repoid", //
          "slash"); // Slash.
-      
+
       SimpleWorkspaceInfo wInfo = new SimpleWorkspaceInfo();
       //      wInfo.addCollection(new FolderChildrenCollection(storageProvider));
       //      wInfo.addCollection(new ParentsCollection(storageProvider));
