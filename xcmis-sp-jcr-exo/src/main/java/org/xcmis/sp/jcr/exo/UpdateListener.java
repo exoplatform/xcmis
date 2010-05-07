@@ -27,6 +27,7 @@ import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.RenditionContentStream;
+import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.RenditionProvider;
 import org.xcmis.spi.utils.MimeType;
 
@@ -46,7 +47,7 @@ public class UpdateListener implements EventListener
    /** Logger. */
    private static final Log LOG = ExoLogger.getLogger(UpdateListener.class.getName());
 
-   Map<MimeType, RenditionProvider> renditionProviders;
+   RenditionManager renditionManager;
 
    private final String workspace;
 
@@ -63,11 +64,11 @@ public class UpdateListener implements EventListener
     * @param workspace the workspace
     * @param renditionProviders the rendition providers
     */
-   public UpdateListener(Repository repository, String workspace, Map<MimeType, RenditionProvider> renditionProviders)
+   public UpdateListener(Repository repository, String workspace, RenditionManager renditionManager)
    {
       this.repository = repository;
       this.workspace = workspace;
-      this.renditionProviders = renditionProviders;
+      this.renditionManager = renditionManager;
    }
 
    /**
@@ -120,33 +121,29 @@ public class UpdateListener implements EventListener
                MimeType mimeType = MimeType.fromString(contentNode.getProperty(JcrCMIS.JCR_MIMETYPE).getString());
                if (contentNode.hasProperty(JcrCMIS.JCR_ENCODING))
                {
-                  mimeType.getParameters().put(CmisConstants.CHARSET, contentNode.getProperty(JcrCMIS.JCR_ENCODING).getString());
+                  mimeType.getParameters().put(CmisConstants.CHARSET,
+                     contentNode.getProperty(JcrCMIS.JCR_ENCODING).getString());
                }
 
                ContentStream content = new BaseContentStream(fileContent.getStream(), length, null, mimeType);
 
                int count = 0;
-               for (Map.Entry<MimeType, RenditionProvider> e : renditionProviders.entrySet())
+
+               RenditionContentStream renditionContentStream =
+                  (RenditionContentStream)renditionManager.getStream(content, content.getMediaType());
+               if (renditionContentStream != null)
                {
-                  if (e.getKey().match(content.getMediaType()))
-                  {
-                     RenditionProvider renditionProvider = e.getValue();
-                     if (renditionProvider.canStoreRendition())
-                     {
-                        RenditionContentStream renditionContentStream = renditionProvider.getRenditionStream(content);
-                        String id = IdGenerator.generate();
-                        Node rendition = node.addNode(id, JcrCMIS.CMIS_NT_RENDITION);
-                        rendition.setProperty(JcrCMIS.CMIS_RENDITION_STREAM, renditionContentStream.getStream());
-                        rendition.setProperty(JcrCMIS.CMIS_RENDITION_MIME_TYPE, renditionContentStream.getMediaType()
-                           .getBaseType());
-                        rendition.setProperty(JcrCMIS.CMIS_RENDITION_ENCODING, renditionContentStream.getMediaType()
-                           .getParameter(CmisConstants.CHARSET));
-                        rendition.setProperty(JcrCMIS.CMIS_RENDITION_KIND, renditionContentStream.getKind());
-                        rendition.setProperty(JcrCMIS.CMIS_RENDITION_HEIGHT, renditionContentStream.getHeight());
-                        rendition.setProperty(JcrCMIS.CMIS_RENDITION_WIDTH, renditionContentStream.getWidth());
-                        count++;
-                     }
-                  }
+                  String id = IdGenerator.generate();
+                  Node rendition = node.addNode(id, JcrCMIS.CMIS_NT_RENDITION);
+                  rendition.setProperty(JcrCMIS.CMIS_RENDITION_STREAM, renditionContentStream.getStream());
+                  rendition.setProperty(JcrCMIS.CMIS_RENDITION_MIME_TYPE, renditionContentStream.getMediaType()
+                     .getBaseType());
+                  rendition.setProperty(JcrCMIS.CMIS_RENDITION_ENCODING, renditionContentStream.getMediaType()
+                     .getParameter(CmisConstants.CHARSET));
+                  rendition.setProperty(JcrCMIS.CMIS_RENDITION_KIND, renditionContentStream.getKind());
+                  rendition.setProperty(JcrCMIS.CMIS_RENDITION_HEIGHT, renditionContentStream.getHeight());
+                  rendition.setProperty(JcrCMIS.CMIS_RENDITION_WIDTH, renditionContentStream.getWidth());
+                  count++;
                   if (count > 0)
                   {
                      node.save();

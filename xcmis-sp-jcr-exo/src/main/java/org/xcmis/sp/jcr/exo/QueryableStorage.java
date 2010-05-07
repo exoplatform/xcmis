@@ -32,6 +32,7 @@ import org.xcmis.spi.FolderData;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.ObjectData;
+import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.Storage;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.query.Query;
@@ -82,10 +83,10 @@ public class QueryableStorage extends StorageImpl
     * Constructor.
     * @param session Session
     * @param configuration StorageConfiguration
-    * @param renditionManager RenditionManagerImpl
+    * @param renditionManager RenditionManager
     * @param searchService the search service
     */
-   public QueryableStorage(Session session, StorageConfiguration configuration, RenditionManagerImpl renditionManager,
+   public QueryableStorage(Session session, StorageConfiguration configuration, RenditionManager renditionManager,
       SearchService searchService)
    {
       super(session, configuration, renditionManager);

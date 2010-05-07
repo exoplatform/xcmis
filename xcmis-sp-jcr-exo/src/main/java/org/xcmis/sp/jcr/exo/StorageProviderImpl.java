@@ -41,6 +41,8 @@ import org.xcmis.sp.jcr.exo.index.CmisContentReader;
 import org.xcmis.sp.jcr.exo.index.CmisSchema;
 import org.xcmis.sp.jcr.exo.index.CmisSchemaTableResolver;
 import org.xcmis.sp.jcr.exo.index.IndexListener;
+import org.xcmis.spi.CmisRegistry;
+import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.RenditionProvider;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
@@ -59,6 +61,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.jcr.Credentials;
 import javax.jcr.Node;
@@ -112,34 +115,11 @@ public class StorageProviderImpl implements StorageProvider, Startable
 
    private final DocumentReaderService documentReaderService;
 
+   private RenditionManager renditionManager;
+
    private final Map<String, StorageConfiguration> storageConfigs = new HashMap<String, StorageConfiguration>();
 
    private final Map<String, SearchService> searchServices = new HashMap<String, SearchService>();
-
-   Map<MimeType, RenditionProvider> renditionProviders =
-      new TreeMap<MimeType, RenditionProvider>(new Comparator<MimeType>()
-      {
-         public int compare(MimeType m1, MimeType m2)
-         {
-            if (m1.getType().equals(CmisConstants.WILDCARD) && !m2.getType().equals(CmisConstants.WILDCARD))
-            {
-               return 1;
-            }
-            if (!m1.getType().equals(CmisConstants.WILDCARD) && m2.getType().equals(CmisConstants.WILDCARD))
-            {
-               return -1;
-            }
-            if (m1.getSubType().equals(CmisConstants.WILDCARD) && !m2.getSubType().equals(CmisConstants.WILDCARD))
-            {
-               return 1;
-            }
-            if (!m1.getSubType().equals(CmisConstants.WILDCARD) && m2.getSubType().equals(CmisConstants.WILDCARD))
-            {
-               return -1;
-            }
-            return m1.toString().compareToIgnoreCase(m2.toString());
-         }
-      });
 
    public StorageProviderImpl(RepositoryService repositoryService, InitParams initParams,
       DocumentReaderService documentReaderService)
@@ -189,7 +169,6 @@ public class StorageProviderImpl implements StorageProvider, Startable
       {
          ManageableRepository repository = repositoryService.getRepository(repositoryId);
          Session session = repository.login(ws);
-         RenditionManagerImpl renditionManager = new RenditionManagerImpl(renditionProviders);
 
          SearchService searchService = getSearchService(id);
          Storage storage = new QueryableStorage(session, configuration, renditionManager, searchService);
@@ -296,33 +275,44 @@ public class StorageProviderImpl implements StorageProvider, Startable
             }
 
             session.save();
+            this.renditionManager = RenditionManager.getInstance();
 
-            Workspace workspace = session.getWorkspace();
+            boolean isPersistRenditions = false;
 
-            try
+            if (cmisRepositoryConfiguration.getProperties() != null
+               && cmisRepositoryConfiguration.getProperties().get("exo.cmis.renditions.persistent") != null)
             {
-               EventListenerIterator it = workspace.getObservationManager().getRegisteredEventListeners();
-               boolean exist = false;
-               while (it.hasNext())
+               isPersistRenditions =
+                  (Boolean)cmisRepositoryConfiguration.getProperties().get("exo.cmis.renditions.persistent");
+            }
+            if (isPersistRenditions)
+            {
+               Workspace workspace = session.getWorkspace();
+               try
                {
-                  EventListener one = it.nextEventListener();
-                  if (one.getClass() == UpdateListener.class)
+                  EventListenerIterator it = workspace.getObservationManager().getRegisteredEventListeners();
+                  boolean exist = false;
+                  while (it.hasNext())
                   {
-                     exist = true;
+                     EventListener one = it.nextEventListener();
+                     if (one.getClass() == UpdateListener.class)
+                     {
+                        exist = true;
+                     }
+                  }
+
+                  if (!exist)
+                  {
+                     workspace.getObservationManager().addEventListener(
+                        new UpdateListener(repository, cmisRepositoryConfiguration.getWorkspace(), renditionManager),
+                        Event.NODE_ADDED | Event.PROPERTY_ADDED | Event.PROPERTY_CHANGED, "/", true, null,
+                        new String[]{JcrCMIS.NT_FILE, JcrCMIS.NT_RESOURCE}, false);
                   }
                }
-
-               if (!exist)
+               catch (Exception ex)
                {
-                  workspace.getObservationManager().addEventListener(
-                     new UpdateListener(repository, cmisRepositoryConfiguration.getWorkspace(), renditionProviders),
-                     Event.NODE_ADDED | Event.PROPERTY_ADDED | Event.PROPERTY_CHANGED, "/", true, null,
-                     new String[]{JcrCMIS.NT_FILE, JcrCMIS.NT_RESOURCE}, false);
+                  LOG.error("Unable to create event listener, " + ex.getMessage());
                }
-            }
-            catch (Exception ex)
-            {
-               LOG.error("Unable to create event listener, " + ex.getMessage());
             }
             //prepare search service
             StorageImpl storage = new StorageImpl(session, cmisRepositoryConfiguration);
@@ -397,14 +387,5 @@ public class StorageProviderImpl implements StorageProvider, Startable
    public StorageConfiguration getStorageConfiguration(String id)
    {
       return storageConfigs.get(id);
-   }
-
-   public void addRenditionProvider(Object prov)
-   {
-         for (String mimeType : ((RenditionProvider)prov).getSupportedMediaType())
-         {
-            renditionProviders.put(MimeType.fromString(mimeType), (RenditionProvider)prov);
-         }
-     
    }
 }

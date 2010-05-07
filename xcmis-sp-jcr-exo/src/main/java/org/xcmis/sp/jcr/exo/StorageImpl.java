@@ -147,7 +147,7 @@ public class StorageImpl implements Storage
       this.configuration = configuration;
    }
 
-   public StorageImpl(Session session, StorageConfiguration configuration, RenditionManagerImpl renditionManager)
+   public StorageImpl(Session session, StorageConfiguration configuration, RenditionManager renditionManager)
    {
       this.session = session;
       this.configuration = configuration;
@@ -171,7 +171,7 @@ public class StorageImpl implements Storage
    }
 
    public StorageImpl(Session session, IndexListener indexListener, StorageConfiguration configuration,
-      RenditionManagerImpl renditionManager)
+      RenditionManager renditionManager)
    {
       this.session = session;
       this.indexListener = indexListener;
@@ -917,14 +917,28 @@ public class StorageImpl implements Storage
 
    public ItemsIterator<Rendition> getRenditions(ObjectData object)
    {
-      if (renditionManager != null)
+      try
       {
-         return renditionManager.getRenditions(object);
+         RenditionIterator it = new RenditionIterator(((BaseObjectData)object).getNode().getNodes());
+         if (it.hasNext())
+         {
+            return it;
+         }
+         else
+         {
+            if (renditionManager != null)
+            {
+               return new RenditionIterator(renditionManager.getRenditions(object));
+            }
+         }
       }
-      else
+      catch (javax.jcr.RepositoryException re)
       {
-         return null;
+         String msg =
+            "Unable get renditions for object " + object.getObjectId() + " Unexpected error " + re.getMessage();
+         throw new StorageException(msg, re);
       }
+      return null;
    }
 
    /**
