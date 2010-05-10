@@ -915,6 +915,9 @@ public class StorageImpl implements Storage
       }
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public ItemsIterator<Rendition> getRenditions(ObjectData object)
    {
       try
@@ -928,7 +931,11 @@ public class StorageImpl implements Storage
          {
             if (renditionManager != null)
             {
-               return new RenditionIterator(renditionManager.getRenditions(object));
+               ArrayList<Rendition> renditionList = new ArrayList<Rendition>();
+               Rendition rend = renditionManager.getRenditions(object);
+               if (rend != null)
+                  renditionList.add(rend);
+               return new BaseItemsIterator<Rendition>(renditionList);
             }
          }
       }

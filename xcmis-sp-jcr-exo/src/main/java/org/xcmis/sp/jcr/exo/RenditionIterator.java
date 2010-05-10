@@ -60,17 +60,6 @@ class RenditionIterator implements ItemsIterator<Rendition>
    }
 
    /**
-    * Create RenditionIterator instance with elready defined element.
-    *
-    * @param type Rendition
-    */
-   public RenditionIterator(Rendition type)
-   {
-      this.iter = null;
-      this.next = type;
-   }
-
-   /**
     * {@inheritDoc}
     */
    public boolean hasNext()

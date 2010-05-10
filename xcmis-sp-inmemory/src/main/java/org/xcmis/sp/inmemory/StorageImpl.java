@@ -759,16 +759,17 @@ public class StorageImpl implements Storage
       return getObjectById(point);
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public ItemsIterator<Rendition> getRenditions(ObjectData object)
    {
-      // TODO
-     // return CmisUtils.emptyItemsIterator();
       if (renditionManager != null)
       {
          ArrayList<Rendition> renditionList = new ArrayList<Rendition>();
          Rendition rend = renditionManager.getRenditions(object);
          if (rend != null)
-           renditionList.add(rend);
+            renditionList.add(rend);
          return new BaseItemsIterator<Rendition>(renditionList);
       }
       return CmisUtils.emptyItemsIterator();

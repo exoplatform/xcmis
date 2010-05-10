@@ -116,7 +116,7 @@ public class RenditionManager
    }
 
    /**
-    * Get rendition stream for objects with specified id.
+    * Get rendition stream for objects with specified stream id.
     *
     * @param streamId stream id
     * @param ObjectData object
@@ -147,7 +147,7 @@ public class RenditionManager
    }
 
    /**
-    * Get rendition stream for objects with mime-type.
+    * Get rendition from content stream  with known mime-type.
     *
     * @param mime MimeType 
     * @param ObjectData object
@@ -226,7 +226,7 @@ public class RenditionManager
             }
             catch (Exception e)
             {
-               LOG.error("Cannot instatiate rendition provider instance: ", e);
+               LOG.error("Cannot instantiate rendition provider instance: ", e);
             }
          }
    }
