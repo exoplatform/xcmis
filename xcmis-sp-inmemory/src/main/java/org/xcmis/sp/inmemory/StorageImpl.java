@@ -53,6 +53,7 @@ import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.RelationshipData;
+import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.Storage;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.TypeNotFoundException;
@@ -155,6 +156,9 @@ public class StorageImpl implements Storage
     * Cmis query parser.
     */
    final QueryParser cmisQueryParser;
+   
+   /** The rendition manager. */
+   private RenditionManager renditionManager;
 
    private final StorageConfiguration configuration;
 
@@ -167,6 +171,11 @@ public class StorageImpl implements Storage
    private final long maxStorageMemSize;
 
    private final int maxItemsNumber;
+
+   public StorageImpl(StorageConfiguration configuration, RenditionManager manager){
+      this(configuration);
+      this.renditionManager = manager;
+   }
 
    public StorageImpl(StorageConfiguration configuration)
    {
@@ -685,7 +694,7 @@ public class StorageImpl implements Storage
          case DOCUMENT :
             return new DocumentDataImpl(new Entry(new HashMap<String, Value>(values), new HashMap<String, Set<String>>(
                permissions.get(objectId)), new HashSet<String>(policies.get(objectId))),
-               getTypeDefinition(typeId, true), this);
+               getTypeDefinition(typeId, true), this, renditionManager);
          case FOLDER :
             return new FolderDataImpl(new Entry(new HashMap<String, Value>(values), new HashMap<String, Set<String>>(
                permissions.get(objectId)), new HashSet<String>(policies.get(objectId))),
@@ -753,6 +762,15 @@ public class StorageImpl implements Storage
    public ItemsIterator<Rendition> getRenditions(ObjectData object)
    {
       // TODO
+     // return CmisUtils.emptyItemsIterator();
+      if (renditionManager != null)
+      {
+         ArrayList<Rendition> renditionList = new ArrayList<Rendition>();
+         Rendition rend = renditionManager.getRenditions(object);
+         if (rend != null)
+           renditionList.add(rend);
+         return new BaseItemsIterator<Rendition>(renditionList);
+      }
       return CmisUtils.emptyItemsIterator();
    }
 

@@ -30,6 +30,7 @@ import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.RelationshipData;
+import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.model.ContentStreamAllowed;
@@ -67,7 +68,15 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
    private ContentStream contentStream;
 
    protected final VersioningState versioningState;
+   
+   private RenditionManager renditionManager;
 
+   public DocumentDataImpl(Entry entry, TypeDefinition type, StorageImpl storage, RenditionManager manager)
+   {
+     this(entry, type, storage);
+     this.renditionManager = manager;
+   }
+   
    public DocumentDataImpl(Entry entry, TypeDefinition type, StorageImpl storage)
    {
       super(entry, type, storage);
@@ -281,7 +290,15 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
       }
 
       // TODO renditions
-      return null;
+      //return null;
+      try
+      {
+         return renditionManager.getStream(this, streamId);
+      }
+      catch (Exception e)
+      {
+         throw new CmisRuntimeException("Unable get rendition stream. " + e.getMessage(), e);
+      }
    }
 
    /**
