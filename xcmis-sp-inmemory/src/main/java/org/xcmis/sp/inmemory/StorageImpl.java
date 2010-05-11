@@ -156,7 +156,7 @@ public class StorageImpl implements Storage
     * Cmis query parser.
     */
    final QueryParser cmisQueryParser;
-   
+
    /** The rendition manager. */
    private RenditionManager renditionManager;
 
@@ -172,7 +172,8 @@ public class StorageImpl implements Storage
 
    private final int maxItemsNumber;
 
-   public StorageImpl(StorageConfiguration configuration, RenditionManager manager){
+   public StorageImpl(StorageConfiguration configuration, RenditionManager manager)
+   {
       this(configuration);
       this.renditionManager = manager;
    }
@@ -600,6 +601,8 @@ public class StorageImpl implements Storage
          throw new ConstraintException("Unable delete root folder.");
       }
 
+      final Collection<String> failedToDelete = new ArrayList<String>();
+
       for (ItemsIterator<ObjectData> iterator = folder.getChildren(null); iterator.hasNext();)
       {
          ObjectData object = iterator.next();
@@ -609,13 +612,27 @@ public class StorageImpl implements Storage
          }
          else
          {
-            deleteObject(object, false);
+            try
+            {
+               deleteObject(object, false);
+            }
+            catch (StorageException e)
+            {
+               failedToDelete.add(object.getObjectId());
+            }
          }
       }
 
-      deleteObject(folder, false);
+      try
+      {
+         deleteObject(folder, false);
+      }
+      catch (StorageException e)
+      {
+         failedToDelete.add(folder.getObjectId());
+      }
 
-      return Collections.emptyList();
+      return failedToDelete;
    }
 
    public Collection<DocumentData> getAllVersions(String versionSeriesId) throws ObjectNotFoundException

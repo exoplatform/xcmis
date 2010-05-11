@@ -749,9 +749,9 @@ public class StorageTest extends BaseTest
       //        |_2
       //        | |_doc1
       //        | |_doc2
-      //        | |_doc3
       //        | |_3
       //        |   |_4
+      //        |   | |_doc3
       //        |   | |_doc4
       //        |   |_7
       //        |     |_doc3
@@ -840,9 +840,9 @@ public class StorageTest extends BaseTest
       //        |_2
       //        | |_doc1
       //        | |_doc2
-      //        | |_doc3
       //        | |_3
       //        |   |_4
+      //        |   | |_doc3
       //        |   | |_doc4
       //        |   |_7
       //        |     |_doc3
@@ -925,9 +925,9 @@ public class StorageTest extends BaseTest
       //        |_2
       //        | |_doc1
       //        | |_doc2
-      //        | |_doc3
       //        | |_3
       //        |   |_4
+      //        |   | |_doc3
       //        |   | |_doc4
       //        |   |_7
       //        |     |_doc3

@@ -621,7 +621,7 @@ public class StorageImpl implements Storage
          throw new CmisRuntimeException("Unable delete only specified version.");
       }
 
-      final List<String> failedToDelete = new ArrayList<String>();
+      final Collection<String> failedToDelete = new ArrayList<String>();
       DeleteTreeVisitor v = new DeleteTreeVisitor(folder.getPath(), unfileObject);
 
       try
@@ -683,7 +683,16 @@ public class StorageImpl implements Storage
       {
          // TODO : provide list of not deleted objects.
          // If fact plain list of all items in current tree.
-         throw new CmisRuntimeException(re.getMessage(), re);
+         try
+         {
+            TreeVisitor vv = new TreeVisitor();
+            vv.visit(((FolderDataImpl)folder).getNode());
+            failedToDelete.addAll(vv.getAllChildrenObjects());
+         }
+         catch (RepositoryException e)
+         {
+            throw new CmisRuntimeException(re.getMessage(), re);
+         }
       }
       return failedToDelete;
    }
@@ -1312,7 +1321,7 @@ public class StorageImpl implements Storage
       public DeleteTreeVisitor(String path, UnfileObject unfileObject)
       {
          this.treePath = path;
-         this.unfileObject = unfileObject;
+         this.unfileObject = unfileObject != null ? unfileObject : UnfileObject.DELETE;
       }
 
       /**
@@ -1413,5 +1422,53 @@ public class StorageImpl implements Storage
       {
          return moveMapping;
       }
+   }
+
+   private class TreeVisitor implements ItemVisitor
+   {
+
+      private final Collection<String> allChildrenObjects = new HashSet<String>();
+
+      public TreeVisitor()
+      {
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public void visit(javax.jcr.Property property) throws RepositoryException
+      {
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public void visit(Node node) throws RepositoryException
+      {
+         NodeType nt = node.getPrimaryNodeType();
+         String uuid = ((ExtendedNode)node).getIdentifier();
+
+         if (nt.isNodeType(JcrCMIS.NT_FOLDER) || nt.isNodeType(JcrCMIS.NT_UNSTRUCTURED))
+         {
+            for (NodeIterator children = node.getNodes(); children.hasNext();)
+            {
+               children.nextNode().accept(this);
+            }
+            allChildrenObjects.add(uuid);
+         }
+         else
+         {
+            if (!allChildrenObjects.contains(uuid))
+            {
+               allChildrenObjects.add(uuid);
+            }
+         }
+      }
+
+      public Collection<String> getAllChildrenObjects()
+      {
+         return allChildrenObjects;
+      }
+
    }
 }
