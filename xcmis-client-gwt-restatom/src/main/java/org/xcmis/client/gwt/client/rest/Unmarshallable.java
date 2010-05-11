@@ -33,6 +33,7 @@ public interface Unmarshallable
    /**
     * prepares an object from the incoming string
     * @param body
+    * @throws UnmarshallerException 
     */
    void unmarshal(String body) throws UnmarshallerException;   
 

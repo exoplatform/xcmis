@@ -46,10 +46,10 @@ import com.google.gwt.xml.client.NodeList;
 
 /**
  * Created by The eXo Platform SAS.
- *	
+ * 
  * @author <a href="mailto:zhulevaanna@gmail.com">Ann Zhuleva</a>
- * @version $Id:   ${date} ${time}
- *
+ * @version $Id: ${date} ${time}
+ * 
  */
 public class PropertyDefinitionParser
 {
@@ -58,20 +58,20 @@ public class PropertyDefinitionParser
     */
    private static BasePropertyDefinition<?> propertyDefinition;
 
-   private static List<Choice<?>> choices = new ArrayList<Choice<?>>();
-
    /**
     * Constructor.
     */
    protected PropertyDefinitionParser()
    {
-      throw new UnsupportedOperationException(); // prevents calls from subclass
+      throw new UnsupportedOperationException(); // prevents calls from
+      // subclass
    }
 
    /**
     * Parse xml element to get {@link CmisPropertyBooleanDefinitionType}.
     * 
-    * @param node node
+    * @param node
+    *            node
     * @return {@link CmisPropertyBooleanDefinitionType}
     */
 
@@ -212,22 +212,23 @@ public class PropertyDefinitionParser
          {
             Node displayName = property.getAttributes().getNamedItem(CMIS.DISPLAY_NAME);
             String choiceDisplayName = (displayName == null) ? "" : displayName.getNodeValue();
-            choices.add(parseChoice(choiceDisplayName, property.getChildNodes()));
+            parseChoice(choiceDisplayName, property.getChildNodes());
          }
          else if (property.getNodeName().equals(CMIS.CMIS_DEFAULT_VALUE))
          {
             setDefaultValue(propertyDefinition, property.getChildNodes());
          }
       }
-
       return propertyDefinition;
    }
 
    /**
     * Parses default value node list and sets default value to propDefinition
     * 
-    * @param propertyDefinition property definition
-    * @param children node list, which contains default values
+    * @param propertyDefinition
+    *            property definition
+    * @param children
+    *            node list, which contains default values
     */
    private static void setDefaultValue(BasePropertyDefinition<?> propertyDefinition, NodeList children)
    {
@@ -315,13 +316,14 @@ public class PropertyDefinitionParser
    /**
     * Parses choice node list and returns choice of required type.
     * 
-    * @param displayName display name for choice
-    * @param children node list of children
-    * @param propertyType required property type
-    * 
-    * @return {@link Choice}
+    * @param displayName
+    *            display name for choice
+    * @param children
+    *            node list of children
+    * @param propertyType
+    *            required property type
     */
-   private static Choice<?> parseChoice(String displayName, NodeList children)
+   private static void parseChoice(String displayName, NodeList children)
    {
       List<String> stringValues = new ArrayList<String>();
       for (int i = 0; i < children.getLength(); i++)
@@ -331,55 +333,62 @@ public class PropertyDefinitionParser
             stringValues.add((node.getFirstChild() == null) ? null : node.getFirstChild().getNodeValue());
       }
 
-      EnumPropertyType propertyType = propertyDefinition.getPropertyType();
-
-      if (propertyType.equals(EnumPropertyType.BOOLEAN))
+      if (propertyDefinition instanceof BooleanPropertyDefinition)
       {
          Boolean[] arrayValues = new Boolean[stringValues.size()];
          for (int i = 0; i < stringValues.size(); i++)
          {
             arrayValues[i] = Boolean.parseBoolean(stringValues.get(i));
          }
-         return new Choice<Boolean>(arrayValues, displayName);
+         ((BooleanPropertyDefinition)propertyDefinition).getChoices()
+            .add(new Choice<Boolean>(arrayValues, displayName));
       }
-      else if (propertyType.equals(EnumPropertyType.DATETIME))
+      else if (propertyDefinition instanceof DateTimePropertyDefinition)
       {
          Date[] arrayValues = new Date[stringValues.size()];
          for (int i = 0; i < stringValues.size(); i++)
          {
             arrayValues[i] = DateUtil.parseDate(stringValues.get(i));
          }
-         return new Choice<Date>(arrayValues, displayName);
+         ((DateTimePropertyDefinition)propertyDefinition).getChoices().add(new Choice<Date>(arrayValues, displayName));
       }
-      else if (propertyType.equals(EnumPropertyType.DECIMAL))
+      else if (propertyDefinition instanceof DecimalPropertyDefinition)
       {
          Double[] arrayValues = new Double[stringValues.size()];
          for (int i = 0; i < stringValues.size(); i++)
          {
             arrayValues[i] = Double.valueOf(stringValues.get(i));
          }
-         return new Choice<Double>(arrayValues, displayName);
+         ((DecimalPropertyDefinition)propertyDefinition).getChoices().add(new Choice<Double>(arrayValues, displayName));
       }
-      else if (propertyType.equals(EnumPropertyType.HTML) || propertyType.equals(EnumPropertyType.ID)
-         || propertyType.equals(EnumPropertyType.STRING) || propertyType.equals(EnumPropertyType.URI))
+      else if (propertyDefinition instanceof HtmlPropertyDefinition)
       {
-         String[] arrayValues = new String[stringValues.size()];
-         for (int i = 0; i < stringValues.size(); i++)
-         {
-            arrayValues[i] = stringValues.get(i);
-         }
-         return new Choice<String>(arrayValues, displayName);
+         ((HtmlPropertyDefinition)propertyDefinition).getChoices().add(
+            new Choice<String>(stringValues.toArray(new String[stringValues.size()]), displayName));
       }
-      else if (propertyType.equals(EnumPropertyType.INTEGER))
+      else if (propertyDefinition instanceof IdPropertyDefinition)
+      {
+         ((IdPropertyDefinition)propertyDefinition).getChoices().add(
+            new Choice<String>(stringValues.toArray(new String[stringValues.size()]), displayName));
+      }
+      else if (propertyDefinition instanceof StringPropertyDefinition)
+      {
+         ((StringPropertyDefinition)propertyDefinition).getChoices().add(
+            new Choice<String>(stringValues.toArray(new String[stringValues.size()]), displayName));
+      }
+      else if (propertyDefinition instanceof UriPropertyDefinition)
+      {
+         ((UriPropertyDefinition)propertyDefinition).getChoices().add(
+            new Choice<String>(stringValues.toArray(new String[stringValues.size()]), displayName));
+      }
+      else if (propertyDefinition instanceof IntegerPropertyDefinition)
       {
          Long[] arrayValues = new Long[stringValues.size()];
          for (int i = 0; i < stringValues.size(); i++)
          {
             arrayValues[i] = Long.valueOf(stringValues.get(i));
          }
-         return new Choice<Long>(arrayValues, displayName);
+         ((IntegerPropertyDefinition)propertyDefinition).getChoices().add(new Choice<Long>(arrayValues, displayName));
       }
-      return null;
    }
-
 }

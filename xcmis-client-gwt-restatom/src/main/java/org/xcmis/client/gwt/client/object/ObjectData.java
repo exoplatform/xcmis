@@ -26,6 +26,8 @@ import org.xcmis.client.gwt.client.object.impl.CmisFolderImpl;
 import org.xcmis.client.gwt.client.object.impl.CmisPolicyImpl;
 import org.xcmis.client.gwt.client.object.impl.CmisRelationshipImpl;
 import org.xcmis.client.gwt.client.object.impl.ObjectInfo;
+import org.xcmis.client.gwt.client.rest.ServerException;
+import org.xcmis.client.gwt.client.rest.UnmarshallerException;
 
 import java.util.List;
 
@@ -39,8 +41,9 @@ public class ObjectData
 
    /**
     * @param entryList list of entries
+    * @throws UnmarshallerException 
     */
-   public static void extractData(List<AtomEntry> entryList)
+   public static void extractData(List<AtomEntry> entryList) throws UnmarshallerException
    {
       for (AtomEntry entry : entryList)
       {
@@ -50,14 +53,24 @@ public class ObjectData
 
    /**
     * @param entry entry
+    * @throws ServerException 
+    * @throws UnmarshallerException 
     */
-   public static void extractData(AtomEntry entry)
+   public static void extractData(AtomEntry entry) throws UnmarshallerException
    {
       CmisObject object = entry.getObject();
 
       ObjectInfo objectInfo = new ObjectInfo();
       String baseTypeId = object.getProperties().getId(CMIS.CMIS_BASE_TYPE_ID);
-      objectInfo.setBaseType(EnumBaseObjectTypeIds.fromValue(baseTypeId));
+
+      try
+      {
+         objectInfo.setBaseType(EnumBaseObjectTypeIds.fromValue(baseTypeId));
+      }
+      catch (Exception e)
+      {
+         throw new UnmarshallerException("Base object type must not be empty.");
+      }
       objectInfo.setTypeId(object.getProperties().getId(CMIS.CMIS_OBJECT_TYPE_ID));
       objectInfo.setId(object.getProperties().getId(CMIS.CMIS_OBJECT_ID));
       objectInfo.setName(object.getProperties().getString(CMIS.CMIS_NAME));

@@ -82,15 +82,15 @@ public class TypeXMLBuilder
       Element typeId = doc.createElement(CMIS.CMIS_ID);
       typeId.appendChild(doc.createTextNode(type.getId()));
       typeElement.appendChild(typeId);
-      
+
       Element typeLocalName = doc.createElement(CMIS.CMIS_LOCAL_NAME);
       typeLocalName.appendChild(doc.createTextNode(type.getLocalName()));
       typeElement.appendChild(typeLocalName);
-      
+
       Element typeDisplayName = doc.createElement(CMIS.CMIS_DISPLAY_NAME);
       typeDisplayName.appendChild(doc.createTextNode(type.getDisplayName()));
       typeElement.appendChild(typeDisplayName);
-      
+
       Element typeQueryName = doc.createElement(CMIS.CMIS_QUERY_NAME);
       typeQueryName.appendChild(doc.createTextNode(type.getQueryName()));
       typeElement.appendChild(typeQueryName);
@@ -106,33 +106,31 @@ public class TypeXMLBuilder
       Element typeParentId = doc.createElement(CMIS.CMIS_PARENT_ID);
       typeParentId.appendChild(doc.createTextNode(type.getParentId()));
       typeElement.appendChild(typeParentId);
-      
+
       Element typeCreatable = doc.createElement(CMIS.CMIS_CREATABLE);
       typeCreatable.appendChild(doc.createTextNode(String.valueOf(type.isCreatable())));
       typeElement.appendChild(typeCreatable);
-      
+
       Element typeFileable = doc.createElement(CMIS.CMIS_FILEABLE);
       typeFileable.appendChild(doc.createTextNode(String.valueOf(type.isFileable())));
       typeElement.appendChild(typeFileable);
-      
+
       Element typeQueryable = doc.createElement(CMIS.CMIS_QUERYABLE);
       typeQueryable.appendChild(doc.createTextNode(String.valueOf(type.isQueryable())));
       typeElement.appendChild(typeQueryable);
-      
+
       Element typeFulltextIndexed = doc.createElement(CMIS.CMIS_FULL_TEXT_INDEXED);
       typeFulltextIndexed.appendChild(doc.createTextNode(String.valueOf(type.isFulltextIndexed())));
       typeElement.appendChild(typeFulltextIndexed);
-      
+
       Element typeIncludedInSupertypeQuery = doc.createElement(CMIS.CMIS_INCLUDED_IN_SUPERTYPE_QUERY);
-      typeIncludedInSupertypeQuery.appendChild(
-         doc.createTextNode(String.valueOf(type.isIncludedInSupertypeQuery())));
+      typeIncludedInSupertypeQuery.appendChild(doc.createTextNode(String.valueOf(type.isIncludedInSupertypeQuery())));
       typeElement.appendChild(typeIncludedInSupertypeQuery);
-      
+
       Element typeControllablePolicy = doc.createElement(CMIS.CMIS_CONTROLLABLE_POLICY);
-      typeControllablePolicy.appendChild(
-         doc.createTextNode(String.valueOf(type.isControllablePolicy())));
+      typeControllablePolicy.appendChild(doc.createTextNode(String.valueOf(type.isControllablePolicy())));
       typeElement.appendChild(typeControllablePolicy);
-      
+
       Element typeControllableACL = doc.createElement(CMIS.CMIS_CONTROLLABLE_ACL);
       typeControllableACL.appendChild(doc.createTextNode(String.valueOf(type.isControllableACL())));
       typeElement.appendChild(typeControllableACL);
@@ -172,8 +170,8 @@ public class TypeXMLBuilder
          {
             propertyElement = doc.createElement(CMIS.CMIS_PROPERTY_STRING_DEFINITION);
             Element maxLenght = doc.createElement(CMIS.CMIS_MAX_LENGHT);
-            maxLenght.appendChild(doc.createTextNode(String
-               .valueOf(((StringPropertyDefinition)propertyDefinition).getMaxLength())));
+            maxLenght.appendChild(doc.createTextNode(String.valueOf(((StringPropertyDefinition)propertyDefinition)
+               .getMaxLength())));
             propertyElement.appendChild(maxLenght);
          }
          else if (propertyDefinition instanceof BooleanPropertyDefinition)
@@ -184,8 +182,8 @@ public class TypeXMLBuilder
          {
             propertyElement = doc.createElement(CMIS.CMIS_PROPERTY_DATETIME_DEFINITION);
             Element resolution = doc.createElement(CMIS.CMIS_RESOLUTION);
-            resolution.appendChild(doc.createTextNode(((DateTimePropertyDefinition)propertyDefinition).getDateTimeResolution()
-               .value()));
+            resolution.appendChild(doc.createTextNode(((DateTimePropertyDefinition)propertyDefinition)
+               .getDateTimeResolution().value()));
             propertyElement.appendChild(resolution);
          }
          else if (propertyDefinition instanceof DecimalPropertyDefinition)
@@ -246,6 +244,14 @@ public class TypeXMLBuilder
          displayName.appendChild(doc.createTextNode(propertyDefinition.getDisplayName()));
          propertyElement.appendChild(displayName);
 
+         Element localName = doc.createElement(CMIS.CMIS_LOCAL_NAME);
+         localName.appendChild(doc.createTextNode(propertyDefinition.getLocalName()));
+         propertyElement.appendChild(localName);
+
+         Element queryName = doc.createElement(CMIS.CMIS_QUERY_NAME);
+         queryName.appendChild(doc.createTextNode(propertyDefinition.getQueryName()));
+         propertyElement.appendChild(queryName);
+
          Element propertyType = doc.createElement(CMIS.CMIS_PROPERTY_TYPE);
          propertyType.appendChild(doc.createTextNode(propertyDefinition.getPropertyType().value()));
          propertyElement.appendChild(propertyType);
@@ -285,6 +291,13 @@ public class TypeXMLBuilder
       }
    }
 
+   /**
+    * Add default value xml element to property definition xml element.
+    * 
+    * @param propertyDefinition property definition
+    * @param propertyDefinitionElement property definition xml element
+    * @param doc xml document
+    */
    private static void addDefaultValueElement(PropertyDefinition<?> propertyDefinition,
       Element propertyDefinitionElement, Document doc)
    {
@@ -310,6 +323,13 @@ public class TypeXMLBuilder
       }
    }
 
+   /**
+    * Add choices xml element to property definition xml element.
+    * 
+    * @param propertyDefinition property definition
+    * @param propertyDefinitionElement property definition xml element
+    * @param doc xml document
+    */
    private static void addChoicesElements(PropertyDefinition<?> propertyDefinition, Element propertyDefinitionElement,
       Document doc)
    {

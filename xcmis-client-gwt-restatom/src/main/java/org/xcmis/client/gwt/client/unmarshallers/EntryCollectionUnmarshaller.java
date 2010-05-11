@@ -24,6 +24,7 @@ import org.xcmis.client.gwt.client.model.restatom.EntryCollection;
 import org.xcmis.client.gwt.client.model.restatom.FeedType;
 import org.xcmis.client.gwt.client.object.ObjectData;
 import org.xcmis.client.gwt.client.rest.Unmarshallable;
+import org.xcmis.client.gwt.client.rest.UnmarshallerException;
 import org.xcmis.client.gwt.client.unmarshallers.parser.FeedParser;
 
 import java.util.List;
@@ -58,8 +59,9 @@ public class EntryCollectionUnmarshaller implements Unmarshallable
     * @see org.exoplatform.gwtframework.commons.rest.Unmarshallable#unmarshal(java.lang.String)
     * 
     * @param body body
+    * @throws UnmarshallerException 
     */
-   public void unmarshal(String body)
+   public void unmarshal(String body) throws UnmarshallerException
    {
       GWT.log(body, null);
       Document doc = XMLParser.parse(body);
