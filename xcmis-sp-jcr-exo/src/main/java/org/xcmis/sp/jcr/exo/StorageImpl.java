@@ -63,6 +63,7 @@ import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.Permission;
 import org.xcmis.spi.model.PermissionMapping;
 import org.xcmis.spi.model.PropertyDefinition;
+import org.xcmis.spi.model.PropertyType;
 import org.xcmis.spi.model.Rendition;
 import org.xcmis.spi.model.RepositoryCapabilities;
 import org.xcmis.spi.model.RepositoryInfo;
@@ -125,6 +126,8 @@ public class StorageImpl implements Storage
    public static final String XCMIS_RELATIONSHIPS = "xcmis:relationshipStore";
 
    public static final String XCMIS_POLICIES = "xcmis:policiesStore";
+
+   public static final String XCMIS_PROPERTY_TYPE = "_xcmis_property_type";
 
    static String latestLabel = "latest";
 
@@ -234,6 +237,7 @@ public class StorageImpl implements Storage
 
                List<String> defaultValues = null;
 
+               //calculate default values
                switch (propDef.getPropertyType())
                {
                   case BOOLEAN :
@@ -330,6 +334,18 @@ public class StorageImpl implements Storage
                jcrPropDef.setReadOnly(false);
 
                jcrPropDefintions.add(jcrPropDef);
+
+               // TODO replace with native types in JCR 2.x 
+               // add type definition for ID, HTML, URI
+               if (propDef.getPropertyType() == PropertyType.URI || propDef.getPropertyType() == PropertyType.HTML
+                  || propDef.getPropertyType() == PropertyType.URI)
+               {
+                  List<String> actualTypeStorage = new ArrayList<String>();
+                  actualTypeStorage.add(propDef.getPropertyType().toString());
+                  jcrPropDefintions.add(new PropertyDefinitionValue(propDef.getId() + XCMIS_PROPERTY_TYPE, false,
+                     false, OnParentVersionAction.COPY, false, null, false, 0, new ArrayList<String>()));
+               }
+
             }
 
             nodeTypeValue.setDeclaredPropertyDefinitionValues(jcrPropDefintions);
@@ -943,7 +959,9 @@ public class StorageImpl implements Storage
                ArrayList<Rendition> renditionList = new ArrayList<Rendition>();
                Rendition rend = renditionManager.getRenditions(object);
                if (rend != null)
+               {
                   renditionList.add(rend);
+               }
                return new BaseItemsIterator<Rendition>(renditionList);
             }
          }

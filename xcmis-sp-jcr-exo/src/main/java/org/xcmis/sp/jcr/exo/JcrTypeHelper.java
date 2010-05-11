@@ -40,6 +40,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Value;
@@ -52,15 +53,16 @@ import javax.jcr.nodetype.NodeType;
 class JcrTypeHelper
 {
 
-   static final Set<String> ignoredProperties = new HashSet<String>();
+   static final Set<Pattern> ignoredProperties = new HashSet<Pattern>();
    static
    {
-      ignoredProperties.add("jcr:created");
-      ignoredProperties.add("jcr:mixinTypes");
-      ignoredProperties.add("jcr:uuid");
-      ignoredProperties.add("jcr:primaryType");
-      ignoredProperties.add("exo:owner");
-      ignoredProperties.add("*");
+      ignoredProperties.add(Pattern.compile("jcr:created"));
+      ignoredProperties.add(Pattern.compile("jcr:mixinTypes"));
+      ignoredProperties.add(Pattern.compile("jcr:uuid"));
+      ignoredProperties.add(Pattern.compile("jcr:primaryType"));
+      ignoredProperties.add(Pattern.compile("exo:owner"));
+      ignoredProperties.add(Pattern.compile("\\*"));
+      ignoredProperties.add(Pattern.compile(".*" + StorageImpl.XCMIS_PROPERTY_TYPE));
    }
 
    /**
@@ -364,12 +366,29 @@ class JcrTypeHelper
 
       Set<String> knownIds = PropertyDefinitions.getPropertyIds(typeDefinition.getBaseId().value());
 
-      for (javax.jcr.nodetype.PropertyDefinition jcrPropertyDef : nt.getPropertyDefinitions())
+      final javax.jcr.nodetype.PropertyDefinition[] propertyDefinitions = nt.getPropertyDefinitions();
+      //map for quick string properties lookup 
+      Map<String, javax.jcr.nodetype.PropertyDefinition> propertyDefinitionsMap =
+         new HashMap<String, javax.jcr.nodetype.PropertyDefinition>(propertyDefinitions.length);
+      for (int i = 0; i < propertyDefinitions.length; i++)
+      {
+         propertyDefinitionsMap.put(propertyDefinitions[i].getName(), propertyDefinitions[i]);
+      }
+
+      for (javax.jcr.nodetype.PropertyDefinition jcrPropertyDef : propertyDefinitions)
       {
          String pdName = jcrPropertyDef.getName();
-         // TODO : need something better that this.
          // At the moment just hide JCR properties
-         if (ignoredProperties.contains(pdName))
+         boolean shouldBeIgnored = false;
+         for (Pattern ignoredPattern : ignoredProperties)
+         {
+            if (ignoredPattern.matcher(pdName).matches())
+            {
+               shouldBeIgnored = true;
+               break;
+            }
+         }
+         if (shouldBeIgnored)
          {
             continue;
          }
@@ -481,8 +500,30 @@ class JcrTypeHelper
                         }
                      }
                   }
+                  PropertyType propertyType = PropertyType.STRING;
+                  //Let's find out the actual type
+                  if (propertyDefinitionsMap.containsKey(pdName + StorageImpl.XCMIS_PROPERTY_TYPE))
+                  {
+                     try
+                     {
+                        final Value[] defaultValues =
+                           propertyDefinitionsMap.get(pdName + StorageImpl.XCMIS_PROPERTY_TYPE).getDefaultValues();
+                        if (defaultValues.length > 0)
+                        {
+                           propertyType = PropertyType.fromValue(defaultValues[0].getString());
+                        }
+                     }
+                     catch (IllegalStateException e)
+                     {
+                        throw new CmisRuntimeException(e.getLocalizedMessage(), e);
+                     }
+                     catch (RepositoryException e)
+                     {
+                        throw new CmisRuntimeException(e.getLocalizedMessage(), e);
+                     }
+                  }
                   PropertyDefinition<String> stringDef =
-                     new PropertyDefinition<String>(pdName, pdName, pdName, null, pdName, null, PropertyType.STRING,
+                     new PropertyDefinition<String>(pdName, pdName, pdName, null, pdName, null, propertyType,
                         jcrPropertyDef.isProtected() ? Updatability.READONLY : Updatability.READWRITE, false,
                         jcrPropertyDef.isMandatory(), true, true, openChoice, jcrPropertyDef.isMultiple(), choices,
                         jcrDefaultValues != null ? createDefaultValues(jcrDefaultValues,
