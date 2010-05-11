@@ -22,10 +22,14 @@ package org.xcmis.spi;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicReference;
+
+
 
 /**
  * @version $Id:$
@@ -94,9 +98,14 @@ public class CmisRegistry
     *         never null
     */
    // TODO : short info about storages, e.g. CmisRepositoryEntryType
-   public final Set<String> getStorageIDs()
+   public final Set<StorageInfo> getStorageInfos()
    {
-      return Collections.unmodifiableSet(storageProviders.keySet());
+      Set <StorageInfo> set = new HashSet<StorageInfo>();
+      Iterator<String> it = storageProviders.keySet().iterator();
+      while (it.hasNext()){
+         set.add(new StorageInfo(it.next()));
+      }
+      return Collections.unmodifiableSet(set);
    }
 
    /**
