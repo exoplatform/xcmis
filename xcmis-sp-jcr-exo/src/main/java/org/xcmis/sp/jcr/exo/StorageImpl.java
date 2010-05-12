@@ -89,6 +89,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.jcr.Item;
 import javax.jcr.ItemExistsException;
@@ -128,6 +129,8 @@ public class StorageImpl implements Storage
    public static final String XCMIS_POLICIES = "xcmis:policiesStore";
 
    public static final String XCMIS_PROPERTY_TYPE = "_xcmis_property_type";
+
+   public static final Pattern XCMIS_PROPERTY_TYPE_PATTERN = Pattern.compile(".*" + StorageImpl.XCMIS_PROPERTY_TYPE);
 
    static String latestLabel = "latest";
 
@@ -231,6 +234,11 @@ public class StorageImpl implements Storage
                {
                   String msg = "Property Type required.";
                   throw new InvalidArgumentException(msg);
+               }
+               if (XCMIS_PROPERTY_TYPE_PATTERN.matcher(propDef.getId()).matches())
+               {
+                  throw new InvalidArgumentException("Unacceptable property definition name " + propDef.getId()
+                     + " type " + type.getId());
                }
 
                PropertyDefinitionValue jcrPropDef = new PropertyDefinitionValue();
@@ -337,13 +345,13 @@ public class StorageImpl implements Storage
 
                // TODO replace with native types in JCR 2.x 
                // add type definition for ID, HTML, URI
-               if (propDef.getPropertyType() == PropertyType.URI || propDef.getPropertyType() == PropertyType.HTML
+               if (propDef.getPropertyType() == PropertyType.ID || propDef.getPropertyType() == PropertyType.HTML
                   || propDef.getPropertyType() == PropertyType.URI)
                {
                   List<String> actualTypeStorage = new ArrayList<String>();
                   actualTypeStorage.add(propDef.getPropertyType().toString());
                   jcrPropDefintions.add(new PropertyDefinitionValue(propDef.getId() + XCMIS_PROPERTY_TYPE, false,
-                     false, OnParentVersionAction.COPY, false, null, false, 0, new ArrayList<String>()));
+                     false, OnParentVersionAction.COPY, false, actualTypeStorage, false, 0, new ArrayList<String>()));
                }
 
             }

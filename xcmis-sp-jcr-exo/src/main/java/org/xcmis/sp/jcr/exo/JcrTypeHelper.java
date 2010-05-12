@@ -19,6 +19,8 @@
 
 package org.xcmis.sp.jcr.exo;
 
+import static org.xcmis.sp.jcr.exo.StorageImpl.XCMIS_PROPERTY_TYPE_PATTERN;
+
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.model.BaseType;
@@ -62,7 +64,7 @@ class JcrTypeHelper
       ignoredProperties.add(Pattern.compile("jcr:primaryType"));
       ignoredProperties.add(Pattern.compile("exo:owner"));
       ignoredProperties.add(Pattern.compile("\\*"));
-      ignoredProperties.add(Pattern.compile(".*" + StorageImpl.XCMIS_PROPERTY_TYPE));
+      ignoredProperties.add(XCMIS_PROPERTY_TYPE_PATTERN);
    }
 
    /**

@@ -52,7 +52,7 @@
          <propertyDefinition name="cmis:boolean-type" requiredType="Boolean" autoCreated="false" mandatory="false" onParentVersion="COPY"
             protected="false" multiple="false">
          </propertyDefinition>
-         <propertyDefinition name="cmis:integer-type" requiredType="Integer" autoCreated="false" mandatory="false" onParentVersion="COPY"
+         <propertyDefinition name="cmis:integer-type" requiredType="Long" autoCreated="false" mandatory="false" onParentVersion="COPY"
             protected="false" multiple="false">
          </propertyDefinition>
          <propertyDefinition name="cmis:datetime-type" requiredType="Date" autoCreated="false" mandatory="false" onParentVersion="COPY"
