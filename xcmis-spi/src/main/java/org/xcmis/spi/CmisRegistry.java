@@ -29,6 +29,8 @@ import java.util.Set;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.xcmis.spi.model.RepositoryShortInfo;
+
 
 
 /**
@@ -98,12 +100,12 @@ public class CmisRegistry
     *         never null
     */
    // TODO : short info about storages, e.g. CmisRepositoryEntryType
-   public final Set<StorageInfo> getStorageInfos()
+   public final Set<RepositoryShortInfo> getStorageInfos()
    {
-      Set <StorageInfo> set = new HashSet<StorageInfo>();
+      Set <RepositoryShortInfo> set = new HashSet<RepositoryShortInfo>();
       Iterator<String> it = storageProviders.keySet().iterator();
       while (it.hasNext()){
-         set.add(new StorageInfo(it.next()));
+         set.add(new RepositoryShortInfo(it.next()));
       }
       return Collections.unmodifiableSet(set);
    }

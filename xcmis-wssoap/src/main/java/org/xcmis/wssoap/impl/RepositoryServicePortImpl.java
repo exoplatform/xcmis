@@ -31,7 +31,7 @@ import org.xcmis.soap.RepositoryServicePort;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
-import org.xcmis.spi.StorageInfo;
+import org.xcmis.spi.model.RepositoryShortInfo;
 import org.xcmis.spi.model.RepositoryInfo;
 
 import java.math.BigInteger;
@@ -73,16 +73,16 @@ public class RepositoryServicePortImpl implements RepositoryServicePort
       {
          LOG.debug("Executing operation getRepositories");
       }
-      Set<StorageInfo> entries = CmisRegistry.getInstance().getStorageInfos();
+      Set<RepositoryShortInfo> entries = CmisRegistry.getInstance().getStorageInfos();
 
       Connection conn = null;
 
       try
       {
          List<CmisRepositoryEntryType> res = new ArrayList<CmisRepositoryEntryType>();
-         for (StorageInfo storageInfo : entries)
+         for (RepositoryShortInfo info : entries)
          {
-            conn = CmisRegistry.getInstance().getConnection(storageInfo.getStorageId());
+            conn = CmisRegistry.getInstance().getConnection(info.getRepositoryId());
 
             RepositoryInfo repoInfo = conn.getStorage().getRepositoryInfo();
             CmisRepositoryEntryType type = new CmisRepositoryEntryType();

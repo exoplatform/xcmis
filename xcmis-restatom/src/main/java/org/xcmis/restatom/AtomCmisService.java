@@ -42,7 +42,7 @@ import org.xcmis.restatom.abdera.UriTemplateTypeElement;
 import org.xcmis.restatom.types.CmisUriTemplateType;
 import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
-import org.xcmis.spi.StorageInfo;
+import org.xcmis.spi.model.RepositoryShortInfo;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
@@ -485,13 +485,13 @@ public class AtomCmisService implements ResourceContainer
    @GET
    public Response getRepositories(@Context HttpServletRequest httpRequest, @Context UriInfo uriInfo)
    {
-      Set<StorageInfo> entries = CmisRegistry.getInstance().getStorageInfos();
+      Set<RepositoryShortInfo> entries = CmisRegistry.getInstance().getStorageInfos();
 
       Service service = AbderaFactory.getInstance().getFactory().newService();
       service.declareNS(AtomCMIS.CMISRA_NS_URI, AtomCMIS.CMISRA_PREFIX);
-      for (StorageInfo storageInfo : entries)
+      for (RepositoryShortInfo info : entries)
       {
-         addCmisRepository(httpRequest, service, storageInfo.getStorageId(), uriInfo.getBaseUri());
+         addCmisRepository(httpRequest, service, info.getRepositoryId(), uriInfo.getBaseUri());
       }
       return Response.ok().entity(service).header(HttpHeaders.CACHE_CONTROL, "no-cache").type(
          MediaType.APPLICATION_ATOM_XML).build();

@@ -16,32 +16,32 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xcmis.spi;
+package org.xcmis.spi.model;
 
-public class StorageInfo
+public class RepositoryShortInfo
 {
 
-   protected String storageId;
+   protected String repositoryId;
    
-   protected String storageName;
+   protected String repositoryName;
    
-   public StorageInfo(String repositoryId){
-      this.storageId = repositoryId;
+   public RepositoryShortInfo(String repositoryId){
+      this.repositoryId = repositoryId;
    }
    
-   public StorageInfo(String storageId, String storageName){
-      this.storageId = storageId;
-      this.storageName = storageName;
-   }
-
-   public String getStorageId()
-   {
-      return storageId;
+   public RepositoryShortInfo(String storageId, String storageName){
+      this.repositoryId = storageId;
+      this.repositoryName = storageName;
    }
 
-   public String getStorageName()
+   public String getRepositoryId()
    {
-      return storageName;
+      return repositoryId;
+   }
+
+   public String getRepositoryName()
+   {
+      return repositoryName;
    }
    
 }
