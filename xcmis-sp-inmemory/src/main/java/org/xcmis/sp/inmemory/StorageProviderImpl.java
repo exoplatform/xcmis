@@ -26,6 +26,7 @@ import org.exoplatform.services.log.Log;
 import org.picocontainer.Startable;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.InvalidArgumentException;
+import org.xcmis.spi.PermissionService;
 import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.StorageProvider;
 
@@ -36,8 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
-
-import javax.security.auth.login.LoginException;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
@@ -51,7 +50,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
    private final Map<String, StorageImpl> storageImpls = new HashMap<String, StorageImpl>();
 
    private final Map<String, StorageConfiguration> storagesConfig = new HashMap<String, StorageConfiguration>();
-   
+
    private RenditionManager renditionManager;
 
    public StorageProviderImpl(InitParams initParams)
@@ -103,7 +102,8 @@ public class StorageProviderImpl implements StorageProvider, Startable
       this.renditionManager = RenditionManager.getInstance();
       for (Entry<String, StorageConfiguration> configElement : storagesConfig.entrySet())
       {
-         storageImpls.put(configElement.getKey(), new StorageImpl(configElement.getValue(), renditionManager));
+         storageImpls.put(configElement.getKey(), new StorageImpl(configElement.getValue(), renditionManager,
+            new PermissionService()));
       }
    }
 

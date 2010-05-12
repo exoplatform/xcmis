@@ -21,6 +21,7 @@ package org.xcmis.sp.inmemory;
 
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.exoplatform.services.security.ConversationState;
 import org.xcmis.search.InvalidQueryException;
 import org.xcmis.search.SearchService;
 import org.xcmis.search.SearchServiceException;
@@ -51,6 +52,7 @@ import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.ObjectNotFoundException;
+import org.xcmis.spi.PermissionService;
 import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.RenditionManager;
@@ -172,10 +174,13 @@ public class StorageImpl implements Storage
 
    private final int maxItemsNumber;
 
-   public StorageImpl(StorageConfiguration configuration, RenditionManager manager)
+   private PermissionService permissionService;
+
+   public StorageImpl(StorageConfiguration configuration, RenditionManager manager, PermissionService permissionService)
    {
       this(configuration);
       this.renditionManager = manager;
+      this.permissionService = permissionService;
    }
 
    public StorageImpl(StorageConfiguration configuration)
@@ -360,82 +365,9 @@ public class StorageImpl implements Storage
    // TODO use PermissionService
    public AllowableActions calculateAllowableActions(ObjectData object)
    {
-      AllowableActions actions = new AllowableActions();
-      TypeDefinition type = object.getTypeDefinition();
-
-      RepositoryCapabilities capabilities = getRepositoryInfo().getCapabilities();
-
-      boolean isCheckedout = type.getBaseId() == BaseType.DOCUMENT //
-         && type.isVersionable() //
-         && ((DocumentData)object).isVersionSeriesCheckedOut();
-
-      actions.setCanGetProperties(true);
-
-      actions.setCanUpdateProperties(true); // TODO : need to check is it latest version ??
-
-      actions.setCanApplyACL(type.isControllableACL());
-
-      actions.setCanGetACL(type.isControllableACL());
-
-      actions.setCanApplyPolicy(type.isControllablePolicy());
-
-      actions.setCanGetAppliedPolicies(type.isControllablePolicy());
-
-      actions.setCanRemovePolicy(type.isControllablePolicy());
-
-      actions.setCanGetObjectParents(type.isFileable());
-
-      actions.setCanMoveObject(type.isFileable());
-
-      actions.setCanAddObjectToFolder(capabilities.isCapabilityMultifiling() //
-         && type.isFileable() //
-         && type.getBaseId() != BaseType.FOLDER);
-
-      actions.setCanRemoveObjectFromFolder(capabilities.isCapabilityUnfiling() //
-         && type.isFileable() //
-         && type.getBaseId() != BaseType.FOLDER);
-
-      actions.setCanGetDescendants(capabilities.isCapabilityGetDescendants() //
-         && type.getBaseId() == BaseType.FOLDER);
-
-      actions.setCanGetFolderTree(capabilities.isCapabilityGetFolderTree() //
-         && type.getBaseId() == BaseType.FOLDER);
-
-      actions.setCanCreateDocument(type.getBaseId() == BaseType.FOLDER);
-
-      actions.setCanCreateFolder(type.getBaseId() == BaseType.FOLDER);
-
-      actions.setCanDeleteTree(type.getBaseId() == BaseType.FOLDER);
-
-      actions.setCanGetChildren(type.getBaseId() == BaseType.FOLDER);
-
-      actions.setCanGetFolderParent(type.getBaseId() == BaseType.FOLDER);
-
-      actions.setCanGetContentStream(type.getBaseId() == BaseType.DOCUMENT //
-         && ((DocumentData)object).hasContent());
-
-      actions.setCanSetContentStream(type.getBaseId() == BaseType.DOCUMENT //
-         && type.getContentStreamAllowed() != ContentStreamAllowed.NOT_ALLOWED);
-
-      actions.setCanDeleteContentStream(type.getBaseId() == BaseType.DOCUMENT //
-         && type.getContentStreamAllowed() != ContentStreamAllowed.REQUIRED);
-
-      actions.setCanGetAllVersions(type.getBaseId() == BaseType.DOCUMENT);
-
-      actions.setCanGetRenditions(capabilities.getCapabilityRenditions() == CapabilityRendition.READ);
-
-      actions.setCanCheckIn(isCheckedout);
-
-      actions.setCanCancelCheckOut(isCheckedout);
-
-      actions.setCanCheckOut(!isCheckedout);
-
-      actions.setCanGetObjectRelationships(type.getBaseId() != BaseType.RELATIONSHIP);
-
-      actions.setCanCreateRelationship(type.getBaseId() != BaseType.RELATIONSHIP);
-
-      // TODO : applied policy, not empty folders, not latest versions may not be delete.
-      actions.setCanDeleteObject(true);
+      AllowableActions actions =
+         permissionService.calculateAllowableActions(object, ConversationState.getCurrent().getIdentity(),
+            getRepositoryInfo());
 
       return actions;
    }
