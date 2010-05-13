@@ -499,6 +499,15 @@ public class AtomCmisService implements ResourceContainer
             RepositoryInfoTypeElement repoInfoElement = ws.addExtension(AtomCMIS.REPOSITORY_INFO);
             repoInfoElement.addSimpleExtension(AtomCMIS.REPOSITORY_ID, info.getRepositoryId());
             repoInfoElement.addSimpleExtension(AtomCMIS.REPOSITORY_NAME, info.getRepositoryName());
+
+            String repoPath =
+               UriBuilder.fromUri(uriInfo.getBaseUri()).path(getClass()).path(info.getRepositoryId()).build()
+                  .toString();
+
+            String rootFolderId = info.getRootFolderId();
+            includeCollections(ws, info.getRepositoryId(), httpRequest, repoPath, rootFolderId);
+
+            includeURITemplates(ws, repoPath);
          }
       }
       return Response.ok().entity(service).header(HttpHeaders.CACHE_CONTROL, "no-cache").type(
@@ -677,8 +686,7 @@ public class AtomCmisService implements ResourceContainer
       return getFeed(repositoryId, httpRequest);
    }
 
-   protected Workspace addCmisRepository(HttpServletRequest httpRequest, Service service, String repositoryId,
-      URI baseUri)
+   private Workspace addCmisRepository(HttpServletRequest httpRequest, Service service, String repositoryId, URI baseUri)
    {
       RepositoryInfo repoInfo;
       Connection conn = null;
@@ -702,8 +710,20 @@ public class AtomCmisService implements ResourceContainer
       RepositoryInfoTypeElement repoInfoElement = ws.addExtension(AtomCMIS.REPOSITORY_INFO);
       repoInfoElement.build(repoInfo);
 
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
       String repoPath = UriBuilder.fromUri(baseUri).path(getClass()).path(repositoryId).build().toString();
+
+      includeCollections(ws, repositoryId, httpRequest, repoPath, repoInfo.getRootFolderId());
+
+      includeURITemplates(ws, repoPath);
+
+      return ws;
+
+   }
+
+   private void includeCollections(Workspace ws, String repositoryId, HttpServletRequest httpRequest, String repoPath,
+      String rootFolderId)
+   {
+      RequestContext request = initRequestContext(repositoryId, httpRequest);
       Collection<CollectionInfo> collectionsInfo = getCollectionsInfo(request);
       for (CollectionInfo collectionInfo : collectionsInfo)
       {
@@ -714,7 +734,7 @@ public class AtomCmisService implements ResourceContainer
          if (href.equals("/children"))
          {
             collectionType = AtomCMIS.COLLECTION_TYPE_ROOT;
-            path += '/' + repoInfo.getRootFolderId();
+            path += '/' + rootFolderId;
          }
          else if (href.equals("/types"))
          {
@@ -739,7 +759,10 @@ public class AtomCmisService implements ResourceContainer
             collection.addSimpleExtension(AtomCMIS.COLLECTION_TYPE, collectionType);
          }
       }
+   }
 
+   private void includeURITemplates(Workspace ws, String repoPath)
+   {
       // objectbyid template
       CmisUriTemplateType objectById = new CmisUriTemplateType();
       objectById.setMediatype(AtomCMIS.MEDIATYPE_ATOM_ENTRY);
@@ -796,9 +819,6 @@ public class AtomCmisService implements ResourceContainer
       typeById.setType(AtomCMIS.URITEMPLATE_TYPEBYID);
       UriTemplateTypeElement typeByIdElement = ws.addExtension(AtomCMIS.URITEMPLATE);
       typeByIdElement.build(typeById);
-
-      return ws;
-
    }
 
    protected Response createErrorResponse(Throwable t, int status)
@@ -856,7 +876,7 @@ public class AtomCmisService implements ResourceContainer
       return builder.entity(abderaResponse).build();
    }
 
-   protected RequestContext initRequestContext(String repositoryId, HttpServletRequest httpRequest)
+   private RequestContext initRequestContext(String repositoryId, HttpServletRequest httpRequest)
    {
       return new ServletRequestContext(provider, httpRequest)
       {
