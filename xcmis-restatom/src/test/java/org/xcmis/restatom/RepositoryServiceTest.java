@@ -50,6 +50,7 @@ public class RepositoryServiceTest extends BaseTest
       ContainerResponse resp = service("GET", requestURI, "http://localhost:8080/rest", null, null, writer);
 
       //      printBody(writer.getBody());
+
       assertEquals(200, resp.getStatus());
 
       DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
@@ -61,7 +62,7 @@ public class RepositoryServiceTest extends BaseTest
       assertEquals(1, length);
       for (int i = 0; i < length; i++)
       {
-         validateWorkspaceElement(workspaces.item(i));
+         validateWorkspaceElement(workspaces.item(i), true);
       }
    }
 
@@ -71,7 +72,8 @@ public class RepositoryServiceTest extends BaseTest
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
       ContainerResponse resp = service("GET", requestURI, "http://localhost:8080/rest", null, null, writer);
 
-      //      printBody(writer.getBody());
+      //            printBody(writer.getBody());
+
       assertEquals(200, resp.getStatus());
 
       DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
@@ -80,7 +82,7 @@ public class RepositoryServiceTest extends BaseTest
 
       org.w3c.dom.Node workspace = getNode("/app:service/app:workspace", xmlDoc);
       assertEquals(cmisRepositoryId, getStringElement("cmisra:repositoryInfo/cmis:repositoryId", workspace));
-      validateWorkspaceElement(workspace);
+      validateWorkspaceElement(workspace, false);
    }
 
    public void testCapability() throws Exception
@@ -136,29 +138,35 @@ public class RepositoryServiceTest extends BaseTest
 
    }
 
-   private void validateWorkspaceElement(org.w3c.dom.Node workspace) throws Exception
+   private void validateWorkspaceElement(org.w3c.dom.Node workspace, boolean isShortInfo) throws Exception
    {
       assertTrue("Not found xml element " + "atom:title", hasElementValue("atom:title", workspace));
       assertTrue("Not found xml element " + "cmisra:repositoryInfo",
          hasElementValue("cmisra:repositoryInfo", workspace));
       assertTrue("Not found xml element " + "cmisra:repositoryInfo/cmis:repositoryId", hasElementValue(
          "cmisra:repositoryInfo/cmis:repositoryId", workspace));
-      assertTrue("Not found xml element " + "cmisra:repositoryInfo/cmis:cmisVersionSupported", hasElementValue(
-         "cmisra:repositoryInfo/cmis:cmisVersionSupported", workspace));
-      assertTrue("Not found xml element " + "cmisra:repositoryInfo/cmis:capabilities", hasElementValue(
-         "cmisra:repositoryInfo/cmis:capabilities", workspace));
+      assertTrue("Not found xml element " + "cmisra:repositoryInfo/cmis:repositoryName", hasElementValue(
+         "cmisra:repositoryInfo/cmis:repositoryName", workspace));
 
-      NodeList templates = getNodeSet("cmisra:uritemplate", workspace);
-      int length = templates.getLength();
-      List<String> list = new ArrayList<String>();
-      for (int i = 0; i < length; i++)
+      if (!isShortInfo)
       {
-         org.w3c.dom.Node template = templates.item(i);
-         list.add(getStringElement("cmisra:type", template));
+         assertTrue("Not found xml element " + "cmisra:repositoryInfo/cmis:cmisVersionSupported", hasElementValue(
+            "cmisra:repositoryInfo/cmis:cmisVersionSupported", workspace));
+         assertTrue("Not found xml element " + "cmisra:repositoryInfo/cmis:capabilities", hasElementValue(
+            "cmisra:repositoryInfo/cmis:capabilities", workspace));
+
+         NodeList templates = getNodeSet("cmisra:uritemplate", workspace);
+         int length = templates.getLength();
+         List<String> list = new ArrayList<String>();
+         for (int i = 0; i < length; i++)
+         {
+            org.w3c.dom.Node template = templates.item(i);
+            list.add(getStringElement("cmisra:type", template));
+         }
+         assertTrue("URI Template 'objectbyid' not found", list.contains("objectbyid"));
+         assertTrue("URI Template 'objectbypath' not found", list.contains("objectbypath"));
+         assertTrue("URI Template 'typebyid' not found", list.contains("typebyid"));
       }
-      assertTrue("URI Template 'objectbyid' not found", list.contains("objectbyid"));
-      assertTrue("URI Template 'objectbypath' not found", list.contains("objectbypath"));
-      assertTrue("URI Template 'typebyid' not found", list.contains("typebyid"));
    }
 
 }

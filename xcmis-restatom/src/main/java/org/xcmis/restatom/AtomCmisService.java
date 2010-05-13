@@ -42,7 +42,6 @@ import org.xcmis.restatom.abdera.UriTemplateTypeElement;
 import org.xcmis.restatom.types.CmisUriTemplateType;
 import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
-import org.xcmis.spi.model.RepositoryShortInfo;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
@@ -51,6 +50,7 @@ import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.AccessControlPropagation;
 import org.xcmis.spi.model.AllowableActions;
 import org.xcmis.spi.model.RepositoryInfo;
+import org.xcmis.spi.model.RepositoryShortInfo;
 import org.xcmis.spi.model.UnfileObject;
 
 import java.io.IOException;
@@ -485,13 +485,21 @@ public class AtomCmisService implements ResourceContainer
    @GET
    public Response getRepositories(@Context HttpServletRequest httpRequest, @Context UriInfo uriInfo)
    {
-      Set<RepositoryShortInfo> entries = CmisRegistry.getInstance().getStorageInfos();
-
       Service service = AbderaFactory.getInstance().getFactory().newService();
       service.declareNS(AtomCMIS.CMISRA_NS_URI, AtomCMIS.CMISRA_PREFIX);
-      for (RepositoryShortInfo info : entries)
+
+      Set<RepositoryShortInfo> shortInfos = CmisRegistry.getInstance().getStorageInfos();
+
+      if (shortInfos != null && !shortInfos.isEmpty())
       {
-         addCmisRepository(httpRequest, service, info.getRepositoryId(), uriInfo.getBaseUri());
+         for (RepositoryShortInfo info : shortInfos)
+         {
+            Workspace ws = service.addWorkspace(info.getRepositoryId());
+            ws.setTitle(info.getRepositoryName());
+            RepositoryInfoTypeElement repoInfoElement = ws.addExtension(AtomCMIS.REPOSITORY_INFO);
+            repoInfoElement.addSimpleExtension(AtomCMIS.REPOSITORY_ID, info.getRepositoryId());
+            repoInfoElement.addSimpleExtension(AtomCMIS.REPOSITORY_NAME, info.getRepositoryName());
+         }
       }
       return Response.ok().entity(service).header(HttpHeaders.CACHE_CONTROL, "no-cache").type(
          MediaType.APPLICATION_ATOM_XML).build();

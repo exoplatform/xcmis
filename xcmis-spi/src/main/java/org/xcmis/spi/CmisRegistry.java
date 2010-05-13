@@ -31,8 +31,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.xcmis.spi.model.RepositoryShortInfo;
 
-
-
 /**
  * @version $Id:$
  */
@@ -99,13 +97,14 @@ public class CmisRegistry
     * @return storages iDs if no one storages configured than empty set returned
     *         never null
     */
-   // TODO : short info about storages, e.g. CmisRepositoryEntryType
    public final Set<RepositoryShortInfo> getStorageInfos()
    {
-      Set <RepositoryShortInfo> set = new HashSet<RepositoryShortInfo>();
+      Set<RepositoryShortInfo> set = new HashSet<RepositoryShortInfo>();
       Iterator<String> it = storageProviders.keySet().iterator();
-      while (it.hasNext()){
-         set.add(new RepositoryShortInfo(it.next()));
+      while (it.hasNext())
+      {
+         String id = it.next();
+         set.add(new RepositoryShortInfo(id, id));
       }
       return Collections.unmodifiableSet(set);
    }
