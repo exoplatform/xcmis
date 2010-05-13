@@ -41,6 +41,8 @@ public class RepositoriesReceivedEvent extends GwtEvent<RepositoriesReceivedHand
    public static final GwtEvent.Type<RepositoriesReceivedHandler> TYPE = 
       new GwtEvent.Type<RepositoriesReceivedHandler>();
 
+   private String serviceUrl;
+   
    /**
     * CMIS repositories
     */
@@ -49,9 +51,10 @@ public class RepositoriesReceivedEvent extends GwtEvent<RepositoriesReceivedHand
    /**
     * @param repositories cmisService
     */
-   public RepositoriesReceivedEvent(CmisRepositories repositories)
+   public RepositoriesReceivedEvent(String serviceUrl, CmisRepositories repositories)
    {
       this.repositories = repositories;
+      this.serviceUrl = serviceUrl;
    }
    
    /**
@@ -84,4 +87,11 @@ public class RepositoriesReceivedEvent extends GwtEvent<RepositoriesReceivedHand
       return TYPE;
    }
 
+   /**
+    * @return the serviceUrl repositories end point location
+    */
+   public String getServiceUrl()
+   {
+      return serviceUrl;
+   }
 }

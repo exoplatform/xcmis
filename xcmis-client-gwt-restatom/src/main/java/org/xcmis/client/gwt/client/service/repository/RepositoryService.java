@@ -83,7 +83,7 @@ public class RepositoryService
    public void getRepositories(String url)
    {
       CmisRepositories cmisService = new CmisRepositories();
-      RepositoriesReceivedEvent event = new RepositoriesReceivedEvent(cmisService);
+      RepositoriesReceivedEvent event = new RepositoriesReceivedEvent(url, cmisService);
       RepositoriesFailedEvent failEvent = new RepositoriesFailedEvent(url);
       RepositoriesUnmarshaller unmarshaller = new RepositoriesUnmarshaller(cmisService);
       AsyncRequestCallback callback = new AsyncRequestCallback(eventBus, unmarshaller, event, failEvent);

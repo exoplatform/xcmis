@@ -67,7 +67,7 @@ public class RepositoriesParser
             CmisRepositoryInfo repositoryInfo = new CmisRepositoryInfo();
             RepositoryInfoParser.parse(node, repositoryInfo);
             repositoryInfoList.add(repositoryInfo);
-            repositoryInfoList.get(i).setCollections(CollectionsParser.parse(node));
+            repositoryInfo.setCollections(CollectionsParser.parse(node));
          }
       }
       return repositoryInfoList;

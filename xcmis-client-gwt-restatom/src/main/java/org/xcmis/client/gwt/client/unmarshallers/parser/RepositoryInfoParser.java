@@ -146,5 +146,7 @@ public class RepositoryInfoParser
             }
          }
       }
+      repositoryInfo.setCollections(CollectionsParser.parse(node));
+      
    }
 }
