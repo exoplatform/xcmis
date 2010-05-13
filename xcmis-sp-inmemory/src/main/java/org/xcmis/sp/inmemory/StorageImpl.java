@@ -362,7 +362,6 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   // TODO use PermissionService
    public AllowableActions calculateAllowableActions(ObjectData object)
    {
       AllowableActions actions =
