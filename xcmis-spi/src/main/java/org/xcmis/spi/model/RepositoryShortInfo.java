@@ -25,6 +25,8 @@ public class RepositoryShortInfo
    
    protected String repositoryName;
    
+   protected String rootFolderId;
+
    public RepositoryShortInfo(String repositoryId){
       this.repositoryId = repositoryId;
    }
@@ -42,6 +44,16 @@ public class RepositoryShortInfo
    public String getRepositoryName()
    {
       return repositoryName;
+   }
+   
+   public String getRootFolderId()
+   {
+      return rootFolderId;
+   }
+
+   public void setRootFolderId(String rootFolderId)
+   {
+      this.rootFolderId = rootFolderId;
    }
    
 }
