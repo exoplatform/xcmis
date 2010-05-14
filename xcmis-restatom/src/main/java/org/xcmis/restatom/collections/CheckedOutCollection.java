@@ -174,7 +174,6 @@ public class CheckedOutCollection extends CmisObjectCollection
          return id;
       }
       // Need this for getCheckedOutDocuments when folderId is not specified.
-      // was: return "cmis:checkedout:" + getRepositoryId(request);
       return null;
    }
 
