@@ -27,10 +27,10 @@ package org.xcmis.spi;
  * token will be passed to caller of
  * {@link Connection#getContentChanges(ChangeLogTokenHolder, boolean, String, boolean, boolean, int)}
  * . After that caller can use this token to get next set of change event.
- * 
+ *
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: ChangeLogTokenHolder.java 316 2010-03-09 15:20:28Z andrew00x $
  */
-public class ChangeLogTokenHolder extends AbstractHolder<String>
+public final class ChangeLogTokenHolder extends TokenHolder<String>
 {
 }

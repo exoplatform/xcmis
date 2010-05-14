@@ -19,8 +19,6 @@
 
 package org.xcmis.wssoap.impl;
 
-import java.util.List;
-
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.core.CmisAccessControlListType;
@@ -29,10 +27,12 @@ import org.xcmis.messaging.CmisACLType;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.soap.ACLServicePort;
 import org.xcmis.soap.CmisException;
-import org.xcmis.spi.AccessControlEntry;
-import org.xcmis.spi.AccessControlPropagation;
+import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
-import org.xcmis.spi.StorageProvider;
+import org.xcmis.spi.model.AccessControlEntry;
+import org.xcmis.spi.model.AccessControlPropagation;
+
+import java.util.List;
 
 /**
  * @author <a href="mailto:max.shaposhnik@exoplatform.com">Max Shaposhnik</a>
@@ -51,17 +51,12 @@ public class ACLServicePortImpl implements ACLServicePort
    /** Logger. */
    private static final Log LOG = ExoLogger.getLogger(ACLServicePortImpl.class);
 
-   /** StorageProvider. */
-   private StorageProvider storageProvider;
-
    /**
-    * Constructs instance of <code>ACLServicePortImpl</code>. 
-    * 
-    * @param storageProvider StorageProvider
+    * Constructs instance of <code>ACLServicePortImpl</code>.
+    *
     */
-   public ACLServicePortImpl(StorageProvider storageProvider)
+   public ACLServicePortImpl()
    {
-      this.storageProvider = storageProvider;
    }
 
    /**
@@ -72,14 +67,16 @@ public class ACLServicePortImpl implements ACLServicePort
       throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation applyACL");
+      }
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
          conn.applyACL(objectId, //
-            TypeConverter.convertAccessControlEntryList(addACEs.getPermission()), //
-            TypeConverter.convertAccessControlEntryList(removeACEs.getPermission()), //
+            TypeConverter.getAccessControlEntryList(addACEs.getPermission()), //
+            TypeConverter.getAccessControlEntryList(removeACEs.getPermission()), //
             aclPropagation == null ? AccessControlPropagation.REPOSITORYDETERMINED : AccessControlPropagation
                .fromValue(aclPropagation.value()));
          CmisACLType res = new CmisACLType();
@@ -87,13 +84,15 @@ public class ACLServicePortImpl implements ACLServicePort
       }
       catch (Exception e)
       {
-         e.printStackTrace();
          LOG.error("Apply ACL error: " + e.getMessage());
          throw ExceptionFactory.generateException(e);
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -104,12 +103,15 @@ public class ACLServicePortImpl implements ACLServicePort
       CmisExtensionType extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation getACL");
+      }
       Connection conn = null;
 
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          List<AccessControlEntry> list =
             conn.getACL(objectId, onlyBasicPermissions == null ? true : onlyBasicPermissions);
          CmisAccessControlListType type = TypeConverter.getCmisAccessControlListType(list);
@@ -124,7 +126,10 @@ public class ACLServicePortImpl implements ACLServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 

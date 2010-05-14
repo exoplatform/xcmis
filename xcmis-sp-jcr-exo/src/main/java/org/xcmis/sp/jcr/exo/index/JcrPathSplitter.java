@@ -31,6 +31,7 @@ import javax.jcr.RepositoryException;
  * @version $Id: exo-jboss-codetemplates.xml 34360 2009-07-22 23:58:59Z ksm $
  *
  */
+@Deprecated
 public class JcrPathSplitter implements PathSplitter<String>
 {
    /**
@@ -42,6 +43,7 @@ public class JcrPathSplitter implements PathSplitter<String>
 
    /**
     * 
+    * @param locationFactory LocationFactory
     */
    public JcrPathSplitter(LocationFactory locationFactory)
    {

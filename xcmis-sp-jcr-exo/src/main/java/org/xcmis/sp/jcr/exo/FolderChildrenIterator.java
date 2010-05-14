@@ -22,10 +22,11 @@ package org.xcmis.sp.jcr.exo;
 import org.exoplatform.services.jcr.impl.core.NodeImpl;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.spi.BaseType;
+import org.xcmis.sp.jcr.exo.index.IndexListener;
 import org.xcmis.spi.ItemsIterator;
-import org.xcmis.spi.TypeDefinition;
-import org.xcmis.spi.data.ObjectData;
+import org.xcmis.spi.ObjectData;
+import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.TypeDefinition;
 
 import java.util.HashSet;
 import java.util.NoSuchElementException;
@@ -61,12 +62,16 @@ class FolderChildrenIterator implements ItemsIterator<ObjectData>
    /** Next CMIS item instance. */
    protected ObjectData next;
 
+   private final IndexListener indexListener;
+
    /**
     * @param iter back-end NodeIterator
+    * @param indexListener the index listener
     */
-   public FolderChildrenIterator(NodeIterator iter)
+   public FolderChildrenIterator(NodeIterator iter, IndexListener indexListener)
    {
       this.iter = iter;
+      this.indexListener = indexListener;
       fetchNext();
    }
 
@@ -148,18 +153,39 @@ class FolderChildrenIterator implements ItemsIterator<ObjectData>
             {
                node = node.getProperty("jcr:content").getNode();
             }
+            else if (node.isNodeType("xcmis:unfiledObject"))
+            {
+               NodeIterator child = node.getNodes();
+               if (child.hasNext())
+               {
+                  node = child.nextNode();
+               }
+            }
 
             TypeDefinition type = JcrTypeHelper.getTypeDefinition(node.getPrimaryNodeType(), true);
 
             if (type.getBaseId() == BaseType.DOCUMENT)
             {
-               next = new DocumentImpl(type, node);
+               if (!node.isNodeType(JcrCMIS.CMIS_MIX_DOCUMENT))
+               {
+                  next = new JcrFile(type, node, null, indexListener);
+               }
+               else
+               {
+                  next = new DocumentDataImpl(type, node, indexListener);
+               }
             }
             else if (type.getBaseId() == BaseType.FOLDER)
             {
-               next = new FolderImpl(type, node);
+               if (!node.isNodeType(JcrCMIS.CMIS_MIX_FOLDER))
+               {
+                  next = new JcrFolder(type, node, indexListener);
+               }
+               else
+               {
+                  next = new FolderDataImpl(type, node, indexListener);
+               }
             }
-
          }
          catch (NotSupportedNodeTypeException iae)
          {
@@ -169,7 +195,6 @@ class FolderChildrenIterator implements ItemsIterator<ObjectData>
                // unsupported by xCMIS nodes met.
                LOG.warn("Unable get next object . " + iae.getMessage());
             }
-            LOG.warn("Unable get next object . " + iae.getMessage());
          }
          catch (javax.jcr.RepositoryException re)
          {
@@ -177,5 +202,4 @@ class FolderChildrenIterator implements ItemsIterator<ObjectData>
          }
       }
    }
-
 }

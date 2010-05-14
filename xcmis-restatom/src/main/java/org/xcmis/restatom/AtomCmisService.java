@@ -40,17 +40,18 @@ import org.xcmis.restatom.abdera.AllowableActionsElement;
 import org.xcmis.restatom.abdera.RepositoryInfoTypeElement;
 import org.xcmis.restatom.abdera.UriTemplateTypeElement;
 import org.xcmis.restatom.types.CmisUriTemplateType;
-import org.xcmis.spi.AccessControlEntry;
-import org.xcmis.spi.AccessControlPropagation;
-import org.xcmis.spi.AllowableActions;
+import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.RepositoryInfo;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.StorageProvider;
-import org.xcmis.spi.UnfileObject;
 import org.xcmis.spi.UpdateConflictException;
+import org.xcmis.spi.model.AccessControlEntry;
+import org.xcmis.spi.model.AccessControlPropagation;
+import org.xcmis.spi.model.AllowableActions;
+import org.xcmis.spi.model.RepositoryInfo;
+import org.xcmis.spi.model.RepositoryShortInfo;
+import org.xcmis.spi.model.UnfileObject;
 
 import java.io.IOException;
 import java.net.URI;
@@ -95,15 +96,13 @@ public class AtomCmisService implements ResourceContainer
    protected ProviderImpl provider;
 
    /** The storage provider. */
-   protected StorageProvider storageProvider;
 
    /**
     * Instantiates a new atom cmis service.
     */
-   public AtomCmisService(StorageProvider storageProvider)
+   public AtomCmisService()
    {
-      this.storageProvider = storageProvider;
-      provider = new ProviderImpl(storageProvider);
+      provider = new ProviderImpl();
       provider.init(AbderaFactory.getInstance(), new HashMap<String, String>());
    }
 
@@ -116,7 +115,8 @@ public class AtomCmisService implements ResourceContainer
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          RequestContext request = initRequestContext(repositoryId, httpRequest);
          Document doc = request.getDocument();
          List<AccessControlEntryTypeElement> listEl = doc.getRoot().getElements();
@@ -162,7 +162,7 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @POST
-   @Path("{repositoryId}/checkedout{rubbish:(/)?}{documentId:.*}")
+   @Path("{repositoryId}/checkedout")
    public Response checkOut(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
       throws Exception
    {
@@ -243,7 +243,8 @@ public class AtomCmisService implements ResourceContainer
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          Boolean deleteAllVersions = true; // TODO
          conn.deleteTree(folderId, deleteAllVersions, unfileObject, continueOnFailure);
          return Response.noContent().build();
@@ -291,7 +292,8 @@ public class AtomCmisService implements ResourceContainer
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          List<AccessControlEntry> list = conn.getACL(objectId, onlyBasicPermissions);
          FOMExtensibleElement accessControlListTypeElement =
             AbderaFactory.getInstance().getFactory().newElement(AtomCMIS.ACL);
@@ -325,7 +327,8 @@ public class AtomCmisService implements ResourceContainer
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          AllowableActions result = conn.getAllowableActions(objectId);
          AllowableActionsElement el = AbderaFactory.getInstance().getFactory().newElement(AtomCMIS.ALLOWABLE_ACTIONS);
          el.build(result);
@@ -373,7 +376,8 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @GET
-   @Path("{repositoryId}/versions/{versionSeriesId}")
+   // @Path("{repositoryId}/versions/{versionSeriesId}")
+   @Path("{repositoryId}/versions/{versionSeriesId:.+}")
    @Produces("application/atom+xml;type=entry")
    public Response getAllVersions(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId)
@@ -390,7 +394,7 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @GET
-   @Path("{repositoryId}/checkedout{rubbish:(/)?}{folderId:.*}")
+   @Path("{repositoryId}/checkedout")
    public Response getCheckedOut(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
    {
       return getFeed(repositoryId, httpRequest);
@@ -445,7 +449,7 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @GET
-   @Path("{repositoryId}/objectbypath/{path:.*}")
+   @Path("{repositoryId}/objectbypath")
    @Produces("application/atom+xml;type=entry")
    public Response getObjectByPath(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId)
@@ -481,12 +485,30 @@ public class AtomCmisService implements ResourceContainer
    @GET
    public Response getRepositories(@Context HttpServletRequest httpRequest, @Context UriInfo uriInfo)
    {
-      Set<String> entries = storageProvider.getStorageIDs();
       Service service = AbderaFactory.getInstance().getFactory().newService();
       service.declareNS(AtomCMIS.CMISRA_NS_URI, AtomCMIS.CMISRA_PREFIX);
-      for (String storageId : entries)
+
+      Set<RepositoryShortInfo> shortInfos = CmisRegistry.getInstance().getStorageInfos();
+
+      if (shortInfos != null && !shortInfos.isEmpty())
       {
-         addCmisRepository(httpRequest, service, storageId, uriInfo.getBaseUri());
+         for (RepositoryShortInfo info : shortInfos)
+         {
+            Workspace ws = service.addWorkspace(info.getRepositoryId());
+            ws.setTitle(info.getRepositoryName());
+            RepositoryInfoTypeElement repoInfoElement = ws.addExtension(AtomCMIS.REPOSITORY_INFO);
+            repoInfoElement.addSimpleExtension(AtomCMIS.REPOSITORY_ID, info.getRepositoryId());
+            repoInfoElement.addSimpleExtension(AtomCMIS.REPOSITORY_NAME, info.getRepositoryName());
+
+            String repoPath =
+               UriBuilder.fromUri(uriInfo.getBaseUri()).path(getClass()).path(info.getRepositoryId()).build()
+                  .toString();
+
+            String rootFolderId = info.getRootFolderId();
+            includeCollections(ws, info.getRepositoryId(), httpRequest, repoPath, rootFolderId);
+
+            includeURITemplates(ws, repoPath);
+         }
       }
       return Response.ok().entity(service).header(HttpHeaders.CACHE_CONTROL, "no-cache").type(
          MediaType.APPLICATION_ATOM_XML).build();
@@ -537,6 +559,18 @@ public class AtomCmisService implements ResourceContainer
    @POST
    @Path("{repositoryId}/query")
    public Response query(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
+   {
+      RequestContext request = initRequestContext(repositoryId, httpRequest);
+      ResponseContext abderaResponse = getCollection(request).getFeed(request);
+      ResponseBuilder builder = Response.status(abderaResponse.getStatus() == 200 ? 201 : abderaResponse.getStatus());
+      copyAbderaHeaders(builder, abderaResponse);
+      builder.header(HttpHeaders.CACHE_CONTROL, "no-cache");
+      return builder.entity(abderaResponse).build();
+   }
+
+   @GET
+   @Path("{repositoryId}/query")
+   public Response queryGET(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
    {
       return getFeed(repositoryId, httpRequest);
    }
@@ -606,7 +640,7 @@ public class AtomCmisService implements ResourceContainer
             }
          }
       }
-      // XXX 
+      // XXX
       throw new WebApplicationException(new InvalidArgumentException("Content of document is missing."), 400);
    }
 
@@ -637,14 +671,29 @@ public class AtomCmisService implements ResourceContainer
       }
    }
 
-   protected Workspace addCmisRepository(HttpServletRequest httpRequest, Service service, String repositoryId,
-      URI baseUri)
+   @POST
+   @Path("{repositoryId}/unfiled")
+   public Response unfile(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
+      throws Exception
+   {
+      return createItem(repositoryId, httpRequest);
+   }
+
+   @GET
+   @Path("{repositoryId}/unfiled")
+   public Response getUnfiled(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
+   {
+      return getFeed(repositoryId, httpRequest);
+   }
+
+   private Workspace addCmisRepository(HttpServletRequest httpRequest, Service service, String repositoryId, URI baseUri)
    {
       RepositoryInfo repoInfo;
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          repoInfo = conn.getStorage().getRepositoryInfo();
       }
       catch (InvalidArgumentException iae)
@@ -661,8 +710,20 @@ public class AtomCmisService implements ResourceContainer
       RepositoryInfoTypeElement repoInfoElement = ws.addExtension(AtomCMIS.REPOSITORY_INFO);
       repoInfoElement.build(repoInfo);
 
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
       String repoPath = UriBuilder.fromUri(baseUri).path(getClass()).path(repositoryId).build().toString();
+
+      includeCollections(ws, repositoryId, httpRequest, repoPath, repoInfo.getRootFolderId());
+
+      includeURITemplates(ws, repoPath);
+
+      return ws;
+
+   }
+
+   private void includeCollections(Workspace ws, String repositoryId, HttpServletRequest httpRequest, String repoPath,
+      String rootFolderId)
+   {
+      RequestContext request = initRequestContext(repositoryId, httpRequest);
       Collection<CollectionInfo> collectionsInfo = getCollectionsInfo(request);
       for (CollectionInfo collectionInfo : collectionsInfo)
       {
@@ -673,7 +734,7 @@ public class AtomCmisService implements ResourceContainer
          if (href.equals("/children"))
          {
             collectionType = AtomCMIS.COLLECTION_TYPE_ROOT;
-            path += '/' + repoInfo.getRootFolderId();
+            path += '/' + rootFolderId;
          }
          else if (href.equals("/types"))
          {
@@ -687,6 +748,10 @@ public class AtomCmisService implements ResourceContainer
          {
             collectionType = AtomCMIS.COLLECTION_TYPE_QUERY;
          }
+         else if (href.equals("/unfiled"))
+         {
+            collectionType = AtomCMIS.COLLECTION_TYPE_UNFILED;
+         }
 
          if (collectionType != null)
          {
@@ -694,11 +759,10 @@ public class AtomCmisService implements ResourceContainer
             collection.addSimpleExtension(AtomCMIS.COLLECTION_TYPE, collectionType);
          }
       }
+   }
 
-      // XXX : Does not support 'Unfiling' but need add it.
-      org.apache.abdera.model.Collection collection = ws.addCollection("Unfiled collection", repoPath + "/unfiled");
-      collection.addSimpleExtension(AtomCMIS.COLLECTION_TYPE, AtomCMIS.COLLECTION_TYPE_UNFILED);
-
+   private void includeURITemplates(Workspace ws, String repoPath)
+   {
       // objectbyid template
       CmisUriTemplateType objectById = new CmisUriTemplateType();
       objectById.setMediatype(AtomCMIS.MEDIATYPE_ATOM_ENTRY);
@@ -709,38 +773,44 @@ public class AtomCmisService implements ResourceContainer
          .append("includeAllowableActions={includeAllowableActions}&") //
          .append("includePolicyIds={includePolicyIds}&") //
          .append("includeRelationships={includeRelationships}&") //
-         .append("includeACL={includeACL}").toString());
+         .append("includeACL={includeACL}&") //
+         .append("renditionFilter={renditionFilter}").toString());
       objectById.setType(AtomCMIS.URITEMPLATE_OBJECTBYID);
       UriTemplateTypeElement objectByIdElement = ws.addExtension(AtomCMIS.URITEMPLATE);
       objectByIdElement.build(objectById);
 
       // objectbypath template
-      CmisUriTemplateType folderByPath = new CmisUriTemplateType();
-      folderByPath.setMediatype(AtomCMIS.MEDIATYPE_ATOM_ENTRY);
-      folderByPath.setTemplate(new StringBuilder() //
+      CmisUriTemplateType objectByPath = new CmisUriTemplateType();
+      objectByPath.setMediatype(AtomCMIS.MEDIATYPE_ATOM_ENTRY);
+      objectByPath.setTemplate(new StringBuilder() //
          .append(repoPath) //
-         .append("/objectbypath/{objectpath}?")//
+         .append("/objectbypath?")//
+         .append("path={path}&")//
          .append("filter={filter}&")//
          .append("includeAllowableActions={includeAllowableActions}&")//
          .append("includePolicyIds={includePolicyIds}&")//
          .append("includeRelationships={includeRelationships}&")//
-         .append("includeACL={includeACL}").toString());
-      folderByPath.setType(AtomCMIS.URITEMPLATE_OBJECTBYPATH);
+         .append("includeACL={includeACL}&") //
+         .append("renditionFilter={renditionFilter}").toString());
+      objectByPath.setType(AtomCMIS.URITEMPLATE_OBJECTBYPATH);
       UriTemplateTypeElement folderByPathElement = ws.addExtension(AtomCMIS.URITEMPLATE);
-      folderByPathElement.build(folderByPath);
+      folderByPathElement.build(objectByPath);
 
-      //      // query template
-      //      CmisUriTemplateType query = new CmisUriTemplateType();
-      //      query.setMediatype(AtomCMIS.MEDIATYPE_ATOM_FEED);
-      //      query.setTemplate(repoPath + "/query?"//
-      //         + "q={q}&"//
-      //         + "searchAllVersions={searchAllVersions}&"//
-      //         + "maxItems={maxItems}&skipCount={skipCount}&"//
-      //         + "includeAllowableActions={includeAllowableActions}=&"//
-      //         + "includeRelationships={includeRelationships}");
-      //      query.setType(AtomCMIS.URITEMPLATE_QUERY);
-      //      UriTemplateTypeElement queryElement = ws.addExtension(AtomCMIS.URITEMPLATE);
-      //      queryElement.build(query);
+      // query template
+      CmisUriTemplateType query = new CmisUriTemplateType();
+      query.setMediatype(AtomCMIS.MEDIATYPE_ATOM_FEED);
+      query.setTemplate(new StringBuilder() //
+         .append(repoPath) //
+         .append("/query?")//
+         .append("q={q}&")//
+         .append("searchAllVersions={searchAllVersions}&") //
+         .append("maxItems={maxItems}&") //
+         .append("skipCount={skipCount}&") //
+         .append("includeAllowableActions={includeAllowableActions}=&")//
+         .append("includeRelationships={includeRelationships}").toString());
+      query.setType(AtomCMIS.URITEMPLATE_QUERY);
+      UriTemplateTypeElement queryElement = ws.addExtension(AtomCMIS.URITEMPLATE);
+      queryElement.build(query);
 
       // typebyid template
       CmisUriTemplateType typeById = new CmisUriTemplateType();
@@ -749,9 +819,6 @@ public class AtomCmisService implements ResourceContainer
       typeById.setType(AtomCMIS.URITEMPLATE_TYPEBYID);
       UriTemplateTypeElement typeByIdElement = ws.addExtension(AtomCMIS.URITEMPLATE);
       typeByIdElement.build(typeById);
-
-      return ws;
-
    }
 
    protected Response createErrorResponse(Throwable t, int status)
@@ -809,11 +876,10 @@ public class AtomCmisService implements ResourceContainer
       return builder.entity(abderaResponse).build();
    }
 
-   protected RequestContext initRequestContext(String repositoryId, HttpServletRequest httpRequest)
+   private RequestContext initRequestContext(String repositoryId, HttpServletRequest httpRequest)
    {
       return new ServletRequestContext(provider, httpRequest)
       {
-
          @Override
          public String getTargetPath()
          {
@@ -821,7 +887,6 @@ public class AtomCmisService implements ResourceContainer
             String bpath = getTargetBasePath();
             return uri.substring(bpath.length());
          }
-
       };
    }
 

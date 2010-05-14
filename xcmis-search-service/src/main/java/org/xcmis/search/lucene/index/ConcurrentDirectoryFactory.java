@@ -29,46 +29,6 @@ import java.io.IOException;
  */
 public interface ConcurrentDirectoryFactory
 {
-
-   /**
-    * Set lock on directory.
-    * 
-    * @param dir - directory
-    */
-   // void lock(String dir);
-   /**
-    * Try set lock on directory.
-    * 
-    * @param dir - directory
-    * @return true if locked, else in other case
-    */
-   // boolean tryLock(String dir);
-   /**
-    * Set read lock on directory.
-    * 
-    * @param dir -directory
-    */
-   // void lockRead(String dir);
-   /**
-    * Unlock directory.
-    * 
-    * @param dir - directory
-    */
-   // void unlock(String dir);
-   /**
-    * Release read lock from directory.
-    * 
-    * @param dir - directory
-    */
-   // void unlockRead(String dir);
-   /**
-    * Returns Lock according to directory. Creates new lock if map do not
-    * contains record for directory path.
-    * 
-    * @param dir - directory
-    * @return Lock
-    */
-   // Lock getLockByPath(String dir);
    /**
     * Create file with locking of <code>dirCount</code> parent directories.
     * 

@@ -23,32 +23,34 @@ import org.exoplatform.services.jcr.access.AccessControlList;
 import org.exoplatform.services.jcr.access.PermissionType;
 import org.exoplatform.services.jcr.core.ExtendedNode;
 import org.exoplatform.services.jcr.core.ExtendedSession;
-import org.xcmis.spi.AccessControlEntry;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.BaseContentStream;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ConstraintException;
+import org.xcmis.spi.ContentStream;
+import org.xcmis.spi.DocumentData;
+import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsIterator;
+import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.PropertyDefinition;
+import org.xcmis.spi.PolicyData;
+import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.Storage;
-import org.xcmis.spi.TypeDefinition;
-import org.xcmis.spi.UnfileObject;
-import org.xcmis.spi.VersioningState;
-import org.xcmis.spi.data.BaseContentStream;
-import org.xcmis.spi.data.ContentStream;
-import org.xcmis.spi.data.Document;
-import org.xcmis.spi.data.Folder;
-import org.xcmis.spi.data.ObjectData;
-import org.xcmis.spi.data.Policy;
-import org.xcmis.spi.data.Relationship;
-import org.xcmis.spi.impl.AccessControlEntryImpl;
-import org.xcmis.spi.object.Property;
-import org.xcmis.spi.object.impl.StringProperty;
+import org.xcmis.spi.VersioningException;
+import org.xcmis.spi.model.AccessControlEntry;
+import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.PropertyDefinition;
+import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.model.UnfileObject;
+import org.xcmis.spi.model.VersioningState;
+import org.xcmis.spi.model.impl.StringProperty;
+import org.xcmis.spi.utils.MimeType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -67,20 +69,21 @@ public class StorageTest extends BaseTest
 
    protected Storage storage;
 
-   protected Folder rootFolder;
+   protected FolderData rootFolder;
 
+   @Override
    public void setUp() throws Exception
    {
       super.setUp();
-      storage = storageProvider.getConnection(cmisRepositoryId, null).getStorage();
-      rootFolder = (Folder)storage.getObject(JcrCMIS.ROOT_FOLDER_ID);
+      storage = storageProvider.getConnection(cmisRepositoryId).getStorage();
+      rootFolder = (FolderData)storage.getObjectById(JcrCMIS.ROOT_FOLDER_ID);
    }
 
    public void testApplyACL() throws Exception
    {
-      Document document = createDocument(rootFolder, "applyACLTestDocument", "cmis:document", null, null);
+      DocumentData document = createDocument(rootFolder, "applyACLTestDocument", "cmis:document", null, null);
       AccessControlEntry ace =
-         new AccessControlEntryImpl("root", new HashSet<String>(Arrays.asList("cmis:read", "cmis:write")));
+         new AccessControlEntry("root", new HashSet<String>(Arrays.asList("cmis:read", "cmis:write")));
       document.setACL(Arrays.asList(ace));
       storage.saveObject(document);
 
@@ -98,35 +101,299 @@ public class StorageTest extends BaseTest
 
    public void testApplyPolicy() throws Exception
    {
-      Document document = createDocument(rootFolder, "applyPolicyTestDocument", "cmis:document", null, null);
-      Policy policy = createPolicy(rootFolder, "applyPolicyTestPolicy01", "test apply policy", "cmis:policy");
+      DocumentData document = createDocument(rootFolder, "applyPolicyTestDocument", "cmis:document", null, null);
+      PolicyData policy = createPolicy(rootFolder, "applyPolicyTestPolicy01", "test apply policy", "cmis:policy");
       document.applyPolicy(policy);
       storage.saveObject(document);
 
       Node documentNode = (Node)session.getItem("/applyPolicyTestDocument");
       assertTrue(documentNode.hasProperty(policy.getObjectId()));
 
-      Collection<Policy> policies = document.getPolicies();
+      Collection<PolicyData> policies = document.getPolicies();
       assertEquals(1, policies.size());
       assertEquals(policy.getObjectId(), policies.iterator().next().getObjectId());
    }
 
    public void testCheckOut() throws Exception
    {
-      //      Document document = createDocument(rootFolder, "checkoutTest", "cmis:document", null, null);
-      //      document.checkout();
-      //      for (NodeIterator i = root.getNodes(); i.hasNext();)
-      //         System.out.println(">>>> "+i.nextNode().getName());
+      DocumentData document =
+         createDocument(rootFolder, "checkoutTest", "cmis:document", new BaseContentStream("checkout test".getBytes(),
+            null, new MimeType("text", "plain")), null);
+
+      DocumentData pwc = document.checkout();
+
+      assertTrue(document.isVersionSeriesCheckedOut());
+      assertTrue(pwc.isVersionSeriesCheckedOut());
+      assertEquals(document.getVersionSeriesId(), pwc.getVersionSeriesId());
+      assertEquals(document.getVersionSeriesCheckedOutId(), pwc.getObjectId());
+      assertNotNull(document.getVersionSeriesCheckedOutBy());
+      assertNotNull(pwc.getVersionSeriesCheckedOutBy());
+
+      // check content
+      byte[] b = new byte[128];
+      int r = pwc.getContentStream().getStream().read(b);
+      assertEquals("checkout test", new String(b, 0, r));
+   }
+
+   public void testCheckoutFail() throws Exception
+   {
+      DocumentData document =
+         createDocument(rootFolder, "checkoutTest", "cmis:document", new BaseContentStream("checkout test".getBytes(),
+            null, new MimeType("text", "plain")), null);
+
+      document.checkout();
+      try
+      {
+         document.checkout();
+         fail("VersioningException should be thrown.");
+      }
+      catch (VersioningException ve)
+      {
+         // OK
+      }
+
+   }
+
+   public void testCheckIn() throws Exception
+   {
+      DocumentData document =
+         createDocument(rootFolder, "checkinTest", "cmis:document", new BaseContentStream("checkin test".getBytes(),
+            null, new MimeType("text", "plain")), null);
+      DocumentData pwc = document.checkout();
+      String pwcId = pwc.getObjectId();
+
+      // Get PWC from storage
+      pwc = (DocumentData)storage.getObjectById(pwcId);
+
+      pwc.setContentStream(new BaseContentStream("checkin test. content updated".getBytes(), null, new MimeType("text",
+         "plain")));
+      pwc.checkin(true, "my comment");
+
+      try
+      {
+         storage.getObjectById(pwcId);
+         fail("PWC must be removed.");
+      }
+      catch (ObjectNotFoundException e)
+      {
+         // OK
+      }
+
+      assertFalse(document.isVersionSeriesCheckedOut());
+      assertNull(document.getVersionSeriesCheckedOutId());
+      assertNull(document.getVersionSeriesCheckedOutBy());
+      assertEquals("my comment", document.getProperty(CmisConstants.CHECKIN_COMMENT).getValues().get(0));
+
+      // check content
+      byte[] b = new byte[128];
+      int r = document.getContentStream().getStream().read(b);
+      assertEquals("checkin test. content updated", new String(b, 0, r));
+   }
+
+   public void testCheckInRename() throws Exception
+   {
+      DocumentData document =
+         createDocument(rootFolder, "checkinTestRename", "cmis:document", new BaseContentStream("checkin test"
+            .getBytes(), null, new MimeType("text", "plain")), null);
+      DocumentData pwc = document.checkout();
+      String pwcId = pwc.getObjectId();
+
+      // update
+      pwc = (DocumentData)storage.getObjectById(pwcId);
+      pwc.setContentStream(new BaseContentStream("checkin test. content updated".getBytes(), null, new MimeType("text",
+         "plain")));
+      pwc.setName("checkinTestRename_NewName");
+
+      pwc.checkin(true, "my comment");
+
+      try
+      {
+         storage.getObjectById(pwcId);
+         fail("PWC must be removed.");
+      }
+      catch (ObjectNotFoundException e)
+      {
+         // OK
+      }
+
+      assertFalse(document.isVersionSeriesCheckedOut());
+      assertNull(document.getVersionSeriesCheckedOutId());
+      assertNull(document.getVersionSeriesCheckedOutBy());
+      assertEquals("my comment", document.getProperty(CmisConstants.CHECKIN_COMMENT).getValues().get(0));
+
+      assertEquals("checkinTestRename_NewName", document.getName());
+      // check content
+      byte[] b = new byte[128];
+      int r = document.getContentStream().getStream().read(b);
+      assertEquals("checkin test. content updated", new String(b, 0, r));
+   }
+
+   public void testCancelCheckOutDocument() throws Exception
+   {
+      DocumentData document =
+         createDocument(rootFolder, "cancelCheckoutDocumentTest", "cmis:document", new BaseContentStream(
+            "cancel checkout test".getBytes(), null, new MimeType("text", "plain")), null);
+      DocumentData pwc = document.checkout();
+      String pwcId = pwc.getObjectId();
+
+      // Call cancel checkout on other then PWC version in repository.
+      document.cancelCheckout();
+
+      try
+      {
+         storage.getObjectById(pwcId);
+         fail("PWC must be removed.");
+      }
+      catch (ObjectNotFoundException e)
+      {
+         // OK
+      }
+
+      assertFalse(document.isVersionSeriesCheckedOut());
+      assertNull(document.getVersionSeriesCheckedOutId());
+      assertNull(document.getVersionSeriesCheckedOutBy());
+   }
+
+   public void testCancelCheckOutPWC() throws Exception
+   {
+      DocumentData document =
+         createDocument(rootFolder, "cancelCheckoutPWCTest", "cmis:document", new BaseContentStream(
+            "cancel checkout test".getBytes(), null, new MimeType("text", "plain")), null);
+
+      DocumentData pwc = document.checkout();
+      String pwcId = pwc.getObjectId();
+
+      // Get PWC from storage
+      pwc = (DocumentData)storage.getObjectById(pwcId);
+
+      // Call cancel checkout on PWC.
+      pwc.cancelCheckout();
+
+      try
+      {
+         storage.getObjectById(pwcId);
+         fail("PWC must be removed.");
+      }
+      catch (ObjectNotFoundException e)
+      {
+         // OK
+      }
+
+      assertFalse(document.isVersionSeriesCheckedOut());
+      assertNull(document.getVersionSeriesCheckedOutId());
+      assertNull(document.getVersionSeriesCheckedOutBy());
+   }
+
+   public void testDeletePWC() throws Exception
+   {
+      DocumentData document =
+         createDocument(rootFolder, "deletePWCTest", "cmis:document", new BaseContentStream("delete PWC test"
+            .getBytes(), null, new MimeType("text", "plain")), null);
+
+      DocumentData pwc = document.checkout();
+      String pwcId = pwc.getObjectId();
+
+      // Get PWC from storage
+      pwc = (DocumentData)storage.getObjectById(pwcId);
+
+      // Delete PWC.
+      storage.deleteObject(pwc, true);
+
+      try
+      {
+         storage.getObjectById(pwcId);
+         fail("PWC mus be removed.");
+      }
+      catch (ObjectNotFoundException e)
+      {
+         // OK
+      }
+
+      // Property on document must be the same as in not checked-out state.
+      assertFalse(document.isVersionSeriesCheckedOut());
+      assertNull(document.getVersionSeriesCheckedOutId());
+      assertNull(document.getVersionSeriesCheckedOutBy());
+   }
+
+   public void testGetAllVersions() throws Exception
+   {
+      DocumentData document = createDocument(rootFolder, "getAllVersionsTest", "cmis:document", null, null);
+      String versionSeriesId = document.getVersionSeriesId();
+      Collection<DocumentData> allVersions = storage.getAllVersions(versionSeriesId);
+      assertEquals(1, allVersions.size());
+      assertEquals(document.getObjectId(), allVersions.iterator().next().getObjectId());
+   }
+
+   public void testGetAllVersionsWithPwc() throws Exception
+   {
+      DocumentData document = createDocument(rootFolder, "getAllVersionsPwcTest", "cmis:document", null, null);
+      String versionSeriesId = document.getVersionSeriesId();
+      DocumentData pwc = document.checkout();
+      Collection<DocumentData> allVersions = storage.getAllVersions(versionSeriesId);
+      assertEquals(2, allVersions.size());
+      Iterator<DocumentData> vi = allVersions.iterator();
+      assertEquals(pwc.getObjectId(), vi.next().getObjectId());
+      assertEquals(document.getObjectId(), vi.next().getObjectId());
+   }
+
+   public void testGetAllVersionsPwcVersions() throws Exception
+   {
+      DocumentData document = createDocument(rootFolder, "getAllVersionsPwcVersionsTest", "cmis:document", null, null);
+      String versionSeriesId = document.getVersionSeriesId();
+
+      DocumentData pwc = document.checkout();
+
+      pwc.checkin(true, "");
+
+      pwc = document.checkout();
+
+      Collection<DocumentData> allVersions = storage.getAllVersions(versionSeriesId);
+      assertEquals(3, allVersions.size());
+
+      Iterator<DocumentData> vi = allVersions.iterator();
+      assertEquals(pwc.getObjectId(), vi.next().getObjectId());
+      assertEquals(document.getObjectId(), vi.next().getObjectId());
+   }
+
+   public void tesGetCheckedOutDocs() throws Exception
+   {
+      DocumentData document1 = createDocument(rootFolder, "getCheckedOutTest01", "cmis:document", null, null);
+      FolderData folder = createFolder(rootFolder, "folderCheckedOutTest", "cmis:folder");
+      DocumentData document2 = createDocument(folder, "getCheckedOutTest02", "cmis:document", null, null);
+      DocumentData pwc1 = document1.checkout();
+      DocumentData pwc2 = document2.checkout();
+
+      List<String> r = new ArrayList<String>();
+      // Should be both documents
+      for (ItemsIterator<DocumentData> checkedOutDocs = storage.getCheckedOutDocuments(null, null); checkedOutDocs
+         .hasNext();)
+      {
+         r.add(checkedOutDocs.next().getObjectId());
+      }
+      assertEquals(2, r.size());
+      assertTrue(r.contains(pwc1.getObjectId()));
+      assertTrue(r.contains(pwc2.getObjectId()));
+
+      r.clear();
+
+      // Should be only PWC "from" specified folder
+      for (ItemsIterator<DocumentData> checkedOutDocs = storage.getCheckedOutDocuments(folder, null); checkedOutDocs
+         .hasNext();)
+      {
+         r.add(checkedOutDocs.next().getObjectId());
+      }
+      assertEquals(1, r.size());
+      assertTrue(r.contains(pwc2.getObjectId()));
    }
 
    public void testChildren() throws Exception
    {
-      Folder folder = createFolder(rootFolder, "folderChildrenTest", "cmis:folder");
+      FolderData folder = createFolder(rootFolder, "folderChildrenTest", "cmis:folder");
       Set<String> source = new HashSet<String>();
       String name = "testChildren";
       for (int i = 1; i <= 20; i++)
       {
-         Document document = createDocument(folder, name + i, "cmis:document", null, null);
+         DocumentData document = createDocument(folder, name + i, "cmis:document", null, null);
          storage.saveObject(document);
          source.add(document.getObjectId());
       }
@@ -160,19 +427,20 @@ public class StorageTest extends BaseTest
 
    public void testCreateDocument() throws Exception
    {
-      PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:document", CMIS.NAME);
+      PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:document", CmisConstants.NAME);
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-      properties.put(CMIS.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
+      properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
          .getDisplayName(), "createDocumentTest"));
 
       ContentStream cs =
-         new BaseContentStream("to be or not to be".getBytes(), /*"createDocumentTest"*/null, "text/plain");
-      Document document = storage.createDocument(rootFolder, "cmis:document", VersioningState.MAJOR);
+         new BaseContentStream("to be or not to be".getBytes(), /*"createDocumentTest"*/null, new MimeType("text",
+            "plain"));
+      DocumentData document = storage.createDocument(rootFolder, "cmis:document", VersioningState.MAJOR);
       document.setProperties(properties);
       //      document.setName("createDocumentTest");
       document.setContentStream(cs);
       AccessControlEntry ace =
-         new AccessControlEntryImpl("root", new HashSet<String>(Arrays.asList("cmis:read", "cmis:write")));
+         new AccessControlEntry("root", new HashSet<String>(Arrays.asList("cmis:read", "cmis:write")));
       document.setACL(Arrays.asList(ace));
       storage.saveObject(document);
 
@@ -208,10 +476,10 @@ public class StorageTest extends BaseTest
 
    public void testCreateDocumentFromSource() throws Exception
    {
-      ContentStream cs = new BaseContentStream("to be or not to be".getBytes(), null, "text/plain");
-      Document document = createDocument(rootFolder, "createDocumentSource", "cmis:document", cs, null);
+      ContentStream cs = new BaseContentStream("to be or not to be".getBytes(), null, new MimeType("text", "plain"));
+      DocumentData document = createDocument(rootFolder, "createDocumentSource", "cmis:document", cs, null);
 
-      Document documentCopy = storage.createCopyOfDocument(document, rootFolder, VersioningState.MINOR);
+      DocumentData documentCopy = storage.copyDocument(document, rootFolder, VersioningState.MINOR);
       documentCopy.setName("createDocumentSourceCopy");
       storage.saveObject(documentCopy);
 
@@ -231,14 +499,14 @@ public class StorageTest extends BaseTest
 
    public void testCreateDocumentUnfiled() throws Exception
    {
-      Document document = createDocument(null, "createUnfiledDocumentTest", "cmis:document", null, null);
+      DocumentData document = createDocument(null, "createUnfiledDocumentTest", "cmis:document", null, null);
 
-      Node docNode = ((DocumentImpl)document).getNode();
+      Node docNode = ((DocumentDataImpl)document).getNode();
       String path = docNode.getPath();
       assertTrue("Document must be created in unfiled store.", path.startsWith(StorageImpl.XCMIS_SYSTEM_PATH + "/"
          + StorageImpl.XCMIS_UNFILED));
 
-      Collection<Folder> parents = document.getParents();
+      Collection<FolderData> parents = document.getParents();
       assertEquals(0, parents.size());
 
       // Add document in root folder.
@@ -250,12 +518,12 @@ public class StorageTest extends BaseTest
 
    public void testCreateFolder() throws Exception
    {
-      PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:folder", CMIS.NAME);
+      PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:folder", CmisConstants.NAME);
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-      properties.put(CMIS.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
+      properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
          .getDisplayName(), "createFolderTest"));
 
-      Folder newFolder = storage.createFolder(rootFolder, "cmis:folder");
+      FolderData newFolder = storage.createFolder(rootFolder, "cmis:folder");
       newFolder.setProperties(properties);
       storage.saveObject(newFolder);
 
@@ -268,12 +536,13 @@ public class StorageTest extends BaseTest
    {
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
 
-      PropertyDefinition<?> defName = PropertyDefinitions.getPropertyDefinition("cmis:policy", CMIS.NAME);
-      properties.put(CMIS.NAME, new StringProperty(defName.getId(), defName.getQueryName(), defName.getLocalName(),
-         defName.getDisplayName(), "createPolicyTest"));
+      PropertyDefinition<?> defName = PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.NAME);
+      properties.put(CmisConstants.NAME, new StringProperty(defName.getId(), defName.getQueryName(), defName
+         .getLocalName(), defName.getDisplayName(), "createPolicyTest"));
 
-      PropertyDefinition<?> defPolicyText = PropertyDefinitions.getPropertyDefinition("cmis:policy", CMIS.POLICY_TEXT);
-      properties.put(CMIS.POLICY_TEXT, new StringProperty(defPolicyText.getId(), defPolicyText.getQueryName(),
+      PropertyDefinition<?> defPolicyText =
+         PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
+      properties.put(CmisConstants.POLICY_TEXT, new StringProperty(defPolicyText.getId(), defPolicyText.getQueryName(),
          defPolicyText.getLocalName(), defPolicyText.getDisplayName(), "simple policy"));
 
       ObjectData policy = storage.createPolicy(rootFolder, "cmis:policy");
@@ -294,11 +563,12 @@ public class StorageTest extends BaseTest
       ObjectData targetDoc = createDocument(rootFolder, "createRelationshipTarget", "cmis:document", null, null);
 
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-      PropertyDefinition<?> defName = PropertyDefinitions.getPropertyDefinition("cmis:relationship", CMIS.NAME);
-      properties.put(CMIS.NAME, new StringProperty(defName.getId(), defName.getQueryName(), defName.getLocalName(),
-         defName.getDisplayName(), "createRelationshipTest"));
+      PropertyDefinition<?> defName =
+         PropertyDefinitions.getPropertyDefinition("cmis:relationship", CmisConstants.NAME);
+      properties.put(CmisConstants.NAME, new StringProperty(defName.getId(), defName.getQueryName(), defName
+         .getLocalName(), defName.getDisplayName(), "createRelationshipTest"));
 
-      Relationship relationship = storage.createRelationship(sourceDoc, targetDoc, "cmis:relationship");
+      RelationshipData relationship = storage.createRelationship(sourceDoc, targetDoc, "cmis:relationship");
       relationship.setProperties(properties);
       storage.saveObject(relationship);
 
@@ -310,8 +580,8 @@ public class StorageTest extends BaseTest
 
    public void testDeleteContent() throws Exception
    {
-      ContentStream cs = new BaseContentStream("to be or not to be".getBytes(), null, "text/plain");
-      Document document = createDocument(rootFolder, "removeContentTest", "cmis:document", cs, null);
+      ContentStream cs = new BaseContentStream("to be or not to be".getBytes(), null, new MimeType("text", "plain"));
+      DocumentData document = createDocument(rootFolder, "removeContentTest", "cmis:document", cs, null);
       Node documentNode = (Node)session.getItem("/removeContentTest");
       assertEquals("to be or not to be", documentNode.getProperty("jcr:content/jcr:data").getString());
       assertEquals("text/plain", documentNode.getProperty("jcr:content/jcr:mimeType").getString());
@@ -326,22 +596,22 @@ public class StorageTest extends BaseTest
 
    public void testDeleteDocument() throws Exception
    {
-      Document document = createDocument(rootFolder, "deleteDocumentTest", "cmis:document", null, null);
+      DocumentData document = createDocument(rootFolder, "deleteDocumentTest", "cmis:document", null, null);
       storage.deleteObject(document, true);
       assertFalse(session.itemExists("/deleteDocumentTest"));
    }
 
    public void testDeleteFolder() throws Exception
    {
-      Folder folder = createFolder(rootFolder, "deleteFolderTest", "cmis:folder");
+      FolderData folder = createFolder(rootFolder, "deleteFolderTest", "cmis:folder");
       storage.deleteObject(folder, true);
       assertFalse(session.itemExists("/deleteFolderTest"));
    }
 
    public void testDeleteFolderWithChildren() throws Exception
    {
-      Folder folder = createFolder(rootFolder, "deleteFolderWithChildrenTest", "cmis:folder");
-      Document document = createDocument(folder, "child1", "cmis:document", null, null);
+      FolderData folder = createFolder(rootFolder, "deleteFolderWithChildrenTest", "cmis:folder");
+      DocumentData document = createDocument(folder, "child1", "cmis:document", null, null);
       try
       {
          storage.deleteObject(folder, true);
@@ -358,11 +628,11 @@ public class StorageTest extends BaseTest
 
    public void testDeleteMultifiledObject() throws Exception
    {
-      Document document = createDocument(rootFolder, "deleteMultifiledTest", "cmis:document", null, null);
+      DocumentData document = createDocument(rootFolder, "deleteMultifiledTest", "cmis:document", null, null);
 
-      Folder folder1 = createFolder(rootFolder, "deleteMultifiledTest01", "cmis:folder");
-      Folder folder2 = createFolder(rootFolder, "deleteMultifiledTest02", "cmis:folder");
-      Folder folder3 = createFolder(rootFolder, "deleteMultifiledTest03", "cmis:folder");
+      FolderData folder1 = createFolder(rootFolder, "deleteMultifiledTest01", "cmis:folder");
+      FolderData folder2 = createFolder(rootFolder, "deleteMultifiledTest02", "cmis:folder");
+      FolderData folder3 = createFolder(rootFolder, "deleteMultifiledTest03", "cmis:folder");
       folder1.addObject(document);
       folder2.addObject(document);
       folder3.addObject(document);
@@ -380,6 +650,17 @@ public class StorageTest extends BaseTest
       assertFalse(session.itemExists("/deleteMultifiledTest"));
    }
 
+   public void testDeleteUnfiledDocument() throws Exception
+   {
+      DocumentData document = createDocument(rootFolder, "deleteUnfiledTest", "cmis:document", null, null);
+      rootFolder.removeObject(document);
+      assertEquals(0, document.getParents().size());
+      assertTrue(root.getNode("xcmis:system/xcmis:unfileStore").getNodes().hasNext());
+      storage.deleteObject(document, true);
+      // wrapper node must be removed
+      assertFalse(root.getNode("xcmis:system/xcmis:unfileStore").getNodes().hasNext());
+   }
+
    public void testDeleteObjectWithRelationship() throws Exception
    {
       ObjectData sourceDoc =
@@ -387,7 +668,7 @@ public class StorageTest extends BaseTest
       ObjectData targetDoc =
          createDocument(rootFolder, "deleteObjectWithRelationshipTarget", "cmis:document", null, null);
 
-      Relationship relationship = storage.createRelationship(sourceDoc, targetDoc, "cmis:relationship");
+      RelationshipData relationship = storage.createRelationship(sourceDoc, targetDoc, "cmis:relationship");
       relationship.setName("relationship01");
       storage.saveObject(relationship);
 
@@ -405,8 +686,8 @@ public class StorageTest extends BaseTest
 
    public void testDeletePolicy() throws Exception
    {
-      Document document = createDocument(rootFolder, "deletePolicyTestDocument", "cmis:document", null, null);
-      Policy policy = createPolicy(rootFolder, "deletePolicyTestPolicy01", "test delete policy", "cmis:policy");
+      DocumentData document = createDocument(rootFolder, "deletePolicyTestDocument", "cmis:document", null, null);
+      PolicyData policy = createPolicy(rootFolder, "deletePolicyTestPolicy01", "test delete policy", "cmis:policy");
       document.applyPolicy(policy);
       storage.saveObject(document);
       try
@@ -441,17 +722,17 @@ public class StorageTest extends BaseTest
    public void testDeleteTreeDelete() throws Exception
    {
       // Create tree.
-      Folder folder1 = createFolder(rootFolder, "1", "cmis:folder");
-      Folder folder2 = createFolder(folder1, "2", "cmis:folder");
-      Folder folder3 = createFolder(folder2, "3", "cmis:folder");
-      Folder folder4 = createFolder(folder3, "4", "cmis:folder");
-      Folder folder5 = createFolder(folder1, "5", "cmis:folder");
-      Folder folder6 = createFolder(folder5, "6", "cmis:folder");
-      Folder folder7 = createFolder(folder3, "7", "cmis:folder");
-      Document doc1 = createDocument(folder2, "doc1", "cmis:document", null, null);
-      Document doc2 = createDocument(folder2, "doc2", "cmis:document", null, null);
-      Document doc3 = createDocument(folder4, "doc3", "cmis:document", null, null);
-      Document doc4 = createDocument(folder4, "doc4", "cmis:document", null, null);
+      FolderData folder1 = createFolder(rootFolder, "1", "cmis:folder");
+      FolderData folder2 = createFolder(folder1, "2", "cmis:folder");
+      FolderData folder3 = createFolder(folder2, "3", "cmis:folder");
+      FolderData folder4 = createFolder(folder3, "4", "cmis:folder");
+      FolderData folder5 = createFolder(folder1, "5", "cmis:folder");
+      FolderData folder6 = createFolder(folder5, "6", "cmis:folder");
+      FolderData folder7 = createFolder(folder3, "7", "cmis:folder");
+      DocumentData doc1 = createDocument(folder2, "doc1", "cmis:document", null, null);
+      DocumentData doc2 = createDocument(folder2, "doc2", "cmis:document", null, null);
+      DocumentData doc3 = createDocument(folder4, "doc3", "cmis:document", null, null);
+      DocumentData doc4 = createDocument(folder4, "doc4", "cmis:document", null, null);
 
       folder5.addObject(doc1);
       folder6.addObject(doc2);
@@ -468,9 +749,9 @@ public class StorageTest extends BaseTest
       //        |_2
       //        | |_doc1
       //        | |_doc2
-      //        | |_doc3
       //        | |_3
       //        |   |_4
+      //        |   | |_doc3
       //        |   | |_doc4
       //        |   |_7
       //        |     |_doc3
@@ -492,7 +773,7 @@ public class StorageTest extends BaseTest
 
       try
       {
-         doc1 = (Document)storage.getObject(doc1Id);
+         doc1 = (DocumentData)storage.getObjectById(doc1Id);
          fail(doc1 + " must be deleted.");
       }
       catch (ObjectNotFoundException e)
@@ -501,7 +782,7 @@ public class StorageTest extends BaseTest
       }
       try
       {
-         doc2 = (Document)storage.getObject(doc2Id);
+         doc2 = (DocumentData)storage.getObjectById(doc2Id);
          fail(doc2 + " must be deleted.");
       }
       catch (ObjectNotFoundException e)
@@ -510,7 +791,7 @@ public class StorageTest extends BaseTest
       }
       try
       {
-         doc3 = (Document)storage.getObject(doc3Id);
+         doc3 = (DocumentData)storage.getObjectById(doc3Id);
          fail(doc3 + " must be deleted.");
       }
       catch (ObjectNotFoundException e)
@@ -519,7 +800,7 @@ public class StorageTest extends BaseTest
       }
       try
       {
-         doc4 = (Document)storage.getObject(doc4Id);
+         doc4 = (DocumentData)storage.getObjectById(doc4Id);
          fail(doc4 + " must be deleted.");
       }
       catch (ObjectNotFoundException e)
@@ -532,17 +813,17 @@ public class StorageTest extends BaseTest
    public void testDeleteTreeDeletesinglefiled() throws Exception
    {
       // Create tree.
-      Folder folder1 = createFolder(rootFolder, "1", "cmis:folder");
-      Folder folder2 = createFolder(folder1, "2", "cmis:folder");
-      Folder folder3 = createFolder(folder2, "3", "cmis:folder");
-      Folder folder4 = createFolder(folder3, "4", "cmis:folder");
-      Folder folder5 = createFolder(folder1, "5", "cmis:folder");
-      Folder folder6 = createFolder(folder5, "6", "cmis:folder");
-      Folder folder7 = createFolder(folder3, "7", "cmis:folder");
-      Document doc1 = createDocument(folder2, "doc1", "cmis:document", null, null);
-      Document doc2 = createDocument(folder2, "doc2", "cmis:document", null, null);
-      Document doc3 = createDocument(folder4, "doc3", "cmis:document", null, null);
-      Document doc4 = createDocument(folder4, "doc4", "cmis:document", null, null);
+      FolderData folder1 = createFolder(rootFolder, "1", "cmis:folder");
+      FolderData folder2 = createFolder(folder1, "2", "cmis:folder");
+      FolderData folder3 = createFolder(folder2, "3", "cmis:folder");
+      FolderData folder4 = createFolder(folder3, "4", "cmis:folder");
+      FolderData folder5 = createFolder(folder1, "5", "cmis:folder");
+      FolderData folder6 = createFolder(folder5, "6", "cmis:folder");
+      FolderData folder7 = createFolder(folder3, "7", "cmis:folder");
+      DocumentData doc1 = createDocument(folder2, "doc1", "cmis:document", null, null);
+      DocumentData doc2 = createDocument(folder2, "doc2", "cmis:document", null, null);
+      DocumentData doc3 = createDocument(folder4, "doc3", "cmis:document", null, null);
+      DocumentData doc4 = createDocument(folder4, "doc4", "cmis:document", null, null);
 
       folder5.addObject(doc1);
       folder6.addObject(doc2);
@@ -559,9 +840,9 @@ public class StorageTest extends BaseTest
       //        |_2
       //        | |_doc1
       //        | |_doc2
-      //        | |_doc3
       //        | |_3
       //        |   |_4
+      //        |   | |_doc3
       //        |   | |_doc4
       //        |   |_7
       //        |     |_doc3
@@ -583,11 +864,11 @@ public class StorageTest extends BaseTest
       //          | |_doc2
       //          |_doc1
 
-      doc1 = (Document)storage.getObject(doc1Id);
-      doc2 = (Document)storage.getObject(doc2Id);
+      doc1 = (DocumentData)storage.getObjectById(doc1Id);
+      doc2 = (DocumentData)storage.getObjectById(doc2Id);
       try
       {
-         doc3 = (Document)storage.getObject(doc3Id);
+         doc3 = (DocumentData)storage.getObjectById(doc3Id);
          fail(doc3 + " must be deleted.");
       }
       catch (ObjectNotFoundException e)
@@ -596,7 +877,7 @@ public class StorageTest extends BaseTest
       }
       try
       {
-         doc4 = (Document)storage.getObject(doc4Id);
+         doc4 = (DocumentData)storage.getObjectById(doc4Id);
          fail(doc3 + " must be deleted.");
       }
       catch (ObjectNotFoundException e)
@@ -604,10 +885,10 @@ public class StorageTest extends BaseTest
          //ok
       }
 
-      Collection<Folder> doc1Parents = doc1.getParents();
+      Collection<FolderData> doc1Parents = doc1.getParents();
       assertEquals(1, doc1Parents.size());
       assertEquals(folder5.getObjectId(), doc1Parents.iterator().next().getObjectId());
-      Collection<Folder> doc2Parents = doc2.getParents();
+      Collection<FolderData> doc2Parents = doc2.getParents();
       assertEquals(1, doc2Parents.size());
       assertEquals(folder6.getObjectId(), doc2Parents.iterator().next().getObjectId());
 
@@ -617,17 +898,17 @@ public class StorageTest extends BaseTest
    public void testDeleteTreeUnfile() throws Exception
    {
       // Create tree.
-      Folder folder1 = createFolder(rootFolder, "1", "cmis:folder");
-      Folder folder2 = createFolder(folder1, "2", "cmis:folder");
-      Folder folder3 = createFolder(folder2, "3", "cmis:folder");
-      Folder folder4 = createFolder(folder3, "4", "cmis:folder");
-      Folder folder5 = createFolder(folder1, "5", "cmis:folder");
-      Folder folder6 = createFolder(folder5, "6", "cmis:folder");
-      Folder folder7 = createFolder(folder3, "7", "cmis:folder");
-      Document doc1 = createDocument(folder2, "doc1", "cmis:document", null, null);
-      Document doc2 = createDocument(folder2, "doc2", "cmis:document", null, null);
-      Document doc3 = createDocument(folder4, "doc3", "cmis:document", null, null);
-      Document doc4 = createDocument(folder4, "doc4", "cmis:document", null, null);
+      FolderData folder1 = createFolder(rootFolder, "1", "cmis:folder");
+      FolderData folder2 = createFolder(folder1, "2", "cmis:folder");
+      FolderData folder3 = createFolder(folder2, "3", "cmis:folder");
+      FolderData folder4 = createFolder(folder3, "4", "cmis:folder");
+      FolderData folder5 = createFolder(folder1, "5", "cmis:folder");
+      FolderData folder6 = createFolder(folder5, "6", "cmis:folder");
+      FolderData folder7 = createFolder(folder3, "7", "cmis:folder");
+      DocumentData doc1 = createDocument(folder2, "doc1", "cmis:document", null, null);
+      DocumentData doc2 = createDocument(folder2, "doc2", "cmis:document", null, null);
+      DocumentData doc3 = createDocument(folder4, "doc3", "cmis:document", null, null);
+      DocumentData doc4 = createDocument(folder4, "doc4", "cmis:document", null, null);
 
       folder5.addObject(doc1);
       folder6.addObject(doc2);
@@ -644,9 +925,9 @@ public class StorageTest extends BaseTest
       //        |_2
       //        | |_doc1
       //        | |_doc2
-      //        | |_doc3
       //        | |_3
       //        |   |_4
+      //        |   | |_doc3
       //        |   | |_doc4
       //        |   |_7
       //        |     |_doc3
@@ -670,20 +951,20 @@ public class StorageTest extends BaseTest
       // doc3 <unfiled>
       // doc4 <unfiled>
 
-      doc1 = (Document)storage.getObject(doc1Id);
-      doc2 = (Document)storage.getObject(doc2Id);
-      doc3 = (Document)storage.getObject(doc3Id);
-      doc4 = (Document)storage.getObject(doc4Id);
+      doc1 = (DocumentData)storage.getObjectById(doc1Id);
+      doc2 = (DocumentData)storage.getObjectById(doc2Id);
+      doc3 = (DocumentData)storage.getObjectById(doc3Id);
+      doc4 = (DocumentData)storage.getObjectById(doc4Id);
 
-      Collection<Folder> doc1Parents = doc1.getParents();
+      Collection<FolderData> doc1Parents = doc1.getParents();
       assertEquals(1, doc1Parents.size());
       assertEquals(folder5.getObjectId(), doc1Parents.iterator().next().getObjectId());
-      Collection<Folder> doc2Parents = doc2.getParents();
+      Collection<FolderData> doc2Parents = doc2.getParents();
       assertEquals(1, doc2Parents.size());
       assertEquals(folder6.getObjectId(), doc2Parents.iterator().next().getObjectId());
-      Collection<Folder> doc3Parents = doc3.getParents();
+      Collection<FolderData> doc3Parents = doc3.getParents();
       assertEquals(0, doc3Parents.size());
-      Collection<Folder> doc4Parents = doc4.getParents();
+      Collection<FolderData> doc4Parents = doc4.getParents();
       assertEquals(0, doc4Parents.size());
 
       //      printTree(folder1);
@@ -691,17 +972,17 @@ public class StorageTest extends BaseTest
 
    public void testGetParent() throws Exception
    {
-      Document document = createDocument(rootFolder, "getParentTest", "cmis:document", null, null);
+      DocumentData document = createDocument(rootFolder, "getParentTest", "cmis:document", null, null);
       assertEquals(rootFolder.getObjectId(), document.getParent().getObjectId());
    }
 
    public void testGetParents() throws Exception
    {
-      Document document = createDocument(rootFolder, "getParentsTest", "cmis:document", null, null);
-      Collection<Folder> parents = document.getParents();
+      DocumentData document = createDocument(rootFolder, "getParentsTest", "cmis:document", null, null);
+      Collection<FolderData> parents = document.getParents();
       assertEquals(1, parents.size());
       assertEquals(rootFolder.getObjectId(), parents.iterator().next().getObjectId());
-      Folder folder = createFolder(rootFolder, "getParentsTestFolder01", "cmis:folder");
+      FolderData folder = createFolder(rootFolder, "getParentsTestFolder01", "cmis:folder");
       folder.addObject(document);
       parents = document.getParents();
       assertEquals(2, parents.size());
@@ -753,7 +1034,7 @@ public class StorageTest extends BaseTest
    public void testMoveDocument() throws Exception
    {
       ObjectData document = createDocument(rootFolder, "moveDocumentTest", "cmis:document", null, null);
-      Folder targetFolder = createFolder(rootFolder, "moveDocumentTestDestination", "cmis:folder");
+      FolderData targetFolder = createFolder(rootFolder, "moveDocumentTestDestination", "cmis:folder");
 
       assertTrue(session.itemExists("/moveDocumentTest"));
       assertFalse(session.itemExists("/moveDocumentTestDestination/moveDocumentTest"));
@@ -764,9 +1045,9 @@ public class StorageTest extends BaseTest
 
    public void testMoveFolder() throws Exception
    {
-      Folder folder = createFolder(rootFolder, "moveFolderTest", "cmis:folder");
+      FolderData folder = createFolder(rootFolder, "moveFolderTest", "cmis:folder");
       createDocument(folder, "childDocument", "cmis:document", null, null);
-      Folder targetFolder = createFolder(rootFolder, "moveFolderTestDestination", "cmis:folder");
+      FolderData targetFolder = createFolder(rootFolder, "moveFolderTestDestination", "cmis:folder");
 
       assertTrue(session.itemExists("/moveFolderTest/childDocument"));
       assertTrue(session.itemExists("/moveFolderTest"));
@@ -781,9 +1062,9 @@ public class StorageTest extends BaseTest
 
    public void testMultifiledChild() throws Exception
    {
-      Document document = createDocument(rootFolder, "multifiledChildTest", "cmis:document", null, null);
-      Folder folder1 = createFolder(rootFolder, "multifiledChildFolderTest01", "cmis:folder");
-      Document child1 = createDocument(folder1, "child1", "cmis:document", null, null);
+      DocumentData document = createDocument(rootFolder, "multifiledChildTest", "cmis:document", null, null);
+      FolderData folder1 = createFolder(rootFolder, "multifiledChildFolderTest01", "cmis:folder");
+      DocumentData child1 = createDocument(folder1, "child1", "cmis:document", null, null);
 
       List<String> chs = new ArrayList<String>();
       for (ItemsIterator<ObjectData> children = folder1.getChildren(null); children.hasNext();)
@@ -805,11 +1086,11 @@ public class StorageTest extends BaseTest
 
    public void testMultifiling() throws Exception
    {
-      Document document = createDocument(rootFolder, "multifilingDocumentTest", "cmis:document", null, null);
-      Folder folder1 = createFolder(rootFolder, "multifilingFolderTest1", "cmis:folder");
-      Folder folder2 = createFolder(rootFolder, "multifilingFolderTest2", "cmis:folder");
-      Folder folder3 = createFolder(rootFolder, "multifilingFolderTest3", "cmis:folder");
-      Folder folder4 = createFolder(rootFolder, "multifilingFolderTest4", "cmis:folder");
+      DocumentData document = createDocument(rootFolder, "multifilingDocumentTest", "cmis:document", null, null);
+      FolderData folder1 = createFolder(rootFolder, "multifilingFolderTest1", "cmis:folder");
+      FolderData folder2 = createFolder(rootFolder, "multifilingFolderTest2", "cmis:folder");
+      FolderData folder3 = createFolder(rootFolder, "multifilingFolderTest3", "cmis:folder");
+      FolderData folder4 = createFolder(rootFolder, "multifilingFolderTest4", "cmis:folder");
       folder1.addObject(document);
       folder2.addObject(document);
       folder3.addObject(document);
@@ -818,10 +1099,10 @@ public class StorageTest extends BaseTest
       Set<String> expectedParents =
          new HashSet<String>(Arrays.asList(rootFolder.getObjectId(), folder1.getObjectId(), folder2.getObjectId(),
             folder3.getObjectId(), folder4.getObjectId()));
-      Collection<Folder> parents = document.getParents();
+      Collection<FolderData> parents = document.getParents();
 
       assertEquals(expectedParents.size(), parents.size());
-      for (Folder f : parents)
+      for (FolderData f : parents)
       {
          assertTrue("Folder " + f.getObjectId() + " must be in parents list.", expectedParents
             .contains(f.getObjectId()));
@@ -836,30 +1117,32 @@ public class StorageTest extends BaseTest
       parents = document.getParents();
 
       assertEquals(expectedParents.size(), parents.size());
-      for (Folder f : parents)
+      for (FolderData f : parents)
       {
          assertTrue("Folder " + f.getObjectId() + " must be in parents list.", expectedParents
             .contains(f.getObjectId()));
       }
-      System.out.println(">>> new location: " + ((DocumentImpl)document).getNode().getPath());
+      System.out.println(" StorageTest.testMultifiling > new location: "
+         + ((DocumentDataImpl)document).getNode().getPath());
    }
 
    public void testRenameDocument() throws Exception
    {
-      ContentStream cs = new BaseContentStream("to be or not to be".getBytes(), null, "text/plain");
-      Document document = createDocument(rootFolder, "renameDocumentTest", "cmis:document", cs, null);
+      ContentStream cs = new BaseContentStream("to be or not to be".getBytes(), null, new MimeType("text", "plain"));
+      DocumentData document = createDocument(rootFolder, "renameDocumentTest", "cmis:document", cs, null);
       document.setName("renameDocumentTest01");
       storage.saveObject(document);
 
       assertTrue(session.itemExists("/renameDocumentTest01"));
 
       assertEquals("renameDocumentTest01", document.getName());
-      assertEquals("renameDocumentTest01", document.getProperty(CMIS.CONTENT_STREAM_FILE_NAME).getValues().get(0));
+      assertEquals("renameDocumentTest01", document.getProperty(CmisConstants.CONTENT_STREAM_FILE_NAME).getValues()
+         .get(0));
    }
 
    public void testRenameFolder() throws Exception
    {
-      Folder folder = createFolder(rootFolder, "renameFolderTest", "cmis:folder");
+      FolderData folder = createFolder(rootFolder, "renameFolderTest", "cmis:folder");
       createDocument(folder, "child1", "cmis:document", null, null);
       folder.setName("renameFolderTest01");
       storage.saveObject(folder);
@@ -872,12 +1155,12 @@ public class StorageTest extends BaseTest
 
    public void testSetContent() throws Exception
    {
-      Document document = createDocument(rootFolder, "setContentTest", "cmis:document", null, null);
+      DocumentData document = createDocument(rootFolder, "setContentTest", "cmis:document", null, null);
       Node documentNode = (Node)session.getItem("/setContentTest");
       assertEquals("", documentNode.getProperty("jcr:content/jcr:data").getString());
       assertEquals("", documentNode.getProperty("jcr:content/jcr:mimeType").getString());
 
-      ContentStream cs = new BaseContentStream("to be or not to be".getBytes(), null, "text/plain");
+      ContentStream cs = new BaseContentStream("to be or not to be".getBytes(), null, new MimeType("text", "plain"));
       document.setContentStream(cs);
       storage.saveObject(document);
 
@@ -888,11 +1171,11 @@ public class StorageTest extends BaseTest
 
    public void testUnfileAll() throws Exception
    {
-      Document document = createDocument(rootFolder, "unfilingDocumentAllTest", "cmis:document", null, null);
+      DocumentData document = createDocument(rootFolder, "unfilingDocumentAllTest", "cmis:document", null, null);
 
-      Folder folder1 = createFolder(rootFolder, "unfilingFolderAllTest01", "cmis:folder");
-      Folder folder2 = createFolder(rootFolder, "unfilingFolderAllTest02", "cmis:folder");
-      Folder folder3 = createFolder(rootFolder, "unfilingFolderAllTest03", "cmis:folder");
+      FolderData folder1 = createFolder(rootFolder, "unfilingFolderAllTest01", "cmis:folder");
+      FolderData folder2 = createFolder(rootFolder, "unfilingFolderAllTest02", "cmis:folder");
+      FolderData folder3 = createFolder(rootFolder, "unfilingFolderAllTest03", "cmis:folder");
       folder1.addObject(document);
       folder2.addObject(document);
       folder3.addObject(document);
@@ -905,22 +1188,38 @@ public class StorageTest extends BaseTest
 
    public void testUnfiling() throws Exception
    {
-      Document document = createDocument(rootFolder, "unfilingDocumentTest", "cmis:document", null, null);
+      assertEquals(0, getSize(storage.getUnfiledObjectsId()));
+      DocumentData document = createDocument(rootFolder, "unfilingDocumentTest", "cmis:document", null, null);
       assertTrue(rootFolder.getChildren(null).hasNext());
       rootFolder.removeObject(document);
       assertFalse(rootFolder.getChildren(null).hasNext());
 
       assertFalse(session.itemExists("/unfilingDocumentTest"));
 
-      Collection<Folder> parents = document.getParents();
+      Collection<FolderData> parents = document.getParents();
       assertEquals(0, parents.size());
+      storage.getObjectById(document.getObjectId());
+
+      assertEquals(1, getSize(storage.getUnfiledObjectsId()));
    }
 
-   private void printTree(Folder folder) throws Exception
+   private int getSize(Iterator<String> iterator)
+   {
+      int result = 0;
+
+      while (iterator.hasNext())
+      {
+         iterator.next();
+         result++;
+      }
+      return result;
+   }
+
+   private void printTree(FolderData folder) throws Exception
    {
       System.out.println("--------- TREE --------");
       System.out.println(folder.getPath());
-      ((FolderImpl)folder).getNode().accept(new ItemVisitor()
+      ((FolderDataImpl)folder).getNode().accept(new ItemVisitor()
       {
          int l = 0;
 
@@ -958,10 +1257,10 @@ public class StorageTest extends BaseTest
       System.out.println("-----------------------");
    }
 
-   protected Document createDocument(Folder folder, String name, String typeId, ContentStream content,
+   protected DocumentData createDocument(FolderData folder, String name, String typeId, ContentStream content,
       VersioningState versioningState) throws Exception
    {
-      Document document =
+      DocumentData document =
          storage.createDocument(folder, typeId, versioningState == null ? VersioningState.MAJOR : versioningState);
       document.setName(name);
       document.setContentStream(content);
@@ -969,30 +1268,55 @@ public class StorageTest extends BaseTest
       return document;
    }
 
-   protected Folder createFolder(Folder folder, String name, String typeId) throws Exception
+   protected FolderData createFolder(FolderData folder, String name, String typeId) throws Exception
    {
-      Folder newFolder = storage.createFolder(folder, typeId);
+      FolderData newFolder = storage.createFolder(folder, typeId);
       newFolder.setName(name);
       storage.saveObject(newFolder);
       return newFolder;
    }
 
-   protected Policy createPolicy(Folder folder, String name, String policyText, String typeId) throws Exception
+   protected PolicyData createPolicy(FolderData folder, String name, String policyText, String typeId) throws Exception
    {
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
 
-      PropertyDefinition<?> defName = PropertyDefinitions.getPropertyDefinition("cmis:policy", CMIS.NAME);
-      properties.put(CMIS.NAME, new StringProperty(defName.getId(), defName.getQueryName(), defName.getLocalName(),
-         defName.getDisplayName(), name));
+      PropertyDefinition<?> defName = PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.NAME);
+      properties.put(CmisConstants.NAME, new StringProperty(defName.getId(), defName.getQueryName(), defName
+         .getLocalName(), defName.getDisplayName(), name));
 
-      PropertyDefinition<?> defPolicyText = PropertyDefinitions.getPropertyDefinition("cmis:policy", CMIS.POLICY_TEXT);
-      properties.put(CMIS.POLICY_TEXT, new StringProperty(defPolicyText.getId(), defPolicyText.getQueryName(),
+      PropertyDefinition<?> defPolicyText =
+         PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
+      properties.put(CmisConstants.POLICY_TEXT, new StringProperty(defPolicyText.getId(), defPolicyText.getQueryName(),
          defPolicyText.getLocalName(), defPolicyText.getDisplayName(), policyText));
 
-      Policy policy = storage.createPolicy(folder, typeId);
+      PolicyData policy = storage.createPolicy(folder, typeId);
       policy.setProperties(properties);
       storage.saveObject(policy);
 
       return policy;
    }
+
+   //   public void testCreateAiim() throws Exception
+   //   {
+   //      createAiimDocument(rootFolder, "aiim01", null);
+   //   }
+   //
+   //   protected DocumentData createAiimDocument(FolderData folder, String name, ContentStream content) throws Exception
+   //   {
+   //      DocumentData document = storage.createDocument(folder, "aiim_2010demo", VersioningState.MAJOR);
+   //      document.setName(name);
+   //      document.setProperty(new StringProperty("aiim_Ioinc", "aiim_Ioinc", "aiim_Ioinc", "aiim_Ioinc",
+   //         "Consultation Note 11488-4"));
+   //      document.setProperty(new StringProperty("aiim_procedure", "aiim_procedure", "aiim_procedure", "aiim_procedure",
+   //         "Cystoscopy 24139008"));
+   //
+   //      document.setContentStream(content);
+   //      storage.saveObject(document);
+   //      for (Map.Entry<String, Property<?>> p : document.getProperties().entrySet())
+   //      {
+   //         System.out.println(p.getKey()+ ": " + p.getValue().getValues());
+   //      }
+   //      return document;
+   //   }
+
 }

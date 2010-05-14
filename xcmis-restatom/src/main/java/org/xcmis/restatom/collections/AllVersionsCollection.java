@@ -26,20 +26,19 @@ import org.apache.abdera.model.Feed;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.StorageProvider;
-import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.model.CmisObject;
 
 import java.util.List;
 
 /**
  * Collection of all versions of document.
- * 
+ *
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com.ua">Alexey
  *         Zavizionov</a>
  * @version $Id: AllVersionsCollection.java 216 2010-02-12 17:19:50Z andrew00x $
@@ -51,9 +50,9 @@ public class AllVersionsCollection extends CmisObjectCollection
     * Instantiates a new all versions collection.
     * @param storageProvider TODO
     */
-   public AllVersionsCollection(StorageProvider storageProvider)
+   public AllVersionsCollection(/*StorageProvider storageProvider*/)
    {
-      super(storageProvider);
+      super(/*storageProvider*/);
       setHref("/versions");
    }
 
@@ -63,10 +62,10 @@ public class AllVersionsCollection extends CmisObjectCollection
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
       String objectId = getId(request);
-      String propertyFilter = null;
+      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
       boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
-      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CMIS.MAX_ITEMS);
-      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CMIS.SKIP_COUNT);
+      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CmisConstants.MAX_ITEMS);
+      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CmisConstants.SKIP_COUNT);
       Connection conn = null;
       try
       {
@@ -146,7 +145,7 @@ public class AllVersionsCollection extends CmisObjectCollection
 
    /**
     * Get version series id.
-    * 
+    *
     * @param request request context
     * @return versionSeriesid string
     */

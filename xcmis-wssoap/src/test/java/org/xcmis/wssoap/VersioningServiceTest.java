@@ -26,8 +26,8 @@ import org.xcmis.core.CmisPropertyId;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.messaging.CmisObjectListType;
 import org.xcmis.soap.VersioningServicePort;
-import org.xcmis.spi.CMIS;
-import org.xcmis.spi.IncludeRelationships;
+import org.xcmis.spi.CmisConstants;
+import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.wssoap.impl.TypeConverter;
 import org.xcmis.wssoap.impl.VersioningServicePortImpl;
 
@@ -52,7 +52,8 @@ public class VersioningServiceTest extends BaseTest
    public void setUp() throws Exception
    {
       super.setUp();
-      server = complexDeployService(SERVICE_ADDRESS, new VersioningServicePortImpl(storageProvider), null, null, true);
+      server =
+         complexDeployService(SERVICE_ADDRESS, new VersioningServicePortImpl(/*storageProvider*/), null, null, true);
       port = getVersioningService(SERVICE_ADDRESS);
       assertNotNull(server);
       assertNotNull(port);
@@ -76,6 +77,7 @@ public class VersioningServiceTest extends BaseTest
          0 // Skip count
          ));
       assertEquals(1, checkedout.getObjects().size());
+      conn.deleteObject(idHolder.value, true);
    }
 
    public void testCancelCheckOut() throws Exception
@@ -106,6 +108,7 @@ public class VersioningServiceTest extends BaseTest
          0 // Skip count
          ));
       assertEquals(0, checkedout.getObjects().size());
+      conn.deleteObject(id, true);
    }
 
    public void testCheckIn() throws Exception
@@ -116,17 +119,17 @@ public class VersioningServiceTest extends BaseTest
       CmisObjectType pwc =
          TypeConverter.getCmisObjectType(conn.getObject(pwcId, false, IncludeRelationships.NONE, false, false, false,
             null, null));
-      CmisPropertyId versionSeriesIdProp = (CmisPropertyId)getProperty(pwc, CMIS.VERSION_SERIES_ID);
+      CmisPropertyId versionSeriesIdProp = (CmisPropertyId)getProperty(pwc, CmisConstants.VERSION_SERIES_ID);
       String versionSeriesId = versionSeriesIdProp.getValue().get(0);
       List<CmisObjectType> allVersions =
-         TypeConverter.getListCmisObjectType(conn.getAllVersions(versionSeriesId, false, false, null));
+         TypeConverter.getCmisObjectTypeList(conn.getAllVersions(versionSeriesId, false, false, null));
       //      assertEquals(1, allVersions.size());
       assertEquals(2, allVersions.size());
       port.checkIn(//
          repositoryId, //
          pwcHolder, //
          true, // Major
-         null, // Properties
+         new CmisPropertiesType(), // Properties
          null, // Content stream
          "comment", // Check-in comment
          null, // Policies
@@ -134,14 +137,21 @@ public class VersioningServiceTest extends BaseTest
          null, // Remove ACL
          new Holder<CmisExtensionType>() // Extensions
          );
-      allVersions = TypeConverter.getListCmisObjectType(conn.getAllVersions(versionSeriesId, false, false, null));
+      allVersions = TypeConverter.getCmisObjectTypeList(conn.getAllVersions(versionSeriesId, false, false, null));
       assertEquals(2, allVersions.size());
+      conn.deleteObject(id, true);
    }
 
    public void testGetAllVersions() throws Exception
    {
       String docId = createDocument(testFolderId, "doc1");
+      Thread.sleep(500);
       String pwcId = conn.checkout(docId);
+      CmisObjectType pwc =
+         TypeConverter.getCmisObjectType(conn.getObject(pwcId, false, IncludeRelationships.NONE, false, false, false,
+            null, null));
+      CmisPropertyId versionSeriesIdProp = (CmisPropertyId)getProperty(pwc, CmisConstants.VERSION_SERIES_ID);
+      String versionSeriesId = versionSeriesIdProp.getValue().get(0);
       conn.checkin(//
          pwcId, //
          true, // Major
@@ -152,22 +162,25 @@ public class VersioningServiceTest extends BaseTest
          null, // Remove ACL
          null // Policies
          );
-      CmisObjectType pwc =
-         TypeConverter.getCmisObjectType(conn.getObject(pwcId, false, IncludeRelationships.NONE, false, false, false,
-            null, null));
-      CmisPropertyId versionSeriesIdProp = (CmisPropertyId)getProperty(pwc, CMIS.VERSION_SERIES_ID);
-      String versionSeriesId = versionSeriesIdProp.getValue().get(0);
+
       List<CmisObjectType> allVersions = port.getAllVersions(repositoryId, versionSeriesId, null, false, null);
       assertEquals(2, allVersions.size());
+      conn.deleteObject(docId, true);
 
    }
 
    public void testGetLatestVersionProperties() throws Exception
    {
       String id = createDocument(testFolderId, "doc1");
-      // XXX : Be sure creation document and PWC have different Last Modification dates.
       Thread.sleep(500);
       String pwcId = conn.checkout(id);
+
+      CmisObjectType pwc =
+         TypeConverter.getCmisObjectType(conn.getObject(pwcId, false, IncludeRelationships.NONE, false, false, false,
+            null, null));
+      CmisPropertyId versionSeriesIdProp = (CmisPropertyId)getProperty(pwc, CmisConstants.VERSION_SERIES_ID);
+      String versionSeriesId = versionSeriesIdProp.getValue().get(0);
+
       String lv = conn.checkin(//
          pwcId, //
          true, // Major
@@ -178,20 +191,16 @@ public class VersioningServiceTest extends BaseTest
          null, // Remove ACL
          null // Policies
          );
-      CmisObjectType pwc =
-         TypeConverter.getCmisObjectType(conn.getObject(pwcId, false, IncludeRelationships.NONE, false, false, false,
-            null, null));
-      CmisPropertyId versionSeriesIdProp = (CmisPropertyId)getProperty(pwc, CMIS.VERSION_SERIES_ID);
-      String versionSeriesId = versionSeriesIdProp.getValue().get(0);
 
       CmisPropertiesType properties = port.getPropertiesOfLatestVersion(//
          repositoryId, //
          versionSeriesId, //
          false, //
-         CMIS.OBJECT_ID, //
+         CmisConstants.OBJECT_ID, //
          new CmisExtensionType() //
          );
       assertEquals(lv, ((CmisPropertyId)properties.getProperty().get(0)).getValue().get(0));
+      conn.deleteObject(id, true);
    }
 
    private VersioningServicePort getVersioningService(String address)

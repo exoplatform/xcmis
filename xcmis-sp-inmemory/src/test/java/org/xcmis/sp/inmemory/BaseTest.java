@@ -19,16 +19,23 @@
 
 package org.xcmis.sp.inmemory;
 
+import junit.framework.TestCase;
+
 import org.exoplatform.services.log.LogConfigurator;
 import org.exoplatform.services.log.impl.Log4JConfigurator;
-import org.xcmis.sp.inmemory.CMISRepositoryConfiguration;
-import org.xcmis.sp.inmemory.RepositoryImpl;
-import org.xcmis.spi.Repository;
+import org.xcmis.spi.CmisConstants;
+import org.xcmis.spi.ContentStream;
+import org.xcmis.spi.DocumentData;
+import org.xcmis.spi.FolderData;
+import org.xcmis.spi.ObjectData;
+import org.xcmis.spi.PolicyData;
+import org.xcmis.spi.RelationshipData;
+import org.xcmis.spi.model.PropertyDefinition;
+import org.xcmis.spi.model.VersioningState;
+import org.xcmis.spi.model.impl.StringProperty;
 
 import java.util.HashMap;
 import java.util.Properties;
-
-import junit.framework.TestCase;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
@@ -36,20 +43,65 @@ import junit.framework.TestCase;
  */
 public abstract class BaseTest extends TestCase
 {
-   protected Repository repository;
 
-   protected final String repositoryId = "cmis_simple";
+   protected StorageImpl storage;
+
+   protected FolderData rootFolder;
+
+   protected final String storageId = "inmem1";
 
    public void setUp() throws Exception
    {
       super.setUp();
-      HashMap<String, Object> properties = new HashMap<String, Object>();
-      properties.put("exo.cmis.changetoken.feature", false);
-      repository = new RepositoryImpl(new CMISRepositoryConfiguration(repositoryId, properties));
-      
       LogConfigurator lc = new Log4JConfigurator();
       Properties props = new Properties();
       props.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("conf/log4j.properties"));
       lc.configure(props);
+
+      HashMap<String, Object> properties = new HashMap<String, Object>();
+      properties.put("exo.cmis.changetoken.feature", false);
+      StorageConfiguration configuration = new StorageConfiguration(storageId, properties);
+
+      storage = new StorageImpl(configuration);
+      rootFolder = (FolderData)storage.getObjectById(storage.getRepositoryInfo().getRootFolderId());
+   }
+
+   protected FolderData createFolder(FolderData parent, String name, String type)
+   {
+      FolderData folder = storage.createFolder(parent, type);
+      folder.setName(name);
+      storage.saveObject(folder);
+      return folder;
+   }
+
+   protected DocumentData createDocument(FolderData parent, String name, String type, ContentStream content,
+      VersioningState versioningState)
+   {
+      DocumentData doc = storage.createDocument(parent, type, versioningState);
+      doc.setName(name);
+      doc.setContentStream(content);
+      storage.saveObject(doc);
+      return doc;
+   }
+
+   protected PolicyData createPolicy(String name, String type, String policyText)
+   {
+      PolicyData policy = storage.createPolicy(null, type);
+      policy.setName(name);
+
+      PropertyDefinition<?> defPolicyText = PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
+      policy.setProperty(new StringProperty(defPolicyText.getId(), defPolicyText.getQueryName(), defPolicyText
+         .getLocalName(), defPolicyText.getDisplayName(), policyText));
+
+      storage.saveObject(policy);
+      return policy;
+   }
+
+   public RelationshipData createRelationship(String name, ObjectData source, ObjectData target, String typeId)
+   {
+      RelationshipData relationship = storage.createRelationship(source, target, typeId);
+      relationship.setName(name);
+      storage.saveObject(relationship);
+      return relationship;
    }
 }

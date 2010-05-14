@@ -20,7 +20,7 @@ package org.xcmis.search.lucene.content;
 
 /**
  * @author <a href="mailto:Sergey.Kabashnyuk@gmail.com">Sergey Kabashnyuk</a>
- * @version $Id: exo-jboss-codetemplates.xml 34027 2009-07-15 23:26:43Z
+ * @version $Id: VirtualTableResolver.java 34027 2009-07-15 23:26:43Z
  *          aheritier $
  */
 public interface VirtualTableResolver<Q>

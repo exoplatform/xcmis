@@ -30,8 +30,9 @@ import org.apache.lucene.store.LockObtainFailedException;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.search.Startable;
-import org.xcmis.search.config.IndexConfigurationException;
 import org.xcmis.search.config.IndexConfiguration;
+import org.xcmis.search.config.IndexConfigurationException;
+import org.xcmis.search.content.IndexModificationException;
 import org.xcmis.search.lucene.index.merge.IndexAggregator;
 
 import java.io.IOException;
@@ -90,11 +91,12 @@ public class LocalStorageIndexDataManager implements LuceneIndexDataManager, Ind
       }
       else
       {
+         IndexWriter writer = null;
          try
          {
             final PersistedIndex index = chains.get(0);
-            final IndexWriter writer =
-               new IndexWriter(index.getDirectory(), new StandardAnalyzer(), MaxFieldLength.UNLIMITED);
+
+            writer = new IndexWriter(index.getDirectory(), new StandardAnalyzer(), MaxFieldLength.UNLIMITED);
             final List<Directory> dirs = new ArrayList<Directory>();
             for (final LuceneIndexDataManager luceneIndexDataManager : indexes)
             {
@@ -105,7 +107,6 @@ public class LocalStorageIndexDataManager implements LuceneIndexDataManager, Ind
             final Directory[] dirsToMerge = new Directory[dirs.size()];
             writer.addIndexesNoOptimize(dirs.toArray(dirsToMerge));
             writer.optimize();
-            writer.close();
          }
          catch (final CorruptIndexException e)
          {
@@ -118,6 +119,25 @@ public class LocalStorageIndexDataManager implements LuceneIndexDataManager, Ind
          catch (final IOException e)
          {
             throw new IndexException(e.getLocalizedMessage(), e);
+         }
+         finally
+         {
+            if (writer != null)
+            {
+               try
+               {
+                  writer.close();
+               }
+               catch (CorruptIndexException e)
+               {
+                  throw new IndexException(e.getLocalizedMessage(), e);
+               }
+               catch (IOException e)
+               {
+                  throw new IndexException(e.getLocalizedMessage(), e);
+               }
+            }
+
          }
       }
       return null;
@@ -244,7 +264,8 @@ public class LocalStorageIndexDataManager implements LuceneIndexDataManager, Ind
 
             if (changes.getRemovedDocuments().size() > 0)
             {
-               log.error(changes.getRemovedDocuments().size());
+               throw new IndexModificationException("Unable to remove item's with id's "
+                  + changes.getRemovedDocuments() + " from index");
             }
 
          }

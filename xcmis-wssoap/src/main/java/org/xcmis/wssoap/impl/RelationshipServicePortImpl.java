@@ -26,19 +26,20 @@ import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.messaging.CmisObjectListType;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.RelationshipServicePort;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
+import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
-import org.xcmis.spi.RelationshipDirection;
-import org.xcmis.spi.StorageProvider;
+import org.xcmis.spi.model.RelationshipDirection;
 
 import java.math.BigInteger;
 
 /**
  * @author <a href="mailto:max.shaposhnik@exoplatform.com">Max Shaposhnik</a>
- * @version $Id: RelationshipServicePortImpl.java 2 2010-02-04 17:21:49Z andrew00x $
+ * @version $Id: RelationshipServicePortImpl.java 2 2010-02-04 17:21:49Z
+ *          andrew00x $
  */
 @javax.jws.WebService(// name = "RelationshipServicePort",
-serviceName = "RelationshipService", // 
+serviceName = "RelationshipService", //
 portName = "RelationshipServicePort", //
 targetNamespace = "http://docs.oasis-open.org/ns/cmis/ws/200908/", //
 wsdlLocation = "/wsdl/CMISWS-Service.wsdl" //,
@@ -50,17 +51,12 @@ public class RelationshipServicePortImpl implements RelationshipServicePort
    /** Logger. */
    private static final Log LOG = ExoLogger.getLogger(RelationshipServicePortImpl.class);
 
-   /** StorageProvider. */
-   private StorageProvider storageProvider;
-
    /**
     * Constructs instance of <code>RelationshipServicePortImpl</code> .
-    * 
-    * @param relationshipService RelationshipService
+    *
     */
-   public RelationshipServicePortImpl(StorageProvider storageProvider)
+   public RelationshipServicePortImpl()
    {
-      this.storageProvider = storageProvider;
    }
 
    /**
@@ -78,12 +74,15 @@ public class RelationshipServicePortImpl implements RelationshipServicePort
       CmisExtensionType extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation getRelationships");
+      }
       Connection conn = null;
 
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          return TypeConverter.getCmisObjectListType(conn.getObjectRelationships(
             objectId, //
             relationshipDirection == null ? RelationshipDirection.SOURCE : RelationshipDirection
@@ -92,7 +91,7 @@ public class RelationshipServicePortImpl implements RelationshipServicePort
             includeSubRelationshipTypes == null ? false : includeSubRelationshipTypes, //
             includeAllowableActions == null ? false : includeAllowableActions, //
             true, propertyFilter, //
-            maxItems == null ? CMIS.MAX_ITEMS : maxItems.intValue(), //
+            maxItems == null ? CmisConstants.MAX_ITEMS : maxItems.intValue(), //
             skipCount == null ? 0 : skipCount.intValue() //
             ).getItems());
       }
@@ -103,7 +102,10 @@ public class RelationshipServicePortImpl implements RelationshipServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 }

@@ -37,8 +37,6 @@ public interface QueryElement extends Serializable
     * 
     * @param visitor
     *           the visitor.
-    * @param context
-    *           user defined data, which is passed to the visit method.
     */
    public void accept(QueryObjectModelVisitor visitor) throws VisitException;
 

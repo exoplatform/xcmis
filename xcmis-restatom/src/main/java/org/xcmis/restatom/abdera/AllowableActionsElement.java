@@ -23,8 +23,7 @@ import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.AllowableActions;
-import org.xcmis.spi.impl.AllowableActionsImpl;
+import org.xcmis.spi.model.AllowableActions;
 
 import javax.xml.namespace.QName;
 
@@ -37,7 +36,7 @@ public class AllowableActionsElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new allowable actions element.
-    * 
+    *
     * @param internal the internal
     */
    public AllowableActionsElement(Element internal)
@@ -47,7 +46,7 @@ public class AllowableActionsElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new allowable actions element.
-    * 
+    *
     * @param factory the factory
     * @param qname the qname
     */
@@ -56,86 +55,9 @@ public class AllowableActionsElement extends ExtensibleElementWrapper
       super(factory, qname);
    }
 
-   // Never use in real life. Useful for tests.
-   /**
-    * Gets the allowable actions.
-    * 
-    * @return the allowable actions
-    */
-   public AllowableActions getAllowableActions()
-   {
-      AllowableActionsImpl actions = new AllowableActionsImpl();
-
-      Element el = null;
-      el = getExtension(AtomCMIS.CAN_DELETE_OBJECT);
-      actions.setCanDeleteObject(Boolean.valueOf(el != null ? el.getText() : null));
-      el = getExtension(AtomCMIS.CAN_UPDATE_PROPERTIES);
-      actions.setCanUpdateProperties(Boolean.valueOf(el != null ? el.getText() : null));
-      el = getExtension(AtomCMIS.CAN_GET_FOLDER_TREE);
-      actions.setCanGetFolderTree(Boolean.valueOf(el != null ? el.getText() : null));
-      el = getExtension(AtomCMIS.CAN_GET_PROPERTIES);
-      actions.setCanGetProperties(Boolean.valueOf(el != null ? el.getText() : null));
-      el = getExtension(AtomCMIS.CAN_GET_OBJECT_RELATIONSHIPS);
-      actions.setCanGetObjectRelationships(Boolean.valueOf(el != null ? el.getText() : null));
-      el = getExtension(AtomCMIS.CAN_GET_OBJECT_PARENTS);
-      actions.setCanGetObjectParents(Boolean.valueOf(el != null ? el.getText() : null));
-      el = getExtension(AtomCMIS.CAN_GET_FOLDER_PARENT);
-      actions.setCanGetFolderParent(Boolean.valueOf(el != null ? el.getText() : null));
-      el = getExtension(AtomCMIS.CAN_GET_DESCENDANTS);
-      actions.setCanGetDescendants(Boolean.valueOf(el != null ? el.getText() : null));
-      el = getExtension(AtomCMIS.CAN_MOVE_OBJECT);
-      actions.setCanMoveObject(Boolean.valueOf(el != null ? el.getText() : null));
-      el = getExtension(AtomCMIS.CAN_DELETE_CONTENT_STREAM);
-      actions.setCanDeleteContentStream(Boolean.valueOf(el != null ? el.getText() : null));
-      el = getExtension(AtomCMIS.CAN_CHECK_OUT);
-      actions.setCanCheckOut(Boolean.valueOf(el != null ? el.getText() : null));
-      el = getExtension(AtomCMIS.CAN_CANCEL_CHECK_OUT);
-      actions.setCanCancelCheckOut(Boolean.valueOf(el != null ? el.getText() : null));
-      el = getExtension(AtomCMIS.CAN_CHECK_IN);
-      actions.setCanCheckIn(Boolean.valueOf(el != null ? el.getText() : null));
-      el = getExtension(AtomCMIS.CAN_SET_CONTENT_STREAM);
-      actions.setCanSetContentStream(Boolean.valueOf(el != null ? el.getText() : null));
-      el = getExtension(AtomCMIS.CAN_GET_ALL_VERSIONS);
-      actions.setCanGetAllVersions(Boolean.valueOf(el != null ? el.getText() : null));
-      el = getExtension(AtomCMIS.CAN_ADD_OBJECT_TO_FOLDER);
-      actions.setCanAddObjectToFolder(Boolean.valueOf(el != null ? el.getText() : null));
-      el = getExtension(AtomCMIS.CAN_REMOVE_OBJECT_FROM_FOLDER);
-      actions.setCanRemoveObjectFromFolder(Boolean.valueOf(el != null ? el.getText() : null));
-      el = getExtension(AtomCMIS.CAN_GET_CONTENT_STREAM);
-      actions.setCanGetContentStream(Boolean.valueOf(el != null ? el.getText() : null));
-      el = getExtension(AtomCMIS.CAN_APPLY_POLICY);
-      actions.setCanApplyPolicy(Boolean.valueOf(el != null ? el.getText() : null));
-      el = getExtension(AtomCMIS.CAN_GET_APPLIED_POLICIES);
-      actions.setCanGetAppliedPolicies(Boolean.valueOf(el != null ? el.getText() : null));
-      el = getExtension(AtomCMIS.CAN_REMOVE_POLICY);
-      actions.setCanRemovePolicy(Boolean.valueOf(el != null ? el.getText() : null));
-      el = getExtension(AtomCMIS.CAN_GET_CHILDREN);
-      actions.setCanGetChildren(Boolean.valueOf(el != null ? el.getText() : null));
-      el = getExtension(AtomCMIS.CAN_CREATE_DOCUMENT);
-      actions.setCanCreateDocument(Boolean.valueOf(el != null ? el.getText() : null));
-      el = getExtension(AtomCMIS.CAN_CREATE_FOLDER);
-      actions.setCanCreateFolder(Boolean.valueOf(el != null ? el.getText() : null));
-      el = getExtension(AtomCMIS.CAN_CREATE_RELATIONSHIP);
-      actions.setCanCreateRelationship(Boolean.valueOf(el != null ? el.getText() : null));
-      el = getExtension(AtomCMIS.CAN_DELETE_TREE);
-      actions.setCanDeleteTree(Boolean.valueOf(el != null ? el.getText() : null));
-
-      /* renditions */
-      el = getExtension(AtomCMIS.CAN_GET_RENDITIONS);
-      actions.setCanGetRenditions(Boolean.valueOf(el != null ? el.getText() : null));
-
-      /* ACL */
-      el = getExtension(AtomCMIS.CAN_GET_ACL);
-      actions.setCanGetACL(Boolean.valueOf(el != null ? el.getText() : null));
-      el = getExtension(AtomCMIS.CAN_APPLY_ACL);
-      actions.setCanApplyACL(Boolean.valueOf(el != null ? el.getText() : null));
-
-      return actions;
-   }
-
    /**
     * Builds the element.
-    * 
+    *
     * @param actions the actions
     */
    public void build(AllowableActions actions)

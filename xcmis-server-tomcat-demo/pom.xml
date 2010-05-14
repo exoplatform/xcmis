@@ -8,10 +8,8 @@
    </parent>
 
    <artifactId>xcmis-server-demo-war</artifactId>
-   <name>xCMIS :: Server WAR</name>
-   <description>xCMIS Server WAR</description>
-
    <packaging>war</packaging>
+   <name>xCMIS :: Server :: Demo WAR</name>
 
    <dependencies>
 
@@ -28,12 +26,6 @@
       <dependency>
          <groupId>org.exoplatform.kernel</groupId>
          <artifactId>exo.kernel.container</artifactId>
-      </dependency>
-
-      <dependency>
-         <groupId>org.xcmis</groupId>
-         <artifactId>xcmis-core</artifactId>
-         <scope>runtime</scope>
       </dependency>
 
       <dependency>

@@ -46,7 +46,7 @@ public class SearchServiceConfiguration
    private NameConverter nameConverter;
 
    /**
-    * Split path  string to names
+    * Split path  string to names.
     */
    private PathSplitter pathSplitter;
 
@@ -56,29 +56,21 @@ public class SearchServiceConfiguration
    private IndexConfiguration indexConfiguration;
 
    /**
-    * @return the defaultInvocationContext
-    */
-   public InvocationContext getDefaultInvocationContext()
-   {
-      return defaultInvocationContext;
-   }
-
-   /**
-    * @param defaultInvocationContext the defaultInvocationContext to set
-    */
-   public void setDefaultInvocationContext(InvocationContext defaultInvocationContext)
-   {
-      this.defaultInvocationContext = defaultInvocationContext;
-   }
-
-   /**
-    * Default invocation context;
+    * Default invocation context.
     */
    private InvocationContext defaultInvocationContext;
 
    public ContentReaderInterceptor getContentReader()
    {
       return contentReader;
+   }
+
+   /**
+    * @return the defaultInvocationContext
+    */
+   public InvocationContext getDefaultInvocationContext()
+   {
+      return defaultInvocationContext;
    }
 
    /**
@@ -119,6 +111,14 @@ public class SearchServiceConfiguration
    public void setContentReader(ContentReaderInterceptor contentReader)
    {
       this.contentReader = contentReader;
+   }
+
+   /**
+    * @param defaultInvocationContext the defaultInvocationContext to set
+    */
+   public void setDefaultInvocationContext(InvocationContext defaultInvocationContext)
+   {
+      this.defaultInvocationContext = defaultInvocationContext;
    }
 
    /**

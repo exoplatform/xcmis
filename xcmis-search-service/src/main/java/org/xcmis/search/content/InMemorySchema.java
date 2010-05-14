@@ -1,27 +1,28 @@
 /*
  * Copyright (C) 2010 eXo Platform SAS.
- *
- * This is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation; either version 2.1 of
- * the License, or (at your option) any later version.
- *
- * This software is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this software; if not, write to the Free
- * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
- * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ * 
+ * This is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either version 2.1 of the License, or (at your option)
+ * any later version.
+ * 
+ * This software is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this software; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA, or see the FSF
+ * site: http://www.fsf.org.
  */
 package org.xcmis.search.content;
 
 import org.apache.commons.lang.Validate;
-import org.xcmis.search.InvalidQueryException;
 import org.xcmis.search.model.Query;
+import org.xcmis.search.model.constraint.Operator;
 import org.xcmis.search.model.source.SelectorName;
+import org.xcmis.search.value.PropertyType;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -60,14 +61,15 @@ public class InMemorySchema implements Schema
       }
 
       /**
-       * Add a table with the supplied name and column names. Each column will be given a default type. The table will also
-       * overwrite any existing table definition with the same name.
+       * Add a table with the supplied name and column names. Each column will
+       * be given a default type. The table will also overwrite any existing
+       * table definition with the same name.
        * 
-       * @param name the name of the new table
-       * @param columnNames the names of the columns.
+       * @param name
+       *           the name of the new table
+       * @param columnNames
+       *           the names of the columns.
        * @return this builder, for convenience in method chaining; never null
-       * @throws IllegalArgumentException if the table name is null or empty, any column name is null or empty, or if no column
-       *         names are given
        */
       public Builder addTable(String name, String... columnNames)
       {
@@ -78,8 +80,8 @@ public class InMemorySchema implements Schema
          for (String columnName : columnNames)
          {
             Validate.notEmpty(columnName, "columnName[" + (i++) + "] may not be empty");;
-            //TODO default type 
-            columns.add(new InMemoryColumn(columnName, "String"));
+            // TODO default type
+            columns.add(new InMemoryColumn(columnName, PropertyType.STRING));
          }
          InMemoryTable table = new InMemoryTable(new SelectorName(name), columns);
          tables.put(table.getName(), table);
@@ -87,17 +89,19 @@ public class InMemorySchema implements Schema
       }
 
       /**
-       * Add a table with the supplied name and column names and types. The table will also overwrite any existing table
-       * definition with the same name.
+       * Add a table with the supplied name and column names and types. The
+       * table will also overwrite any existing table definition with the same
+       * name.
        * 
-       * @param name the name of the new table
-       * @param columnNames the names of the columns
-       * @param types the types for the columns
+       * @param name
+       *           the name of the new table
+       * @param columnNames
+       *           the names of the columns
+       * @param types
+       *           the types for the columns
        * @return this builder, for convenience in method chaining; never null
-       * @throws IllegalArgumentException if the table name is null or empty, any column name is null or empty, if no column
-       *         names are given, or if the number of types does not match the number of columns
        */
-      public Builder addTable(String name, String[] columnNames, String[] types)
+      public Builder addTable(String name, String[] columnNames, PropertyType[] types)
       {
          Validate.notEmpty(name, " name may not be empty");
          Validate.notEmpty(columnNames, " columnNames may not be empty");
@@ -117,38 +121,45 @@ public class InMemorySchema implements Schema
       }
 
       /**
-       * Add a column with the supplied name and type to the named table. Any existing column with that name will be replaced
-       * with the new column. If the table does not yet exist, it will be added.
+       * Add a column with the supplied name and type to the named table. Any
+       * existing column with that name will be replaced with the new column. If
+       * the table does not yet exist, it will be added.
        * 
-       * @param tableName the name of the new table
-       * @param columnName the names of the column
-       * @param type the type for the column
+       * @param tableName
+       *           the name of the new table
+       * @param columnName
+       *           the names of the column
+       * @param type
+       *           the type for the column
        * @return this builder, for convenience in method chaining; never null
-       * @throws IllegalArgumentException if the table name is null or empty, any column name is null or empty, if no column
-       *         names are given, or if the number of types does not match the number of columns
        */
-      public Builder addColumn(String tableName, String columnName, String type)
+      public Builder addColumn(String tableName, String columnName, PropertyType type)
       {
          Validate.notEmpty(tableName, " tableName may not be empty");
          Validate.notEmpty(columnName, " columnName may not be empty");
          Validate.notNull(type, " type may not be null");
 
-         return addColumn(tableName, columnName, type, InMemoryColumn.DEFAULT_FULL_TEXT_SEARCHABLE);
+         return addColumn(tableName, columnName, type, InMemoryColumn.DEFAULT_FULL_TEXT_SEARCHABLE, Operator.ALL);
       }
 
       /**
-       * Add a column with the supplied name and type to the named table. Any existing column with that name will be replaced
-       * with the new column. If the table does not yet exist, it will be added.
+       * Add a column with the supplied name and type to the named table. Any
+       * existing column with that name will be replaced with the new column. If
+       * the table does not yet exist, it will be added.
        * 
-       * @param tableName the name of the new table
-       * @param columnName the names of the column
-       * @param type the type for the column
-       * @param fullTextSearchable true if the column should be full-text searchable, or false if not
+       * @param tableName
+       *           the name of the new table
+       * @param columnName
+       *           the names of the column
+       * @param type
+       *           the type for the column
+       * @param fullTextSearchable
+       *           true if the column should be full-text searchable, or false
+       *           if not
        * @return this builder, for convenience in method chaining; never null
-       * @throws IllegalArgumentException if the table name is null or empty, the column name is null or empty, or if the
-       *         property type is null
        */
-      public Builder addColumn(String tableName, String columnName, String type, boolean fullTextSearchable)
+      public Builder addColumn(String tableName, String columnName, PropertyType type, boolean fullTextSearchable,
+         Operator[] availableQueryOperators)
       {
          Validate.notEmpty(tableName, " tableName may not be empty");
          Validate.notEmpty(columnName, " columnName may not be empty");
@@ -159,12 +170,12 @@ public class InMemorySchema implements Schema
          if (existing == null)
          {
             List<Column> columns = new ArrayList<Column>();
-            columns.add(new InMemoryColumn(columnName, type, fullTextSearchable));
+            columns.add(new InMemoryColumn(columnName, type, fullTextSearchable, availableQueryOperators));
             table = new InMemoryTable(selector, columns);
          }
          else
          {
-            table = existing.withColumn(columnName, type);
+            table = existing.withColumn(columnName, type, fullTextSearchable, availableQueryOperators);
          }
          tables.put(table.getName(), table);
          return this;
@@ -173,10 +184,11 @@ public class InMemorySchema implements Schema
       /**
        * Make sure the column on the named table is searchable.
        * 
-       * @param tableName the name of the new table
-       * @param columnName the names of the column
+       * @param tableName
+       *           the name of the new table
+       * @param columnName
+       *           the names of the column
        * @return this builder, for convenience in method chaining; never null
-       * @throws IllegalArgumentException if the table name is null or empty or if the column name is null or empty
        */
       public Builder makeSearchable(String tableName, String columnName)
       {
@@ -188,32 +200,31 @@ public class InMemorySchema implements Schema
          if (existing == null)
          {
             List<Column> columns = new ArrayList<Column>();
-            //TODO default type 
-            columns.add(new InMemoryColumn(columnName, "String", true));
+            // TODO default type
+            columns.add(new InMemoryColumn(columnName, PropertyType.STRING, true, Operator.ALL));
             table = new InMemoryTable(selector, columns);
          }
          else
          {
             Column column = existing.getColumn(columnName);
-            //TODO default type 
-            String type = "String";
+            // TODO default type
+            PropertyType type = PropertyType.STRING;
             if (column != null)
             {
                type = column.getPropertyType();
             }
-            table = existing.withColumn(columnName, type, true);
+            table = existing.withColumn(columnName, type, true, column.getAvailableQueryOperators());
          }
          tables.put(table.getName(), table);
          return this;
       }
 
       /**
-       * Build the {@link Schema} instance, using the current state of the builder. This method creates a snapshot of the
-       * tables (with their columns) as they exist at the moment this method is called.
+       * Build the {@link Schema} instance, using the current state of the
+       * builder. This method creates a snapshot of the tables (with their
+       * columns) as they exist at the moment this method is called.
        * 
        * @return the new Schema; never null
-       * @throws InvalidQueryException 
-       * @throws InvalidQueryException if any of the view definitions is invalid and cannot be resolved
        */
       public Schema build()
       {

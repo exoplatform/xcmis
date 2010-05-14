@@ -19,25 +19,33 @@
 
 package org.xcmis.sp.jcr.exo;
 
-import org.xcmis.spi.BaseType;
-import org.xcmis.spi.CMIS;
-import org.xcmis.spi.ContentStreamAllowed;
-import org.xcmis.spi.DateResolution;
-import org.xcmis.spi.Precision;
-import org.xcmis.spi.PropertyDefinition;
-import org.xcmis.spi.PropertyType;
-import org.xcmis.spi.TypeDefinition;
-import org.xcmis.spi.Updatability;
-import org.xcmis.spi.impl.PropertyDefinitionImpl;
-import org.xcmis.spi.impl.TypeDefinitionImpl;
+import static org.xcmis.sp.jcr.exo.StorageImpl.XCMIS_PROPERTY_TYPE_PATTERN;
+
+import org.xcmis.spi.CmisConstants;
+import org.xcmis.spi.CmisRuntimeException;
+import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.Choice;
+import org.xcmis.spi.model.ContentStreamAllowed;
+import org.xcmis.spi.model.DateResolution;
+import org.xcmis.spi.model.Precision;
+import org.xcmis.spi.model.PropertyDefinition;
+import org.xcmis.spi.model.PropertyType;
+import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.model.Updatability;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
+import javax.jcr.RepositoryException;
+import javax.jcr.Value;
 import javax.jcr.nodetype.NodeType;
 
 /**
@@ -46,6 +54,18 @@ import javax.jcr.nodetype.NodeType;
  */
 class JcrTypeHelper
 {
+
+   static final Set<Pattern> ignoredProperties = new HashSet<Pattern>();
+   static
+   {
+      ignoredProperties.add(Pattern.compile("jcr:created"));
+      ignoredProperties.add(Pattern.compile("jcr:mixinTypes"));
+      ignoredProperties.add(Pattern.compile("jcr:uuid"));
+      ignoredProperties.add(Pattern.compile("jcr:primaryType"));
+      ignoredProperties.add(Pattern.compile("exo:owner"));
+      ignoredProperties.add(Pattern.compile("\\*"));
+      ignoredProperties.add(XCMIS_PROPERTY_TYPE_PATTERN);
+   }
 
    /**
     * Get object type definition.
@@ -131,7 +151,7 @@ class JcrTypeHelper
     */
    protected static TypeDefinition getDocumentDefinition(NodeType nt, boolean includePropertyDefinition)
    {
-      TypeDefinitionImpl def = new TypeDefinitionImpl();
+      TypeDefinition def = new TypeDefinition();
       String localTypeName = nt.getName();
       String typeId = getCmisTypeId(localTypeName);
       def.setBaseId(BaseType.DOCUMENT);
@@ -185,7 +205,7 @@ class JcrTypeHelper
     */
    protected static TypeDefinition getFolderDefinition(NodeType nt, boolean includePropertyDefinition)
    {
-      TypeDefinitionImpl def = new TypeDefinitionImpl();
+      TypeDefinition def = new TypeDefinition();
       String localTypeName = nt.getName();
       String typeId = getCmisTypeId(localTypeName);
       def.setBaseId(BaseType.FOLDER);
@@ -237,7 +257,7 @@ class JcrTypeHelper
     */
    protected static TypeDefinition getPolicyDefinition(NodeType nt, boolean includePropertyDefinition)
    {
-      TypeDefinitionImpl def = new TypeDefinitionImpl();
+      TypeDefinition def = new TypeDefinition();
       String localTypeName = nt.getName();
       String typeId = getCmisTypeId(localTypeName);
       def.setBaseId(BaseType.POLICY);
@@ -249,7 +269,7 @@ class JcrTypeHelper
       def.setFileable(false);
       def.setFulltextIndexed(false);
       def.setId(typeId);
-      def.setIncludedInSupertypeQuery(true);
+      def.setIncludedInSupertypeQuery(false);
       def.setLocalName(localTypeName);
       def.setLocalNamespace(JcrCMIS.EXO_CMIS_NS_URI);
       if (typeId.equals(BaseType.POLICY.value()))
@@ -289,7 +309,7 @@ class JcrTypeHelper
     */
    protected static TypeDefinition getRelationshipDefinition(NodeType nt, boolean includePropertyDefinition)
    {
-      TypeDefinitionImpl def = new TypeDefinitionImpl();
+      TypeDefinition def = new TypeDefinition();
       String localTypeName = nt.getName();
       String typeId = getCmisTypeId(localTypeName);
       def.setBaseId(BaseType.RELATIONSHIP);
@@ -348,92 +368,221 @@ class JcrTypeHelper
 
       Set<String> knownIds = PropertyDefinitions.getPropertyIds(typeDefinition.getBaseId().value());
 
-      for (javax.jcr.nodetype.PropertyDefinition jcrPropertyDef : nt.getPropertyDefinitions())
+      final javax.jcr.nodetype.PropertyDefinition[] propertyDefinitions = nt.getPropertyDefinitions();
+      //map for quick string properties lookup 
+      Map<String, javax.jcr.nodetype.PropertyDefinition> propertyDefinitionsMap =
+         new HashMap<String, javax.jcr.nodetype.PropertyDefinition>(propertyDefinitions.length);
+      for (int i = 0; i < propertyDefinitions.length; i++)
+      {
+         propertyDefinitionsMap.put(propertyDefinitions[i].getName(), propertyDefinitions[i]);
+      }
+
+      for (javax.jcr.nodetype.PropertyDefinition jcrPropertyDef : propertyDefinitions)
       {
          String pdName = jcrPropertyDef.getName();
-         // TODO : Do not use any constraint about prefixes, need discovery
-         // hierarchy of JCR types or so on.
-         if (pdName.startsWith("cmis:"))
+         // At the moment just hide JCR properties
+         boolean shouldBeIgnored = false;
+         for (Pattern ignoredPattern : ignoredProperties)
          {
-            // Do not process known properties
-            if (!knownIds.contains(pdName))
+            if (ignoredPattern.matcher(pdName).matches())
             {
-               PropertyDefinition<?> cmisPropDef = null;
-               // TODO : default values.
-               switch (jcrPropertyDef.getRequiredType())
-               {
-
-                  case javax.jcr.PropertyType.BOOLEAN :
-                     PropertyDefinitionImpl<Boolean> boolDef =
-                        new PropertyDefinitionImpl<Boolean>(pdName, pdName, pdName, null, pdName, null,
-                           PropertyType.BOOLEAN, jcrPropertyDef.isProtected() ? Updatability.READONLY
-                              : Updatability.READWRITE, false, jcrPropertyDef.isMandatory(), true, true, null,
-                           jcrPropertyDef.isMultiple(), null, null);
-
-                     cmisPropDef = boolDef;
-                     break;
-
-                  case javax.jcr.PropertyType.DATE :
-                     PropertyDefinitionImpl<Calendar> dateDef =
-                        new PropertyDefinitionImpl<Calendar>(pdName, pdName, pdName, null, pdName, null,
-                           PropertyType.DATETIME, jcrPropertyDef.isProtected() ? Updatability.READONLY
-                              : Updatability.READWRITE, false, jcrPropertyDef.isMandatory(), true, true, null,
-                           jcrPropertyDef.isMultiple(), null, null);
-
-                     dateDef.setDateResolution(DateResolution.TIME);
-                     cmisPropDef = dateDef;
-                     break;
-
-                  case javax.jcr.PropertyType.DOUBLE :
-                     PropertyDefinitionImpl<BigDecimal> decimalDef =
-                        new PropertyDefinitionImpl<BigDecimal>(pdName, pdName, pdName, null, pdName, null,
-                           PropertyType.DECIMAL, jcrPropertyDef.isProtected() ? Updatability.READONLY
-                              : Updatability.READWRITE, false, jcrPropertyDef.isMandatory(), true, true, null,
-                           jcrPropertyDef.isMultiple(), null, null);
-
-                     decimalDef.setPrecision(Precision.Bit32);
-                     decimalDef.setMaxDecimal(CMIS.MAX_DECIMAL_VALUE);
-                     decimalDef.setMinDecimal(CMIS.MIN_DECIMAL_VALUE);
-                     cmisPropDef = decimalDef;
-                     break;
-
-                  case javax.jcr.PropertyType.LONG :
-                     PropertyDefinitionImpl<BigInteger> integerDef =
-                        new PropertyDefinitionImpl<BigInteger>(pdName, pdName, pdName, null, pdName, null,
-                           PropertyType.INTEGER, jcrPropertyDef.isProtected() ? Updatability.READONLY
-                              : Updatability.READWRITE, false, jcrPropertyDef.isMandatory(), true, true, null,
-                           jcrPropertyDef.isMultiple(), null, null);
-
-                     integerDef.setMaxInteger(CMIS.MAX_INTEGER_VALUE);
-                     integerDef.setMinInteger(CMIS.MIN_INTEGER_VALUE);
-                     cmisPropDef = integerDef;
-                     break;
-
-                  case javax.jcr.PropertyType.NAME : // TODO
-                     //                     CmisPropertyIdDefinitionType idDef = new CmisPropertyIdDefinitionType();
-                     //                     idDef.setPropertyType(EnumPropertyType.ID);
-                     //                     cmisPropDef = idDef;
-                     //                     break;
-                  case javax.jcr.PropertyType.REFERENCE :
-                  case javax.jcr.PropertyType.STRING :
-                  case javax.jcr.PropertyType.PATH :
-                  case javax.jcr.PropertyType.BINARY :
-                  case javax.jcr.PropertyType.UNDEFINED :
-                     PropertyDefinitionImpl<String> stringDef =
-                        new PropertyDefinitionImpl<String>(pdName, pdName, pdName, null, pdName, null,
-                           PropertyType.STRING, jcrPropertyDef.isProtected() ? Updatability.READONLY
-                              : Updatability.READWRITE, false, jcrPropertyDef.isMandatory(), true, true, null,
-                           jcrPropertyDef.isMultiple(), null, null);
-                     stringDef.setMaxLength(CMIS.MAX_STRING_LENGTH);
-                     cmisPropDef = stringDef;
-                     break;
-
-               }
-               pd.put(cmisPropDef.getId(), cmisPropDef);
+               shouldBeIgnored = true;
+               break;
             }
          }
+         if (shouldBeIgnored)
+         {
+            continue;
+         }
+         // Do not process known properties
+         if (!knownIds.contains(pdName))
+         {
+            PropertyDefinition<?> cmisPropDef = null;
+            switch (jcrPropertyDef.getRequiredType())
+            {
+
+               case javax.jcr.PropertyType.BOOLEAN : {
+                  Value[] jcrDefaultValues = jcrPropertyDef.getDefaultValues();
+                  PropertyDefinition<Boolean> boolDef =
+                     new PropertyDefinition<Boolean>(pdName, pdName, pdName, null, pdName, null, PropertyType.BOOLEAN,
+                        jcrPropertyDef.isProtected() ? Updatability.READONLY : Updatability.READWRITE, false,
+                        jcrPropertyDef.isMandatory(), true, true, null, jcrPropertyDef.isMultiple(), null,
+                        jcrDefaultValues != null ? createDefaultValues(jcrDefaultValues,
+                           new Boolean[jcrDefaultValues.length]) : null);
+
+                  cmisPropDef = boolDef;
+                  break;
+               }
+
+               case javax.jcr.PropertyType.DATE : {
+                  Value[] jcrDefaultValues = jcrPropertyDef.getDefaultValues();
+                  PropertyDefinition<Calendar> dateDef =
+                     new PropertyDefinition<Calendar>(pdName, pdName, pdName, null, pdName, null,
+                        PropertyType.DATETIME, jcrPropertyDef.isProtected() ? Updatability.READONLY
+                           : Updatability.READWRITE, false, jcrPropertyDef.isMandatory(), true, true, null,
+                        jcrPropertyDef.isMultiple(), null, jcrDefaultValues != null ? createDefaultValues(
+                           jcrDefaultValues, new Calendar[jcrDefaultValues.length]) : null);
+
+                  dateDef.setDateResolution(DateResolution.TIME);
+                  cmisPropDef = dateDef;
+                  break;
+               }
+               case javax.jcr.PropertyType.DOUBLE : {
+                  Value[] jcrDefaultValues = jcrPropertyDef.getDefaultValues();
+                  PropertyDefinition<BigDecimal> decimalDef =
+                     new PropertyDefinition<BigDecimal>(pdName, pdName, pdName, null, pdName, null,
+                        PropertyType.DECIMAL, jcrPropertyDef.isProtected() ? Updatability.READONLY
+                           : Updatability.READWRITE, false, jcrPropertyDef.isMandatory(), true, true, null,
+                        jcrPropertyDef.isMultiple(), null, jcrDefaultValues != null ? createDefaultValues(
+                           jcrDefaultValues, new BigDecimal[jcrDefaultValues.length]) : null);
+
+                  decimalDef.setDecimalPrecision(Precision.Bit32);
+                  decimalDef.setMaxDecimal(CmisConstants.MAX_DECIMAL_VALUE);
+                  decimalDef.setMinDecimal(CmisConstants.MIN_DECIMAL_VALUE);
+                  cmisPropDef = decimalDef;
+                  break;
+               }
+
+               case javax.jcr.PropertyType.LONG : {
+                  Value[] jcrDefaultValues = jcrPropertyDef.getDefaultValues();
+                  PropertyDefinition<BigInteger> integerDef =
+                     new PropertyDefinition<BigInteger>(pdName, pdName, pdName, null, pdName, null,
+                        PropertyType.INTEGER, jcrPropertyDef.isProtected() ? Updatability.READONLY
+                           : Updatability.READWRITE, false, jcrPropertyDef.isMandatory(), true, true, null,
+                        jcrPropertyDef.isMultiple(), null, jcrDefaultValues != null ? createDefaultValues(
+                           jcrDefaultValues, new BigInteger[jcrDefaultValues.length]) : null);
+
+                  integerDef.setMaxInteger(CmisConstants.MAX_INTEGER_VALUE);
+                  integerDef.setMinInteger(CmisConstants.MIN_INTEGER_VALUE);
+                  cmisPropDef = integerDef;
+                  break;
+               }
+
+               case javax.jcr.PropertyType.NAME : // TODO
+               case javax.jcr.PropertyType.REFERENCE :
+               case javax.jcr.PropertyType.STRING :
+               case javax.jcr.PropertyType.PATH :
+               case javax.jcr.PropertyType.BINARY :
+               case javax.jcr.PropertyType.UNDEFINED : {
+                  Value[] jcrDefaultValues = jcrPropertyDef.getDefaultValues();
+                  List<Choice<String>> choices = null;
+                  Boolean openChoice = null;
+                  if (javax.jcr.PropertyType.STRING == jcrPropertyDef.getRequiredType())
+                  {
+                     String[] vc = jcrPropertyDef.getValueConstraints();
+                     if (vc != null && vc.length > 0)
+                     {
+                        openChoice = false;
+                        choices = new ArrayList<Choice<String>>();
+                        if (jcrPropertyDef.isMultiple())
+                        {
+                           List<String> vals = new ArrayList<String>();
+                           for (String chVal : vc)
+                           {
+                              if (".*".equals(chVal))
+                              {
+                                 openChoice = true;
+                                 continue;
+                              }
+                              vals.add(chVal);
+                           }
+                           choices.add(new Choice<String>(vals.toArray(new String[vals.size()]), ""));
+                        }
+                        else
+                        {
+                           for (String chVal : vc)
+                           {
+                              if (".*".equals(chVal))
+                              {
+                                 openChoice = true;
+                                 continue;
+                              }
+                              choices.add(new Choice<String>(new String[]{chVal}, ""));
+                           }
+                        }
+                     }
+                  }
+                  PropertyType propertyType = PropertyType.STRING;
+                  //Let's find out the actual type
+                  if (propertyDefinitionsMap.containsKey(pdName + StorageImpl.XCMIS_PROPERTY_TYPE))
+                  {
+                     try
+                     {
+                        final Value[] defaultValues =
+                           propertyDefinitionsMap.get(pdName + StorageImpl.XCMIS_PROPERTY_TYPE).getDefaultValues();
+                        if (defaultValues.length > 0)
+                        {
+                           propertyType = PropertyType.fromValue(defaultValues[0].getString());
+                        }
+                     }
+                     catch (IllegalStateException e)
+                     {
+                        throw new CmisRuntimeException(e.getLocalizedMessage(), e);
+                     }
+                     catch (RepositoryException e)
+                     {
+                        throw new CmisRuntimeException(e.getLocalizedMessage(), e);
+                     }
+                  }
+                  PropertyDefinition<String> stringDef =
+                     new PropertyDefinition<String>(pdName, pdName, pdName, null, pdName, null, propertyType,
+                        jcrPropertyDef.isProtected() ? Updatability.READONLY : Updatability.READWRITE, false,
+                        jcrPropertyDef.isMandatory(), true, true, openChoice, jcrPropertyDef.isMultiple(), choices,
+                        jcrDefaultValues != null ? createDefaultValues(jcrDefaultValues,
+                           new String[jcrDefaultValues.length]) : null);
+                  stringDef.setMaxLength(CmisConstants.MAX_STRING_LENGTH);
+                  cmisPropDef = stringDef;
+                  break;
+               }
+
+            }
+            pd.put(cmisPropDef.getId(), cmisPropDef);
+         }
       }
-      ((TypeDefinitionImpl)typeDefinition).setPropertyDefinitions(pd);
+
+      typeDefinition.setPropertyDefinitions(pd);
+   }
+
+   private static <T> T[] createDefaultValues(Value[] jcrValues, T[] a)
+   {
+      try
+      {
+         Object[] tmp = new Object[jcrValues.length];
+         for (int i = 0; i < jcrValues.length; i++)
+         {
+            Value v = jcrValues[i];
+            switch (v.getType())
+            {
+               case javax.jcr.PropertyType.BOOLEAN :
+                  tmp[i] = v.getBoolean();
+                  break;
+               case javax.jcr.PropertyType.DATE :
+                  tmp[i] = v.getDate();
+                  break;
+               case javax.jcr.PropertyType.DOUBLE :
+                  tmp[i] = BigDecimal.valueOf(v.getDouble());
+                  break;
+               case javax.jcr.PropertyType.LONG :
+                  tmp[i] = BigInteger.valueOf(v.getLong());
+                  break;
+               case javax.jcr.PropertyType.NAME :
+               case javax.jcr.PropertyType.REFERENCE :
+               case javax.jcr.PropertyType.STRING :
+               case javax.jcr.PropertyType.PATH :
+               case javax.jcr.PropertyType.BINARY :
+               case javax.jcr.PropertyType.UNDEFINED :
+                  tmp[i] = v.getString();
+                  break;
+            }
+         }
+         System.arraycopy(tmp, 0, a, 0, tmp.length);
+         return a;
+      }
+      catch (RepositoryException re)
+      {
+         throw new CmisRuntimeException("Unable get property definition. " + re.getMessage(), re);
+      }
+
    }
 
 }

@@ -39,15 +39,14 @@ import java.io.IOException;
  */
 public class CaseInsensitiveRangeQuery extends RangeQuery
 {
-   /**
-    * 
-    */
+
+   /** The serialVersionUID. */
    private static final long serialVersionUID = 3351256558561558491L;
 
    /**
     * Class logger.
     */
-   private final Log log = ExoLogger.getLogger(getClass().getName());
+   private final static Log log = ExoLogger.getLogger(CaseInsensitiveRangeQuery.class);
 
    public CaseInsensitiveRangeQuery(Term lowerTerm, Term upperTerm, boolean inclusive)
    {

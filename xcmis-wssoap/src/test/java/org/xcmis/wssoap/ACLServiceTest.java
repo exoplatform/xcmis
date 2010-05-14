@@ -29,7 +29,7 @@ import org.xcmis.core.EnumBasicPermissions;
 import org.xcmis.messaging.CmisACLType;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.soap.ACLServicePort;
-import org.xcmis.spi.AccessControlPropagation;
+import org.xcmis.spi.model.AccessControlPropagation;
 import org.xcmis.wssoap.impl.ACLServicePortImpl;
 import org.xcmis.wssoap.impl.TypeConverter;
 import org.xcmis.wssoap.impl.server.IdentityInterceptor;
@@ -61,7 +61,7 @@ public class ACLServiceTest extends BaseTest
       super.setUp();
       ArrayList<AbstractPhaseInterceptor<?>> in = new ArrayList<AbstractPhaseInterceptor<?>>();
       in.add(new IdentityInterceptor());
-      server = complexDeployService(SERVICE_ADDRESS, new ACLServicePortImpl(storageProvider), in, null, true);
+      server = complexDeployService(SERVICE_ADDRESS, new ACLServicePortImpl(/*storageProvider*/), in, null, true);
       port = getAccessControlService(SERVICE_ADDRESS);
       assertNotNull(server);
       assertNotNull(port);
@@ -150,8 +150,8 @@ public class ACLServiceTest extends BaseTest
       entry1.getPermission().add(EnumBasicPermissions.CMIS_READ.value());
       entry1.getPermission().add(EnumBasicPermissions.CMIS_WRITE.value());
       addACL.getPermission().add(entry1);
-      conn.applyACL(docId, TypeConverter.getCmisListAccessControlEntry(addACL), TypeConverter
-         .getCmisListAccessControlEntry(removeACL), AccessControlPropagation.REPOSITORYDETERMINED);
+      conn.applyACL(docId, TypeConverter.getListAccessControlEntry(addACL), TypeConverter
+         .getListAccessControlEntry(removeACL), AccessControlPropagation.REPOSITORYDETERMINED);
       CmisACLType resp = port.getACL(repositoryId, docId, false, new CmisExtensionType());
       assertNotNull(resp);
       CmisAccessControlListType acl = resp.getACL();

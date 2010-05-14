@@ -34,15 +34,16 @@ import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.messaging.DeleteTreeResponse;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.ObjectServicePort;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.ChangeTokenHolder;
+import org.xcmis.spi.CmisConstants;
+import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
-import org.xcmis.spi.IncludeRelationships;
-import org.xcmis.spi.StorageProvider;
-import org.xcmis.spi.UnfileObject;
-import org.xcmis.spi.VersioningState;
-import org.xcmis.spi.data.BaseContentStream;
-import org.xcmis.spi.data.ContentStream;
+import org.xcmis.spi.ContentStream;
+import org.xcmis.spi.model.IncludeRelationships;
+import org.xcmis.spi.model.UnfileObject;
+import org.xcmis.spi.model.VersioningState;
+import org.xcmis.spi.utils.MimeType;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -54,7 +55,7 @@ import javax.activation.DataHandler;
  * @version $Id: ObjectServicePortImpl.java 2 2010-02-04 17:21:49Z andrew00x $
  */
 @javax.jws.WebService(// name = "ObjectServicePort",
-serviceName = "ObjectService", // 
+serviceName = "ObjectService", //
 portName = "ObjectServicePort", //
 targetNamespace = "http://docs.oasis-open.org/ns/cmis/ws/200908/", //
 wsdlLocation = "/wsdl/CMISWS-Service.wsdl" //,
@@ -66,17 +67,12 @@ public class ObjectServicePortImpl implements ObjectServicePort
    /** Logger. */
    private static final Log LOG = ExoLogger.getLogger(ObjectServicePortImpl.class);
 
-   /** StorageProvider. */
-   private StorageProvider storageProvider;
-
    /**
     * Constructs instance of <code>ObjectServicePortImpl</code> .
-    * 
-    * @param objectService ObjectService
+    *
     */
-   public ObjectServicePortImpl(StorageProvider storageProvider)
+   public ObjectServicePortImpl()
    {
-      this.storageProvider = storageProvider;
    }
 
    /**
@@ -101,19 +97,20 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          if (contentStream != null)
          {
             cs =
-               new BaseContentStream(contentStream.getStream().getInputStream(), contentStream.getFilename(),
-                  contentStream.getMimeType());
+               new BaseContentStream(contentStream.getStream().getInputStream(), contentStream.getFilename(), MimeType
+                  .fromString(contentStream.getMimeType()));
          }
          objectId.value =
             conn.createDocument(folderId, //
                TypeConverter.getPropertyMap(properties), //
                cs, //
-               TypeConverter.getCmisListAccessControlEntry(addACEs), //
-               TypeConverter.getCmisListAccessControlEntry(removeACEs), //
+               TypeConverter.getListAccessControlEntry(addACEs), //
+               TypeConverter.getListAccessControlEntry(removeACEs), //
                policies, versioningState == null ? VersioningState.MAJOR : VersioningState.fromValue(versioningState
                   .value()) //
                );
@@ -125,7 +122,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -150,13 +150,14 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          objectId.value =
             conn.createDocumentFromSource(sourceId, //
                folderId, //
                TypeConverter.getPropertyMap(properties), //
-               TypeConverter.getCmisListAccessControlEntry(addACEs), //
-               TypeConverter.getCmisListAccessControlEntry(removeACEs), //
+               TypeConverter.getListAccessControlEntry(addACEs), //
+               TypeConverter.getListAccessControlEntry(removeACEs), //
                policies, versioningState == null ? VersioningState.MAJOR : VersioningState.fromValue(versioningState
                   .value()) //
                );
@@ -168,7 +169,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
 
    }
@@ -192,11 +196,12 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          objectId.value =
             conn.createFolder(folderId, TypeConverter.getPropertyMap(properties), TypeConverter
-               .getCmisListAccessControlEntry(addACEs), //
-               TypeConverter.getCmisListAccessControlEntry(removeACEs), //
+               .getListAccessControlEntry(addACEs), //
+               TypeConverter.getListAccessControlEntry(removeACEs), //
                policies);
       }
       catch (Exception e)
@@ -206,7 +211,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -229,11 +237,12 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          objectId.value =
             conn.createPolicy(folderId, TypeConverter.getPropertyMap(properties), TypeConverter
-               .getCmisListAccessControlEntry(addACEs), //
-               TypeConverter.getCmisListAccessControlEntry(removeACEs), policies);
+               .getListAccessControlEntry(addACEs), //
+               TypeConverter.getListAccessControlEntry(removeACEs), policies);
       }
       catch (Exception e)
       {
@@ -242,7 +251,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -264,11 +276,12 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          objectId.value =
             conn.createRelationship(TypeConverter.getPropertyMap(properties), TypeConverter
-               .getCmisListAccessControlEntry(addACEs), //
-               TypeConverter.getCmisListAccessControlEntry(removeACEs), policies);
+               .getListAccessControlEntry(addACEs), //
+               TypeConverter.getListAccessControlEntry(removeACEs), policies);
       }
       catch (Exception e)
       {
@@ -277,7 +290,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -294,7 +310,8 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          ChangeTokenHolder hold = new ChangeTokenHolder();
          if (changeToken != null)
          {
@@ -310,7 +327,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -327,7 +347,8 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          conn.deleteObject(objectId, allVersions);
       }
       catch (Exception e)
@@ -337,7 +358,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
       return new CmisExtensionType();
    }
@@ -359,7 +383,8 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          DeleteTreeResponse.FailedToDelete failed = new DeleteTreeResponse.FailedToDelete();
          failed.getObjectIds().addAll(conn.deleteTree(folderId, //
             allVersions, //
@@ -374,7 +399,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -391,8 +419,9 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
-         return TypeConverter.getAllowableActionsType(conn.getAllowableActions(objectId));
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
+         return TypeConverter.getCmisAllowableActionsType(conn.getAllowableActions(objectId));
       }
       catch (Exception e)
       {
@@ -401,7 +430,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -422,7 +454,8 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          CmisContentStreamType stream = new CmisContentStreamType();
          ContentStream cs = conn.getContentStream(objectId, //
             streamId, //
@@ -430,12 +463,13 @@ public class ObjectServicePortImpl implements ObjectServicePort
             length != null ? length.longValue() : -1);
 
          stream.setFilename(cs.getFileName());
-         stream.setMimeType(cs.getMediaType());
+         String mediaType = cs.getMediaType().toString();
+         stream.setMimeType(mediaType);
          if (cs.length() != -1)
          {
             stream.setLength(BigInteger.valueOf(cs.length()));
          }
-         stream.setStream(new DataHandler(cs.getStream(), cs.getMediaType()));
+         stream.setStream(new DataHandler(cs.getStream(), mediaType));
          return stream;
       }
       catch (Exception e)
@@ -445,7 +479,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -469,7 +506,8 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          return TypeConverter.getCmisObjectType(conn.getObject(objectId, //
             includeAllowableActions == null ? false : includeAllowableActions, //
             includeRelationships == null ? IncludeRelationships.NONE : IncludeRelationships
@@ -486,7 +524,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
 
    }
@@ -511,7 +552,8 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          return TypeConverter.getCmisObjectType(conn.getObjectByPath(path, //
             includeAllowableActions == null ? false : includeAllowableActions, //
             includeRelationships == null ? IncludeRelationships.NONE : IncludeRelationships
@@ -528,7 +570,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
 
    }
@@ -546,7 +591,8 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          return TypeConverter.getCmisPropertiesType(conn.getProperties(objectId, true, propertyFilter));
       }
       catch (Exception e)
@@ -556,7 +602,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -573,10 +622,11 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
-         return TypeConverter.getRenditionList(conn.getRenditions(objectId, //
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
+         return TypeConverter.getCmisRenditionTypeList(conn.getRenditions(objectId, //
             renditionFilter, //
-            maxItems == null ? CMIS.MAX_ITEMS : maxItems.intValue(), //
+            maxItems == null ? CmisConstants.MAX_ITEMS : maxItems.intValue(), //
             skipCount == null ? 0 : skipCount.intValue()));
       }
       catch (Exception e)
@@ -586,7 +636,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -603,7 +656,8 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          objectId.value = conn.moveObject(objectId.value, targetFolderId, sourceFolderId);
       }
       catch (Exception e)
@@ -613,7 +667,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -634,13 +691,14 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          ContentStream cs = null;
          if (contentStream != null)
          {
-            cs = new BaseContentStream(contentStream.getStream().getInputStream(), //
-               contentStream.getFilename(), //
-               contentStream.getMimeType());
+            cs =
+               new BaseContentStream(contentStream.getStream().getInputStream(), contentStream.getFilename(), MimeType
+                  .fromString(contentStream.getMimeType()));
          }
 
          ChangeTokenHolder hold = new ChangeTokenHolder();
@@ -661,7 +719,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -681,7 +742,8 @@ public class ObjectServicePortImpl implements ObjectServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          ChangeTokenHolder hold = new ChangeTokenHolder();
          if (changeToken != null)
          {
@@ -699,7 +761,10 @@ public class ObjectServicePortImpl implements ObjectServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 

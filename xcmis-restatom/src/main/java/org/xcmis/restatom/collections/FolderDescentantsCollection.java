@@ -27,16 +27,15 @@ import org.apache.abdera.model.Link;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.FilterNotValidException;
-import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.StorageProvider;
-import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.model.CmisObject;
+import org.xcmis.spi.model.IncludeRelationships;
 
 import java.util.List;
 
@@ -52,9 +51,9 @@ public class FolderDescentantsCollection extends CmisObjectCollection
     * Instantiates a new folder descentants collection.
     * @param storageProvider TODO
     */
-   public FolderDescentantsCollection(StorageProvider storageProvider)
+   public FolderDescentantsCollection(/*StorageProvider storageProvider*/)
    {
-      super(storageProvider);
+      super(/*storageProvider*/);
       setHref("/descendants");
    }
 
@@ -78,7 +77,7 @@ public class FolderDescentantsCollection extends CmisObjectCollection
 
    /**
     * Recursively discovery all levels.
-    * 
+    *
     * @param entry current parent entry
     * @param children children
     * @param feedIri root level feed IRI
@@ -133,14 +132,12 @@ public class FolderDescentantsCollection extends CmisObjectCollection
    /**
     * {@inheritDoc}
     */
+   @Override
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
       boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
       boolean includePathSegments = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PATH_SEGMENT, false);
-      // XXX At the moment get all properties from back-end. We need some of them for build correct feed.
-      // Filter will be applied during build final Atom Document.
-      //      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
-      String propertyFilter = null;
+      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
       String renditionFilter = request.getParameter(AtomCMIS.PARAM_RENDITION_FILTER);
       IncludeRelationships includeRelationships;
       try
@@ -155,7 +152,7 @@ public class FolderDescentantsCollection extends CmisObjectCollection
          String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS);
          throw new ResponseContextException(msg, 400);
       }
-      int depth = getIntegerParameter(request, AtomCMIS.PARAM_DEPTH, CMIS.DEPTH);
+      int depth = getIntegerParameter(request, AtomCMIS.PARAM_DEPTH, CmisConstants.DEPTH);
       Connection conn = null;
       try
       {
@@ -181,7 +178,7 @@ public class FolderDescentantsCollection extends CmisObjectCollection
                   Element pathSegment = e.addExtension(AtomCMIS.PATH_SEGMENT);
                   pathSegment.setText(oifContainer.getContainer().getPathSegment());
                }
-               if (oifContainer.getChildren().size() > 0)
+               if (oifContainer.getChildren() != null && oifContainer.getChildren().size() > 0)
                {
                   addChildren(e, oifContainer.getChildren(), feedIri, request);
                }

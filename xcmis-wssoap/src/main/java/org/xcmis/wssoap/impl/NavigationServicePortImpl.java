@@ -30,11 +30,11 @@ import org.xcmis.messaging.CmisObjectListType;
 import org.xcmis.messaging.CmisObjectParentsType;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.NavigationServicePort;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
+import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
-import org.xcmis.spi.IncludeRelationships;
-import org.xcmis.spi.StorageProvider;
-import org.xcmis.spi.object.ObjectParent;
+import org.xcmis.spi.model.IncludeRelationships;
+import org.xcmis.spi.model.ObjectParent;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -42,7 +42,8 @@ import java.util.List;
 
 /**
  * @author <a href="mailto:max.shaposhnik@exoplatform.com">Max Shaposhnik</a>
- * @version $Id: NavigationServicePortImpl.java 2 2010-02-04 17:21:49Z andrew00x $
+ * @version $Id: NavigationServicePortImpl.java 2 2010-02-04 17:21:49Z andrew00x
+ *          $
  */
 @javax.jws.WebService(// name = "NavigationServicePort",
 serviceName = "NavigationService", //
@@ -57,17 +58,12 @@ public class NavigationServicePortImpl implements NavigationServicePort
    /** Logger. */
    private static final Log LOG = ExoLogger.getLogger(NavigationServicePortImpl.class);
 
-   /** StorageProvider. */
-   private StorageProvider storageProvider;
-
    /**
     * Constructs instance of <code>NavigationServicePortImpl</code> .
-    * 
-    * @param storageProvider StorageProvider
+    *
     */
-   public NavigationServicePortImpl(StorageProvider storageProvider)
+   public NavigationServicePortImpl()
    {
-      this.storageProvider = storageProvider;
    }
 
    /**
@@ -85,11 +81,14 @@ public class NavigationServicePortImpl implements NavigationServicePort
       CmisExtensionType extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation getCheckedoutDocs");
+      }
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          return TypeConverter.getCmisObjectListType(conn.getCheckedOutDocs(folderId, //
             includeAllowableActions == null ? false : includeAllowableActions, //
             includeRelationships == null ? IncludeRelationships.NONE : IncludeRelationships
@@ -97,7 +96,7 @@ public class NavigationServicePortImpl implements NavigationServicePort
             true, propertyFilter, //
             renditionFilter, //
             orderBy, //
-            maxItems == null ? CMIS.MAX_ITEMS : maxItems.intValue(), //
+            maxItems == null ? CmisConstants.MAX_ITEMS : maxItems.intValue(), //
             skipCount == null ? 0 : skipCount.intValue()));
       }
       catch (Exception e)
@@ -107,7 +106,10 @@ public class NavigationServicePortImpl implements NavigationServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -127,11 +129,14 @@ public class NavigationServicePortImpl implements NavigationServicePort
       CmisExtensionType extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation getChildren");
+      }
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          return TypeConverter.getCmisObjectInFolderListType(conn.getChildren(folderId, //
             includeAllowableActions == null ? false : includeAllowableActions, //
             includeRelationships == null ? IncludeRelationships.NONE : IncludeRelationships
@@ -140,19 +145,21 @@ public class NavigationServicePortImpl implements NavigationServicePort
             true, propertyFilter, //
             renditionFilter, //
             orderBy, //
-            maxItems == null ? CMIS.MAX_ITEMS : maxItems.intValue(), //
+            maxItems == null ? CmisConstants.MAX_ITEMS : maxItems.intValue(), //
             skipCount == null ? 0 : skipCount.intValue()));
 
       }
       catch (Exception e)
       {
-         e.printStackTrace();
          LOG.error("Get children error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -170,12 +177,15 @@ public class NavigationServicePortImpl implements NavigationServicePort
       CmisExtensionType extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation getDescendants");
+      }
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
-         return TypeConverter.getCmisObjectInFolderContainerType(conn.getDescendants(folderId, //
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
+         return TypeConverter.getCmisObjectInFolderContainerTypeList(conn.getDescendants(folderId, //
             depth == null ? 1 : depth.intValue(), //
             includeAllowableActions == null ? false : includeAllowableActions, //
             includeRelationships == null ? IncludeRelationships.NONE : IncludeRelationships
@@ -186,13 +196,15 @@ public class NavigationServicePortImpl implements NavigationServicePort
       }
       catch (Exception e)
       {
-         e.printStackTrace();
          LOG.error("Get descendants error: " + e.getMessage(), e);
          throw ExceptionFactory.generateException(e);
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -203,11 +215,14 @@ public class NavigationServicePortImpl implements NavigationServicePort
       CmisExtensionType extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation getFolderParent");
+      }
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          return TypeConverter.getCmisObjectType(conn.getFolderParent(folderId, true, propertyFilter));
       }
       catch (Exception e)
@@ -217,7 +232,10 @@ public class NavigationServicePortImpl implements NavigationServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -235,12 +253,15 @@ public class NavigationServicePortImpl implements NavigationServicePort
       CmisExtensionType extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation getFolderTree");
+      }
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
-         return TypeConverter.getCmisObjectInFolderContainerType(conn.getFolderTree(folderId, //
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
+         return TypeConverter.getCmisObjectInFolderContainerTypeList(conn.getFolderTree(folderId, //
             depth == null ? 1 : depth.intValue(), //
             includeAllowableActions == null ? false : includeAllowableActions, //
             includeRelationships == null ? IncludeRelationships.NONE : IncludeRelationships
@@ -256,7 +277,10 @@ public class NavigationServicePortImpl implements NavigationServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -273,11 +297,14 @@ public class NavigationServicePortImpl implements NavigationServicePort
       CmisExtensionType extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation getObjectParents");
+      }
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          List<CmisObjectParentsType> res = new ArrayList<CmisObjectParentsType>();
          List<ObjectParent> out =
             conn.getObjectParents(objectId, //
@@ -301,7 +328,10 @@ public class NavigationServicePortImpl implements NavigationServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 }

@@ -23,13 +23,9 @@ import org.xcmis.search.content.command.VisitableCommand;
 import org.xcmis.search.content.command.index.ModifyIndexCommand;
 import org.xcmis.search.content.command.query.ExecuteSelectorCommand;
 import org.xcmis.search.content.command.query.ProcessQueryCommand;
-import org.xcmis.search.content.command.read.GetChildNodeCommand;
-import org.xcmis.search.content.command.read.GetChildNodesCommand;
-import org.xcmis.search.content.command.read.GetNodeCommand;
-import org.xcmis.search.content.command.read.GetPropertiesCommand;
-import org.xcmis.search.content.command.read.GetPropertyCommand;
-import org.xcmis.search.content.command.tx.CommitCommand;
-import org.xcmis.search.content.command.tx.RollBackCommand;
+import org.xcmis.search.content.command.read.GetChildEntriesCommand;
+import org.xcmis.search.content.command.read.GetContentEntryCommand;
+import org.xcmis.search.content.command.read.GetUnfiledEntriesCommand;
 
 /**
  * This interface is the core of search service, where each
@@ -49,19 +45,6 @@ public interface Visitor
    Object visitModifyIndexCommand(InvocationContext ctx, ModifyIndexCommand command) throws Throwable;
 
    /**
-    * Visits a CommitCommand.
-    * 
-    * @param ctx
-    *           invocation context
-    * @param command
-    *           command to visit
-    * @return response from the visit
-    * @throws Throwable
-    *            in the event of problems.
-    */
-   Object visitCommitCommand(InvocationContext ctx, CommitCommand command) throws Throwable;
-
-   /**
     * @param ctx
     * @param executeQueryCommand
     * @return
@@ -70,52 +53,18 @@ public interface Visitor
 
    /**
     * @param ctx
-    * @param getChildNodeCommand
-    * @return
-    */
-   Object visitGetChildNodeCommand(InvocationContext ctx, GetChildNodeCommand command) throws Throwable;
-
-   /**
-    * @param ctx
     * @param getChildNodesCommand
     * @return
     * @throws Throwable
     */
-   Object visitGetChildNodesCommand(InvocationContext ctx, GetChildNodesCommand command) throws Throwable;
+   Object visitChildEntriesCommand(InvocationContext ctx, GetChildEntriesCommand command) throws Throwable;
 
    /**
     * @param ctx
     * @param getNodeCommand
     * @return
     */
-   Object visitGetNodeCommand(InvocationContext ctx, GetNodeCommand command) throws Throwable;
-
-   /**
-    * @param ctx
-    * @param getPropertiesCommand
-    * @return
-    */
-   Object visitGetPropertiesCommand(InvocationContext ctx, GetPropertiesCommand command) throws Throwable;
-
-   /**
-    * @param ctx
-    * @param getPropertyCommand
-    * @return
-    */
-   Object visitGetPropertyCommand(InvocationContext ctx, GetPropertyCommand command) throws Throwable;
-
-   /**
-    * Visits a RollBackCommand.
-    * 
-    * @param ctx
-    *           invocation context
-    * @param command
-    *           command to visit
-    * @return response from the visit
-    * @throws Throwable
-    *            in the event of problems.
-    */
-   Object visitRollBackCommand(InvocationContext ctx, RollBackCommand command) throws Throwable;
+   Object visitGetContentEntryCommand(InvocationContext ctx, GetContentEntryCommand command) throws Throwable;
 
    /**
     * @param ctx
@@ -124,4 +73,11 @@ public interface Visitor
     * @throws Throwable
     */
    Object visitProcessQueryCommand(InvocationContext ctx, ProcessQueryCommand command) throws Throwable;
+
+   /**
+    * @param ctx
+    * @param getUnfilledEntriesCommand
+    * @return
+    */
+   Object visitGetUnfiledEntriesCommand(InvocationContext ctx, GetUnfiledEntriesCommand command) throws Throwable;
 }

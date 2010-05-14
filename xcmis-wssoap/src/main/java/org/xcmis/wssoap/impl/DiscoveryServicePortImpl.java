@@ -27,15 +27,16 @@ import org.xcmis.messaging.Query;
 import org.xcmis.messaging.QueryResponse;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.DiscoveryServicePort;
-import org.xcmis.spi.CMIS;
 import org.xcmis.spi.ChangeLogTokenHolder;
+import org.xcmis.spi.CmisConstants;
+import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
-import org.xcmis.spi.IncludeRelationships;
-import org.xcmis.spi.StorageProvider;
+import org.xcmis.spi.model.IncludeRelationships;
 
 /**
  * @author <a href="mailto:max.shaposhnik@exoplatform.com">Max Shaposhnik</a>
- * @version $Id: DiscoveryServicePortImpl.java 2 2010-02-04 17:21:49Z andrew00x $
+ * @version $Id: DiscoveryServicePortImpl.java 2 2010-02-04 17:21:49Z andrew00x
+ *          $
  */
 @javax.jws.WebService(// name = "DiscoveryServicePort",
 serviceName = "DiscoveryService", //
@@ -50,17 +51,12 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
    /** Logger. */
    private static final Log LOG = ExoLogger.getLogger(DiscoveryServicePortImpl.class);
 
-   /** StorageProvider. */
-   private StorageProvider storageProvider;
-
    /**
     * Constructs instance of <code>DiscoveryServicePortImpl</code> .
-    * 
-    * @param storageProvider StorageProvider
+    *
     */
-   public DiscoveryServicePortImpl(StorageProvider storageProvider)
+   public DiscoveryServicePortImpl()
    {
-      this.storageProvider = storageProvider;
    }
 
    /**
@@ -69,12 +65,15 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
    public QueryResponse query(Query parameters) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation query");
+      }
       Connection conn = null;
       try
       {
          String repositoryId = parameters.getRepositoryId();
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          String statement = parameters.getStatement();
          boolean allVersions =
             parameters.getSearchAllVersions() == null || parameters.getSearchAllVersions().isNil() ? false : parameters
@@ -90,7 +89,7 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
             parameters.getRenditionFilter() == null || parameters.getRenditionFilter().isNil() ? null : parameters
                .getRenditionFilter().getValue();
          int maxItems =
-            parameters.getMaxItems() == null || parameters.getMaxItems().isNil() ? CMIS.MAX_ITEMS : parameters
+            parameters.getMaxItems() == null || parameters.getMaxItems().isNil() ? CmisConstants.MAX_ITEMS : parameters
                .getMaxItems().getValue().intValue();
          int skipCount =
             parameters.getSkipCount() == null || parameters.getSkipCount().isNil() ? 0 : parameters.getSkipCount()
@@ -110,7 +109,10 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -128,11 +130,14 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
       javax.xml.ws.Holder<CmisObjectListType> objects) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation getContentChanges");
+      }
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          objects.value =
             TypeConverter.getCmisObjectListType(conn.getContentChanges(changeLogToken == null ? null
                : new ChangeLogTokenHolder(), //
@@ -140,7 +145,7 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
                propertyFilter, //
                includePolicyIds == null ? false : includePolicyIds, //
                includeACL == null ? false : includeACL, //
-               true, maxItems == null ? CMIS.MAX_ITEMS : maxItems.intValue()));
+               true, maxItems == null ? CmisConstants.MAX_ITEMS : maxItems.intValue()));
       }
       catch (Exception e)
       {
@@ -149,7 +154,10 @@ public class DiscoveryServicePortImpl implements DiscoveryServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 }

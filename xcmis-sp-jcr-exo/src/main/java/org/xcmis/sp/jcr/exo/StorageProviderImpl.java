@@ -21,34 +21,30 @@ package org.xcmis.sp.jcr.exo;
 
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.container.xml.ObjectParameter;
+import org.exoplatform.services.document.DocumentReaderService;
 import org.exoplatform.services.jcr.RepositoryService;
 import org.exoplatform.services.jcr.config.RepositoryConfigurationException;
 import org.exoplatform.services.jcr.core.CredentialsImpl;
 import org.exoplatform.services.jcr.core.ManageableRepository;
 import org.exoplatform.services.jcr.ext.common.SessionProvider;
-import org.exoplatform.services.jcr.impl.core.SessionImpl;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.exoplatform.services.security.ConversationState;
 import org.picocontainer.Startable;
 import org.xcmis.search.SearchService;
 import org.xcmis.search.SearchServiceException;
-import org.xcmis.search.config.IndexConfigurationImpl;
+import org.xcmis.search.config.IndexConfiguration;
 import org.xcmis.search.config.SearchServiceConfiguration;
 import org.xcmis.search.content.command.InvocationContext;
-import org.xcmis.search.lucene.LuceneSearchService;
-import org.xcmis.search.lucene.content.SchemaTableResolver;
+import org.xcmis.search.value.SlashSplitter;
 import org.xcmis.search.value.ToStringNameConverter;
 import org.xcmis.sp.jcr.exo.index.CmisContentReader;
-import org.xcmis.sp.jcr.exo.index.CmisRecoverService;
-import org.xcmis.sp.jcr.exo.index.CmisRestoreService;
 import org.xcmis.sp.jcr.exo.index.CmisSchema;
+import org.xcmis.sp.jcr.exo.index.CmisSchemaTableResolver;
 import org.xcmis.sp.jcr.exo.index.IndexListener;
-import org.xcmis.sp.jcr.exo.index.JcrPathSplitter;
-import org.xcmis.sp.jcr.exo.rendition.ImageRenditionProvider;
-import org.xcmis.sp.jcr.exo.rendition.PDFDocumentRenditionProvider;
-import org.xcmis.sp.jcr.exo.rendition.RenditionProvider;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisRegistry;
+import org.xcmis.spi.RenditionManager;
+import org.xcmis.spi.RenditionProvider;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.InvalidArgumentException;
@@ -65,6 +61,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.jcr.Credentials;
 import javax.jcr.Node;
@@ -89,26 +86,26 @@ public class StorageProviderImpl implements StorageProvider, Startable
       /**
        * The list of storages configuration.
        */
-      private List<StorageConfiguration> configs;
+      private List<StorageConfiguration> storages;
 
       /**
        * @return the list of storages configuration
        */
-      public List<StorageConfiguration> getConfigs()
+      public List<StorageConfiguration> getStorages()
       {
-         if (configs == null)
+         if (storages == null)
          {
-            configs = new ArrayList<StorageConfiguration>();
+            storages = new ArrayList<StorageConfiguration>();
          }
-         return configs;
+         return storages;
       }
 
       /**
-       * @param configs the list of storages configuration
+       * @param storages the list of storages configuration
        */
-      public void setConfigs(List<StorageConfiguration> configs)
+      public void setStorages(List<StorageConfiguration> storages)
       {
-         this.configs = configs;
+         this.storages = storages;
       }
    }
 
@@ -116,41 +113,19 @@ public class StorageProviderImpl implements StorageProvider, Startable
 
    private final RepositoryService repositoryService;
 
-   private RenditionManagerImpl renditionManager;
+   private final DocumentReaderService documentReaderService;
 
-   private final Map<String, StorageConfiguration> storages = new HashMap<String, StorageConfiguration>();
+   private RenditionManager renditionManager;
+
+   private final Map<String, StorageConfiguration> storageConfigs = new HashMap<String, StorageConfiguration>();
 
    private final Map<String, SearchService> searchServices = new HashMap<String, SearchService>();
 
-   /** The map for the rendition providers. */
-   private final Map<MimeType, RenditionProvider> renditionProviders =
-      new TreeMap<MimeType, RenditionProvider>(new Comparator<MimeType>()
-      {
-         public int compare(MimeType m1, MimeType m2)
-         {
-            if (m1.getType().equals(CMIS.WILDCARD) && !m2.getType().equals(CMIS.WILDCARD))
-            {
-               return 1;
-            }
-            if (!m1.getType().equals(CMIS.WILDCARD) && m2.getType().equals(CMIS.WILDCARD))
-            {
-               return -1;
-            }
-            if (m1.getSubType().equals(CMIS.WILDCARD) && !m2.getSubType().equals(CMIS.WILDCARD))
-            {
-               return 1;
-            }
-            if (!m1.getSubType().equals(CMIS.WILDCARD) && m2.getSubType().equals(CMIS.WILDCARD))
-            {
-               return -1;
-            }
-            return m1.toString().compareToIgnoreCase(m2.toString());
-         }
-      });
-
-   public StorageProviderImpl(RepositoryService repositoryService, InitParams initParams)
+   public StorageProviderImpl(RepositoryService repositoryService, InitParams initParams,
+      DocumentReaderService documentReaderService)
    {
       this.repositoryService = repositoryService;
+      this.documentReaderService = documentReaderService;
 
       if (initParams != null)
       {
@@ -163,9 +138,9 @@ public class StorageProviderImpl implements StorageProvider, Startable
 
          StorageProviderConfig confs = (StorageProviderConfig)param.getObject();
 
-         for (StorageConfiguration conf : confs.getConfigs())
+         for (StorageConfiguration conf : confs.getStorages())
          {
-            storages.put(conf.getId(), conf);
+            storageConfigs.put(conf.getId(), conf);
          }
       }
       else
@@ -173,21 +148,18 @@ public class StorageProviderImpl implements StorageProvider, Startable
          LOG.error("Not found configuration for any storages.");
       }
 
-      addRenditionProvider(new ImageRenditionProvider()); /* TODO : add form configuration ?? */
-      addRenditionProvider(new PDFDocumentRenditionProvider()); /* TODO : add form configuration ?? */
-
    }
 
    /**
     * {@inheritDoc}
     */
-   public Connection getConnection(String id, ConversationState conversation)
+   public Connection getConnection(String id)
    {
-      StorageConfiguration configuration = storages.get(id);
+      StorageConfiguration configuration = storageConfigs.get(id);
 
       if (configuration == null)
       {
-         throw new InvalidArgumentException("CMIS repository " + id + " does not exists.");
+         throw new InvalidArgumentException("CMIS repository '" + id + "' does not exist.");
       }
 
       String repositoryId = configuration.getRepository();
@@ -197,11 +169,6 @@ public class StorageProviderImpl implements StorageProvider, Startable
       {
          ManageableRepository repository = repositoryService.getRepository(repositoryId);
          Session session = repository.login(ws);
-
-         if (renditionManager == null)
-         {
-            renditionManager = new RenditionManagerImpl(renditionProviders);
-         }
 
          SearchService searchService = getSearchService(id);
          Storage storage = new QueryableStorage(session, configuration, renditionManager, searchService);
@@ -226,47 +193,8 @@ public class StorageProviderImpl implements StorageProvider, Startable
       }
    }
 
-   public Connection getConnection(String id, String user, String password) throws LoginException,
-      InvalidArgumentException
-   {
-      StorageConfiguration configuration = storages.get(id);
-
-      if (configuration == null)
-      {
-         throw new InvalidArgumentException("CMIS repository " + id + " does not exists.");
-      }
-
-      String repositoryId = configuration.getRepository();
-      String ws = configuration.getWorkspace();
-
-      try
-      {
-         ManageableRepository repository = repositoryService.getRepository(repositoryId);
-         Credentials credentials = new CredentialsImpl(user, password.toCharArray());
-         Session session = repository.login(credentials, ws);
-         SearchService searchService = getSearchService(id);
-         Storage storage = new QueryableStorage(session, configuration, searchService);
-         IndexListener indexListener = new IndexListener(storage, searchService);
-         //TODO make this method public
-         ((StorageImpl)storage).setIndexListener(indexListener);
-         return new JcrConnection(storage);
-      }
-      catch (RepositoryException re)
-      {
-         throw new CmisRuntimeException("Unable get CMIS repository " + id + ". " + re.getMessage(), re);
-      }
-      catch (RepositoryConfigurationException rce)
-      {
-         throw new CmisRuntimeException("Unable get CMIS repository " + id + ". " + rce.getMessage(), rce);
-      }
-      catch (SearchServiceException rce)
-      {
-         throw new CmisRuntimeException("Unable get CMIS repository " + id + ". " + rce.getMessage(), rce);
-      }
-   }
-
    /**
-    *
+    * Gets the search service. 
     * @return instance of {@link SearchService}
     * @throws SearchServiceException
     */
@@ -280,7 +208,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
     */
    public Set<String> getStorageIDs()
    {
-      return Collections.unmodifiableSet(storages.keySet());
+      return Collections.unmodifiableSet(storageConfigs.keySet());
    }
 
    /**
@@ -292,7 +220,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
 
       try
       {
-         for (Entry<String, StorageConfiguration> entry : storages.entrySet())
+         for (Entry<String, StorageConfiguration> entry : storageConfigs.entrySet())
          {
             StorageConfiguration cmisRepositoryConfiguration = entry.getValue();
             ManageableRepository repository =
@@ -347,55 +275,75 @@ public class StorageProviderImpl implements StorageProvider, Startable
             }
 
             session.save();
+            this.renditionManager = RenditionManager.getInstance();
 
-            Workspace workspace = session.getWorkspace();
+            boolean isPersistRenditions = false;
 
-            try
+            if (cmisRepositoryConfiguration.getProperties() != null
+               && cmisRepositoryConfiguration.getProperties().get("exo.cmis.renditions.persistent") != null)
             {
-               EventListenerIterator it = workspace.getObservationManager().getRegisteredEventListeners();
-               boolean exist = false;
-               while (it.hasNext())
+               isPersistRenditions =
+                  (Boolean)cmisRepositoryConfiguration.getProperties().get("exo.cmis.renditions.persistent");
+            }
+            if (isPersistRenditions)
+            {
+               Workspace workspace = session.getWorkspace();
+               try
                {
-                  EventListener one = it.nextEventListener();
-                  if (one.getClass() == UpdateListener.class)
+                  EventListenerIterator it = workspace.getObservationManager().getRegisteredEventListeners();
+                  boolean exist = false;
+                  while (it.hasNext())
                   {
-                     exist = true;
+                     EventListener one = it.nextEventListener();
+                     if (one.getClass() == UpdateListener.class)
+                     {
+                        exist = true;
+                     }
+                  }
+
+                  if (!exist)
+                  {
+                     workspace.getObservationManager().addEventListener(
+                        new UpdateListener(repository, cmisRepositoryConfiguration.getWorkspace(), renditionManager),
+                        Event.NODE_ADDED | Event.PROPERTY_ADDED | Event.PROPERTY_CHANGED, "/", true, null,
+                        new String[]{JcrCMIS.NT_FILE, JcrCMIS.NT_RESOURCE}, false);
                   }
                }
-
-               if (!exist)
+               catch (Exception ex)
                {
-                  workspace.getObservationManager().addEventListener(
-                     new UpdateListener(repository, cmisRepositoryConfiguration.getWorkspace(), renditionProviders),
-                     Event.NODE_ADDED | Event.PROPERTY_ADDED | Event.PROPERTY_CHANGED | Event.PROPERTY_REMOVED, "/",
-                     true, null, new String[]{JcrCMIS.NT_FILE}, false);
+                  LOG.error("Unable to create event listener, " + ex.getMessage());
                }
-            }
-            catch (Exception ex)
-            {
-               LOG.error("Unable to create event listener, " + ex.getMessage());
             }
             //prepare search service
             StorageImpl storage = new StorageImpl(session, cmisRepositoryConfiguration);
-            IndexConfigurationImpl indexConfiguration =
-               (IndexConfigurationImpl)cmisRepositoryConfiguration.getIndexConfiguration();
-            indexConfiguration.setIndexRecoverService(new CmisRecoverService(storage));
-            indexConfiguration.setIndexRestoreService(new CmisRestoreService(storage));
+            CmisSchema schema = new CmisSchema(storage);
+            CmisSchemaTableResolver tableResolver =
+               new CmisSchemaTableResolver(new ToStringNameConverter(), schema, storage);
+
+            IndexConfiguration indexConfiguration = cmisRepositoryConfiguration.getIndexConfiguration();
+            indexConfiguration.setRootUuid(storage.getRepositoryInfo().getRootFolderId());
+            //if list of root parents is empty it will be indexed as empty string
+            indexConfiguration.setRootParentUuid("");
+            indexConfiguration.setDocumentReaderService(documentReaderService);
+
             //default invocation context
             InvocationContext invocationContext = new InvocationContext();
             invocationContext.setNameConverter(new ToStringNameConverter());
-            CmisSchema schema = new CmisSchema(storage);
+
             invocationContext.setSchema(schema);
-            invocationContext.setPathSplitter(new JcrPathSplitter(((SessionImpl)session).getLocationFactory()));
-            invocationContext.setTableResolver(new SchemaTableResolver(new ToStringNameConverter(), schema));
+            invocationContext.setPathSplitter(new SlashSplitter());
+
+            invocationContext.setTableResolver(tableResolver);
 
             SearchServiceConfiguration configuration = new SearchServiceConfiguration();
             configuration.setIndexConfiguration(indexConfiguration);
             configuration.setContentReader(new CmisContentReader(storage));
             configuration.setNameConverter(new ToStringNameConverter());
             configuration.setDefaultInvocationContext(invocationContext);
+            configuration.setTableResolver(tableResolver);
+            configuration.setPathSplitter(new SlashSplitter());
 
-            LuceneSearchService searchService = new LuceneSearchService(configuration);
+            SearchService searchService = new SearchService(configuration);
             searchService.start();
 
             //attach listener to the created storage
@@ -430,23 +378,14 @@ public class StorageProviderImpl implements StorageProvider, Startable
     */
    public void stop()
    {
+      for (SearchService searchService : searchServices.values())
+      {
+         searchService.stop();
+      }
    }
 
    public StorageConfiguration getStorageConfiguration(String id)
    {
-      return storages.get(id);
-   }
-
-   /**
-    * Add the rendition provider.
-    *
-    * @param renditionProvider rendition provider to be added
-    */
-   private void addRenditionProvider(RenditionProvider renditionProvider)
-   {
-      for (String mimeType : renditionProvider.getSupportedMediaType())
-      {
-         renditionProviders.put(MimeType.fromString(mimeType), renditionProvider);
-      }
+      return storageConfigs.get(id);
    }
 }

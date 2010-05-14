@@ -22,8 +22,7 @@ package org.xcmis.sp.jcr.exo;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.spi.ItemsIterator;
-import org.xcmis.spi.Rendition;
-import org.xcmis.spi.impl.RenditionImpl;
+import org.xcmis.spi.model.Rendition;
 
 import java.util.NoSuchElementException;
 
@@ -33,7 +32,7 @@ import javax.jcr.PathNotFoundException;
 
 /**
  * Iterator over set of object's renditions.
- * 
+ *
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id$
  */
@@ -51,23 +50,13 @@ class RenditionIterator implements ItemsIterator<Rendition>
 
    /**
     * Create RenditionIterator instance.
-    * 
+    *
     * @param iter the node iterator
     */
    public RenditionIterator(NodeIterator iter)
    {
       this.iter = iter;
       fetchNext();
-   }
-   
-   /**
-    * Create RenditionIterator instance with elready defined element.
-    * 
-    * @param iter the node iterator
-    */
-   public RenditionIterator (Rendition type){
-      this.iter = null;
-      this.next = type;
    }
 
    /**
@@ -84,7 +73,9 @@ class RenditionIterator implements ItemsIterator<Rendition>
    public Rendition next()
    {
       if (next == null)
+      {
          throw new NoSuchElementException();
+      }
       Rendition n = next;
       fetchNext();
       return n;
@@ -112,19 +103,25 @@ class RenditionIterator implements ItemsIterator<Rendition>
    public void skip(int skip) throws NoSuchElementException
    {
       while (skip-- > 0)
-         iter.next();
+      {
+         fetchNext();
+         if (next == null)
+         {
+            throw new NoSuchElementException();
+         }
+      }
    }
 
    /**
-    * Fetching next renditions. If during iteration rendition that is unsupported
-    * by <code>renditionFilter</code> is met than this method will trying to find
-    * another one acceptable by filter.
+    * Fetching next rendition.
     */
    protected void fetchNext()
    {
       next = null;
-      if (iter == null) // iter can be null if rendition is created in runtime and not stored in JCR
+      if (iter == null)
+      {
          return;
+      }
       while (next == null && iter.hasNext())
       {
          Node node = iter.nextNode();
@@ -132,19 +129,20 @@ class RenditionIterator implements ItemsIterator<Rendition>
          {
             if (node.isNodeType(JcrCMIS.CMIS_NT_RENDITION))
             {
-               RenditionImpl rendition = new RenditionImpl();
+               Rendition rendition = new Rendition();
                rendition.setStreamId(node.getName());
                rendition.setKind(node.getProperty(JcrCMIS.CMIS_RENDITION_KIND).getString());
                rendition.setMimeType(node.getProperty(JcrCMIS.CMIS_RENDITION_MIME_TYPE).getString());
                rendition.setLength(node.getProperty(JcrCMIS.CMIS_RENDITION_STREAM).getLength());
                try
                {
-                  rendition.setHeight(Long.valueOf(node.getProperty(JcrCMIS.CMIS_RENDITION_HEIGHT).getLong()).intValue());
+                  rendition.setHeight(Long.valueOf(node.getProperty(JcrCMIS.CMIS_RENDITION_HEIGHT).getLong())
+                     .intValue());
                   rendition.setWidth(Long.valueOf(node.getProperty(JcrCMIS.CMIS_RENDITION_WIDTH).getLong()).intValue());
                }
                catch (PathNotFoundException pnfe)
                {
-                  // Height & Width is optional 
+                  // Height & Width is optional
                }
                next = rendition;
             }
@@ -156,7 +154,5 @@ class RenditionIterator implements ItemsIterator<Rendition>
          }
       }
    }
-
-  
 
 }

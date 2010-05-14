@@ -137,7 +137,6 @@ public class PushWhereCriteria implements OptimizerCriteria
    public QueryExecutionPlan execute(QueryExecutionContext context, QueryExecutionPlan plan,
       LinkedList<OptimizerCriteria> criteriaStack)
    {
-      // TODO Auto-generated method stub
       return null;
    }
 

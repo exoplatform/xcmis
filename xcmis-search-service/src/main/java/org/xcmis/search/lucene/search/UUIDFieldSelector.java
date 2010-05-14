@@ -32,9 +32,8 @@ import org.xcmis.search.lucene.index.FieldNames;
  */
 public class UUIDFieldSelector implements FieldSelector
 {
-   /**
-    * 
-    */
+   
+   /** The serialVersionUID. */
    private static final long serialVersionUID = 4682829486158459956L;
 
    /**

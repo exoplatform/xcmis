@@ -19,6 +19,8 @@
 
 package org.xcmis.spi;
 
+import org.xcmis.spi.model.TypeDefinition;
+
 
 /**
  * Produces type definition.
@@ -47,7 +49,7 @@ public interface TypeManager
     * @param includePropertyDefinition if <code>true</code> property definition
     *        should be included
     * @return type definition
-    * @throws TypeNotFoundException if type <code>typeId</code> does not exists
+    * @throws TypeNotFoundException if type <code>typeId</code> does not exist
     * @throws CmisRuntimeException if any others errors occur
     */
    TypeDefinition getTypeDefinition(String typeId, boolean includePropertyDefinition)
@@ -59,7 +61,7 @@ public interface TypeManager
     * @param typeId the type id, if not <code>null</code> then return only
     *        specified Object Type and its direct descendant. If
     *        <code>null</code> then return base types
-    * @param includePropertyDefinition <code>true</code> if property definition
+    * @param includePropertyDefinitions <code>true</code> if property definition
     *        should be included <code>false</code> otherwise
     * @return set of base types or specified object type and its direct children
     * @throws TypeNotFoundException if type <code>typeId</code> does not exist

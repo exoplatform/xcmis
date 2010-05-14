@@ -18,12 +18,12 @@
  */
 package org.xcmis.search.content;
 
-import org.xcmis.search.SearchServiceException;
+import org.xcmis.search.lucene.index.IndexException;
 
 /**
  * Exception that can occur during index modification.
  */
-public class IndexModificationException extends SearchServiceException
+public class IndexModificationException extends IndexException
 {
 
    /**

@@ -29,27 +29,25 @@ import org.apache.abdera.protocol.server.TargetType;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.abdera.ObjectTypeElement;
-import org.xcmis.spi.AccessControlEntry;
-import org.xcmis.spi.BaseType;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FilterNotValidException;
-import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.StreamNotSupportedException;
-import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.UpdateConflictException;
-import org.xcmis.spi.VersioningState;
-import org.xcmis.spi.object.CmisObject;
-import org.xcmis.spi.object.Property;
-import org.xcmis.spi.object.impl.CmisObjectImpl;
-import org.xcmis.spi.object.impl.IdProperty;
+import org.xcmis.spi.model.AccessControlEntry;
+import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.CmisObject;
+import org.xcmis.spi.model.IncludeRelationships;
+import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.model.VersioningState;
+import org.xcmis.spi.model.impl.IdProperty;
 
 import java.util.HashMap;
 import java.util.List;
@@ -67,17 +65,19 @@ public class FolderChildrenCollection extends CmisObjectCollection
 
    /**
     * Instantiates a new folder children collection.
+    *
     * @param storageProvider TODO
     */
-   public FolderChildrenCollection(StorageProvider storageProvider)
+   public FolderChildrenCollection(/*StorageProvider storageProvider*/)
    {
-      super(storageProvider);
+      super(/*storageProvider*/);
       setHref("/children");
    }
 
    /**
     * {@inheritDoc}
     */
+   @Override
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
       boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
@@ -94,13 +94,10 @@ public class FolderChildrenCollection extends CmisObjectCollection
          String msg = "Invalid parameter " + request.getParameter(AtomCMIS.PARAM_INCLUDE_RELATIONSHIPS);
          throw new ResponseContextException(msg, 400);
       }
-      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CMIS.MAX_ITEMS);
-      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CMIS.SKIP_COUNT);
+      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CmisConstants.MAX_ITEMS);
+      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CmisConstants.SKIP_COUNT);
       boolean includePathSegments = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PATH_SEGMENT, false);
-      // XXX At the moment get all properties from back-end. We need some of them for build correct feed.
-      // Filter will be applied during build final Atom Document.
-      //      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
-      String propertyFilter = null;
+      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
       String renditionFilter = request.getParameter(AtomCMIS.PARAM_RENDITION_FILTER);
       String orderBy = request.getParameter(AtomCMIS.PARAM_ORDER_BY);
       Connection conn = null;
@@ -121,6 +118,10 @@ public class FolderChildrenCollection extends CmisObjectCollection
                Element numItems = feed.addExtension(AtomCMIS.NUM_ITEMS);
                numItems.setText(Integer.toString(list.getNumItems()));
             }
+
+            //          // add cmisra:hasMoreItems
+            //          Element hasMoreItems = feed.addExtension(AtomCMIS.HAS_MORE_ITEMS);
+            //          hasMoreItems.setText(Boolean.toString(list.isHasMoreItems()));
 
             for (CmisObject oif : list.getItems())
             {
@@ -162,6 +163,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
    /**
     * {@inheritDoc}
     */
+   @Override
    public Iterable<CmisObject> getEntries(RequestContext request) throws ResponseContextException
    {
       throw new UnsupportedOperationException("entries");
@@ -187,21 +189,22 @@ public class FolderChildrenCollection extends CmisObjectCollection
 
       String typeId = null;
       String id = null;
+      CmisObject newObject = null;
 
       ObjectTypeElement objectElement = entry.getFirstChild(AtomCMIS.OBJECT);
       boolean hasCMISElement = objectElement != null;
-      CmisObject object = hasCMISElement ? object = objectElement.getObject() : new CmisObjectImpl();
+      CmisObject object = hasCMISElement ? object = objectElement.getObject() : new CmisObject();
       updatePropertiesFromEntry(object, entry);
       if (hasCMISElement)
       {
          for (Property<?> p : object.getProperties().values())
          {
             String pName = p.getId();
-            if (CMIS.OBJECT_TYPE_ID.equals(pName))
+            if (CmisConstants.OBJECT_TYPE_ID.equals(pName))
             {
                typeId = ((IdProperty)p).getValues().get(0);
             }
-            else if (CMIS.OBJECT_ID.equals(pName))
+            else if (CmisConstants.OBJECT_ID.equals(pName))
             {
                id = ((IdProperty)p).getValues().get(0);
             }
@@ -210,9 +213,9 @@ public class FolderChildrenCollection extends CmisObjectCollection
       }
       else
       {
-         typeId = CMIS.DOCUMENT;
+         typeId = CmisConstants.DOCUMENT;
          IdProperty idProperty = new IdProperty();
-         idProperty.setId(CMIS.OBJECT_TYPE_ID);
+         idProperty.setId(CmisConstants.OBJECT_TYPE_ID);
          idProperty.getValues().add(typeId);
          object.getProperties().put(idProperty.getId(), idProperty);
       }
@@ -227,11 +230,13 @@ public class FolderChildrenCollection extends CmisObjectCollection
          {
             if (sourceFolderId == null)
             {
+               // If not specified the 'sourceFolderId', addObjectToFolder will be performed.
                conn.addObjectToFolder(id, targetFolderId, false);
+               objectId = id;
             }
             else
             {
-               // move object
+               // If specified the 'sourceFolderId' moveObject will be performed.
                objectId = conn.moveObject(id, targetFolderId, sourceFolderId);
             }
          }
@@ -276,18 +281,23 @@ public class FolderChildrenCollection extends CmisObjectCollection
             {
                objectId = conn.createPolicy(getId(request), object.getProperties(), addACL, removeACL, policies);
             }
-
-            // TODO do we need to fill the perameters ?
-            boolean isIncludeAllowableActions = false;
-            IncludeRelationships isIncludeRelationships = null;
-            boolean isIncludePolicyIDs = false;
-            String renditionFilter = null;
-            String propertyFilter = CMIS.WILDCARD;
-            boolean isIncludeAcl = false;
-            object =
-               conn.getObject(objectId, isIncludeAllowableActions, isIncludeRelationships, isIncludePolicyIDs,
-                  isIncludeAcl, true, propertyFilter, renditionFilter);
+            else
+            {
+               objectId = conn.createRelationship(object.getProperties(), addACL, removeACL, policies);
+            }
          }
+
+         // TODO do we need to fill the perameters ?
+         boolean isIncludeAllowableActions = false;
+         IncludeRelationships isIncludeRelationships = null;
+         boolean isIncludePolicyIDs = false;
+         String renditionFilter = null;
+         String propertyFilter = CmisConstants.WILDCARD;
+         boolean isIncludeAcl = false;
+
+         newObject =
+            conn.getObject(objectId, isIncludeAllowableActions, isIncludeRelationships, isIncludePolicyIDs,
+               isIncludeAcl, true, propertyFilter, renditionFilter);
 
       }
       catch (ConstraintException cve)
@@ -334,7 +344,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
       try
       {
          // updated object
-         addEntryDetails(request, entry, request.getResolvedUri(), object);
+         addEntryDetails(request, entry, request.getResolvedUri(), newObject);
       }
       catch (ResponseContextException rce)
       {

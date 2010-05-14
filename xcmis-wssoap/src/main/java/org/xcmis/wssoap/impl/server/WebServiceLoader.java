@@ -24,7 +24,6 @@ import org.apache.cxf.interceptor.LoggingInInterceptor;
 import org.apache.cxf.interceptor.LoggingOutInterceptor;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.spi.StorageProvider;
 import org.xcmis.wssoap.impl.ACLServicePortImpl;
 import org.xcmis.wssoap.impl.DiscoveryServicePortImpl;
 import org.xcmis.wssoap.impl.MultiFilingServicePortImpl;
@@ -54,23 +53,21 @@ public class WebServiceLoader
     */
    private static final Log LOG = ExoLogger.getLogger(WebServiceLoader.class);
 
-
-   
-   private StorageProvider storageProvider;
+   //   private StorageProvider storageProvider;
 
    /**
     * Constructs instance of WebServiceLoader.
-    * 
+    *
     * @param containerContext the ExoContainer context.
     */
-   public WebServiceLoader(StorageProvider storageProvider)
+   public WebServiceLoader(/*StorageProvider storageProvider*/)
    {
-      this.storageProvider = storageProvider;
+      //      this.storageProvider = storageProvider;
    }
 
    /**
     * Register all available container components in a CXF engine from Servlet.
-    * 
+    *
     */
    public void init()
    {
@@ -78,22 +75,33 @@ public class WebServiceLoader
    }
 
    /**
-    * Register all available container components in a CXF engine from Servlet with given baseURL.
-    * 
+    * Register all available container components in a CXF engine from Servlet
+    * with given baseURL.
+    *
     * @param baseURL string base URL
     */
    public void init(String baseURL)
    {
       List<Object> services = new ArrayList<Object>();
-      services.add(new ACLServicePortImpl(storageProvider));
-      services.add(new DiscoveryServicePortImpl(storageProvider));
-      services.add(new MultiFilingServicePortImpl(storageProvider));
-      services.add(new NavigationServicePortImpl(storageProvider));
-      services.add(new ObjectServicePortImpl(storageProvider));
-      services.add(new PolicyServicePortImpl(storageProvider));
-      services.add(new RelationshipServicePortImpl(storageProvider));
-      services.add(new RepositoryServicePortImpl(storageProvider));
-      services.add(new VersioningServicePortImpl(storageProvider));
+      //      services.add(new ACLServicePortImpl(storageProvider));
+      //      services.add(new DiscoveryServicePortImpl(storageProvider));
+      //      services.add(new MultiFilingServicePortImpl(storageProvider));
+      //      services.add(new NavigationServicePortImpl(storageProvider));
+      //      services.add(new ObjectServicePortImpl(storageProvider));
+      //      services.add(new PolicyServicePortImpl(storageProvider));
+      //      services.add(new RelationshipServicePortImpl(storageProvider));
+      //      services.add(new RepositoryServicePortImpl(storageProvider));
+      //      services.add(new VersioningServicePortImpl(storageProvider));
+
+      services.add(new ACLServicePortImpl());
+      services.add(new DiscoveryServicePortImpl());
+      services.add(new MultiFilingServicePortImpl());
+      services.add(new NavigationServicePortImpl());
+      services.add(new ObjectServicePortImpl());
+      services.add(new PolicyServicePortImpl());
+      services.add(new RelationshipServicePortImpl());
+      services.add(new RepositoryServicePortImpl());
+      services.add(new VersioningServicePortImpl());
 
       for (Object implementor : services)
       {
@@ -108,7 +116,7 @@ public class WebServiceLoader
 
    /**
     * Get service address with WebService annotation for implementor.
-    * 
+    *
     * @param baseURL string base URL
     * @param implementor object implementor
     * @return address string
@@ -119,20 +127,30 @@ public class WebServiceLoader
       String portName = implementor.getClass().getAnnotation(WebService.class).portName();
 
       if (LOG.isDebugEnabled())
+      {
          LOG.debug(" serviceName = " + serviceName);
+      }
       if (LOG.isDebugEnabled())
+      {
          LOG.debug(" portName = " + portName);
+      }
 
       String address = new String();
 
       if (baseURL != null && baseURL.length() != 0)
+      {
          address += baseURL;
+      }
 
       if (serviceName != null && serviceName.length() != 0)
+      {
          address += "/" + serviceName;
+      }
 
       if (portName != null && portName.length() != 0)
+      {
          address += "/" + portName;
+      }
 
       if (LOG.isDebugEnabled())
       {
@@ -144,7 +162,7 @@ public class WebServiceLoader
 
    /**
     * Simple deploy service. Uses Endpoint class.
-    * 
+    *
     * @param address string service address
     * @param object service object
     * @return endpoint Endpoint
@@ -153,7 +171,9 @@ public class WebServiceLoader
    {
 
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Starting Service: object = " + object + " at the address = " + address);
+      }
       Endpoint endpoint = Endpoint.publish(address, object);
 
       if (LOG.isDebugEnabled())
@@ -166,13 +186,15 @@ public class WebServiceLoader
       }
 
       if (endpoint.isPublished())
+      {
          LOG.info("The webservice '" + address + "' has been published SUCCESSFUL!");
+      }
       return endpoint;
    }
 
    /**
     * Simple deploy service. Uses Endpoint class.
-    * 
+    *
     * @param address string service address
     * @param object service object
     * @return endpoint Endpoint
@@ -181,7 +203,9 @@ public class WebServiceLoader
    {
 
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Starting Service: object = " + object + " at the address = " + address);
+      }
       Endpoint endpoint = Endpoint.publish(address, object);
 
       if (LOG.isDebugEnabled())
@@ -193,7 +217,9 @@ public class WebServiceLoader
       }
 
       if (endpoint.isPublished())
+      {
          LOG.info("The webservice '" + address + "' has been published SUCCESSFUL!");
+      }
       return endpoint;
    }
 }

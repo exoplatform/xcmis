@@ -35,9 +35,8 @@ import org.xcmis.search.model.source.SelectorName;
  */
 public class SameNodeJoinCondition extends JoinCondition
 {
-   /**
-    * 
-    */
+   
+   /** The  serialVersionUID. */
    private static final long serialVersionUID = 8876245918655451590L;
 
    private final SelectorName selector1Name;
@@ -56,8 +55,6 @@ public class SameNodeJoinCondition extends JoinCondition
     *           the name of the first selector
     * @param selector2Name
     *           the name of the second selector
-    * @throws IllegalArgumentException
-    *            if either selector name is null
     */
    public SameNodeJoinCondition(SelectorName selector1Name, SelectorName selector2Name)
    {
@@ -76,8 +73,6 @@ public class SameNodeJoinCondition extends JoinCondition
     * @param selector2Path
     *           the relative path from the second selector locating the node
     *           being compared with the first selector
-    * @throws IllegalArgumentException
-    *            if the path or either selector name is null
     */
    public SameNodeJoinCondition(SelectorName selector1Name, SelectorName selector2Name, String selector2Path)
    {

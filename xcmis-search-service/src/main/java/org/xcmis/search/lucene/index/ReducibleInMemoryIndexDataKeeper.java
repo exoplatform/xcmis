@@ -18,6 +18,7 @@
  */
 package org.xcmis.search.lucene.index;
 
+import org.apache.lucene.analysis.SimpleAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.CorruptIndexException;
@@ -48,7 +49,7 @@ import java.util.Map.Entry;
 public class ReducibleInMemoryIndexDataKeeper implements TransactionableLuceneIndexDataManager
 {
    /**
-    * Class logger.
+    * Class logger.g
     */
    private static final Log LOG = ExoLogger.getLogger(ReducibleInMemoryIndexDataKeeper.class);
 
@@ -109,6 +110,7 @@ public class ReducibleInMemoryIndexDataKeeper implements TransactionableLuceneIn
 
       this.documentsBuffer = new HashMap<String, Document>(changes.getAddedDocuments());
       this.pendingDocumentsBuffer = new HashMap<String, Document>(changes.getAddedDocuments());
+      initDirectory();
    }
 
    public ReducibleInMemoryIndexDataKeeper(final RAMDirectory indexDirectiry,
@@ -132,7 +134,11 @@ public class ReducibleInMemoryIndexDataKeeper implements TransactionableLuceneIn
    // TODO removed
    public Directory getDirectory() throws IndexException
    {
-      return this.indexDirectiry;
+      if (!isPendingCommited)
+      {
+         commitPending();
+      }
+      return indexDirectiry;
    }
 
    /**
@@ -342,6 +348,7 @@ public class ReducibleInMemoryIndexDataKeeper implements TransactionableLuceneIn
     */
    private void commitPending() throws IndexException
    {
+      IndexWriter writer = null;
       try
       {
          if (this.pendingDocumentsBuffer.size() > 0)
@@ -349,8 +356,7 @@ public class ReducibleInMemoryIndexDataKeeper implements TransactionableLuceneIn
             synchronized (this.indexDirectiry)
             {
 
-               final IndexWriter writer =
-                  new IndexWriter(this.indexDirectiry, new StandardAnalyzer(), MaxFieldLength.UNLIMITED);
+               writer = new IndexWriter(this.indexDirectiry, new StandardAnalyzer(), MaxFieldLength.UNLIMITED);
                for (final Entry<String, Document> addedDocument : this.pendingDocumentsBuffer.entrySet())
                {
                   writer.addDocument(addedDocument.getValue());
@@ -373,6 +379,43 @@ public class ReducibleInMemoryIndexDataKeeper implements TransactionableLuceneIn
          throw new IndexException(e.getLocalizedMessage(), e);
       }
       catch (final IOException e)
+      {
+         throw new IndexException(e.getLocalizedMessage(), e);
+      }
+      finally
+      {
+         if (writer != null)
+         {
+            try
+            {
+               writer.close();
+            }
+            catch (CorruptIndexException e)
+            {
+               throw new IndexException(e.getLocalizedMessage(), e);
+            }
+            catch (IOException e)
+            {
+               throw new IndexException(e.getLocalizedMessage(), e);
+            }
+         }
+      }
+   }
+
+   /**
+    * @throws CorruptIndexException
+    * @throws LockObtainFailedException
+    * @throws IOException
+    */
+   private void initDirectory() throws IndexException
+   {
+      try
+      {
+         IndexWriter.MaxFieldLength fieldLength = new IndexWriter.MaxFieldLength(IndexWriter.DEFAULT_MAX_FIELD_LENGTH);
+         IndexWriter iw = new IndexWriter(indexDirectiry, new SimpleAnalyzer(), true, fieldLength);
+         iw.close();
+      }
+      catch (IOException e)
       {
          throw new IndexException(e.getLocalizedMessage(), e);
       }

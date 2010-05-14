@@ -23,7 +23,7 @@ import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.Rendition;
+import org.xcmis.spi.model.Rendition;
 
 import javax.xml.namespace.QName;
 

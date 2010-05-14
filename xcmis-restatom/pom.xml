@@ -7,14 +7,15 @@
    </parent>
 
    <artifactId>xcmis-restatom</artifactId>
-   <name>xCMIS :: REST :: Atom</name>
+   <packaging>jar</packaging>
+   <name>xCMIS :: REST Atom</name>
 
    <dependencies>
       <dependency>
          <groupId>org.xcmis</groupId>
          <artifactId>xcmis-spi</artifactId>
       </dependency>
-      
+
 <!--      <dependency>-->
 <!--         <groupId>org.xcmis</groupId>-->
 <!--         <artifactId>xcmis-sp-inmemory</artifactId>-->
@@ -23,7 +24,7 @@
 
       <dependency>
          <groupId>org.xcmis</groupId>
-         <artifactId>xcmis-sp-jcr-exo-new</artifactId>
+         <artifactId>xcmis-sp-jcr-exo</artifactId>
          <scope>test</scope>
       </dependency>
 

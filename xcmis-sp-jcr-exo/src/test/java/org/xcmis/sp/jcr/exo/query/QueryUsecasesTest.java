@@ -19,17 +19,22 @@
 
 package org.xcmis.sp.jcr.exo.query;
 
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.BaseContentStream;
+import org.xcmis.spi.CmisConstants;
+import org.xcmis.spi.ContentStream;
+import org.xcmis.spi.DocumentData;
+import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsIterator;
-import org.xcmis.spi.UnfileObject;
-import org.xcmis.spi.data.BaseContentStream;
-import org.xcmis.spi.data.ContentStream;
-import org.xcmis.spi.data.Document;
-import org.xcmis.spi.data.Folder;
-import org.xcmis.spi.object.impl.DecimalProperty;
-import org.xcmis.spi.object.impl.StringProperty;
+import org.xcmis.spi.model.CapabilityJoin;
+import org.xcmis.spi.model.CapabilityQuery;
+import org.xcmis.spi.model.RepositoryCapabilities;
+import org.xcmis.spi.model.UnfileObject;
+import org.xcmis.spi.model.impl.BooleanProperty;
+import org.xcmis.spi.model.impl.DecimalProperty;
+import org.xcmis.spi.model.impl.StringProperty;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
+import org.xcmis.spi.utils.MimeType;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -38,30 +43,14 @@ import java.util.List;
 /**
  * Created by The eXo Platform SAS. <br/>
  * Date:
- * 
+ *
  * @author <a href="karpenko.sergiy@gmail.com">Karpenko Sergiy</a>
  * @version $Id: QueryUsecasesTest.java 27 2010-02-08 07:49:20Z andrew00x $
  */
 public class QueryUsecasesTest extends BaseQueryTest
 {
 
-   private final static String CONTENT_TYPE = "text/plain";
-
-   private final static String NASA_DOCUMENT = "cmis:nasa-mission";
-
-   private final static String PROPERTY_BOOSTER = "cmis:booster-name";
-
-   private final static String PROPERTY_COMMANDER = "cmis:commander";
-
-   private final static String PROPERTY_COMMAND_MODULE_PILOT = "cmis:command-module-pilot";
-
-   private final static String PROPERTY_LUNAR_MODULE_PILOT = "cmis:lunar-module-pilot";
-
-   private final static String PROPERTY_BOOSTER_MASS = "cmis:booster-mass";
-
-   private final static String PROPERTY_SAMPLE_RETURNED = "cmis:sample-returned";
-
-   private Folder testRoot;
+   private FolderData testRoot;
 
    /**
     * @see org.xcmis.sp.jcr.exo.query.BaseQueryTest#setUp()
@@ -73,6 +62,15 @@ public class QueryUsecasesTest extends BaseQueryTest
       testRoot = createFolder(rootFolder, "QueryUsecasesTest", "cmis:folder");
       // create data
 
+   }
+
+   public void testSearchCapabilities() throws Exception
+   {
+      RepositoryCapabilities repCapabilities = storage.getRepositoryInfo().getCapabilities();
+      assertEquals(CapabilityQuery.BOTHCOMBINED, repCapabilities.getCapabilityQuery());
+      assertEquals(CapabilityJoin.NONE, repCapabilities.getCapabilityJoin());
+      assertFalse(repCapabilities.isCapabilityPWCSearchable());
+      assertFalse(repCapabilities.isCapabilityAllVersionsSearchable());
    }
 
    /**
@@ -92,13 +90,13 @@ public class QueryUsecasesTest extends BaseQueryTest
     * exo:Commander is Frank F. Borman, II or James A. Lovell, Jr.
     * <p>
     * Expected result: document2 and document3
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testAndOrConstraint() throws Exception
    {
 
-      List<Document> appolloContent = createNasaContent(testRoot);
+      List<DocumentData> appolloContent = createNasaContent(testRoot);
       StringBuffer sql = new StringBuffer();
       sql.append("SELECT * ");
       sql.append("FROM ");
@@ -112,7 +110,7 @@ public class QueryUsecasesTest extends BaseQueryTest
 
       ItemsIterator<Result> result = storage.query(query);
       // check results
-      checkResult(result, new Document[]{appolloContent.get(1), appolloContent.get(2)});
+      checkResult(result, new DocumentData[]{appolloContent.get(1), appolloContent.get(2)});
 
    }
 
@@ -130,17 +128,17 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Select all documents that are in folder1.
     * <p>
     * Expected result: doc1
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testDocumentInFolderConstrain() throws Exception
    {
       // create data
-      Folder testRoot1 = createFolder(testRoot, "testDocumentInFolderConstrain1", "cmis:folder");
-      Folder testRoot2 = createFolder(testRoot, "testDocumentInFolderConstrain2", "cmis:folder");
+      FolderData testRoot1 = createFolder(testRoot, "testDocumentInFolderConstrain1", "cmis:folder");
+      FolderData testRoot2 = createFolder(testRoot, "testDocumentInFolderConstrain2", "cmis:folder");
 
-      List<Document> appolloContent = createNasaContent(testRoot1);
-      List<Document> appolloContent2 = createNasaContent(testRoot2);
+      List<DocumentData> appolloContent = createNasaContent(testRoot1);
+      List<DocumentData> appolloContent2 = createNasaContent(testRoot2);
 
       String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE IN_FOLDER( '" + testRoot2.getObjectId() + "')";
 
@@ -148,7 +146,7 @@ public class QueryUsecasesTest extends BaseQueryTest
       ItemsIterator<Result> result = storage.query(query);
 
       // check results
-      checkResult(result, appolloContent2.toArray(new Document[appolloContent2.size()]));
+      checkResult(result, appolloContent2.toArray(new DocumentData[appolloContent2.size()]));
 
    }
 
@@ -172,31 +170,34 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Select all folders that are in folder1.
     * <p>
     * Expected result: folder3
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testFolderInFolderConstrain() throws Exception
    {
       // create data
-      Folder folder1 = createFolder(testRoot, "folder1", "cmis:folder");
+      FolderData folder1 = createFolder(testRoot, "folder1", "cmis:folder");
       storage.saveObject(folder1);
 
-      Document doc1 = createDocument(folder1, "node1", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
+      DocumentData doc1 =
+         createDocument(folder1, "node1", NASA_DOCUMENT, "hello world".getBytes(), new MimeType("text", "plain"));
       storage.saveObject(doc1);
 
-      Folder folder2 = createFolder(testRoot, "folder2", "cmis:folder");
+      FolderData folder2 = createFolder(testRoot, "folder2", "cmis:folder");
       storage.saveObject(folder2);
 
-      Document doc2 = createDocument(folder2, "node2", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
+      DocumentData doc2 =
+         createDocument(folder2, "node2", NASA_DOCUMENT, "hello world".getBytes(), new MimeType("text", "plain"));
       storage.saveObject(doc2);
 
-      Folder folder3 = createFolder(folder1, "folder3", "cmis:folder");
+      FolderData folder3 = createFolder(folder1, "folder3", "cmis:folder");
       storage.saveObject(folder3);
 
-      Document doc3 = createDocument(folder3, "node3", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
+      DocumentData doc3 =
+         createDocument(folder3, "node3", NASA_DOCUMENT, "hello world".getBytes(), new MimeType("text", "plain"));
       storage.saveObject(doc3);
 
-      Folder folder4 = createFolder(folder3, "folder4", "cmis:folder");
+      FolderData folder4 = createFolder(folder3, "folder4", "cmis:folder");
       storage.saveObject(folder4);
 
       String statement = "SELECT * FROM cmis:folder  WHERE IN_FOLDER( '" + folder1.getObjectId() + "')";
@@ -205,14 +206,14 @@ public class QueryUsecasesTest extends BaseQueryTest
       ItemsIterator<Result> result = storage.query(query);
 
       // check results
-      checkResult(result, new Folder[]{folder3});
+      checkResult(result, new FolderData[]{folder3});
 
    }
 
    //
    //   /**
    //    * Constraints with multi-valued properties is not supported.
-   //    * 
+   //    *
    //    * @throws Exception
    //    */
    //   // XXX temporary excluded
@@ -256,27 +257,27 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Select all documents where data contains "moon" word.
     * <p>
     * Expected result: document1 and document2
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testFulltextConstraint() throws Exception
    {
 
-      List<Document> appolloContent = createNasaContent(testRoot);
+      List<DocumentData> appolloContent = createNasaContent(testRoot);
 
       String statement1 = "SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"moon\")";
       Query query = new Query(statement1, true);
       ItemsIterator<Result> result = storage.query(query);
 
       assertEquals(2, result.size());
-      checkResult(result, new Document[]{appolloContent.get(1), appolloContent.get(2)});
+      checkResult(result, new DocumentData[]{appolloContent.get(1), appolloContent.get(2)});
 
       String statement2 = "SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"Moon\")";
       query = new Query(statement2, true);
       ItemsIterator<Result> result2 = storage.query(query);
 
       assertEquals(2, result2.size());
-      checkResult(result2, new Document[]{appolloContent.get(1), appolloContent.get(2)});
+      checkResult(result2, new DocumentData[]{appolloContent.get(1), appolloContent.get(2)});
 
    }
 
@@ -289,17 +290,17 @@ public class QueryUsecasesTest extends BaseQueryTest
     * <li>document2: <b>Title</b> - node2 <b>name</b> - anyname
     * </ul>
     * <p>
-    * Query : Select all documents where name is in set {'admin' , 'supervisor' ,
-    * 'Vasya' }.
+    * Query : Select all documents where name is in set {'admin' , 'supervisor'
+    * , 'Vasya' }.
     * <p>
     * Expected result: document2 and document3
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testINConstraint() throws Exception
    {
 
-      List<Document> appolloContent = createNasaContent(testRoot);
+      List<DocumentData> appolloContent = createNasaContent(testRoot);
 
       String statement =
          "SELECT * FROM " + NASA_DOCUMENT + " WHERE " + PROPERTY_COMMANDER
@@ -308,7 +309,7 @@ public class QueryUsecasesTest extends BaseQueryTest
       Query query = new Query(statement, true);
       ItemsIterator<Result> result = storage.query(query);
       assertEquals(1, result.size());
-      checkResult(result, new Document[]{appolloContent.get(1)});
+      checkResult(result, new DocumentData[]{appolloContent.get(1)});
 
    }
 
@@ -328,7 +329,7 @@ public class QueryUsecasesTest extends BaseQueryTest
    //    * document parentFolderName.
    //    * <p>
    //    * Expected result: doc1 and folder1
-   //    * 
+   //    *
    //    * @throws Exception if an unexpected error occurs
    //    */
    //   // XXX temporary excluded
@@ -371,12 +372,12 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Select all documents where prop begins with "ad".
     * <p>
     * Expected result: doc1, doc2
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testLIKEConstraint() throws Exception
    {
-      List<Document> appolloContent = createNasaContent(testRoot);
+      List<DocumentData> appolloContent = createNasaContent(testRoot);
 
       String statement = "SELECT * FROM " + NASA_DOCUMENT + " AS doc WHERE " + PROPERTY_COMMANDER + " LIKE 'James%'";
 
@@ -386,7 +387,7 @@ public class QueryUsecasesTest extends BaseQueryTest
 
       // check results
       assertEquals(1, result.size());
-      checkResult(result, new Document[]{appolloContent.get(2)});
+      checkResult(result, new DocumentData[]{appolloContent.get(2)});
 
    }
 
@@ -403,21 +404,24 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Select all documents where prop like 'ad\\%min%'.
     * <p>
     * Expected result: doc1
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testLIKEConstraintEscapeSymbols() throws Exception
    {
 
-      Document doc1 = createDocument(testRoot, "node1", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
+      DocumentData doc1 =
+         createDocument(testRoot, "node1", NASA_DOCUMENT, "hello world".getBytes(), new MimeType("text", "plain"));
       doc1.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "ad%min master"));
 
-      Document doc2 = createDocument(testRoot, "node2", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
+      DocumentData doc2 =
+         createDocument(testRoot, "node2", NASA_DOCUMENT, "hello world".getBytes(), new MimeType("text", "plain"));
       doc2.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "admin operator"));
 
-      Document doc3 = createDocument(testRoot, "node3", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
+      DocumentData doc3 =
+         createDocument(testRoot, "node3", NASA_DOCUMENT, "hello world".getBytes(), new MimeType("text", "plain"));
       doc3.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "radmin"));
 
@@ -433,7 +437,7 @@ public class QueryUsecasesTest extends BaseQueryTest
 
       // check results
       assertEquals(1, result.size());
-      checkResult(result, new Document[]{doc1});
+      checkResult(result, new DocumentData[]{doc1});
 
    }
 
@@ -449,23 +453,25 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Select all documents that not contains "world" word.
     * <p>
     * Expected result: doc2
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testNOTConstraint() throws Exception
    {
 
-      Document doc1 = createDocument(testRoot, "node1", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
+      DocumentData doc1 =
+         createDocument(testRoot, "node1", NASA_DOCUMENT, "hello world".getBytes(), new MimeType("text", "plain"));
 
-      Folder folder2 = createFolder(testRoot, "folder2", "cmis:folder");
-      Document doc2 = createDocument(folder2, "node2", NASA_DOCUMENT, "hello".getBytes(), "text/plain");
+      FolderData folder2 = createFolder(testRoot, "folder2", "cmis:folder");
+      DocumentData doc2 =
+         createDocument(folder2, "node2", NASA_DOCUMENT, "hello".getBytes(), new MimeType("text", "plain"));
 
       String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE NOT CONTAINS(\"world\")";
 
       Query query = new Query(statement, true);
       ItemsIterator<Result> result = storage.query(query);
 
-      checkResult(result, new Document[]{doc2});
+      checkResult(result, new DocumentData[]{doc2});
 
    }
 
@@ -481,12 +487,12 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Select all documents where long property not in set {15 , 20}.
     * <p>
     * Expected result: doc1
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testNotINConstraint() throws Exception
    {
-      List<Document> appolloContent = createNasaContent(testRoot);
+      List<DocumentData> appolloContent = createNasaContent(testRoot);
 
       String statement =
          "SELECT * FROM " + NASA_DOCUMENT + " WHERE " + PROPERTY_COMMANDER
@@ -495,7 +501,7 @@ public class QueryUsecasesTest extends BaseQueryTest
       Query query = new Query(statement, true);
       ItemsIterator<Result> result = storage.query(query);
 
-      checkResult(result, new Document[]{appolloContent.get(1), appolloContent.get(3)});
+      checkResult(result, new DocumentData[]{appolloContent.get(1), appolloContent.get(3)});
 
    }
 
@@ -512,13 +518,13 @@ public class QueryUsecasesTest extends BaseQueryTest
     * IN).
     * <p>
     * Expected result: doc2
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testNotNotINConstraint() throws Exception
    {
 
-      List<Document> appolloContent = createNasaContent(testRoot);
+      List<DocumentData> appolloContent = createNasaContent(testRoot);
 
       String statement =
          "SELECT * FROM " + NASA_DOCUMENT + " WHERE  NOT (" + PROPERTY_COMMANDER + " NOT IN ('James A. Lovell, Jr.'))";
@@ -526,7 +532,7 @@ public class QueryUsecasesTest extends BaseQueryTest
       Query query = new Query(statement, true);
       ItemsIterator<Result> result = storage.query(query);
 
-      checkResult(result, new Document[]{appolloContent.get(2)});
+      checkResult(result, new DocumentData[]{appolloContent.get(2)});
 
    }
 
@@ -542,19 +548,19 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Order by exo:Commander property value
     * <p>
     * Expected result: doc2
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testOrderByFieldDesc() throws Exception
    {
 
-      List<Document> appolloContent = createNasaContent(testRoot);
+      List<DocumentData> appolloContent = createNasaContent(testRoot);
 
       StringBuffer sql = new StringBuffer();
       sql.append("SELECT  ");
-      sql.append(CMIS.LAST_MODIFIED_BY + " as last , ");
-      sql.append(CMIS.OBJECT_ID + " , ");
-      sql.append(CMIS.LAST_MODIFICATION_DATE);
+      sql.append(CmisConstants.LAST_MODIFIED_BY + " as last , ");
+      sql.append(CmisConstants.OBJECT_ID + " , ");
+      sql.append(CmisConstants.LAST_MODIFICATION_DATE);
       sql.append(" FROM ");
       sql.append(NASA_DOCUMENT);
       sql.append(" ORDER BY ");
@@ -569,7 +575,7 @@ public class QueryUsecasesTest extends BaseQueryTest
       // James A. Lovell, Jr. (2)
       // Frank F. Borman, II (1)
       //Eugene A. Cernan  (3)
-      checkResultOrder(result, new Document[]{appolloContent.get(0), appolloContent.get(2), appolloContent.get(1),
+      checkResultOrder(result, new DocumentData[]{appolloContent.get(0), appolloContent.get(2), appolloContent.get(1),
          appolloContent.get(3)});
 
    }
@@ -583,19 +589,19 @@ public class QueryUsecasesTest extends BaseQueryTest
     * ascending.
     * <p>
     * Expected result: doc2, doc3, doc1
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testOrderByFieldAsk() throws Exception
    {
 
-      List<Document> appolloContent = createNasaContent(testRoot);
+      List<DocumentData> appolloContent = createNasaContent(testRoot);
 
       StringBuffer sql = new StringBuffer();
       sql.append("SELECT ");
-      sql.append(CMIS.LAST_MODIFIED_BY + ", ");
-      sql.append(CMIS.OBJECT_ID + ", ");
-      sql.append(CMIS.LAST_MODIFICATION_DATE);
+      sql.append(CmisConstants.LAST_MODIFIED_BY + ", ");
+      sql.append(CmisConstants.OBJECT_ID + ", ");
+      sql.append(CmisConstants.LAST_MODIFICATION_DATE);
       sql.append(" FROM ");
       sql.append(NASA_DOCUMENT);
       sql.append(" ORDER BY ");
@@ -610,7 +616,7 @@ public class QueryUsecasesTest extends BaseQueryTest
       // James A. Lovell, Jr. (2)
       // Walter M. Schirra (0)
 
-      checkResultOrder(result, new Document[]{appolloContent.get(3), appolloContent.get(1), appolloContent.get(2),
+      checkResultOrder(result, new DocumentData[]{appolloContent.get(3), appolloContent.get(1), appolloContent.get(2),
          appolloContent.get(0)});
 
    }
@@ -624,19 +630,19 @@ public class QueryUsecasesTest extends BaseQueryTest
     * ascending.
     * <p>
     * Expected result: doc3, doc1, doc2
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testOrderByDefault() throws Exception
    {
 
-      List<Document> appolloContent = createNasaContent(testRoot);
+      List<DocumentData> appolloContent = createNasaContent(testRoot);
 
       StringBuffer sql = new StringBuffer();
       sql.append("SELECT ");
-      sql.append(CMIS.LAST_MODIFIED_BY + ", ");
-      sql.append(CMIS.OBJECT_ID + ", ");
-      sql.append(CMIS.LAST_MODIFICATION_DATE);
+      sql.append(CmisConstants.LAST_MODIFIED_BY + ", ");
+      sql.append(CmisConstants.OBJECT_ID + ", ");
+      sql.append(CmisConstants.LAST_MODIFICATION_DATE);
       sql.append(" FROM ");
       sql.append(NASA_DOCUMENT);
 
@@ -648,7 +654,7 @@ public class QueryUsecasesTest extends BaseQueryTest
       // Apollo 17 (3)
       // Apollo 7 (0)
       // Apollo 8 (1)
-      checkResultOrder(result, new Document[]{appolloContent.get(2), appolloContent.get(3), appolloContent.get(0),
+      checkResultOrder(result, new DocumentData[]{appolloContent.get(2), appolloContent.get(3), appolloContent.get(0),
          appolloContent.get(1)});
 
    }
@@ -662,20 +668,20 @@ public class QueryUsecasesTest extends BaseQueryTest
     * ascending.
     * <p>
     * Expected result: doc3, doc1, doc2
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testOrderByScore() throws Exception
    {
 
-      List<Document> appolloContent = createNasaContent(testRoot);
+      List<DocumentData> appolloContent = createNasaContent(testRoot);
 
       StringBuffer sql = new StringBuffer();
       sql.append("SELECT ");
       sql.append(" SCORE() AS scoreCol, ");
-      sql.append(CMIS.LAST_MODIFIED_BY + ", ");
-      sql.append(CMIS.OBJECT_ID + ", ");
-      sql.append(CMIS.LAST_MODIFICATION_DATE);
+      sql.append(CmisConstants.LAST_MODIFIED_BY + ", ");
+      sql.append(CmisConstants.OBJECT_ID + ", ");
+      sql.append(CmisConstants.LAST_MODIFICATION_DATE);
       sql.append(" FROM ");
       sql.append(NASA_DOCUMENT);
       sql.append(" WHERE CONTAINS(\"moon\") ");
@@ -685,9 +691,9 @@ public class QueryUsecasesTest extends BaseQueryTest
 
       Query query = new Query(statement, true);
       ItemsIterator<Result> result = storage.query(query);
-      // Apollo 13 (2)
       // Apollo 8 (1)
-      checkResultOrder(result, new Document[]{appolloContent.get(2), appolloContent.get(1)});
+      // Apollo 13 (2)
+      checkResultOrder(result, new DocumentData[]{appolloContent.get(1), appolloContent.get(2)});
 
    }
 
@@ -704,25 +710,27 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Select all documents that has "prop" property (IS NOT NULL).
     * <p>
     * Expected result: doc1
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testPropertyExistence() throws Exception
    {
       // Document folder1 = createFolder(root, "CASETest");
 
-      Document doc1 = createDocument(testRoot, "node1", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
+      DocumentData doc1 =
+         createDocument(testRoot, "node1", NASA_DOCUMENT, "hello world".getBytes(), new MimeType("text", "plain"));
       doc1.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "James A. Lovell, Jr."));
       storage.saveObject(doc1);
-      Document doc2 = createDocument(testRoot, "node2", NASA_DOCUMENT, "hello".getBytes(), "text/plain");
+      DocumentData doc2 =
+         createDocument(testRoot, "node2", NASA_DOCUMENT, "hello".getBytes(), new MimeType("text", "plain"));
       storage.saveObject(doc2);
 
       String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE " + PROPERTY_COMMANDER + " IS NOT NULL";
       Query query = new Query(statement, true);
 
       ItemsIterator<Result> result = storage.query(query);
-      checkResult(result, new Document[]{doc1});
+      checkResult(result, new DocumentData[]{doc1});
 
    }
 
@@ -739,15 +747,15 @@ public class QueryUsecasesTest extends BaseQueryTest
     * search score .
     * <p>
     * Expected result: doc1 and doc2 score numbers.
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testScoreAsColumn() throws Exception
    {
-      List<Document> appolloContent = createNasaContent(testRoot);
+      List<DocumentData> appolloContent = createNasaContent(testRoot);
 
       String statement =
-         "SELECT SCORE() AS scoreCol , " + CMIS.NAME + " AS id FROM " + NASA_DOCUMENT
+         "SELECT SCORE() AS scoreCol , " + CmisConstants.NAME + " AS id FROM " + NASA_DOCUMENT
             + " WHERE CONTAINS(\"hello OR world\") ORDER BY SCORE()";
 
       Query query = new Query(statement, true);
@@ -778,26 +786,28 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Select all documents that are in tree of folder1.
     * <p>
     * Expected result: doc1,doc2.
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testTreeConstrain() throws Exception
    {
       // create data
-      Folder folder1 = createFolder(testRoot, "folder1", "cmis:folder");
+      FolderData folder1 = createFolder(testRoot, "folder1", "cmis:folder");
 
-      Document doc1 = createDocument(folder1, "node1", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
+      DocumentData doc1 =
+         createDocument(folder1, "node1", NASA_DOCUMENT, "hello world".getBytes(), new MimeType("text", "plain"));
 
-      Folder subfolder1 = createFolder(folder1, "folder2", "cmis:folder");
+      FolderData subfolder1 = createFolder(folder1, "folder2", "cmis:folder");
 
-      Document doc2 = createDocument(subfolder1, "node1", NASA_DOCUMENT, "hello world".getBytes(), "text/plain");
+      DocumentData doc2 =
+         createDocument(subfolder1, "node1", NASA_DOCUMENT, "hello world".getBytes(), new MimeType("text", "plain"));
 
       String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE IN_TREE('" + folder1.getObjectId() + "')";
 
       Query query = new Query(statement, true);
       ItemsIterator<Result> result = storage.query(query);
 
-      checkResult(result, new Document[]{doc1, doc2});
+      checkResult(result, new DocumentData[]{doc1, doc2});
    }
 
    /**
@@ -812,7 +822,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Select all documents property long not equal to 3.
     * <p>
     * Expected result: doc2.
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testNotEqualDecimal() throws Exception
@@ -820,16 +830,15 @@ public class QueryUsecasesTest extends BaseQueryTest
       // create data
       String name = "fileCS2.doc";
       String name2 = "fileCS3.doc";
-      String contentType = "text/plain";
 
-      Folder folder = createFolder(testRoot, "NotEqualDecimal", "cmis:folder");
+      FolderData folder = createFolder(testRoot, "NotEqualDecimal", "cmis:folder");
       storage.saveObject(folder);
-      Document doc1 = createDocument(folder, name, NASA_DOCUMENT, new byte[0], contentType);
+      DocumentData doc1 = createDocument(folder, name, NASA_DOCUMENT, new byte[0], new MimeType("text", "plain"));
       doc1.setProperty(new DecimalProperty(PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS,
          PROPERTY_BOOSTER_MASS, new BigDecimal(3)));
       storage.saveObject(doc1);
 
-      Document doc2 = createDocument(folder, name2, NASA_DOCUMENT, new byte[0], contentType);
+      DocumentData doc2 = createDocument(folder, name2, NASA_DOCUMENT, new byte[0], new MimeType("text", "plain"));
       doc2.setProperty(new DecimalProperty(PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS,
          PROPERTY_BOOSTER_MASS, new BigDecimal(15)));
       storage.saveObject(doc2);
@@ -838,7 +847,7 @@ public class QueryUsecasesTest extends BaseQueryTest
       Query query = new Query(statement, true);
       ItemsIterator<Result> result = storage.query(query);
 
-      checkResult(result, new Document[]{doc2});
+      checkResult(result, new DocumentData[]{doc2});
    }
 
    /**
@@ -853,7 +862,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Select all documents property long more than 5.
     * <p>
     * Expected result: doc2.
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testMoreThanDecimal() throws Exception
@@ -861,17 +870,16 @@ public class QueryUsecasesTest extends BaseQueryTest
       // create data
       String name = "fileCS2.doc";
       String name2 = "fileCS3.doc";
-      String contentType = "text/plain";
 
-      Folder folder = createFolder(testRoot, "CASETest", "cmis:folder");
+      FolderData folder = createFolder(testRoot, "CASETest", "cmis:folder");
       storage.saveObject(folder);
 
-      Document doc1 = createDocument(folder, name, NASA_DOCUMENT, new byte[0], contentType);
+      DocumentData doc1 = createDocument(folder, name, NASA_DOCUMENT, new byte[0], new MimeType("text", "plain"));
       doc1.setProperty(new DecimalProperty(PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS,
          PROPERTY_BOOSTER_MASS, new BigDecimal(3)));
       storage.saveObject(doc1);
 
-      Document doc2 = createDocument(folder, name2, NASA_DOCUMENT, new byte[0], contentType);
+      DocumentData doc2 = createDocument(folder, name2, NASA_DOCUMENT, new byte[0], new MimeType("text", "plain"));
       doc2.setProperty(new DecimalProperty(PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS,
          PROPERTY_BOOSTER_MASS, new BigDecimal(15)));
       storage.saveObject(doc2);
@@ -881,7 +889,7 @@ public class QueryUsecasesTest extends BaseQueryTest
       Query query = new Query(statement, true);
       ItemsIterator<Result> result = storage.query(query);
 
-      checkResult(result, new Document[]{doc2});
+      checkResult(result, new DocumentData[]{doc2});
    }
 
    /**
@@ -897,7 +905,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * "test word second".
     * <p>
     * Expected result: doc1.
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testNotEqualString() throws Exception
@@ -905,17 +913,16 @@ public class QueryUsecasesTest extends BaseQueryTest
       // create data
       String name = "fileCS2.doc";
       String name2 = "fileCS3.doc";
-      String contentType = "text/plain";
 
-      Folder folder = createFolder(testRoot, "CASETest", "cmis:folder");
+      FolderData folder = createFolder(testRoot, "CASETest", "cmis:folder");
       storage.saveObject(folder);
 
-      Document doc1 = createDocument(folder, name, NASA_DOCUMENT, new byte[0], contentType);
+      DocumentData doc1 = createDocument(folder, name, NASA_DOCUMENT, new byte[0], new MimeType("text", "plain"));
       doc1.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "test word first"));
       storage.saveObject(doc1);
 
-      Document doc2 = createDocument(folder, name2, NASA_DOCUMENT, new byte[0], contentType);
+      DocumentData doc2 = createDocument(folder, name2, NASA_DOCUMENT, new byte[0], new MimeType("text", "plain"));
       doc2.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "test word second"));
       storage.saveObject(doc2);
@@ -925,201 +932,200 @@ public class QueryUsecasesTest extends BaseQueryTest
       Query query = new Query(statement, true);
       ItemsIterator<Result> result = storage.query(query);
 
-      checkResult(result, new Document[]{doc1});
+      checkResult(result, new DocumentData[]{doc1});
    }
 
-   //
-   //   /**
-   //    * Test fulltext search from jcr:content.
-   //    * <p>
-   //    * Initial data:
-   //    * <ul>
-   //    * <li>doc1: <b>Title</b> - node1 <b>content</b> - "There must be test word"
-   //    * <li>doc2: <b>Title</b> - node2 <b>content</b> - " Test word is not here"
-   //    * </ul>
-   //    * <p>
-   //    * Query : Select all documents that contains "here" word.
-   //    * <p>
-   //    * Expected result: doc2.
-   //    * 
-   //    * @throws Exception if an unexpected error occurs
-   //    */
-   //   public void testSimpleFulltext() throws Exception
-   //   {
-   //      // create data
-   //      String name1 = "fileFirst";
-   //      String name2 = "fileSecond";
-   //      String contentType = "text/plain";
-   //
-   //      Document folder = createFolder(root, "SimpleFullTextTest");
-   //
-   //      Document doc1 = createDocument(folder.getObjectId(), name1, new byte[0], contentType);
-   //      doc1.setString("strprop", "There must be test word");
-   //      doc1.save();
-   //
-   //      Document doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
-   //      doc2.setString("strprop", " Test word is not here");
-   //      doc2.save();
-   //
-   //      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"here\")";
-   //
-   //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = storage.query(query);
-   //
-   //      checkResult(result, new Document[]{doc2});
-   //   }
-   //
-   //   /**
-   //    * Test complex fulltext query.
-   //    * <p>
-   //    * Initial data:
-   //    * <ul>
-   //    * <li>doc1: <b>Title</b> - node1 <b>strprop</b> - "There must be test word"
-   //    * <li>doc2: <b>Title</b> - node2 <b>strprop</b> -
-   //    * " Test word is not here. Another check-word."
-   //    * <li>doc3: <b>Title</b> - node3 <b>strprop</b> - "There must be check-word."
-   //    * </ul>
-   //    * <p>
-   //    * Query : Select all documents that contains "There must" phrase and do not
-   //    * contain "check-word" word.
-   //    * <p>
-   //    * Expected result: doc1.
-   //    * 
-   //    * @throws Exception if an unexpected error occurs
-   //    */
-   //   public void testExtendedFulltext() throws Exception
-   //   {
-   //      // create data
-   //      String name1 = "fileCS1.doc";
-   //      String name2 = "fileCS2.doc";
-   //      String name3 = "fileCS3.doc";
-   //      String contentType = "text/plain";
-   //
-   //      Document folder = createFolder(root, "CASETest");
-   //
-   //      Document doc1 = createDocument(folder.getObjectId(), name1, new byte[0], contentType);
-   //      doc1.setString("strprop", "There must be test word");
-   //
-   //      Document doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
-   //      doc2.setString("strprop", " Test word is not here. Another check-word.");
-   //
-   //      Document doc3 = createDocument(folder.getObjectId(), name3, new byte[0], contentType);
-   //      doc3.setString("strprop", "There must be check-word.");
-   //
-   //      String statement =
-   //         "SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"\\\"There must\\\" -\\\"check\\-word\\\"\")";
-   //
-   //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = storage.query(query);
-   //
-   //      checkResult(result, new Document[]{doc1});
-   //   }
-   //
-   //   /**
-   //    * Same as testNOTConstraint.
-   //    */
-   //   public void testNotContains() throws Exception
-   //   {
-   //      // create data
-   //      String name = "fileCS2.doc";
-   //      String name2 = "fileCS3.doc";
-   //      String contentType = "text/plain";
-   //
-   //      Document folder = createFolder(root, "NotContains");
-   //
-   //      Document doc1 = createDocument(folder.getObjectId(), name, new byte[0], contentType);
-   //      doc1.setString("strprop", "There must be test word");
-   //      doc1.save();
-   //
-   //      Document doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
-   //      doc2.setString("strprop", " Test word is not here");
-   //      doc2.save();
-   //
-   //      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE NOT CONTAINS(\"here\")";
-   //
-   //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = storage.query(query);
-   //
-   //      checkResult(result, new Document[]{doc1});
-   //   }
-   //
-   //   /**
-   //    * Test comparison of boolean property.
-   //    * <p>
-   //    * Initial data:
-   //    * <ul>
-   //    * <li>doc1: <b>Title</b> - node1 <b>boolprop</b> - true
-   //    * <li>doc2: <b>Title</b> - node2 <b>boolprop</b> - false
-   //    * </ul>
-   //    * <p>
-   //    * Query : Select all documents where boolprop equal to false.
-   //    * <p>
-   //    * Expected result: doc2.
-   //    * 
-   //    * @throws Exception if an unexpected error occurs
-   //    */
-   //   public void testBooleanConstraint() throws Exception
-   //   {
-   //      // create data
-   //      String name = "fileCS2.doc";
-   //      String name2 = "fileCS3.doc";
-   //      String contentType = "text/plain";
-   //
-   //      Document folder = this.createFolder(root, "CASETest");
-   //
-   //      Document doc1 = createDocument(folder.getObjectId(), name, new byte[0], contentType);
-   //      doc1.setBoolean("boolprop", true);
-   //      doc1.save();
-   //
-   //      Document doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
-   //      doc2.setBoolean("boolprop", false);
-   //      doc2.save();
-   //
-   //      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE (boolprop = FALSE )";
-   //
-   //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = storage.query(query);
-   //
-   //      checkResult(result, new Document[]{doc2});
-   //   }
-   //
-   //   /**
-   //    * Test comparison of date property.
-   //    * <p>
-   //    * Initial data:
-   //    * <ul>
-   //    * <li>doc1: <b>Title</b> - node1 <b>dateProp</b> - 2009-08-08
-   //    * <li>doc2: <b>Title</b> - node2 <b>dateProp</b> - 2009-08-08
-   //    * </ul>
-   //    * <p>
-   //    * Query : Select all documents where dateProp more than 2007-01-01.
-   //    * <p>
-   //    * Expected result: doc2.
-   //    * 
-   //    * @throws Exception if an unexpected error occurs
-   //    */
-   //   public void testDateConstraint() throws Exception
-   //   {
-   //      // create data
-   //      String name = "fileCS2.doc";
-   //      String name2 = "fileCS3.doc";
-   //      String contentType = "text/plain";
-   //
-   //      Document folder = createFolder(root, "CASETest");
-   //
-   //      Document doc1 = createDocument(folder.getObjectId(), name, new byte[0], contentType);
-   //
-   //      Document doc2 = createDocument(folder.getObjectId(), name2, new byte[0], contentType);
-   //
-   //      String statement =
-   //         "SELECT * FROM " + NASA_DOCUMENT
-   //            + " WHERE ( cmis:lastModificationDate >= TIMESTAMP '2007-01-01T00:00:00.000Z' )";
-   //
-   //      Query query = new Query(statement, true);
-   //      ItemsIterator<Result> result = storage.query(query);
-   //
-   //      checkResult(result, new Document[]{doc1, doc2});
-   //   }
+   /**
+    * Test fulltext search from jcr:content.
+    * <p>
+    * Initial data:
+    * <ul>
+    * <li>doc1: <b>Title</b> - node1 <b>content</b> - "There must be test word"
+    * <li>doc2: <b>Title</b> - node2 <b>content</b> - " Test word is not here"
+    * </ul>
+    * <p>
+    * Query : Select all documents that contains "here" word.
+    * <p>
+    * Expected result: doc2.
+    *
+    * @throws Exception if an unexpected error occurs
+    */
+   public void testSimpleFulltext() throws Exception
+   {
+      // create data
+      String name1 = "fileFirst";
+      String name2 = "fileSecond";
+
+      FolderData folder = createFolder(testRoot, "SimpleFullTextTest", "cmis:folder");
+      storage.saveObject(folder);
+      DocumentData doc1 = createDocument(folder, name1, NASA_DOCUMENT, new byte[0], new MimeType("text", "plain"));
+      doc1.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+         PROPERTY_COMMANDER, "There must be test word"));
+      storage.saveObject(doc1);
+
+      DocumentData doc2 = createDocument(folder, name2, NASA_DOCUMENT, new byte[0], new MimeType("text", "plain"));
+      doc2.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+         PROPERTY_COMMANDER, "Test word is not here"));
+      storage.saveObject(doc2);
+      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"here\")";
+
+      Query query = new Query(statement, true);
+      ItemsIterator<Result> result = storage.query(query);
+
+      checkResult(result, new DocumentData[]{doc2});
+   }
+
+   /**
+    * Test complex fulltext query.
+    * <p>
+    * Initial data:
+    * <ul>
+    * <li>doc1: <b>Title</b> - node1 <b>strprop</b> - "There must be test word"
+    * <li>doc2: <b>Title</b> - node2 <b>strprop</b> -
+    * " Test word is not here. Another check-word."
+    * <li>doc3: <b>Title</b> - node3 <b>strprop</b> -
+    * "There must be check-word."
+    * </ul>
+    * <p>
+    * Query : Select all documents that contains "There must" phrase and do not
+    * contain "check-word" word.
+    * <p>
+    * Expected result: doc1.
+    *
+    * @throws Exception if an unexpected error occurs
+    */
+   public void testExtendedFulltext() throws Exception
+   {
+      // create data
+      String name1 = "fileCS1.doc";
+      String name2 = "fileCS2.doc";
+      String name3 = "fileCS3.doc";
+
+      FolderData folder = createFolder(testRoot, "CASETest", "cmis:folder");
+      storage.saveObject(folder);
+
+      DocumentData doc1 = createDocument(folder, name1, NASA_DOCUMENT, new byte[0], new MimeType("text", "plain"));
+      doc1.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+         PROPERTY_COMMANDER, "There must be test word"));
+      storage.saveObject(doc1);
+
+      DocumentData doc2 = createDocument(folder, name2, NASA_DOCUMENT, new byte[0], new MimeType("text", "plain"));
+      doc2.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+         PROPERTY_COMMANDER, "Test word is not here. Another check-word."));
+      storage.saveObject(doc2);
+
+      DocumentData doc3 = createDocument(folder, name3, NASA_DOCUMENT, new byte[0], new MimeType("text", "plain"));
+      doc2.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+         PROPERTY_COMMANDER, "There must be check-word."));
+      storage.saveObject(doc2);
+
+      String statement =
+         "SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"\\\"There must\\\" -\\\"check\\-word\\\"\")";
+
+      Query query = new Query(statement, true);
+      ItemsIterator<Result> result = storage.query(query);
+
+      checkResult(result, new DocumentData[]{doc1});
+   }
+
+   /**
+    * Same as testNOTConstraint.
+    */
+   public void testNotContains() throws Exception
+   {
+      // create data
+      String name = "fileCS2.doc";
+      String name2 = "fileCS3.doc";
+
+      DocumentData doc1 = createDocument(testRoot, name, NASA_DOCUMENT, new byte[0], new MimeType("text", "plain"));
+      doc1.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+         PROPERTY_COMMANDER, "There must be test word"));
+      storage.saveObject(doc1);
+
+      DocumentData doc2 = createDocument(testRoot, name2, NASA_DOCUMENT, new byte[0], new MimeType("text", "plain"));
+      doc2.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+         PROPERTY_COMMANDER, "Test word is not here"));
+      storage.saveObject(doc2);
+
+      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE NOT CONTAINS(\"here\")";
+
+      Query query = new Query(statement, true);
+      ItemsIterator<Result> result = storage.query(query);
+
+      checkResult(result, new DocumentData[]{doc1});
+   }
+
+   /**
+    * Test comparison of boolean property.
+    * <p>
+    * Initial data:
+    * <ul>
+    * <li>doc1: <b>Title</b> - node1 <b>boolprop</b> - true
+    * <li>doc2: <b>Title</b> - node2 <b>boolprop</b> - false
+    * </ul>
+    * <p>
+    * Query : Select all documents where boolprop equal to false.
+    * <p>
+    * Expected result: doc2.
+    *
+    * @throws Exception if an unexpected error occurs
+    */
+   public void testBooleanConstraint() throws Exception
+   {
+      // create data
+      String name = "fileCS2.doc";
+      String name2 = "fileCS3.doc";
+
+      DocumentData doc1 = createDocument(testRoot, name, NASA_DOCUMENT, new byte[0], new MimeType("text", "plain"));
+      doc1.setProperty(new BooleanProperty(PROPERTY_STATUS, PROPERTY_STATUS, PROPERTY_STATUS, PROPERTY_STATUS, true));
+      storage.saveObject(doc1);
+
+      DocumentData doc2 = createDocument(testRoot, name2, NASA_DOCUMENT, new byte[0], new MimeType("text", "plain"));
+      doc2.setProperty(new BooleanProperty(PROPERTY_STATUS, PROPERTY_STATUS, PROPERTY_STATUS, PROPERTY_STATUS, false));
+      storage.saveObject(doc2);
+
+      String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE (" + PROPERTY_STATUS + " = FALSE )";
+
+      Query query = new Query(statement, true);
+      ItemsIterator<Result> result = storage.query(query);
+
+      checkResult(result, new DocumentData[]{doc2});
+   }
+
+   /**
+    * Test comparison of date property.
+    * <p>
+    * Initial data:
+    * <ul>
+    * <li>doc1: <b>Title</b> - node1 <b>dateProp</b> - 2009-08-08
+    * <li>doc2: <b>Title</b> - node2 <b>dateProp</b> - 2009-08-08
+    * </ul>
+    * <p>
+    * Query : Select all documents where dateProp more than 2007-01-01.
+    * <p>
+    * Expected result: doc2.
+    *
+    * @throws Exception if an unexpected error occurs
+    */
+   public void testDateConstraint() throws Exception
+   {
+      // create data
+      String name = "fileCS2.doc";
+      String name2 = "fileCS3.doc";
+
+      DocumentData doc1 = createDocument(testRoot, name, NASA_DOCUMENT, new byte[0], new MimeType("text", "plain"));
+      storage.saveObject(doc1);
+      DocumentData doc2 = createDocument(testRoot, name2, NASA_DOCUMENT, new byte[0], new MimeType("text", "plain"));
+      storage.saveObject(doc2);
+      String statement =
+         "SELECT * FROM " + NASA_DOCUMENT
+            + " WHERE ( cmis:lastModificationDate >= TIMESTAMP '2007-01-01T00:00:00.000Z' )";
+
+      Query query = new Query(statement, true);
+      ItemsIterator<Result> result = storage.query(query);
+
+      checkResult(result, new DocumentData[]{doc1, doc2});
+   }
 
    /**
     * Simple test.
@@ -1129,16 +1135,16 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Select all CMIS_DOCUMENTS.
     * <p>
     * Expected result: document1 and document1
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testSimpleQuery() throws Exception
    {
-      List<Document> appolloContent = createNasaContent(testRoot);
+      List<DocumentData> appolloContent = createNasaContent(testRoot);
       String statement = "SELECT * FROM " + NASA_DOCUMENT;
       Query query = new Query(statement, true);
       ItemsIterator<Result> result = storage.query(query);
-      checkResult(result, appolloContent.toArray(new Document[appolloContent.size()]));
+      checkResult(result, appolloContent.toArray(new DocumentData[appolloContent.size()]));
 
    }
 
@@ -1152,16 +1158,16 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Select all documents where data contains "moon" word.
     * <p>
     * Expected result: document1 and document2
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testUpdateFulltextConstraint() throws Exception
    {
 
-      Document doc3 =
+      DocumentData doc3 =
          createDocument(testRoot, "Apollo 13", NASA_DOCUMENT, ("Apollo 13 was the third "
             + "manned mission by NASA intended to land on the Moon, but a mid-mission technical "
-            + "malfunction forced the lunar landing to be aborted. ").getBytes(), CONTENT_TYPE);
+            + "malfunction forced the lunar landing to be aborted. ").getBytes(), new MimeType("text", "plain"));
       doc3.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "James A. Lovell, Jr."));
       doc3.setProperty(new StringProperty(PROPERTY_BOOSTER, PROPERTY_BOOSTER, PROPERTY_BOOSTER, PROPERTY_BOOSTER,
@@ -1173,10 +1179,10 @@ public class QueryUsecasesTest extends BaseQueryTest
       ItemsIterator<Result> result = storage.query(query);
 
       assertEquals(1, result.size());
-      checkResult(result, new Document[]{doc3});
+      checkResult(result, new DocumentData[]{doc3});
 
       //replace content
-      ContentStream cs = new BaseContentStream("Sun".getBytes(), "test", CONTENT_TYPE);
+      ContentStream cs = new BaseContentStream("Sun".getBytes(), "test", new MimeType("text", "plain"));
       doc3.setContentStream(cs);
 
       storage.saveObject(doc3);
@@ -1190,16 +1196,17 @@ public class QueryUsecasesTest extends BaseQueryTest
       result = storage.query(query);
 
       assertEquals(1, result.size());
-      checkResult(result, new Document[]{doc3});
+      checkResult(result, new DocumentData[]{doc3});
 
    }
 
-   protected Document createAppoloMission(Folder parentFolder, String missionName, String commander,
+   protected DocumentData createAppoloMission(FolderData parentFolder, String missionName, String commander,
       String commandModulePilot, String lunarModulePilot, String boosterName, double boosterMass, long sampleReturned,
       String objectives) throws Exception
    {
 
-      Document doc = createDocument(parentFolder, missionName, NASA_DOCUMENT, objectives.getBytes(), CONTENT_TYPE);
+      DocumentData doc =
+         createDocument(parentFolder, missionName, NASA_DOCUMENT, objectives.getBytes(), new MimeType("text", "plain"));
       doc.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, commander));
       doc.setProperty(new StringProperty(PROPERTY_COMMAND_MODULE_PILOT, PROPERTY_COMMAND_MODULE_PILOT,
@@ -1230,14 +1237,14 @@ public class QueryUsecasesTest extends BaseQueryTest
 
    /**
     * Create content for Apollo program.
-    * 
+    *
     * @param folder
     * @return
     * @throws Exception
     */
-   private List<Document> createNasaContent(Folder folder) throws Exception
+   private List<DocumentData> createNasaContent(FolderData folder) throws Exception
    {
-      List<Document> result = new ArrayList<Document>();
+      List<DocumentData> result = new ArrayList<DocumentData>();
       result.add(createAppoloMission(folder, "Apollo 7", "Walter M. Schirra", "Donn F. Eisele", "R. Walter Cunningham",
          "Saturn 1B", 581.844, 0, "Apollo 7 (October 11-22, 1968) was the first manned mission "
             + "in the Apollo program to be launched. It was an eleven-day "
@@ -1260,11 +1267,33 @@ public class QueryUsecasesTest extends BaseQueryTest
          "Saturn V", 3038.500, 111, "Apollo 17 was the eleventh manned space "
             + "mission in the NASA Apollo program. It was the first night launch of a U.S. human "
             + "spaceflight and the sixth and final lunar landing mission of the Apollo program."));
-      for (Document document : result)
+      for (DocumentData document : result)
       {
          storage.saveObject(document);
       }
       return result;
    }
 
+   public void testIncludedInSupertypeQueryTestTwoDocTypes() throws Exception
+   {
+      // create data
+
+      DocumentData doc1 =
+         createDocument(testRoot, "node1", "cmis:article-sports", "hello world".getBytes(), new MimeType("text",
+            "plain"));
+      storage.saveObject(doc1);
+
+      DocumentData doc2 =
+         createDocument(testRoot, "node2", "cmis:article-animals", "hello world".getBytes(), new MimeType("text",
+            "plain"));
+      storage.saveObject(doc2);
+
+      String stat = "SELECT * FROM cmis:article WHERE IN_FOLDER( '" + testRoot.getObjectId() + "')";
+
+      Query query = new Query(stat, false);
+      ItemsIterator<Result> result = storage.query(query);
+
+      // check results
+      checkResult(result, new DocumentData[]{doc1, doc2});
+   }
 }

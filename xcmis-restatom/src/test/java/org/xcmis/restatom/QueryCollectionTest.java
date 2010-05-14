@@ -22,7 +22,7 @@ package org.xcmis.restatom;
 import org.apache.abdera.model.Document;
 import org.apache.abdera.model.Element;
 import org.xcmis.restatom.abdera.QueryTypeElement;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.query.Query;
 
 import java.io.ByteArrayInputStream;
@@ -37,7 +37,7 @@ public class QueryCollectionTest extends BaseTest
    public void testQueryElement() throws Exception
    {
       String s = "<?xml version='1.0' encoding='utf-8'?>" //
-         + "<cmis:query xmlns='http://www.w3.org/2005/Atom' xmlns:cmis='" + CMIS.CMIS_NS_URI + "'>" //
+         + "<cmis:query xmlns='http://www.w3.org/2005/Atom' xmlns:cmis='" + CmisConstants.CMIS_NS_URI + "'>" //
          + "<cmis:statement>SELECT * FROM Document</cmis:statement>" //
          + "<cmis:maxItems>10</cmis:maxItems>" //
          + "<cmis:skipCount>0</cmis:skipCount>" //

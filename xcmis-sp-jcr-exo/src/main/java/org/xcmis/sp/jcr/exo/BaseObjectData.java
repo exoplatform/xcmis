@@ -30,39 +30,39 @@ import org.exoplatform.services.jcr.impl.core.value.StringValue;
 import org.exoplatform.services.jcr.util.IdGenerator;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.spi.AccessControlEntry;
-import org.xcmis.spi.BaseType;
-import org.xcmis.spi.CMIS;
+import org.xcmis.sp.jcr.exo.index.IndexListener;
+import org.xcmis.spi.BaseItemsIterator;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
+import org.xcmis.spi.DocumentData;
+import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
-import org.xcmis.spi.PropertyDefinition;
+import org.xcmis.spi.ObjectData;
+import org.xcmis.spi.ObjectDataVisitor;
+import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.PropertyFilter;
-import org.xcmis.spi.PropertyType;
-import org.xcmis.spi.RelationshipDirection;
+import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.TypeDefinition;
-import org.xcmis.spi.Updatability;
 import org.xcmis.spi.UpdateConflictException;
-import org.xcmis.spi.Permission.BasicPermissions;
-import org.xcmis.spi.data.Document;
-import org.xcmis.spi.data.Folder;
-import org.xcmis.spi.data.ObjectData;
-import org.xcmis.spi.data.Policy;
-import org.xcmis.spi.data.Relationship;
-import org.xcmis.spi.impl.AccessControlEntryImpl;
-import org.xcmis.spi.impl.BaseItemsIterator;
-import org.xcmis.spi.impl.CmisVisitor;
-import org.xcmis.spi.object.Property;
-import org.xcmis.spi.object.impl.BooleanProperty;
-import org.xcmis.spi.object.impl.DateTimeProperty;
-import org.xcmis.spi.object.impl.DecimalProperty;
-import org.xcmis.spi.object.impl.HtmlProperty;
-import org.xcmis.spi.object.impl.IdProperty;
-import org.xcmis.spi.object.impl.IntegerProperty;
-import org.xcmis.spi.object.impl.StringProperty;
-import org.xcmis.spi.object.impl.UriProperty;
+import org.xcmis.spi.model.AccessControlEntry;
+import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.PropertyDefinition;
+import org.xcmis.spi.model.PropertyType;
+import org.xcmis.spi.model.RelationshipDirection;
+import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.model.Updatability;
+import org.xcmis.spi.model.Permission.BasicPermissions;
+import org.xcmis.spi.model.impl.BooleanProperty;
+import org.xcmis.spi.model.impl.DateTimeProperty;
+import org.xcmis.spi.model.impl.DecimalProperty;
+import org.xcmis.spi.model.impl.HtmlProperty;
+import org.xcmis.spi.model.impl.IdProperty;
+import org.xcmis.spi.model.impl.IntegerProperty;
+import org.xcmis.spi.model.impl.StringProperty;
+import org.xcmis.spi.model.impl.UriProperty;
 import org.xcmis.spi.utils.CmisUtils;
 
 import java.io.IOException;
@@ -76,6 +76,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -116,7 +117,7 @@ abstract class BaseObjectData implements ObjectData
     * Temporary storage for policies applied to object. For newly created all
     * policies will be stored in here before calling {@link #save()}.
     */
-   protected Set<Policy> policies;
+   protected Set<PolicyData> policies;
 
    /**
     * Temporary storage for ACL applied to object. For newly created all ACL
@@ -127,7 +128,7 @@ abstract class BaseObjectData implements ObjectData
    /**
     * Parent folder id for newly created fileable objects.
     */
-   protected FolderImpl parent;
+   protected FolderDataImpl parent;
 
    /**
     * Back-end JCR node, it is <code>null</code> for newly created object.
@@ -141,6 +142,8 @@ abstract class BaseObjectData implements ObjectData
     */
    protected String name;
 
+   protected final IndexListener indexListener;
+
    /**
     * Create new unsaved instance of CMIS object. This object should be saved,
     * {@link #save()}.
@@ -149,10 +152,11 @@ abstract class BaseObjectData implements ObjectData
     * @param parent parent folder
     * @param session JCR session
     */
-   public BaseObjectData(TypeDefinition type, Folder parent, Session session)
+   public BaseObjectData(TypeDefinition type, FolderData parent, Session session, IndexListener indexListener)
    {
       this.type = type;
-      this.parent = (FolderImpl)parent;
+      this.indexListener = indexListener;
+      this.parent = (FolderDataImpl)parent;
       this.session = session;
       this.node = null;
    }
@@ -163,13 +167,18 @@ abstract class BaseObjectData implements ObjectData
     * @param type object's type
     * @param node back-end JCR node
     */
-   public BaseObjectData(TypeDefinition type, Node node)
+   public BaseObjectData(TypeDefinition type, Node node, IndexListener indexListener)
    {
       this.type = type;
       this.node = node;
+      this.indexListener = indexListener;
       try
       {
          this.session = node.getSession();
+         if (!node.isCheckedOut())
+         {
+            node.checkout();
+         }
       }
       catch (RepositoryException re)
       {
@@ -180,7 +189,7 @@ abstract class BaseObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
-   public void accept(CmisVisitor visitor)
+   public void accept(ObjectDataVisitor visitor)
    {
       if (isNew())
       {
@@ -192,7 +201,7 @@ abstract class BaseObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
-   public void applyPolicy(Policy policy) throws ConstraintException
+   public void applyPolicy(PolicyData policy) throws ConstraintException
    {
       if (!type.isControllablePolicy())
       {
@@ -208,7 +217,7 @@ abstract class BaseObjectData implements ObjectData
       {
          if (policies == null)
          {
-            policies = new HashSet<Policy>();
+            policies = new HashSet<PolicyData>();
          }
          policies.add(policy);
       }
@@ -270,7 +279,7 @@ abstract class BaseObjectData implements ObjectData
       {
          return null;
       }
-      return getString(CMIS.CHANGE_TOKEN);
+      return getString(CmisConstants.CHANGE_TOKEN);
    }
 
    /**
@@ -282,7 +291,7 @@ abstract class BaseObjectData implements ObjectData
       {
          return null;
       }
-      return getString(CMIS.CREATED_BY);
+      return getString(CmisConstants.CREATED_BY);
    }
 
    /**
@@ -294,7 +303,7 @@ abstract class BaseObjectData implements ObjectData
       {
          return null;
       }
-      return getDate(CMIS.CREATION_DATE);
+      return getDate(CmisConstants.CREATION_DATE);
    }
 
    /**
@@ -306,7 +315,7 @@ abstract class BaseObjectData implements ObjectData
       {
          return null;
       }
-      return getDate(CMIS.LAST_MODIFICATION_DATE);
+      return getDate(CmisConstants.LAST_MODIFICATION_DATE);
    }
 
    /**
@@ -318,7 +327,7 @@ abstract class BaseObjectData implements ObjectData
       {
          return null;
       }
-      return getString(CMIS.LAST_MODIFIED_BY);
+      return getString(CmisConstants.LAST_MODIFIED_BY);
    }
 
    /**
@@ -364,7 +373,7 @@ abstract class BaseObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
-   public Folder getParent() throws ConstraintException
+   public FolderData getParent() throws ConstraintException
    {
       if (isNew())
       {
@@ -378,7 +387,7 @@ abstract class BaseObjectData implements ObjectData
             throw new ConstraintException("Unable get parent of root folder.");
          }
 
-         Collection<Folder> parents = getParents();
+         Collection<FolderData> parents = getParents();
          if (parents.size() > 1)
          {
             throw new ConstraintException("Object has more then one parent.");
@@ -401,13 +410,13 @@ abstract class BaseObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
-   public Collection<Folder> getParents()
+   public Collection<FolderData> getParents()
    {
       if (isNew())
       {
          if (parent != null)
          {
-            List<Folder> parents = new ArrayList<Folder>(1);
+            List<FolderData> parents = new ArrayList<FolderData>(1);
             parents.add(parent);
             return parents;
          }
@@ -422,20 +431,22 @@ abstract class BaseObjectData implements ObjectData
             return Collections.emptyList();
          }
 
-         Set<Folder> parents = new HashSet<Folder>();
+         Set<FolderData> parents = new HashSet<FolderData>();
          for (PropertyIterator iterator = node.getReferences(); iterator.hasNext();)
          {
             Node link = iterator.nextProperty().getParent();
             if (link.isNodeType("nt:linkedFile"))
             {
                Node parent = link.getParent();
-               parents.add(new FolderImpl(JcrTypeHelper.getTypeDefinition(parent.getPrimaryNodeType(), true), parent));
+               parents.add(new FolderDataImpl(JcrTypeHelper.getTypeDefinition(parent.getPrimaryNodeType(), true),
+                  parent, indexListener));
             }
          }
          if (!node.getParent().isNodeType("xcmis:unfiledObject"))
          {
             Node parent = node.getParent();
-            parents.add(new FolderImpl(JcrTypeHelper.getTypeDefinition(parent.getPrimaryNodeType(), true), parent));
+            parents.add(new FolderDataImpl(JcrTypeHelper.getTypeDefinition(parent.getPrimaryNodeType(), true), parent,
+               indexListener));
          }
          return parents;
       }
@@ -448,7 +459,7 @@ abstract class BaseObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
-   public Collection<Policy> getPolicies()
+   public Collection<PolicyData> getPolicies()
    {
       if (!type.isControllablePolicy())
       {
@@ -506,7 +517,7 @@ abstract class BaseObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
-   public ItemsIterator<Relationship> getRelationships(RelationshipDirection direction, TypeDefinition type,
+   public ItemsIterator<RelationshipData> getRelationships(RelationshipDirection direction, TypeDefinition type,
       boolean includeSubRelationshipTypes)
    {
       if (isNew())
@@ -517,7 +528,7 @@ abstract class BaseObjectData implements ObjectData
       try
       {
          // Can met one relationship twice if object has relation to it self.
-         Set<Relationship> cache = new HashSet<Relationship>();
+         Set<RelationshipData> cache = new HashSet<RelationshipData>();
 
          for (PropertyIterator iter = node.getReferences(); iter.hasNext();)
          {
@@ -525,10 +536,10 @@ abstract class BaseObjectData implements ObjectData
 
             String propName = prop.getName();
 
-            if ((direction == RelationshipDirection.EITHER && (propName.equals(CMIS.SOURCE_ID) || propName
-               .equals(CMIS.TARGET_ID))) //
-               || (direction == RelationshipDirection.SOURCE && propName.equals(CMIS.SOURCE_ID)) //
-               || (direction == RelationshipDirection.TARGET && propName.equals(CMIS.TARGET_ID)))
+            if ((direction == RelationshipDirection.EITHER && (propName.equals(CmisConstants.SOURCE_ID) || propName
+               .equals(CmisConstants.TARGET_ID))) //
+               || (direction == RelationshipDirection.SOURCE && propName.equals(CmisConstants.SOURCE_ID)) //
+               || (direction == RelationshipDirection.TARGET && propName.equals(CmisConstants.TARGET_ID)))
             {
 
                Node relNode = prop.getParent();
@@ -538,8 +549,8 @@ abstract class BaseObjectData implements ObjectData
                if (nodeType.getName().equals(type.getLocalName()) //
                   || (includeSubRelationshipTypes && nodeType.isNodeType(type.getLocalName())))
                {
-                  RelationshipImpl relationship =
-                     new RelationshipImpl(JcrTypeHelper.getTypeDefinition(nodeType, true), relNode);
+                  RelationshipDataImpl relationship =
+                     new RelationshipDataImpl(JcrTypeHelper.getTypeDefinition(nodeType, true), relNode, indexListener);
                   boolean added = cache.add(relationship);
                   if (LOG.isDebugEnabled() && added)
                   {
@@ -548,7 +559,7 @@ abstract class BaseObjectData implements ObjectData
                }
             }
          }
-         return new BaseItemsIterator<Relationship>(cache);
+         return new BaseItemsIterator<RelationshipData>(cache);
       }
       catch (RepositoryException re)
       {
@@ -559,7 +570,7 @@ abstract class BaseObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
-   public Map<String, Property<?>> getSubset(PropertyFilter filter)
+   public Map<String, Property<?>> getProperties(PropertyFilter filter)
    {
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       for (PropertyDefinition<?> def : type.getPropertyDefinitions())
@@ -602,7 +613,7 @@ abstract class BaseObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
-   public void removePolicy(Policy policy) throws ConstraintException
+   public void removePolicy(PolicyData policy) throws ConstraintException
    {
       if (!type.isControllablePolicy())
       {
@@ -612,7 +623,14 @@ abstract class BaseObjectData implements ObjectData
       if (isNew())
       {
          // If not saved yet simply remove from temporary storage
-         policies.remove(policy);
+         // TODO override equals & hashCode for CMIS objects classes
+         for (Iterator<PolicyData> policyIterator = policies.iterator(); policyIterator.hasNext();)
+         {
+            if (policyIterator.next().getObjectId().equals(policy.getObjectId()))
+            {
+               policies.remove(policy);
+            }
+         }
       }
       else
       {
@@ -702,7 +720,7 @@ abstract class BaseObjectData implements ObjectData
 
       if (property.getType() != definition.getPropertyType())
       {
-         throw new ConstraintException("Property type is not match.");
+         throw new ConstraintException("Property type is not match. Property id " + property.getId());
       }
 
       if (!definition.isMultivalued() && property.getValues().size() > 1)
@@ -715,11 +733,21 @@ abstract class BaseObjectData implements ObjectData
          throw new ConstraintException("Required property " + property.getId() + " can't be removed.");
       }
 
-      for (Object v : property.getValues())
+      //      for (Object v : property.getValues())
+      //      {
+      //         if (v == null)
+      //         {
+      //            throw new ConstraintException("Null value not allowed. List must not contains null items.");
+      //         }
+      //      }
+
+      // Do not store nulls
+      for (Iterator<?> i = property.getValues().iterator(); i.hasNext();)
       {
+         Object v = i.next();
          if (v == null)
          {
-            throw new ConstraintException("Null value not allowed. List must not contains null items.");
+            i.remove();
          }
       }
 
@@ -728,10 +756,10 @@ abstract class BaseObjectData implements ObjectData
       Updatability updatability = definition.getUpdatability();
       if (updatability == Updatability.READWRITE //
          || (updatability == Updatability.ONCREATE && isNew()) //
-         || (updatability == Updatability.WHENCHECKEDOUT && getBaseType() == BaseType.DOCUMENT && ((Document)this)
+         || (updatability == Updatability.WHENCHECKEDOUT && getBaseType() == BaseType.DOCUMENT && ((DocumentData)this)
             .isPWC()))
       {
-         if (property.getId().equals(CMIS.NAME))
+         if (property.getId().equals(CmisConstants.NAME))
          {
             // Special property for JCR back-end.
             name = (String)property.getValues().get(0);
@@ -953,7 +981,7 @@ abstract class BaseObjectData implements ObjectData
 
          for (String principal : cache.keySet())
          {
-            AccessControlEntryImpl cmisACE = new AccessControlEntryImpl();
+            AccessControlEntry cmisACE = new AccessControlEntry();
             cmisACE.setPrincipal(principal);
 
             Set<String> values = cache.get(principal);
@@ -980,9 +1008,9 @@ abstract class BaseObjectData implements ObjectData
       return Collections.emptyList();
    }
 
-   private Collection<Policy> getAppliedPolicies() throws RepositoryException
+   private Collection<PolicyData> getAppliedPolicies() throws RepositoryException
    {
-      Set<Policy> policies = new HashSet<Policy>();
+      Set<PolicyData> policies = new HashSet<PolicyData>();
 
       for (PropertyIterator iter = node.getProperties(); iter.hasNext();)
       {
@@ -996,7 +1024,8 @@ abstract class BaseObjectData implements ObjectData
                if (pol.getPrimaryNodeType().isNodeType(JcrCMIS.CMIS_NT_POLICY))
                {
                   boolean added =
-                     policies.add(new PolicyImpl(JcrTypeHelper.getTypeDefinition(pol.getPrimaryNodeType(), true), pol));
+                     policies.add(new PolicyDataImpl(JcrTypeHelper.getTypeDefinition(pol.getPrimaryNodeType(), true),
+                        pol, indexListener));
 
                   if (LOG.isDebugEnabled() && added)
                   {
@@ -1021,73 +1050,116 @@ abstract class BaseObjectData implements ObjectData
       {
          return properties.get(definition.getId());
       }
-      else
+      try
       {
+         // Check known prepared shortcut for properties.
+         // Some properties may be virtual relating to JCR, it minds they
+         // are not stored in JCR as properties but may be calculated in
+         // some way.
+         if (definition.getId().equals(CmisConstants.OBJECT_ID))
+         {
+            return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(), definition
+               .getDisplayName(), getObjectId());
+         }
+         else if (definition.getId().equals(CmisConstants.OBJECT_TYPE_ID))
+         {
+            return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(), definition
+               .getDisplayName(), getTypeId());
+         }
+         else if (definition.getId().equals(CmisConstants.BASE_TYPE_ID))
+         {
+            return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(), definition
+               .getDisplayName(), getBaseType().value());
+         }
+         else if (definition.getId().equals(CmisConstants.NAME))
+         {
+            return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
+               definition.getDisplayName(), getName());
+         }
+         else if (definition.getId().equals(CmisConstants.CREATION_DATE))
+         {
+            return new DateTimeProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
+               definition.getDisplayName(), getCreationDate());
+         }
+         else if (definition.getId().equals(CmisConstants.PATH))
+         {
+            return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
+               definition.getDisplayName(), ((FolderData)this).getPath());
+         }
+         else if (definition.getId().equals(CmisConstants.PARENT_ID) && node.getDepth() != 0)
+         {
+            return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(), definition
+               .getDisplayName(), getParent().getObjectId());
+         }
+         else if (definition.getId().equals(CmisConstants.CONTENT_STREAM_FILE_NAME))
+         {
+            if (((DocumentData)this).hasContent())
+            {
+               return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
+                  definition.getDisplayName(), getName());
+            }
+         }
+         else if (definition.getId().equals(CmisConstants.CONTENT_STREAM_MIME_TYPE))
+         {
+            if (((DocumentData)this).hasContent())
+            {
+               return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
+                  definition.getDisplayName(), ((DocumentData)this).getContentStreamMimeType());
+            }
+         }
+         else if (definition.getId().equals(CmisConstants.CONTENT_STREAM_LENGTH))
+         {
+            if (((DocumentData)this).hasContent())
+            {
+               return new IntegerProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
+                  definition.getDisplayName(), BigInteger.valueOf(((DocumentDataImpl)this).getContentStreamLength()));
+            }
+         }
+         else if (definition.getId().equals(CmisConstants.VERSION_SERIES_ID))
+         {
+            return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(), definition
+               .getDisplayName(), ((DocumentData)this).getVersionSeriesId());
+         }
+         else if (definition.getId().equals(CmisConstants.VERSION_LABEL))
+         {
+            return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
+               definition.getDisplayName(), ((DocumentData)this).getVersionLabel());
+         }
+
          try
          {
-            try
-            {
-               javax.jcr.Property jcrProperty = node.getProperty(definition.getLocalName());
+            javax.jcr.Property jcrProperty = node.getProperty(definition.getId());
+            //            javax.jcr.Property jcrProperty = node.getProperty(definition.getLocalName());
 
-               return createProperty(definition, //
-                  definition.isMultivalued() ? jcrProperty.getValues() : new Value[]{jcrProperty.getValue()});
-            }
-            catch (PathNotFoundException pnf)
-            {
-               if (LOG.isDebugEnabled())
-               {
-                  LOG.debug("Property " + definition.getId() + " is not set.");
-               }
-
-               if (definition.getId().equals(CMIS.OBJECT_ID))
-               {
-                  return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
-                     definition.getDisplayName(), getObjectId());
-               }
-               else if (definition.getId().equals(CMIS.NAME))
-               {
-                  return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
-                     definition.getDisplayName(), getName());
-               }
-               else if (definition.getId().equals(CMIS.PATH))
-               {
-                  return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
-                     definition.getDisplayName(), node.getPath());
-               }
-               else if (definition.getId().equals(CMIS.PARENT_ID) && node.getDepth() != 0)
-               {
-                  return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
-                     definition.getDisplayName(), ((ExtendedNode)node.getParent()).getIdentifier());
-               }
-               else if (definition.getId().equals(CMIS.CONTENT_STREAM_FILE_NAME))
-               {
-                  if (((Document)this).hasContent())
-                  {
-                     return new StringProperty(definition.getId(), definition.getQueryName(),
-                        definition.getLocalName(), definition.getDisplayName(), getName());
-                  }
-               }
-
-               // TODO : need more virtual properties ??
-
-               // Property is valid but not set in back-end.
-               // Return property in 'value not set' state.
-               return createProperty(definition, new Value[0]);
-            }
+            return createProperty(definition, //
+               definition.isMultivalued() ? jcrProperty.getValues() : new Value[]{jcrProperty.getValue()});
          }
-         catch (RepositoryException re)
+         catch (PathNotFoundException pnf)
          {
-            throw new CmisRuntimeException("Unable get property " + definition.getId() + ". " + re.getMessage(), re);
+            if (LOG.isDebugEnabled())
+            {
+               LOG.debug("Property " + definition.getId() + " is not set.");
+            }
+
+            // TODO : need more virtual properties ??
+
+            // Property is valid but not set in back-end.
+            // Return property in 'value not set' state.
+            return createProperty(definition, new Value[0]);
          }
+      }
+      catch (RepositoryException re)
+      {
+         throw new CmisRuntimeException("Unable get property " + definition.getId() + ". " + re.getMessage(), re);
       }
    }
 
-   protected void applyPolicy(Node data, Policy policy) throws RepositoryException
+   protected void applyPolicy(Node data, PolicyData policy) throws RepositoryException
    {
       String policyId = policy.getObjectId();
       if (!data.hasProperty(policyId))
       {
-         data.setProperty(policyId, ((PolicyImpl)policy).getNode());
+         data.setProperty(policyId, ((PolicyDataImpl)policy).getNode());
       }
    }
 
@@ -1100,7 +1172,7 @@ abstract class BaseObjectData implements ObjectData
     */
    protected abstract void create() throws StorageException, NameConstraintViolationException;
 
-   // ------- helpers
+   // Helpers for internal usage ONLY. There is no validation for property type.
 
    protected Boolean getBoolean(String id)
    {
@@ -1115,7 +1187,7 @@ abstract class BaseObjectData implements ObjectData
       }
       catch (PathNotFoundException pe)
       {
-         // does not exists
+         // does not exist
          return null;
       }
       catch (RepositoryException re)
@@ -1143,7 +1215,7 @@ abstract class BaseObjectData implements ObjectData
       }
       catch (PathNotFoundException pe)
       {
-         // does not exists
+         // does not exist
          return null;
       }
       catch (RepositoryException re)
@@ -1165,7 +1237,7 @@ abstract class BaseObjectData implements ObjectData
       }
       catch (PathNotFoundException pe)
       {
-         // does not exists
+         // does not exist
          return null;
       }
       catch (RepositoryException re)
@@ -1193,7 +1265,7 @@ abstract class BaseObjectData implements ObjectData
       }
       catch (PathNotFoundException pe)
       {
-         // does not exists
+         // does not exist
          return null;
       }
       catch (RepositoryException re)
@@ -1215,7 +1287,7 @@ abstract class BaseObjectData implements ObjectData
       }
       catch (PathNotFoundException pe)
       {
-         // does not exists
+         // does not exist
          return null;
       }
       catch (RepositoryException re)
@@ -1243,7 +1315,7 @@ abstract class BaseObjectData implements ObjectData
       }
       catch (PathNotFoundException pe)
       {
-         // does not exists
+         // does not exist
          return null;
       }
       catch (RepositoryException re)
@@ -1265,7 +1337,7 @@ abstract class BaseObjectData implements ObjectData
       }
       catch (PathNotFoundException pe)
       {
-         // does not exists
+         // does not exist
          return null;
       }
       catch (RepositoryException re)
@@ -1293,7 +1365,7 @@ abstract class BaseObjectData implements ObjectData
       }
       catch (PathNotFoundException pe)
       {
-         // does not exists
+         // does not exist
          return null;
       }
       catch (RepositoryException re)
@@ -1315,7 +1387,7 @@ abstract class BaseObjectData implements ObjectData
       }
       catch (PathNotFoundException pe)
       {
-         // does not exists
+         // does not exist
          return null;
       }
       catch (RepositoryException re)
@@ -1343,7 +1415,7 @@ abstract class BaseObjectData implements ObjectData
       }
       catch (PathNotFoundException pe)
       {
-         // does not exists
+         // does not exist
          return null;
       }
       catch (RepositoryException re)
@@ -1363,6 +1435,7 @@ abstract class BaseObjectData implements ObjectData
 
       // Not merge ACL overwrite it.
       extNode.clearACL();
+
       if (aces != null && aces.size() > 0)
       {
          extNode.setPermissions(createPermissionMap(aces));
@@ -1380,16 +1453,19 @@ abstract class BaseObjectData implements ObjectData
 
       try
       {
+         // TODO : do not check twice
+         boolean multivalued = type.getPropertyDefinition(property.getId()).isMultivalued();
+
          if (property.getType() == PropertyType.BOOLEAN)
          {
             List<Boolean> booleans = (List<Boolean>)property.getValues();
             if (booleans.size() == 0)
             {
-               data.setProperty(property.getLocalName(), (Boolean)null);
+               data.setProperty(/*property.getLocalName()*/property.getId(), (Value)null);
             }
-            else if (booleans.size() == 1)
+            else if (/*booleans.size() == 1 && */!multivalued)
             {
-               data.setProperty(property.getLocalName(), booleans.get(0));
+               data.setProperty(/*property.getLocalName()*/property.getId(), booleans.get(0));
             }
             else
             {
@@ -1400,7 +1476,7 @@ abstract class BaseObjectData implements ObjectData
                   jcrValue[i] = new BooleanValue(booleans.get(i));
                }
 
-               data.setProperty(property.getLocalName(), jcrValue);
+               data.setProperty(/*property.getLocalName()*/property.getId(), jcrValue);
             }
          }
          else if (property.getType() == PropertyType.DATETIME)
@@ -1408,11 +1484,11 @@ abstract class BaseObjectData implements ObjectData
             List<Calendar> datetime = (List<Calendar>)property.getValues();
             if (datetime.size() == 0)
             {
-               data.setProperty(property.getLocalName(), (Calendar)null);
+               data.setProperty(/*property.getLocalName()*/property.getId(), (Value)null);
             }
-            else if (datetime.size() == 1)
+            else if (/*datetime.size() == 1*/!multivalued)
             {
-               data.setProperty(property.getLocalName(), datetime.get(0));
+               data.setProperty(/*property.getLocalName()*/property.getId(), datetime.get(0));
             }
             else
             {
@@ -1423,7 +1499,7 @@ abstract class BaseObjectData implements ObjectData
                   jcrValue[i] = new DateValue(datetime.get(i));
                }
 
-               data.setProperty(property.getLocalName(), jcrValue);
+               data.setProperty(/*property.getLocalName()*/property.getId(), jcrValue);
             }
          }
          else if (property.getType() == PropertyType.DECIMAL)
@@ -1431,11 +1507,11 @@ abstract class BaseObjectData implements ObjectData
             List<BigDecimal> doubles = (List<BigDecimal>)property.getValues();
             if (doubles.size() == 0)
             {
-               data.setProperty(property.getLocalName(), (Double)null);
+               data.setProperty(/*property.getLocalName()*/property.getId(), (Value)null);
             }
-            else if (doubles.size() == 1)
+            else if (/*doubles.size() == 1*/!multivalued)
             {
-               data.setProperty(property.getLocalName(), doubles.get(0).doubleValue());
+               data.setProperty(/*property.getLocalName()*/property.getId(), doubles.get(0).doubleValue());
             }
             else
             {
@@ -1446,7 +1522,7 @@ abstract class BaseObjectData implements ObjectData
                   jcrValue[i] = new DoubleValue(doubles.get(i).doubleValue());
                }
 
-               data.setProperty(property.getLocalName(), jcrValue);
+               data.setProperty(/*property.getLocalName()*/property.getId(), jcrValue);
             }
          }
          else if (property.getType() == PropertyType.INTEGER)
@@ -1454,11 +1530,11 @@ abstract class BaseObjectData implements ObjectData
             List<BigInteger> integers = (List<BigInteger>)property.getValues();
             if (integers.size() == 0)
             {
-               data.setProperty(property.getLocalName(), (Long)null);
+               data.setProperty(/*property.getLocalName()*/property.getId(), (Value)null);
             }
-            else if (integers.size() == 1)
+            else if (/*integers.size() == 1*/!multivalued)
             {
-               data.setProperty(property.getLocalName(), integers.get(0).longValue());
+               data.setProperty(/*property.getLocalName()*/property.getId(), integers.get(0).longValue());
             }
             else
             {
@@ -1469,7 +1545,7 @@ abstract class BaseObjectData implements ObjectData
                   jcrValue[i] = new LongValue(integers.get(i).longValue());
                }
 
-               data.setProperty(property.getLocalName(), jcrValue);
+               data.setProperty(/*property.getLocalName()*/property.getId(), jcrValue);
             }
          }
          /*
@@ -1484,11 +1560,11 @@ abstract class BaseObjectData implements ObjectData
             List<String> text = (List<String>)property.getValues();
             if (text.size() == 0)
             {
-               data.setProperty(property.getLocalName(), (String)null);
+               data.setProperty(/*property.getLocalName()*/property.getId(), (Value)null);
             }
-            else if (text.size() == 1)
+            else if (/*text.size() == 1*/!multivalued)
             {
-               data.setProperty(property.getLocalName(), text.get(0));
+               data.setProperty(/*property.getLocalName()*/property.getId(), text.get(0));
             }
             else
             {
@@ -1499,7 +1575,7 @@ abstract class BaseObjectData implements ObjectData
                   jcrValue[i] = new StringValue(text.get(i));
                }
 
-               data.setProperty(property.getLocalName(), jcrValue);
+               data.setProperty(/*property.getLocalName()*/property.getId(), jcrValue);
             }
          }
          else if (property.getType() == PropertyType.URI)
@@ -1507,11 +1583,11 @@ abstract class BaseObjectData implements ObjectData
             List<URI> uris = (List<URI>)property.getValues();
             if (uris.size() == 0)
             {
-               data.setProperty(property.getLocalName(), (String)null);
+               data.setProperty(/*property.getLocalName()*/property.getId(), (Value)null);
             }
-            else if (uris.size() == 1)
+            else if (/*uris.size() == 1*/!multivalued)
             {
-               data.setProperty(property.getLocalName(), uris.get(0).toString());
+               data.setProperty(/*property.getLocalName()*/property.getId(), uris.get(0).toString());
             }
             else
             {
@@ -1522,7 +1598,7 @@ abstract class BaseObjectData implements ObjectData
                   jcrValue[i] = new StringValue(uris.get(i).toString());
                }
 
-               data.setProperty(property.getLocalName(), jcrValue);
+               data.setProperty(/*property.getLocalName()*/property.getId(), jcrValue);
             }
          }
       }
@@ -1545,7 +1621,15 @@ abstract class BaseObjectData implements ObjectData
 
       try
       {
-         node.remove();
+         if (getBaseType() == BaseType.DOCUMENT && getParents().size() == 0)
+         {
+            // unfiled document
+            node.getParent().remove();
+         }
+         else
+         {
+            node.remove();
+         }
          session.save();
       }
       catch (javax.jcr.ReferentialIntegrityException rie)
@@ -1600,12 +1684,9 @@ abstract class BaseObjectData implements ObjectData
                node = (Node)session.getItem(destPath);
             }
 
-            node.setProperty(CMIS.LAST_MODIFICATION_DATE,//
-               Calendar.getInstance());
-            node.setProperty(CMIS.LAST_MODIFIED_BY, //
-               node.getSession().getUserID());
-            node.setProperty(CMIS.CHANGE_TOKEN, //
-               IdGenerator.generate());
+            node.setProperty(CmisConstants.LAST_MODIFICATION_DATE, Calendar.getInstance());
+            node.setProperty(CmisConstants.LAST_MODIFIED_BY, node.getSession().getUserID());
+            node.setProperty(CmisConstants.CHANGE_TOKEN, IdGenerator.generate());
 
             session.save();
          }
@@ -1647,8 +1728,7 @@ abstract class BaseObjectData implements ObjectData
             }
          }
 
-         Node unfiledStore =
-            (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_UNFILED);
+         Node unfiledStore = (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_UNFILED);
          Node unfiled = unfiledStore.addNode(getObjectId(), "xcmis:unfiledObject");
 
          String destPath = unfiled.getPath() + "/" + node.getName();

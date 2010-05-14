@@ -17,7 +17,7 @@ For assembly "xCMIS" or "xCMIS Demo" with Tomcat server application:
      xcmis.bat run
    * On Unix/linux/cygwin/MacOSX
      Open a terminal and type the command:
-     ./xcmis run
+     ./xcmis.sh run
      You may need to change the permission of all *.sh files in the tomcat/bin dir by using: chmod +x *.sh 
    Available services URLs:
    * Home page at the URL "http://localhost:8080/xcmis"
@@ -39,7 +39,7 @@ For assembly "xCMIS" or "xCMIS Demo" with Tomcat server application:
      xcmis.bat run
    * On Unix/linux/cygwin/MacOSX
      Open a terminal and type the command:
-     ./xcmis run
+     ./xcmis.sh run
      You may need to change the permission of all *.sh files in the tomcat/bin dir by using: chmod +x *.sh 
    Available services URLs:
    * Home page at the URL "http://localhost:8080/xcmis"

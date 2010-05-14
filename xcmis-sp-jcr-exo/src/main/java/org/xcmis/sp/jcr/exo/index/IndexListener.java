@@ -19,6 +19,7 @@
 
 package org.xcmis.sp.jcr.exo.index;
 
+import org.apache.commons.lang.Validate;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.search.SearchService;
@@ -29,20 +30,20 @@ import org.xcmis.search.content.Property.BinaryValue;
 import org.xcmis.search.content.Property.ContentValue;
 import org.xcmis.search.content.Property.SimpleValue;
 import org.xcmis.search.value.PropertyType;
+import org.xcmis.spi.CmisConstants;
+import org.xcmis.spi.ContentStream;
+import org.xcmis.spi.DocumentData;
+import org.xcmis.spi.FolderData;
+import org.xcmis.spi.ObjectData;
+import org.xcmis.spi.PolicyData;
+import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.Storage;
-import org.xcmis.spi.data.ContentStream;
-import org.xcmis.spi.data.Document;
-import org.xcmis.spi.data.Folder;
-import org.xcmis.spi.data.ObjectData;
-import org.xcmis.spi.data.Policy;
-import org.xcmis.spi.data.Relationship;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -61,7 +62,7 @@ public class IndexListener
    private final SearchService searchService;
 
    /**
-    * Content storage
+    * Content storage.
     */
    private final Storage storage;
 
@@ -69,6 +70,7 @@ public class IndexListener
 
    public IndexListener(Storage storage, SearchService searchService)
    {
+      Validate.notNull(searchService, "The searchService argument may not be null");
       this.storage = storage;
       this.searchService = searchService;
       this.contentEntryAdapter = new ContentEntryAdapter();
@@ -76,14 +78,10 @@ public class IndexListener
 
    public void created(ObjectData object)
    {
-
       //LOG.info(object.getObjectId() + " " + object.getParent().getPath() + "/" + object.getName());
-      List<ContentEntry> contentEntries = new ArrayList<ContentEntry>(1);
       try
       {
-
-         contentEntries.add(contentEntryAdapter.createEntry(object));
-         searchService.update(contentEntries, Collections.EMPTY_SET);
+         searchService.update(contentEntryAdapter.createEntry(object), null);
       }
       catch (IndexModificationException e)
       {
@@ -97,25 +95,23 @@ public class IndexListener
 
    public void removed(Set<String> removed)
    {
+      //LOG.info(removed);
       try
       {
          searchService.update(Collections.EMPTY_LIST, removed);
       }
       catch (IndexModificationException e)
       {
-         LOG.error(e.getLocalizedMessage(), e);
+         LOG.error(e.getLocalizedMessage());
       }
    }
 
    public void updated(ObjectData object)
    {
-      Set<String> removed = new HashSet<String>();
-      removed.add(object.getObjectId());
-      List<ContentEntry> contentEntries = new ArrayList<ContentEntry>(1);
+      //LOG.info(object.getObjectId() + " " + object.getParent().getPath() + "/" + object.getName());
       try
       {
-         contentEntries.add(contentEntryAdapter.createEntry(object));
-         searchService.update(contentEntries, removed);
+         searchService.update(contentEntryAdapter.createEntry(object), object.getObjectId());
       }
       catch (IndexModificationException e)
       {
@@ -128,40 +124,45 @@ public class IndexListener
    }
 
    /**
-    * Adapt changes produced by CMIS SPI to {@link ContentEntry} 
-    * acceptable for {@link SearchService} 
+    * Adapt changes produced by CMIS SPI to {@link ContentEntry} acceptable for.
+    * {@link SearchService}
     */
    public static class ContentEntryAdapter
    {
       /**
        * Convert {@link ObjectData} to {@link ContentEntry}.
-       * @param objectData
-       * @return
-       * @throws IOException 
+       *
+       * @param objectData ObjectData
+       * @return contentEntry ContentEntry
+       * @throws IOException
        */
       public ContentEntry createEntry(ObjectData objectData) throws IOException
       {
-         switch (objectData.getBaseType())
+         if (objectData != null)
          {
-            case DOCUMENT :
-               return createFromDocument((Document)objectData);
-            case FOLDER :
-               return createFromFolder((Folder)objectData);
-            case POLICY :
-               return createFromPolicy((Policy)objectData);
-            case RELATIONSHIP :
-               return createFromRelationship((Relationship)objectData);
-            default :
-               throw new UnsupportedOperationException(objectData.getBaseType().toString()
-                  + " is not supported for indexing");
+            switch (objectData.getBaseType())
+            {
+               case DOCUMENT :
+                  return createFromDocument((DocumentData)objectData);
+               case FOLDER :
+                  return createFromFolder((FolderData)objectData);
+               case POLICY :
+                  return createFromPolicy((PolicyData)objectData);
+               case RELATIONSHIP :
+                  return createFromRelationship((RelationshipData)objectData);
+               default :
+                  throw new UnsupportedOperationException(objectData.getBaseType().toString()
+                     + " is not supported for indexing");
+            }
          }
+         return null;
       }
 
       /**
        * @param objectData
-       * @return
+       * @return ContentEntry ContentEntry;
        */
-      private ContentEntry createFromRelationship(Relationship objectData)
+      private ContentEntry createFromRelationship(RelationshipData objectData)
       {
          MockContentEntry mockEntry = fillCommonInformation(objectData);
          //mark parent of root as parent
@@ -171,10 +172,10 @@ public class IndexListener
       }
 
       /**
-       * @param objectData
-       * @return
+       * @param objectData PolicyData
+       * @return contentEntry ContentEntry
        */
-      private ContentEntry createFromPolicy(Policy objectData)
+      private ContentEntry createFromPolicy(PolicyData objectData)
       {
          MockContentEntry mockEntry = fillCommonInformation(objectData);
          //mark parent of root as parent
@@ -189,12 +190,12 @@ public class IndexListener
          contentEntry.tableNames.add(objectData.getTypeDefinition().getQueryName());
          contentEntry.identifier = objectData.getObjectId();
          contentEntry.name = objectData.getName();
-         for (Folder folder : objectData.getParents())
+         for (FolderData folder : objectData.getParents())
          {
             contentEntry.parentIdentifiers.add(folder.getObjectId());
          }
 
-         for (org.xcmis.spi.object.Property<?> property : objectData.getProperties().values())
+         for (org.xcmis.spi.model.Property<?> property : objectData.getProperties().values())
          {
             if (property.getValues().size() > 0)
             {
@@ -204,7 +205,7 @@ public class IndexListener
          return contentEntry;
       }
 
-      private <G> Property<G> convertProperty(org.xcmis.spi.object.Property<G> property)
+      private <G> Property<G> convertProperty(org.xcmis.spi.model.Property<G> property)
       {
          Collection<ContentValue<G>> value = new ArrayList<ContentValue<G>>();
          for (G contentValue : property.getValues())
@@ -216,11 +217,12 @@ public class IndexListener
       }
 
       /**
-       * Convert {@link Folder} to {@link ContentEntry}.
-       * @param objectData
-       * @return
+       * Convert {@link FolderData} to {@link ContentEntry}.
+       *
+       * @param objectData FolderData
+       * @return contentEntry ContentEntry
        */
-      private ContentEntry createFromFolder(Folder objectData)
+      private ContentEntry createFromFolder(FolderData objectData)
       {
          MockContentEntry mockEntry = fillCommonInformation(objectData);
          return new ContentEntry(mockEntry.name, mockEntry.getTableNames(), mockEntry.identifier, mockEntry
@@ -228,19 +230,21 @@ public class IndexListener
       }
 
       /**
-       * Convert {@link Document} to {@link ContentEntry}.
+       * Convert {@link DocumentData} to {@link ContentEntry}.
+       *
        * @param objectData
-       * @return
-       * @throws IOException 
+       * @return contentEntry ContentEntry.
+       * @throws IOException
        */
-      private ContentEntry createFromDocument(Document objectData) throws IOException
+      private ContentEntry createFromDocument(DocumentData objectData) throws IOException
       {
          MockContentEntry mockEntry = fillCommonInformation(objectData);
          ContentStream cs = objectData.getContentStream();
          if (cs != null)
          {
             List<ContentValue<InputStream>> vals = new ArrayList<ContentValue<InputStream>>(1);
-            vals.add(new BinaryValue(cs.getStream(), cs.getMediaType(), null, cs.length()));
+            vals.add(new BinaryValue(cs.getStream(), cs.getMediaType().getBaseType(), cs.getMediaType().getParameter(
+               CmisConstants.CHARSET), cs.length()));
             //TODO add constant for property name content
             mockEntry.properties.add(new Property<InputStream>(PropertyType.BINARY, "content", vals));
          }
@@ -252,7 +256,7 @@ public class IndexListener
    private static class MockContentEntry
    {
       /**
-       *  List of table names which identifies this content
+       * List of table names which identifies this content.
        */
       List<String> tableNames;
 
@@ -262,22 +266,22 @@ public class IndexListener
       String name;
 
       /**
-       * List of parent entry identifiers
+       * List of parent entry identifiers.
        */
       List<String> parentIdentifiers;
 
       /**
-       *  Entry identifier.
+       * Entry identifier.
        */
       String identifier;
 
       /**
-       * List of entry properties
+       * List of entry properties.
        */
       List<Property> properties;
 
       /**
-       * 
+       *
        */
       MockContentEntry()
       {

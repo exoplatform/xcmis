@@ -37,8 +37,8 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.ProviderImpl;
+import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
-import org.xcmis.spi.StorageProvider;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -57,15 +57,16 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
    private static final Log LOG = ExoLogger.getLogger(AbstractCmisCollection.class);
 
    /** The Storage provider */
-   protected StorageProvider storageProvider;
+   //   protected StorageProvider storageProvider;
 
    /**
     * Instantiates a new abstract cmis collection.
+    *
     * @param storageProvider TODO
     */
-   public AbstractCmisCollection(StorageProvider storageProvider)
+   public AbstractCmisCollection(/*StorageProvider storageProvider*/)
    {
-      this.storageProvider = storageProvider;
+      //      this.storageProvider = storageProvider;
    }
 
    /**
@@ -117,7 +118,7 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
     * @param maxItems max items in each response
     * @param skipCount number of skipped results from the begin of set
     * @param total total number items in result set. If total number is unknown
-    *           then this parameter must be set as -1.
+    *        then this parameter must be set as -1.
     * @param hasMore true if has more items in result set false otherwise
     * @param request request context
     */
@@ -215,10 +216,10 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
 
    /**
     * Creates the error response.
-    * 
+    *
     * @param msg the msg
     * @param status the status
-    * 
+    *
     * @return the response context
     */
    protected ResponseContext createErrorResponse(String msg, int status)
@@ -229,10 +230,10 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
 
    /**
     * Creates the error response.
-    * 
+    *
     * @param t the t
     * @param status the status
-    * 
+    *
     * @return the response context
     */
    protected ResponseContext createErrorResponse(Throwable t, int status)
@@ -244,7 +245,7 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
 
    /**
     * Create link to object type description.
-    * 
+    *
     * @param id object type id
     * @param request request context
     * @return link to AtomPub Document that describes object type
@@ -261,6 +262,7 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
 
    /**
     * Get id of CMIS repository.
+    *
     * @param request RequestContext
     * @return repositoryId string
     */
@@ -272,7 +274,7 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
    /**
     * Create link to AtomPub Service Document contains the set of repositories
     * that are available.
-    * 
+    *
     * @param request the request context
     * @return link to AtomPub Service Document
     */
@@ -286,28 +288,27 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
 
    /**
     * To get Connection for provided repository Id within request.
-    * 
+    *
     * @param request the request context
     * @return the Connection to CMIS storage
     */
    protected Connection getConnection(RequestContext request)
    {
-      return storageProvider.getConnection(getRepositoryId(request), null);
+      //      return storageProvider.getConnection(getRepositoryId(request));
+      return CmisRegistry.getInstance().getConnection(getRepositoryId(request));
    }
 
    protected boolean getBooleanParameter(RequestContext request, String name, boolean defaultValue)
    {
-      Boolean result;
       String param = request.getParameter(name);
       if (param != null && param.length() > 0)
       {
-         result = Boolean.parseBoolean(param);
+         return Boolean.parseBoolean(param);
       }
       else
       {
-         result = defaultValue;
+         return defaultValue;
       }
-      return result;
    }
 
    protected Integer getIntegerParameter(RequestContext request, String name, Integer defaultValue)

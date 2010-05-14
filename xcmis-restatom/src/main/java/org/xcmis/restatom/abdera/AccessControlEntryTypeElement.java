@@ -24,8 +24,7 @@ import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.apache.abdera.parser.stax.FOMExtensibleElement;
 import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.AccessControlEntry;
-import org.xcmis.spi.impl.AccessControlEntryImpl;
+import org.xcmis.spi.model.AccessControlEntry;
 
 import java.util.List;
 
@@ -40,7 +39,7 @@ public class AccessControlEntryTypeElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new access control entry type element.
-    * 
+    *
     * @param internal the internal
     */
    public AccessControlEntryTypeElement(Element internal)
@@ -50,7 +49,7 @@ public class AccessControlEntryTypeElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new access control entry type element.
-    * 
+    *
     * @param factory the factory
     * @param qname the qname
     */
@@ -61,8 +60,8 @@ public class AccessControlEntryTypeElement extends ExtensibleElementWrapper
 
    /**
     * Builds the element.
-    * 
-    * @param value the AccessControlEntry
+    *
+    * @param accessControlEntry the AccessControlEntry
     */
    public void build(AccessControlEntry accessControlEntry)
    {
@@ -93,13 +92,13 @@ public class AccessControlEntryTypeElement extends ExtensibleElementWrapper
 
    /**
     * Gets the AccessControlEntry.
-    * 
+    *
     * @return AccessControlEntry
     */
    public AccessControlEntry getACE()
    {
 
-      AccessControlEntryImpl accessControlEntry = new AccessControlEntryImpl();
+      AccessControlEntry accessControlEntry = new AccessControlEntry();
 
       // PRINCIPAL
       FOMExtensibleElement principalElement = getExtension(AtomCMIS.PRINCIPAL);

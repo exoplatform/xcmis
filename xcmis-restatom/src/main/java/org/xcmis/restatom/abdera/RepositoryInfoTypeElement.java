@@ -23,8 +23,8 @@ import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.BaseType;
-import org.xcmis.spi.RepositoryInfo;
+import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.RepositoryInfo;
 
 import java.util.Collection;
 
@@ -39,7 +39,7 @@ public class RepositoryInfoTypeElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new repository info type element.
-    * 
+    *
     * @param internal the internal
     */
    public RepositoryInfoTypeElement(Element internal)
@@ -49,7 +49,7 @@ public class RepositoryInfoTypeElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new repository info type element.
-    * 
+    *
     * @param factory the factory
     * @param qname the qname
     */
@@ -60,7 +60,7 @@ public class RepositoryInfoTypeElement extends ExtensibleElementWrapper
 
    /**
     * Builds the element.
-    * 
+    *
     * @param repoInfo the repo info
     */
    public void build(RepositoryInfo repoInfo)

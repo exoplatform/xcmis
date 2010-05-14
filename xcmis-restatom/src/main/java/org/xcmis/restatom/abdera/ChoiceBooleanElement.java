@@ -23,8 +23,7 @@ import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.Choice;
-import org.xcmis.spi.impl.ChoiceImpl;
+import org.xcmis.spi.model.Choice;
 
 import java.util.List;
 
@@ -41,7 +40,7 @@ public class ChoiceBooleanElement extends ChoiceElement<Choice<Boolean>>
 
    /**
     * Instantiates a new choice boolean element.
-    * 
+    *
     * @param internal the internal
     */
    public ChoiceBooleanElement(Element internal)
@@ -51,7 +50,7 @@ public class ChoiceBooleanElement extends ChoiceElement<Choice<Boolean>>
 
    /**
     * Instantiates a new choice boolean element.
-    * 
+    *
     * @param factory the factory
     * @param qname the qname
     */
@@ -63,6 +62,7 @@ public class ChoiceBooleanElement extends ChoiceElement<Choice<Boolean>>
    /**
     * {@inheritDoc}
     */
+   @Override
    public void build(Choice<Boolean> choice)
    {
       if (choice != null)
@@ -74,7 +74,9 @@ public class ChoiceBooleanElement extends ChoiceElement<Choice<Boolean>>
             for (Boolean v : choice.getValues())
             {
                if (v != null)
+               {
                   addSimpleExtension(AtomCMIS.VALUE, v.toString());
+               }
             }
          }
          // CHOICE
@@ -89,9 +91,10 @@ public class ChoiceBooleanElement extends ChoiceElement<Choice<Boolean>>
       }
    }
 
+   @Override
    public Choice<Boolean> getChoice()
    {
-      ChoiceImpl<Boolean> result = new ChoiceImpl<Boolean>();
+      Choice<Boolean> result = new Choice<Boolean>();
       // VALUES
       List<Element> values = getExtensions(AtomCMIS.VALUE);
       if (values != null && values.size() > 0)
@@ -108,10 +111,12 @@ public class ChoiceBooleanElement extends ChoiceElement<Choice<Boolean>>
       // CHOICE
       List<ExtensibleElementWrapper> choices = getExtensions(AtomCMIS.CHOICE);
       if (choices != null && choices.size() > 0)
+      {
          for (ExtensibleElementWrapper choiceBooleanElement : choices)
          {
             result.getChoices().add(new ChoiceBooleanElement(choiceBooleanElement).getChoice());
          }
+      }
       return result;
    }
 

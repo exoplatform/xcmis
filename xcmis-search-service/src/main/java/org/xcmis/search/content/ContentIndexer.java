@@ -18,17 +18,15 @@
  */
 package org.xcmis.search.content;
 
-import org.xcmis.search.lucene.index.IndexTransaction;
-
 /**
- * Convert changes of type <b>T<b> to the 
+ * Convert {@link ContentEntry} to the suitable format D for indexing 
  */
 public interface ContentIndexer<D>
 {
    /**
-    * Convert changes to a suitable format for the index
+    * Convert changes to a suitable format for the index.
     * @param changes
     * @return index transaction
     */
-   IndexTransaction<D> convertChanges(Object changes);
+   D createDocument(ContentEntry contentEntry);
 }

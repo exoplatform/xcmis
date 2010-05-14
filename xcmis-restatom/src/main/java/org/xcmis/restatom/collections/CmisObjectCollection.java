@@ -43,45 +43,45 @@ import org.xcmis.restatom.abdera.ContentTypeElement;
 import org.xcmis.restatom.abdera.ObjectTypeElement;
 import org.xcmis.restatom.types.CmisContentType;
 import org.xcmis.restatom.types.EnumReturnVersion;
-import org.xcmis.spi.AccessControlEntry;
-import org.xcmis.spi.BaseType;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.ChangeTokenHolder;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentAlreadyExistsException;
+import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.FilterNotValidException;
-import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.PropertyFilter;
-import org.xcmis.spi.Rendition;
-import org.xcmis.spi.RepositoryCapabilities;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.StreamNotSupportedException;
 import org.xcmis.spi.UpdateConflictException;
-import org.xcmis.spi.data.BaseContentStream;
-import org.xcmis.spi.data.ContentStream;
-import org.xcmis.spi.object.CmisObject;
-import org.xcmis.spi.object.Property;
-import org.xcmis.spi.object.impl.CmisObjectImpl;
-import org.xcmis.spi.object.impl.StringProperty;
+import org.xcmis.spi.model.AccessControlEntry;
+import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.CmisObject;
+import org.xcmis.spi.model.IncludeRelationships;
+import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.Rendition;
+import org.xcmis.spi.model.RepositoryCapabilities;
+import org.xcmis.spi.model.impl.StringProperty;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.security.Principal;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.activation.MimeType;
-import javax.activation.MimeTypeParseException;
+import javax.activation.MimeTypeParameterList;
 import javax.ws.rs.core.HttpHeaders;
 
 /**
@@ -103,11 +103,12 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Instantiates a new cmis object collection.
+    *
     * @param storageProvider TODO
     */
-   public CmisObjectCollection(StorageProvider storageProvider)
+   public CmisObjectCollection(/*StorageProvider storageProvider*/)
    {
-      super(storageProvider);
+      super(/*storageProvider*/);
    }
 
    /**
@@ -181,8 +182,8 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          String objectId = conn.deleteContentStream(getId(request), //
             changeTokenHolder // changeToken
             );
-         CmisObject object = conn.getProperties(objectId, true, CMIS.CHANGE_TOKEN);
-         Property<String> changeToken = (Property<String>)getProperty(object, CMIS.CHANGE_TOKEN);
+         CmisObject object = conn.getProperties(objectId, true, CmisConstants.CHANGE_TOKEN);
+         Property<String> changeToken = (Property<String>)getProperty(object, CmisConstants.CHANGE_TOKEN);
          // TODO : 204, is it correct ? It used by default when delete content of ATOM resource
          ResponseContext response = new EmptyResponseContext(204);
          if (changeToken != null && changeToken.getValues().size() > 0)
@@ -275,6 +276,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    /**
     * {@inheritDoc}
     */
+   @Override
    public String getAuthor(RequestContext request) throws ResponseContextException
    {
       Principal principal = request.getPrincipal();
@@ -322,13 +324,11 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    /**
     * {@inheritDoc}
     */
+   @Override
    public CmisObject getEntry(String id, RequestContext request) throws ResponseContextException
    {
       boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
-      // XXX At the moment get all properties from back-end. We need some of them for build correct feed.
-      // Filter will be applied during build final Atom Document.
-      //      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
-      String propertyFilter = null;
+      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
       boolean includePolicies = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_POLICY_IDS, false);
       boolean includeACL = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ACL, false);
       String renditionFilter = request.getParameter(AtomCMIS.PARAM_RENDITION_FILTER);
@@ -352,7 +352,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          CmisObject object;
          if (id.charAt(0) != '/')
          {
-            // Get by id. 
+            // Get by id.
             object =
                conn.getObject(id, includeAllowableActions, includeRelationships, includePolicies, includeACL, true,
                   propertyFilter, renditionFilter);
@@ -446,6 +446,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    /**
     * {@inheritDoc}
     */
+   @Override
    public String getId(CmisObject object) throws ResponseContextException
    {
       return object.getObjectInfo().getId();
@@ -454,6 +455,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    /**
     * {@inheritDoc}
     */
+   @Override
    public String getId(RequestContext request)
    {
       return request.getTarget().getParameter("objectid");
@@ -469,18 +471,18 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       try
       {
          conn = getConnection(request);
-         // TODO : resolve (optional) offset, length 
+         // TODO : resolve (optional) offset, length
          ContentStream content = conn.getContentStream(//
             //
             getId(request), //
             getStreamId(request), //
-            0, // 
+            0, //
             Long.MAX_VALUE);
          /*         if (content == null)
                      return new EmptyResponseContext(200);
          */
          ResponseContext response = new MediaResponseContext(content.getStream(), 200);
-         response.setContentType(content.getMediaType());
+         response.setContentType(content.getMediaType().toString());
          response.setContentLength(content.length());
          response.setHeader(AtomCMIS.CONTENT_DISPOSITION_HEADER, //
             "attachment; filename=\"" + content.getFileName() + "\"");
@@ -515,6 +517,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    /**
     * {@inheritDoc}
     */
+   @Override
    public String getName(CmisObject object) throws ResponseContextException
    {
       return object.getObjectInfo().getName();
@@ -531,6 +534,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    /**
     * {@inheritDoc}
     */
+   @Override
    public String getTitle(CmisObject object) throws ResponseContextException
    {
       return object.getObjectInfo().getName();
@@ -539,6 +543,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    /**
     * {@inheritDoc}
     */
+   @Override
    public Date getUpdated(CmisObject object) throws ResponseContextException
    {
       return getLastModificationDate(object).getTime();
@@ -566,11 +571,11 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          conn = getConnection(request);
          ObjectTypeElement objectElement = entry.getFirstChild(AtomCMIS.OBJECT);
-         CmisObject object = objectElement != null ? object = objectElement.getObject() : new CmisObjectImpl();
+         CmisObject object = objectElement != null ? object = objectElement.getObject() : new CmisObject();
          updatePropertiesFromEntry(object, entry);
 
          Map<String, Property<?>> properties = object.getProperties();
-         Set<String> policyIds = (Set<String>)object.getPolicyIds();
+         Collection<String> policyIds = object.getPolicyIds();
          List<AccessControlEntry> acl = object.getACL();
          ContentStream contentStream = getContentStream(entry, request);
 
@@ -578,7 +583,8 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          String updatedId = null;
          if (checkin)
          {
-            boolean major = getBooleanParameter(request, AtomCMIS.PARAM_MAJOR, false);
+            // If 'checkin' param is TRUE, execute checkin() service.
+            boolean major = getBooleanParameter(request, AtomCMIS.PARAM_MAJOR, true);
             String checkinComment = request.getParameter(AtomCMIS.PARAM_CHECKIN_COMMENT);
             // TODO : ACEs for removing. Not clear from specification how to
             // pass (obtain) ACEs for adding and removing from one object.
@@ -588,6 +594,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          }
          else
          {
+            // If 'checkin' param is FALSE, execute updateProperties() service.
             // TODO : is correct to use 'if-match' header?
             // Get 'if-match' header as is, according to HTTP specification :
             // http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html#sec13.3.3
@@ -596,18 +603,21 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
             // weak validators or strong validators. Clients MUST NOT use weak
             // validators in other forms of request.
             // ------------------------------------------
-            // Method is PUT - use strong comparison. 
+            // Method is PUT - use strong comparison.
+            CmisObject cmisObject = conn.getProperties(getId(request), true, CmisConstants.BASE_TYPE_ID);
+            BaseType baseType = cmisObject.getObjectInfo().getBaseType();
+
             ChangeTokenHolder changeTokenHolder = new ChangeTokenHolder();
             changeTokenHolder.setValue(request.getHeader(HttpHeaders.IF_MATCH));
             updatedId = conn.updateProperties(getId(request), changeTokenHolder, properties);
-            if (contentStream != null)
+            if (baseType == BaseType.DOCUMENT && contentStream != null)
             {
                updatedId = conn.setContentStream(getId(request), contentStream, changeTokenHolder, true);
             }
 
          }
 
-         CmisObject updated = conn.getProperties(updatedId, true, CMIS.WILDCARD);
+         CmisObject updated = conn.getProperties(updatedId, true, CmisConstants.WILDCARD);
          entry = request.getAbdera().getFactory().newEntry();
          addEntryDetails(request, entry, request.getResolvedUri(), updated);
          return buildGetEntryResponse(request, entry);
@@ -651,13 +661,13 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Put media.
-    * 
+    *
     * @param entryObj the entry obj
     * @param contentType the content type
     * @param slug the slug
     * @param inputStream the input stream
     * @param request the request
-    * 
+    *
     * @throws ResponseContextException the response context exception
     */
    @Override
@@ -668,11 +678,11 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       try
       {
          conn = getConnection(request);
-         ContentStream content = new BaseContentStream(inputStream, null, contentType.getBaseType());
+         ContentStream content = new BaseContentStream(inputStream, null, convertMimeType(contentType));
          // TODO : is correct ?
          ChangeTokenHolder changeTokenHolder = new ChangeTokenHolder();
          changeTokenHolder.setValue(request.getHeader(HttpHeaders.IF_MATCH));
-         boolean overwriteFlag = getBooleanParameter(request, AtomCMIS.PARAM_OVERWRITE_FLAG, false);
+         boolean overwriteFlag = getBooleanParameter(request, AtomCMIS.PARAM_OVERWRITE_FLAG, true);
          conn.setContentStream(getId(request), content, changeTokenHolder, overwriteFlag);
       }
       catch (IOException ioe)
@@ -723,19 +733,16 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       try
       {
          conn = getConnection(request);
-         ContentStream content = new BaseContentStream(request.getInputStream(), //
-            null, //
-            request.getContentType() == null ? "application/octet-stream" : request.getContentType().getBaseType());
+
+         ContentStream content =
+            new BaseContentStream(request.getInputStream(), null, convertMimeType(request.getContentType()));
 
          // TODO : is correct ?
          ChangeTokenHolder changeTokenHolder = new ChangeTokenHolder();
          changeTokenHolder.setValue(request.getHeader(HttpHeaders.IF_MATCH));
-         String overwriteFlagParameter = request.getParameter(AtomCMIS.PARAM_OVERWRITE_FLAG);
-         boolean overwriteFlag =
-            overwriteFlagParameter == null || overwriteFlagParameter.length() == 0 ? true : Boolean
-               .parseBoolean(overwriteFlagParameter);
+         boolean overwriteFlag = getBooleanParameter(request, AtomCMIS.PARAM_OVERWRITE_FLAG, true);
          String updatedId = conn.setContentStream(getId(request), content, changeTokenHolder, overwriteFlag);
-         CmisObject updated = conn.getProperties(updatedId, true, CMIS.CHANGE_TOKEN);
+         CmisObject updated = conn.getProperties(updatedId, true, CmisConstants.CHANGE_TOKEN);
          ResponseContext response = new EmptyResponseContext(201);
          String contentLink = getContentLink(getId(request), request);
          response.setHeader(HttpHeaders.CONTENT_LOCATION, contentLink);
@@ -787,11 +794,11 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Process rendition links.
-    * 
+    *
     * @param entry the entry
     * @param object the object
     * @param request the request
-    * 
+    *
     * @throws ResponseContextException the response context exception
     */
    private void processRenditionLinks(Entry entry, CmisObject object, RequestContext request)
@@ -1000,11 +1007,9 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
       ObjectTypeElement objectElement = new ObjectTypeElement(request.getAbdera().getFactory(), AtomCMIS.OBJECT);
 
-      // Apply property filter for serialized object.
-      String filter = request.getParameter(AtomCMIS.PARAM_FILTER);
       try
       {
-         objectElement.build(object, new PropertyFilter(filter));
+         objectElement.build(object);
       }
       catch (FilterNotValidException fe)
       {
@@ -1013,6 +1018,22 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       entry.addExtension(objectElement);
 
       return self;
+   }
+
+   protected org.xcmis.spi.utils.MimeType convertMimeType(MimeType aMimeType)
+   {
+      if (aMimeType == null)
+      {
+         return new org.xcmis.spi.utils.MimeType();
+      }
+      MimeTypeParameterList aParameters = aMimeType.getParameters();
+      Map<String, String> paremeters = new HashMap<String, String>();
+      for (Enumeration<String> names = aParameters.getNames(); names.hasMoreElements();)
+      {
+         String name = names.nextElement();
+         paremeters.put(name, aParameters.get(name));
+      }
+      return new org.xcmis.spi.utils.MimeType(aMimeType.getPrimaryType(), aMimeType.getSubType(), paremeters);
    }
 
    /**
@@ -1043,7 +1064,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get link to AtomPub Document that describes object's ACL.
-    * 
+    *
     * @param id object id
     * @param request request context
     * @return link to allowable actions document
@@ -1060,7 +1081,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get link to AtomPub Document that describes object's allowable actions.
-    * 
+    *
     * @param id object id
     * @param request request context
     * @return link to allowable actions document
@@ -1077,7 +1098,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get link to AtomPub Document that describes object's versions.
-    * 
+    *
     * @param id objects id
     * @param request request context
     * @return link to AtomPub Document that describes object's versions
@@ -1094,7 +1115,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get object's base type.
-    * 
+    *
     * @param object object
     * @return object's base type
     */
@@ -1105,7 +1126,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get link to express renditions.
-    * 
+    *
     * @param id objects id
     * @param request request context
     * @return link to AtomPub Document that describes object's parent(s)
@@ -1122,7 +1143,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get link to AtomPub document that describes folder's children.
-    * 
+    *
     * @param id folder id
     * @param request request context
     * @return link to AtomPub document that describes folder's children
@@ -1139,7 +1160,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get link to document content.
-    * 
+    *
     * @param id document id
     * @param request request context
     * @return link to document content
@@ -1156,11 +1177,11 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get content stream from entry.
-    * 
+    *
     * @param entry source entry
     * @param request request context
     * @return content stream as <code>ContentStream</code> or null if there is
-    *            no 'content' in entry
+    *         no 'content' in entry
     * @throws IOException if any i/o error occurs
     * @throws ResponseContextException other errors
     */
@@ -1178,7 +1199,8 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          {
             data = Base64.decodeBase64(base64.getBytes());
          }
-         contentStream = new BaseContentStream(data, null, content.getMediatype());
+         contentStream =
+            new BaseContentStream(data, null, org.xcmis.spi.utils.MimeType.fromString(content.getMediatype()));
       }
       else
       {
@@ -1198,7 +1220,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
                else
                {
                   HTTPConnection connection = new HTTPConnection(//
-                     src.getScheme(), // 
+                     src.getScheme(), //
                      src.getHost(), //
                      src.getPort());
                   // Disable user interaction.
@@ -1212,13 +1234,9 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
                      int status = response.getStatusCode();
                      if (200 == status)
                      {
-                        String mediaType = null;
-                        String ct = response.getHeader("Content-Type");
-                        if (ct != null)
-                        {
-                           mediaType = new MimeType(ct).getBaseType();
-                        }
-                        contentStream = new BaseContentStream(response.getInputStream(), null, mediaType);
+                        contentStream =
+                           new BaseContentStream(response.getInputStream(), null, org.xcmis.spi.utils.MimeType
+                              .fromString(response.getHeader("Content-Type")));
                      }
                      else
                      {
@@ -1231,58 +1249,61 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
                   {
                      throw new ResponseContextException(createErrorResponse(ce, 500));
                   }
-                  catch (MimeTypeParseException mte)
-                  {
-                     throw new ResponseContextException(createErrorResponse(mte, 500));
-                  }
                }
             }
             else
             {
                Type contentType = content.getContentType();
-               String mediaType;
+               org.xcmis.spi.utils.MimeType mediaType;
                if (contentType == Type.XML || contentType == Type.XHTML || contentType == Type.HTML
                   || contentType == Type.TEXT)
                {
                   switch (contentType)
                   {
                      case XHTML :
-                        mediaType = "application/xhtml+xml";
+                        mediaType = new org.xcmis.spi.utils.MimeType("application", "xhtml+xml");
                         break;
                      case HTML :
-                        mediaType = "text/html";
+                        mediaType = new org.xcmis.spi.utils.MimeType("text", "html");
                         break;
                      case TEXT :
-                        mediaType = "text/plain";
+                        mediaType = new org.xcmis.spi.utils.MimeType("text", "plain");
                         break;
                      case XML :
-                        mediaType = content.getMimeType().getBaseType();
+                        mediaType = convertMimeType(content.getMimeType());
                         break;
                      default :
                         // Must never happen.
-                        mediaType = null;
+                        mediaType = new org.xcmis.spi.utils.MimeType();
                   }
 
                   byte[] data;
                   // XXX CMISSpaces sends XML content as Base64 encoded but
                   // Abdera waits for plain text.
-                  // TODO Done just for research work. Find good solution to fix this. 
+                  // TODO Done just for research work. Find good solution to fix this.
                   if (SPACES_AIR_SPECIFIC_REFERER.equalsIgnoreCase(request.getHeader("referer")))
                   {
                      data = Base64.decodeBase64(content.getText().getBytes());
                   }
                   else
                   {
-                     data = content.getValue().getBytes("UTF-8");
+                     String charset = mediaType.getParameter(CmisConstants.CHARSET);
+                     if (charset == null)
+                     {
+                        // workaround
+                        mediaType.getParameters().put(CmisConstants.CHARSET, "UTF-8");
+                     }
+                     data = content.getValue().getBytes(charset == null ? "UTF-8" : charset);
+
                   }
 
                   contentStream = new BaseContentStream(data, null, mediaType);
                }
                else
                {
-                  //                  mediaType = content.getMimeType().toString();
-                  mediaType = content.getMimeType().getBaseType();
-                  contentStream = new BaseContentStream(content.getDataHandler().getInputStream(), null, mediaType);
+                  contentStream =
+                     new BaseContentStream(content.getDataHandler().getInputStream(), null, convertMimeType(content
+                        .getMimeType()));
                }
             }
          }
@@ -1292,7 +1313,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get object creation date.
-    * 
+    *
     * @param object source object
     * @return creation date
     */
@@ -1310,14 +1331,14 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    }
 
    /**
-    * Get link to AtomPub document that describes folder's descendants.
-    * If repository does not support capability 'getDescendants' this method will
+    * Get link to AtomPub document that describes folder's descendants. If
+    * repository does not support capability 'getDescendants' this method will
     * return null.
-    * 
+    *
     * @param id folder id
     * @param request request context
-    * @return link to AtomPub document that describes folder's descendants or null
-    *            if capability 'getDescendants' is not supported. 
+    * @return link to AtomPub document that describes folder's descendants or
+    *         null if capability 'getDescendants' is not supported.
     */
    protected String getDescendantsLink(String id, RequestContext request)
    {
@@ -1347,14 +1368,13 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    }
 
    /**
-    * Get link to AtomPub document that describes folder's tree.
-    * If repository does not support capability 'getFolderTree' this method will
-    * return null.
-    * 
+    * Get link to AtomPub document that describes folder's tree. If repository
+    * does not support capability 'getFolderTree' this method will return null.
+    *
     * @param id folder id
     * @param request request context
-    * @return link to AtomPub document that describes folder's tree or null
-    *            if capability 'getFolderTree' is not supported. 
+    * @return link to AtomPub document that describes folder's tree or null if
+    *         capability 'getFolderTree' is not supported.
     */
    protected String getFolderTreeLink(String id, RequestContext request)
    {
@@ -1385,7 +1405,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get object creation date.
-    * 
+    *
     * @param object source object
     * @return creation date
     */
@@ -1404,10 +1424,11 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get link to AtomPub Document that describes object with <code>id</code>.
-    * 
+    *
     * @param id object id
     * @param request request context
-    * @return link to AtomPub Document that describes object with <code>id</code>
+    * @return link to AtomPub Document that describes object with
+    *         <code>id</code>
     */
    protected String getObjectLink(String id, RequestContext request)
    {
@@ -1421,7 +1442,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get link to AtomPub Document that describes object's parent(s).
-    * 
+    *
     * @param id objects id
     * @param request request context
     * @return link to AtomPub Document that describes object's parent(s)
@@ -1438,7 +1459,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get link to AtomPub Document that describes object's policies.
-    * 
+    *
     * @param id objects id
     * @param request request context
     * @return link to AtomPub Document that describes policies applied to object
@@ -1455,10 +1476,10 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get object's property.
-    * 
+    *
     * @param object object
     * @param propertyName property name
-    * @return property or null if property does not exists
+    * @return property or null if property does not exist
     */
    protected Property<?> getProperty(CmisObject object, String propertyName)
    {
@@ -1478,7 +1499,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get link to AtomPub Document that describes object's relationships.
-    * 
+    *
     * @param id objects id
     * @param request request context
     * @return link to AtomPub Document that describes object's relationships
@@ -1496,47 +1517,95 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    /**
     * Get's the name of the specific resource requested
     */
+   @Override
    protected String getResourceName(RequestContext request)
    {
       // TODO : can get smarter?
       String path;
-      if ((path = request.getTarget().getParameter("objectpath")) != null)
+      if ((path = request.getTarget().getParameter("path")) != null)
       {
+         try
+         {
+            path = URLDecoder.decode(path, "UTF-8");
+         }
+         catch (UnsupportedEncodingException uee)
+         {
+         }
          return path.charAt(0) == '/' ? path : ('/' + path);
       }
       return super.getResourceName(request);
    }
 
    /**
-    * From specification (1.0-cd06), section 3.5.2 Entries.
-    * When POSTing an Atom Document, the Atom elements MUST take precedence over
-    * the corresponding writable CMIS property.
-    * For example, atom:title will overwrite cmis:name.
-    * 
+    * From specification (1.0-cd06), section 3.5.2 Entries. When POSTing an Atom
+    * Document, the Atom elements MUST take precedence over the corresponding
+    * writable CMIS property. For example, atom:title will overwrite cmis:name.
+    *
     * @param object CMIS object
     * @param entry entry that delivered CMIS object.
     */
    protected void updatePropertiesFromEntry(CmisObject object, Entry entry)
    {
+      // SPEC.: 3.5.2 Entries
+      // atom:title MUST be the cmis:name property
       String title = entry.getTitle();
-      if (title != null)
+      if (title != null && title.length() > 0)
       {
          // Should never be null, but check it to avoid overwriting existed cmis:name property.
-         StringProperty name = (StringProperty)getProperty(object, CMIS.NAME);
-         if (name == null)
+         StringProperty prop = (StringProperty)getProperty(object, CmisConstants.NAME);
+         if (prop == null)
          {
-            name = new StringProperty();
-            name.setId(CMIS.NAME);
-            name.getValues().add(title);
-            object.getProperties().put(name.getId(), name);
+            prop = new StringProperty();
+            prop.setId(CmisConstants.NAME);
+            prop.setLocalName(CmisConstants.NAME);
+            prop.getValues().add(title);
+            object.getProperties().put(prop.getId(), prop);
          }
          else
          {
-            name.getValues().clear();
-            name.getValues().add(title);
+            prop.getValues().clear();
+            prop.getValues().add(title);
          }
       }
-      // TODO : check about other properties.
+      //      // atom:id SHOULD be derived from cmis:objectId.
+      //      IRIElement idElement = entry.getIdElement();
+      //      String id = idElement != null ? idElement.getValue().Text() : null;
+      //      if (id != null && id.length() > 0)
+      //      {
+      //         IdProperty prop = (IdProperty)getProperty(object, CmisConstants.OBJECT_ID);
+      //         if (prop == null)
+      //         {
+      //            prop = new IdProperty();
+      //            prop.setId(CmisConstants.OBJECT_ID);
+      //            prop.setLocalName(CmisConstants.OBJECT_ID);
+      //            prop.getValues().add(id);
+      //            object.getProperties().put(prop.getId(), prop);
+      //         }
+      //         else
+      //         {
+      //            prop.getValues().clear();
+      //            prop.getValues().add(id);
+      //         }
+      //      }
+      // atom:author/atom:name MUST be cmis:createdBy
+      String author = entry.getAuthor() != null ? entry.getAuthor().getName() : null;
+      if (author != null && author.length() > 0)
+      {
+         StringProperty prop = (StringProperty)getProperty(object, CmisConstants.CREATED_BY);
+         if (prop == null)
+         {
+            prop = new StringProperty();
+            prop.setId(CmisConstants.CREATED_BY);
+            prop.setLocalName(CmisConstants.CREATED_BY);
+            prop.getValues().add(author);
+            object.getProperties().put(prop.getId(), prop);
+         }
+         else
+         {
+            prop.getValues().clear();
+            prop.getValues().add(author);
+         }
+      }
    }
 
 }

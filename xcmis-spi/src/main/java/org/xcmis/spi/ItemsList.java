@@ -19,28 +19,54 @@
 
 package org.xcmis.spi;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * List of CMIS items. It contains list itself and additional information such
  * as {@link #isHasMoreItems()} and {@link #getNumItems()}.
- * 
+ *
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey
  *         Zavizionov</a>
  * @version $Id: CmisObjectInFolderList.java 34360 2009-07-22 23:58:59Z sunman $
  */
-public interface ItemsList<T>
+public final class ItemsList<T>
 {
+
+   private int numItems = -1;
+
+   private boolean hasMoreItems;
+
+   private List<T> list;
+
+   /**
+    * Default constructor.
+    */
+   public ItemsList()
+   {
+   }
+
+   /**
+    * Constructor.
+    * 
+    * @param list the list of items.
+    */
+   public ItemsList(List<T> list)
+   {
+      this.list = list;
+   }
 
    /**
     * @return set of items
     */
-   List<T> getItems();
-
-   /**
-    * @return <code>false</code> if this is last sub-set of items in paging
-    */
-   boolean isHasMoreItems();
+   public List<T> getItems()
+   {
+      if (list == null)
+      {
+         list = new ArrayList<T>();
+      }
+      return list;
+   }
 
    /**
     * @return total number of items. It is not need to be equals to number of
@@ -49,6 +75,27 @@ public interface ItemsList<T>
     *         requested items and no more pages available. This method must
     *         return -1 if total number of items in unknown.
     */
-   int getNumItems();
+   public int getNumItems()
+   {
+      return numItems;
+   }
+
+   public void setNumItems(int numItems)
+   {
+      this.numItems = numItems;
+   }
+
+   /**
+    * @return <code>false</code> if this is last sub-set of items in paging
+    */
+   public boolean isHasMoreItems()
+   {
+      return hasMoreItems;
+   }
+
+   public void setHasMoreItems(boolean hasMoreItems)
+   {
+      this.hasMoreItems = hasMoreItems;
+   }
 
 }

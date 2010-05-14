@@ -28,12 +28,11 @@ import org.apache.abdera.protocol.server.TargetType;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.StorageProvider;
-import org.xcmis.spi.TypeDefinition;
+import org.xcmis.spi.model.TypeDefinition;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -50,11 +49,10 @@ public class TypesChildrenCollection extends CmisTypeCollection
 
    /**
     * Instantiates a new types children collection.
-    * @param storageProvider TODO
     */
-   public TypesChildrenCollection(StorageProvider storageProvider)
+   public TypesChildrenCollection()
    {
-      super(storageProvider);
+      super();
       setHref("/types");
    }
 
@@ -64,9 +62,10 @@ public class TypesChildrenCollection extends CmisTypeCollection
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
       String typeId = request.getTarget().getParameter(AtomCMIS.PARAM_TYPE_ID);
-      boolean includePropertyDefinitions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PROPERTY_DEFINITIONS, false);
-      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CMIS.MAX_ITEMS);
-      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CMIS.SKIP_COUNT);
+      boolean includePropertyDefinitions =
+         getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PROPERTY_DEFINITIONS, false);
+      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CmisConstants.MAX_ITEMS);
+      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CmisConstants.SKIP_COUNT);
       Connection conn = null;
       try
       {

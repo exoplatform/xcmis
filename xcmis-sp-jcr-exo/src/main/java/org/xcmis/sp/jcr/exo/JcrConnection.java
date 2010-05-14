@@ -19,20 +19,20 @@
 
 package org.xcmis.sp.jcr.exo;
 
+import org.xcmis.spi.Connection;
+import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.Storage;
 import org.xcmis.spi.UpdateConflictException;
-import org.xcmis.spi.data.ObjectData;
-import org.xcmis.spi.impl.BaseConnection;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-public class JcrConnection extends BaseConnection
+public class JcrConnection extends Connection
 {
 
    private boolean closed;
-   
+
    public JcrConnection(Storage storage)
    {
       super(storage);
@@ -43,7 +43,7 @@ public class JcrConnection extends BaseConnection
     */
    public void close()
    {
-      // TODO 
+      // TODO
       ((StorageImpl)storage).session.logout();
       closed = true;
    }
@@ -63,7 +63,9 @@ public class JcrConnection extends BaseConnection
    protected void checkConnection() throws IllegalStateException
    {
       if (closed)
+      {
          throw new IllegalStateException("Connection closed.");
+      }
    }
 
 }

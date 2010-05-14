@@ -23,8 +23,7 @@ import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.Choice;
-import org.xcmis.spi.impl.ChoiceImpl;
+import org.xcmis.spi.model.Choice;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -33,7 +32,7 @@ import javax.xml.namespace.QName;
 
 /**
  * Created by The eXo Platform SAS .
- * 
+ *
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com.ua">Alexey
  *         Zavizionov</a>
  * @version $Id: ChoiceDecimalTypeElement.java 2487 2009-07-31 14:14:34Z
@@ -44,7 +43,7 @@ public class ChoiceDecimalElement extends ChoiceElement<Choice<BigDecimal>>
 
    /**
     * Instantiates a new choice decimal element.
-    * 
+    *
     * @param internal the internal
     */
    public ChoiceDecimalElement(Element internal)
@@ -54,7 +53,7 @@ public class ChoiceDecimalElement extends ChoiceElement<Choice<BigDecimal>>
 
    /**
     * Instantiates a new choice decimal element.
-    * 
+    *
     * @param factory the factory
     * @param qname the qname
     */
@@ -66,6 +65,7 @@ public class ChoiceDecimalElement extends ChoiceElement<Choice<BigDecimal>>
    /**
     * {@inheritDoc}
     */
+   @Override
    public void build(Choice<BigDecimal> choice)
    {
       if (choice != null)
@@ -77,7 +77,9 @@ public class ChoiceDecimalElement extends ChoiceElement<Choice<BigDecimal>>
             for (BigDecimal v : choice.getValues())
             {
                if (v != null)
+               {
                   addSimpleExtension(AtomCMIS.VALUE, v.toString());
+               }
             }
          }
          // CHOICE
@@ -92,9 +94,10 @@ public class ChoiceDecimalElement extends ChoiceElement<Choice<BigDecimal>>
       }
    }
 
+   @Override
    public Choice<BigDecimal> getChoice()
    {
-      ChoiceImpl<BigDecimal> result = new ChoiceImpl<BigDecimal>();
+      Choice<BigDecimal> result = new Choice<BigDecimal>();
       // VALUES
       List<Element> values = getExtensions(AtomCMIS.VALUE);
       if (values != null && values.size() > 0)
@@ -111,10 +114,12 @@ public class ChoiceDecimalElement extends ChoiceElement<Choice<BigDecimal>>
       // CHOICE
       List<ExtensibleElementWrapper> choices = getExtensions(AtomCMIS.CHOICE);
       if (choices != null && choices.size() > 0)
+      {
          for (ExtensibleElementWrapper choiceDecimalElement : choices)
          {
             result.getChoices().add(new ChoiceDecimalElement(choiceDecimalElement).getChoice());
          }
+      }
       return result;
    }
 

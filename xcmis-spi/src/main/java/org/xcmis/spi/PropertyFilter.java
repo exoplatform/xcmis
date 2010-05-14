@@ -32,7 +32,7 @@ public class PropertyFilter
 {
 
    /** Property filter for all properties. */
-   public static final String ALL_FILTER = CMIS.WILDCARD;
+   public static final String ALL_FILTER = CmisConstants.WILDCARD;
 
    /** Property filter for all properties. */
    public static final PropertyFilter ALL;

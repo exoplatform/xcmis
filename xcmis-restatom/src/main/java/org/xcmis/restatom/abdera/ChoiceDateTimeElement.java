@@ -24,8 +24,7 @@ import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
-import org.xcmis.spi.Choice;
-import org.xcmis.spi.impl.ChoiceImpl;
+import org.xcmis.spi.model.Choice;
 
 import java.util.Calendar;
 import java.util.List;
@@ -43,7 +42,7 @@ public class ChoiceDateTimeElement extends ChoiceElement<Choice<Calendar>>
 
    /**
     * Instantiates a new choice date time element.
-    * 
+    *
     * @param internal the internal
     */
    public ChoiceDateTimeElement(Element internal)
@@ -53,7 +52,7 @@ public class ChoiceDateTimeElement extends ChoiceElement<Choice<Calendar>>
 
    /**
     * Instantiates a new choice date time element.
-    * 
+    *
     * @param factory the factory
     * @param qname the qname
     */
@@ -65,6 +64,7 @@ public class ChoiceDateTimeElement extends ChoiceElement<Choice<Calendar>>
    /**
     * {@inheritDoc}
     */
+   @Override
    public void build(Choice<Calendar> choice)
    {
       if (choice != null)
@@ -76,7 +76,9 @@ public class ChoiceDateTimeElement extends ChoiceElement<Choice<Calendar>>
             for (Calendar v : choice.getValues())
             {
                if (v != null)
+               {
                   addSimpleExtension(AtomCMIS.VALUE, AtomUtils.getAtomDate(v));
+               }
             }
          }
          // CHOICE
@@ -91,9 +93,10 @@ public class ChoiceDateTimeElement extends ChoiceElement<Choice<Calendar>>
       }
    }
 
+   @Override
    public Choice<Calendar> getChoice()
    {
-      ChoiceImpl<Calendar> result = new ChoiceImpl<Calendar>();
+      Choice<Calendar> result = new Choice<Calendar>();
       // VALUES
       List<Element> values = getExtensions(AtomCMIS.VALUE);
       if (values != null && values.size() > 0)
@@ -110,10 +113,12 @@ public class ChoiceDateTimeElement extends ChoiceElement<Choice<Calendar>>
       // CHOICE
       List<ExtensibleElementWrapper> choices = getExtensions(AtomCMIS.CHOICE);
       if (choices != null && choices.size() > 0)
+      {
          for (ExtensibleElementWrapper choiceBooleanElement : choices)
          {
             result.getChoices().add(new ChoiceDateTimeElement(choiceBooleanElement).getChoice());
          }
+      }
       return result;
    }
 

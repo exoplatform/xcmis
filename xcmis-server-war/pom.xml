@@ -8,10 +8,8 @@
    </parent>
 
    <artifactId>xcmis-server-war</artifactId>
-   <name>xCMIS :: Server WAR</name>
-   <description>xCMIS Server WAR</description>
-
    <packaging>war</packaging>
+   <name>xCMIS :: Server :: WAR</name>
 
    <dependencies>
 
@@ -30,15 +28,15 @@
          <artifactId>exo.kernel.container</artifactId>
       </dependency>
 
-<!--      <dependency>-->
-<!--         <groupId>org.xcmis</groupId>-->
-<!--         <artifactId>xcmis-core</artifactId>-->
-<!--         <scope>runtime</scope>-->
-<!--      </dependency>-->
-
       <dependency>
          <groupId>org.xcmis</groupId>
          <artifactId>xcmis-sp-jcr-exo</artifactId>
+         <scope>runtime</scope>
+      </dependency>
+
+      <dependency>
+         <groupId>org.xcmis</groupId>
+         <artifactId>xcmis-sp-inmemory</artifactId>
          <scope>runtime</scope>
       </dependency>
 

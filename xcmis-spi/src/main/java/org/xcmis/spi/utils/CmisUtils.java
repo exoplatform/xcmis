@@ -19,10 +19,9 @@
 
 package org.xcmis.spi.utils;
 
-import org.xcmis.spi.AccessControlEntry;
 import org.xcmis.spi.ItemsIterator;
-import org.xcmis.spi.data.ObjectData;
-import org.xcmis.spi.impl.AccessControlEntryImpl;
+import org.xcmis.spi.ObjectData;
+import org.xcmis.spi.model.AccessControlEntry;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -96,17 +95,20 @@ public final class CmisUtils
    public static List<AccessControlEntry> createAclFromPermissionMap(Map<String, Set<String>> permissions)
    {
       List<AccessControlEntry> acl = new ArrayList<AccessControlEntry>();
-      for (Map.Entry<String, Set<String>> e : permissions.entrySet())
+      if (permissions != null)
       {
-         AccessControlEntry ace = new AccessControlEntryImpl(e.getKey(), e.getValue());
-         acl.add(ace);
+         for (Map.Entry<String, Set<String>> e : permissions.entrySet())
+         {
+            AccessControlEntry ace = new AccessControlEntry(e.getKey(), e.getValue());
+            acl.add(ace);
+         }
       }
       return acl;
    }
 
    /**
     * Get XMLGregorianCalendar that is based on Calendar.
-    * 
+    *
     * @param calendar source Calendar
     * @return XMLGregorianCalendar
     */
@@ -140,7 +142,7 @@ public final class CmisUtils
       return createAclFromPermissionMap(cache);
    }
 
-   private static void addAclToPermissionMap(Map<String, Set<String>> map, List<AccessControlEntry> acl)
+   public static void addAclToPermissionMap(Map<String, Set<String>> map, List<AccessControlEntry> acl)
    {
       if (acl != null)
       {
@@ -148,7 +150,9 @@ public final class CmisUtils
          {
             String principal = ace.getPrincipal();
             if (principal == null)
+            {
                continue;
+            }
 
             Set<String> permissions = map.get(principal);
             if (permissions == null)
@@ -161,7 +165,7 @@ public final class CmisUtils
       }
    }
 
-   private static void removeAclFromPermissionMap(Map<String, Set<String>> map, List<AccessControlEntry> acl)
+   public static void removeAclFromPermissionMap(Map<String, Set<String>> map, List<AccessControlEntry> acl)
    {
       if (acl != null)
       {
@@ -169,14 +173,18 @@ public final class CmisUtils
          {
             String principal = ace.getPrincipal();
             if (principal == null)
+            {
                continue;
+            }
 
             Set<String> permissions = map.get(principal);
             if (permissions != null)
             {
                permissions.removeAll(ace.getPermissions());
                if (permissions.size() == 0)
+               {
                   map.remove(principal);
+               }
             }
          }
       }

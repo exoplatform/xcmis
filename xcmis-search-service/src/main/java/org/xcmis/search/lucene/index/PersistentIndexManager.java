@@ -28,6 +28,7 @@ import java.io.IOException;
  * @author <a href="mailto:Sergey.Kabashnyuk@gmail.com">Sergey Kabashnyuk</a>
  * @version $Id: PersistentIndexManager.java 2 2010-02-04 17:21:49Z andrew00x $
  */
+@Deprecated
 public interface PersistentIndexManager<W, S> extends Startable
 {
    public W getIndexWriter() throws IOException;

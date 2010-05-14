@@ -28,8 +28,9 @@ import org.xcmis.search.model.QueryElement;
 import org.xcmis.search.model.source.SelectorName;
 
 /**
- * Created by The eXo Platform SAS.
- * 
+ * @author <a href="mailto:Sergey.Kabashnyuk@exoplatform.org">Sergey Kabashnyuk</a>
+ * @version $Id: Column.java 34360 2009-07-22 23:58:59Z ksm $
+ *
  */
 public class Column implements QueryElement
 {
@@ -240,7 +241,7 @@ public class Column implements QueryElement
 
    /**
     * This is a predicate function that encapsulates the full-text 
-    * search capability that MAY be provided by a service
+    * search capability that MAY be provided by a service.
     */
    public static class ScoreFunction implements ColumnFunction
    {

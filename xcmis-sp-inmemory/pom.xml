@@ -8,6 +8,7 @@
    </parent>
 
    <artifactId>xcmis-sp-inmemory</artifactId>
+   <packaging>jar</packaging>
    <name>xCMIS :: SP :: InMemory</name>
 
    <dependencies>
@@ -20,8 +21,21 @@
          <artifactId>exo.kernel.component.common</artifactId>
       </dependency>
       <dependency>
+         <groupId>org.slf4j</groupId>
+         <artifactId>slf4j-log4j12</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
          <groupId>org.exoplatform.core</groupId>
          <artifactId>exo.core.component.security.core</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.xcmis</groupId>
+         <artifactId>xcmis-search-service</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.xcmis</groupId>
+         <artifactId>xcmis-search-parser-cmis</artifactId>
       </dependency>
    </dependencies>
 </project>

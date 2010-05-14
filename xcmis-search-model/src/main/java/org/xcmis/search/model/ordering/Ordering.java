@@ -47,8 +47,6 @@ public class Ordering implements QueryElement
     *           the operand being ordered
     * @param order
     *           the order type
-    * @throws IllegalArgumentException
-    *            if the operand or order type is null
     */
    public Ordering(DynamicOperand operand, Order order)
    {

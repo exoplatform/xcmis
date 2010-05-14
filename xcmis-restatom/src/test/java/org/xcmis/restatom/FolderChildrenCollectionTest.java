@@ -24,12 +24,13 @@ import org.exoplatform.services.rest.impl.ContainerResponse;
 import org.exoplatform.services.rest.impl.MultivaluedMapImpl;
 import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
 import org.w3c.dom.NodeList;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.BaseContentStream;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ConstraintException;
+import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.data.BaseContentStream;
-import org.xcmis.spi.data.ContentStream;
-import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.model.CmisObject;
+import org.xcmis.spi.utils.MimeType;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -43,7 +44,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id: FolderChildrenCollectionTest.java 2 2010-02-04 17:21:49Z andrew00x $
+ * @version $Id: FolderChildrenCollectionTest.java 2 2010-02-04 17:21:49Z
+ *          andrew00x $
  */
 public class FolderChildrenCollectionTest extends BaseTest
 {
@@ -71,12 +73,12 @@ public class FolderChildrenCollectionTest extends BaseTest
    public void testCreateDocument() throws Exception
    {
       String s = "<?xml version='1.0' encoding='utf-8'?>" //
-         + "<entry xmlns='http://www.w3.org/2005/Atom'" + " xmlns:cmis='" + CMIS.CMIS_NS_URI + "'" //
+         + "<entry xmlns='http://www.w3.org/2005/Atom'" + " xmlns:cmis='" + CmisConstants.CMIS_NS_URI + "'" //
          + " xmlns:cmisra='" + AtomCMIS.CMISRA_NS_URI + "'>" //
          + "<title>title</title><summary>summary</summary>" //
          + "<content type='text'>hello</content>" //
          + "<cmisra:object><cmis:properties>" //
-         + "<cmis:propertyId propertyDefinitionId='cmis:objectTypeId'>" //
+         + "<cmis:propertyId localName='cmis:objectTypeId' propertyDefinitionId='cmis:objectTypeId'>" //
          + "<cmis:value>cmis:document</cmis:value></cmis:propertyId>" //
          + "</cmis:properties>" + "</cmisra:object></entry>";
       String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/children/" + testFolderId;
@@ -102,7 +104,7 @@ public class FolderChildrenCollectionTest extends BaseTest
    public void testCreateDocumentCmisContent() throws Exception
    {
       String s = "<?xml version='1.0' encoding='utf-8'?>" //
-         + "<entry xmlns='http://www.w3.org/2005/Atom'" + " xmlns:cmis='" + CMIS.CMIS_NS_URI + "'" //
+         + "<entry xmlns='http://www.w3.org/2005/Atom'" + " xmlns:cmis='" + CmisConstants.CMIS_NS_URI + "'" //
          + " xmlns:cmisra='" + AtomCMIS.CMISRA_NS_URI + "'>" //
          + "<title>title</title><summary>summary</summary>" //
          + "<cmisra:content>" //
@@ -110,7 +112,7 @@ public class FolderChildrenCollectionTest extends BaseTest
          + "<cmisra:base64>" + new String(Base64.encodeBase64("hello".getBytes())) + "</cmisra:base64>" //
          + "</cmisra:content>" //
          + "<cmisra:object><cmis:properties>" //
-         + "<cmis:propertyId propertyDefinitionId='cmis:objectTypeId'>" //
+         + "<cmis:propertyId localName='cmis:objectTypeId' propertyDefinitionId='cmis:objectTypeId'>" //
          + "<cmis:value>cmis:document</cmis:value></cmis:propertyId>" //
          + "</cmis:properties>" + "</cmisra:object></entry>";
       String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/children/" + testFolderId;
@@ -119,7 +121,7 @@ public class FolderChildrenCollectionTest extends BaseTest
 
       ContainerResponse resp = service("POST", requestURI, "http://localhost:8080/rest", null, s.getBytes(), writer);
 
-      //            printBody(writer.getBody());
+      //      printBody(writer.getBody());
       assertEquals(201, resp.getStatus());
 
       assertNotNull(resp.getHttpHeaders().getFirst(HttpHeaders.LOCATION));
@@ -140,11 +142,11 @@ public class FolderChildrenCollectionTest extends BaseTest
    public void testCreateFolder() throws Exception
    {
       String s = "<?xml version='1.0' encoding='utf-8'?>" //
-         + "<entry xmlns='http://www.w3.org/2005/Atom' xmlns:cmis='" + CMIS.CMIS_NS_URI + "' "//
+         + "<entry xmlns='http://www.w3.org/2005/Atom' xmlns:cmis='" + CmisConstants.CMIS_NS_URI + "' "//
          + " xmlns:cmisra='" + AtomCMIS.CMISRA_NS_URI + "'>" //
          + "<title>title</title><summary>summary</summary>" //
          + "<cmisra:object><cmis:properties>" //
-         + "<cmis:propertyId propertyDefinitionId='cmis:objectTypeId'>" //
+         + "<cmis:propertyId localName='cmis:objectTypeId' propertyDefinitionId='cmis:objectTypeId'>" //
          + "<cmis:value>cmis:folder</cmis:value></cmis:propertyId>" //
          + "</cmis:properties>" //
          + "</cmisra:object></entry>";
@@ -154,6 +156,7 @@ public class FolderChildrenCollectionTest extends BaseTest
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
 
       ContainerResponse resp = service("POST", requestURI, "http://localhost:8080/rest", null, s.getBytes(), writer);
+
       //                  printBody(writer.getBody());
       assertEquals(201, resp.getStatus());
 
@@ -170,7 +173,9 @@ public class FolderChildrenCollectionTest extends BaseTest
 
    public void testDeleteContent() throws Exception
    {
-      ContentStream content = new BaseContentStream("to be or not to be".getBytes(), "file", "text/plain");
+      ContentStream content =
+         new BaseContentStream("to be or not to be".getBytes(), "file", MimeType
+            .fromString("text/plain; charset=UTF-8"));
       String docId = createDocument(testFolderId, "doc1", null, content);
       ContentStream docStream = conn.getContentStream(docId, null, -1, -1);
       assertNotNull(docStream);
@@ -218,7 +223,7 @@ public class FolderChildrenCollectionTest extends BaseTest
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
       ContainerResponse resp = service("GET", requestURI, "http://localhost:8080/rest", null, null, writer);
 
-      //            printBody(writer.getBody());
+      //          printBody(writer.getBody());
       assertEquals(200, resp.getStatus());
 
       DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
@@ -296,7 +301,9 @@ public class FolderChildrenCollectionTest extends BaseTest
 
    public void testGetContent() throws Exception
    {
-      ContentStream content = new BaseContentStream("to be or not to be".getBytes(), "file", "text/plain");
+      ContentStream content =
+         new BaseContentStream("to be or not to be".getBytes(), "file", MimeType
+            .fromString("text/plain; charset=UTF-8"));
       String docId = createDocument(testFolderId, "doc1", null, content);
 
       String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/file/" + docId;
@@ -334,7 +341,8 @@ public class FolderChildrenCollectionTest extends BaseTest
    {
       String docId = createDocument(testFolderId, "doc1", null, null);
       String requestURI =
-         "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/objectbypath/" + testFolderName + "/doc1";
+         "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/objectbypath" + "?path=%2FtestRoot%2Fdoc1";
+
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
 
       ContainerResponse resp = service("GET", requestURI, "http://localhost:8080/rest", null, null, writer);
@@ -359,22 +367,24 @@ public class FolderChildrenCollectionTest extends BaseTest
       String id = createDocument(testFolderId, "doc1", null, null);
 
       String s = "<?xml version='1.0' encoding='utf-8'?>" //
-         + "<entry xmlns='http://www.w3.org/2005/Atom'" + " xmlns:cmis='" + CMIS.CMIS_NS_URI + "'" //
+         + "<entry xmlns='http://www.w3.org/2005/Atom'" + " xmlns:cmis='" + CmisConstants.CMIS_NS_URI + "'" //
          + " xmlns:cmisra='" + AtomCMIS.CMISRA_NS_URI + "'>" //
          + "<title>title</title><summary>summary</summary>" //
          + "<cmisra:object><cmis:properties>" //
-         + "<cmis:propertyId propertyDefinitionId=\"cmis:objectId\"><cmis:value>" //
+         + "<cmis:propertyId localName='cmis:objectId' propertyDefinitionId='cmis:objectId'><cmis:value>" //
          + id //
          + "</cmis:value></cmis:propertyId>" //
          + "</cmis:properties></cmisra:object></entry>";
 
-      String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/children/" + rootFolderId;
+      String requestURI =
+         "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/children/" + rootFolderId + "?sourceFolderId="
+            + testFolderId;
       assertEquals(testFolderId, getParents(id).get(0).getObject().getObjectInfo().getId());
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
 
       ContainerResponse resp = service("POST", requestURI, "http://localhost:8080/rest", null, s.getBytes(), writer);
 
-      //                  printBody(writer.getBody());
+      //      printBody(writer.getBody());
       assertEquals(201, resp.getStatus());
 
       assertNotNull(resp.getHttpHeaders().getFirst(HttpHeaders.LOCATION));
@@ -390,7 +400,9 @@ public class FolderChildrenCollectionTest extends BaseTest
 
    public void testSetContent() throws Exception
    {
-      ContentStream content = new BaseContentStream("to be or not to be".getBytes(), "file", "text/plain");
+      ContentStream content =
+         new BaseContentStream("to be or not to be".getBytes(), "file", MimeType
+            .fromString("text/plain; charset=UTF-8"));
       String docId = createDocument(testFolderId, "doc1", null, content);
 
       String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/file/" + docId;
@@ -402,6 +414,26 @@ public class FolderChildrenCollectionTest extends BaseTest
       ContentStream docStream = conn.getContentStream(docId, null, -1, -1);
       int r = docStream.getStream().read(b);
       assertEquals("to be", new String(b, 0, r));
+   }
+
+   public void testSetContentNotUTF8() throws Exception
+   {
+      ContentStream content =
+         new BaseContentStream("to be or not to be".getBytes(), "file", MimeType
+            .fromString("text/plain; charset=UTF-8"));
+      String docId = createDocument(testFolderId, "doc1", null, content);
+
+      String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/file/" + docId;
+      MultivaluedMap<String, String> headers = new MultivaluedMapImpl();
+      headers.putSingle(HttpHeaders.CONTENT_TYPE, "text/plain;charset=windows-1251");
+      ContainerResponse resp =
+         service("PUT", requestURI, "http://localhost:8080/rest", headers, "тест".getBytes("windows-1251"));
+      assertEquals(201, resp.getStatus());
+      byte[] b = new byte[128];
+      ContentStream docStream = conn.getContentStream(docId, null, -1, -1);
+      //      System.out.println(docStream.getMediaType());
+      int r = docStream.getStream().read(b);
+      assertEquals("тест", new String(b, 0, r, docStream.getMediaType().getParameter("charset")));
    }
 
    public void testSetContentMultipart() throws Exception
@@ -422,13 +454,13 @@ public class FolderChildrenCollectionTest extends BaseTest
          + "--abcdef--\r\n");
       w.flush();
       byte[] data = out.toByteArray();
-
       //            printBody(data);
+
       ContainerResponse resp = service("POST", requestURI, "http://localhost:8080/rest", headers, data);
       assertEquals(201, resp.getStatus());
       byte[] b = new byte[128];
       ContentStream content = conn.getContentStream(docId, null, -1, -1);
-      assertEquals("text/plain", content.getMediaType());
+      assertEquals("text/plain", content.getMediaType().getBaseType());
       int r = content.getStream().read(b);
       assertEquals("to be or not to be", new String(b, 0, r));
    }
@@ -437,7 +469,7 @@ public class FolderChildrenCollectionTest extends BaseTest
    {
       String s = "<?xml version='1.0' encoding='utf-8'?>" //
          + "<entry xmlns='http://www.w3.org/2005/Atom'" //
-         + " xmlns:cmis='" + CMIS.CMIS_NS_URI + "'" //
+         + " xmlns:cmis='" + CmisConstants.CMIS_NS_URI + "'" //
          + " xmlns:cmisra='" + AtomCMIS.CMISRA_NS_URI + "'>" //
          + "<title>title</title><summary>summary</summary>" //
          + "<cmisra:object><cmis:properties>" //

@@ -19,6 +19,7 @@
 
 package org.xcmis.sp.jcr.exo;
 
+import org.exoplatform.services.jcr.access.SystemIdentity;
 import org.exoplatform.services.jcr.core.ExtendedNode;
 import org.exoplatform.services.jcr.core.ExtendedSession;
 import org.exoplatform.services.jcr.core.nodetype.ExtendedNodeTypeManager;
@@ -27,52 +28,68 @@ import org.exoplatform.services.jcr.core.nodetype.PropertyDefinitionValue;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.sp.jcr.exo.index.IndexListener;
-import org.xcmis.spi.AllowableActions;
-import org.xcmis.spi.BaseType;
-import org.xcmis.spi.CapabilityRendition;
-import org.xcmis.spi.ChangeEvent;
+import org.xcmis.spi.BaseItemsIterator;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
-import org.xcmis.spi.ContentStreamAllowed;
+import org.xcmis.spi.DocumentData;
+import org.xcmis.spi.FolderData;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.NotSupportedException;
+import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.PropertyDefinition;
-import org.xcmis.spi.Rendition;
-import org.xcmis.spi.RepositoryCapabilities;
-import org.xcmis.spi.RepositoryInfo;
+import org.xcmis.spi.PolicyData;
+import org.xcmis.spi.RelationshipData;
+import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.Storage;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.TypeNotFoundException;
-import org.xcmis.spi.UnfileObject;
-import org.xcmis.spi.Updatability;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.VersioningException;
-import org.xcmis.spi.VersioningState;
-import org.xcmis.spi.data.Document;
-import org.xcmis.spi.data.Folder;
-import org.xcmis.spi.data.ObjectData;
-import org.xcmis.spi.data.Policy;
-import org.xcmis.spi.data.Relationship;
-import org.xcmis.spi.impl.AllowableActionsImpl;
-import org.xcmis.spi.impl.BaseItemsIterator;
-import org.xcmis.spi.object.RenditionManager;
+import org.xcmis.spi.model.ACLCapability;
+import org.xcmis.spi.model.AccessControlPropagation;
+import org.xcmis.spi.model.AllowableActions;
+import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.CapabilityACL;
+import org.xcmis.spi.model.CapabilityChanges;
+import org.xcmis.spi.model.CapabilityContentStreamUpdatable;
+import org.xcmis.spi.model.CapabilityJoin;
+import org.xcmis.spi.model.CapabilityQuery;
+import org.xcmis.spi.model.CapabilityRendition;
+import org.xcmis.spi.model.ChangeEvent;
+import org.xcmis.spi.model.ContentStreamAllowed;
+import org.xcmis.spi.model.Permission;
+import org.xcmis.spi.model.PermissionMapping;
+import org.xcmis.spi.model.PropertyDefinition;
+import org.xcmis.spi.model.PropertyType;
+import org.xcmis.spi.model.Rendition;
+import org.xcmis.spi.model.RepositoryCapabilities;
+import org.xcmis.spi.model.RepositoryInfo;
+import org.xcmis.spi.model.SupportedPermissions;
+import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.model.UnfileObject;
+import org.xcmis.spi.model.VersioningState;
+import org.xcmis.spi.model.Permission.BasicPermissions;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.jcr.Item;
 import javax.jcr.ItemExistsException;
@@ -87,10 +104,14 @@ import javax.jcr.nodetype.NoSuchNodeTypeException;
 import javax.jcr.nodetype.NodeType;
 import javax.jcr.nodetype.NodeTypeIterator;
 import javax.jcr.version.OnParentVersionAction;
+import javax.jcr.version.Version;
+import javax.jcr.version.VersionHistory;
+import javax.jcr.version.VersionIterator;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: StorageImpl.java 804 2010-04-16 16:48:59Z
+ *          alexey.zavizionov@gmail.com $
  */
 public class StorageImpl implements Storage
 {
@@ -107,6 +128,10 @@ public class StorageImpl implements Storage
 
    public static final String XCMIS_POLICIES = "xcmis:policiesStore";
 
+   public static final String XCMIS_PROPERTY_TYPE = "_xcmis_property_type";
+
+   public static final Pattern XCMIS_PROPERTY_TYPE_PATTERN = Pattern.compile(".*" + StorageImpl.XCMIS_PROPERTY_TYPE);
+
    static String latestLabel = "latest";
 
    static String pwcLabel = "pwc";
@@ -120,13 +145,15 @@ public class StorageImpl implements Storage
 
    private IndexListener indexListener;
 
+   private RepositoryInfo repositoryInfo;
+
    public StorageImpl(Session session, StorageConfiguration configuration)
    {
       this.session = session;
       this.configuration = configuration;
    }
 
-   public StorageImpl(Session session, StorageConfiguration configuration, RenditionManagerImpl renditionManager)
+   public StorageImpl(Session session, StorageConfiguration configuration, RenditionManager renditionManager)
    {
       this.session = session;
       this.configuration = configuration;
@@ -150,7 +177,7 @@ public class StorageImpl implements Storage
    }
 
    public StorageImpl(Session session, IndexListener indexListener, StorageConfiguration configuration,
-      RenditionManagerImpl renditionManager)
+      RenditionManager renditionManager)
    {
       this.session = session;
       this.indexListener = indexListener;
@@ -197,28 +224,28 @@ public class StorageImpl implements Storage
          nodeTypeValue.setPrimaryItemName("");
 
          List<PropertyDefinitionValue> jcrPropDefintions = null;
-         if (type.getPropertyDefinitions().size() > 0)
+         if (type.getPropertyDefinitions() != null && type.getPropertyDefinitions().size() > 0)
          {
             jcrPropDefintions = new ArrayList<PropertyDefinitionValue>();
 
             for (PropertyDefinition<?> propDef : type.getPropertyDefinitions())
             {
-               PropertyDefinitionValue jcrPropDef = new PropertyDefinitionValue();
-               jcrPropDef.setMandatory(propDef.isRequired());
-               jcrPropDef.setMultiple(propDef.isMultivalued());
-               jcrPropDef.setName(propDef.getId());
-               jcrPropDef.setOnVersion(OnParentVersionAction.COPY);
-               jcrPropDef.setReadOnly(propDef.getUpdatability() != null
-                  && propDef.getUpdatability() == Updatability.READONLY);
-
                if (propDef.getPropertyType() == null)
                {
                   String msg = "Property Type required.";
                   throw new InvalidArgumentException(msg);
                }
+               if (XCMIS_PROPERTY_TYPE_PATTERN.matcher(propDef.getId()).matches())
+               {
+                  throw new InvalidArgumentException("Unacceptable property definition name " + propDef.getId()
+                     + " type " + type.getId());
+               }
+
+               PropertyDefinitionValue jcrPropDef = new PropertyDefinitionValue();
 
                List<String> defaultValues = null;
 
+               //calculate default values
                switch (propDef.getPropertyType())
                {
                   case BOOLEAN :
@@ -302,7 +329,30 @@ public class StorageImpl implements Storage
                   jcrPropDef.setAutoCreate(false);
                }
 
+               jcrPropDef.setMandatory(propDef.isRequired());
+               jcrPropDef.setMultiple(propDef.isMultivalued());
+               jcrPropDef.setName(propDef.getId());
+               jcrPropDef.setOnVersion(OnParentVersionAction.COPY);
+
+               //               jcrPropDef.setReadOnly(propDef.getUpdatability() != null
+               //                  && propDef.getUpdatability() == Updatability.READONLY);
+
+               // TODO May not set read-only for property definition at JCR level.
+               // In this case can't update property through JCR API.
+               jcrPropDef.setReadOnly(false);
+
                jcrPropDefintions.add(jcrPropDef);
+
+               // TODO replace with native types in JCR 2.x 
+               // add type definition for ID, HTML, URI
+               if (propDef.getPropertyType() == PropertyType.ID || propDef.getPropertyType() == PropertyType.HTML
+                  || propDef.getPropertyType() == PropertyType.URI)
+               {
+                  List<String> actualTypeStorage = new ArrayList<String>();
+                  actualTypeStorage.add(propDef.getPropertyType().toString());
+                  jcrPropDefintions.add(new PropertyDefinitionValue(propDef.getId() + XCMIS_PROPERTY_TYPE, false,
+                     false, OnParentVersionAction.COPY, false, actualTypeStorage, false, 0, new ArrayList<String>()));
+               }
 
             }
 
@@ -325,14 +375,14 @@ public class StorageImpl implements Storage
     */
    public AllowableActions calculateAllowableActions(ObjectData object)
    {
-      AllowableActionsImpl actions = new AllowableActionsImpl();
+      AllowableActions actions = new AllowableActions();
       TypeDefinition type = object.getTypeDefinition();
 
       RepositoryCapabilities capabilities = getRepositoryInfo().getCapabilities();
 
       boolean isCheckedout = type.getBaseId() == BaseType.DOCUMENT //
          && type.isVersionable() //
-         && ((Document)object).isVersionSeriesCheckedOut();
+         && ((DocumentData)object).isVersionSeriesCheckedOut();
 
       actions.setCanGetProperties(true);
 
@@ -377,7 +427,7 @@ public class StorageImpl implements Storage
       actions.setCanGetFolderParent(type.getBaseId() == BaseType.FOLDER);
 
       actions.setCanGetContentStream(type.getBaseId() == BaseType.DOCUMENT //
-         && ((Document)object).hasContent());
+         && ((DocumentData)object).hasContent());
 
       actions.setCanSetContentStream(type.getBaseId() == BaseType.DOCUMENT //
          && type.getContentStreamAllowed() != ContentStreamAllowed.NOT_ALLOWED);
@@ -408,18 +458,20 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public Document createCopyOfDocument(Document source, Folder folder, VersioningState versioningState)
+   public DocumentData copyDocument(DocumentData source, FolderData parent, VersioningState versioningState)
       throws ConstraintException, StorageException
    {
-      // TODO : remove when implement unfiling feature.
-      if (folder == null)
+      if (parent != null)
       {
-         throw new NotSupportedException("Unfiling capability is not supported.");
-      }
-
-      if (folder.isNew())
-      {
-         throw new CmisRuntimeException("Unable create document in newly created folder.");
+         if (parent.isNew())
+         {
+            throw new CmisRuntimeException("Unable create document in newly created folder.");
+         }
+         if (!parent.isAllowedChildType(source.getTypeId()))
+         {
+            throw new ConstraintException("Type " + source.getTypeId()
+               + " is not in list of allowed child type for folder " + parent.getObjectId());
+         }
       }
 
       if (source.isNew())
@@ -432,13 +484,9 @@ public class StorageImpl implements Storage
          throw new ConstraintException("Source object has type whose base type is not Document.");
       }
 
-      if (!folder.isAllowedChildType(source.getTypeId()))
-      {
-         throw new ConstraintException("Type " + source.getTypeId()
-            + " is not in list of allowed child type for folder " + folder.getObjectId());
-      }
-
-      DocumentCopy copy = new DocumentCopy(source, folder, session, versioningState);
+      DocumentCopy copy =
+         new DocumentCopy(source, getTypeDefinition(source.getTypeId(), true), parent, session, versioningState,
+            indexListener);
 
       return copy;
    }
@@ -446,19 +494,19 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public Document createDocument(Folder folder, String typeId, VersioningState versioningState)
+   public DocumentData createDocument(FolderData parent, String typeId, VersioningState versioningState)
       throws ConstraintException
    {
-      if (folder != null)
+      if (parent != null)
       {
-         if (folder.isNew())
+         if (parent.isNew())
          {
             throw new CmisRuntimeException("Unable create document in newly created folder.");
          }
-         if (!folder.isAllowedChildType(typeId))
+         if (!parent.isAllowedChildType(typeId))
          {
             throw new ConstraintException("Type " + typeId + " is not in list of allowed child type for folder "
-               + folder.getObjectId());
+               + parent.getObjectId());
          }
       }
 
@@ -469,7 +517,7 @@ public class StorageImpl implements Storage
          throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Document.");
       }
 
-      Document document = new DocumentImpl(typeDefinition, folder, session, versioningState);
+      DocumentData document = new DocumentDataImpl(typeDefinition, parent, session, versioningState, indexListener);
 
       return document;
    }
@@ -477,22 +525,22 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public Folder createFolder(Folder folder, String typeId) throws ConstraintException
+   public FolderData createFolder(FolderData parent, String typeId) throws ConstraintException
    {
-      if (folder == null)
+      if (parent == null)
       {
          throw new ConstraintException("Parent folder must be provided.");
       }
 
-      if (folder.isNew())
+      if (parent.isNew())
       {
          throw new CmisRuntimeException("Unable create child folder in newly created folder.");
       }
 
-      if (!folder.isAllowedChildType(typeId))
+      if (!parent.isAllowedChildType(typeId))
       {
          throw new ConstraintException("Type " + typeId + " is not in list of allowed child type for folder "
-            + folder.getObjectId());
+            + parent.getObjectId());
       }
 
       TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
@@ -502,7 +550,7 @@ public class StorageImpl implements Storage
          throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Folder.");
       }
 
-      Folder newFolder = new FolderImpl(typeDefinition, folder, session);
+      FolderData newFolder = new FolderDataImpl(typeDefinition, parent, session, indexListener);
 
       return newFolder;
    }
@@ -510,7 +558,7 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public Policy createPolicy(Folder folder, String typeId) throws ConstraintException
+   public PolicyData createPolicy(FolderData parent, String typeId) throws ConstraintException
    {
       TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
 
@@ -521,7 +569,7 @@ public class StorageImpl implements Storage
 
       // TODO : need raise exception if parent folder is provided ??
       // Do not use parent folder, policy is not fileable.
-      Policy policy = new PolicyImpl(typeDefinition, null, session);
+      PolicyData policy = new PolicyDataImpl(typeDefinition, session, indexListener);
 
       return policy;
    }
@@ -529,7 +577,7 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public Relationship createRelationship(ObjectData source, ObjectData target, String typeId)
+   public RelationshipData createRelationship(ObjectData source, ObjectData target, String typeId)
       throws ConstraintException
    {
       if (source.isNew())
@@ -549,7 +597,7 @@ public class StorageImpl implements Storage
          throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Relationship.");
       }
 
-      Relationship relationship = new RelationshipImpl(typeDefinition, source, target, session);
+      RelationshipData relationship = new RelationshipDataImpl(typeDefinition, source, target, session, indexListener);
 
       return relationship;
    }
@@ -586,7 +634,7 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public Collection<String> deleteTree(Folder folder, boolean deleteAllVersions, UnfileObject unfileObject,
+   public Collection<String> deleteTree(FolderData folder, boolean deleteAllVersions, UnfileObject unfileObject,
       boolean continueOnFailure) throws UpdateConflictException
    {
       if (!deleteAllVersions)
@@ -597,17 +645,13 @@ public class StorageImpl implements Storage
          throw new CmisRuntimeException("Unable delete only specified version.");
       }
 
-      final List<String> failedToDelete = new ArrayList<String>();
+      final Collection<String> failedToDelete = new ArrayList<String>();
       DeleteTreeVisitor v = new DeleteTreeVisitor(folder.getPath(), unfileObject);
 
       try
       {
-         v.visit(((FolderImpl)folder).getNode());
+         v.visit(((FolderDataImpl)folder).getNode());
 
-         if (LOG.isDebugEnabled())
-         {
-            LOG.debug("<DELETE LINKS>");
-         }
          for (String id : v.getDeleteLinks())
          {
             if (LOG.isDebugEnabled())
@@ -617,10 +661,6 @@ public class StorageImpl implements Storage
             ((ExtendedSession)session).getNodeByIdentifier(id).remove();
          }
 
-         if (LOG.isDebugEnabled())
-         {
-            LOG.debug("<MOVE>");
-         }
          for (Map.Entry<String, String> e : v.getMoveMapping().entrySet())
          {
             String scrPath = e.getKey();
@@ -648,10 +688,6 @@ public class StorageImpl implements Storage
             session.move(scrPath, destPath);
          }
 
-         if (LOG.isDebugEnabled())
-         {
-            LOG.debug("<DELETE OBJECTS>");
-         }
          for (String e : v.getDeleteObjects())
          {
             if (LOG.isDebugEnabled())
@@ -671,16 +707,52 @@ public class StorageImpl implements Storage
       {
          // TODO : provide list of not deleted objects.
          // If fact plain list of all items in current tree.
-         throw new CmisRuntimeException(re.getMessage(), re);
+         try
+         {
+            TreeVisitor vv = new TreeVisitor();
+            vv.visit(((FolderDataImpl)folder).getNode());
+            failedToDelete.addAll(vv.getAllChildrenObjects());
+         }
+         catch (RepositoryException e)
+         {
+            throw new CmisRuntimeException(re.getMessage(), re);
+         }
       }
-      // TODO : index listener
       return failedToDelete;
    }
 
-   public Collection<Document> getAllVersions(String versionSeriesId) throws ObjectNotFoundException
+   public Collection<DocumentData> getAllVersions(String versionSeriesId) throws ObjectNotFoundException
    {
-      // TODO Auto-generated method stub
-      return null;
+      try
+      {
+         Node node = ((ExtendedSession)session).getNodeByIdentifier(versionSeriesId);
+         VersionHistory vh = ((VersionHistory)node);
+         LinkedList<DocumentData> versions = new LinkedList<DocumentData>();
+         VersionIterator iterator = vh.getAllVersions();
+         iterator.next(); // skip jcr:rootVersion
+         while (iterator.hasNext())
+         {
+            Version v = iterator.nextVersion();
+            versions.addFirst(getDocumentVersion(v.getNode(JcrCMIS.JCR_FROZEN_NODE)));
+         }
+         DocumentData latest = (DocumentData)getObjectById(vh.getVersionableUUID());
+         versions.addFirst(latest);
+         String pwcId = latest.getVersionSeriesCheckedOutId();
+         if (pwcId != null)
+         {
+            PWC pwc = (PWC)getObjectById(pwcId);
+            versions.addFirst(pwc);
+         }
+         return versions;
+      }
+      catch (ItemNotFoundException infe)
+      {
+         throw new ObjectNotFoundException("Version series '" + versionSeriesId + "' does not exist.");
+      }
+      catch (javax.jcr.RepositoryException re)
+      {
+         throw new CmisRuntimeException("Unable get version series " + versionSeriesId + ". " + re.getMessage(), re);
+      }
    }
 
    /**
@@ -691,10 +763,51 @@ public class StorageImpl implements Storage
       throw new NotSupportedException("Changes log feature is not supported.");
    }
 
-   public ItemsIterator<ObjectData> getCheckedOutDocuments(ObjectData folder, String orderBy)
+   public ItemsIterator<DocumentData> getCheckedOutDocuments(ObjectData folder, String orderBy)
    {
-      // TODO Auto-generated method stub
-      return null;
+      try
+      {
+         Node workingCopies =
+            (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_WORKING_COPIES);
+
+         List<DocumentData> checkedOut = new ArrayList<DocumentData>();
+
+         for (NodeIterator iterator = workingCopies.getNodes(); iterator.hasNext();)
+         {
+            Node wc = iterator.nextNode();
+            if (!wc.hasNodes())
+            {
+               // Must not happen.
+               LOG.error("PWC node not fould.");
+               continue;
+            }
+            Node node = wc.getNodes().nextNode();
+            TypeDefinition type = JcrTypeHelper.getTypeDefinition(node.getPrimaryNodeType(), true);
+            String latestVersion = node.getProperty("xcmis:latestVersionId").getString();
+            PWC pwc = new PWC(type, node, (DocumentData)getObjectById(latestVersion), indexListener);
+            if (folder != null)
+            {
+               for (FolderData parent : pwc.getParents())
+               {
+                  // TODO equals and hashCode for objects
+                  if (parent.getObjectId().equals(folder.getObjectId()))
+                  {
+                     checkedOut.add(pwc);
+                  }
+               }
+            }
+            else
+            {
+               checkedOut.add(pwc);
+            }
+         }
+
+         return new BaseItemsIterator<DocumentData>(checkedOut);
+      }
+      catch (RepositoryException re)
+      {
+         throw new CmisRuntimeException("Unable get checked-out documents. " + re.getMessage(), re);
+      }
    }
 
    /**
@@ -708,28 +821,50 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public ObjectData getObject(String objectId) throws ObjectNotFoundException
+   public ObjectData getObjectById(String objectId) throws ObjectNotFoundException
    {
+      if (objectId == null)
+      {
+         throw new CmisRuntimeException("Object id may not be null.");
+      }
       try
       {
          Node node = ((ExtendedSession)session).getNodeByIdentifier(objectId);
+         if (node.isNodeType(JcrCMIS.NT_FROZEN_NODE))
+         {
+            return getDocumentVersion(node);
+         }
          TypeDefinition type = JcrTypeHelper.getTypeDefinition(node.getPrimaryNodeType(), true);
 
          if (type.getBaseId() == BaseType.DOCUMENT)
          {
-            return new DocumentImpl(type, node, renditionManager);
+            if (!node.isNodeType(JcrCMIS.CMIS_MIX_DOCUMENT))
+            {
+               return new JcrFile(type, node, renditionManager, indexListener);
+            }
+            if (node.getParent().isNodeType("xcmis:workingCopy"))
+            {
+               // TODO get smarter (simpler)
+               String latestVersion = node.getProperty("xcmis:latestVersionId").getString();
+               return new PWC(type, node, (DocumentData)getObjectById(latestVersion), indexListener);
+            }
+            return new DocumentDataImpl(type, node, renditionManager, indexListener);
          }
          else if (type.getBaseId() == BaseType.FOLDER)
          {
-            return new FolderImpl(type, node);
+            if (!node.isNodeType(JcrCMIS.CMIS_MIX_FOLDER))
+            {
+               return new JcrFolder(type, node, indexListener);
+            }
+            return new FolderDataImpl(type, node, indexListener);
          }
          else if (type.getBaseId() == BaseType.POLICY)
          {
-            return new PolicyImpl(type, node);
+            return new PolicyDataImpl(type, node, indexListener);
          }
          else if (type.getBaseId() == BaseType.RELATIONSHIP)
          {
-            return new RelationshipImpl(type, node);
+            return new RelationshipDataImpl(type, node, indexListener);
          }
 
          // Must never happen.
@@ -737,7 +872,7 @@ public class StorageImpl implements Storage
       }
       catch (ItemNotFoundException nfe)
       {
-         throw new ObjectNotFoundException("Object " + objectId + " does not exists.");
+         throw new ObjectNotFoundException("Object '" + objectId + "' does not exist.");
       }
       catch (RepositoryException re)
       {
@@ -745,17 +880,30 @@ public class StorageImpl implements Storage
       }
    }
 
+   private DocumentVersion getDocumentVersion(Node node) throws RepositoryException
+   {
+      TypeDefinition type =
+         JcrTypeHelper.getTypeDefinition(getNodeType(node.getProperty(JcrCMIS.JCR_FROZEN_PRIMARY_TYPE).getString()),
+            true);
+
+      return new DocumentVersion(type, node, indexListener);
+   }
+
    /**
     * {@inheritDoc}
     */
    public ObjectData getObjectByPath(String path) throws ObjectNotFoundException
    {
+      if (path == null)
+      {
+         throw new CmisRuntimeException("Object path may not be null.");
+      }
       try
       {
          Item item = session.getItem(path);
          if (!item.isNode())
          {
-            throw new ObjectNotFoundException("Object " + path + " does not exists.");
+            throw new ObjectNotFoundException("Object '" + path + "' does not exist.");
          }
 
          Node node = (Node)item;
@@ -764,19 +912,27 @@ public class StorageImpl implements Storage
 
          if (type.getBaseId() == BaseType.DOCUMENT)
          {
-            return new DocumentImpl(type, node, renditionManager);
+            if (!node.isNodeType(JcrCMIS.CMIS_MIX_DOCUMENT))
+            {
+               return new JcrFile(type, node, renditionManager, indexListener);
+            }
+            return new DocumentDataImpl(type, node, renditionManager, indexListener);
          }
          else if (type.getBaseId() == BaseType.FOLDER)
          {
-            return new FolderImpl(type, node);
+            if (!node.isNodeType(JcrCMIS.CMIS_MIX_FOLDER))
+            {
+               return new JcrFolder(type, node, indexListener);
+            }
+            return new FolderDataImpl(type, node, indexListener);
          }
          else if (type.getBaseId() == BaseType.POLICY)
          {
-            return new PolicyImpl(type, node);
+            return new PolicyDataImpl(type, node, indexListener);
          }
          else if (type.getBaseId() == BaseType.RELATIONSHIP)
          {
-            return new RelationshipImpl(type, node);
+            return new RelationshipDataImpl(type, node, indexListener);
          }
 
          // Must never happen.
@@ -784,7 +940,7 @@ public class StorageImpl implements Storage
       }
       catch (ItemNotFoundException nfe)
       {
-         throw new ObjectNotFoundException("Object  " + path + " does not exists.");
+         throw new ObjectNotFoundException("Object  '" + path + "' does not exist.");
       }
       catch (RepositoryException re)
       {
@@ -792,16 +948,39 @@ public class StorageImpl implements Storage
       }
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public ItemsIterator<Rendition> getRenditions(ObjectData object)
    {
-      if (renditionManager != null)
+      try
       {
-         return renditionManager.getRenditions(object);
+         RenditionIterator it = new RenditionIterator(((BaseObjectData)object).getNode().getNodes());
+         if (it.hasNext())
+         {
+            return it;
+         }
+         else
+         {
+            if (renditionManager != null)
+            {
+               ArrayList<Rendition> renditionList = new ArrayList<Rendition>();
+               Rendition rend = renditionManager.getRenditions(object);
+               if (rend != null)
+               {
+                  renditionList.add(rend);
+               }
+               return new BaseItemsIterator<Rendition>(renditionList);
+            }
+         }
       }
-      else
+      catch (javax.jcr.RepositoryException re)
       {
-         return null;
+         String msg =
+            "Unable get renditions for object " + object.getObjectId() + " Unexpected error " + re.getMessage();
+         throw new StorageException(msg, re);
       }
+      return null;
    }
 
    /**
@@ -809,7 +988,98 @@ public class StorageImpl implements Storage
     */
    public RepositoryInfo getRepositoryInfo()
    {
-      return new RepositoryInfoImpl(configuration.getId());
+      if (repositoryInfo == null)
+      {
+         PermissionMapping permissionMapping = new PermissionMapping();
+
+         permissionMapping.put(PermissionMapping.CAN_GET_DESCENDENTS_FOLDER, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value()));
+         permissionMapping.put(PermissionMapping.CAN_GET_CHILDREN_FOLDER, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value()));
+         permissionMapping.put(PermissionMapping.CAN_GET_OBJECT_PARENTS_OBJECT, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value()));
+         permissionMapping.put(PermissionMapping.CAN_GET_FOLDER_PARENT_FOLDER, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value()));
+         permissionMapping.put(PermissionMapping.CAN_CREATE_DOCUMENT_FOLDER, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value()));
+         permissionMapping.put(PermissionMapping.CAN_CREATE_FOLDER_FOLDER, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value()));
+         permissionMapping.put(PermissionMapping.CAN_CREATE_RELATIONSHIP_SOURCE, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value()));
+         permissionMapping.put(PermissionMapping.CAN_CREATE_RELATIONSHIP_TARGET, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value()));
+         permissionMapping.put(PermissionMapping.CAN_GET_PROPERTIES_OBJECT, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value()));
+         permissionMapping.put(PermissionMapping.CAN_GET_CONTENT_STREAM_OBJECT, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value()));
+         permissionMapping.put(PermissionMapping.CAN_GET_RENDITIONS_OBJECT, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value()));
+         permissionMapping.put(PermissionMapping.CAN_UPDATE_PROPERTIES_OBJECT, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value(), BasicPermissions.CMIS_WRITE.value()));
+         permissionMapping.put(PermissionMapping.CAN_MOVE_OBJECT_OBJECT, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value(), BasicPermissions.CMIS_WRITE.value()));
+         permissionMapping.put(PermissionMapping.CAN_MOVE_OBJECT_TARGET, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value()));
+         permissionMapping.put(PermissionMapping.CAN_MOVE_OBJECT_SOURCE, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value()));
+         permissionMapping.put(PermissionMapping.CAN_DELETE_OBJECT, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value(), BasicPermissions.CMIS_WRITE.value()));
+         permissionMapping.put(PermissionMapping.CAN_DELETE_TREE_FOLDER, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value(), BasicPermissions.CMIS_WRITE.value()));
+         permissionMapping.put(PermissionMapping.CAN_SET_CONTENT_DOCUMENT, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value(), BasicPermissions.CMIS_WRITE.value()));
+         permissionMapping.put(PermissionMapping.CAN_DELETE_CONTENT_DOCUMENT, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value(), BasicPermissions.CMIS_WRITE.value()));
+         permissionMapping.put(PermissionMapping.CAN_ADD_TO_FOLDER_OBJECT, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value()));
+         permissionMapping.put(PermissionMapping.CAN_ADD_TO_FOLDER_FOLDER, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value()));
+         permissionMapping.put(PermissionMapping.CAN_REMOVE_OBJECT_FROM_FOLDER_OBJECT, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value()));
+         permissionMapping.put(PermissionMapping.CAN_REMOVE_OBJECT_FROM_FOLDER_FOLDER, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value()));
+         permissionMapping.put(PermissionMapping.CAN_CHECKOUT_DOCUMENT, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value(), BasicPermissions.CMIS_WRITE.value()));
+         permissionMapping.put(PermissionMapping.CAN_CANCEL_CHECKOUT_DOCUMENT, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value(), BasicPermissions.CMIS_WRITE.value()));
+         permissionMapping.put(PermissionMapping.CAN_CHECKIN_DOCUMENT, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value(), BasicPermissions.CMIS_WRITE.value()));
+         permissionMapping.put(PermissionMapping.CAN_GET_ALL_VERSIONS_DOCUMENT, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value()));
+         permissionMapping.put(PermissionMapping.CAN_GET_OBJECT_RELATIONSHIPS_OBJECT, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value()));
+         permissionMapping.put(PermissionMapping.CAN_ADD_POLICY_OBJECT, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value(), BasicPermissions.CMIS_WRITE.value()));
+         permissionMapping.put(PermissionMapping.CAN_ADD_POLICY_POLICY, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value()));
+         permissionMapping.put(PermissionMapping.CAN_REMOVE_POLICY_OBJECT, //
+            Arrays.asList(BasicPermissions.CMIS_WRITE.value()));
+         permissionMapping.put(PermissionMapping.CAN_REMOVE_POLICY_POLICY, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value()));
+         permissionMapping.put(PermissionMapping.CAN_GET_APPLIED_POLICIES_OBJECT, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value()));
+         permissionMapping.put(PermissionMapping.CAN_GET_ACL_OBJECT, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value()));
+         permissionMapping.put(PermissionMapping.CAN_APPLY_ACL_OBJECT, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value(), BasicPermissions.CMIS_WRITE.value()));
+
+         List<Permission> permissions = new ArrayList<Permission>(4);
+         for (BasicPermissions b : BasicPermissions.values())
+         {
+            permissions.add(new Permission(b.value(), ""));
+         }
+
+         repositoryInfo =
+            new RepositoryInfo(getId(), getId(), JcrCMIS.ROOT_FOLDER_ID, CmisConstants.SUPPORTED_VERSION,
+               new RepositoryCapabilities(CapabilityACL.MANAGE, CapabilityChanges.NONE,
+                  CapabilityContentStreamUpdatable.ANYTIME, CapabilityJoin.NONE, CapabilityQuery.BOTHCOMBINED,
+                  CapabilityRendition.READ, false, true, true, true, false, true, true, false), new ACLCapability(
+                  permissionMapping, Collections.unmodifiableList(permissions), AccessControlPropagation.OBJECTONLY,
+                  SupportedPermissions.BASIC), SystemIdentity.ANONIM, SystemIdentity.ANY, null, null, true, null,
+               "eXo", "xCMIS (eXo JCR SP)", "1.0", null);
+      }
+
+      return repositoryInfo;
    }
 
    /**
@@ -874,7 +1144,7 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public ObjectData moveObject(ObjectData object, Folder target, Folder source) throws ConstraintException,
+   public ObjectData moveObject(ObjectData object, FolderData target, FolderData source) throws ConstraintException,
       InvalidArgumentException, UpdateConflictException, VersioningException, NameConstraintViolationException,
       StorageException
    {
@@ -942,7 +1212,7 @@ public class StorageImpl implements Storage
     */
    public void removeType(String typeId) throws TypeNotFoundException, StorageException, CmisRuntimeException
    {
-      // Throws exceptions if type with specified 'typeId' does not exists or is unsupported by CMIS.
+      // Throws exceptions if type with specified 'typeId' does not exist or is unsupported by CMIS.
       getTypeDefinition(typeId, false);
       try
       {
@@ -961,6 +1231,63 @@ public class StorageImpl implements Storage
    public void unfileObject(ObjectData object)
    {
       ((BaseObjectData)object).unfile();
+   }
+
+   /**
+    * @see org.xcmis.spi.Storage#getUnfiledObjects()
+    */
+   public Iterator<String> getUnfiledObjectsId() throws StorageException
+   {
+      try
+      {
+         Node unfiledStore = (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_UNFILED);
+         final NodeIterator nodes = unfiledStore.getNodes();
+
+         return new Iterator<String>()
+         {
+
+            public boolean hasNext()
+            {
+               return nodes.hasNext();
+            }
+
+            public String next()
+            {
+               if (nodes.hasNext())
+               {
+                  //get wrapper
+                  Node nextNode = nodes.nextNode();
+                  NodeIterator etries;
+                  try
+                  {
+                     etries = nextNode.getNodes();
+                     if (etries.hasNext())
+                     {
+                        return ((ExtendedNode)etries.nextNode()).getIdentifier();
+                     }
+                     throw new CmisRuntimeException("Unfiled node object not found for wrapper object "
+                        + nextNode.getPath());
+                  }
+                  catch (RepositoryException e)
+                  {
+                     throw new CmisRuntimeException(e.getLocalizedMessage(), e);
+                  }
+               }
+               return null;
+            }
+
+            public void remove()
+            {
+               throw new UnsupportedOperationException();
+
+            }
+         };
+
+      }
+      catch (RepositoryException e)
+      {
+         throw new StorageException("Unable unfiled objects. " + e.getMessage(), e);
+      }
    }
 
    /**
@@ -1020,7 +1347,7 @@ public class StorageImpl implements Storage
       public DeleteTreeVisitor(String path, UnfileObject unfileObject)
       {
          this.treePath = path;
-         this.unfileObject = unfileObject;
+         this.unfileObject = unfileObject != null ? unfileObject : UnfileObject.DELETE;
       }
 
       /**
@@ -1121,7 +1448,53 @@ public class StorageImpl implements Storage
       {
          return moveMapping;
       }
-
    }
 
+   private class TreeVisitor implements ItemVisitor
+   {
+
+      private final Collection<String> allChildrenObjects = new HashSet<String>();
+
+      public TreeVisitor()
+      {
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public void visit(javax.jcr.Property property) throws RepositoryException
+      {
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public void visit(Node node) throws RepositoryException
+      {
+         NodeType nt = node.getPrimaryNodeType();
+         String uuid = ((ExtendedNode)node).getIdentifier();
+
+         if (nt.isNodeType(JcrCMIS.NT_FOLDER) || nt.isNodeType(JcrCMIS.NT_UNSTRUCTURED))
+         {
+            for (NodeIterator children = node.getNodes(); children.hasNext();)
+            {
+               children.nextNode().accept(this);
+            }
+            allChildrenObjects.add(uuid);
+         }
+         else
+         {
+            if (!allChildrenObjects.contains(uuid))
+            {
+               allChildrenObjects.add(uuid);
+            }
+         }
+      }
+
+      public Collection<String> getAllChildrenObjects()
+      {
+         return allChildrenObjects;
+      }
+
+   }
 }

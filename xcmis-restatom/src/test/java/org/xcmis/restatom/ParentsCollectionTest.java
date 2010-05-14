@@ -36,6 +36,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 public class ParentsCollectionTest extends BaseTest
 {
 
+   @Override
    public void setUp() throws Exception
    {
       super.setUp();
@@ -89,7 +90,8 @@ public class ParentsCollectionTest extends BaseTest
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
       ContainerResponse resp = service("GET", requestURI, "http://localhost:8080/rest", null, null, writer);
 
-      //            printBody(writer.getBody());
+      //      printBody(writer.getBody());
+
       assertEquals(200, resp.getStatus());
 
       DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
@@ -108,6 +110,6 @@ public class ParentsCollectionTest extends BaseTest
       org.w3c.dom.Node xmlEntry = getNode("atom:entry", xmlFeed);
       validateObjectEntry(xmlEntry, "cmis:folder");
 
-      assertEquals(testFolderName, getStringElement("cmisra:relativePathSegment", xmlEntry));
+      assertEquals("doc1", getStringElement("cmisra:relativePathSegment", xmlEntry));
    }
 }

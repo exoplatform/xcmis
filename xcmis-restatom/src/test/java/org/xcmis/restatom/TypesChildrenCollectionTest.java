@@ -22,16 +22,14 @@ package org.xcmis.restatom;
 import org.exoplatform.services.rest.impl.ContainerResponse;
 import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
 import org.w3c.dom.NodeList;
-import org.xcmis.spi.BaseType;
-import org.xcmis.spi.CMIS;
-import org.xcmis.spi.ContentStreamAllowed;
-import org.xcmis.spi.PropertyDefinition;
-import org.xcmis.spi.PropertyType;
-import org.xcmis.spi.TypeDefinition;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.TypeNotFoundException;
-import org.xcmis.spi.Updatability;
-import org.xcmis.spi.impl.PropertyDefinitionImpl;
-import org.xcmis.spi.impl.TypeDefinitionImpl;
+import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.ContentStreamAllowed;
+import org.xcmis.spi.model.PropertyDefinition;
+import org.xcmis.spi.model.PropertyType;
+import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.model.Updatability;
 
 import java.io.ByteArrayInputStream;
 import java.util.HashMap;
@@ -46,13 +44,14 @@ import javax.xml.parsers.DocumentBuilderFactory;
 public class TypesChildrenCollectionTest extends BaseTest
 {
 
-   private TypeDefinitionImpl article;
+   private TypeDefinition article;
 
+   @Override
    public void setUp() throws Exception
    {
       super.setUp();
       //cmis:article
-      article = new TypeDefinitionImpl();
+      article = new TypeDefinition();
       article.setBaseId(BaseType.DOCUMENT);
       article.setControllableACL(false);
       article.setControllablePolicy(false);
@@ -70,7 +69,7 @@ public class TypesChildrenCollectionTest extends BaseTest
       article.setContentStreamAllowed(ContentStreamAllowed.ALLOWED);
       article.setVersionable(false);
 
-      PropertyDefinitionImpl<String> pd = new PropertyDefinitionImpl<String>();
+      PropertyDefinition<String> pd = new PropertyDefinition<String>();
       pd.setMultivalued(false);
       pd.setUpdatability(Updatability.READWRITE);
       pd.setDisplayName("cmis:hello");
@@ -164,10 +163,11 @@ public class TypesChildrenCollectionTest extends BaseTest
 
    public void testAddType() throws Exception
    {
-      String req = "<?xml version='1.0' encoding='utf-8'?>" // 
+      String req = "<?xml version='1.0' encoding='utf-8'?>" //
          + "<entry xmlns='http://www.w3.org/2005/Atom'" //
-         + " xmlns:cmis='" + CMIS.CMIS_NS_URI + "'" //
-         + " xmlns:cmisra='" + AtomCMIS.CMISRA_NS_URI + "'>" + "<id>cmis:folder1</id>"//
+         + " xmlns:cmis='" + CmisConstants.CMIS_NS_URI + "'" //
+         + " xmlns:cmisra='" + AtomCMIS.CMISRA_NS_URI + "'>"//
+         + "<id>cmis:folder1</id>"//
          + "<cmisra:type xmlns:cmis=\"http://docs.oasis-open.org/ns/cmis/core/200908/\">"//
          + "<cmis:id>cmis:folder1</cmis:id>"//
          + "<cmis:baseId>cmis:folder</cmis:baseId>"//
@@ -216,8 +216,12 @@ public class TypesChildrenCollectionTest extends BaseTest
       }
       boolean propDef = false;
       for (PropertyDefinition<?> d : type.getPropertyDefinitions())
+      {
          if (d.getId().equals("cmis:newProperty"))
+         {
             propDef = true;
+         }
+      }
 
       assertTrue("Property definition for newly created type not found.", propDef);
    }

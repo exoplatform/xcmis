@@ -18,8 +18,22 @@
  */
 package org.xcmis.sp.jcr.exo;
 
+import org.exoplatform.services.jcr.core.ManageableRepository;
+import org.exoplatform.services.jcr.ext.common.SessionProvider;
+import org.exoplatform.services.jcr.util.IdGenerator;
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
+import org.xcmis.spi.BaseContentStream;
+import org.xcmis.spi.CmisConstants;
+import org.xcmis.spi.ContentStream;
+import org.xcmis.spi.RenditionContentStream;
+import org.xcmis.spi.RenditionManager;
+import org.xcmis.spi.RenditionProvider;
+import org.xcmis.spi.utils.MimeType;
+
 import java.util.Map;
 
+import javax.jcr.Item;
 import javax.jcr.Node;
 import javax.jcr.Property;
 import javax.jcr.Repository;
@@ -28,45 +42,33 @@ import javax.jcr.observation.Event;
 import javax.jcr.observation.EventIterator;
 import javax.jcr.observation.EventListener;
 
-import org.exoplatform.services.jcr.core.ManageableRepository;
-import org.exoplatform.services.jcr.ext.common.SessionProvider;
-import org.exoplatform.services.jcr.util.IdGenerator;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
-import org.xcmis.sp.jcr.exo.rendition.RenditionContentStream;
-import org.xcmis.sp.jcr.exo.rendition.RenditionProvider;
-import org.xcmis.spi.CMIS;
-import org.xcmis.spi.data.BaseContentStream;
-import org.xcmis.spi.data.ContentStream;
-import org.xcmis.spi.utils.MimeType;
-
 public class UpdateListener implements EventListener
 {
    /** Logger. */
    private static final Log LOG = ExoLogger.getLogger(UpdateListener.class.getName());
 
-   Map<MimeType, RenditionProvider> renditionProviders;
+   RenditionManager renditionManager;
 
    private final String workspace;
 
    private final Repository repository;
-   
+
    SessionProvider prov = null;
-   
+
    Session session = null;
 
    /**
     * Instantiates a new update listener.
-    * 
+    *
     * @param repository the repository
     * @param workspace the workspace
     * @param renditionProviders the rendition providers
     */
-   public UpdateListener(Repository repository, String workspace, Map<MimeType, RenditionProvider> renditionProviders)
+   public UpdateListener(Repository repository, String workspace, RenditionManager renditionManager)
    {
       this.repository = repository;
       this.workspace = workspace;
-      this.renditionProviders = renditionProviders;
+      this.renditionManager = renditionManager;
    }
 
    /**
@@ -74,61 +76,77 @@ public class UpdateListener implements EventListener
     */
    public void onEvent(EventIterator eventIterator)
    {
-      
+
       try
       {
          while (eventIterator.hasNext())
          {
             Event event = eventIterator.nextEvent();
             String path = event.getPath();
-            if (event.getPath().endsWith("jcr:content"))
+            if (path.contains("xcmis:system"))
+            {
+               return;
+            }
+
+            if (event.getPath().endsWith("jcr:content") || event.getPath().endsWith("jcr:data"))
             {
                if (prov == null)
+               {
                   prov = SessionProvider.createSystemProvider();
+               }
                if (session == null)
-              session = prov.getSession(workspace, (ManageableRepository)repository);
+               {
+                  session = prov.getSession(workspace, (ManageableRepository)repository);
+               }
 
-               Node node = session.getItem(path).getParent();
-              //Entry entry = new EntryImpl(node);
-               ContentStream content;
-               //content = entry.getContent(null);
+               Node node = null;
+               Item item = session.getItem(path);
+               if (item.isNode())
+               {
+                  node = session.getItem(path).getParent();
+               }
+               else
+               {
+                  node = session.getItem(path).getParent().getParent();
+               }
+
                Node contentNode = node.getNode(JcrCMIS.JCR_CONTENT);
                Property fileContent = contentNode.getProperty(JcrCMIS.JCR_DATA);
-               long length = fileContent.getLength();
+               int length = fileContent.getStream().available();
                if (length == 0)
-                  content =  null; // No content, but node has empty stream.
-               content = new BaseContentStream(fileContent.getStream(), //
-                  length, //
-                  node.getDepth() == 0 ? CMIS.ROOT_FOLDER_NAME : node.getName(), //
-                  contentNode.getProperty(JcrCMIS.JCR_MIMETYPE).getString());
-               
-               
-               if (content != null)
                {
-                  int count = 0;
-                  for (Map.Entry<MimeType, RenditionProvider> e : renditionProviders.entrySet())
+                  return; // No content, but node has empty stream.
+               }
+
+               MimeType mimeType = MimeType.fromString(contentNode.getProperty(JcrCMIS.JCR_MIMETYPE).getString());
+               if (contentNode.hasProperty(JcrCMIS.JCR_ENCODING))
+               {
+                  mimeType.getParameters().put(CmisConstants.CHARSET,
+                     contentNode.getProperty(JcrCMIS.JCR_ENCODING).getString());
+               }
+
+               ContentStream content = new BaseContentStream(fileContent.getStream(), length, null, mimeType);
+
+               int count = 0;
+
+               RenditionContentStream renditionContentStream =
+                  (RenditionContentStream)renditionManager.getStream(content, content.getMediaType());
+               if (renditionContentStream != null)
+               {
+                  String id = IdGenerator.generate();
+                  Node rendition = node.addNode(id, JcrCMIS.CMIS_NT_RENDITION);
+                  rendition.setProperty(JcrCMIS.CMIS_RENDITION_STREAM, renditionContentStream.getStream());
+                  rendition.setProperty(JcrCMIS.CMIS_RENDITION_MIME_TYPE, renditionContentStream.getMediaType()
+                     .getBaseType());
+                  rendition.setProperty(JcrCMIS.CMIS_RENDITION_ENCODING, renditionContentStream.getMediaType()
+                     .getParameter(CmisConstants.CHARSET));
+                  rendition.setProperty(JcrCMIS.CMIS_RENDITION_KIND, renditionContentStream.getKind());
+                  rendition.setProperty(JcrCMIS.CMIS_RENDITION_HEIGHT, renditionContentStream.getHeight());
+                  rendition.setProperty(JcrCMIS.CMIS_RENDITION_WIDTH, renditionContentStream.getWidth());
+                  count++;
+                  if (count > 0)
                   {
-                     if (e.getKey().match(MimeType.fromString(content.getMediaType())))
-                     {
-                        RenditionProvider renditionProvider = e.getValue();
-                        if (renditionProvider.canStoreRendition())
-                        {
-                           RenditionContentStream renditionContentStream = renditionProvider.getRenditionStream(content);
-                           Node rendition =
-                              node.addNode(IdGenerator.generate(), JcrCMIS.CMIS_NT_RENDITION);
-                           rendition.setProperty(JcrCMIS.CMIS_RENDITION_STREAM, renditionContentStream.getStream());
-                           rendition.setProperty(JcrCMIS.CMIS_RENDITION_MIME_TYPE, renditionContentStream
-                              .getMediaType());
-                           rendition.setProperty(JcrCMIS.CMIS_RENDITION_KIND, renditionContentStream.getKind());
-                           rendition.setProperty(JcrCMIS.CMIS_RENDITION_HEIGHT, renditionContentStream.getHeight());
-                           rendition.setProperty(JcrCMIS.CMIS_RENDITION_WIDTH, renditionContentStream.getWidth());
-                           count++;
-                        }
-                     }
-                     if (count > 0)
-                   {
-                      node.save();
-                   }
+                     node.save();
                   }
                }
             }

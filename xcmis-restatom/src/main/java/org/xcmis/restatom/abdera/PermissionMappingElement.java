@@ -23,7 +23,6 @@ import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.PermissionMapping;
 
 import java.util.Collection;
 
@@ -31,14 +30,15 @@ import javax.xml.namespace.QName;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id: PermissionMappingElement.java 2 2010-02-04 17:21:49Z andrew00x $
+ * @version $Id: PermissionMappingElement.java 2 2010-02-04 17:21:49Z andrew00x
+ *          $
  */
 public class PermissionMappingElement extends ExtensibleElementWrapper
 {
 
    /**
     * Instantiates a new permission mapping element.
-    * 
+    *
     * @param internal the internal
     */
    public PermissionMappingElement(Element internal)
@@ -48,7 +48,7 @@ public class PermissionMappingElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new permission mapping element.
-    * 
+    *
     * @param factory the factory
     * @param qname the qname
     */
@@ -59,23 +59,15 @@ public class PermissionMappingElement extends ExtensibleElementWrapper
 
    /**
     * Builds the element.
-    * 
+    *
     * @param permissionMapping the permission mapping
     */
-   public void build(PermissionMapping permissionMapping)
+   public void build(String key, Collection<String> permissions)
    {
-      if (permissionMapping != null)
+      addSimpleExtension(AtomCMIS.KEY, key);
+      for (String string : permissions)
       {
-         addSimpleExtension(AtomCMIS.KEY, permissionMapping.getKey());
-
-         Collection<String> listPermission = permissionMapping.getPermissions();
-         if (listPermission != null && listPermission.size() > 0)
-         {
-            for (String string : listPermission)
-            {
-               addSimpleExtension(AtomCMIS.PERMISSION, string);
-            }
-         }
+         addSimpleExtension(AtomCMIS.PERMISSION, string);
       }
    }
 }

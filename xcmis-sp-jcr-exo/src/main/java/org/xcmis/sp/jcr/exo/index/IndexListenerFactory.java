@@ -23,6 +23,7 @@ package org.xcmis.sp.jcr.exo.index;
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
+@Deprecated
 public class IndexListenerFactory
 {
 

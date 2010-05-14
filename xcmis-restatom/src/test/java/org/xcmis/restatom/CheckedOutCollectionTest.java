@@ -22,6 +22,7 @@ package org.xcmis.restatom;
 import org.exoplatform.services.rest.impl.ContainerResponse;
 import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
 import org.w3c.dom.NodeList;
+import org.xcmis.spi.CmisConstants;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
@@ -39,11 +40,27 @@ public class CheckedOutCollectionTest extends BaseTest
    public void testCheckOut() throws Exception
    {
       String docId = createDocument(testFolderId, "doc1", null, null);
+
+      String s = "<?xml version='1.0' encoding='utf-8'?>" //
+         + "<entry xmlns='http://www.w3.org/2005/Atom'" + " xmlns:cmis='" + CmisConstants.CMIS_NS_URI + "'"//
+         + " xmlns:cmisra='" + AtomCMIS.CMISRA_NS_URI + "'>" //
+         + "<title>title</title>" //
+         + "<summary>summary</summary>" //
+         + "<id>" + docId + "</id>" //
+         + "<cmisra:object>" //
+         + "<cmis:properties>" //
+         + "<cmis:propertyId localName='cmis:objectId' propertyDefinitionId='cmis:objectId'>" //
+         + "<cmis:value>" + docId + "</cmis:value></cmis:propertyId>" //
+         + "</cmis:properties>" //
+         + "</cmisra:object>" //
+         + "</entry>";
+      assertNull("Should be no checkedout document.", getCmisObject(docId).getObjectInfo()
+         .getVersionSeriesCheckedOutId());
       
-      assertNull("Should be no checkedout document.", getCmisObject(docId).getObjectInfo().getVersionSeriesCheckedOutId());
-      String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/checkedout/" + docId;
+      String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/checkedout";
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
-      ContainerResponse response = service("POST", requestURI, "http://localhost:8080/rest", null, null, writer);
+      ContainerResponse response =
+         service("POST", requestURI, "http://localhost:8080/rest", null, s.getBytes(), writer);
 
       //      printBody(writer.getBody());
       assertEquals(201, response.getStatus());
@@ -53,6 +70,7 @@ public class CheckedOutCollectionTest extends BaseTest
       org.w3c.dom.Document xmlDoc = f.newDocumentBuilder().parse(new ByteArrayInputStream(writer.getBody()));
 
       org.w3c.dom.Node entry = getNode("atom:entry", xmlDoc);
+      assertNotNull(entry);
       validateObjectEntry(entry, "cmis:document");
       assertNotNull("Object must be checkedout.", getCmisObject(docId).getObjectInfo().getVersionSeriesCheckedOutId());
    }
@@ -65,7 +83,8 @@ public class CheckedOutCollectionTest extends BaseTest
       String doc2Id = createDocument(testFolderId, "doc2", null, null);
       String pwc2 = conn.checkout(doc2Id);
 
-      String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/checkedout/";
+      String requestURI =
+         "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/checkedout" + "?folderId=" + testFolderId;
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
       ContainerResponse response = service("GET", requestURI, "http://localhost:8080/rest", null, null, writer);
 
@@ -77,6 +96,7 @@ public class CheckedOutCollectionTest extends BaseTest
       org.w3c.dom.Document xmlDoc = f.newDocumentBuilder().parse(new ByteArrayInputStream(writer.getBody()));
 
       org.w3c.dom.Node xmlFeed = getNode("atom:feed", xmlDoc);
+      assertNotNull(xmlFeed);
       validateFeedCommons(xmlFeed);
 
       assertTrue(hasLink(AtomCMIS.LINK_SERVICE, xmlFeed));

@@ -19,9 +19,11 @@
 package org.xcmis.search.content;
 
 import org.xcmis.search.content.Schema.Column;
+import org.xcmis.search.model.constraint.Operator;
+import org.xcmis.search.value.PropertyType;
 
 /**
- * In memory column definition   
+ * In memory column definition.
  */
 public class InMemoryColumn implements Column
 {
@@ -31,17 +33,20 @@ public class InMemoryColumn implements Column
 
    private final String name;
 
-   private final String type;
+   private final PropertyType type;
 
-   public InMemoryColumn(String name, String type)
+   private final Operator[] availableQueryOperators;
+
+   public InMemoryColumn(String name, PropertyType type)
    {
-      this(name, type, DEFAULT_FULL_TEXT_SEARCHABLE);
+      this(name, type, DEFAULT_FULL_TEXT_SEARCHABLE, Operator.ALL);
    }
 
-   public InMemoryColumn(String name, String type, boolean fullTextSearchable)
+   public InMemoryColumn(String name, PropertyType type, boolean fullTextSearchable, Operator[] availableQueryOperators)
    {
       this.name = name;
       this.type = type;
+      this.availableQueryOperators = availableQueryOperators;
       this.fullTextSearchable = fullTextSearchable;
 
    }
@@ -57,7 +62,7 @@ public class InMemoryColumn implements Column
    /**
     * @see org.xcmis.search.content.Schema.Column#getPropertyType()
     */
-   public String getPropertyType()
+   public PropertyType getPropertyType()
    {
       return type;
    }
@@ -79,5 +84,13 @@ public class InMemoryColumn implements Column
    public String toString()
    {
       return this.name + "(" + type + ")";
+   }
+
+   /**
+    * @see org.xcmis.search.content.Schema.Column#getAvailableQueryOperators()
+    */
+   public Operator[] getAvailableQueryOperators()
+   {
+      return availableQueryOperators;
    }
 }

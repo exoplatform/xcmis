@@ -29,14 +29,13 @@ import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.StorageProvider;
-import org.xcmis.spi.TypeDefinition;
+import org.xcmis.spi.model.TypeDefinition;
 
 import java.util.Calendar;
 import java.util.List;
@@ -49,12 +48,10 @@ public class TypesDescendantsCollection extends CmisTypeCollection
 {
    /**
     * Instantiates a new types descendants collection.
-    * @param storageProvider TODO
-    * @param repositoryService the repository service
     */
-   public TypesDescendantsCollection(StorageProvider storageProvider)
+   public TypesDescendantsCollection()
    {
-      super(storageProvider);
+      super();
       setHref("/typedescendants");
    }
 
@@ -75,8 +72,9 @@ public class TypesDescendantsCollection extends CmisTypeCollection
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
       String typeId = request.getTarget().getParameter(AtomCMIS.PARAM_TYPE_ID);
-      boolean includePropertyDefinitions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PROPERTY_DEFINITIONS, false);
-      int depth = getIntegerParameter(request, AtomCMIS.PARAM_DEPTH, CMIS.DEPTH);
+      boolean includePropertyDefinitions =
+         getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PROPERTY_DEFINITIONS, false);
+      int depth = getIntegerParameter(request, AtomCMIS.PARAM_DEPTH, CmisConstants.DEPTH);
       Connection conn = null;
       try
       {
@@ -105,7 +103,7 @@ public class TypesDescendantsCollection extends CmisTypeCollection
             Entry e = feed.addEntry();
             IRI feedIri = new IRI(getFeedIriForEntry(typeContainer.getContainer(), request));
             addEntryDetails(request, e, feedIri, typeContainer.getContainer());
-            if (typeContainer.getChildren().size() > 0)
+            if (typeContainer.getChildren() != null && !typeContainer.getChildren().isEmpty())
             {
                addChildren(e, typeContainer.getChildren(), feedIri, request);
             }
@@ -140,12 +138,12 @@ public class TypesDescendantsCollection extends CmisTypeCollection
 
    /**
     * Adds the children.
-    * 
+    *
     * @param entry the entry
     * @param children the children
     * @param feedIri the feed iri
     * @param request the request
-    * 
+    *
     * @throws ResponseContextException the response context exception
     */
    protected void addChildren(Entry entry, List children, IRI feedIri, RequestContext request)
@@ -180,7 +178,7 @@ public class TypesDescendantsCollection extends CmisTypeCollection
       {
          Entry ch = entry.getFactory().newEntry(childrenElement);
          addEntryDetails(request, ch, feedIri, (TypeDefinition)typeContainer.getContainer());
-         if (typeContainer.getChildren().size() > 0)
+         if (typeContainer.getChildren() != null && typeContainer.getChildren().size() > 0)
          {
             addChildren(ch, typeContainer.getChildren(), feedIri, request);
          }
@@ -190,6 +188,7 @@ public class TypesDescendantsCollection extends CmisTypeCollection
    /**
     * {@inheritDoc}
     */
+   @Override
    public String getTitle(RequestContext request)
    {
       return "Type Descendants";

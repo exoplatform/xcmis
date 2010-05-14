@@ -48,8 +48,6 @@ public class PropertyValue extends DynamicOperand
     *           the name of the selector
     * @param propertyName
     *           the name of the property
-    * @throws IllegalArgumentException
-    *            if the selector name or property name are null
     */
    public PropertyValue(SelectorName selectorName, String propertyName)
    {

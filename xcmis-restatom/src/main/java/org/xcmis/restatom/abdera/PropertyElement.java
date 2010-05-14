@@ -23,7 +23,7 @@ import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.object.impl.BaseProperty;
+import org.xcmis.spi.model.impl.BaseProperty;
 
 import javax.xml.namespace.QName;
 
@@ -66,8 +66,14 @@ public abstract class PropertyElement<T extends BaseProperty<?>> extends Extensi
       {
          setAttributeValue(AtomCMIS.PROPERTY_DEFINITION_ID.getLocalPart(), property.getId());
          setAttributeValue(AtomCMIS.LOCAL_NAME.getLocalPart(), property.getLocalName());
-         setAttributeValue(AtomCMIS.DISPLAY_NAME.getLocalPart(), property.getDisplayName());
-         setAttributeValue(AtomCMIS.QUERY_NAME.getLocalPart(), property.getQueryName());
+         if (property.getDisplayName() != null)
+         {
+            setAttributeValue(AtomCMIS.DISPLAY_NAME.getLocalPart(), property.getDisplayName());
+         }
+         if (property.getQueryName() != null)
+         {
+            setAttributeValue(AtomCMIS.QUERY_NAME.getLocalPart(), property.getQueryName());
+         }
       }
    }
 
@@ -87,8 +93,16 @@ public abstract class PropertyElement<T extends BaseProperty<?>> extends Extensi
    {
       obj.setId(getAttributeValue(AtomCMIS.PROPERTY_DEFINITION_ID.getLocalPart()));
       obj.setLocalName(getAttributeValue(AtomCMIS.LOCAL_NAME.getLocalPart()));
-      obj.setDisplayName(getAttributeValue(AtomCMIS.DISPLAY_NAME.getLocalPart()));
-      obj.setQueryName(getAttributeValue(AtomCMIS.QUERY_NAME.getLocalPart()));
+      String displayName = getAttributeValue(AtomCMIS.DISPLAY_NAME.getLocalPart());
+      if (displayName != null)
+      {
+         obj.setDisplayName(getAttributeValue(AtomCMIS.DISPLAY_NAME.getLocalPart()));
+      }
+      String queryName = getAttributeValue(AtomCMIS.QUERY_NAME.getLocalPart());
+      if (queryName != null)
+      {
+         obj.setQueryName(queryName);
+      }
    }
 
 }

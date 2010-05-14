@@ -22,10 +22,9 @@ package org.xcmis.restatom;
 import org.exoplatform.services.rest.impl.ContainerResponse;
 import org.exoplatform.services.rest.tools.ByteArrayContainerResponseWriter;
 import org.w3c.dom.NodeList;
-import org.xcmis.spi.AccessControlEntry;
-import org.xcmis.spi.AccessControlPropagation;
-import org.xcmis.spi.Permission.BasicPermissions;
-import org.xcmis.spi.impl.AccessControlEntryImpl;
+import org.xcmis.spi.model.AccessControlEntry;
+import org.xcmis.spi.model.AccessControlPropagation;
+import org.xcmis.spi.model.Permission.BasicPermissions;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
@@ -35,7 +34,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * Created by The eXo Platform SAS .
- * 
+ *
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com.ua">Alexey Zavizionov</a>
  * @version $Id: RepositoryServiceTest.java 2734 2009-08-19 15:42:18Z andrew00x
  *          $ Jul 20, 2009
@@ -48,12 +47,12 @@ public class ACLTest extends BaseTest
       String docId = createDocument(testFolderId, "doc1", null, null);
 
       List<AccessControlEntry> addACL = new ArrayList<AccessControlEntry>();
-      AccessControlEntryImpl entry1 = new AccessControlEntryImpl();
+      AccessControlEntry entry1 = new AccessControlEntry();
       entry1.setPrincipal("Makis");
       entry1.getPermissions().add(BasicPermissions.CMIS_WRITE.value());
 
       addACL.add(entry1);
-      AccessControlEntryImpl entry2 = new AccessControlEntryImpl();
+      AccessControlEntry entry2 = new AccessControlEntry();
       entry2.setPrincipal("root");
       entry2.getPermissions().add(BasicPermissions.CMIS_READ.value());
       entry2.getPermissions().add(BasicPermissions.CMIS_WRITE.value());

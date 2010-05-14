@@ -18,7 +18,9 @@
  */
 package org.xcmis.search.content;
 
+import org.xcmis.search.model.constraint.Operator;
 import org.xcmis.search.model.source.SelectorName;
+import org.xcmis.search.value.PropertyType;
 
 import java.util.List;
 import java.util.Map;
@@ -94,7 +96,7 @@ public interface Schema
        * 
        * @return the property type; never null
        */
-      String getPropertyType();
+      PropertyType getPropertyType();
 
       /**
        * Get whether the column can be used in a full-text search.
@@ -102,6 +104,13 @@ public interface Schema
        * @return true if the column is full-text searchable, or false otherwise
        */
       boolean isFullTextSearchable();
+
+      /**
+       * Available query operators for the given column.
+       * 
+       * @return array of query operators
+       */
+      Operator[] getAvailableQueryOperators();
 
    }
 }

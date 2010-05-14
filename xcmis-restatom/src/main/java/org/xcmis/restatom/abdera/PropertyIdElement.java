@@ -22,7 +22,7 @@ package org.xcmis.restatom.abdera;
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.object.impl.IdProperty;
+import org.xcmis.spi.model.impl.IdProperty;
 
 import java.util.List;
 
@@ -84,7 +84,8 @@ public class PropertyIdElement extends PropertyElement<IdProperty>
       processPropertyElement(id);
       if (getElements() != null && getElements().size() > 0)
       {
-         for (Element el : getElements()) {
+         for (Element el : getElements())
+         {
             id.getValues().add(el.getText());
          }
       }

@@ -26,16 +26,15 @@ import org.apache.abdera.model.Feed;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.FilterNotValidException;
-import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.StorageProvider;
-import org.xcmis.spi.object.CmisObject;
-import org.xcmis.spi.object.ObjectParent;
+import org.xcmis.spi.model.CmisObject;
+import org.xcmis.spi.model.IncludeRelationships;
+import org.xcmis.spi.model.ObjectParent;
 
 import java.util.List;
 
@@ -48,12 +47,10 @@ public class ParentsCollection extends CmisObjectCollection
 
    /**
     * Instantiates a new parents collection.
-    * @param storageProvider TODO
-    * 
     */
-   public ParentsCollection(StorageProvider storageProvider)
+   public ParentsCollection()
    {
-      super(storageProvider);
+      super();
       setHref("/parents");
    }
 
@@ -76,7 +73,7 @@ public class ParentsCollection extends CmisObjectCollection
 
    /**
     * Adds the feed details.
-    * 
+    *
     * @param feed the feed
     * @param request the request
     * @throws ResponseContextException the response context exception
@@ -87,11 +84,7 @@ public class ParentsCollection extends CmisObjectCollection
       boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
       boolean includeRelativePathSegment =
          getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_RELATIVE_PATH_SEGMENT, false);
-
-      // XXX At the moment get all properties from back-end. We need some of them for build correct feed.
-      // Filter will be applied during build final Atom Document.
-      //      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
-      String propertyFilter = null;
+      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
       String renditionFilter = request.getParameter(AtomCMIS.PARAM_RENDITION_FILTER);
       IncludeRelationships includeRelationships;
       try
@@ -113,7 +106,8 @@ public class ParentsCollection extends CmisObjectCollection
          conn = getConnection(request);
          String objectId = getId(request);
          CmisObject object =
-            conn.getObject(objectId, false, IncludeRelationships.NONE, false, false, true, CMIS.BASE_TYPE_ID, null);
+            conn.getObject(objectId, false, IncludeRelationships.NONE, false, false, true, CmisConstants.BASE_TYPE_ID,
+               null);
 
          switch (getBaseObjectType(object))
          {

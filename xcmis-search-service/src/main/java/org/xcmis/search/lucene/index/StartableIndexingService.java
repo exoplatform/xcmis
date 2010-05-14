@@ -22,8 +22,9 @@ package org.xcmis.search.lucene.index;
 import org.apache.lucene.document.Document;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.search.config.IndexConfigurationException;
 import org.xcmis.search.config.IndexConfiguration;
+import org.xcmis.search.config.IndexConfigurationException;
+import org.xcmis.search.lucene.IndexRecoveryTool;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,7 +53,7 @@ public class StartableIndexingService extends LuceneIndexingService
    private final File indexDir;
 
    /** The index restore service. */
-   private final IndexRestoreService indexRestoreService;
+   private final IndexRecoveryTool indexRecoveryTool;
 
    /** Is started flag. */
    private boolean isStarted = false;
@@ -65,10 +66,11 @@ public class StartableIndexingService extends LuceneIndexingService
     * @throws IndexConfigurationException
     * @throws IndexException
     */
-   public StartableIndexingService(IndexConfiguration configuration) throws IndexConfigurationException, IndexException
+   public StartableIndexingService(IndexConfiguration configuration, IndexRecoveryTool indexRecoveryTool)
+      throws IndexConfigurationException, IndexException
    {
-      super(configuration);
-      this.indexRestoreService = configuration.getIndexRestoreService();
+      super(configuration, indexRecoveryTool);
+      this.indexRecoveryTool = indexRecoveryTool;
       this.indexDir = new File(configuration.getIndexDir());
       if (!indexDir.exists() && !indexDir.mkdirs())
       {
@@ -122,11 +124,6 @@ public class StartableIndexingService extends LuceneIndexingService
          }
       }
       catch (IndexException e)
-      {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      }
-      catch (IndexTransactionException e)
       {
          // TODO Auto-generated catch block
          e.printStackTrace();
@@ -194,7 +191,7 @@ public class StartableIndexingService extends LuceneIndexingService
       // clean persisted index
       softCleanIndex();
 
-      indexRestoreService.restoreIndex(this);
+      indexRecoveryTool.recoverAll();
 
       if (!flag.delete())
       {

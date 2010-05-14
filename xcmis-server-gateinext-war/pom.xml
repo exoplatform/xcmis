@@ -1,6 +1,5 @@
 <project>
    <modelVersion>4.0.0</modelVersion>
-
    <parent>
       <groupId>org.xcmis</groupId>
       <artifactId>xcmis-parent</artifactId>
@@ -8,10 +7,8 @@
    </parent>
 
    <artifactId>xcmis-server-gateinext-war</artifactId>
-   <name>xCMIS :: Server GateIn Ext WAR</name>
-   <description>xCMIS Server GateIn Ext WAR</description>
-
    <packaging>war</packaging>
+   <name>xCMIS :: Server :: GateIn Ext WAR</name>
 
    <dependencies>
    </dependencies>

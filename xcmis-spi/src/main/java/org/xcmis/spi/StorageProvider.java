@@ -19,15 +19,11 @@
 
 package org.xcmis.spi;
 
-import org.exoplatform.services.security.ConversationState;
-
 import java.util.Set;
-
-import javax.security.auth.login.LoginException;
 
 /**
  * Provide access to all available CMIS storages.
- * 
+ *
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: StorageProvider.java 316 2010-03-09 15:20:28Z andrew00x $
  */
@@ -35,33 +31,18 @@ public interface StorageProvider
 {
 
    /**
-    * Get storage with specified id.
-    * 
-    * @param id storage id
-    * @param user user name
-    * @param password user password
-    * @return connection
-    * @throws LoginException if parameters <code>user</code> or
-    *         <code>password</code> in invalid
-    * @throws InvalidArgumentException if storage with <code>id</code> does not
-    *         exists
-    */
-   Connection getConnection(String id, String user, String password) throws LoginException, InvalidArgumentException;
-
-   /**
-    * Create new connection for user that has specified
-    * <code>conversation</code>.
-    * 
-    * @param id storage id
-    * @param conversation user's state that contains user identity and some
-    *        optional context specific attributes
+    * Create new connection for user. This method may be used for anonymous user
+    * or when environment able to determine current user. This implementation
+    * specific.
+    *
+    * @param storageId storage id
     * @return connection
     */
-   Connection getConnection(String id, ConversationState conversation);
+   Connection getConnection(String storageId);
 
    /**
     * Get id of all available storages.
-    * 
+    *
     * @return storages iDs if no one storages configured than empty set returned
     *         never null
     */

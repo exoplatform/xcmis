@@ -26,8 +26,8 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.search.config.IndexConfigurationException;
 import org.xcmis.search.config.IndexConfiguration;
+import org.xcmis.search.config.IndexConfigurationException;
 
 import java.io.File;
 import java.io.IOException;
@@ -160,7 +160,7 @@ public class PersistentIndexDataKeeperFactory extends LuceneIndexDataKeeperFacto
          for (final LuceneIndexDataManager luceneIndexDataManager : chains)
          {
             // TODO remove get reader
-            luceneIndexDataManager.getIndexReader();
+            // luceneIndexDataManager.getIndexReader();
             dirs.add(luceneIndexDataManager.getDirectory());
          }
          final Directory[] dirsToMerge = new Directory[dirs.size()];

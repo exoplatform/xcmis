@@ -151,5 +151,4 @@ public class StorageConfiguration
    {
       this.workspace = workspace;
    }
-
 }

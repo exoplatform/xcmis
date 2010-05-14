@@ -25,7 +25,9 @@ import org.xcmis.search.VisitException;
 import org.xcmis.search.Visitors;
 
 /**
- * 
+ * @author <a href="mailto:Sergey.Kabashnyuk@exoplatform.org">Sergey Kabashnyuk</a>
+ * @version $Id: Limit.java 34360 2009-07-22 23:58:59Z ksm $
+ *
  */
 
 public class Limit implements QueryElement
@@ -45,8 +47,6 @@ public class Limit implements QueryElement
     * 
     * @param rowLimit
     *           the maximum number of rows
-    * @throws IllegalArgumentException
-    *            if the row limit is not positive
     */
    public Limit(int rowLimit)
    {
@@ -61,8 +61,6 @@ public class Limit implements QueryElement
     *           the maximum number of rows
     * @param offset
     *           the number of rows to skip before beginning the results
-    * @throws IllegalArgumentException
-    *            if the row limit is not positive, or if the offset is negative
     */
    public Limit(int rowLimit, int offset)
    {

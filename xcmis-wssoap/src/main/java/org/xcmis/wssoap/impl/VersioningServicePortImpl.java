@@ -29,18 +29,20 @@ import org.xcmis.messaging.CmisContentStreamType;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.soap.CmisException;
 import org.xcmis.soap.VersioningServicePort;
+import org.xcmis.spi.BaseContentStream;
+import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
-import org.xcmis.spi.IncludeRelationships;
-import org.xcmis.spi.StorageProvider;
-import org.xcmis.spi.data.BaseContentStream;
-import org.xcmis.spi.object.CmisObject;
+import org.xcmis.spi.model.CmisObject;
+import org.xcmis.spi.model.IncludeRelationships;
+import org.xcmis.spi.utils.MimeType;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author <a href="mailto:max.shaposhnik@exoplatform.com">Max Shaposhnik</a>
- * @version $Id: VersioningServicePortImpl.java 2 2010-02-04 17:21:49Z andrew00x $
+ * @version $Id: VersioningServicePortImpl.java 2 2010-02-04 17:21:49Z andrew00x
+ *          $
  */
 @javax.jws.WebService(// name = "VersioningServicePort",
 serviceName = "VersioningService", //
@@ -55,17 +57,13 @@ public class VersioningServicePortImpl implements VersioningServicePort
    /** Logger. */
    private static final Log LOG = ExoLogger.getLogger(VersioningServicePortImpl.class);
 
-   /** StorageProvider. */
-   private StorageProvider storageProvider;
-
    /**
     * Constructs instance of <code>VersioningServicePortImpl</code> .
-    * 
+    *
     * @param storageProvider StorageProvider
     */
-   public VersioningServicePortImpl(StorageProvider storageProvider)
+   public VersioningServicePortImpl()
    {
-      this.storageProvider = storageProvider;
    }
 
    /**
@@ -75,11 +73,14 @@ public class VersioningServicePortImpl implements VersioningServicePort
       throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation cancelCheckOut");
+      }
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          conn.cancelCheckout(documentId);
          return new CmisExtensionType();
       }
@@ -90,7 +91,10 @@ public class VersioningServicePortImpl implements VersioningServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -109,23 +113,28 @@ public class VersioningServicePortImpl implements VersioningServicePort
       javax.xml.ws.Holder<CmisExtensionType> extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation checkIn");
+      }
       Connection conn = null;
       BaseContentStream cs = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          if (contentStream != null)
+         {
             cs =
-               new BaseContentStream(contentStream.getStream().getInputStream(), contentStream.getFilename(),
-                  contentStream.getMimeType());
+               new BaseContentStream(contentStream.getStream().getInputStream(), contentStream.getFilename(), MimeType
+                  .fromString(contentStream.getMimeType()));
+         }
          String res = conn.checkin(documentId.value, //
             major == null ? true : major, // major as default
             TypeConverter.getPropertyMap(properties), //
             cs, //
             checkinComment, //
-            TypeConverter.getCmisListAccessControlEntry(addACEs), //
-            TypeConverter.getCmisListAccessControlEntry(removeACEs), //
+            TypeConverter.getListAccessControlEntry(addACEs), //
+            TypeConverter.getListAccessControlEntry(removeACEs), //
             policies);
          documentId.value = res;
          CmisExtensionType ext = new CmisExtensionType();
@@ -138,7 +147,10 @@ public class VersioningServicePortImpl implements VersioningServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -150,11 +162,14 @@ public class VersioningServicePortImpl implements VersioningServicePort
       throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation checkOut");
+      }
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          String res = conn.checkout(documentId.value);
          documentId.value = res;
          CmisExtensionType ext = new CmisExtensionType();
@@ -168,7 +183,10 @@ public class VersioningServicePortImpl implements VersioningServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -179,12 +197,15 @@ public class VersioningServicePortImpl implements VersioningServicePort
       Boolean includeAllowableActions, CmisExtensionType extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation getAllVersions");
+      }
       Connection conn = null;
       List<CmisObjectType> res = new ArrayList<CmisObjectType>();
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          List<CmisObject> list = conn.getAllVersions(versionSeriesId, //
             includeAllowableActions == null ? false : includeAllowableActions, //
             true, propertyFilter);
@@ -200,7 +221,10 @@ public class VersioningServicePortImpl implements VersioningServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
       return res;
    }
@@ -221,7 +245,8 @@ public class VersioningServicePortImpl implements VersioningServicePort
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          return TypeConverter.getCmisObjectType(conn.getObjectOfLatestVersion(versionSeriesId, //
             major == null ? false : major, //
             includeAllowableActions == null ? false : includeAllowableActions, //
@@ -239,7 +264,10 @@ public class VersioningServicePortImpl implements VersioningServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -250,11 +278,14 @@ public class VersioningServicePortImpl implements VersioningServicePort
       String filter, CmisExtensionType extension) throws CmisException
    {
       if (LOG.isDebugEnabled())
+      {
          LOG.debug("Executing operation getPropertiesOfLatestVersion");
+      }
       Connection conn = null;
       try
       {
-         conn = storageProvider.getConnection(repositoryId, null);
+         conn = CmisRegistry.getInstance().getConnection(repositoryId);
+
          return TypeConverter.getCmisPropertiesType(conn.getPropertiesOfLatestVersion(objectId, //
             major == null ? false : major, //
             true, filter));
@@ -266,7 +297,10 @@ public class VersioningServicePortImpl implements VersioningServicePort
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 

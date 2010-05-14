@@ -19,10 +19,10 @@
 package org.xcmis.search;
 
 /**
- * Query model exception
+ * Query model exception.
  * 
- * @author <a href="mailto:foo@bar.org">Foo Bar</a>
- * @version $Id: exo-jboss-codetemplates.xml 34360 2009-07-22 23:58:59Z
+ * @author <a href="mailto:Sergey.Kabashnyuk@exoplatform.org">Sergey Kabashnyuk</a>
+ * @version $Id: QueryObjectModelException.java 34360 2009-07-22 23:58:59Z
  *          aheritier $
  * 
  */
@@ -34,7 +34,7 @@ public class QueryObjectModelException extends Exception
    private static final long serialVersionUID = -2354666701076126822L;
 
    /**
-    * @param string
+    * @param string String
     */
    public QueryObjectModelException(String string)
    {

@@ -23,21 +23,36 @@ import java.util.List;
 
 /**
  * Reflect tree hierarchy of CMIS object.
- * 
+ *
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */
-public interface ItemsTree<T>
+public final class ItemsTree<T>
 {
+
+   private final T container;
+
+   private final List<ItemsTree<T>> children;
+
+   public ItemsTree(T element, List<ItemsTree<T>> children)
+   {
+      this.container = element;
+      this.children = children;
+   }
 
    /**
     * @return element (node) in three hierarchy
     */
-   T getContainer();
+   public T getContainer()
+   {
+      return container;
+   }
 
    /**
     * @return children of object returned by {@link #getContainer()}
     */
-   List<ItemsTree<T>> getChildren();
-
+   public List<ItemsTree<T>> getChildren()
+   {
+      return children;
+   }
 }

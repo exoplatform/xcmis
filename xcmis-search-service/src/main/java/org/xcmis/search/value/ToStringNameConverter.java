@@ -20,7 +20,7 @@ package org.xcmis.search.value;
 
 /**
  * @author <a href="mailto:Sergey.Kabashnyuk@exoplatform.org">Sergey Kabashnyuk</a>
- * @version $Id: exo-jboss-codetemplates.xml 34360 2009-07-22 23:58:59Z ksm $
+ * @version $Id: ToStringNameConverter.java 34360 2009-07-22 23:58:59Z ksm $
  *
  */
 public class ToStringNameConverter implements NameConverter<String>

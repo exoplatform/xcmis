@@ -20,7 +20,6 @@ package org.xcmis.search.lucene.index;
 
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.search.SearchServiceException;
 
 /**
  * Created by The eXo Platform SAS.
@@ -28,7 +27,7 @@ import org.xcmis.search.SearchServiceException;
  * @author <a href="mailto:Sergey.Kabashnyuk@gmail.com">Sergey Kabashnyuk</a>
  * @version $Id: IndexTransactionException.java 2 2010-02-04 17:21:49Z andrew00x $
  */
-public class IndexTransactionException extends SearchServiceException
+public class IndexTransactionException extends IndexException
 {
    /**
     * 

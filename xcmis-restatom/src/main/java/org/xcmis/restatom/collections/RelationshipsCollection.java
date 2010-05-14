@@ -29,20 +29,19 @@ import org.apache.abdera.protocol.server.TargetType;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.abdera.ObjectTypeElement;
-import org.xcmis.spi.AccessControlEntry;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.RelationshipDirection;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.StorageProvider;
-import org.xcmis.spi.object.CmisObject;
-import org.xcmis.spi.object.Property;
-import org.xcmis.spi.object.impl.IdProperty;
+import org.xcmis.spi.model.AccessControlEntry;
+import org.xcmis.spi.model.CmisObject;
+import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.RelationshipDirection;
+import org.xcmis.spi.model.impl.IdProperty;
 
 import java.util.HashMap;
 import java.util.List;
@@ -58,17 +57,17 @@ public class RelationshipsCollection extends CmisObjectCollection
 
    /**
     * Instantiates a new relationships collection.
-    * @param storageProvider TODO
     */
-   public RelationshipsCollection(StorageProvider storageProvider)
+   public RelationshipsCollection()
    {
-      super(storageProvider);
+      super();
       setHref("/relationships");
    }
 
    /**
     * {@inheritDoc}
     */
+   @Override
    public Iterable<CmisObject> getEntries(RequestContext request) throws ResponseContextException
    {
       // To process hierarchically structure override addFeedDetails(Feed, RequestContext) method.
@@ -111,15 +110,15 @@ public class RelationshipsCollection extends CmisObjectCollection
       for (Property<?> p : properties.values())
       {
          String pId = p.getId();
-         if (CMIS.OBJECT_TYPE_ID.equals(pId))
+         if (CmisConstants.OBJECT_TYPE_ID.equals(pId))
          {
             typeId = ((IdProperty)p).getValues().get(0);
          }
-         else if (CMIS.SOURCE_ID.equals(pId))
+         else if (CmisConstants.SOURCE_ID.equals(pId))
          {
             sourceId = ((IdProperty)p).getValues().get(0);
          }
-         else if (CMIS.TARGET_ID.equals(pId))
+         else if (CmisConstants.TARGET_ID.equals(pId))
          {
             targetId = ((IdProperty)p).getValues().get(0);
          }
@@ -127,15 +126,15 @@ public class RelationshipsCollection extends CmisObjectCollection
 
       if (typeId == null)
       {
-         return createErrorResponse("ObjectTypeId is not specified.", 400);
+         return createErrorResponse("The cmis:objectTypeId is not specified.", 400);
       }
       if (sourceId == null)
       {
-         return createErrorResponse("Source id is not specified.", 400);
+         return createErrorResponse("The cmis:sourceId is not specified.", 400);
       }
       if (targetId == null)
       {
-         return createErrorResponse("Traget id is not specified.", 400);
+         return createErrorResponse("The cmis:targetId is not specified.", 400);
       }
 
       List<AccessControlEntry> addACL = null;
@@ -149,7 +148,7 @@ public class RelationshipsCollection extends CmisObjectCollection
       {
          conn = getConnection(request);
          relationshipId = conn.createRelationship(properties, addACL, removeACL, policies);
-         relationship = conn.getProperties(relationshipId, true, CMIS.WILDCARD);
+         relationship = conn.getProperties(relationshipId, true, CmisConstants.WILDCARD);
       }
       catch (ConstraintException cve)
       {
@@ -196,19 +195,18 @@ public class RelationshipsCollection extends CmisObjectCollection
    /**
     * {@inheritDoc}
     */
+   @Override
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
 
       String objectId = getId(request);
       String typeId = request.getParameter(AtomCMIS.PARAM_TYPE_ID);
-      // XXX At the moment get all properties from back-end. We need some of them for build correct feed.
-      // Filter will be applied during build final Atom Document.
-      //      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
-      String propertyFilter = null;
-      boolean includeSubRelationship = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_SUB_RELATIONSHIP_TYPES, false);
+      String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
+      boolean includeSubRelationship =
+         getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_SUB_RELATIONSHIP_TYPES, false);
       boolean includeAllowableActions = getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_ALLOWABLE_ACTIONS, false);
-      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CMIS.MAX_ITEMS);
-      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CMIS.SKIP_COUNT);
+      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CmisConstants.MAX_ITEMS);
+      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CmisConstants.SKIP_COUNT);
       RelationshipDirection direction;
       try
       {
@@ -231,9 +229,16 @@ public class RelationshipsCollection extends CmisObjectCollection
                true, propertyFilter, maxItems, skipCount);
          if (list.getItems().size() > 0)
          {
-            // add cmisra:numItems
-            Element numItems = feed.addExtension(AtomCMIS.NUM_ITEMS);
-            numItems.setText(Integer.toString(list.getNumItems()));
+            if (list.getNumItems() != -1)
+            {
+               // add cmisra:numItems
+               Element numItems = feed.addExtension(AtomCMIS.NUM_ITEMS);
+               numItems.setText(Integer.toString(list.getNumItems()));
+            }
+
+            //          // add cmisra:hasMoreItems
+            //          Element hasMoreItems = feed.addExtension(AtomCMIS.HAS_MORE_ITEMS);
+            //          hasMoreItems.setText(Boolean.toString(list.isHasMoreItems()));
 
             //Paging links
             addPageLinks(objectId, feed, "relationships", maxItems, skipCount, list.getNumItems(), list

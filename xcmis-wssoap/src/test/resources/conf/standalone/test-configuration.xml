@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.exoplaform.org/xml/ns/kernel_1_0.xsd http://www.exoplaform.org/xml/ns/kernel_1_0.xsd" xmlns="http://www.exoplaform.org/xml/ns/kernel_1_0.xsd">
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.exoplaform.org/xml/ns/kernel_1_0.xsd http://www.exoplaform.org/xml/ns/kernel_1_0.xsd"
+   xmlns="http://www.exoplaform.org/xml/ns/kernel_1_0.xsd">
 
    <component>
       <key>org.exoplatform.services.log.LogConfigurationInitializer</key>
@@ -28,58 +29,22 @@
          </properties-param>
       </init-params>
    </component>
+   
+   <component>
+      <type>org.xcmis.spi.deploy.ExoContainerCmisRegistry</type>
+   </component>
 
+   <component>
+      <key>org.exoplatform.services.document.DocumentReaderService</key>
+      <type>org.xcmis.spi.utils.CmisDocumentReaderService</type>
+   </component>
 
    <!-- JCR components -->
    <component>
       <key>org.exoplatform.services.jcr.RepositoryService</key>
       <type>org.exoplatform.services.jcr.impl.RepositoryServiceImpl</type>
-      <component-plugins>
-         <!--         <component-plugin>-->
-         <!--            <name>add.namespaces</name>-->
-         <!--            <set-method>addPlugin</set-method>-->
-         <!--            <type>org.exoplatform.services.jcr.impl.AddNamespacesPlugin</type>-->
-         <!--            <init-params>-->
-         <!--               <properties-param>-->
-         <!--                  <name>namespaces</name>-->
-         <!--                  <property name="dc" value="http://purl.org/dc/elements/1.1/" />-->
-         <!--                  <property name="cmis" value="http://www.exoplatform.com/jcr/cmis/1.0" />-->
-         <!--               </properties-param>-->
-         <!--            </init-params>-->
-         <!--         </component-plugin>-->
-         <!--         <component-plugin>-->
-         <!--            <name>add.nodeType</name>-->
-         <!--            <set-method>addPlugin</set-method>-->
-         <!--            <type>org.exoplatform.services.jcr.impl.AddNodeTypePlugin</type>-->
-         <!--            <init-params>-->
-         <!--               <values-param>-->
-         <!--                  <name>autoCreatedInNewRepository</name>-->
-         <!--                  <description>Node types configuration file</description>-->
-         <!--                  <value>jar:/conf/cmis-nodetypes-config.xml</value>-->
-         <!--               </values-param>-->
-         <!--            </init-params>-->
-         <!--         </component-plugin>-->
-         <component-plugin>
-            <name>register.listener</name>
-            <set-method>addPlugin</set-method>
-            <type>org.exoplatform.services.jcr.impl.RepositoryChangesListenerRegisterPlugin</type>
-            <init-params>
-               <value-param>
-                  <name>repository-name</name>
-                  <value>db1</value>
-               </value-param>
-               <value-param>
-                  <name>workspaces</name>
-                  <value>ws1</value>
-               </value-param>
-               <value-param>
-                  <name>component-class-name</name>
-                  <value>org.xcmis.sp.jcr.exo.query.index.StartableJcrIndexingService</value>
-               </value-param>
-            </init-params>
-         </component-plugin>
-      </component-plugins>
    </component>
+
    <component>
       <key>org.exoplatform.services.jcr.config.RepositoryServiceConfiguration</key>
       <type>org.exoplatform.services.jcr.impl.config.RepositoryServiceConfigurationImpl</type>
@@ -97,14 +62,14 @@
    </component>
 
 
-<!-- Storage Provider -->
+   <!-- Storage Provider -->
    <component>
       <type>org.xcmis.sp.jcr.exo.StorageProviderImpl</type>
       <init-params>
          <object-param>
             <name>configs</name>
             <object type="org.xcmis.sp.jcr.exo.StorageProviderImpl$StorageProviderConfig">
-               <field name="configs">
+               <field name="storages">
                   <collection type="java.util.ArrayList">
                      <value>
                         <object type="org.xcmis.sp.jcr.exo.StorageConfiguration">
@@ -117,13 +82,13 @@
                            <field name="workspace">
                               <string>ws1</string>
                            </field>
-                            <field name="indexConfiguration">
-				<object type="org.xcmis.search.config.IndexConfigurationImpl">
-			 	<field name="indexDir">
-				<string>target/temp/index/db1/ws1</string>
-			        </field>
-				</object>
-				</field>
+                           <field name="indexConfiguration">
+                              <object type="org.xcmis.search.config.IndexConfiguration">
+                                 <field name="indexDir">
+                                    <string>target/temp/index/db1/ws1</string>
+                                 </field>
+                              </object>
+                           </field>
                            <field name="properties">
                               <map type="java.util.HashMap">
                                  <entry>
@@ -145,7 +110,7 @@
       </init-params>
    </component>
 
-<component>
+   <component>
       <type>org.exoplatform.services.jcr.ext.app.ThreadLocalSessionProviderService</type>
    </component>
 

@@ -18,19 +18,26 @@
  */
 package org.xcmis.search.lucene;
 
+import org.apache.commons.lang.Validate;
+import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.index.TermDocs;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.search.config.IndexConfigurationException;
 import org.xcmis.search.config.SearchServiceConfiguration;
 import org.xcmis.search.content.interceptors.QueryableIndexStorage;
+import org.xcmis.search.lucene.index.FieldNames;
 import org.xcmis.search.lucene.index.IndexException;
 import org.xcmis.search.lucene.index.IndexTransactionException;
 import org.xcmis.search.lucene.index.LuceneIndexTransaction;
 import org.xcmis.search.lucene.index.StartableIndexingService;
 
+import java.io.IOException;
+
 /**
- * Lucene persisted implementation of {@link QueryableIndexStorage}  
+ * Lucene persisted implementation of {@link QueryableIndexStorage}.
  * 
  */
 public class LuceneQueryableIndexStorage extends AbstractLuceneQueryableIndexStorage
@@ -45,32 +52,17 @@ public class LuceneQueryableIndexStorage extends AbstractLuceneQueryableIndexSto
    /**
     * @param indexConfuguration
     * @throws IndexException
-    * @throws IndexConfigurationException
     * @throws org.xcmis.search.lucene.index.IndexException
     */
    public LuceneQueryableIndexStorage(SearchServiceConfiguration serviceConfuguration) throws IndexException
    {
       super(serviceConfuguration);
-      this.indexDataManager = new StartableIndexingService(serviceConfuguration.getIndexConfuguration());
+      Validate.notNull(serviceConfuguration.getIndexConfuguration().getIndexDir(),
+         "The IndexDir may not be null in IndexConfiguration");
+      this.indexDataManager =
+         new StartableIndexingService(serviceConfuguration.getIndexConfuguration(), new IndexRecoveryTool(this,
+            nodeIndexer, serviceConfuguration.getIndexConfuguration()));
 
-   }
-
-   /**
-    * @see org.xcmis.search.lucene.AbstractLuceneQueryableIndexStorage#getIndexReader()
-    */
-   @Override
-   protected IndexReader getIndexReader()
-   {
-      try
-      {
-         return indexDataManager.getIndexReader();
-      }
-      catch (IndexException e)
-      {
-         e.printStackTrace();
-         LOG.error(e.getLocalizedMessage(), e);
-      }
-      return null;
    }
 
    /**
@@ -94,8 +86,45 @@ public class LuceneQueryableIndexStorage extends AbstractLuceneQueryableIndexSto
    }
 
    /**
-    * @throws IndexTransactionException 
-    * @throws IndexException 
+    * 
+    * @see org.xcmis.search.lucene.AbstractLuceneQueryableIndexStorage#getIndexReader()
+    */
+   @Override
+   protected IndexReader getIndexReader() throws IndexException
+   {
+      return indexDataManager.getIndexReader();
+   }
+
+   protected Document getDocument(String uuid, IndexReader reader) throws IndexException
+   {
+
+      try
+      {
+
+         if (reader != null)
+         {
+            final TermDocs termDocs = reader.termDocs(new Term(FieldNames.UUID, uuid));
+            if (termDocs.next())
+            {
+               final Document document = reader.document(termDocs.doc());
+               if (termDocs.next())
+               {
+                  throw new IndexException("More then one document found for uuid:" + uuid);
+               }
+               return document;
+            }
+         }
+      }
+      catch (final IOException e)
+      {
+         throw new IndexException(e.getLocalizedMessage(), e);
+      }
+      return null;
+   }
+
+   /**
+    * @throws IndexTransactionException
+    * @throws IndexException
     * @see org.xcmis.search.lucene.AbstractLuceneQueryableIndexStorage#save(org.xcmis.search.lucene.index.LuceneIndexTransaction)
     */
    @Override

@@ -24,7 +24,7 @@ package org.xcmis.search.value;
 public interface CastSystem
 {
    /**
-    * Cast value
+    * Cast value.
     * 
     * @param value
     *           - string representation of value

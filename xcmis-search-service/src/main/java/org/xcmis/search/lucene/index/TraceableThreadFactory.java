@@ -32,6 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author <a href="mailto:Sergey.Kabashnyuk@gmail.com">Sergey Kabashnyuk</a>
  * @version $Id: TraceableThreadFactory.java 2 2010-02-04 17:21:49Z andrew00x $
  */
+@Deprecated
 public class TraceableThreadFactory
 {
    /**

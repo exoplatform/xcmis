@@ -18,6 +18,101 @@
  */
 package org.xcmis.wssoap.impl;
 
+import org.xcmis.core.CmisACLCapabilityType;
+import org.xcmis.core.CmisAccessControlEntryType;
+import org.xcmis.core.CmisAccessControlListType;
+import org.xcmis.core.CmisAccessControlPrincipalType;
+import org.xcmis.core.CmisAllowableActionsType;
+import org.xcmis.core.CmisChangeEventType;
+import org.xcmis.core.CmisChoiceBoolean;
+import org.xcmis.core.CmisChoiceDateTime;
+import org.xcmis.core.CmisChoiceDecimal;
+import org.xcmis.core.CmisChoiceHtml;
+import org.xcmis.core.CmisChoiceId;
+import org.xcmis.core.CmisChoiceInteger;
+import org.xcmis.core.CmisChoiceString;
+import org.xcmis.core.CmisChoiceUri;
+import org.xcmis.core.CmisListOfIdsType;
+import org.xcmis.core.CmisObjectType;
+import org.xcmis.core.CmisPermissionMapping;
+import org.xcmis.core.CmisPropertiesType;
+import org.xcmis.core.CmisProperty;
+import org.xcmis.core.CmisPropertyBoolean;
+import org.xcmis.core.CmisPropertyBooleanDefinitionType;
+import org.xcmis.core.CmisPropertyDateTime;
+import org.xcmis.core.CmisPropertyDateTimeDefinitionType;
+import org.xcmis.core.CmisPropertyDecimal;
+import org.xcmis.core.CmisPropertyDecimalDefinitionType;
+import org.xcmis.core.CmisPropertyDefinitionType;
+import org.xcmis.core.CmisPropertyHtml;
+import org.xcmis.core.CmisPropertyHtmlDefinitionType;
+import org.xcmis.core.CmisPropertyId;
+import org.xcmis.core.CmisPropertyIdDefinitionType;
+import org.xcmis.core.CmisPropertyInteger;
+import org.xcmis.core.CmisPropertyIntegerDefinitionType;
+import org.xcmis.core.CmisPropertyString;
+import org.xcmis.core.CmisPropertyStringDefinitionType;
+import org.xcmis.core.CmisPropertyUri;
+import org.xcmis.core.CmisPropertyUriDefinitionType;
+import org.xcmis.core.CmisRenditionType;
+import org.xcmis.core.CmisRepositoryCapabilitiesType;
+import org.xcmis.core.CmisRepositoryInfoType;
+import org.xcmis.core.CmisTypeDefinitionType;
+import org.xcmis.core.EnumACLPropagation;
+import org.xcmis.core.EnumAllowableActionsKey;
+import org.xcmis.core.EnumBaseObjectTypeIds;
+import org.xcmis.core.EnumCapabilityACL;
+import org.xcmis.core.EnumCapabilityChanges;
+import org.xcmis.core.EnumCapabilityContentStreamUpdates;
+import org.xcmis.core.EnumCapabilityJoin;
+import org.xcmis.core.EnumCapabilityQuery;
+import org.xcmis.core.EnumCapabilityRendition;
+import org.xcmis.core.EnumCardinality;
+import org.xcmis.core.EnumPropertyType;
+import org.xcmis.core.EnumSupportedPermissions;
+import org.xcmis.core.EnumTypeOfChanges;
+import org.xcmis.core.EnumUpdatability;
+import org.xcmis.messaging.CmisContentStreamType;
+import org.xcmis.messaging.CmisExtensionType;
+import org.xcmis.messaging.CmisObjectInFolderContainerType;
+import org.xcmis.messaging.CmisObjectInFolderListType;
+import org.xcmis.messaging.CmisObjectInFolderType;
+import org.xcmis.messaging.CmisObjectListType;
+import org.xcmis.messaging.CmisObjectParentsType;
+import org.xcmis.messaging.CmisRepositoryEntryType;
+import org.xcmis.messaging.CmisTypeContainer;
+import org.xcmis.messaging.CmisTypeDefinitionListType;
+import org.xcmis.spi.ContentStream;
+import org.xcmis.spi.ItemsList;
+import org.xcmis.spi.ItemsTree;
+import org.xcmis.spi.model.ACLCapability;
+import org.xcmis.spi.model.AccessControlEntry;
+import org.xcmis.spi.model.AllowableActions;
+import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.ChangeInfo;
+import org.xcmis.spi.model.Choice;
+import org.xcmis.spi.model.CmisObject;
+import org.xcmis.spi.model.ContentStreamAllowed;
+import org.xcmis.spi.model.ObjectParent;
+import org.xcmis.spi.model.PermissionMapping;
+import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.PropertyDefinition;
+import org.xcmis.spi.model.PropertyType;
+import org.xcmis.spi.model.Rendition;
+import org.xcmis.spi.model.RepositoryCapabilities;
+import org.xcmis.spi.model.RepositoryInfo;
+import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.model.Updatability;
+import org.xcmis.spi.model.impl.BooleanProperty;
+import org.xcmis.spi.model.impl.DateTimeProperty;
+import org.xcmis.spi.model.impl.DecimalProperty;
+import org.xcmis.spi.model.impl.HtmlProperty;
+import org.xcmis.spi.model.impl.IdProperty;
+import org.xcmis.spi.model.impl.IntegerProperty;
+import org.xcmis.spi.model.impl.StringProperty;
+import org.xcmis.spi.model.impl.UriProperty;
+import org.xcmis.spi.utils.CmisUtils;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -26,6 +121,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,77 +130,6 @@ import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.xcmis.core.CmisACLCapabilityType;
-import org.xcmis.core.CmisAccessControlEntryType;
-import org.xcmis.core.CmisAccessControlListType;
-import org.xcmis.core.CmisAccessControlPrincipalType;
-import org.xcmis.core.CmisAllowableActionsType;
-import org.xcmis.core.CmisChangeEventType;
-import org.xcmis.core.CmisListOfIdsType;
-import org.xcmis.core.CmisObjectType;
-import org.xcmis.core.CmisPropertiesType;
-import org.xcmis.core.CmisProperty;
-import org.xcmis.core.CmisPropertyBoolean;
-import org.xcmis.core.CmisPropertyDateTime;
-import org.xcmis.core.CmisPropertyDecimal;
-import org.xcmis.core.CmisPropertyDefinitionType;
-import org.xcmis.core.CmisPropertyHtml;
-import org.xcmis.core.CmisPropertyId;
-import org.xcmis.core.CmisPropertyInteger;
-import org.xcmis.core.CmisPropertyString;
-import org.xcmis.core.CmisPropertyUri;
-import org.xcmis.core.CmisRenditionType;
-import org.xcmis.core.CmisRepositoryCapabilitiesType;
-import org.xcmis.core.CmisRepositoryInfoType;
-import org.xcmis.core.CmisTypeDefinitionType;
-import org.xcmis.core.EnumACLPropagation;
-import org.xcmis.core.EnumBaseObjectTypeIds;
-import org.xcmis.core.EnumCapabilityACL;
-import org.xcmis.core.EnumSupportedPermissions;
-import org.xcmis.core.EnumTypeOfChanges;
-import org.xcmis.messaging.CmisContentStreamType;
-import org.xcmis.messaging.CmisExtensionType;
-import org.xcmis.messaging.CmisObjectInFolderContainerType;
-import org.xcmis.messaging.CmisObjectInFolderListType;
-import org.xcmis.messaging.CmisObjectInFolderType;
-import org.xcmis.messaging.CmisObjectListType;
-import org.xcmis.messaging.CmisRepositoryEntryType;
-import org.xcmis.messaging.CmisObjectParentsType;
-import org.xcmis.messaging.CmisTypeContainer;
-import org.xcmis.messaging.CmisTypeDefinitionListType;
-import org.xcmis.spi.ACLCapability;
-import org.xcmis.spi.AccessControlEntry;
-import org.xcmis.spi.AllowableActions;
-import org.xcmis.spi.BaseType;
-import org.xcmis.spi.ContentStreamAllowed;
-import org.xcmis.spi.ItemsList;
-import org.xcmis.spi.ItemsTree;
-import org.xcmis.spi.PropertyDefinition;
-import org.xcmis.spi.PropertyType;
-import org.xcmis.spi.RepositoryCapabilities;
-import org.xcmis.spi.RepositoryInfo;
-import org.xcmis.spi.TypeDefinition;
-import org.xcmis.spi.Rendition;
-import org.xcmis.spi.Updatability;
-import org.xcmis.spi.data.ContentStream;
-import org.xcmis.spi.impl.AccessControlEntryImpl;
-import org.xcmis.spi.impl.PropertyDefinitionImpl;
-import org.xcmis.spi.impl.RenditionImpl;
-import org.xcmis.spi.impl.TypeDefinitionImpl;
-import org.xcmis.spi.object.ChangeInfo;
-import org.xcmis.spi.object.CmisObject;
-import org.xcmis.spi.object.ObjectParent;
-import org.xcmis.spi.object.Property;
-import org.xcmis.spi.object.impl.BooleanProperty;
-import org.xcmis.spi.object.impl.DateTimeProperty;
-import org.xcmis.spi.object.impl.DecimalProperty;
-import org.xcmis.spi.object.impl.HtmlProperty;
-import org.xcmis.spi.object.impl.IdProperty;
-import org.xcmis.spi.object.impl.IntegerProperty;
-import org.xcmis.spi.object.impl.StringProperty;
-import org.xcmis.spi.object.impl.UriProperty;
-import org.xcmis.spi.utils.CmisUtils;
-
 /**
  * @author <a href="mailto:max.shaposhnik@exoplatform.com">Max Shaposhnik</a>
  * @version $Id$
@@ -112,7 +137,7 @@ import org.xcmis.spi.utils.CmisUtils;
 public class TypeConverter
 {
 
-   public static List<AccessControlEntry> convertAccessControlEntryList(List<CmisAccessControlEntryType> source)
+   public static List<AccessControlEntry> getAccessControlEntryList(List<CmisAccessControlEntryType> source)
    {
       List<AccessControlEntry> res = new ArrayList<AccessControlEntry>();
       for (CmisAccessControlEntryType one : source)
@@ -124,21 +149,25 @@ public class TypeConverter
 
    public static AccessControlEntry getAccessControlEntry(CmisAccessControlEntryType source)
    {
-      AccessControlEntryImpl res = new AccessControlEntryImpl();
+      AccessControlEntry res = new AccessControlEntry();
       res.getPermissions().addAll(source.getPermission());
       res.setPrincipal(source.getPrincipal().getPrincipalId());
       return res;
    }
 
-   public static CmisACLCapabilityType getAclCapabilityType(ACLCapability source)
+   public static CmisACLCapabilityType getCmisAclCapabilityType(ACLCapability source)
    {
       CmisACLCapabilityType result = new CmisACLCapabilityType();
       result.setPropagation(EnumACLPropagation.fromValue(source.getPropagation().value()));
       result.setSupportedPermissions(EnumSupportedPermissions.fromValue(source.getSupportedPermissions().value()));
+      if (source.getMapping() != null)
+      {
+            result.getMapping().addAll(getCmisPermissionMappingList(source.getMapping()));
+      }
       return result;
    }
 
-   public static CmisAllowableActionsType getAllowableActionsType(AllowableActions source)
+   public static CmisAllowableActionsType getCmisAllowableActionsType(AllowableActions source)
    {
       CmisAllowableActionsType result = new CmisAllowableActionsType();
       result.setCanAddObjectToFolder(source.isCanAddObjectToFolder());
@@ -183,7 +212,7 @@ public class TypeConverter
       return result;
    }
 
-   public static List<AccessControlEntry> getCmisListAccessControlEntry(CmisAccessControlListType source)
+   public static List<AccessControlEntry> getListAccessControlEntry(CmisAccessControlListType source)
    {
       List<AccessControlEntry> result = new ArrayList<AccessControlEntry>();
       if (source != null && source.getPermission().size() > 0)
@@ -198,39 +227,59 @@ public class TypeConverter
 
    public static Map<String, Property<?>> getPropertyMap(CmisPropertiesType input)
    {
+      if (input == null)
+      {
+         return null;
+      }
       Map<String, Property<?>> result = new HashMap<String, Property<?>>();
       for (CmisProperty source : input.getProperty())
       {
          if (source instanceof CmisPropertyHtml)
+         {
             result.put(source.getPropertyDefinitionId(), new HtmlProperty(source.getPropertyDefinitionId(), source
                .getQueryName(), source.getLocalName(), source.getDisplayName(), ((CmisPropertyHtml)source).getValue()));
+         }
          else if (source instanceof CmisPropertyDecimal)
+         {
             result.put(source.getPropertyDefinitionId(), new DecimalProperty(source.getPropertyDefinitionId(), source
                .getQueryName(), source.getLocalName(), source.getDisplayName(), ((CmisPropertyDecimal)source)
                .getValue()));
+         }
          else if (source instanceof CmisPropertyDateTime)
+         {
             result.put(source.getPropertyDefinitionId(), new DateTimeProperty(source.getPropertyDefinitionId(), source
                .getQueryName(), source.getLocalName(), source.getDisplayName(),
-               getCalendar(((CmisPropertyDateTime)source).getValue())));
+               getCalendarList(((CmisPropertyDateTime)source).getValue())));
+         }
          else if (source instanceof CmisPropertyId)
+         {
             result.put(source.getPropertyDefinitionId(), new IdProperty(source.getPropertyDefinitionId(), source
                .getQueryName(), source.getLocalName(), source.getDisplayName(), ((CmisPropertyId)source).getValue()));
+         }
          else if (source instanceof CmisPropertyString)
+         {
             result.put(source.getPropertyDefinitionId(),
                new StringProperty(source.getPropertyDefinitionId(), source.getQueryName(), source.getLocalName(),
                   source.getDisplayName(), ((CmisPropertyString)source).getValue()));
+         }
          else if (source instanceof CmisPropertyUri)
+         {
             result.put(source.getPropertyDefinitionId(), new UriProperty(source.getPropertyDefinitionId(), source
-               .getQueryName(), source.getLocalName(), source.getDisplayName(), getURI(((CmisPropertyUri)source)
+               .getQueryName(), source.getLocalName(), source.getDisplayName(), getURIList(((CmisPropertyUri)source)
                .getValue())));
+         }
          else if (source instanceof CmisPropertyBoolean)
+         {
             result.put(source.getPropertyDefinitionId(), new BooleanProperty(source.getPropertyDefinitionId(), source
                .getQueryName(), source.getLocalName(), source.getDisplayName(), ((CmisPropertyBoolean)source)
                .getValue()));
+         }
          else if (source instanceof CmisPropertyInteger)
+         {
             result.put(source.getPropertyDefinitionId(), new IntegerProperty(source.getPropertyDefinitionId(), source
                .getQueryName(), source.getLocalName(), source.getDisplayName(), ((CmisPropertyInteger)source)
                .getValue()));
+         }
       }
       return result;
    }
@@ -267,9 +316,13 @@ public class TypeConverter
       result.setProperties(props);
       result.setAcl(getCmisAccessControlListType(object.getACL()));
       if (object.getAllowableActions() != null)
-         result.setAllowableActions(getAllowableActionsType(object.getAllowableActions()));
+      {
+         result.setAllowableActions(getCmisAllowableActionsType(object.getAllowableActions()));
+      }
       if (object.getChangeInfo() != null)
-         result.setChangeEventInfo(getChangeEventType(object.getChangeInfo()));
+      {
+         result.setChangeEventInfo(getCmisChangeEventType(object.getChangeInfo()));
+      }
       result.setExactACL(object.isExactACL());
       result.setPolicyIds(getCmisListOfIdsType(object.getPolicyIds()));
       return result;
@@ -278,7 +331,7 @@ public class TypeConverter
    public static CmisRepositoryInfoType getCmisRepositoryInfoType(RepositoryInfo source)
    {
       CmisRepositoryInfoType result = new CmisRepositoryInfoType();
-      result.setAclCapability(getAclCapabilityType(source.getAclCapability()));
+      result.setAclCapability(getCmisAclCapabilityType(source.getAclCapability()));
       result.setCapabilities(getCmisRepositoryCapabilitiesType(source.getCapabilities()));
       result.setChangesIncomplete(source.isChangesIncomplete());
       result.setCmisVersionSupported(source.getCmisVersionSupported());
@@ -302,11 +355,13 @@ public class TypeConverter
       return null;
    }
 
-   @SuppressWarnings("unchecked")
-   public static CmisObjectListType getCmisObjectListType(ItemsList<?> source)
+   public static CmisObjectListType getCmisObjectListType(ItemsList<CmisObject> source)
    {
       CmisObjectListType result = new CmisObjectListType();
-      result.getObjects().addAll((List<CmisObjectType>)source.getItems()); //TODO: right ?
+      for (CmisObject one : source.getItems())
+      {
+         result.getObjects().add(getCmisObjectType(one));
+      }
       result.setHasMoreItems(source.isHasMoreItems());
       result.setNumItems(BigInteger.valueOf(source.getNumItems()));
       return result;
@@ -322,7 +377,7 @@ public class TypeConverter
       return result;
    }
 
-   public static List<CmisObjectType> getListCmisObjectType(List<CmisObject> source)
+   public static List<CmisObjectType> getCmisObjectTypeList(List<CmisObject> source)
    {
       List<CmisObjectType> result = new ArrayList<CmisObjectType>();
       for (CmisObject one : source)
@@ -338,7 +393,9 @@ public class TypeConverter
       for (Object one : source.getItems())
       {
          if (one instanceof CmisObject)
+         {
             result.getObjects().add(getCmisObjectInFolderType((CmisObject)one));
+         }
       }
       result.setHasMoreItems(source.isHasMoreItems());
       result.setNumItems(BigInteger.valueOf(source.getNumItems()));
@@ -353,19 +410,19 @@ public class TypeConverter
       return result;
    }
 
-   public static List<CmisTypeContainer> getCmisTypeContainer(List<ItemsTree<TypeDefinition>> source)
+   public static List<CmisTypeContainer> getCmisTypeContainerList(List<ItemsTree<TypeDefinition>> source)
    {
       List<CmisTypeContainer> result = new ArrayList<CmisTypeContainer>();
       for (ItemsTree<TypeDefinition> one : source)
       {
          CmisTypeContainer containerType = new CmisTypeContainer();
-         CmisTypeDefinitionType type = getCmisTypeDefinitionType((TypeDefinition)one.getContainer());
+         CmisTypeDefinitionType type = getCmisTypeDefinitionType(one.getContainer());
          containerType.setType(type);
          if (one.getChildren() != null)
          {
             for (ItemsTree<TypeDefinition> d : one.getChildren())
             {
-               containerType.getChildren().addAll(getCmisTypeContainer(d.getChildren()));
+               containerType.getChildren().addAll(getCmisTypeContainerList(d.getChildren()));
             }
          }
          result.add(containerType);
@@ -373,7 +430,7 @@ public class TypeConverter
       return result;
    }
 
-   public static List<CmisObjectInFolderContainerType> getCmisObjectInFolderContainerType(
+   public static List<CmisObjectInFolderContainerType> getCmisObjectInFolderContainerTypeList(
       List<ItemsTree<CmisObject>> source)
    {
       List<CmisObjectInFolderContainerType> result = new ArrayList<CmisObjectInFolderContainerType>();
@@ -386,10 +443,13 @@ public class TypeConverter
          {
             for (ItemsTree<CmisObject> d : one.getChildren())
             {
-               containerType.getChildren().addAll(getCmisObjectInFolderContainerType(d.getChildren()));
+               if (d != null)
+               {
+                  containerType.getChildren().addAll(getCmisObjectInFolderContainerTypeList(d.getChildren()));
+               }
             }
          }
-         result.add(containerType);         
+         result.add(containerType);
       }
       return result;
    }
@@ -407,10 +467,11 @@ public class TypeConverter
       CmisContentStreamType result = new CmisContentStreamType();
       result.setFilename(source.getFileName());
       result.setLength(BigInteger.valueOf(source.length()));
-      result.setMimeType(source.getMediaType());
+      result.setMimeType(source.getMediaType().toString());
       try
       {
-         result.setStream(new DataHandler(new ByteArrayDataSource(source.getStream(), source.getMediaType())));
+         result
+            .setStream(new DataHandler(new ByteArrayDataSource(source.getStream(), source.getMediaType().toString())));
       }
       catch (IOException e)
       {
@@ -437,13 +498,429 @@ public class TypeConverter
       result.setParentId(source.getParentId());
       result.setQueryable(source.isQueryable());
       result.setQueryName(source.getQueryName());
+      result.getPropertyDefinition().addAll(getCmisPropertyDefintitionTypeList(source.getPropertyDefinitions()));
+      return result;
+   }
+
+   public static CmisChoiceBoolean getCmisChoiceBoolean(Choice<Boolean> source)
+   {
+      CmisChoiceBoolean cmisChoice = new CmisChoiceBoolean();
+      cmisChoice.setDisplayName(source.getDisplayName());
+      if (source.getValues() != null)
+      {
+         for (Boolean v : source.getValues())
+         {
+            cmisChoice.getValue().add(v);
+         }
+      }
+      if (source.getChoices() != null && source.getChoices().size() > 0)
+      {
+         for (Choice<Boolean> c : source.getChoices())
+         {
+            cmisChoice.getChoice().add(getCmisChoiceBoolean(c));
+         }
+      }
+      return cmisChoice;
+   }
+
+   public static CmisChoiceDateTime getCmisChoiceDateTime(Choice<Calendar> source)
+   {
+      CmisChoiceDateTime cmisChoice = new CmisChoiceDateTime();
+      cmisChoice.setDisplayName(source.getDisplayName());
+      if (source.getValues() != null)
+      {
+         for (Calendar v : source.getValues())
+         {
+            cmisChoice.getValue().add(CmisUtils.fromCalendar(v));
+         }
+      }
+      if (source.getChoices() != null && source.getChoices().size() > 0)
+      {
+         for (Choice<Calendar> c : source.getChoices())
+         {
+            cmisChoice.getChoice().add(getCmisChoiceDateTime(c));
+         }
+      }
+      return cmisChoice;
+   }
+
+   public static CmisChoiceDecimal getCmisChoiceDecimal(Choice<BigDecimal> source)
+   {
+      CmisChoiceDecimal cmisChoice = new CmisChoiceDecimal();
+      cmisChoice.setDisplayName(source.getDisplayName());
+      if (source.getValues() != null)
+      {
+         for (BigDecimal v : source.getValues())
+         {
+            cmisChoice.getValue().add(v);
+         }
+      }
+      if (source.getChoices() != null && source.getChoices().size() > 0)
+      {
+         for (Choice<BigDecimal> c : source.getChoices())
+         {
+            cmisChoice.getChoice().add(getCmisChoiceDecimal(c));
+         }
+      }
+      return cmisChoice;
+   }
+
+   public static CmisChoiceHtml getCmisChoiceHtml(Choice<String> source)
+   {
+      CmisChoiceHtml cmisChoice = new CmisChoiceHtml();
+      cmisChoice.setDisplayName(source.getDisplayName());
+      if (source.getValues() != null)
+      {
+         for (String v : source.getValues())
+         {
+            cmisChoice.getValue().add(v);
+         }
+      }
+      if (source.getChoices() != null && source.getChoices().size() > 0)
+      {
+         for (Choice<String> c : source.getChoices())
+         {
+            cmisChoice.getChoice().add(getCmisChoiceHtml(c));
+         }
+      }
+      return cmisChoice;
+   }
+
+   public static CmisChoiceId getCmisChoiceId(Choice<String> source)
+   {
+      CmisChoiceId cmisChoice = new CmisChoiceId();
+      cmisChoice.setDisplayName(source.getDisplayName());
+      if (source.getValues() != null)
+      {
+         for (String v : source.getValues())
+         {
+            cmisChoice.getValue().add(v);
+         }
+      }
+      if (source.getChoices() != null && source.getChoices().size() > 0)
+      {
+         for (Choice<String> c : source.getChoices())
+         {
+            cmisChoice.getChoice().add(getCmisChoiceId(c));
+         }
+      }
+      return cmisChoice;
+   }
+
+   public static CmisChoiceInteger getCmisChoiceInteger(Choice<BigInteger> source)
+   {
+      CmisChoiceInteger cmisChoice = new CmisChoiceInteger();
+      cmisChoice.setDisplayName(source.getDisplayName());
+      if (source.getValues() != null)
+      {
+         for (BigInteger v : source.getValues())
+         {
+            cmisChoice.getValue().add(v);
+         }
+      }
+      if (source.getChoices() != null && source.getChoices().size() > 0)
+      {
+         for (Choice<BigInteger> c : source.getChoices())
+         {
+            cmisChoice.getChoice().add(getCmisChoiceInteger(c));
+         }
+      }
+      return cmisChoice;
+   }
+
+   public static CmisChoiceString getCmisChoiceString(Choice<String> source)
+   {
+      CmisChoiceString cmisChoice = new CmisChoiceString();
+      cmisChoice.setDisplayName(source.getDisplayName());
+      if (source.getValues() != null)
+      {
+         for (String v : source.getValues())
+         {
+            cmisChoice.getValue().add(v);
+         }
+      }
+      if (source.getChoices() != null && source.getChoices().size() > 0)
+      {
+         for (Choice<String> c : source.getChoices())
+         {
+            cmisChoice.getChoice().add(getCmisChoiceString(c));
+         }
+      }
+      return cmisChoice;
+   }
+
+   public static CmisChoiceUri getCmisChoiceUri(Choice<URI> source)
+   {
+      CmisChoiceUri cmisChoice = new CmisChoiceUri();
+      cmisChoice.setDisplayName(source.getDisplayName());
+      if (source.getValues() != null)
+      {
+         for (URI v : source.getValues())
+         {
+            cmisChoice.getValue().add(v.toASCIIString());
+         }
+      }
+      if (source.getChoices() != null && source.getChoices().size() > 0)
+      {
+         for (Choice<URI> c : source.getChoices())
+         {
+            cmisChoice.getChoice().add(getCmisChoiceUri(c));
+         }
+      }
+      return cmisChoice;
+   }
+
+   @SuppressWarnings("unchecked")
+   public static List<CmisPropertyDefinitionType> getCmisPropertyDefintitionTypeList(
+      Collection<PropertyDefinition<?>> source)
+   {
+      if (source == null)
+      {
+         return Collections.emptyList();
+      }
+
+      List<CmisPropertyDefinitionType> result = new ArrayList<CmisPropertyDefinitionType>();
+      for (PropertyDefinition<?> definition : source)
+      {
+
+         CmisPropertyDefinitionType cmisPropertyDefinition = null;
+
+         switch (definition.getPropertyType())
+         {
+            case BOOLEAN :
+               CmisPropertyBooleanDefinitionType bool = new CmisPropertyBooleanDefinitionType();
+               if (definition.getChoices() != null && definition.getChoices().size() > 0)
+               {
+                  for (Choice<?> c : definition.getChoices())
+                  {
+                     bool.getChoice().add(getCmisChoiceBoolean((Choice<Boolean>)c));
+                  }
+               }
+               if (definition.getDefaultValue() != null && definition.getDefaultValue().length > 0)
+               {
+                  CmisPropertyBoolean def = new CmisPropertyBoolean();
+                  def.setDisplayName(definition.getDisplayName());
+                  def.setLocalName(definition.getLocalName());
+                  def.setPropertyDefinitionId(definition.getId());
+                  def.setQueryName(definition.getQueryName());
+
+                  for (Object o : definition.getDefaultValue())
+                  {
+                     def.getValue().add((Boolean)o);
+                  }
+                  bool.setDefaultValue(def);
+               }
+               cmisPropertyDefinition = bool;
+               break;
+            case DATETIME :
+               CmisPropertyDateTimeDefinitionType date = new CmisPropertyDateTimeDefinitionType();
+               if (definition.getChoices() != null && definition.getChoices().size() > 0)
+               {
+                  for (Choice<?> c : definition.getChoices())
+                  {
+                     date.getChoice().add(getCmisChoiceDateTime((Choice<Calendar>)c));
+                  }
+               }
+               if (definition.getDefaultValue() != null && definition.getDefaultValue().length > 0)
+               {
+                  CmisPropertyDateTime def = new CmisPropertyDateTime();
+                  def.setDisplayName(definition.getDisplayName());
+                  def.setLocalName(definition.getLocalName());
+                  def.setPropertyDefinitionId(definition.getId());
+                  def.setQueryName(definition.getQueryName());
+
+                  for (Object o : definition.getDefaultValue())
+                  {
+                     def.getValue().add(CmisUtils.fromCalendar((Calendar)o));
+                  }
+                  date.setDefaultValue(def);
+               }
+               cmisPropertyDefinition = date;
+               break;
+            case DECIMAL :
+               CmisPropertyDecimalDefinitionType decimal = new CmisPropertyDecimalDefinitionType();
+               if (definition.getChoices() != null && definition.getChoices().size() > 0)
+               {
+                  for (Choice<?> c : definition.getChoices())
+                  {
+                     decimal.getChoice().add(getCmisChoiceDecimal((Choice<BigDecimal>)c));
+                  }
+               }
+               if (definition.getDefaultValue() != null && definition.getDefaultValue().length > 0)
+               {
+                  CmisPropertyDecimal def = new CmisPropertyDecimal();
+                  def.setDisplayName(definition.getDisplayName());
+                  def.setLocalName(definition.getLocalName());
+                  def.setPropertyDefinitionId(definition.getId());
+                  def.setQueryName(definition.getQueryName());
+
+                  for (Object o : definition.getDefaultValue())
+                  {
+                     def.getValue().add((BigDecimal)o);
+                  }
+                  decimal.setDefaultValue(def);
+               }
+
+               decimal.setMaxValue(definition.getMaxDecimal());
+               decimal.setMinValue(definition.getMinDecimal());
+               cmisPropertyDefinition = decimal;
+               break;
+            case HTML :
+               CmisPropertyHtmlDefinitionType html = new CmisPropertyHtmlDefinitionType();
+               if (definition.getChoices() != null && definition.getChoices().size() > 0)
+               {
+                  for (Choice<?> c : definition.getChoices())
+                  {
+                     html.getChoice().add(getCmisChoiceHtml((Choice<String>)c));
+                  }
+               }
+               if (definition.getDefaultValue() != null && definition.getDefaultValue().length > 0)
+               {
+                  CmisPropertyHtml def = new CmisPropertyHtml();
+                  def.setDisplayName(definition.getDisplayName());
+                  def.setLocalName(definition.getLocalName());
+                  def.setPropertyDefinitionId(definition.getId());
+                  def.setQueryName(definition.getQueryName());
+
+                  for (Object o : definition.getDefaultValue())
+                  {
+                     def.getValue().add((String)o);
+                  }
+                  html.setDefaultValue(def);
+               }
+               cmisPropertyDefinition = html;
+               break;
+            case ID :
+               CmisPropertyIdDefinitionType id = new CmisPropertyIdDefinitionType();
+               if (definition.getChoices() != null && definition.getChoices().size() > 0)
+               {
+                  for (Choice<?> c : definition.getChoices())
+                  {
+                     id.getChoice().add(getCmisChoiceId((Choice<String>)c));
+                  }
+               }
+               if (definition.getDefaultValue() != null && definition.getDefaultValue().length > 0)
+               {
+                  CmisPropertyId def = new CmisPropertyId();
+                  def.setDisplayName(definition.getDisplayName());
+                  def.setLocalName(definition.getLocalName());
+                  def.setPropertyDefinitionId(definition.getId());
+                  def.setQueryName(definition.getQueryName());
+
+                  for (Object o : definition.getDefaultValue())
+                  {
+                     def.getValue().add((String)o);
+                  }
+                  id.setDefaultValue(def);
+               }
+               cmisPropertyDefinition = id;
+               break;
+            case INTEGER :
+               CmisPropertyIntegerDefinitionType integ = new CmisPropertyIntegerDefinitionType();
+               if (definition.getChoices() != null && definition.getChoices().size() > 0)
+               {
+                  for (Choice<?> c : definition.getChoices())
+                  {
+                     integ.getChoice().add(getCmisChoiceInteger((Choice<BigInteger>)c));
+                  }
+               }
+               if (definition.getDefaultValue() != null && definition.getDefaultValue().length > 0)
+               {
+                  CmisPropertyInteger def = new CmisPropertyInteger();
+                  def.setDisplayName(definition.getDisplayName());
+                  def.setLocalName(definition.getLocalName());
+                  def.setPropertyDefinitionId(definition.getId());
+                  def.setQueryName(definition.getQueryName());
+
+                  for (Object o : definition.getDefaultValue())
+                  {
+                     def.getValue().add((BigInteger)o);
+                  }
+                  integ.setDefaultValue(def);
+               }
+
+               integ.setMaxValue(definition.getMaxInteger());
+               integ.setMinValue(definition.getMinInteger());
+               cmisPropertyDefinition = integ;
+               break;
+            case STRING :
+               CmisPropertyStringDefinitionType str = new CmisPropertyStringDefinitionType();
+               if (definition.getChoices() != null && definition.getChoices().size() > 0)
+               {
+                  for (Choice<?> c : definition.getChoices())
+                  {
+                     str.getChoice().add(getCmisChoiceString((Choice<String>)c));
+                  }
+               }
+               if (definition.getDefaultValue() != null && definition.getDefaultValue().length > 0)
+               {
+                  CmisPropertyString def = new CmisPropertyString();
+                  def.setDisplayName(definition.getDisplayName());
+                  def.setLocalName(definition.getLocalName());
+                  def.setPropertyDefinitionId(definition.getId());
+                  def.setQueryName(definition.getQueryName());
+
+                  for (Object o : definition.getDefaultValue())
+                  {
+                     def.getValue().add((String)o);
+                  }
+                  str.setDefaultValue(def);
+               }
+               str.setMaxLength(BigInteger.valueOf(definition.getMaxLength()));
+               cmisPropertyDefinition = str;
+               break;
+            case URI :
+               CmisPropertyUriDefinitionType uri = new CmisPropertyUriDefinitionType();
+               if (definition.getChoices() != null && definition.getChoices().size() > 0)
+               {
+                  for (Choice<?> c : definition.getChoices())
+                  {
+                     uri.getChoice().add(getCmisChoiceUri((Choice<URI>)c));
+                  }
+               }
+               if (definition.getDefaultValue() != null && definition.getDefaultValue().length > 0)
+               {
+                  CmisPropertyUri def = new CmisPropertyUri();
+                  def.setDisplayName(definition.getDisplayName());
+                  def.setLocalName(definition.getLocalName());
+                  def.setPropertyDefinitionId(definition.getId());
+                  def.setQueryName(definition.getQueryName());
+
+                  for (Object o : definition.getDefaultValue())
+                  {
+                     def.getValue().add((String)o);
+                  }
+                  uri.setDefaultValue(def);
+               }
+               cmisPropertyDefinition = uri;
+               break;
+         }
+
+         cmisPropertyDefinition.setCardinality(definition.isMultivalued() ? EnumCardinality.MULTI
+            : EnumCardinality.SINGLE);
+         cmisPropertyDefinition.setDescription(definition.getDescription());
+         cmisPropertyDefinition.setDisplayName(definition.getDisplayName());
+         cmisPropertyDefinition.setId(definition.getId());
+         cmisPropertyDefinition.setInherited(definition.getInherited());
+         cmisPropertyDefinition.setLocalName(definition.getLocalName());
+         cmisPropertyDefinition.setLocalNamespace(definition.getLocalNamespace());
+         cmisPropertyDefinition.setOpenChoice(definition.isOpenChoice());
+         cmisPropertyDefinition.setOrderable(definition.isOrderable());
+         cmisPropertyDefinition.setPropertyType(EnumPropertyType.fromValue(definition.getPropertyType().value()));
+         cmisPropertyDefinition.setQueryable(definition.isQueryable());
+         cmisPropertyDefinition.setQueryName(definition.getQueryName());
+         cmisPropertyDefinition.setRequired(definition.isRequired());
+         cmisPropertyDefinition.setUpdatability(EnumUpdatability.fromValue(definition.getUpdatability().value()));
+
+         result.add(cmisPropertyDefinition);
+      }
       return result;
    }
 
    public static TypeDefinition getTypeDefinition(CmisTypeDefinitionType source)
    {
-      TypeDefinitionImpl result =
-         new TypeDefinitionImpl(source.getId(), BaseType.fromValue(source.getBaseId().value()), source.getQueryName(),
+      TypeDefinition result =
+         new TypeDefinition(source.getId(), BaseType.fromValue(source.getBaseId().value()), source.getQueryName(),
             source.getLocalName(), source.getLocalNamespace(), source.getParentId(), source.getDisplayName(), source
                .getDescription(), source.isCreatable(), source.isFileable(), source.isQueryable(), source
                .isFulltextIndexed(), source.isIncludedInSupertypeQuery(), source.isControllablePolicy(), source
@@ -453,13 +930,14 @@ public class TypeConverter
       return result;
    }
 
+   @SuppressWarnings("unchecked")
    public static Map<String, PropertyDefinition<?>> getPropertyDefinitionMap(List<CmisPropertyDefinitionType> source)
    {
 
       Map<String, PropertyDefinition<?>> result = new HashMap<String, PropertyDefinition<?>>();
       for (CmisPropertyDefinitionType one : source)
       {
-         result.put(one.getId(), new PropertyDefinitionImpl(one.getId(), one.getQueryName(), one.getLocalName(), one
+         result.put(one.getId(), new PropertyDefinition(one.getId(), one.getQueryName(), one.getLocalName(), one
             .getLocalNamespace(), one.getDisplayName(), one.getDescription(), PropertyType.fromValue(one
             .getPropertyType().value()), Updatability.fromValue(one.getUpdatability().value()), one.isInherited(), one
             .isRequired(), one.isQueryable(), one.isOrderable(), one.isOpenChoice(), false, null, null));
@@ -472,6 +950,20 @@ public class TypeConverter
    {
       CmisRepositoryCapabilitiesType result = new CmisRepositoryCapabilitiesType();
       result.setCapabilityACL(EnumCapabilityACL.fromValue(source.getCapabilityACL().value()));
+      result.setCapabilityAllVersionsSearchable(source.isCapabilityAllVersionsSearchable());
+      result.setCapabilityChanges(EnumCapabilityChanges.fromValue(source.getCapabilityChanges().value()));
+      result.setCapabilityContentStreamUpdatability(EnumCapabilityContentStreamUpdates.fromValue(source
+         .getCapabilityContentStreamUpdatable().value()));
+      result.setCapabilityGetDescendants(source.isCapabilityGetDescendants());
+      result.setCapabilityGetFolderTree(source.isCapabilityGetFolderTree());
+      result.setCapabilityJoin(EnumCapabilityJoin.fromValue(source.getCapabilityJoin().value()));
+      result.setCapabilityMultifiling(source.isCapabilityMultifiling());
+      result.setCapabilityPWCSearchable(source.isCapabilityPWCSearchable());
+      result.setCapabilityPWCUpdatable(source.isCapabilityPWCUpdatable());
+      result.setCapabilityQuery(EnumCapabilityQuery.fromValue(source.getCapabilityQuery().value()));
+      result.setCapabilityRenditions(EnumCapabilityRendition.fromValue(source.getCapabilityRenditions().value()));
+      result.setCapabilityUnfiling(source.isCapabilityUnfiling());
+      result.setCapabilityVersionSpecificFiling(source.isCapabilityVersionSpecificFiling());
       return result;
    }
 
@@ -485,7 +977,7 @@ public class TypeConverter
       return result;
    }
 
-   public static List<CmisRenditionType> getRenditionList(List<Rendition> source)
+   public static List<CmisRenditionType> getCmisRenditionTypeList(List<Rendition> source)
    {
       List<CmisRenditionType> result = new ArrayList<CmisRenditionType>();
       for (Rendition one : source)
@@ -495,9 +987,9 @@ public class TypeConverter
       return result;
    }
 
-   public static Rendition getCmisRenditionType(CmisRenditionType source)
+   public static Rendition getRendition(CmisRenditionType source)
    {
-      RenditionImpl result = new RenditionImpl();
+      Rendition result = new Rendition();
       result.setHeight(source.getHeight().intValue());
       result.setKind(source.getKind());
       result.setLength(source.getLength().intValue());
@@ -523,12 +1015,34 @@ public class TypeConverter
       return result;
    }
 
-   public static CmisChangeEventType getChangeEventType(ChangeInfo source)
+   public static CmisChangeEventType getCmisChangeEventType(ChangeInfo source)
    {
       CmisChangeEventType result = new CmisChangeEventType();
       Calendar cal = source.getChangeTime();
       result.setChangeTime(CmisUtils.fromCalendar(cal));
       result.setChangeType(EnumTypeOfChanges.fromValue(source.getChangeType().value()));
+      return result;
+   }
+
+   public static List<CmisPermissionMapping> getCmisPermissionMappingList(PermissionMapping source)
+   {
+      List<CmisPermissionMapping> result = new ArrayList<CmisPermissionMapping>();
+      for (Map.Entry<String, Collection<String>> e : source.getAll().entrySet())
+      {
+         CmisPermissionMapping one = new CmisPermissionMapping();
+         if (e.getValue() != null && e.getValue().size() > 0)
+         {
+            try {
+            one.setKey(EnumAllowableActionsKey.fromValue(e.getKey()));
+            one.getPermission().addAll(e.getValue());
+            result.add(one);
+            } catch (IllegalArgumentException ex){
+               continue;
+               // TODO:  Permission mapping keys described in spec does not coresponds with xml schema, so some keys are causing error
+               // when try to do EnumAllowableActionsKey.fromValue(e.getKey()), e.g canRenditions.Object is present in spen but not in cmis-core.xsd;
+            }
+         }
+      }
       return result;
    }
 
@@ -604,29 +1118,35 @@ public class TypeConverter
       return result;
    }
 
-   public static List<URI> getURI(List<String> values)
+   public static List<URI> getURIList(List<String> values)
    {
       List<URI> result = new ArrayList<URI>();
       for (String one : values)
       {
-         try
+         if (one != null)
          {
-            result.add(new URI(one));
-         }
-         catch (URISyntaxException e)
-         {
-            e.printStackTrace();
+            try
+            {
+               result.add(new URI(one));
+            }
+            catch (URISyntaxException e)
+            {
+               e.printStackTrace();
+            }
          }
       }
       return result;
    }
 
-   public static List<Calendar> getCalendar(List<XMLGregorianCalendar> source)
+   public static List<Calendar> getCalendarList(List<XMLGregorianCalendar> source)
    {
       List<Calendar> result = new ArrayList<Calendar>();
       for (XMLGregorianCalendar one : source)
       {
-         result.add(one.toGregorianCalendar());
+         if (one != null)
+         {
+            result.add(one.toGregorianCalendar());
+         }
       }
       return result;
    }

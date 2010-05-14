@@ -32,13 +32,14 @@ import org.xcmis.core.EnumVersioningState;
 import org.xcmis.messaging.CmisContentStreamType;
 import org.xcmis.messaging.CmisExtensionType;
 import org.xcmis.soap.ObjectServicePort;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.ChangeTokenHolder;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ConstraintException;
-import org.xcmis.spi.IncludeRelationships;
+import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.data.BaseContentStream;
-import org.xcmis.spi.data.ContentStream;
+import org.xcmis.spi.model.IncludeRelationships;
+import org.xcmis.spi.utils.MimeType;
 import org.xcmis.wssoap.impl.ObjectServicePortImpl;
 
 import javax.activation.DataHandler;
@@ -61,7 +62,7 @@ public class ObjectServiceTest extends BaseTest
    public void setUp() throws Exception
    {
       super.setUp();
-      server = complexDeployService(SERVICE_ADDRESS, new ObjectServicePortImpl(storageProvider), null, null, true);
+      server = complexDeployService(SERVICE_ADDRESS, new ObjectServicePortImpl(/*storageProvider*/), null, null, true);
       port = getObjectService(SERVICE_ADDRESS);
       assertNotNull(server);
       assertNotNull(port);
@@ -72,11 +73,11 @@ public class ObjectServiceTest extends BaseTest
       CmisPropertiesType props = new CmisPropertiesType();
       // typeId
       CmisPropertyId propTypeId = new CmisPropertyId();
-      propTypeId.setPropertyDefinitionId(CMIS.OBJECT_TYPE_ID);
+      propTypeId.setPropertyDefinitionId(CmisConstants.OBJECT_TYPE_ID);
       propTypeId.getValue().add(EnumBaseObjectTypeIds.CMIS_DOCUMENT.value());
       // name
       CmisPropertyString propName = new CmisPropertyString();
-      propName.setPropertyDefinitionId(CMIS.NAME);
+      propName.setPropertyDefinitionId(CmisConstants.NAME);
       propName.getValue().add("document1");
 
       props.getProperty().add(propTypeId);
@@ -110,11 +111,11 @@ public class ObjectServiceTest extends BaseTest
       CmisPropertiesType props = new CmisPropertiesType();
       // typeId
       CmisPropertyId propTypeId = new CmisPropertyId();
-      propTypeId.setPropertyDefinitionId(CMIS.OBJECT_TYPE_ID);
+      propTypeId.setPropertyDefinitionId(CmisConstants.OBJECT_TYPE_ID);
       propTypeId.getValue().add(EnumBaseObjectTypeIds.CMIS_FOLDER.value());
       // name
       CmisPropertyString propName = new CmisPropertyString();
-      propName.setPropertyDefinitionId(CMIS.NAME);
+      propName.setPropertyDefinitionId(CmisConstants.NAME);
       propName.getValue().add("folder1");
 
       props.getProperty().add(propTypeId);
@@ -148,11 +149,11 @@ public class ObjectServiceTest extends BaseTest
 
       // typeId
       CmisPropertyId propTypeId = new CmisPropertyId();
-      propTypeId.setPropertyDefinitionId(CMIS.OBJECT_TYPE_ID);
+      propTypeId.setPropertyDefinitionId(CmisConstants.OBJECT_TYPE_ID);
       propTypeId.getValue().add(EnumBaseObjectTypeIds.CMIS_RELATIONSHIP.value());
       // name
       CmisPropertyString propName = new CmisPropertyString();
-      propName.setPropertyDefinitionId(CMIS.NAME);
+      propName.setPropertyDefinitionId(CmisConstants.NAME);
       propName.getValue().add("relation1");
       // sourceId
       CmisPropertyId sourceId = new CmisPropertyId();
@@ -194,18 +195,18 @@ public class ObjectServiceTest extends BaseTest
    {
       // typeId
       CmisPropertyId propTypeId = new CmisPropertyId();
-      propTypeId.setPropertyDefinitionId(CMIS.OBJECT_TYPE_ID);
-      propTypeId.setLocalName(CMIS.OBJECT_TYPE_ID);
+      propTypeId.setPropertyDefinitionId(CmisConstants.OBJECT_TYPE_ID);
+      propTypeId.setLocalName(CmisConstants.OBJECT_TYPE_ID);
       propTypeId.getValue().add(EnumBaseObjectTypeIds.CMIS_POLICY.value());
       // name
       CmisPropertyString propName = new CmisPropertyString();
-      propName.setPropertyDefinitionId(CMIS.NAME);
-      propName.setLocalName(CMIS.NAME);
+      propName.setPropertyDefinitionId(CmisConstants.NAME);
+      propName.setLocalName(CmisConstants.NAME);
       propName.getValue().add("policy1");
 
       CmisPropertyString propText = new CmisPropertyString();
-      propText.setPropertyDefinitionId(CMIS.POLICY_TEXT);
-      propText.setLocalName(CMIS.POLICY_TEXT);
+      propText.setPropertyDefinitionId(CmisConstants.POLICY_TEXT);
+      propText.setLocalName(CmisConstants.POLICY_TEXT);
       propText.getValue().add("policy23");
 
       CmisPropertiesType props = new CmisPropertiesType();
@@ -238,7 +239,8 @@ public class ObjectServiceTest extends BaseTest
    {
       String docId = createDocument(testFolderId, "doc1");
       String content = "<?xml version='1.0' encoding='UTF-8'?>";
-      ContentStream stream = new BaseContentStream(content.getBytes(), "test", "text/xml");
+      ContentStream stream =
+         new BaseContentStream(content.getBytes(), "test", MimeType.fromString("text/xml;charset=UTF-8"));
       String updated = conn.setContentStream(//
          docId, //
          stream, //
@@ -293,7 +295,7 @@ public class ObjectServiceTest extends BaseTest
       String id = createDocument(testFolderId, "doc1");
       CmisObjectType obj = port.getObject(//
          repositoryId, //
-         id, // 
+         id, //
          null, // Property filter
          false, // Allowable actions
          EnumIncludeRelationships.NONE, //
@@ -327,21 +329,21 @@ public class ObjectServiceTest extends BaseTest
 
    public void testMoveObject() throws Exception
    {
-      String id = createDocument(testFolderId, "doc1");
+      String id = createDocument(testFolderId, "doc1234");
       String targetId = createFolder(testFolderId, "folder1");
       Holder<String> hId = new Holder<String>(id);
       port.moveObject(//
          repositoryId, //
          hId, //
          targetId, // Target folder
-         testFolderId, // Source folder (don't need provide because multi-filing is not supported)
+         testFolderId, // Source folder
          new Holder<CmisExtensionType>() // Extension
          );
       assertEquals(id, hId.value);
-      // Check it is moved. 
+      // Check it is moved.
       CmisObjectType moved = port.getObjectByPath(//
          repositoryId, //
-         "/testFolder/folder1/doc1", // 'testFolder' is root folder for test
+         "/testFolder/folder1/doc1234", // 'testFolder' is root folder for test
          null, //
          false, //
          EnumIncludeRelationships.NONE, //
@@ -380,7 +382,7 @@ public class ObjectServiceTest extends BaseTest
 
    /**
     * Get object service.
-    * 
+    *
     * @return TicketOrderService
     */
    private ObjectServicePort getObjectService(String address)

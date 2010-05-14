@@ -25,12 +25,16 @@ import org.xcmis.search.model.column.Column;
 import org.xcmis.search.model.source.SelectorName;
 import org.xcmis.search.parser.CmisQueryParser;
 import org.xcmis.search.parser.QueryParser;
+import org.xcmis.search.query.QueryExecutionException;
 import org.xcmis.search.result.ScoredRow;
+import org.xcmis.spi.CmisRuntimeException;
+import org.xcmis.spi.FolderData;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsIterator;
+import org.xcmis.spi.ObjectData;
+import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.Storage;
-import org.xcmis.spi.data.Folder;
-import org.xcmis.spi.data.ObjectData;
+import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 import org.xcmis.spi.query.Score;
@@ -49,7 +53,7 @@ import java.util.Set;
 import javax.jcr.Session;
 
 /**
- * {@link Storage} with implemented Storage.query(Query query)  method
+ * {@link Storage} with implemented Storage.query(Query query)  method.
  */
 public class QueryableStorage extends StorageImpl
 {
@@ -64,8 +68,9 @@ public class QueryableStorage extends StorageImpl
    private final QueryParser cmisQueryParser;
 
    /**
-    * @param session
-    * @param configuration
+    * @param session Session
+    * @param configuration StorageConfiguration
+    * @param searchService the search service
     */
    public QueryableStorage(Session session, StorageConfiguration configuration, SearchService searchService)
    {
@@ -75,11 +80,13 @@ public class QueryableStorage extends StorageImpl
    }
 
    /**
-    * @param session
-    * @param configuration
-    * @param renditionManager
+    * Constructor.
+    * @param session Session
+    * @param configuration StorageConfiguration
+    * @param renditionManager RenditionManager
+    * @param searchService the search service
     */
-   public QueryableStorage(Session session, StorageConfiguration configuration, RenditionManagerImpl renditionManager,
+   public QueryableStorage(Session session, StorageConfiguration configuration, RenditionManager renditionManager,
       SearchService searchService)
    {
       super(session, configuration, renditionManager);
@@ -109,6 +116,10 @@ public class QueryableStorage extends StorageImpl
       catch (InvalidQueryException e)
       {
          throw new InvalidArgumentException(e.getLocalizedMessage(), e);
+      }
+      catch (QueryExecutionException e)
+      {
+         throw new CmisRuntimeException(e.getLocalizedMessage(), e);
       }
    }
 
@@ -203,7 +214,7 @@ public class QueryableStorage extends StorageImpl
                for (Column column : qom.getColumns())
                {
                   //TODO check
-                  if (true)
+                  if (column.isFunction())
                   {
                      score = new Score(column.getColumnName(), BigDecimal.valueOf(row.getScore()));
                   }
@@ -278,9 +289,9 @@ public class QueryableStorage extends StorageImpl
 
       /**
        * The Constructor.
-       * 
-       * @param itemMgr the item mgr
-       * @param selectorName the selector name
+       *
+       * @param selectorName String selector name
+       * @param storage the storage
        */
       public DocumentOrderResultSorter(final String selectorName, Storage storage)
       {
@@ -309,20 +320,26 @@ public class QueryableStorage extends StorageImpl
       }
 
       /**
-       * Return comparable location of the object
-       * @param identifer
-       * @return
+       * Return comparable location of the object.
+       * @param identifer String
+       * @return path String
        */
       public String getPath(String identifer)
       {
          ObjectData obj = itemCache.get(identifer);
          if (obj == null)
          {
-            obj = storage.getObject(identifer);
+            obj = storage.getObjectById(identifer);
             itemCache.put(identifer, obj);
          }
-
-         Folder parent = obj.getParent();
+         if (obj.getBaseType() == BaseType.FOLDER)
+         {
+            if (((FolderData)obj).isRoot())
+            {
+               return obj.getName();
+            }
+         }
+         FolderData parent = obj.getParent();
          if (parent == null)
          {
             return obj.getName();

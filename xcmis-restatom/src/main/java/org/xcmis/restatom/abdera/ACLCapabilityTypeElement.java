@@ -23,24 +23,27 @@ import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.ACLCapability;
-import org.xcmis.spi.Permission;
-import org.xcmis.spi.PermissionMapping;
+import org.xcmis.spi.model.ACLCapability;
+import org.xcmis.spi.model.Permission;
+import org.xcmis.spi.model.PermissionMapping;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id: ACLCapabilityTypeElement.java 2 2010-02-04 17:21:49Z andrew00x $
+ * @version $Id: ACLCapabilityTypeElement.java 2 2010-02-04 17:21:49Z andrew00x
+ *          $
  */
 public class ACLCapabilityTypeElement extends ExtensibleElementWrapper
 {
-   
+
    /**
     * Instantiates a new aCL capability type element.
-    * 
+    *
     * @param internal the internal
     */
    public ACLCapabilityTypeElement(Element internal)
@@ -50,7 +53,7 @@ public class ACLCapabilityTypeElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new aCL capability type element.
-    * 
+    *
     * @param factory the factory
     * @param qname the qname
     */
@@ -61,7 +64,7 @@ public class ACLCapabilityTypeElement extends ExtensibleElementWrapper
 
    /**
     * Builds the element.
-    * 
+    *
     * @param aclCapability the acl capability
     */
    public void build(ACLCapability aclCapability)
@@ -69,9 +72,13 @@ public class ACLCapabilityTypeElement extends ExtensibleElementWrapper
       if (aclCapability != null)
       {
          if (aclCapability.getPropagation() != null)
+         {
             addSimpleExtension(AtomCMIS.PROPAGATION, aclCapability.getPropagation().value());
+         }
          if (aclCapability.getSupportedPermissions() != null)
+         {
             addSimpleExtension(AtomCMIS.SUPPORTED_PERMISSIONS, aclCapability.getSupportedPermissions().value());
+         }
 
          List<Permission> listPermission = aclCapability.getPermissions();
          if (listPermission != null && listPermission.size() > 0)
@@ -83,13 +90,17 @@ public class ACLCapabilityTypeElement extends ExtensibleElementWrapper
             }
          }
 
-         List<PermissionMapping> listPermissionMapping = aclCapability.getMapping();
-         if (listPermissionMapping != null && listPermissionMapping.size() > 0)
+         PermissionMapping permissionMapping = aclCapability.getMapping();
+         if (permissionMapping != null && permissionMapping.getAll().size() > 0)
          {
-            for (PermissionMapping permissionMapping : listPermissionMapping)
+            for (Map.Entry<String, Collection<String>> e : permissionMapping.getAll().entrySet())
             {
-               PermissionMappingElement permissionMappingElement = addExtension(AtomCMIS.MAPPING);
-               permissionMappingElement.build(permissionMapping);
+               if (e.getValue() != null && e.getValue().size() > 0)
+               {
+                  PermissionMappingElement me = addExtension(AtomCMIS.MAPPING);
+                  me.build(e.getKey(), e.getValue());
+
+               }
             }
          }
       }

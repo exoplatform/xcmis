@@ -77,7 +77,6 @@ public class FileSystemTransactionLog implements TransactionLog
       {
          throw new TransactionLogException("File not exist " + this.file.getAbsolutePath());
       }
-      // this.load();
    }
 
    /**

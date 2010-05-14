@@ -198,7 +198,7 @@ public class SimplePlaner implements QueryExecutionPlaner
             }
             else
             {
-               selectorPlan.addSelector(selector.getAlias());
+               selectorPlan.addSelector(selector.getName());
                selectorPlan.setName(selector.getName());
             }
             // Validate the source name and set the available columns ...

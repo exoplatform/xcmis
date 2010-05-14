@@ -32,9 +32,8 @@ import org.xcmis.restatom.abdera.TypeDefinitionTypeElement;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.StorageProvider;
-import org.xcmis.spi.TypeDefinition;
 import org.xcmis.spi.TypeNotFoundException;
+import org.xcmis.spi.model.TypeDefinition;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -53,9 +52,9 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
     * @param storageProvider TODO
     * @param repositoryService the repository service
     */
-   public CmisTypeCollection(StorageProvider storageProvider)
+   public CmisTypeCollection(/*StorageProvider storageProvider*/)
    {
-      super(storageProvider);
+      super(/*storageProvider*/);
    }
 
    /**
@@ -92,7 +91,9 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
       finally
       {
          if (conn != null)
+         {
             conn.close();
+         }
       }
    }
 
@@ -111,7 +112,9 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
    {
       String typeId = request.getTarget().getParameter("typeid");
       if (typeId == null)
+      {
          return "cmis:types";
+      }
       return typeId;
    }
 
@@ -193,7 +196,9 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
       finally
       {
          if (conn != null)
+         {
             conn.close();
+         }
       }
 
       Map<String, String> params = new HashMap<String, String>();
@@ -253,7 +258,7 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
    /**
     * Get link to AtomPub Document that describes direct descendants type for
     * specified type <code>id</code>.
-    * 
+    *
     * @param typeId type id
     * @param request request context
     * @return link to AtomPub Document that describes direct descendants type for
@@ -272,7 +277,7 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
    /**
     * Get link to AtomPub Document that describes all descendants type for
     * specified type <code>id</code>.
-    * 
+    *
     * @param typeId type id
     * @param request request context
     * @return link to AtomPub Document that describes all descendants type for
@@ -290,7 +295,7 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
 
    /**
     * Delete entry.
-    * 
+    *
     * @param typeId the type id
     * @param request the request
     * @throws ResponseContextException the response context exception
@@ -319,7 +324,9 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
       finally
       {
          if (conn != null)
+         {
             conn.close();
+         }
       }
    }
 

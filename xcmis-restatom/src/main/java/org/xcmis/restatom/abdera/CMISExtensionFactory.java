@@ -21,8 +21,8 @@ package org.xcmis.restatom.abdera;
 
 import org.apache.abdera.util.AbstractExtensionFactory;
 import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.CMIS;
-import org.xcmis.spi.PropertyType;
+import org.xcmis.spi.CmisConstants;
+import org.xcmis.spi.model.PropertyType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,7 +44,7 @@ public class CMISExtensionFactory extends AbstractExtensionFactory
     */
    public CMISExtensionFactory()
    {
-      super(CMIS.CMIS_NS_URI);
+      super(CmisConstants.CMIS_NS_URI);
       addImpl(AtomCMIS.REPOSITORY_INFO, RepositoryInfoTypeElement.class);
       addImpl(AtomCMIS.CAPABILITIES, RepositoryCapabilitiesTypeElement.class);
       addImpl(AtomCMIS.TYPE, TypeDefinitionTypeElement.class);
@@ -72,7 +72,6 @@ public class CMISExtensionFactory extends AbstractExtensionFactory
       addImpl(AtomCMIS.ALLOWABLE_ACTIONS, AllowableActionsElement.class);
       addImpl(AtomCMIS.QUERY, QueryTypeElement.class);
       addImpl(AtomCMIS.CHANGE_EVENT_INFO, ChangeEventTypeElement.class);
-      addImpl(AtomCMIS.PERMISSIONS, PermissionDefinitionElement.class);
       addImpl(AtomCMIS.MAPPING, PermissionMappingElement.class);
       addImpl(AtomCMIS.ACL_CAPABILITY, ACLCapabilityTypeElement.class);
       addImpl(AtomCMIS.RENDITION, RenditionTypeElement.class);
@@ -92,7 +91,7 @@ public class CMISExtensionFactory extends AbstractExtensionFactory
 
    /**
     * Gets the Property Definition Type element name.
-    * 
+    *
     * @param propertyType the PropertyType
     * @return the QName element name
     */

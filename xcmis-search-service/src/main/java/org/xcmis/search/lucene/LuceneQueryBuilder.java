@@ -38,13 +38,13 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.regex.RegexQuery;
-import org.xcmis.search.IndexConstants;
 import org.xcmis.search.InvalidQueryException;
 import org.xcmis.search.QueryObjectModelVisitor;
 import org.xcmis.search.VisitException;
 import org.xcmis.search.Visitors;
 import org.xcmis.search.antlr.FullTextLexer;
 import org.xcmis.search.antlr.FullTextParser;
+import org.xcmis.search.config.IndexConfiguration;
 import org.xcmis.search.lucene.content.ErrorReporterImpl;
 import org.xcmis.search.lucene.index.ExtendedNumberTools;
 import org.xcmis.search.lucene.index.FieldNames;
@@ -126,7 +126,10 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
     */
    private IndexReader indexReader;
 
+   private final IndexConfiguration indexConfuguration;
+
    /**
+    * @param indexConfuguration 
     * @param indexDataManager 
     * @param indexingService
     * @param resultSorterFactory
@@ -134,9 +137,10 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
     * @param tableResolver
     * @param documentMatcherFactory
     */
-   public LuceneQueryBuilder(IndexReader indexReader, NameConverter nameConverter, PathSplitter pathSplitter,
-      Map<String, Object> bindVariablesValues)
+   public LuceneQueryBuilder(IndexReader indexReader, NameConverter<?> nameConverter, PathSplitter<?> pathSplitter,
+      Map<String, Object> bindVariablesValues, IndexConfiguration indexConfuguration)
    {
+      this.indexConfuguration = indexConfuguration;
       Validate.notNull(indexReader, "The indexReader argument may not be null");
 
       this.indexReader = indexReader;
@@ -222,25 +226,31 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
       {
 
          final Object[] entries = pathSplitter.splitPath(parentPath);
-         Query childNodeQuery = null;
-
-         for (int i = 0; i < entries.length; i++)
+         if (entries.length > 0)
          {
-            if (i == 0)
+            Query childNodeQuery = null;
+            for (int i = 0; i < entries.length; i++)
             {
-               childNodeQuery = new TermQuery(new Term(FieldNames.UUID, IndexConstants.ROOT_UUID));
+               if (i == 0)
+               {
+                  childNodeQuery = new TermQuery(new Term(FieldNames.UUID, indexConfuguration.getRootUuid()));
+               }
+               else
+               {
+                  final String stepName = nameConverter.convertName(entries[i]);
+                  final Query nameQuery = new TermQuery(new Term(FieldNames.LABEL, stepName));
+                  childNodeQuery = new DescendantQueryNode(nameQuery, childNodeQuery);
+               }
             }
-            else
-            {
-               final String stepName = nameConverter.convertName(entries[i]);
-               final Query nameQuery = new TermQuery(new Term(FieldNames.LABEL, stepName));
-               childNodeQuery = new DescendantQueryNode(nameQuery, childNodeQuery);
-            }
-         }
 
-         // all child
-         childNodeQuery = new ChildTraversingQueryNode(childNodeQuery, false);
-         queryBuilderStack.push(childNodeQuery);
+            // all child
+            childNodeQuery = new ChildTraversingQueryNode(childNodeQuery, false);
+            queryBuilderStack.push(childNodeQuery);
+         }
+         else
+         {
+            queryBuilderStack.push(new MatchAllDocsQuery());
+         }
       }
 
    }
@@ -300,20 +310,13 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
       {
          final Object[] entries = pathSplitter.splitPath(parentPath);
 
-         Query descendantQuery = null;
+         Query descendantQuery = new TermQuery(new Term(FieldNames.UUID, indexConfuguration.getRootUuid()));
 
-         for (int i = 0; i < entries.length; i++)
+         for (int i = 1; i < entries.length; i++)
          {
-            if (i == 0)
-            {
-               descendantQuery = new TermQuery(new Term(FieldNames.UUID, IndexConstants.ROOT_UUID));
-            }
-            else
-            {
-               final String stepName = nameConverter.convertName(entries[i]);
-               final Query nameQuery = new TermQuery(new Term(FieldNames.LABEL, stepName));
-               descendantQuery = new DescendantQueryNode(nameQuery, descendantQuery);
-            }
+            final String stepName = nameConverter.convertName(entries[i]);
+            final Query nameQuery = new TermQuery(new Term(FieldNames.LABEL, stepName));
+            descendantQuery = new DescendantQueryNode(nameQuery, descendantQuery);
          }
          // all childs
 
@@ -441,7 +444,7 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
       Validate.isTrue(queryBuilderStack.peek() instanceof Operator, "Stack should contains comparation operator ");
       Operator operator = (Operator)queryBuilderStack.pop();
 
-      Validate.isTrue(queryBuilderStack.peek() instanceof Long, "Stack should contains long value. But found "
+      Validate.isTrue(queryBuilderStack.peek() instanceof Long, "Invalid literal type, should be long. But found "
          + queryBuilderStack.peek().getClass().getCanonicalName());
 
       Long staticLongValue = (Long)queryBuilderStack.pop();
@@ -810,7 +813,7 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
       Validate.isTrue(queryBuilderStack.peek() instanceof Operator, "Stack should contains comparation operator ");
       Operator operator = (Operator)queryBuilderStack.pop();
       Object staticValue = queryBuilderStack.peek();
-      Validate.isTrue((staticValue instanceof String || staticValue instanceof Double
+      Validate.isTrue((staticValue instanceof String || staticValue instanceof Double || staticValue instanceof Long
          || staticValue instanceof Calendar || staticValue instanceof Boolean),
          "Stack should contains static value. But found " + queryBuilderStack.peek().getClass().getCanonicalName());
       staticValue = queryBuilderStack.pop();
@@ -825,6 +828,10 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
       else if (staticValue instanceof Double)
       {
          staticStingValue = ExtendedNumberTools.doubleToString((Double)staticValue);
+      }
+      else if (staticValue instanceof Long)
+      {
+         staticStingValue = NumberTools.longToString((Long)staticValue);
       }
       else if (staticValue instanceof Calendar)
       {
@@ -966,7 +973,7 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
       {
          if (i == 0)
          {
-            descendantQuery = new TermQuery(new Term(FieldNames.UUID, IndexConstants.ROOT_UUID));
+            descendantQuery = new TermQuery(new Term(FieldNames.UUID, indexConfuguration.getRootUuid()));
          }
          else
          {

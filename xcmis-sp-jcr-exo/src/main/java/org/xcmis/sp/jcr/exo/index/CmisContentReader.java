@@ -18,13 +18,21 @@
  */
 package org.xcmis.sp.jcr.exo.index;
 
+import org.xcmis.search.content.ContentEntry;
 import org.xcmis.search.content.command.InvocationContext;
-import org.xcmis.search.content.command.read.GetChildNodesCommand;
-import org.xcmis.search.content.command.read.GetNodeCommand;
-import org.xcmis.search.content.command.read.GetPropertiesCommand;
-import org.xcmis.search.content.command.read.GetPropertyCommand;
+import org.xcmis.search.content.command.read.GetChildEntriesCommand;
+import org.xcmis.search.content.command.read.GetContentEntryCommand;
+import org.xcmis.search.content.command.read.GetUnfiledEntriesCommand;
 import org.xcmis.search.content.interceptors.ContentReaderInterceptor;
+import org.xcmis.sp.jcr.exo.index.IndexListener.ContentEntryAdapter;
+import org.xcmis.spi.FolderData;
+import org.xcmis.spi.ItemsIterator;
+import org.xcmis.spi.ObjectData;
+import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.Storage;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author <a href="mailto:Sergey.Kabashnyuk@exoplatform.org">Sergey Kabashnyuk</a>
@@ -35,53 +43,66 @@ public class CmisContentReader extends ContentReaderInterceptor
 {
    private final Storage storage;
 
+   private final ContentEntryAdapter contentEntryAdapter;
+
    /**
-    * @param storage
+    * Constructor.
+    * @param storage Storage
     */
    public CmisContentReader(Storage storage)
    {
       super();
       this.storage = storage;
+      this.contentEntryAdapter = new ContentEntryAdapter();
    }
 
    /**
-    * @see org.xcmis.search.content.interceptors.ContentReaderInterceptor#visitGetChildNodesCommand(org.xcmis.search.content.command.InvocationContext, org.xcmis.search.content.command.read.GetChildNodesCommand)
+    * @see org.xcmis.search.content.interceptors.ContentReaderInterceptor#visitChildEntriesCommand(org.xcmis.search.content.command.InvocationContext, org.xcmis.search.content.command.read.GetChildEntriesCommand)
     */
    @Override
-   public Object visitGetChildNodesCommand(InvocationContext ctx, GetChildNodesCommand command) throws Throwable
+   public Object visitChildEntriesCommand(InvocationContext ctx, GetChildEntriesCommand command) throws Throwable
    {
-      // TODO Auto-generated method stub
-      return null;
+      List<ContentEntry> childs = new ArrayList<ContentEntry>();
+      ObjectData parent = storage.getObjectById(command.getParentUuid());
+      if (parent instanceof FolderData)
+      {
+         ItemsIterator<ObjectData> childDatas = ((FolderData)parent).getChildren(null);
+         while (childDatas.hasNext())
+         {
+            childs.add(contentEntryAdapter.createEntry(childDatas.next()));
+
+         }
+
+      }
+      return childs;
    }
 
    /**
-    * @see org.xcmis.search.content.interceptors.ContentReaderInterceptor#visitGetNodeCommand(org.xcmis.search.content.command.InvocationContext, org.xcmis.search.content.command.read.GetNodeCommand)
+    * @see org.xcmis.search.content.interceptors.ContentReaderInterceptor#visitGetContentEntryCommand(org.xcmis.search.content.command.InvocationContext, org.xcmis.search.content.command.read.GetContentEntryCommand)
     */
    @Override
-   public Object visitGetNodeCommand(InvocationContext ctx, GetNodeCommand command) throws Throwable
+   public Object visitGetContentEntryCommand(InvocationContext ctx, GetContentEntryCommand command) throws Throwable
    {
-      // TODO Auto-generated method stub
-      return null;
+
+      ObjectData entry;
+      try
+      {
+         entry = storage.getObjectById(command.getEntryUuid());
+      }
+      catch (ObjectNotFoundException e)
+      {
+         return null;
+      }
+      return contentEntryAdapter.createEntry(entry);
    }
 
    /**
-    * @see org.xcmis.search.content.interceptors.ContentReaderInterceptor#visitGetPropertiesCommand(org.xcmis.search.content.command.InvocationContext, org.xcmis.search.content.command.read.GetPropertiesCommand)
+    * @see org.xcmis.search.content.interceptors.ContentReaderInterceptor#visitGetUnfilledEntriesCommand(org.xcmis.search.content.command.InvocationContext, org.xcmis.search.content.command.read.GetUnfilledEntriesCommand)
     */
    @Override
-   public Object visitGetPropertiesCommand(InvocationContext ctx, GetPropertiesCommand command) throws Throwable
+   public Object visitGetUnfiledEntriesCommand(InvocationContext ctx, GetUnfiledEntriesCommand command)
+      throws Throwable
    {
-      // TODO Auto-generated method stub
-      return null;
+      return storage.getUnfiledObjectsId();
    }
-
-   /**
-    * @see org.xcmis.search.content.interceptors.ContentReaderInterceptor#visitGetPropertyCommand(org.xcmis.search.content.command.InvocationContext, org.xcmis.search.content.command.read.GetPropertyCommand)
-    */
-   @Override
-   public Object visitGetPropertyCommand(InvocationContext ctx, GetPropertyCommand command) throws Throwable
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
 }

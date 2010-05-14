@@ -118,7 +118,7 @@ public class Comparison extends Constraint
    }
 
    /**
-    * Get the operator for this comparison
+    * Get the operator for this comparison.
     * 
     * @return the operator; never null
     */

@@ -24,12 +24,14 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
 import org.apache.commons.io.FileUtils;
+import org.exoplatform.services.document.DocumentReaderService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.xcmis.search.InvalidQueryException;
+import org.xcmis.search.SearchService;
 import org.xcmis.search.SearchServiceException;
-import org.xcmis.search.config.IndexConfigurationImpl;
+import org.xcmis.search.config.IndexConfiguration;
 import org.xcmis.search.config.SearchServiceConfiguration;
 import org.xcmis.search.content.ContentEntry;
 import org.xcmis.search.content.InMemorySchema;
@@ -39,15 +41,14 @@ import org.xcmis.search.content.InMemorySchema.Builder;
 import org.xcmis.search.content.Property.BinaryValue;
 import org.xcmis.search.content.command.InvocationContext;
 import org.xcmis.search.content.interceptors.ContentReaderInterceptor;
-import org.xcmis.search.lucene.LuceneSearchService;
+import org.xcmis.search.lucene.InMemoryLuceneQueryableIndexStorage;
 import org.xcmis.search.lucene.content.SchemaTableResolver;
-import org.xcmis.search.lucene.index.IndexRecoverService;
-import org.xcmis.search.lucene.index.IndexRestoreService;
 import org.xcmis.search.model.Query;
 import org.xcmis.search.result.ScoredRow;
 import org.xcmis.search.value.CastSystem;
 import org.xcmis.search.value.NameConverter;
 import org.xcmis.search.value.PropertyType;
+import org.xcmis.search.value.SlashSplitter;
 import org.xcmis.search.value.ToStringNameConverter;
 
 import java.io.ByteArrayInputStream;
@@ -103,25 +104,83 @@ public class SearchServiceTest
    public void shouldNotCreateSearchServieWithEmptyReadOnlyInterceptor() throws SearchServiceException
    {
       SearchServiceConfiguration configuration = new SearchServiceConfiguration();
-      LuceneSearchService luceneSearchService = new LuceneSearchService(configuration);
+      SearchService searchService = new SearchService(configuration);
    }
 
    @Test
-   public void testShouldCreateSearchServie() throws SearchServiceException
+   public void testShouldCreateSearchService() throws SearchServiceException
    {
+      NameConverter<String> nameConverter = new ToStringNameConverter();
+      SchemaTableResolver tableResolver = new SchemaTableResolver(nameConverter, schema);
+
       //index configuration
-      IndexConfigurationImpl indexConfuration = new IndexConfigurationImpl();
+      IndexConfiguration indexConfuration = new IndexConfiguration();
       indexConfuration.setIndexDir(tempDir.getAbsolutePath());
-      indexConfuration.setIndexRecoverService(mock(IndexRecoverService.class));
-      indexConfuration.setIndexRestoreService(mock(IndexRestoreService.class));
+      indexConfuration.setRootParentUuid("rootParentUuid");
+      indexConfuration.setRootUuid("rootUuid");
+      indexConfuration.setDocumentReaderService(mock(DocumentReaderService.class));
 
       //search service configuration
       SearchServiceConfiguration configuration = new SearchServiceConfiguration();
       configuration.setIndexConfiguration(indexConfuration);
       configuration.setContentReader(mock(ContentReaderInterceptor.class));
-      LuceneSearchService luceneSearchService = new LuceneSearchService(configuration);
+      configuration.setPathSplitter(new SlashSplitter());
+      configuration.setTableResolver(tableResolver);
+      configuration.setNameConverter(nameConverter);
+      SearchService luceneSearchService = new SearchService(configuration);
 
       assertThat(luceneSearchService, notNullValue());
+   }
+
+   @Test
+   public void testShouldCreateSearchServiceWithRamDirectory() throws SearchServiceException
+   {
+      NameConverter<String> nameConverter = new ToStringNameConverter();
+      SchemaTableResolver tableResolver = new SchemaTableResolver(nameConverter, schema);
+
+      //index configuration
+      IndexConfiguration indexConfuration = new IndexConfiguration();
+      indexConfuration.setIndexDir(tempDir.getAbsolutePath());
+      indexConfuration.setRootParentUuid("rootParentUuid");
+      indexConfuration.setRootUuid("rootUuid");
+      indexConfuration.setDocumentReaderService(mock(DocumentReaderService.class));
+      indexConfuration.setQueryableIndexStorage(InMemoryLuceneQueryableIndexStorage.class.getName());
+
+      //search service configuration
+      SearchServiceConfiguration configuration = new SearchServiceConfiguration();
+      configuration.setIndexConfiguration(indexConfuration);
+      configuration.setContentReader(mock(ContentReaderInterceptor.class));
+      configuration.setPathSplitter(new SlashSplitter());
+      configuration.setTableResolver(tableResolver);
+      configuration.setNameConverter(nameConverter);
+      SearchService luceneSearchService = new SearchService(configuration);
+
+      assertThat(luceneSearchService, notNullValue());
+   }
+
+   @Test(expected = SearchServiceException.class)
+   public void testShouldNotCreateSearchServiceWithWrongStorage() throws SearchServiceException
+   {
+      NameConverter<String> nameConverter = new ToStringNameConverter();
+      SchemaTableResolver tableResolver = new SchemaTableResolver(nameConverter, schema);
+
+      //index configuration
+      IndexConfiguration indexConfuration = new IndexConfiguration();
+      indexConfuration.setIndexDir(tempDir.getAbsolutePath());
+      indexConfuration.setRootParentUuid("rootParentUuid");
+      indexConfuration.setRootUuid("rootUuid");
+      indexConfuration.setDocumentReaderService(mock(DocumentReaderService.class));
+      indexConfuration.setQueryableIndexStorage(DocumentReaderService.class.getName());
+
+      //search service configuration
+      SearchServiceConfiguration configuration = new SearchServiceConfiguration();
+      configuration.setIndexConfiguration(indexConfuration);
+      configuration.setContentReader(mock(ContentReaderInterceptor.class));
+      configuration.setPathSplitter(new SlashSplitter());
+      configuration.setTableResolver(tableResolver);
+      configuration.setNameConverter(nameConverter);
+      SearchService luceneSearchService = new SearchService(configuration);
+
    }
 
    //TODO check
@@ -133,10 +192,11 @@ public class SearchServiceTest
       SchemaTableResolver tableResolver = new SchemaTableResolver(nameConverter, schema);
 
       //index configuration
-      IndexConfigurationImpl indexConfuration = new IndexConfigurationImpl();
+      IndexConfiguration indexConfuration = new IndexConfiguration();
       indexConfuration.setIndexDir(tempDir.getAbsolutePath());
-      indexConfuration.setIndexRecoverService(mock(IndexRecoverService.class));
-      indexConfuration.setIndexRestoreService(mock(IndexRestoreService.class));
+      indexConfuration.setRootParentUuid("rootParentUuid");
+      indexConfuration.setRootUuid("rootUuid");
+      indexConfuration.setDocumentReaderService(mock(DocumentReaderService.class));
 
       //search service configuration
       SearchServiceConfiguration configuration = new SearchServiceConfiguration();
@@ -144,19 +204,19 @@ public class SearchServiceTest
       configuration.setContentReader(mock(ContentReaderInterceptor.class));
       configuration.setNameConverter(nameConverter);
       configuration.setTableResolver(tableResolver);
-
-      LuceneSearchService luceneSearchService = new LuceneSearchService(configuration);
-
-      Query query = builder.selectStar().from("someTable").query();
-
+      configuration.setPathSplitter(new SlashSplitter());
       InvocationContext invocationContext = new InvocationContext();
       invocationContext.setSchema(schema);
 
       invocationContext.setTableResolver(tableResolver);
       invocationContext.setNameConverter(nameConverter);
-      luceneSearchService.setInvocationContext(invocationContext);
+      configuration.setDefaultInvocationContext(invocationContext);
 
-      luceneSearchService.execute(query, new HashMap<String, Object>());
+      SearchService luceneSearchService = new SearchService(configuration);
+
+      Query query = builder.selectStar().from("someTable").query();
+
+      luceneSearchService.execute(query);
    }
 
    @Test
@@ -167,10 +227,11 @@ public class SearchServiceTest
       SchemaTableResolver tableResolver = new SchemaTableResolver(nameConverter, schema);
 
       //index configuration
-      IndexConfigurationImpl indexConfuration = new IndexConfigurationImpl();
+      IndexConfiguration indexConfuration = new IndexConfiguration();
       indexConfuration.setIndexDir(tempDir.getAbsolutePath());
-      indexConfuration.setIndexRecoverService(mock(IndexRecoverService.class));
-      indexConfuration.setIndexRestoreService(mock(IndexRestoreService.class));
+      indexConfuration.setRootParentUuid("rootParentUuid");
+      indexConfuration.setRootUuid("rootUuid");
+      indexConfuration.setDocumentReaderService(mock(DocumentReaderService.class));
 
       //search service configuration
       SearchServiceConfiguration configuration = new SearchServiceConfiguration();
@@ -178,8 +239,9 @@ public class SearchServiceTest
       configuration.setContentReader(mock(ContentReaderInterceptor.class));
       configuration.setNameConverter(nameConverter);
       configuration.setTableResolver(tableResolver);
+      configuration.setPathSplitter(new SlashSplitter());
 
-      LuceneSearchService luceneSearchService = new LuceneSearchService(configuration);
+      SearchService luceneSearchService = new SearchService(configuration);
       luceneSearchService.start();
 
       byte[] bytes =
@@ -203,10 +265,9 @@ public class SearchServiceTest
 
       invocationContext.setTableResolver(tableResolver);
       invocationContext.setNameConverter(nameConverter);
-      luceneSearchService.setInvocationContext(invocationContext);
 
       Query query = builder.selectStar().from("someTable AS someTable").query();
-      List<ScoredRow> result = luceneSearchService.execute(query, new HashMap());
+      List<ScoredRow> result = luceneSearchService.execute(query, new HashMap(), invocationContext);
       assertThat(result.size(), is(1));
    }
 }

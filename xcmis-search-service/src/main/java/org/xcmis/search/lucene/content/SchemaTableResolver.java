@@ -99,19 +99,9 @@ public class SchemaTableResolver implements VirtualTableResolver<Query>
     * @param tableName
     * @return
     */
-   private Set<String> getSubTypes(String tableName)
+   protected Set<String> getSubTypes(String tableName)
    {
       return Collections.emptySet();
-   }
-
-   /**
-    * @param tableName
-    * @return
-    */
-   protected boolean isMixin(String tableName)
-   {
-      // TODO Fix me
-      return false;
    }
 
 }

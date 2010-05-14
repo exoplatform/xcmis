@@ -30,8 +30,10 @@ import org.xcmis.search.model.constraint.ChildNode;
 import org.xcmis.search.model.constraint.Comparison;
 import org.xcmis.search.model.constraint.DescendantNode;
 import org.xcmis.search.model.constraint.FullTextSearch;
+import org.xcmis.search.model.constraint.Operator;
 import org.xcmis.search.model.constraint.PropertyExistence;
 import org.xcmis.search.model.constraint.SameNode;
+import org.xcmis.search.model.operand.DynamicOperand;
 import org.xcmis.search.model.operand.FullTextSearchScore;
 import org.xcmis.search.model.operand.Length;
 import org.xcmis.search.model.operand.LowerCase;
@@ -89,7 +91,7 @@ public class Validator extends AbstractModelVisitor
    }
 
    /**
-    * Check if selector exists in list of selectors
+    * Check if selector exists in list of selectors.
     * @param selectorName
     * @return 
     */
@@ -109,7 +111,7 @@ public class Validator extends AbstractModelVisitor
    }
 
    /**
-    * Check if selector exists in list of selectors
+    * Check if selector exists in list of selectors.
     * @param selectorName
     */
    public Schema.Column checkTableAndColumnExistance(SelectorName selectorName, String propertyName,
@@ -182,9 +184,50 @@ public class Validator extends AbstractModelVisitor
    {
 
       super.visit(node);
+      DynamicOperand dynamicOperand = node.getOperand1();
+      if (dynamicOperand instanceof PropertyValue)
+      {
+         PropertyValue propertyValueOperand = (PropertyValue)dynamicOperand;
+         Table table = checkSelectorExistance(propertyValueOperand.getSelectorName());
+         //no need to check select ALL properties.
+         String propertyName = propertyValueOperand.getPropertyName();
+         if (table != null && !propertyName.equals("*"))
+         {
+            Schema.Column column = table.getColumn(propertyName);
+            if (column != null)
+            {
+               boolean isAvaileable = false;
+               for (Operator operator : column.getAvailableQueryOperators())
+               {
+                  if (node.getOperator().equals(operator))
+                  {
+                     isAvaileable = true;
+                     break;
+                  }
+               }
+               if (!isAvaileable)
+               {
+                  throw new VisitException("Operator :" + node.getOperator()
+                     + " is not availeble query operator for property '" + propertyValueOperand.getPropertyName()
+                     + "' of the table  '" + propertyValueOperand.getSelectorName() + "'");
+               }
+            }
 
-      //TODO  available query operator for property
-      //TODO NodeName is not accepteable for long and boolean
+         }
+      }
+      else if (dynamicOperand instanceof Length)
+      {
+         //TODO Length is not accepteable for boolean other?
+      }
+      else if (dynamicOperand instanceof NodeName)
+      {
+         //TODO NodeName is not accepteable for long and boolean
+      }
+      else if (dynamicOperand instanceof NodeLocalName)
+      {
+         //TODO NodeName is not accepteable for long and boolean
+      }
+
    }
 
    /**

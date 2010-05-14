@@ -23,7 +23,7 @@ import org.apache.abdera.factory.Factory;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.ExtensibleElementWrapper;
 import org.xcmis.restatom.AtomCMIS;
-import org.xcmis.spi.Permission;
+import org.xcmis.spi.model.Permission;
 
 import javax.xml.namespace.QName;
 
@@ -36,7 +36,7 @@ public class PermissionDefinitionElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new permission definition element.
-    * 
+    *
     * @param internal the internal
     */
    public PermissionDefinitionElement(Element internal)
@@ -46,7 +46,7 @@ public class PermissionDefinitionElement extends ExtensibleElementWrapper
 
    /**
     * Instantiates a new permission definition element.
-    * 
+    *
     * @param factory the factory
     * @param qname the qname
     */
@@ -57,7 +57,7 @@ public class PermissionDefinitionElement extends ExtensibleElementWrapper
 
    /**
     * Builds the element.
-    * 
+    *
     * @param permission the acl capability
     */
    public void build(Permission permission)

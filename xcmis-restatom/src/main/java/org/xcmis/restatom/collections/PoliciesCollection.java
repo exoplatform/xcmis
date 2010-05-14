@@ -30,18 +30,17 @@ import org.apache.abdera.protocol.server.context.EmptyResponseContext;
 import org.apache.abdera.protocol.server.context.ResponseContextException;
 import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.abdera.ObjectTypeElement;
-import org.xcmis.spi.CMIS;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FilterNotValidException;
-import org.xcmis.spi.IncludeRelationships;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.StorageProvider;
-import org.xcmis.spi.object.CmisObject;
-import org.xcmis.spi.object.Property;
-import org.xcmis.spi.object.impl.IdProperty;
+import org.xcmis.spi.model.CmisObject;
+import org.xcmis.spi.model.IncludeRelationships;
+import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.impl.IdProperty;
 
 import java.util.HashMap;
 import java.util.List;
@@ -57,23 +56,22 @@ public class PoliciesCollection extends CmisObjectCollection
 
    /**
     * Instantiates a new policies collection.
-    * @param storageProvider TODO
     */
-   public PoliciesCollection(StorageProvider storageProvider)
+   public PoliciesCollection()
    {
-      super(storageProvider);
+      super();
       setHref("/policies");
    }
 
    /**
     * {@inheritDoc}
     */
+   @Override
    protected void addFeedDetails(Feed feed, RequestContext request) throws ResponseContextException
    {
       String propertyFilter = request.getParameter(AtomCMIS.PARAM_FILTER);
-
-      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CMIS.MAX_ITEMS);
-      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CMIS.SKIP_COUNT);
+      int maxItems = getIntegerParameter(request, AtomCMIS.PARAM_MAX_ITEMS, CmisConstants.MAX_ITEMS);
+      int skipCount = getIntegerParameter(request, AtomCMIS.PARAM_SKIP_COUNT, CmisConstants.SKIP_COUNT);
 
       Connection conn = null;
       try
@@ -138,6 +136,7 @@ public class PoliciesCollection extends CmisObjectCollection
    {
       Entry entry;
       String objectId;
+
       try
       {
          entry = getEntryFromRequest(request);
@@ -149,16 +148,19 @@ public class PoliciesCollection extends CmisObjectCollection
       }
 
       ObjectTypeElement objectElement = entry.getFirstChild(AtomCMIS.OBJECT);
-      CmisObject object = objectElement.getObject();
-
+      boolean hasCMISElement = objectElement != null;
+      CmisObject object = hasCMISElement ? object = objectElement.getObject() : new CmisObject();
+      updatePropertiesFromEntry(object, entry);
       String policyId = null;
-
-      for (Property<?> p : object.getProperties().values())
+      if (hasCMISElement)
       {
-         String pName = p.getId();
-         if (pName.equals(CMIS.OBJECT_ID))
+         for (Property<?> p : object.getProperties().values())
          {
-            policyId = ((IdProperty)p).getValues().get(0);
+            String pName = p.getId();
+            if (CmisConstants.OBJECT_ID.equals(pName))
+            {
+               policyId = ((IdProperty)p).getValues().get(0);
+            }
          }
       }
 
@@ -166,31 +168,62 @@ public class PoliciesCollection extends CmisObjectCollection
       try
       {
          conn = getConnection(request);
-         // apply policy
-         if (policyId != null)
+         try
          {
-            conn.applyPolicy(policyId, objectId);
+            // apply policy
+            if (policyId != null)
+            {
+               conn.applyPolicy(policyId, objectId);
+            }
          }
-      }
-      catch (ConstraintException cve)
-      {
-         return createErrorResponse(cve, 409);
-      }
-      catch (ObjectNotFoundException onfe)
-      {
-         return createErrorResponse(onfe, 404);
-      }
-      catch (InvalidArgumentException iae)
-      {
-         return createErrorResponse(iae, 400);
-      }
-      catch (StorageException re)
-      {
-         return createErrorResponse(re, 500);
-      }
-      catch (Throwable t)
-      {
-         return createErrorResponse(t, 500);
+         catch (ConstraintException cve)
+         {
+            return createErrorResponse(cve, 409);
+         }
+         catch (ObjectNotFoundException onfe)
+         {
+            return createErrorResponse(onfe, 404);
+         }
+         catch (InvalidArgumentException iae)
+         {
+            return createErrorResponse(iae, 400);
+         }
+         catch (StorageException re)
+         {
+            return createErrorResponse(re, 500);
+         }
+         catch (Throwable t)
+         {
+            return createErrorResponse(t, 500);
+         }
+
+         entry = request.getAbdera().getFactory().newEntry();
+         try
+         {
+            // updated object
+            addEntryDetails(request, entry, request.getResolvedUri(), conn.getObject(policyId, true,
+               IncludeRelationships.BOTH, true, true, true, null, null));
+         }
+         catch (ResponseContextException rce)
+         {
+            return rce.getResponseContext();
+         }
+         catch (ObjectNotFoundException onfe)
+         {
+            return createErrorResponse(onfe, 404);
+         }
+         catch (FilterNotValidException fae)
+         {
+            return createErrorResponse(fae, 400);
+         }
+         catch (StorageException re)
+         {
+            return createErrorResponse(re, 500);
+         }
+
+         Map<String, String> params = new HashMap<String, String>();
+         String link = request.absoluteUrlFor(TargetType.ENTRY, params);
+         return buildCreateEntryResponse(link, entry);
       }
       finally
       {
@@ -199,34 +232,6 @@ public class PoliciesCollection extends CmisObjectCollection
             conn.close();
          }
       }
-
-      entry = request.getAbdera().getFactory().newEntry();
-      try
-      {
-         // updated object
-         addEntryDetails(request, entry, request.getResolvedUri(), conn.getObject(policyId, true,
-            IncludeRelationships.BOTH, true, true, true, null, null));
-      }
-      catch (ResponseContextException rce)
-      {
-         return rce.getResponseContext();
-      }
-      catch (ObjectNotFoundException onfe)
-      {
-         return createErrorResponse(onfe, 404);
-      }
-      catch (FilterNotValidException fae)
-      {
-         return createErrorResponse(fae, 400);
-      }
-      catch (StorageException re)
-      {
-         return createErrorResponse(re, 500);
-      }
-
-      Map<String, String> params = new HashMap<String, String>();
-      String link = request.absoluteUrlFor(TargetType.ENTRY, params);
-      return buildCreateEntryResponse(link, entry);
    }
 
    /**
@@ -255,7 +260,7 @@ public class PoliciesCollection extends CmisObjectCollection
       for (Property<?> p : object.getProperties().values())
       {
          String pName = p.getId();
-         if (pName.equals(CMIS.OBJECT_ID))
+         if (pName.equals(CmisConstants.OBJECT_ID))
          {
             policyId = ((IdProperty)p).getValues().get(0);
          }
