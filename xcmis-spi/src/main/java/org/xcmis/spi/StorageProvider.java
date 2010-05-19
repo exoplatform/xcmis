@@ -19,8 +19,6 @@
 
 package org.xcmis.spi;
 
-import java.util.Set;
-
 /**
  * Provide access to all available CMIS storages.
  *
@@ -38,15 +36,15 @@ public interface StorageProvider
     * @param storageId storage id
     * @return connection
     */
-   Connection getConnection(String storageId);
+   Connection getConnection();
 
    /**
-    * Get id of all available storages.
+    * Get id of storage.
     *
     * @return storages iDs if no one storages configured than empty set returned
     *         never null
     */
-   // TODO : short info about storages, e.g. CmisRepositoryEntryType
-   Set<String> getStorageIDs();
+   String getStorageID();
+   
 
 }

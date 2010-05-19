@@ -80,9 +80,7 @@
          <object-param>
             <name>configs</name>
             <object type="org.xcmis.sp.jcr.exo.StorageProviderImpl$StorageProviderConfig">
-               <field name="storages">
-                  <collection type="java.util.ArrayList">
-                     <value>
+               <field name="storage">
                         <object type="org.xcmis.sp.jcr.exo.StorageConfiguration">
                            <field name="id">
                               <string>cmis1</string>
@@ -113,8 +111,6 @@
                               </map>
                            </field>
                         </object>
-                     </value>
-                  </collection>
                </field>
             </object>
          </object-param>

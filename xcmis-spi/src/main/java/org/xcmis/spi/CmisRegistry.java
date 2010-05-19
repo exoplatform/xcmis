@@ -67,7 +67,6 @@ public class CmisRegistry
 
    public final void addStorage(String id, StorageProvider storageProvider)
    {
-      // TODO : Need retrieval all storages from StorageProvider ??
       if (this.storageProviders.get(id) != null)
       {
          throw new CmisRuntimeException("Storage " + id + " already registered.");
@@ -88,7 +87,7 @@ public class CmisRegistry
       {
          throw new InvalidArgumentException("Storage '" + storageId + "' does not exist.");
       }
-      return storageProvider.getConnection(storageId);
+      return storageProvider.getConnection();
    }
 
    /**
@@ -105,7 +104,8 @@ public class CmisRegistry
       {
          String id = it.next();
          RepositoryShortInfo info = new RepositoryShortInfo(id, id);
-         info.setRootFolderId(storageProviders.get(id).getConnection(id).getStorage().getRepositoryInfo().getRootFolderId());
+         //info.setRootFolderId(storageProviders.get(id).getConnection(id).getStorage().getRepositoryInfo().getRootFolderId());
+         info.setRootFolderId(storageProviders.get(id).getConnection().getStorage().getRepositoryInfo().getRootFolderId());
          set.add(info);
       }
       return Collections.unmodifiableSet(set);

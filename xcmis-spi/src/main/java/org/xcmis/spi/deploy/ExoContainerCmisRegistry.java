@@ -74,11 +74,7 @@ public class ExoContainerCmisRegistry extends CmisRegistry implements Startable
 
       for (StorageProvider sp : sps)
       {
-
-         for (String id : sp.getStorageIDs())
-         {
-            addStorage(id, sp);
-         }
+         addStorage(sp.getStorageID(), sp);
       }
       setInstance(this);
    }
