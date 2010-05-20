@@ -75,7 +75,15 @@ public class StorageProviderImpl implements StorageProvider
          LOG.error("Not found configuration for any storages.");
       }
    }
-
+   
+   public StorageProviderImpl(String repositoryId, String repositoryName, String description, String maxStorageMemSize,
+      String maxItemsNumber)
+   {
+      this.storageConfig =
+         new StorageConfiguration(repositoryId, repositoryName, description, maxStorageMemSize, maxItemsNumber);
+      this.renditionManager = RenditionManager.getInstance();
+      this.storageImpl = new StorageImpl(storageConfig, renditionManager, new PermissionService());
+   }
    
    public Connection getConnection()
    {
