@@ -42,7 +42,7 @@ import java.util.Map.Entry;
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-public class StorageProviderImpl implements StorageProvider, Startable
+public class StorageProviderImpl implements StorageProvider
 {
 
    private static final Log LOG = ExoLogger.getLogger(StorageProviderImpl.class);
@@ -66,6 +66,9 @@ public class StorageProviderImpl implements StorageProvider, Startable
 
          StorageProviderConfig confs = (StorageProviderConfig)param.getObject();
          this.storageConfig = confs.getStorage();
+         this.renditionManager = RenditionManager.getInstance();
+         this.storageImpl = new StorageImpl(storageConfig, renditionManager,
+          new PermissionService());
       }
       else
       {
@@ -87,16 +90,6 @@ public class StorageProviderImpl implements StorageProvider, Startable
    public String getStorageID()
    {
       return storageConfig.getId();
-   }
-
-   /**
-    * @see org.picocontainer.Startable#start()
-    */
-   public void start()
-   {
-      this.renditionManager = RenditionManager.getInstance();
-           this.storageImpl = new StorageImpl(storageConfig, renditionManager,
-            new PermissionService());
    }
 
    /**
