@@ -63,8 +63,6 @@ public abstract class BaseTest extends TestCase
 
    protected StandaloneContainer container;
 
-   //   protected StorageProvider storageProvider;
-
    protected Connection conn;
 
    protected String rootFolderId;
@@ -81,9 +79,6 @@ public abstract class BaseTest extends TestCase
       ConversationState state = new ConversationState(new Identity("root"));
       ConversationState.setCurrent(state);
 
-      //      storageProvider = (StorageProvider)container.getComponentInstanceOfType(StorageProvider.class);
-
-      //      conn = storageProvider.getConnection(repositoryId);
       conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
       rootFolderId = conn.getStorage().getRepositoryInfo().getRootFolderId();

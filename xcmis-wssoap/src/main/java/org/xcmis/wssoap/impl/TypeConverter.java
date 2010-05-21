@@ -162,7 +162,7 @@ public class TypeConverter
       result.setSupportedPermissions(EnumSupportedPermissions.fromValue(source.getSupportedPermissions().value()));
       if (source.getMapping() != null)
       {
-            result.getMapping().addAll(getCmisPermissionMappingList(source.getMapping()));
+         result.getMapping().addAll(getCmisPermissionMappingList(source.getMapping()));
       }
       return result;
    }
@@ -1032,11 +1032,14 @@ public class TypeConverter
          CmisPermissionMapping one = new CmisPermissionMapping();
          if (e.getValue() != null && e.getValue().size() > 0)
          {
-            try {
-            one.setKey(EnumAllowableActionsKey.fromValue(e.getKey()));
-            one.getPermission().addAll(e.getValue());
-            result.add(one);
-            } catch (IllegalArgumentException ex){
+            try
+            {
+               one.setKey(EnumAllowableActionsKey.fromValue(e.getKey()));
+               one.getPermission().addAll(e.getValue());
+               result.add(one);
+            }
+            catch (IllegalArgumentException ex)
+            {
                continue;
                // TODO:  Permission mapping keys described in spec does not coresponds with xml schema, so some keys are causing error
                // when try to do EnumAllowableActionsKey.fromValue(e.getKey()), e.g canRenditions.Object is present in spen but not in cmis-core.xsd;

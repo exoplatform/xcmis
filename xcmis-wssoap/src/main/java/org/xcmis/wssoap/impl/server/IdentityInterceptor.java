@@ -50,6 +50,9 @@ public class IdentityInterceptor extends AbstractSoapInterceptor
       }
    }
    
+   /* (non-Javadoc)
+    * @see org.apache.cxf.interceptor.Interceptor#handleMessage(org.apache.cxf.message.Message)
+    */
    public void handleMessage(SoapMessage arg0) throws Fault
    {
       if (LOG.isDebugEnabled())
