@@ -26,6 +26,7 @@ import org.xcmis.client.gwt.client.marshallers.CreateFolderMarshaller;
 import org.xcmis.client.gwt.client.marshallers.CreatePolicyMarshaller;
 import org.xcmis.client.gwt.client.marshallers.CreateRelationshipMarshaller;
 import org.xcmis.client.gwt.client.marshallers.MoveObjectMarshaller;
+import org.xcmis.client.gwt.client.marshallers.UpdateDocumentContentMarshaller;
 import org.xcmis.client.gwt.client.marshallers.UpdatePropertiesMarshaller;
 import org.xcmis.client.gwt.client.model.AllowableActions;
 import org.xcmis.client.gwt.client.model.CmisContentStreamType;
@@ -47,6 +48,7 @@ import org.xcmis.client.gwt.client.service.object.event.AllowableActionsReceived
 import org.xcmis.client.gwt.client.service.object.event.ContentStreamDeletedEvent;
 import org.xcmis.client.gwt.client.service.object.event.ContentStreamReceivedEvent;
 import org.xcmis.client.gwt.client.service.object.event.ContentStreamSetEvent;
+import org.xcmis.client.gwt.client.service.object.event.DocumentContentUpdatedEvent;
 import org.xcmis.client.gwt.client.service.object.event.DocumentCreatedEvent;
 import org.xcmis.client.gwt.client.service.object.event.DocumentFromSourceCreatedEvent;
 import org.xcmis.client.gwt.client.service.object.event.EmptyDocumentCreatedEvent;
@@ -112,6 +114,46 @@ public class ObjectService
       AsyncRequest.build(RequestBuilder.POST, url + "?" + params).data(marshaller).send(callback);
    }
 
+   
+   /**
+    * @param url
+    * @param createDocument
+    * @param sourceUrl
+    * @param contentType
+    */
+   public void createDocument(String url, CreateDocument createDocument, String sourceUrl)
+   {
+      AtomEntry document = new AtomEntry();
+      DocumentCreatedEvent event = new DocumentCreatedEvent(document);
+      EntryUnmarshaller unmarshaller = new EntryUnmarshaller(document);
+      CreateDocumentMarshaller marshaller = new CreateDocumentMarshaller(createDocument, sourceUrl);
+      String params =
+         (createDocument.getVersioningState() == null) ? "" : CmisArguments.VERSIONING_STATE + "="
+            + createDocument.getVersioningState().value();
+
+      AsyncRequestCallback callback = new AsyncRequestCallback(eventBus, unmarshaller, event);
+      AsyncRequest.build(RequestBuilder.POST, url + "?" + params).data(marshaller).send(callback);
+   }
+   
+   
+ 
+   /**
+    * Updating document's content stream copying by url pointed in second parameter.
+    * 
+    * @param url document location
+    * @param sourceUrl location of source for content stream
+    */
+   public void updateDocumentContent(String url, String sourceUrl)
+   {
+      AtomEntry document = new AtomEntry();
+      DocumentContentUpdatedEvent event = new DocumentContentUpdatedEvent(document);
+      EntryUnmarshaller unmarshaller = new EntryUnmarshaller(document);
+      UpdateDocumentContentMarshaller marshaller = new UpdateDocumentContentMarshaller(sourceUrl);
+      AsyncRequestCallback callback = new AsyncRequestCallback(eventBus, unmarshaller, event);
+      AsyncRequest.build(RequestBuilder.POST, url).header(HTTPHeader.X_HTTP_METHOD_OVERRIDE, HTTPMethod.PUT).data(marshaller).send(callback);
+   }
+   
+   
    /**
     * On success response received, {@link EmptyDocumentCreatedEvent} event is fired.
     * 

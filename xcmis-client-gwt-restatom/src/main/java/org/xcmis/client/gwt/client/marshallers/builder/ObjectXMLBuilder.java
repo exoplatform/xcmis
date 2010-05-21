@@ -68,11 +68,11 @@ public class ObjectXMLBuilder
    /**
     * Create document request.
     * 
-    * @param createDocument
-    *            createDocument
-    * @return String
+    * @param createDocument create document data
+    * @param contentSourceUrl location of source for content stream (optional)
+    * @return {@link String} xml request for creation 
     */
-   public static String createDocument(CreateDocument createDocument)
+   public static String createDocument(CreateDocument createDocument, String contentSourceUrl)
    {
       Document doc = XMLParser.createDocument();
       Element entry = EntryXMLBuilder.createEntryElement(doc);
@@ -93,6 +93,10 @@ public class ObjectXMLBuilder
       Element summary = doc.createElement(CMIS.SUMMARY);
       summary.appendChild(doc.createTextNode("Document creation"));
       Element content = doc.createElement(CMIS.CONTENT);
+      /* Source for document content stream */
+      if (contentSourceUrl != null){
+        content.setAttribute(CMIS.SOURCE, contentSourceUrl);
+      }
 
       entry.appendChild(title);
       entry.appendChild(content);
@@ -315,6 +319,27 @@ public class ObjectXMLBuilder
       }
 
       entry.appendChild(object);
+      doc.appendChild(entry);
+      return EntryXMLBuilder.createStringRequest(doc);
+   }
+   
+   /**
+    * Create request for changing content stream by url.
+    * 
+    * @param contentSourceUrl
+    * @return {@link String} xml request for changing content stream by url
+    */
+   public static String updateDocumentContent(String contentSourceUrl)
+   {
+      Document doc = XMLParser.createDocument();
+      Element entry = EntryXMLBuilder.createEntryElement(doc);
+
+      Element content = doc.createElement(CMIS.CONTENT);
+      
+      if (contentSourceUrl != null){
+        content.setAttribute(CMIS.SOURCE, contentSourceUrl);
+      }
+      entry.appendChild(content);
       doc.appendChild(entry);
       return EntryXMLBuilder.createStringRequest(doc);
    }

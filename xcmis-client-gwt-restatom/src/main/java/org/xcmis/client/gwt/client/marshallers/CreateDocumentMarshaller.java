@@ -37,6 +37,12 @@ public class CreateDocumentMarshaller implements Marshallable
     * Data for creating new document.
     */
    private CreateDocument createDocument;
+   
+  
+   /**
+    * Location of content stream source (optional).
+    */
+   private String contentSourceUrl;
 
    /**
     * @param createDocument createDocument
@@ -45,6 +51,12 @@ public class CreateDocumentMarshaller implements Marshallable
    {
       this.createDocument = createDocument;
    }
+   
+   public CreateDocumentMarshaller(CreateDocument createDocument, String contentSourceUrl)
+   {
+      this.createDocument = createDocument;
+      this.contentSourceUrl = contentSourceUrl;
+   }
 
    /**
     * @see org.exoplatform.gwtframework.commons.rest.Marshallable#marshal()
@@ -52,7 +64,6 @@ public class CreateDocumentMarshaller implements Marshallable
     */
    public String marshal()
    {
-      return ObjectXMLBuilder.createDocument(createDocument);
+      return ObjectXMLBuilder.createDocument(createDocument, contentSourceUrl);
    }
-
 }
