@@ -78,16 +78,16 @@ public class QueryUsecasesTest extends BaseQueryTest
     * <p>
     * Initial data:
     * <ul>
-    * <li>document1: <b>Title</b> - Apollo 7 <b>exo:Booster</b> - Saturn 1B
-    * <b>exo:Commander</b> - Walter M. Schirra</li>
-    * <li>document2: <b>Title</b> - Apollo 8 <b>exo:Booster</b> - Saturn V
-    * <b>exo:Commander</b> - Frank F. Borman, II</li>
-    * <li>document3: <b>Title</b> - Apollo 13<b> exo:Booster</b> - Saturn V
-    * <b>exo:Commander</b> - James A. Lovell, Jr.</li>
+    * <li>document1: <b>Title</b> - Apollo 7 <b>PROPERTY_BOOSTER</b> - Saturn 1B
+    * <b>PROPERTY_COMMANDER</b> - Walter M. Schirra</li>
+    * <li>document2: <b>Title</b> - Apollo 8 <b>PROPERTY_BOOSTER</b> - Saturn V
+    * <b>PROPERTY_COMMANDER</b> - Frank F. Borman, II</li>
+    * <li>document3: <b>Title</b> - Apollo 13<b>PROPERTY_BOOSTER</b> - Saturn V
+    * <b>PROPERTY_COMMANDER</b> - James A. Lovell, Jr.</li>
     * </ul>
     * <p>
-    * Query : Select all documents where exo:Booster is 'Saturn V' and
-    * exo:Commander is Frank F. Borman, II or James A. Lovell, Jr.
+    * Query : Select all documents where PROPERTY_BOOSTER is 'Saturn V' and
+    * PROPERTY_COMMANDER is Frank F. Borman, II or James A. Lovell, Jr.
     * <p>
     * Expected result: document2 and document3
     *
@@ -119,15 +119,15 @@ public class QueryUsecasesTest extends BaseQueryTest
     * <p>
     * Initial data:
     * <ul>
-    * <li>folder1:
-    * <li>doc1: <b>Title</b> - node1
-    * <li>folder2
-    * <li>doc2: <b>Title</b> - node2
+    * <li>testDocumentInFolderConstrain1:
+    * <li>-see createNasaContent()
+    * <li>testDocumentInFolderConstrain2:
+    * <li>-see createNasaContent()
     * </ul>
     * <p>
-    * Query : Select all documents that are in folder1.
+    * Query : Select all documents that are in folder2.
     * <p>
-    * Expected result: doc1
+    * Expected result: all documents that are in folder2.
     *
     * @throws Exception if an unexpected error occurs
     */
@@ -159,13 +159,13 @@ public class QueryUsecasesTest extends BaseQueryTest
     * <p>
     * -doc1: <b>Title</b> - node1
     * <p>
-    * folder2:
-    * <p>
-    * -doc2: <b>Title</b> - node2
-    * <p>
     * -folder3:
     * <p>
     * --folder4 </ul>
+    * <p>
+    * folder2:
+    * <p>
+    * -doc2: <b>Title</b> - node2
     * <p>
     * Query : Select all folders that are in folder1.
     * <p>
@@ -252,11 +252,11 @@ public class QueryUsecasesTest extends BaseQueryTest
     * <p>
     * Initial data:
     * <p>
-    * see createApolloContent()
+    * see createNasaContent()
     * <p>
     * Query : Select all documents where data contains "moon" word.
     * <p>
-    * Expected result: document1 and document2
+    * Expected result: document2 and document3
     *
     * @throws Exception if an unexpected error occurs
     */
@@ -286,14 +286,15 @@ public class QueryUsecasesTest extends BaseQueryTest
     * <p>
     * Initial data:
     * <ul>
-    * <li>document1: <b>Title</b> - node1 <b>name</b> - supervisor
-    * <li>document2: <b>Title</b> - node2 <b>name</b> - anyname
+    * <li>document1: <b>PROPERTY_COMMANDER</b> - Walter M. Schirra
+    * <li>document2: <b>PROPERTY_COMMANDER</b> - Frank F. Borman, II
+    * <li>document3: <b>PROPERTY_COMMANDER</b> - James A. Lovell, Jr.
+    * <li>document4: <b>PROPERTY_COMMANDER</b> - Eugene A. Cernan
     * </ul>
     * <p>
-    * Query : Select all documents where name is in set {'admin' , 'supervisor'
-    * , 'Vasya' }.
+    * Query : Select all documents where name is in set {'Virgil I. Grissom', 'Frank F. Borman, II', 'Charles Conrad, Jr.'}.
     * <p>
-    * Expected result: document2 and document3
+    * Expected result: document2
     *
     * @throws Exception if an unexpected error occurs
     */
@@ -364,14 +365,15 @@ public class QueryUsecasesTest extends BaseQueryTest
     * <p>
     * Initial data:
     * <ul>
-    * <li>doc1: <b>Title</b> - node1 <b>prop</b> - administrator
-    * <li>doc2: <b>Title</b> - node2 <b>prop</b> - admin
-    * <li>doc3: <b>Title</b> - node2 <b>prop</b> - radmin
+    * <li>document1: <b>PROPERTY_COMMANDER</b> - Walter M. Schirra
+    * <li>document2: <b>PROPERTY_COMMANDER</b> - Frank F. Borman, II
+    * <li>document3: <b>PROPERTY_COMMANDER</b> - James A. Lovell, Jr.
+    * <li>document4: <b>PROPERTY_COMMANDER</b> - Eugene A. Cernan
     * </ul>
     * <p>
-    * Query : Select all documents where prop begins with "ad".
+    * Query : Select all documents where prop begins with "James".
     * <p>
-    * Expected result: doc1, doc2
+    * Expected result: doc3
     *
     * @throws Exception if an unexpected error occurs
     */
@@ -480,13 +482,15 @@ public class QueryUsecasesTest extends BaseQueryTest
     * <p>
     * Initial data:
     * <ul>
-    * <li>doc1: <b>Title</b> - node1 <b>long</b> - 3
-    * <li>doc2: <b>Title</b> - node2 <b>long</b> - 15
+    * <li>document1: <b>PROPERTY_COMMANDER</b> - Walter M. Schirra
+    * <li>document2: <b>PROPERTY_COMMANDER</b> - Frank F. Borman, II
+    * <li>document3: <b>PROPERTY_COMMANDER</b> - James A. Lovell, Jr.
+    * <li>document4: <b>PROPERTY_COMMANDER</b> - Eugene A. Cernan
     * </ul>
     * <p>
-    * Query : Select all documents where long property not in set {15 , 20}.
+    * Query : Select all documents where long property not in set {'Walter M. Schirra', 'James A. Lovell, Jr.'}.
     * <p>
-    * Expected result: doc1
+    * Expected result: document2, document4 
     *
     * @throws Exception if an unexpected error occurs
     */
@@ -510,14 +514,15 @@ public class QueryUsecasesTest extends BaseQueryTest
     * <p>
     * Initial data:
     * <ul>
-    * <li>doc1: <b>Title</b> - node1 <b>long</b> - 3
-    * <li>doc2: <b>Title</b> - node2 <b>long</b> - 15
+    * <li>document1: <b>PROPERTY_COMMANDER</b> - Walter M. Schirra
+    * <li>document2: <b>PROPERTY_COMMANDER</b> - Frank F. Borman, II
+    * <li>document3: <b>PROPERTY_COMMANDER</b> - James A. Lovell, Jr.
+    * <li>document4: <b>PROPERTY_COMMANDER</b> - Eugene A. Cernan
     * </ul>
     * <p>
-    * Query : Select all documents where long property in set {15 , 20} (NOT NOT
-    * IN).
+    * Query : Select all documents where long property in set {'James A. Lovell, Jr.'} (NOT NOT IN).
     * <p>
-    * Expected result: doc2
+    * Expected result: document3.
     *
     * @throws Exception if an unexpected error occurs
     */
@@ -541,13 +546,15 @@ public class QueryUsecasesTest extends BaseQueryTest
     * <p>
     * Initial data:
     * <ul>
-    * <li>doc1: <b>Title</b> - node1 <b>long</b> - 3
-    * <li>doc2: <b>Title</b> - node2 <b>long</b> - 15
+    * <li>document1: <b>PROPERTY_COMMANDER</b> - Walter M. Schirra
+    * <li>document2: <b>PROPERTY_COMMANDER</b> - Frank F. Borman, II
+    * <li>document3: <b>PROPERTY_COMMANDER</b> - James A. Lovell, Jr.
+    * <li>document4: <b>PROPERTY_COMMANDER</b> - Eugene A. Cernan
     * </ul>
     * <p>
-    * Query : Order by exo:Commander property value
+    * Query : Order by PROPERTY_COMMANDER property value (descending).
     * <p>
-    * Expected result: doc2
+    * Expected result: document1, document3, document2, document4.
     *
     * @throws Exception if an unexpected error occurs
     */
@@ -574,7 +581,7 @@ public class QueryUsecasesTest extends BaseQueryTest
       // Walter M. Schirra (0)
       // James A. Lovell, Jr. (2)
       // Frank F. Borman, II (1)
-      //Eugene A. Cernan  (3)
+      // Eugene A. Cernan  (3)
       checkResultOrder(result, new DocumentData[]{appolloContent.get(0), appolloContent.get(2), appolloContent.get(1),
          appolloContent.get(3)});
 
@@ -584,11 +591,16 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Test ORDER BY ASC.
     * <p>
     * Initial data: see createApolloContent
+    * <ul>
+    * <li>document1: <b>PROPERTY_COMMANDER</b> - Walter M. Schirra
+    * <li>document2: <b>PROPERTY_COMMANDER</b> - Frank F. Borman, II
+    * <li>document3: <b>PROPERTY_COMMANDER</b> - James A. Lovell, Jr.
+    * <li>document4: <b>PROPERTY_COMMANDER</b> - Eugene A. Cernan
+    * </ul>
     * <p>
-    * Query : Select all documents and order by propertyComander values
-    * ascending.
+    * Query : Order by PROPERTY_COMMANDER property value (ascending).
     * <p>
-    * Expected result: doc2, doc3, doc1
+    * Expected result: document4, document2, document3, document1.
     *
     * @throws Exception if an unexpected error occurs
     */
@@ -611,11 +623,10 @@ public class QueryUsecasesTest extends BaseQueryTest
 
       Query query = new Query(statement, true);
       ItemsIterator<Result> result = storage.query(query);
-      //Eugene A. Cernan  (3)
+      // Eugene A. Cernan  (3)
       // Frank F. Borman, II (1)
       // James A. Lovell, Jr. (2)
       // Walter M. Schirra (0)
-
       checkResultOrder(result, new DocumentData[]{appolloContent.get(3), appolloContent.get(1), appolloContent.get(2),
          appolloContent.get(0)});
 
@@ -625,11 +636,16 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Test ORDER BY default.
     * <p>
     * Initial data: see createApolloContent
+    * <ul>
+    * <li>document1: <b>Title</b> - Apollo 7
+    * <li>document2: <b>Title</b> - Apollo 8
+    * <li>document3: <b>Title</b> - Apollo 13
+    * <li>document4: <b>Title</b> - Apollo 17
+    * </ul>
     * <p>
-    * Query : Select all documents and order by propertyComander values
-    * ascending.
+    * Query : Select all documents in default order.
     * <p>
-    * Expected result: doc3, doc1, doc2
+    * Expected result: document3, document4, document1, document2.
     *
     * @throws Exception if an unexpected error occurs
     */
@@ -662,12 +678,11 @@ public class QueryUsecasesTest extends BaseQueryTest
    /**
     * Test ORDER BY SCORE().
     * <p>
-    * Initial data: see createApolloContent
+    * Initial data: see createNasaContent
     * <p>
-    * Query : Select all documents and order by propertyComander values
-    * ascending.
+    * Query : Select all documents which contains word "moon" in ORDER BY SCORE.
     * <p>
-    * Expected result: doc3, doc1, doc2
+    * Expected result: doc2, doc3.
     *
     * @throws Exception if an unexpected error occurs
     */
@@ -703,7 +718,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * <p>
     * Initial data:
     * <ul>
-    * <li>doc1: <b>Title</b> - node1 <b>prop</b> - test string
+    * <li>doc1: <b>Title</b> - node1 <b>StringProperty</b> - James A. Lovell, Jr.
     * <li>doc2: <b>Title</b> - node2
     * </ul>
     * <p>
@@ -737,13 +752,9 @@ public class QueryUsecasesTest extends BaseQueryTest
    /**
     * Test SCORE as column.
     * <p>
-    * Initial data:
-    * <ul>
-    * <li>doc1: <b>Title</b> - node1 <b>content</b> - hello world
-    * <li>doc2: <b>Title</b> - node2 <b>content</b> - hello
-    * </ul>
+    * Initial data: see createNasaContent
     * <p>
-    * Query : Select all documents that contains hello or world words, and show
+    * Query : Select all documents that contains "hello or world" words, and show
     * search score .
     * <p>
     * Expected result: doc1 and doc2 score numbers.
@@ -815,11 +826,11 @@ public class QueryUsecasesTest extends BaseQueryTest
     * <p>
     * Initial data:
     * <ul>
-    * <li>doc1: <b>Title</b> - node1 <b>long</b> - 3
-    * <li>doc2: <b>Title</b> - node2 <b>long</b> - 15
+    * <li>doc1: <b>Title</b> - fileCS2.doc <b>DecimalProperty</b> - 3
+    * <li>doc2: <b>Title</b> - fileCS3.doc <b>DecimalProperty</b> - 15
     * </ul>
     * <p>
-    * Query : Select all documents property long not equal to 3.
+    * Query : Select all documents property DecimalProperty not equals to 3.
     * <p>
     * Expected result: doc2.
     *
@@ -855,11 +866,11 @@ public class QueryUsecasesTest extends BaseQueryTest
     * <p>
     * Initial data:
     * <ul>
-    * <li>doc1: <b>Title</b> - node1 <b>long</b> - 3
-    * <li>doc2: <b>Title</b> - node2 <b>long</b> - 15
+    * <li>doc1: <b>Title</b> - fileCS2.doc <b>DecimalProperty</b> - 3
+    * <li>doc2: <b>Title</b> - fileCS3.doc <b>DecimalProperty</b> - 15
     * </ul>
     * <p>
-    * Query : Select all documents property long more than 5.
+    * Query : Select all documents property DecimalProperty more than 5.
     * <p>
     * Expected result: doc2.
     *
@@ -897,11 +908,11 @@ public class QueryUsecasesTest extends BaseQueryTest
     * <p>
     * Initial data:
     * <ul>
-    * <li>doc1: <b>Title</b> - node1 <b>strprop</b> - test word first
-    * <li>doc2: <b>Title</b> - node2 <b>strprop</b> - test word second
+    * <li>doc1: <b>Title</b> - fileCS2.doc <b>StringProperty</b> - test word first
+    * <li>doc2: <b>Title</b> - fileCS3.doc <b>StringProperty</b> - test word second
     * </ul>
     * <p>
-    * Query : Select all documents property strprop not equal to
+    * Query : Select all documents property StringPropertye not equal to
     * "test word second".
     * <p>
     * Expected result: doc1.
@@ -940,8 +951,8 @@ public class QueryUsecasesTest extends BaseQueryTest
     * <p>
     * Initial data:
     * <ul>
-    * <li>doc1: <b>Title</b> - node1 <b>content</b> - "There must be test word"
-    * <li>doc2: <b>Title</b> - node2 <b>content</b> - " Test word is not here"
+    * <li>doc1: <b>Title</b> - fileFirst  <b>StringProperty</b> - "There must be test word"
+    * <li>doc2: <b>Title</b> - fileSecond <b>StringProperty</b> - " Test word is not here"
     * </ul>
     * <p>
     * Query : Select all documents that contains "here" word.
@@ -980,11 +991,9 @@ public class QueryUsecasesTest extends BaseQueryTest
     * <p>
     * Initial data:
     * <ul>
-    * <li>doc1: <b>Title</b> - node1 <b>strprop</b> - "There must be test word"
-    * <li>doc2: <b>Title</b> - node2 <b>strprop</b> -
-    * " Test word is not here. Another check-word."
-    * <li>doc3: <b>Title</b> - node3 <b>strprop</b> -
-    * "There must be check-word."
+    * <li>doc1: <b>Title</b> - fileCS1.doc <b>StringProperty</b> - "There must be test word"
+    * <li>doc2: <b>Title</b> - fileCS2.doc <b>StringProperty</b> - " Test word is not here. Another check-word."
+    * <li>doc3: <b>Title</b> - fileCS3.doc <b>StringProperty</b> - "There must be check-word."
     * </ul>
     * <p>
     * Query : Select all documents that contains "There must" phrase and do not
@@ -1060,11 +1069,11 @@ public class QueryUsecasesTest extends BaseQueryTest
     * <p>
     * Initial data:
     * <ul>
-    * <li>doc1: <b>Title</b> - node1 <b>boolprop</b> - true
-    * <li>doc2: <b>Title</b> - node2 <b>boolprop</b> - false
+    * <li>doc1: <b>Title</b> - fileCS2.doc <b>BooleanProperty</b> - true
+    * <li>doc2: <b>Title</b> - fileCS3.doc <b>BooleanProperty</b> - false
     * </ul>
     * <p>
-    * Query : Select all documents where boolprop equal to false.
+    * Query : Select all documents where BooleanProperty equals to false.
     * <p>
     * Expected result: doc2.
     *
@@ -1097,13 +1106,13 @@ public class QueryUsecasesTest extends BaseQueryTest
     * <p>
     * Initial data:
     * <ul>
-    * <li>doc1: <b>Title</b> - node1 <b>dateProp</b> - 2009-08-08
-    * <li>doc2: <b>Title</b> - node2 <b>dateProp</b> - 2009-08-08
+    * <li>doc1: <b>Title</b> - fileCS2.doc <b>dateProp</b> - 2009-08-08
+    * <li>doc2: <b>Title</b> - fileCS3.doc <b>dateProp</b> - 2009-08-08
     * </ul>
     * <p>
     * Query : Select all documents where dateProp more than 2007-01-01.
     * <p>
-    * Expected result: doc2.
+    * Expected result: doc1, doc2.
     *
     * @throws Exception if an unexpected error occurs
     */
@@ -1130,11 +1139,11 @@ public class QueryUsecasesTest extends BaseQueryTest
    /**
     * Simple test.
     * <p>
-    * All documents from Apollo program
+    * All documents from Nasa program.
     * <p>
-    * Query : Select all CMIS_DOCUMENTS.
+    * Query : Select all NASA_DOCUMENT.
     * <p>
-    * Expected result: document1 and document1
+    * Expected result: all documents.
     *
     * @throws Exception if an unexpected error occurs
     */
@@ -1155,10 +1164,22 @@ public class QueryUsecasesTest extends BaseQueryTest
     * <p>
     * see createApolloContent()
     * <p>
+    * Before updating
+    * <p>
     * Query : Select all documents where data contains "moon" word.
     * <p>
-    * Expected result: document1 and document2
-    *
+    * Expected result: doc3
+    * <p>
+    * After updating (content is changed to "Sun")
+    * <p>
+    * Query : Select all documents where data contains "moon" word.
+    * <p>
+    * Expected result: 0
+    * <p>
+    * Query : Select all documents where data contains "moon" word.
+    * <p>
+    * Expected result: doc3
+    * 
     * @throws Exception if an unexpected error occurs
     */
    public void testUpdateFulltextConstraint() throws Exception
