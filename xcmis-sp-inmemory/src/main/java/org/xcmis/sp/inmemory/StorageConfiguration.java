@@ -75,6 +75,7 @@ public class StorageConfiguration
       this.id = id;
       this.name = name;
       this.description = description;
+      this.properties = new HashMap<String, Object>();
       if (maxMem != null)
          this.properties.put(MAX_STORAGE_MEM_SIZE, maxMem);
       if (maxObjects != null)
