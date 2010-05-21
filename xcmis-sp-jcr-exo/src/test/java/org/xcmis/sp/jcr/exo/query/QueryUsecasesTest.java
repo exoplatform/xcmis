@@ -1298,7 +1298,7 @@ public class QueryUsecasesTest extends BaseQueryTest
    }
 
    /**
-    * Test comparison of date property.
+    * Included in supertype.
     * <p>
     * Initial data:
     * <ul>
