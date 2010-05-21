@@ -590,7 +590,7 @@ public class QueryUsecasesTest extends BaseQueryTest
    /**
     * Test ORDER BY ASC.
     * <p>
-    * Initial data: see createApolloContent
+    * Initial data: see createNasaContent
     * <ul>
     * <li>document1: <b>PROPERTY_COMMANDER</b> - Walter M. Schirra
     * <li>document2: <b>PROPERTY_COMMANDER</b> - Frank F. Borman, II
@@ -635,7 +635,7 @@ public class QueryUsecasesTest extends BaseQueryTest
    /**
     * Test ORDER BY default.
     * <p>
-    * Initial data: see createApolloContent
+    * Initial data: see createNasaContent
     * <ul>
     * <li>document1: <b>Title</b> - Apollo 7
     * <li>document2: <b>Title</b> - Apollo 8
@@ -1160,9 +1160,7 @@ public class QueryUsecasesTest extends BaseQueryTest
    /**
     * Test fulltext constraint.
     * <p>
-    * Initial data:
-    * <p>
-    * see createApolloContent()
+    * Initial data: see createNasaContent()
     * <p>
     * Before updating
     * <p>
