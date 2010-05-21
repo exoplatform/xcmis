@@ -1297,6 +1297,21 @@ public class QueryUsecasesTest extends BaseQueryTest
       return result;
    }
 
+   /**
+    * Test comparison of date property.
+    * <p>
+    * Initial data:
+    * <ul>
+    * <li>doc1: <b>Title</b> - node1 <b>typeID</b> - cmis:article-sports
+    * <li>doc2: <b>Title</b> - node2 <b>typeID</b> - cmis:article-animals
+    * </ul>
+    * <p>
+    * Query : Select all documents where query supertype is cmis:article.
+    * <p>
+    * Expected result: doc1, doc2.
+    *
+    * @throws Exception if an unexpected error occurs
+    */
    public void testIncludedInSupertypeQueryTestTwoDocTypes() throws Exception
    {
       // create data
