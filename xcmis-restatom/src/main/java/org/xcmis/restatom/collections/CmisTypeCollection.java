@@ -49,12 +49,10 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
 
    /**
     * Instantiates a new cmis type collection.
-    * @param storageProvider TODO
-    * @param repositoryService the repository service
     */
-   public CmisTypeCollection(/*StorageProvider storageProvider*/)
+   public CmisTypeCollection()
    {
-      super(/*storageProvider*/);
+      super();
    }
 
    /**

@@ -49,6 +49,7 @@ public class PermissionService
     *
     * @param object object
     * @param userIdentity user's identity
+    * @param repositoryInfo RepositoryInfo
     * @return allowable actions for object
     * @see Identity
     */

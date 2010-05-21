@@ -48,11 +48,10 @@ public class AllVersionsCollection extends CmisObjectCollection
 
    /**
     * Instantiates a new all versions collection.
-    * @param storageProvider TODO
     */
-   public AllVersionsCollection(/*StorageProvider storageProvider*/)
+   public AllVersionsCollection()
    {
-      super(/*storageProvider*/);
+      super();
       setHref("/versions");
    }
 

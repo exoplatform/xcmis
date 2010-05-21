@@ -34,7 +34,7 @@ public class CmisContentType
    /**
     * Gets the value of the mediatype property.
     * 
-    * @return
+    * @return media type string
     */
    public String getMediatype()
    {
@@ -44,7 +44,7 @@ public class CmisContentType
    /**
     * Sets the value of the mediatype property.
     * 
-    * @param value
+    * @param value String value
     */
    public void setMediatype(String value)
    {
@@ -54,7 +54,7 @@ public class CmisContentType
    /**
     * Gets the value of the base64 property.
     * 
-    * @return
+    * @return string value
     */
    public String getBase64()
    {
@@ -64,7 +64,7 @@ public class CmisContentType
    /**
     * Sets the value of the base64 property.
     * 
-    * @param value
+    * @param value String
     */
    public void setBase64(String value)
    {

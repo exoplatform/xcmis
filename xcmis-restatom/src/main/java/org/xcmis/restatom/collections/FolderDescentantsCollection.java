@@ -49,11 +49,10 @@ public class FolderDescentantsCollection extends CmisObjectCollection
 
    /**
     * Instantiates a new folder descentants collection.
-    * @param storageProvider TODO
     */
-   public FolderDescentantsCollection(/*StorageProvider storageProvider*/)
+   public FolderDescentantsCollection()
    {
-      super(/*storageProvider*/);
+      super();
       setHref("/descendants");
    }
 

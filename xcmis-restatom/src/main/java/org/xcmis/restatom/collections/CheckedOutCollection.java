@@ -60,9 +60,9 @@ public class CheckedOutCollection extends CmisObjectCollection
     * @param storageProvider TODO
     *
     */
-   public CheckedOutCollection(/*StorageProvider storageProvider*/)
+   public CheckedOutCollection()
    {
-      super(/*storageProvider*/);
+      super();
       setHref("/checkedout");
    }
 

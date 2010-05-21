@@ -90,8 +90,6 @@ import javax.ws.rs.core.HttpHeaders;
  */
 public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisObject>
 {
-
-   //   private static final Log LOG = ExoLogger.getLogger(CmisObjectCollection.class);
    /** The Constant SPACES_AIR_SPECIFIC_REFERER. */
    protected static final String SPACES_AIR_SPECIFIC_REFERER = "app:/CMISSpacesAir.swf";
 
@@ -104,11 +102,10 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    /**
     * Instantiates a new cmis object collection.
     *
-    * @param storageProvider TODO
     */
-   public CmisObjectCollection(/*StorageProvider storageProvider*/)
+   public CmisObjectCollection()
    {
-      super(/*storageProvider*/);
+      super();
    }
 
    /**
@@ -1515,7 +1512,9 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
    }
 
    /**
-    * Get's the name of the specific resource requested
+    * Get's the name of the specific resource requested.
+    * @param request RequestContext
+    * @return string resource name
     */
    @Override
    protected String getResourceName(RequestContext request)

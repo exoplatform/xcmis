@@ -120,7 +120,7 @@ public class RenditionManager
     * Get rendition stream for objects with specified stream id.
     *
     * @param streamId stream id
-    * @param ObjectData object
+    * @param obj ObjectData
     * @return Renditions content stream
     */
    public ContentStream getStream(ObjectData obj, String streamId)
@@ -151,10 +151,10 @@ public class RenditionManager
     * Get rendition from content stream  with known mime-type.
     *
     * @param mime MimeType 
-    * @param ObjectData object
+    * @param stream ContentStream
     * @return Renditions content stream
     */
-   public ContentStream getStream(ContentStream str, MimeType mime)
+   public ContentStream getStream(ContentStream stream, MimeType mime)
    {
       for (Map.Entry<MimeType, RenditionProvider> e : renditionProviders.entrySet())
       {
@@ -164,11 +164,11 @@ public class RenditionManager
             RenditionContentStream renditionContentStream = null;
             try
             {
-               renditionContentStream = renditionProvider.getRenditionStream(str);
+               renditionContentStream = renditionProvider.getRenditionStream(stream);
             }
             catch (IOException ioe)
             {
-               String msg = "Unable get renditions for stream " + str + " -  Unexpected error " + ioe.getMessage();
+               String msg = "Unable get renditions for stream " + stream + " -  Unexpected error " + ioe.getMessage();
                throw new StorageException(msg, ioe);
             }
             return renditionContentStream;
