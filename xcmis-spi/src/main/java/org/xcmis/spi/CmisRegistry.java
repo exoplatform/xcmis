@@ -104,8 +104,8 @@ public class CmisRegistry
       {
          String id = it.next();
          RepositoryShortInfo info = new RepositoryShortInfo(id, id);
-         //info.setRootFolderId(storageProviders.get(id).getConnection(id).getStorage().getRepositoryInfo().getRootFolderId());
-         info.setRootFolderId(storageProviders.get(id).getConnection().getStorage().getRepositoryInfo().getRootFolderId());
+         info.setRootFolderId(storageProviders.get(id).getConnection().getStorage().getRepositoryInfo()
+            .getRootFolderId());
          set.add(info);
       }
       return Collections.unmodifiableSet(set);

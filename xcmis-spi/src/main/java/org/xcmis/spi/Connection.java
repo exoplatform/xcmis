@@ -28,10 +28,12 @@ import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.CapabilityACL;
 import org.xcmis.spi.model.CapabilityRendition;
 import org.xcmis.spi.model.CmisObject;
+import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.ObjectInfo;
 import org.xcmis.spi.model.ObjectParent;
 import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.RelationshipDirection;
 import org.xcmis.spi.model.Rendition;
 import org.xcmis.spi.model.TypeDefinition;
@@ -185,9 +187,29 @@ public abstract class Connection
 
       // TODO: check ACL propagation.
       ObjectData object = storage.getObjectById(objectId);
-      applyACL(object, addACL, removeACL);
 
-      storage.saveObject(object);
+      CapabilityACL capabilityACL = storage.getRepositoryInfo().getCapabilities().getCapabilityACL();
+
+      if (capabilityACL == CapabilityACL.NONE)
+      {
+         throw new NotSupportedException("ACL capability is not supported.");
+      }
+      else if (capabilityACL == CapabilityACL.DISCOVER)
+      {
+         throw new NotSupportedException("ACL can be discovered but not managed via CMIS services.");
+      }
+
+      TypeDefinition typeDefinition = object.getTypeDefinition();
+      if (!typeDefinition.isControllableACL())
+      {
+         throw new ConstraintException("Type " + typeDefinition.getId() + " is not controllable by ACL.");
+      }
+
+      // Merge ACL include existed one. It may be inherited from parent even for newly created object .
+      List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(object.getACL(false), addACL, removeACL);
+
+      object.setACL(mergedACL);
+
    }
 
    /**
@@ -212,7 +234,6 @@ public abstract class Connection
       }
       object.applyPolicy((PolicyData)policy);
 
-      storage.saveObject(object);
    }
 
    /**
@@ -291,27 +312,13 @@ public abstract class Connection
          throw new VersioningException("Object " + documentId + " is not Private Working Copy.");
       }
 
-      if (properties != null)
-      {
-         pwc.setProperties(properties);
-      }
+      TypeDefinition typeDefinition = pwc.getTypeDefinition();
 
-      if (content != null)
-      {
-         ((DocumentData)pwc).setContentStream(content);
-      }
+      Collection<ObjectData> policiesObjectData = new ArrayList<ObjectData>();
+      checkOnCreate(typeDefinition, properties, content, addACL, removeACL, policies, policiesObjectData);
 
-      if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
-      {
-         applyACL(pwc, addACL, removeACL);
-      }
-
-      if (policies != null && policies.size() > 0)
-      {
-         applyPolicies(pwc, policies);
-      }
-
-      DocumentData version = ((DocumentData)pwc).checkin(major, checkinComment);
+      DocumentData version =
+         ((DocumentData)pwc).checkin(major, checkinComment, properties, content, addACL, removeACL, policiesObjectData);
 
       return version.getObjectId();
    }
@@ -461,23 +468,16 @@ public abstract class Connection
          versioningState = VersioningState.MAJOR;
       }
 
-      DocumentData newDocument = storage.createDocument((FolderData)folder, typeId, versioningState);
+      TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
 
-      newDocument.setProperties(properties);
+      Collection<ObjectData> policiesObjectData = new ArrayList<ObjectData>();
+      checkOnCreate(typeDefinition, properties, content, addACL, removeACL, policies, policiesObjectData);
 
-      newDocument.setContentStream(content);
+      // CREATE NEW DOCUMENT 
 
-      if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
-      {
-         applyACL(newDocument, addACL, removeACL);
-      }
-
-      if (policies != null && policies.size() > 0)
-      {
-         applyPolicies(newDocument, policies);
-      }
-
-      storage.saveObject(newDocument);
+      DocumentData newDocument =
+         storage.createDocument((FolderData)folder, typeId, properties, content, addACL, removeACL, policiesObjectData,
+            versioningState);
 
       return newDocument.getObjectId();
    }
@@ -565,24 +565,17 @@ public abstract class Connection
          throw new ConstraintException("Unfiling capability is not supported, parent folder must be provided.");
       }
 
-      DocumentData newDocument = storage.copyDocument((DocumentData)source, (FolderData)folder, versioningState);
+      String typeId = source.getTypeId();
+      TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
 
-      if (properties != null)
-      {
-         newDocument.setProperties(properties);
-      }
+      Collection<ObjectData> policiesObjectData = new ArrayList<ObjectData>();
+      checkOnCreate(typeDefinition, properties, null, addACL, removeACL, policies, policiesObjectData);
 
-      if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
-      {
-         applyACL(newDocument, addACL, removeACL);
-      }
+      // CREATE NEW DOCUMENT COPY
 
-      if (policies != null && policies.size() > 0)
-      {
-         applyPolicies(newDocument, policies);
-      }
-
-      storage.saveObject(newDocument);
+      DocumentData newDocument =
+         storage.copyDocument((DocumentData)source, (FolderData)folder, properties, addACL, removeACL,
+            policiesObjectData, versioningState);
 
       return newDocument.getObjectId();
    }
@@ -665,21 +658,15 @@ public abstract class Connection
          throw new InvalidArgumentException("Object " + folderId + " is not a Folder object.");
       }
 
-      ObjectData newFolder = storage.createFolder((FolderData)folder, typeId);
+      TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
 
-      newFolder.setProperties(properties);
+      Collection<ObjectData> policiesObjectData = new ArrayList<ObjectData>();
+      checkOnCreate(typeDefinition, properties, null, addACL, removeACL, policies, policiesObjectData);
 
-      if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
-      {
-         applyACL(newFolder, addACL, removeACL);
-      }
+      // CREATE NEW FOLDER 
 
-      if (policies != null && policies.size() > 0)
-      {
-         applyPolicies(newFolder, policies);
-      }
-
-      storage.saveObject(newFolder);
+      ObjectData newFolder =
+         storage.createFolder((FolderData)folder, typeId, properties, addACL, removeACL, policiesObjectData);
 
       return newFolder.getObjectId();
    }
@@ -766,21 +753,15 @@ public abstract class Connection
          throw new ConstraintException("Unfiling capability is not supported, parent folder must be provided.");
       }
 
-      ObjectData newPolicy = storage.createPolicy((FolderData)folder, typeId);
+      TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
 
-      newPolicy.setProperties(properties);
+      Collection<ObjectData> policiesObjectData = new ArrayList<ObjectData>();
+      checkOnCreate(typeDefinition, properties, null, addACL, removeACL, policies, policiesObjectData);
 
-      if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
-      {
-         applyACL(newPolicy, addACL, removeACL);
-      }
+      // CREATE NEW POLICY 
 
-      if (policies != null && policies.size() > 0)
-      {
-         applyPolicies(newPolicy, policies);
-      }
-
-      storage.saveObject(newPolicy);
+      ObjectData newPolicy =
+         storage.createPolicy((FolderData)folder, typeId, properties, addACL, removeACL, policiesObjectData);
 
       return newPolicy.getObjectId();
    }
@@ -871,22 +852,16 @@ public abstract class Connection
          throw new InvalidArgumentException("Required Target Id property ('cmis:targetId') is not specified.");
       }
 
+      TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
+
+      Collection<ObjectData> policiesObjectData = new ArrayList<ObjectData>();
+      checkOnCreate(typeDefinition, properties, null, addACL, removeACL, policies, policiesObjectData);
+
+      // CREATE NEW RELATIONSHIP 
+
       ObjectData newRelationship =
-         storage.createRelationship(storage.getObjectById(sourceId), storage.getObjectById(targetId), typeId);
-
-      newRelationship.setProperties(properties);
-
-      if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
-      {
-         applyACL(newRelationship, addACL, removeACL);
-      }
-
-      if (policies != null && policies.size() > 0)
-      {
-         applyPolicies(newRelationship, policies);
-      }
-
-      storage.saveObject(newRelationship);
+         storage.createRelationship(storage.getObjectById(sourceId), storage.getObjectById(targetId), typeId,
+            properties, addACL, removeACL, policiesObjectData);
 
       return newRelationship.getObjectId();
    }
@@ -935,9 +910,14 @@ public abstract class Connection
       // Validate change token, object may be already updated.
       validateChangeToken(document, changeTokenHolder.getValue());
 
-      ((DocumentData)document).setContentStream(null);
-
-      storage.saveObject(document);
+      try
+      {
+         ((DocumentData)document).setContentStream(null);
+      }
+      catch (IOException ioe)
+      {
+         throw new CmisRuntimeException("Unable delete document content stream. " + ioe.getMessage(), ioe);
+      }
 
       String changeToken = document.getChangeToken();
       changeTokenHolder.setValue(changeToken);
@@ -2681,7 +2661,6 @@ public abstract class Connection
 
       object.removePolicy((PolicyData)policyData);
 
-      storage.saveObject(object);
    }
 
    /**
@@ -2739,7 +2718,7 @@ public abstract class Connection
     */
    public String setContentStream(String documentId, ContentStream content, ChangeTokenHolder changeTokenHolder,
       boolean overwriteFlag) throws ObjectNotFoundException, ContentAlreadyExistsException,
-      StreamNotSupportedException, UpdateConflictException, VersioningException, IOException, StorageException
+      StreamNotSupportedException, UpdateConflictException, VersioningException, StorageException
    {
       if (changeTokenHolder == null)
       {
@@ -2763,9 +2742,14 @@ public abstract class Connection
       // Validate change token, object may be already updated.
       validateChangeToken(document, changeTokenHolder.getValue());
 
-      ((DocumentData)document).setContentStream(content);
-
-      storage.saveObject(document);
+      try
+      {
+         ((DocumentData)document).setContentStream(content);
+      }
+      catch (IOException ioe)
+      {
+         throw new CmisRuntimeException("Unable set document content stream. " + ioe.getMessage(), ioe);
+      }
 
       String changeToken = document.getChangeToken();
       changeTokenHolder.setValue(changeToken);
@@ -2829,63 +2813,10 @@ public abstract class Connection
 
       object.setProperties(properties);
 
-      storage.saveObject(object);
-
       String changeToken = object.getChangeToken();
       changeTokenHolder.setValue(changeToken);
 
       return object.getObjectId();
-   }
-
-   /**
-    * Apply ACLs to specified object.
-    *
-    * @param object object
-    * @param addACL ACL to be added
-    * @param removeACL ACL to be removed
-    */
-   private void applyACL(ObjectData object, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL)
-   {
-      CapabilityACL capabilityACL = storage.getRepositoryInfo().getCapabilities().getCapabilityACL();
-
-      if (capabilityACL == CapabilityACL.NONE)
-      {
-         throw new NotSupportedException("ACL capability is not supported.");
-      }
-      else if (capabilityACL == CapabilityACL.DISCOVER)
-      {
-         throw new NotSupportedException("ACL can be discovered but not managed via CMIS services.");
-      }
-
-      TypeDefinition typeDefinition = object.getTypeDefinition();
-      if (!typeDefinition.isControllableACL())
-      {
-         throw new ConstraintException("Type " + typeDefinition.getId() + " is not controllable by ACL.");
-      }
-
-      // Merge ACL include existed one. It may be inherited from parent even for newly created object .
-      List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(object.getACL(false), addACL, removeACL);
-
-      object.setACL(mergedACL);
-   }
-
-   private void applyPolicies(ObjectData object, Collection<String> policies)
-   {
-      TypeDefinition typeDefinition = object.getTypeDefinition();
-      if (!typeDefinition.isControllablePolicy())
-      {
-         throw new ConstraintException("Type " + typeDefinition.getId() + " is not controllable by Policy.");
-      }
-
-      for (String policyID : policies)
-      {
-         ObjectData policy = storage.getObjectById(policyID);
-         if (policy.getBaseType() != BaseType.POLICY)
-         {
-            throw new InvalidArgumentException("Object " + policyID + " is not a Policy object.");
-         }
-         object.applyPolicy((PolicyData)policy);
-      }
    }
 
    private List<ItemsTree<CmisObject>> getTree(String folderId, int depth, BaseType typeFilter,
@@ -3070,6 +3001,80 @@ public abstract class Connection
          cmis.setObjectInfo(objectInfo);
       }
       return cmis;
+   }
+
+   private void checkOnCreate(TypeDefinition typeDefinition, Map<String, Property<?>> properties,
+      ContentStream content, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
+      Collection<String> policies, Collection<ObjectData> resultPolicies) throws ConstraintException,
+      NotSupportedException, InvalidArgumentException
+   {
+
+      // CHECK CONTENT STREAM
+      if (typeDefinition.getBaseId() == BaseType.DOCUMENT)
+      {
+         if (typeDefinition.getContentStreamAllowed() == ContentStreamAllowed.REQUIRED && content == null)
+         {
+            throw new ConstraintException("Content stream required for object of type " + typeDefinition.getId()
+               + ", it can't be null.");
+         }
+         if (typeDefinition.getContentStreamAllowed() == ContentStreamAllowed.NOT_ALLOWED && content != null)
+         {
+            throw new ConstraintException("Content stream not allowed for object of type " + typeDefinition.getId());
+         }
+      }
+
+      // CHECK PROPERTIES
+      for (Property<?> property : properties.values())
+      {
+         PropertyDefinition<?> definition = typeDefinition.getPropertyDefinition(property.getId());
+         if (definition == null)
+         {
+            throw new ConstraintException("Property " + property.getId()
+               + " is not in property definitions list of type " + typeDefinition.getId());
+         }
+         if (property.getType() != definition.getPropertyType())
+         {
+            throw new ConstraintException("Property type is not match. Property id " + property.getId());
+         }
+         if (!definition.isMultivalued() && property.getValues().size() > 1)
+         {
+            throw new ConstraintException("Property " + property.getId() + " is not multi-valued.");
+         }
+         if (definition.isRequired() && property.getValues().size() == 0)
+         {
+            throw new ConstraintException("Required property " + property.getId() + " can't be removed.");
+         }
+      }
+
+      // CHECK ACL
+      CapabilityACL capabilityACL = storage.getRepositoryInfo().getCapabilities().getCapabilityACL();
+      if (capabilityACL == CapabilityACL.NONE)
+      {
+         throw new NotSupportedException("ACL capability is not supported.");
+      }
+      else if (capabilityACL == CapabilityACL.DISCOVER)
+      {
+         throw new NotSupportedException("ACL can be discovered but not managed via CMIS services.");
+      }
+      if (!typeDefinition.isControllableACL())
+      {
+         throw new ConstraintException("Type " + typeDefinition.getId() + " is not controllable by ACL.");
+      }
+
+      // CHECK POLICY
+      if (!typeDefinition.isControllablePolicy())
+      {
+         throw new ConstraintException("Type " + typeDefinition.getId() + " is not controllable by Policy.");
+      }
+      for (String policyID : policies)
+      {
+         ObjectData policy = storage.getObjectById(policyID);
+         if (policy.getBaseType() != BaseType.POLICY)
+         {
+            throw new InvalidArgumentException("Object " + policyID + " is not a Policy object.");
+         }
+         resultPolicies.add(policy);
+      }
    }
 
    /**

@@ -19,22 +19,28 @@
 
 package org.xcmis.sp.jcr.exo;
 
-import org.exoplatform.services.jcr.core.ExtendedNode;
 import org.xcmis.sp.jcr.exo.index.IndexListener;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
+import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
-import org.xcmis.spi.NameConstraintViolationException;
+import org.xcmis.spi.ObjectData;
+import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.StorageException;
+import org.xcmis.spi.model.AccessControlEntry;
+import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.utils.CmisUtils;
 
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.jcr.Node;
@@ -80,9 +86,9 @@ class PWC extends DocumentDataImpl
    /** Latest version of document. */
    private final DocumentDataImpl document;
 
-   public PWC(DocumentData document, Session session, IndexListener indexListener)
+   public PWC(DocumentData document, Session session, Node node, IndexListener indexListener)
    {
-      super(document.getTypeDefinition(), null, session, null, indexListener);
+      super(document.getTypeDefinition(), null, session, node, null, indexListener);
       this.document = (DocumentDataImpl)document;
    }
 
@@ -122,7 +128,9 @@ class PWC extends DocumentDataImpl
     * {@inheritDoc}
     */
    @Override
-   public DocumentData checkin(boolean major, String checkinComment) throws ConstraintException, StorageException
+   public DocumentData checkin(boolean major, String checkinComment, Map<String, Property<?>> properties,
+      ContentStream content, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
+      Collection<ObjectData> policies) throws ConstraintException, StorageException
    {
       try
       {
@@ -139,23 +147,13 @@ class PWC extends DocumentDataImpl
          // to emulate creation new version.
          docNode.setProperty(CmisConstants.CREATED_BY, session.getUserID());
          docNode.setProperty(CmisConstants.CREATION_DATE, Calendar.getInstance());
-//         docNode.setProperty(CmisConstants.LAST_MODIFIED_BY, session.getUserID());
-//         docNode.setProperty(CmisConstants.LAST_MODIFICATION_DATE, Calendar.getInstance());
+         //         docNode.setProperty(CmisConstants.LAST_MODIFIED_BY, session.getUserID());
+         //         docNode.setProperty(CmisConstants.LAST_MODIFICATION_DATE, Calendar.getInstance());
          //
          docNode.setProperty(CmisConstants.IS_MAJOR_VERSION, major);
          if (checkinComment != null)
          {
             docNode.setProperty(CmisConstants.CHECKIN_COMMENT, checkinComment);
-         }
-
-         // Copy the other properties from document.
-         for (PropertyDefinition<?> def : type.getPropertyDefinitions())
-         {
-            String pId = def.getId();
-            if (!checkinCheckoutSkip.contains(pId))
-            {
-               setProperty(docNode, getProperty(pId));
-            }
          }
 
          String name = getName();
@@ -168,17 +166,44 @@ class PWC extends DocumentDataImpl
          {
             // TODO : Need to check if contents are the same then not was
             // not updated not need to change
-            setContentStream(docNode, getContentStream());
+            setContentStream(docNode, content);
          }
          catch (IOException ioe)
          {
             throw new CmisRuntimeException("Unable copy content for new document. " + ioe.getMessage(), ioe);
          }
 
+         // Copy the other properties from document.
+         for (PropertyDefinition<?> def : type.getPropertyDefinitions())
+         {
+            String pId = def.getId();
+            if (!checkinCheckoutSkip.contains(pId))
+            {
+               setProperty(docNode, properties.get(pId));
+            }
+         }
+
+         if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
+         {
+            List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(document.getACL(false), addACL, removeACL);
+            if (mergedACL != null && mergedACL.size() > 0)
+            {
+               BaseObjectData.setACL(docNode, mergedACL);
+            }
+         }
+
+         if (policies != null && policies.size() > 0)
+         {
+            for (ObjectData aPolicy : policies)
+            {
+               BaseObjectData.applyPolicy(docNode, (PolicyData)aPolicy);
+            }
+         }
+
          // document.save() will save this change
          node.getParent().remove();
 
-         document.save();
+         document.save(false);
 
          return document;
       }
@@ -224,81 +249,4 @@ class PWC extends DocumentDataImpl
       return true;
    }
 
-   @Override
-   protected void create() throws StorageException, NameConstraintViolationException
-   {
-      try
-      {
-         name = document.getName();
-
-         Node workingCopies =
-            (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_WORKING_COPIES);
-
-         Node wc = workingCopies.addNode(document.getObjectId(), "xcmis:workingCopy");
-
-         Node pwc = wc.addNode(name, type.getLocalName());
-
-         if (!pwc.isNodeType(JcrCMIS.CMIS_MIX_DOCUMENT))
-         {
-            pwc.addMixin(JcrCMIS.CMIS_MIX_DOCUMENT);
-         }
-         if (pwc.canAddMixin(JcrCMIS.MIX_VERSIONABLE))
-         {
-            pwc.addMixin(JcrCMIS.MIX_VERSIONABLE);
-         }
-
-         pwc.setProperty(CmisConstants.OBJECT_TYPE_ID, type.getId());
-         pwc.setProperty(CmisConstants.BASE_TYPE_ID, type.getBaseId().value());
-         pwc.setProperty(CmisConstants.CREATED_BY, session.getUserID());
-         pwc.setProperty(CmisConstants.CREATION_DATE, Calendar.getInstance());
-         pwc.setProperty(CmisConstants.LAST_MODIFIED_BY, session.getUserID());
-         pwc.setProperty(CmisConstants.LAST_MODIFICATION_DATE, Calendar.getInstance());
-         pwc.setProperty(CmisConstants.VERSION_SERIES_ID, document.getVersionSeriesId());
-         pwc.setProperty(CmisConstants.IS_LATEST_VERSION, true);
-         pwc.setProperty(CmisConstants.IS_MAJOR_VERSION, false);
-         pwc.setProperty(CmisConstants.VERSION_LABEL, pwcLabel);
-         pwc.setProperty(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, true);
-         pwc.setProperty(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, ((ExtendedNode)pwc).getIdentifier());
-         pwc.setProperty(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, session.getUserID());
-
-         pwc.setProperty("xcmis:latestVersionId", document.getObjectId());
-
-         try
-         {
-            // TODO : use native JCR ??
-            setContentStream(pwc, document.getContentStream());
-         }
-         catch (IOException ioe)
-         {
-            throw new CmisRuntimeException("Unable copy content for new document. " + ioe.getMessage(), ioe);
-         }
-
-         // Copy the other properties from document.
-         for (PropertyDefinition<?> def : type.getPropertyDefinitions())
-         {
-            String pId = def.getId();
-            if (!checkinCheckoutSkip.contains(pId))
-            {
-               setProperty(pwc, document.getProperty(pId));
-            }
-         }
-
-         // Update source document.
-         Node docNode = document.getNode();
-         docNode.setProperty(CmisConstants.IS_LATEST_VERSION, false);
-         docNode.setProperty(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, true);
-         docNode.setProperty(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, ((ExtendedNode)pwc).getIdentifier());
-         docNode.setProperty(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, session.getUserID());
-
-         session.save();
-
-         name = null;
-
-         node = pwc;
-      }
-      catch (RepositoryException re)
-      {
-         throw new StorageException("Unable save Document. " + re.getMessage(), re);
-      }
-   }
 }

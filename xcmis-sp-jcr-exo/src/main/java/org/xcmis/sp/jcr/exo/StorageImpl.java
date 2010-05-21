@@ -25,6 +25,7 @@ import org.exoplatform.services.jcr.core.ExtendedSession;
 import org.exoplatform.services.jcr.core.nodetype.ExtendedNodeTypeManager;
 import org.exoplatform.services.jcr.core.nodetype.NodeTypeValue;
 import org.exoplatform.services.jcr.core.nodetype.PropertyDefinitionValue;
+import org.exoplatform.services.jcr.util.IdGenerator;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.sp.jcr.exo.index.IndexListener;
@@ -32,6 +33,7 @@ import org.xcmis.spi.BaseItemsIterator;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
+import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.InvalidArgumentException;
@@ -49,6 +51,7 @@ import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.model.ACLCapability;
+import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.AccessControlPropagation;
 import org.xcmis.spi.model.AllowableActions;
 import org.xcmis.spi.model.BaseType;
@@ -62,6 +65,7 @@ import org.xcmis.spi.model.ChangeEvent;
 import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.Permission;
 import org.xcmis.spi.model.PermissionMapping;
+import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.PropertyType;
 import org.xcmis.spi.model.Rendition;
@@ -74,7 +78,9 @@ import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.model.Permission.BasicPermissions;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
+import org.xcmis.spi.utils.CmisUtils;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -458,15 +464,12 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public DocumentData copyDocument(DocumentData source, FolderData parent, VersioningState versioningState)
-      throws ConstraintException, StorageException
+   public DocumentData copyDocument(DocumentData source, FolderData parent, Map<String, Property<?>> properties,
+      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<ObjectData> policies,
+      VersioningState versioningState) throws ConstraintException, StorageException
    {
       if (parent != null)
       {
-         if (parent.isNew())
-         {
-            throw new CmisRuntimeException("Unable create document in newly created folder.");
-         }
          if (!parent.isAllowedChildType(source.getTypeId()))
          {
             throw new ConstraintException("Type " + source.getTypeId()
@@ -474,19 +477,124 @@ public class StorageImpl implements Storage
          }
       }
 
-      if (source.isNew())
-      {
-         throw new CmisRuntimeException("Unable use newly created document as source.");
-      }
-
       if (source.getBaseType() != BaseType.DOCUMENT)
       {
          throw new ConstraintException("Source object has type whose base type is not Document.");
       }
 
-      DocumentCopy copy =
-         new DocumentCopy(source, getTypeDefinition(source.getTypeId(), true), parent, session, versioningState,
-            indexListener);
+      DocumentData copy = null;
+
+      try
+      {
+
+         String name = null;
+         Property<?> nameProperty = properties.get(CmisConstants.NAME);
+         if (nameProperty != null)
+         {
+            name = (String)nameProperty.getValues().get(0);
+         }
+
+         if (name == null || name.length() == 0)
+         {
+            name = source.getName();
+         }
+
+         Node parentNode = ((FolderDataImpl)parent).getNode();
+
+         if (parentNode.hasNode(name))
+         {
+            throw new NameConstraintViolationException("Object with name " + name
+               + " already exists in specified folder.");
+         }
+
+         TypeDefinition type = source.getTypeDefinition();
+
+         Node copyNode = parentNode.addNode(name, type.getLocalName());
+
+         if (!copyNode.isNodeType(JcrCMIS.CMIS_MIX_DOCUMENT))
+         {
+            copyNode.addMixin(JcrCMIS.CMIS_MIX_DOCUMENT);
+         }
+         if (copyNode.canAddMixin(JcrCMIS.MIX_VERSIONABLE))
+         {
+            copyNode.addMixin(JcrCMIS.MIX_VERSIONABLE);
+         }
+
+         copyNode.setProperty(CmisConstants.OBJECT_TYPE_ID, //
+            type.getId());
+         copyNode.setProperty(CmisConstants.BASE_TYPE_ID, //
+            type.getBaseId().value());
+         copyNode.setProperty(CmisConstants.CREATED_BY, //
+            session.getUserID());
+         copyNode.setProperty(CmisConstants.CREATION_DATE, //
+            Calendar.getInstance());
+         copyNode.setProperty(CmisConstants.LAST_MODIFIED_BY, //
+            session.getUserID());
+         copyNode.setProperty(CmisConstants.LAST_MODIFICATION_DATE, //
+            Calendar.getInstance());
+         copyNode.setProperty(CmisConstants.VERSION_SERIES_ID, //
+            copyNode.getProperty(JcrCMIS.JCR_VERSION_HISTORY).getString());
+         copyNode.setProperty(CmisConstants.IS_LATEST_VERSION, //
+            true);
+         copyNode.setProperty(CmisConstants.IS_MAJOR_VERSION, //
+            versioningState == VersioningState.MAJOR);
+         copyNode.setProperty(CmisConstants.VERSION_LABEL, //
+            versioningState == VersioningState.CHECKEDOUT ? pwcLabel : latestLabel);
+         copyNode.setProperty(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, //
+            versioningState == VersioningState.CHECKEDOUT);
+         if (versioningState == VersioningState.CHECKEDOUT)
+         {
+            copyNode.setProperty(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, //
+               ((ExtendedNode)copyNode).getIdentifier());
+            copyNode.setProperty(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, //
+               session.getUserID());
+         }
+
+         copy =
+            new DocumentCopy(source, getTypeDefinition(source.getTypeId(), true), parent, session, copyNode,
+               versioningState, indexListener);
+
+         // TODO : support for checked-out initial state
+
+         for (Property<?> property : properties.values())
+         {
+            ((BaseObjectData)copy).setProperty(copyNode, property);
+         }
+
+         try
+         {
+            // TODO : use native JCR ??
+            DocumentDataImpl.setContentStream(copyNode, source.getContentStream());
+         }
+         catch (IOException ioe)
+         {
+            throw new CmisRuntimeException("Unable copy content for new document. " + ioe.getMessage(), ioe);
+         }
+
+         if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
+         {
+            List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(copy.getACL(false), addACL, removeACL);
+            if (mergedACL != null && mergedACL.size() > 0)
+            {
+               BaseObjectData.setACL(copyNode, mergedACL);
+            }
+         }
+
+         if (policies != null && policies.size() > 0)
+         {
+            for (ObjectData aPolicy : policies)
+            {
+               BaseObjectData.applyPolicy(copyNode, (PolicyData)aPolicy);
+            }
+         }
+
+         ((BaseObjectData)copy).save(true);
+
+      }
+      catch (RepositoryException re)
+      {
+         throw new StorageException("Unable to create a copy of Document. " + re.getMessage(), re);
+      }
 
       return copy;
    }
@@ -494,15 +602,12 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public DocumentData createDocument(FolderData parent, String typeId, VersioningState versioningState)
-      throws ConstraintException
+   public DocumentData createDocument(FolderData parent, String typeId, Map<String, Property<?>> properties,
+      ContentStream content, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
+      Collection<ObjectData> policies, VersioningState versioningState) throws ConstraintException
    {
       if (parent != null)
       {
-         if (parent.isNew())
-         {
-            throw new CmisRuntimeException("Unable create document in newly created folder.");
-         }
          if (!parent.isAllowedChildType(typeId))
          {
             throw new ConstraintException("Type " + typeId + " is not in list of allowed child type for folder "
@@ -517,7 +622,113 @@ public class StorageImpl implements Storage
          throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Document.");
       }
 
-      DocumentData document = new DocumentDataImpl(typeDefinition, parent, session, versioningState, indexListener);
+      DocumentData document = null;
+
+      try
+      {
+
+         String name = null;
+         Property<?> nameProperty = properties.get(CmisConstants.NAME);
+         if (nameProperty != null)
+         {
+            name = (String)nameProperty.getValues().get(0);
+         }
+
+         if (name == null && content != null)
+         {
+            name = content.getFileName();
+         }
+
+         if (name == null || name.length() == 0)
+         {
+            throw new NameConstraintViolationException("Name for new document must be provided.");
+         }
+
+         Node documentNode = null;
+         if (parent != null)
+         {
+            Node parentNode = ((FolderDataImpl)parent).getNode();
+
+            if (parentNode.hasNode(name))
+            {
+               throw new NameConstraintViolationException("Object with name " + name
+                  + " already exists in specified folder.");
+            }
+
+            documentNode = parentNode.addNode(name, typeDefinition.getLocalName());
+         }
+         else
+         {
+            Node unfiledStore = (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_UNFILED);
+            // wrapper around Document node with unique name.
+            Node unfiled = unfiledStore.addNode(IdGenerator.generate(), "xcmis:unfiledObject");
+            documentNode = unfiled.addNode(name, typeDefinition.getLocalName());
+         }
+
+         if (!documentNode.isNodeType(JcrCMIS.CMIS_MIX_DOCUMENT))
+         {
+            documentNode.addMixin(JcrCMIS.CMIS_MIX_DOCUMENT);
+         }
+         if (documentNode.canAddMixin(JcrCMIS.MIX_VERSIONABLE))
+         {
+            documentNode.addMixin(JcrCMIS.MIX_VERSIONABLE);
+         }
+
+         documentNode.setProperty(CmisConstants.OBJECT_TYPE_ID, typeDefinition.getId());
+         documentNode.setProperty(CmisConstants.BASE_TYPE_ID, typeDefinition.getBaseId().value());
+         documentNode.setProperty(CmisConstants.CREATED_BY, session.getUserID());
+         documentNode.setProperty(CmisConstants.CREATION_DATE, Calendar.getInstance());
+         documentNode.setProperty(CmisConstants.LAST_MODIFIED_BY, session.getUserID());
+         documentNode.setProperty(CmisConstants.LAST_MODIFICATION_DATE, Calendar.getInstance());
+         documentNode.setProperty(CmisConstants.VERSION_SERIES_ID, documentNode
+            .getProperty(JcrCMIS.JCR_VERSION_HISTORY).getString());
+         documentNode.setProperty(CmisConstants.IS_LATEST_VERSION, true);
+         documentNode.setProperty(CmisConstants.IS_MAJOR_VERSION, versioningState == VersioningState.MAJOR);
+
+         documentNode.setProperty(CmisConstants.VERSION_LABEL, latestLabel);
+
+         document = new DocumentDataImpl(typeDefinition, parent, session, documentNode, versioningState, indexListener);
+
+         // TODO : support for checked-out initial state
+
+         for (Property<?> property : properties.values())
+         {
+            ((BaseObjectData)document).setProperty(documentNode, property);
+         }
+
+         try
+         {
+            DocumentDataImpl.setContentStream(documentNode, content);
+         }
+         catch (IOException ioe)
+         {
+            throw new CmisRuntimeException("Unable save document content. " + ioe.getMessage(), ioe);
+         }
+
+         if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
+         {
+            List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(document.getACL(false), addACL, removeACL);
+            if (mergedACL != null && mergedACL.size() > 0)
+            {
+               BaseObjectData.setACL(documentNode, mergedACL);
+            }
+         }
+
+         if (policies != null && policies.size() > 0)
+         {
+            for (ObjectData aPolicy : policies)
+            {
+               BaseObjectData.applyPolicy(documentNode, (PolicyData)aPolicy);
+            }
+         }
+
+         ((BaseObjectData)document).save(true);
+
+      }
+      catch (RepositoryException re)
+      {
+         throw new StorageException("Unable to create Document. " + re.getMessage(), re);
+      }
 
       return document;
    }
@@ -525,16 +736,14 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public FolderData createFolder(FolderData parent, String typeId) throws ConstraintException
+   public FolderData createFolder(FolderData parent, String typeId, Map<String, Property<?>> properties,
+      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<ObjectData> policies)
+      throws ConstraintException
    {
+
       if (parent == null)
       {
          throw new ConstraintException("Parent folder must be provided.");
-      }
-
-      if (parent.isNew())
-      {
-         throw new CmisRuntimeException("Unable create child folder in newly created folder.");
       }
 
       if (!parent.isAllowedChildType(typeId))
@@ -550,15 +759,94 @@ public class StorageImpl implements Storage
          throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Folder.");
       }
 
-      FolderData newFolder = new FolderDataImpl(typeDefinition, parent, session, indexListener);
+      FolderData folder = null;
 
-      return newFolder;
+      try
+      {
+
+         String name = null;
+         Property<?> nameProperty = properties.get(CmisConstants.NAME);
+         if (nameProperty != null)
+         {
+            name = (String)nameProperty.getValues().get(0);
+         }
+
+         if (name == null || name.length() == 0)
+         {
+            throw new NameConstraintViolationException("Name for new folder must be provided.");
+         }
+
+         Node parentNode = ((FolderDataImpl)parent).getNode();
+
+         if (parentNode.hasNode(name))
+         {
+            throw new NameConstraintViolationException("Object with name " + name
+               + " already exists in specified folder.");
+         }
+
+         Node folderNode = parentNode.addNode(name, typeDefinition.getLocalName());
+
+         if (!folderNode.isNodeType(JcrCMIS.CMIS_MIX_FOLDER))
+         {
+            folderNode.addMixin(JcrCMIS.CMIS_MIX_FOLDER);
+         }
+
+         folderNode.setProperty(CmisConstants.OBJECT_TYPE_ID, //
+            typeDefinition.getId());
+         folderNode.setProperty(CmisConstants.BASE_TYPE_ID, //
+            typeDefinition.getBaseId().value());
+         folderNode.setProperty(CmisConstants.CREATED_BY, //
+            session.getUserID());
+         folderNode.setProperty(CmisConstants.CREATION_DATE, //
+            Calendar.getInstance());
+         folderNode.setProperty(CmisConstants.LAST_MODIFIED_BY, //
+            session.getUserID());
+         folderNode.setProperty(CmisConstants.LAST_MODIFICATION_DATE, //
+            Calendar.getInstance());
+
+         folder = new FolderDataImpl(typeDefinition, parent, session, folderNode, indexListener);
+
+         // TODO : support for checked-out initial state
+
+         for (Property<?> property : properties.values())
+         {
+            ((BaseObjectData)folder).setProperty(folderNode, property);
+         }
+
+         if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
+         {
+            List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(folder.getACL(false), addACL, removeACL);
+            if (mergedACL != null && mergedACL.size() > 0)
+            {
+               BaseObjectData.setACL(folderNode, mergedACL);
+            }
+         }
+
+         if (policies != null && policies.size() > 0)
+         {
+            for (ObjectData aPolicy : policies)
+            {
+               BaseObjectData.applyPolicy(folderNode, (PolicyData)aPolicy);
+            }
+         }
+
+         ((BaseObjectData)folder).save(true);
+
+      }
+      catch (RepositoryException re)
+      {
+         throw new StorageException("Unable to create Folder. " + re.getMessage(), re);
+      }
+
+      return folder;
    }
 
    /**
     * {@inheritDoc}
     */
-   public PolicyData createPolicy(FolderData parent, String typeId) throws ConstraintException
+   public PolicyData createPolicy(FolderData parent, String typeId, Map<String, Property<?>> properties,
+      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<ObjectData> policies)
+      throws ConstraintException
    {
       TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
 
@@ -569,7 +857,80 @@ public class StorageImpl implements Storage
 
       // TODO : need raise exception if parent folder is provided ??
       // Do not use parent folder, policy is not fileable.
-      PolicyData policy = new PolicyDataImpl(typeDefinition, session, indexListener);
+      // This parameter "parent" MUST be specified if the Repository does NOT support the optional “unfiling” capability.
+
+      PolicyData policy = null;
+
+      try
+      {
+
+         String name = null;
+         Property<?> nameProperty = properties.get(CmisConstants.NAME);
+         if (nameProperty != null)
+         {
+            name = (String)nameProperty.getValues().get(0);
+         }
+
+         if (name == null || name.length() == 0)
+         {
+            throw new NameConstraintViolationException("Name for new policy must be provided.");
+         }
+
+         Node policiesStore = (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_POLICIES);
+
+         if (policiesStore.hasNode(name))
+         {
+            throw new NameConstraintViolationException("Policy with name " + name + " already exists.");
+         }
+
+         Node policyNode = policiesStore.addNode(name, typeDefinition.getLocalName());
+
+         policyNode.setProperty(CmisConstants.OBJECT_TYPE_ID, //
+            typeDefinition.getId());
+         policyNode.setProperty(CmisConstants.BASE_TYPE_ID, //
+            typeDefinition.getBaseId().value());
+         policyNode.setProperty(CmisConstants.CREATED_BY, //
+            session.getUserID());
+         policyNode.setProperty(CmisConstants.CREATION_DATE, //
+            Calendar.getInstance());
+         policyNode.setProperty(CmisConstants.LAST_MODIFIED_BY, //
+            session.getUserID());
+         policyNode.setProperty(CmisConstants.LAST_MODIFICATION_DATE, //
+            Calendar.getInstance());
+
+         policy = new PolicyDataImpl(typeDefinition, session, policyNode, indexListener);
+
+         // TODO : support for checked-out initial state
+
+         for (Property<?> property : properties.values())
+         {
+            ((BaseObjectData)policy).setProperty(policyNode, property);
+         }
+
+         if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
+         {
+            List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(policy.getACL(false), addACL, removeACL);
+            if (mergedACL != null && mergedACL.size() > 0)
+            {
+               BaseObjectData.setACL(policyNode, mergedACL);
+            }
+         }
+
+         if (policies != null && policies.size() > 0)
+         {
+            for (ObjectData aPolicy : policies)
+            {
+               BaseObjectData.applyPolicy(policyNode, (PolicyData)aPolicy);
+            }
+         }
+
+         ((BaseObjectData)policy).save(true);
+
+      }
+      catch (RepositoryException re)
+      {
+         throw new StorageException("Unable create new policy. " + re.getMessage(), re);
+      }
 
       return policy;
    }
@@ -577,18 +938,10 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public RelationshipData createRelationship(ObjectData source, ObjectData target, String typeId)
-      throws ConstraintException
+   public RelationshipData createRelationship(ObjectData source, ObjectData target, String typeId,
+      Map<String, Property<?>> properties, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
+      Collection<ObjectData> policies) throws ConstraintException
    {
-      if (source.isNew())
-      {
-         throw new CmisRuntimeException("Unable use newly created object as relationship source.");
-      }
-
-      if (target.isNew())
-      {
-         throw new CmisRuntimeException("Unable use newly created object as relationship target.");
-      }
 
       TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
 
@@ -597,7 +950,84 @@ public class StorageImpl implements Storage
          throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Relationship.");
       }
 
-      RelationshipData relationship = new RelationshipDataImpl(typeDefinition, source, target, session, indexListener);
+      RelationshipData relationship = null;
+
+      try
+      {
+
+         String name = null;
+         Property<?> nameProperty = properties.get(CmisConstants.NAME);
+         if (nameProperty != null)
+         {
+            name = (String)nameProperty.getValues().get(0);
+         }
+
+         if (name == null || name.length() == 0)
+         {
+            throw new NameConstraintViolationException("Name for new relationship must be provided.");
+         }
+
+         Node relationships =
+            (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_RELATIONSHIPS);
+
+         if (relationships.hasNode(name))
+         {
+            throw new NameConstraintViolationException("Relationship with name " + name + " already exists.");
+         }
+
+         Node relationshipNode = relationships.addNode(name, typeDefinition.getLocalName());
+
+         relationshipNode.setProperty(CmisConstants.OBJECT_TYPE_ID, //
+            typeDefinition.getId());
+         relationshipNode.setProperty(CmisConstants.BASE_TYPE_ID, //
+            typeDefinition.getBaseId().value());
+         relationshipNode.setProperty(CmisConstants.CREATED_BY, //
+            session.getUserID());
+         relationshipNode.setProperty(CmisConstants.CREATION_DATE, //
+            Calendar.getInstance());
+         relationshipNode.setProperty(CmisConstants.LAST_MODIFIED_BY, //
+            session.getUserID());
+         relationshipNode.setProperty(CmisConstants.LAST_MODIFICATION_DATE, //
+            Calendar.getInstance());
+         relationshipNode.setProperty(CmisConstants.SOURCE_ID, //
+            ((BaseObjectData)source).getNode());
+         relationshipNode.setProperty(CmisConstants.TARGET_ID, //
+            ((BaseObjectData)target).getNode());
+
+         relationship =
+            new RelationshipDataImpl(typeDefinition, source, target, session, relationshipNode, indexListener);
+
+         // TODO : support for checked-out initial state
+
+         for (Property<?> property : properties.values())
+         {
+            ((BaseObjectData)relationship).setProperty(relationshipNode, property);
+         }
+
+         if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
+         {
+            List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(relationship.getACL(false), addACL, removeACL);
+            if (mergedACL != null && mergedACL.size() > 0)
+            {
+               BaseObjectData.setACL(relationshipNode, mergedACL);
+            }
+         }
+
+         if (policies != null && policies.size() > 0)
+         {
+            for (ObjectData aPolicy : policies)
+            {
+               BaseObjectData.applyPolicy(relationshipNode, (PolicyData)aPolicy);
+            }
+         }
+
+         ((BaseObjectData)relationship).save(true);
+
+      }
+      catch (RepositoryException re)
+      {
+         throw new StorageException("Unable create new policy. " + re.getMessage(), re);
+      }
 
       return relationship;
    }
@@ -1180,31 +1610,6 @@ public class StorageImpl implements Storage
    public ItemsIterator<Result> query(Query query) throws InvalidArgumentException
    {
       throw new UnsupportedOperationException();
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public String saveObject(ObjectData object) throws StorageException, NameConstraintViolationException,
-      UpdateConflictException
-   {
-      boolean isNew = object.isNew();
-
-      ((BaseObjectData)object).save();
-
-      if (indexListener != null)
-      {
-         if (isNew)
-         {
-            indexListener.created(object);
-         }
-         else
-         {
-            indexListener.updated(object);
-         }
-      }
-
-      return object.getObjectId();
    }
 
    /**

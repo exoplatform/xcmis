@@ -192,8 +192,8 @@ public abstract class BaseTest extends TestCase
 
    protected void setProperty(DocumentData doc, String propertyName, String propertyValue) throws RepositoryException
    {
-      ((BaseObjectData)doc).setProperty(((BaseObjectData)doc).node, new StringProperty(propertyName, propertyName,
-         propertyName, propertyName, propertyValue));
+      ((BaseObjectData)doc).setProperty(new StringProperty(propertyName, propertyName, propertyName, propertyName,
+         propertyValue));
    }
 
 }

@@ -24,13 +24,10 @@ import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.FolderData;
-import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.TypeDefinition;
 
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -46,9 +43,9 @@ import javax.jcr.Session;
 class PolicyDataImpl extends BaseObjectData implements PolicyData
 {
 
-   public PolicyDataImpl(TypeDefinition type, Session session, IndexListener indexListener)
+   public PolicyDataImpl(TypeDefinition type, Session session, Node node, IndexListener indexListener)
    {
-      super(type, null, session, indexListener);
+      super(type, null, session, node, indexListener);
    }
 
    public PolicyDataImpl(TypeDefinition type, Node node, IndexListener indexListener)
@@ -120,74 +117,6 @@ class PolicyDataImpl extends BaseObjectData implements PolicyData
    public String getPolicyText()
    {
       return getString(CmisConstants.POLICY_TEXT);
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   @Override
-   protected void create() throws StorageException, NameConstraintViolationException
-   {
-      try
-      {
-         if (name == null || name.length() == 0)
-         {
-            throw new NameConstraintViolationException("Name for new policy must be provided.");
-         }
-
-         Node policiesStore = (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_POLICIES);
-
-         if (policiesStore.hasNode(name))
-         {
-            throw new NameConstraintViolationException("Policy with name " + name + " already exists.");
-         }
-
-         Node newPolicy = policiesStore.addNode(name, type.getLocalName());
-
-         newPolicy.setProperty(CmisConstants.OBJECT_TYPE_ID, //
-            type.getId());
-         newPolicy.setProperty(CmisConstants.BASE_TYPE_ID, //
-            type.getBaseId().value());
-         newPolicy.setProperty(CmisConstants.CREATED_BY, //
-            session.getUserID());
-         newPolicy.setProperty(CmisConstants.CREATION_DATE, //
-            Calendar.getInstance());
-         newPolicy.setProperty(CmisConstants.LAST_MODIFIED_BY, //
-            session.getUserID());
-         newPolicy.setProperty(CmisConstants.LAST_MODIFICATION_DATE, //
-            Calendar.getInstance());
-
-         for (Property<?> property : properties.values())
-         {
-            setProperty(newPolicy, property);
-         }
-
-         if (policies != null && policies.size() > 0)
-         {
-            for (PolicyData policy : policies)
-            {
-               applyPolicy(newPolicy, policy);
-            }
-         }
-
-         if (acl != null && acl.size() > 0)
-         {
-            setACL(newPolicy, acl);
-         }
-
-         session.save();
-
-         name = null;
-         policies = null;
-         acl = null;
-         properties.clear();
-
-         node = newPolicy;
-      }
-      catch (RepositoryException re)
-      {
-         throw new StorageException("Unable create new policy. " + re.getMessage(), re);
-      }
    }
 
 }

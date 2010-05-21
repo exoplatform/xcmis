@@ -24,20 +24,14 @@ import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.FolderData;
-import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectData;
-import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.RelationshipData;
-import org.xcmis.spi.StorageException;
-import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.TypeDefinition;
 
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 
 import javax.jcr.Node;
-import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
 /**
@@ -58,12 +52,13 @@ class RelationshipDataImpl extends BaseObjectData implements RelationshipData
     * @param source source of relationship
     * @param target target of relationship
     * @param session session
+    * @param node TODO
     * @see StorageImpl#createRelationship(ObjectData, ObjectData, String)
     */
-   public RelationshipDataImpl(TypeDefinition type, ObjectData source, ObjectData target, Session session,
+   public RelationshipDataImpl(TypeDefinition type, ObjectData source, ObjectData target, Session session, Node node,
       IndexListener indexListener)
    {
-      super(type, null, session, indexListener);
+      super(type, null, session, null, indexListener);
       this.source = source;
       this.target = target;
    }
@@ -87,10 +82,6 @@ class RelationshipDataImpl extends BaseObjectData implements RelationshipData
     */
    public String getSourceId()
    {
-      if (isNew())
-      {
-         return source.getObjectId();
-      }
       return getString(CmisConstants.SOURCE_ID);
    }
 
@@ -99,10 +90,6 @@ class RelationshipDataImpl extends BaseObjectData implements RelationshipData
     */
    public String getTargetId()
    {
-      if (isNew())
-      {
-         return target.getObjectId();
-      }
       return getString(CmisConstants.TARGET_ID);
    }
 
@@ -132,76 +119,4 @@ class RelationshipDataImpl extends BaseObjectData implements RelationshipData
       return Collections.emptyList();
    }
 
-   /**
-    * {@inheritDoc}
-    */
-   @Override
-   protected void create() throws StorageException, NameConstraintViolationException
-   {
-      try
-      {
-         if (name == null || name.length() == 0)
-         {
-            throw new NameConstraintViolationException("Name for new relationship must be provided.");
-         }
-
-         Node relationships =
-            (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_RELATIONSHIPS);
-
-         if (relationships.hasNode(name))
-         {
-            throw new NameConstraintViolationException("Relationship with name " + name + " already exists.");
-         }
-
-         Node relationship = relationships.addNode(name, type.getLocalName());
-
-         relationship.setProperty(CmisConstants.OBJECT_TYPE_ID, //
-            type.getId());
-         relationship.setProperty(CmisConstants.BASE_TYPE_ID, //
-            type.getBaseId().value());
-         relationship.setProperty(CmisConstants.CREATED_BY, //
-            session.getUserID());
-         relationship.setProperty(CmisConstants.CREATION_DATE, //
-            Calendar.getInstance());
-         relationship.setProperty(CmisConstants.LAST_MODIFIED_BY, //
-            session.getUserID());
-         relationship.setProperty(CmisConstants.LAST_MODIFICATION_DATE, //
-            Calendar.getInstance());
-         relationship.setProperty(CmisConstants.SOURCE_ID, //
-            ((BaseObjectData)source).getNode());
-         relationship.setProperty(CmisConstants.TARGET_ID, //
-            ((BaseObjectData)target).getNode());
-
-         for (Property<?> property : properties.values())
-         {
-            setProperty(relationship, property);
-         }
-
-         if (policies != null && policies.size() > 0)
-         {
-            for (PolicyData policy : policies)
-            {
-               applyPolicy(relationship, policy);
-            }
-         }
-
-         if (acl != null && acl.size() > 0)
-         {
-            setACL(relationship, acl);
-         }
-
-         relationships.save();
-
-         name = null;
-         policies = null;
-         acl = null;
-         properties.clear();
-
-         node = relationship;
-      }
-      catch (RepositoryException re)
-      {
-         throw new StorageException("Unable create new relationship. " + re.getMessage(), re);
-      }
-   }
 }

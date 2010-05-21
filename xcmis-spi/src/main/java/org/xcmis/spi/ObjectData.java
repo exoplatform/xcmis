@@ -104,14 +104,6 @@ public interface ObjectData
    //
 
    /**
-    * @return <code>true</code> if current object is newly created and was not
-    *         persisted yet. If may be created via
-    *         {@link Storage#createDocument(FolderData, String, org.xcmis.spi.VersioningState)}
-    *         , {@link Storage#createFolder(FolderData, String)}, etc.
-    */
-   boolean isNew();
-
-   /**
     * @return base type of object
     * @see BaseType
     */
@@ -160,8 +152,7 @@ public interface ObjectData
    String getName();
 
    /**
-    * Shortcut to 'cmis:objectId' property. This method always return
-    * <code>null</code> for newly created unsaved objects. See {@link #isNew()}.
+    * Shortcut to 'cmis:objectId' property.
     *
     * @return 'cmis:objectId' property
     */

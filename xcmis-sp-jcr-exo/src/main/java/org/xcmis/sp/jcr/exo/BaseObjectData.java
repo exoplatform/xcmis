@@ -63,7 +63,6 @@ import org.xcmis.spi.model.impl.IdProperty;
 import org.xcmis.spi.model.impl.IntegerProperty;
 import org.xcmis.spi.model.impl.StringProperty;
 import org.xcmis.spi.model.impl.UriProperty;
-import org.xcmis.spi.utils.CmisUtils;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -109,19 +108,19 @@ abstract class BaseObjectData implements ObjectData
 
    /**
     * Temporary storage for object properties. For newly create object all
-    * properties will be stored here before calling {@link #save()}.
+    * properties will be stored here before calling {@link #save(boolean)}.
     */
    protected final Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
 
    /**
     * Temporary storage for policies applied to object. For newly created all
-    * policies will be stored in here before calling {@link #save()}.
+    * policies will be stored in here before calling {@link #save(boolean)}.
     */
    protected Set<PolicyData> policies;
 
    /**
     * Temporary storage for ACL applied to object. For newly created all ACL
-    * will be stored in here before calling {@link #save()}.
+    * will be stored in here before calling {@link #save(boolean)}.
     */
    protected List<AccessControlEntry> acl;
 
@@ -145,20 +144,24 @@ abstract class BaseObjectData implements ObjectData
    protected final IndexListener indexListener;
 
    /**
-    * Create new unsaved instance of CMIS object. This object should be saved,
-    * {@link #save()}.
+    * Create new instance of CMIS object.
     *
     * @param type type definition for new object
     * @param parent parent folder
     * @param session JCR session
+    * @param node TODO
     */
-   public BaseObjectData(TypeDefinition type, FolderData parent, Session session, IndexListener indexListener)
+   public BaseObjectData(TypeDefinition type, FolderData parent, Session session, Node node, IndexListener indexListener)
    {
       this.type = type;
-      this.indexListener = indexListener;
       this.parent = (FolderDataImpl)parent;
       this.session = session;
-      this.node = null;
+      this.indexListener = indexListener;
+
+      this.node = node;
+      this.policies = new HashSet<PolicyData>();
+      this.acl = new ArrayList<AccessControlEntry>();
+
    }
 
    /**
@@ -172,6 +175,10 @@ abstract class BaseObjectData implements ObjectData
       this.type = type;
       this.node = node;
       this.indexListener = indexListener;
+
+      this.policies = new HashSet<PolicyData>();
+      this.acl = new ArrayList<AccessControlEntry>();
+
       try
       {
          this.session = node.getSession();
@@ -191,10 +198,6 @@ abstract class BaseObjectData implements ObjectData
     */
    public void accept(ObjectDataVisitor visitor)
    {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException("accept");
-      }
       visitor.visit(this);
    }
 
@@ -207,31 +210,15 @@ abstract class BaseObjectData implements ObjectData
       {
          throw new ConstraintException("Type " + type.getId() + " is not controlable by Policy.");
       }
-
-      if (policy.isNew())
+      try
       {
-         throw new CmisRuntimeException("Unable apply newly created policy.");
+         applyPolicy(node, policy);
       }
-
-      if (isNew())
+      catch (RepositoryException re)
       {
-         if (policies == null)
-         {
-            policies = new HashSet<PolicyData>();
-         }
-         policies.add(policy);
+         throw new CmisRuntimeException("Unable to apply policy. " + re.getMessage(), re);
       }
-      else
-      {
-         try
-         {
-            applyPolicy(node, policy);
-         }
-         catch (RepositoryException re)
-         {
-            throw new CmisRuntimeException("Unable to apply policy. " + re.getMessage(), re);
-         }
-      }
+      save(false);
    }
 
    /**
@@ -244,14 +231,6 @@ abstract class BaseObjectData implements ObjectData
          return Collections.emptyList();
       }
 
-      if (isNew())
-      {
-         if (acl == null)
-         {
-            return Collections.emptyList();
-         }
-         return Collections.unmodifiableList(acl);
-      }
       try
       {
          return getACL();
@@ -275,10 +254,6 @@ abstract class BaseObjectData implements ObjectData
     */
    public String getChangeToken()
    {
-      if (isNew())
-      {
-         return null;
-      }
       return getString(CmisConstants.CHANGE_TOKEN);
    }
 
@@ -287,10 +262,6 @@ abstract class BaseObjectData implements ObjectData
     */
    public String getCreatedBy()
    {
-      if (isNew())
-      {
-         return null;
-      }
       return getString(CmisConstants.CREATED_BY);
    }
 
@@ -299,10 +270,6 @@ abstract class BaseObjectData implements ObjectData
     */
    public Calendar getCreationDate()
    {
-      if (isNew())
-      {
-         return null;
-      }
       return getDate(CmisConstants.CREATION_DATE);
    }
 
@@ -311,10 +278,6 @@ abstract class BaseObjectData implements ObjectData
     */
    public Calendar getLastModificationDate()
    {
-      if (isNew())
-      {
-         return null;
-      }
       return getDate(CmisConstants.LAST_MODIFICATION_DATE);
    }
 
@@ -323,10 +286,6 @@ abstract class BaseObjectData implements ObjectData
     */
    public String getLastModifiedBy()
    {
-      if (isNew())
-      {
-         return null;
-      }
       return getString(CmisConstants.LAST_MODIFIED_BY);
    }
 
@@ -335,11 +294,6 @@ abstract class BaseObjectData implements ObjectData
     */
    public String getName()
    {
-      if (isNew() || name != null)
-      {
-         return name;
-      }
-
       try
       {
          return node.getName();
@@ -355,11 +309,6 @@ abstract class BaseObjectData implements ObjectData
     */
    public String getObjectId()
    {
-      if (isNew())
-      {
-         return null;
-      }
-
       try
       {
          return ((ExtendedNode)node).getIdentifier();
@@ -375,11 +324,6 @@ abstract class BaseObjectData implements ObjectData
     */
    public FolderData getParent() throws ConstraintException
    {
-      if (isNew())
-      {
-         return parent;
-      }
-
       try
       {
          if (node.getDepth() == 0)
@@ -412,18 +356,6 @@ abstract class BaseObjectData implements ObjectData
     */
    public Collection<FolderData> getParents()
    {
-      if (isNew())
-      {
-         if (parent != null)
-         {
-            List<FolderData> parents = new ArrayList<FolderData>(1);
-            parents.add(parent);
-            return parents;
-         }
-
-         return Collections.emptyList();
-      }
-
       try
       {
          if (node.getDepth() == 0)
@@ -464,15 +396,6 @@ abstract class BaseObjectData implements ObjectData
       if (!type.isControllablePolicy())
       {
          return Collections.emptyList();
-      }
-
-      if (isNew())
-      {
-         if (policies == null)
-         {
-            return Collections.emptySet();
-         }
-         return Collections.unmodifiableSet(policies);
       }
 
       try
@@ -520,11 +443,6 @@ abstract class BaseObjectData implements ObjectData
    public ItemsIterator<RelationshipData> getRelationships(RelationshipDirection direction, TypeDefinition type,
       boolean includeSubRelationshipTypes)
    {
-      if (isNew())
-      {
-         return CmisUtils.emptyItemsIterator();
-      }
-
       try
       {
          // Can met one relationship twice if object has relation to it self.
@@ -605,44 +523,21 @@ abstract class BaseObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
-   public boolean isNew()
-   {
-      return node == null;
-   }
-
-   /**
-    * {@inheritDoc}
-    */
    public void removePolicy(PolicyData policy) throws ConstraintException
    {
       if (!type.isControllablePolicy())
       {
          throw new ConstraintException("Type " + type.getId() + " is not controlable by Policy.");
       }
-
-      if (isNew())
+      try
       {
-         // If not saved yet simply remove from temporary storage
-         // TODO override equals & hashCode for CMIS objects classes
-         for (Iterator<PolicyData> policyIterator = policies.iterator(); policyIterator.hasNext();)
-         {
-            if (policyIterator.next().getObjectId().equals(policy.getObjectId()))
-            {
-               policies.remove(policy);
-            }
-         }
+         node.setProperty(policy.getObjectId(), (Node)null);
       }
-      else
+      catch (javax.jcr.RepositoryException re)
       {
-         try
-         {
-            node.setProperty(policy.getObjectId(), (Node)null);
-         }
-         catch (javax.jcr.RepositoryException re)
-         {
-            throw new CmisRuntimeException("Unable remove policy. " + re.getMessage(), re);
-         }
+         throw new CmisRuntimeException("Unable remove policy. " + re.getMessage(), re);
       }
+      save(false);
    }
 
    /**
@@ -654,34 +549,15 @@ abstract class BaseObjectData implements ObjectData
       {
          throw new ConstraintException("Type " + type.getId() + " is not controlable by ACL.");
       }
-
-      if (isNew())
+      try
       {
-         if (this.acl != null)
-         {
-            this.acl.clear(); // Not merged, just replaced.
-         }
-
-         if (aces != null && aces.size() > 0)
-         {
-            if (this.acl == null)
-            {
-               this.acl = new ArrayList<AccessControlEntry>();
-            }
-            this.acl.addAll(aces);
-         }
+         setACL(node, aces);
       }
-      else
+      catch (RepositoryException re)
       {
-         try
-         {
-            setACL(node, aces);
-         }
-         catch (RepositoryException re)
-         {
-            throw new CmisRuntimeException("Unable to apply ACL. " + re.getMessage(), re);
-         }
+         throw new CmisRuntimeException("Unable to apply ACL. " + re.getMessage(), re);
       }
+      save(false);
    }
 
    /**
@@ -689,26 +565,12 @@ abstract class BaseObjectData implements ObjectData
     */
    public void setName(String name) throws NameConstraintViolationException
    {
-      // Name will be used when method {@link #save()} called. Then node will be moved.
+      // TODO Do we need still this method? Zavizionov
       this.name = name;
+      save(false);
    }
 
-   /**
-    * {@inheritDoc}
-    */
-   public void setProperties(Map<String, Property<?>> properties) throws ConstraintException,
-      NameConstraintViolationException
-   {
-      for (Property<?> property : properties.values())
-      {
-         setProperty(property);
-      }
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public void setProperty(Property<?> property) throws ConstraintException
+   private void setPropertyWithVerify(Property<?> property) throws ConstraintException
    {
       PropertyDefinition<?> definition = type.getPropertyDefinition(property.getId());
 
@@ -755,7 +617,7 @@ abstract class BaseObjectData implements ObjectData
 
       Updatability updatability = definition.getUpdatability();
       if (updatability == Updatability.READWRITE //
-         || (updatability == Updatability.ONCREATE && isNew()) //
+         //         || (updatability == Updatability.ONCREATE && isNew()) //
          || (updatability == Updatability.WHENCHECKEDOUT && getBaseType() == BaseType.DOCUMENT && ((DocumentData)this)
             .isPWC()))
       {
@@ -766,21 +628,14 @@ abstract class BaseObjectData implements ObjectData
          }
          else
          {
-            if (isNew())
+            try
             {
-               properties.put(property.getId(), property);
+               setProperty(node, property);
             }
-            else
+            catch (RepositoryException re)
             {
-               try
-               {
-                  setProperty(node, property);
-               }
-               catch (RepositoryException re)
-               {
-                  throw new CmisRuntimeException("Failed set or update property " + property.getId() + ". "
-                     + re.getMessage(), re);
-               }
+               throw new CmisRuntimeException("Failed set or update property " + property.getId() + ". "
+                  + re.getMessage(), re);
             }
          }
       }
@@ -795,13 +650,35 @@ abstract class BaseObjectData implements ObjectData
    }
 
    /**
+    * {@inheritDoc}
+    */
+   public void setProperties(Map<String, Property<?>> properties) throws ConstraintException,
+      NameConstraintViolationException
+   {
+      for (Property<?> property : properties.values())
+      {
+         setPropertyWithVerify(property);
+      }
+      save(false);
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public void setProperty(Property<?> property) throws ConstraintException
+   {
+      setPropertyWithVerify(property);
+      save(false);
+   }
+
+   /**
     * Create permission map which can be passed to JCR node.
     *
     * @param source source ACL
     * @return permission map
     * @throws ConstraintException if at least permission is unknown
     */
-   private Map<String, String[]> createPermissionMap(List<AccessControlEntry> source) throws ConstraintException
+   private static Map<String, String[]> createPermissionMap(List<AccessControlEntry> source) throws ConstraintException
    {
       Map<String, Set<String>> cache = new HashMap<String, Set<String>>();
       for (AccessControlEntry ace : source)
@@ -1046,10 +923,6 @@ abstract class BaseObjectData implements ObjectData
 
    private Property<?> getProperty(PropertyDefinition<?> definition)
    {
-      if (isNew())
-      {
-         return properties.get(definition.getId());
-      }
       try
       {
          // Check known prepared shortcut for properties.
@@ -1154,7 +1027,7 @@ abstract class BaseObjectData implements ObjectData
       }
    }
 
-   protected void applyPolicy(Node data, PolicyData policy) throws RepositoryException
+   protected static void applyPolicy(Node data, PolicyData policy) throws RepositoryException
    {
       String policyId = policy.getObjectId();
       if (!data.hasProperty(policyId))
@@ -1163,24 +1036,10 @@ abstract class BaseObjectData implements ObjectData
       }
    }
 
-   /**
-    * Persist current newly created object.
-    *
-    * @throws StorageException if any storage error occurs
-    * @throws NameConstraintViolationException if object name is not allowed for
-    *         parent folder
-    */
-   protected abstract void create() throws StorageException, NameConstraintViolationException;
-
    // Helpers for internal usage ONLY. There is no validation for property type.
 
    protected Boolean getBoolean(String id)
    {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException();
-      }
-
       try
       {
          return node.getProperty(id).getBoolean();
@@ -1198,11 +1057,6 @@ abstract class BaseObjectData implements ObjectData
 
    protected Boolean[] getBooleans(String id)
    {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException();
-      }
-
       try
       {
          Value[] values = node.getProperty(id).getValues();
@@ -1226,11 +1080,6 @@ abstract class BaseObjectData implements ObjectData
 
    protected Calendar getDate(String id)
    {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException();
-      }
-
       try
       {
          return node.getProperty(id).getDate();
@@ -1248,11 +1097,6 @@ abstract class BaseObjectData implements ObjectData
 
    protected Calendar[] getDates(String id)
    {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException();
-      }
-
       try
       {
          Value[] values = node.getProperty(id).getValues();
@@ -1276,11 +1120,6 @@ abstract class BaseObjectData implements ObjectData
 
    protected Double getDouble(String id)
    {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException();
-      }
-
       try
       {
          return node.getProperty(id).getDouble();
@@ -1298,11 +1137,6 @@ abstract class BaseObjectData implements ObjectData
 
    protected Double[] getDoubles(String id)
    {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException();
-      }
-
       try
       {
          Value[] values = node.getProperty(id).getValues();
@@ -1326,11 +1160,6 @@ abstract class BaseObjectData implements ObjectData
 
    protected Long getLong(String id)
    {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException();
-      }
-
       try
       {
          return node.getProperty(id).getLong();
@@ -1348,11 +1177,6 @@ abstract class BaseObjectData implements ObjectData
 
    protected Long[] getLongs(String id)
    {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException();
-      }
-
       try
       {
          Value[] values = node.getProperty(id).getValues();
@@ -1376,11 +1200,6 @@ abstract class BaseObjectData implements ObjectData
 
    protected String getString(String id)
    {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException();
-      }
-
       try
       {
          return node.getProperty(id).getString();
@@ -1398,11 +1217,6 @@ abstract class BaseObjectData implements ObjectData
 
    protected String[] getStrings(String id)
    {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException();
-      }
-
       try
       {
          Value[] values = node.getProperty(id).getValues();
@@ -1424,14 +1238,14 @@ abstract class BaseObjectData implements ObjectData
       }
    }
 
-   protected void setACL(Node data, List<AccessControlEntry> aces) throws RepositoryException
+   protected static void setACL(Node node, List<AccessControlEntry> aces) throws RepositoryException
    {
-      if (!data.isNodeType(JcrCMIS.EXO_PRIVILEGABLE))
+      if (!node.isNodeType(JcrCMIS.EXO_PRIVILEGABLE))
       {
-         data.addMixin(JcrCMIS.EXO_PRIVILEGABLE);
+         node.addMixin(JcrCMIS.EXO_PRIVILEGABLE);
       }
 
-      ExtendedNode extNode = (ExtendedNode)data;
+      ExtendedNode extNode = (ExtendedNode)node;
 
       // Not merge ACL overwrite it.
       extNode.clearACL();
@@ -1613,12 +1427,6 @@ abstract class BaseObjectData implements ObjectData
 
    void delete() throws StorageException
    {
-      if (isNew())
-      {
-         // Not need to do anything.
-         return;
-      }
-
       try
       {
          if (getBaseType() == BaseType.DOCUMENT && getParents().size() == 0)
@@ -1651,58 +1459,62 @@ abstract class BaseObjectData implements ObjectData
       return node;
    }
 
-   void save() throws StorageException, NameConstraintViolationException, UpdateConflictException
+   void save(boolean isNewObject) throws StorageException, NameConstraintViolationException, UpdateConflictException
    {
-      if (isNew())
+      try
       {
-         create();
-      }
-      else
-      {
-         try
+         // TODO Check to correct do the move here 
+
+         Node parentNode = node.getParent();
+         // New name was set. Need rename Document.
+         // See setName(String), setProperty(Node, Property<?>).
+         if (name != null)
          {
-            Node parentNode = node.getParent();
-            // New name was set. Need rename Document.
-            // See setName(String), setProperty(Node, Property<?>).
-            if (name != null)
+            if (name.length() == 0)
             {
-               if (name.length() == 0)
-               {
-                  throw new NameConstraintViolationException("Name is empty.");
-               }
-
-               if (parentNode.hasNode(name))
-               {
-                  throw new NameConstraintViolationException("Object with name " + name + " already exists.");
-               }
-
-               String srcPath = node.getPath();
-               String destPath = srcPath.substring(0, srcPath.lastIndexOf('/') + 1) + name;
-
-               session.move(srcPath, destPath);
-
-               node = (Node)session.getItem(destPath);
+               throw new NameConstraintViolationException("Name is empty.");
             }
 
-            node.setProperty(CmisConstants.LAST_MODIFICATION_DATE, Calendar.getInstance());
-            node.setProperty(CmisConstants.LAST_MODIFIED_BY, node.getSession().getUserID());
-            node.setProperty(CmisConstants.CHANGE_TOKEN, IdGenerator.generate());
+            if (parentNode.hasNode(name))
+            {
+               throw new NameConstraintViolationException("Object with name " + name + " already exists.");
+            }
 
-            session.save();
+            String srcPath = node.getPath();
+            String destPath = srcPath.substring(0, srcPath.lastIndexOf('/') + 1) + name;
+
+            session.move(srcPath, destPath);
+
+            node = (Node)session.getItem(destPath);
          }
-         catch (RepositoryException re)
+
+         node.setProperty(CmisConstants.LAST_MODIFICATION_DATE, Calendar.getInstance());
+         node.setProperty(CmisConstants.LAST_MODIFIED_BY, node.getSession().getUserID());
+         node.setProperty(CmisConstants.CHANGE_TOKEN, IdGenerator.generate());
+
+         session.save();
+      }
+      catch (RepositoryException re)
+      {
+         throw new StorageException("Unable save object. " + re.getMessage(), re);
+      }
+
+      if (indexListener != null)
+      {
+         if (isNewObject)
          {
-            throw new StorageException("Unable save object. " + re.getMessage(), re);
+            indexListener.created(this);
+         }
+         else
+         {
+            indexListener.updated(this);
          }
       }
+
    }
 
    void unfile()
    {
-      if (isNew())
-      {
-         throw new ConstraintException("Not supported for newly created objects.");
-      }
 
       if (!getTypeDefinition().isFileable())
       {

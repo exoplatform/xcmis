@@ -65,10 +65,6 @@ class FolderDataImpl extends BaseObjectData implements FolderData
     */
    public void addObject(ObjectData object) throws ConstraintException
    {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException("Unable add object in newly created folder.");
-      }
       storage.children.get(getObjectId()).add(object.getObjectId());
       storage.parents.get(object.getObjectId()).add(getObjectId());
       storage.unfiled.remove(object.getObjectId());
@@ -80,10 +76,6 @@ class FolderDataImpl extends BaseObjectData implements FolderData
     */
    public ItemsIterator<ObjectData> getChildren(String orderBy)
    {
-      if (isNew())
-      {
-         return CmisUtils.emptyItemsIterator();
-      }
 
       Set<String> childrenIds = storage.children.get(getObjectId());
       List<ObjectData> children = new ArrayList<ObjectData>(childrenIds.size());
@@ -147,10 +139,6 @@ class FolderDataImpl extends BaseObjectData implements FolderData
     */
    public void removeObject(ObjectData object)
    {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException("Unable remove object from newly created folder.");
-      }
       storage.children.get(getObjectId()).remove(object.getObjectId());
       storage.parents.get(object.getObjectId()).remove(getObjectId());
       if (storage.parents.get(object.getObjectId()).size() == 0)
@@ -245,32 +233,32 @@ class FolderDataImpl extends BaseObjectData implements FolderData
 
       String id;
 
-      if (isNew())
-      {
-         id = StorageImpl.generateId();
-
-         entry.setValue(CmisConstants.OBJECT_ID, new StringValue(id));
-         entry.setValue(CmisConstants.OBJECT_TYPE_ID, new StringValue(getTypeId()));
-         entry.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(getBaseType().value()));
-         entry.setValue(CmisConstants.CREATED_BY, new StringValue());
-         entry.setValue(CmisConstants.CREATION_DATE, new DateValue(Calendar.getInstance()));
-
-         storage.children.get(parent.getObjectId()).add(id);
-
-         Set<String> parents = new CopyOnWriteArraySet<String>();
-         parents.add(parent.getObjectId());
-         storage.parents.put(id, parents);
-
-         storage.children.put(id, new CopyOnWriteArraySet<String>());
-
-         storage.properties.put(id, new ConcurrentHashMap<String, Value>());
-         storage.policies.put(id, new CopyOnWriteArraySet<String>());
-         storage.permissions.put(id, new ConcurrentHashMap<String, Set<String>>());
-      }
-      else
-      {
+//      if (isNew())
+//      {
+//         id = StorageImpl.generateId();
+//
+//         entry.setValue(CmisConstants.OBJECT_ID, new StringValue(id));
+//         entry.setValue(CmisConstants.OBJECT_TYPE_ID, new StringValue(getTypeId()));
+//         entry.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(getBaseType().value()));
+//         entry.setValue(CmisConstants.CREATED_BY, new StringValue());
+//         entry.setValue(CmisConstants.CREATION_DATE, new DateValue(Calendar.getInstance()));
+//
+//         storage.children.get(parent.getObjectId()).add(id);
+//
+//         Set<String> parents = new CopyOnWriteArraySet<String>();
+//         parents.add(parent.getObjectId());
+//         storage.parents.put(id, parents);
+//
+//         storage.children.put(id, new CopyOnWriteArraySet<String>());
+//
+//         storage.properties.put(id, new ConcurrentHashMap<String, Value>());
+//         storage.policies.put(id, new CopyOnWriteArraySet<String>());
+//         storage.permissions.put(id, new ConcurrentHashMap<String, Set<String>>());
+//      }
+//      else
+//      {
          id = getObjectId();
-      }
+//      }
 
       entry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue());
       entry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));

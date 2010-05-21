@@ -23,22 +23,15 @@ import org.exoplatform.services.jcr.core.ExtendedNode;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.sp.jcr.exo.index.IndexListener;
-import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsIterator;
-import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectData;
-import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.TypeDefinition;
-import org.xcmis.spi.utils.CmisUtils;
-
-import java.util.Calendar;
 
 import javax.jcr.Node;
 import javax.jcr.PathNotFoundException;
@@ -55,9 +48,9 @@ class FolderDataImpl extends BaseObjectData implements FolderData
 
    private static final Log LOG = ExoLogger.getLogger(FolderDataImpl.class);
 
-   public FolderDataImpl(TypeDefinition type, FolderData parent, Session session, IndexListener indexListener)
+   public FolderDataImpl(TypeDefinition type, FolderData parent, Session session, Node node, IndexListener indexListener)
    {
-      super(type, parent, session, indexListener);
+      super(type, parent, session, node, indexListener);
    }
 
    public FolderDataImpl(TypeDefinition type, Node node, IndexListener indexListener)
@@ -70,11 +63,6 @@ class FolderDataImpl extends BaseObjectData implements FolderData
     */
    public void addObject(ObjectData object) throws ConstraintException
    {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException("Not supported for newly created objects.");
-      }
-
       try
       {
          Node data = ((BaseObjectData)object).getNode();
@@ -118,11 +106,6 @@ class FolderDataImpl extends BaseObjectData implements FolderData
          LOG.debug("Get children " + getObjectId() + ", name " + getName());
       }
 
-      if (isNew())
-      {
-         return CmisUtils.emptyItemsIterator();
-      }
-
       try
       {
          return new FolderChildrenIterator(node.getNodes(), indexListener);
@@ -148,11 +131,6 @@ class FolderDataImpl extends BaseObjectData implements FolderData
     */
    public String getPath()
    {
-      if (isNew())
-      {
-         return null;
-      }
-
       try
       {
          return node.getPath();
@@ -168,11 +146,6 @@ class FolderDataImpl extends BaseObjectData implements FolderData
     */
    public boolean hasChildren()
    {
-      if (isNew())
-      {
-         return false;
-      }
-
       try
       {
          // Weak solution. Even this method return true iterator over children may
@@ -190,11 +163,6 @@ class FolderDataImpl extends BaseObjectData implements FolderData
     */
    public boolean isAllowedChildType(String typeId)
    {
-      if (isNew())
-      {
-         return false;
-      }
-
       // There is no any restriction about types. Any fileable objects supported.
       // Is type is fileable must be checked before calling this method.
       return true;
@@ -205,11 +173,6 @@ class FolderDataImpl extends BaseObjectData implements FolderData
     */
    public boolean isRoot()
    {
-      if (isNew())
-      {
-         return false;
-      }
-
       try
       {
          return node.getDepth() == 0;
@@ -225,11 +188,6 @@ class FolderDataImpl extends BaseObjectData implements FolderData
     */
    public void removeObject(ObjectData object)
    {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException("Not supported for newly created objects.");
-      }
-
       try
       {
          Node data = ((BaseObjectData)object).getNode();
@@ -300,80 +258,6 @@ class FolderDataImpl extends BaseObjectData implements FolderData
       catch (RepositoryException re)
       {
          throw new CmisRuntimeException("Unable remove object from current folder. " + re.getMessage(), re);
-      }
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   @Override
-   protected void create() throws StorageException, NameConstraintViolationException
-   {
-      try
-      {
-         if (name == null || name.length() == 0)
-         {
-            throw new NameConstraintViolationException("Name for new folder must be provided.");
-         }
-
-         Node parentNode = parent.getNode();
-
-         if (parentNode.hasNode(name))
-         {
-            throw new NameConstraintViolationException("Object with name " + name
-               + " already exists in specified folder.");
-         }
-
-         Node folder = parentNode.addNode(name, type.getLocalName());
-
-         if (!folder.isNodeType(JcrCMIS.CMIS_MIX_FOLDER))
-         {
-            folder.addMixin(JcrCMIS.CMIS_MIX_FOLDER);
-         }
-
-         folder.setProperty(CmisConstants.OBJECT_TYPE_ID, //
-            type.getId());
-         folder.setProperty(CmisConstants.BASE_TYPE_ID, //
-            type.getBaseId().value());
-         folder.setProperty(CmisConstants.CREATED_BY, //
-            session.getUserID());
-         folder.setProperty(CmisConstants.CREATION_DATE, //
-            Calendar.getInstance());
-         folder.setProperty(CmisConstants.LAST_MODIFIED_BY, //
-            session.getUserID());
-         folder.setProperty(CmisConstants.LAST_MODIFICATION_DATE, //
-            Calendar.getInstance());
-
-         for (Property<?> property : properties.values())
-         {
-            setProperty(folder, property);
-         }
-
-         if (policies != null && policies.size() > 0)
-         {
-            for (PolicyData policy : policies)
-            {
-               applyPolicy(folder, policy);
-            }
-         }
-
-         if (acl != null && acl.size() > 0)
-         {
-            setACL(folder, acl);
-         }
-
-         session.save();
-
-         name = null;
-         policies = null;
-         acl = null;
-         properties.clear();
-
-         node = folder;
-      }
-      catch (RepositoryException re)
-      {
-         throw new StorageException("Unable save Folder. " + re.getMessage(), re);
       }
    }
 

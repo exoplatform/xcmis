@@ -19,8 +19,10 @@
 
 package org.xcmis.spi;
 
+import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.AllowableActions;
 import org.xcmis.spi.model.ChangeEvent;
+import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.Rendition;
 import org.xcmis.spi.model.RepositoryInfo;
 import org.xcmis.spi.model.UnfileObject;
@@ -30,6 +32,8 @@ import org.xcmis.spi.query.Result;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
@@ -99,8 +103,9 @@ public interface Storage extends TypeManager
     *         </ul>
     * @see VersioningState
     */
-   DocumentData createDocument(FolderData parent, String typeId, VersioningState versioningState)
-      throws ConstraintException;
+   DocumentData createDocument(FolderData parent, String typeId, Map<String, Property<?>> properties,
+      ContentStream content, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
+      Collection<ObjectData> policies, VersioningState versioningState) throws ConstraintException;
 
    /**
     * Create new document as copy of the given <code>source</code> document and
@@ -136,8 +141,9 @@ public interface Storage extends TypeManager
     *         internal problem
     * @see VersioningState
     */
-   DocumentData copyDocument(DocumentData source, FolderData parent, VersioningState versioningState)
-      throws ConstraintException, StorageException;
+   DocumentData copyDocument(DocumentData source, FolderData parent, Map<String, Property<?>> properties,
+      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<ObjectData> policies,
+      VersioningState versioningState) throws ConstraintException, StorageException;
 
    /**
     * Create new instance of folder with type <code>typeId</code> using
@@ -158,7 +164,9 @@ public interface Storage extends TypeManager
     *         <code>false</code> for <code>typeId</code>)</li>
     *         </ul>
     */
-   FolderData createFolder(FolderData parent, String typeId) throws ConstraintException;
+   FolderData createFolder(FolderData parent, String typeId, Map<String, Property<?>> properties,
+      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<ObjectData> policies)
+      throws ConstraintException;
 
    /**
     * Create new instance of policy with type <code>typeId</code> using
@@ -182,7 +190,8 @@ public interface Storage extends TypeManager
     *         <code>false</code> for <code>typeId</code>)</li>
     *         </ul>
     */
-   PolicyData createPolicy(FolderData parent, String typeId) throws ConstraintException;
+   PolicyData createPolicy(FolderData parent, String typeId, Map<String, Property<?>> properties,
+      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<ObjectData> policies) throws ConstraintException;
 
    /**
     * Create new instance of relationship for specified <code>source</code> and
@@ -204,7 +213,8 @@ public interface Storage extends TypeManager
     *         AllowedTargetTypes specified by the object type definition</li>
     *         </ul>
     */
-   RelationshipData createRelationship(ObjectData source, ObjectData target, String typeId) throws ConstraintException;
+   RelationshipData createRelationship(ObjectData source, ObjectData target, String typeId, Map<String, Property<?>> properties,
+      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<ObjectData> policies) throws ConstraintException;
 
    /**
     * Delete specified object. If multi-filed object is deleted then it is
@@ -264,21 +274,6 @@ public interface Storage extends TypeManager
     * @param object object
     */
    void unfileObject(ObjectData object);
-
-   /**
-    * Save updated object or newly created object.
-    *
-    * @param object object to be saved
-    * @return  object id String
-    * @throws StorageException if changes can't be saved cause storage internal
-    *         errors
-    * @throws NameConstraintViolationException if updated name (property
-    *         'cmis:name') cause name conflict, e.g. object with the same name
-    *         already exists
-    * @throws UpdateConflictException if saved object is not current any more
-    */
-   String saveObject(ObjectData object) throws StorageException, NameConstraintViolationException,
-      UpdateConflictException;
 
    /**
     * Gets content changes.

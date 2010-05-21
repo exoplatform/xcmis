@@ -85,7 +85,6 @@ public class StorageTest extends BaseTest
       AccessControlEntry ace =
          new AccessControlEntry("root", new HashSet<String>(Arrays.asList("cmis:read", "cmis:write")));
       document.setACL(Arrays.asList(ace));
-      storage.saveObject(document);
 
       Node documentNode = (Node)session.getItem("/applyACLTestDocument");
       AccessControlList acl = ((ExtendedNode)documentNode).getACL();
@@ -104,7 +103,6 @@ public class StorageTest extends BaseTest
       DocumentData document = createDocument(rootFolder, "applyPolicyTestDocument", "cmis:document", null, null);
       PolicyData policy = createPolicy(rootFolder, "applyPolicyTestPolicy01", "test apply policy", "cmis:policy");
       document.applyPolicy(policy);
-      storage.saveObject(document);
 
       Node documentNode = (Node)session.getItem("/applyPolicyTestDocument");
       assertTrue(documentNode.hasProperty(policy.getObjectId()));
@@ -165,9 +163,10 @@ public class StorageTest extends BaseTest
       // Get PWC from storage
       pwc = (DocumentData)storage.getObjectById(pwcId);
 
-      pwc.setContentStream(new BaseContentStream("checkin test. content updated".getBytes(), null, new MimeType("text",
-         "plain")));
-      pwc.checkin(true, "my comment");
+      ContentStream cs =
+         new BaseContentStream("checkin test. content updated".getBytes(), null, new MimeType("text", "plain"));
+      //      pwc.setContentStream(cs);
+      pwc.checkin(true, "my comment", null, cs, null, null, null);
 
       try
       {
@@ -200,11 +199,18 @@ public class StorageTest extends BaseTest
 
       // update
       pwc = (DocumentData)storage.getObjectById(pwcId);
-      pwc.setContentStream(new BaseContentStream("checkin test. content updated".getBytes(), null, new MimeType("text",
-         "plain")));
-      pwc.setName("checkinTestRename_NewName");
+      
+      PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:document", CmisConstants.NAME);
+      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+      properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
+         .getDisplayName(), "checkinTestRename_NewName"));
+      
+      ContentStream cs =
+         new BaseContentStream("checkin test. content updated".getBytes(), null, new MimeType("text", "plain"));
+      //      pwc.setContentStream(cs);
+      //      pwc.setName("checkinTestRename_NewName");
 
-      pwc.checkin(true, "my comment");
+      pwc.checkin(true, "my comment", properties, cs, null, null, null);
 
       try
       {
@@ -343,7 +349,7 @@ public class StorageTest extends BaseTest
 
       DocumentData pwc = document.checkout();
 
-      pwc.checkin(true, "");
+      pwc.checkin(true, "", null, null, null, null, null);
 
       pwc = document.checkout();
 
@@ -394,7 +400,6 @@ public class StorageTest extends BaseTest
       for (int i = 1; i <= 20; i++)
       {
          DocumentData document = createDocument(folder, name + i, "cmis:document", null, null);
-         storage.saveObject(document);
          source.add(document.getObjectId());
       }
       // Check children viewing with paging. It should be close to real usage.
@@ -435,14 +440,12 @@ public class StorageTest extends BaseTest
       ContentStream cs =
          new BaseContentStream("to be or not to be".getBytes(), /*"createDocumentTest"*/null, new MimeType("text",
             "plain"));
-      DocumentData document = storage.createDocument(rootFolder, "cmis:document", VersioningState.MAJOR);
-      document.setProperties(properties);
-      //      document.setName("createDocumentTest");
-      document.setContentStream(cs);
       AccessControlEntry ace =
          new AccessControlEntry("root", new HashSet<String>(Arrays.asList("cmis:read", "cmis:write")));
-      document.setACL(Arrays.asList(ace));
-      storage.saveObject(document);
+
+      DocumentData document =
+         storage.createDocument(rootFolder, "cmis:document", properties, cs, Arrays.asList(ace), null, null,
+            VersioningState.MAJOR);
 
       assertTrue(session.itemExists("/createDocumentTest"));
       Node documentNode = (Node)session.getItem("/createDocumentTest");
@@ -479,9 +482,13 @@ public class StorageTest extends BaseTest
       ContentStream cs = new BaseContentStream("to be or not to be".getBytes(), null, new MimeType("text", "plain"));
       DocumentData document = createDocument(rootFolder, "createDocumentSource", "cmis:document", cs, null);
 
-      DocumentData documentCopy = storage.copyDocument(document, rootFolder, VersioningState.MINOR);
-      documentCopy.setName("createDocumentSourceCopy");
-      storage.saveObject(documentCopy);
+      PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:document", CmisConstants.NAME);
+      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+      properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
+         .getDisplayName(), "createDocumentSourceCopy"));
+
+      DocumentData documentCopy =
+         storage.copyDocument(document, rootFolder, properties, null, null, null, VersioningState.MINOR);
 
       // Check is node and content copied.
       assertTrue(session.itemExists("/createDocumentSourceCopy"));
@@ -523,9 +530,7 @@ public class StorageTest extends BaseTest
       properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
          .getDisplayName(), "createFolderTest"));
 
-      FolderData newFolder = storage.createFolder(rootFolder, "cmis:folder");
-      newFolder.setProperties(properties);
-      storage.saveObject(newFolder);
+      FolderData newFolder = storage.createFolder(rootFolder, "cmis:folder", properties, null, null, null);
 
       assertTrue(session.itemExists("/createFolderTest"));
       Node folderNode = (Node)session.getItem("/createFolderTest");
@@ -545,9 +550,7 @@ public class StorageTest extends BaseTest
       properties.put(CmisConstants.POLICY_TEXT, new StringProperty(defPolicyText.getId(), defPolicyText.getQueryName(),
          defPolicyText.getLocalName(), defPolicyText.getDisplayName(), "simple policy"));
 
-      ObjectData policy = storage.createPolicy(rootFolder, "cmis:policy");
-      policy.setProperties(properties);
-      storage.saveObject(policy);
+      ObjectData policy = storage.createPolicy(rootFolder, "cmis:policy", properties, null, null, null);
 
       String expectedPath = StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_POLICIES + "/createPolicyTest";
       assertTrue(session.itemExists(expectedPath));
@@ -568,9 +571,8 @@ public class StorageTest extends BaseTest
       properties.put(CmisConstants.NAME, new StringProperty(defName.getId(), defName.getQueryName(), defName
          .getLocalName(), defName.getDisplayName(), "createRelationshipTest"));
 
-      RelationshipData relationship = storage.createRelationship(sourceDoc, targetDoc, "cmis:relationship");
-      relationship.setProperties(properties);
-      storage.saveObject(relationship);
+      RelationshipData relationship =
+         storage.createRelationship(sourceDoc, targetDoc, "cmis:relationship", null, null, null, null);
 
       Node relationshipNode = ((ExtendedSession)session).getNodeByIdentifier(relationship.getObjectId());
       assertEquals("cmis:relationship", relationshipNode.getPrimaryNodeType().getName());
@@ -587,7 +589,6 @@ public class StorageTest extends BaseTest
       assertEquals("text/plain", documentNode.getProperty("jcr:content/jcr:mimeType").getString());
 
       document.setContentStream(null);
-      storage.saveObject(document);
 
       documentNode = (Node)session.getItem("/removeContentTest");
       assertEquals("", documentNode.getProperty("jcr:content/jcr:data").getString());
@@ -668,9 +669,14 @@ public class StorageTest extends BaseTest
       ObjectData targetDoc =
          createDocument(rootFolder, "deleteObjectWithRelationshipTarget", "cmis:document", null, null);
 
-      RelationshipData relationship = storage.createRelationship(sourceDoc, targetDoc, "cmis:relationship");
-      relationship.setName("relationship01");
-      storage.saveObject(relationship);
+      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+      PropertyDefinition<?> defName =
+         PropertyDefinitions.getPropertyDefinition("cmis:relationship", CmisConstants.NAME);
+      properties.put(CmisConstants.NAME, new StringProperty(defName.getId(), defName.getQueryName(), defName
+         .getLocalName(), defName.getDisplayName(), "relationship01"));
+
+      RelationshipData relationship =
+         storage.createRelationship(sourceDoc, targetDoc, "cmis:relationship", properties, null, null, null);
 
       try
       {
@@ -689,7 +695,6 @@ public class StorageTest extends BaseTest
       DocumentData document = createDocument(rootFolder, "deletePolicyTestDocument", "cmis:document", null, null);
       PolicyData policy = createPolicy(rootFolder, "deletePolicyTestPolicy01", "test delete policy", "cmis:policy");
       document.applyPolicy(policy);
-      storage.saveObject(document);
       try
       {
          storage.deleteObject(policy, true);
@@ -700,7 +705,6 @@ public class StorageTest extends BaseTest
          // OK. Applied policy may not be deleted.
       }
       document.removePolicy(policy);
-      storage.saveObject(document);
 
       // Should be able delete now.
       storage.deleteObject(policy, true);
@@ -1131,7 +1135,6 @@ public class StorageTest extends BaseTest
       ContentStream cs = new BaseContentStream("to be or not to be".getBytes(), null, new MimeType("text", "plain"));
       DocumentData document = createDocument(rootFolder, "renameDocumentTest", "cmis:document", cs, null);
       document.setName("renameDocumentTest01");
-      storage.saveObject(document);
 
       assertTrue(session.itemExists("/renameDocumentTest01"));
 
@@ -1145,7 +1148,6 @@ public class StorageTest extends BaseTest
       FolderData folder = createFolder(rootFolder, "renameFolderTest", "cmis:folder");
       createDocument(folder, "child1", "cmis:document", null, null);
       folder.setName("renameFolderTest01");
-      storage.saveObject(folder);
 
       assertTrue(session.itemExists("/renameFolderTest01"));
       assertTrue(session.itemExists("/renameFolderTest01/child1"));
@@ -1162,7 +1164,6 @@ public class StorageTest extends BaseTest
 
       ContentStream cs = new BaseContentStream("to be or not to be".getBytes(), null, new MimeType("text", "plain"));
       document.setContentStream(cs);
-      storage.saveObject(document);
 
       documentNode = (Node)session.getItem("/setContentTest");
       assertEquals("to be or not to be", documentNode.getProperty("jcr:content/jcr:data").getString());
@@ -1260,19 +1261,26 @@ public class StorageTest extends BaseTest
    protected DocumentData createDocument(FolderData folder, String name, String typeId, ContentStream content,
       VersioningState versioningState) throws Exception
    {
+      PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:document", CmisConstants.NAME);
+      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+      properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
+         .getDisplayName(), name));
+
       DocumentData document =
-         storage.createDocument(folder, typeId, versioningState == null ? VersioningState.MAJOR : versioningState);
-      document.setName(name);
-      document.setContentStream(content);
-      storage.saveObject(document);
+         storage.createDocument(folder, typeId, properties, content, null, null, null, versioningState == null
+            ? VersioningState.MAJOR : versioningState);
       return document;
    }
 
    protected FolderData createFolder(FolderData folder, String name, String typeId) throws Exception
    {
-      FolderData newFolder = storage.createFolder(folder, typeId);
+      PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:folder", CmisConstants.NAME);
+      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+      properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
+         .getDisplayName(), name));
+
+      FolderData newFolder = storage.createFolder(folder, typeId, properties, null, null, null);
       newFolder.setName(name);
-      storage.saveObject(newFolder);
       return newFolder;
    }
 
@@ -1289,9 +1297,7 @@ public class StorageTest extends BaseTest
       properties.put(CmisConstants.POLICY_TEXT, new StringProperty(defPolicyText.getId(), defPolicyText.getQueryName(),
          defPolicyText.getLocalName(), defPolicyText.getDisplayName(), policyText));
 
-      PolicyData policy = storage.createPolicy(folder, typeId);
-      policy.setProperties(properties);
-      storage.saveObject(policy);
+      PolicyData policy = storage.createPolicy(folder, typeId, properties, null, null, null);
 
       return policy;
    }
@@ -1311,7 +1317,6 @@ public class StorageTest extends BaseTest
    //         "Cystoscopy 24139008"));
    //
    //      document.setContentStream(content);
-   //      storage.saveObject(document);
    //      for (Map.Entry<String, Property<?>> p : document.getProperties().entrySet())
    //      {
    //         System.out.println(p.getKey()+ ": " + p.getValue().getValues());

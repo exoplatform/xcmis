@@ -63,7 +63,7 @@ class JcrFolder extends FolderDataImpl
       }
    }
 
-   void save() throws StorageException, NameConstraintViolationException, UpdateConflictException
+   void save(boolean isNewObject) throws StorageException, NameConstraintViolationException, UpdateConflictException
    {
       try
       {

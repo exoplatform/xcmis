@@ -19,9 +19,14 @@
 
 package org.xcmis.spi;
 
+import org.xcmis.spi.model.AccessControlEntry;
+import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.TypeDefinition;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
@@ -113,8 +118,9 @@ public interface DocumentData extends ObjectData
     *         <code>null</code> or if
     *         {@link TypeDefinition#getContentStreamAllowed()} attribute is
     *         'required' and <code>contentStream</code> is <code>null</code>
+    * @throws IOException TODO
     */
-   void setContentStream(ContentStream contentStream) throws ConstraintException;
+   void setContentStream(ContentStream contentStream) throws ConstraintException, IOException;
 
    /**
     * Check does current document has content or not.
@@ -140,7 +146,9 @@ public interface DocumentData extends ObjectData
     * @throws StorageException if newly version of Document can't be saved in
     *         storage cause to its internal problem
     */
-   DocumentData checkin(boolean major, String checkinComment) throws ConstraintException, StorageException;
+   DocumentData checkin(boolean major, String checkinComment, Map<String, Property<?>> properties,
+      ContentStream content, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
+      Collection<ObjectData> policies) throws ConstraintException, StorageException;
 
    /**
     * Create PWC from this document. Properties and content (optionally) of this

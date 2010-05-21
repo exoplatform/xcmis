@@ -27,16 +27,22 @@ import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.NameConstraintViolationException;
+import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.VersioningException;
+import org.xcmis.spi.model.AccessControlEntry;
+import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.utils.MimeType;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
@@ -80,7 +86,9 @@ class JcrFile extends DocumentDataImpl
     * {@inheritDoc}
     */
    @Override
-   public DocumentData checkin(boolean major, String checkinComment) throws ConstraintException, StorageException
+   public DocumentData checkin(boolean major, String checkinComment, Map<String, Property<?>> properties,
+      ContentStream content, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
+      Collection<ObjectData> policies) throws ConstraintException, StorageException
    {
       // TODO
       throw new CmisRuntimeException("Not implemented for not CMIS type.");
@@ -99,7 +107,7 @@ class JcrFile extends DocumentDataImpl
    /**
     * {@inheritDoc}
     */
-   void save() throws StorageException, NameConstraintViolationException, UpdateConflictException
+   void save(boolean isNewObject) throws StorageException, NameConstraintViolationException, UpdateConflictException
    {
       try
       {
@@ -137,7 +145,7 @@ class JcrFile extends DocumentDataImpl
    /**
     * {@inheritDoc}
     */
-   protected void setContentStream(Node data, ContentStream content) throws RepositoryException, IOException
+   protected static void setContentStream(Node data, ContentStream content) throws RepositoryException, IOException
    {
       // jcr:content
       Node contentNode = data.getNode(JcrCMIS.JCR_CONTENT);

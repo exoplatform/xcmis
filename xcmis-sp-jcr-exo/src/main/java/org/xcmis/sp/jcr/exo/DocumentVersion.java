@@ -28,6 +28,7 @@ import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
+import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.StorageException;
@@ -39,6 +40,7 @@ import org.xcmis.spi.model.RelationshipDirection;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.utils.CmisUtils;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -87,7 +89,9 @@ public class DocumentVersion extends DocumentDataImpl
     * {@inheritDoc}
     */
    @Override
-   public DocumentData checkin(boolean major, String checkinComment) throws ConstraintException, StorageException
+   public DocumentData checkin(boolean major, String checkinComment, Map<String, Property<?>> properties,
+      ContentStream content, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
+      Collection<ObjectData> policies) throws ConstraintException, StorageException
    {
       throw new VersioningException("Not supported for non current version of document.");
    }
@@ -218,7 +222,7 @@ public class DocumentVersion extends DocumentDataImpl
     * {@inheritDoc}
     */
    @Override
-   public void setContentStream(ContentStream contentStream) throws ConstraintException
+   public void setContentStream(ContentStream contentStream) throws ConstraintException, IOException
    {
       throw new VersioningException("Not supported for non current version of document.");
    }
@@ -285,7 +289,7 @@ public class DocumentVersion extends DocumentDataImpl
     * {@inheritDoc}
     */
    @Override
-   void save() throws StorageException, NameConstraintViolationException, UpdateConflictException
+   void save(boolean isNewObject) throws StorageException, NameConstraintViolationException, UpdateConflictException
    {
       throw new ConstraintException("Not supported for non current version of document.");
    }

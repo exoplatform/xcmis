@@ -33,7 +33,9 @@ import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.VersioningException;
+import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.ContentStreamAllowed;
+import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.RelationshipDirection;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.VersioningState;
@@ -44,6 +46,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -130,7 +133,9 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
    /**
     * {@inheritDoc}
     */
-   public DocumentData checkin(boolean major, String checkinComment) throws ConstraintException, StorageException
+   public DocumentData checkin(boolean major, String checkinComment, Map<String, Property<?>> properties,
+      ContentStream content, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
+      Collection<ObjectData> policies) throws ConstraintException, StorageException
    {
       if (!type.isVersionable())
       {
@@ -177,11 +182,6 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
     */
    public DocumentData checkout() throws ConstraintException, VersioningException, StorageException
    {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException("Unable checkout newly created Document.");
-      }
-
       if (!type.isVersionable())
       {
          throw new ConstraintException("Object is not versionable.");
@@ -255,11 +255,6 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
     */
    public ContentStream getContentStream()
    {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException("getContentStream");
-      }
-
       byte[] bytes = storage.contents.get(getObjectId());
       if (bytes != null && bytes.length > 0)
       {
@@ -279,11 +274,6 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
     */
    public ContentStream getContentStream(String streamId)
    {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException("getContentStream");
-      }
-
       if (streamId == null || streamId.equals(getString(CmisConstants.CONTENT_STREAM_ID)))
       {
          return getContentStream();
@@ -346,11 +336,6 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
     */
    public boolean hasContent()
    {
-      if (isNew())
-      {
-         return false;
-      }
-
       return storage.contents.get(getObjectId()).length != 0;
    }
 
@@ -385,11 +370,6 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
     */
    public boolean isPWC()
    {
-      if (isNew())
-      {
-         return false;
-      }
-
       return getObjectId().equals(getVersionSeriesCheckedOutId());
    }
 
@@ -405,7 +385,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
    /**
     * {@inheritDoc}
     */
-   public void setContentStream(ContentStream contentStream) throws ConstraintException
+   public void setContentStream(ContentStream contentStream) throws ConstraintException, IOException
    {
       if (type.getContentStreamAllowed() == ContentStreamAllowed.REQUIRED && contentStream == null)
       {
@@ -447,35 +427,34 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
 
       String id;
       String vsId;
-      boolean isNew = isNew();
 
-      if (isNew)
-      {
-         id = StorageImpl.generateId();
-         vsId = StorageImpl.generateId();
-         entry.setValue(CmisConstants.OBJECT_ID, new StringValue(id));
-         entry.setValue(CmisConstants.OBJECT_TYPE_ID, new StringValue(getTypeId()));
-         entry.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(getBaseType().value()));
-         entry.setValue(CmisConstants.CREATED_BY, new StringValue());
-         entry.setValue(CmisConstants.CREATION_DATE, new DateValue(Calendar.getInstance()));
-         entry.setValue(CmisConstants.VERSION_SERIES_ID, new StringValue(vsId));
-         entry.setValue(CmisConstants.IS_LATEST_VERSION, new BooleanValue(true));
-         entry.setValue(CmisConstants.IS_MAJOR_VERSION, new BooleanValue(versioningState == VersioningState.MAJOR));
-         entry.setValue(CmisConstants.VERSION_LABEL, new StringValue(versioningState == VersioningState.CHECKEDOUT
-            ? pwcLabel : latestLabel));
-         entry.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(
-            versioningState == VersioningState.CHECKEDOUT));
-         if (versioningState == VersioningState.CHECKEDOUT)
-         {
-            entry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue(id));
-            entry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, new StringValue());
-         }
-      }
-      else
-      {
+//      if (isNew)
+//      {
+//         id = StorageImpl.generateId();
+//         vsId = StorageImpl.generateId();
+//         entry.setValue(CmisConstants.OBJECT_ID, new StringValue(id));
+//         entry.setValue(CmisConstants.OBJECT_TYPE_ID, new StringValue(getTypeId()));
+//         entry.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(getBaseType().value()));
+//         entry.setValue(CmisConstants.CREATED_BY, new StringValue());
+//         entry.setValue(CmisConstants.CREATION_DATE, new DateValue(Calendar.getInstance()));
+//         entry.setValue(CmisConstants.VERSION_SERIES_ID, new StringValue(vsId));
+//         entry.setValue(CmisConstants.IS_LATEST_VERSION, new BooleanValue(true));
+//         entry.setValue(CmisConstants.IS_MAJOR_VERSION, new BooleanValue(versioningState == VersioningState.MAJOR));
+//         entry.setValue(CmisConstants.VERSION_LABEL, new StringValue(versioningState == VersioningState.CHECKEDOUT
+//            ? pwcLabel : latestLabel));
+//         entry.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(
+//            versioningState == VersioningState.CHECKEDOUT));
+//         if (versioningState == VersioningState.CHECKEDOUT)
+//         {
+//            entry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue(id));
+//            entry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, new StringValue());
+//         }
+//      }
+//      else
+//      {
          id = getObjectId();
          vsId = getVersionSeriesId();
-      }
+//      }
 
       entry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue());
       entry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));

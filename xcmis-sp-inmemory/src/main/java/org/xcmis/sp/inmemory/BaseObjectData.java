@@ -117,11 +117,6 @@ abstract class BaseObjectData implements ObjectData
          throw new ConstraintException("Type " + type.getId() + " is not controlable by Policy.");
       }
 
-      if (policy.isNew())
-      {
-         throw new CmisRuntimeException("Unable apply newly created policy.");
-      }
-
       entry.addPolicy(policy.getObjectId());
    }
 
@@ -198,10 +193,6 @@ abstract class BaseObjectData implements ObjectData
     */
    public String getObjectId()
    {
-      if (isNew())
-      {
-         return null;
-      }
       return entry.getId();
    }
 
@@ -210,11 +201,6 @@ abstract class BaseObjectData implements ObjectData
     */
    public FolderData getParent() throws ConstraintException
    {
-      if (isNew())
-      {
-         return parent;
-      }
-
       if (StorageImpl.ROOT_FOLDER_ID.equals(getObjectId()))
       {
          throw new ConstraintException("Unable get parent of root folder.");
@@ -238,18 +224,6 @@ abstract class BaseObjectData implements ObjectData
     */
    public Collection<FolderData> getParents()
    {
-      if (isNew())
-      {
-         if (parent != null)
-         {
-            List<FolderData> parents = new ArrayList<FolderData>(1);
-            parents.add(parent);
-            return parents;
-         }
-
-         return Collections.emptyList();
-      }
-
       List<FolderData> parents = new ArrayList<FolderData>();
       Set<String> parentIds = storage.parents.get(getObjectId());
 
@@ -314,12 +288,6 @@ abstract class BaseObjectData implements ObjectData
    public ItemsIterator<RelationshipData> getRelationships(RelationshipDirection direction, TypeDefinition type,
       boolean includeSubRelationshipTypes)
    {
-      if (isNew())
-      {
-         // Newly created object may not have relationship.
-         return CmisUtils.emptyItemsIterator();
-      }
-
       Set<String> relationshipIds = storage.relationships.get(getObjectId());
       if (relationshipIds == null)
       {
@@ -375,14 +343,6 @@ abstract class BaseObjectData implements ObjectData
    public String getTypeId()
    {
       return type.getId();
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public boolean isNew()
-   {
-      return entry.getId() == null;
    }
 
    /**
@@ -474,7 +434,7 @@ abstract class BaseObjectData implements ObjectData
 
       Updatability updatability = definition.getUpdatability();
       if (updatability == Updatability.READWRITE //
-         || (updatability == Updatability.ONCREATE && isNew()) //
+//         || (updatability == Updatability.ONCREATE && isNew()) //
          || (updatability == Updatability.WHENCHECKEDOUT && getBaseType() == BaseType.DOCUMENT && ((DocumentData)this)
             .isPWC()))
       {

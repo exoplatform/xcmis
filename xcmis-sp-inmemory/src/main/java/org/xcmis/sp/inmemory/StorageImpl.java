@@ -45,6 +45,7 @@ import org.xcmis.spi.BaseItemsIterator;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
+import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.InvalidArgumentException;
@@ -62,6 +63,7 @@ import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.model.ACLCapability;
+import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.AccessControlPropagation;
 import org.xcmis.spi.model.AllowableActions;
 import org.xcmis.spi.model.BaseType;
@@ -75,6 +77,7 @@ import org.xcmis.spi.model.ChangeEvent;
 import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.Permission;
 import org.xcmis.spi.model.PermissionMapping;
+import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.Rendition;
 import org.xcmis.spi.model.RepositoryCapabilities;
@@ -374,25 +377,17 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public DocumentData copyDocument(DocumentData source, FolderData parent, VersioningState versioningState)
-      throws ConstraintException, StorageException
+   public DocumentData copyDocument(DocumentData source, FolderData parent, Map<String, Property<?>> properties,
+      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<ObjectData> policies,
+      VersioningState versioningState) throws ConstraintException, StorageException
    {
       if (parent != null)
       {
-         if (parent.isNew())
-         {
-            throw new CmisRuntimeException("Unable create document in newly created folder.");
-         }
          if (!parent.isAllowedChildType(source.getTypeId()))
          {
             throw new ConstraintException("Type " + source.getTypeId()
                + " is not in list of allowed child type for folder " + parent.getObjectId());
          }
-      }
-
-      if (source.isNew())
-      {
-         throw new CmisRuntimeException("Unable use newly created document as source.");
       }
 
       if (source.getBaseType() != BaseType.DOCUMENT)
@@ -406,15 +401,12 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public DocumentData createDocument(FolderData parent, String typeId, VersioningState versioningState)
-      throws ConstraintException
+   public DocumentData createDocument(FolderData parent, String typeId, Map<String, Property<?>> properties,
+      ContentStream content, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
+      Collection<ObjectData> policies, VersioningState versioningState) throws ConstraintException
    {
       if (parent != null)
       {
-         if (parent.isNew())
-         {
-            throw new CmisRuntimeException("Unable create document in newly created folder.");
-         }
          if (!parent.isAllowedChildType(typeId))
          {
             throw new ConstraintException("Type " + typeId + " is not in list of allowed child type for folder "
@@ -435,16 +427,13 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public FolderData createFolder(FolderData parent, String typeId) throws ConstraintException
+   public FolderData createFolder(FolderData parent, String typeId, Map<String, Property<?>> properties,
+      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<ObjectData> policies)
+      throws ConstraintException
    {
       if (parent == null)
       {
          throw new ConstraintException("Parent folder must be provided.");
-      }
-
-      if (parent.isNew())
-      {
-         throw new CmisRuntimeException("Unable create child folder in newly created folder.");
       }
 
       if (!parent.isAllowedChildType(typeId))
@@ -466,7 +455,8 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public PolicyData createPolicy(FolderData parent, String typeId) throws ConstraintException
+   public PolicyData createPolicy(FolderData parent, String typeId, Map<String, Property<?>> properties,
+      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<ObjectData> policies) throws ConstraintException
    {
       TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
 
@@ -481,19 +471,10 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public RelationshipData createRelationship(ObjectData source, ObjectData target, String typeId)
+   public RelationshipData createRelationship(ObjectData source, ObjectData target, String typeId, Map<String, Property<?>> properties,
+      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<ObjectData> policies)
       throws ConstraintException
    {
-      if (source.isNew())
-      {
-         throw new CmisRuntimeException("Unable use newly created object as relationship source.");
-      }
-
-      if (target.isNew())
-      {
-         throw new CmisRuntimeException("Unable use newly created object as relationship target.");
-      }
-
       TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
 
       if (typeDefinition.getBaseId() != BaseType.RELATIONSHIP)
@@ -777,13 +758,14 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public String saveObject(ObjectData object) throws StorageException, NameConstraintViolationException,
+   private String saveObject(ObjectData object) throws StorageException, NameConstraintViolationException,
       UpdateConflictException
    {
       validateMaxItemsNumber(object);
 
       boolean isNew = object.isNew();
       ((BaseObjectData)object).save();
+      
       if (indexListener != null)
       {
          if (isNew)
@@ -967,14 +949,11 @@ public class StorageImpl implements Storage
 
    void validateMaxItemsNumber(ObjectData object)
    {
-      if (object.isNew())
+      if (properties.size() > maxItemsNumber)
       {
-         if (properties.size() > maxItemsNumber)
-         {
-            throw new CmisRuntimeException("Unable add new object in storage. Max number '" + maxItemsNumber
-               + "' of items is reached."
-               + " Increase or set storage configuration property 'org.xcmis.inmemory.maxitems'.");
-         }
+         throw new CmisRuntimeException("Unable add new object in storage. Max number '" + maxItemsNumber
+            + "' of items is reached."
+            + " Increase or set storage configuration property 'org.xcmis.inmemory.maxitems'.");
       }
    }
 
