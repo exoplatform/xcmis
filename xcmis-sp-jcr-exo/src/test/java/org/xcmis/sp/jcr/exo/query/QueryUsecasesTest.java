@@ -678,7 +678,9 @@ public class QueryUsecasesTest extends BaseQueryTest
    /**
     * Test ORDER BY SCORE().
     * <p>
-    * Initial data: see createNasaContent
+    * Initial data: 
+    * <p>
+    * see createNasaContent()
     * <p>
     * Query : Select all documents which contains word "moon" in ORDER BY SCORE.
     * <p>
@@ -752,7 +754,9 @@ public class QueryUsecasesTest extends BaseQueryTest
    /**
     * Test SCORE as column.
     * <p>
-    * Initial data: see createNasaContent
+    * Initial data: 
+    * <p>
+    * see createNasaContent()
     * <p>
     * Query : Select all documents that contains "hello or world" words, and show
     * search score .
