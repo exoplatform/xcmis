@@ -488,7 +488,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * <li>document4: <b>PROPERTY_COMMANDER</b> - Eugene A. Cernan
     * </ul>
     * <p>
-    * Query : Select all documents where long property not in set {'Walter M. Schirra', 'James A. Lovell, Jr.'}.
+    * Query : Select all documents where PROPERTY_COMMANDER property not in set {'Walter M. Schirra', 'James A. Lovell, Jr.'}.
     * <p>
     * Expected result: document2, document4 
     *
@@ -520,7 +520,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * <li>document4: <b>PROPERTY_COMMANDER</b> - Eugene A. Cernan
     * </ul>
     * <p>
-    * Query : Select all documents where long property in set {'James A. Lovell, Jr.'} (NOT NOT IN).
+    * Query : Select all documents where PROPERTY_COMMANDER property NOT NOT IN set {'James A. Lovell, Jr.'}.
     * <p>
     * Expected result: document3.
     *
