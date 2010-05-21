@@ -1638,7 +1638,7 @@ abstract class BaseObjectData implements ObjectData
          // Should raise StorageException if is not relationship reference.
          throw new ConstraintException("Object can't be deleted cause to storage referential integrity. "
             + "Probably this object is source or target at least one Relationship. "
-            + "Those Relationship should be delted before.");
+            + "Those Relationship should be deleted before.");
       }
       catch (RepositoryException re)
       {
