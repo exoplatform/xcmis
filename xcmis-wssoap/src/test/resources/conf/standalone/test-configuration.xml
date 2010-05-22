@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.exoplaform.org/xml/ns/kernel_1_0.xsd http://www.exoplaform.org/xml/ns/kernel_1_0.xsd"
-   xmlns="http://www.exoplaform.org/xml/ns/kernel_1_0.xsd">
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.exoplaform.org/xml/ns/kernel_1_0.xsd http://www.exoplaform.org/xml/ns/kernel_1_0.xsd" xmlns="http://www.exoplaform.org/xml/ns/kernel_1_0.xsd">
 
    <component>
       <key>org.exoplatform.services.log.LogConfigurationInitializer</key>
@@ -29,7 +28,7 @@
          </properties-param>
       </init-params>
    </component>
-   
+
    <component>
       <type>org.xcmis.spi.deploy.ExoContainerCmisRegistry</type>
    </component>
@@ -70,36 +69,24 @@
             <name>configs</name>
             <object type="org.xcmis.sp.jcr.exo.StorageProviderImpl$StorageProviderConfig">
                <field name="storage">
-                        <object type="org.xcmis.sp.jcr.exo.StorageConfiguration">
-                           <field name="id">
-                              <string>cmis1</string>
-                           </field>
-                           <field name="repository">
-                              <string>db1</string>
-                           </field>
-                           <field name="workspace">
-                              <string>ws1</string>
-                           </field>
-                           <field name="indexConfiguration">
-                              <object type="org.xcmis.search.config.IndexConfiguration">
-                                 <field name="indexDir">
-                                    <string>target/temp/index/db1/ws1</string>
-                                 </field>
-                              </object>
-                           </field>
-                           <field name="properties">
-                              <map type="java.util.HashMap">
-                                 <entry>
-                                    <key>
-                                       <string>exo.cmis.changetoken.feature</string>
-                                    </key>
-                                    <value>
-                                       <boolean>false</boolean>
-                                    </value>
-                                 </entry>
-                              </map>
+                  <object type="org.xcmis.sp.jcr.exo.StorageConfiguration">
+                     <field name="id">
+                        <string>cmis1</string>
+                     </field>
+                     <field name="repository">
+                        <string>db1</string>
+                     </field>
+                     <field name="workspace">
+                        <string>ws1</string>
+                     </field>
+                     <field name="indexConfiguration">
+                        <object type="org.xcmis.search.config.IndexConfiguration">
+                           <field name="indexDir">
+                              <string>target/temp/index/db1/ws1</string>
                            </field>
                         </object>
+                     </field>
+                  </object>
                </field>
             </object>
          </object-param>

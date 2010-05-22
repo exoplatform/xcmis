@@ -26,7 +26,7 @@
             <property name="log4j.appender.stdout.threshold" value="DEBUG" />
             <property name="log4j.appender.file.layout" value="org.apache.log4j.PatternLayout" />
             <property name="log4j.appender.file.layout.ConversionPattern" value="%d{dd.MM.yyyy HH:mm:ss} *%-5p* [%t] %c{1}: %m (%F, line %L) %n" />
-            <!--            <property name="log4j.logger.org.exoplatform.services.rest.impl.RequestHandlerImpl" value="DEBUG" />-->
+            <!-- <property name="log4j.logger.org.exoplatform.services.rest.impl.RequestHandlerImpl" value="DEBUG" /> -->
          </properties-param>
       </init-params>
    </component>
@@ -66,37 +66,25 @@
             <name>configs</name>
             <object type="org.xcmis.sp.jcr.exo.StorageProviderImpl$StorageProviderConfig">
                <field name="storage">
-                        <object type="org.xcmis.sp.jcr.exo.StorageConfiguration">
-                           <field name="id">
-                              <string>cmis1</string>
-                           </field>
-                           <field name="repository">
-                              <string>db1</string>
-                           </field>
-                           <field name="workspace">
-                              <string>ws1</string>
-                           </field>
-                           <field name="indexConfiguration">
-                              <object type="org.xcmis.search.config.IndexConfiguration">
-                                 <field name="indexDir">
-                                    <string>target/temp/index/db1/ws1</string>
-                                 </field>
-                              </object>
-                           </field>
-                           <field name="properties">
-                              <map type="java.util.HashMap">
-                                 <entry>
-                                    <key>
-                                       <string>exo.cmis.changetoken.feature</string>
-                                    </key>
-                                    <value>
-                                       <boolean>false</boolean>
-                                    </value>
-                                 </entry>
-                              </map>
+                  <object type="org.xcmis.sp.jcr.exo.StorageConfiguration">
+                     <field name="id">
+                        <string>cmis1</string>
+                     </field>
+                     <field name="repository">
+                        <string>db1</string>
+                     </field>
+                     <field name="workspace">
+                        <string>ws1</string>
+                     </field>
+                     <field name="indexConfiguration">
+                        <object type="org.xcmis.search.config.IndexConfiguration">
+                           <field name="indexDir">
+                              <string>target/temp/index/db1/ws1</string>
                            </field>
                         </object>
-                   </field>
+                     </field>
+                  </object>
+               </field>
             </object>
          </object-param>
       </init-params>
