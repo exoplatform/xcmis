@@ -22,11 +22,11 @@ package org.xcmis.restatom.collections;
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.i18n.iri.IRI;
 import org.apache.abdera.model.Content;
+import org.apache.abdera.model.Content.Type;
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.model.Link;
 import org.apache.abdera.model.Person;
-import org.apache.abdera.model.Content.Type;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.ResponseContext;
 import org.apache.abdera.protocol.server.TargetType;
@@ -681,10 +681,6 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          changeTokenHolder.setValue(request.getHeader(HttpHeaders.IF_MATCH));
          boolean overwriteFlag = getBooleanParameter(request, AtomCMIS.PARAM_OVERWRITE_FLAG, true);
          conn.setContentStream(getId(request), content, changeTokenHolder, overwriteFlag);
-      }
-      catch (IOException ioe)
-      {
-         throw new ResponseContextException(createErrorResponse(ioe, 500));
       }
       catch (ConstraintException cve)
       {

@@ -80,9 +80,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.core.Response.ResponseBuilder;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
@@ -117,7 +117,7 @@ public class AtomCmisService implements ResourceContainer
       {
          conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
-         RequestContext request = initRequestContext(repositoryId, httpRequest);
+         RequestContext request = initRequestContext(httpRequest);
          Document doc = request.getDocument();
          List<AccessControlEntryTypeElement> listEl = doc.getRoot().getElements();
          List<AccessControlEntry> listACE = new ArrayList<AccessControlEntry>();
@@ -201,7 +201,7 @@ public class AtomCmisService implements ResourceContainer
    public Response deleteContentStream(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
+      RequestContext request = initRequestContext(httpRequest);
       ResponseContext abderaResponse = ((AbstractCollectionAdapter)getCollection(request)).deleteMedia(request);
       return Response.status(abderaResponse.getStatus()).entity(abderaResponse).build();
    }
@@ -413,7 +413,7 @@ public class AtomCmisService implements ResourceContainer
    public Response getContentStream(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
+      RequestContext request = initRequestContext(httpRequest);
       @SuppressWarnings("unchecked")
       ResponseContext abderaResponse = ((AbstractEntityCollectionAdapter)getCollection(request)).getMedia(request);
       ResponseBuilder builder = Response.status(abderaResponse.getStatus());
@@ -560,7 +560,7 @@ public class AtomCmisService implements ResourceContainer
    @Path("{repositoryId}/query")
    public Response query(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
+      RequestContext request = initRequestContext(httpRequest);
       ResponseContext abderaResponse = getCollection(request).getFeed(request);
       ResponseBuilder builder = Response.status(abderaResponse.getStatus() == 200 ? 201 : abderaResponse.getStatus());
       copyAbderaHeaders(builder, abderaResponse);
@@ -587,7 +587,7 @@ public class AtomCmisService implements ResourceContainer
    public Response setContentStream(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
+      RequestContext request = initRequestContext(httpRequest);
       @SuppressWarnings("unchecked")
       ResponseContext abderaResponse = ((AbstractEntityCollectionAdapter)getCollection(request)).putMedia(request);
       ResponseBuilder builder = Response.status(abderaResponse.getStatus());
@@ -621,7 +621,7 @@ public class AtomCmisService implements ResourceContainer
                   contentType = file.getContentType();
                }
 
-               RequestContext request = initRequestContext(repositoryId, httpRequest);
+               RequestContext request = initRequestContext(httpRequest);
                ((AbstractEntityCollectionAdapter)getCollection(request)).putMedia(null, new javax.activation.MimeType(
                   contentType), null, file.getInputStream(), request);
                return Response.status(201).build();
@@ -650,7 +650,7 @@ public class AtomCmisService implements ResourceContainer
    public Response updateProperties(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
+      RequestContext request = initRequestContext(httpRequest);
       @SuppressWarnings("unchecked")
       ResponseContext abderaResponse = ((AbstractEntityCollectionAdapter)getCollection(request)).putEntry(request);
       ResponseBuilder builder = Response.status(abderaResponse.getStatus());
@@ -723,7 +723,7 @@ public class AtomCmisService implements ResourceContainer
    private void includeCollections(Workspace ws, String repositoryId, HttpServletRequest httpRequest, String repoPath,
       String rootFolderId)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
+      RequestContext request = initRequestContext(httpRequest);
       Collection<CollectionInfo> collectionsInfo = getCollectionsInfo(request);
       for (CollectionInfo collectionInfo : collectionsInfo)
       {
@@ -828,7 +828,7 @@ public class AtomCmisService implements ResourceContainer
 
    protected Response createItem(String repositoryId, HttpServletRequest httpRequest)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
+      RequestContext request = initRequestContext(httpRequest);
       ResponseContext abderaResponse = getCollection(request).postEntry(request);
       ResponseBuilder builder = Response.status(abderaResponse.getStatus());
       copyAbderaHeaders(builder, abderaResponse);
@@ -837,7 +837,7 @@ public class AtomCmisService implements ResourceContainer
 
    protected Response deleteItem(String repositoryId, HttpServletRequest httpRequest)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
+      RequestContext request = initRequestContext(httpRequest);
       ResponseContext abderaResponse = getCollection(request).deleteEntry(request);
       ResponseBuilder builder = Response.status(abderaResponse.getStatus());
       copyAbderaHeaders(builder, abderaResponse);
@@ -858,7 +858,7 @@ public class AtomCmisService implements ResourceContainer
 
    protected Response getEntry(String repositoryId, HttpServletRequest httpRequest)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
+      RequestContext request = initRequestContext(httpRequest);
       ResponseContext abderaResponse = getCollection(request).getEntry(request);
       ResponseBuilder builder = Response.status(abderaResponse.getStatus());
       copyAbderaHeaders(builder, abderaResponse);
@@ -868,7 +868,7 @@ public class AtomCmisService implements ResourceContainer
 
    protected Response getFeed(String repositoryId, HttpServletRequest httpRequest)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
+      RequestContext request = initRequestContext(httpRequest);
       ResponseContext abderaResponse = getCollection(request).getFeed(request);
       ResponseBuilder builder = Response.status(abderaResponse.getStatus());
       copyAbderaHeaders(builder, abderaResponse);
@@ -876,7 +876,7 @@ public class AtomCmisService implements ResourceContainer
       return builder.entity(abderaResponse).build();
    }
 
-   private RequestContext initRequestContext(String repositoryId, HttpServletRequest httpRequest)
+   private RequestContext initRequestContext(HttpServletRequest httpRequest)
    {
       return new ServletRequestContext(provider, httpRequest)
       {
