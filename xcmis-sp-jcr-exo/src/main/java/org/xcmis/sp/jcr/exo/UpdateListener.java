@@ -28,10 +28,7 @@ import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.RenditionContentStream;
 import org.xcmis.spi.RenditionManager;
-import org.xcmis.spi.RenditionProvider;
 import org.xcmis.spi.utils.MimeType;
-
-import java.util.Map;
 
 import javax.jcr.Item;
 import javax.jcr.Node;

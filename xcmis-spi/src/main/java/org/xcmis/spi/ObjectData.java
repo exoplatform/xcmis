@@ -21,10 +21,10 @@ package org.xcmis.spi;
 
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.BaseType;
-import org.xcmis.spi.model.Permission.BasicPermissions;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.RelationshipDirection;
 import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.model.Permission.BasicPermissions;
 
 import java.util.Calendar;
 import java.util.Collection;

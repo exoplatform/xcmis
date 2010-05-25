@@ -19,18 +19,18 @@
 
 package org.xcmis.spi;
 
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
+import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.Rendition;
+import org.xcmis.spi.utils.MimeType;
+
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
-
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
-import org.xcmis.spi.model.BaseType;
-import org.xcmis.spi.model.Rendition;
-import org.xcmis.spi.utils.MimeType;
 
 /**
  * Manage object's renditions.
