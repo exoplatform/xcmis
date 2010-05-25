@@ -321,7 +321,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
       }
       catch (StreamNotSupportedException se)
       {
-         return createErrorResponse(se, 400); // XXX in specification status is set as 403, correct ???
+         return createErrorResponse(se, 403); 
       }
       catch (StorageException re)
       {

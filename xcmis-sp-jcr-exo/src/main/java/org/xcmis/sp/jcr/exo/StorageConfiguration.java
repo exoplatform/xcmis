@@ -38,6 +38,9 @@ public class StorageConfiguration
 
    /** Workspace name. */
    private String workspace;
+   
+   /** Repository description. */
+   private String description;
 
    /** Configuration for the index. */
    private IndexConfiguration indexConfiguration;
@@ -93,6 +96,16 @@ public class StorageConfiguration
    }
 
    /**
+    * Get description.
+    *
+    * @return repository name.
+    */
+   public String getDescription()
+   {
+      return description;
+   }
+   
+   /**
     * Get workspace name.
     *
     * @return the workspace name
@@ -142,6 +155,16 @@ public class StorageConfiguration
       this.repository = repository;
    }
 
+   /**
+    * Sets description.
+    *
+    * @param description string description
+    */
+   public void setDescription(String description)
+   {
+      this.description = description;
+   }
+   
    /**
     * Set workspace name.
     *
