@@ -3048,7 +3048,7 @@ public abstract class Connection
 
       // CHECK ACL
       CapabilityACL capabilityACL = storage.getRepositoryInfo().getCapabilities().getCapabilityACL();
-      if (capabilityACL == CapabilityACL.NONE)
+      if (capabilityACL == CapabilityACL.NONE && ((addACL != null && addACL.size() != 0)  || (removeACL != null && removeACL.size() != 0)))
       {
          throw new NotSupportedException("ACL capability is not supported.");
       }
