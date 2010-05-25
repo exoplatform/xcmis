@@ -107,7 +107,7 @@ class JcrFile extends DocumentDataImpl
    /**
     * {@inheritDoc}
     */
-   void save(boolean isNewObject) throws StorageException, NameConstraintViolationException, UpdateConflictException
+   void save(Boolean isNewObject) throws StorageException, NameConstraintViolationException, UpdateConflictException
    {
       try
       {

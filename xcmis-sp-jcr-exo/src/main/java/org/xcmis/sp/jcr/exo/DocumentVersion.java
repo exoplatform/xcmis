@@ -289,7 +289,7 @@ public class DocumentVersion extends DocumentDataImpl
     * {@inheritDoc}
     */
    @Override
-   void save(boolean isNewObject) throws StorageException, NameConstraintViolationException, UpdateConflictException
+   void save(Boolean isNewObject) throws StorageException, NameConstraintViolationException, UpdateConflictException
    {
       throw new ConstraintException("Not supported for non current version of document.");
    }

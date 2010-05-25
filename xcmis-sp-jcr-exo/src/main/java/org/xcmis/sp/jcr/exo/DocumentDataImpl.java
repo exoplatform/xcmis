@@ -214,13 +214,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
          docNode.setProperty(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, ((ExtendedNode)pwcNode).getIdentifier());
          docNode.setProperty(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, session.getUserID());
 
-         node = pwcNode;
          session.save();
-
-//         if (indexListener != null)
-//         {
-//            indexListener.created(this);
-//         }
 
       }
       catch (IOException ioe)
