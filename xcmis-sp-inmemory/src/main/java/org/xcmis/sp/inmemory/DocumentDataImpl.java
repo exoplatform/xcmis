@@ -278,9 +278,6 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
       {
          return getContentStream();
       }
-
-      // TODO renditions
-      //return null;
       try
       {
          return renditionManager.getStream(this, streamId);
