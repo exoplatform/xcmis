@@ -93,8 +93,12 @@ class RelationshipDataImpl extends BaseObjectData implements RelationshipData
       return getString(CmisConstants.TARGET_ID);
    }
 
-   @Override
    protected void save() throws StorageException
+   {
+      save(false);
+   }
+
+   protected void save(boolean isNew) throws StorageException
    {
       String name = getName();
       if (name == null || name.length() == 0)
@@ -104,6 +108,7 @@ class RelationshipDataImpl extends BaseObjectData implements RelationshipData
 
       // TODO : check relationship same names
 
+      storage.validateMaxItemsNumber(this);
       String id;
 
 //      if (isNew())
@@ -145,6 +150,18 @@ class RelationshipDataImpl extends BaseObjectData implements RelationshipData
 //      {
          id = getObjectId();
 //      }
+         
+         if (storage.indexListener != null)
+         {
+            if (isNew)
+            {
+               storage.indexListener.created(this);
+            }
+            else
+            {
+               storage.indexListener.updated(this);
+            }
+         }
 
       entry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue());
       entry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));

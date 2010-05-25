@@ -132,7 +132,7 @@ public class StorageImpl implements Storage
 
    final Map<String, Set<String>> children;
 
-   final Map<String, Set<String>> parents;
+   final  Map<String, Set<String>> parents;
 
    final Set<String> unfiled;
 
@@ -395,7 +395,29 @@ public class StorageImpl implements Storage
          throw new ConstraintException("Source object has type whose base type is not Document.");
       }
 
-      return new DocumentCopy(source, parent, getTypeDefinition(source.getTypeId(), true), versioningState, this);
+      //return new DocumentCopy(source, parent, getTypeDefinition(source.getTypeId(), true), versioningState, this);
+      DocumentCopy obj = new DocumentCopy(source, parent, getTypeDefinition(source.getTypeId(), true), versioningState, this);
+      if (properties != null)
+      {
+         for (Property<?> property : properties.values())
+         {
+            ((BaseObjectData)obj).setPropertyProtected(property);
+         }
+      }
+      
+      if (policies != null)
+      {
+         for (ObjectData policy : policies)
+         {
+            ((BaseObjectData)obj).applyPolicyProtected((PolicyData)policy);
+         }
+      }
+      
+      List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(obj.getACL(false), addACL, removeACL);
+      obj.setACLProtected(mergedACL);
+      
+      obj.save(true);
+      return obj;
    }
 
    /**
@@ -421,9 +443,34 @@ public class StorageImpl implements Storage
          throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Document.");
       }
 
-      return new DocumentDataImpl(parent, typeDefinition, versioningState, this);
+      //return new DocumentDataImpl(parent, typeDefinition, versioningState, this);
+      DocumentDataImpl obj = new DocumentDataImpl(parent, typeDefinition, versioningState, this);
+      if (properties != null)
+      {
+         for (Property<?> property : properties.values())
+         {
+            ((BaseObjectData)obj).setPropertyProtected(property);
+         }
+      }
+      
+      if (policies != null)
+      {
+         for (ObjectData policy : policies)
+         {
+            ((BaseObjectData)obj).applyPolicyProtected((PolicyData)policy);
+         }
+      }
+      
+      List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(obj.getACL(false), addACL, removeACL);
+      obj.setACLProtected(mergedACL);
+      
+      
+      obj.save(true);
+      return obj;
    }
 
+   
+    
    /**
     * {@inheritDoc}
     */
@@ -449,7 +496,30 @@ public class StorageImpl implements Storage
          throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Folder.");
       }
 
-      return new FolderDataImpl(parent, typeDefinition, this);
+      //return new FolderDataImpl(parent, typeDefinition, this);
+      FolderDataImpl obj = new FolderDataImpl(parent, typeDefinition, this);
+      
+      if (properties != null)
+      {
+         for (Property<?> property : properties.values())
+         {
+            ((BaseObjectData)obj).setPropertyProtected(property);
+         }
+      }
+      
+      if (policies != null)
+      {
+         for (ObjectData policy : policies)
+         {
+            ((BaseObjectData)obj).applyPolicyProtected((PolicyData)policy);
+         }
+      }
+      
+      List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(obj.getACL(false), addACL, removeACL);
+      obj.setACLProtected(mergedACL);
+      
+      obj.save(true);
+      return obj;
    }
 
    /**
@@ -465,7 +535,31 @@ public class StorageImpl implements Storage
          throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Policy.");
       }
 
-      return new PolicyDataImpl(typeDefinition, this);
+      //return new PolicyDataImpl(typeDefinition, this);
+      PolicyDataImpl obj = new PolicyDataImpl(typeDefinition, this);
+      
+      if (properties != null)
+      {
+         for (Property<?> property : properties.values())
+         {
+            ((BaseObjectData)obj).setPropertyProtected(property);
+         }
+      }
+      
+      if (policies != null)
+      {
+         for (ObjectData policy : policies)
+         {
+            ((BaseObjectData)obj).applyPolicyProtected((PolicyData)policy);
+         }
+      }
+      
+      obj.save(true);
+      
+      List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(obj.getACL(false), addACL, removeACL);
+      obj.setACLProtected(mergedACL);
+      
+      return obj;
    }
 
    /**
@@ -482,7 +576,30 @@ public class StorageImpl implements Storage
          throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Relationship.");
       }
 
-      return new RelationshipDataImpl(getTypeDefinition(typeId, true), source, target, this);
+      //return new RelationshipDataImpl(getTypeDefinition(typeId, true), source, target, this);
+      RelationshipDataImpl obj = new RelationshipDataImpl(getTypeDefinition(typeId, true), source, target, this);
+
+      if (properties != null)
+      {
+         for (Property<?> property : properties.values())
+         {
+            ((BaseObjectData)obj).setPropertyProtected(property);
+         }
+      }
+      
+      if (policies != null)
+      {
+         for (ObjectData policy : policies)
+         {
+            ((BaseObjectData)obj).applyPolicyProtected((PolicyData)policy);
+         }
+      }
+      
+      List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(obj.getACL(false), addACL, removeACL);
+      obj.setACLProtected(mergedACL);
+      
+      obj.save(true);
+      return obj;
    }
 
    /**
@@ -755,30 +872,30 @@ public class StorageImpl implements Storage
       }
    }
 
-   /**
-    * {@inheritDoc}
-    */
-   private String saveObject(ObjectData object) throws StorageException, NameConstraintViolationException,
-      UpdateConflictException
-   {
-      validateMaxItemsNumber(object);
-
-      boolean isNew = object.isNew();
-      ((BaseObjectData)object).save();
-      
-      if (indexListener != null)
-      {
-         if (isNew)
-         {
-            indexListener.created(object);
-         }
-         else
-         {
-            indexListener.updated(object);
-         }
-      }
-      return object.getObjectId();
-   }
+//   /**
+//    * {@inheritDoc}
+//    */
+//   private String saveObject(ObjectData object) throws StorageException, NameConstraintViolationException,
+//      UpdateConflictException
+//   {
+//      validateMaxItemsNumber(object);
+//
+//      boolean isNew = object.isNew();
+//      ((BaseObjectData)object).save();
+//      
+//      if (indexListener != null)
+//      {
+//         if (isNew)
+//         {
+//            indexListener.created(object);
+//         }
+//         else
+//         {
+//            indexListener.updated(object);
+//         }
+//      }
+//      return object.getObjectId();
+//   }
 
    /**
     * {@inheritDoc}

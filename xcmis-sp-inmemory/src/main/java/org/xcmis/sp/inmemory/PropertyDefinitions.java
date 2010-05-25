@@ -38,7 +38,7 @@ import java.util.Set;
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id: PropertyDefinitions.java 578 2010-04-02 12:25:27Z andrew00x $
  */
-final class PropertyDefinitions
+public final class PropertyDefinitions
 {
 
    private static final Map<String, Map<String, PropertyDefinition<?>>> all =

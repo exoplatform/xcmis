@@ -107,16 +107,23 @@ abstract class BaseObjectData implements ObjectData
       throw new UnsupportedOperationException();
    }
 
+   
+   
+   public void applyPolicy(PolicyData policy) throws ConstraintException
+   {
+      applyPolicyProtected(policy);
+      save();
+   }   
+   
    /**
     * {@inheritDoc}
     */
-   public void applyPolicy(PolicyData policy) throws ConstraintException
+   public void applyPolicyProtected(PolicyData policy) throws ConstraintException
    {
       if (!type.isControllablePolicy())
       {
          throw new ConstraintException("Type " + type.getId() + " is not controlable by Policy.");
       }
-
       entry.addPolicy(policy.getObjectId());
    }
 
@@ -357,10 +364,17 @@ abstract class BaseObjectData implements ObjectData
       entry.removePolicy(policy.getObjectId());
    }
 
+   
+   public void setACL(List<AccessControlEntry> aces) throws ConstraintException
+   {
+      setACLProtected(aces);
+      save();
+   }
+   
    /**
     * {@inheritDoc}
     */
-   public void setACL(List<AccessControlEntry> aces) throws ConstraintException
+   public void setACLProtected(List<AccessControlEntry> aces) throws ConstraintException
    {
       if (!type.isControllableACL())
       {
@@ -381,6 +395,7 @@ abstract class BaseObjectData implements ObjectData
       }
 
       entry.setValue(CmisConstants.NAME, new StringValue(name));
+      save();
    }
 
    /**
@@ -395,11 +410,21 @@ abstract class BaseObjectData implements ObjectData
       }
    }
 
+   
    /**
     * {@inheritDoc}
     */
    @SuppressWarnings("unchecked")
    public void setProperty(Property<?> property) throws ConstraintException
+   {
+      setPropertyProtected(property);
+      save();
+   }
+   /**
+    * @param isNew 
+    */
+   @SuppressWarnings("unchecked")
+   public void setPropertyProtected(Property<?> property) throws ConstraintException
    {
       PropertyDefinition<?> definition = type.getPropertyDefinition(property.getId());
 
@@ -479,6 +504,9 @@ abstract class BaseObjectData implements ObjectData
          }
       }
    }
+      
+      
+
 
    public String toString()
    {

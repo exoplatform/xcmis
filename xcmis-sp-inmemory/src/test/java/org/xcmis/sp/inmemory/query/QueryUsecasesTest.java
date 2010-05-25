@@ -193,28 +193,21 @@ public class QueryUsecasesTest extends BaseQueryTest
    {
       // create data
       FolderData folder1 = createFolder(testRoot, "folder1", "cmis:folder");
-      storage.saveObject(folder1);
 
       DocumentData doc1 =
          createDocument(folder1, "node1", NASA_DOCUMENT, "hello world".getBytes(), MimeType.fromString("text/plain"));
-      storage.saveObject(doc1);
 
       FolderData folder2 = createFolder(testRoot, "folder2", "cmis:folder");
-      storage.saveObject(folder2);
 
       DocumentData doc2 =
          createDocument(folder2, "node2", NASA_DOCUMENT, "hello world".getBytes(), MimeType.fromString("text/plain"));
-      storage.saveObject(doc2);
 
       FolderData folder3 = createFolder(folder1, "folder3", "cmis:folder");
-      storage.saveObject(folder3);
 
       DocumentData doc3 =
          createDocument(folder3, "node3", NASA_DOCUMENT, "hello world".getBytes(), MimeType.fromString("text/plain"));
-      storage.saveObject(doc3);
 
       FolderData folder4 = createFolder(folder3, "folder4", "cmis:folder");
-      storage.saveObject(folder4);
 
       String statement = "SELECT * FROM cmis:folder  WHERE IN_FOLDER( '" + folder1.getObjectId() + "')";
 
@@ -441,9 +434,6 @@ public class QueryUsecasesTest extends BaseQueryTest
       doc3.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "radmin"));
 
-      storage.saveObject(doc1);
-      storage.saveObject(doc2);
-      storage.saveObject(doc3);
 
       String statement =
          "SELECT * FROM " + NASA_DOCUMENT + " AS doc WHERE  " + PROPERTY_COMMANDER + " LIKE 'ad\\%min%'";
@@ -477,12 +467,10 @@ public class QueryUsecasesTest extends BaseQueryTest
 
       DocumentData doc1 =
          createDocument(testRoot, "node1", NASA_DOCUMENT, "hello world".getBytes(), MimeType.fromString("text/plain"));
-      storage.saveObject(doc1);
 
       FolderData folder2 = createFolder(testRoot, "folder2", "cmis:folder");
       DocumentData doc2 =
          createDocument(folder2, "node2", NASA_DOCUMENT, "hello".getBytes(), MimeType.fromString("text/plain"));
-      storage.saveObject(doc2);
       String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE NOT CONTAINS(\"world\")";
 
       Query query = new Query(statement, true);
@@ -738,11 +726,10 @@ public class QueryUsecasesTest extends BaseQueryTest
          createDocument(testRoot, "node1", NASA_DOCUMENT, "hello world".getBytes(), MimeType.fromString("text/plain"));
       doc1.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "James A. Lovell, Jr."));
-      storage.saveObject(doc1);
+
       DocumentData doc2 =
          createDocument(testRoot, "node2", NASA_DOCUMENT, "hello".getBytes(), MimeType.fromString("text/plain"));
-      storage.saveObject(doc2);
-
+     
       String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE " + PROPERTY_COMMANDER + " IS NOT NULL";
       Query query = new Query(statement, true);
 
@@ -813,12 +800,12 @@ public class QueryUsecasesTest extends BaseQueryTest
 
       DocumentData doc1 =
          createDocument(folder1, "node1", NASA_DOCUMENT, "hello world".getBytes(), MimeType.fromString("text/plain"));
-      storage.saveObject(doc1);
+
       FolderData subfolder1 = createFolder(folder1, "folder2", "cmis:folder");
 
       DocumentData doc2 =
          createDocument(subfolder1, "node1", NASA_DOCUMENT, "hello world".getBytes(), MimeType.fromString("text/plain"));
-      storage.saveObject(doc2);
+
       String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE IN_TREE('" + folder1.getObjectId() + "')";
 
       Query query = new Query(statement, true);
@@ -850,16 +837,15 @@ public class QueryUsecasesTest extends BaseQueryTest
       MimeType contentType = MimeType.fromString("text/plain");
 
       FolderData folder = createFolder(testRoot, "NotEqualDecimal", "cmis:folder");
-      storage.saveObject(folder);
+
       DocumentData doc1 = createDocument(folder, name, NASA_DOCUMENT, new byte[0], contentType);
       doc1.setProperty(new DecimalProperty(PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS,
          PROPERTY_BOOSTER_MASS, new BigDecimal(3)));
-      storage.saveObject(doc1);
 
       DocumentData doc2 = createDocument(folder, name2, NASA_DOCUMENT, new byte[0], contentType);
       doc2.setProperty(new DecimalProperty(PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS,
          PROPERTY_BOOSTER_MASS, new BigDecimal(15)));
-      storage.saveObject(doc2);
+
       String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE " + PROPERTY_BOOSTER_MASS + " <> 3";
 
       Query query = new Query(statement, true);
@@ -891,17 +877,14 @@ public class QueryUsecasesTest extends BaseQueryTest
       MimeType contentType = MimeType.fromString("text/plain");
 
       FolderData folder = createFolder(testRoot, "CASETest", "cmis:folder");
-      storage.saveObject(folder);
 
       DocumentData doc1 = createDocument(folder, name, NASA_DOCUMENT, new byte[0], contentType);
       doc1.setProperty(new DecimalProperty(PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS,
          PROPERTY_BOOSTER_MASS, new BigDecimal(3)));
-      storage.saveObject(doc1);
 
       DocumentData doc2 = createDocument(folder, name2, NASA_DOCUMENT, new byte[0], contentType);
       doc2.setProperty(new DecimalProperty(PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS,
          PROPERTY_BOOSTER_MASS, new BigDecimal(15)));
-      storage.saveObject(doc2);
 
       String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE " + PROPERTY_BOOSTER_MASS + " > 5";
 
@@ -935,17 +918,14 @@ public class QueryUsecasesTest extends BaseQueryTest
       MimeType contentType = MimeType.fromString("text/plain");
 
       FolderData folder = createFolder(testRoot, "CASETest", "cmis:folder");
-      storage.saveObject(folder);
 
       DocumentData doc1 = createDocument(folder, name, NASA_DOCUMENT, new byte[0], contentType);
       doc1.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "test word first"));
-      storage.saveObject(doc1);
 
       DocumentData doc2 = createDocument(folder, name2, NASA_DOCUMENT, new byte[0], contentType);
       doc2.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "test word second"));
-      storage.saveObject(doc2);
 
       String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE " + PROPERTY_COMMANDER + " <> 'test word second'";
 
@@ -978,16 +958,15 @@ public class QueryUsecasesTest extends BaseQueryTest
       MimeType contentType = MimeType.fromString("text/plain");
 
       FolderData folder = createFolder(testRoot, "SimpleFullTextTest", "cmis:folder");
-      storage.saveObject(folder);
+
       DocumentData doc1 = createDocument(folder, name1, NASA_DOCUMENT, new byte[0], contentType);
       doc1.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "There must be test word"));
-      storage.saveObject(doc1);
 
       DocumentData doc2 = createDocument(folder, name2, NASA_DOCUMENT, new byte[0], contentType);
       doc2.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "Test word is not here"));
-      storage.saveObject(doc2);
+
       String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"here\")";
 
       Query query = new Query(statement, true);
@@ -1024,22 +1003,18 @@ public class QueryUsecasesTest extends BaseQueryTest
       MimeType contentType = MimeType.fromString("text/plain");
 
       FolderData folder = createFolder(testRoot, "CASETest", "cmis:folder");
-      storage.saveObject(folder);
 
       DocumentData doc1 = createDocument(folder, name1, NASA_DOCUMENT, new byte[0], contentType);
       doc1.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "There must be test word"));
-      storage.saveObject(doc1);
 
       DocumentData doc2 = createDocument(folder, name2, NASA_DOCUMENT, new byte[0], contentType);
       doc2.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "Test word is not here. Another check-word."));
-      storage.saveObject(doc2);
 
       DocumentData doc3 = createDocument(folder, name3, NASA_DOCUMENT, new byte[0], contentType);
       doc2.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "There must be check-word."));
-      storage.saveObject(doc2);
 
       String statement =
          "SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"\\\"There must\\\" -\\\"check\\-word\\\"\")";
@@ -1063,12 +1038,10 @@ public class QueryUsecasesTest extends BaseQueryTest
       DocumentData doc1 = createDocument(testRoot, name, NASA_DOCUMENT, new byte[0], contentType);
       doc1.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "There must be test word"));
-      storage.saveObject(doc1);
 
       DocumentData doc2 = createDocument(testRoot, name2, NASA_DOCUMENT, new byte[0], contentType);
       doc2.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "Test word is not here"));
-      storage.saveObject(doc2);
 
       String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE NOT CONTAINS(\"here\")";
 
@@ -1102,11 +1075,9 @@ public class QueryUsecasesTest extends BaseQueryTest
 
       DocumentData doc1 = createDocument(testRoot, name, NASA_DOCUMENT, new byte[0], contentType);
       doc1.setProperty(new BooleanProperty(PROPERTY_STATUS, PROPERTY_STATUS, PROPERTY_STATUS, PROPERTY_STATUS, true));
-      storage.saveObject(doc1);
 
       DocumentData doc2 = createDocument(testRoot, name2, NASA_DOCUMENT, new byte[0], contentType);
       doc2.setProperty(new BooleanProperty(PROPERTY_STATUS, PROPERTY_STATUS, PROPERTY_STATUS, PROPERTY_STATUS, false));
-      storage.saveObject(doc2);
 
       String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE (" + PROPERTY_STATUS + " = FALSE )";
 
@@ -1139,9 +1110,9 @@ public class QueryUsecasesTest extends BaseQueryTest
       MimeType contentType = MimeType.fromString("text/plain");
 
       DocumentData doc1 = createDocument(testRoot, name, NASA_DOCUMENT, new byte[0], contentType);
-      storage.saveObject(doc1);
+
       DocumentData doc2 = createDocument(testRoot, name2, NASA_DOCUMENT, new byte[0], contentType);
-      storage.saveObject(doc2);
+
       String statement =
          "SELECT * FROM " + NASA_DOCUMENT
             + " WHERE ( cmis:lastModificationDate >= TIMESTAMP '2007-01-01T00:00:00.000Z' )";
@@ -1197,7 +1168,6 @@ public class QueryUsecasesTest extends BaseQueryTest
          PROPERTY_COMMANDER, "James A. Lovell, Jr."));
       doc3.setProperty(new StringProperty(PROPERTY_BOOSTER, PROPERTY_BOOSTER, PROPERTY_BOOSTER, PROPERTY_BOOSTER,
          "Saturn V"));
-      storage.saveObject(doc3);
 
       String statement1 = "SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"moon\")";
       Query query = new Query(statement1, true);
@@ -1209,8 +1179,6 @@ public class QueryUsecasesTest extends BaseQueryTest
       //replace content
       ContentStream cs = new BaseContentStream("Sun".getBytes(), "test", MimeType.fromString("text/plain"));
       doc3.setContentStream(cs);
-
-      storage.saveObject(doc3);
 
       //check old one
       result = storage.query(query);
@@ -1293,10 +1261,6 @@ public class QueryUsecasesTest extends BaseQueryTest
          "Saturn V", 3038.500, 111, "Apollo 17 was the eleventh manned space "
             + "mission in the NASA Apollo program. It was the first night launch of a U.S. human "
             + "spaceflight and the sixth and final lunar landing mission of the Apollo program."));
-      for (DocumentData document : result)
-      {
-         storage.saveObject(document);
-      }
       return result;
    }
 
@@ -1307,12 +1271,10 @@ public class QueryUsecasesTest extends BaseQueryTest
       DocumentData doc1 =
          createDocument(testRoot, "node1", "cmis:article-sports", "hello world".getBytes(), MimeType
             .fromString("text/plain"));
-      storage.saveObject(doc1);
 
       DocumentData doc2 =
          createDocument(testRoot, "node2", "cmis:article-animals", "hello world".getBytes(), MimeType
             .fromString("text/plain"));
-      storage.saveObject(doc2);
 
       String stat = "SELECT * FROM cmis:article WHERE IN_FOLDER( '" + testRoot.getObjectId() + "')";
 

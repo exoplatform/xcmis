@@ -396,8 +396,12 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
 
       this.contentStream = contentStream;
    }
+   
+   protected void save() throws StorageException{
+      save(false);
+   }
 
-   protected void save() throws StorageException
+   protected void save(boolean isNew) throws StorageException
    {
       String name = getName();
       if (name == null || name.length() == 0)
@@ -421,7 +425,9 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
             }
          }
       }
-
+      
+      
+      storage.validateMaxItemsNumber(this);
       String id;
       String vsId;
 
@@ -511,6 +517,19 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
          storage.validateMemSize(content);
       }
 
+      
+      if (storage.indexListener != null)
+       {
+          if (isNew)
+          {
+             storage.indexListener.created(this);
+          }
+          else
+          {
+             storage.indexListener.updated(this);
+          }
+       }
+      
       if (isNew)
       {
          if (parent != null)

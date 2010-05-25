@@ -48,7 +48,6 @@ public class StorageTest extends BaseTest
       String id = document.getObjectId();
       document.setACL(Collections.singletonList(new AccessControlEntry("root", new HashSet<String>(Arrays.asList(
          "cmis:read", "cmis:write")))));
-      storage.saveObject(document);
       document = (DocumentData)storage.getObjectById(id);
       System.out.println(document.getACL(true));
    }

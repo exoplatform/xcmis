@@ -212,6 +212,11 @@ class FolderDataImpl extends BaseObjectData implements FolderData
 
    protected void save() throws StorageException
    {
+      save(false);
+   }
+   
+   protected void save(boolean isNew) throws StorageException
+   {
       String name = getName();
       if (name == null || name.length() == 0)
       {
@@ -221,6 +226,7 @@ class FolderDataImpl extends BaseObjectData implements FolderData
       for (ItemsIterator<ObjectData> iterator = getParent().getChildren(null); iterator.hasNext();)
       {
          ObjectData object = iterator.next();
+         System.out.println(object+"<<<<<<<<<<<<<<<");
          if (object.getObjectId().equals(getObjectId()))
          {
             continue;
@@ -232,6 +238,7 @@ class FolderDataImpl extends BaseObjectData implements FolderData
       }
 
       String id;
+      storage.validateMaxItemsNumber(this);
 
 //      if (isNew())
 //      {
@@ -260,6 +267,18 @@ class FolderDataImpl extends BaseObjectData implements FolderData
          id = getObjectId();
 //      }
 
+         if (storage.indexListener != null)
+         {
+            if (isNew)
+            {
+               storage.indexListener.created(this);
+            }
+            else
+            {
+               storage.indexListener.updated(this);
+            }
+         }
+         
       entry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue());
       entry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));
       entry.setValue(CmisConstants.CHANGE_TOKEN, new StringValue(StorageImpl.generateId()));

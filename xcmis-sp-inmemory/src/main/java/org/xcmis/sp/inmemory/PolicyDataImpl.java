@@ -91,8 +91,13 @@ class PolicyDataImpl extends BaseObjectData implements PolicyData
       return getString(CmisConstants.POLICY_TEXT);
    }
 
-   @Override
    protected void save() throws StorageException
+   {
+      save(false);
+   }
+   
+   
+   protected void save(boolean isNew) throws StorageException
    {
       String name = getName();
       if (name == null || name.length() == 0)
@@ -107,6 +112,7 @@ class PolicyDataImpl extends BaseObjectData implements PolicyData
       }
 
       String id;
+      storage.validateMaxItemsNumber(this);
 
 //      if (isNew())
 //      {
@@ -128,6 +134,18 @@ class PolicyDataImpl extends BaseObjectData implements PolicyData
 //      {
          id = getObjectId();
 //      }
+         
+         if (storage.indexListener != null)
+         {
+            if (isNew)
+            {
+               storage.indexListener.created(this);
+            }
+            else
+            {
+               storage.indexListener.updated(this);
+            }
+         }
 
       entry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue());
       entry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));

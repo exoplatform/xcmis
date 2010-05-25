@@ -22,7 +22,9 @@ package org.xcmis.sp.inmemory.query;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.sp.inmemory.BaseTest;
+import org.xcmis.sp.inmemory.PropertyDefinitions;
 import org.xcmis.spi.BaseContentStream;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
@@ -30,11 +32,13 @@ import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.ContentStreamAllowed;
+import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.PropertyType;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.Updatability;
 import org.xcmis.spi.model.VersioningState;
+import org.xcmis.spi.model.impl.StringProperty;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 import org.xcmis.spi.utils.MimeType;
@@ -175,20 +179,31 @@ public abstract class BaseQueryTest extends BaseTest
    //      checkResult(result, new Document[]{doc1});
    //   }
    {
+      PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:document", CmisConstants.NAME);
+      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+      properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
+         .getDisplayName(), "createFolderTest"));
+      
       DocumentData document =
-         storage.createDocument(folder, typeId, versioningState == null ? VersioningState.MAJOR : versioningState);
+         storage.createDocument(folder, typeId, properties, null,null,null,null, versioningState == null ? VersioningState.MAJOR : versioningState);
       document.setName(name);
+      try {
       document.setContentStream(content);
-      storage.saveObject(document);
-      //document.save();
+      } catch (Exception ex){
+         fail();
+      }
       return document;
    }
 
    protected FolderData createFolder(FolderData folder, String name, String typeId)
    {
-      FolderData newFolder = storage.createFolder(folder, typeId);
+      PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:folder", CmisConstants.NAME);
+      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+      properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
+         .getDisplayName(), "createFolderTest"));
+      
+      FolderData newFolder = storage.createFolder(folder, typeId, properties, null, null, null);
       newFolder.setName(name);
-      storage.saveObject(newFolder);
       return newFolder;
    }
 

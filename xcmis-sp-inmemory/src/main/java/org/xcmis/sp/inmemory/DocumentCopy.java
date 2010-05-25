@@ -59,6 +59,11 @@ class DocumentCopy extends DocumentDataImpl
 
    protected void save() throws StorageException
    {
+      save(false);
+   }
+   
+   protected void save(boolean isNew) throws StorageException
+   {
       String name = getName();
       if (name == null || name.length() == 0)
       {
@@ -76,6 +81,10 @@ class DocumentCopy extends DocumentDataImpl
             }
          }
       }
+      
+      storage.validateMaxItemsNumber(this);
+      
+      
 
       String id = StorageImpl.generateId();
       entry.setValue(CmisConstants.OBJECT_ID, new StringValue(id));
@@ -147,6 +156,18 @@ class DocumentCopy extends DocumentDataImpl
       }
       // check is max memory size reached
       storage.validateMemSize(content);
+      
+      if (storage.indexListener != null)
+      {
+         if (isNew)
+         {
+            storage.indexListener.created(this);
+         }
+         else
+         {
+            storage.indexListener.updated(this);
+         }
+      }
 
       if (parent != null)
       {
