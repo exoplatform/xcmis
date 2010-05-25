@@ -86,10 +86,6 @@ public class RenditionManager
          }
       });
 
-   public RenditionManager()
-   {
-   }
-
    /**
     * Get all renditions of specified entry.
     *
@@ -109,7 +105,7 @@ public class RenditionManager
             Rendition rendition = new Rendition();
             rendition.setStreamId(encode(contentType.toString()));
             rendition.setKind("cmis:thumbnail");
-            rendition.setMimeType("image/png"); //TODO: not so good, we can't know which type of rendition will be ceated;
+            rendition.setMimeType("image/png"); //TODO: not so good, we can't know which type of rendition will be created;
             return rendition;
          }
       }
