@@ -3024,56 +3024,65 @@ public abstract class Connection
       }
 
       // CHECK PROPERTIES
-      for (Property<?> property : properties.values())
+      if (properties != null && properties.size() != 0)
       {
-         PropertyDefinition<?> definition = typeDefinition.getPropertyDefinition(property.getId());
-         if (definition == null)
+         for (Property<?> property : properties.values())
          {
-            throw new ConstraintException("Property " + property.getId()
-               + " is not in property definitions list of type " + typeDefinition.getId());
-         }
-         if (property.getType() != definition.getPropertyType())
-         {
-            throw new ConstraintException("Property type is not match. Property id " + property.getId());
-         }
-         if (!definition.isMultivalued() && property.getValues().size() > 1)
-         {
-            throw new ConstraintException("Property " + property.getId() + " is not multi-valued.");
-         }
-         if (definition.isRequired() && property.getValues().size() == 0)
-         {
-            throw new ConstraintException("Required property " + property.getId() + " can't be removed.");
+            PropertyDefinition<?> definition = typeDefinition.getPropertyDefinition(property.getId());
+            if (definition == null)
+            {
+               throw new ConstraintException("Property " + property.getId()
+                  + " is not in property definitions list of type " + typeDefinition.getId());
+            }
+            if (property.getType() != definition.getPropertyType())
+            {
+               throw new ConstraintException("Property type is not match. Property id " + property.getId());
+            }
+            if (!definition.isMultivalued() && property.getValues().size() > 1)
+            {
+               throw new ConstraintException("Property " + property.getId() + " is not multi-valued.");
+            }
+            if (definition.isRequired() && property.getValues().size() == 0)
+            {
+               throw new ConstraintException("Required property " + property.getId() + " can't be removed.");
+            }
          }
       }
 
       // CHECK ACL
-      CapabilityACL capabilityACL = storage.getRepositoryInfo().getCapabilities().getCapabilityACL();
-      if (capabilityACL == CapabilityACL.NONE && ((addACL != null && addACL.size() != 0)  || (removeACL != null && removeACL.size() != 0)))
+      if ((addACL != null && addACL.size() != 0) || (removeACL != null && removeACL.size() != 0))
       {
-         throw new NotSupportedException("ACL capability is not supported.");
-      }
-      else if (capabilityACL == CapabilityACL.DISCOVER)
-      {
-         throw new NotSupportedException("ACL can be discovered but not managed via CMIS services.");
-      }
-      if (!typeDefinition.isControllableACL())
-      {
-         throw new ConstraintException("Type " + typeDefinition.getId() + " is not controllable by ACL.");
+         CapabilityACL capabilityACL = storage.getRepositoryInfo().getCapabilities().getCapabilityACL();
+         if (capabilityACL == CapabilityACL.NONE)
+         {
+            throw new NotSupportedException("ACL capability is not supported.");
+         }
+         else if (capabilityACL == CapabilityACL.DISCOVER)
+         {
+            throw new NotSupportedException("ACL can be discovered but not managed via CMIS services.");
+         }
+         if (!typeDefinition.isControllableACL())
+         {
+            throw new ConstraintException("Type " + typeDefinition.getId() + " is not controllable by ACL.");
+         }
       }
 
       // CHECK POLICY
-      if (!typeDefinition.isControllablePolicy())
+      if (policies != null && policies.size() != 0)
       {
-         throw new ConstraintException("Type " + typeDefinition.getId() + " is not controllable by Policy.");
-      }
-      for (String policyID : policies)
-      {
-         ObjectData policy = storage.getObjectById(policyID);
-         if (policy.getBaseType() != BaseType.POLICY)
+         if (!typeDefinition.isControllablePolicy())
          {
-            throw new InvalidArgumentException("Object " + policyID + " is not a Policy object.");
+            throw new ConstraintException("Type " + typeDefinition.getId() + " is not controllable by Policy.");
          }
-         resultPolicies.add(policy);
+         for (String policyID : policies)
+         {
+            ObjectData policy = storage.getObjectById(policyID);
+            if (policy.getBaseType() != BaseType.POLICY)
+            {
+               throw new InvalidArgumentException("Object " + policyID + " is not a Policy object.");
+            }
+            resultPolicies.add(policy);
+         }
       }
    }
 
