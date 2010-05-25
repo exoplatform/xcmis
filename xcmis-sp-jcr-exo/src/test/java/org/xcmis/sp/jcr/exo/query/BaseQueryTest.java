@@ -128,12 +128,12 @@ public abstract class BaseQueryTest extends BaseTest
    //      checkResult(result, new Document[]{doc1});
    //   }
    {
-      
+
       PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:document", CmisConstants.NAME);
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
          .getDisplayName(), name));
-      
+
       DocumentData document =
          storage.createDocument(folder, typeId, properties, content, null, null, null, versioningState == null
             ? VersioningState.MAJOR : versioningState);
@@ -146,9 +146,8 @@ public abstract class BaseQueryTest extends BaseTest
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
          .getDisplayName(), name));
-      
+
       FolderData newFolder = storage.createFolder(folder, typeId, properties, null, null, null);
-      newFolder.setName(name);
       return newFolder;
    }
 

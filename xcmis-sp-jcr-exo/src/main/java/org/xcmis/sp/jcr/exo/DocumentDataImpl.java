@@ -158,7 +158,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
 
       try
       {
-         name = this.getName();
+         String name = this.getName();
 
          Node workingCopies =
             (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_WORKING_COPIES);

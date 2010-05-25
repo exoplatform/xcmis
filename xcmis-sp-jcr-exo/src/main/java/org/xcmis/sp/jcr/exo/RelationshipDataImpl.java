@@ -58,7 +58,7 @@ class RelationshipDataImpl extends BaseObjectData implements RelationshipData
    public RelationshipDataImpl(TypeDefinition type, ObjectData source, ObjectData target, Session session, Node node,
       IndexListener indexListener)
    {
-      super(type, null, session, null, indexListener);
+      super(type, null, session, node, indexListener);
       this.source = source;
       this.target = target;
    }
