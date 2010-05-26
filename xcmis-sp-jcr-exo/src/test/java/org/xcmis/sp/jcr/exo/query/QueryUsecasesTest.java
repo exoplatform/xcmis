@@ -64,6 +64,11 @@ public class QueryUsecasesTest extends BaseQueryTest
 
    }
 
+   /**
+    * Get query capabilities. 
+    * 
+    * @throws Exception if an unexpected error occurs
+    */
    public void testSearchCapabilities() throws Exception
    {
       RepositoryCapabilities repCapabilities = storage.getRepositoryInfo().getCapabilities();
@@ -579,7 +584,7 @@ public class QueryUsecasesTest extends BaseQueryTest
    /**
     * Test ORDER BY ASC.
     * <p>
-    * Initial data: see createNasaContent
+    * Initial data:
     * <ul>
     * <li>document1: <b>PROPERTY_COMMANDER</b> - Walter M. Schirra
     * <li>document2: <b>PROPERTY_COMMANDER</b> - Frank F. Borman, II
@@ -624,7 +629,7 @@ public class QueryUsecasesTest extends BaseQueryTest
    /**
     * Test ORDER BY default.
     * <p>
-    * Initial data: see createNasaContent
+    * Initial data: 
     * <ul>
     * <li>document1: <b>Title</b> - Apollo 7
     * <li>document2: <b>Title</b> - Apollo 8
@@ -745,10 +750,9 @@ public class QueryUsecasesTest extends BaseQueryTest
     * <p>
     * see createNasaContent()
     * <p>
-    * Query : Select all documents that contains "hello or world" words, and show
-    * search score .
+    * Query : Select all documents that contains "first" word and ordered by score. 
     * <p>
-    * Expected result: doc1 and doc2 score numbers.
+    * Expected result: doc4, doc1 and doc2.
     *
     * @throws Exception if an unexpected error occurs
     */
@@ -758,7 +762,7 @@ public class QueryUsecasesTest extends BaseQueryTest
 
       String statement =
          "SELECT SCORE() AS scoreCol , " + CmisConstants.NAME + " AS id FROM " + NASA_DOCUMENT
-            + " WHERE CONTAINS(\"hello OR world\") ORDER BY SCORE()";
+            + " WHERE CONTAINS(\"first\") ORDER BY SCORE()";
 
       Query query = new Query(statement, true);
       ItemsIterator<Result> result = storage.query(query);
@@ -769,7 +773,6 @@ public class QueryUsecasesTest extends BaseQueryTest
          Result next = result.next();
          assertTrue(next.getScore().getScoreValue().doubleValue() > 0);
       }
-
    }
 
    /**
@@ -934,7 +937,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Initial data:
     * <ul>
     * <li>doc1: <b>Title</b> - fileFirst  <b>StringProperty</b> - "There must be test word"
-    * <li>doc2: <b>Title</b> - fileSecond <b>StringProperty</b> - " Test word is not here"
+    * <li>doc2: <b>Title</b> - fileSecond <b>StringProperty</b> - "Test word is not here"
     * </ul>
     * <p>
     * Query : Select all documents that contains "here" word.
@@ -971,7 +974,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Initial data:
     * <ul>
     * <li>doc1: <b>Title</b> - fileCS1.doc <b>StringProperty</b> - "There must be test word"
-    * <li>doc2: <b>Title</b> - fileCS2.doc <b>StringProperty</b> - " Test word is not here. Another check-word."
+    * <li>doc2: <b>Title</b> - fileCS2.doc <b>StringProperty</b> - "Test word is not here. Another check-word."
     * <li>doc3: <b>Title</b> - fileCS3.doc <b>StringProperty</b> - "There must be check-word."
     * </ul>
     * <p>
