@@ -65,8 +65,9 @@ public class CmisRegistry
       this.storageProviders = new HashMap<String, StorageProvider>();
    }
 
-   public final void addStorage(String id, StorageProvider storageProvider)
+   public final void addStorage(StorageProvider storageProvider)
    {
+      String id = storageProvider.getStorageID();
       if (this.storageProviders.get(id) != null)
       {
          throw new CmisRuntimeException("Storage " + id + " already registered.");
