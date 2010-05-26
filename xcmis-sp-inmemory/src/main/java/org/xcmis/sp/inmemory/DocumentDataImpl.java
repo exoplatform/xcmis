@@ -381,10 +381,20 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
       return checkout == null ? false : checkout;
    }
 
+   
    /**
     * {@inheritDoc}
     */
-   public void setContentStream(ContentStream contentStream) throws ConstraintException, IOException
+   public void setContentStream(ContentStream contentStream) throws ConstraintException
+   {
+      setContentStreamInternal(contentStream);
+      save();
+   }
+   
+   /**
+    * {@inheritDoc}
+    */
+   public void setContentStreamInternal(ContentStream contentStream) throws ConstraintException
    {
       if (type.getContentStreamAllowed() == ContentStreamAllowed.REQUIRED && contentStream == null)
       {
@@ -397,7 +407,6 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
       }
 
       this.contentStream = contentStream;
-      save();
    }
 
    protected void save() throws StorageException

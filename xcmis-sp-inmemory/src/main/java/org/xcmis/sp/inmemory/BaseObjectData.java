@@ -111,14 +111,14 @@ abstract class BaseObjectData implements ObjectData
    
    public void applyPolicy(PolicyData policy) throws ConstraintException
    {
-      applyPolicyProtected(policy);
+      applyPolicyInternal(policy);
       save();
    }   
    
    /**
     * {@inheritDoc}
     */
-   public void applyPolicyProtected(PolicyData policy) throws ConstraintException
+   public void applyPolicyInternal(PolicyData policy) throws ConstraintException
    {
       if (!type.isControllablePolicy())
       {
@@ -367,14 +367,14 @@ abstract class BaseObjectData implements ObjectData
    
    public void setACL(List<AccessControlEntry> aces) throws ConstraintException
    {
-      setACLProtected(aces);
+      setACLInternal(aces);
       save();
    }
    
    /**
     * {@inheritDoc}
     */
-   public void setACLProtected(List<AccessControlEntry> aces) throws ConstraintException
+   public void setACLInternal(List<AccessControlEntry> aces) throws ConstraintException
    {
       if (!type.isControllableACL())
       {
@@ -417,14 +417,14 @@ abstract class BaseObjectData implements ObjectData
    @SuppressWarnings("unchecked")
    public void setProperty(Property<?> property) throws ConstraintException
    {
-      setPropertyProtected(property);
+      setPropertyInternal(property);
       save();
    }
    /**
     * @param isNew 
     */
    @SuppressWarnings("unchecked")
-   public void setPropertyProtected(Property<?> property) throws ConstraintException
+   public void setPropertyInternal(Property<?> property) throws ConstraintException
    {
       PropertyDefinition<?> definition = type.getPropertyDefinition(property.getId());
 

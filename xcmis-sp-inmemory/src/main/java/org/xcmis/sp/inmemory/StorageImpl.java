@@ -401,7 +401,7 @@ public class StorageImpl implements Storage
       {
          for (Property<?> property : properties.values())
          {
-            ((BaseObjectData)obj).setPropertyProtected(property);
+            ((BaseObjectData)obj).setPropertyInternal(property);
          }
       }
       
@@ -409,12 +409,12 @@ public class StorageImpl implements Storage
       {
          for (ObjectData policy : policies)
          {
-            ((BaseObjectData)obj).applyPolicyProtected((PolicyData)policy);
+            ((BaseObjectData)obj).applyPolicyInternal((PolicyData)policy);
          }
       }
       
       List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(obj.getACL(false), addACL, removeACL);
-      obj.setACLProtected(mergedACL);
+      obj.setACLInternal(mergedACL);
       
       obj.save(true);
       return obj;
@@ -445,11 +445,16 @@ public class StorageImpl implements Storage
 
       //return new DocumentDataImpl(parent, typeDefinition, versioningState, this);
       DocumentDataImpl obj = new DocumentDataImpl(parent, typeDefinition, versioningState, this);
+      if (content != null)
+      {
+         obj.setContentStreamInternal(content);
+      }
+      
       if (properties != null)
       {
          for (Property<?> property : properties.values())
          {
-            ((BaseObjectData)obj).setPropertyProtected(property);
+            ((BaseObjectData)obj).setPropertyInternal(property);
          }
       }
       
@@ -457,12 +462,12 @@ public class StorageImpl implements Storage
       {
          for (ObjectData policy : policies)
          {
-            ((BaseObjectData)obj).applyPolicyProtected((PolicyData)policy);
+            ((BaseObjectData)obj).applyPolicyInternal((PolicyData)policy);
          }
       }
       
       List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(obj.getACL(false), addACL, removeACL);
-      obj.setACLProtected(mergedACL);
+      obj.setACLInternal(mergedACL);
       
       
       obj.save(true);
@@ -503,7 +508,7 @@ public class StorageImpl implements Storage
       {
          for (Property<?> property : properties.values())
          {
-            ((BaseObjectData)obj).setPropertyProtected(property);
+            ((BaseObjectData)obj).setPropertyInternal(property);
          }
       }
       
@@ -511,12 +516,12 @@ public class StorageImpl implements Storage
       {
          for (ObjectData policy : policies)
          {
-            ((BaseObjectData)obj).applyPolicyProtected((PolicyData)policy);
+            ((BaseObjectData)obj).applyPolicyInternal((PolicyData)policy);
          }
       }
       
       List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(obj.getACL(false), addACL, removeACL);
-      obj.setACLProtected(mergedACL);
+      obj.setACLInternal(mergedACL);
       
       obj.save(true);
       return obj;
@@ -542,7 +547,7 @@ public class StorageImpl implements Storage
       {
          for (Property<?> property : properties.values())
          {
-            ((BaseObjectData)obj).setPropertyProtected(property);
+            ((BaseObjectData)obj).setPropertyInternal(property);
          }
       }
       
@@ -550,14 +555,14 @@ public class StorageImpl implements Storage
       {
          for (ObjectData policy : policies)
          {
-            ((BaseObjectData)obj).applyPolicyProtected((PolicyData)policy);
+            ((BaseObjectData)obj).applyPolicyInternal((PolicyData)policy);
          }
       }
       
       obj.save(true);
       
       List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(obj.getACL(false), addACL, removeACL);
-      obj.setACLProtected(mergedACL);
+      obj.setACLInternal(mergedACL);
       
       return obj;
    }
@@ -583,7 +588,7 @@ public class StorageImpl implements Storage
       {
          for (Property<?> property : properties.values())
          {
-            ((BaseObjectData)obj).setPropertyProtected(property);
+            ((BaseObjectData)obj).setPropertyInternal(property);
          }
       }
       
@@ -591,12 +596,12 @@ public class StorageImpl implements Storage
       {
          for (ObjectData policy : policies)
          {
-            ((BaseObjectData)obj).applyPolicyProtected((PolicyData)policy);
+            ((BaseObjectData)obj).applyPolicyInternal((PolicyData)policy);
          }
       }
       
       List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(obj.getACL(false), addACL, removeACL);
-      obj.setACLProtected(mergedACL);
+      obj.setACLInternal(mergedACL);
       
       obj.save(true);
       return obj;
@@ -871,31 +876,6 @@ public class StorageImpl implements Storage
          throw new CmisRuntimeException(e.getLocalizedMessage(), e);
       }
    }
-
-//   /**
-//    * {@inheritDoc}
-//    */
-//   private String saveObject(ObjectData object) throws StorageException, NameConstraintViolationException,
-//      UpdateConflictException
-//   {
-//      validateMaxItemsNumber(object);
-//
-//      boolean isNew = object.isNew();
-//      ((BaseObjectData)object).save();
-//      
-//      if (indexListener != null)
-//      {
-//         if (isNew)
-//         {
-//            indexListener.created(object);
-//         }
-//         else
-//         {
-//            indexListener.updated(object);
-//         }
-//      }
-//      return object.getObjectId();
-//   }
 
    /**
     * {@inheritDoc}

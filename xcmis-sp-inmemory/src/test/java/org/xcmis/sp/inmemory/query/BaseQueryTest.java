@@ -149,17 +149,8 @@ public abstract class BaseQueryTest extends BaseTest
          .getDisplayName(), name));
 
       DocumentData document =
-         storage.createDocument(folder, typeId, properties, null, null, null, null, versioningState == null
+         storage.createDocument(folder, typeId, properties, content, null, null, null, versioningState == null
             ? VersioningState.MAJOR : versioningState);
-      //document.setName(name);
-      try
-      {
-         document.setContentStream(content);
-      }
-      catch (Exception ex)
-      {
-         fail();
-      }
       return document;
    }
 
