@@ -126,6 +126,7 @@ public abstract class BaseQueryTest extends BaseTest
          "cmis:article-sports", "", "cmis:article", "cmis:article-sports", "Cmis cmis:article-sports", true, true,
          true, true, true, true, true, true, null, null, ContentStreamAllowed.ALLOWED,
          new HashMap<String, PropertyDefinition<?>>()));
+
       storage.addType(new TypeDefinition("cmis:article-animals", BaseType.DOCUMENT, "cmis:article-animals",
          "cmis:article-animals", "", "cmis:article", "cmis:article-animals", "Cmis cmis:article-animals", true, true,
          true, true, true, true, true, true, null, null, ContentStreamAllowed.ALLOWED,
@@ -135,12 +136,44 @@ public abstract class BaseQueryTest extends BaseTest
    protected DocumentData createDocument(FolderData folder, String name, String typeId, byte[] content,
       MimeType mimeType) throws Exception
    {
-
-      return createDocument(folder, name, typeId, new BaseContentStream(content, null, mimeType), null);
+      ContentStream cs = new BaseContentStream(content, null, mimeType);
+      return createDocument(folder, name, typeId, cs, null);
    }
 
    protected DocumentData createDocument(FolderData folder, String name, String typeId, ContentStream content,
       VersioningState versioningState)
+   {
+      PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:document", CmisConstants.NAME);
+      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+      properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
+         .getDisplayName(), name));
+
+      DocumentData document =
+         storage.createDocument(folder, typeId, properties, null, null, null, null, versioningState == null
+            ? VersioningState.MAJOR : versioningState);
+      //document.setName(name);
+      try
+      {
+         document.setContentStream(content);
+      }
+      catch (Exception ex)
+      {
+         fail();
+      }
+      return document;
+   }
+
+   protected FolderData createFolder(FolderData folder, String name, String typeId)
+   {
+      PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:folder", CmisConstants.NAME);
+      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+      properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
+         .getDisplayName(), name));
+
+      FolderData newFolder = storage.createFolder(folder, typeId, properties, null, null, null);
+      //     newFolder.setName(name);
+      return newFolder;
+   }
 
    /**
    //    * Test NOT IN constraint.
@@ -178,34 +211,6 @@ public abstract class BaseQueryTest extends BaseTest
    //
    //      checkResult(result, new Document[]{doc1});
    //   }
-   {
-      PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:document", CmisConstants.NAME);
-      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-      properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
-         .getDisplayName(), "createFolderTest"));
-      
-      DocumentData document =
-         storage.createDocument(folder, typeId, properties, null,null,null,null, versioningState == null ? VersioningState.MAJOR : versioningState);
-      document.setName(name);
-      try {
-      document.setContentStream(content);
-      } catch (Exception ex){
-         fail();
-      }
-      return document;
-   }
-
-   protected FolderData createFolder(FolderData folder, String name, String typeId)
-   {
-      PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:folder", CmisConstants.NAME);
-      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-      properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
-         .getDisplayName(), "createFolderTest"));
-      
-      FolderData newFolder = storage.createFolder(folder, typeId, properties, null, null, null);
-      newFolder.setName(name);
-      return newFolder;
-   }
 
    protected void checkResult(ItemsIterator<Result> result, String[] columns, String[][] expectedResults)
       throws Exception

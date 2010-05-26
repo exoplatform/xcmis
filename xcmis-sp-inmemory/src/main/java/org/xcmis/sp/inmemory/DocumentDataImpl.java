@@ -71,15 +71,15 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
    private ContentStream contentStream;
 
    protected final VersioningState versioningState;
-   
+
    private RenditionManager renditionManager;
 
    public DocumentDataImpl(Entry entry, TypeDefinition type, StorageImpl storage, RenditionManager manager)
    {
-     this(entry, type, storage);
-     this.renditionManager = manager;
+      this(entry, type, storage);
+      this.renditionManager = manager;
    }
-   
+
    public DocumentDataImpl(Entry entry, TypeDefinition type, StorageImpl storage)
    {
       super(entry, type, storage);
@@ -246,7 +246,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
 
          storage.workingCopies.put(getVersionSeriesId(), pwcId);
 
-         DocumentDataImpl obj =  new DocumentDataImpl(pwc, storage.getTypeDefinition(getTypeId(), true), storage);
+         DocumentDataImpl obj = new DocumentDataImpl(pwc, storage.getTypeDefinition(getTypeId(), true), storage);
          obj.save();
          return obj;
       }
@@ -399,8 +399,9 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
       this.contentStream = contentStream;
       save();
    }
-   
-   protected void save() throws StorageException{
+
+   protected void save() throws StorageException
+   {
       save(false);
    }
 
@@ -428,8 +429,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
             }
          }
       }
-      
-      
+
       storage.validateMaxItemsNumber(this);
       String id;
       String vsId;
@@ -520,19 +520,6 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
          storage.validateMemSize(content);
       }
 
-      
-      if (storage.indexListener != null)
-       {
-          if (isNew)
-          {
-             storage.indexListener.created(this);
-          }
-          else
-          {
-             storage.indexListener.updated(this);
-          }
-       }
-      
       if (isNew)
       {
          if (parent != null)
@@ -572,6 +559,18 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
       storage.properties.get(id).putAll(entry.getValues());
       storage.policies.get(id).addAll(entry.getPolicies());
       storage.permissions.get(id).putAll(entry.getPermissions());
+
+      if (storage.indexListener != null)
+      {
+         if (isNew)
+         {
+            storage.indexListener.created(this);
+         }
+         else
+         {
+            storage.indexListener.updated(this);
+         }
+      }
 
       contentStream = null;
    }
