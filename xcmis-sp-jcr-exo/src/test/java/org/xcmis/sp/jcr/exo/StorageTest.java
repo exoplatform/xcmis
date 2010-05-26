@@ -200,11 +200,6 @@ public class StorageTest extends BaseTest
       // update
       pwc = (DocumentData)storage.getObjectById(pwcId);
 
-//      PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:document", CmisConstants.NAME);
-//      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-//      properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
-//         .getDisplayName(), "checkinTestRename_NewName"));
-
       ContentStream cs =
          new BaseContentStream("checkin test. content updated".getBytes(), null, new MimeType("text", "plain"));
 
@@ -1281,7 +1276,7 @@ public class StorageTest extends BaseTest
          .getDisplayName(), name));
 
       FolderData newFolder = storage.createFolder(folder, typeId, properties, null, null, null);
-//      newFolder.setName(name);
+      //      newFolder.setName(name);
       return newFolder;
    }
 
