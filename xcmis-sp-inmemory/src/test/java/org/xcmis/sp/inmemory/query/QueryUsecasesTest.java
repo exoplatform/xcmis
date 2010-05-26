@@ -467,10 +467,13 @@ public class QueryUsecasesTest extends BaseQueryTest
 
       DocumentData doc1 =
          createDocument(testRoot, "node1", NASA_DOCUMENT, "hello world".getBytes(), MimeType.fromString("text/plain"));
+      System.out.println("DOC1:" + doc1.getObjectId());
 
       FolderData folder2 = createFolder(testRoot, "folder2", "cmis:folder");
       DocumentData doc2 =
          createDocument(folder2, "node2", NASA_DOCUMENT, "hello".getBytes(), MimeType.fromString("text/plain"));
+      
+      System.out.println("DOC2:" + doc2.getObjectId());
       String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE NOT CONTAINS(\"world\")";
 
       Query query = new Query(statement, true);

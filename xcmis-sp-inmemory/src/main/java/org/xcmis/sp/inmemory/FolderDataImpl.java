@@ -214,7 +214,7 @@ class FolderDataImpl extends BaseObjectData implements FolderData
    {
       save(false);
    }
-   
+
    protected void save(boolean isNew) throws StorageException
    {
       String name = getName();
@@ -223,62 +223,65 @@ class FolderDataImpl extends BaseObjectData implements FolderData
          throw new NameConstraintViolationException("Object name may noy be null or empty string.");
       }
 
-      for (ItemsIterator<ObjectData> iterator = getParent().getChildren(null); iterator.hasNext();)
+      if (parent != null)
       {
-         ObjectData object = iterator.next();
-         System.out.println(object+"<<<<<<<<<<<<<<<");
-         if (object.getObjectId().equals(getObjectId()))
+         for (ItemsIterator<ObjectData> iterator = parent.getChildren(null); iterator.hasNext();)
          {
-            continue;
-         }
-         if (name.equals(object.getName()))
-         {
-            throw new NameConstraintViolationException("Object with name " + name + " already exists in parent folder.");
+            ObjectData object = iterator.next();
+            if (object.getObjectId().equals(getObjectId()))
+            {
+               continue;
+            }
+            if (name.equals(object.getName()))
+            {
+               throw new NameConstraintViolationException("Object with name " + name
+                  + " already exists in parent folder.");
+            }
          }
       }
 
       String id;
       storage.validateMaxItemsNumber(this);
 
-//      if (isNew())
-//      {
-//         id = StorageImpl.generateId();
-//
-//         entry.setValue(CmisConstants.OBJECT_ID, new StringValue(id));
-//         entry.setValue(CmisConstants.OBJECT_TYPE_ID, new StringValue(getTypeId()));
-//         entry.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(getBaseType().value()));
-//         entry.setValue(CmisConstants.CREATED_BY, new StringValue());
-//         entry.setValue(CmisConstants.CREATION_DATE, new DateValue(Calendar.getInstance()));
-//
-//         storage.children.get(parent.getObjectId()).add(id);
-//
-//         Set<String> parents = new CopyOnWriteArraySet<String>();
-//         parents.add(parent.getObjectId());
-//         storage.parents.put(id, parents);
-//
-//         storage.children.put(id, new CopyOnWriteArraySet<String>());
-//
-//         storage.properties.put(id, new ConcurrentHashMap<String, Value>());
-//         storage.policies.put(id, new CopyOnWriteArraySet<String>());
-//         storage.permissions.put(id, new ConcurrentHashMap<String, Set<String>>());
-//      }
-//      else
-//      {
-         id = getObjectId();
-//      }
+      if (isNew)
+      {
+         id = StorageImpl.generateId();
 
-         if (storage.indexListener != null)
+         entry.setValue(CmisConstants.OBJECT_ID, new StringValue(id));
+         entry.setValue(CmisConstants.OBJECT_TYPE_ID, new StringValue(getTypeId()));
+         entry.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(getBaseType().value()));
+         entry.setValue(CmisConstants.CREATED_BY, new StringValue());
+         entry.setValue(CmisConstants.CREATION_DATE, new DateValue(Calendar.getInstance()));
+
+         storage.children.get(parent.getObjectId()).add(id);
+
+         Set<String> parents = new CopyOnWriteArraySet<String>();
+         parents.add(parent.getObjectId());
+         storage.parents.put(id, parents);
+
+         storage.children.put(id, new CopyOnWriteArraySet<String>());
+
+         storage.properties.put(id, new ConcurrentHashMap<String, Value>());
+         storage.policies.put(id, new CopyOnWriteArraySet<String>());
+         storage.permissions.put(id, new ConcurrentHashMap<String, Set<String>>());
+      }
+      else
+      {
+         id = getObjectId();
+      }
+
+      if (storage.indexListener != null)
+      {
+         if (isNew)
          {
-            if (isNew)
-            {
-               storage.indexListener.created(this);
-            }
-            else
-            {
-               storage.indexListener.updated(this);
-            }
+            storage.indexListener.created(this);
          }
-         
+         else
+         {
+            storage.indexListener.updated(this);
+         }
+      }
+
       entry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue());
       entry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));
       entry.setValue(CmisConstants.CHANGE_TOKEN, new StringValue(StorageImpl.generateId()));

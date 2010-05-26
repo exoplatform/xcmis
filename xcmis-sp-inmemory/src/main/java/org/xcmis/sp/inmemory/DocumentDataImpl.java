@@ -173,7 +173,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
          storage.workingCopies.remove(getVersionSeriesId());
          storage.versions.get(getVersionSeriesId()).add(pwcId);
       }
-
+      this.save();
       return this;
    }
 
@@ -246,7 +246,9 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
 
          storage.workingCopies.put(getVersionSeriesId(), pwcId);
 
-         return new DocumentDataImpl(pwc, storage.getTypeDefinition(getTypeId(), true), storage);
+         DocumentDataImpl obj =  new DocumentDataImpl(pwc, storage.getTypeDefinition(getTypeId(), true), storage);
+         obj.save();
+         return obj;
       }
    }
 
@@ -395,6 +397,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
       }
 
       this.contentStream = contentStream;
+      save();
    }
    
    protected void save() throws StorageException{
@@ -431,33 +434,33 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
       String id;
       String vsId;
 
-//      if (isNew)
-//      {
-//         id = StorageImpl.generateId();
-//         vsId = StorageImpl.generateId();
-//         entry.setValue(CmisConstants.OBJECT_ID, new StringValue(id));
-//         entry.setValue(CmisConstants.OBJECT_TYPE_ID, new StringValue(getTypeId()));
-//         entry.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(getBaseType().value()));
-//         entry.setValue(CmisConstants.CREATED_BY, new StringValue());
-//         entry.setValue(CmisConstants.CREATION_DATE, new DateValue(Calendar.getInstance()));
-//         entry.setValue(CmisConstants.VERSION_SERIES_ID, new StringValue(vsId));
-//         entry.setValue(CmisConstants.IS_LATEST_VERSION, new BooleanValue(true));
-//         entry.setValue(CmisConstants.IS_MAJOR_VERSION, new BooleanValue(versioningState == VersioningState.MAJOR));
-//         entry.setValue(CmisConstants.VERSION_LABEL, new StringValue(versioningState == VersioningState.CHECKEDOUT
-//            ? pwcLabel : latestLabel));
-//         entry.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(
-//            versioningState == VersioningState.CHECKEDOUT));
-//         if (versioningState == VersioningState.CHECKEDOUT)
-//         {
-//            entry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue(id));
-//            entry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, new StringValue());
-//         }
-//      }
-//      else
-//      {
+      if (isNew)
+      {
+         id = StorageImpl.generateId();
+         vsId = StorageImpl.generateId();
+         entry.setValue(CmisConstants.OBJECT_ID, new StringValue(id));
+         entry.setValue(CmisConstants.OBJECT_TYPE_ID, new StringValue(getTypeId()));
+         entry.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(getBaseType().value()));
+         entry.setValue(CmisConstants.CREATED_BY, new StringValue());
+         entry.setValue(CmisConstants.CREATION_DATE, new DateValue(Calendar.getInstance()));
+         entry.setValue(CmisConstants.VERSION_SERIES_ID, new StringValue(vsId));
+         entry.setValue(CmisConstants.IS_LATEST_VERSION, new BooleanValue(true));
+         entry.setValue(CmisConstants.IS_MAJOR_VERSION, new BooleanValue(versioningState == VersioningState.MAJOR));
+         entry.setValue(CmisConstants.VERSION_LABEL, new StringValue(versioningState == VersioningState.CHECKEDOUT
+            ? pwcLabel : latestLabel));
+         entry.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(
+            versioningState == VersioningState.CHECKEDOUT));
+         if (versioningState == VersioningState.CHECKEDOUT)
+         {
+            entry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue(id));
+            entry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, new StringValue());
+         }
+      }
+      else
+      {
          id = getObjectId();
          vsId = getVersionSeriesId();
-//      }
+      }
 
       entry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue());
       entry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));

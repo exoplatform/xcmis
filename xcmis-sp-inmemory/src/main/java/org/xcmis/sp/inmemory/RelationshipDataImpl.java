@@ -111,57 +111,57 @@ class RelationshipDataImpl extends BaseObjectData implements RelationshipData
       storage.validateMaxItemsNumber(this);
       String id;
 
-//      if (isNew())
-//      {
-//         id = StorageImpl.generateId();
-//
-//         entry.setValue(CmisConstants.OBJECT_ID, new StringValue(id));
-//         entry.setValue(CmisConstants.OBJECT_TYPE_ID, new StringValue(getTypeId()));
-//         entry.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(getBaseType().value()));
-//         entry.setValue(CmisConstants.CREATED_BY, new StringValue());
-//         entry.setValue(CmisConstants.CREATION_DATE, new DateValue(Calendar.getInstance()));
-//         entry.setValue(CmisConstants.SOURCE_ID, new StringValue(source.getObjectId()));
-//         entry.setValue(CmisConstants.TARGET_ID, new StringValue(target.getObjectId()));
-//
-//         Set<String> sourceRelationships = storage.relationships.get(source.getObjectId());
-//         if (sourceRelationships == null)
-//         {
-//            sourceRelationships = new CopyOnWriteArraySet<String>();
-//            storage.relationships.put(source.getObjectId(), sourceRelationships);
-//         }
-//         sourceRelationships.add(id);
-//
-//         Set<String> targetRelationships = storage.relationships.get(target.getObjectId());
-//         if (targetRelationships == null)
-//         {
-//            targetRelationships = new CopyOnWriteArraySet<String>();
-//            storage.relationships.put(target.getObjectId(), targetRelationships);
-//         }
-//         targetRelationships.add(id);
-//
-//         storage.parents.put(id, StorageImpl.EMPTY_PARENTS);
-//
-//         storage.properties.put(id, new ConcurrentHashMap<String, Value>());
-//         storage.policies.put(id, new CopyOnWriteArraySet<String>());
-//         storage.permissions.put(id, new ConcurrentHashMap<String, Set<String>>());
-//
-//      }
-//      else
-//      {
-         id = getObjectId();
-//      }
-         
-         if (storage.indexListener != null)
+      if (isNew)
+      {
+         id = StorageImpl.generateId();
+
+         entry.setValue(CmisConstants.OBJECT_ID, new StringValue(id));
+         entry.setValue(CmisConstants.OBJECT_TYPE_ID, new StringValue(getTypeId()));
+         entry.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(getBaseType().value()));
+         entry.setValue(CmisConstants.CREATED_BY, new StringValue());
+         entry.setValue(CmisConstants.CREATION_DATE, new DateValue(Calendar.getInstance()));
+         entry.setValue(CmisConstants.SOURCE_ID, new StringValue(source.getObjectId()));
+         entry.setValue(CmisConstants.TARGET_ID, new StringValue(target.getObjectId()));
+
+         Set<String> sourceRelationships = storage.relationships.get(source.getObjectId());
+         if (sourceRelationships == null)
          {
-            if (isNew)
-            {
-               storage.indexListener.created(this);
-            }
-            else
-            {
-               storage.indexListener.updated(this);
-            }
+            sourceRelationships = new CopyOnWriteArraySet<String>();
+            storage.relationships.put(source.getObjectId(), sourceRelationships);
          }
+         sourceRelationships.add(id);
+
+         Set<String> targetRelationships = storage.relationships.get(target.getObjectId());
+         if (targetRelationships == null)
+         {
+            targetRelationships = new CopyOnWriteArraySet<String>();
+            storage.relationships.put(target.getObjectId(), targetRelationships);
+         }
+         targetRelationships.add(id);
+
+         storage.parents.put(id, StorageImpl.EMPTY_PARENTS);
+
+         storage.properties.put(id, new ConcurrentHashMap<String, Value>());
+         storage.policies.put(id, new CopyOnWriteArraySet<String>());
+         storage.permissions.put(id, new ConcurrentHashMap<String, Set<String>>());
+
+      }
+      else
+      {
+         id = getObjectId();
+      }
+
+      if (storage.indexListener != null)
+      {
+         if (isNew)
+         {
+            storage.indexListener.created(this);
+         }
+         else
+         {
+            storage.indexListener.updated(this);
+         }
+      }
 
       entry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue());
       entry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));
