@@ -30,6 +30,11 @@
 		</init-params>
 	</component>
 
+  <component>
+    <type>org.exoplatform.services.rest.ext.proxy.ProxyService</type>
+  </component>
+
+
 	<component>
 		<type>org.xcmis.spi.deploy.ExoContainerCmisRegistry</type>
                  <init-params>
