@@ -57,6 +57,11 @@ public class PermissionService
       RepositoryInfo repositoryInfo)
    {
 
+      if (userIdentity == null)
+      {
+         userIdentity = new Identity(repositoryInfo.getPrincipalAnonymous(), new HashSet<MembershipEntry>());
+      }
+      
       PermissionMapping permissionMapping = repositoryInfo.getAclCapability().getMapping();
 
       AllowableActions actions = new AllowableActions();
