@@ -124,6 +124,10 @@
    </component>
 
    <component>
+      <type>org.xcmis.spi.PermissionService</type>
+   </component>
+
+   <component>
       <type>org.exoplatform.services.organization.impl.mock.DummyOrganizationService</type>
    </component>
 

@@ -35,6 +35,10 @@
       <type>org.xcmis.spi.deploy.ExoContainerCmisRegistry</type>
    </component>
 
+   <component>
+      <type>org.xcmis.spi.PermissionService</type>
+   </component>
+
    <!-- JCR components -->
    <component>
       <key>org.exoplatform.services.jcr.RepositoryService</key>

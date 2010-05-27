@@ -53,7 +53,7 @@ public class StorageProviderImpl implements StorageProvider
 
    private RenditionManager renditionManager;
 
-   public StorageProviderImpl(InitParams initParams)
+   public StorageProviderImpl(InitParams initParams, PermissionService permissionService)
    {
       if (initParams != null)
       {
@@ -67,8 +67,7 @@ public class StorageProviderImpl implements StorageProvider
          StorageProviderConfig confs = (StorageProviderConfig)param.getObject();
          this.storageConfig = confs.getStorage();
          this.renditionManager = RenditionManager.getInstance();
-         this.storageImpl = new StorageImpl(storageConfig, renditionManager,
-          new PermissionService());
+         this.storageImpl = new StorageImpl(storageConfig, renditionManager, permissionService);
       }
       else
       {

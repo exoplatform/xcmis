@@ -43,6 +43,7 @@ import org.xcmis.sp.jcr.exo.index.IndexListener;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.InvalidArgumentException;
+import org.xcmis.spi.PermissionService;
 import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.Storage;
 import org.xcmis.spi.StorageProvider;
@@ -99,14 +100,17 @@ public class StorageProviderImpl implements StorageProvider, Startable
    private RenditionManager renditionManager;
 
    private StorageConfiguration storageConfig = null;
+   
+   private PermissionService permissionService;
 
    private final Map<String, SearchService> searchServices = new HashMap<String, SearchService>();
 
    public StorageProviderImpl(RepositoryService repositoryService, InitParams initParams,
-      DocumentReaderService documentReaderService)
+      DocumentReaderService documentReaderService, PermissionService permissionService)
    {
       this.repositoryService = repositoryService;
       this.documentReaderService = documentReaderService;
+      this.permissionService = permissionService;
 
       if (initParams != null)
       {
@@ -147,7 +151,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
          Session session = repository.login(ws);
 
          SearchService searchService = getSearchService(storageConfig.getId());
-         Storage storage = new QueryableStorage(session, storageConfig, renditionManager, searchService);
+         Storage storage = new QueryableStorage(session, storageConfig, renditionManager, searchService, permissionService);
          IndexListener indexListener = new IndexListener(storage, searchService);
          //TODO make this method public
          ((StorageImpl)storage).setIndexListener(indexListener);
@@ -286,7 +290,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
             }
          }
          //prepare search service
-         StorageImpl storage = new StorageImpl(session, storageConfig);
+         StorageImpl storage = new StorageImpl(session, storageConfig, permissionService);
          CmisSchema schema = new CmisSchema(storage);
          CmisSchemaTableResolver tableResolver =
             new CmisSchemaTableResolver(new ToStringNameConverter(), schema, storage);

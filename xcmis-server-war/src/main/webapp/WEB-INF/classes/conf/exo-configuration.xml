@@ -43,6 +43,10 @@
 		</init-params>
 	</component>
 
+        <component>
+          <type>org.xcmis.spi.PermissionService</type>
+        </component>
+
 	<component>
 		<key>org.exoplatform.services.document.DocumentReaderService</key>
 		<type>org.xcmis.spi.utils.CmisDocumentReaderService</type>

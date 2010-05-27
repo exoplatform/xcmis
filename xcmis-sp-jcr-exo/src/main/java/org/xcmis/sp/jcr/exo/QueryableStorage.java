@@ -32,6 +32,7 @@ import org.xcmis.spi.FolderData;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.ObjectData;
+import org.xcmis.spi.PermissionService;
 import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.Storage;
 import org.xcmis.spi.model.BaseType;
@@ -72,9 +73,9 @@ public class QueryableStorage extends StorageImpl
     * @param configuration StorageConfiguration
     * @param searchService the search service
     */
-   public QueryableStorage(Session session, StorageConfiguration configuration, SearchService searchService)
+   public QueryableStorage(Session session, StorageConfiguration configuration, SearchService searchService, PermissionService permissionService)
    {
-      super(session, configuration);
+      super(session, configuration,permissionService);
       this.searchService = searchService;
       this.cmisQueryParser = new CmisQueryParser();
    }
@@ -87,9 +88,9 @@ public class QueryableStorage extends StorageImpl
     * @param searchService the search service
     */
    public QueryableStorage(Session session, StorageConfiguration configuration, RenditionManager renditionManager,
-      SearchService searchService)
+      SearchService searchService, PermissionService permissionService)
    {
-      super(session, configuration, renditionManager);
+      super(session, configuration, renditionManager, permissionService);
       this.searchService = searchService;
       this.cmisQueryParser = new CmisQueryParser();
    }
