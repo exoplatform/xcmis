@@ -46,7 +46,7 @@ public class IdentityInterceptor extends AbstractSoapInterceptor
       super(Phase.READ);
       if (LOG.isDebugEnabled())
       {
-         LOG.debug(">>> IdentityInterceptor.IdentityInterceptor() entered");
+         LOG.debug(">> > IdentityInterceptor.IdentityInterceptor() entered");
       }
    }
    
@@ -57,7 +57,7 @@ public class IdentityInterceptor extends AbstractSoapInterceptor
    {
       if (LOG.isDebugEnabled())
       {
-         LOG.debug(">>> IdentityInterceptor.handleMessage() entered");
+         LOG.debug(">> > IdentityInterceptor.handleMessage() entered");
       }
       ConversationState state = new ConversationState(new Identity("root"));
       ConversationState.setCurrent(state);

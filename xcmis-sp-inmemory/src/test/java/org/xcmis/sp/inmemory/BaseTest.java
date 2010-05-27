@@ -96,7 +96,6 @@ public abstract class BaseTest extends TestCase
       properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
          .getDisplayName(), "createFolderTest"));
 
-      System.out.println(">>> alexey: BaseTest.createDocument typeDefinition = " + typeDefinition);
       DocumentData doc = storage.createDocument(parent, typeDefinition, properties, null, null, null, null, versioningState);
       doc.setName(name);
       try
