@@ -82,7 +82,12 @@ public interface Storage extends TypeManager
     *
     * @param parent parent folder or <code>null</code> if document should be
     *        created in unfiling state
-    * @param typeDefinition type id
+    * @param typeDefinition the document type definition
+    * @param properties the document properties
+    * @param content the document content
+    * @param addACL the list of ACEs to be added
+    * @param removeACL the list of ACEs to be removed
+    * @param policies the list of policy IDs
     * @param versioningState versioning state
     * @return new unsaved instance of document
     * @throws ConstraintException if any of following condition are met:
@@ -121,6 +126,10 @@ public interface Storage extends TypeManager
     * @param source source document
     * @param parent parent folder or <code>null</code> if document should be
     *        created in unfiling state
+    * @param properties the document properties
+    * @param addACL the list of ACEs to be added
+    * @param removeACL the list of ACEs to be removed
+    * @param policies the list of policy IDs
     * @param versioningState versioning state
     * @return new instance of document
     * @throws ConstraintException if any of following condition are met:
@@ -153,7 +162,11 @@ public interface Storage extends TypeManager
     * save this folder method {@link ObjectData#save()} must be used.
     *
     * @param parent parent folder
-    * @param typeDefinition type id
+    * @param typeDefinition the folder type definition
+    * @param properties the folder properties
+    * @param addACL the list of ACEs to be added
+    * @param removeACL the list of ACEs to be removed
+    * @param policies the list of policy IDs
     * @return new unsaved instance of folder
     * @throws ConstraintException if any of following condition are met:
     *         <ul>
@@ -177,7 +190,11 @@ public interface Storage extends TypeManager
     * save this policy method {@link ObjectData#save()} must be used.
     *
     * @param parent parent folder
-    * @param typeDefinition type id
+    * @param typeDefinition the policy type definition
+    * @param properties the policy properties
+    * @param addACL the list of ACEs to be added
+    * @param removeACL the list of ACEs to be removed
+    * @param policies the list of policy IDs
     * @return new unsaved instance of policy
     * @throws ConstraintException if any of following condition are met:
     *         <ul>
@@ -192,7 +209,8 @@ public interface Storage extends TypeManager
     *         </ul>
     */
    PolicyData createPolicy(FolderData parent, TypeDefinition typeDefinition, Map<String, Property<?>> properties,
-      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<ObjectData> policies) throws ConstraintException;
+      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<ObjectData> policies)
+      throws ConstraintException;
 
    /**
     * Create new instance of relationship for specified <code>source</code> and
@@ -202,7 +220,11 @@ public interface Storage extends TypeManager
     *
     * @param source source of relationship
     * @param target target of relationship
-    * @param typeDefinition type of relationship
+    * @param typeDefinition the relationship type definition
+    * @param properties the relationship properties
+    * @param addACL the list of ACEs to be added
+    * @param removeACL the list of ACEs to be removed
+    * @param policies the list of policy IDs
     * @return new unsaved instance of relationship
     * @throws ConstraintException if any of following condition are met:
     *         <ul>
@@ -214,8 +236,9 @@ public interface Storage extends TypeManager
     *         AllowedTargetTypes specified by the object type definition</li>
     *         </ul>
     */
-   RelationshipData createRelationship(ObjectData source, ObjectData target, TypeDefinition typeDefinition, Map<String, Property<?>> properties,
-      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<ObjectData> policies) throws ConstraintException;
+   RelationshipData createRelationship(ObjectData source, ObjectData target, TypeDefinition typeDefinition,
+      Map<String, Property<?>> properties, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
+      Collection<ObjectData> policies) throws ConstraintException;
 
    /**
     * Delete specified object. If multi-filed object is deleted then it is
@@ -270,7 +293,7 @@ public interface Storage extends TypeManager
 
    /**
     * Remove non-folder fileable object from all folder where in which it is
-    * currently filed. This method never remove object itself .
+    * currently filed. This method never remove object itself!
     *
     * @param object object
     */
@@ -352,7 +375,7 @@ public interface Storage extends TypeManager
    /**
     * Get object renditions.
     *
-    * @param object object
+    * @param object the object
     * @return iterator over object's renditions. If object has not any
     *         renditions then empty iterator must be returned but never
     *         <code>null</code>
@@ -370,7 +393,7 @@ public interface Storage extends TypeManager
     * Collection of all Document in the specified version series, sorted by
     * cmis:creationDate descending.
     *
-    * @param versionSeriesId id of version series
+    * @param versionSeriesId the id of version series
     * @return document versions
     * @throws ObjectNotFoundException if version series with
     *         <code>versionSeriesId</code> does not exist
