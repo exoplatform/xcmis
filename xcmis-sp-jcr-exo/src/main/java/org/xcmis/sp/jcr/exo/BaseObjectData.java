@@ -1010,6 +1010,11 @@ abstract class BaseObjectData implements ObjectData
             return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
                definition.getDisplayName(), ((DocumentData)this).getVersionLabel());
          }
+         else if (definition.getId().equals(CmisConstants.IS_LATEST_MAJOR_VERSION))
+         {
+            return new BooleanProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
+               definition.getDisplayName(), ((DocumentData)this).isLatestMajorVersion());
+         }
 
          try
          {
