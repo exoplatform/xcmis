@@ -71,12 +71,25 @@ public class StorageTest extends BaseTest
 
    protected FolderData rootFolder;
 
+   protected TypeDefinition documentTypeDefinition;
+
+   protected TypeDefinition folderTypeDefinition;
+
+   protected TypeDefinition policyTypeDefinition;
+
+   protected TypeDefinition relationshipTypeDefinition;
+
    @Override
    public void setUp() throws Exception
    {
       super.setUp();
       storage = storageProvider.getConnection().getStorage();
       rootFolder = (FolderData)storage.getObjectById(JcrCMIS.ROOT_FOLDER_ID);
+
+      documentTypeDefinition = storage.getTypeDefinition("cmis:document", true);
+      folderTypeDefinition = storage.getTypeDefinition("cmis:folder", true);
+      policyTypeDefinition = storage.getTypeDefinition("cmis:policy", true);
+      relationshipTypeDefinition = storage.getTypeDefinition("cmis:relationship", true);
    }
 
    public void testApplyACL() throws Exception
@@ -440,7 +453,7 @@ public class StorageTest extends BaseTest
          new AccessControlEntry("root", new HashSet<String>(Arrays.asList("cmis:read", "cmis:write")));
 
       DocumentData document =
-         storage.createDocument(rootFolder, "cmis:document", properties, cs, Arrays.asList(ace), null, null,
+         storage.createDocument(rootFolder, documentTypeDefinition, properties, cs, Arrays.asList(ace), null, null,
             VersioningState.MAJOR);
 
       assertTrue(session.itemExists("/createDocumentTest"));
@@ -526,7 +539,7 @@ public class StorageTest extends BaseTest
       properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
          .getDisplayName(), "createFolderTest"));
 
-      FolderData newFolder = storage.createFolder(rootFolder, "cmis:folder", properties, null, null, null);
+      FolderData newFolder = storage.createFolder(rootFolder, folderTypeDefinition, properties, null, null, null);
 
       assertTrue(session.itemExists("/createFolderTest"));
       Node folderNode = (Node)session.getItem("/createFolderTest");
@@ -546,7 +559,7 @@ public class StorageTest extends BaseTest
       properties.put(CmisConstants.POLICY_TEXT, new StringProperty(defPolicyText.getId(), defPolicyText.getQueryName(),
          defPolicyText.getLocalName(), defPolicyText.getDisplayName(), "simple policy"));
 
-      ObjectData policy = storage.createPolicy(rootFolder, "cmis:policy", properties, null, null, null);
+      ObjectData policy = storage.createPolicy(rootFolder, policyTypeDefinition, properties, null, null, null);
 
       String expectedPath = StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_POLICIES + "/createPolicyTest";
       assertTrue(session.itemExists(expectedPath));
@@ -568,7 +581,7 @@ public class StorageTest extends BaseTest
          .getLocalName(), defName.getDisplayName(), "createRelationshipTest"));
 
       RelationshipData relationship =
-         storage.createRelationship(sourceDoc, targetDoc, "cmis:relationship", properties, null, null, null);
+         storage.createRelationship(sourceDoc, targetDoc, relationshipTypeDefinition, properties, null, null, null);
 
       Node relationshipNode = ((ExtendedSession)session).getNodeByIdentifier(relationship.getObjectId());
       assertEquals("cmis:relationship", relationshipNode.getPrimaryNodeType().getName());
@@ -672,7 +685,7 @@ public class StorageTest extends BaseTest
          .getLocalName(), defName.getDisplayName(), "relationship01"));
 
       RelationshipData relationship =
-         storage.createRelationship(sourceDoc, targetDoc, "cmis:relationship", properties, null, null, null);
+         storage.createRelationship(sourceDoc, targetDoc, relationshipTypeDefinition, properties, null, null, null);
 
       try
       {
@@ -1263,8 +1276,8 @@ public class StorageTest extends BaseTest
          .getDisplayName(), name));
 
       DocumentData document =
-         storage.createDocument(folder, typeId, properties, content, null, null, null, versioningState == null
-            ? VersioningState.MAJOR : versioningState);
+         storage.createDocument(folder, documentTypeDefinition, properties, content, null, null, null,
+            versioningState == null ? VersioningState.MAJOR : versioningState);
       return document;
    }
 
@@ -1275,7 +1288,7 @@ public class StorageTest extends BaseTest
       properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
          .getDisplayName(), name));
 
-      FolderData newFolder = storage.createFolder(folder, typeId, properties, null, null, null);
+      FolderData newFolder = storage.createFolder(folder, folderTypeDefinition, properties, null, null, null);
       //      newFolder.setName(name);
       return newFolder;
    }
@@ -1293,7 +1306,7 @@ public class StorageTest extends BaseTest
       properties.put(CmisConstants.POLICY_TEXT, new StringProperty(defPolicyText.getId(), defPolicyText.getQueryName(),
          defPolicyText.getLocalName(), defPolicyText.getDisplayName(), policyText));
 
-      PolicyData policy = storage.createPolicy(folder, typeId, properties, null, null, null);
+      PolicyData policy = storage.createPolicy(folder, policyTypeDefinition, properties, null, null, null);
 
       return policy;
    }

@@ -132,7 +132,7 @@ public class StorageImpl implements Storage
 
    final Map<String, Set<String>> children;
 
-   final  Map<String, Set<String>> parents;
+   final Map<String, Set<String>> parents;
 
    final Set<String> unfiled;
 
@@ -396,7 +396,8 @@ public class StorageImpl implements Storage
       }
 
       //return new DocumentCopy(source, parent, getTypeDefinition(source.getTypeId(), true), versioningState, this);
-      DocumentCopy obj = new DocumentCopy(source, parent, getTypeDefinition(source.getTypeId(), true), versioningState, this);
+      DocumentCopy obj =
+         new DocumentCopy(source, parent, getTypeDefinition(source.getTypeId(), true), versioningState, this);
       if (properties != null)
       {
          for (Property<?> property : properties.values())
@@ -404,7 +405,7 @@ public class StorageImpl implements Storage
             ((BaseObjectData)obj).setPropertyInternal(property);
          }
       }
-      
+
       if (policies != null)
       {
          for (ObjectData policy : policies)
@@ -412,10 +413,10 @@ public class StorageImpl implements Storage
             ((BaseObjectData)obj).applyPolicyInternal((PolicyData)policy);
          }
       }
-      
+
       List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(obj.getACL(false), addACL, removeACL);
       obj.setACLInternal(mergedACL);
-      
+
       obj.save(true);
       return obj;
    }
@@ -423,24 +424,23 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public DocumentData createDocument(FolderData parent, String typeId, Map<String, Property<?>> properties,
-      ContentStream content, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
-      Collection<ObjectData> policies, VersioningState versioningState) throws ConstraintException
+   public DocumentData createDocument(FolderData parent, TypeDefinition typeDefinition,
+      Map<String, Property<?>> properties, ContentStream content, List<AccessControlEntry> addACL,
+      List<AccessControlEntry> removeACL, Collection<ObjectData> policies, VersioningState versioningState)
+      throws ConstraintException
    {
       if (parent != null)
       {
-         if (!parent.isAllowedChildType(typeId))
+         if (!parent.isAllowedChildType(typeDefinition.getId()))
          {
-            throw new ConstraintException("Type " + typeId + " is not in list of allowed child type for folder "
-               + parent.getObjectId());
+            throw new ConstraintException("Type " + typeDefinition
+               + " is not in list of allowed child type for folder " + parent.getObjectId());
          }
       }
 
-      TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
-
       if (typeDefinition.getBaseId() != BaseType.DOCUMENT)
       {
-         throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Document.");
+         throw new ConstraintException("Type " + typeDefinition + " is ID of type whose base type is not Document.");
       }
 
       //return new DocumentDataImpl(parent, typeDefinition, versioningState, this);
@@ -449,7 +449,7 @@ public class StorageImpl implements Storage
       {
          obj.setContentStreamInternal(content);
       }
-      
+
       if (properties != null)
       {
          for (Property<?> property : properties.values())
@@ -457,7 +457,7 @@ public class StorageImpl implements Storage
             ((BaseObjectData)obj).setPropertyInternal(property);
          }
       }
-      
+
       if (policies != null)
       {
          for (ObjectData policy : policies)
@@ -465,45 +465,40 @@ public class StorageImpl implements Storage
             ((BaseObjectData)obj).applyPolicyInternal((PolicyData)policy);
          }
       }
-      
+
       List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(obj.getACL(false), addACL, removeACL);
       obj.setACLInternal(mergedACL);
-      
-      
+
       obj.save(true);
       return obj;
    }
 
-   
-    
    /**
     * {@inheritDoc}
     */
-   public FolderData createFolder(FolderData parent, String typeId, Map<String, Property<?>> properties,
-      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<ObjectData> policies)
-      throws ConstraintException
+   public FolderData createFolder(FolderData parent, TypeDefinition typeDefinition,
+      Map<String, Property<?>> properties, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
+      Collection<ObjectData> policies) throws ConstraintException
    {
       if (parent == null)
       {
          throw new ConstraintException("Parent folder must be provided.");
       }
 
-      if (!parent.isAllowedChildType(typeId))
+      if (!parent.isAllowedChildType(typeDefinition.getId()))
       {
-         throw new ConstraintException("Type " + typeId + " is not in list of allowed child type for folder "
+         throw new ConstraintException("Type " + typeDefinition + " is not in list of allowed child type for folder "
             + parent.getObjectId());
       }
 
-      TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
-
       if (typeDefinition.getBaseId() != BaseType.FOLDER)
       {
-         throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Folder.");
+         throw new ConstraintException("Type " + typeDefinition + " is ID of type whose base type is not Folder.");
       }
 
       //return new FolderDataImpl(parent, typeDefinition, this);
       FolderDataImpl obj = new FolderDataImpl(parent, typeDefinition, this);
-      
+
       if (properties != null)
       {
          for (Property<?> property : properties.values())
@@ -511,7 +506,7 @@ public class StorageImpl implements Storage
             ((BaseObjectData)obj).setPropertyInternal(property);
          }
       }
-      
+
       if (policies != null)
       {
          for (ObjectData policy : policies)
@@ -519,10 +514,10 @@ public class StorageImpl implements Storage
             ((BaseObjectData)obj).applyPolicyInternal((PolicyData)policy);
          }
       }
-      
+
       List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(obj.getACL(false), addACL, removeACL);
       obj.setACLInternal(mergedACL);
-      
+
       obj.save(true);
       return obj;
    }
@@ -530,19 +525,18 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public PolicyData createPolicy(FolderData parent, String typeId, Map<String, Property<?>> properties,
-      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<ObjectData> policies) throws ConstraintException
+   public PolicyData createPolicy(FolderData parent, TypeDefinition typeDefinition,
+      Map<String, Property<?>> properties, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
+      Collection<ObjectData> policies) throws ConstraintException
    {
-      TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
-
       if (typeDefinition.getBaseId() != BaseType.POLICY)
       {
-         throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Policy.");
+         throw new ConstraintException("Type " + typeDefinition + " is ID of type whose base type is not Policy.");
       }
 
       //return new PolicyDataImpl(typeDefinition, this);
       PolicyDataImpl obj = new PolicyDataImpl(typeDefinition, this);
-      
+
       if (properties != null)
       {
          for (Property<?> property : properties.values())
@@ -550,7 +544,7 @@ public class StorageImpl implements Storage
             ((BaseObjectData)obj).setPropertyInternal(property);
          }
       }
-      
+
       if (policies != null)
       {
          for (ObjectData policy : policies)
@@ -558,31 +552,29 @@ public class StorageImpl implements Storage
             ((BaseObjectData)obj).applyPolicyInternal((PolicyData)policy);
          }
       }
-      
+
       obj.save(true);
-      
+
       List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(obj.getACL(false), addACL, removeACL);
       obj.setACLInternal(mergedACL);
-      
+
       return obj;
    }
 
    /**
     * {@inheritDoc}
     */
-   public RelationshipData createRelationship(ObjectData source, ObjectData target, String typeId, Map<String, Property<?>> properties,
-      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<ObjectData> policies)
-      throws ConstraintException
+   public RelationshipData createRelationship(ObjectData source, ObjectData target, TypeDefinition typeDefinition,
+      Map<String, Property<?>> properties, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
+      Collection<ObjectData> policies) throws ConstraintException
    {
-      TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
-
       if (typeDefinition.getBaseId() != BaseType.RELATIONSHIP)
       {
-         throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Relationship.");
+         throw new ConstraintException("Type " + typeDefinition + " is ID of type whose base type is not Relationship.");
       }
 
       //return new RelationshipDataImpl(getTypeDefinition(typeId, true), source, target, this);
-      RelationshipDataImpl obj = new RelationshipDataImpl(getTypeDefinition(typeId, true), source, target, this);
+      RelationshipDataImpl obj = new RelationshipDataImpl(typeDefinition, source, target, this);
 
       if (properties != null)
       {
@@ -591,7 +583,7 @@ public class StorageImpl implements Storage
             ((BaseObjectData)obj).setPropertyInternal(property);
          }
       }
-      
+
       if (policies != null)
       {
          for (ObjectData policy : policies)
@@ -599,10 +591,10 @@ public class StorageImpl implements Storage
             ((BaseObjectData)obj).applyPolicyInternal((PolicyData)policy);
          }
       }
-      
+
       List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(obj.getACL(false), addACL, removeACL);
       obj.setACLInternal(mergedACL);
-      
+
       obj.save(true);
       return obj;
    }

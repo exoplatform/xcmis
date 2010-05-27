@@ -154,7 +154,7 @@ public class StorageImpl implements Storage
    private IndexListener indexListener;
 
    private RepositoryInfo repositoryInfo;
-   
+
    private PermissionService permissionService;
 
    public StorageImpl(Session session, StorageConfiguration configuration, PermissionService permissionService)
@@ -164,14 +164,15 @@ public class StorageImpl implements Storage
       this.permissionService = permissionService;
    }
 
-   public StorageImpl(Session session, StorageConfiguration configuration, RenditionManager renditionManager, PermissionService permissionService)
+   public StorageImpl(Session session, StorageConfiguration configuration, RenditionManager renditionManager,
+      PermissionService permissionService)
    {
       this.session = session;
       this.configuration = configuration;
       this.renditionManager = renditionManager;
       this.permissionService = permissionService;
    }
-   
+
    public StorageImpl(Session session, IndexListener indexListener, StorageConfiguration configuration,
       RenditionManager renditionManager, PermissionService permissionService)
    {
@@ -393,87 +394,85 @@ public class StorageImpl implements Storage
             getRepositoryInfo());
 
       return actions;
-      
-      
-      
-//      AllowableActions actions = new AllowableActions();
-//      TypeDefinition type = object.getTypeDefinition();
-//
-//      RepositoryCapabilities capabilities = getRepositoryInfo().getCapabilities();
-//
-//      boolean isCheckedout = type.getBaseId() == BaseType.DOCUMENT //
-//         && type.isVersionable() //
-//         && ((DocumentData)object).isVersionSeriesCheckedOut();
-//
-//      actions.setCanGetProperties(true);
-//
-//      actions.setCanUpdateProperties(true); // TODO : need to check is it latest version ??
-//
-//      actions.setCanApplyACL(type.isControllableACL());
-//
-//      actions.setCanGetACL(type.isControllableACL());
-//
-//      actions.setCanApplyPolicy(type.isControllablePolicy());
-//
-//      actions.setCanGetAppliedPolicies(type.isControllablePolicy());
-//
-//      actions.setCanRemovePolicy(type.isControllablePolicy());
-//
-//      actions.setCanGetObjectParents(type.isFileable());
-//
-//      actions.setCanMoveObject(type.isFileable());
-//
-//      actions.setCanAddObjectToFolder(capabilities.isCapabilityMultifiling() //
-//         && type.isFileable() //
-//         && type.getBaseId() != BaseType.FOLDER);
-//
-//      actions.setCanRemoveObjectFromFolder(capabilities.isCapabilityUnfiling() //
-//         && type.isFileable() //
-//         && type.getBaseId() != BaseType.FOLDER);
-//
-//      actions.setCanGetDescendants(capabilities.isCapabilityGetDescendants() //
-//         && type.getBaseId() == BaseType.FOLDER);
-//
-//      actions.setCanGetFolderTree(capabilities.isCapabilityGetFolderTree() //
-//         && type.getBaseId() == BaseType.FOLDER);
-//
-//      actions.setCanCreateDocument(type.getBaseId() == BaseType.FOLDER);
-//
-//      actions.setCanCreateFolder(type.getBaseId() == BaseType.FOLDER);
-//
-//      actions.setCanDeleteTree(type.getBaseId() == BaseType.FOLDER);
-//
-//      actions.setCanGetChildren(type.getBaseId() == BaseType.FOLDER);
-//
-//      actions.setCanGetFolderParent(type.getBaseId() == BaseType.FOLDER);
-//
-//      actions.setCanGetContentStream(type.getBaseId() == BaseType.DOCUMENT //
-//         && ((DocumentData)object).hasContent());
-//
-//      actions.setCanSetContentStream(type.getBaseId() == BaseType.DOCUMENT //
-//         && type.getContentStreamAllowed() != ContentStreamAllowed.NOT_ALLOWED);
-//
-//      actions.setCanDeleteContentStream(type.getBaseId() == BaseType.DOCUMENT //
-//         && type.getContentStreamAllowed() != ContentStreamAllowed.REQUIRED);
-//
-//      actions.setCanGetAllVersions(type.getBaseId() == BaseType.DOCUMENT);
-//
-//      actions.setCanGetRenditions(capabilities.getCapabilityRenditions() == CapabilityRendition.READ);
-//
-//      actions.setCanCheckIn(isCheckedout);
-//
-//      actions.setCanCancelCheckOut(isCheckedout);
-//
-//      actions.setCanCheckOut(!isCheckedout);
-//
-//      actions.setCanGetObjectRelationships(type.getBaseId() != BaseType.RELATIONSHIP);
-//
-//      actions.setCanCreateRelationship(type.getBaseId() != BaseType.RELATIONSHIP);
-//
-//      // TODO : applied policy, not empty folders, not latest versions may not be delete.
-//      actions.setCanDeleteObject(true);
-//
-//      return actions;
+
+      //      AllowableActions actions = new AllowableActions();
+      //      TypeDefinition type = object.getTypeDefinition();
+      //
+      //      RepositoryCapabilities capabilities = getRepositoryInfo().getCapabilities();
+      //
+      //      boolean isCheckedout = type.getBaseId() == BaseType.DOCUMENT //
+      //         && type.isVersionable() //
+      //         && ((DocumentData)object).isVersionSeriesCheckedOut();
+      //
+      //      actions.setCanGetProperties(true);
+      //
+      //      actions.setCanUpdateProperties(true); // TODO : need to check is it latest version ??
+      //
+      //      actions.setCanApplyACL(type.isControllableACL());
+      //
+      //      actions.setCanGetACL(type.isControllableACL());
+      //
+      //      actions.setCanApplyPolicy(type.isControllablePolicy());
+      //
+      //      actions.setCanGetAppliedPolicies(type.isControllablePolicy());
+      //
+      //      actions.setCanRemovePolicy(type.isControllablePolicy());
+      //
+      //      actions.setCanGetObjectParents(type.isFileable());
+      //
+      //      actions.setCanMoveObject(type.isFileable());
+      //
+      //      actions.setCanAddObjectToFolder(capabilities.isCapabilityMultifiling() //
+      //         && type.isFileable() //
+      //         && type.getBaseId() != BaseType.FOLDER);
+      //
+      //      actions.setCanRemoveObjectFromFolder(capabilities.isCapabilityUnfiling() //
+      //         && type.isFileable() //
+      //         && type.getBaseId() != BaseType.FOLDER);
+      //
+      //      actions.setCanGetDescendants(capabilities.isCapabilityGetDescendants() //
+      //         && type.getBaseId() == BaseType.FOLDER);
+      //
+      //      actions.setCanGetFolderTree(capabilities.isCapabilityGetFolderTree() //
+      //         && type.getBaseId() == BaseType.FOLDER);
+      //
+      //      actions.setCanCreateDocument(type.getBaseId() == BaseType.FOLDER);
+      //
+      //      actions.setCanCreateFolder(type.getBaseId() == BaseType.FOLDER);
+      //
+      //      actions.setCanDeleteTree(type.getBaseId() == BaseType.FOLDER);
+      //
+      //      actions.setCanGetChildren(type.getBaseId() == BaseType.FOLDER);
+      //
+      //      actions.setCanGetFolderParent(type.getBaseId() == BaseType.FOLDER);
+      //
+      //      actions.setCanGetContentStream(type.getBaseId() == BaseType.DOCUMENT //
+      //         && ((DocumentData)object).hasContent());
+      //
+      //      actions.setCanSetContentStream(type.getBaseId() == BaseType.DOCUMENT //
+      //         && type.getContentStreamAllowed() != ContentStreamAllowed.NOT_ALLOWED);
+      //
+      //      actions.setCanDeleteContentStream(type.getBaseId() == BaseType.DOCUMENT //
+      //         && type.getContentStreamAllowed() != ContentStreamAllowed.REQUIRED);
+      //
+      //      actions.setCanGetAllVersions(type.getBaseId() == BaseType.DOCUMENT);
+      //
+      //      actions.setCanGetRenditions(capabilities.getCapabilityRenditions() == CapabilityRendition.READ);
+      //
+      //      actions.setCanCheckIn(isCheckedout);
+      //
+      //      actions.setCanCancelCheckOut(isCheckedout);
+      //
+      //      actions.setCanCheckOut(!isCheckedout);
+      //
+      //      actions.setCanGetObjectRelationships(type.getBaseId() != BaseType.RELATIONSHIP);
+      //
+      //      actions.setCanCreateRelationship(type.getBaseId() != BaseType.RELATIONSHIP);
+      //
+      //      // TODO : applied policy, not empty folders, not latest versions may not be delete.
+      //      actions.setCanDeleteObject(true);
+      //
+      //      return actions;
    }
 
    /**
@@ -617,24 +616,23 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public DocumentData createDocument(FolderData parent, String typeId, Map<String, Property<?>> properties,
-      ContentStream content, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
-      Collection<ObjectData> policies, VersioningState versioningState) throws ConstraintException
+   public DocumentData createDocument(FolderData parent, TypeDefinition typeDefinition,
+      Map<String, Property<?>> properties, ContentStream content, List<AccessControlEntry> addACL,
+      List<AccessControlEntry> removeACL, Collection<ObjectData> policies, VersioningState versioningState)
+      throws ConstraintException
    {
       if (parent != null)
       {
-         if (!parent.isAllowedChildType(typeId))
+         if (!parent.isAllowedChildType(typeDefinition.getId()))
          {
-            throw new ConstraintException("Type " + typeId + " is not in list of allowed child type for folder "
-               + parent.getObjectId());
+            throw new ConstraintException("Type " + typeDefinition
+               + " is not in list of allowed child type for folder " + parent.getObjectId());
          }
       }
 
-      TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
-
       if (typeDefinition.getBaseId() != BaseType.DOCUMENT)
       {
-         throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Document.");
+         throw new ConstraintException("Type " + typeDefinition + " is ID of type whose base type is not Document.");
       }
 
       DocumentData document = null;
@@ -751,9 +749,9 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public FolderData createFolder(FolderData parent, String typeId, Map<String, Property<?>> properties,
-      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<ObjectData> policies)
-      throws ConstraintException
+   public FolderData createFolder(FolderData parent, TypeDefinition typeDefinition,
+      Map<String, Property<?>> properties, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
+      Collection<ObjectData> policies) throws ConstraintException
    {
 
       if (parent == null)
@@ -761,17 +759,15 @@ public class StorageImpl implements Storage
          throw new ConstraintException("Parent folder must be provided.");
       }
 
-      if (!parent.isAllowedChildType(typeId))
+      if (!parent.isAllowedChildType(typeDefinition.getId()))
       {
-         throw new ConstraintException("Type " + typeId + " is not in list of allowed child type for folder "
+         throw new ConstraintException("Type " + typeDefinition + " is not in list of allowed child type for folder "
             + parent.getObjectId());
       }
 
-      TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
-
       if (typeDefinition.getBaseId() != BaseType.FOLDER)
       {
-         throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Folder.");
+         throw new ConstraintException("Type " + typeDefinition + " is ID of type whose base type is not Folder.");
       }
 
       FolderData folder = null;
@@ -859,15 +855,13 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public PolicyData createPolicy(FolderData parent, String typeId, Map<String, Property<?>> properties,
-      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<ObjectData> policies)
-      throws ConstraintException
+   public PolicyData createPolicy(FolderData parent, TypeDefinition typeDefinition,
+      Map<String, Property<?>> properties, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
+      Collection<ObjectData> policies) throws ConstraintException
    {
-      TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
-
       if (typeDefinition.getBaseId() != BaseType.POLICY)
       {
-         throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Policy.");
+         throw new ConstraintException("Type " + typeDefinition + " is ID of type whose base type is not Policy.");
       }
 
       // TODO : need raise exception if parent folder is provided ??
@@ -953,16 +947,13 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public RelationshipData createRelationship(ObjectData source, ObjectData target, String typeId,
+   public RelationshipData createRelationship(ObjectData source, ObjectData target, TypeDefinition typeDefinition,
       Map<String, Property<?>> properties, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
       Collection<ObjectData> policies) throws ConstraintException
    {
-
-      TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
-
       if (typeDefinition.getBaseId() != BaseType.RELATIONSHIP)
       {
-         throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Relationship.");
+         throw new ConstraintException("Type " + typeDefinition + " is ID of type whose base type is not Relationship.");
       }
 
       RelationshipData relationship = null;

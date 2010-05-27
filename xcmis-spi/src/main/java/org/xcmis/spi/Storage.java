@@ -25,6 +25,7 @@ import org.xcmis.spi.model.ChangeEvent;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.Rendition;
 import org.xcmis.spi.model.RepositoryInfo;
+import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.UnfileObject;
 import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.query.Query;
@@ -81,7 +82,7 @@ public interface Storage extends TypeManager
     *
     * @param parent parent folder or <code>null</code> if document should be
     *        created in unfiling state
-    * @param typeId type id
+    * @param typeDefinition type id
     * @param versioningState versioning state
     * @return new unsaved instance of document
     * @throws ConstraintException if any of following condition are met:
@@ -103,7 +104,7 @@ public interface Storage extends TypeManager
     *         </ul>
     * @see VersioningState
     */
-   DocumentData createDocument(FolderData parent, String typeId, Map<String, Property<?>> properties,
+   DocumentData createDocument(FolderData parent, TypeDefinition typeDefinition, Map<String, Property<?>> properties,
       ContentStream content, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
       Collection<ObjectData> policies, VersioningState versioningState) throws ConstraintException;
 
@@ -152,7 +153,7 @@ public interface Storage extends TypeManager
     * save this folder method {@link ObjectData#save()} must be used.
     *
     * @param parent parent folder
-    * @param typeId type id
+    * @param typeDefinition type id
     * @return new unsaved instance of folder
     * @throws ConstraintException if any of following condition are met:
     *         <ul>
@@ -164,7 +165,7 @@ public interface Storage extends TypeManager
     *         <code>false</code> for <code>typeId</code>)</li>
     *         </ul>
     */
-   FolderData createFolder(FolderData parent, String typeId, Map<String, Property<?>> properties,
+   FolderData createFolder(FolderData parent, TypeDefinition typeDefinition, Map<String, Property<?>> properties,
       List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<ObjectData> policies)
       throws ConstraintException;
 
@@ -176,7 +177,7 @@ public interface Storage extends TypeManager
     * save this policy method {@link ObjectData#save()} must be used.
     *
     * @param parent parent folder
-    * @param typeId type id
+    * @param typeDefinition type id
     * @return new unsaved instance of policy
     * @throws ConstraintException if any of following condition are met:
     *         <ul>
@@ -190,7 +191,7 @@ public interface Storage extends TypeManager
     *         <code>false</code> for <code>typeId</code>)</li>
     *         </ul>
     */
-   PolicyData createPolicy(FolderData parent, String typeId, Map<String, Property<?>> properties,
+   PolicyData createPolicy(FolderData parent, TypeDefinition typeDefinition, Map<String, Property<?>> properties,
       List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<ObjectData> policies) throws ConstraintException;
 
    /**
@@ -201,7 +202,7 @@ public interface Storage extends TypeManager
     *
     * @param source source of relationship
     * @param target target of relationship
-    * @param typeId type of relationship
+    * @param typeDefinition type of relationship
     * @return new unsaved instance of relationship
     * @throws ConstraintException if any of following condition are met:
     *         <ul>
@@ -213,7 +214,7 @@ public interface Storage extends TypeManager
     *         AllowedTargetTypes specified by the object type definition</li>
     *         </ul>
     */
-   RelationshipData createRelationship(ObjectData source, ObjectData target, String typeId, Map<String, Property<?>> properties,
+   RelationshipData createRelationship(ObjectData source, ObjectData target, TypeDefinition typeDefinition, Map<String, Property<?>> properties,
       List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<ObjectData> policies) throws ConstraintException;
 
    /**

@@ -34,6 +34,7 @@ import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.Storage;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.PropertyDefinition;
+import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.model.impl.StringProperty;
 import org.xcmis.spi.query.Query;
@@ -76,22 +77,29 @@ public abstract class BaseQueryTest extends BaseTest
 
    protected FolderData rootFolder;
 
+   protected TypeDefinition nasaDocumentTypeDefinition;
+
+   protected TypeDefinition folderTypeDefinition;
+
    public void setUp() throws Exception
    {
       super.setUp();
       storage = storageProvider.getConnection().getStorage();
       rootFolder = (FolderData)storage.getObjectById(JcrCMIS.ROOT_FOLDER_ID);
+
+      nasaDocumentTypeDefinition = storage.getTypeDefinition(NASA_DOCUMENT, true);
+      folderTypeDefinition = storage.getTypeDefinition("cmis:folder", true);
    }
 
-   protected DocumentData createDocument(FolderData folder, String name, String typeId, byte[] content,
+   protected DocumentData createDocument(FolderData folder, String name, TypeDefinition typeDefinition, byte[] content,
       MimeType mimeType) throws Exception
    {
 
-      return createDocument(folder, name, typeId, new BaseContentStream(content, null, mimeType), null);
+      return createDocument(folder, name, typeDefinition, new BaseContentStream(content, null, mimeType), null);
    }
 
-   protected DocumentData createDocument(FolderData folder, String name, String typeId, ContentStream content,
-      VersioningState versioningState) throws Exception//   /**
+   protected DocumentData createDocument(FolderData folder, String name, TypeDefinition typeDefinition,
+      ContentStream content, VersioningState versioningState) throws Exception//   /**
    //    * Test NOT IN constraint.
    //    * <p>
    //    * Initial data:
@@ -135,19 +143,19 @@ public abstract class BaseQueryTest extends BaseTest
          .getDisplayName(), name));
 
       DocumentData document =
-         storage.createDocument(folder, typeId, properties, content, null, null, null, versioningState == null
+         storage.createDocument(folder, typeDefinition, properties, content, null, null, null, versioningState == null
             ? VersioningState.MAJOR : versioningState);
       return document;
    }
 
-   protected FolderData createFolder(FolderData folder, String name, String typeId) throws Exception
+   protected FolderData createFolder(FolderData folder, String name, TypeDefinition typeDefinition) throws Exception
    {
       PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:folder", CmisConstants.NAME);
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
          .getDisplayName(), name));
 
-      FolderData newFolder = storage.createFolder(folder, typeId, properties, null, null, null);
+      FolderData newFolder = storage.createFolder(folder, typeDefinition, properties, null, null, null);
       return newFolder;
    }
 

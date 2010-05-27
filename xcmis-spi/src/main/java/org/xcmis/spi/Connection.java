@@ -476,7 +476,7 @@ public abstract class Connection
       // CREATE NEW DOCUMENT 
 
       DocumentData newDocument =
-         storage.createDocument((FolderData)folder, typeId, properties, content, addACL, removeACL, policiesObjectData,
+         storage.createDocument((FolderData)folder, typeDefinition, properties, content, addACL, removeACL, policiesObjectData,
             versioningState);
 
       return newDocument.getObjectId();
@@ -666,7 +666,7 @@ public abstract class Connection
       // CREATE NEW FOLDER 
 
       ObjectData newFolder =
-         storage.createFolder((FolderData)folder, typeId, properties, addACL, removeACL, policiesObjectData);
+         storage.createFolder((FolderData)folder, typeDefinition, properties, addACL, removeACL, policiesObjectData);
 
       return newFolder.getObjectId();
    }
@@ -761,7 +761,7 @@ public abstract class Connection
       // CREATE NEW POLICY 
 
       ObjectData newPolicy =
-         storage.createPolicy((FolderData)folder, typeId, properties, addACL, removeACL, policiesObjectData);
+         storage.createPolicy((FolderData)folder, typeDefinition, properties, addACL, removeACL, policiesObjectData);
 
       return newPolicy.getObjectId();
    }
@@ -860,7 +860,7 @@ public abstract class Connection
       // CREATE NEW RELATIONSHIP 
 
       ObjectData newRelationship =
-         storage.createRelationship(storage.getObjectById(sourceId), storage.getObjectById(targetId), typeId,
+         storage.createRelationship(storage.getObjectById(sourceId), storage.getObjectById(targetId), typeDefinition,
             properties, addACL, removeACL, policiesObjectData);
 
       return newRelationship.getObjectId();

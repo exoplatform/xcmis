@@ -32,6 +32,7 @@ import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.PropertyDefinition;
+import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.model.impl.StringProperty;
 
@@ -51,6 +52,8 @@ public abstract class BaseTest extends TestCase
    protected FolderData rootFolder;
 
    protected final String storageId = "inmem1";
+   
+   protected TypeDefinition documentTypeDefinition;
 
    public void setUp() throws Exception
    {
@@ -66,62 +69,70 @@ public abstract class BaseTest extends TestCase
 
       storage = new StorageImpl(configuration);
       rootFolder = (FolderData)storage.getObjectById(storage.getRepositoryInfo().getRootFolderId());
+      
+      documentTypeDefinition = storage.getTypeDefinition("cmis:document", true);
    }
 
-   protected FolderData createFolder(FolderData parent, String name, String type)
+   protected FolderData createFolder(FolderData parent, String name)
    {
       PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:folder", CmisConstants.NAME);
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
          .getDisplayName(), "createFolderTest"));
-      
-      FolderData folder = storage.createFolder(parent, type, properties, null, null, null);
+
+      TypeDefinition typeDefinition = storage.getTypeDefinition("cmis:folder", true);
+
+      FolderData folder = storage.createFolder(parent, typeDefinition, properties, null, null, null);
       folder.setName(name);
       return folder;
    }
 
-   protected DocumentData createDocument(FolderData parent, String name, String type, ContentStream content,
+   protected DocumentData createDocument(FolderData parent, String name, TypeDefinition typeDefinition, ContentStream content,
       VersioningState versioningState)
    {
-      
+
       PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:document", CmisConstants.NAME);
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
          .getDisplayName(), "createFolderTest"));
-      
-      DocumentData doc = storage.createDocument(parent, type,properties, null,null,null,null, versioningState);
+
+      System.out.println(">>> alexey: BaseTest.createDocument typeDefinition = " + typeDefinition);
+      DocumentData doc = storage.createDocument(parent, typeDefinition, properties, null, null, null, null, versioningState);
       doc.setName(name);
-      try {
-      doc.setContentStream(content);
-      } catch (Exception ex){
+      try
+      {
+         doc.setContentStream(content);
+      }
+      catch (Exception ex)
+      {
          fail();
       }
       return doc;
    }
 
-   protected PolicyData createPolicy(String name, String type, String policyText)
+   protected PolicyData createPolicy(String name, TypeDefinition typeDefinition, String policyText)
    {
-      
+
       PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
          .getDisplayName(), "createFolderTest"));
-      
-      PolicyData policy = storage.createPolicy(null, type, properties, null,null,null);
+
+      PolicyData policy = storage.createPolicy(null, typeDefinition, properties, null, null, null);
       policy.setName(name);
 
       return policy;
    }
 
-   public RelationshipData createRelationship(String name, ObjectData source, ObjectData target, String typeId)
+   public RelationshipData createRelationship(String name, ObjectData source, ObjectData target, TypeDefinition typeDefinition)
    {
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       PropertyDefinition<?> defName =
          PropertyDefinitions.getPropertyDefinition("cmis:relationship", CmisConstants.NAME);
       properties.put(CmisConstants.NAME, new StringProperty(defName.getId(), defName.getQueryName(), defName
          .getLocalName(), defName.getDisplayName(), "createRelationshipTest"));
-      
-      RelationshipData relationship = storage.createRelationship(source, target, typeId, properties, null, null, null);
+
+      RelationshipData relationship = storage.createRelationship(source, target, typeDefinition, properties, null, null, null);
       relationship.setName(name);
       return relationship;
    }

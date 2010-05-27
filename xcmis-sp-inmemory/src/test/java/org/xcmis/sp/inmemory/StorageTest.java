@@ -44,7 +44,7 @@ public class StorageTest extends BaseTest
 
    public void testAddAcl() throws Exception
    {
-      DocumentData document = createDocument(rootFolder, "aclTest", "cmis:document", null, null);
+      DocumentData document = createDocument(rootFolder, "aclTest", documentTypeDefinition, null, null);
       String id = document.getObjectId();
       document.setACL(Collections.singletonList(new AccessControlEntry("root", new HashSet<String>(Arrays.asList(
          "cmis:read", "cmis:write")))));
@@ -54,9 +54,9 @@ public class StorageTest extends BaseTest
 
    public void testMultifiledChild() throws Exception
    {
-      DocumentData document = createDocument(rootFolder, "multifiledChildTest", "cmis:document", null, null);
-      FolderData folder1 = createFolder(rootFolder, "multifiledChildFolderTest01", "cmis:folder");
-      DocumentData child1 = createDocument(folder1, "child1", "cmis:document", null, null);
+      DocumentData document = createDocument(rootFolder, "multifiledChildTest", documentTypeDefinition, null, null);
+      FolderData folder1 = createFolder(rootFolder, "multifiledChildFolderTest01");
+      DocumentData child1 = createDocument(folder1, "child1", documentTypeDefinition, null, null);
 
       List<String> chs = new ArrayList<String>();
       for (ItemsIterator<ObjectData> children = folder1.getChildren(null); children.hasNext();)
@@ -78,11 +78,11 @@ public class StorageTest extends BaseTest
 
    public void testMultifiling() throws Exception
    {
-      DocumentData document = createDocument(rootFolder, "multifilingDocumentTest", "cmis:document", null, null);
-      FolderData folder1 = createFolder(rootFolder, "multifilingFolderTest1", "cmis:folder");
-      FolderData folder2 = createFolder(rootFolder, "multifilingFolderTest2", "cmis:folder");
-      FolderData folder3 = createFolder(rootFolder, "multifilingFolderTest3", "cmis:folder");
-      FolderData folder4 = createFolder(rootFolder, "multifilingFolderTest4", "cmis:folder");
+      DocumentData document = createDocument(rootFolder, "multifilingDocumentTest", documentTypeDefinition, null, null);
+      FolderData folder1 = createFolder(rootFolder, "multifilingFolderTest1");
+      FolderData folder2 = createFolder(rootFolder, "multifilingFolderTest2");
+      FolderData folder3 = createFolder(rootFolder, "multifilingFolderTest3");
+      FolderData folder4 = createFolder(rootFolder, "multifilingFolderTest4");
       folder1.addObject(document);
       folder2.addObject(document);
       folder3.addObject(document);
@@ -121,7 +121,7 @@ public class StorageTest extends BaseTest
    public void testUnfiling() throws Exception
    {
       assertEquals(0, getSize(storage.getUnfiledObjectsId()));
-      DocumentData document = createDocument(rootFolder, "unfilingDocumentTest", "cmis:document", null, null);
+      DocumentData document = createDocument(rootFolder, "unfilingDocumentTest", documentTypeDefinition, null, null);
       assertTrue(rootFolder.getChildren(null).hasNext());
       rootFolder.removeObject(document);
       assertFalse(rootFolder.getChildren(null).hasNext());
