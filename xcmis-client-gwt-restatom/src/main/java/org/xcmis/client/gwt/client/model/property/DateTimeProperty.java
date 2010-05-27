@@ -38,6 +38,11 @@ public class DateTimeProperty extends BaseProperty<Date>
    {
       super();
    }
+   
+   public DateTimeProperty(DateTimeProperty other)
+   {
+      super(other);
+   }
 
    /**
     * @param id id

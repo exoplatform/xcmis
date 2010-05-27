@@ -37,6 +37,11 @@ public class IntegerProperty extends BaseProperty<Long>
    {
       super();
    }
+   
+   public IntegerProperty(IntegerProperty other)
+   {
+      super(other);
+   }
 
    /**
     * @param id id

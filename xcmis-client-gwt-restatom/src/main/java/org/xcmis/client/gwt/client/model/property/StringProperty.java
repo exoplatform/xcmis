@@ -37,6 +37,11 @@ public class StringProperty extends BaseProperty<String>
    {
       super();
    }
+   
+   public StringProperty(StringProperty other)
+   {
+      super(other);
+   }
 
    /**
     * @param id id

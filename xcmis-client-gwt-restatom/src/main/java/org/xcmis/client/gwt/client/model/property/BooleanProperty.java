@@ -38,6 +38,11 @@ public class BooleanProperty extends BaseProperty<Boolean>
       super();
    }
    
+   public BooleanProperty(BooleanProperty other)
+   {
+      super(other);
+   }
+   
    /**
     * @param id id 
     * @param queryName query name

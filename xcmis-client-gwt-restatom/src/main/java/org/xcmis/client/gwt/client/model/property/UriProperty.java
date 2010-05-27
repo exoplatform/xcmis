@@ -37,6 +37,11 @@ public class UriProperty extends BaseProperty<String>
    {
       super();
    }
+   
+   public UriProperty(UriProperty other)
+   {
+      super(other);
+   }
 
    /**
     * @param id id

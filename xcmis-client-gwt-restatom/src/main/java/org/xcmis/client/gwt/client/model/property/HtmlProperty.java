@@ -37,6 +37,11 @@ public class HtmlProperty extends BaseProperty<String>
    {
       super();
    }
+   
+   public HtmlProperty(HtmlProperty other)
+   {
+      super(other);
+   }
 
    /**
     * @param id id

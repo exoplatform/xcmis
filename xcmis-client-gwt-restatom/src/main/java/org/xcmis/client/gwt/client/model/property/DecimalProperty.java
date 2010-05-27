@@ -37,7 +37,12 @@ public class DecimalProperty extends BaseProperty<Double>
    {
       super();
    }
-
+   
+   public DecimalProperty(DecimalProperty other)
+   {
+      super(other);
+   }
+   
    /**
     * @param id id
     * @param queryName query name
