@@ -617,6 +617,9 @@ public class StorageImpl implements Storage
       }
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public Collection<String> deleteTree(FolderData folder, boolean deleteAllVersions, UnfileObject unfileObject,
       boolean continueOnFailure) throws UpdateConflictException
    {
@@ -661,6 +664,9 @@ public class StorageImpl implements Storage
       return failedToDelete;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public Collection<DocumentData> getAllVersions(String versionSeriesId) throws ObjectNotFoundException
    {
       List<DocumentData> v = new ArrayList<DocumentData>();
@@ -680,6 +686,9 @@ public class StorageImpl implements Storage
       return v;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public ItemsIterator<ChangeEvent> getChangeLog(String changeLogToken) throws ConstraintException
    {
       // TODO
@@ -715,6 +724,9 @@ public class StorageImpl implements Storage
       return new BaseItemsIterator<DocumentData>(checkedOut);
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public String getId()
    {
       return configuration.getId();
@@ -843,6 +855,9 @@ public class StorageImpl implements Storage
       return getObjectById(objectid);
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public ItemsIterator<Result> query(Query query) throws InvalidArgumentException
    {
       try
@@ -883,13 +898,16 @@ public class StorageImpl implements Storage
    }
 
    /**
-    * @see org.xcmis.spi.Storage#getUnfiledObjects()
+    * {@inheritDoc}
     */
    public Iterator<String> getUnfiledObjectsId() throws StorageException
    {
       return unfiled.iterator();
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public String addType(TypeDefinition type) throws StorageException, CmisRuntimeException
    {
       if (types.get(type.getId()) != null)

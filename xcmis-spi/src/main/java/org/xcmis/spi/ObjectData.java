@@ -95,7 +95,7 @@ public interface ObjectData
     * object itself. If Policy object type is not supported then this method
     * must throw {@link NotSupportedException}.
     *
-    * @param policy policy object
+    * @param policy the policy object
     * @throws ConstraintException if current object is not controllable by
     *         Policy, see {@link TypeDefinition#isControllablePolicy()}.
     */
@@ -104,6 +104,8 @@ public interface ObjectData
    //
 
    /**
+    * To get object's base type.
+    * 
     * @return base type of object
     * @see BaseType
     */
@@ -195,11 +197,15 @@ public interface ObjectData
       boolean includeSubRelationshipTypes);
 
    /**
+    * To get the object's type id.
+    * 
     * @return type id
     */
    String getTypeId();
 
    /**
+    * To get the object's type definition.
+    * 
     * @return type definition of object
     */
    TypeDefinition getTypeDefinition();
@@ -207,7 +213,7 @@ public interface ObjectData
    /**
     * Shortcut setter for 'cmis:name' property.
     *
-    *@param name String name
+    *@param name the String name
     * @throws NameConstraintViolationException if <i>cmis:name</i> specified in
     *         properties throws conflict
     */
@@ -222,7 +228,9 @@ public interface ObjectData
    Property<?> getProperty(String id);
 
    /**
-    * @return set of CMIS properties
+    * To get the object's properties.
+    * 
+    * @return the set of CMIS properties
     */
    Map<String, Property<?>> getProperties();
 
@@ -235,13 +243,13 @@ public interface ObjectData
    Map<String, Property<?>> getProperties(PropertyFilter filter);
 
    /**
-    * Set or update property. Changes may be updated immediately or after
-    * calling {@link ObjectData#save()}. This is implementation specific. Empty
+    * Set or update property. Changes will be updated immediately.
+    * This is implementation specific. Empty
     * list for property value {@link Property#getValues()} minds the property
     * will be in 'value not set' state. If property is required then
     * {@link ConstraintException} will be thrown.
     *
-    * @param property new property
+    * @param property the new property
     * @throws ConstraintException if value of the property violates the
     *         min/max/required/length constraints specified in the property
     *         definition in the object type
@@ -250,14 +258,14 @@ public interface ObjectData
 
    /**
     * Set or add new properties. Properties will be merged with existed one and
-    * not replace whole set of existed properties. Changes may be updated
-    * immediately or after calling {@link ObjectData#save()}. This is
+    * not replace whole set of existed properties. Changes will be updated
+    * immediately. This is
     * implementation specific. Empty list for property value
     * {@link Property#getValues()} minds the property will be in 'value not set'
     * state. If property is required then {@link ConstraintException} will be
     * thrown.
     *
-    * @param properties new set of properties
+    * @param properties the new set of properties
     * @throws ConstraintException if value of any of the properties violates the
     *         min/max/required/length constraints specified in the property
     *         definition in the object type
@@ -266,7 +274,7 @@ public interface ObjectData
     */
    void setProperties(Map<String, Property<?>> properties) throws ConstraintException, NameConstraintViolationException;
 
-   //
+   // Content stream
 
    /**
     * Get the content stream with specified id. Often it should be rendition
@@ -274,21 +282,9 @@ public interface ObjectData
     * <code>streamId == null</code> then this method return <code>null</code>.
     * For Document objects default content stream will be returned.
     *
-    * @param streamId content stream id
+    * @param streamId the content stream id
     * @return content stream or <code>null</code>
     */
    ContentStream getContentStream(String streamId);
-
-   //   /**
-   //    * Save updated object or newly created object.
-   //    *
-   //    * @throws StorageException if changes can't be saved cause storage internal
-   //    *         errors
-   //    * @throws NameConstraintViolationException if updated name (property
-   //    *         'cmis:name') cause name conflict, e.g. object with the same name
-   //    *         already exists
-   //    * @throws UpdateConflictException if saved object is not current any more
-   //    */
-   //   void save() throws StorageException, NameConstraintViolationException, UpdateConflictException;
 
 }

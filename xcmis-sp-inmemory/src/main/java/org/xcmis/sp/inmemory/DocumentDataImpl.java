@@ -92,6 +92,9 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
       this.versioningState = versioningState;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public void cancelCheckout() throws StorageException
    {
       if (!type.isVersionable())
@@ -409,6 +412,9 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
       this.contentStream = contentStream;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    protected void save() throws StorageException
    {
       save(false);
@@ -584,6 +590,9 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
       contentStream = null;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    protected void delete() throws ConstraintException, StorageException
    {
       ItemsIterator<RelationshipData> relationships = getRelationships(RelationshipDirection.EITHER, null, true);

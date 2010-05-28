@@ -178,6 +178,9 @@ class FolderDataImpl extends BaseObjectData implements FolderData
       return path.toString();
    }
 
+   /**
+    * {@inheritDoc}
+    */
    protected void delete() throws ConstraintException, StorageException
    {
       if (isRoot())
@@ -210,6 +213,9 @@ class FolderDataImpl extends BaseObjectData implements FolderData
       storage.children.remove(objectId);
    }
 
+   /**
+    * {@inheritDoc}
+    */
    protected void save() throws StorageException
    {
       save(false);

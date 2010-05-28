@@ -59,6 +59,9 @@ class RelationshipDataImpl extends BaseObjectData implements RelationshipData
       this.target = target;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public ContentStream getContentStream(String streamId)
    {
       // no content or renditions for relationship
@@ -83,16 +86,25 @@ class RelationshipDataImpl extends BaseObjectData implements RelationshipData
       return Collections.emptyList();
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public String getSourceId()
    {
       return getString(CmisConstants.SOURCE_ID);
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public String getTargetId()
    {
       return getString(CmisConstants.TARGET_ID);
    }
 
+   /**
+    * {@inheritDoc}
+    */
    protected void save() throws StorageException
    {
       save(false);
@@ -172,6 +184,9 @@ class RelationshipDataImpl extends BaseObjectData implements RelationshipData
       storage.permissions.get(id).putAll(entry.getPermissions());
    }
 
+   /**
+    * {@inheritDoc}
+    */
    protected void delete() throws ConstraintException, StorageException
    {
       String objectId = getObjectId();

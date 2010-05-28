@@ -155,6 +155,9 @@ class PolicyDataImpl extends BaseObjectData implements PolicyData
       storage.permissions.get(id).putAll(entry.getPermissions());
    }
 
+   /**
+    * {@inheritDoc}
+    */
    protected void delete() throws ConstraintException, StorageException
    {
       String objectId = getObjectId();

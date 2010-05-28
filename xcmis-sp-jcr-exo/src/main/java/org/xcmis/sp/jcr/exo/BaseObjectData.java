@@ -572,7 +572,6 @@ abstract class BaseObjectData implements ObjectData
     */
    public void setName(String name) throws NameConstraintViolationException
    {
-      // TODO Do we need still this method? Zavizionov
       this.name = name;
       save(false);
    }

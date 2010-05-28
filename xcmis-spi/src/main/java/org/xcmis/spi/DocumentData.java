@@ -102,8 +102,9 @@ public interface DocumentData extends ObjectData
 
    /**
     * Get document content stream.
-    * @throws IOException if an I/O error occurs
+    * 
     * @return content stream or <code>null</code> if document has not content
+    * @throws IOException if an I/O error occurs
     */
    ContentStream getContentStream() throws IOException;
 
@@ -141,6 +142,11 @@ public interface DocumentData extends ObjectData
     *
     * @param major is major
     * @param checkinComment check-in comment
+    * @param properties the document properties
+    * @param content the document content stream
+    * @param addACL the list of ACEs to be added
+    * @param removeACL the list of ACEs to be removed
+    * @param policies the list of policy IDs
     * @return DocumentData document
     * @throws ConstraintException if the object is not versionable
     * @throws StorageException if newly version of Document can't be saved in

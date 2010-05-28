@@ -101,23 +101,24 @@ abstract class BaseObjectData implements ObjectData
       this.entry = new Entry();
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public void accept(ObjectDataVisitor visitor)
    {
       // TODO Auto-generated method stub
       throw new UnsupportedOperationException();
    }
 
-   
-   
+   /**
+    * {@inheritDoc}
+    */
    public void applyPolicy(PolicyData policy) throws ConstraintException
    {
       applyPolicyInternal(policy);
       save();
-   }   
-   
-   /**
-    * {@inheritDoc}
-    */
+   }
+
    public void applyPolicyInternal(PolicyData policy) throws ConstraintException
    {
       if (!type.isControllablePolicy())
@@ -364,16 +365,15 @@ abstract class BaseObjectData implements ObjectData
       entry.removePolicy(policy.getObjectId());
    }
 
-   
+   /**
+    * {@inheritDoc}
+    */
    public void setACL(List<AccessControlEntry> aces) throws ConstraintException
    {
       setACLInternal(aces);
       save();
    }
-   
-   /**
-    * {@inheritDoc}
-    */
+
    public void setACLInternal(List<AccessControlEntry> aces) throws ConstraintException
    {
       if (!type.isControllableACL())
@@ -410,7 +410,6 @@ abstract class BaseObjectData implements ObjectData
       }
    }
 
-   
    /**
     * {@inheritDoc}
     */
@@ -420,8 +419,17 @@ abstract class BaseObjectData implements ObjectData
       setPropertyInternal(property);
       save();
    }
+
    /**
-    * @param isNew 
+    * Set or update property. Changes will be updated after call the {@link BaseObjectData#save()} method.
+    * Empty list for property value {@link Property#getValues()} minds the property
+    * will be in 'value not set' state. If property is required then
+    * {@link ConstraintException} will be thrown.
+    *
+    * @param property the new property
+    * @throws ConstraintException if value of the property violates the
+    *         min/max/required/length constraints specified in the property
+    *         definition in the object type
     */
    @SuppressWarnings("unchecked")
    public void setPropertyInternal(Property<?> property) throws ConstraintException
@@ -459,7 +467,7 @@ abstract class BaseObjectData implements ObjectData
 
       Updatability updatability = definition.getUpdatability();
       if (updatability == Updatability.READWRITE //
-//         || (updatability == Updatability.ONCREATE && isNew()) //
+         //         || (updatability == Updatability.ONCREATE && isNew()) //
          || (updatability == Updatability.WHENCHECKEDOUT && getBaseType() == BaseType.DOCUMENT && ((DocumentData)this)
             .isPWC()))
       {
@@ -504,9 +512,6 @@ abstract class BaseObjectData implements ObjectData
          }
       }
    }
-      
-      
-
 
    public String toString()
    {
@@ -526,6 +531,13 @@ abstract class BaseObjectData implements ObjectData
       return createProperty(definition, value);
    }
 
+   /**
+    * To create the new property.
+    * 
+    * @param def the property definition
+    * @param value the value
+    * @return the new property
+    */
    private Property<?> createProperty(PropertyDefinition<?> def, Value value)
    {
       if (def.getPropertyType() == PropertyType.BOOLEAN)

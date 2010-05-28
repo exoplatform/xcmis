@@ -1157,6 +1157,9 @@ public class StorageImpl implements Storage
       return failedToDelete;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public Collection<DocumentData> getAllVersions(String versionSeriesId) throws ObjectNotFoundException
    {
       try
@@ -1199,6 +1202,9 @@ public class StorageImpl implements Storage
       throw new NotSupportedException("Changes log feature is not supported.");
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public ItemsIterator<DocumentData> getCheckedOutDocuments(ObjectData folder, String orderBy)
    {
       try
@@ -1613,6 +1619,9 @@ public class StorageImpl implements Storage
       }
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public ItemsIterator<Result> query(Query query) throws InvalidArgumentException
    {
       throw new UnsupportedOperationException();
@@ -1645,7 +1654,7 @@ public class StorageImpl implements Storage
    }
 
    /**
-    * @see org.xcmis.spi.Storage#getUnfiledObjects()
+    * {@inheritDoc}
     */
    public Iterator<String> getUnfiledObjectsId() throws StorageException
    {
