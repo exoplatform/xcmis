@@ -63,7 +63,8 @@ public class AtomLinkParser
          String rel = "";
 
          Node attribute = attributesList.item(j);
-         String attributeValue = attribute.getFirstChild().getNodeValue();
+         
+         String attributeValue = attribute.getNodeValue();
          String attributeName = attribute.getNodeName();
          if (attributeName.equals(CMIS.RELATION))
          {

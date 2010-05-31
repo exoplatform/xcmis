@@ -134,11 +134,11 @@ public class AtomEntryParser
             {
                if (item.getAttributes().item(k).getNodeName().equals(CMIS.SOURCE))
                {
-                  content.setSource(item.getAttributes().item(k).getFirstChild().getNodeValue());
+                  content.setSource(item.getAttributes().item(k).getNodeValue());
                }
                else if (item.getAttributes().item(k).getNodeName().equals(CMIS.TYPE))
                {
-                  content.setType(item.getAttributes().item(k).getFirstChild().getNodeValue());
+                  content.setType(item.getAttributes().item(k).getNodeValue());
                }
             }
             entryInfo.setContent(content);

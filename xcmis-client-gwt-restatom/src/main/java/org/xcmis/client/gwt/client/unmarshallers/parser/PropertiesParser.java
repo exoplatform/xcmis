@@ -80,10 +80,10 @@ public class PropertiesParser
          Node item = nodeList.item(i);
          
          NamedNodeMap nodeListOfAttributes = item.getAttributes();
-         String propertyDefinitionId = (nodeListOfAttributes.getNamedItem(CMIS.PROPERTY_DEFINITION_ID)!= null) ? nodeListOfAttributes.getNamedItem(CMIS.PROPERTY_DEFINITION_ID).getFirstChild().getNodeValue() : null;
-         String localName = (nodeListOfAttributes.getNamedItem(CMIS.LOCAL_NAME)!= null) ? nodeListOfAttributes.getNamedItem(CMIS.LOCAL_NAME).getFirstChild().getNodeValue() : null;
-         String queryName = (nodeListOfAttributes.getNamedItem(CMIS.QUERY_NAME)!= null) ? nodeListOfAttributes.getNamedItem(CMIS.QUERY_NAME).getFirstChild().getNodeValue() : null;
-         String displayName = (nodeListOfAttributes.getNamedItem(CMIS.DISPLAY_NAME)!= null) ? nodeListOfAttributes.getNamedItem(CMIS.DISPLAY_NAME).getFirstChild().getNodeValue() : null;
+         String propertyDefinitionId = (nodeListOfAttributes.getNamedItem(CMIS.PROPERTY_DEFINITION_ID)!= null) ? nodeListOfAttributes.getNamedItem(CMIS.PROPERTY_DEFINITION_ID).getNodeValue() : null;
+         String localName = (nodeListOfAttributes.getNamedItem(CMIS.LOCAL_NAME)!= null) ? nodeListOfAttributes.getNamedItem(CMIS.LOCAL_NAME).getNodeValue() : null;
+         String queryName = (nodeListOfAttributes.getNamedItem(CMIS.QUERY_NAME)!= null) ? nodeListOfAttributes.getNamedItem(CMIS.QUERY_NAME).getNodeValue() : null;
+         String displayName = (nodeListOfAttributes.getNamedItem(CMIS.DISPLAY_NAME)!= null) ? nodeListOfAttributes.getNamedItem(CMIS.DISPLAY_NAME).getNodeValue() : null;
          
          List<String> values = getValues(item);
 
