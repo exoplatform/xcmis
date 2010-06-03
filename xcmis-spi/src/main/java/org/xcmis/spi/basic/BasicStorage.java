@@ -16,17 +16,12 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xcmis.sp.basic;
+package org.xcmis.spi.basic;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
+import org.exoplatform.services.security.ConversationState;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
+import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.InvalidArgumentException;
@@ -34,6 +29,7 @@ import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.ObjectNotFoundException;
+import org.xcmis.spi.PermissionService;
 import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.Storage;
@@ -45,287 +41,210 @@ import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.AllowableActions;
 import org.xcmis.spi.model.BaseType;
-import org.xcmis.spi.model.CapabilityRendition;
 import org.xcmis.spi.model.ChangeEvent;
-import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.Rendition;
-import org.xcmis.spi.model.RepositoryCapabilities;
 import org.xcmis.spi.model.RepositoryInfo;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 import org.xcmis.spi.utils.CmisUtils;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Basic Storage impl
  */
-public abstract class BasicStorage implements Storage {
-  
-  protected RepositoryInfo repositoryInfo;
-  
-  protected TypeManager typeManager;
-  
-  public BasicStorage(RepositoryInfo repositoryInfo, TypeManager typeManager) 
-  {
-    this.repositoryInfo = repositoryInfo;
-    this.typeManager = typeManager;
-  }
+public abstract class BasicStorage implements Storage
+{
 
-  /* (non-Javadoc)
-   * @see org.xcmis.spi.Storage#getRepositoryInfo()
-   */
-  public RepositoryInfo getRepositoryInfo() 
-  {
-    return this.repositoryInfo;
-  }
-  
-  
-  /* (non-Javadoc)
-   * @see org.xcmis.spi.Storage#calculateAllowableActions(org.xcmis.spi.ObjectData)
-   */
-  public AllowableActions calculateAllowableActions(ObjectData object)
-  {
-     AllowableActions actions = new AllowableActions();
-     TypeDefinition type = object.getTypeDefinition();
+   protected RepositoryInfo repositoryInfo;
 
-     RepositoryCapabilities capabilities = getRepositoryInfo().getCapabilities();
+   protected TypeManager typeManager;
 
-     boolean isCheckedout = type.getBaseId() == BaseType.DOCUMENT //
-        && type.isVersionable() //
-        && ((DocumentData)object).isVersionSeriesCheckedOut();
+   protected PermissionService permissionService;
 
-     actions.setCanGetProperties(true);
+   public BasicStorage(RepositoryInfo repositoryInfo, TypeManager typeManager, PermissionService permissionService)
+   {
+      this.repositoryInfo = repositoryInfo;
+      this.typeManager = typeManager;
+      this.permissionService = permissionService;
+   }
 
-     actions.setCanUpdateProperties(true); // TODO : need to check is it latest version ??
+   /**
+    * {@inheritDoc}
+    */
+   public RepositoryInfo getRepositoryInfo()
+   {
+      return this.repositoryInfo;
+   }
 
-     actions.setCanApplyACL(type.isControllableACL());
+   /**
+    * {@inheritDoc}
+    */
+   public AllowableActions calculateAllowableActions(ObjectData object)
+   {
+      ConversationState state = ConversationState.getCurrent();
+      AllowableActions actions =
+         permissionService.calculateAllowableActions(object, state != null ? state.getIdentity() : null,
+            getRepositoryInfo());
+      return actions;
+   }
 
-     actions.setCanGetACL(type.isControllableACL());
+   /**
+    * {@inheritDoc}
+    */
+   public String addType(TypeDefinition type) throws ConstraintException, StorageException, CmisRuntimeException
+   {
+      return this.typeManager.addType(type);
+   }
 
-     actions.setCanApplyPolicy(type.isControllablePolicy());
+   /**
+    * {@inheritDoc}
+    */
+   public void removeType(String typeId) throws TypeNotFoundException, ConstraintException, StorageException,
+      CmisRuntimeException
+   {
+      this.typeManager.removeType(typeId);
+   }
 
-     actions.setCanGetAppliedPolicies(type.isControllablePolicy());
+   /**
+    * {@inheritDoc}
+    */
+   public ItemsIterator<TypeDefinition> getTypeChildren(String typeId, boolean includePropertyDefinitions)
+      throws TypeNotFoundException, CmisRuntimeException
+   {
 
-     actions.setCanRemovePolicy(type.isControllablePolicy());
+      return this.typeManager.getTypeChildren(typeId, includePropertyDefinitions);
+   }
 
-     actions.setCanGetObjectParents(type.isFileable());
+   /**
+    * {@inheritDoc}
+    */
+   public TypeDefinition getTypeDefinition(String typeId, boolean includePropertyDefinition)
+      throws TypeNotFoundException, CmisRuntimeException
+   {
 
-     actions.setCanMoveObject(type.isFileable());
+      return this.typeManager.getTypeDefinition(typeId, includePropertyDefinition);
+   }
 
-     actions.setCanAddObjectToFolder(capabilities.isCapabilityMultifiling() //
-        && type.isFileable() //
-        && type.getBaseId() != BaseType.FOLDER);
+   /**
+    * {@inheritDoc}
+    */
+   public DocumentData createDocument(FolderData parent, TypeDefinition typeDefinition,
+      Map<String, Property<?>> properties, ContentStream content, List<AccessControlEntry> acl,
+      Collection<PolicyData> policies, VersioningState versioningState) throws ConstraintException,
+      NameConstraintViolationException, IOException, StorageException
+   {
+      throw new UnsupportedOperationException();
+   }
 
-     actions.setCanRemoveObjectFromFolder(capabilities.isCapabilityUnfiling() //
-        && type.isFileable() //
-        && type.getBaseId() != BaseType.FOLDER);
+   /**
+    * {@inheritDoc}
+    */
+   public PolicyData createPolicy(FolderData parent, TypeDefinition typeDefinition,
+      Map<String, Property<?>> properties, List<AccessControlEntry> acl, Collection<PolicyData> policies)
+      throws ConstraintException, NameConstraintViolationException, StorageException
+   {
+      throw new UnsupportedOperationException();
+   }
 
-     actions.setCanGetDescendants(capabilities.isCapabilityGetDescendants() //
-        && type.getBaseId() == BaseType.FOLDER);
+   /**
+    * {@inheritDoc}
+    */
+   public RelationshipData createRelationship(ObjectData source, ObjectData target, TypeDefinition typeDefinition,
+      Map<String, Property<?>> properties, List<AccessControlEntry> acl, Collection<PolicyData> policies)
+      throws NameConstraintViolationException, StorageException
+   {
+      throw new UnsupportedOperationException();
+   }
 
-     actions.setCanGetFolderTree(capabilities.isCapabilityGetFolderTree() //
-        && type.getBaseId() == BaseType.FOLDER);
+   /**
+    * {@inheritDoc}
+    */
+   public Collection<DocumentData> getAllVersions(String versionSeriesId) throws ObjectNotFoundException
+   {
+      //throw new UnsupportedOperationException();
+      // TODO
+      ObjectData data = getObjectById(versionSeriesId);
+      if (data.getBaseType() == BaseType.DOCUMENT)
+      {
+         List<DocumentData> l = new ArrayList<DocumentData>(1);
+         l.add((DocumentData)data);
+         return l;
+      }
+      return Collections.emptySet();
 
-     actions.setCanCreateDocument(type.getBaseId() == BaseType.FOLDER);
+   }
 
-     actions.setCanCreateFolder(type.getBaseId() == BaseType.FOLDER);
+   /**
+    * {@inheritDoc}
+    */
+   public ItemsIterator<ChangeEvent> getChangeLog(String changeLogToken) throws ConstraintException
+   {
+      throw new UnsupportedOperationException();
+   }
 
-     actions.setCanDeleteTree(type.getBaseId() == BaseType.FOLDER);
+   public ItemsIterator<DocumentData> getCheckedOutDocuments(ObjectData folder, String orderBy)
+   {
+      throw new UnsupportedOperationException();
+   }
 
-     actions.setCanGetChildren(type.getBaseId() == BaseType.FOLDER);
+   /**
+    * {@inheritDoc}
+    */
+   public String getId()
+   {
+      return repositoryInfo.getRepositoryId();
+   }
 
-     actions.setCanGetFolderParent(type.getBaseId() == BaseType.FOLDER);
+   /**
+    * {@inheritDoc}
+    */
+   public ItemsIterator<Rendition> getRenditions(ObjectData object)
+   {
+      return CmisUtils.emptyItemsIterator();
+      //throw new UnsupportedOperationException();
+   }
 
-     actions.setCanGetContentStream(type.getBaseId() == BaseType.DOCUMENT //
-        && ((DocumentData)object).hasContent());
+   /**
+    * {@inheritDoc}
+    */
+   public ObjectData moveObject(ObjectData object, FolderData target, FolderData source)
+      throws UpdateConflictException, VersioningException, NameConstraintViolationException, StorageException
+   {
+      throw new UnsupportedOperationException();
+   }
 
-     actions.setCanSetContentStream(type.getBaseId() == BaseType.DOCUMENT //
-        && type.getContentStreamAllowed() != ContentStreamAllowed.NOT_ALLOWED);
+   /**
+    * {@inheritDoc}
+    */
+   public ItemsIterator<Result> query(Query query) throws InvalidArgumentException
+   {
+      throw new UnsupportedOperationException();
+   }
 
-     actions.setCanDeleteContentStream(type.getBaseId() == BaseType.DOCUMENT //
-        && type.getContentStreamAllowed() != ContentStreamAllowed.REQUIRED);
+   /**
+    * {@inheritDoc}
+    */
+   public void unfileObject(ObjectData object)
+   {
+      throw new UnsupportedOperationException();
+   }
 
-     actions.setCanGetAllVersions(type.getBaseId() == BaseType.DOCUMENT);
-
-     actions.setCanGetRenditions(capabilities.getCapabilityRenditions() == CapabilityRendition.READ);
-
-     actions.setCanCheckIn(isCheckedout);
-
-     actions.setCanCancelCheckOut(isCheckedout);
-
-     actions.setCanCheckOut(!isCheckedout);
-
-     actions.setCanGetObjectRelationships(type.getBaseId() != BaseType.RELATIONSHIP);
-
-     actions.setCanCreateRelationship(type.getBaseId() != BaseType.RELATIONSHIP);
-
-     // TODO : applied policy, not empty folders, not latest versions may not be delete.
-     actions.setCanDeleteObject(true);
-
-     return actions;
-  }
-
-  /* (non-Javadoc)
-   * @see org.xcmis.spi.TypeManager#addType(org.xcmis.spi.model.TypeDefinition)
-   */
-  public String addType(TypeDefinition type) throws StorageException,
-      CmisRuntimeException {
-    return this.typeManager.addType(type);
-  }
-
-  /* (non-Javadoc)
-   * @see org.xcmis.spi.TypeManager#removeType(java.lang.String)
-   */
-  public void removeType(String typeId) throws TypeNotFoundException,
-      StorageException, CmisRuntimeException {
-    this.typeManager.removeType(typeId);
-
-  }
-  
-  /* (non-Javadoc)
-   * @see org.xcmis.spi.TypeManager#getTypeChildren(java.lang.String, boolean)
-   */
-  public ItemsIterator<TypeDefinition> getTypeChildren(String typeId,
-      boolean includePropertyDefinitions) throws TypeNotFoundException,
-      CmisRuntimeException {
-    
-    return this.typeManager.getTypeChildren(typeId, includePropertyDefinitions);
-  }
-
-  /* (non-Javadoc)
-   * @see org.xcmis.spi.TypeManager#getTypeDefinition(java.lang.String, boolean)
-   */
-  public TypeDefinition getTypeDefinition(String typeId,
-      boolean includePropertyDefinition) throws TypeNotFoundException,
-      CmisRuntimeException {
-    
-    return this.typeManager.getTypeDefinition(typeId, includePropertyDefinition);
-  }
-
-
-  /* (non-Javadoc)
-   * @see org.xcmis.spi.Storage#copyDocument(org.xcmis.spi.DocumentData, org.xcmis.spi.FolderData, java.util.Map, java.util.List, java.util.List, java.util.Collection, org.xcmis.spi.model.VersioningState)
-   */
-  public DocumentData copyDocument(DocumentData arg0, FolderData arg1,
-      Map<String, Property<?>> arg2, List<AccessControlEntry> arg3,
-      List<AccessControlEntry> arg4, Collection<ObjectData> arg5,
-      VersioningState arg6) throws ConstraintException, StorageException {
-    throw new UnsupportedOperationException();
-  }
-
-  
-  /* (non-Javadoc)
-   * @see org.xcmis.spi.Storage#createPolicy(org.xcmis.spi.FolderData, java.lang.String, java.util.Map, java.util.List, java.util.List, java.util.Collection)
-   */
-  public PolicyData createPolicy(FolderData arg0, String arg1,
-      Map<String, Property<?>> arg2, List<AccessControlEntry> arg3,
-      List<AccessControlEntry> arg4, Collection<ObjectData> arg5)
-      throws ConstraintException {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-
-  /* (non-Javadoc)
-   * @see org.xcmis.spi.Storage#createRelationship(org.xcmis.spi.ObjectData, org.xcmis.spi.ObjectData, java.lang.String, java.util.Map, java.util.List, java.util.List, java.util.Collection)
-   */
-  public RelationshipData createRelationship(ObjectData arg0, ObjectData arg1,
-      String arg2, Map<String, Property<?>> arg3,
-      List<AccessControlEntry> arg4, List<AccessControlEntry> arg5,
-      Collection<ObjectData> arg6) throws ConstraintException {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-
-  /* (non-Javadoc)
-   * @see org.xcmis.spi.Storage#getAllVersions(java.lang.String)
-   */
-  public Collection<DocumentData> getAllVersions(String versionSeriesId)
-      throws ObjectNotFoundException {
-    //throw new UnsupportedOperationException();
-    
-    // TODO
-    
-    ObjectData data = getObjectById(versionSeriesId);
-    if (data.getBaseType() == BaseType.DOCUMENT)
-    {
-       List<DocumentData> l = new ArrayList<DocumentData>(1);
-       l.add((DocumentData)data);
-       return l;
-    }
-   return Collections.emptySet();
-    
-  }
-
-  /* (non-Javadoc)
-   * @see org.xcmis.spi.Storage#getChangeLog(java.lang.String)
-   */
-  public ItemsIterator<ChangeEvent> getChangeLog(String changeLogToken)
-      throws ConstraintException {
-    throw new UnsupportedOperationException();
-  }
-
-  /* (non-Javadoc)
-   * @see org.xcmis.spi.Storage#getCheckedOutDocuments(org.xcmis.spi.ObjectData, java.lang.String)
-   */
-  public ItemsIterator<DocumentData> getCheckedOutDocuments(ObjectData folder,
-      String orderBy) {
-    throw new UnsupportedOperationException();
-  }
-
-  /* (non-Javadoc)
-   * @see org.xcmis.spi.Storage#getId()
-   */
-  public String getId() {
-    return repositoryInfo.getRepositoryId();
-  }
-
-  /* (non-Javadoc)
-   * @see org.xcmis.spi.Storage#getRenditions(org.xcmis.spi.ObjectData)
-   */
-  public ItemsIterator<Rendition> getRenditions(ObjectData object) {
-    return CmisUtils.emptyItemsIterator();
-    //throw new UnsupportedOperationException();
-  }
-
-
-
-  /* (non-Javadoc)
-   * @see org.xcmis.spi.Storage#moveObject(org.xcmis.spi.ObjectData, org.xcmis.spi.FolderData, org.xcmis.spi.FolderData)
-   */
-  public ObjectData moveObject(ObjectData object, FolderData target,
-      FolderData source) throws ConstraintException, InvalidArgumentException,
-      UpdateConflictException, VersioningException,
-      NameConstraintViolationException, StorageException {
-    throw new UnsupportedOperationException();
-  }
-
-  /* (non-Javadoc)
-   * @see org.xcmis.spi.Storage#query(org.xcmis.spi.query.Query)
-   */
-  public ItemsIterator<Result> query(Query query)
-      throws InvalidArgumentException {
-    throw new UnsupportedOperationException();
-  }
-
-
-  /* (non-Javadoc)
-   * @see org.xcmis.spi.Storage#unfileObject(org.xcmis.spi.ObjectData)
-   */
-  public void unfileObject(ObjectData object) {
-    throw new UnsupportedOperationException();
-  }
-
-/* (non-Javadoc)
- * @see org.xcmis.spi.Storage#getUnfiledObjectsId()
- */
-public Iterator<String> getUnfiledObjectsId() throws StorageException {
-	throw new UnsupportedOperationException();
-}
-  
-  
-
+   /**
+    * {@inheritDoc}
+    */
+   public Iterator<String> getUnfiledObjectsId() throws StorageException
+   {
+      throw new UnsupportedOperationException();
+   }
 
 }

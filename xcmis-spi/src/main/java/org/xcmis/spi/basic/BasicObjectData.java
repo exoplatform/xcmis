@@ -16,14 +16,11 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xcmis.sp.basic;
+package org.xcmis.spi.basic;
 
-import java.util.Collection;
-import java.util.List;
-
-import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsIterator;
+import org.xcmis.spi.NotSupportedException;
 import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.ObjectDataVisitor;
 import org.xcmis.spi.PolicyData;
@@ -31,79 +28,87 @@ import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.RelationshipDirection;
 import org.xcmis.spi.model.TypeDefinition;
+
+import java.util.Collection;
+import java.util.List;
+
 /**
  * Default Object Data impl
  */
-public abstract class BasicObjectData implements ObjectData {
+public abstract class BasicObjectData implements ObjectData
+{
 
-  /* (non-Javadoc)
-   * @see org.xcmis.spi.ObjectData#accept(org.xcmis.spi.ObjectDataVisitor)
-   */
-  public void accept(ObjectDataVisitor visitor) {
-    throw new UnsupportedOperationException();
-  }
+   /**
+    * {@inheritDoc}
+    */
+   public void accept(ObjectDataVisitor visitor)
+   {
+      throw new UnsupportedOperationException();
+   }
 
-  /* (non-Javadoc)
-   * @see org.xcmis.spi.ObjectData#applyPolicy(org.xcmis.spi.PolicyData)
-   */
-  public void applyPolicy(PolicyData policy) throws ConstraintException {
-    throw new UnsupportedOperationException();
+   /**
+    * {@inheritDoc}
+    */
+   public void applyPolicy(PolicyData policy)
+   {
+      throw new NotSupportedException();
+   }
 
-  }
+   /**
+    * {@inheritDoc}
+    */
+   public List<AccessControlEntry> getACL(boolean onlyBasicPermissions)
+   {
+      throw new NotSupportedException();
+   }
 
-  /* (non-Javadoc)
-   * @see org.xcmis.spi.ObjectData#getACL(boolean)
-   */
-  public List<AccessControlEntry> getACL(boolean onlyBasicPermissions) {
-    throw new UnsupportedOperationException();
-  }
+   /**
+    * {@inheritDoc}
+    */
+   public String getChangeToken()
+   {
+      return null;
+   }
 
-  /* (non-Javadoc)
-   * @see org.xcmis.spi.ObjectData#getChangeToken()
-   */
-  public String getChangeToken() {
-   
-    return null;
-   
-  }
+   /**
+    * {@inheritDoc}
+    */
+   public Collection<FolderData> getParents()
+   {
+      throw new UnsupportedOperationException();
+   }
 
+   /**
+    * {@inheritDoc}
+    */
+   public Collection<PolicyData> getPolicies()
+   {
+      throw new NotSupportedException();
+   }
 
-  /* (non-Javadoc)
-   * @see org.xcmis.spi.ObjectData#getParents()
-   */
-  public Collection<FolderData> getParents() {
-    throw new UnsupportedOperationException();
-  }
+   /**
+    * {@inheritDoc}
+    */
+   public ItemsIterator<RelationshipData> getRelationships(RelationshipDirection direction, TypeDefinition type,
+      boolean includeSubRelationshipTypes)
+   {
+      throw new UnsupportedOperationException();
+   }
 
-  /* (non-Javadoc)
-   * @see org.xcmis.spi.ObjectData#getPolicies()
-   */
-  public Collection<PolicyData> getPolicies() {
-    throw new UnsupportedOperationException();
-  }
+   /**
+    * {@inheritDoc}
+    */
+   public void removePolicy(PolicyData policy)
+   {
+      throw new NotSupportedException();
+   }
 
-  /* (non-Javadoc)
-   * @see org.xcmis.spi.ObjectData#getRelationships(org.xcmis.spi.model.RelationshipDirection, org.xcmis.spi.model.TypeDefinition, boolean)
-   */
-  public ItemsIterator<RelationshipData> getRelationships(
-      RelationshipDirection direction, TypeDefinition type,
-      boolean includeSubRelationshipTypes) {
-    throw new UnsupportedOperationException();
-  }
-
-
-  /* (non-Javadoc)
-   * @see org.xcmis.spi.ObjectData#removePolicy(org.xcmis.spi.PolicyData)
-   */
-  public void removePolicy(PolicyData policy) throws ConstraintException {
-    throw new UnsupportedOperationException();
-  }
-
-  /* (non-Javadoc)
-   * @see org.xcmis.spi.ObjectData#setACL(java.util.List)
-   */
-  public void setACL(List<AccessControlEntry> acl) throws ConstraintException {
-    throw new UnsupportedOperationException();
-  }
+   /**
+    * {@inheritDoc}
+    */
+   public void setACL(List<AccessControlEntry> acl)
+   {
+      throw new NotSupportedException();
+   }
 
 }

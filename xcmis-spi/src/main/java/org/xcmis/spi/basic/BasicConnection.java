@@ -16,37 +16,37 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xcmis.sp.basic;
+package org.xcmis.spi.basic;
 
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.Storage;
 import org.xcmis.spi.UpdateConflictException;
+
 /**
  * Empty Connection impl
  */
-public class BasicConnection extends Connection {
-  
+public class BasicConnection extends Connection
+{
 
-  public BasicConnection(Storage storage) {
-    super(storage);
-    
-  }
+   public BasicConnection(Storage storage)
+   {
+      super(storage);
+   }
 
-  @Override
-  protected void checkConnection() throws IllegalStateException {
-    
-  }
+   @Override
+   protected void checkConnection() throws IllegalStateException
+   {
+   }
 
-  @Override
-  public void close() {
- 
-  }
+   @Override
+   public void close()
+   {
+   }
 
-  @Override
-  protected void validateChangeToken(ObjectData object, String changeToken)
-      throws UpdateConflictException {
-
-  }
+   @Override
+   protected void validateChangeToken(ObjectData object, String changeToken) throws UpdateConflictException
+   {
+   }
 
 }

@@ -23,7 +23,7 @@ import org.xcmis.spi.model.TypeDefinition;
 
 /**
  * Produces type definition.
- * 
+ *
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id: TypeManager.java 316 2010-03-09 15:20:28Z andrew00x $
  */
@@ -32,7 +32,7 @@ public interface TypeManager
 
    /**
     * Add new type in repository.
-    * 
+    *
     * @param type type definition
     * @return ID of added type
     * @throws StorageException if type can't be added cause to storage internal
@@ -53,19 +53,18 @@ public interface TypeManager
 
    /**
     * Get type definition for type <code>typeId</code> .
-    * 
+    *
     * @param typeId type Id
     * @param includePropertyDefinition if <code>true</code> property definition
     *        should be included
     * @return type definition
     * @throws TypeNotFoundException if type <code>typeId</code> does not exist
-    * @throws CmisRuntimeException if any others errors occur
     */
    TypeDefinition getTypeDefinition(String typeId, boolean includePropertyDefinition) throws TypeNotFoundException;
 
    /**
     * Iterator over object types.
-    * 
+    *
     * @param typeId the type id, if not <code>null</code> then return only
     *        specified Object Type and its direct descendant. If
     *        <code>null</code> then return base types
@@ -73,21 +72,22 @@ public interface TypeManager
     *        should be included <code>false</code> otherwise
     * @return set of base types or specified object type and its direct children
     * @throws TypeNotFoundException if type <code>typeId</code> does not exist
-    * @throws CmisRuntimeException if any others errors occur
     */
    ItemsIterator<TypeDefinition> getTypeChildren(String typeId, boolean includePropertyDefinitions)
       throws TypeNotFoundException;
 
    /**
     * Remove type definition for type <code>typeId</code> .
-    * 
+    *
     * @param typeId type Id
     * @throws TypeNotFoundException if type <code>typeId</code> not found in
     *         repository
     * @throws StorageException if type can't be added cause to storage internal
     *         problem
-    * @throws CmisRuntimeException if any others errors occur
+    * @throws ConstraintException if removing type violates a storage
+    *         constraint. For example, if storage already contains object of
+    *         this type
     */
-   void removeType(String typeId) throws TypeNotFoundException, StorageException;
+   void removeType(String typeId) throws ConstraintException, TypeNotFoundException, StorageException;
 
 }

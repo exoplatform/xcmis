@@ -312,17 +312,21 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
          conn = getConnection(request);
          conn.getStorage().removeType(typeId);
       }
+      catch (ConstraintException cve)
+      {
+         throw new ResponseContextException(createErrorResponse(cve, 409));
+      }
       catch (TypeNotFoundException tnfe)
       {
-         createErrorResponse(tnfe, 404);
+         throw new ResponseContextException(createErrorResponse(tnfe, 404));
       }
       catch (InvalidArgumentException iae)
       {
-         createErrorResponse(iae, 400);
+         throw new ResponseContextException(createErrorResponse(iae, 400));
       }
       catch (StorageException re)
       {
-         createErrorResponse(re, 500);
+         throw new ResponseContextException(createErrorResponse(re, 500));
       }
       finally
       {
