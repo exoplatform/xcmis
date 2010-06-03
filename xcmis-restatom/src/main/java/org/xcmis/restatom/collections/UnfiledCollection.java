@@ -125,8 +125,7 @@ public class UnfiledCollection extends CmisObjectCollection
       try
       {
          conn = getConnection(request);
-         ObjectData objectData = conn.getStorage().getObjectById(id);
-         conn.getStorage().unfileObject(objectData);
+         conn.removeObjectFromFolder(id, null);
 
          entry = request.getAbdera().getFactory().newEntry();
          try

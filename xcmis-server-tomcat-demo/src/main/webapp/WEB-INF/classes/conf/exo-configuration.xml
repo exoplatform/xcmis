@@ -68,7 +68,7 @@
 		</init-params>
 	</component>
 
-	<!-- Storage Provider -->
+	<!-- Storage Provider JCR eXo-->
 	<component>
 		<type>org.xcmis.sp.jcr.exo.StorageProviderImpl</type>
 		<init-params>
@@ -100,6 +100,40 @@
 											<string>exo.cmis.changetoken.feature</string>
 										</key>
 										<value>
+											<boolean>false</boolean>
+										</value>
+									</entry>
+								</map>
+							</field>
+						</object>
+					</field>
+				</object>
+			</object-param>
+		</init-params>
+	</component>
+
+   <!-- Storage Provider InMemory -->
+   <!-- Do not forget to add xcmis-sp-inmemory-x.y.jar to the webapps/xcmis.war/WEB-INF/lib -->
+	<component>
+		<type>org.xcmis.sp.inmemory.StorageProviderImpl</type>
+		<init-params>
+			<object-param>
+				<name>configs</name>
+				<object type="org.xcmis.sp.inmemory.StorageProviderImpl$StorageProviderConfig">
+					<field name="storage">
+						<object type="org.xcmis.sp.inmemory.StorageConfiguration">
+							<field name="id">
+								<!-- ID of CMIS repository -->
+								<string>cmis-inmem1</string>
+							</field>
+							<field name="properties">
+								<map type="java.util.HashMap">
+									<entry>
+										<key>
+											<string>exo.cmis.changetoken.feature</string>
+										</key>
+										<value>
+											<!-- Enable/Disable change token feature. -->
 											<boolean>false</boolean>
 										</value>
 									</entry>
