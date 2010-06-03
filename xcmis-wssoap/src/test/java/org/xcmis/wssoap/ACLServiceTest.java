@@ -90,6 +90,13 @@ public class ACLServiceTest extends BaseTest
       addACL.getPermission().add(entry1);
       addACL.getPermission().add(entry2);
 
+      CmisAccessControlEntryType entry3 = new CmisAccessControlEntryType();
+      CmisAccessControlPrincipalType principal3 = new CmisAccessControlPrincipalType();
+      principal3.setPrincipalId("any");
+      entry3.setPrincipal(principal3);
+      entry3.getPermission().add(EnumBasicPermissions.CMIS_ALL.value());
+      removeACL.getPermission().add(entry3);
+
       port.applyACL(repositoryId, //
          docId, //
          addACL, //
@@ -137,19 +144,29 @@ public class ACLServiceTest extends BaseTest
       String docId = createDocument(testFolderId, "doc");
       CmisAccessControlListType addACL = new CmisAccessControlListType();
       CmisAccessControlListType removeACL = new CmisAccessControlListType();
-      CmisAccessControlEntryType entry = new CmisAccessControlEntryType();
-      CmisAccessControlPrincipalType principal = new CmisAccessControlPrincipalType();
-      principal.setPrincipalId("Makis");
-      entry.setPrincipal(principal);
-      entry.getPermission().add(EnumBasicPermissions.CMIS_WRITE.value());
-      addACL.getPermission().add(entry);
+
       CmisAccessControlEntryType entry1 = new CmisAccessControlEntryType();
       CmisAccessControlPrincipalType principal1 = new CmisAccessControlPrincipalType();
-      principal1.setPrincipalId("root");
+      principal1.setPrincipalId("Makis");
       entry1.setPrincipal(principal1);
-      entry1.getPermission().add(EnumBasicPermissions.CMIS_READ.value());
       entry1.getPermission().add(EnumBasicPermissions.CMIS_WRITE.value());
       addACL.getPermission().add(entry1);
+
+      CmisAccessControlEntryType entry2 = new CmisAccessControlEntryType();
+      CmisAccessControlPrincipalType principal2 = new CmisAccessControlPrincipalType();
+      principal2.setPrincipalId("root");
+      entry2.setPrincipal(principal2);
+      entry2.getPermission().add(EnumBasicPermissions.CMIS_READ.value());
+      entry2.getPermission().add(EnumBasicPermissions.CMIS_WRITE.value());
+      addACL.getPermission().add(entry2);
+
+      CmisAccessControlEntryType entry3 = new CmisAccessControlEntryType();
+      CmisAccessControlPrincipalType principal3 = new CmisAccessControlPrincipalType();
+      principal3.setPrincipalId("any");
+      entry3.setPrincipal(principal3);
+      entry3.getPermission().add(EnumBasicPermissions.CMIS_ALL.value());
+      removeACL.getPermission().add(entry3);
+
       conn.applyACL(docId, TypeConverter.getListAccessControlEntry(addACL), TypeConverter
          .getListAccessControlEntry(removeACL), AccessControlPropagation.REPOSITORYDETERMINED);
       CmisACLType resp = port.getACL(repositoryId, docId, false, new CmisExtensionType());

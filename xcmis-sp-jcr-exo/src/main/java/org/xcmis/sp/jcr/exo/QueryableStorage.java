@@ -32,6 +32,7 @@ import org.xcmis.spi.FolderData;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.ObjectData;
+import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.PermissionService;
 import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.Storage;
@@ -42,6 +43,7 @@ import org.xcmis.spi.query.Score;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -330,7 +332,15 @@ public class QueryableStorage extends StorageImpl
          ObjectData obj = itemCache.get(identifer);
          if (obj == null)
          {
-            obj = storage.getObjectById(identifer);
+            try
+            {
+               obj = storage.getObjectById(identifer);
+            }
+            catch (ObjectNotFoundException e)
+            {
+               // XXX : correct ?
+               return null;
+            }
             itemCache.put(identifer, obj);
          }
          if (obj.getBaseType() == BaseType.FOLDER)
@@ -340,12 +350,12 @@ public class QueryableStorage extends StorageImpl
                return obj.getName();
             }
          }
-         FolderData parent = obj.getParent();
-         if (parent == null)
+         Collection<FolderData> parents = obj.getParents();
+         if (parents.size() == 0)
          {
             return obj.getName();
          }
-         return parent.getPath() + "/" + obj.getName();
+         return parents.iterator().next().getPath() + "/" + obj.getName();
       }
    }
 

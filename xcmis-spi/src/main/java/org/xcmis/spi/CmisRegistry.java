@@ -77,9 +77,11 @@ public class CmisRegistry
 
    /**
     * Create new connection. Delegated to appropriate StorageProvider method
-    *
+    * 
     * @param storageId storage id
     * @return connection
+    * @throws InvalidArgumentException if storage with specified id is not
+    *         registered
     */
    public final Connection getConnection(String storageId)
    {
@@ -93,7 +95,7 @@ public class CmisRegistry
 
    /**
     * Get id of all available storages.
-    *
+    * 
     * @return storages iDs if no one storages configured than empty set returned
     *         never null
     */
@@ -114,7 +116,7 @@ public class CmisRegistry
 
    /**
     * Adds an extra rendition provider .
-    *
+    * 
     * @param provider String FQN of provider to add.
     * 
     */

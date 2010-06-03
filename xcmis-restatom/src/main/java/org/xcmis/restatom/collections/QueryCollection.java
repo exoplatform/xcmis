@@ -35,9 +35,7 @@ import org.xcmis.spi.Connection;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsList;
-import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.RenditionFilter;
-import org.xcmis.spi.StorageException;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.query.Query;
@@ -117,7 +115,7 @@ public class QueryCollection extends CmisObjectCollection
          int maxItems = CmisConstants.MAX_ITEMS;
          int skipCount = CmisConstants.SKIP_COUNT;
          String q = null;
-         String renditionFilter = RenditionFilter.NONE_FILTER;
+         String renditionFilter = RenditionFilter.NONE;
          boolean isSearchAllVersions = false;
          IncludeRelationships includeRelationships = IncludeRelationships.NONE;
          boolean isIncludeAllowableActions = false;
@@ -196,17 +194,9 @@ public class QueryCollection extends CmisObjectCollection
          }
 
       }
-      catch (StorageException re)
-      {
-         throw new ResponseContextException(createErrorResponse(re, 500));
-      }
       catch (FilterNotValidException fe)
       {
          throw new ResponseContextException(createErrorResponse(fe, 400));
-      }
-      catch (ObjectNotFoundException onfe)
-      {
-         throw new ResponseContextException(createErrorResponse(onfe, 404));
       }
       catch (InvalidArgumentException iae)
       {

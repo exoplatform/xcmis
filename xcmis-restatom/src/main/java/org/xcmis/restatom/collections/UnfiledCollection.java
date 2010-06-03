@@ -31,14 +31,11 @@ import org.xcmis.restatom.AtomUtils;
 import org.xcmis.restatom.abdera.ObjectTypeElement;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.Connection;
-import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsList;
-import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.Property;
@@ -49,8 +46,9 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey Zavizionov</a>
- * @version $Id:  $
+ * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey
+ *         Zavizionov</a>
+ * @version $Id: $
  *
  */
 public class UnfiledCollection extends CmisObjectCollection
@@ -115,12 +113,6 @@ public class UnfiledCollection extends CmisObjectCollection
          }
       }
 
-      // TODO 
-      //  The following arguments may be supplied. Please see the domain model for more information:
-      //  • removeFrom: For repositories which support multi-filing, this parameter identifies which folder to
-      //    remove this object from. If specified, it indicates the folder from which the object shall be moved.
-      //    If not specified, the object will be removed from all folders.
-
       Connection conn = null;
       try
       {
@@ -138,18 +130,6 @@ public class UnfiledCollection extends CmisObjectCollection
          }
          String link = getObjectLink(id, request);
          return buildCreateEntryResponse(link, entry);
-      }
-      catch (ConstraintException cve)
-      {
-         return createErrorResponse(cve, 409);
-      }
-      catch (StorageException re)
-      {
-         return createErrorResponse(re, 500);
-      }
-      catch (UpdateConflictException uce)
-      {
-         return createErrorResponse(uce, 409);
       }
       catch (ObjectNotFoundException onfe)
       {

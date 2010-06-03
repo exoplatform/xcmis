@@ -25,7 +25,7 @@ package org.xcmis.spi;
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id: StorageException.java 2 2010-02-04 17:21:49Z andrew00x $
  */
-public class StorageException extends CmisRuntimeException
+public class StorageException extends CmisException
 {
 
    /**

@@ -21,7 +21,7 @@ package org.xcmis.spi;
 
 /**
  * Provide access to all available CMIS storages.
- *
+ * 
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: StorageProvider.java 316 2010-03-09 15:20:28Z andrew00x $
  */
@@ -32,7 +32,7 @@ public interface StorageProvider
     * Create new connection for user. This method may be used for anonymous user
     * or when environment able to determine current user. This implementation
     * specific.
-    *
+    * 
     * @param storageId storage id
     * @return connection
     */
@@ -40,11 +40,10 @@ public interface StorageProvider
 
    /**
     * Get id of storage.
-    *
+    * 
     * @return storages iDs if no one storages configured than empty set returned
     *         never null
     */
    String getStorageID();
-   
 
 }

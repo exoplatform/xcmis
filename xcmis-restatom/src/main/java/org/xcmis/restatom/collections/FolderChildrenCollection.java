@@ -130,10 +130,6 @@ public class FolderChildrenCollection extends CmisObjectCollection
             }
          }
       }
-      catch (StorageException re)
-      {
-         throw new ResponseContextException(createErrorResponse(re, 500));
-      }
       catch (FilterNotValidException fe)
       {
          throw new ResponseContextException(createErrorResponse(fe, 400));
@@ -321,7 +317,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
       }
       catch (StreamNotSupportedException se)
       {
-         return createErrorResponse(se, 403); 
+         return createErrorResponse(se, 403);
       }
       catch (StorageException re)
       {
@@ -402,10 +398,6 @@ public class FolderChildrenCollection extends CmisObjectCollection
                CmisObject parent = conn.getFolderParent(id, true, null);
                feed.addLink(getObjectLink(getId(parent), request), AtomCMIS.LINK_UP, AtomCMIS.MEDIATYPE_ATOM_ENTRY,
                   null, null, -1);
-            }
-            catch (StorageException re)
-            {
-               throw new ResponseContextException(createErrorResponse(re, 500));
             }
             catch (FilterNotValidException fe)
             {

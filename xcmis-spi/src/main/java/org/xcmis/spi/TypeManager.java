@@ -21,7 +21,6 @@ package org.xcmis.spi;
 
 import org.xcmis.spi.model.TypeDefinition;
 
-
 /**
  * Produces type definition.
  * 
@@ -38,9 +37,19 @@ public interface TypeManager
     * @return ID of added type
     * @throws StorageException if type can't be added cause to storage internal
     *         problem
-    * @throws CmisRuntimeException if any others errors occur
+    * @throws ConstraintException if any of the following conditions are met:
+    *         <ul>
+    *         <li>Storage already has type with the same id, see
+    *         {@link TypeDefinition#getId()}</li>
+    *         <li>Base type is not specified or is one of optional type that is
+    *         not supported by storage, see {@link TypeDefinition#getBaseId()}</li>
+    *         <li>Parent type is not specified or does not exist, see
+    *         {@link TypeDefinition#getParentId()}</li>
+    *         <li>New type has at least one property definitions that has
+    *         unsupported type, invalid id, so on</li>
+    *         </ul>
     */
-   String addType(TypeDefinition type) throws StorageException, CmisRuntimeException;
+   String addType(TypeDefinition type) throws ConstraintException, StorageException;
 
    /**
     * Get type definition for type <code>typeId</code> .
@@ -52,8 +61,7 @@ public interface TypeManager
     * @throws TypeNotFoundException if type <code>typeId</code> does not exist
     * @throws CmisRuntimeException if any others errors occur
     */
-   TypeDefinition getTypeDefinition(String typeId, boolean includePropertyDefinition)
-      throws TypeNotFoundException, CmisRuntimeException;
+   TypeDefinition getTypeDefinition(String typeId, boolean includePropertyDefinition) throws TypeNotFoundException;
 
    /**
     * Iterator over object types.
@@ -68,7 +76,7 @@ public interface TypeManager
     * @throws CmisRuntimeException if any others errors occur
     */
    ItemsIterator<TypeDefinition> getTypeChildren(String typeId, boolean includePropertyDefinitions)
-      throws TypeNotFoundException, CmisRuntimeException;
+      throws TypeNotFoundException;
 
    /**
     * Remove type definition for type <code>typeId</code> .
@@ -80,6 +88,6 @@ public interface TypeManager
     *         problem
     * @throws CmisRuntimeException if any others errors occur
     */
-   void removeType(String typeId) throws TypeNotFoundException, StorageException, CmisRuntimeException;
+   void removeType(String typeId) throws TypeNotFoundException, StorageException;
 
 }

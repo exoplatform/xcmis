@@ -58,8 +58,14 @@ public class ACLTest extends BaseTest
       entry2.getPermissions().add(BasicPermissions.CMIS_WRITE.value());
       addACL.add(entry2);
 
+      List<AccessControlEntry> removeACL = new ArrayList<AccessControlEntry>();
+      AccessControlEntry entry3 = new AccessControlEntry();
+      entry3.setPrincipal("any");
+      entry3.getPermissions().add(BasicPermissions.CMIS_ALL.value());
+      removeACL.add(entry3);
+
       // Apply via common service
-      conn.applyACL(docId, addACL, null, AccessControlPropagation.REPOSITORYDETERMINED);
+      conn.applyACL(docId, addACL, removeACL, AccessControlPropagation.REPOSITORYDETERMINED);
 
       String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/objacl/" + docId;
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
@@ -117,12 +123,13 @@ public class ACLTest extends BaseTest
          + "</cmis:permission>" //
          + "</cmis:acl>";
 
-      String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/addacl/" + testFolderId;
+      String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/objacl/" + testFolderId;
 
       ByteArrayContainerResponseWriter writer = new ByteArrayContainerResponseWriter();
       ContainerResponse resp = service("PUT", requestURI, "http://localhost:8080/rest", null, s.getBytes(), writer);
       //            printBody(writer.getBody());
-      assertEquals(201, resp.getStatus());
+      //assertEquals(201, resp.getStatus());
+      assertEquals(200, resp.getStatus());
 
       List<AccessControlEntry> acl = conn.getACL(docId, true);
       for (AccessControlEntry ace : acl)

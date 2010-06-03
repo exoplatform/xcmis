@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * List of CMIS items. It contains list itself and additional information such
  * as {@link #isHasMoreItems()} and {@link #getNumItems()}.
- *
+ * 
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey
  *         Zavizionov</a>
  * @version $Id: CmisObjectInFolderList.java 34360 2009-07-22 23:58:59Z sunman $

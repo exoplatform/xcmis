@@ -61,6 +61,7 @@ public interface FolderData extends ObjectData
     * @throws ConstraintException if <code>object</code> has type that is
     *         unsupported by current folder. See
     *         {@link CMIS#ALLOWED_CHILD_OBJECT_TYPE_IDS}
+    * @throws NotSupportedException if multifiling capability is not supported
     */
    void addObject(ObjectData object) throws ConstraintException;
 
@@ -70,6 +71,7 @@ public interface FolderData extends ObjectData
     * not supported then this method must throw {@link NotSupportedException}.
     * 
     * @param object object to be removed from current folder
+    * @throws NotSupportedException if unfiling capability is not supported
     */
    void removeObject(ObjectData object);
 

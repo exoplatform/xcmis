@@ -19,22 +19,17 @@
 
 package org.xcmis.sp.jcr.exo;
 
-
 import org.xcmis.sp.jcr.exo.index.IndexListener;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
-import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.DocumentData;
-import org.xcmis.spi.NameConstraintViolationException;
-import org.xcmis.spi.ObjectData;
+import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.Property;
-import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.utils.MimeType;
 
 import java.io.ByteArrayInputStream;
@@ -55,20 +50,20 @@ import javax.jcr.Value;
 class JcrFile extends DocumentDataImpl
 {
 
-   public JcrFile(TypeDefinition type, Node node, RenditionManager manager, IndexListener indexListener)
+   public JcrFile(JcrNodeAdapter jcrEntry, IndexListener indexListener, RenditionManager renditionManager)
    {
-      super(type, node, manager, indexListener);
+      super(jcrEntry, indexListener, renditionManager);
       try
       {
-         if (type.isVersionable() && this.node.canAddMixin(JcrCMIS.MIX_VERSIONABLE))
+         if (jcrEntry.getType().isVersionable() && jcrEntry.getNode().canAddMixin(JcrCMIS.MIX_VERSIONABLE))
          {
-            this.node.addMixin(JcrCMIS.MIX_VERSIONABLE);
-            session.save();
+            jcrEntry.getNode().addMixin(JcrCMIS.MIX_VERSIONABLE);
+            jcrEntry.save();
          }
       }
-      catch (RepositoryException re)
+      catch (Exception e)
       {
-         throw new CmisRuntimeException("Unexpected error. " + re.getMessage(), re);
+         throw new CmisRuntimeException(e.getMessage(), e);
       }
    }
 
@@ -78,7 +73,6 @@ class JcrFile extends DocumentDataImpl
    @Override
    public void cancelCheckout() throws StorageException
    {
-      // TODO
       throw new CmisRuntimeException("Not implemented for not CMIS type.");
    }
 
@@ -87,10 +81,8 @@ class JcrFile extends DocumentDataImpl
     */
    @Override
    public DocumentData checkin(boolean major, String checkinComment, Map<String, Property<?>> properties,
-      ContentStream content, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
-      Collection<ObjectData> policies) throws ConstraintException, StorageException
+      ContentStream content, List<AccessControlEntry> acl, Collection<PolicyData> policies) throws StorageException
    {
-      // TODO
       throw new CmisRuntimeException("Not implemented for not CMIS type.");
    }
 
@@ -98,133 +90,9 @@ class JcrFile extends DocumentDataImpl
     * {@inheritDoc}
     */
    @Override
-   public DocumentData checkout() throws ConstraintException, VersioningException, StorageException
+   public DocumentData checkout() throws VersioningException, StorageException
    {
-      // TODO
       throw new CmisRuntimeException("Not implemented for not CMIS type.");
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   void save(Boolean isNewObject) throws StorageException, NameConstraintViolationException, UpdateConflictException
-   {
-      try
-      {
-         Node parentNode = node.getParent();
-         // New name was set. Need rename Document.
-         // See setName(String), setProperty(Node, Property<?>).
-         if (name != null)
-         {
-            if (name.length() == 0)
-            {
-               throw new NameConstraintViolationException("Name is empty.");
-            }
-
-            if (parentNode.hasNode(name))
-            {
-               throw new NameConstraintViolationException("Object with name " + name + " already exists.");
-            }
-
-            String srcPath = node.getPath();
-            String destPath = srcPath.substring(0, srcPath.lastIndexOf('/') + 1) + name;
-
-            session.move(srcPath, destPath);
-
-            node = (Node)session.getItem(destPath);
-         }
-
-         session.save();
-      }
-      catch (RepositoryException re)
-      {
-         throw new StorageException("Unable save object. " + re.getMessage(), re);
-      }
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   protected static void setContentStream(Node data, ContentStream content) throws RepositoryException, IOException
-   {
-      // jcr:content
-      Node contentNode = data.getNode(JcrCMIS.JCR_CONTENT);
-
-      if (content != null)
-      {
-         MimeType mediaType = content.getMediaType();
-         contentNode.setProperty(JcrCMIS.JCR_MIMETYPE, mediaType.getBaseType());
-         if (mediaType.getParameter(CmisConstants.CHARSET) != null)
-         {
-            contentNode.setProperty(JcrCMIS.JCR_ENCODING, mediaType.getParameter(CmisConstants.CHARSET));
-         }
-         contentNode.setProperty(JcrCMIS.JCR_DATA, content.getStream()).getLength();
-         contentNode.setProperty(JcrCMIS.JCR_LAST_MODIFIED, Calendar.getInstance());
-      }
-      else
-      {
-         contentNode.setProperty(JcrCMIS.JCR_MIMETYPE, "");
-         contentNode.setProperty(JcrCMIS.JCR_ENCODING, (Value)null);
-         contentNode.setProperty(JcrCMIS.JCR_DATA, new ByteArrayInputStream(new byte[0]));
-      }
-
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   @Override
-   public String getContentStreamMimeType()
-   {
-      try
-      {
-         return node.getProperty("jcr:content/jcr:mimeType").getString();
-      }
-      catch (RepositoryException re)
-      {
-         throw new CmisRuntimeException("Unable get content stream mime type. " + re.getMessage(), re);
-      }
-   }
-
-   //   /**
-   //    * {@inheritDoc}
-   //    */
-   //   @Override
-   //   protected Long getContentStreamLength()
-   //   {
-   //      try
-   //      {
-   //         return node.getProperty("jcr:content/jcr:data").getLength();
-   //      }
-   //      catch (RepositoryException re)
-   //      {
-   //         throw new CmisRuntimeException("Unable get content stream length. " + re.getMessage(), re);
-   //      }
-   //   }
-
-   /**
-    * {@inheritDoc}
-    */
-   @Override
-   public String getVersionLabel()
-   {
-      return latestLabel;
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   @Override
-   public String getVersionSeriesId()
-   {
-      try
-      {
-         return node.getProperty(JcrCMIS.JCR_VERSION_HISTORY).getString();
-      }
-      catch (RepositoryException re)
-      {
-         throw new CmisRuntimeException("Unable get version series ID. " + re.getMessage(), re);
-      }
    }
 
    /**
@@ -235,11 +103,79 @@ class JcrFile extends DocumentDataImpl
    {
       try
       {
-         return node.getProperty(JcrCMIS.JCR_CREATED).getDate();
+         return getNode().getProperty(JcrCMIS.JCR_CREATED).getDate();
       }
       catch (RepositoryException re)
       {
          throw new CmisRuntimeException("Unable get cteation date. " + re.getMessage(), re);
+      }
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   @Override
+   public String getVersionLabel()
+   {
+      return StorageImpl.latestLabel;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   @Override
+   public String getVersionSeriesId()
+   {
+      try
+      {
+         return getNode().getProperty(JcrCMIS.JCR_VERSION_HISTORY).getString();
+      }
+      catch (RepositoryException re)
+      {
+         throw new CmisRuntimeException("Unable get version series ID. " + re.getMessage(), re);
+      }
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public void setContentStream(ContentStream content) throws IOException, StorageException
+   {
+      try
+      {
+         // jcr:content
+         Node contentNode = getNode().getNode(JcrCMIS.JCR_CONTENT);
+         if (content != null)
+         {
+            MimeType mediaType = content.getMediaType();
+            contentNode.setProperty(JcrCMIS.JCR_MIMETYPE, mediaType.getBaseType());
+            if (mediaType.getParameter(CmisConstants.CHARSET) != null)
+            {
+               contentNode.setProperty(JcrCMIS.JCR_ENCODING, mediaType.getParameter(CmisConstants.CHARSET));
+            }
+            contentNode.setProperty(JcrCMIS.JCR_DATA, content.getStream()).getLength();
+            contentNode.setProperty(JcrCMIS.JCR_LAST_MODIFIED, Calendar.getInstance());
+         }
+         else
+         {
+            contentNode.setProperty(JcrCMIS.JCR_MIMETYPE, "");
+            contentNode.setProperty(JcrCMIS.JCR_ENCODING, (Value)null);
+            contentNode.setProperty(JcrCMIS.JCR_DATA, new ByteArrayInputStream(new byte[0]));
+         }
+      }
+      catch (RepositoryException re)
+      {
+         throw new StorageException("Unable set content stream. " + re.getMessage(), re);
+      }
+      save();
+   }
+
+   protected void save() throws StorageException
+   {
+      jcrEntry.save();
+      if (indexListener != null)
+      {
+         indexListener.updated(this);
       }
    }
 }

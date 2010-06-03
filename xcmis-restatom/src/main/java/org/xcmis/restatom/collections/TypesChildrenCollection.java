@@ -30,8 +30,9 @@ import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.Connection;
+import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsList;
-import org.xcmis.spi.StorageException;
+import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.model.TypeDefinition;
 
 import java.util.Calendar;
@@ -96,9 +97,13 @@ public class TypesChildrenCollection extends CmisTypeCollection
             addEntryDetails(request, e, feedIri, type);
          }
       }
-      catch (StorageException re)
+      catch (InvalidArgumentException iae)
       {
-         throw new ResponseContextException(createErrorResponse(re, 500));
+         throw new ResponseContextException(createErrorResponse(iae, 400));
+      }
+      catch (TypeNotFoundException tnfe)
+      {
+         throw new ResponseContextException(createErrorResponse(tnfe, 404));
       }
       catch (Throwable t)
       {

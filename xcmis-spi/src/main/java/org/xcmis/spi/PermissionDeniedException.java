@@ -23,7 +23,8 @@ package org.xcmis.spi;
  * If there is no permission for operation.
  * 
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id: PermissionDeniedException.java 2 2010-02-04 17:21:49Z andrew00x $
+ * @version $Id: PermissionDeniedException.java 2 2010-02-04 17:21:49Z andrew00x
+ *          $
  */
 public final class PermissionDeniedException extends CmisRuntimeException
 {
@@ -53,8 +54,8 @@ public final class PermissionDeniedException extends CmisRuntimeException
    }
 
    /**
-    * Construct instance <tt>PermissionDeniedException</tt> with message and cause
-    * exception. 
+    * Construct instance <tt>PermissionDeniedException</tt> with message and
+    * cause exception.
     * 
     * @param message the detail message about exception
     * @param cause the cause exception
@@ -67,7 +68,8 @@ public final class PermissionDeniedException extends CmisRuntimeException
    }
 
    /**
-    * Construct instance <tt>PermissionDeniedException</tt> with cause exception.
+    * Construct instance <tt>PermissionDeniedException</tt> with cause
+    * exception.
     * 
     * @param cause the cause exception
     * @see Throwable#getCause()

@@ -255,7 +255,7 @@ public class ObjectServiceTest extends BaseTest
          );
       Holder<String> hId = new Holder<String>(updated);
 
-      ContentStream cs = conn.getContentStream(updated, null, 0, -1);
+      ContentStream cs = conn.getContentStream(updated, null);
       byte b[] = new byte[1024];
       int rd = cs.getStream().read(b);
       assertEquals(content, new String(b, 0, rd));
@@ -265,7 +265,7 @@ public class ObjectServiceTest extends BaseTest
          new CmisExtensionType()));
       try
       {
-         cs = conn.getContentStream(hId.value, null, 0, -1);
+         cs = conn.getContentStream(hId.value, null);
          fail();
       }
       catch (ConstraintException ex)
@@ -380,7 +380,7 @@ public class ObjectServiceTest extends BaseTest
          new Holder<CmisExtensionType>() // Extension
          );
 
-      ContentStream cs = conn.getContentStream(hId.value, null, 0, -1);
+      ContentStream cs = conn.getContentStream(hId.value, null);
       byte[] b = new byte[128];
       int rd = cs.getStream().read(b);
       assertEquals(content, new String(b, 0, rd));

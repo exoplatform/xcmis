@@ -23,7 +23,7 @@ import java.util.List;
 
 /**
  * Reflect tree hierarchy of CMIS object.
- *
+ * 
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */

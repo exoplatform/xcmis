@@ -35,35 +35,35 @@ public class RenditionFilter
 {
 
    /** None filter to include all renditions. */
-   public static final String ANY_FILTER = CmisConstants.WILDCARD;
+   public static final String ANY = CmisConstants.WILDCARD;
 
    /** None filter to exclude all renditions. */
-   public static final String NONE_FILTER = "cmis:none";
+   public static final String NONE = "cmis:none";
 
    /** None filter to accept only renditions with 'cmis:thumbnail' kind. */
-   public static final String THUMBNAIL_FILTER = "cmis:thumbnail";
+   public static final String THUMBNAIL = "cmis:thumbnail";
 
    /** Filter instance with 'cmis:thumbnail' kind. */
-   public static final RenditionFilter THUMBNAIL;
+   public static final RenditionFilter THUMBNAIL_FILTER;
 
    /** Filter instance with all renditions included. */
-   public static final RenditionFilter ANY;
+   public static final RenditionFilter ANY_FILTER;
 
    /** Filter instance with none renditions included. */
-   public static final RenditionFilter NONE;
+   public static final RenditionFilter NONE_FILTER;
 
    static
    {
-      THUMBNAIL = new RenditionFilter();
+      THUMBNAIL_FILTER = new RenditionFilter();
       Set<String> tmp = new HashSet<String>();
-      tmp.add(THUMBNAIL_FILTER);
-      THUMBNAIL.kinds = Collections.unmodifiableSet(tmp);
-      THUMBNAIL.mediaTypes = Collections.emptySet();
-      ANY = new RenditionFilter();
-      ANY.anyRenditions = true;
-      NONE = new RenditionFilter();
-      NONE.kinds = Collections.emptySet();
-      NONE.mediaTypes = Collections.emptySet();
+      tmp.add(THUMBNAIL);
+      THUMBNAIL_FILTER.kinds = Collections.unmodifiableSet(tmp);
+      THUMBNAIL_FILTER.mediaTypes = Collections.emptySet();
+      ANY_FILTER = new RenditionFilter();
+      ANY_FILTER.anyRenditions = true;
+      NONE_FILTER = new RenditionFilter();
+      NONE_FILTER.kinds = Collections.emptySet();
+      NONE_FILTER.mediaTypes = Collections.emptySet();
    }
 
    /** Pattern for parsing source filter string. */
@@ -90,13 +90,13 @@ public class RenditionFilter
     */
    public RenditionFilter(String filterString) throws FilterNotValidException
    {
-      if (filterString == null || filterString.length() == 0 || NONE_FILTER.equals(filterString.trim()))
+      if (filterString == null || filterString.length() == 0 || NONE.equals(filterString.trim()))
       {
          // Filter will exclude all associated renditions.
          this.kinds = Collections.emptySet();
          this.mediaTypes = Collections.emptySet();
       }
-      else if (ANY_FILTER.equals(filterString.trim()))
+      else if (ANY.equals(filterString.trim()))
       {
          this.anyRenditions = true;
       }
@@ -107,7 +107,7 @@ public class RenditionFilter
          this.mediaTypes = new HashSet<MimeType>();
          for (String token : SPLITTER.split(filterString))
          {
-            if (token.length() > 0 && !token.equals(ANY_FILTER))
+            if (token.length() > 0 && !token.equals(ANY))
             {
                for (char ch : token.toCharArray())
                {
@@ -134,10 +134,7 @@ public class RenditionFilter
       }
    }
 
-   /**
-    * Private create instance of RenditionFilter.
-    */
-   private RenditionFilter()
+   protected RenditionFilter()
    {
    }
 

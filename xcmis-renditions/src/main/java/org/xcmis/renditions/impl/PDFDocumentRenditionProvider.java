@@ -21,8 +21,8 @@ package org.xcmis.renditions.impl;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
+import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.ContentStream;
-import org.xcmis.spi.RenditionContentStream;
 import org.xcmis.spi.RenditionProvider;
 import org.xcmis.spi.utils.MimeType;
 
@@ -42,8 +42,9 @@ import javax.imageio.ImageIO;
 public class PDFDocumentRenditionProvider implements RenditionProvider
 {
 
-   /** The String[] SUPPORTED_MEDIA_TYPES. */
-   private static final String[] SUPPORTED_MEDIA_TYPES = new String[]{"application/pdf"};
+   private static final MimeType[] SUPPORTED_MEDIA_TYPES = new MimeType[]{new MimeType("application", "pdf")};
+
+   private static final MimeType PRODUCED = new MimeType("image", "png");
 
    // TODO configurable maxHeigth & maxWidth
    /** The max height. */
@@ -55,7 +56,31 @@ public class PDFDocumentRenditionProvider implements RenditionProvider
    /**
     * {@inheritDoc}
     */
-   public RenditionContentStream getRenditionStream(ContentStream stream) throws IOException
+   public int getHeight()
+   {
+      return -1;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public String getKind()
+   {
+      return "cmis:thumbnail";
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public MimeType getProducedMediaType()
+   {
+      return PRODUCED;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public ContentStream getRenditionStream(ContentStream stream) throws IOException
    {
       PDDocument pdf = null;
       try
@@ -64,10 +89,9 @@ public class PDFDocumentRenditionProvider implements RenditionProvider
          PDPage page = (PDPage)pdf.getDocumentCatalog().getAllPages().get(0);
          BufferedImage image = page.convertToImage();
          // Determine scale and be sure both width and height are not greater the max
-         int scale = (int)Math.max(//
-            Math.floor((image.getHeight() / maxHeight) + 1.0d), //
-            Math.floor((image.getWidth() / maxWidth) + 1.0d) //
-            );
+         int scale =
+            (int)Math.max(Math.floor((image.getHeight() / maxHeight) + 1.0d), Math
+               .floor((image.getWidth() / maxWidth) + 1.0d));
          int height = image.getHeight() / scale;
          int width = image.getWidth() / scale;
          BufferedImage scaledImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -78,10 +102,7 @@ public class PDFDocumentRenditionProvider implements RenditionProvider
 
          ByteArrayOutputStream out = new ByteArrayOutputStream();
          ImageIO.write(scaledImage, "png", out);
-         RenditionContentStream renditionStream =
-            new RenditionContentStream(out.toByteArray(), null, new MimeType("image", " png"), "cmis:thumbnail");
-         renditionStream.setHeight(height);
-         renditionStream.setWidth(width);
+         ContentStream renditionStream = new BaseContentStream(out.toByteArray(), null, new MimeType("image", " png"));
          return renditionStream;
       }
       finally
@@ -96,8 +117,16 @@ public class PDFDocumentRenditionProvider implements RenditionProvider
    /**
     * {@inheritDoc}
     */
-   public String[] getSupportedMediaType()
+   public MimeType[] getSupportedMediaType()
    {
       return SUPPORTED_MEDIA_TYPES;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public int getWidth()
+   {
+      return -1;
    }
 }

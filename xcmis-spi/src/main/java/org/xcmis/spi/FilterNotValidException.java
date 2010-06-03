@@ -23,9 +23,10 @@ package org.xcmis.spi;
  * If caller try apply property or rendition filter that is not valid.
  * 
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id: FilterNotValidException.java 260 2010-03-03 15:53:42Z andrew00x $
+ * @version $Id: FilterNotValidException.java 260 2010-03-03 15:53:42Z andrew00x
+ *          $
  */
-public final class FilterNotValidException extends InvalidArgumentException
+public final class FilterNotValidException extends CmisException
 {
 
    /**
@@ -52,8 +53,8 @@ public final class FilterNotValidException extends InvalidArgumentException
    }
 
    /**
-    * Construct instance <tt>FilterNotValidException</tt> with message and
-    * cause exception.
+    * Construct instance <tt>FilterNotValidException</tt> with message and cause
+    * exception.
     * 
     * @param message the detail message about exception
     * @param cause the cause exception
@@ -66,8 +67,7 @@ public final class FilterNotValidException extends InvalidArgumentException
    }
 
    /**
-    * Construct instance <tt>FilterNotValidException</tt> with cause
-    * exception.
+    * Construct instance <tt>FilterNotValidException</tt> with cause exception.
     * 
     * @param cause the cause exception
     * @see Throwable#getCause()

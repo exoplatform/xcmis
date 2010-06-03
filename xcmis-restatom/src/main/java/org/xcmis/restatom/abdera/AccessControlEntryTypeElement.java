@@ -32,7 +32,8 @@ import javax.xml.namespace.QName;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id: AccessControlEntryTypeElement.java 2 2010-02-04 17:21:49Z andrew00x $
+ * @version $Id: AccessControlEntryTypeElement.java 2 2010-02-04 17:21:49Z
+ *          andrew00x $
  */
 public class AccessControlEntryTypeElement extends ExtensibleElementWrapper
 {
@@ -85,9 +86,8 @@ public class AccessControlEntryTypeElement extends ExtensibleElementWrapper
          }
       }
 
-      // DIRECT
-      // TODO direct element
-      //      permissionElement.addSimpleExtension(AtomCMIS.DIRECT, accessControlEntry.isDirect() ? "true" : "false");
+      Boolean direct = accessControlEntry.isDirect();
+      addSimpleExtension(AtomCMIS.DIRECT, ((direct != null && direct) ? "true" : "false"));
    }
 
    /**

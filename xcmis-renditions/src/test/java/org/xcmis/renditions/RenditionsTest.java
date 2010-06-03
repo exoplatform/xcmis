@@ -22,9 +22,8 @@ package org.xcmis.renditions;
 import junit.framework.TestCase;
 
 import org.xcmis.renditions.impl.ImageRenditionProvider;
-import org.xcmis.renditions.impl.PDFDocumentRenditionProvider;
 import org.xcmis.spi.BaseContentStream;
-import org.xcmis.spi.RenditionContentStream;
+import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.utils.MimeType;
 
 import java.io.InputStream;
@@ -70,10 +69,9 @@ public class RenditionsTest extends TestCase
          InputStream jpg = getClass().getResource("/" + jpgname).openStream();
          ImageRenditionProvider prov = new ImageRenditionProvider();
          BaseContentStream stream = new BaseContentStream(jpg, jpgname, new MimeType("image", "jpg"));
-         RenditionContentStream out = prov.getRenditionStream(stream);
+         ContentStream out = prov.getRenditionStream(stream);
          assertNotNull(out);
          assertNotNull(out.getStream());
-         assertEquals(kind, out.getKind());
          jpg.close();
       }
       catch (java.io.IOException ex)

@@ -26,10 +26,11 @@ import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.model.TypeDefinition;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.jcr.Node;
 import javax.jcr.PropertyIterator;
@@ -43,45 +44,9 @@ import javax.jcr.Session;
 class PolicyDataImpl extends BaseObjectData implements PolicyData
 {
 
-   public PolicyDataImpl(TypeDefinition type, Session session, Node node, IndexListener indexListener)
+   public PolicyDataImpl(JcrNodeAdapter jcrEntry, IndexListener indexListener)
    {
-      super(type, null, session, node, indexListener);
-   }
-
-   public PolicyDataImpl(TypeDefinition type, Node node, IndexListener indexListener)
-   {
-      super(type, node, indexListener);
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   @Override
-   void delete() throws StorageException
-   {
-      try
-      {
-         // Check is policy applied to at least one object.
-         for (PropertyIterator iter = node.getReferences(); iter.hasNext();)
-         {
-            Node controllable = iter.nextProperty().getParent();
-            if (controllable.isNodeType(JcrCMIS.NT_FILE) //
-               || controllable.isNodeType(JcrCMIS.NT_FOLDER) //
-               || controllable.isNodeType(JcrCMIS.CMIS_NT_POLICY))
-            {
-               String msg = "Unable to delete applied policy.";
-               throw new ConstraintException(msg);
-            }
-         }
-
-      }
-      catch (RepositoryException re)
-      {
-         throw new StorageException("Unable delete object. " + re.getMessage(), re);
-      }
-
-      // If not applied to any object
-      super.delete();
+      super(jcrEntry, indexListener);
    }
 
    /**
@@ -96,7 +61,6 @@ class PolicyDataImpl extends BaseObjectData implements PolicyData
    /**
     * {@inheritDoc}
     */
-   @Override
    public FolderData getParent() throws ConstraintException
    {
       return null;
@@ -105,7 +69,6 @@ class PolicyDataImpl extends BaseObjectData implements PolicyData
    /**
     * {@inheritDoc}
     */
-   @Override
    public Collection<FolderData> getParents()
    {
       return Collections.emptyList();
@@ -116,7 +79,40 @@ class PolicyDataImpl extends BaseObjectData implements PolicyData
     */
    public String getPolicyText()
    {
-      return getString(CmisConstants.POLICY_TEXT);
+      return jcrEntry.getString(CmisConstants.POLICY_TEXT);
+   }
+
+   protected void delete() throws StorageException
+   {
+      String objectId = getObjectId();
+      try
+      {
+         // Check is policy applied to at least one object.
+         Node node = getNode();
+         Session session = node.getSession();
+         for (PropertyIterator iter = node.getReferences(); iter.hasNext();)
+         {
+            Node controllable = iter.nextProperty().getParent();
+            if (controllable.isNodeType(JcrCMIS.NT_FILE) //
+               || controllable.isNodeType(JcrCMIS.NT_FOLDER) //
+               || controllable.isNodeType(JcrCMIS.CMIS_NT_POLICY))
+            {
+               throw new StorageException("Unable to delete applied policy.");
+            }
+         }
+         node.remove();
+         session.save();
+      }
+      catch (RepositoryException re)
+      {
+         throw new StorageException("Unable delete object. " + re.getMessage(), re);
+      }
+      if (indexListener != null)
+      {
+         Set<String> removed = new HashSet<String>();
+         removed.add(objectId);
+         indexListener.removed(removed);
+      }
    }
 
 }

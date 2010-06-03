@@ -128,7 +128,7 @@ public class FolderChildrenCollectionTest extends BaseTest
       assertTrue(getChildren(testFolderId).getItems().iterator().hasNext());
       CmisObject doc = getChildren(testFolderId).getItems().iterator().next();
       byte[] buff = new byte[1024];
-      int rd = conn.getContentStream(doc.getObjectInfo().getId(), null, -1, -1).getStream().read(buff);
+      int rd = conn.getContentStream(doc.getObjectInfo().getId(), null).getStream().read(buff);
       assertEquals("hello", new String(buff, 0, rd));
 
       DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
@@ -177,7 +177,7 @@ public class FolderChildrenCollectionTest extends BaseTest
          new BaseContentStream("to be or not to be".getBytes(), "file", MimeType
             .fromString("text/plain; charset=UTF-8"));
       String docId = createDocument(testFolderId, "doc1", null, content);
-      ContentStream docStream = conn.getContentStream(docId, null, -1, -1);
+      ContentStream docStream = conn.getContentStream(docId, null);
       assertNotNull(docStream);
 
       String requestURI = "http://localhost:8080/rest/cmisatom/" + cmisRepositoryId + "/file/" + docId;
@@ -186,7 +186,7 @@ public class FolderChildrenCollectionTest extends BaseTest
       assertEquals(204, resp.getStatus());
       try
       {
-         docStream = conn.getContentStream(docId, null, -1, -1);
+         docStream = conn.getContentStream(docId, null);
          fail("Should be the ConstraintException 'Object does not have content stream.'");
       }
       catch (ConstraintException e)
@@ -411,7 +411,7 @@ public class FolderChildrenCollectionTest extends BaseTest
       ContainerResponse resp = service("PUT", requestURI, "http://localhost:8080/rest", headers, "to be".getBytes());
       assertEquals(201, resp.getStatus());
       byte[] b = new byte[128];
-      ContentStream docStream = conn.getContentStream(docId, null, -1, -1);
+      ContentStream docStream = conn.getContentStream(docId, null);
       int r = docStream.getStream().read(b);
       assertEquals("to be", new String(b, 0, r));
    }
@@ -430,7 +430,7 @@ public class FolderChildrenCollectionTest extends BaseTest
          service("PUT", requestURI, "http://localhost:8080/rest", headers, "тест".getBytes("windows-1251"));
       assertEquals(201, resp.getStatus());
       byte[] b = new byte[128];
-      ContentStream docStream = conn.getContentStream(docId, null, -1, -1);
+      ContentStream docStream = conn.getContentStream(docId, null);
       //      System.out.println(docStream.getMediaType());
       int r = docStream.getStream().read(b);
       assertEquals("тест", new String(b, 0, r, docStream.getMediaType().getParameter("charset")));
@@ -459,7 +459,7 @@ public class FolderChildrenCollectionTest extends BaseTest
       ContainerResponse resp = service("POST", requestURI, "http://localhost:8080/rest", headers, data);
       assertEquals(201, resp.getStatus());
       byte[] b = new byte[128];
-      ContentStream content = conn.getContentStream(docId, null, -1, -1);
+      ContentStream content = conn.getContentStream(docId, null);
       assertEquals("text/plain", content.getMediaType().getBaseType());
       int r = content.getStream().read(b);
       assertEquals("to be or not to be", new String(b, 0, r));

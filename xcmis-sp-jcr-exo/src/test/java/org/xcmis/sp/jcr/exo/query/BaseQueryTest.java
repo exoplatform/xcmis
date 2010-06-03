@@ -31,6 +31,7 @@ import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.ObjectData;
+import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.Storage;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.PropertyDefinition;
@@ -143,7 +144,7 @@ public abstract class BaseQueryTest extends BaseTest
          .getDisplayName(), name));
 
       DocumentData document =
-         storage.createDocument(folder, typeDefinition, properties, content, null, null, null, versioningState == null
+         storage.createDocument(folder, typeDefinition, properties, content, null, null, versioningState == null
             ? VersioningState.MAJOR : versioningState);
       return document;
    }
@@ -155,7 +156,7 @@ public abstract class BaseQueryTest extends BaseTest
       properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
          .getDisplayName(), name));
 
-      FolderData newFolder = storage.createFolder(folder, typeDefinition, properties, null, null, null);
+      FolderData newFolder = storage.createFolder(folder, typeDefinition, properties, null, null);
       return newFolder;
    }
 
@@ -243,7 +244,14 @@ public abstract class BaseQueryTest extends BaseTest
          Result next = result.next();
          String id = next.getObjectId();
          resultPaths.add(id);
-         ObjectData object = storage.getObjectById(id);
+         try
+         {
+            storage.getObjectById(id);
+         }
+         catch (ObjectNotFoundException e)
+         {
+            fail(e.getMessage());
+         }
          //LOG.debug("id:=" + id + " path:=" + object.getParent().getPath() + "/" + object.getName());
       }
 

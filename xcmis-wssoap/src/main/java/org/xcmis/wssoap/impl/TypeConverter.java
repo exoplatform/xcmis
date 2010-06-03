@@ -152,6 +152,7 @@ public class TypeConverter
       AccessControlEntry res = new AccessControlEntry();
       res.getPermissions().addAll(source.getPermission());
       res.setPrincipal(source.getPrincipal().getPrincipalId());
+      //res.setDirect(source.isDirect());
       return res;
    }
 

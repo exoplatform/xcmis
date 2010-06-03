@@ -26,7 +26,7 @@ import java.util.NoSuchElementException;
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id: BaseItemsIterator.java 316 2010-03-09 15:20:28Z andrew00x $
- *
+ * 
  * @param <T>
  */
 public class BaseItemsIterator<T> implements ItemsIterator<T>

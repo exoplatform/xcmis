@@ -45,7 +45,9 @@ import org.xcmis.core.EnumPropertiesRelationship;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
+import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.ItemsList;
+import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.VersioningState;
@@ -289,7 +291,7 @@ public abstract class BaseTest extends TestCase
 
    }
 
-   protected ItemsList<CmisObject> getChildren(String folderId)
+   protected ItemsList<CmisObject> getChildren(String folderId) throws ObjectNotFoundException, FilterNotValidException
    {
       return conn.getChildren(folderId, false, null, false, true, CmisConstants.WILDCARD, null, null, -1, 0);
    }

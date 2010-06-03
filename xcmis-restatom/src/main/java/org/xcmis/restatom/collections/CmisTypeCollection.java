@@ -30,6 +30,7 @@ import org.xcmis.restatom.AtomCMIS;
 import org.xcmis.restatom.AtomUtils;
 import org.xcmis.restatom.abdera.TypeDefinitionTypeElement;
 import org.xcmis.spi.Connection;
+import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.TypeNotFoundException;
@@ -73,10 +74,6 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
       {
          conn = getConnection(request);
          return conn.getTypeDefinition(typeId);
-      }
-      catch (StorageException re)
-      {
-         throw new ResponseContextException(createErrorResponse(re, 500));
       }
       catch (TypeNotFoundException tne)
       {
@@ -171,17 +168,25 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
          conn = getConnection(request);
          TypeDefinitionTypeElement typeElement = entry.getFirstChild(AtomCMIS.TYPE);
          TypeDefinition type = typeElement.getTypeDefinition();
-         String typeId = type.getId();
-         conn.getStorage().addType(type);
-         boolean includePropertyDefinition = false; // TODO sunman
+         String typeId = conn.addType(type);
+         boolean includePropertyDefinition =
+            getBooleanParameter(request, AtomCMIS.PARAM_INCLUDE_PROPERTY_DEFINITIONS, false);
          // Updated (formed) type definition.
-         type = conn.getStorage().getTypeDefinition(typeId, includePropertyDefinition);
+         type = conn.getTypeDefinition(typeId, includePropertyDefinition);
          entry = request.getAbdera().getFactory().newEntry();
          addEntryDetails(request, entry, request.getResolvedUri(), type);
       }
       catch (InvalidArgumentException iae)
       {
          return createErrorResponse(iae, 400);
+      }
+      catch (ConstraintException ce)
+      {
+         return createErrorResponse(ce, 409);
+      }
+      catch (TypeNotFoundException tnfe)
+      {
+         return createErrorResponse(tnfe, 404);
       }
       catch (StorageException re)
       {
@@ -259,8 +264,8 @@ public abstract class CmisTypeCollection extends AbstractCmisCollection<TypeDefi
     *
     * @param typeId type id
     * @param request request context
-    * @return link to AtomPub Document that describes direct descendants type for
-    *         specified type <code>id</code>
+    * @return link to AtomPub Document that describes direct descendants type
+    *         for specified type <code>id</code>
     */
    protected String getTypeChildrenLink(String typeId, RequestContext request)
    {

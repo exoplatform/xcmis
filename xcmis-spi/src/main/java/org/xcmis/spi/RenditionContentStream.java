@@ -25,7 +25,9 @@ import java.io.InputStream;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: RenditionContentStream.java 840 2010-04-21 07:45:33Z andrew00x
+ *          $
+ * @deprecated
  */
 public class RenditionContentStream extends BaseContentStream
 {

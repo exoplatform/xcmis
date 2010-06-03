@@ -66,8 +66,8 @@ public class QueryUsecasesTest extends BaseQueryTest
    }
 
    /**
-    * Get query capabilities. 
-    * 
+    * Get query capabilities.
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testSearchCapabilities() throws Exception
@@ -417,19 +417,19 @@ public class QueryUsecasesTest extends BaseQueryTest
       DocumentData doc1 =
          createDocument(testRoot, "node1", nasaDocumentTypeDefinition, "hello world".getBytes(), new MimeType("text",
             "plain"));
-      doc1.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+      setProperty(doc1, new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "ad%min master"));
 
       DocumentData doc2 =
          createDocument(testRoot, "node2", nasaDocumentTypeDefinition, "hello world".getBytes(), new MimeType("text",
             "plain"));
-      doc2.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+      setProperty(doc2, new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "admin operator"));
 
       DocumentData doc3 =
          createDocument(testRoot, "node3", nasaDocumentTypeDefinition, "hello world".getBytes(), new MimeType("text",
             "plain"));
-      doc3.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+      setProperty(doc3, new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "radmin"));
 
       String statement =
@@ -492,7 +492,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * <p>
     * Query : Select all documents where PROPERTY_COMMANDER property not in set {'Walter M. Schirra', 'James A. Lovell, Jr.'}.
     * <p>
-    * Expected result: document2, document4 
+    * Expected result: document2, document4
     *
     * @throws Exception if an unexpected error occurs
     */
@@ -637,7 +637,7 @@ public class QueryUsecasesTest extends BaseQueryTest
    /**
     * Test ORDER BY default.
     * <p>
-    * Initial data: 
+    * Initial data:
     * <ul>
     * <li>document1: <b>Title</b> - Apollo 7
     * <li>document2: <b>Title</b> - Apollo 8
@@ -680,7 +680,7 @@ public class QueryUsecasesTest extends BaseQueryTest
    /**
     * Test ORDER BY SCORE().
     * <p>
-    * Initial data: 
+    * Initial data:
     * <p>
     * see createNasaContent()
     * <p>
@@ -739,7 +739,7 @@ public class QueryUsecasesTest extends BaseQueryTest
       DocumentData doc1 =
          createDocument(testRoot, "node1", nasaDocumentTypeDefinition, "hello world".getBytes(), new MimeType("text",
             "plain"));
-      doc1.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+      setProperty(doc1, new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "James A. Lovell, Jr."));
       DocumentData doc2 =
          createDocument(testRoot, "node2", nasaDocumentTypeDefinition, "hello".getBytes(),
@@ -756,11 +756,11 @@ public class QueryUsecasesTest extends BaseQueryTest
    /**
     * Test SCORE as column.
     * <p>
-    * Initial data: 
+    * Initial data:
     * <p>
     * see createNasaContent()
     * <p>
-    * Query : Select all documents that contains "first" word and ordered by score. 
+    * Query : Select all documents that contains "first" word and ordered by score.
     * <p>
     * Expected result: doc4, doc1 and doc2.
     *
@@ -851,12 +851,12 @@ public class QueryUsecasesTest extends BaseQueryTest
       FolderData folder = createFolder(testRoot, "NotEqualDecimal", folderTypeDefinition);
       DocumentData doc1 =
          createDocument(folder, name, nasaDocumentTypeDefinition, new byte[0], new MimeType("text", "plain"));
-      doc1.setProperty(new DecimalProperty(PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS,
+      setProperty(doc1, new DecimalProperty(PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS,
          PROPERTY_BOOSTER_MASS, new BigDecimal(3)));
 
       DocumentData doc2 =
          createDocument(folder, name2, nasaDocumentTypeDefinition, new byte[0], new MimeType("text", "plain"));
-      doc2.setProperty(new DecimalProperty(PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS,
+      setProperty(doc2, new DecimalProperty(PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS,
          PROPERTY_BOOSTER_MASS, new BigDecimal(15)));
       String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE " + PROPERTY_BOOSTER_MASS + " <> 3";
 
@@ -891,12 +891,12 @@ public class QueryUsecasesTest extends BaseQueryTest
 
       DocumentData doc1 =
          createDocument(folder, name, nasaDocumentTypeDefinition, new byte[0], new MimeType("text", "plain"));
-      doc1.setProperty(new DecimalProperty(PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS,
+      setProperty(doc1, new DecimalProperty(PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS,
          PROPERTY_BOOSTER_MASS, new BigDecimal(3)));
 
       DocumentData doc2 =
          createDocument(folder, name2, nasaDocumentTypeDefinition, new byte[0], new MimeType("text", "plain"));
-      doc2.setProperty(new DecimalProperty(PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS,
+      setProperty(doc2, new DecimalProperty(PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS,
          PROPERTY_BOOSTER_MASS, new BigDecimal(15)));
 
       String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE " + PROPERTY_BOOSTER_MASS + " > 5";
@@ -933,12 +933,12 @@ public class QueryUsecasesTest extends BaseQueryTest
 
       DocumentData doc1 =
          createDocument(folder, name, nasaDocumentTypeDefinition, new byte[0], new MimeType("text", "plain"));
-      doc1.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+      setProperty(doc1, new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "test word first"));
 
       DocumentData doc2 =
          createDocument(folder, name2, nasaDocumentTypeDefinition, new byte[0], new MimeType("text", "plain"));
-      doc2.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+      setProperty(doc2, new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "test word second"));
 
       String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE " + PROPERTY_COMMANDER + " <> 'test word second'";
@@ -973,12 +973,12 @@ public class QueryUsecasesTest extends BaseQueryTest
       FolderData folder = createFolder(testRoot, "SimpleFullTextTest", folderTypeDefinition);
       DocumentData doc1 =
          createDocument(folder, name1, nasaDocumentTypeDefinition, new byte[0], new MimeType("text", "plain"));
-      doc1.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+      setProperty(doc1, new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "There must be test word"));
 
       DocumentData doc2 =
          createDocument(folder, name2, nasaDocumentTypeDefinition, new byte[0], new MimeType("text", "plain"));
-      doc2.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+      setProperty(doc2, new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "Test word is not here"));
       String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"here\")";
 
@@ -1016,17 +1016,17 @@ public class QueryUsecasesTest extends BaseQueryTest
 
       DocumentData doc1 =
          createDocument(folder, name1, nasaDocumentTypeDefinition, new byte[0], new MimeType("text", "plain"));
-      doc1.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+      setProperty(doc1, new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "There must be test word"));
 
       DocumentData doc2 =
          createDocument(folder, name2, nasaDocumentTypeDefinition, new byte[0], new MimeType("text", "plain"));
-      doc2.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+      setProperty(doc2, new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "Test word is not here. Another check-word."));
 
       DocumentData doc3 =
          createDocument(folder, name3, nasaDocumentTypeDefinition, new byte[0], new MimeType("text", "plain"));
-      doc2.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+      setProperty(doc3, new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "There must be check-word."));
 
       String statement =
@@ -1049,12 +1049,12 @@ public class QueryUsecasesTest extends BaseQueryTest
 
       DocumentData doc1 =
          createDocument(testRoot, name, nasaDocumentTypeDefinition, new byte[0], new MimeType("text", "plain"));
-      doc1.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+      setProperty(doc1, new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "There must be test word"));
 
       DocumentData doc2 =
          createDocument(testRoot, name2, nasaDocumentTypeDefinition, new byte[0], new MimeType("text", "plain"));
-      doc2.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+      setProperty(doc2, new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "Test word is not here"));
 
       String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE NOT CONTAINS(\"here\")";
@@ -1088,11 +1088,11 @@ public class QueryUsecasesTest extends BaseQueryTest
 
       DocumentData doc1 =
          createDocument(testRoot, name, nasaDocumentTypeDefinition, new byte[0], new MimeType("text", "plain"));
-      doc1.setProperty(new BooleanProperty(PROPERTY_STATUS, PROPERTY_STATUS, PROPERTY_STATUS, PROPERTY_STATUS, true));
+      setProperty(doc1, new BooleanProperty(PROPERTY_STATUS, PROPERTY_STATUS, PROPERTY_STATUS, PROPERTY_STATUS, true));
 
       DocumentData doc2 =
          createDocument(testRoot, name2, nasaDocumentTypeDefinition, new byte[0], new MimeType("text", "plain"));
-      doc2.setProperty(new BooleanProperty(PROPERTY_STATUS, PROPERTY_STATUS, PROPERTY_STATUS, PROPERTY_STATUS, false));
+      setProperty(doc2, new BooleanProperty(PROPERTY_STATUS, PROPERTY_STATUS, PROPERTY_STATUS, PROPERTY_STATUS, false));
 
       String statement = "SELECT * FROM " + NASA_DOCUMENT + " WHERE (" + PROPERTY_STATUS + " = FALSE )";
 
@@ -1179,7 +1179,7 @@ public class QueryUsecasesTest extends BaseQueryTest
     * Query : Select all documents where data contains "moon" word.
     * <p>
     * Expected result: doc3
-    * 
+    *
     * @throws Exception if an unexpected error occurs
     */
    public void testUpdateFulltextConstraint() throws Exception
@@ -1189,9 +1189,9 @@ public class QueryUsecasesTest extends BaseQueryTest
          createDocument(testRoot, "Apollo 13", nasaDocumentTypeDefinition, ("Apollo 13 was the third "
             + "manned mission by NASA intended to land on the Moon, but a mid-mission technical "
             + "malfunction forced the lunar landing to be aborted. ").getBytes(), new MimeType("text", "plain"));
-      doc3.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+      setProperty(doc3, new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, "James A. Lovell, Jr."));
-      doc3.setProperty(new StringProperty(PROPERTY_BOOSTER, PROPERTY_BOOSTER, PROPERTY_BOOSTER, PROPERTY_BOOSTER,
+      setProperty(doc3, new StringProperty(PROPERTY_BOOSTER, PROPERTY_BOOSTER, PROPERTY_BOOSTER, PROPERTY_BOOSTER,
          "Saturn V"));
 
       String statement1 = "SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"moon\")";
@@ -1226,18 +1226,18 @@ public class QueryUsecasesTest extends BaseQueryTest
       DocumentData doc =
          createDocument(parentFolder, missionName, nasaDocumentTypeDefinition, objectives.getBytes(), new MimeType(
             "text", "plain"));
-      doc.setProperty(new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
+      setProperty(doc, new StringProperty(PROPERTY_COMMANDER, PROPERTY_COMMANDER, PROPERTY_COMMANDER,
          PROPERTY_COMMANDER, commander));
-      doc.setProperty(new StringProperty(PROPERTY_COMMAND_MODULE_PILOT, PROPERTY_COMMAND_MODULE_PILOT,
+      setProperty(doc, new StringProperty(PROPERTY_COMMAND_MODULE_PILOT, PROPERTY_COMMAND_MODULE_PILOT,
          PROPERTY_COMMAND_MODULE_PILOT, PROPERTY_COMMAND_MODULE_PILOT, commandModulePilot));
-      doc.setProperty(new StringProperty(PROPERTY_LUNAR_MODULE_PILOT, PROPERTY_LUNAR_MODULE_PILOT,
+      setProperty(doc, new StringProperty(PROPERTY_LUNAR_MODULE_PILOT, PROPERTY_LUNAR_MODULE_PILOT,
          PROPERTY_LUNAR_MODULE_PILOT, PROPERTY_LUNAR_MODULE_PILOT, lunarModulePilot));
-      doc.setProperty(new StringProperty(PROPERTY_BOOSTER, PROPERTY_BOOSTER, PROPERTY_BOOSTER, PROPERTY_BOOSTER,
+      setProperty(doc, new StringProperty(PROPERTY_BOOSTER, PROPERTY_BOOSTER, PROPERTY_BOOSTER, PROPERTY_BOOSTER,
          boosterName));
 
-      doc.setProperty(new DecimalProperty(PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS,
+      setProperty(doc, new DecimalProperty(PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS, PROPERTY_BOOSTER_MASS,
          PROPERTY_BOOSTER_MASS, new BigDecimal(boosterMass)));
-      doc.setProperty(new DecimalProperty(PROPERTY_SAMPLE_RETURNED, PROPERTY_SAMPLE_RETURNED, PROPERTY_SAMPLE_RETURNED,
+      setProperty(doc, new DecimalProperty(PROPERTY_SAMPLE_RETURNED, PROPERTY_SAMPLE_RETURNED, PROPERTY_SAMPLE_RETURNED,
          PROPERTY_SAMPLE_RETURNED, new BigDecimal(sampleReturned)));
       return doc;
    }

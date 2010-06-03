@@ -33,8 +33,7 @@ import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsTree;
-import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.StorageException;
+import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.model.TypeDefinition;
 
 import java.util.Calendar;
@@ -109,21 +108,17 @@ public class TypesDescendantsCollection extends CmisTypeCollection
             }
          }
       }
-      catch (StorageException re)
-      {
-         throw new ResponseContextException(createErrorResponse(re, 500));
-      }
-      catch (ObjectNotFoundException onfe)
-      {
-         throw new ResponseContextException(createErrorResponse(onfe, 404));
-      }
       catch (InvalidArgumentException iae)
       {
          throw new ResponseContextException(createErrorResponse(iae, 400));
       }
+      catch (TypeNotFoundException tnfe)
+      {
+         throw new ResponseContextException(createErrorResponse(tnfe, 404));
+      }
       catch (Throwable t)
       {
-         t.printStackTrace();
+         //t.printStackTrace();
          throw new ResponseContextException(createErrorResponse(t, 500));
       }
       finally

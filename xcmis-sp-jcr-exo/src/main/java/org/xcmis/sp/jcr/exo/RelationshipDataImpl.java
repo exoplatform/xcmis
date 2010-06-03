@@ -24,57 +24,29 @@ import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.FolderData;
-import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.RelationshipData;
-import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.StorageException;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.jcr.Node;
+import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: RelationshipDataImpl.java 1177 2010-05-25 12:03:35Z
+ *          alexey.zavizionov@gmail.com $
  */
 class RelationshipDataImpl extends BaseObjectData implements RelationshipData
 {
 
-   protected ObjectData source;
-
-   protected ObjectData target;
-
-   /**
-    * New unsaved instance of relationship.
-    *
-    * @param type type definition
-    * @param source source of relationship
-    * @param target target of relationship
-    * @param session session
-    * @param node TODO
-    * @see StorageImpl#createRelationship(ObjectData, ObjectData, String)
-    */
-   public RelationshipDataImpl(TypeDefinition type, ObjectData source, ObjectData target, Session session, Node node,
-      IndexListener indexListener)
+   public RelationshipDataImpl(JcrNodeAdapter jcrEntry, IndexListener indexListener)
    {
-      super(type, null, session, node, indexListener);
-      this.source = source;
-      this.target = target;
-   }
-
-   /**
-    * Create already saved instance of relationship.
-    *
-    * @param type type definition
-    * @param node back-end JCR node
-    * @param indexListener inde listener
-    * @see StorageImpl#getObjectById(String)
-    * @see StorageImpl#getObjectByPath(String)
-    */
-   public RelationshipDataImpl(TypeDefinition type, Node node, IndexListener indexListener)
-   {
-      super(type, node, indexListener);
+      super(jcrEntry, indexListener);
    }
 
    /**
@@ -82,7 +54,7 @@ class RelationshipDataImpl extends BaseObjectData implements RelationshipData
     */
    public String getSourceId()
    {
-      return getString(CmisConstants.SOURCE_ID);
+      return jcrEntry.getString(CmisConstants.SOURCE_ID);
    }
 
    /**
@@ -90,7 +62,7 @@ class RelationshipDataImpl extends BaseObjectData implements RelationshipData
     */
    public String getTargetId()
    {
-      return getString(CmisConstants.TARGET_ID);
+      return jcrEntry.getString(CmisConstants.TARGET_ID);
    }
 
    /**
@@ -104,7 +76,6 @@ class RelationshipDataImpl extends BaseObjectData implements RelationshipData
    /**
     * {@inheritDoc}
     */
-   @Override
    public FolderData getParent() throws ConstraintException
    {
       return null;
@@ -113,10 +84,33 @@ class RelationshipDataImpl extends BaseObjectData implements RelationshipData
    /**
     * {@inheritDoc}
     */
-   @Override
    public Collection<FolderData> getParents()
    {
       return Collections.emptyList();
+   }
+
+   protected void delete() throws StorageException
+   {
+      {
+         String objectId = getObjectId();
+         try
+         {
+            Node node = getNode();
+            Session session = node.getSession();
+            node.remove();
+            session.save();
+         }
+         catch (RepositoryException re)
+         {
+            throw new StorageException("Unable delete object. " + re.getMessage(), re);
+         }
+         if (indexListener != null)
+         {
+            Set<String> removed = new HashSet<String>();
+            removed.add(objectId);
+            indexListener.removed(removed);
+         }
+      }
    }
 
 }

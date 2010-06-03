@@ -44,7 +44,6 @@ import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.StorageException;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.AccessControlPropagation;
@@ -80,9 +79,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
@@ -107,7 +106,7 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @PUT
-   @Path("{repositoryId}/addacl/{objectId}")
+   @Path("{repositoryId}/objacl/{objectId}")
    @Produces("application/cmisacl+xml")
    public Response addACL(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId,
       @PathParam("objectId") String objectId)
@@ -126,21 +125,35 @@ public class AtomCmisService implements ResourceContainer
             listACE.add(el.getACE());
          }
          List<AccessControlEntry> removeACL = new ArrayList<AccessControlEntry>();
+
          conn.applyACL(objectId, listACE, removeACL, AccessControlPropagation.REPOSITORYDETERMINED);
 
-         return Response.status(201).build();
+         List<AccessControlEntry> list = conn.getACL(objectId, false);
+         FOMExtensibleElement accessControlListTypeElement =
+            AbderaFactory.getInstance().getFactory().newElement(AtomCMIS.ACL);
+         for (AccessControlEntry accessControlEntry : list)
+         {
+            AccessControlEntryTypeElement ace = accessControlListTypeElement.addExtension(AtomCMIS.PERMISSION);
+            ace.build(accessControlEntry);
+         }
+
+         //return Response.status(201).build();
+         return Response.ok(accessControlListTypeElement).header(HttpHeaders.CACHE_CONTROL, "no-cache").build();
       }
       catch (IOException io)
       {
          throw new WebApplicationException(io, createErrorResponse(io, 500));
       }
-      catch (StorageException re)
+      catch (Throwable t)
       {
-         throw new WebApplicationException(re, createErrorResponse(re, 500));
+         throw new WebApplicationException(t, createErrorResponse(t, 500));
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
 
    }
@@ -249,10 +262,6 @@ public class AtomCmisService implements ResourceContainer
          conn.deleteTree(folderId, deleteAllVersions, unfileObject, continueOnFailure);
          return Response.noContent().build();
       }
-      catch (StorageException re)
-      {
-         throw new WebApplicationException(re, createErrorResponse(re, 500));
-      }
       catch (UpdateConflictException uce)
       {
          throw new WebApplicationException(uce, createErrorResponse(uce, 409));
@@ -271,7 +280,10 @@ public class AtomCmisService implements ResourceContainer
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -304,9 +316,9 @@ public class AtomCmisService implements ResourceContainer
          }
          return Response.ok(accessControlListTypeElement).header(HttpHeaders.CACHE_CONTROL, "no-cache").build();
       }
-      catch (StorageException re)
+      catch (InvalidArgumentException iae)
       {
-         throw new WebApplicationException(re, createErrorResponse(re, 500));
+         throw new WebApplicationException(iae, createErrorResponse(iae, 400));
       }
       catch (Throwable others)
       {
@@ -314,7 +326,10 @@ public class AtomCmisService implements ResourceContainer
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -334,10 +349,6 @@ public class AtomCmisService implements ResourceContainer
          el.build(result);
          return Response.ok(el).header(HttpHeaders.CACHE_CONTROL, "no-cache").build();
       }
-      catch (StorageException re)
-      {
-         throw new WebApplicationException(re, createErrorResponse(re, 500));
-      }
       catch (ObjectNotFoundException onfe)
       {
          throw new WebApplicationException(onfe, createErrorResponse(onfe, 404));
@@ -352,7 +363,10 @@ public class AtomCmisService implements ResourceContainer
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 

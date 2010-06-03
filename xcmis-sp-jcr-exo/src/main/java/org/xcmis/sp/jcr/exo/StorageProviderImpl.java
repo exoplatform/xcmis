@@ -270,7 +270,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
                while (it.hasNext())
                {
                   EventListener one = it.nextEventListener();
-                  if (one.getClass() == UpdateListener.class)
+                  if (one.getClass() == RenditionsUpdateListener.class)
                   {
                      exist = true;
                   }
@@ -279,7 +279,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
                if (!exist)
                {
                   workspace.getObservationManager().addEventListener(
-                     new UpdateListener(repository, storageConfig.getWorkspace(), renditionManager),
+                     new RenditionsUpdateListener(repository, storageConfig.getWorkspace(), renditionManager),
                      Event.NODE_ADDED | Event.PROPERTY_ADDED | Event.PROPERTY_CHANGED, "/", true, null,
                      new String[]{JcrCMIS.NT_FILE, JcrCMIS.NT_RESOURCE}, false);
                }

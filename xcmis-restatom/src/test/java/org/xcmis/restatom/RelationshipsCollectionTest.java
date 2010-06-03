@@ -107,7 +107,7 @@ public class RelationshipsCollectionTest extends BaseTest
       assertTrue(hasLink(AtomCMIS.LINK_VIA, xmlFeed));
       assertTrue(hasLink(AtomCMIS.LINK_FIRST, xmlFeed));
 
-      assertEquals("1", getStringElement("cmisra:numItems", xmlFeed));
+      //assertEquals("1", getStringElement("cmisra:numItems", xmlFeed));
 
       org.w3c.dom.Node xmlEntry = getNode("atom:entry", xmlFeed);
       validateObjectEntry(xmlEntry, "cmis:relationship");
@@ -119,7 +119,7 @@ public class RelationshipsCollectionTest extends BaseTest
       String targetId = createDocument(testFolderId, "doc2", null, null);
       String s = "<?xml version='1.0' encoding='utf-8'?>" //
          + "<entry xmlns='http://www.w3.org/2005/Atom'" //
-         + " xmlns:cmis='" + CmisConstants.CMIS_NS_URI + "'"//  
+         + " xmlns:cmis='" + CmisConstants.CMIS_NS_URI + "'"//
          + " xmlns:cmism='http://docs.oasis-open.org/ns/cmis/messaging/200908/'" //
          + " xmlns:cmisra='http://docs.oasis-open.org/ns/cmis/restatom/200908/'>" //
          + "<title>title</title><summary>summary</summary>" //

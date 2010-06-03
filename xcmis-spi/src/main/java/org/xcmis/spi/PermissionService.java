@@ -46,7 +46,7 @@ public class PermissionService
 
    /**
     * Calculate allowable actions for specified object.
-    *
+    * 
     * @param object object
     * @param userIdentity user's identity
     * @param repositoryInfo RepositoryInfo
@@ -61,7 +61,7 @@ public class PermissionService
       {
          userIdentity = new Identity(repositoryInfo.getPrincipalAnonymous(), new HashSet<MembershipEntry>());
       }
-      
+
       PermissionMapping permissionMapping = repositoryInfo.getAclCapability().getMapping();
 
       AllowableActions actions = new AllowableActions();

@@ -39,20 +39,16 @@ import javax.jcr.observation.Event;
 import javax.jcr.observation.EventIterator;
 import javax.jcr.observation.EventListener;
 
-public class UpdateListener implements EventListener
+public class RenditionsUpdateListener implements EventListener
 {
    /** Logger. */
-   private static final Log LOG = ExoLogger.getLogger(UpdateListener.class.getName());
+   private static final Log LOG = ExoLogger.getLogger(RenditionsUpdateListener.class.getName());
 
-   RenditionManager renditionManager;
+   private final RenditionManager renditionManager;
 
    private final String workspace;
 
    private final Repository repository;
-
-   SessionProvider prov = null;
-
-   Session session = null;
 
    /**
     * Instantiates a new update listener.
@@ -61,7 +57,7 @@ public class UpdateListener implements EventListener
     * @param workspace the workspace
     * @param renditionProviders the rendition providers
     */
-   public UpdateListener(Repository repository, String workspace, RenditionManager renditionManager)
+   public RenditionsUpdateListener(Repository repository, String workspace, RenditionManager renditionManager)
    {
       this.repository = repository;
       this.workspace = workspace;
@@ -87,15 +83,9 @@ public class UpdateListener implements EventListener
 
             if (event.getPath().endsWith("jcr:content") || event.getPath().endsWith("jcr:data"))
             {
-               if (prov == null)
-               {
-                  prov = SessionProvider.createSystemProvider();
-               }
-               if (session == null)
-               {
-                  session = prov.getSession(workspace, (ManageableRepository)repository);
-               }
 
+               SessionProvider sessionProvider = SessionProvider.createSystemProvider();
+               Session session = sessionProvider.getSession(workspace, (ManageableRepository)repository);
                Node node = null;
                Item item = session.getItem(path);
                if (item.isNode())
@@ -106,7 +96,6 @@ public class UpdateListener implements EventListener
                {
                   node = session.getItem(path).getParent().getParent();
                }
-
                Node contentNode = node.getNode(JcrCMIS.JCR_CONTENT);
                Property fileContent = contentNode.getProperty(JcrCMIS.JCR_DATA);
                int length = fileContent.getStream().available();
@@ -153,7 +142,6 @@ public class UpdateListener implements EventListener
       {
          LOG.error("Creating rendition on event failed. ", e);
       }
-
    }
 
 }

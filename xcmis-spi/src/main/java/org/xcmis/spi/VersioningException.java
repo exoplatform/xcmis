@@ -19,15 +19,15 @@
 
 package org.xcmis.spi;
 
-
 /**
- * If performing an update operation on a Document that can't be updated because
- * of its position in version series (not current version).
+ * If performing an update operation on a Document that can't be updated,
+ * deleted because of its position in version series (not current version) or
+ * other versioning conflict.
  * 
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id: VersioningException.java 2 2010-02-04 17:21:49Z andrew00x $
  */
-public final class VersioningException extends CmisRuntimeException
+public final class VersioningException extends CmisException
 {
 
    /**

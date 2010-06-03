@@ -19,17 +19,16 @@
 
 package org.xcmis.sp.jcr.exo;
 
-import org.exoplatform.services.jcr.core.ExtendedNode;
 import org.exoplatform.services.jcr.core.ExtendedSession;
 import org.xcmis.sp.jcr.exo.index.IndexListener;
-import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
-import org.xcmis.spi.ObjectData;
+import org.xcmis.spi.NameConstraintViolationException;
+import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.RenditionContentStream;
 import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.StorageException;
@@ -38,83 +37,79 @@ import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.TypeDefinition;
-import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.utils.MimeType;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import javax.jcr.ItemNotFoundException;
 import javax.jcr.Node;
 import javax.jcr.PathNotFoundException;
 import javax.jcr.PropertyIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import javax.jcr.Value;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: DocumentDataImpl.java 1177 2010-05-25 12:03:35Z
+ *          alexey.zavizionov@gmail.com $
  */
 class DocumentDataImpl extends BaseObjectData implements DocumentData
 {
 
-   static String latestLabel = "latest";
+   protected static final Set<String> CHECKOUT_SKIP = new HashSet<String>();
 
-   static String pwcLabel = "pwc";
-
-   protected final VersioningState versioningState;
-
-   private RenditionManager renditionManager;
-
-   public DocumentDataImpl(TypeDefinition type, FolderData parent, Session session, Node node,
-      VersioningState versioningState, IndexListener indexListener)
+   static
    {
-      super(type, parent, session, node, indexListener);
-      this.versioningState = versioningState;
+      CHECKOUT_SKIP.add(CmisConstants.NAME);
+      CHECKOUT_SKIP.add(CmisConstants.OBJECT_ID);
+      CHECKOUT_SKIP.add(CmisConstants.OBJECT_TYPE_ID);
+      CHECKOUT_SKIP.add(CmisConstants.BASE_TYPE_ID);
+      CHECKOUT_SKIP.add(CmisConstants.CREATED_BY);
+      CHECKOUT_SKIP.add(CmisConstants.CREATION_DATE);
+      CHECKOUT_SKIP.add(CmisConstants.LAST_MODIFIED_BY);
+      CHECKOUT_SKIP.add(CmisConstants.LAST_MODIFICATION_DATE);
+      CHECKOUT_SKIP.add(CmisConstants.CHANGE_TOKEN);
+      CHECKOUT_SKIP.add(CmisConstants.IS_IMMUTABLE);
+      CHECKOUT_SKIP.add(CmisConstants.VERSION_SERIES_ID);
+      CHECKOUT_SKIP.add(CmisConstants.IS_LATEST_VERSION);
+      CHECKOUT_SKIP.add(CmisConstants.IS_MAJOR_VERSION);
+      CHECKOUT_SKIP.add(CmisConstants.IS_LATEST_MAJOR_VERSION);
+      CHECKOUT_SKIP.add(CmisConstants.VERSION_LABEL);
+      CHECKOUT_SKIP.add(CmisConstants.CHECKIN_COMMENT);
+      CHECKOUT_SKIP.add(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT);
+      CHECKOUT_SKIP.add(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID);
+      CHECKOUT_SKIP.add(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY);
+      CHECKOUT_SKIP.add(CmisConstants.CONTENT_STREAM_FILE_NAME);
+      CHECKOUT_SKIP.add(CmisConstants.CONTENT_STREAM_ID);
+      CHECKOUT_SKIP.add(CmisConstants.CONTENT_STREAM_LENGTH);
+      CHECKOUT_SKIP.add(CmisConstants.CONTENT_STREAM_MIME_TYPE);
+      CHECKOUT_SKIP.add("xcmis:latestVersionId");
    }
 
-   public DocumentDataImpl(TypeDefinition type, Node node, IndexListener indexListener)
-   {
-      super(type, node, indexListener);
-      versioningState = null; // no sense for not newly created Document
-   }
+   protected final RenditionManager renditionManager;
 
-   public DocumentDataImpl(TypeDefinition type, Node node, RenditionManager manager, IndexListener indexListener)
+   public DocumentDataImpl(JcrNodeAdapter jcrEntry, IndexListener indexListener, RenditionManager renditionManager)
    {
-      super(type, node, indexListener);
-      versioningState = null; // no sense for not newly created Document
-      this.renditionManager = manager;
+      super(jcrEntry, indexListener);
+      this.renditionManager = renditionManager;
    }
 
    /**
     * {@inheritDoc}
     */
-   public void cancelCheckout() throws StorageException
+   public void cancelCheckout() throws VersioningException, StorageException
    {
-      if (!type.isVersionable())
-      {
-         throw new ConstraintException("Object is not versionable.");
-      }
-
-      if (!isVersionSeriesCheckedOut())
-      {
-         throw new ConstraintException("There is no Private Working Copy in version series.");
-      }
-
       try
       {
+         Session session = getNode().getSession();
          Node pwcNode = ((ExtendedSession)session).getNodeByIdentifier(getVersionSeriesCheckedOutId());
-         PWC pwc = new PWC(type, pwcNode, this, indexListener);
+         PWC pwc = new PWC(new JcrNodeAdapter(pwcNode), indexListener, renditionManager);
          pwc.delete();
-      }
-      catch (ItemNotFoundException e)
-      {
-         throw new ConstraintException("There is no Private Working Copy in version series.");
       }
       catch (RepositoryException re)
       {
@@ -125,48 +120,34 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
    /**
     * {@inheritDoc}
     */
-   // Will be overridden in PWC
    public DocumentData checkin(boolean major, String checkinComment, Map<String, Property<?>> properties,
-      ContentStream content, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
-      Collection<ObjectData> policies) throws ConstraintException, StorageException
+      ContentStream content, List<AccessControlEntry> acl, Collection<PolicyData> policies)
+      throws NameConstraintViolationException, StorageException
    {
-      if (!type.isVersionable())
-      {
-         throw new ConstraintException("Object is not versionable.");
-      }
-
-      throw new ConstraintException("Current object is not Private Working Copy.");
+      // Will be overridden in PWC
+      throw new CmisRuntimeException("Current object is not Private Working Copy.");
    }
 
    /**
     * {@inheritDoc}
     */
-   public DocumentData checkout() throws ConstraintException, VersioningException, StorageException
+   public DocumentData checkout() throws VersioningException, StorageException
    {
-      if (!type.isVersionable())
-      {
-         throw new ConstraintException("Object is not versionable.");
-      }
-
       if (isVersionSeriesCheckedOut())
       {
          throw new VersioningException("Version series already checked-out. "
             + "Not allowed have more then one PWC for version series at a time.");
       }
-
-      DocumentData pwc = null;
-
       try
       {
+         // create node
+         Session session = getNode().getSession();
          String name = this.getName();
-
+         TypeDefinition type = getTypeDefinition();
          Node workingCopies =
             (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_WORKING_COPIES);
-
          Node wc = workingCopies.addNode(this.getObjectId(), "xcmis:workingCopy");
-
          Node pwcNode = wc.addNode(name, type.getLocalName());
-
          if (!pwcNode.isNodeType(JcrCMIS.CMIS_MIX_DOCUMENT))
          {
             pwcNode.addMixin(JcrCMIS.CMIS_MIX_DOCUMENT);
@@ -176,46 +157,56 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
             pwcNode.addMixin(JcrCMIS.MIX_VERSIONABLE);
          }
 
-         pwcNode.setProperty(CmisConstants.OBJECT_TYPE_ID, type.getId());
-         pwcNode.setProperty(CmisConstants.BASE_TYPE_ID, type.getBaseId().value());
-         pwcNode.setProperty(CmisConstants.CREATED_BY, session.getUserID());
-         pwcNode.setProperty(CmisConstants.CREATION_DATE, Calendar.getInstance());
-         pwcNode.setProperty(CmisConstants.LAST_MODIFIED_BY, session.getUserID());
-         pwcNode.setProperty(CmisConstants.LAST_MODIFICATION_DATE, Calendar.getInstance());
-         pwcNode.setProperty(CmisConstants.VERSION_SERIES_ID, this.getVersionSeriesId());
-         pwcNode.setProperty(CmisConstants.IS_LATEST_VERSION, true);
-         pwcNode.setProperty(CmisConstants.IS_MAJOR_VERSION, false);
-         pwcNode.setProperty(CmisConstants.VERSION_LABEL, pwcLabel);
-         pwcNode.setProperty(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, true);
-         pwcNode.setProperty(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, ((ExtendedNode)pwcNode).getIdentifier());
-         pwcNode.setProperty(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, session.getUserID());
+         JcrNodeAdapter pwcNodeAdapter = new JcrNodeAdapter(pwcNode);
 
-         pwcNode.setProperty("xcmis:latestVersionId", this.getObjectId());
+         pwcNodeAdapter.setValue(CmisConstants.OBJECT_TYPE_ID, type.getId());
+         pwcNodeAdapter.setValue(CmisConstants.BASE_TYPE_ID, type.getBaseId().value());
+         String userId = session.getUserID();
+         pwcNodeAdapter.setValue(CmisConstants.CREATED_BY, userId);
+         pwcNodeAdapter.setValue(CmisConstants.LAST_MODIFIED_BY, userId);
+         Calendar cal = Calendar.getInstance();
+         pwcNodeAdapter.setValue(CmisConstants.CREATION_DATE, cal);
+         pwcNodeAdapter.setValue(CmisConstants.LAST_MODIFICATION_DATE, cal);
+         pwcNodeAdapter.setValue(CmisConstants.VERSION_SERIES_ID, this.getVersionSeriesId());
+         pwcNodeAdapter.setValue(CmisConstants.IS_LATEST_VERSION, true);
+         pwcNodeAdapter.setValue(CmisConstants.IS_MAJOR_VERSION, false);
+         pwcNodeAdapter.setValue(CmisConstants.VERSION_LABEL, StorageImpl.PWC_LABEL);
+         pwcNodeAdapter.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, true);
+         pwcNodeAdapter.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, pwcNodeAdapter.getId());
+         pwcNodeAdapter.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, session.getUserID());
+         pwcNodeAdapter.setValue("xcmis:latestVersionId", this.getObjectId());
 
-         pwc = new PWC(this, session, pwcNode, indexListener);
-         
-         // TODO : use native JCR ??
-         setContentStream(pwcNode, this.getContentStream());
+         // copy content
+         pwcNodeAdapter.setContentStream(getContentStream());
 
          // Copy the other properties from document.
-         for (PropertyDefinition<?> def : type.getPropertyDefinitions())
+         try
          {
-            String pId = def.getId();
-            if (!PWC.checkinCheckoutSkip.contains(pId))
+            for (PropertyDefinition<?> def : type.getPropertyDefinitions())
             {
-               ((BaseObjectData)pwc).setProperty(pwcNode, getProperty(pId));
+               String pId = def.getId();
+               if (!CHECKOUT_SKIP.contains(pId))
+               {
+                  pwcNodeAdapter.setProperty(this.getProperty(pId));
+               }
             }
+         }
+         catch (NameConstraintViolationException never)
+         {
+            // Should never happen.
+            throw new CmisRuntimeException(never.getMessage(), never);
          }
 
          // Update source document.
-         Node docNode = this.getNode();
-         docNode.setProperty(CmisConstants.IS_LATEST_VERSION, false);
-         docNode.setProperty(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, true);
-         docNode.setProperty(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, ((ExtendedNode)pwcNode).getIdentifier());
-         docNode.setProperty(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, session.getUserID());
+         jcrEntry.setValue(CmisConstants.IS_LATEST_VERSION, false);
+         jcrEntry.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, true);
+         jcrEntry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, pwcNodeAdapter.getId());
+         jcrEntry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, userId);
 
          session.save();
 
+         DocumentData pwc = new PWC(pwcNodeAdapter, indexListener, renditionManager);
+         return pwc;
       }
       catch (IOException ioe)
       {
@@ -226,55 +217,33 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
          throw new StorageException("Unable checkout. " + re.getMessage(), re);
       }
 
-      return pwc;
    }
 
    /**
     * {@inheritDoc}
     */
-   public ContentStream getContentStream()
+   public ContentStream getContentStream() throws IOException
    {
-      try
-      {
-         // Main content
-         Node contentNode = node.getNode(JcrCMIS.JCR_CONTENT);
-
-         long contentLength = contentNode.getProperty(JcrCMIS.JCR_DATA).getLength();
-
-         if (contentLength == 0)
-         {
-            return null;
-         }
-
-         MimeType mimeType = MimeType.fromString(contentNode.getProperty(JcrCMIS.JCR_MIMETYPE).getString());
-         if (contentNode.hasProperty(JcrCMIS.JCR_ENCODING))
-         {
-            mimeType.getParameters().put(CmisConstants.CHARSET,
-               contentNode.getProperty(JcrCMIS.JCR_ENCODING).getString());
-         }
-         return new BaseContentStream(contentNode.getProperty(JcrCMIS.JCR_DATA).getStream(), contentLength, getName(),
-            mimeType);
-      }
-      catch (RepositoryException re)
-      {
-         throw new CmisRuntimeException("Unable get content stream. " + re.getMessage(), re);
-      }
+      return jcrEntry.getContentStream();
    }
 
    /**
     * {@inheritDoc}
     */
-   public ContentStream getContentStream(String streamId)
+   public ContentStream getContentStream(String streamId) throws IOException
    {
-      if (streamId == null || streamId.equals(getString(CmisConstants.CONTENT_STREAM_ID)))
+      if (streamId == null)
+      {
+         return getContentStream();
+      }
+      if (streamId.equals(jcrEntry.getString(CmisConstants.CONTENT_STREAM_ID)))
       {
          return getContentStream();
       }
 
-      Node rendition = null;
       try
       {
-         rendition = node.getNode(streamId);
+         Node rendition = getNode().getNode(streamId);
          javax.jcr.Property renditionContent = rendition.getProperty(JcrCMIS.CMIS_RENDITION_STREAM);
          MimeType mimeType = MimeType.fromString(rendition.getProperty(JcrCMIS.CMIS_RENDITION_MIME_TYPE).getString());
          if (rendition.hasProperty(JcrCMIS.CMIS_RENDITION_ENCODING))
@@ -288,20 +257,16 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
       }
       catch (PathNotFoundException pnfe)
       {
-         try
+         if (renditionManager != null)
          {
             return renditionManager.getStream(this, streamId);
          }
-         catch (Exception e)
-         {
-            throw new CmisRuntimeException("Unable get rendition stream. " + e.getMessage(), e);
-         }
+         return null;
       }
       catch (RepositoryException re)
       {
          throw new CmisRuntimeException("Unable get rendition stream. " + re.getMessage(), re);
       }
-
    }
 
    /**
@@ -309,26 +274,69 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
     */
    public String getContentStreamMimeType()
    {
-      return getString(CmisConstants.CONTENT_STREAM_MIME_TYPE);
-   }
-
-   /**
-    * @return length of content in bytes
-    */
-   protected Long getContentStreamLength()
-   {
-      Long length = getLong(CmisConstants.CONTENT_STREAM_LENGTH);
-      if (length != null)
+      String mimeType = jcrEntry.getString(CmisConstants.CONTENT_STREAM_MIME_TYPE);
+      if (mimeType != null)
       {
-         return length;
+         return mimeType;
       }
       try
       {
-         return node.getProperty("jcr:content/jcr:data").getLength();
+         return getNode().getProperty("jcr:content/jcr:mimeType").getString();
       }
       catch (RepositoryException re)
       {
-         throw new CmisRuntimeException("Unable get content stream length. " + re.getMessage(), re);
+         throw new CmisRuntimeException("Unable get content stream mime type. " + re.getMessage(), re);
+      }
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public FolderData getParent() throws ConstraintException
+   {
+      Collection<FolderData> parents = getParents();
+      if (parents.size() > 1)
+      {
+         throw new ConstraintException("Object has more then one parent.");
+      }
+      else if (parents.size() == 0)
+      {
+         return null;
+      }
+      else
+      {
+         return parents.iterator().next();
+      }
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public Collection<FolderData> getParents()
+   {
+      try
+      {
+         Node node = getNode();
+         Set<FolderData> parents = new HashSet<FolderData>();
+         for (PropertyIterator iterator = node.getReferences(); iterator.hasNext();)
+         {
+            Node link = iterator.nextProperty().getParent();
+            if (link.isNodeType("nt:linkedFile"))
+            {
+               Node parent = link.getParent();
+               parents.add(new FolderDataImpl(new JcrNodeAdapter(parent), indexListener, renditionManager));
+            }
+         }
+         if (!node.getParent().isNodeType("xcmis:unfiledObject"))
+         {
+            Node parent = node.getParent();
+            parents.add(new FolderDataImpl(new JcrNodeAdapter(parent), indexListener, renditionManager));
+         }
+         return parents;
+      }
+      catch (RepositoryException re)
+      {
+         throw new CmisRuntimeException("Unable get object parent. " + re.getMessage(), re);
       }
    }
 
@@ -337,7 +345,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
     */
    public String getVersionLabel()
    {
-      return getString(CmisConstants.VERSION_LABEL);
+      return jcrEntry.getString(CmisConstants.VERSION_LABEL);
    }
 
    /**
@@ -345,7 +353,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
     */
    public String getVersionSeriesCheckedOutBy()
    {
-      return getString(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY);
+      return jcrEntry.getString(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY);
    }
 
    /**
@@ -353,7 +361,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
     */
    public String getVersionSeriesCheckedOutId()
    {
-      return getString(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID);
+      return jcrEntry.getString(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID);
    }
 
    /**
@@ -361,7 +369,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
     */
    public String getVersionSeriesId()
    {
-      return getString(CmisConstants.VERSION_SERIES_ID);
+      return jcrEntry.getString(CmisConstants.VERSION_SERIES_ID);
    }
 
    /**
@@ -369,17 +377,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
     */
    public boolean hasContent()
    {
-      try
-      {
-         // Main content
-         Node contentNode = node.getNode(JcrCMIS.JCR_CONTENT);
-         long contentLength = contentNode.getProperty(JcrCMIS.JCR_DATA).getLength();
-         return contentLength > 0;
-      }
-      catch (RepositoryException re)
-      {
-         throw new CmisRuntimeException("Unable get content stream. " + re.getMessage(), re);
-      }
+      return jcrEntry.hasContent();
    }
 
    /**
@@ -395,7 +393,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
     */
    public boolean isLatestVersion()
    {
-      Boolean latest = getBoolean(CmisConstants.IS_LATEST_VERSION);
+      Boolean latest = jcrEntry.getBoolean(CmisConstants.IS_LATEST_VERSION);
       return latest == null ? true : latest;
    }
 
@@ -404,7 +402,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
     */
    public boolean isMajorVersion()
    {
-      Boolean major = getBoolean(CmisConstants.IS_MAJOR_VERSION);
+      Boolean major = jcrEntry.getBoolean(CmisConstants.IS_MAJOR_VERSION);
       return major == null ? false : major;
    }
 
@@ -421,88 +419,46 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
     */
    public boolean isVersionSeriesCheckedOut()
    {
-      Boolean checkout = getBoolean(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT);
+      Boolean checkout = jcrEntry.getBoolean(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT);
       return checkout == null ? false : checkout;
    }
 
    /**
     * {@inheritDoc}
     */
-   public void setContentStream(ContentStream contentStream) throws ConstraintException, IOException
+   public void setContentStream(ContentStream contentStream) throws IOException, VersioningException, StorageException
    {
+      jcrEntry.setContentStream(contentStream);
+      save();
+   }
+
+   /**
+    * @return length of content in bytes
+    */
+   protected long getContentStreamLength()
+   {
+      Long length = jcrEntry.getLong(CmisConstants.CONTENT_STREAM_LENGTH);
+      if (length != null)
+      {
+         return length;
+      }
       try
       {
-         setContentStream(node, contentStream);
+         return getNode().getProperty("jcr:content/jcr:data").getLength();
       }
       catch (RepositoryException re)
       {
-         throw new CmisRuntimeException("Unable save document content. " + re.getMessage(), re);
-      }
-      save(false);
-   }
-
-   /**
-    * Set new or remove (if <code>content == null</code>) content stream.
-    *
-    * @param data node to which content stream should be set
-    * @param content content
-    * @throws RepositoryException if any JCR repository error occurs
-    * @throws IOException if any i/o error occurs
-    */
-   static void setContentStream(Node data, ContentStream content) throws RepositoryException, IOException
-   {
-      // jcr:content
-      Node contentNode =
-         data.hasNode(JcrCMIS.JCR_CONTENT) ? data.getNode(JcrCMIS.JCR_CONTENT) : data.addNode(JcrCMIS.JCR_CONTENT,
-            JcrCMIS.NT_RESOURCE);
-
-      if (content != null)
-      {
-         MimeType mediaType = content.getMediaType();
-         contentNode.setProperty(JcrCMIS.JCR_MIMETYPE, mediaType.getBaseType());
-         if (mediaType.getParameter(CmisConstants.CHARSET) != null)
-         {
-            contentNode.setProperty(JcrCMIS.JCR_ENCODING, mediaType.getParameter(CmisConstants.CHARSET));
-         }
-
-         // Re-count content length
-         long contentLength = contentNode.setProperty(JcrCMIS.JCR_DATA, content.getStream()).getLength();
-
-         contentNode.setProperty(JcrCMIS.JCR_LAST_MODIFIED, Calendar.getInstance());
-
-         // Update CMIS properties
-         if (!data.hasProperty(CmisConstants.CONTENT_STREAM_ID))
-         {
-            // If new node
-            data.setProperty(CmisConstants.CONTENT_STREAM_ID, ((ExtendedNode)contentNode).getIdentifier());
-         }
-         data.setProperty(CmisConstants.CONTENT_STREAM_LENGTH, contentLength);
-         data.setProperty(CmisConstants.CONTENT_STREAM_MIME_TYPE, mediaType.getBaseType());
-      }
-      else
-      {
-         contentNode.setProperty(JcrCMIS.JCR_MIMETYPE, "");
-         contentNode.setProperty(JcrCMIS.JCR_ENCODING, (Value)null);
-
-         contentNode.setProperty(JcrCMIS.JCR_DATA, new ByteArrayInputStream(new byte[0]));
-
-         contentNode.setProperty(JcrCMIS.JCR_LAST_MODIFIED, Calendar.getInstance());
-
-         // Update CMIS properties
-         data.setProperty(CmisConstants.CONTENT_STREAM_ID, (Value)null);
-         data.setProperty(CmisConstants.CONTENT_STREAM_LENGTH, 0);
-         data.setProperty(CmisConstants.CONTENT_STREAM_MIME_TYPE, (Value)null);
+         throw new CmisRuntimeException("Unable get content stream length. " + re.getMessage(), re);
       }
    }
 
-   /**
-    * {@inheritDoc}
-    */
-   @Override
-   void delete() throws StorageException
+   protected void delete() throws StorageException
    {
+      String objectId = getObjectId();
       try
       {
+         Node node = getNode();
+         Session session = node.getSession();
          // Check is Document node has any references.
          // It minds Document is multfiled, need remove all links first.
          for (PropertyIterator references = node.getReferences(); references.hasNext();)
@@ -516,17 +472,44 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
          String pwcId = getVersionSeriesCheckedOutId();
          if (pwcId != null)
          {
+            // remove PWC
             Node pwcNode = ((ExtendedSession)session).getNodeByIdentifier(pwcId);
             pwcNode.getParent().remove();
          }
+         if (getParents().size() == 0)
+         {
+            // Unfiled document. Remove node with wrapper.
+            node.getParent().remove();
+         }
+         else
+         {
+            node.remove();
+         }
+         session.save();
+      }
+      catch (javax.jcr.ReferentialIntegrityException rie)
+      {
+         // TODO : Check is really ONLY relationships is in references.
+         // Should raise StorageException if is not relationship reference.
+         throw new StorageException("Object can't be deleted cause to storage referential integrity. "
+            + "Probably this object is source or target at least one Relationship. "
+            + "Those Relationship should be deleted before.");
       }
       catch (RepositoryException re)
       {
          throw new StorageException("Unable delete object. " + re.getMessage(), re);
       }
 
-      // Common delete.
-      super.delete();
+      if (indexListener != null)
+      {
+         Set<String> removed = new HashSet<String>();
+         removed.add(objectId);
+         indexListener.removed(removed);
+      }
    }
 
+   void unfile()
+   {
+      jcrEntry.unfile();
+   }
 }

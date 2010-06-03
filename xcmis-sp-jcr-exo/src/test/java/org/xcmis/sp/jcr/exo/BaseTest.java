@@ -33,16 +33,16 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.security.ConversationState;
 import org.exoplatform.services.security.Identity;
-import org.xcmis.spi.DocumentData;
+import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.StorageProvider;
-import org.xcmis.spi.model.TypeDefinition;
-import org.xcmis.spi.model.impl.StringProperty;
+import org.xcmis.spi.model.Property;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
-import javax.jcr.RepositoryException;
 
 public abstract class BaseTest extends TestCase
 {
@@ -191,10 +191,11 @@ public abstract class BaseTest extends TestCase
       super.tearDown();
    }
 
-   protected void setProperty(DocumentData doc, String propertyName, String propertyValue) throws RepositoryException
+   protected void setProperty(ObjectData object, Property<?> property) throws Exception
    {
-      ((BaseObjectData)doc).setProperty(new StringProperty(propertyName, propertyName, propertyName, propertyName,
-         propertyValue));
+      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+      properties.put(property.getId(), property);
+      object.setProperties(properties);
    }
 
 }

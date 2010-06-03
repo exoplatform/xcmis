@@ -22,11 +22,11 @@ package org.xcmis.restatom.collections;
 import org.apache.abdera.factory.Factory;
 import org.apache.abdera.i18n.iri.IRI;
 import org.apache.abdera.model.Content;
-import org.apache.abdera.model.Content.Type;
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.model.Link;
 import org.apache.abdera.model.Person;
+import org.apache.abdera.model.Content.Type;
 import org.apache.abdera.protocol.server.RequestContext;
 import org.apache.abdera.protocol.server.ResponseContext;
 import org.apache.abdera.protocol.server.TargetType;
@@ -118,16 +118,6 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       try
       {
          conn = getConnection(request);
-         /*
-         CmisObject doc =
-            conn.getObjectById(objectId, false, IncludeRelationships.NONE,
-               false, false, CMIS.IS_VERSION_SERIES_CHECKED_OUT, null);
-         BooleanProperty checkedOut = (BooleanProperty)getProperty(doc, CMIS.IS_VERSION_SERIES_CHECKED_OUT);
-         if (checkedOut != null && checkedOut.getValues().size() > 0 && checkedOut.getValues().get(0))
-            conn.cancelCheckout(objectId);
-         else
-            conn.deleteObject(objectId, true);
-         */
          conn.deleteObject(objectId, null);
       }
       catch (ConstraintException cve)
@@ -411,10 +401,6 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
          // Is not document.
          return object;
       }
-      catch (StorageException re)
-      {
-         throw new ResponseContextException(createErrorResponse(re, 500));
-      }
       catch (FilterNotValidException fe)
       {
          throw new ResponseContextException(createErrorResponse(fe, 400));
@@ -469,15 +455,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       {
          conn = getConnection(request);
          // TODO : resolve (optional) offset, length
-         ContentStream content = conn.getContentStream(//
-            //
-            getId(request), //
-            getStreamId(request), //
-            0, //
-            Long.MAX_VALUE);
-         /*         if (content == null)
-                     return new EmptyResponseContext(200);
-         */
+         ContentStream content = conn.getContentStream(getId(request), getStreamId(request));
          ResponseContext response = new MediaResponseContext(content.getStream(), 200);
          response.setContentType(content.getMediaType().toString());
          response.setContentLength(content.length());
@@ -493,10 +471,6 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       catch (ConstraintException cve)
       {
          return createErrorResponse(cve, 409);
-      }
-      catch (StorageException re)
-      {
-         return createErrorResponse(re, 500);
       }
       catch (Throwable t)
       {
@@ -999,34 +973,26 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       }
 
       ObjectTypeElement objectElement = new ObjectTypeElement(request.getAbdera().getFactory(), AtomCMIS.OBJECT);
-
-      try
-      {
-         objectElement.build(object);
-      }
-      catch (FilterNotValidException fe)
-      {
-         throw new ResponseContextException(400, fe);
-      }
+      objectElement.build(object);
       entry.addExtension(objectElement);
 
       return self;
    }
 
-   protected org.xcmis.spi.utils.MimeType convertMimeType(MimeType aMimeType)
+   protected org.xcmis.spi.utils.MimeType convertMimeType(MimeType abderaMimeType)
    {
-      if (aMimeType == null)
+      if (abderaMimeType == null)
       {
          return new org.xcmis.spi.utils.MimeType();
       }
-      MimeTypeParameterList aParameters = aMimeType.getParameters();
+      MimeTypeParameterList abderaParameters = abderaMimeType.getParameters();
       Map<String, String> paremeters = new HashMap<String, String>();
-      for (Enumeration<String> names = aParameters.getNames(); names.hasMoreElements();)
+      for (Enumeration<String> names = abderaParameters.getNames(); names.hasMoreElements();)
       {
          String name = names.nextElement();
-         paremeters.put(name, aParameters.get(name));
+         paremeters.put(name, abderaParameters.get(name));
       }
-      return new org.xcmis.spi.utils.MimeType(aMimeType.getPrimaryType(), aMimeType.getSubType(), paremeters);
+      return new org.xcmis.spi.utils.MimeType(abderaMimeType.getPrimaryType(), abderaMimeType.getSubType(), paremeters);
    }
 
    /**
@@ -1509,6 +1475,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
 
    /**
     * Get's the name of the specific resource requested.
+    *
     * @param request RequestContext
     * @return string resource name
     */

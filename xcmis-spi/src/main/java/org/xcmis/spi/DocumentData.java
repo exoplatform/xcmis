@@ -16,12 +16,10 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-
 package org.xcmis.spi;
 
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.Property;
-import org.xcmis.spi.model.TypeDefinition;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -98,11 +96,9 @@ public interface DocumentData extends ObjectData
     */
    String getContentStreamMimeType();
 
-   //
-
    /**
     * Get document content stream.
-    * 
+    *
     * @return content stream or <code>null</code> if document has not content
     * @throws IOException if an I/O error occurs
     */
@@ -113,15 +109,13 @@ public interface DocumentData extends ObjectData
     * <code>null</code> then existed content of this document will be removed.
     *
     * @param contentStream {@link ContentStream} or <code>null</code>
-    * @throws ConstraintException if document type definition attribute
-    *         {@link TypeDefinition#getContentStreamAllowed()} is 'notallowed'
-    *         and specified <code>contentStream</code> is other then
-    *         <code>null</code> or if
-    *         {@link TypeDefinition#getContentStreamAllowed()} attribute is
-    *         'required' and <code>contentStream</code> is <code>null</code>
-    * @throws IOException TODO
+    * @throws IOException if any i/o error occurs
+    * @throws VersioningException if object is not current version and storage
+    *         do not support update other then latest version
+    * @throws StorageException if object's content stream can not be updated
+    *         (save changes) cause to storage internal problem
     */
-   void setContentStream(ContentStream contentStream) throws ConstraintException, IOException;
+   void setContentStream(ContentStream contentStream) throws IOException, VersioningException, StorageException;
 
    /**
     * Check does current document has content or not.
@@ -133,49 +127,57 @@ public interface DocumentData extends ObjectData
    /**
     * Discard checkout operation. See {@link Connection#cancelCheckout(String)}.
     *
-    * @throws StorageException if any storage error occurs
+    * @throws VersioningException if object is non-current document version and
+    *         'cancel checkout' action and not supported for non-current version
+    *         of document
+    * @throws StorageException if changes can't be saved cause to storage
+    *         internal problem
     */
-   void cancelCheckout() throws StorageException;
+   void cancelCheckout() throws VersioningException, StorageException;
 
    /**
-    * Set private working copy as latest (current) version of.
+    * Set private working copy as latest (current) version of document.
     *
     * @param major is major
     * @param checkinComment check-in comment
-    * @param properties the document properties
-    * @param content the document content stream
-    * @param addACL the list of ACEs to be added
-    * @param removeACL the list of ACEs to be removed
-    * @param policies the list of policy IDs
-    * @return DocumentData document
-    * @throws ConstraintException if the object is not versionable
+    * @param properties the document properties. May be <code>null</code> if
+    *        properties are not changed
+    * @param content the document content stream. May be <code>null</code> if
+    *        content is not changed
+    * @param acl the list of ACEs to be applied to new version of document. May
+    *        be <code>null</code> or empty list
+    * @param policies the list of policies. May be <code>null</code> or empty
+    *        collection
+    * @return new version of document
+    * @throws NameConstraintViolationException if <i>cmis:name</i> specified in
+    *         properties throws conflict
     * @throws StorageException if newly version of Document can't be saved in
     *         storage cause to its internal problem
     */
    DocumentData checkin(boolean major, String checkinComment, Map<String, Property<?>> properties,
-      ContentStream content, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
-      Collection<ObjectData> policies) throws ConstraintException, StorageException;
+      ContentStream content, List<AccessControlEntry> acl, Collection<PolicyData> policies)
+      throws NameConstraintViolationException, StorageException;
 
    /**
     * Create PWC from this document. Properties and content (optionally) of this
     * document copied to PWC.
     *
     * @return PWC
-    * @throws ConstraintException if the object is not versionable
-    * @throws VersioningException if object is not latest version of document
-    *         version and it is not supported to checked-out other then latest
-    *         version
+    * @throws VersioningException if one of the following conditions are met:
+    *         <ul>
+    *         <li>object is not latest version of document version and it is not
+    *         supported to checked-out other then latest version</li>
+    *         <li>version series already have one checked-out document. It is
+    *         not possible to have more then one PWC at time</li>
+    *         </ul>
     * @throws StorageException if newly created PWC was not saved in storage
     *         cause to storage internal problem
     */
-   DocumentData checkout() throws ConstraintException, VersioningException, StorageException;
+   DocumentData checkout() throws VersioningException, StorageException;
 
    /**
     * @return <code>true</code> if current Document is private working copy and
     *         <code>false</code> otherwise
     */
    boolean isPWC();
-
-   //   Collection<DocumentData> getAllVersions() throws CmisRuntimeException;
-
 }

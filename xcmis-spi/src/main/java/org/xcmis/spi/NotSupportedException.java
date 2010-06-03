@@ -35,7 +35,8 @@ public final class NotSupportedException extends CmisRuntimeException
    private static final long serialVersionUID = 5389468024775133596L;
 
    /**
-    * Construct instance <tt>OperationNotSupportedException</tt> without message.
+    * Construct instance <tt>OperationNotSupportedException</tt> without
+    * message.
     */
    public NotSupportedException()
    {
