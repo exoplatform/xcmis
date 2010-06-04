@@ -151,9 +151,7 @@ public class SimplePlaner implements QueryExecutionPlaner
     * @param context
     * @param source
     * @param querySelectorsMap
-    * @param executionPlan 
-    * @return 
-    * @return
+    * @return QueryExecutionPlan
     * @throws VisitException 
     */
    protected QueryExecutionPlan createSelectorPlan(final QueryExecutionContext context, final Source source,
@@ -252,7 +250,7 @@ public class SimplePlaner implements QueryExecutionPlaner
     * Attach a PROJECT node at the top of the plan tree.
     * 
     * @param context the context in which the query is being planned
-    * @param plan the existing plan
+    * @param executionPlan the existing plan
     * @param columns the columns being projected; may be null
     * @param selectors the selectors keyed by their alias or name
     * @return the updated plan
@@ -326,7 +324,7 @@ public class SimplePlaner implements QueryExecutionPlaner
     * 
     * @param context the context in which the query is being planned
     * @param limit the limit definition; may be null
-    * @param plan the existing plan    *
+    * @param executionPlan the existing plan    *
     */
    protected QueryExecutionPlan createLimits(QueryExecutionContext context, Limit limit,
       QueryExecutionPlan executionPlan)
