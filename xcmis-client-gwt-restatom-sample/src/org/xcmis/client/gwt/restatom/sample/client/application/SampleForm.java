@@ -17,19 +17,19 @@
 
 package org.xcmis.client.gwt.restatom.sample.client.application;
 
-import org.xcmis.client.gwt.client.CMIS;
-import org.xcmis.client.gwt.client.model.EnumBaseObjectTypeIds;
-import org.xcmis.client.gwt.client.model.property.BooleanProperty;
-import org.xcmis.client.gwt.client.model.property.CmisProperties;
-import org.xcmis.client.gwt.client.model.property.DateTimeProperty;
-import org.xcmis.client.gwt.client.model.property.DecimalProperty;
-import org.xcmis.client.gwt.client.model.property.IdProperty;
-import org.xcmis.client.gwt.client.model.property.IntegerProperty;
-import org.xcmis.client.gwt.client.model.property.Property;
-import org.xcmis.client.gwt.client.model.property.StringProperty;
-import org.xcmis.client.gwt.client.model.property.UriProperty;
-import org.xcmis.client.gwt.client.model.repository.CmisRepositoryInfo;
-import org.xcmis.client.gwt.client.model.restatom.AtomEntry;
+import org.xcmis.client.gwt.CMIS;
+import org.xcmis.client.gwt.model.EnumBaseObjectTypeIds;
+import org.xcmis.client.gwt.model.property.BooleanProperty;
+import org.xcmis.client.gwt.model.property.CmisProperties;
+import org.xcmis.client.gwt.model.property.DateTimeProperty;
+import org.xcmis.client.gwt.model.property.DecimalProperty;
+import org.xcmis.client.gwt.model.property.IdProperty;
+import org.xcmis.client.gwt.model.property.IntegerProperty;
+import org.xcmis.client.gwt.model.property.Property;
+import org.xcmis.client.gwt.model.property.StringProperty;
+import org.xcmis.client.gwt.model.property.UriProperty;
+import org.xcmis.client.gwt.model.repository.CmisRepositoryInfo;
+import org.xcmis.client.gwt.model.restatom.AtomEntry;
 
 import java.util.List;
 
