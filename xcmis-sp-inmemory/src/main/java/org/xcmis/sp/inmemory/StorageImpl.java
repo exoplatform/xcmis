@@ -821,11 +821,8 @@ public class StorageImpl implements Storage
    {
       if (renditionManager != null)
       {
-         ArrayList<Rendition> renditionList = new ArrayList<Rendition>();
-         Rendition rend = renditionManager.getRenditions(object);
-         if (rend != null)
-            renditionList.add(rend);
-         return new BaseItemsIterator<Rendition>(renditionList);
+         ItemsIterator<Rendition> renditions = renditionManager.getRenditions(object);
+         return renditions;
       }
       return CmisUtils.emptyItemsIterator();
    }

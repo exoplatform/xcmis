@@ -26,12 +26,15 @@ import org.xcmis.search.SearchServiceException;
 public class ColumnDoesNotExistOnTable extends SearchServiceException
 {
 
+   /** The Constant serialVersionUID. */
+   private static final long serialVersionUID = 1L;
+
    /**
-    * 
+    *Constructor. 
     */
    public ColumnDoesNotExistOnTable()
    {
-      // TODO Auto-generated constructor stub
+      
    }
 
    /**
@@ -40,7 +43,6 @@ public class ColumnDoesNotExistOnTable extends SearchServiceException
    public ColumnDoesNotExistOnTable(String message)
    {
       super(message);
-      // TODO Auto-generated constructor stub
    }
 
    /**
@@ -49,7 +51,6 @@ public class ColumnDoesNotExistOnTable extends SearchServiceException
    public ColumnDoesNotExistOnTable(Throwable cause)
    {
       super(cause);
-      // TODO Auto-generated constructor stub
    }
 
    /**
@@ -59,7 +60,6 @@ public class ColumnDoesNotExistOnTable extends SearchServiceException
    public ColumnDoesNotExistOnTable(String message, Throwable cause)
    {
       super(message, cause);
-      // TODO Auto-generated constructor stub
    }
 
 }

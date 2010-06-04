@@ -35,7 +35,7 @@ import java.util.List;
 public class InterceptorChain implements Startable
 {
    /**
-    * reference to the first interceptor in the chain
+    * Reference to the first interceptor in the chain.
     */
    private CommandInterceptor firstInChain;
 
@@ -52,6 +52,8 @@ public class InterceptorChain implements Startable
    /**
     * Adds a new interceptor in list after an interceptor of a given type.
     *
+    * @param toAdd
+    * @param afterInterceptor
     * @return true if the interceptor was added; i.e. the afterInterceptor exists
     */
    public synchronized boolean addAfterInterceptor(CommandInterceptor toAdd,
@@ -74,6 +76,8 @@ public class InterceptorChain implements Startable
    /**
     * Adds a new interceptor in list after an interceptor of a given type.
     *
+    * @param toAdd
+    * @param beforeInterceptor
     * @return true if the interceptor was added; i.e. the afterInterceptor exists
     */
    public synchronized boolean addBeforeInterceptor(CommandInterceptor toAdd,
@@ -103,6 +107,8 @@ public class InterceptorChain implements Startable
    /**
     * Inserts the given interceptor at the specified position in the chain (o based indexing).
     *
+    * @param interceptor CommandInterceptor
+    * @param  position int
     * @throws IllegalArgumentException if the position is invalid (e.g. 5 and there are only 2 interceptors in the chain)
     */
    public synchronized void addInterceptor(CommandInterceptor interceptor, int position)
@@ -134,6 +140,8 @@ public class InterceptorChain implements Startable
 
    /**
     * Appends at the end.
+    * 
+    * @param ci CommandInterceptor
     */
    public void appendIntereceptor(CommandInterceptor ci)
    {
@@ -208,6 +216,8 @@ public class InterceptorChain implements Startable
 
    /**
     * Returns all interceptors which extend the given command interceptor.
+    * 
+    * @param interceptorClass
     */
    public List<CommandInterceptor> getInterceptorsWhichExtend(Class<? extends CommandInterceptor> interceptorClass)
    {
@@ -225,6 +235,8 @@ public class InterceptorChain implements Startable
 
    /**
     * Returns all the interceptors that have the fully qualified name of their class equal with the supplied class name.
+    * 
+    * @param fqName String
     */
    public List<CommandInterceptor> getInterceptorsWithClassName(String fqName)
    {

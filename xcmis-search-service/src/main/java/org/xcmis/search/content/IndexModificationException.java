@@ -26,13 +26,11 @@ import org.xcmis.search.lucene.index.IndexException;
 public class IndexModificationException extends IndexException
 {
 
-   /**
-    * 
-    */
+   /** The serialVersionUID. */
    private static final long serialVersionUID = 5437717624548665715L;
 
    /**
-    * 
+    * Constructor.
     */
    public IndexModificationException()
    {
@@ -40,8 +38,8 @@ public class IndexModificationException extends IndexException
    }
 
    /**
-    * @param message
-    * @param cause
+    * @param message String
+    * @param cause Throwable
     */
    public IndexModificationException(String message, Throwable cause)
    {
@@ -49,7 +47,7 @@ public class IndexModificationException extends IndexException
    }
 
    /**
-    * @param message
+    * @param message String
     */
    public IndexModificationException(String message)
    {
@@ -57,7 +55,7 @@ public class IndexModificationException extends IndexException
    }
 
    /**
-    * @param cause
+    * @param cause Throwable
     */
    public IndexModificationException(Throwable cause)
    {

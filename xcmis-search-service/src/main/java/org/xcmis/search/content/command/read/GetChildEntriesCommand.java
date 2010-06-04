@@ -32,7 +32,7 @@ public class GetChildEntriesCommand implements AbstractReadDataCommand
    private final String parentUuid;
 
    /**
-    * @param parentUuid
+    * @param parentUuid String
     */
    public GetChildEntriesCommand(String parentUuid)
    {

@@ -89,7 +89,7 @@ public class SearchService implements Startable, ContentModificationListener, Se
     * Execute query.
     * @param query Query
     * @return
-    * @throws InvalidQueryException
+    * @throws InvalidQueryException, QueryExecutionException
     */
    @SuppressWarnings("unchecked")
    public List<ScoredRow> execute(Query query) throws InvalidQueryException, QueryExecutionException
@@ -107,7 +107,7 @@ public class SearchService implements Startable, ContentModificationListener, Se
     * @param query Query
     * @param bindVariablesValues Map<String, Object>
     * @return List<ScoredRow>
-    * @throws InvalidQueryException
+    * @throws InvalidQueryException, QueryExecutionException
     */
    public List<ScoredRow> execute(Query query, Map<String, Object> bindVariablesValues) throws InvalidQueryException,
       QueryExecutionException

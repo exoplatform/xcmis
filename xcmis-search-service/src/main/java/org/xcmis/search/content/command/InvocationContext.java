@@ -44,7 +44,7 @@ public class InvocationContext
    private NameConverter nameConverter;
 
    /**
-    * Split path  string to names
+    * Split path  string to names.
     */
    private PathSplitter pathSplitter;
 

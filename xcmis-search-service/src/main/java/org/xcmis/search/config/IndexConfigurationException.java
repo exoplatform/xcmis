@@ -32,13 +32,12 @@ import org.xcmis.search.lucene.index.IndexException;
  */
 public class IndexConfigurationException extends IndexException
 {
-   /**
-    * 
-    */
+   
+   /** The  serialVersionUID. */
    private static final long serialVersionUID = -3029464014145259931L;
 
    /**
-    * 
+    * Constructor.
     */
    public IndexConfigurationException()
    {
@@ -46,7 +45,7 @@ public class IndexConfigurationException extends IndexException
    }
 
    /**
-    * @param message
+    * @param message String message
     */
    public IndexConfigurationException(String message)
    {
@@ -54,8 +53,8 @@ public class IndexConfigurationException extends IndexException
    }
 
    /**
-    * @param message
-    * @param cause
+    * @param message String message
+    * @param cause Throwable cause
     */
    public IndexConfigurationException(String message, Throwable cause)
    {

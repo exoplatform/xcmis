@@ -41,6 +41,7 @@ public interface Visitor
     * @param ctx
     * @param putDocumentsToTheIndexCommand
     * @return
+    * @throws Throwable
     */
    Object visitModifyIndexCommand(InvocationContext ctx, ModifyIndexCommand command) throws Throwable;
 
@@ -48,6 +49,7 @@ public interface Visitor
     * @param ctx
     * @param executeQueryCommand
     * @return
+    * @throws Throwable
     */
    Object visitExecuteSelectorCommand(InvocationContext ctx, ExecuteSelectorCommand command) throws Throwable;
 
@@ -63,6 +65,7 @@ public interface Visitor
     * @param ctx
     * @param getNodeCommand
     * @return
+    * @throws Throwable
     */
    Object visitGetContentEntryCommand(InvocationContext ctx, GetContentEntryCommand command) throws Throwable;
 
@@ -78,6 +81,7 @@ public interface Visitor
     * @param ctx
     * @param getUnfilledEntriesCommand
     * @return
+    * @throws Throwable
     */
    Object visitGetUnfiledEntriesCommand(InvocationContext ctx, GetUnfiledEntriesCommand command) throws Throwable;
 }

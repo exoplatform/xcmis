@@ -31,6 +31,7 @@ import org.xcmis.spi.utils.MimeType;
 
 import javax.jcr.Item;
 import javax.jcr.Node;
+import javax.jcr.NodeIterator;
 import javax.jcr.Property;
 import javax.jcr.Repository;
 import javax.jcr.Session;
@@ -100,32 +101,46 @@ public class RenditionsUpdateListener implements EventListener
                int length = fileContent.getStream().available();
                if (length == 0)
                {
-                  return; // No content, but node has empty stream.
+                  {
+                     NodeIterator iter = node.getNodes();
+                     while (iter.hasNext())
+                     {
+                        Node tmp = iter.nextNode();
+                        if (tmp.isNodeType(JcrCMIS.CMIS_NT_RENDITION))
+                        {
+                           tmp.remove();
+                           node.save();
+                        }
+                     }
+                  }
                }
 
-               MimeType mimeType = MimeType.fromString(contentNode.getProperty(JcrCMIS.JCR_MIMETYPE).getString());
-               if (contentNode.hasProperty(JcrCMIS.JCR_ENCODING))
+               else
                {
-                  mimeType.getParameters().put(CmisConstants.CHARSET,
-                     contentNode.getProperty(JcrCMIS.JCR_ENCODING).getString());
-               }
+                  MimeType mimeType = MimeType.fromString(contentNode.getProperty(JcrCMIS.JCR_MIMETYPE).getString());
+                  if (contentNode.hasProperty(JcrCMIS.JCR_ENCODING))
+                  {
+                     mimeType.getParameters().put(CmisConstants.CHARSET,
+                        contentNode.getProperty(JcrCMIS.JCR_ENCODING).getString());
+                  }
 
-               RenditionContentStream renditionContentStream =
-                  renditionManager.getStream(new BaseContentStream(fileContent.getStream(), length, null, mimeType),
-                     mimeType);
-               if (renditionContentStream != null)
-               {
-                  String id = IdGenerator.generate();
-                  Node rendition = node.addNode(id, JcrCMIS.CMIS_NT_RENDITION);
-                  rendition.setProperty(JcrCMIS.CMIS_RENDITION_STREAM, renditionContentStream.getStream());
-                  rendition.setProperty(JcrCMIS.CMIS_RENDITION_MIME_TYPE, renditionContentStream.getMediaType()
-                     .getBaseType());
-                  rendition.setProperty(JcrCMIS.CMIS_RENDITION_ENCODING, renditionContentStream.getMediaType()
-                     .getParameter(CmisConstants.CHARSET));
-                  rendition.setProperty(JcrCMIS.CMIS_RENDITION_KIND, renditionContentStream.getKind());
-                  rendition.setProperty(JcrCMIS.CMIS_RENDITION_HEIGHT, renditionContentStream.getHeight());
-                  rendition.setProperty(JcrCMIS.CMIS_RENDITION_WIDTH, renditionContentStream.getWidth());
-                  session.save();
+                  RenditionContentStream renditionContentStream =
+                     renditionManager.getStream(new BaseContentStream(fileContent.getStream(), length, null, mimeType),
+                        mimeType);
+                  if (renditionContentStream != null)
+                  {
+                     String id = IdGenerator.generate();
+                     Node rendition = node.addNode(id, JcrCMIS.CMIS_NT_RENDITION);
+                     rendition.setProperty(JcrCMIS.CMIS_RENDITION_STREAM, renditionContentStream.getStream());
+                     rendition.setProperty(JcrCMIS.CMIS_RENDITION_MIME_TYPE, renditionContentStream.getMediaType()
+                        .getBaseType());
+                     rendition.setProperty(JcrCMIS.CMIS_RENDITION_ENCODING, renditionContentStream.getMediaType()
+                        .getParameter(CmisConstants.CHARSET));
+                     rendition.setProperty(JcrCMIS.CMIS_RENDITION_KIND, renditionContentStream.getKind());
+                     rendition.setProperty(JcrCMIS.CMIS_RENDITION_HEIGHT, renditionContentStream.getHeight());
+                     rendition.setProperty(JcrCMIS.CMIS_RENDITION_WIDTH, renditionContentStream.getWidth());
+                     session.save();
+                  }
                }
             }
          }

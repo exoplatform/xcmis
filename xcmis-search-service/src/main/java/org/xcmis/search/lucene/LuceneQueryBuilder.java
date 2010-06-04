@@ -126,21 +126,19 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
     */
    private IndexReader indexReader;
 
-   private final IndexConfiguration indexConfuguration;
+   private final IndexConfiguration indexConfiguration;
 
    /**
-    * @param indexConfuguration 
-    * @param indexDataManager 
-    * @param indexingService
-    * @param resultSorterFactory
-    * @param namespaceMappings
-    * @param tableResolver
-    * @param documentMatcherFactory
+    * @param indexReader 
+    * @param nameConverter 
+    * @param pathSplitter
+    * @param bindVariablesValues
+    * @param indexConfiguration
     */
    public LuceneQueryBuilder(IndexReader indexReader, NameConverter<?> nameConverter, PathSplitter<?> pathSplitter,
-      Map<String, Object> bindVariablesValues, IndexConfiguration indexConfuguration)
+      Map<String, Object> bindVariablesValues, IndexConfiguration indexConfiguration)
    {
-      this.indexConfuguration = indexConfuguration;
+      this.indexConfiguration = indexConfiguration;
       Validate.notNull(indexReader, "The indexReader argument may not be null");
 
       this.indexReader = indexReader;
@@ -233,7 +231,7 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
             {
                if (i == 0)
                {
-                  childNodeQuery = new TermQuery(new Term(FieldNames.UUID, indexConfuguration.getRootUuid()));
+                  childNodeQuery = new TermQuery(new Term(FieldNames.UUID, indexConfiguration.getRootUuid()));
                }
                else
                {
@@ -271,7 +269,6 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
 
    public void visit(Column node) throws VisitException
    {
-      // TODO Auto-generated method stub
 
    }
 
@@ -310,7 +307,7 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
       {
          final Object[] entries = pathSplitter.splitPath(parentPath);
 
-         Query descendantQuery = new TermQuery(new Term(FieldNames.UUID, indexConfuguration.getRootUuid()));
+         Query descendantQuery = new TermQuery(new Term(FieldNames.UUID, indexConfiguration.getRootUuid()));
 
          for (int i = 1; i < entries.length; i++)
          {
@@ -332,7 +329,6 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
 
    public void visit(DescendantNodeJoinCondition node) throws VisitException
    {
-      // TODO Auto-generated method stub
 
    }
 
@@ -342,7 +338,6 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
 
    public void visit(EquiJoinCondition node) throws VisitException
    {
-      // TODO Auto-generated method stub
 
    }
 
@@ -428,7 +423,6 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
 
    public void visit(Join node) throws VisitException
    {
-      // TODO Auto-generated method stub
 
    }
 
@@ -493,7 +487,6 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
 
    public void visit(Limit limit) throws VisitException
    {
-      // TODO Auto-generated method stub
 
    }
 
@@ -533,7 +526,6 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
 
    public void visit(NodeDepth depth) throws VisitException
    {
-      // TODO Auto-generated method stub
 
    }
 
@@ -787,7 +779,6 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
 
    public void visit(Ordering node) throws VisitException
    {
-      // TODO Auto-generated method stub
 
    }
 
@@ -956,7 +947,6 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
 
    public void visit(org.xcmis.search.model.Query node) throws VisitException
    {
-      // TODO Auto-generated method stub
 
    }
 
@@ -973,7 +963,7 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
       {
          if (i == 0)
          {
-            descendantQuery = new TermQuery(new Term(FieldNames.UUID, indexConfuguration.getRootUuid()));
+            descendantQuery = new TermQuery(new Term(FieldNames.UUID, indexConfiguration.getRootUuid()));
          }
          else
          {
@@ -993,7 +983,6 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
 
    public void visit(SameNodeJoinCondition node) throws VisitException
    {
-      // TODO Auto-generated method stub
 
    }
 
@@ -1003,7 +992,6 @@ public class LuceneQueryBuilder implements QueryObjectModelVisitor
 
    public void visit(Selector selector) throws VisitException
    {
-      // TODO Auto-generated method stub
 
    }
 
