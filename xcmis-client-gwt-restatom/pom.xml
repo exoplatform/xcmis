@@ -80,8 +80,8 @@
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>gwt-maven-plugin</artifactId>
 						<configuration>
-							<module>org.xcmis.gwtframework.CmisClientFrameworkJUnit</module>
-							<runTarget>org.xcmis.gwtframework.CmisClientFrameworkJUnit/CmisClientFrameworkJUnit.html</runTarget>
+							<module>org.xcmis.CmisClientFrameworkJUnit</module>
+							<runTarget>org.xcmis.CmisClientFrameworkJUnit/CmisClientFrameworkJUnit.html</runTarget>
 							<logLevel>INFO</logLevel>
 							<hostedWebapp>${basedir}/target/war</hostedWebapp>
 							<tomcat>${basedir}/target/tomcat</tomcat>
