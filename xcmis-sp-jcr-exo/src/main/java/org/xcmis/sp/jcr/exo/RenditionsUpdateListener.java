@@ -125,7 +125,7 @@ public class RenditionsUpdateListener implements EventListener
                   }
 
                   RenditionContentStream renditionContentStream =
-                     renditionManager.getStream(new BaseContentStream(fileContent.getStream(), length, null, mimeType),
+                     (RenditionContentStream)renditionManager.getStream(new BaseContentStream(fileContent.getStream(), length, null, mimeType),
                         mimeType);
                   if (renditionContentStream != null)
                   {

@@ -30,9 +30,8 @@ package org.xcmis.search;
  */
 public class VisitException extends QueryObjectModelException
 {
-   /**
-    * 
-    */
+   
+   /** The serialVersionUID. */
    private static final long serialVersionUID = 3730043060732772674L;
 
    /**

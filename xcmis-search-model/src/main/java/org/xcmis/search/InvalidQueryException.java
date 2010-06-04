@@ -27,9 +27,7 @@ package org.xcmis.search;
 public class InvalidQueryException extends Exception
 {
 
-   /**
-    * 
-    */
+   /** The serialVersionUID. */
    private static final long serialVersionUID = -393218322369202333L;
 
    /**

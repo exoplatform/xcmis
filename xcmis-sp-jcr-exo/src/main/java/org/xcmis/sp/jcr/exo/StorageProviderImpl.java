@@ -178,6 +178,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
 
    /**
     * Gets the search service. 
+    * @param id String
     * @return instance of {@link SearchService}
     * @throws SearchServiceException
     */
