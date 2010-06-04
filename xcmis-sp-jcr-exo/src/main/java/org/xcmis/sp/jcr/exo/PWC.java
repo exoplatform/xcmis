@@ -63,6 +63,13 @@ class PWC extends DocumentDataImpl
       super(jcrNodeAdapter, indexListener, renditionManager);
    }
 
+   public PWC(JcrNodeAdapter jcrEntry, IndexListener indexListener, RenditionManager renditionManager,
+      DocumentDataImpl document)
+   {
+      super(jcrEntry, indexListener, renditionManager);
+      this.document = document;
+   }
+
    /**
     * {@inheritDoc}
     */

@@ -21,8 +21,8 @@ package org.xcmis.renditions.impl;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
-import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.ContentStream;
+import org.xcmis.spi.RenditionContentStream;
 import org.xcmis.spi.RenditionProvider;
 import org.xcmis.spi.utils.MimeType;
 
@@ -80,7 +80,7 @@ public class PDFDocumentRenditionProvider implements RenditionProvider
    /**
     * {@inheritDoc}
     */
-   public ContentStream getRenditionStream(ContentStream stream) throws IOException
+   public RenditionContentStream getRenditionStream(ContentStream stream) throws IOException
    {
       PDDocument pdf = null;
       try
@@ -102,7 +102,8 @@ public class PDFDocumentRenditionProvider implements RenditionProvider
 
          ByteArrayOutputStream out = new ByteArrayOutputStream();
          ImageIO.write(scaledImage, "png", out);
-         ContentStream renditionStream = new BaseContentStream(out.toByteArray(), null, new MimeType("image", " png"));
+         RenditionContentStream renditionStream =
+            new RenditionContentStream(out.toByteArray(), null, new MimeType("image", " png"), getKind(), height, width);
          return renditionStream;
       }
       finally

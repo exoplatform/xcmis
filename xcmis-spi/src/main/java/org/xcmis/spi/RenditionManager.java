@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Manage object's renditions.
- * 
+ *
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id$
  */
@@ -65,7 +65,7 @@ public class RenditionManager
 
    /**
     * Decode string from hex-string.
-    * 
+    *
     * @param in the input string
     * @return string output
     */
@@ -84,7 +84,7 @@ public class RenditionManager
 
    /**
     * Encode string into hex-string.
-    * 
+    *
     * @param in the input string
     * @return the string hex-sequence
     */
@@ -98,8 +98,8 @@ public class RenditionManager
       return out.toString();
    }
 
-   protected Map<MimeType, RenditionProvider> renditionProviders = new TreeMap<MimeType, RenditionProvider>(
-      new Comparator<MimeType>()
+   protected Map<MimeType, RenditionProvider> renditionProviders =
+      new TreeMap<MimeType, RenditionProvider>(new Comparator<MimeType>()
       {
          public int compare(MimeType m1, MimeType m2)
          {
@@ -150,8 +150,40 @@ public class RenditionManager
    }
 
    /**
+    * Get all renditions using all available {@link RenditionProvider} that can
+    * provide rendition for specified mime-type.
+    *
+    * @param @param mime MimeType
+    * @return set of object renditions. If object has not renditions then empty
+    *         iterator will be returned
+    * @throws NullPointerException if <code>mime == null</code>
+    */
+   public ItemsIterator<Rendition> getRenditions(MimeType mime)
+   {
+      if (mime == null)
+      {
+         throw new NullPointerException("Mime-type may not be null.");
+      }
+      List<Rendition> renditions = new ArrayList<Rendition>();
+      for (Map.Entry<MimeType, RenditionProvider> e : renditionProviders.entrySet())
+      {
+         if (e.getKey().match(mime))
+         {
+            Rendition rendition = new Rendition();
+            // e.getKey() is unique because is key of map.
+            // Use it as id for content stream.
+            rendition.setStreamId(encode(e.getKey().toString()));
+            rendition.setKind(e.getValue().getKind());
+            rendition.setMimeType(e.getValue().getProducedMediaType().toString());
+            renditions.add(rendition);
+         }
+      }
+      return new BaseItemsIterator<Rendition>(renditions);
+   }
+
+   /**
     * Get all renditions of specified entry.
-    * 
+    *
     * @param object object for getting renditions
     * @return set of object renditions. If object has not renditions then empty
     *         iterator will be returned
@@ -162,41 +194,37 @@ public class RenditionManager
       if (object.getBaseType() == BaseType.DOCUMENT && ((DocumentData)object).hasContent())
       {
          MimeType mime = MimeType.fromString(((DocumentData)object).getContentStreamMimeType());
-         List<Rendition> renditions = new ArrayList<Rendition>();
-         for (Map.Entry<MimeType, RenditionProvider> e : renditionProviders.entrySet())
-         {
-            if (e.getKey().match(mime))
-            {
-               Rendition rendition = new Rendition();
-               // e.getKey() is unique because is key of map.
-               // Use it as id for content stream.
-               rendition.setStreamId(encode(e.getKey().toString()));
-               rendition.setKind(e.getValue().getKind());
-               rendition.setMimeType(e.getValue().getProducedMediaType().toString());
-               renditions.add(rendition);
-            }
-         }
-         return new BaseItemsIterator<Rendition>(renditions);
+         return getRenditions(mime);
       }
       return CmisUtils.emptyItemsIterator();
    }
 
    /**
-    * Get rendition from content stream with known mime-type.
-    * 
+    * Get rendition from content stream with known mime-type and use most
+    * suitable {@link RenditionProvider}. For example if two RenditionProviders
+    * registered:
+    * <ul>
+    * <li>can process 'image/*' content</li>
+    * <li>can process 'image/jpeg' content</li>
+    * </ul>
+    * and provided MimeType is 'image/jpeg' then second provider from list will
+    * be in use.
+    *
     * @param mime MimeType
     * @param stream ContentStream
-    * @return Renditions content stream
+    * @return rendition content stream or <code>null</code> if there is no
+    *         {@link RenditionProvider} which can produce stream for requested
+    *         type
     * @throws IOException if any I/O error occurs
     */
-   public ContentStream getStream(ContentStream stream, MimeType mime) throws IOException
+   public RenditionContentStream getStream(ContentStream stream, MimeType mime) throws IOException
    {
       for (Map.Entry<MimeType, RenditionProvider> e : renditionProviders.entrySet())
       {
          if (e.getKey().match(mime))
          {
             RenditionProvider renditionProvider = e.getValue();
-            ContentStream renditionContentStream = renditionProvider.getRenditionStream(stream);
+            RenditionContentStream renditionContentStream = renditionProvider.getRenditionStream(stream);
             return renditionContentStream;
          }
       }
@@ -205,13 +233,13 @@ public class RenditionManager
 
    /**
     * Get rendition stream for objects with specified stream id.
-    * 
+    *
     * @param streamId stream id
     * @param obj ObjectData
     * @return Renditions content stream
     * @throws IOException if any I/O error occurs
     */
-   public ContentStream getStream(ObjectData object, String streamId) throws IOException
+   public RenditionContentStream getStream(ObjectData object, String streamId) throws IOException
    {
       // Assume streamId is encoded produces mime-type of RenditionProvider.
       // See RenditionProvider#getProducedMediaType().

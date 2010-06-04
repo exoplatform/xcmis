@@ -21,6 +21,7 @@ package org.xcmis.sp.jcr.exo;
 
 import org.exoplatform.services.jcr.core.ExtendedSession;
 import org.xcmis.sp.jcr.exo.index.IndexListener;
+import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
@@ -29,7 +30,6 @@ import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.PolicyData;
-import org.xcmis.spi.RenditionContentStream;
 import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.VersioningException;
@@ -108,7 +108,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
       {
          Session session = getNode().getSession();
          Node pwcNode = ((ExtendedSession)session).getNodeByIdentifier(getVersionSeriesCheckedOutId());
-         PWC pwc = new PWC(new JcrNodeAdapter(pwcNode), indexListener, renditionManager);
+         PWC pwc = new PWC(new JcrNodeAdapter(pwcNode), indexListener, renditionManager, this);
          pwc.delete();
       }
       catch (RepositoryException re)
@@ -205,7 +205,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
 
          session.save();
 
-         DocumentData pwc = new PWC(pwcNodeAdapter, indexListener, renditionManager);
+         DocumentData pwc = new PWC(pwcNodeAdapter, indexListener, renditionManager, this);
          return pwc;
       }
       catch (IOException ioe)
@@ -252,8 +252,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
                rendition.getProperty(JcrCMIS.CMIS_RENDITION_ENCODING).getString());
          }
 
-         return new RenditionContentStream(renditionContent.getStream(), renditionContent.getLength(), null, mimeType,
-            rendition.getProperty(JcrCMIS.CMIS_RENDITION_KIND).getString());
+         return new BaseContentStream(renditionContent.getStream(), renditionContent.getLength(), null, mimeType);
       }
       catch (PathNotFoundException pnfe)
       {

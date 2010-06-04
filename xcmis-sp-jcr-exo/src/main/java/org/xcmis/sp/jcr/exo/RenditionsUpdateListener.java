@@ -25,7 +25,6 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CmisConstants;
-import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.RenditionContentStream;
 import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.utils.MimeType;
@@ -70,8 +69,11 @@ public class RenditionsUpdateListener implements EventListener
    public void onEvent(EventIterator eventIterator)
    {
 
+      SessionProvider sessionProvider = null;
       try
       {
+         sessionProvider = SessionProvider.createSystemProvider();
+         Session session = sessionProvider.getSession(workspace, (ManageableRepository)repository);
          while (eventIterator.hasNext())
          {
             Event event = eventIterator.nextEvent();
@@ -83,9 +85,6 @@ public class RenditionsUpdateListener implements EventListener
 
             if (event.getPath().endsWith("jcr:content") || event.getPath().endsWith("jcr:data"))
             {
-
-               SessionProvider sessionProvider = SessionProvider.createSystemProvider();
-               Session session = sessionProvider.getSession(workspace, (ManageableRepository)repository);
                Node node = null;
                Item item = session.getItem(path);
                if (item.isNode())
@@ -111,12 +110,9 @@ public class RenditionsUpdateListener implements EventListener
                      contentNode.getProperty(JcrCMIS.JCR_ENCODING).getString());
                }
 
-               ContentStream content = new BaseContentStream(fileContent.getStream(), length, null, mimeType);
-
-               int count = 0;
-
                RenditionContentStream renditionContentStream =
-                  (RenditionContentStream)renditionManager.getStream(content, content.getMediaType());
+                  renditionManager.getStream(new BaseContentStream(fileContent.getStream(), length, null, mimeType),
+                     mimeType);
                if (renditionContentStream != null)
                {
                   String id = IdGenerator.generate();
@@ -129,11 +125,7 @@ public class RenditionsUpdateListener implements EventListener
                   rendition.setProperty(JcrCMIS.CMIS_RENDITION_KIND, renditionContentStream.getKind());
                   rendition.setProperty(JcrCMIS.CMIS_RENDITION_HEIGHT, renditionContentStream.getHeight());
                   rendition.setProperty(JcrCMIS.CMIS_RENDITION_WIDTH, renditionContentStream.getWidth());
-                  count++;
-                  if (count > 0)
-                  {
-                     node.save();
-                  }
+                  session.save();
                }
             }
          }
@@ -141,6 +133,13 @@ public class RenditionsUpdateListener implements EventListener
       catch (Exception e)
       {
          LOG.error("Creating rendition on event failed. ", e);
+      }
+      finally
+      {
+         if (sessionProvider != null)
+         {
+            sessionProvider.close();
+         }
       }
    }
 

@@ -19,8 +19,8 @@
 
 package org.xcmis.renditions.impl;
 
-import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.ContentStream;
+import org.xcmis.spi.RenditionContentStream;
 import org.xcmis.spi.RenditionProvider;
 import org.xcmis.spi.utils.MimeType;
 
@@ -34,7 +34,8 @@ import javax.imageio.ImageIO;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: ImageRenditionProvider.java 1218 2010-06-03 14:56:06Z andrew00x
+ *          $
  */
 public class ImageRenditionProvider implements RenditionProvider
 {
@@ -87,7 +88,7 @@ public class ImageRenditionProvider implements RenditionProvider
    /**
     * {@inheritDoc}
     */
-   public ContentStream getRenditionStream(ContentStream stream) throws IOException
+   public RenditionContentStream getRenditionStream(ContentStream stream) throws IOException
    {
       BufferedImage image = ImageIO.read(stream.getStream());
       // Determine scale and be sure both width and height are not greater the max
@@ -104,7 +105,8 @@ public class ImageRenditionProvider implements RenditionProvider
 
       ByteArrayOutputStream out = new ByteArrayOutputStream();
       ImageIO.write(scaledImage, "png", out);
-      ContentStream renditionStream = new BaseContentStream(out.toByteArray(), null, new MimeType("image", "png"));
+      RenditionContentStream renditionStream =
+         new RenditionContentStream(out.toByteArray(), null, new MimeType("image", "png"), getKind(), height, width);
 
       return renditionStream;
    }

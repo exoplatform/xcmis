@@ -24,88 +24,73 @@ import org.xcmis.spi.utils.MimeType;
 import java.io.InputStream;
 
 /**
- * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id: RenditionContentStream.java 840 2010-04-21 07:45:33Z andrew00x
- *          $
- * @deprecated
+ * Rendition {@link ContentStream}.
+ *
+ * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
+ * @version $Id$
  */
-public class RenditionContentStream extends BaseContentStream
+public final class RenditionContentStream extends BaseContentStream
 {
 
-   /** Rendition's kind. */
    private final String kind;
 
-   /** Height of thumbnail rendition. */
-   private int height = -1;
+   private final int height;
 
-   /** Width of thumbnail rendition. */
-   private int width = -1;
+   private final int width;
 
-   /**
-    * @param bytes source bytes of content
-    * @param fileName name of content file
-    * @param mediaType media type of content
-    * @param kind rendition's kind
-    */
+   public RenditionContentStream(byte[] bytes, String fileName, MimeType mediaType, String kind, int height, int width)
+   {
+      super(bytes, fileName, mediaType);
+      this.kind = kind;
+      this.height = height;
+      this.width = width;
+   }
+
+   public RenditionContentStream(InputStream in, long length, String fileName, MimeType mediaType, String kind,
+      int height, int width)
+   {
+      super(in, length, fileName, mediaType);
+      this.kind = kind;
+      this.height = height;
+      this.width = width;
+   }
+
+   public RenditionContentStream(InputStream in, String fileName, MimeType mediaType, String kind, int height, int width)
+   {
+      super(in, fileName, mediaType);
+      this.kind = kind;
+      this.height = height;
+      this.width = width;
+   }
+
    public RenditionContentStream(byte[] bytes, String fileName, MimeType mediaType, String kind)
    {
       super(bytes, fileName, mediaType);
       this.kind = kind;
+      this.width = -1;
+      this.height = -1;
    }
 
-   /**
-    * @param in source stream
-    * @param length content length. Must be -1 if content length is unknown.
-    * @param fileName name of content file
-    * @param mediaType media type of content
-    * @param kind rendition's kind
-    */
    public RenditionContentStream(InputStream in, long length, String fileName, MimeType mediaType, String kind)
    {
       super(in, length, fileName, mediaType);
       this.kind = kind;
+      this.width = -1;
+      this.height = -1;
    }
 
-   /**
-    * @param in source stream
-    * @param fileName name of content file
-    * @param mediaType media type of content
-    * @param kind rendition's kind
-    */
    public RenditionContentStream(InputStream in, String fileName, MimeType mediaType, String kind)
    {
       super(in, fileName, mediaType);
       this.kind = kind;
+      this.width = -1;
+      this.height = -1;
    }
 
    /**
-    * Get rendition height. It should provider height of thumbnail if rendition
-    * type is 'cmis:thumbnail'.
-    *
-    * @return rendition height or -1 if not able to determine height or
-    *         rendition kind is not 'cmis:thumbnail
-    */
-   public int getHeight()
-   {
-      return height;
-   }
-
-   /**
-    * Get rendition kind. At the moment just one expected kind 'cmis:thumbnail'.
-    *
-    * @return rendition kind
-    */
-   public String getKind()
-   {
-      return kind;
-   }
-
-   /**
-    * Get rendition width. It should provider width of thumbnail if rendition
-    * type is 'cmis:thumbnail'.
-    *
-    * @return rendition width or -1 if not able to determine width or rendition
-    *         kind is not 'cmis:thumbnail
+    * @return rendition width if rendition kind is 'cmis:thumbnail'. If
+    *         rendition kind is different or width can't be determined then -1
+    *         will be returned
     */
    public int getWidth()
    {
@@ -113,23 +98,21 @@ public class RenditionContentStream extends BaseContentStream
    }
 
    /**
-    * Set height or rendition.
-    *
-    * @param height rendition height
+    * @return rendition height if rendition kind is 'cmis:thumbnail'. If
+    *         rendition kind is different or height can't be determined then -1
+    *         will be returned
     */
-   public void setHeight(int height)
+   public int getHeight()
    {
-      this.height = height;
+      return height;
    }
 
    /**
-    * Set width or rendition.
-    *
-    * @param width rendition width
+    * @return rendition kind
     */
-   public void setWidth(int width)
+   public String getKind()
    {
-      this.width = width;
+      return kind;
    }
 
 }
