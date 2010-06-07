@@ -20,7 +20,6 @@
 package org.xcmis.client.gwt.service.discovery.event;
 
 import org.xcmis.client.gwt.model.restatom.EntryCollection;
-import org.xcmis.client.gwt.rest.ServerExceptionEvent;
 
 import com.google.gwt.event.shared.GwtEvent;
 
@@ -32,7 +31,7 @@ import com.google.gwt.event.shared.GwtEvent;
  * @author <a href="mailto:zhulevaanna@gmail.com">Anna Zhuleva</a>
  * @version $Id:
  */
-public class QueryResultReceivedEvent extends ServerExceptionEvent<QueryResultReceivedHandler>
+public class QueryResultReceivedEvent extends GwtEvent<QueryResultReceivedHandler>
 {
    /**
     * Type.
@@ -40,8 +39,6 @@ public class QueryResultReceivedEvent extends ServerExceptionEvent<QueryResultRe
    public static final GwtEvent.Type<QueryResultReceivedHandler> TYPE = 
       new GwtEvent.Type<QueryResultReceivedHandler>();
    
-   private Throwable exception;
-
    /**
     * Results of the query.
     */
@@ -77,24 +74,7 @@ public class QueryResultReceivedEvent extends ServerExceptionEvent<QueryResultRe
    {
       return TYPE;
    }
-
-   /**
-    * @see org.xcmis.client.gwt.rest.ServerExceptionEvent#setException(java.lang.Throwable)
-    */
-   @Override
-   public void setException(Throwable exception)
-   {
-      this.exception = exception;
-   }
-
-   /**
-    * @return the exception
-    */
-   public Throwable getException()
-   {
-      return exception;
-   }
-
+   
    /**
     * @return the queryResults
     */

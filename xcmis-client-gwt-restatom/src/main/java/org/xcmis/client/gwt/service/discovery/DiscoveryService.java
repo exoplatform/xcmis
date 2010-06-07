@@ -25,6 +25,7 @@ import org.xcmis.client.gwt.model.actions.Query;
 import org.xcmis.client.gwt.model.restatom.EntryCollection;
 import org.xcmis.client.gwt.rest.AsyncRequest;
 import org.xcmis.client.gwt.rest.AsyncRequestCallback;
+import org.xcmis.client.gwt.rest.ExceptionThrownEvent;
 import org.xcmis.client.gwt.service.discovery.event.QueryResultReceivedEvent;
 import org.xcmis.client.gwt.unmarshallers.EntryCollectionUnmarshaller;
 
@@ -66,6 +67,7 @@ public class DiscoveryService
    {
       EntryCollection entryCollection = new EntryCollection();
       QueryResultReceivedEvent event = new QueryResultReceivedEvent(entryCollection);
+      ExceptionThrownEvent errorEvent = new ExceptionThrownEvent("Query was performed with errors.");
       EntryCollectionUnmarshaller unmarshaller = new EntryCollectionUnmarshaller(entryCollection);
 
       QueryMarshaller marshaller = new QueryMarshaller(query);
@@ -85,7 +87,7 @@ public class DiscoveryService
          (query.getSkipCount() == null || query.getSkipCount() < 0) ? "" : CmisArguments.SKIP_COUNT + "="
             + query.getSkipCount() + "&";
 
-      AsyncRequestCallback callback = new AsyncRequestCallback(eventBus, unmarshaller, event, event);
+      AsyncRequestCallback callback = new AsyncRequestCallback(eventBus, unmarshaller, event, errorEvent);
       AsyncRequest.build(RequestBuilder.POST, url + "?" + params).data(marshaller).send(callback);
    }
 
