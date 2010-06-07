@@ -447,6 +447,7 @@ public class StorageImpl implements Storage
 
    protected final Session session;
 
+   /** The storage configuration. */
    private final StorageConfiguration configuration;
 
    /** The rendition manager. */

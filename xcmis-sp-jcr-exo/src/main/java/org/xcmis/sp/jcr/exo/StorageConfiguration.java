@@ -138,7 +138,7 @@ public class StorageConfiguration
    /**
     * Set additional repository's properties.
     *
-    * @param properties properties
+    * @param properties properties map
     */
    public void setProperties(Map<String, Object> properties)
    {
