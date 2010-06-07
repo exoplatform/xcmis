@@ -1431,7 +1431,7 @@ public class StorageImpl implements Storage
          {
             if (renditionManager != null)
             {
-               renditionManager.getRenditions(object);
+               return  renditionManager.getRenditions(object);
             }
          }
       }
