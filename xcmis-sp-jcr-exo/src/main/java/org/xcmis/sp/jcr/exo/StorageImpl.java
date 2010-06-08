@@ -441,7 +441,7 @@ public class StorageImpl implements Storage
 
    public static final Pattern XCMIS_PROPERTY_TYPE_PATTERN = Pattern.compile(".*" + StorageImpl.XCMIS_PROPERTY_TYPE);
 
-   static String latestLabel = "latest";
+   static String LATEST_LABEL = "latest";
 
    static String PWC_LABEL = "pwc";
 
@@ -752,7 +752,7 @@ public class StorageImpl implements Storage
          copyNodeAdapter.setValue(CmisConstants.IS_MAJOR_VERSION, versioningState == VersioningState.MAJOR);
 
          // TODO : support for checked-out initial state
-         copyNodeAdapter.setValue(CmisConstants.VERSION_LABEL, latestLabel);
+         copyNodeAdapter.setValue(CmisConstants.VERSION_LABEL, LATEST_LABEL);
 
          for (Property<?> property : properties.values())
          {
@@ -863,7 +863,7 @@ public class StorageImpl implements Storage
          documentNodeAdapter.setValue(CmisConstants.IS_MAJOR_VERSION, versioningState == VersioningState.MAJOR);
 
          // TODO : support for checked-out initial state
-         documentNode.setProperty(CmisConstants.VERSION_LABEL, latestLabel);
+         documentNodeAdapter.setValue(CmisConstants.VERSION_LABEL, LATEST_LABEL);
 
          for (Property<?> property : properties.values())
          {

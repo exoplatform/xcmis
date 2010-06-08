@@ -256,11 +256,13 @@ public interface ObjectData
     *         properties throws conflict
     * @throws VersioningException if object is not current version and storage
     *         do not support update other then latest version
+    * @throws UpdateConflictException if object that is no longer current (as
+    *         determined by the storage)
     * @throws StorageException if object's properties can not be updated (save
     *         changes) cause to storage internal problem
     */
    void setProperties(Map<String, Property<?>> properties) throws NameConstraintViolationException,
-      VersioningException, StorageException;
+      UpdateConflictException, VersioningException, StorageException;
 
    /**
     * Set or update property. Changes will be updated immediately. Empty list
@@ -273,9 +275,11 @@ public interface ObjectData
     *         properties throws conflict
     * @throws VersioningException if object is not current version and storage
     *         do not support update other then latest version
+    * @throws UpdateConflictException if object that is no longer current (as
+    *         determined by the storage)
     * @throws StorageException if object's properties can not be updated (save
     *         changes) cause to storage internal problem
     */
-   void setProperty(Property<?> property) throws NameConstraintViolationException, VersioningException,
+   void setProperty(Property<?> property) throws NameConstraintViolationException, UpdateConflictException, VersioningException,
       StorageException;
 }

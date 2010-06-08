@@ -19,85 +19,54 @@
 
 package org.xcmis.sp.inmemory;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.net.URI;
-import java.util.Calendar;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-abstract class Value
+public class ByteArrayValue extends Value
 {
 
-   public Boolean[] getBooleans()
+   private final byte[] values;
+
+   private static final byte[] EMPTY = new byte[0];
+
+   public ByteArrayValue(byte[] a)
    {
-      return null;
+      this.values = new byte[a.length];
+      System.arraycopy(a, 0, this.values, 0, a.length);
    }
 
-   public Calendar[] getDates()
-   {
-      return null;
-   }
-
-   public BigDecimal[] getDecimals()
-   {
-      return null;
-   }
-
-   public BigInteger[] getIntegers()
-   {
-      return null;
-   }
-
-   public String[] getStrings()
-   {
-      return null;
-   }
-
-   public URI[] getURI()
-   {
-      return null;
-   }
-
+   @Override
    public byte[] getBytes()
    {
-      return null;
+      return values;
    }
 
-   public boolean isBoolean()
-   {
-      return false;
-   }
-
-   public boolean isDate()
-   {
-      return false;
-   }
-
-   public boolean isDecimal()
-   {
-      return false;
-   }
-
-   public boolean isInteger()
-   {
-      return false;
-   }
-
-   public boolean isString()
-   {
-      return false;
-   }
-
-   public boolean isURI()
-   {
-      return false;
-   }
-
+   @Override
    public boolean isContent()
    {
-      return false;
+      return true;
    }
+
+   public static ByteArrayValue fromStream(InputStream stream) throws IOException
+   {
+      if (stream == null)
+      {
+         return new ByteArrayValue(new byte[0]);
+      }
+      ByteArrayOutputStream bout = new ByteArrayOutputStream();
+      byte[] buf = new byte[1024];
+      int r = -1;
+      while ((r = stream.read(buf)) != -1)
+      {
+         bout.write(buf, 0, r);
+      }
+      byte[] bytes = bout.toByteArray();
+      return new ByteArrayValue(bytes);
+   }
+
 }

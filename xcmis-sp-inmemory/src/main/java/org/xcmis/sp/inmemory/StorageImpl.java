@@ -85,6 +85,7 @@ import org.xcmis.spi.model.RepositoryInfo;
 import org.xcmis.spi.model.SupportedPermissions;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.UnfileObject;
+import org.xcmis.spi.model.Updatability;
 import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.model.Permission.BasicPermissions;
 import org.xcmis.spi.query.Query;
@@ -92,8 +93,11 @@ import org.xcmis.spi.query.Result;
 import org.xcmis.spi.query.Score;
 import org.xcmis.spi.utils.CmisDocumentReaderService;
 import org.xcmis.spi.utils.CmisUtils;
+import org.xcmis.spi.utils.MimeType;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -110,6 +114,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
@@ -126,9 +131,11 @@ public class StorageImpl implements Storage
       return UUID.randomUUID().toString();
    }
 
-   final Map<String, Map<String, Value>> properties;
+   //final Map<String, Map<String, Value>> properties;
 
-   final Map<String, byte[]> contents;
+   //final Map<String, byte[]> contents;
+
+   final Map<String, Entry> entries;
 
    final Map<String, Set<String>> children;
 
@@ -136,9 +143,9 @@ public class StorageImpl implements Storage
 
    final Set<String> unfiled;
 
-   final Map<String, Set<String>> policies;
+   //final Map<String, Set<String>> policies;
 
-   final Map<String, Map<String, Set<String>>> permissions;
+   //final Map<String, Map<String, Set<String>>> permissions;
 
    final Map<String, Set<String>> relationships;
 
@@ -163,7 +170,7 @@ public class StorageImpl implements Storage
    final QueryParser cmisQueryParser;
 
    /** The rendition manager. */
-   private RenditionManager renditionManager;
+   protected RenditionManager renditionManager;
 
    private final StorageConfiguration configuration;
 
@@ -200,7 +207,9 @@ public class StorageImpl implements Storage
             ? StorageConfiguration.DEFAULT_MAX_STORAGE_NUMBER_ITEMS : StorageConfiguration.parseNumber(
                (String)configuration.getProperties().get(StorageConfiguration.MAX_ITEMS_NUMBER)).intValue();
 
-      this.properties = new ConcurrentHashMap<String, Map<String, Value>>();
+      this.entries = new ConcurrentHashMap<String, Entry>();
+
+      //this.properties = new ConcurrentHashMap<String, Map<String, Value>>();
       this.children = new ConcurrentHashMap<String, Set<String>>();
       this.parents = new ConcurrentHashMap<String, Set<String>>();
 
@@ -209,19 +218,21 @@ public class StorageImpl implements Storage
 
       this.unfiled = new CopyOnWriteArraySet<String>();
 
-      this.contents = new ConcurrentHashMap<String, byte[]>();
+      //this.contents = new ConcurrentHashMap<String, byte[]>();
 
       this.relationships = new ConcurrentHashMap<String, Set<String>>();
 
-      this.policies = new ConcurrentHashMap<String, Set<String>>();
+      //this.policies = new ConcurrentHashMap<String, Set<String>>();
 
-      this.permissions = new ConcurrentHashMap<String, Map<String, Set<String>>>();
+      //this.permissions = new ConcurrentHashMap<String, Map<String, Set<String>>>();
 
       this.types = new ConcurrentHashMap<String, TypeDefinition>();
 
       PermissionMapping permissionMapping = new PermissionMapping();
 
       permissionMapping.put(PermissionMapping.CAN_GET_DESCENDENTS_FOLDER, //
+         Arrays.asList(BasicPermissions.CMIS_READ.value()));
+      permissionMapping.put(PermissionMapping.CAN_GET_FOLDER_TREE_FOLDER, //
          Arrays.asList(BasicPermissions.CMIS_READ.value()));
       permissionMapping.put(PermissionMapping.CAN_GET_CHILDREN_FOLDER, //
          Arrays.asList(BasicPermissions.CMIS_READ.value()));
@@ -334,26 +345,17 @@ public class StorageImpl implements Storage
       typeChildren.put("cmis:relationship", new HashSet<String>());
 
       Map<String, Value> root = new ConcurrentHashMap<String, Value>();
-      root.put(CmisConstants.NAME, //
-         new StringValue(""));
-      root.put(CmisConstants.OBJECT_ID, //
-         new StringValue(ROOT_FOLDER_ID));
-      root.put(CmisConstants.OBJECT_TYPE_ID, //
-         new StringValue("cmis:folder"));
-      root.put(CmisConstants.BASE_TYPE_ID, //
-         new StringValue(BaseType.FOLDER.value()));
-      root.put(CmisConstants.CREATION_DATE, //
-         new DateValue(Calendar.getInstance()));
-      root.put(CmisConstants.CREATED_BY, //
-         new StringValue("system"));
-      root.put(CmisConstants.LAST_MODIFICATION_DATE, //
-         new DateValue(Calendar.getInstance()));
-      root.put(CmisConstants.LAST_MODIFIED_BY, //
-         new StringValue("system"));
+      root.put(CmisConstants.NAME, new StringValue(""));
+      root.put(CmisConstants.OBJECT_ID, new StringValue(ROOT_FOLDER_ID));
+      root.put(CmisConstants.OBJECT_TYPE_ID, new StringValue("cmis:folder"));
+      root.put(CmisConstants.BASE_TYPE_ID, new StringValue(BaseType.FOLDER.value()));
+      root.put(CmisConstants.CREATION_DATE, new DateValue(Calendar.getInstance()));
+      root.put(CmisConstants.CREATED_BY, new StringValue("system"));
+      root.put(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));
+      root.put(CmisConstants.LAST_MODIFIED_BY, new StringValue("system"));
 
-      properties.put(ROOT_FOLDER_ID, root);
-      policies.put(ROOT_FOLDER_ID, new HashSet<String>());
-      permissions.put(ROOT_FOLDER_ID, new HashMap<String, Set<String>>());
+      Entry rootEntry = new Entry(root, null, null);
+      entries.put(rootEntry.getId(), rootEntry);
       parents.put(ROOT_FOLDER_ID, EMPTY_PARENTS);
       children.put(ROOT_FOLDER_ID, new CopyOnWriteArraySet<String>());
 
@@ -378,231 +380,465 @@ public class StorageImpl implements Storage
     * {@inheritDoc}
     */
    public DocumentData copyDocument(DocumentData source, FolderData parent, Map<String, Property<?>> properties,
-      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<ObjectData> policies,
-      VersioningState versioningState) throws ConstraintException, StorageException
+      List<AccessControlEntry> acl, Collection<PolicyData> policies, VersioningState versioningState)
+      throws ConstraintException, NameConstraintViolationException, StorageException
    {
+      String name = null;
+      Property<?> nameProperty = properties.get(CmisConstants.NAME);
+      if (nameProperty != null && nameProperty.getValues().size() > 0)
+      {
+         name = (String)nameProperty.getValues().get(0);
+      }
+      if (name == null || name.length() == 0)
+      {
+         name = source.getName();
+      }
+
       if (parent != null)
       {
-         if (!parent.isAllowedChildType(source.getTypeId()))
+         for (ItemsIterator<ObjectData> iterator = parent.getChildren(null); iterator.hasNext();)
          {
-            throw new ConstraintException("Type " + source.getTypeId()
-               + " is not in list of allowed child type for folder " + parent.getObjectId());
+            if (name.equals(iterator.next().getName()))
+            {
+               throw new NameConstraintViolationException("Object with name " + name
+                  + " already exists in parent folder.");
+            }
          }
       }
 
-      if (source.getBaseType() != BaseType.DOCUMENT)
+      Entry docEntry = new Entry();
+
+      TypeDefinition sourceType = source.getTypeDefinition();
+      TypeDefinition typeDefinition =
+         new TypeDefinition(sourceType.getId(), sourceType.getBaseId(), sourceType.getQueryName(), sourceType
+            .getLocalName(), sourceType.getLocalNamespace(), sourceType.getParentId(), sourceType.getDisplayName(),
+            sourceType.getDescription(), sourceType.isCreatable(), sourceType.isFileable(), sourceType.isQueryable(),
+            sourceType.isFulltextIndexed(), sourceType.isIncludedInSupertypeQuery(), sourceType.isControllablePolicy(),
+            sourceType.isControllableACL(), sourceType.isVersionable(), sourceType.getAllowedSourceTypes(), sourceType
+               .getAllowedTargetTypes(), sourceType.getContentStreamAllowed(), PropertyDefinitions.getAll(sourceType
+               .getId()));
+
+      docEntry.setValue(CmisConstants.OBJECT_TYPE_ID, new StringValue(typeDefinition.getId()));
+      docEntry.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(typeDefinition.getBaseId().value()));
+      String docId = StorageImpl.generateId();
+      String verSerId = StorageImpl.generateId();
+      docEntry.setValue(CmisConstants.OBJECT_ID, new StringValue(docId));
+      docEntry.setValue(CmisConstants.VERSION_SERIES_ID, new StringValue(verSerId));
+      docEntry.setValue(CmisConstants.CREATED_BY, new StringValue());
+      docEntry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue());
+      Calendar cal = Calendar.getInstance();
+      docEntry.setValue(CmisConstants.CREATION_DATE, new DateValue(cal));
+      docEntry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(cal));
+      docEntry.setValue(CmisConstants.IS_LATEST_VERSION, new BooleanValue(true));
+      docEntry.setValue(CmisConstants.IS_MAJOR_VERSION, new BooleanValue(versioningState == VersioningState.MAJOR));
+
+      // TODO : support for checked-out initial state
+      docEntry.setValue(CmisConstants.VERSION_LABEL, new StringValue(DocumentDataImpl.LATEST_LABEL));
+      docEntry.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(false));
+      docEntry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue());
+      docEntry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, new StringValue());
+
+      try
       {
-         throw new ConstraintException("Source object has type whose base type is not Document.");
+         ContentStream content = source.getContentStream();
+         if (content != null)
+         {
+            ByteArrayValue cv = ByteArrayValue.fromStream(content.getStream());
+            MimeType mimeType = content.getMediaType();
+            docEntry.setValue(CmisConstants.CONTENT_STREAM_MIME_TYPE, new StringValue(mimeType.getBaseType()));
+            String charset = mimeType.getParameter(CmisConstants.CHARSET);
+            if (charset != null)
+            {
+               docEntry.setValue(CmisConstants.CHARSET, new StringValue(charset));
+            }
+            docEntry.setValue(CmisConstants.CONTENT_STREAM_LENGTH, new IntegerValue(BigInteger
+               .valueOf(cv.getBytes().length)));
+         }
+      }
+      catch (IOException ioe)
+      {
+         throw new CmisRuntimeException("Unable copy content for new document. " + ioe.getMessage(), ioe);
       }
 
-      //return new DocumentCopy(source, parent, getTypeDefinition(source.getTypeId(), true), versioningState, this);
-      DocumentCopy obj =
-         new DocumentCopy(source, parent, getTypeDefinition(source.getTypeId(), true), versioningState, this);
-      if (properties != null)
+      for (Property<?> property : properties.values())
       {
-         for (Property<?> property : properties.values())
+         PropertyDefinition<?> definition = typeDefinition.getPropertyDefinition(property.getId());
+         Updatability updatability = definition.getUpdatability();
+         if (updatability == Updatability.READWRITE || updatability == Updatability.ONCREATE)
          {
-            ((BaseObjectData)obj).setPropertyInternal(property);
+            docEntry.setProperty(property);
          }
       }
 
-      if (policies != null)
+      if (policies != null && policies.size() > 0)
       {
-         for (ObjectData policy : policies)
+         for (PolicyData policy : policies)
          {
-            ((BaseObjectData)obj).applyPolicyInternal((PolicyData)policy);
+            docEntry.addPolicy(policy);
          }
       }
 
-      List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(obj.getACL(false), addACL, removeACL);
-      obj.setACLInternal(mergedACL);
+      if (acl != null && acl.size() > 0)
+      {
+         CmisUtils.addAclToPermissionMap(docEntry.getPermissions(), acl);
+      }
 
-      obj.save(true);
-      return obj;
+      if (parent != null)
+      {
+         children.get(parent.getObjectId()).add(docId);
+         Set<String> set = new CopyOnWriteArraySet<String>();
+         set.add(parent.getObjectId());
+         parents.put(docId, set);
+      }
+      else
+      {
+         unfiled.add(docId);
+         parents.put(docId, new CopyOnWriteArraySet<String>());
+      }
+      List<String> set = new CopyOnWriteArrayList<String>();
+      set.add(docId);
+      versions.put(verSerId, set);
+      entries.put(docId, docEntry);
+
+      // TODO index!!!!
+
+      return new DocumentDataImpl(docEntry, typeDefinition, this);
    }
 
    /**
     * {@inheritDoc}
     */
    public DocumentData createDocument(FolderData parent, TypeDefinition typeDefinition,
-      Map<String, Property<?>> properties, ContentStream content, List<AccessControlEntry> addACL,
-      List<AccessControlEntry> removeACL, Collection<ObjectData> policies, VersioningState versioningState)
-      throws ConstraintException
+      Map<String, Property<?>> properties, ContentStream content, List<AccessControlEntry> acl,
+      Collection<PolicyData> policies, VersioningState versioningState) throws ConstraintException,
+      NameConstraintViolationException, IOException, StorageException
    {
+      String name = null;
+      Property<?> nameProperty = properties.get(CmisConstants.NAME);
+      if (nameProperty != null && nameProperty.getValues().size() > 0)
+      {
+         name = (String)nameProperty.getValues().get(0);
+      }
+      if (name == null && content != null)
+      {
+         name = content.getFileName();
+      }
+      if (name == null || name.length() == 0)
+      {
+         throw new NameConstraintViolationException("Name for new document must be provided.");
+      }
+
       if (parent != null)
       {
-         if (!parent.isAllowedChildType(typeDefinition.getId()))
+         for (ItemsIterator<ObjectData> iterator = parent.getChildren(null); iterator.hasNext();)
          {
-            throw new ConstraintException("Type " + typeDefinition
-               + " is not in list of allowed child type for folder " + parent.getObjectId());
+            if (name.equals(iterator.next().getName()))
+            {
+               throw new NameConstraintViolationException("Object with name " + name
+                  + " already exists in parent folder.");
+            }
          }
       }
 
-      if (typeDefinition.getBaseId() != BaseType.DOCUMENT)
-      {
-         throw new ConstraintException("Type " + typeDefinition + " is ID of type whose base type is not Document.");
-      }
+      Entry docEntry = new Entry();
 
-      //return new DocumentDataImpl(parent, typeDefinition, versioningState, this);
-      DocumentDataImpl obj = new DocumentDataImpl(parent, typeDefinition, versioningState, this);
+      docEntry.setValue(CmisConstants.OBJECT_TYPE_ID, new StringValue(typeDefinition.getId()));
+      docEntry.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(typeDefinition.getBaseId().value()));
+      String docId = StorageImpl.generateId();
+      String verSerId = StorageImpl.generateId();
+      docEntry.setValue(CmisConstants.OBJECT_ID, new StringValue(docId));
+      docEntry.setValue(CmisConstants.VERSION_SERIES_ID, new StringValue(verSerId));
+      docEntry.setValue(CmisConstants.CREATED_BY, new StringValue());
+      docEntry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue());
+      Calendar cal = Calendar.getInstance();
+      docEntry.setValue(CmisConstants.CREATION_DATE, new DateValue(cal));
+      docEntry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(cal));
+      docEntry.setValue(CmisConstants.IS_LATEST_VERSION, new BooleanValue(true));
+      docEntry.setValue(CmisConstants.IS_MAJOR_VERSION, new BooleanValue(versioningState == VersioningState.MAJOR));
+
+      // TODO : support for checked-out initial state
+      docEntry.setValue(CmisConstants.VERSION_LABEL, new StringValue(DocumentDataImpl.LATEST_LABEL));
+      docEntry.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(false));
+      docEntry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue());
+      docEntry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, new StringValue());
+
       if (content != null)
       {
-         obj.setContentStreamInternal(content);
+         ByteArrayValue cv = ByteArrayValue.fromStream(content.getStream());
+         docEntry.setContent(cv);
+         MimeType mimeType = content.getMediaType();
+         docEntry.setValue(CmisConstants.CONTENT_STREAM_MIME_TYPE, new StringValue(mimeType.getBaseType()));
+         String charset = mimeType.getParameter(CmisConstants.CHARSET);
+         if (charset != null)
+         {
+            docEntry.setValue(CmisConstants.CHARSET, new StringValue(charset));
+         }
+         docEntry.setValue(CmisConstants.CONTENT_STREAM_LENGTH, new IntegerValue(BigInteger
+            .valueOf(cv.getBytes().length)));
       }
 
-      if (properties != null)
+      for (Property<?> property : properties.values())
       {
-         for (Property<?> property : properties.values())
+         PropertyDefinition<?> definition = typeDefinition.getPropertyDefinition(property.getId());
+         Updatability updatability = definition.getUpdatability();
+         if (updatability == Updatability.READWRITE || updatability == Updatability.ONCREATE)
          {
-            ((BaseObjectData)obj).setPropertyInternal(property);
+            docEntry.setProperty(property);
          }
       }
 
-      if (policies != null)
+      if (policies != null && policies.size() > 0)
       {
-         for (ObjectData policy : policies)
+         for (PolicyData policy : policies)
          {
-            ((BaseObjectData)obj).applyPolicyInternal((PolicyData)policy);
+            docEntry.addPolicy(policy);
          }
       }
 
-      List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(obj.getACL(false), addACL, removeACL);
-      obj.setACLInternal(mergedACL);
+      if (acl != null && acl.size() > 0)
+      {
+         CmisUtils.addAclToPermissionMap(docEntry.getPermissions(), acl);
+      }
 
-      obj.save(true);
-      return obj;
+      if (parent != null)
+      {
+         children.get(parent.getObjectId()).add(docId);
+         Set<String> set = new CopyOnWriteArraySet<String>();
+         set.add(parent.getObjectId());
+         parents.put(docId, set);
+      }
+      else
+      {
+         unfiled.add(docId);
+         parents.put(docId, new CopyOnWriteArraySet<String>());
+      }
+      List<String> set = new CopyOnWriteArrayList<String>();
+      set.add(docId);
+      versions.put(verSerId, set);
+      entries.put(docId, docEntry);
+
+      DocumentDataImpl document = new DocumentDataImpl(docEntry, typeDefinition, this);
+      if (indexListener != null)
+      {
+         indexListener.created(document);
+      }
+
+      // TODO index!!!!
+
+      return document;
    }
 
    /**
     * {@inheritDoc}
     */
    public FolderData createFolder(FolderData parent, TypeDefinition typeDefinition,
-      Map<String, Property<?>> properties, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
-      Collection<ObjectData> policies) throws ConstraintException
+      Map<String, Property<?>> properties, List<AccessControlEntry> acl, Collection<PolicyData> policies)
+      throws ConstraintException, NameConstraintViolationException, StorageException
    {
       if (parent == null)
       {
          throw new ConstraintException("Parent folder must be provided.");
       }
 
-      if (!parent.isAllowedChildType(typeDefinition.getId()))
+      String name = null;
+      Property<?> nameProperty = properties.get(CmisConstants.NAME);
+      if (nameProperty != null && nameProperty.getValues().size() > 0)
       {
-         throw new ConstraintException("Type " + typeDefinition + " is not in list of allowed child type for folder "
-            + parent.getObjectId());
+         name = (String)nameProperty.getValues().get(0);
+      }
+      if (name == null || name.length() == 0)
+      {
+         throw new NameConstraintViolationException("Name for new folder must be provided.");
       }
 
-      if (typeDefinition.getBaseId() != BaseType.FOLDER)
+      for (ItemsIterator<ObjectData> iterator = parent.getChildren(null); iterator.hasNext();)
       {
-         throw new ConstraintException("Type " + typeDefinition + " is ID of type whose base type is not Folder.");
-      }
-
-      //return new FolderDataImpl(parent, typeDefinition, this);
-      FolderDataImpl obj = new FolderDataImpl(parent, typeDefinition, this);
-
-      if (properties != null)
-      {
-         for (Property<?> property : properties.values())
+         if (name.equals(iterator.next().getName()))
          {
-            ((BaseObjectData)obj).setPropertyInternal(property);
+            throw new NameConstraintViolationException("Object with name " + name + " already exists in parent folder.");
          }
       }
 
-      if (policies != null)
+      Entry folderEntry = new Entry();
+
+      folderEntry.setValue(CmisConstants.OBJECT_TYPE_ID, new StringValue(typeDefinition.getId()));
+      folderEntry.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(typeDefinition.getBaseId().value()));
+      String folderId = StorageImpl.generateId();
+      folderEntry.setValue(CmisConstants.OBJECT_ID, new StringValue(folderId));
+      folderEntry.setValue(CmisConstants.CREATED_BY, new StringValue());
+      folderEntry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue());
+      Calendar cal = Calendar.getInstance();
+      folderEntry.setValue(CmisConstants.CREATION_DATE, new DateValue(cal));
+      folderEntry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(cal));
+
+      for (Property<?> property : properties.values())
       {
-         for (ObjectData policy : policies)
+         PropertyDefinition<?> definition = typeDefinition.getPropertyDefinition(property.getId());
+         Updatability updatability = definition.getUpdatability();
+         if (updatability == Updatability.READWRITE || updatability == Updatability.ONCREATE)
          {
-            ((BaseObjectData)obj).applyPolicyInternal((PolicyData)policy);
+            folderEntry.setProperty(property);
          }
       }
 
-      List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(obj.getACL(false), addACL, removeACL);
-      obj.setACLInternal(mergedACL);
+      if (policies != null && policies.size() > 0)
+      {
+         for (PolicyData policy : policies)
+         {
+            folderEntry.addPolicy(policy);
+         }
+      }
 
-      obj.save(true);
-      return obj;
+      if (acl != null && acl.size() > 0)
+      {
+         CmisUtils.addAclToPermissionMap(folderEntry.getPermissions(), acl);
+      }
+
+      children.get(parent.getObjectId()).add(folderId);
+      Set<String> set = new CopyOnWriteArraySet<String>();
+      set.add(parent.getObjectId());
+      parents.put(folderId, set);
+      entries.put(folderId, folderEntry);
+      children.put(folderId, new CopyOnWriteArraySet<String>());
+
+      FolderDataImpl folder = new FolderDataImpl(folderEntry, typeDefinition, this);
+      if (indexListener != null)
+      {
+         indexListener.created(folder);
+      }
+      // TODO index!!!!
+
+      return folder;
    }
 
    /**
     * {@inheritDoc}
     */
-   public PolicyData createPolicy(FolderData parent, TypeDefinition typeDefinition,
-      Map<String, Property<?>> properties, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
-      Collection<ObjectData> policies) throws ConstraintException
+   public PolicyData createPolicy(FolderData _parent, TypeDefinition typeDefinition,
+      Map<String, Property<?>> properties, List<AccessControlEntry> acl, Collection<PolicyData> policies)
+      throws ConstraintException, NameConstraintViolationException, StorageException
    {
-      if (typeDefinition.getBaseId() != BaseType.POLICY)
+      String name = null;
+      Property<?> nameProperty = properties.get(CmisConstants.NAME);
+      if (nameProperty != null && nameProperty.getValues().size() > 0)
       {
-         throw new ConstraintException("Type " + typeDefinition + " is ID of type whose base type is not Policy.");
+         name = (String)nameProperty.getValues().get(0);
+      }
+      if (name == null || name.length() == 0)
+      {
+         throw new NameConstraintViolationException("Name for new policy must be provided.");
       }
 
-      //return new PolicyDataImpl(typeDefinition, this);
-      PolicyDataImpl obj = new PolicyDataImpl(typeDefinition, this);
+      Entry policyEntry = new Entry();
 
-      if (properties != null)
+      policyEntry.setValue(CmisConstants.OBJECT_TYPE_ID, new StringValue(typeDefinition.getId()));
+      policyEntry.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(typeDefinition.getBaseId().value()));
+      String policyId = StorageImpl.generateId();
+      policyEntry.setValue(CmisConstants.OBJECT_ID, new StringValue(policyId));
+      policyEntry.setValue(CmisConstants.CREATED_BY, new StringValue());
+      policyEntry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue());
+      Calendar cal = Calendar.getInstance();
+      policyEntry.setValue(CmisConstants.CREATION_DATE, new DateValue(cal));
+      policyEntry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(cal));
+
+      for (Property<?> property : properties.values())
       {
-         for (Property<?> property : properties.values())
+         PropertyDefinition<?> definition = typeDefinition.getPropertyDefinition(property.getId());
+         Updatability updatability = definition.getUpdatability();
+         if (updatability == Updatability.READWRITE || updatability == Updatability.ONCREATE)
          {
-            ((BaseObjectData)obj).setPropertyInternal(property);
+            policyEntry.setProperty(property);
          }
       }
 
-      if (policies != null)
+      if (policies != null && policies.size() > 0)
       {
-         for (ObjectData policy : policies)
+         for (PolicyData policy : policies)
          {
-            ((BaseObjectData)obj).applyPolicyInternal((PolicyData)policy);
+            policyEntry.addPolicy(policy);
          }
       }
 
-      obj.save(true);
+      if (acl != null && acl.size() > 0)
+      {
+         CmisUtils.addAclToPermissionMap(policyEntry.getPermissions(), acl);
+      }
 
-      List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(obj.getACL(false), addACL, removeACL);
-      obj.setACLInternal(mergedACL);
+      parents.put(policyId, EMPTY_PARENTS);
+      entries.put(policyId, policyEntry);
 
-      return obj;
+      // TODO index!!!!
+
+      return new PolicyDataImpl(policyEntry, typeDefinition, this);
    }
 
    /**
     * {@inheritDoc}
     */
    public RelationshipData createRelationship(ObjectData source, ObjectData target, TypeDefinition typeDefinition,
-      Map<String, Property<?>> properties, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
-      Collection<ObjectData> policies) throws ConstraintException
+      Map<String, Property<?>> properties, List<AccessControlEntry> acl, Collection<PolicyData> policies)
+      throws NameConstraintViolationException, StorageException
    {
-      if (typeDefinition.getBaseId() != BaseType.RELATIONSHIP)
+      String name = null;
+      Property<?> nameProperty = properties.get(CmisConstants.NAME);
+      if (nameProperty != null && nameProperty.getValues().size() > 0)
       {
-         throw new ConstraintException("Type " + typeDefinition + " is ID of type whose base type is not Relationship.");
+         name = (String)nameProperty.getValues().get(0);
+      }
+      if (name == null || name.length() == 0)
+      {
+         throw new NameConstraintViolationException("Name for new relationship must be provided.");
       }
 
-      //return new RelationshipDataImpl(getTypeDefinition(typeId, true), source, target, this);
-      RelationshipDataImpl obj = new RelationshipDataImpl(typeDefinition, source, target, this);
+      Entry relationshipEntry = new Entry();
 
-      if (properties != null)
+      relationshipEntry.setValue(CmisConstants.OBJECT_TYPE_ID, new StringValue(typeDefinition.getId()));
+      relationshipEntry.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(typeDefinition.getBaseId().value()));
+      String relationshipId = StorageImpl.generateId();
+      relationshipEntry.setValue(CmisConstants.OBJECT_ID, new StringValue(relationshipId));
+      relationshipEntry.setValue(CmisConstants.CREATED_BY, new StringValue());
+      relationshipEntry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue());
+      Calendar cal = Calendar.getInstance();
+      relationshipEntry.setValue(CmisConstants.CREATION_DATE, new DateValue(cal));
+      relationshipEntry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(cal));
+      relationshipEntry.setValue(CmisConstants.SOURCE_ID, new StringValue(source.getObjectId()));
+      relationshipEntry.setValue(CmisConstants.TARGET_ID, new StringValue(target.getObjectId()));
+
+      for (Property<?> property : properties.values())
       {
-         for (Property<?> property : properties.values())
+         PropertyDefinition<?> definition = typeDefinition.getPropertyDefinition(property.getId());
+         Updatability updatability = definition.getUpdatability();
+         if (updatability == Updatability.READWRITE || updatability == Updatability.ONCREATE)
          {
-            ((BaseObjectData)obj).setPropertyInternal(property);
+            relationshipEntry.setProperty(property);
          }
       }
 
-      if (policies != null)
+      if (policies != null && policies.size() > 0)
       {
-         for (ObjectData policy : policies)
+         for (PolicyData policy : policies)
          {
-            ((BaseObjectData)obj).applyPolicyInternal((PolicyData)policy);
+            relationshipEntry.addPolicy(policy);
          }
       }
 
-      List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(obj.getACL(false), addACL, removeACL);
-      obj.setACLInternal(mergedACL);
+      if (acl != null && acl.size() > 0)
+      {
+         CmisUtils.addAclToPermissionMap(relationshipEntry.getPermissions(), acl);
+      }
 
-      obj.save(true);
-      return obj;
+      parents.put(relationshipId, EMPTY_PARENTS);
+      entries.put(relationshipId, relationshipEntry);
+
+      // TODO index!!!!
+
+      return new RelationshipDataImpl(relationshipEntry, typeDefinition, this);
    }
 
    /**
     * {@inheritDoc}
     */
-   public void deleteObject(ObjectData object, boolean deleteAllVersions) throws ConstraintException,
+   public void deleteObject(ObjectData object, boolean deleteAllVersions) throws VersioningException,
       UpdateConflictException, StorageException
    {
       String objectId = object.getObjectId();
@@ -623,14 +859,13 @@ public class StorageImpl implements Storage
    public Collection<String> deleteTree(FolderData folder, boolean deleteAllVersions, UnfileObject unfileObject,
       boolean continueOnFailure) throws UpdateConflictException
    {
-      // TODO : unfile & continueOnFailure
+      // TODO : unfile
+      //      if (unfileObject != UnfileObject.DELETE)
+      //      {
+      //         throw new NotSupportedException("Parameter 'unfileObject' may not be other then 'DELETE'.");
+      //      }
 
-      if (ROOT_FOLDER_ID.equals(folder.getObjectId()))
-      {
-         throw new ConstraintException("Unable delete root folder.");
-      }
-
-      final Collection<String> failedToDelete = new ArrayList<String>();
+      Collection<String> failedToDelete = new ArrayList<String>();
 
       for (ItemsIterator<ObjectData> iterator = folder.getChildren(null); iterator.hasNext();)
       {
@@ -647,7 +882,25 @@ public class StorageImpl implements Storage
             }
             catch (StorageException e)
             {
-               failedToDelete.add(object.getObjectId());
+               if (continueOnFailure)
+               {
+                  failedToDelete.add(object.getObjectId());
+               }
+               else
+               {
+                  throw new CmisRuntimeException(e.getMessage(), e);
+               }
+            }
+            catch (VersioningException e)
+            {
+               if (continueOnFailure)
+               {
+                  failedToDelete.add(object.getObjectId());
+               }
+               else
+               {
+                  throw new CmisRuntimeException(e.getMessage(), e);
+               }
             }
          }
       }
@@ -658,7 +911,26 @@ public class StorageImpl implements Storage
       }
       catch (StorageException e)
       {
-         failedToDelete.add(folder.getObjectId());
+         if (continueOnFailure)
+         {
+            failedToDelete.add(folder.getObjectId());
+         }
+         else
+         {
+            throw new CmisRuntimeException(e.getMessage(), e);
+         }
+      }
+      catch (VersioningException e)
+      {
+         // should not happen for not versionable type
+         if (continueOnFailure)
+         {
+            failedToDelete.add(folder.getObjectId());
+         }
+         else
+         {
+            throw new CmisRuntimeException(e.getMessage(), e);
+         }
       }
 
       return failedToDelete;
@@ -698,13 +970,22 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public ItemsIterator<DocumentData> getCheckedOutDocuments(ObjectData folder, String orderBy)
+   public ItemsIterator<DocumentData> getCheckedOutDocuments(FolderData folder, String orderBy)
    {
       List<DocumentData> checkedOut = new ArrayList<DocumentData>();
 
       for (String pwcId : workingCopies.values())
       {
-         DocumentData pwc = (DocumentData)getObjectById(pwcId);
+         DocumentData pwc = null;
+         try
+         {
+            pwc = (DocumentData)getObjectById(pwcId);
+         }
+         catch (ObjectNotFoundException e)
+         {
+            LOG.warn("Object " + pwcId + " not found.");
+            continue;
+         }
          if (folder != null)
          {
             for (FolderData parent : pwc.getParents())
@@ -737,32 +1018,32 @@ public class StorageImpl implements Storage
     */
    public ObjectData getObjectById(String objectId) throws ObjectNotFoundException
    {
-      Map<String, Value> values = properties.get(objectId);
-      if (values == null)
+      Entry entry = entries.get(objectId);
+      if (entry == null)
       {
          throw new ObjectNotFoundException("Object '" + objectId + "' does not exist.");
       }
-      BaseType baseType = BaseType.fromValue(values.get(CmisConstants.BASE_TYPE_ID).getStrings()[0]);
-      String typeId = values.get(CmisConstants.OBJECT_TYPE_ID).getStrings()[0];
+      BaseType baseType = entry.getBaseTypeId();
+      String typeId = entry.getTypeId();
+      TypeDefinition typeDefinition = null;
+      try
+      {
+         typeDefinition = getTypeDefinition(typeId, true);
+      }
+      catch (TypeNotFoundException e)
+      {
+         throw new CmisRuntimeException(e.getMessage(), e);
+      }
       switch (baseType)
       {
          case DOCUMENT :
-            return new DocumentDataImpl(new Entry(new HashMap<String, Value>(values), new HashMap<String, Set<String>>(
-               permissions.get(objectId)), new HashSet<String>(policies.get(objectId))),
-               getTypeDefinition(typeId, true), this, renditionManager);
+            return new DocumentDataImpl(entry, typeDefinition, this);
          case FOLDER :
-            return new FolderDataImpl(new Entry(new HashMap<String, Value>(values), new HashMap<String, Set<String>>(
-               permissions.get(objectId)), new HashSet<String>(policies.get(objectId))),
-               getTypeDefinition(typeId, true), this);
+            return new FolderDataImpl(entry, typeDefinition, this);
          case POLICY :
-            return new PolicyDataImpl(new Entry(new HashMap<String, Value>(values), new HashMap<String, Set<String>>(
-               permissions.get(objectId)), new HashSet<String>(policies.get(objectId))),
-               getTypeDefinition(typeId, true), this);
+            return new PolicyDataImpl(entry, typeDefinition, this);
          case RELATIONSHIP :
-            return new RelationshipDataImpl(
-               new Entry(new HashMap<String, Value>(values),
-                  new HashMap<String, Set<String>>(permissions.get(objectId)), new HashSet<String>(policies
-                     .get(objectId))), getTypeDefinition(typeId, true), this);
+            return new RelationshipDataImpl(entry, typeDefinition, this);
       }
       // Must never happen.
       throw new CmisRuntimeException("Unknown base type. ");
@@ -838,9 +1119,8 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public ObjectData moveObject(ObjectData object, FolderData target, FolderData source) throws ConstraintException,
-      InvalidArgumentException, UpdateConflictException, VersioningException, NameConstraintViolationException,
-      StorageException
+   public ObjectData moveObject(ObjectData object, FolderData target, FolderData source)
+      throws UpdateConflictException, VersioningException, NameConstraintViolationException, StorageException
    {
       String objectid = object.getObjectId();
       String sourceId = source.getObjectId();
@@ -849,7 +1129,14 @@ public class StorageImpl implements Storage
       children.get(targetId).add(objectid);
       parents.get(object.getObjectId()).remove(sourceId);
       parents.get(object.getObjectId()).add(targetId);
-      return getObjectById(objectid);
+      try
+      {
+         return getObjectById(objectid);
+      }
+      catch (ObjectNotFoundException e)
+      {
+         throw new CmisRuntimeException("Unable get object after moving.");
+      }
    }
 
    /**
@@ -1020,7 +1307,7 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public void removeType(String typeId) throws TypeNotFoundException, StorageException, CmisRuntimeException
+   public void removeType(String typeId) throws TypeNotFoundException, StorageException, ConstraintException
    {
       TypeDefinition type = types.get(typeId);
       if (type == null)
@@ -1038,9 +1325,9 @@ public class StorageImpl implements Storage
          throw new ConstraintException("Unable remove type " + typeId + ". Type has descendant types.");
       }
 
-      for (Iterator<Map<String, Value>> iterator = properties.values().iterator(); iterator.hasNext();)
+      for (Iterator<Entry> iterator = entries.values().iterator(); iterator.hasNext();)
       {
-         if (typeId.equals(iterator.next().get(CmisConstants.OBJECT_TYPE_ID).getStrings()[0]))
+         if (typeId.equals(iterator.next().getTypeId()))
          {
             throw new ConstraintException("Unable remove type definition if at least one object of this type exists.");
          }
@@ -1051,32 +1338,44 @@ public class StorageImpl implements Storage
       PropertyDefinitions.removeAll(typeId);
    }
 
-   void validateMaxItemsNumber(ObjectData object)
+   protected String getCurrentUser()
    {
-      if (properties.size() > maxItemsNumber)
+      ConversationState state = ConversationState.getCurrent();
+      if (state != null)
       {
-         throw new CmisRuntimeException("Unable add new object in storage. Max number '" + maxItemsNumber
+         return state.getIdentity().getUserId();
+      }
+      return getRepositoryInfo().getPrincipalAnonymous();
+   }
+
+
+   void validateMaxItemsNumber(ObjectData object) throws StorageException
+   {
+      if (entries.size() > maxItemsNumber)
+      {
+         throw new StorageException("Unable add new object in storage. Max number '" + maxItemsNumber
             + "' of items is reached."
             + " Increase or set storage configuration property 'org.xcmis.inmemory.maxitems'.");
       }
    }
 
-   void validateMemSize(byte[] content)
+   void validateMemSize(byte[] content) throws StorageException
    {
       if (content == null || content.length == 0)
       {
          return;
       }
       long size = 0;
-      for (byte[] c : contents.values())
+      for (Entry c : entries.values())
       {
-         size += c.length;
+         ByteArrayValue _content = c.getContent();
+         if (_content != null)
+            size += _content.getBytes().length;
       }
       if ((size + content.length) > maxStorageMemSize)
       {
-         throw new CmisRuntimeException("Unable add new object in storage. Max allowed memory size '"
-            + maxStorageMemSize + "' bytes is reached."
-            + " Increase or set storage configuration property 'org.xcmis.inmemory.maxmem'.");
+         throw new StorageException("Unable add new object in storage. Max allowed memory size '" + maxStorageMemSize
+            + "' bytes is reached." + " Increase or set storage configuration property 'org.xcmis.inmemory.maxmem'.");
       }
    }
 
@@ -1181,7 +1480,15 @@ public class StorageImpl implements Storage
          ObjectData obj = itemCache.get(identifer);
          if (obj == null)
          {
-            obj = storage.getObjectById(identifer);
+            try
+            {
+               obj = storage.getObjectById(identifer);
+            }
+            catch (ObjectNotFoundException e)
+            {
+               // XXX : correct ?
+               return null;
+            }
             itemCache.put(identifer, obj);
          }
          if (obj.getBaseType() == BaseType.FOLDER)
@@ -1191,12 +1498,12 @@ public class StorageImpl implements Storage
                return obj.getName();
             }
          }
-         FolderData parent = obj.getParent();
-         if (parent == null)
+         Collection<FolderData> parents = obj.getParents();
+         if (parents.size() == 0)
          {
             return obj.getName();
          }
-         return parent.getPath() + "/" + obj.getName();
+         return parents.iterator().next().getPath() + "/" + obj.getName();
       }
    }
 
@@ -1354,71 +1661,71 @@ public class StorageImpl implements Storage
       }
    }
 
-   public static class LazyDocumentIterator implements ItemsIterator<ObjectData>
-   {
-      private final Storage storage;
-
-      private final Iterator<String> documentIds;
-
-      /**
-       * @param storage
-       * @param documentIds
-       */
-      public LazyDocumentIterator(Storage storage, Iterator<String> documentIds)
-      {
-         super();
-         this.storage = storage;
-         this.documentIds = documentIds;
-      }
-
-      /**
-       * @see java.util.Iterator#hasNext()
-       */
-      public boolean hasNext()
-      {
-         return documentIds.hasNext();
-      }
-
-      /**
-       * @see java.util.Iterator#next()
-       */
-      public DocumentData next()
-      {
-         return (DocumentData)storage.getObjectById(documentIds.next());
-      }
-
-      /**
-       * @see java.util.Iterator#remove()
-       */
-      public void remove()
-      {
-         throw new UnsupportedOperationException();
-      }
-
-      /**
-       * @see org.xcmis.spi.ItemsIterator#size()
-       */
-      public int size()
-      {
-
-         return -1;
-      }
-
-      /**
-       * @see org.xcmis.spi.ItemsIterator#skip(int)
-       */
-      public void skip(int skip) throws NoSuchElementException
-      {
-         while (skip-- > 0)
-         {
-            if (!documentIds.hasNext())
-            {
-               throw new NoSuchElementException();
-            }
-            documentIds.next();
-         }
-
-      }
-
-   }
+   //   public static class LazyDocumentIterator implements ItemsIterator<ObjectData>
+   //   {
+   //      private final Storage storage;
+   //
+   //      private final Iterator<String> documentIds;
+   //
+   //      /**
+   //       * @param storage
+   //       * @param documentIds
+   //       */
+   //      public LazyDocumentIterator(Storage storage, Iterator<String> documentIds)
+   //      {
+   //         super();
+   //         this.storage = storage;
+   //         this.documentIds = documentIds;
+   //      }
+   //
+   //      /**
+   //       * @see java.util.Iterator#hasNext()
+   //       */
+   //      public boolean hasNext()
+   //      {
+   //         return documentIds.hasNext();
+   //      }
+   //
+   //      /**
+   //       * @see java.util.Iterator#next()
+   //       */
+   //      public DocumentData next()
+   //      {
+   //         return (DocumentData)storage.getObjectById(documentIds.next());
+   //      }
+   //
+   //      /**
+   //       * @see java.util.Iterator#remove()
+   //       */
+   //      public void remove()
+   //      {
+   //         throw new UnsupportedOperationException();
+   //      }
+   //
+   //      /**
+   //       * @see org.xcmis.spi.ItemsIterator#size()
+   //       */
+   //      public int size()
+   //      {
+   //
+   //         return -1;
+   //      }
+   //
+   //      /**
+   //       * @see org.xcmis.spi.ItemsIterator#skip(int)
+   //       */
+   //      public void skip(int skip) throws NoSuchElementException
+   //      {
+   //         while (skip-- > 0)
+   //         {
+   //            if (!documentIds.hasNext())
+   //            {
+   //               throw new NoSuchElementException();
+   //            }
+   //            documentIds.next();
+   //         }
+   //
+   //      }
+   //
+   //   }
 }

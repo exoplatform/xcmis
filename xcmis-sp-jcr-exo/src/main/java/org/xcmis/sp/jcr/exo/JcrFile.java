@@ -117,7 +117,7 @@ class JcrFile extends DocumentDataImpl
    @Override
    public String getVersionLabel()
    {
-      return StorageImpl.latestLabel;
+      return StorageImpl.LATEST_LABEL;
    }
 
    /**

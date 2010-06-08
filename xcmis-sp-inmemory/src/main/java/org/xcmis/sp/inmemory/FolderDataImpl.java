@@ -19,45 +19,43 @@
 
 package org.xcmis.sp.inmemory;
 
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
 import org.xcmis.spi.BaseItemsIterator;
-import org.xcmis.spi.CmisConstants;
+import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsIterator;
-import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectData;
+import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.StorageException;
+import org.xcmis.spi.UpdateConflictException;
+import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.RelationshipDirection;
 import org.xcmis.spi.model.TypeDefinition;
-import org.xcmis.spi.utils.CmisUtils;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: FolderDataImpl.java 1197 2010-05-28 08:15:37Z
+ *          alexey.zavizionov@gmail.com $
  */
 class FolderDataImpl extends BaseObjectData implements FolderData
 {
 
+   private static final Log LOG = ExoLogger.getLogger(FolderDataImpl.class);
+
    public FolderDataImpl(Entry entry, TypeDefinition type, StorageImpl storage)
    {
       super(entry, type, storage);
-   }
-
-   public FolderDataImpl(FolderData parent, TypeDefinition type, StorageImpl storage)
-   {
-      super(parent, type, storage);
    }
 
    /**
@@ -81,7 +79,16 @@ class FolderDataImpl extends BaseObjectData implements FolderData
       List<ObjectData> children = new ArrayList<ObjectData>(childrenIds.size());
       for (String ch : childrenIds)
       {
-         ObjectData object = storage.getObjectById(ch);
+         ObjectData object = null;
+         try
+         {
+            object = storage.getObjectById(ch);
+         }
+         catch (ObjectNotFoundException e)
+         {
+            LOG.warn("Object " + ch + " not found in storage.");
+            continue;
+         }
          if (object.getBaseType() == BaseType.DOCUMENT && !((DocumentData)object).isLatestVersion())
          {
             continue;
@@ -158,12 +165,24 @@ class FolderDataImpl extends BaseObjectData implements FolderData
       LinkedList<String> pathSegms = new LinkedList<String>();
       pathSegms.add(getName());
 
-      FolderData parent = getParent();
-      while (!parent.isRoot())
+      try
       {
-         pathSegms.addFirst(parent.getName());
-         parent = parent.getParent();
+         FolderData parent = getParent();
+         while (!parent.isRoot())
+         {
+            pathSegms.addFirst(parent.getName());
+            parent = parent.getParent();
+         }
       }
+      catch (ConstraintException e)
+      {
+         // Should not happen:
+         // 1. this object is folder
+         // 2. not root folder
+         // 3. when traversing up always check is folder root
+         throw new CmisRuntimeException("Unable get object path.", e);
+      }
+
       StringBuilder path = new StringBuilder();
       path.append('/');
       for (String seg : pathSegms)
@@ -181,30 +200,17 @@ class FolderDataImpl extends BaseObjectData implements FolderData
    /**
     * {@inheritDoc}
     */
-   protected void delete() throws ConstraintException, StorageException
+   protected void delete() throws UpdateConflictException, VersioningException, StorageException
    {
-      if (isRoot())
-      {
-         throw new ConstraintException("Root folder can't be removed.");
-      }
-
-      if (hasChildren())
-      {
-         throw new ConstraintException("Failed delete object. Object " + getObjectId()
-            + " is Folder and contains one or more objects.");
-      }
-
       ItemsIterator<RelationshipData> relationships = getRelationships(RelationshipDirection.EITHER, null, true);
       if (relationships.hasNext())
       {
-         throw new ConstraintException("Object can't be deleted cause to storage referential integrity. "
+         throw new StorageException("Object can't be deleted cause to storage referential integrity. "
             + "Object is source or target at least one Relationship.");
       }
 
       String objectId = getObjectId();
-      storage.properties.remove(objectId);
-      storage.policies.remove(objectId);
-      storage.permissions.remove(objectId);
+      storage.entries.remove(objectId);
       for (String parent : storage.parents.get(objectId))
       {
          storage.children.get(parent).remove(objectId);
@@ -213,88 +219,4 @@ class FolderDataImpl extends BaseObjectData implements FolderData
       storage.children.remove(objectId);
    }
 
-   /**
-    * {@inheritDoc}
-    */
-   protected void save() throws StorageException
-   {
-      save(false);
-   }
-
-   protected void save(boolean isNew) throws StorageException
-   {
-      String name = getName();
-      if (name == null || name.length() == 0)
-      {
-         throw new NameConstraintViolationException("Object name may noy be null or empty string.");
-      }
-
-      if (parent != null)
-      {
-         for (ItemsIterator<ObjectData> iterator = parent.getChildren(null); iterator.hasNext();)
-         {
-            ObjectData object = iterator.next();
-            if (object.getObjectId().equals(getObjectId()))
-            {
-               continue;
-            }
-            if (name.equals(object.getName()))
-            {
-               throw new NameConstraintViolationException("Object with name " + name
-                  + " already exists in parent folder.");
-            }
-         }
-      }
-
-      String id;
-      storage.validateMaxItemsNumber(this);
-
-      if (isNew)
-      {
-         id = StorageImpl.generateId();
-
-         entry.setValue(CmisConstants.OBJECT_ID, new StringValue(id));
-         entry.setValue(CmisConstants.OBJECT_TYPE_ID, new StringValue(getTypeId()));
-         entry.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(getBaseType().value()));
-         entry.setValue(CmisConstants.CREATED_BY, new StringValue());
-         entry.setValue(CmisConstants.CREATION_DATE, new DateValue(Calendar.getInstance()));
-
-         storage.children.get(parent.getObjectId()).add(id);
-
-         Set<String> parents = new CopyOnWriteArraySet<String>();
-         parents.add(parent.getObjectId());
-         storage.parents.put(id, parents);
-
-         storage.children.put(id, new CopyOnWriteArraySet<String>());
-
-         storage.properties.put(id, new ConcurrentHashMap<String, Value>());
-         storage.policies.put(id, new CopyOnWriteArraySet<String>());
-         storage.permissions.put(id, new ConcurrentHashMap<String, Set<String>>());
-      }
-      else
-      {
-         id = getObjectId();
-      }
-
-      if (storage.indexListener != null)
-      {
-         if (isNew)
-         {
-            storage.indexListener.created(this);
-         }
-         else
-         {
-            storage.indexListener.updated(this);
-         }
-      }
-
-      entry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue());
-      entry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));
-      entry.setValue(CmisConstants.CHANGE_TOKEN, new StringValue(StorageImpl.generateId()));
-
-      storage.properties.get(id).putAll(entry.getValues());
-      storage.policies.get(id).addAll(entry.getPolicies());
-      storage.permissions.get(id).putAll(entry.getPermissions());
-
-   }
 }

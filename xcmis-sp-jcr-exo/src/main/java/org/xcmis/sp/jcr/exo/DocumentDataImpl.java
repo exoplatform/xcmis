@@ -32,6 +32,7 @@ import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.StorageException;
+import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.Property;
@@ -102,7 +103,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
    /**
     * {@inheritDoc}
     */
-   public void cancelCheckout() throws VersioningException, StorageException
+   public void cancelCheckout() throws VersioningException, UpdateConflictException, StorageException
    {
       try
       {
@@ -122,7 +123,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
     */
    public DocumentData checkin(boolean major, String checkinComment, Map<String, Property<?>> properties,
       ContentStream content, List<AccessControlEntry> acl, Collection<PolicyData> policies)
-      throws NameConstraintViolationException, StorageException
+      throws NameConstraintViolationException, UpdateConflictException, StorageException
    {
       // Will be overridden in PWC
       throw new CmisRuntimeException("Current object is not Private Working Copy.");
@@ -131,7 +132,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
    /**
     * {@inheritDoc}
     */
-   public DocumentData checkout() throws VersioningException, StorageException
+   public DocumentData checkout() throws VersioningException, UpdateConflictException, StorageException
    {
       if (isVersionSeriesCheckedOut())
       {
@@ -425,7 +426,8 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
    /**
     * {@inheritDoc}
     */
-   public void setContentStream(ContentStream contentStream) throws IOException, VersioningException, StorageException
+   public void setContentStream(ContentStream contentStream) throws IOException, VersioningException,
+      UpdateConflictException, StorageException
    {
       jcrEntry.setContentStream(contentStream);
       save();

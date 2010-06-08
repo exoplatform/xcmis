@@ -20,10 +20,19 @@
 package org.xcmis.sp.inmemory;
 
 import org.xcmis.spi.CmisConstants;
+import org.xcmis.spi.PolicyData;
+import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.PropertyType;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.net.URI;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -54,9 +63,20 @@ final class Entry
       this.policies = policies;
    }
 
-   public void addPolicy(String policy)
+   public void addPolicy(PolicyData policy)
    {
-      policies.add(policy);
+      policies.add(policy.getObjectId());
+   }
+
+   public BaseType getBaseTypeId()
+   {
+      Value value = values.get(CmisConstants.BASE_TYPE_ID);
+      return value == null ? null : BaseType.fromValue(value.getStrings()[0]);
+   }
+
+   public ByteArrayValue getContent()
+   {
+      return (ByteArrayValue)values.get(DocumentDataImpl.CONTENT);
    }
 
    public String getId()
@@ -91,9 +111,50 @@ final class Entry
       return values;
    }
 
-   public void removePolicy(String policy)
+   public void removePolicy(PolicyData policy)
    {
-      policies.remove(policy);
+      policies.remove(policy.getObjectId());
+   }
+
+   public void setContent(ByteArrayValue bytes)
+   {
+      values.put(DocumentDataImpl.CONTENT, bytes);
+   }
+
+   @SuppressWarnings("unchecked")
+   public void setProperty(Property<?> property)
+   {
+      if (property.getType() == PropertyType.BOOLEAN)
+      {
+         List<Boolean> booleans = (List<Boolean>)property.getValues();
+         setValue(property.getId(), new BooleanValue(booleans));
+      }
+      else if (property.getType() == PropertyType.DATETIME)
+      {
+         List<Calendar> dates = (List<Calendar>)property.getValues();
+         setValue(property.getId(), new DateValue(dates));
+      }
+      else if (property.getType() == PropertyType.DECIMAL)
+      {
+         List<BigDecimal> decimals = (List<BigDecimal>)property.getValues();
+         setValue(property.getId(), new DecimalValue(decimals));
+      }
+      else if (property.getType() == PropertyType.INTEGER)
+      {
+         List<BigInteger> integers = (List<BigInteger>)property.getValues();
+         setValue(property.getId(), new IntegerValue(integers));
+      }
+      else if (property.getType() == PropertyType.URI)
+      {
+         List<URI> uris = (List<URI>)property.getValues();
+         setValue(property.getId(), new UriValue(uris));
+      }
+      else if (property.getType() == PropertyType.STRING || property.getType() == PropertyType.HTML
+         || property.getType() == PropertyType.ID)
+      {
+         List<String> text = (List<String>)property.getValues();
+         setValue(property.getId(), new StringValue(text));
+      }
    }
 
    public void setValue(String id, Value value)

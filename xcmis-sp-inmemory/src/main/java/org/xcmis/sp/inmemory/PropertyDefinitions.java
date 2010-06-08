@@ -188,20 +188,6 @@ public final class PropertyDefinitions
       }
    }
 
-   //   /**
-   //    * Get all property definitions for <code>objectTypeId</code>.
-   //    *
-   //    * @param objectTypeId object type id
-   //    * @return set of object property definitions
-   //    */
-   //   public static Collection<PropertyDefinition<?>> getAll(String objectTypeId)
-   //   {
-   //      Map<String, PropertyDefinition<?>> defs = all.get(objectTypeId);
-   //      if (defs == null)
-   //         return Collections.emptyList();
-   //      return Collections.unmodifiableCollection(defs.values());
-   //   }
-
    /**
     * Get all property definitions for <code>objectTypeId</code>.
     *

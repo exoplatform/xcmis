@@ -70,6 +70,13 @@ import java.util.Set;
  */
 public abstract class Connection
 {
+
+   protected static final int CREATE = 1;
+
+   protected static final int UPDATE = 2;
+
+   protected static final int VERSION = 4;
+
    private static final Log LOG = ExoLogger.getLogger(Connection.class);
 
    protected Storage storage;
@@ -335,7 +342,7 @@ public abstract class Connection
 
       TypeDefinition typeDefinition = pwc.getTypeDefinition();
 
-      checkProperties(typeDefinition, properties);
+      checkProperties(typeDefinition, properties, VERSION);
       // Do not use method 'checkContent' because stream may be null if content does not changed.
       if (typeDefinition.getContentStreamAllowed() == ContentStreamAllowed.NOT_ALLOWED && content != null)
       {
@@ -514,7 +521,7 @@ public abstract class Connection
       // to resolve this issue.
 
       // check inputs
-      checkProperties(typeDefinition, properties);
+      checkProperties(typeDefinition, properties, CREATE);
       checkContent(typeDefinition, content);
       checkACL(typeDefinition, addACL, removeACL);
       checkPolicies(typeDefinition, policies);
@@ -633,7 +640,7 @@ public abstract class Connection
       // to resolve this issue.
 
       // check inputs
-      checkProperties(typeDefinition, properties);
+      checkProperties(typeDefinition, properties, CREATE);
       checkACL(typeDefinition, addACL, removeACL);
       checkPolicies(typeDefinition, policies);
 
@@ -718,7 +725,7 @@ public abstract class Connection
          throw new ConstraintException("Object type " + typeId + " is not allowed as child for destination folder");
       }
 
-      checkProperties(typeDefinition, properties);
+      checkProperties(typeDefinition, properties, CREATE);
       checkACL(typeDefinition, addACL, removeACL);
       checkPolicies(typeDefinition, policies);
 
@@ -808,7 +815,7 @@ public abstract class Connection
          throw new ConstraintException("Policy type is fileable. Parent folder must be provided.");
       }
 
-      checkProperties(typeDefinition, properties);
+      checkProperties(typeDefinition, properties, CREATE);
       checkACL(typeDefinition, addACL, removeACL);
       checkPolicies(typeDefinition, policies);
 
@@ -894,7 +901,7 @@ public abstract class Connection
          throw new ConstraintException("Target object type " + target.getTypeId() + " is not supported.");
       }
 
-      checkProperties(typeDefinition, properties);
+      checkProperties(typeDefinition, properties, CREATE);
       checkACL(typeDefinition, addACL, removeACL);
       checkPolicies(typeDefinition, policies);
 
@@ -2936,7 +2943,7 @@ public abstract class Connection
 
       // Validate change token, object may be already updated.
       validateChangeToken(object, changeTokenHolder.getValue());
-      checkProperties(object.getTypeDefinition(), properties);
+      checkProperties(object.getTypeDefinition(), properties, UPDATE);
 
       object.setProperties(properties);
 
@@ -3173,22 +3180,25 @@ public abstract class Connection
       }
    }
 
-   private void checkProperties(TypeDefinition typeDefinition, Map<String, Property<?>> properties)
+   private void checkProperties(TypeDefinition typeDefinition, Map<String, Property<?>> properties, int operation)
       throws ConstraintException
    {
       // NOTE do not check is property updatable. Lets storage to do it.
       // Some client may sent whole set of properties but storage should
       // modify only read-write properties and ignore others.
-      if (properties != null && properties.size() != 0)
+      for (PropertyDefinition<?> definition : typeDefinition.getPropertyDefinitions())
       {
-         for (Property<?> property : properties.values())
+         Property<?> property = null;
+         if (properties != null && properties.size() != 0)
          {
-            PropertyDefinition<?> definition = typeDefinition.getPropertyDefinition(property.getId());
-            if (definition == null)
-            {
-               throw new ConstraintException("Property " + property.getId()
-                  + " is not in property definitions list of type " + typeDefinition.getId());
-            }
+            property = properties.get(definition.getId());
+         }
+         if (definition.isRequired() && (3 & operation) > 0 && (property == null || property.getValues().size() == 0))
+         {
+            throw new ConstraintException("Required property " + definition.getId() + " can't be not set.");
+         }
+         else if (property != null)
+         {
             if (property.getType() != definition.getPropertyType())
             {
                throw new ConstraintException("Property type is not match. Property id " + property.getId());
@@ -3197,13 +3207,33 @@ public abstract class Connection
             {
                throw new ConstraintException("Property " + property.getId() + " is not multi-valued.");
             }
-            if (definition.isRequired() && property.getValues().size() == 0)
-            {
-               throw new ConstraintException("Required property " + property.getId() + " can't be not set.");
-            }
-            // TODO : validate min/max/length etc.
          }
+         // TODO : validate min/max/length etc.
       }
+      //      if (properties != null && properties.size() != 0)
+      //      {
+      //         for (Property<?> property : properties.values())
+      //         {
+      //            PropertyDefinition<?> definition = typeDefinition.getPropertyDefinition(property.getId());
+      //            if (definition == null)
+      //            {
+      //               throw new ConstraintException("Property " + property.getId()
+      //                  + " is not in property definitions list of type " + typeDefinition.getId());
+      //            }
+      //            if (property.getType() != definition.getPropertyType())
+      //            {
+      //               throw new ConstraintException("Property type is not match. Property id " + property.getId());
+      //            }
+      //            if (!definition.isMultivalued() && property.getValues().size() > 1)
+      //            {
+      //               throw new ConstraintException("Property " + property.getId() + " is not multi-valued.");
+      //            }
+      //            if (definition.isRequired() && property.getValues().size() == 0)
+      //            {
+      //               throw new ConstraintException("Required property " + property.getId() + " can't be not set.");
+      //            }
+      //         }
+      //      }
    }
 
    private void checkACL(TypeDefinition typeDefinition, List<AccessControlEntry> addACL,

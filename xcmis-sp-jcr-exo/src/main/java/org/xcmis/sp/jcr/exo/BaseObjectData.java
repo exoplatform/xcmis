@@ -37,6 +37,7 @@ import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.StorageException;
+import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.BaseType;
@@ -538,7 +539,7 @@ abstract class BaseObjectData implements ObjectData
     * {@inheritDoc}
     */
    public void setProperties(Map<String, Property<?>> properties) throws NameConstraintViolationException,
-      VersioningException, StorageException
+      UpdateConflictException, VersioningException, StorageException
    {
       for (Property<?> property : properties.values())
       {
@@ -550,14 +551,14 @@ abstract class BaseObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
-   public void setProperty(Property<?> property) throws NameConstraintViolationException, VersioningException,
-      StorageException
+   public void setProperty(Property<?> property) throws NameConstraintViolationException, UpdateConflictException,
+      VersioningException, StorageException
    {
       doSetProperty(property);
       save();
    }
 
-   private Property<?> doGetProperty(PropertyDefinition<?> definition)
+   protected Property<?> doGetProperty(PropertyDefinition<?> definition)
    {
       // Check known prepared shortcut for properties.
       // Some properties may be virtual relating to JCR, it minds they
@@ -656,7 +657,7 @@ abstract class BaseObjectData implements ObjectData
     *
     * @param property property to be updated
     */
-   private void doSetProperty(Property<?> property) throws NameConstraintViolationException
+   protected void doSetProperty(Property<?> property) throws NameConstraintViolationException
    {
       PropertyDefinition<?> definition = getTypeDefinition().getPropertyDefinition(property.getId());
 

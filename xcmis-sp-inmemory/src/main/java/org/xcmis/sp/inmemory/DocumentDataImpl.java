@@ -22,86 +22,54 @@ package org.xcmis.sp.inmemory;
 import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
-import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.DocumentData;
-import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
-import org.xcmis.spi.ObjectData;
+import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.RelationshipData;
-import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.StorageException;
+import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.model.AccessControlEntry;
-import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.RelationshipDirection;
 import org.xcmis.spi.model.TypeDefinition;
-import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.utils.MimeType;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: DocumentDataImpl.java 1197 2010-05-28 08:15:37Z
+ *          alexey.zavizionov@gmail.com $
  */
 class DocumentDataImpl extends BaseObjectData implements DocumentData
 {
 
-   static String latestLabel = "latest";
+   protected static final String LATEST_LABEL = "latest";
 
-   static String pwcLabel = "pwc";
+   protected static final String PWC_LABEL = "pwc";
 
-   static byte[] EMPTY_CONTENT = new byte[0];
-
-   private ContentStream contentStream;
-
-   protected final VersioningState versioningState;
-
-   private RenditionManager renditionManager;
-
-   public DocumentDataImpl(Entry entry, TypeDefinition type, StorageImpl storage, RenditionManager manager)
-   {
-      this(entry, type, storage);
-      this.renditionManager = manager;
-   }
+   protected static final String CONTENT = "xcmis:content";
 
    public DocumentDataImpl(Entry entry, TypeDefinition type, StorageImpl storage)
    {
       super(entry, type, storage);
-      this.versioningState = null;
-   }
-
-   public DocumentDataImpl(FolderData parent, TypeDefinition type, VersioningState versioningState, StorageImpl storage)
-   {
-      super(parent, type, storage);
-      this.versioningState = versioningState;
    }
 
    /**
     * {@inheritDoc}
     */
-   public void cancelCheckout() throws StorageException
+   public void cancelCheckout() throws UpdateConflictException, VersioningException, StorageException
    {
-      if (!type.isVersionable())
-      {
-         throw new ConstraintException("Object is not versionable.");
-      }
-
       synchronized (storage)
       {
          String vsId = getVersionSeriesId();
@@ -111,10 +79,6 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
             return;
          }
 
-         storage.properties.remove(pwcId);
-         storage.policies.remove(pwcId);
-         storage.permissions.remove(pwcId);
-         storage.contents.remove(pwcId);
          for (String parent : storage.parents.get(pwcId))
          {
             storage.children.get(parent).remove(pwcId);
@@ -126,9 +90,9 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
          for (Iterator<String> iterator = storage.versions.get(getVersionSeriesId()).iterator(); iterator.hasNext();)
          {
             String version = iterator.next();
-            Map<String, Value> props = storage.properties.get(version);
-            props.put(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(false));
-            props.put(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue());
+            Entry ventry = storage.entries.get(version);
+            ventry.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(false));
+            ventry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue());
          }
       }
    }
@@ -137,17 +101,12 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
     * {@inheritDoc}
     */
    public DocumentData checkin(boolean major, String checkinComment, Map<String, Property<?>> properties,
-      ContentStream content, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
-      Collection<ObjectData> policies) throws ConstraintException, StorageException
+      ContentStream contentStream, List<AccessControlEntry> acl, Collection<PolicyData> policies)
+      throws NameConstraintViolationException, UpdateConflictException, StorageException
    {
-      if (!type.isVersionable())
-      {
-         throw new ConstraintException("Object is not versionable.");
-      }
-
       if (!isPWC())
       {
-         throw new ConstraintException("Current object is not Private Working Copy.");
+         throw new CmisRuntimeException("Current object is not Private Working Copy.");
       }
 
       synchronized (storage)
@@ -157,16 +116,36 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
          for (Iterator<String> iterator = storage.versions.get(getVersionSeriesId()).iterator(); iterator.hasNext();)
          {
             String version = iterator.next();
-            Map<String, Value> props = storage.properties.get(version);
-            props.put(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(false));
-            props.put(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue());
-            props.put(CmisConstants.IS_LATEST_VERSION, new BooleanValue(false));
+            Entry ventry = storage.entries.get(version);
+            ventry.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(false));
+            ventry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue());
+            ventry.setValue(CmisConstants.IS_LATEST_VERSION, new BooleanValue(false));
             // update version labels
-            props.put(CmisConstants.VERSION_LABEL, new StringValue("" + i++));
+            ventry.setValue(CmisConstants.VERSION_LABEL, new StringValue("" + i++));
+         }
+
+         if (properties != null)
+         {
+            for (Property<?> property : properties.values())
+            {
+               doSetProperty(property);
+            }
+         }
+
+         try
+         {
+            if (contentStream != null)
+            {
+               doSetContentStream(contentStream);
+            }
+         }
+         catch (IOException ioe)
+         {
+            throw new StorageException("Unable checkin PWC. " + ioe.getMessage(), ioe);
          }
 
          entry.setValue(CmisConstants.IS_LATEST_VERSION, new BooleanValue(true));
-         entry.setValue(CmisConstants.VERSION_LABEL, new StringValue(latestLabel));
+         entry.setValue(CmisConstants.VERSION_LABEL, new StringValue(LATEST_LABEL));
          entry.setValue(CmisConstants.IS_MAJOR_VERSION, new BooleanValue(major));
          if (checkinComment != null)
          {
@@ -183,13 +162,8 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
    /**
     * {@inheritDoc}
     */
-   public DocumentData checkout() throws ConstraintException, VersioningException, StorageException
+   public DocumentData checkout() throws UpdateConflictException, VersioningException, StorageException
    {
-      if (!type.isVersionable())
-      {
-         throw new ConstraintException("Object is not versionable.");
-      }
-
       synchronized (storage)
       {
          if (storage.workingCopies.get(getVersionSeriesId()) != null)
@@ -199,59 +173,79 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
          }
 
          Entry pwc = new Entry();
-         pwc.setValues(entry.getValues());
+         pwc.setValue(CmisConstants.OBJECT_TYPE_ID, new StringValue(type.getId()));
+         pwc.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(type.getBaseId().value()));
+         pwc.setValue(CmisConstants.VERSION_SERIES_ID, new StringValue(this.getVersionSeriesId()));
          String pwcId = StorageImpl.generateId();
          pwc.setValue(CmisConstants.OBJECT_ID, new StringValue(pwcId));
-         pwc.setValue(CmisConstants.CREATED_BY, new StringValue());
-         pwc.setValue(CmisConstants.CREATION_DATE, new DateValue(Calendar.getInstance()));
+         String userId = storage.getCurrentUser();
+         pwc.setValue(CmisConstants.CREATED_BY, new StringValue(userId));
+         pwc.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue(userId));
+         Calendar cal = Calendar.getInstance();
+         pwc.setValue(CmisConstants.CREATION_DATE, new DateValue(cal));
+         pwc.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(cal));
          pwc.setValue(CmisConstants.IS_LATEST_VERSION, new BooleanValue(false));
          pwc.setValue(CmisConstants.IS_MAJOR_VERSION, new BooleanValue(false));
-         pwc.setValue(CmisConstants.VERSION_LABEL, new StringValue(pwcLabel));
+         pwc.setValue(CmisConstants.VERSION_LABEL, new StringValue(PWC_LABEL));
          pwc.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(true));
          pwc.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue(pwcId));
-         pwc.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, new StringValue());
+         pwc.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, new StringValue(userId));
 
-         byte[] content = storage.contents.get(getObjectId());
-
-         // check is max memory size reached
-         storage.validateMemSize(content);
-
-         byte[] pwcContent;
-
-         if (content == EMPTY_CONTENT)
+         ByteArrayValue contentValue = entry.getContent();
+         if (contentValue != null)
          {
-            pwcContent = EMPTY_CONTENT;
-         }
-         else
-         {
-            pwcContent = new byte[content.length];
-            System.arraycopy(content, 0, pwcContent, 0, pwcContent.length);
+            // check is max memory size reached
+            byte[] src = contentValue.getBytes();
+            storage.validateMemSize(src);
+
+            byte[] bytes = new byte[src.length];
+            System.arraycopy(src, 0, bytes, 0, bytes.length);
+            pwc.setContent(new ByteArrayValue(bytes));
+
+            String mimeType = getContentStreamMimeType();
+            if (mimeType != null)
+            {
+               pwc.setValue(CmisConstants.CONTENT_STREAM_MIME_TYPE, new StringValue(mimeType));
+            }
+
+            String charset = getString(CmisConstants.CHARSET);
+            if (charset != null)
+            {
+               entry.setValue(CmisConstants.CHARSET, new StringValue(charset));
+            }
+
+            entry.setValue(CmisConstants.CONTENT_STREAM_LENGTH, new IntegerValue(BigInteger.valueOf(bytes.length)));
          }
 
          for (Iterator<String> iterator = storage.versions.get(getVersionSeriesId()).iterator(); iterator.hasNext();)
          {
             String version = iterator.next();
-            Map<String, Value> props = storage.properties.get(version);
-            props.put(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(true));
-            props.put(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue(pwcId));
+            Entry ventry = storage.entries.get(version);
+            ventry.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(true));
+            ventry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue(pwcId));
+            ventry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, new StringValue(userId));
          }
 
-         storage.contents.put(pwcId, pwcContent);
-
+         storage.entries.put(pwcId, pwc);
          for (String parent : storage.parents.get(getObjectId()))
          {
             storage.children.get(parent).add(pwcId);
          }
          storage.parents.put(pwcId, new CopyOnWriteArraySet<String>(storage.parents.get(getObjectId())));
-         storage.properties.put(pwcId, new ConcurrentHashMap<String, Value>(pwc.getValues()));
-         storage.policies.put(pwcId, new CopyOnWriteArraySet<String>());
-         storage.permissions.put(pwcId, new ConcurrentHashMap<String, Set<String>>());
 
          storage.workingCopies.put(getVersionSeriesId(), pwcId);
 
-         DocumentDataImpl obj = new DocumentDataImpl(pwc, storage.getTypeDefinition(getTypeId(), true), storage);
-         obj.save();
-         return obj;
+         DocumentDataImpl pwcObject =
+            new DocumentDataImpl(pwc, //
+               new TypeDefinition(type.getId(), type.getBaseId(), type.getQueryName(), type.getLocalName(), type
+                  .getLocalNamespace(), type.getParentId(), type.getDisplayName(), type.getDescription(), type
+                  .isCreatable(), type.isFileable(), type.isQueryable(), type.isFulltextIndexed(), type
+                  .isIncludedInSupertypeQuery(), type.isControllablePolicy(), type.isControllableACL(), type
+                  .isVersionable(), type.getAllowedSourceTypes(), type.getAllowedTargetTypes(), type
+                  .getContentStreamAllowed(), PropertyDefinitions.getAll(getTypeId())), //
+               storage);
+
+         return pwcObject;
       }
    }
 
@@ -260,8 +254,8 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
     */
    public ContentStream getContentStream()
    {
-      byte[] bytes = storage.contents.get(getObjectId());
-      if (bytes != null && bytes.length > 0)
+      ByteArrayValue contentValue = entry.getContent();
+      if (contentValue != null && contentValue.getBytes().length > 0)
       {
          MimeType mimeType = MimeType.fromString(getString(CmisConstants.CONTENT_STREAM_MIME_TYPE));
          String charset = getString(CmisConstants.CHARSET);
@@ -269,7 +263,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
          {
             mimeType.getParameters().put(CmisConstants.CHARSET, charset);
          }
-         return new BaseContentStream(bytes, getName(), mimeType);
+         return new BaseContentStream(contentValue.getBytes(), getName(), mimeType);
       }
       return null;
    }
@@ -285,7 +279,11 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
       }
       try
       {
-         return renditionManager.getStream(this, streamId);
+         if (storage.renditionManager != null)
+         {
+            return storage.renditionManager.getStream(this, streamId);
+         }
+         return null;
       }
       catch (Exception e)
       {
@@ -338,7 +336,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
     */
    public boolean hasContent()
    {
-      return storage.contents.get(getObjectId()).length != 0;
+      return entry.getContent() != null;
    }
 
    /**
@@ -384,221 +382,49 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
       return checkout == null ? false : checkout;
    }
 
-   
    /**
     * {@inheritDoc}
     */
-   public void setContentStream(ContentStream contentStream) throws ConstraintException
+   public void setContentStream(ContentStream contentStream) throws IOException, UpdateConflictException,
+      VersioningException, StorageException
    {
-      setContentStreamInternal(contentStream);
+      doSetContentStream(contentStream);
       save();
    }
-   
-   /**
-    * {@inheritDoc}
-    */
-   public void setContentStreamInternal(ContentStream contentStream) throws ConstraintException
+
+   private void doSetContentStream(ContentStream contentStream) throws IOException, StorageException
    {
-      if (type.getContentStreamAllowed() == ContentStreamAllowed.REQUIRED && contentStream == null)
+      if (contentStream == null || contentStream.getStream() == null)
       {
-         throw new ConstraintException("Content stream required for object of type " + getTypeId()
-            + ", it can't be null.");
-      }
-      if (type.getContentStreamAllowed() == ContentStreamAllowed.NOT_ALLOWED && contentStream != null)
-      {
-         throw new ConstraintException("Content stream not allowed for object of type " + getTypeId());
-      }
-
-      this.contentStream = contentStream;
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   protected void save() throws StorageException
-   {
-      save(false);
-   }
-
-   protected void save(boolean isNew) throws StorageException
-   {
-      String name = getName();
-      if (name == null || name.length() == 0)
-      {
-         throw new NameConstraintViolationException("Object name may not be null or empty string.");
-      }
-
-      if (parent != null)
-      {
-         for (ItemsIterator<ObjectData> iterator = parent.getChildren(null); iterator.hasNext();)
-         {
-            ObjectData object = iterator.next();
-            if (object.getObjectId().equals(getObjectId()))
-            {
-               continue;
-            }
-            if (name.equals(object.getName()))
-            {
-               throw new NameConstraintViolationException("Object with name " + name
-                  + " already exists in parent folder.");
-            }
-         }
-      }
-
-      storage.validateMaxItemsNumber(this);
-      String id;
-      String vsId;
-
-      if (isNew)
-      {
-         id = StorageImpl.generateId();
-         vsId = StorageImpl.generateId();
-         entry.setValue(CmisConstants.OBJECT_ID, new StringValue(id));
-         entry.setValue(CmisConstants.OBJECT_TYPE_ID, new StringValue(getTypeId()));
-         entry.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(getBaseType().value()));
-         entry.setValue(CmisConstants.CREATED_BY, new StringValue());
-         entry.setValue(CmisConstants.CREATION_DATE, new DateValue(Calendar.getInstance()));
-         entry.setValue(CmisConstants.VERSION_SERIES_ID, new StringValue(vsId));
-         entry.setValue(CmisConstants.IS_LATEST_VERSION, new BooleanValue(true));
-         entry.setValue(CmisConstants.IS_MAJOR_VERSION, new BooleanValue(versioningState == VersioningState.MAJOR));
-         entry.setValue(CmisConstants.VERSION_LABEL, new StringValue(versioningState == VersioningState.CHECKEDOUT
-            ? pwcLabel : latestLabel));
-         entry.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(
-            versioningState == VersioningState.CHECKEDOUT));
-         if (versioningState == VersioningState.CHECKEDOUT)
-         {
-            entry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue(id));
-            entry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, new StringValue());
-         }
+         entry.setContent(new ByteArrayValue(new byte[0]));
+         entry.setValue(CmisConstants.CONTENT_STREAM_MIME_TYPE, new StringValue());
+         entry.setValue(CmisConstants.CHARSET, new StringValue());
+         entry.setValue(CmisConstants.CONTENT_STREAM_LENGTH, new IntegerValue(BigInteger.valueOf(0)));
       }
       else
       {
-         id = getObjectId();
-         vsId = getVersionSeriesId();
+         ByteArrayValue cv = ByteArrayValue.fromStream(contentStream.getStream());
+         storage.validateMemSize(cv.getBytes());
+
+         MimeType mimeType = contentStream.getMediaType();
+entry.setContent(cv);
+         entry.setValue(CmisConstants.CONTENT_STREAM_MIME_TYPE, new StringValue(mimeType.getBaseType()));
+         String charset = mimeType.getParameter(CmisConstants.CHARSET);
+         if (charset != null)
+         {
+            entry.setValue(CmisConstants.CHARSET, new StringValue(charset));
+         }
+         entry
+            .setValue(CmisConstants.CONTENT_STREAM_LENGTH, new IntegerValue(BigInteger.valueOf(cv.getBytes().length)));
       }
-
-      entry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue());
-      entry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));
-      entry.setValue(CmisConstants.CHANGE_TOKEN, new StringValue(StorageImpl.generateId()));
-
-      byte[] content = null;
-
-      if (contentStream != null)
-      {
-         try
-         {
-            ByteArrayOutputStream bout = new ByteArrayOutputStream();
-            InputStream in = contentStream.getStream();
-            if (in != null)
-            {
-               byte[] buf = new byte[1024];
-               int r = -1;
-               while ((r = in.read(buf)) != -1)
-               {
-                  bout.write(buf, 0, r);
-               }
-
-               content = bout.toByteArray();
-
-               MimeType mimeType = contentStream.getMediaType();
-
-               entry.setValue(CmisConstants.CONTENT_STREAM_MIME_TYPE, new StringValue(mimeType.getBaseType()));
-               String charset = mimeType.getParameter(CmisConstants.CHARSET);
-               if (charset != null)
-               {
-                  entry.setValue(CmisConstants.CHARSET, new StringValue(charset));
-               }
-               entry
-                  .setValue(CmisConstants.CONTENT_STREAM_LENGTH, new IntegerValue(BigInteger.valueOf(content.length)));
-            }
-            else
-            {
-               entry.setValue(CmisConstants.CONTENT_STREAM_MIME_TYPE, new StringValue(""));
-               entry.setValue(CmisConstants.CONTENT_STREAM_LENGTH, new IntegerValue(BigInteger.valueOf(0)));
-               content = EMPTY_CONTENT;
-            }
-
-         }
-         catch (IOException e)
-         {
-            throw new CmisRuntimeException("Unable add content for document. " + e.getMessage(), e);
-         }
-      }
-      else if (isNew)
-      {
-         content = EMPTY_CONTENT;
-      }
-
-      // check is max memory size reached
-      if (content != null)
-      {
-         storage.validateMemSize(content);
-      }
-
-      if (isNew)
-      {
-         if (parent != null)
-         {
-            storage.children.get(parent.getObjectId()).add(id);
-
-            Set<String> parents = new CopyOnWriteArraySet<String>();
-            parents.add(parent.getObjectId());
-            storage.parents.put(id, parents);
-         }
-         else
-         {
-            storage.unfiled.add(id);
-            storage.parents.put(id, new CopyOnWriteArraySet<String>());
-         }
-
-         storage.properties.put(id, new ConcurrentHashMap<String, Value>());
-         storage.policies.put(id, new CopyOnWriteArraySet<String>());
-         storage.permissions.put(id, new ConcurrentHashMap<String, Set<String>>());
-         List<String> versions = new CopyOnWriteArrayList<String>();
-         storage.versions.put(vsId, versions);
-         if (versioningState != VersioningState.CHECKEDOUT)
-         {
-            versions.add(id);
-         }
-         else
-         {
-            storage.workingCopies.put(vsId, id);
-         }
-      }
-
-      if (content != null)
-      {
-         storage.contents.put(id, content);
-      }
-
-      storage.properties.get(id).putAll(entry.getValues());
-      storage.policies.get(id).addAll(entry.getPolicies());
-      storage.permissions.get(id).putAll(entry.getPermissions());
-
-      if (storage.indexListener != null)
-      {
-         if (isNew)
-         {
-            storage.indexListener.created(this);
-         }
-         else
-         {
-            storage.indexListener.updated(this);
-         }
-      }
-
-      contentStream = null;
    }
 
-   /**
-    * {@inheritDoc}
-    */
-   protected void delete() throws ConstraintException, StorageException
+   protected void delete() throws StorageException, UpdateConflictException, VersioningException
    {
       ItemsIterator<RelationshipData> relationships = getRelationships(RelationshipDirection.EITHER, null, true);
       if (relationships.hasNext())
       {
-         throw new ConstraintException("Object can't be deleted cause to storage referential integrity. "
+         throw new StorageException("Object can't be deleted cause to storage referential integrity. "
             + "Object is source or target at least one Relationship.");
       }
 
@@ -610,10 +436,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
       {
          String objectId = getObjectId();
          String vsId = getVersionSeriesId();
-         storage.properties.remove(objectId);
-         storage.policies.remove(objectId);
-         storage.permissions.remove(objectId);
-         storage.contents.remove(objectId);
+         storage.entries.remove(objectId);
          for (String parent : storage.parents.get(objectId))
          {
             storage.children.get(parent).remove(objectId);

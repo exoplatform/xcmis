@@ -112,10 +112,13 @@ public interface DocumentData extends ObjectData
     * @throws IOException if any i/o error occurs
     * @throws VersioningException if object is not current version and storage
     *         do not support update other then latest version
+    * @throws UpdateConflictException if object that is no longer current (as
+    *         determined by the storage)
     * @throws StorageException if object's content stream can not be updated
     *         (save changes) cause to storage internal problem
     */
-   void setContentStream(ContentStream contentStream) throws IOException, VersioningException, StorageException;
+   void setContentStream(ContentStream contentStream) throws IOException, UpdateConflictException, VersioningException,
+      StorageException;
 
    /**
     * Check does current document has content or not.
@@ -130,10 +133,12 @@ public interface DocumentData extends ObjectData
     * @throws VersioningException if object is non-current document version and
     *         'cancel checkout' action and not supported for non-current version
     *         of document
+    * @throws UpdateConflictException if object that is no longer current (as
+    *         determined by the storage)
     * @throws StorageException if changes can't be saved cause to storage
     *         internal problem
     */
-   void cancelCheckout() throws VersioningException, StorageException;
+   void cancelCheckout() throws VersioningException, UpdateConflictException, StorageException;
 
    /**
     * Set private working copy as latest (current) version of document.
@@ -151,12 +156,14 @@ public interface DocumentData extends ObjectData
     * @return new version of document
     * @throws NameConstraintViolationException if <i>cmis:name</i> specified in
     *         properties throws conflict
+    * @throws UpdateConflictException if object that is no longer current (as
+    *         determined by the storage)
     * @throws StorageException if newly version of Document can't be saved in
     *         storage cause to its internal problem
     */
    DocumentData checkin(boolean major, String checkinComment, Map<String, Property<?>> properties,
       ContentStream content, List<AccessControlEntry> acl, Collection<PolicyData> policies)
-      throws NameConstraintViolationException, StorageException;
+      throws NameConstraintViolationException, UpdateConflictException, StorageException;
 
    /**
     * Create PWC from this document. Properties and content (optionally) of this
@@ -170,10 +177,12 @@ public interface DocumentData extends ObjectData
     *         <li>version series already have one checked-out document. It is
     *         not possible to have more then one PWC at time</li>
     *         </ul>
+    * @throws UpdateConflictException if object that is no longer current (as
+    *         determined by the storage)
     * @throws StorageException if newly created PWC was not saved in storage
     *         cause to storage internal problem
     */
-   DocumentData checkout() throws VersioningException, StorageException;
+   DocumentData checkout() throws VersioningException, UpdateConflictException, StorageException;
 
    /**
     * @return <code>true</code> if current Document is private working copy and

@@ -24,24 +24,22 @@ import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsIterator;
-import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.StorageException;
+import org.xcmis.spi.UpdateConflictException;
+import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.model.RelationshipDirection;
 import org.xcmis.spi.model.TypeDefinition;
 
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: PolicyDataImpl.java 1197 2010-05-28 08:15:37Z
+ *          alexey.zavizionov@gmail.com $
  */
 class PolicyDataImpl extends BaseObjectData implements PolicyData
 {
@@ -49,11 +47,6 @@ class PolicyDataImpl extends BaseObjectData implements PolicyData
    public PolicyDataImpl(Entry entry, TypeDefinition type, StorageImpl storage)
    {
       super(entry, type, storage);
-   }
-
-   public PolicyDataImpl(TypeDefinition type, StorageImpl storage)
-   {
-      super((FolderData)null, type, storage);
    }
 
    /**
@@ -91,95 +84,29 @@ class PolicyDataImpl extends BaseObjectData implements PolicyData
       return getString(CmisConstants.POLICY_TEXT);
    }
 
-   protected void save() throws StorageException
-   {
-      save(false);
-   }
-
-   protected void save(boolean isNew) throws StorageException
-   {
-      String name = getName();
-      if (name == null || name.length() == 0)
-      {
-         throw new NameConstraintViolationException("Object name may noy be null or empty string.");
-      }
-
-      // TODO : check policies same names
-      if (getString(CmisConstants.POLICY_TEXT) == null)
-      {
-         throw new ConstraintException("Required property 'cmis:policyText' is not set.");
-      }
-
-      String id;
-      storage.validateMaxItemsNumber(this);
-
-      if (isNew)
-      {
-         id = StorageImpl.generateId();
-
-         entry.setValue(CmisConstants.OBJECT_ID, new StringValue(id));
-         entry.setValue(CmisConstants.OBJECT_TYPE_ID, new StringValue(getTypeId()));
-         entry.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(getBaseType().value()));
-         entry.setValue(CmisConstants.CREATED_BY, new StringValue());
-         entry.setValue(CmisConstants.CREATION_DATE, new DateValue(Calendar.getInstance()));
-
-         storage.properties.put(id, new ConcurrentHashMap<String, Value>());
-         storage.policies.put(id, new CopyOnWriteArraySet<String>());
-         storage.permissions.put(id, new ConcurrentHashMap<String, Set<String>>());
-
-         storage.parents.put(id, StorageImpl.EMPTY_PARENTS);
-      }
-      else
-      {
-         id = getObjectId();
-      }
-
-      if (storage.indexListener != null)
-      {
-         if (isNew)
-         {
-            storage.indexListener.created(this);
-         }
-         else
-         {
-            storage.indexListener.updated(this);
-         }
-      }
-
-      entry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue());
-      entry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));
-      entry.setValue(CmisConstants.CHANGE_TOKEN, new StringValue(StorageImpl.generateId()));
-
-      storage.properties.get(id).putAll(entry.getValues());
-      storage.policies.get(id).addAll(entry.getPolicies());
-      storage.permissions.get(id).putAll(entry.getPermissions());
-   }
-
    /**
     * {@inheritDoc}
     */
-   protected void delete() throws ConstraintException, StorageException
+   protected void delete() throws UpdateConflictException, VersioningException, StorageException
    {
       String objectId = getObjectId();
 
-      for (Iterator<Set<String>> iterator = storage.policies.values().iterator(); iterator.hasNext();)
+      for (Iterator<Entry> iterator = storage.entries.values().iterator(); iterator.hasNext();)
       {
-         if (iterator.next().contains(objectId))
+         Entry next = iterator.next();
+         if (next.getPolicies().contains(objectId))
          {
-            throw new ConstraintException("Unable delete applied policy");
+            throw new StorageException("Unable delete applied policy");
          }
       }
 
       ItemsIterator<RelationshipData> relationships = getRelationships(RelationshipDirection.EITHER, null, true);
       if (relationships.hasNext())
       {
-         throw new ConstraintException("Object can't be deleted cause to storage referential integrity. "
+         throw new StorageException("Object can't be deleted cause to storage referential integrity. "
             + "Object is source or target at least one Relationship.");
       }
 
-      storage.properties.remove(objectId);
-      storage.policies.remove(objectId);
-      storage.permissions.remove(objectId);
       storage.parents.remove(objectId);
    }
 }
