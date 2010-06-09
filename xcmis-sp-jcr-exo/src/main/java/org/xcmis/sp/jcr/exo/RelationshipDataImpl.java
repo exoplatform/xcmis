@@ -24,17 +24,13 @@ import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.FolderData;
-import org.xcmis.spi.NameConstraintViolationException;
-import org.xcmis.spi.ObjectData;
-import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.model.Property;
-import org.xcmis.spi.model.TypeDefinition;
 
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
@@ -42,44 +38,15 @@ import javax.jcr.Session;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: RelationshipDataImpl.java 1177 2010-05-25 12:03:35Z
+ *          alexey.zavizionov@gmail.com $
  */
 class RelationshipDataImpl extends BaseObjectData implements RelationshipData
 {
 
-   protected ObjectData source;
-
-   protected ObjectData target;
-
-   /**
-    * New unsaved instance of relationship.
-    *
-    * @param type type definition
-    * @param source source of relationship
-    * @param target target of relationship
-    * @param session session
-    * @see StorageImpl#createRelationship(ObjectData, ObjectData, String)
-    */
-   public RelationshipDataImpl(TypeDefinition type, ObjectData source, ObjectData target, Session session,
-      IndexListener indexListener)
+   public RelationshipDataImpl(JcrNodeEntry jcrEntry, IndexListener indexListener)
    {
-      super(type, null, session, indexListener);
-      this.source = source;
-      this.target = target;
-   }
-
-   /**
-    * Create already saved instance of relationship.
-    *
-    * @param type type definition
-    * @param node back-end JCR node
-    * @param indexListener inde listener
-    * @see StorageImpl#getObjectById(String)
-    * @see StorageImpl#getObjectByPath(String)
-    */
-   public RelationshipDataImpl(TypeDefinition type, Node node, IndexListener indexListener)
-   {
-      super(type, node, indexListener);
+      super(jcrEntry, indexListener);
    }
 
    /**
@@ -87,11 +54,7 @@ class RelationshipDataImpl extends BaseObjectData implements RelationshipData
     */
    public String getSourceId()
    {
-      if (isNew())
-      {
-         return source.getObjectId();
-      }
-      return getString(CmisConstants.SOURCE_ID);
+      return jcrEntry.getString(CmisConstants.SOURCE_ID);
    }
 
    /**
@@ -99,11 +62,7 @@ class RelationshipDataImpl extends BaseObjectData implements RelationshipData
     */
    public String getTargetId()
    {
-      if (isNew())
-      {
-         return target.getObjectId();
-      }
-      return getString(CmisConstants.TARGET_ID);
+      return jcrEntry.getString(CmisConstants.TARGET_ID);
    }
 
    /**
@@ -117,7 +76,6 @@ class RelationshipDataImpl extends BaseObjectData implements RelationshipData
    /**
     * {@inheritDoc}
     */
-   @Override
    public FolderData getParent() throws ConstraintException
    {
       return null;
@@ -126,82 +84,33 @@ class RelationshipDataImpl extends BaseObjectData implements RelationshipData
    /**
     * {@inheritDoc}
     */
-   @Override
    public Collection<FolderData> getParents()
    {
       return Collections.emptyList();
    }
 
-   /**
-    * {@inheritDoc}
-    */
-   @Override
-   protected void create() throws StorageException, NameConstraintViolationException
+   protected void delete() throws StorageException
    {
-      try
       {
-         if (name == null || name.length() == 0)
+         String objectId = getObjectId();
+         try
          {
-            throw new NameConstraintViolationException("Name for new relationship must be provided.");
+            Node node = getNode();
+            Session session = node.getSession();
+            node.remove();
+            session.save();
          }
-
-         Node relationships =
-            (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_RELATIONSHIPS);
-
-         if (relationships.hasNode(name))
+         catch (RepositoryException re)
          {
-            throw new NameConstraintViolationException("Relationship with name " + name + " already exists.");
+            throw new StorageException("Unable delete object. " + re.getMessage(), re);
          }
-
-         Node relationship = relationships.addNode(name, type.getLocalName());
-
-         relationship.setProperty(CmisConstants.OBJECT_TYPE_ID, //
-            type.getId());
-         relationship.setProperty(CmisConstants.BASE_TYPE_ID, //
-            type.getBaseId().value());
-         relationship.setProperty(CmisConstants.CREATED_BY, //
-            session.getUserID());
-         relationship.setProperty(CmisConstants.CREATION_DATE, //
-            Calendar.getInstance());
-         relationship.setProperty(CmisConstants.LAST_MODIFIED_BY, //
-            session.getUserID());
-         relationship.setProperty(CmisConstants.LAST_MODIFICATION_DATE, //
-            Calendar.getInstance());
-         relationship.setProperty(CmisConstants.SOURCE_ID, //
-            ((BaseObjectData)source).getNode());
-         relationship.setProperty(CmisConstants.TARGET_ID, //
-            ((BaseObjectData)target).getNode());
-
-         for (Property<?> property : properties.values())
+         if (indexListener != null)
          {
-            setProperty(relationship, property);
+            Set<String> removed = new HashSet<String>();
+            removed.add(objectId);
+            indexListener.removed(removed);
          }
-
-         if (policies != null && policies.size() > 0)
-         {
-            for (PolicyData policy : policies)
-            {
-               applyPolicy(relationship, policy);
-            }
-         }
-
-         if (acl != null && acl.size() > 0)
-         {
-            setACL(relationship, acl);
-         }
-
-         relationships.save();
-
-         name = null;
-         policies = null;
-         acl = null;
-         properties.clear();
-
-         node = relationship;
-      }
-      catch (RepositoryException re)
-      {
-         throw new StorageException("Unable create new relationship. " + re.getMessage(), re);
       }
    }
+
 }

@@ -78,24 +78,22 @@ public class IndexListener
 
    public void created(ObjectData object)
    {
-      //LOG.info(object.getObjectId() + " " + object.getParent().getPath() + "/" + object.getName());
       try
       {
          searchService.update(contentEntryAdapter.createEntry(object), null);
       }
       catch (IndexModificationException e)
       {
-         LOG.error(e.getLocalizedMessage(), e);
+         LOG.error(e.getLocalizedMessage());
       }
       catch (IOException e)
       {
-         LOG.error(e.getLocalizedMessage(), e);
+         LOG.error(e.getLocalizedMessage());
       }
    }
 
    public void removed(Set<String> removed)
    {
-      //LOG.info(removed);
       try
       {
          searchService.update(Collections.EMPTY_LIST, removed);
@@ -108,18 +106,17 @@ public class IndexListener
 
    public void updated(ObjectData object)
    {
-      //LOG.info(object.getObjectId() + " " + object.getParent().getPath() + "/" + object.getName());
       try
       {
          searchService.update(contentEntryAdapter.createEntry(object), object.getObjectId());
       }
       catch (IndexModificationException e)
       {
-         LOG.error(e.getLocalizedMessage(), e);
+         LOG.error(e.getLocalizedMessage());
       }
       catch (IOException e)
       {
-         LOG.error(e.getLocalizedMessage(), e);
+         LOG.error(e.getLocalizedMessage());
       }
    }
 
@@ -159,7 +156,7 @@ public class IndexListener
       }
 
       /**
-       * @param objectData
+       * @param objectData RelationshipData
        * @return ContentEntry ContentEntry;
        */
       private ContentEntry createFromRelationship(RelationshipData objectData)
@@ -232,7 +229,7 @@ public class IndexListener
       /**
        * Convert {@link DocumentData} to {@link ContentEntry}.
        *
-       * @param objectData
+       * @param objectData DocumentData
        * @return contentEntry ContentEntry.
        * @throws IOException
        */
@@ -261,7 +258,7 @@ public class IndexListener
       List<String> tableNames;
 
       /**
-       * Name of the entry
+       * Name of the entry.
        */
       String name;
 

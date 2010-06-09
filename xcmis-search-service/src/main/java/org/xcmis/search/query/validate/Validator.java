@@ -113,6 +113,8 @@ public class Validator extends AbstractModelVisitor
    /**
     * Check if selector exists in list of selectors.
     * @param selectorName
+    * @param propertyName
+    * @param columnIsRequired
     */
    public Schema.Column checkTableAndColumnExistance(SelectorName selectorName, String propertyName,
       boolean columnIsRequired)

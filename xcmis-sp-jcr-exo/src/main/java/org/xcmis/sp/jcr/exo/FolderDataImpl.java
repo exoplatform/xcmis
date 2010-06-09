@@ -20,27 +20,32 @@
 package org.xcmis.sp.jcr.exo;
 
 import org.exoplatform.services.jcr.core.ExtendedNode;
+import org.exoplatform.services.jcr.impl.core.NodeImpl;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.sp.jcr.exo.index.IndexListener;
-import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsIterator;
-import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectData;
-import org.xcmis.spi.PolicyData;
+import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.TypeDefinition;
-import org.xcmis.spi.utils.CmisUtils;
 
-import java.util.Calendar;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Set;
 
 import javax.jcr.Node;
+import javax.jcr.NodeIterator;
 import javax.jcr.PathNotFoundException;
 import javax.jcr.PropertyIterator;
 import javax.jcr.RepositoryException;
@@ -48,21 +53,178 @@ import javax.jcr.Session;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: FolderDataImpl.java 1160 2010-05-21 17:06:16Z
+ *          alexey.zavizionov@gmail.com $
  */
 class FolderDataImpl extends BaseObjectData implements FolderData
 {
+   static final Set<String> SKIP_CHILD_ITEMS = new HashSet<String>();
+
+   static
+   {
+      SKIP_CHILD_ITEMS.add("jcr:system");
+      SKIP_CHILD_ITEMS.add("xcmis:system");
+   }
+
+   private class FolderChildrenIterator implements ItemsIterator<ObjectData>
+   {
+
+      /** JCR node iterator. */
+      protected final NodeIterator iter;
+
+      /** Next CMIS item instance. */
+      protected ObjectData next;
+
+      private final IndexListener indexListener;
+
+      /**
+       * @param iter back-end NodeIterator
+       * @param indexListener the index listener
+       */
+      FolderChildrenIterator(NodeIterator iter, IndexListener indexListener)
+      {
+         this.iter = iter;
+         this.indexListener = indexListener;
+         fetchNext();
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public boolean hasNext()
+      {
+         return next != null;
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public ObjectData next()
+      {
+         if (next == null)
+         {
+            throw new NoSuchElementException();
+         }
+         ObjectData n = next;
+         fetchNext();
+         return n;
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public void remove()
+      {
+         throw new UnsupportedOperationException("remove");
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public int size()
+      {
+         return -1;
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public void skip(int skip) throws NoSuchElementException
+      {
+         while (skip-- > 0)
+         {
+            fetchNext();
+            if (next == null)
+            {
+               throw new NoSuchElementException();
+            }
+         }
+      }
+
+      /**
+       * To fetch next item.
+       */
+      protected void fetchNext()
+      {
+         next = null;
+         while (next == null && iter.hasNext())
+         {
+            Node node = iter.nextNode();
+            try
+            {
+               if (SKIP_CHILD_ITEMS.contains(node.getName()))
+               {
+                  continue;
+               }
+
+               if (!((NodeImpl)node).isValid())
+               {
+                  continue; // TODO temporary
+               }
+
+               if (node.isNodeType("nt:linkedFile"))
+               {
+                  node = node.getProperty("jcr:content").getNode();
+               }
+               else if (node.isNodeType("xcmis:unfiledObject"))
+               {
+                  NodeIterator child = node.getNodes();
+                  if (child.hasNext())
+                  {
+                     node = child.nextNode();
+                  }
+               }
+
+               TypeDefinition type = JcrTypeHelper.getTypeDefinition(node.getPrimaryNodeType(), true);
+
+               if (type.getBaseId() == BaseType.DOCUMENT)
+               {
+                  if (!node.isNodeType(JcrCMIS.CMIS_MIX_DOCUMENT))
+                  {
+                     next = new JcrFile(new JcrNodeEntry(node, type), indexListener, renditionManager);
+                  }
+                  else
+                  {
+                     next = new DocumentDataImpl(new JcrNodeEntry(node, type), indexListener, renditionManager);
+                  }
+               }
+               else if (type.getBaseId() == BaseType.FOLDER)
+               {
+                  if (!node.isNodeType(JcrCMIS.CMIS_MIX_FOLDER))
+                  {
+                     next = new JcrFolder(new JcrNodeEntry(node, type), indexListener, renditionManager);
+                  }
+                  else
+                  {
+                     next = new FolderDataImpl(new JcrNodeEntry(node, type), indexListener, renditionManager);
+                  }
+               }
+            }
+            catch (NotSupportedNodeTypeException iae)
+            {
+               if (LOG.isDebugEnabled())
+               {
+                  // Show only in debug mode. It may cause a lot of warn when
+                  // unsupported by xCMIS nodes met.
+                  LOG.warn("Unable get next object . " + iae.getMessage());
+               }
+            }
+            catch (javax.jcr.RepositoryException re)
+            {
+               LOG.warn("Unexpected error. Failed get next CMIS object. " + re.getMessage());
+            }
+         }
+      }
+   }
 
    private static final Log LOG = ExoLogger.getLogger(FolderDataImpl.class);
 
-   public FolderDataImpl(TypeDefinition type, FolderData parent, Session session, IndexListener indexListener)
-   {
-      super(type, parent, session, indexListener);
-   }
+   protected final RenditionManager renditionManager;
 
-   public FolderDataImpl(TypeDefinition type, Node node, IndexListener indexListener)
+   public FolderDataImpl(JcrNodeEntry jcrEntry, IndexListener indexListener, RenditionManager renditionManager)
    {
-      super(type, node, indexListener);
+      super(jcrEntry, indexListener);
+      this.renditionManager = renditionManager;
    }
 
    /**
@@ -70,23 +232,20 @@ class FolderDataImpl extends BaseObjectData implements FolderData
     */
    public void addObject(ObjectData object) throws ConstraintException
    {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException("Not supported for newly created objects.");
-      }
-
       try
       {
-         Node data = ((BaseObjectData)object).getNode();
-         if (data.getParent().isNodeType("xcmis:unfiledObject"))
+         Node node = getNode();
+         Session session = node.getSession();
+         Node add = ((BaseObjectData)object).getNode();
+         if (add.getParent().isNodeType("xcmis:unfiledObject"))
          {
             // Object is in unfiled store. Move object in current folder.
-            Node unfiled = data.getParent();
-            String dataName = data.getName();
+            Node unfiled = add.getParent();
+            String dataName = add.getName();
             String destPath = node.getPath();
             destPath += destPath.equals("/") ? dataName : ("/" + dataName);
 
-            session.move(data.getPath(), destPath);
+            session.move(add.getPath(), destPath);
 
             // Remove unnecessary wrapper.
             unfiled.remove();
@@ -96,11 +255,14 @@ class FolderDataImpl extends BaseObjectData implements FolderData
             // Object (real object) is in some folder in repository.
             // Add link in current folder.
             Node link = node.addNode(object.getName(), "nt:linkedFile");
-            link.setProperty("jcr:content", data);
+            link.setProperty("jcr:content", add);
          }
 
          session.save();
-         indexListener.updated(object);
+         if (indexListener != null)
+         {
+            indexListener.updated(object);
+         }
       }
       catch (RepositoryException re)
       {
@@ -118,14 +280,9 @@ class FolderDataImpl extends BaseObjectData implements FolderData
          LOG.debug("Get children " + getObjectId() + ", name " + getName());
       }
 
-      if (isNew())
-      {
-         return CmisUtils.emptyItemsIterator();
-      }
-
       try
       {
-         return new FolderChildrenIterator(node.getNodes(), indexListener);
+         return new FolderChildrenIterator(getNode().getNodes(), indexListener);
       }
       catch (RepositoryException re)
       {
@@ -146,21 +303,53 @@ class FolderDataImpl extends BaseObjectData implements FolderData
    /**
     * {@inheritDoc}
     */
-   public String getPath()
+   public FolderData getParent() throws ConstraintException
    {
-      if (isNew())
-      {
-         return null;
-      }
-
       try
       {
-         return node.getPath();
+         Node node = getNode();
+         if (node.getDepth() == 0)
+         {
+            throw new ConstraintException("Unable get parent of root folder.");
+         }
+         Node parent = node.getParent();
+         return new FolderDataImpl(new JcrNodeEntry(parent), indexListener, renditionManager);
       }
       catch (RepositoryException re)
       {
-         throw new CmisRuntimeException("Unable get folder path. " + re.getMessage(), re);
+         throw new CmisRuntimeException("Unable get object parent. " + re.getMessage(), re);
       }
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public Collection<FolderData> getParents()
+   {
+      try
+      {
+         Node node = getNode();
+         if (node.getDepth() == 0)
+         {
+            return Collections.emptyList();
+         }
+         Node parent = node.getParent();
+         List<FolderData> parents = new ArrayList<FolderData>(1);
+         parents.add(new FolderDataImpl(new JcrNodeEntry(parent), indexListener, renditionManager));
+         return parents;
+      }
+      catch (RepositoryException re)
+      {
+         throw new CmisRuntimeException("Unable get object parent. " + re.getMessage(), re);
+      }
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public String getPath()
+   {
+      return jcrEntry.getPath();
    }
 
    /**
@@ -168,16 +357,11 @@ class FolderDataImpl extends BaseObjectData implements FolderData
     */
    public boolean hasChildren()
    {
-      if (isNew())
-      {
-         return false;
-      }
-
       try
       {
          // Weak solution. Even this method return true iterator over children may
          // be empty if folder contains only not CMIS object.
-         return node.hasNodes();
+         return getNode().hasNodes();
       }
       catch (RepositoryException re)
       {
@@ -190,11 +374,6 @@ class FolderDataImpl extends BaseObjectData implements FolderData
     */
    public boolean isAllowedChildType(String typeId)
    {
-      if (isNew())
-      {
-         return false;
-      }
-
       // There is no any restriction about types. Any fileable objects supported.
       // Is type is fileable must be checked before calling this method.
       return true;
@@ -205,14 +384,9 @@ class FolderDataImpl extends BaseObjectData implements FolderData
     */
    public boolean isRoot()
    {
-      if (isNew())
-      {
-         return false;
-      }
-
       try
       {
-         return node.getDepth() == 0;
+         return getNode().getDepth() == 0;
       }
       catch (RepositoryException re)
       {
@@ -225,21 +399,19 @@ class FolderDataImpl extends BaseObjectData implements FolderData
     */
    public void removeObject(ObjectData object)
    {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException("Not supported for newly created objects.");
-      }
-
       try
       {
-         Node data = ((BaseObjectData)object).getNode();
+         Node remove = ((BaseObjectData)object).getNode();
 
-         if (((ExtendedNode)data.getParent()).getIdentifier().equals(((ExtendedNode)node).getIdentifier()))
+         Node node = getNode();
+         Session session = node.getSession();
+
+         if (((ExtendedNode)remove.getParent()).getIdentifier().equals(((ExtendedNode)node).getIdentifier()))
          {
             // Node 'data' is filed in current folder directly.
             // Check links from other folders.
             Node link = null;
-            for (PropertyIterator references = data.getReferences(); references.hasNext();)
+            for (PropertyIterator references = remove.getReferences(); references.hasNext();)
             {
                Node next = references.nextProperty().getParent();
                if (next.isNodeType("nt:linkedFile"))
@@ -264,21 +436,17 @@ class FolderDataImpl extends BaseObjectData implements FolderData
                // Move this node in unfiled store.
                Node unfiledStore =
                   (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_UNFILED);
-
                Node unfiled = unfiledStore.addNode(object.getObjectId(), "xcmis:unfiledObject");
-
-               destPath = unfiled.getPath() + "/" + data.getName();
+               destPath = unfiled.getPath() + "/" + remove.getName();
             }
 
             // Move object node from current folder.
-            session.move(data.getPath(), destPath);
-            data = (Node)session.getItem(destPath);
-
+            session.move(remove.getPath(), destPath);
          }
          else
          {
             // Need find link in current folder.
-            for (PropertyIterator references = data.getReferences(); references.hasNext();)
+            for (PropertyIterator references = remove.getReferences(); references.hasNext();)
             {
                Node next = references.nextProperty().getParent();
                if (next.isNodeType("nt:linkedFile")
@@ -291,7 +459,10 @@ class FolderDataImpl extends BaseObjectData implements FolderData
          }
 
          session.save();
-         indexListener.updated(object);
+         if (indexListener != null)
+         {
+            indexListener.updated(object);
+         }
       }
       catch (PathNotFoundException pe)
       {
@@ -303,98 +474,32 @@ class FolderDataImpl extends BaseObjectData implements FolderData
       }
    }
 
-   /**
-    * {@inheritDoc}
-    */
-   @Override
-   protected void create() throws StorageException, NameConstraintViolationException
-   {
-      try
-      {
-         if (name == null || name.length() == 0)
-         {
-            throw new NameConstraintViolationException("Name for new folder must be provided.");
-         }
-
-         Node parentNode = parent.getNode();
-
-         if (parentNode.hasNode(name))
-         {
-            throw new NameConstraintViolationException("Object with name " + name
-               + " already exists in specified folder.");
-         }
-
-         Node folder = parentNode.addNode(name, type.getLocalName());
-
-         if (!folder.isNodeType(JcrCMIS.CMIS_MIX_FOLDER))
-         {
-            folder.addMixin(JcrCMIS.CMIS_MIX_FOLDER);
-         }
-
-         folder.setProperty(CmisConstants.OBJECT_TYPE_ID, //
-            type.getId());
-         folder.setProperty(CmisConstants.BASE_TYPE_ID, //
-            type.getBaseId().value());
-         folder.setProperty(CmisConstants.CREATED_BY, //
-            session.getUserID());
-         folder.setProperty(CmisConstants.CREATION_DATE, //
-            Calendar.getInstance());
-         folder.setProperty(CmisConstants.LAST_MODIFIED_BY, //
-            session.getUserID());
-         folder.setProperty(CmisConstants.LAST_MODIFICATION_DATE, //
-            Calendar.getInstance());
-
-         for (Property<?> property : properties.values())
-         {
-            setProperty(folder, property);
-         }
-
-         if (policies != null && policies.size() > 0)
-         {
-            for (PolicyData policy : policies)
-            {
-               applyPolicy(folder, policy);
-            }
-         }
-
-         if (acl != null && acl.size() > 0)
-         {
-            setACL(folder, acl);
-         }
-
-         session.save();
-
-         name = null;
-         policies = null;
-         acl = null;
-         properties.clear();
-
-         node = folder;
-      }
-      catch (RepositoryException re)
-      {
-         throw new StorageException("Unable save Folder. " + re.getMessage(), re);
-      }
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   @Override
-   void delete() throws StorageException
+   protected void delete() throws StorageException
    {
       if (isRoot())
       {
-         throw new ConstraintException("Root folder can't be removed.");
-      }
-      if (hasChildren())
-      {
-         throw new ConstraintException("Failed delete object. Object " + getObjectId()
-            + " is Folder and contains one or more objects.");
+         throw new StorageException("Root folder can't be deleted.");
       }
 
-      // Common delete.
-      super.delete();
+      String objectId = getObjectId();
+      try
+      {
+         Node node = getNode();
+         Session session = node.getSession();
+         node.remove();
+         session.save();
+      }
+      catch (RepositoryException re)
+      {
+         throw new StorageException("Unable delete object. " + re.getMessage(), re);
+      }
+
+      if (indexListener != null)
+      {
+         Set<String> removed = new HashSet<String>();
+         removed.add(objectId);
+         indexListener.removed(removed);
+      }
    }
 
 }

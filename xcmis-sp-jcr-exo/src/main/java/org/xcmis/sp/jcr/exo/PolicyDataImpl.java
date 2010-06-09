@@ -24,15 +24,13 @@ import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.FolderData;
-import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.model.Property;
-import org.xcmis.spi.model.TypeDefinition;
 
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.jcr.Node;
 import javax.jcr.PropertyIterator;
@@ -46,45 +44,9 @@ import javax.jcr.Session;
 class PolicyDataImpl extends BaseObjectData implements PolicyData
 {
 
-   public PolicyDataImpl(TypeDefinition type, Session session, IndexListener indexListener)
+   public PolicyDataImpl(JcrNodeEntry jcrEntry, IndexListener indexListener)
    {
-      super(type, null, session, indexListener);
-   }
-
-   public PolicyDataImpl(TypeDefinition type, Node node, IndexListener indexListener)
-   {
-      super(type, node, indexListener);
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   @Override
-   void delete() throws StorageException
-   {
-      try
-      {
-         // Check is policy applied to at least one object.
-         for (PropertyIterator iter = node.getReferences(); iter.hasNext();)
-         {
-            Node controllable = iter.nextProperty().getParent();
-            if (controllable.isNodeType(JcrCMIS.NT_FILE) //
-               || controllable.isNodeType(JcrCMIS.NT_FOLDER) //
-               || controllable.isNodeType(JcrCMIS.CMIS_NT_POLICY))
-            {
-               String msg = "Unable to delete applied policy.";
-               throw new ConstraintException(msg);
-            }
-         }
-
-      }
-      catch (RepositoryException re)
-      {
-         throw new StorageException("Unable delete object. " + re.getMessage(), re);
-      }
-
-      // If not applied to any object
-      super.delete();
+      super(jcrEntry, indexListener);
    }
 
    /**
@@ -99,7 +61,6 @@ class PolicyDataImpl extends BaseObjectData implements PolicyData
    /**
     * {@inheritDoc}
     */
-   @Override
    public FolderData getParent() throws ConstraintException
    {
       return null;
@@ -108,7 +69,6 @@ class PolicyDataImpl extends BaseObjectData implements PolicyData
    /**
     * {@inheritDoc}
     */
-   @Override
    public Collection<FolderData> getParents()
    {
       return Collections.emptyList();
@@ -119,74 +79,39 @@ class PolicyDataImpl extends BaseObjectData implements PolicyData
     */
    public String getPolicyText()
    {
-      return getString(CmisConstants.POLICY_TEXT);
+      return jcrEntry.getString(CmisConstants.POLICY_TEXT);
    }
 
-   /**
-    * {@inheritDoc}
-    */
-   @Override
-   protected void create() throws StorageException, NameConstraintViolationException
+   protected void delete() throws StorageException
    {
+      String objectId = getObjectId();
       try
       {
-         if (name == null || name.length() == 0)
+         // Check is policy applied to at least one object.
+         Node node = getNode();
+         Session session = node.getSession();
+         for (PropertyIterator iter = node.getReferences(); iter.hasNext();)
          {
-            throw new NameConstraintViolationException("Name for new policy must be provided.");
-         }
-
-         Node policiesStore = (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_POLICIES);
-
-         if (policiesStore.hasNode(name))
-         {
-            throw new NameConstraintViolationException("Policy with name " + name + " already exists.");
-         }
-
-         Node newPolicy = policiesStore.addNode(name, type.getLocalName());
-
-         newPolicy.setProperty(CmisConstants.OBJECT_TYPE_ID, //
-            type.getId());
-         newPolicy.setProperty(CmisConstants.BASE_TYPE_ID, //
-            type.getBaseId().value());
-         newPolicy.setProperty(CmisConstants.CREATED_BY, //
-            session.getUserID());
-         newPolicy.setProperty(CmisConstants.CREATION_DATE, //
-            Calendar.getInstance());
-         newPolicy.setProperty(CmisConstants.LAST_MODIFIED_BY, //
-            session.getUserID());
-         newPolicy.setProperty(CmisConstants.LAST_MODIFICATION_DATE, //
-            Calendar.getInstance());
-
-         for (Property<?> property : properties.values())
-         {
-            setProperty(newPolicy, property);
-         }
-
-         if (policies != null && policies.size() > 0)
-         {
-            for (PolicyData policy : policies)
+            Node controllable = iter.nextProperty().getParent();
+            if (controllable.isNodeType(JcrCMIS.NT_FILE) //
+               || controllable.isNodeType(JcrCMIS.NT_FOLDER) //
+               || controllable.isNodeType(JcrCMIS.CMIS_NT_POLICY))
             {
-               applyPolicy(newPolicy, policy);
+               throw new StorageException("Unable to delete applied policy.");
             }
          }
-
-         if (acl != null && acl.size() > 0)
-         {
-            setACL(newPolicy, acl);
-         }
-
+         node.remove();
          session.save();
-
-         name = null;
-         policies = null;
-         acl = null;
-         properties.clear();
-
-         node = newPolicy;
       }
       catch (RepositoryException re)
       {
-         throw new StorageException("Unable create new policy. " + re.getMessage(), re);
+         throw new StorageException("Unable delete object. " + re.getMessage(), re);
+      }
+      if (indexListener != null)
+      {
+         Set<String> removed = new HashSet<String>();
+         removed.add(objectId);
+         indexListener.removed(removed);
       }
    }
 

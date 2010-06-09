@@ -451,16 +451,14 @@ public class ObjectServicePortImpl implements ObjectServicePort
       {
          LOG.debug("Executing operation getContentStream");
       }
+      // TODO : content range
       Connection conn = null;
       try
       {
          conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
          CmisContentStreamType stream = new CmisContentStreamType();
-         ContentStream cs = conn.getContentStream(objectId, //
-            streamId, //
-            offset != null ? offset.longValue() : 0, //
-            length != null ? length.longValue() : -1);
+         ContentStream cs = conn.getContentStream(objectId, streamId);
 
          stream.setFilename(cs.getFileName());
          String mediaType = cs.getMediaType().toString();

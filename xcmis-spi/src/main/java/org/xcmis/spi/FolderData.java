@@ -19,7 +19,6 @@
 
 package org.xcmis.spi;
 
-
 /**
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
@@ -54,18 +53,6 @@ public interface FolderData extends ObjectData
     */
    boolean hasChildren();
 
-   //   /**
-   //    * Create child of <code>type</code> in this folder.
-   //    * 
-   //    * @param type type of object
-   //    * @return newly created unsaved object. TO persist it method
-   //    *         {@link Storage#saveObject(ObjectData)}
-   //    * @throws ConstraintException if <code>object</code> has type that is
-   //    *         unsupported by current folder. See
-   //    *         {@link CMIS#ALLOWED_CHILD_OBJECT_TYPE_IDS}
-   //    */
-   //   ObjectData createChild(TypeDefinition type) throws ConstraintException;
-
    /**
     * Add existed fileable object in this folder. If multifiling capability is
     * not supported then this method must throw {@link NotSupportedException}.
@@ -74,6 +61,7 @@ public interface FolderData extends ObjectData
     * @throws ConstraintException if <code>object</code> has type that is
     *         unsupported by current folder. See
     *         {@link CMIS#ALLOWED_CHILD_OBJECT_TYPE_IDS}
+    * @throws NotSupportedException if multifiling capability is not supported
     */
    void addObject(ObjectData object) throws ConstraintException;
 
@@ -83,6 +71,7 @@ public interface FolderData extends ObjectData
     * not supported then this method must throw {@link NotSupportedException}.
     * 
     * @param object object to be removed from current folder
+    * @throws NotSupportedException if unfiling capability is not supported
     */
    void removeObject(ObjectData object);
 

@@ -34,7 +34,6 @@ import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.PropertyType;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.Updatability;
-import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 import org.xcmis.spi.utils.MimeType;
@@ -71,6 +70,10 @@ public abstract class BaseQueryTest extends BaseTest
 
    protected final static String PROPERTY_STATUS = "cmis:status";
 
+   protected TypeDefinition nasaDocumentTypeDefinition;
+
+   protected TypeDefinition folderTypeDefinition;
+
    /**
     * @see org.xcmis.sp.inmemory.BaseTest#setUp()
     */
@@ -81,34 +84,34 @@ public abstract class BaseQueryTest extends BaseTest
       super.setUp();
       Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
 
-      propertyDefinitions.put("cmis:booster-name", new PropertyDefinition("cmis:booster-name", "cmis:booster-name",
-         "cmis:booster-name", null, "cmis:booster-name", "cmis:booster-name", PropertyType.STRING,
+      propertyDefinitions.put("cmis:booster-name", new PropertyDefinition<String>("cmis:booster-name",
+         "cmis:booster-name", "cmis:booster-name", null, "cmis:booster-name", "cmis:booster-name", PropertyType.STRING,
          Updatability.READWRITE, true, false, false, false, false, true, null, null));
 
-      propertyDefinitions.put("cmis:commander", new PropertyDefinition("cmis:commander", "cmis:commander",
+      propertyDefinitions.put("cmis:commander", new PropertyDefinition<String>("cmis:commander", "cmis:commander",
          "cmis:commander", null, "cmis:commander", "cmis:commander", PropertyType.STRING, Updatability.READWRITE, true,
          false, false, false, false, true, null, null));
 
-      propertyDefinitions.put("cmis:command-module-pilot", new PropertyDefinition("cmis:command-module-pilot",
+      propertyDefinitions.put("cmis:command-module-pilot", new PropertyDefinition<String>("cmis:command-module-pilot",
          "cmis:command-module-pilot", "cmis:command-module-pilot", null, "cmis:command-module-pilot",
          "cmis:command-module-pilot", PropertyType.STRING, Updatability.READWRITE, true, false, false, false, false,
          true, null, null));
-      propertyDefinitions.put("cmis:lunar-module-pilot", new PropertyDefinition("cmis:lunar-module-pilot",
+      propertyDefinitions.put("cmis:lunar-module-pilot", new PropertyDefinition<String>("cmis:lunar-module-pilot",
          "cmis:lunar-module-pilot", "cmis:lunar-module-pilot", null, "cmis:lunar-module-pilot",
          "cmis:lunar-module-pilot", PropertyType.STRING, Updatability.READWRITE, true, false, false, false, false,
          true, null, null));
 
-      propertyDefinitions.put("cmis:booster-mass", new PropertyDefinition("cmis:booster-mass", "cmis:booster-mass",
-         "cmis:booster-mass", null, "cmis:booster-mass", "cmis:booster-mass", PropertyType.DECIMAL,
-         Updatability.READWRITE, true, false, false, false, false, true, null, null));
+      propertyDefinitions.put("cmis:booster-mass", new PropertyDefinition<String>("cmis:booster-mass",
+         "cmis:booster-mass", "cmis:booster-mass", null, "cmis:booster-mass", "cmis:booster-mass",
+         PropertyType.DECIMAL, Updatability.READWRITE, true, false, false, false, false, true, null, null));
 
-      propertyDefinitions.put("cmis:sample-returned", new PropertyDefinition("cmis:sample-returned",
+      propertyDefinitions.put("cmis:sample-returned", new PropertyDefinition<String>("cmis:sample-returned",
          "cmis:sample-returned", "cmis:sample-returned", null, "cmis:sample-returned", "cmis:sample-returned",
          PropertyType.DECIMAL, Updatability.READWRITE, true, false, false, false, false, true, null, null));
 
-      propertyDefinitions.put("cmis:status", new PropertyDefinition("cmis:status", "cmis:status", "cmis:status", null,
-         "cmis:status", "cmis:status", PropertyType.BOOLEAN, Updatability.READWRITE, true, false, false, false, false,
-         true, null, null));
+      propertyDefinitions.put("cmis:status", new PropertyDefinition<String>("cmis:status", "cmis:status",
+         "cmis:status", null, "cmis:status", "cmis:status", PropertyType.BOOLEAN, Updatability.READWRITE, true, false,
+         false, false, false, true, null, null));
 
       storage.addType(new TypeDefinition("cmis:nasa-mission", BaseType.DOCUMENT, "cmis:nasa-mission",
          "cmis:nasa-mission", "", "cmis:document", "cmis:nasa-mission", "Cmis Document Type", true, true, true, true,
@@ -122,37 +125,66 @@ public abstract class BaseQueryTest extends BaseTest
          "cmis:article-sports", "", "cmis:article", "cmis:article-sports", "Cmis cmis:article-sports", true, true,
          true, true, true, true, true, true, null, null, ContentStreamAllowed.ALLOWED,
          new HashMap<String, PropertyDefinition<?>>()));
+
       storage.addType(new TypeDefinition("cmis:article-animals", BaseType.DOCUMENT, "cmis:article-animals",
          "cmis:article-animals", "", "cmis:article", "cmis:article-animals", "Cmis cmis:article-animals", true, true,
          true, true, true, true, true, true, null, null, ContentStreamAllowed.ALLOWED,
          new HashMap<String, PropertyDefinition<?>>()));
+
+      folderTypeDefinition = storage.getTypeDefinition("cmis:folder", true);
+
+      nasaDocumentTypeDefinition = storage.getTypeDefinition("cmis:nasa-mission", true);
    }
 
-   protected DocumentData createDocument(FolderData folder, String name, String typeId, byte[] content,
+   protected DocumentData createDocument(FolderData folder, String name, TypeDefinition typeDefinition, byte[] content,
       MimeType mimeType) throws Exception
    {
-
-      return createDocument(folder, name, typeId, new BaseContentStream(content, null, mimeType), null);
+      ContentStream cs = new BaseContentStream(content, null, mimeType);
+      return createDocument(folder, name, typeDefinition, cs, null);
    }
 
-   protected DocumentData createDocument(FolderData folder, String name, String typeId, ContentStream content,
-      VersioningState versioningState)
+//   protected DocumentData createDocument(FolderData folder, String name, TypeDefinition typeDefinition,
+//      ContentStream content, VersioningState versioningState)
+//   {
+//      PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:document", CmisConstants.NAME);
+//      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+//      properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
+//         .getDisplayName(), name));
+//
+//      DocumentData document =
+//         storage.createDocument(folder, typeDefinition, properties, content, null, null, versioningState == null
+//            ? VersioningState.MAJOR : versioningState);
+//      return document;
+//   }
+
+//   protected FolderData createFolder(FolderData folder, String name)
+//   {
+//      PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:folder", CmisConstants.NAME);
+//      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+//      properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
+//         .getDisplayName(), name));
+//
+//      FolderData newFolder = storage.createFolder(folder, folderTypeDefinition, properties, null, null);
+//      return newFolder;
+//   }
 
    /**
-   //    * Test NOT IN constraint.
-   //    * <p>
-   //    * Initial data:
-   //    * <ul>
-   //    * <li>doc1: <b>Title</b> - node1 <b>long</b> - 3
-   //    * <li>doc2: <b>Title</b> - node2 <b>long</b> - 15
-   //    * </ul>
-   //    * <p>
-   //    * Query : Select all documents where long property not in set {15 , 20}.
-   //    * <p>
-   //    * Expected result: doc1
-   //    *
-   //    * @throws Exception if an unexpected error occurs
-   //    */
+    * // * Test NOT IN constraint. // *
+    * <p>
+    * // * Initial data: // *
+    * <ul>
+    * // *
+    * <li>doc1: <b>Title</b> - node1 <b>long</b> - 3 // *
+    * <li>doc2: <b>Title</b> - node2 <b>long</b> - 15 // *
+    * </ul>
+    * // *
+    * <p>
+    * // * Query : Select all documents where long property not in set {15 ,
+    * 20}. // *
+    * <p>
+    * // * Expected result: doc1 // * // * @throws Exception if an unexpected
+    * error occurs //
+    */
    //   public void testNotINConstraint() throws Exception
    //   {
    //
@@ -174,23 +206,6 @@ public abstract class BaseQueryTest extends BaseTest
    //
    //      checkResult(result, new Document[]{doc1});
    //   }
-   {
-      DocumentData document =
-         storage.createDocument(folder, typeId, versioningState == null ? VersioningState.MAJOR : versioningState);
-      document.setName(name);
-      document.setContentStream(content);
-      storage.saveObject(document);
-      //document.save();
-      return document;
-   }
-
-   protected FolderData createFolder(FolderData folder, String name, String typeId)
-   {
-      FolderData newFolder = storage.createFolder(folder, typeId);
-      newFolder.setName(name);
-      storage.saveObject(newFolder);
-      return newFolder;
-   }
 
    protected void checkResult(ItemsIterator<Result> result, String[] columns, String[][] expectedResults)
       throws Exception
@@ -268,7 +283,6 @@ public abstract class BaseQueryTest extends BaseTest
          Result next = result.next();
          String id = next.getObjectId();
          resultPaths.add(id);
-         ObjectData object = storage.getObjectById(id);
          //LOG.debug("id:=" + id + " path:=" + object.getParent().getPath() + "/" + object.getName());
       }
 

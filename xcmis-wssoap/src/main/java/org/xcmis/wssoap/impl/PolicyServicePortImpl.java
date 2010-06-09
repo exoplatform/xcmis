@@ -48,7 +48,6 @@ public class PolicyServicePortImpl implements PolicyServicePort
    /**
     * Constructs instance of <code>PolicyServicePortImpl</code> .
     *
-    * @param policyService PolicyService
     */
    public PolicyServicePortImpl()
    {

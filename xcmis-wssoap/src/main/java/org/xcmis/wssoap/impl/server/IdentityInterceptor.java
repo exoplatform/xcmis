@@ -46,15 +46,18 @@ public class IdentityInterceptor extends AbstractSoapInterceptor
       super(Phase.READ);
       if (LOG.isDebugEnabled())
       {
-         LOG.debug(">>> IdentityInterceptor.IdentityInterceptor() entered");
+         LOG.debug(">> > IdentityInterceptor.IdentityInterceptor() entered");
       }
    }
    
+   /* (non-Javadoc)
+    * @see org.apache.cxf.interceptor.Interceptor#handleMessage(org.apache.cxf.message.Message)
+    */
    public void handleMessage(SoapMessage arg0) throws Fault
    {
       if (LOG.isDebugEnabled())
       {
-         LOG.debug(">>> IdentityInterceptor.handleMessage() entered");
+         LOG.debug(">> > IdentityInterceptor.handleMessage() entered");
       }
       ConversationState state = new ConversationState(new Identity("root"));
       ConversationState.setCurrent(state);

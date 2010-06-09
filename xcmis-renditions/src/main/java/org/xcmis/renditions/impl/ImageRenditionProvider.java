@@ -34,15 +34,27 @@ import javax.imageio.ImageIO;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: ImageRenditionProvider.java 1218 2010-06-03 14:56:06Z andrew00x
+ *          $
  */
 public class ImageRenditionProvider implements RenditionProvider
 {
 
-   /** The String[] SUPPORTED_MIEDIA_TYPES. */
-   private static final String[] SUPPORTED_MEDIA_TYPES = ImageIO.getReaderMIMETypes();
+   private static final MimeType[] SUPPORTED_MEDIA_TYPES;
 
-   // TODO configurable maxHeigth & maxWidth
+   static
+   {
+      String[] types = ImageIO.getReaderMIMETypes();
+      SUPPORTED_MEDIA_TYPES = new MimeType[types.length];
+      for (int i = 0; i < types.length; i++)
+      {
+         SUPPORTED_MEDIA_TYPES[i] = MimeType.fromString(types[i]);
+      }
+   }
+
+   private static final MimeType PRODUCED = new MimeType("image", "png");
+
+   // TODO configurable maxHeigth & maxWidth ??
    /** The max height. */
    private int maxHeight = 100;
 
@@ -52,14 +64,37 @@ public class ImageRenditionProvider implements RenditionProvider
    /**
     * {@inheritDoc}
     */
+   public int getHeight()
+   {
+      return -1;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public String getKind()
+   {
+      return "cmis:thumbnail";
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public MimeType getProducedMediaType()
+   {
+      return PRODUCED;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
    public RenditionContentStream getRenditionStream(ContentStream stream) throws IOException
    {
       BufferedImage image = ImageIO.read(stream.getStream());
       // Determine scale and be sure both width and height are not greater the max
-      int scale = (int)Math.max(//
-         Math.floor((image.getHeight() / maxHeight) + 1.0d), //
-         Math.floor((image.getWidth() / maxWidth) + 1.0d) //
-         );
+      int scale =
+         (int)Math.max(Math.floor((image.getHeight() / maxHeight) + 1.0d), Math
+            .floor((image.getWidth() / maxWidth) + 1.0d));
       int height = image.getHeight() / scale;
       int width = image.getWidth() / scale;
       BufferedImage scaledImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -71,17 +106,24 @@ public class ImageRenditionProvider implements RenditionProvider
       ByteArrayOutputStream out = new ByteArrayOutputStream();
       ImageIO.write(scaledImage, "png", out);
       RenditionContentStream renditionStream =
-         new RenditionContentStream(out.toByteArray(), null, new MimeType("image", "png"), "cmis:thumbnail");
-      renditionStream.setHeight(height);
-      renditionStream.setWidth(width);
+         new RenditionContentStream(out.toByteArray(), null, new MimeType("image", "png"), getKind(), height, width);
+
       return renditionStream;
    }
 
    /**
     * {@inheritDoc}
     */
-   public String[] getSupportedMediaType()
+   public MimeType[] getSupportedMediaType()
    {
       return SUPPORTED_MEDIA_TYPES;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public int getWidth()
+   {
+      return -1;
    }
 }

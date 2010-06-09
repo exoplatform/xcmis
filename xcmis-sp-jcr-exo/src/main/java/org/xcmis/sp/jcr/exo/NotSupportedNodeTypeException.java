@@ -26,9 +26,10 @@ import org.xcmis.spi.CmisRuntimeException;
  * one of supported by xCMIS implementation.
  * 
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: NotSupportedNodeTypeException.java 1260 2010-06-09 09:18:30Z
+ *          andrew00x $
  */
-public class NotSupportedNodeTypeException extends CmisRuntimeException
+class NotSupportedNodeTypeException extends CmisRuntimeException
 {
 
    private static final long serialVersionUID = -2990445717857972378L;

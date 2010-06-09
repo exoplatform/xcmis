@@ -18,27 +18,33 @@
  */
 package org.xcmis.sp.jcr.exo.index;
 
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
 import org.xcmis.search.content.Schema;
 import org.xcmis.search.lucene.content.SchemaTableResolver;
 import org.xcmis.search.value.NameConverter;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.TypeManager;
+import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.model.TypeDefinition;
 
 import java.util.HashSet;
 import java.util.Set;
 
 /**
-  * Class override getSubTypes method.
-  * 
+ * Class override getSubTypes method.
+ *
  */
 public class CmisSchemaTableResolver extends SchemaTableResolver
 {
 
    private final TypeManager typeManager;
 
+   private static final Log LOG = ExoLogger.getLogger(CmisSchemaTableResolver.class);
+
    /**
-    *  Instantiates new instance of CmisSchemaTableResolver.
+    * Instantiates new instance of CmisSchemaTableResolver.
+    *
     * @param nameConverter NameConverter
     * @param schema Schema
     * @param typeManager TypeManager
@@ -57,14 +63,19 @@ public class CmisSchemaTableResolver extends SchemaTableResolver
    {
       Set<String> subTypes = new HashSet<String>();
 
-      ItemsIterator<TypeDefinition> typeChildren = typeManager.getTypeChildren(tableName, false);
-      while (typeChildren.hasNext())
+      try
       {
-         TypeDefinition typeDefinition = typeChildren.next();
-         subTypes.add(typeDefinition.getQueryName());
-
+         ItemsIterator<TypeDefinition> typeChildren = typeManager.getTypeChildren(tableName, false);
+         while (typeChildren.hasNext())
+         {
+            TypeDefinition typeDefinition = typeChildren.next();
+            subTypes.add(typeDefinition.getQueryName());
+         }
       }
-
+      catch (TypeNotFoundException tnf)
+      {
+         LOG.error(tnf.getMessage(), tnf);
+      }
       return subTypes;
    }
 }

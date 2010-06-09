@@ -33,7 +33,6 @@ import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.StorageException;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.IncludeRelationships;
 
@@ -49,11 +48,10 @@ public class FolderDescentantsCollection extends CmisObjectCollection
 
    /**
     * Instantiates a new folder descentants collection.
-    * @param storageProvider TODO
     */
-   public FolderDescentantsCollection(/*StorageProvider storageProvider*/)
+   public FolderDescentantsCollection()
    {
-      super(/*storageProvider*/);
+      super();
       setHref("/descendants");
    }
 
@@ -185,10 +183,6 @@ public class FolderDescentantsCollection extends CmisObjectCollection
             }
          }
       }
-      catch (StorageException re)
-      {
-         throw new ResponseContextException(createErrorResponse(re, 500));
-      }
       catch (FilterNotValidException fe)
       {
          throw new ResponseContextException(createErrorResponse(fe, 400));
@@ -247,10 +241,6 @@ public class FolderDescentantsCollection extends CmisObjectCollection
                CmisObject parent = conn.getFolderParent(id, true, null);
                feed.addLink(getObjectLink(getId(parent), request), AtomCMIS.LINK_UP, AtomCMIS.MEDIATYPE_ATOM_ENTRY,
                   null, null, -1);
-            }
-            catch (StorageException re)
-            {
-               throw new ResponseContextException(createErrorResponse(re, 500));
             }
             catch (FilterNotValidException fe)
             {

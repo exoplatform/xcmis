@@ -21,10 +21,8 @@ package org.xcmis.sp.jcr.exo;
 
 import org.xcmis.sp.jcr.exo.index.IndexListener;
 import org.xcmis.spi.CmisRuntimeException;
-import org.xcmis.spi.NameConstraintViolationException;
+import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.UpdateConflictException;
-import org.xcmis.spi.model.TypeDefinition;
 
 import java.util.Calendar;
 
@@ -38,9 +36,9 @@ import javax.jcr.RepositoryException;
 class JcrFolder extends FolderDataImpl
 {
 
-   public JcrFolder(TypeDefinition type, Node node, IndexListener indexListener)
+   public JcrFolder(JcrNodeEntry jcrEntry, IndexListener indexListener, RenditionManager renditionManager)
    {
-      super(type, node, indexListener);
+      super(jcrEntry, indexListener, renditionManager);
    }
 
    /**
@@ -51,6 +49,7 @@ class JcrFolder extends FolderDataImpl
    {
       try
       {
+         Node node = getNode();
          if (node.isNodeType(JcrCMIS.NT_FOLDER))
          {
             return node.getProperty(JcrCMIS.JCR_CREATED).getDate();
@@ -63,38 +62,12 @@ class JcrFolder extends FolderDataImpl
       }
    }
 
-   void save() throws StorageException, NameConstraintViolationException, UpdateConflictException
+   protected void save() throws StorageException
    {
-      try
+      jcrEntry.save();
+      if (indexListener != null)
       {
-         Node parentNode = node.getParent();
-         // New name was set. Need rename Document.
-         // See setName(String), setProperty(Node, Property<?>).
-         if (name != null)
-         {
-            if (name.length() == 0)
-            {
-               throw new NameConstraintViolationException("Name is empty.");
-            }
-
-            if (parentNode.hasNode(name))
-            {
-               throw new NameConstraintViolationException("Object with name " + name + " already exists.");
-            }
-
-            String srcPath = node.getPath();
-            String destPath = srcPath.substring(0, srcPath.lastIndexOf('/') + 1) + name;
-
-            session.move(srcPath, destPath);
-
-            node = (Node)session.getItem(destPath);
-         }
-
-         session.save();
-      }
-      catch (RepositoryException re)
-      {
-         throw new StorageException("Unable save object. " + re.getMessage(), re);
+         indexListener.updated(this);
       }
    }
 

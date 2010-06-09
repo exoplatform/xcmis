@@ -27,7 +27,7 @@ package org.xcmis.spi;
  */
 public class CmisException extends Exception
 {
-   
+
    /** Serial version UID. */
    private static final long serialVersionUID = 1659254884132789242L;
 

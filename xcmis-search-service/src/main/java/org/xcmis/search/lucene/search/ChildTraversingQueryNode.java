@@ -82,6 +82,7 @@ public class ChildTraversingQueryNode extends Query
    /**
     * @param parentQuery - parent query.
     * @param isDeep - if true return only first level child.
+    * @param isIncludeParent
     */
    private ChildTraversingQueryNode(Query parentQuery, boolean isDeep, boolean isIncludeParent)
    {

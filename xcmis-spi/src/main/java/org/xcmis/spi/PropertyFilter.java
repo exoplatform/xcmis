@@ -19,7 +19,6 @@
 
 package org.xcmis.spi;
 
-
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -32,15 +31,15 @@ public class PropertyFilter
 {
 
    /** Property filter for all properties. */
-   public static final String ALL_FILTER = CmisConstants.WILDCARD;
+   public static final String ALL = CmisConstants.WILDCARD;
 
    /** Property filter for all properties. */
-   public static final PropertyFilter ALL;
+   public static final PropertyFilter ALL_FILTER;
 
    static
    {
-      ALL = new PropertyFilter();
-      ALL.retrievalAllProperties = true;
+      ALL_FILTER = new PropertyFilter();
+      ALL_FILTER.retrievalAllProperties = true;
    }
 
    /** Characters that split. */
@@ -62,9 +61,9 @@ public class PropertyFilter
    /**
     * Construct new Property Filter.
     * 
-    * @param filterString the string that contains either '*' or comma-separated list
-    *          of properties names. An arbitrary number of space allowed before
-    *          and after each comma.
+    * @param filterString the string that contains either '*' or comma-separated
+    *        list of properties names. An arbitrary number of space allowed
+    *        before and after each comma.
     * @throws FilterNotValidException if <code>filterString</code> is invalid
     */
    public PropertyFilter(String filterString) throws FilterNotValidException
@@ -76,7 +75,7 @@ public class PropertyFilter
       }
 
       filterString = filterString.trim();
-      if (ALL_FILTER.equals(filterString))
+      if (ALL.equals(filterString))
       {
          this.retrievalAllProperties = true;
       }
@@ -85,7 +84,7 @@ public class PropertyFilter
          this.propertyNames = new HashSet<String>();
          for (String token : SPLITTER.split(filterString))
          {
-            if (token.length() > 0 && !token.equals(ALL_FILTER))
+            if (token.length() > 0 && !token.equals(ALL))
             {
                for (char ch : token.toCharArray())
                {
@@ -109,10 +108,7 @@ public class PropertyFilter
       }
    }
 
-   /**
-    *  Private create instance of PropertyFilter.
-    */
-   private PropertyFilter()
+   protected PropertyFilter()
    {
    }
 

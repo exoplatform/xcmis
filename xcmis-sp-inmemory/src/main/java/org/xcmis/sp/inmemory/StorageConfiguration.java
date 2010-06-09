@@ -31,6 +31,12 @@ public class StorageConfiguration
    /** Storage id. */
    private String id;
 
+   /** Storage name. */
+   private String name;
+
+   /** Description. */
+   private String description;
+
    /** Additional properties. */
    private Map<String, Object> properties;
 
@@ -57,13 +63,52 @@ public class StorageConfiguration
    }
 
    /**
+    * @param id the id
+    * @param name name
+    * @param description description
+    * @param maxMem max memory size
+    * @param maxObjects max objects count
+    */
+   public StorageConfiguration(String id, String name, String description, String maxMem, String maxObjects)
+   {
+      this.id = id;
+      this.name = name;
+      this.description = description;
+      this.properties = new HashMap<String, Object>();
+      if (maxMem != null)
+         this.properties.put(MAX_STORAGE_MEM_SIZE, maxMem);
+      if (maxObjects != null)
+         this.properties.put(MAX_ITEMS_NUMBER, maxObjects);
+   }
+
+   /**
     * Get repository id.
-    *
+    * 
     * @return the repository id
     */
    public String getId()
    {
       return id;
+   }
+
+   /**
+    * Get repository description.
+    * 
+    * @return the repository description
+    */
+   public String getDescription()
+   {
+      return description;
+   }
+
+   /**
+    * Get repository name.
+    * 
+    * @return the repository name
+    */
+   public String getName()
+   {
+      return name;
    }
 
    /**
@@ -87,11 +132,27 @@ public class StorageConfiguration
    }
 
    /**
+    * @param name repository name
+    */
+   public void setName(String name)
+   {
+      this.name = name;
+   }
+
+   /**
     * @param properties properties
     */
    public void setProperties(Map<String, Object> properties)
    {
       this.properties = properties;
+   }
+
+   /**
+    * @param description description
+    */
+   public void setDescription(String description)
+   {
+      this.description = description;
    }
 
    public static Double parseNumber(String text)

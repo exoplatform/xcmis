@@ -19,7 +19,10 @@
 
 package org.xcmis.wssoap;
 
+import java.util.ArrayList;
+
 import org.apache.cxf.endpoint.Server;
+import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.xcmis.core.CmisAllowableActionsType;
 import org.xcmis.core.CmisObjectType;
 import org.xcmis.core.CmisPropertiesType;
@@ -41,6 +44,7 @@ import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.utils.MimeType;
 import org.xcmis.wssoap.impl.ObjectServicePortImpl;
+import org.xcmis.wssoap.impl.server.IdentityInterceptor;
 
 import javax.activation.DataHandler;
 import javax.xml.ws.Holder;
@@ -62,7 +66,9 @@ public class ObjectServiceTest extends BaseTest
    public void setUp() throws Exception
    {
       super.setUp();
-      server = complexDeployService(SERVICE_ADDRESS, new ObjectServicePortImpl(/*storageProvider*/), null, null, true);
+      ArrayList<AbstractPhaseInterceptor<?>> in = new ArrayList<AbstractPhaseInterceptor<?>>();
+      in.add(new IdentityInterceptor());
+      server = complexDeployService(SERVICE_ADDRESS, new ObjectServicePortImpl(), in, null, true);
       port = getObjectService(SERVICE_ADDRESS);
       assertNotNull(server);
       assertNotNull(port);
@@ -249,7 +255,7 @@ public class ObjectServiceTest extends BaseTest
          );
       Holder<String> hId = new Holder<String>(updated);
 
-      ContentStream cs = conn.getContentStream(updated, null, 0, -1);
+      ContentStream cs = conn.getContentStream(updated, null);
       byte b[] = new byte[1024];
       int rd = cs.getStream().read(b);
       assertEquals(content, new String(b, 0, rd));
@@ -259,7 +265,7 @@ public class ObjectServiceTest extends BaseTest
          new CmisExtensionType()));
       try
       {
-         cs = conn.getContentStream(hId.value, null, 0, -1);
+         cs = conn.getContentStream(hId.value, null);
          fail();
       }
       catch (ConstraintException ex)
@@ -374,7 +380,7 @@ public class ObjectServiceTest extends BaseTest
          new Holder<CmisExtensionType>() // Extension
          );
 
-      ContentStream cs = conn.getContentStream(hId.value, null, 0, -1);
+      ContentStream cs = conn.getContentStream(hId.value, null);
       byte[] b = new byte[128];
       int rd = cs.getStream().read(b);
       assertEquals(content, new String(b, 0, rd));
@@ -396,8 +402,8 @@ public class ObjectServiceTest extends BaseTest
 
    protected void tearDown() throws Exception
    {
-      server.stop();
       super.tearDown();
+      server.stop();
    }
 
 }

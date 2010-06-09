@@ -51,11 +51,11 @@ public class ContentEntry
    private final Property[] properties;
 
    /**
-    * @param name
-    * @param tableNames
-    * @param identifier
-    * @param parentIdentifiers
-    * @param properties
+    * @param name String name
+    * @param tableNames String[]
+    * @param identifier String
+    * @param parentIdentifiers String[]
+    * @param properties Property[]
     */
    public ContentEntry(String name, String[] tableNames, String identifer, String[] parentIdentifiers,
       Property[] properties)

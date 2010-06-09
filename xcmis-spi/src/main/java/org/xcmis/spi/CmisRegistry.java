@@ -19,17 +19,17 @@
 
 package org.xcmis.spi;
 
+import org.xcmis.spi.model.RepositoryShortInfo;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicReference;
-
-import org.xcmis.spi.model.RepositoryShortInfo;
 
 /**
  * @version $Id:$
@@ -65,9 +65,9 @@ public class CmisRegistry
       this.storageProviders = new HashMap<String, StorageProvider>();
    }
 
-   public final void addStorage(String id, StorageProvider storageProvider)
+   public final void addStorage(StorageProvider storageProvider)
    {
-      // TODO : Need retrieval all storages from StorageProvider ??
+      String id = storageProvider.getStorageID();
       if (this.storageProviders.get(id) != null)
       {
          throw new CmisRuntimeException("Storage " + id + " already registered.");
@@ -77,9 +77,11 @@ public class CmisRegistry
 
    /**
     * Create new connection. Delegated to appropriate StorageProvider method
-    *
+    * 
     * @param storageId storage id
     * @return connection
+    * @throws InvalidArgumentException if storage with specified id is not
+    *         registered
     */
    public final Connection getConnection(String storageId)
    {
@@ -88,12 +90,12 @@ public class CmisRegistry
       {
          throw new InvalidArgumentException("Storage '" + storageId + "' does not exist.");
       }
-      return storageProvider.getConnection(storageId);
+      return storageProvider.getConnection();
    }
 
    /**
     * Get id of all available storages.
-    *
+    * 
     * @return storages iDs if no one storages configured than empty set returned
     *         never null
     */
@@ -105,7 +107,8 @@ public class CmisRegistry
       {
          String id = it.next();
          RepositoryShortInfo info = new RepositoryShortInfo(id, id);
-         info.setRootFolderId(storageProviders.get(id).getConnection(id).getStorage().getRepositoryInfo().getRootFolderId());
+         info.setRootFolderId(storageProviders.get(id).getConnection().getStorage().getRepositoryInfo()
+            .getRootFolderId());
          set.add(info);
       }
       return Collections.unmodifiableSet(set);
@@ -113,7 +116,7 @@ public class CmisRegistry
 
    /**
     * Adds an extra rendition provider .
-    *
+    * 
     * @param provider String FQN of provider to add.
     * 
     */

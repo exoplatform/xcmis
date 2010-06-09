@@ -9,7 +9,7 @@
 
 	<inherits name="com.google.gwt.http.HTTP" />
 	
-	<inherits name='org.xcmis.client.gwt.CmisClientFramework'/>
+	<inherits name='org.xcmis.CmisClientFramework'/>
 	
 	<inherits name="com.google.gwt.i18n.I18N" />
 

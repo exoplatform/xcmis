@@ -60,7 +60,6 @@ public class VersioningServicePortImpl implements VersioningServicePort
    /**
     * Constructs instance of <code>VersioningServicePortImpl</code> .
     *
-    * @param storageProvider StorageProvider
     */
    public VersioningServicePortImpl()
    {

@@ -61,6 +61,11 @@ abstract class Value
       return null;
    }
 
+   public byte[] getBytes()
+   {
+      return null;
+   }
+
    public boolean isBoolean()
    {
       return false;
@@ -87,6 +92,11 @@ abstract class Value
    }
 
    public boolean isURI()
+   {
+      return false;
+   }
+
+   public boolean isContent()
    {
       return false;
    }

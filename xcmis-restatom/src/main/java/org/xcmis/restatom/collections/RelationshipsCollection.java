@@ -252,10 +252,6 @@ public class RelationshipsCollection extends CmisObjectCollection
             }
          }
       }
-      catch (StorageException re)
-      {
-         throw new ResponseContextException(createErrorResponse(re, 500));
-      }
       catch (FilterNotValidException fe)
       {
          throw new ResponseContextException(createErrorResponse(fe, 400));

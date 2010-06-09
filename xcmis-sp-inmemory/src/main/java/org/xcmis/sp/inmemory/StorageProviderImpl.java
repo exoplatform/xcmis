@@ -42,18 +42,18 @@ import java.util.Map.Entry;
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-public class StorageProviderImpl implements StorageProvider, Startable
+public class StorageProviderImpl implements StorageProvider
 {
 
    private static final Log LOG = ExoLogger.getLogger(StorageProviderImpl.class);
 
-   private final Map<String, StorageImpl> storageImpls = new HashMap<String, StorageImpl>();
+   private StorageImpl storageImpl = null;
 
-   private final Map<String, StorageConfiguration> storagesConfig = new HashMap<String, StorageConfiguration>();
+   private StorageConfiguration storageConfig = null;
 
    private RenditionManager renditionManager;
 
-   public StorageProviderImpl(InitParams initParams)
+   public StorageProviderImpl(InitParams initParams, PermissionService permissionService)
    {
       if (initParams != null)
       {
@@ -65,46 +65,38 @@ public class StorageProviderImpl implements StorageProvider, Startable
          }
 
          StorageProviderConfig confs = (StorageProviderConfig)param.getObject();
-
-         for (StorageConfiguration conf : confs.getStorages())
-         {
-
-            storagesConfig.put(conf.getId(), conf);
-         }
+         this.storageConfig = confs.getStorage();
+         this.renditionManager = RenditionManager.getInstance();
+         this.storageImpl = new StorageImpl(storageConfig, renditionManager, permissionService);
       }
       else
       {
          LOG.error("Not found configuration for any storages.");
       }
    }
-
-   public Connection getConnection(String storageId)
+   
+   public StorageProviderImpl(String repositoryId, String repositoryName, String description, String maxStorageMemSize,
+      String maxItemsNumber)
    {
-      StorageImpl storage = storageImpls.get(storageId);
-      if (storage == null)
-      {
-         throw new InvalidArgumentException("CMIS repository '" + storageId + "' does not exist.");
-      }
-
-      return new InmemConnection(storage);
-   }
-
-   public Set<String> getStorageIDs()
-   {
-      return Collections.unmodifiableSet(storagesConfig.keySet());
-   }
-
-   /**
-    * @see org.picocontainer.Startable#start()
-    */
-   public void start()
-   {
+      this.storageConfig =
+         new StorageConfiguration(repositoryId, repositoryName, description, maxStorageMemSize, maxItemsNumber);
       this.renditionManager = RenditionManager.getInstance();
-      for (Entry<String, StorageConfiguration> configElement : storagesConfig.entrySet())
+      this.storageImpl = new StorageImpl(storageConfig, renditionManager, new PermissionService());
+   }
+   
+   public Connection getConnection()
+   {
+      if (storageImpl == null)
       {
-         storageImpls.put(configElement.getKey(), new StorageImpl(configElement.getValue(), renditionManager,
-            new PermissionService()));
+         throw new InvalidArgumentException("CMIS repository does not exist.");
       }
+
+      return new InmemConnection(storageImpl);
+   }
+
+   public String getStorageID()
+   {
+      return storageConfig.getId();
    }
 
    /**
@@ -119,28 +111,24 @@ public class StorageProviderImpl implements StorageProvider, Startable
    {
 
       /**
-       * The list of storages configuration.
+       * The storage configuration.
        */
-      private List<StorageConfiguration> storages;
+      private StorageConfiguration storage;
 
       /**
-       * @return the list of storages configuration
+       * @return the storage configuration
        */
-      public List<StorageConfiguration> getStorages()
+      public StorageConfiguration getStorage()
       {
-         if (storages == null)
-         {
-            storages = new ArrayList<StorageConfiguration>();
-         }
-         return storages;
+         return storage;
       }
 
       /**
-       * @param configs the list of storages configuration
+       * @param configs storage configuration
        */
-      public void setStorages(List<StorageConfiguration> storages)
+      public void setStorage(StorageConfiguration storage)
       {
-         this.storages = storages;
+         this.storage = storage;
       }
    }
 

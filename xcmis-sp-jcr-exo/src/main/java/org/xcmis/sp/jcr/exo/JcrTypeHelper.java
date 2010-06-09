@@ -69,7 +69,7 @@ class JcrTypeHelper
 
    /**
     * Get object type definition.
-    *
+    * 
     * @param nt JCR back-end node
     * @param includePropertyDefinition true if need include property definition
     *        false otherwise
@@ -105,7 +105,7 @@ class JcrTypeHelper
 
    /**
     * Get CMIS object type id by the JCR node type name.
-    *
+    * 
     * @param ntName the JCR node type name
     * @return CMIS object type id
     */
@@ -124,7 +124,7 @@ class JcrTypeHelper
 
    /**
     * Get JCR node type name by the CMIS object type id.
-    *
+    * 
     * @param typeId the CMIS base object type id
     * @return JCR string node type
     */
@@ -143,7 +143,7 @@ class JcrTypeHelper
 
    /**
     * Document type definition.
-    *
+    * 
     * @param nt node type
     * @param includePropertyDefinition true if need include property definition
     *        false otherwise
@@ -197,7 +197,7 @@ class JcrTypeHelper
 
    /**
     * Folder type definition.
-    *
+    * 
     * @param nt node type
     * @param includePropertyDefinition true if need include property definition
     *        false otherwise
@@ -249,7 +249,7 @@ class JcrTypeHelper
 
    /**
     * Get policy type definition.
-    *
+    * 
     * @param nt node type
     * @param includePropertyDefinition true if need include property definition
     *        false otherwise
@@ -301,7 +301,7 @@ class JcrTypeHelper
 
    /**
     * Get relationship type definition.
-    *
+    * 
     * @param nt node type
     * @param includePropertyDefinition true if need include property definition
     *        false otherwise
@@ -353,7 +353,7 @@ class JcrTypeHelper
 
    /**
     * Add property definitions.
-    *
+    * 
     * @param typeDefinition the object type definition
     * @param nt the JCR node type.
     */

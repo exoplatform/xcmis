@@ -24,7 +24,8 @@ package org.xcmis.spi;
  * content stream without specifying that to override existing content.
  * 
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id: ContentAlreadyExistsException.java 2 2010-02-04 17:21:49Z andrew00x $
+ * @version $Id: ContentAlreadyExistsException.java 2 2010-02-04 17:21:49Z
+ *          andrew00x $
  */
 public final class ContentAlreadyExistsException extends CmisException
 {

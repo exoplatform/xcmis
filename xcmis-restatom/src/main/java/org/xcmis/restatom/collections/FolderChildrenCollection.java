@@ -66,11 +66,10 @@ public class FolderChildrenCollection extends CmisObjectCollection
    /**
     * Instantiates a new folder children collection.
     *
-    * @param storageProvider TODO
     */
-   public FolderChildrenCollection(/*StorageProvider storageProvider*/)
+   public FolderChildrenCollection()
    {
-      super(/*storageProvider*/);
+      super();
       setHref("/children");
    }
 
@@ -130,10 +129,6 @@ public class FolderChildrenCollection extends CmisObjectCollection
                addEntryDetails(request, e, feedIri, oif);
             }
          }
-      }
-      catch (StorageException re)
-      {
-         throw new ResponseContextException(createErrorResponse(re, 500));
       }
       catch (FilterNotValidException fe)
       {
@@ -322,7 +317,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
       }
       catch (StreamNotSupportedException se)
       {
-         return createErrorResponse(se, 400); // XXX in specification status is set as 403, correct ???
+         return createErrorResponse(se, 403);
       }
       catch (StorageException re)
       {
@@ -403,10 +398,6 @@ public class FolderChildrenCollection extends CmisObjectCollection
                CmisObject parent = conn.getFolderParent(id, true, null);
                feed.addLink(getObjectLink(getId(parent), request), AtomCMIS.LINK_UP, AtomCMIS.MEDIATYPE_ATOM_ENTRY,
                   null, null, -1);
-            }
-            catch (StorageException re)
-            {
-               throw new ResponseContextException(createErrorResponse(re, 500));
             }
             catch (FilterNotValidException fe)
             {

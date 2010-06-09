@@ -60,7 +60,8 @@ public class PermissionMappingElement extends ExtensibleElementWrapper
    /**
     * Builds the element.
     *
-    * @param permissionMapping the permission mapping
+    *@param key String key
+    * @param permissions the permissions
     */
    public void build(String key, Collection<String> permissions)
    {

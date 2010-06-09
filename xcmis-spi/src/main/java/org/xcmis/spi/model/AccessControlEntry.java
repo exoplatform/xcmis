@@ -36,6 +36,8 @@ public final class AccessControlEntry
 
    private Set<String> permissions;
 
+   private Boolean direct;
+
    public AccessControlEntry()
    {
    }
@@ -44,6 +46,13 @@ public final class AccessControlEntry
    {
       this.principal = principal;
       this.permissions = permissions;
+   }
+
+   public AccessControlEntry(String principal, Set<String> permissions, Boolean direct)
+   {
+      this.principal = principal;
+      this.permissions = permissions;
+      this.direct = direct;
    }
 
    /**
@@ -64,6 +73,16 @@ public final class AccessControlEntry
    public String getPrincipal()
    {
       return principal;
+   }
+
+   public Boolean isDirect()
+   {
+      return direct;
+   }
+
+   public void setDirect(Boolean direct)
+   {
+      this.direct = direct;
    }
 
    public void setPrincipal(String principal)

@@ -44,7 +44,6 @@ import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.StorageException;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.AccessControlPropagation;
@@ -107,7 +106,7 @@ public class AtomCmisService implements ResourceContainer
    }
 
    @PUT
-   @Path("{repositoryId}/addacl/{objectId}")
+   @Path("{repositoryId}/objacl/{objectId}")
    @Produces("application/cmisacl+xml")
    public Response addACL(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId,
       @PathParam("objectId") String objectId)
@@ -117,7 +116,7 @@ public class AtomCmisService implements ResourceContainer
       {
          conn = CmisRegistry.getInstance().getConnection(repositoryId);
 
-         RequestContext request = initRequestContext(repositoryId, httpRequest);
+         RequestContext request = initRequestContext(httpRequest);
          Document doc = request.getDocument();
          List<AccessControlEntryTypeElement> listEl = doc.getRoot().getElements();
          List<AccessControlEntry> listACE = new ArrayList<AccessControlEntry>();
@@ -126,21 +125,35 @@ public class AtomCmisService implements ResourceContainer
             listACE.add(el.getACE());
          }
          List<AccessControlEntry> removeACL = new ArrayList<AccessControlEntry>();
+
          conn.applyACL(objectId, listACE, removeACL, AccessControlPropagation.REPOSITORYDETERMINED);
 
-         return Response.status(201).build();
+         List<AccessControlEntry> list = conn.getACL(objectId, false);
+         FOMExtensibleElement accessControlListTypeElement =
+            AbderaFactory.getInstance().getFactory().newElement(AtomCMIS.ACL);
+         for (AccessControlEntry accessControlEntry : list)
+         {
+            AccessControlEntryTypeElement ace = accessControlListTypeElement.addExtension(AtomCMIS.PERMISSION);
+            ace.build(accessControlEntry);
+         }
+
+         //return Response.status(201).build();
+         return Response.ok(accessControlListTypeElement).header(HttpHeaders.CACHE_CONTROL, "no-cache").build();
       }
       catch (IOException io)
       {
          throw new WebApplicationException(io, createErrorResponse(io, 500));
       }
-      catch (StorageException re)
+      catch (Throwable t)
       {
-         throw new WebApplicationException(re, createErrorResponse(re, 500));
+         throw new WebApplicationException(t, createErrorResponse(t, 500));
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
 
    }
@@ -201,7 +214,7 @@ public class AtomCmisService implements ResourceContainer
    public Response deleteContentStream(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
+      RequestContext request = initRequestContext(httpRequest);
       ResponseContext abderaResponse = ((AbstractCollectionAdapter)getCollection(request)).deleteMedia(request);
       return Response.status(abderaResponse.getStatus()).entity(abderaResponse).build();
    }
@@ -249,10 +262,6 @@ public class AtomCmisService implements ResourceContainer
          conn.deleteTree(folderId, deleteAllVersions, unfileObject, continueOnFailure);
          return Response.noContent().build();
       }
-      catch (StorageException re)
-      {
-         throw new WebApplicationException(re, createErrorResponse(re, 500));
-      }
       catch (UpdateConflictException uce)
       {
          throw new WebApplicationException(uce, createErrorResponse(uce, 409));
@@ -271,7 +280,10 @@ public class AtomCmisService implements ResourceContainer
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -304,9 +316,9 @@ public class AtomCmisService implements ResourceContainer
          }
          return Response.ok(accessControlListTypeElement).header(HttpHeaders.CACHE_CONTROL, "no-cache").build();
       }
-      catch (StorageException re)
+      catch (InvalidArgumentException iae)
       {
-         throw new WebApplicationException(re, createErrorResponse(re, 500));
+         throw new WebApplicationException(iae, createErrorResponse(iae, 400));
       }
       catch (Throwable others)
       {
@@ -314,7 +326,10 @@ public class AtomCmisService implements ResourceContainer
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -334,10 +349,6 @@ public class AtomCmisService implements ResourceContainer
          el.build(result);
          return Response.ok(el).header(HttpHeaders.CACHE_CONTROL, "no-cache").build();
       }
-      catch (StorageException re)
-      {
-         throw new WebApplicationException(re, createErrorResponse(re, 500));
-      }
       catch (ObjectNotFoundException onfe)
       {
          throw new WebApplicationException(onfe, createErrorResponse(onfe, 404));
@@ -352,7 +363,10 @@ public class AtomCmisService implements ResourceContainer
       }
       finally
       {
-         conn.close();
+         if (conn != null)
+         {
+            conn.close();
+         }
       }
    }
 
@@ -413,7 +427,7 @@ public class AtomCmisService implements ResourceContainer
    public Response getContentStream(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
+      RequestContext request = initRequestContext(httpRequest);
       @SuppressWarnings("unchecked")
       ResponseContext abderaResponse = ((AbstractEntityCollectionAdapter)getCollection(request)).getMedia(request);
       ResponseBuilder builder = Response.status(abderaResponse.getStatus());
@@ -560,7 +574,7 @@ public class AtomCmisService implements ResourceContainer
    @Path("{repositoryId}/query")
    public Response query(@Context HttpServletRequest httpRequest, @PathParam("repositoryId") String repositoryId)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
+      RequestContext request = initRequestContext(httpRequest);
       ResponseContext abderaResponse = getCollection(request).getFeed(request);
       ResponseBuilder builder = Response.status(abderaResponse.getStatus() == 200 ? 201 : abderaResponse.getStatus());
       copyAbderaHeaders(builder, abderaResponse);
@@ -587,7 +601,7 @@ public class AtomCmisService implements ResourceContainer
    public Response setContentStream(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
+      RequestContext request = initRequestContext(httpRequest);
       @SuppressWarnings("unchecked")
       ResponseContext abderaResponse = ((AbstractEntityCollectionAdapter)getCollection(request)).putMedia(request);
       ResponseBuilder builder = Response.status(abderaResponse.getStatus());
@@ -621,7 +635,7 @@ public class AtomCmisService implements ResourceContainer
                   contentType = file.getContentType();
                }
 
-               RequestContext request = initRequestContext(repositoryId, httpRequest);
+               RequestContext request = initRequestContext(httpRequest);
                ((AbstractEntityCollectionAdapter)getCollection(request)).putMedia(null, new javax.activation.MimeType(
                   contentType), null, file.getInputStream(), request);
                return Response.status(201).build();
@@ -650,7 +664,7 @@ public class AtomCmisService implements ResourceContainer
    public Response updateProperties(@Context HttpServletRequest httpRequest,
       @PathParam("repositoryId") String repositoryId)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
+      RequestContext request = initRequestContext(httpRequest);
       @SuppressWarnings("unchecked")
       ResponseContext abderaResponse = ((AbstractEntityCollectionAdapter)getCollection(request)).putEntry(request);
       ResponseBuilder builder = Response.status(abderaResponse.getStatus());
@@ -723,7 +737,7 @@ public class AtomCmisService implements ResourceContainer
    private void includeCollections(Workspace ws, String repositoryId, HttpServletRequest httpRequest, String repoPath,
       String rootFolderId)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
+      RequestContext request = initRequestContext(httpRequest);
       Collection<CollectionInfo> collectionsInfo = getCollectionsInfo(request);
       for (CollectionInfo collectionInfo : collectionsInfo)
       {
@@ -828,7 +842,7 @@ public class AtomCmisService implements ResourceContainer
 
    protected Response createItem(String repositoryId, HttpServletRequest httpRequest)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
+      RequestContext request = initRequestContext(httpRequest);
       ResponseContext abderaResponse = getCollection(request).postEntry(request);
       ResponseBuilder builder = Response.status(abderaResponse.getStatus());
       copyAbderaHeaders(builder, abderaResponse);
@@ -837,7 +851,7 @@ public class AtomCmisService implements ResourceContainer
 
    protected Response deleteItem(String repositoryId, HttpServletRequest httpRequest)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
+      RequestContext request = initRequestContext(httpRequest);
       ResponseContext abderaResponse = getCollection(request).deleteEntry(request);
       ResponseBuilder builder = Response.status(abderaResponse.getStatus());
       copyAbderaHeaders(builder, abderaResponse);
@@ -858,7 +872,7 @@ public class AtomCmisService implements ResourceContainer
 
    protected Response getEntry(String repositoryId, HttpServletRequest httpRequest)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
+      RequestContext request = initRequestContext(httpRequest);
       ResponseContext abderaResponse = getCollection(request).getEntry(request);
       ResponseBuilder builder = Response.status(abderaResponse.getStatus());
       copyAbderaHeaders(builder, abderaResponse);
@@ -868,7 +882,7 @@ public class AtomCmisService implements ResourceContainer
 
    protected Response getFeed(String repositoryId, HttpServletRequest httpRequest)
    {
-      RequestContext request = initRequestContext(repositoryId, httpRequest);
+      RequestContext request = initRequestContext(httpRequest);
       ResponseContext abderaResponse = getCollection(request).getFeed(request);
       ResponseBuilder builder = Response.status(abderaResponse.getStatus());
       copyAbderaHeaders(builder, abderaResponse);
@@ -876,7 +890,7 @@ public class AtomCmisService implements ResourceContainer
       return builder.entity(abderaResponse).build();
    }
 
-   private RequestContext initRequestContext(String repositoryId, HttpServletRequest httpRequest)
+   private RequestContext initRequestContext(HttpServletRequest httpRequest)
    {
       return new ServletRequestContext(provider, httpRequest)
       {

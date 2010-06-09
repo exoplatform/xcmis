@@ -37,13 +37,13 @@ public interface ItemsIterator<T> extends Iterator<T>
     * 
     * @param skip the number of items to skip
     * @throws NoSuchElementException if skipped past the last item in the
-    *           iterator
+    *         iterator
     */
    void skip(int skip) throws NoSuchElementException;
 
    /**
-    * Get total number of items in iterator. If not able determine number
-    * of items then -1 will be returned.
+    * Get total number of items in iterator. If not able determine number of
+    * items then -1 will be returned.
     * 
     * @return number of items or -1
     */

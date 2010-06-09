@@ -109,36 +109,39 @@ public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndex
     */
    protected LuceneIndexer nodeIndexer;
 
+   /**
+    * Index configuration.
+    */
    protected IndexConfiguration indexConfuguration;
 
    /**
-    * @param indexConfuguration
+    * @param serviceConfiguration
     * @throws IndexException
     * @throws IndexConfigurationException
     * @throws org.xcmis.search.lucene.index.IndexException
     */
-   public AbstractLuceneQueryableIndexStorage(SearchServiceConfiguration serviceConfuguration) throws IndexException
+   public AbstractLuceneQueryableIndexStorage(SearchServiceConfiguration serviceConfiguration) throws IndexException
    {
-      super(serviceConfuguration);
-      Validate.notNull(serviceConfuguration.getTableResolver(),
+      super(serviceConfiguration);
+      Validate.notNull(serviceConfiguration.getTableResolver(),
          "The TableResolver may not be null in SearchServiceConfiguration");
-      Validate.notNull(serviceConfuguration.getNameConverter(),
+      Validate.notNull(serviceConfiguration.getNameConverter(),
          "The NameConverter may not be null in SearchServiceConfiguration");
-      Validate.notNull(serviceConfuguration.getPathSplitter(),
+      Validate.notNull(serviceConfiguration.getPathSplitter(),
          "The PathSplitter may not be null in SearchServiceConfiguration");
-      Validate.notNull(serviceConfuguration.getIndexConfuguration(),
+      Validate.notNull(serviceConfiguration.getIndexConfuguration(),
          "The TableResolver  argument may not be null in SearchServiceConfiguration");
-      Validate.notNull(serviceConfuguration.getIndexConfuguration().getRootParentUuid(),
+      Validate.notNull(serviceConfiguration.getIndexConfuguration().getRootParentUuid(),
          "The RootParentUuid  argument may not be null in IndexConfiguration");
-      Validate.notNull(serviceConfuguration.getIndexConfuguration().getRootUuid(),
+      Validate.notNull(serviceConfiguration.getIndexConfuguration().getRootUuid(),
          "The RootUuid may not be null in IndexConfiguration");
-      Validate.notNull(serviceConfuguration.getIndexConfuguration().getDocumentReaderService(),
+      Validate.notNull(serviceConfiguration.getIndexConfuguration().getDocumentReaderService(),
          "The DocumentReaderService may not be null in IndexConfiguration");
 
-      this.tableResolver = serviceConfuguration.getTableResolver();
-      this.nameConverter = serviceConfuguration.getNameConverter();
-      this.pathSplitter = serviceConfuguration.getPathSplitter();
-      this.indexConfuguration = serviceConfuguration.getIndexConfuguration();
+      this.tableResolver = serviceConfiguration.getTableResolver();
+      this.nameConverter = serviceConfiguration.getNameConverter();
+      this.pathSplitter = serviceConfiguration.getPathSplitter();
+      this.indexConfuguration = serviceConfiguration.getIndexConfuguration();
 
       this.nodeIndexer = new LuceneIndexer(indexConfuguration);
 
@@ -247,7 +250,7 @@ public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndex
    }
 
    /**
-    * Different lucene storage's should override this method
+    * Different lucene storage's should override this method.
     */
    protected abstract IndexReader getIndexReader() throws IndexException;
 
@@ -261,7 +264,7 @@ public abstract class AbstractLuceneQueryableIndexStorage extends QueryableIndex
       IndexTransactionException;
 
    /**
-    * Return lucene sorter by list of orderings
+    * Return lucene sorter by list of orderings.
     * 
     * @param list
     * @return

@@ -56,17 +56,12 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
    /** The logger. */
    private static final Log LOG = ExoLogger.getLogger(AbstractCmisCollection.class);
 
-   /** The Storage provider */
-   //   protected StorageProvider storageProvider;
-
    /**
     * Instantiates a new abstract cmis collection.
     *
-    * @param storageProvider TODO
     */
-   public AbstractCmisCollection(/*StorageProvider storageProvider*/)
+   public AbstractCmisCollection()
    {
-      //      this.storageProvider = storageProvider;
    }
 
    /**
@@ -238,7 +233,6 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
     */
    protected ResponseContext createErrorResponse(Throwable t, int status)
    {
-      //      LOG.error(t.getMessage());
       LOG.error(t.getMessage(), t);
       return new EmptyResponseContext(status, t.getMessage());
    }
@@ -294,7 +288,6 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
     */
    protected Connection getConnection(RequestContext request)
    {
-      //      return storageProvider.getConnection(getRepositoryId(request));
       return CmisRegistry.getInstance().getConnection(getRepositoryId(request));
    }
 

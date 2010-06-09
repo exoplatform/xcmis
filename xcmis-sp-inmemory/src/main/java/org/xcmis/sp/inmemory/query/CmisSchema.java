@@ -32,6 +32,7 @@ import org.xcmis.search.model.constraint.Operator;
 import org.xcmis.search.model.source.SelectorName;
 import org.xcmis.search.value.PropertyType;
 import org.xcmis.spi.TypeManager;
+import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.TypeDefinition;
 
@@ -97,12 +98,16 @@ public class CmisSchema implements Schema
     */
    public Table getTable(SelectorName name)
    {
-      TypeDefinition typeDefinition = typeManager.getTypeDefinition(name.getName(), true);
-      if (typeDefinition != null)
+      try
       {
+         TypeDefinition typeDefinition = typeManager.getTypeDefinition(name.getName(), true);
          return new CmisTableDefinition(name, typeDefinition);
       }
-      return null;
+      catch (TypeNotFoundException tnfe)
+      {
+         tnfe.printStackTrace(); // TODO
+         return null;
+      }
    }
 
    private static class CmisTableDefinition implements Table
@@ -112,7 +117,7 @@ public class CmisSchema implements Schema
       private final TypeDefinition typeDefinition;
 
       /**
-       * Instantiates new instance of CmisTableDefinition. 
+       * Instantiates new instance of CmisTableDefinition.
        * @param typeDefinition
        * @param name SelectorName
        */

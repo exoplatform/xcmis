@@ -19,7 +19,6 @@
 
 package org.xcmis.spi;
 
-
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: CmisVisitor.java 316 2010-03-09 15:20:28Z andrew00x $
@@ -27,6 +26,12 @@ package org.xcmis.spi;
 public interface ObjectDataVisitor
 {
 
+   /**
+    * This method is called when instance of visitor is passed to the
+    * {@link ObjectData#accept(org.xcmis.spi.ObjectDataVisitor)}
+    * 
+    * @param object ObjectData that accept visitor
+    */
    void visit(ObjectData object);
-   
+
 }

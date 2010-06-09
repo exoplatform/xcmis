@@ -23,19 +23,28 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.sp.jcr.exo.BaseTest;
 import org.xcmis.sp.jcr.exo.JcrCMIS;
+import org.xcmis.sp.jcr.exo.PropertyDefinitions;
 import org.xcmis.spi.BaseContentStream;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.ObjectData;
+import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.Storage;
+import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.PropertyDefinition;
+import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.VersioningState;
+import org.xcmis.spi.model.impl.StringProperty;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 import org.xcmis.spi.utils.MimeType;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -69,22 +78,29 @@ public abstract class BaseQueryTest extends BaseTest
 
    protected FolderData rootFolder;
 
+   protected TypeDefinition nasaDocumentTypeDefinition;
+
+   protected TypeDefinition folderTypeDefinition;
+
    public void setUp() throws Exception
    {
       super.setUp();
-      storage = storageProvider.getConnection(cmisRepositoryId).getStorage();
+      storage = storageProvider.getConnection().getStorage();
       rootFolder = (FolderData)storage.getObjectById(JcrCMIS.ROOT_FOLDER_ID);
+
+      nasaDocumentTypeDefinition = storage.getTypeDefinition(NASA_DOCUMENT, true);
+      folderTypeDefinition = storage.getTypeDefinition("cmis:folder", true);
    }
 
-   protected DocumentData createDocument(FolderData folder, String name, String typeId, byte[] content, MimeType mimeType)
-      throws Exception
+   protected DocumentData createDocument(FolderData folder, String name, TypeDefinition typeDefinition, byte[] content,
+      MimeType mimeType) throws Exception
    {
 
-      return createDocument(folder, name, typeId, new BaseContentStream(content, null, mimeType), null);
+      return createDocument(folder, name, typeDefinition, new BaseContentStream(content, null, mimeType), null);
    }
 
-   protected DocumentData createDocument(FolderData folder, String name, String typeId, ContentStream content,
-      VersioningState versioningState) throws Exception//   /**
+   protected DocumentData createDocument(FolderData folder, String name, TypeDefinition typeDefinition,
+      ContentStream content, VersioningState versioningState) throws Exception//   /**
    //    * Test NOT IN constraint.
    //    * <p>
    //    * Initial data:
@@ -121,21 +137,26 @@ public abstract class BaseQueryTest extends BaseTest
    //      checkResult(result, new Document[]{doc1});
    //   }
    {
+
+      PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:document", CmisConstants.NAME);
+      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+      properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
+         .getDisplayName(), name));
+
       DocumentData document =
-         storage.createDocument(folder, typeId, versioningState == null ? VersioningState.MAJOR : versioningState);
-      document.setName(name);
-      document.setContentStream(content);
-      storage.saveObject(document);
-      //document.save();
+         storage.createDocument(folder, typeDefinition, properties, content, null, null, versioningState == null
+            ? VersioningState.MAJOR : versioningState);
       return document;
    }
 
-   protected FolderData createFolder(FolderData folder, String name, String typeId) throws Exception
+   protected FolderData createFolder(FolderData folder, String name, TypeDefinition typeDefinition) throws Exception
    {
-      FolderData newFolder = storage.createFolder(folder, typeId);
-      newFolder.setName(name);
-      storage.saveObject(newFolder);
-      //      newFolder.save();
+      PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition("cmis:folder", CmisConstants.NAME);
+      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+      properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
+         .getDisplayName(), name));
+
+      FolderData newFolder = storage.createFolder(folder, typeDefinition, properties, null, null);
       return newFolder;
    }
 
@@ -223,7 +244,14 @@ public abstract class BaseQueryTest extends BaseTest
          Result next = result.next();
          String id = next.getObjectId();
          resultPaths.add(id);
-         ObjectData object = storage.getObjectById(id);
+         try
+         {
+            storage.getObjectById(id);
+         }
+         catch (ObjectNotFoundException e)
+         {
+            fail(e.getMessage());
+         }
          //LOG.debug("id:=" + id + " path:=" + object.getParent().getPath() + "/" + object.getName());
       }
 

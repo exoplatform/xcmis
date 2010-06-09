@@ -38,7 +38,7 @@ import java.util.Set;
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id: PropertyDefinitions.java 578 2010-04-02 12:25:27Z andrew00x $
  */
-final class PropertyDefinitions
+public final class PropertyDefinitions
 {
 
    private static final Map<String, Map<String, PropertyDefinition<?>>> all =
@@ -188,19 +188,11 @@ final class PropertyDefinitions
       }
    }
 
-   //   /**
-   //    * Get all property definitions for <code>objectTypeId</code>.
-   //    *
-   //    * @param objectTypeId object type id
-   //    * @return set of object property definitions
-   //    */
-   //   public static Collection<PropertyDefinition<?>> getAll(String objectTypeId)
-   //   {
-   //      Map<String, PropertyDefinition<?>> defs = all.get(objectTypeId);
-   //      if (defs == null)
-   //         return Collections.emptyList();
-   //      return Collections.unmodifiableCollection(defs.values());
-   //   }
+   static final String CONTENT = "xcmis:content";
+
+   static final String LATEST_LABEL = "latest";
+
+   static final String PWC_LABEL = "pwc";
 
    /**
     * Get all property definitions for <code>objectTypeId</code>.
@@ -219,22 +211,6 @@ final class PropertyDefinitions
    }
 
    /**
-    * Get all property IDs supported for <code>objectTypeId</code>.
-    *
-    * @param objectTypeId object type id
-    * @return set of object property definition IDs.
-    */
-   public static Set<String> getPropertyIds(String objectTypeId)
-   {
-      Map<String, PropertyDefinition<?>> defs = all.get(objectTypeId);
-      if (defs == null)
-      {
-         return Collections.emptySet();
-      }
-      return Collections.unmodifiableSet(defs.keySet());
-   }
-
-   /**
     * Get one property definition with <code>propDefId</code> for
     * <code>objectTypeId</code>.
     *
@@ -250,6 +226,22 @@ final class PropertyDefinitions
          return null;
       }
       return defs.get(propDefId);
+   }
+
+   /**
+    * Get all property IDs supported for <code>objectTypeId</code>.
+    *
+    * @param objectTypeId object type id
+    * @return set of object property definition IDs.
+    */
+   public static Set<String> getPropertyIds(String objectTypeId)
+   {
+      Map<String, PropertyDefinition<?>> defs = all.get(objectTypeId);
+      if (defs == null)
+      {
+         return Collections.emptySet();
+      }
+      return Collections.unmodifiableSet(defs.keySet());
    }
 
    public static void put(String typeId, PropertyDefinition<?> propDef)
@@ -278,7 +270,6 @@ final class PropertyDefinitions
    {
       all.remove(typeId);
    }
-
    private static <T> PropertyDefinition<T> createPropertyDefinition(String id, PropertyType propertyType,
       String queryName, String localName, String localNamespace, String displayName, boolean required,
       boolean queryable, boolean orderable, boolean inherited, boolean isMultivalued, Updatability updatability,

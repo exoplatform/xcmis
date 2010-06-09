@@ -20,13 +20,14 @@
 package org.xcmis.spi;
 
 /**
- * The repository is not able to store the object that the user is creating/updating
- * due to a name constraint violation.
+ * The repository is not able to store the object that the user is
+ * creating/updating due to a name constraint violation.
  * 
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id: NameConstraintViolationException.java 2 2010-02-04 17:21:49Z andrew00x $
+ * @version $Id: NameConstraintViolationException.java 2 2010-02-04 17:21:49Z
+ *          andrew00x $
  */
-public class NameConstraintViolationException extends InvalidArgumentException
+public class NameConstraintViolationException extends CmisException
 {
 
    /**

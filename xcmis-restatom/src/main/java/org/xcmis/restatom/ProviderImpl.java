@@ -28,6 +28,7 @@ import org.apache.abdera.protocol.server.WorkspaceManager;
 import org.apache.abdera.protocol.server.impl.AbstractProvider;
 import org.apache.abdera.protocol.server.impl.AbstractWorkspaceManager;
 import org.apache.abdera.protocol.server.impl.RegexTargetResolver;
+import org.apache.abdera.protocol.server.impl.SimpleSubjectResolver;
 import org.apache.abdera.protocol.server.impl.SimpleWorkspaceInfo;
 import org.apache.abdera.protocol.server.impl.TemplateTargetBuilder;
 import org.xcmis.restatom.collections.AllVersionsCollection;
@@ -43,6 +44,12 @@ import org.xcmis.restatom.collections.TypesChildrenCollection;
 import org.xcmis.restatom.collections.TypesDescendantsCollection;
 import org.xcmis.restatom.collections.UnfiledCollection;
 
+import java.security.Principal;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.security.auth.Subject;
+
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id: ProviderImpl.java 216 2010-02-12 17:19:50Z andrew00x $
@@ -51,21 +58,18 @@ public class ProviderImpl extends AbstractProvider
 {
 
    /** The manager. */
-   private AbstractWorkspaceManager manager;
+   private final AbstractWorkspaceManager manager;
 
    /** The target builder. */
-   private TemplateTargetBuilder targetBuilder;
+   private final TemplateTargetBuilder targetBuilder;
 
    /** The resolver. */
-   private RegexTargetResolver resolver;
+   private final RegexTargetResolver resolver;
 
    /**
     * Instantiates a new provider impl.
-    *
-    * @param storageProvider TODO
-    *
     */
-   public ProviderImpl(/*StorageProvider storageProvider*/)
+   public ProviderImpl()
    {
       targetBuilder = new TemplateTargetBuilder();
       targetBuilder.setTemplate(TargetType.ENTRY, "{target_base}/cmisatom/{repoid}/{atomdoctype}/{id}");
@@ -164,18 +168,6 @@ public class ProviderImpl extends AbstractProvider
          "slash"); // Slash.
 
       SimpleWorkspaceInfo wInfo = new SimpleWorkspaceInfo();
-      //      wInfo.addCollection(new FolderChildrenCollection(storageProvider));
-      //      wInfo.addCollection(new ParentsCollection(storageProvider));
-      //      wInfo.addCollection(new RelationshipsCollection(storageProvider));
-      //      wInfo.addCollection(new FolderDescentantsCollection(storageProvider));
-      //      wInfo.addCollection(new FolderTreeCollection(storageProvider));
-      //      wInfo.addCollection(new TypesChildrenCollection(storageProvider));
-      //      wInfo.addCollection(new TypesDescendantsCollection(storageProvider));
-      //      wInfo.addCollection(new CheckedOutCollection(storageProvider));
-      //      wInfo.addCollection(new AllVersionsCollection(storageProvider));
-      //      wInfo.addCollection(new QueryCollection(storageProvider));
-      //      wInfo.addCollection(new PoliciesCollection(storageProvider));
-
       wInfo.addCollection(new FolderChildrenCollection());
       wInfo.addCollection(new ParentsCollection());
       wInfo.addCollection(new RelationshipsCollection());
@@ -197,7 +189,6 @@ public class ProviderImpl extends AbstractProvider
    /**
     * {@inheritDoc}
     */
-   @Override
    protected TargetBuilder getTargetBuilder(RequestContext request)
    {
       return targetBuilder;
@@ -206,7 +197,6 @@ public class ProviderImpl extends AbstractProvider
    /**
     * {@inheritDoc}
     */
-   @Override
    protected Resolver<Target> getTargetResolver(RequestContext request)
    {
       return resolver;
@@ -215,10 +205,30 @@ public class ProviderImpl extends AbstractProvider
    /**
     * {@inheritDoc}
     */
-   @Override
    public WorkspaceManager getWorkspaceManager(RequestContext request)
    {
       return manager;
    }
 
+   protected Resolver<Subject> getSubjectResolver(RequestContext request)
+   {
+      return new SubjectResolver();
+   }
+
+   // SecurityManager problem when use org.apache.abdera.protocol.server.servlet.ServletRequestContext.
+   // java.security.AccessControlException when try to use
+   // org.apache.abdera.protocol.server.impl.SimpleSubjectResolver.resolve(Request)
+   private class SubjectResolver extends SimpleSubjectResolver
+   {
+
+      @Override
+      public Subject resolve(Principal principal)
+      {
+         Set<Principal> principals = new HashSet<Principal>(1);
+         principals.add(principal != null ? principal : ANONYMOUS);
+         Subject subject = new Subject(false, principals, new HashSet(), new HashSet());
+         return subject;
+      }
+
+   }
 }

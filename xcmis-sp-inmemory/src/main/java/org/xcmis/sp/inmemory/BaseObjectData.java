@@ -31,10 +31,13 @@ import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.ObjectDataVisitor;
+import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.StorageException;
+import org.xcmis.spi.UpdateConflictException;
+import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.Property;
@@ -55,20 +58,21 @@ import org.xcmis.spi.utils.CmisUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: BaseObjectData.java 1197 2010-05-28 08:15:37Z
+ *          alexey.zavizionov@gmail.com $
  */
 abstract class BaseObjectData implements ObjectData
 {
@@ -77,14 +81,9 @@ abstract class BaseObjectData implements ObjectData
 
    protected final TypeDefinition type;
 
-   protected StorageImpl storage;
+   protected final StorageImpl storage;
 
-   /**
-    * Parent folder id for newly created fileable objects.
-    */
-   protected FolderData parent;
-
-   protected Entry entry;
+   protected final Entry entry;
 
    public BaseObjectData(Entry entry, TypeDefinition type, StorageImpl storage)
    {
@@ -93,14 +92,9 @@ abstract class BaseObjectData implements ObjectData
       this.storage = storage;
    }
 
-   public BaseObjectData(FolderData parent, TypeDefinition type, StorageImpl storage)
-   {
-      this.parent = parent;
-      this.type = type;
-      this.storage = storage;
-      this.entry = new Entry();
-   }
-
+   /**
+    * {@inheritDoc}
+    */
    public void accept(ObjectDataVisitor visitor)
    {
       // TODO Auto-generated method stub
@@ -110,19 +104,30 @@ abstract class BaseObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
-   public void applyPolicy(PolicyData policy) throws ConstraintException
+   public void applyPolicy(PolicyData policy)
    {
-      if (!type.isControllablePolicy())
+      entry.addPolicy(policy);
+      try
       {
-         throw new ConstraintException("Type " + type.getId() + " is not controlable by Policy.");
+         save();
       }
-
-      if (policy.isNew())
+      catch (StorageException e)
       {
-         throw new CmisRuntimeException("Unable apply newly created policy.");
+         throw new CmisRuntimeException("Unable apply policy. " + e.getMessage(), e);
       }
+   }
 
-      entry.addPolicy(policy.getObjectId());
+   public boolean equals(Object obj)
+   {
+      if (obj == null)
+      {
+         return false;
+      }
+      if (obj.getClass() != getClass())
+      {
+         return false;
+      }
+      return ((BaseObjectData)obj).getObjectId().equals(getObjectId());
    }
 
    /**
@@ -198,10 +203,6 @@ abstract class BaseObjectData implements ObjectData
     */
    public String getObjectId()
    {
-      if (isNew())
-      {
-         return null;
-      }
       return entry.getId();
    }
 
@@ -210,18 +211,12 @@ abstract class BaseObjectData implements ObjectData
     */
    public FolderData getParent() throws ConstraintException
    {
-      if (isNew())
-      {
-         return parent;
-      }
-
       if (StorageImpl.ROOT_FOLDER_ID.equals(getObjectId()))
       {
          throw new ConstraintException("Unable get parent of root folder.");
       }
 
       Collection<FolderData> parents = getParents();
-
       if (parents.size() > 1)
       {
          throw new ConstraintException("Object has more then one parent.");
@@ -238,29 +233,23 @@ abstract class BaseObjectData implements ObjectData
     */
    public Collection<FolderData> getParents()
    {
-      if (isNew())
-      {
-         if (parent != null)
-         {
-            List<FolderData> parents = new ArrayList<FolderData>(1);
-            parents.add(parent);
-            return parents;
-         }
-
-         return Collections.emptyList();
-      }
-
-      List<FolderData> parents = new ArrayList<FolderData>();
       Set<String> parentIds = storage.parents.get(getObjectId());
+      List<FolderData> parents = new ArrayList<FolderData>(parentIds.size());
 
       if (parentIds != null)
       {
          for (String id : parentIds)
          {
-            parents.add((FolderData)storage.getObjectById(id));
+            try
+            {
+               parents.add((FolderData)storage.getObjectById(id));
+            }
+            catch (ObjectNotFoundException e)
+            {
+               LOG.warn("Not found folder " + id);
+            }
          }
       }
-
       return parents;
    }
 
@@ -277,7 +266,14 @@ abstract class BaseObjectData implements ObjectData
       List<PolicyData> policies = new ArrayList<PolicyData>();
       for (String id : entry.getPolicies())
       {
-         policies.add((PolicyData)storage.getObjectById(id));
+         try
+         {
+            policies.add((PolicyData)storage.getObjectById(id));
+         }
+         catch (ObjectNotFoundException e)
+         {
+            LOG.warn("Not found policy " + id);
+         }
       }
       return policies;
    }
@@ -288,58 +284,11 @@ abstract class BaseObjectData implements ObjectData
    public Map<String, Property<?>> getProperties()
    {
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-      for (PropertyDefinition<?> def : type.getPropertyDefinitions())
+      for (PropertyDefinition<?> definition : type.getPropertyDefinitions())
       {
-         properties.put(def.getId(), getProperty(def));
+         properties.put(definition.getId(), doGetProperty(definition));
       }
       return properties;
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public Property<?> getProperty(String id)
-   {
-      PropertyDefinition<?> definition = type.getPropertyDefinition(id);
-      if (definition == null)
-      {
-         return null;
-      }
-      return getProperty(definition);
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public ItemsIterator<RelationshipData> getRelationships(RelationshipDirection direction, TypeDefinition type,
-      boolean includeSubRelationshipTypes)
-   {
-      if (isNew())
-      {
-         // Newly created object may not have relationship.
-         return CmisUtils.emptyItemsIterator();
-      }
-
-      Set<String> relationshipIds = storage.relationships.get(getObjectId());
-      if (relationshipIds == null)
-      {
-         return CmisUtils.emptyItemsIterator();
-      }
-
-      List<RelationshipData> relationships = new ArrayList<RelationshipData>();
-      for (String id : relationshipIds)
-      {
-         RelationshipData r = (RelationshipData)storage.getObjectById(id);
-         if (direction == RelationshipDirection.EITHER //
-            || (direction == RelationshipDirection.SOURCE && r.getSourceId().equals(getObjectId())) //
-            || (direction == RelationshipDirection.TARGET && r.getTargetId().equals(getObjectId())))
-         {
-            // TODO filter by type.
-            relationships.add(r);
-         }
-      }
-
-      return new BaseItemsIterator<RelationshipData>(relationships);
    }
 
    /**
@@ -351,14 +300,62 @@ abstract class BaseObjectData implements ObjectData
       for (PropertyDefinition<?> definition : type.getPropertyDefinitions())
       {
          String queryName = definition.getQueryName();
-         if (!filter.accept(queryName))
+         if (filter.accept(queryName))
          {
-            continue;
+            String id = definition.getId();
+            properties.put(id, doGetProperty(definition));
          }
-         String id = definition.getId();
-         properties.put(id, getProperty(definition));
       }
       return properties;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public Property<?> getProperty(String id)
+   {
+      PropertyDefinition<?> definition = type.getPropertyDefinition(id);
+      if (definition != null)
+      {
+         return doGetProperty(definition);
+      }
+      return null;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public ItemsIterator<RelationshipData> getRelationships(RelationshipDirection direction, TypeDefinition type,
+      boolean includeSubRelationshipTypes)
+   {
+      Set<String> relationshipIds = storage.relationships.get(getObjectId());
+      if (relationshipIds == null)
+      {
+         return CmisUtils.emptyItemsIterator();
+      }
+
+      List<RelationshipData> relationships = new ArrayList<RelationshipData>();
+      for (String id : relationshipIds)
+      {
+         RelationshipData relationship = null;
+         try
+         {
+            relationship = (RelationshipData)storage.getObjectById(id);
+         }
+         catch (ObjectNotFoundException e)
+         {
+            LOG.warn("Not found relationship " + id + ".");
+            continue;
+         }
+         if (direction == RelationshipDirection.EITHER //
+            || (direction == RelationshipDirection.SOURCE && relationship.getSourceId().equals(getObjectId())) //
+            || (direction == RelationshipDirection.TARGET && relationship.getTargetId().equals(getObjectId())))
+         {
+            // TODO filter by type.
+            relationships.add(relationship);
+         }
+      }
+      return new BaseItemsIterator<RelationshipData>(relationships);
    }
 
    /**
@@ -377,167 +374,83 @@ abstract class BaseObjectData implements ObjectData
       return type.getId();
    }
 
-   /**
-    * {@inheritDoc}
-    */
-   public boolean isNew()
+   public int hashCode()
    {
-      return entry.getId() == null;
+      return getObjectId().hashCode();
    }
 
    /**
     * {@inheritDoc}
     */
-   public void removePolicy(PolicyData policy) throws ConstraintException
+   public void removePolicy(PolicyData policy)
    {
-      if (!type.isControllablePolicy())
+      entry.removePolicy(policy);
+      try
       {
-         throw new ConstraintException("Type " + type.getId() + " is not controlable by Policy.");
+         save();
       }
-      entry.removePolicy(policy.getObjectId());
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public void setACL(List<AccessControlEntry> aces) throws ConstraintException
-   {
-      if (!type.isControllableACL())
+      catch (StorageException e)
       {
-         throw new ConstraintException("Type " + type.getId() + " is not controlable by ACL.");
+         throw new CmisRuntimeException("Unable remove policy. " + e.getMessage(), e);
       }
-
-      CmisUtils.addAclToPermissionMap(entry.getPermissions(), aces);
    }
 
    /**
     * {@inheritDoc}
     */
-   public void setName(String name) throws NameConstraintViolationException
+   public void setACL(List<AccessControlEntry> acl)
    {
-      if (name == null || name.length() == 0)
+      Map<String, Set<String>> permissions = entry.getPermissions();
+      permissions.clear();
+      CmisUtils.addAclToPermissionMap(permissions, acl);
+      try
       {
-         throw new NameConstraintViolationException("Invalid name '" + name + "'.");
+         save();
       }
-
-      entry.setValue(CmisConstants.NAME, new StringValue(name));
+      catch (StorageException e)
+      {
+         throw new CmisRuntimeException("Unable set ACL. " + e.getMessage(), e);
+      }
    }
 
    /**
     * {@inheritDoc}
     */
-   public void setProperties(Map<String, Property<?>> properties) throws ConstraintException,
-      NameConstraintViolationException
+   public void setProperties(Map<String, Property<?>> properties) throws NameConstraintViolationException,
+      UpdateConflictException, VersioningException, StorageException
    {
       for (Property<?> property : properties.values())
       {
-         setProperty(property);
+         doSetProperty(property);
       }
+      save();
    }
 
    /**
     * {@inheritDoc}
     */
-   @SuppressWarnings("unchecked")
-   public void setProperty(Property<?> property) throws ConstraintException
+   public void setProperty(Property<?> property) throws NameConstraintViolationException, StorageException,
+      UpdateConflictException, VersioningException
    {
-      PropertyDefinition<?> definition = type.getPropertyDefinition(property.getId());
-
-      if (definition == null)
-      {
-         throw new ConstraintException("Property " + property.getId() + " is not in property definitions list of type "
-            + type.getId());
-      }
-
-      if (property.getType() != definition.getPropertyType())
-      {
-         throw new ConstraintException("Property type is not match.");
-      }
-
-      if (!definition.isMultivalued() && property.getValues().size() > 1)
-      {
-         throw new ConstraintException("Property " + property.getId() + " is not multi-valued.");
-      }
-
-      if (definition.isRequired() && property.getValues().size() == 0)
-      {
-         throw new ConstraintException("Required property " + property.getId() + " can't be removed.");
-      }
-
-      for (Object v : property.getValues())
-      {
-         if (v == null)
-         {
-            throw new ConstraintException("Null value not allowed. List must not contains null items.");
-         }
-      }
-
-      Updatability updatability = definition.getUpdatability();
-      if (updatability == Updatability.READWRITE //
-         || (updatability == Updatability.ONCREATE && isNew()) //
-         || (updatability == Updatability.WHENCHECKEDOUT && getBaseType() == BaseType.DOCUMENT && ((DocumentData)this)
-            .isPWC()))
-      {
-         if (property.getType() == PropertyType.BOOLEAN)
-         {
-            List<Boolean> booleans = (List<Boolean>)property.getValues();
-            entry.setValue(property.getId(), new BooleanValue(booleans));
-         }
-         else if (property.getType() == PropertyType.DATETIME)
-         {
-            List<Calendar> dates = (List<Calendar>)property.getValues();
-            entry.setValue(property.getId(), new DateValue(dates));
-         }
-         else if (property.getType() == PropertyType.DECIMAL)
-         {
-            List<BigDecimal> decimals = (List<BigDecimal>)property.getValues();
-            entry.setValue(property.getId(), new DecimalValue(decimals));
-         }
-         else if (property.getType() == PropertyType.INTEGER)
-         {
-            List<BigInteger> integers = (List<BigInteger>)property.getValues();
-            entry.setValue(property.getId(), new IntegerValue(integers));
-         }
-         else if (property.getType() == PropertyType.URI)
-         {
-            List<URI> uris = (List<URI>)property.getValues();
-            entry.setValue(property.getId(), new UriValue(uris));
-         }
-         else if (property.getType() == PropertyType.STRING || property.getType() == PropertyType.HTML
-            || property.getType() == PropertyType.ID)
-         {
-            List<String> text = (List<String>)property.getValues();
-            entry.setValue(property.getId(), new StringValue(text));
-         }
-      }
-      else
-      {
-         // Some clients may send all properties even need update only one.
-         if (LOG.isDebugEnabled())
-         {
-            LOG.debug("Property " + property.getId() + " is not updatable.");
-         }
-      }
+      doSetProperty(property);
+      save();
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public String toString()
    {
       return "type: " + getTypeId() + ", name: " + getName() + ", id: " + getObjectId();
    }
 
-   private Property<?> getProperty(PropertyDefinition<?> definition)
-   {
-      // Check in updates for properties.
-      Value value = entry.getValue(definition.getId());
-      if (value == null && CmisConstants.PATH.equals(definition.getId()) && type.getBaseId() == BaseType.FOLDER)
-      {
-         value = new StringValue(((FolderData)this).getPath());
-         // TODO check other virtual property
-      }
-
-      return createProperty(definition, value);
-   }
-
+   /**
+    * To create the new property.
+    *
+    * @param def the property definition
+    * @param value the value
+    * @return the new property
+    */
    private Property<?> createProperty(PropertyDefinition<?> def, Value value)
    {
       if (def.getPropertyType() == PropertyType.BOOLEAN)
@@ -583,6 +496,85 @@ abstract class BaseObjectData implements ObjectData
       else
       {
          throw new CmisRuntimeException("Unknown property type.");
+      }
+   }
+
+   protected abstract void delete() throws StorageException, UpdateConflictException, VersioningException;
+
+   protected Property<?> doGetProperty(PropertyDefinition<?> definition)
+   {
+      Value value = entry.getValue(definition.getId());
+      if (value == null && CmisConstants.PATH.equals(definition.getId()) && type.getBaseId() == BaseType.FOLDER)
+      {
+         value = new StringValue(((FolderData)this).getPath());
+         // add other virtual property
+      }
+      return createProperty(definition, value);
+   }
+
+   /**
+    * Update properties, skip on-create and read-only properties
+    *
+    * @param property property to be updated
+    */
+   protected void doSetProperty(Property<?> property) throws NameConstraintViolationException
+   {
+      PropertyDefinition<?> definition = type.getPropertyDefinition(property.getId());
+      Updatability updatability = definition.getUpdatability();
+      if (updatability == Updatability.READWRITE //
+         || (updatability == Updatability.WHENCHECKEDOUT && getBaseType() == BaseType.DOCUMENT && ((DocumentData)this)
+            .isPWC()))
+      {
+
+         // Do not store nulls
+         for (Iterator<?> i = property.getValues().iterator(); i.hasNext();)
+         {
+            Object v = i.next();
+            if (v == null)
+            {
+               i.remove();
+            }
+         }
+
+         if (CmisConstants.NAME.equals(property.getId()))
+         {
+            String name = null;
+            List<?> values = property.getValues();
+            if (values.size() > 0)
+            {
+               name = (String)values.get(0);
+            }
+
+            if (name == null || name.length() == 0)
+            {
+               throw new NameConstraintViolationException("Name can't be null or empty string.");
+            }
+            if (name.equals(getName()))
+            {
+               return;
+            }
+
+            for (FolderData parent : getParents())
+            {
+               for (ItemsIterator<ObjectData> iterator = parent.getChildren(null); iterator.hasNext();)
+               {
+                  if (name.equals(iterator.next().getName()))
+                  {
+                     throw new NameConstraintViolationException("Object with name " + name
+                        + " already exists in parent folder.");
+                  }
+               }
+            }
+         }
+
+         entry.setProperty(property);
+      }
+      else
+      {
+         if (LOG.isDebugEnabled())
+         {
+            LOG.debug("Property " + property.getId() + " is not updatable.");
+         }
       }
    }
 
@@ -649,6 +641,11 @@ abstract class BaseObjectData implements ObjectData
       return null;
    }
 
+   protected Entry getEntry()
+   {
+      return entry;
+   }
+
    protected String getId(String id)
    {
       return getString(id);
@@ -701,13 +698,22 @@ abstract class BaseObjectData implements ObjectData
       return null;
    }
 
-   protected Entry getEntry()
+   protected void save() throws StorageException
    {
-      return entry;
+      if (storage.entries.get(entry.getId()) == null)
+      {
+         throw new CmisRuntimeException("Object was removed from storage.");
+      }
+
+      entry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue(storage.getCurrentUser()));
+      entry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));
+      entry.setValue(CmisConstants.CHANGE_TOKEN, new StringValue(StorageImpl.generateId()));
+
+      storage.entries.put(entry.getId(), entry);
+      if (storage.indexListener != null)
+      {
+         storage.indexListener.updated(this);
+      }
    }
-
-   protected abstract void save() throws StorageException;
-
-   protected abstract void delete() throws ConstraintException, StorageException;
 
 }

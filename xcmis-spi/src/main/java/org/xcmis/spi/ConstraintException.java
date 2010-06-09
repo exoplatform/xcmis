@@ -25,7 +25,7 @@ package org.xcmis.spi;
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id: ConstraintException.java 2 2010-02-04 17:21:49Z andrew00x $
  */
-public final class ConstraintException extends InvalidArgumentException
+public final class ConstraintException extends CmisException
 {
    /**
     * Serial version UID.
@@ -33,7 +33,7 @@ public final class ConstraintException extends InvalidArgumentException
    private static final long serialVersionUID = 7433963970361873580L;
 
    /**
-    * Construct instance <tt>ConstraintViolationException</tt> without message.
+    * Construct instance <tt>ConstraintException</tt> without message.
     */
    public ConstraintException()
    {
@@ -41,7 +41,7 @@ public final class ConstraintException extends InvalidArgumentException
    }
 
    /**
-    * Construct instance <tt>ConstraintViolationException</tt> with message.
+    * Construct instance <tt>ConstraintException</tt> with message.
     * 
     * @param message the detail message about exception
     * @see Throwable#getMessage()
@@ -52,8 +52,8 @@ public final class ConstraintException extends InvalidArgumentException
    }
 
    /**
-    * Construct instance <tt>ConstraintViolationException</tt> with message and
-    * cause exception.
+    * Construct instance <tt>ConstraintException</tt> with message and cause
+    * exception.
     * 
     * @param message the detail message about exception
     * @param cause the cause exception
@@ -66,8 +66,7 @@ public final class ConstraintException extends InvalidArgumentException
    }
 
    /**
-    * Construct instance <tt>ConstraintViolationException</tt> with cause
-    * exception.
+    * Construct instance <tt>ConstraintException</tt> with cause exception.
     * 
     * @param cause the cause exception
     * @see Throwable#getCause()

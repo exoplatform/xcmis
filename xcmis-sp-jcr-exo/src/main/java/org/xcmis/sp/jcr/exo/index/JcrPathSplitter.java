@@ -42,7 +42,7 @@ public class JcrPathSplitter implements PathSplitter<String>
    private final LocationFactory locationFactory;
 
    /**
-    * 
+    * Constructor.
     * @param locationFactory LocationFactory
     */
    public JcrPathSplitter(LocationFactory locationFactory)

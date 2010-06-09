@@ -23,7 +23,8 @@ package org.xcmis.spi;
  * Should thrown by CMIS service it got not valid argument.
  * 
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id: InvalidArgumentException.java 232 2010-02-18 10:27:51Z andrew00x $
+ * @version $Id: InvalidArgumentException.java 232 2010-02-18 10:27:51Z
+ *          andrew00x $
  */
 public class InvalidArgumentException extends CmisRuntimeException
 {
@@ -53,8 +54,8 @@ public class InvalidArgumentException extends CmisRuntimeException
    }
 
    /**
-    * Construct instance <tt>InvalidArgumentException</tt> with message and cause
-    * exception.
+    * Construct instance <tt>InvalidArgumentException</tt> with message and
+    * cause exception.
     * 
     * @param message the detail message about exception
     * @param cause the cause exception

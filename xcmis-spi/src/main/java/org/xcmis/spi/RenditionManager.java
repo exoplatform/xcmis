@@ -19,18 +19,20 @@
 
 package org.xcmis.spi;
 
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
+import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.Rendition;
+import org.xcmis.spi.utils.CmisUtils;
+import org.xcmis.spi.utils.MimeType;
+
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
-
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
-import org.xcmis.spi.model.BaseType;
-import org.xcmis.spi.model.Rendition;
-import org.xcmis.spi.utils.MimeType;
 
 /**
  * Manage object's renditions.
@@ -61,7 +63,42 @@ public class RenditionManager
       manager.set(inst);
    }
 
-   Map<MimeType, RenditionProvider> renditionProviders =
+   /**
+    * Decode string from hex-string.
+    *
+    * @param in the input string
+    * @return string output
+    */
+   private static String decode(String in)
+   {
+      StringBuffer out = new StringBuffer();
+      int offset = 0;
+      while (offset < in.length())
+      {
+         int part = Integer.parseInt(in.substring(offset, offset + 2), 16);
+         out.append((char)part);
+         offset = offset + 2;
+      }
+      return out.toString();
+   }
+
+   /**
+    * Encode string into hex-string.
+    *
+    * @param in the input string
+    * @return the string hex-sequence
+    */
+   private static String encode(String in)
+   {
+      StringBuffer out = new StringBuffer();
+      for (int i = 0; i < in.length(); i++)
+      {
+         out.append(Integer.toHexString(in.charAt(i)));
+      }
+      return out.toString();
+   }
+
+   protected Map<MimeType, RenditionProvider> renditionProviders =
       new TreeMap<MimeType, RenditionProvider>(new Comparator<MimeType>()
       {
          public int compare(MimeType m1, MimeType m2)
@@ -86,31 +123,109 @@ public class RenditionManager
          }
       });
 
-   public RenditionManager()
+   protected RenditionManager()
    {
+   }
+
+   public void addRenditionProviders(List<String> provs)
+   {
+      if (provs != null && !provs.isEmpty())
+      {
+         for (String one : provs)
+         {
+            try
+            {
+               RenditionProvider prov = (RenditionProvider)Class.forName(one).newInstance();
+               for (MimeType mimeType : prov.getSupportedMediaType())
+               {
+                  renditionProviders.put(mimeType, prov);
+               }
+            }
+            catch (Exception e)
+            {
+               LOG.error("Cannot instantiate rendition provider instance: ", e);
+            }
+         }
+      }
+   }
+
+   /**
+    * Get all renditions using all available {@link RenditionProvider} that can
+    * provide rendition for specified mime-type.
+    *
+    * @param @param mime MimeType
+    * @return set of object renditions. If object has not renditions then empty
+    *         iterator will be returned
+    * @throws NullPointerException if <code>mime == null</code>
+    */
+   public ItemsIterator<Rendition> getRenditions(MimeType mime)
+   {
+      if (mime == null)
+      {
+         throw new NullPointerException("Mime-type may not be null.");
+      }
+      List<Rendition> renditions = new ArrayList<Rendition>();
+      for (Map.Entry<MimeType, RenditionProvider> e : renditionProviders.entrySet())
+      {
+         if (e.getKey().match(mime))
+         {
+            Rendition rendition = new Rendition();
+            // e.getKey() is unique because is key of map.
+            // Use it as id for content stream.
+            rendition.setStreamId(encode(e.getKey().toString()));
+            rendition.setKind(e.getValue().getKind());
+            rendition.setMimeType(e.getValue().getProducedMediaType().toString());
+            renditions.add(rendition);
+         }
+      }
+      return new BaseItemsIterator<Rendition>(renditions);
    }
 
    /**
     * Get all renditions of specified entry.
     *
-    * @param obj ObjectData
+    * @param object object for getting renditions
     * @return set of object renditions. If object has not renditions then empty
-    *            iterator will be returned.
-    * @throws StorageException if any other CMIS repository error occurs
+    *         iterator will be returned
     */
-   public Rendition getRenditions(ObjectData obj) throws StorageException
+   public ItemsIterator<Rendition> getRenditions(ObjectData object)
    {
-      if (obj.getBaseType() == BaseType.DOCUMENT && obj.getContentStream(null) != null)
+      // Not support other than document objects
+      if (object.getBaseType() == BaseType.DOCUMENT && ((DocumentData)object).hasContent())
       {
-         MimeType contentType = MimeType.fromString(((DocumentData)obj).getContentStreamMimeType());
-         RenditionProvider prov = renditionProviders.get(contentType);
-         if (prov != null)
+         MimeType mime = MimeType.fromString(((DocumentData)object).getContentStreamMimeType());
+         return getRenditions(mime);
+      }
+      return CmisUtils.emptyItemsIterator();
+   }
+
+   /**
+    * Get rendition from content stream with known mime-type and use most
+    * suitable {@link RenditionProvider}. For example if two RenditionProviders
+    * registered:
+    * <ul>
+    * <li>can process 'image/*' content</li>
+    * <li>can process 'image/jpeg' content</li>
+    * </ul>
+    * and provided MimeType is 'image/jpeg' then second provider from list will
+    * be in use.
+    *
+    * @param mime MimeType
+    * @param stream ContentStream
+    * @return rendition content stream or <code>null</code> if there is no
+    *         {@link RenditionProvider} which can produce stream for requested
+    *         type
+    * @throws IOException if any I/O error occurs
+    */
+   public RenditionContentStream getStream(ContentStream stream, MimeType mime) throws IOException
+   {
+      for (Map.Entry<MimeType, RenditionProvider> e : renditionProviders.entrySet())
+      {
+         if (e.getKey().match(mime))
          {
-            Rendition rendition = new Rendition();
-            rendition.setStreamId(encode(contentType.toString()));
-            rendition.setKind("cmis:thumbnail");
-            rendition.setMimeType("image/png"); //TODO: not so good, we can't know which type of rendition will be ceated;
-            return rendition;
+            RenditionProvider renditionProvider = e.getValue();
+            RenditionContentStream renditionContentStream = renditionProvider.getRenditionStream(stream);
+            return renditionContentStream;
          }
       }
       return null;
@@ -120,115 +235,20 @@ public class RenditionManager
     * Get rendition stream for objects with specified stream id.
     *
     * @param streamId stream id
-    * @param ObjectData object
+    * @param obj ObjectData
     * @return Renditions content stream
+    * @throws IOException if any I/O error occurs
     */
-   public ContentStream getStream(ObjectData obj, String streamId)
+   public RenditionContentStream getStream(ObjectData object, String streamId) throws IOException
    {
-      for (Map.Entry<MimeType, RenditionProvider> e : renditionProviders.entrySet())
+      // Assume streamId is encoded produces mime-type of RenditionProvider.
+      // See RenditionProvider#getProducedMediaType().
+      // Not support other than document objects
+      if (object.getBaseType() == BaseType.DOCUMENT && ((DocumentData)object).hasContent())
       {
-         if (e.getKey().match(MimeType.fromString(decode(streamId))))
-         {
-            RenditionProvider renditionProvider = e.getValue();
-            RenditionContentStream renditionContentStream = null;
-            try
-            {
-               renditionContentStream = renditionProvider.getRenditionStream(obj.getContentStream(null));
-            }
-            catch (IOException ioe)
-            {
-               String msg =
-                  "Unable get renditions for object " + obj.getObjectId() + " Unexpected error " + ioe.getMessage();
-               throw new StorageException(msg, ioe);
-            }
-            return renditionContentStream;
-         }
+         MimeType mime = MimeType.fromString(decode(streamId));
+         return getStream(((DocumentData)object).getContentStream(), mime);
       }
       return null;
-   }
-
-   /**
-    * Get rendition from content stream  with known mime-type.
-    *
-    * @param mime MimeType 
-    * @param ObjectData object
-    * @return Renditions content stream
-    */
-   public ContentStream getStream(ContentStream str, MimeType mime)
-   {
-      for (Map.Entry<MimeType, RenditionProvider> e : renditionProviders.entrySet())
-      {
-         if (e.getKey().match(mime))
-         {
-            RenditionProvider renditionProvider = e.getValue();
-            RenditionContentStream renditionContentStream = null;
-            try
-            {
-               renditionContentStream = renditionProvider.getRenditionStream(str);
-            }
-            catch (IOException ioe)
-            {
-               String msg = "Unable get renditions for stream " + str + " -  Unexpected error " + ioe.getMessage();
-               throw new StorageException(msg, ioe);
-            }
-            return renditionContentStream;
-         }
-      }
-      return null;
-   }
-
-   /**
-    * Encode string into hex-string.
-    * 
-    * @param in the input string
-    * @return the string hex-sequence
-    */
-   private static String encode(String in)
-   {
-      StringBuffer out = new StringBuffer();
-      for (int i = 0; i < in.length(); i++)
-      {
-         out.append(Integer.toHexString(in.charAt(i)));
-      }
-      return out.toString();
-   }
-
-   /**
-    * Decode string from hex-string.
-    * 
-    * @param in the input string
-    * @return string output
-    */
-   private static String decode(String in)
-   {
-      StringBuffer out = new StringBuffer();
-      int offset = 0;
-      while (offset < in.length())
-      {
-         int part = Integer.parseInt(in.substring(offset, offset + 2), 16);
-         out.append((char)part);
-         offset = offset + 2;
-      }
-      return out.toString();
-   }
-
-   public void addRenditionProviders(List<String> provs)
-   {
-      if (provs != null && !provs.isEmpty())
-         for (String one : provs)
-         {
-            try
-            {
-               RenditionProvider prov = (RenditionProvider)Class.forName(one).newInstance();
-               for (String mimeType : prov.getSupportedMediaType())
-               {
-                  renditionProviders.put(MimeType.fromString(mimeType), (RenditionProvider)prov);
-               }
-            }
-            catch (Exception e)
-            {
-               LOG.error("Cannot instantiate rendition provider instance: ", e);
-            }
-         }
    }
 }

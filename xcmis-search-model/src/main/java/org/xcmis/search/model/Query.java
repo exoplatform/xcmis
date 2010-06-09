@@ -66,8 +66,6 @@ public class Query implements QueryElement, Serializable
     * 
     * @param source
     *           the source
-    * @throws IllegalArgumentException
-    *            if the source is null
     */
    public Query(Source source)
    {

@@ -32,6 +32,8 @@ import org.xcmis.spi.FolderData;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.ObjectData;
+import org.xcmis.spi.ObjectNotFoundException;
+import org.xcmis.spi.PermissionService;
 import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.Storage;
 import org.xcmis.spi.model.BaseType;
@@ -41,6 +43,7 @@ import org.xcmis.spi.query.Score;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -53,7 +56,7 @@ import java.util.Set;
 import javax.jcr.Session;
 
 /**
- * {@link Storage} with implemented Storage.query(Query query)  method.
+ * {@link Storage} with implemented Storage.query(Query query) method.
  */
 public class QueryableStorage extends StorageImpl
 {
@@ -72,24 +75,26 @@ public class QueryableStorage extends StorageImpl
     * @param configuration StorageConfiguration
     * @param searchService the search service
     */
-   public QueryableStorage(Session session, StorageConfiguration configuration, SearchService searchService)
+   public QueryableStorage(Session session, StorageConfiguration configuration, SearchService searchService,
+      PermissionService permissionService)
    {
-      super(session, configuration);
+      super(session, configuration, permissionService);
       this.searchService = searchService;
       this.cmisQueryParser = new CmisQueryParser();
    }
 
    /**
     * Constructor.
+    * 
     * @param session Session
     * @param configuration StorageConfiguration
     * @param renditionManager RenditionManager
     * @param searchService the search service
     */
    public QueryableStorage(Session session, StorageConfiguration configuration, RenditionManager renditionManager,
-      SearchService searchService)
+      SearchService searchService, PermissionService permissionService)
    {
-      super(session, configuration, renditionManager);
+      super(session, configuration, renditionManager, permissionService);
       this.searchService = searchService;
       this.cmisQueryParser = new CmisQueryParser();
    }
@@ -289,7 +294,7 @@ public class QueryableStorage extends StorageImpl
 
       /**
        * The Constructor.
-       *
+       * 
        * @param selectorName String selector name
        * @param storage the storage
        */
@@ -321,6 +326,7 @@ public class QueryableStorage extends StorageImpl
 
       /**
        * Return comparable location of the object.
+       * 
        * @param identifer String
        * @return path String
        */
@@ -329,7 +335,15 @@ public class QueryableStorage extends StorageImpl
          ObjectData obj = itemCache.get(identifer);
          if (obj == null)
          {
-            obj = storage.getObjectById(identifer);
+            try
+            {
+               obj = storage.getObjectById(identifer);
+            }
+            catch (ObjectNotFoundException e)
+            {
+               // XXX : correct ?
+               return null;
+            }
             itemCache.put(identifer, obj);
          }
          if (obj.getBaseType() == BaseType.FOLDER)
@@ -339,12 +353,12 @@ public class QueryableStorage extends StorageImpl
                return obj.getName();
             }
          }
-         FolderData parent = obj.getParent();
-         if (parent == null)
+         Collection<FolderData> parents = obj.getParents();
+         if (parents.size() == 0)
          {
             return obj.getName();
          }
-         return parent.getPath() + "/" + obj.getName();
+         return parents.iterator().next().getPath() + "/" + obj.getName();
       }
    }
 

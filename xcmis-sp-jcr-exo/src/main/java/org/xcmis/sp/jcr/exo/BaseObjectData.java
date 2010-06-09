@@ -16,22 +16,11 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-
 package org.xcmis.sp.jcr.exo;
 
-import org.exoplatform.services.jcr.access.AccessControlList;
-import org.exoplatform.services.jcr.access.PermissionType;
-import org.exoplatform.services.jcr.core.ExtendedNode;
-import org.exoplatform.services.jcr.impl.core.value.BooleanValue;
-import org.exoplatform.services.jcr.impl.core.value.DateValue;
-import org.exoplatform.services.jcr.impl.core.value.DoubleValue;
-import org.exoplatform.services.jcr.impl.core.value.LongValue;
-import org.exoplatform.services.jcr.impl.core.value.StringValue;
-import org.exoplatform.services.jcr.util.IdGenerator;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.sp.jcr.exo.index.IndexListener;
-import org.xcmis.spi.BaseItemsIterator;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
@@ -46,31 +35,21 @@ import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.UpdateConflictException;
+import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.PropertyDefinition;
-import org.xcmis.spi.model.PropertyType;
 import org.xcmis.spi.model.RelationshipDirection;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.Updatability;
-import org.xcmis.spi.model.Permission.BasicPermissions;
 import org.xcmis.spi.model.impl.BooleanProperty;
 import org.xcmis.spi.model.impl.DateTimeProperty;
-import org.xcmis.spi.model.impl.DecimalProperty;
-import org.xcmis.spi.model.impl.HtmlProperty;
 import org.xcmis.spi.model.impl.IdProperty;
 import org.xcmis.spi.model.impl.IntegerProperty;
 import org.xcmis.spi.model.impl.StringProperty;
-import org.xcmis.spi.model.impl.UriProperty;
-import org.xcmis.spi.utils.CmisUtils;
 
-import java.io.IOException;
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -79,111 +58,141 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import javax.jcr.Node;
-import javax.jcr.PathNotFoundException;
 import javax.jcr.PropertyIterator;
 import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import javax.jcr.Value;
-import javax.jcr.ValueFormatException;
 import javax.jcr.nodetype.NodeType;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: BaseObjectData.java 1160 2010-05-21 17:06:16Z
+ *          alexey.zavizionov@gmail.com $
  */
 abstract class BaseObjectData implements ObjectData
 {
+   private class RelationshipIterator implements ItemsIterator<RelationshipData>
+   {
+
+      private final PropertyIterator iter;
+
+      private final TypeDefinition type;
+
+      private final boolean includeSubRelationshipTypes;
+
+      private final RelationshipDirection direction;
+
+      private RelationshipData next;
+
+      RelationshipIterator(PropertyIterator iter, TypeDefinition type, RelationshipDirection direction,
+         boolean includeSubRelationshipTypes)
+      {
+         this.iter = iter;
+         this.type = type;
+         this.direction = direction;
+         this.includeSubRelationshipTypes = includeSubRelationshipTypes;
+         fetchNext();
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public boolean hasNext()
+      {
+         return next != null;
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public RelationshipData next()
+      {
+         if (next == null)
+         {
+            throw new NoSuchElementException();
+         }
+         RelationshipData n = next;
+         fetchNext();
+         return n;
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public void remove()
+      {
+         throw new UnsupportedOperationException("remove");
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public int size()
+      {
+         return -1;
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public void skip(int skip) throws NoSuchElementException
+      {
+         while (skip-- > 0)
+         {
+            fetchNext();
+            if (next == null)
+            {
+               throw new NoSuchElementException();
+            }
+         }
+      }
+
+      /**
+       * To fetch next item.
+       */
+      void fetchNext()
+      {
+         next = null;
+         while (next == null && iter.hasNext())
+         {
+            javax.jcr.Property prop = iter.nextProperty();
+            try
+            {
+               String propName = prop.getName();
+               if ((direction == RelationshipDirection.EITHER && (propName.equals(CmisConstants.SOURCE_ID) || propName
+                  .equals(CmisConstants.TARGET_ID)))
+                  || (direction == RelationshipDirection.SOURCE && propName.equals(CmisConstants.SOURCE_ID))
+                  || (direction == RelationshipDirection.TARGET && propName.equals(CmisConstants.TARGET_ID)))
+               {
+                  Node relNode = prop.getParent();
+                  NodeType nodeType = relNode.getPrimaryNodeType();
+                  if (nodeType.getName().equals(type.getLocalName())
+                     || (includeSubRelationshipTypes && nodeType.isNodeType(type.getLocalName())))
+                  {
+                     next = new RelationshipDataImpl(new JcrNodeEntry(relNode), indexListener);
+                  }
+               }
+            }
+            catch (RepositoryException re)
+            {
+               LOG.error(re.getMessage());
+            }
+         }
+      }
+   }
 
    private static final Log LOG = ExoLogger.getLogger(BaseObjectData.class);
 
-   /** Object's type definition. */
-   protected final TypeDefinition type;
+   protected IndexListener indexListener;
 
-   /**
-    * JCR session.
-    */
-   protected final Session session;
+   protected JcrNodeEntry jcrEntry;
 
-   /**
-    * Temporary storage for object properties. For newly create object all
-    * properties will be stored here before calling {@link #save()}.
-    */
-   protected final Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-
-   /**
-    * Temporary storage for policies applied to object. For newly created all
-    * policies will be stored in here before calling {@link #save()}.
-    */
-   protected Set<PolicyData> policies;
-
-   /**
-    * Temporary storage for ACL applied to object. For newly created all ACL
-    * will be stored in here before calling {@link #save()}.
-    */
-   protected List<AccessControlEntry> acl;
-
-   /**
-    * Parent folder id for newly created fileable objects.
-    */
-   protected FolderDataImpl parent;
-
-   /**
-    * Back-end JCR node, it is <code>null</code> for newly created object.
-    */
-   protected Node node;
-
-   /**
-    * May store new name of object. If <code>null</code> it minds 'name not set
-    * yet' for newly created unsaved objects or 'no new name' for already
-    * persisted object.
-    */
-   protected String name;
-
-   protected final IndexListener indexListener;
-
-   /**
-    * Create new unsaved instance of CMIS object. This object should be saved,
-    * {@link #save()}.
-    *
-    * @param type type definition for new object
-    * @param parent parent folder
-    * @param session JCR session
-    */
-   public BaseObjectData(TypeDefinition type, FolderData parent, Session session, IndexListener indexListener)
+   public BaseObjectData(JcrNodeEntry jcrEntry, IndexListener indexListener)
    {
-      this.type = type;
+      this.jcrEntry = jcrEntry;
       this.indexListener = indexListener;
-      this.parent = (FolderDataImpl)parent;
-      this.session = session;
-      this.node = null;
-   }
-
-   /**
-    * Create new instance of persisted CMIS object.
-    *
-    * @param type object's type
-    * @param node back-end JCR node
-    */
-   public BaseObjectData(TypeDefinition type, Node node, IndexListener indexListener)
-   {
-      this.type = type;
-      this.node = node;
-      this.indexListener = indexListener;
-      try
-      {
-         this.session = node.getSession();
-         if (!node.isCheckedOut())
-         {
-            node.checkout();
-         }
-      }
-      catch (RepositoryException re)
-      {
-         throw new CmisRuntimeException("Unexpected error. " + re.getMessage(), re);
-      }
    }
 
    /**
@@ -191,47 +200,37 @@ abstract class BaseObjectData implements ObjectData
     */
    public void accept(ObjectDataVisitor visitor)
    {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException("accept");
-      }
       visitor.visit(this);
    }
 
    /**
     * {@inheritDoc}
     */
-   public void applyPolicy(PolicyData policy) throws ConstraintException
+   public void applyPolicy(PolicyData policy)
    {
-      if (!type.isControllablePolicy())
+      // Object is controllable by policy. It is checked in Connection.
+      jcrEntry.applyPolicy(policy);
+      try
       {
-         throw new ConstraintException("Type " + type.getId() + " is not controlable by Policy.");
+         save();
       }
+      catch (StorageException se)
+      {
+         throw new CmisRuntimeException("Unable apply policy. " + se.getMessage(), se);
+      }
+   }
 
-      if (policy.isNew())
+   public boolean equals(Object obj)
+   {
+      if (obj == null)
       {
-         throw new CmisRuntimeException("Unable apply newly created policy.");
+         return false;
       }
-
-      if (isNew())
+      if (obj.getClass() != getClass())
       {
-         if (policies == null)
-         {
-            policies = new HashSet<PolicyData>();
-         }
-         policies.add(policy);
+         return false;
       }
-      else
-      {
-         try
-         {
-            applyPolicy(node, policy);
-         }
-         catch (RepositoryException re)
-         {
-            throw new CmisRuntimeException("Unable to apply policy. " + re.getMessage(), re);
-         }
-      }
+      return ((BaseObjectData)obj).getObjectId().equals(getObjectId());
    }
 
    /**
@@ -239,27 +238,11 @@ abstract class BaseObjectData implements ObjectData
     */
    public List<AccessControlEntry> getACL(boolean onlyBasicPermissions)
    {
-      if (!type.isControllableACL())
+      if (!getTypeDefinition().isControllableACL())
       {
          return Collections.emptyList();
       }
-
-      if (isNew())
-      {
-         if (acl == null)
-         {
-            return Collections.emptyList();
-         }
-         return Collections.unmodifiableList(acl);
-      }
-      try
-      {
-         return getACL();
-      }
-      catch (RepositoryException re)
-      {
-         throw new CmisRuntimeException("Unable get object's ACL. " + re.getMessage(), re);
-      }
+      return jcrEntry.getACL();
    }
 
    /**
@@ -267,7 +250,7 @@ abstract class BaseObjectData implements ObjectData
     */
    public BaseType getBaseType()
    {
-      return type.getBaseId();
+      return jcrEntry.getBaseType();
    }
 
    /**
@@ -275,11 +258,7 @@ abstract class BaseObjectData implements ObjectData
     */
    public String getChangeToken()
    {
-      if (isNew())
-      {
-         return null;
-      }
-      return getString(CmisConstants.CHANGE_TOKEN);
+      return jcrEntry.getString(CmisConstants.CHANGE_TOKEN);
    }
 
    /**
@@ -287,11 +266,7 @@ abstract class BaseObjectData implements ObjectData
     */
    public String getCreatedBy()
    {
-      if (isNew())
-      {
-         return null;
-      }
-      return getString(CmisConstants.CREATED_BY);
+      return jcrEntry.getString(CmisConstants.CREATED_BY);
    }
 
    /**
@@ -299,11 +274,7 @@ abstract class BaseObjectData implements ObjectData
     */
    public Calendar getCreationDate()
    {
-      if (isNew())
-      {
-         return null;
-      }
-      return getDate(CmisConstants.CREATION_DATE);
+      return jcrEntry.getDate(CmisConstants.CREATION_DATE);
    }
 
    /**
@@ -311,11 +282,7 @@ abstract class BaseObjectData implements ObjectData
     */
    public Calendar getLastModificationDate()
    {
-      if (isNew())
-      {
-         return null;
-      }
-      return getDate(CmisConstants.LAST_MODIFICATION_DATE);
+      return jcrEntry.getDate(CmisConstants.LAST_MODIFICATION_DATE);
    }
 
    /**
@@ -323,11 +290,7 @@ abstract class BaseObjectData implements ObjectData
     */
    public String getLastModifiedBy()
    {
-      if (isNew())
-      {
-         return null;
-      }
-      return getString(CmisConstants.LAST_MODIFIED_BY);
+      return jcrEntry.getString(CmisConstants.LAST_MODIFIED_BY);
    }
 
    /**
@@ -335,19 +298,7 @@ abstract class BaseObjectData implements ObjectData
     */
    public String getName()
    {
-      if (isNew() || name != null)
-      {
-         return name;
-      }
-
-      try
-      {
-         return node.getName();
-      }
-      catch (RepositoryException re)
-      {
-         throw new CmisRuntimeException("Unable get object name. " + re.getMessage(), re);
-      }
+      return jcrEntry.getName();
    }
 
    /**
@@ -355,105 +306,7 @@ abstract class BaseObjectData implements ObjectData
     */
    public String getObjectId()
    {
-      if (isNew())
-      {
-         return null;
-      }
-
-      try
-      {
-         return ((ExtendedNode)node).getIdentifier();
-      }
-      catch (RepositoryException re)
-      {
-         throw new CmisRuntimeException("Unable get object ID. " + re.getMessage(), re);
-      }
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public FolderData getParent() throws ConstraintException
-   {
-      if (isNew())
-      {
-         return parent;
-      }
-
-      try
-      {
-         if (node.getDepth() == 0)
-         {
-            throw new ConstraintException("Unable get parent of root folder.");
-         }
-
-         Collection<FolderData> parents = getParents();
-         if (parents.size() > 1)
-         {
-            throw new ConstraintException("Object has more then one parent.");
-         }
-         else if (parents.size() == 0)
-         {
-            return null;
-         }
-         else
-         {
-            return parents.iterator().next();
-         }
-      }
-      catch (RepositoryException re)
-      {
-         throw new CmisRuntimeException("Unable get object parent. " + re.getMessage(), re);
-      }
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public Collection<FolderData> getParents()
-   {
-      if (isNew())
-      {
-         if (parent != null)
-         {
-            List<FolderData> parents = new ArrayList<FolderData>(1);
-            parents.add(parent);
-            return parents;
-         }
-
-         return Collections.emptyList();
-      }
-
-      try
-      {
-         if (node.getDepth() == 0)
-         {
-            return Collections.emptyList();
-         }
-
-         Set<FolderData> parents = new HashSet<FolderData>();
-         for (PropertyIterator iterator = node.getReferences(); iterator.hasNext();)
-         {
-            Node link = iterator.nextProperty().getParent();
-            if (link.isNodeType("nt:linkedFile"))
-            {
-               Node parent = link.getParent();
-               parents.add(new FolderDataImpl(JcrTypeHelper.getTypeDefinition(parent.getPrimaryNodeType(), true),
-                  parent, indexListener));
-            }
-         }
-         if (!node.getParent().isNodeType("xcmis:unfiledObject"))
-         {
-            Node parent = node.getParent();
-            parents.add(new FolderDataImpl(JcrTypeHelper.getTypeDefinition(parent.getPrimaryNodeType(), true), parent,
-               indexListener));
-         }
-         return parents;
-      }
-      catch (RepositoryException re)
-      {
-         throw new CmisRuntimeException("Unable get object parent. " + re.getMessage(), re);
-      }
+      return jcrEntry.getId();
    }
 
    /**
@@ -461,28 +314,17 @@ abstract class BaseObjectData implements ObjectData
     */
    public Collection<PolicyData> getPolicies()
    {
-      if (!type.isControllablePolicy())
+      if (!getTypeDefinition().isControllablePolicy())
       {
          return Collections.emptyList();
       }
-
-      if (isNew())
+      Collection<JcrNodeEntry> policyEntries = jcrEntry.getPolicies();
+      Set<PolicyData> policies = new HashSet<PolicyData>(policyEntries.size());
+      for (JcrNodeEntry pe : policyEntries)
       {
-         if (policies == null)
-         {
-            return Collections.emptySet();
-         }
-         return Collections.unmodifiableSet(policies);
+         policies.add(new PolicyDataImpl(pe, indexListener));
       }
-
-      try
-      {
-         return getAppliedPolicies();
-      }
-      catch (RepositoryException re)
-      {
-         throw new CmisRuntimeException("Unable get applied policies. " + re.getMessage(), re);
-      }
+      return policies;
    }
 
    /**
@@ -491,12 +333,29 @@ abstract class BaseObjectData implements ObjectData
    public Map<String, Property<?>> getProperties()
    {
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-
-      for (PropertyDefinition<?> def : type.getPropertyDefinitions())
+      TypeDefinition type = getTypeDefinition();
+      for (PropertyDefinition<?> definition : type.getPropertyDefinitions())
       {
-         properties.put(def.getId(), getProperty(def));
+         properties.put(definition.getId(), doGetProperty(definition));
       }
+      return properties;
+   }
 
+   /**
+    * {@inheritDoc}
+    */
+   public Map<String, Property<?>> getProperties(PropertyFilter filter)
+   {
+      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+      for (PropertyDefinition<?> definition : getTypeDefinition().getPropertyDefinitions())
+      {
+         String queryName = definition.getQueryName();
+         if (filter.accept(queryName))
+         {
+            String id = definition.getId();
+            properties.put(id, doGetProperty(definition));
+         }
+      }
       return properties;
    }
 
@@ -505,13 +364,12 @@ abstract class BaseObjectData implements ObjectData
     */
    public Property<?> getProperty(String id)
    {
-      PropertyDefinition<?> def = type.getPropertyDefinition(id);
-      if (def == null)
+      PropertyDefinition<?> definition = getTypeDefinition().getPropertyDefinition(id);
+      if (definition == null)
       {
          return null; // TODO : need to throw exception ??
       }
-
-      return getProperty(def);
+      return doGetProperty(definition);
    }
 
    /**
@@ -520,46 +378,10 @@ abstract class BaseObjectData implements ObjectData
    public ItemsIterator<RelationshipData> getRelationships(RelationshipDirection direction, TypeDefinition type,
       boolean includeSubRelationshipTypes)
    {
-      if (isNew())
-      {
-         return CmisUtils.emptyItemsIterator();
-      }
-
       try
       {
-         // Can met one relationship twice if object has relation to it self.
-         Set<RelationshipData> cache = new HashSet<RelationshipData>();
-
-         for (PropertyIterator iter = node.getReferences(); iter.hasNext();)
-         {
-            javax.jcr.Property prop = iter.nextProperty();
-
-            String propName = prop.getName();
-
-            if ((direction == RelationshipDirection.EITHER && (propName.equals(CmisConstants.SOURCE_ID) || propName
-               .equals(CmisConstants.TARGET_ID))) //
-               || (direction == RelationshipDirection.SOURCE && propName.equals(CmisConstants.SOURCE_ID)) //
-               || (direction == RelationshipDirection.TARGET && propName.equals(CmisConstants.TARGET_ID)))
-            {
-
-               Node relNode = prop.getParent();
-
-               NodeType nodeType = relNode.getPrimaryNodeType();
-
-               if (nodeType.getName().equals(type.getLocalName()) //
-                  || (includeSubRelationshipTypes && nodeType.isNodeType(type.getLocalName())))
-               {
-                  RelationshipDataImpl relationship =
-                     new RelationshipDataImpl(JcrTypeHelper.getTypeDefinition(nodeType, true), relNode, indexListener);
-                  boolean added = cache.add(relationship);
-                  if (LOG.isDebugEnabled() && added)
-                  {
-                     LOG.debug("Add relationship " + relationship.getName());
-                  }
-               }
-            }
-         }
-         return new BaseItemsIterator<RelationshipData>(cache);
+         PropertyIterator iter = getNode().getReferences();
+         return new RelationshipIterator(iter, type, direction, includeSubRelationshipTypes);
       }
       catch (RepositoryException re)
       {
@@ -570,28 +392,9 @@ abstract class BaseObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
-   public Map<String, Property<?>> getProperties(PropertyFilter filter)
-   {
-      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-      for (PropertyDefinition<?> def : type.getPropertyDefinitions())
-      {
-         String queryName = def.getQueryName();
-         if (!filter.accept(queryName))
-         {
-            continue;
-         }
-         String id = def.getId();
-         properties.put(id, getProperty(def));
-      }
-      return properties;
-   }
-
-   /**
-    * {@inheritDoc}
-    */
    public TypeDefinition getTypeDefinition()
    {
-      return type;
+      return jcrEntry.getType();
    }
 
    /**
@@ -599,1148 +402,229 @@ abstract class BaseObjectData implements ObjectData
     */
    public String getTypeId()
    {
-      return type.getId();
+      return getTypeDefinition().getId();
    }
 
-   /**
-    * {@inheritDoc}
-    */
-   public boolean isNew()
+   public int hashCode()
    {
-      return node == null;
+      return getObjectId().hashCode();
    }
 
    /**
     * {@inheritDoc}
     */
-   public void removePolicy(PolicyData policy) throws ConstraintException
+   public void removePolicy(PolicyData policy)
    {
-      if (!type.isControllablePolicy())
+      // Object is controllable by policy. It is checked in Connection.
+      jcrEntry.removePolicy(policy);
+      try
       {
-         throw new ConstraintException("Type " + type.getId() + " is not controlable by Policy.");
+         save();
       }
-
-      if (isNew())
+      catch (StorageException se)
       {
-         // If not saved yet simply remove from temporary storage
-         // TODO override equals & hashCode for CMIS objects classes
-         for (Iterator<PolicyData> policyIterator = policies.iterator(); policyIterator.hasNext();)
-         {
-            if (policyIterator.next().getObjectId().equals(policy.getObjectId()))
-            {
-               policies.remove(policy);
-            }
-         }
-      }
-      else
-      {
-         try
-         {
-            node.setProperty(policy.getObjectId(), (Node)null);
-         }
-         catch (javax.jcr.RepositoryException re)
-         {
-            throw new CmisRuntimeException("Unable remove policy. " + re.getMessage(), re);
-         }
+         // remove policy does not throw StorageException
+         throw new CmisRuntimeException(se.getMessage(), se);
       }
    }
 
    /**
     * {@inheritDoc}
     */
-   public void setACL(List<AccessControlEntry> aces) throws ConstraintException
+   public void setACL(List<AccessControlEntry> acl)
    {
-      if (!type.isControllableACL())
+      // Object is controllable by ACL. It is checked in Connection.
+      jcrEntry.setACL(acl);
+      try
       {
-         throw new ConstraintException("Type " + type.getId() + " is not controlable by ACL.");
+         save();
       }
-
-      if (isNew())
+      catch (StorageException se)
       {
-         if (this.acl != null)
-         {
-            this.acl.clear(); // Not merged, just replaced.
-         }
-
-         if (aces != null && aces.size() > 0)
-         {
-            if (this.acl == null)
-            {
-               this.acl = new ArrayList<AccessControlEntry>();
-            }
-            this.acl.addAll(aces);
-         }
-      }
-      else
-      {
-         try
-         {
-            setACL(node, aces);
-         }
-         catch (RepositoryException re)
-         {
-            throw new CmisRuntimeException("Unable to apply ACL. " + re.getMessage(), re);
-         }
+         // apply ACL does not throw StorageException
+         throw new CmisRuntimeException(se.getMessage(), se);
       }
    }
 
    /**
     * {@inheritDoc}
     */
-   public void setName(String name) throws NameConstraintViolationException
-   {
-      // Name will be used when method {@link #save()} called. Then node will be moved.
-      this.name = name;
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public void setProperties(Map<String, Property<?>> properties) throws ConstraintException,
-      NameConstraintViolationException
+   public void setProperties(Map<String, Property<?>> properties) throws NameConstraintViolationException,
+      UpdateConflictException, VersioningException, StorageException
    {
       for (Property<?> property : properties.values())
       {
-         setProperty(property);
+         doSetProperty(property);
       }
+      save();
    }
 
    /**
     * {@inheritDoc}
     */
-   public void setProperty(Property<?> property) throws ConstraintException
+   public void setProperty(Property<?> property) throws NameConstraintViolationException, UpdateConflictException,
+      VersioningException, StorageException
    {
-      PropertyDefinition<?> definition = type.getPropertyDefinition(property.getId());
+      doSetProperty(property);
+      save();
+   }
 
-      if (definition == null)
+   protected Property<?> doGetProperty(PropertyDefinition<?> definition)
+   {
+      // Check known prepared shortcut for properties.
+      // Some properties may be virtual relating to JCR, it minds they
+      // are not stored in JCR as properties but may be calculated in
+      // some way.
+      if (definition.getId().equals(CmisConstants.OBJECT_ID))
       {
-         throw new ConstraintException("Property " + property.getId() + " is not in property definitions list of type "
-            + type.getId());
+         return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(), definition
+            .getDisplayName(), getObjectId());
       }
-
-      if (property.getType() != definition.getPropertyType())
+      else if (definition.getId().equals(CmisConstants.OBJECT_TYPE_ID))
       {
-         throw new ConstraintException("Property type is not match. Property id " + property.getId());
+         return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(), definition
+            .getDisplayName(), getTypeId());
       }
-
-      if (!definition.isMultivalued() && property.getValues().size() > 1)
+      else if (definition.getId().equals(CmisConstants.BASE_TYPE_ID))
       {
-         throw new ConstraintException("Property " + property.getId() + " is not multi-valued.");
+         return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(), definition
+            .getDisplayName(), getBaseType().value());
       }
-
-      if (definition.isRequired() && property.getValues().size() == 0)
+      else if (definition.getId().equals(CmisConstants.NAME))
       {
-         throw new ConstraintException("Required property " + property.getId() + " can't be removed.");
+         return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(), definition
+            .getDisplayName(), getName());
       }
-
-      //      for (Object v : property.getValues())
-      //      {
-      //         if (v == null)
-      //         {
-      //            throw new ConstraintException("Null value not allowed. List must not contains null items.");
-      //         }
-      //      }
-
-      // Do not store nulls
-      for (Iterator<?> i = property.getValues().iterator(); i.hasNext();)
+      else if (definition.getId().equals(CmisConstants.CREATION_DATE))
       {
-         Object v = i.next();
-         if (v == null)
+         return new DateTimeProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
+            definition.getDisplayName(), getCreationDate());
+      }
+      else if (definition.getId().equals(CmisConstants.PATH))
+      {
+         return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(), definition
+            .getDisplayName(), ((FolderData)this).getPath());
+      }
+      else if (definition.getId().equals(CmisConstants.PARENT_ID) && getBaseType() == BaseType.FOLDER
+         && !((FolderData)this).isRoot())
+      {
+         try
          {
-            i.remove();
+            return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(), definition
+               .getDisplayName(), getParent().getObjectId());
+         }
+         catch (ConstraintException never)
+         {
+            // Should never happen. We have checked it is a folder and is not
+            // root folder so has exactly one parent.
+            LOG.error("Unable get parent id. " + never.getMessage());
          }
       }
+      else if (definition.getId().equals(CmisConstants.CONTENT_STREAM_FILE_NAME))
+      {
+         if (((DocumentData)this).hasContent())
+         {
+            return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
+               definition.getDisplayName(), getName());
+         }
+      }
+      else if (definition.getId().equals(CmisConstants.CONTENT_STREAM_MIME_TYPE))
+      {
+         if (((DocumentData)this).hasContent())
+         {
+            return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
+               definition.getDisplayName(), ((DocumentData)this).getContentStreamMimeType());
+         }
+      }
+      else if (definition.getId().equals(CmisConstants.CONTENT_STREAM_LENGTH))
+      {
+         if (((DocumentData)this).hasContent())
+         {
+            return new IntegerProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
+               definition.getDisplayName(), BigInteger.valueOf(((DocumentDataImpl)this).getContentStreamLength()));
+         }
+      }
+      else if (definition.getId().equals(CmisConstants.VERSION_SERIES_ID))
+      {
+         return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(), definition
+            .getDisplayName(), ((DocumentData)this).getVersionSeriesId());
+      }
+      else if (definition.getId().equals(CmisConstants.VERSION_LABEL))
+      {
+         return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(), definition
+            .getDisplayName(), ((DocumentData)this).getVersionLabel());
+      }
+      else if (definition.getId().equals(CmisConstants.IS_LATEST_MAJOR_VERSION))
+      {
+         return new BooleanProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
+            definition.getDisplayName(), ((DocumentData)this).isLatestMajorVersion());
+      }
 
-      // TODO : validate min/max/length etc.
+      return jcrEntry.getProperty(definition);
+   }
+
+   /**
+    * Update properties, skip on-create and read-only properties
+    * 
+    * @param property property to be updated
+    */
+   protected void doSetProperty(Property<?> property) throws NameConstraintViolationException
+   {
+      PropertyDefinition<?> definition = getTypeDefinition().getPropertyDefinition(property.getId());
 
       Updatability updatability = definition.getUpdatability();
-      if (updatability == Updatability.READWRITE //
-         || (updatability == Updatability.ONCREATE && isNew()) //
+      if (updatability == Updatability.READWRITE
          || (updatability == Updatability.WHENCHECKEDOUT && getBaseType() == BaseType.DOCUMENT && ((DocumentData)this)
             .isPWC()))
       {
-         if (property.getId().equals(CmisConstants.NAME))
+         // Do not store nulls
+         for (Iterator<?> i = property.getValues().iterator(); i.hasNext();)
          {
-            // Special property for JCR back-end.
-            name = (String)property.getValues().get(0);
-         }
-         else
-         {
-            if (isNew())
+            Object v = i.next();
+            if (v == null)
             {
-               properties.put(property.getId(), property);
-            }
-            else
-            {
-               try
-               {
-                  setProperty(node, property);
-               }
-               catch (RepositoryException re)
-               {
-                  throw new CmisRuntimeException("Failed set or update property " + property.getId() + ". "
-                     + re.getMessage(), re);
-               }
+               i.remove();
             }
          }
+         jcrEntry.setProperty(property);
       }
       else
       {
-         // Some clients may send all properties even need update only one.
          if (LOG.isDebugEnabled())
          {
             LOG.debug("Property " + property.getId() + " is not updatable.");
          }
       }
-   }
 
-   /**
-    * Create permission map which can be passed to JCR node.
-    *
-    * @param source source ACL
-    * @return permission map
-    * @throws ConstraintException if at least permission is unknown
-    */
-   private Map<String, String[]> createPermissionMap(List<AccessControlEntry> source) throws ConstraintException
-   {
-      Map<String, Set<String>> cache = new HashMap<String, Set<String>>();
-      for (AccessControlEntry ace : source)
-      {
-         String principal = ace.getPrincipal();
-         Set<String> permissions = cache.get(principal);
-         if (permissions == null)
-         {
-            permissions = new HashSet<String>();
-            cache.put(principal, permissions);
-         }
-         for (String perm : ace.getPermissions())
-         {
-            if (BasicPermissions.CMIS_READ.value().equals(perm))
-            {
-               permissions.add(PermissionType.READ);
-               // In CMIS child may be add without write permission for parent.
-               permissions.add(PermissionType.ADD_NODE);
-            }
-            else if (BasicPermissions.CMIS_WRITE.value().equals(perm))
-            {
-               permissions.add(PermissionType.SET_PROPERTY);
-               permissions.add(PermissionType.REMOVE);
-            }
-            else if (BasicPermissions.CMIS_ALL.value().equals(perm))
-            {
-               permissions.add(PermissionType.READ);
-               permissions.add(PermissionType.ADD_NODE);
-               permissions.add(PermissionType.SET_PROPERTY);
-               permissions.add(PermissionType.REMOVE);
-            }
-            else
-            {
-               String msg = "Unknown permission " + perm;
-               throw new ConstraintException(msg);
-            }
-         }
-      }
-      Map<String, String[]> aces = new HashMap<String, String[]>();
-
-      for (Map.Entry<String, Set<String>> e : cache.entrySet())
-      {
-         aces.put(e.getKey(), e.getValue().toArray(new String[e.getValue().size()]));
-      }
-
-      return aces;
-   }
-
-   private Property<?> createProperty(PropertyDefinition<?> def, Value[] values) throws RepositoryException
-   {
-      if (def.getPropertyType() == PropertyType.BOOLEAN)
-      {
-         List<Boolean> v = new ArrayList<Boolean>(values.length);
-
-         for (int i = 0; i < values.length; i++)
-         {
-            v.add(values[i].getBoolean());
-         }
-
-         return new BooleanProperty(def.getId(), def.getQueryName(), def.getLocalName(), def.getDisplayName(), v);
-      }
-      else if (def.getPropertyType() == PropertyType.DATETIME)
-      {
-         List<Calendar> v = new ArrayList<Calendar>(values.length);
-
-         for (int i = 0; i < values.length; i++)
-         {
-            v.add(values[i].getDate());
-         }
-
-         return new DateTimeProperty(def.getId(), def.getQueryName(), def.getLocalName(), def.getDisplayName(), v);
-      }
-      else if (def.getPropertyType() == PropertyType.DECIMAL)
-      {
-         List<BigDecimal> v = new ArrayList<BigDecimal>(values.length);
-
-         for (int i = 0; i < values.length; i++)
-         {
-            v.add(BigDecimal.valueOf(values[i].getDouble()));
-         }
-
-         return new DecimalProperty(def.getId(), def.getQueryName(), def.getLocalName(), def.getDisplayName(), v);
-      }
-      else if (def.getPropertyType() == PropertyType.HTML)
-      {
-         List<String> v = new ArrayList<String>(values.length);
-
-         for (int i = 0; i < values.length; i++)
-         {
-            v.add(values[i].getString());
-         }
-
-         return new HtmlProperty(def.getId(), def.getQueryName(), def.getLocalName(), def.getDisplayName(), v);
-      }
-      else if (def.getPropertyType() == PropertyType.ID)
-      {
-         List<String> v = new ArrayList<String>(values.length);
-
-         for (int i = 0; i < values.length; i++)
-         {
-            v.add(values[i].getString());
-         }
-
-         return new IdProperty(def.getId(), def.getQueryName(), def.getLocalName(), def.getDisplayName(), v);
-      }
-      else if (def.getPropertyType() == PropertyType.INTEGER)
-      {
-         List<BigInteger> v = new ArrayList<BigInteger>(values.length);
-
-         for (int i = 0; i < values.length; i++)
-         {
-            v.add(BigInteger.valueOf(values[i].getLong()));
-         }
-
-         return new IntegerProperty(def.getId(), def.getQueryName(), def.getLocalName(), def.getDisplayName(), v);
-      }
-      else if (def.getPropertyType() == PropertyType.STRING)
-      {
-         List<String> v = new ArrayList<String>(values.length);
-
-         for (int i = 0; i < values.length; i++)
-         {
-            v.add(values[i].getString());
-         }
-
-         return new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def.getDisplayName(), v);
-      }
-      else if (def.getPropertyType() == PropertyType.URI)
-      {
-         List<URI> v = new ArrayList<URI>(values.length);
-
-         for (int i = 0; i < values.length; i++)
-         {
-            try
-            {
-               v.add(new URI(values[i].getString()));
-            }
-            catch (URISyntaxException ue)
-            {
-               LOG.error(ue.getMessage(), ue);
-            }
-         }
-
-         return new UriProperty(def.getId(), def.getQueryName(), def.getLocalName(), def.getDisplayName(), v);
-      }
-      else
-      {
-         throw new CmisRuntimeException("Unknown property type.");
-      }
-   }
-
-   private List<AccessControlEntry> getACL() throws RepositoryException
-   {
-      if (node.isNodeType(JcrCMIS.EXO_PRIVILEGABLE))
-      {
-         AccessControlList jcrACL = ((ExtendedNode)node).getACL();
-
-         Map<String, Set<String>> cache = new HashMap<String, Set<String>>();
-
-         // Merge JCR ACEs
-         List<org.exoplatform.services.jcr.access.AccessControlEntry> jcrACEs = jcrACL.getPermissionEntries();
-         for (org.exoplatform.services.jcr.access.AccessControlEntry ace : jcrACEs)
-         {
-            String identity = ace.getIdentity();
-
-            Set<String> permissions = cache.get(identity);
-            if (permissions == null)
-            {
-               permissions = new HashSet<String>();
-               cache.put(identity, permissions);
-            }
-
-            permissions.add(ace.getPermission());
-         }
-
-         List<AccessControlEntry> cmisACL = new ArrayList<AccessControlEntry>(cache.size());
-
-         for (String principal : cache.keySet())
-         {
-            AccessControlEntry cmisACE = new AccessControlEntry();
-            cmisACE.setPrincipal(principal);
-
-            Set<String> values = cache.get(principal);
-            // Represent JCR ACEs as CMIS ACEs.
-            if (values.size() == PermissionType.ALL.length)
-            {
-               cmisACE.getPermissions().add(BasicPermissions.CMIS_ALL.value());
-            }
-            else if (values.contains(PermissionType.READ) && values.contains(PermissionType.ADD_NODE))
-            {
-               cmisACE.getPermissions().add(BasicPermissions.CMIS_READ.value());
-            }
-            else if (values.contains(PermissionType.SET_PROPERTY) && values.contains(PermissionType.REMOVE))
-            {
-               cmisACE.getPermissions().add(BasicPermissions.CMIS_WRITE.value());
-            }
-
-            cmisACL.add(cmisACE);
-         }
-         return Collections.unmodifiableList(cmisACL);
-      }
-
-      // Node has not "exo:privilegeable" mixin.
-      return Collections.emptyList();
-   }
-
-   private Collection<PolicyData> getAppliedPolicies() throws RepositoryException
-   {
-      Set<PolicyData> policies = new HashSet<PolicyData>();
-
-      for (PropertyIterator iter = node.getProperties(); iter.hasNext();)
-      {
-         javax.jcr.Property prop = iter.nextProperty();
-         if (prop.getType() == javax.jcr.PropertyType.REFERENCE)
-         {
-            try
-            {
-               Node pol = prop.getNode();
-
-               if (pol.getPrimaryNodeType().isNodeType(JcrCMIS.CMIS_NT_POLICY))
-               {
-                  boolean added =
-                     policies.add(new PolicyDataImpl(JcrTypeHelper.getTypeDefinition(pol.getPrimaryNodeType(), true),
-                        pol, indexListener));
-
-                  if (LOG.isDebugEnabled() && added)
-                  {
-                     LOG.debug("Add policy " + prop.getName());
-                  }
-               }
-            }
-            catch (ValueFormatException ignored)
-            {
-               // Can be thrown id met multi-valued property.
-               // Not care about it cause policy reference may not be multi-valued.
-            }
-         }
-      }
-
-      return Collections.unmodifiableSet(policies);
-   }
-
-   private Property<?> getProperty(PropertyDefinition<?> definition)
-   {
-      if (isNew())
-      {
-         return properties.get(definition.getId());
-      }
-      try
-      {
-         // Check known prepared shortcut for properties.
-         // Some properties may be virtual relating to JCR, it minds they
-         // are not stored in JCR as properties but may be calculated in
-         // some way.
-         if (definition.getId().equals(CmisConstants.OBJECT_ID))
-         {
-            return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(), definition
-               .getDisplayName(), getObjectId());
-         }
-         else if (definition.getId().equals(CmisConstants.OBJECT_TYPE_ID))
-         {
-            return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(), definition
-               .getDisplayName(), getTypeId());
-         }
-         else if (definition.getId().equals(CmisConstants.BASE_TYPE_ID))
-         {
-            return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(), definition
-               .getDisplayName(), getBaseType().value());
-         }
-         else if (definition.getId().equals(CmisConstants.NAME))
-         {
-            return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
-               definition.getDisplayName(), getName());
-         }
-         else if (definition.getId().equals(CmisConstants.CREATION_DATE))
-         {
-            return new DateTimeProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
-               definition.getDisplayName(), getCreationDate());
-         }
-         else if (definition.getId().equals(CmisConstants.PATH))
-         {
-            return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
-               definition.getDisplayName(), ((FolderData)this).getPath());
-         }
-         else if (definition.getId().equals(CmisConstants.PARENT_ID) && node.getDepth() != 0)
-         {
-            return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(), definition
-               .getDisplayName(), getParent().getObjectId());
-         }
-         else if (definition.getId().equals(CmisConstants.CONTENT_STREAM_FILE_NAME))
-         {
-            if (((DocumentData)this).hasContent())
-            {
-               return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
-                  definition.getDisplayName(), getName());
-            }
-         }
-         else if (definition.getId().equals(CmisConstants.CONTENT_STREAM_MIME_TYPE))
-         {
-            if (((DocumentData)this).hasContent())
-            {
-               return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
-                  definition.getDisplayName(), ((DocumentData)this).getContentStreamMimeType());
-            }
-         }
-         else if (definition.getId().equals(CmisConstants.CONTENT_STREAM_LENGTH))
-         {
-            if (((DocumentData)this).hasContent())
-            {
-               return new IntegerProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
-                  definition.getDisplayName(), BigInteger.valueOf(((DocumentDataImpl)this).getContentStreamLength()));
-            }
-         }
-         else if (definition.getId().equals(CmisConstants.VERSION_SERIES_ID))
-         {
-            return new IdProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(), definition
-               .getDisplayName(), ((DocumentData)this).getVersionSeriesId());
-         }
-         else if (definition.getId().equals(CmisConstants.VERSION_LABEL))
-         {
-            return new StringProperty(definition.getId(), definition.getQueryName(), definition.getLocalName(),
-               definition.getDisplayName(), ((DocumentData)this).getVersionLabel());
-         }
-
-         try
-         {
-            javax.jcr.Property jcrProperty = node.getProperty(definition.getId());
-            //            javax.jcr.Property jcrProperty = node.getProperty(definition.getLocalName());
-
-            return createProperty(definition, //
-               definition.isMultivalued() ? jcrProperty.getValues() : new Value[]{jcrProperty.getValue()});
-         }
-         catch (PathNotFoundException pnf)
-         {
-            if (LOG.isDebugEnabled())
-            {
-               LOG.debug("Property " + definition.getId() + " is not set.");
-            }
-
-            // TODO : need more virtual properties ??
-
-            // Property is valid but not set in back-end.
-            // Return property in 'value not set' state.
-            return createProperty(definition, new Value[0]);
-         }
-      }
-      catch (RepositoryException re)
-      {
-         throw new CmisRuntimeException("Unable get property " + definition.getId() + ". " + re.getMessage(), re);
-      }
-   }
-
-   protected void applyPolicy(Node data, PolicyData policy) throws RepositoryException
-   {
-      String policyId = policy.getObjectId();
-      if (!data.hasProperty(policyId))
-      {
-         data.setProperty(policyId, ((PolicyDataImpl)policy).getNode());
-      }
-   }
-
-   /**
-    * Persist current newly created object.
-    *
-    * @throws StorageException if any storage error occurs
-    * @throws NameConstraintViolationException if object name is not allowed for
-    *         parent folder
-    */
-   protected abstract void create() throws StorageException, NameConstraintViolationException;
-
-   // Helpers for internal usage ONLY. There is no validation for property type.
-
-   protected Boolean getBoolean(String id)
-   {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException();
-      }
-
-      try
-      {
-         return node.getProperty(id).getBoolean();
-      }
-      catch (PathNotFoundException pe)
-      {
-         // does not exist
-         return null;
-      }
-      catch (RepositoryException re)
-      {
-         throw new CmisRuntimeException("Unable get property " + id + ". " + re.getMessage(), re);
-      }
-   }
-
-   protected Boolean[] getBooleans(String id)
-   {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException();
-      }
-
-      try
-      {
-         Value[] values = node.getProperty(id).getValues();
-         Boolean[] res = new Boolean[values.length];
-         for (int i = 0; i < values.length; i++)
-         {
-            res[i] = values[i].getBoolean();
-         }
-         return res;
-      }
-      catch (PathNotFoundException pe)
-      {
-         // does not exist
-         return null;
-      }
-      catch (RepositoryException re)
-      {
-         throw new CmisRuntimeException("Unable get property " + id + ". " + re.getMessage(), re);
-      }
-   }
-
-   protected Calendar getDate(String id)
-   {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException();
-      }
-
-      try
-      {
-         return node.getProperty(id).getDate();
-      }
-      catch (PathNotFoundException pe)
-      {
-         // does not exist
-         return null;
-      }
-      catch (RepositoryException re)
-      {
-         throw new CmisRuntimeException("Unable get property " + id + ". " + re.getMessage(), re);
-      }
-   }
-
-   protected Calendar[] getDates(String id)
-   {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException();
-      }
-
-      try
-      {
-         Value[] values = node.getProperty(id).getValues();
-         Calendar[] res = new Calendar[values.length];
-         for (int i = 0; i < values.length; i++)
-         {
-            res[i] = values[i].getDate();
-         }
-         return res;
-      }
-      catch (PathNotFoundException pe)
-      {
-         // does not exist
-         return null;
-      }
-      catch (RepositoryException re)
-      {
-         throw new CmisRuntimeException("Unable get property " + id + ". " + re.getMessage(), re);
-      }
-   }
-
-   protected Double getDouble(String id)
-   {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException();
-      }
-
-      try
-      {
-         return node.getProperty(id).getDouble();
-      }
-      catch (PathNotFoundException pe)
-      {
-         // does not exist
-         return null;
-      }
-      catch (RepositoryException re)
-      {
-         throw new CmisRuntimeException("Unable get property " + id + ". " + re.getMessage(), re);
-      }
-   }
-
-   protected Double[] getDoubles(String id)
-   {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException();
-      }
-
-      try
-      {
-         Value[] values = node.getProperty(id).getValues();
-         Double[] res = new Double[values.length];
-         for (int i = 0; i < values.length; i++)
-         {
-            res[i] = values[i].getDouble();
-         }
-         return res;
-      }
-      catch (PathNotFoundException pe)
-      {
-         // does not exist
-         return null;
-      }
-      catch (RepositoryException re)
-      {
-         throw new CmisRuntimeException("Unable get property " + id + ". " + re.getMessage(), re);
-      }
-   }
-
-   protected Long getLong(String id)
-   {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException();
-      }
-
-      try
-      {
-         return node.getProperty(id).getLong();
-      }
-      catch (PathNotFoundException pe)
-      {
-         // does not exist
-         return null;
-      }
-      catch (RepositoryException re)
-      {
-         throw new CmisRuntimeException("Unable get property " + id + ". " + re.getMessage(), re);
-      }
-   }
-
-   protected Long[] getLongs(String id)
-   {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException();
-      }
-
-      try
-      {
-         Value[] values = node.getProperty(id).getValues();
-         Long[] res = new Long[values.length];
-         for (int i = 0; i < values.length; i++)
-         {
-            res[i] = values[i].getLong();
-         }
-         return res;
-      }
-      catch (PathNotFoundException pe)
-      {
-         // does not exist
-         return null;
-      }
-      catch (RepositoryException re)
-      {
-         throw new CmisRuntimeException("Unable get property " + id + ". " + re.getMessage(), re);
-      }
-   }
-
-   protected String getString(String id)
-   {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException();
-      }
-
-      try
-      {
-         return node.getProperty(id).getString();
-      }
-      catch (PathNotFoundException pe)
-      {
-         // does not exist
-         return null;
-      }
-      catch (RepositoryException re)
-      {
-         throw new CmisRuntimeException("Unable get property " + id + ". " + re.getMessage(), re);
-      }
-   }
-
-   protected String[] getStrings(String id)
-   {
-      if (isNew())
-      {
-         throw new UnsupportedOperationException();
-      }
-
-      try
-      {
-         Value[] values = node.getProperty(id).getValues();
-         String[] res = new String[values.length];
-         for (int i = 0; i < values.length; i++)
-         {
-            res[i] = values[i].getString();
-         }
-         return res;
-      }
-      catch (PathNotFoundException pe)
-      {
-         // does not exist
-         return null;
-      }
-      catch (RepositoryException re)
-      {
-         throw new CmisRuntimeException("Unable get property " + id + ". " + re.getMessage(), re);
-      }
-   }
-
-   protected void setACL(Node data, List<AccessControlEntry> aces) throws RepositoryException
-   {
-      if (!data.isNodeType(JcrCMIS.EXO_PRIVILEGABLE))
-      {
-         data.addMixin(JcrCMIS.EXO_PRIVILEGABLE);
-      }
-
-      ExtendedNode extNode = (ExtendedNode)data;
-
-      // Not merge ACL overwrite it.
-      extNode.clearACL();
-
-      if (aces != null && aces.size() > 0)
-      {
-         extNode.setPermissions(createPermissionMap(aces));
-      }
-   }
-
-   @SuppressWarnings("unchecked")
-   protected void setProperty(Node data, Property<?> property) throws RepositoryException
-   {
-      // Type and value should be already checked.
-      // 1. Allowed property for this type.
-      // 2. Type matched to type definition.
-      // 3. Required property has value(s).
-      // 4. Single-valued property does not contains more then one value.
-
-      try
-      {
-         // TODO : do not check twice
-         boolean multivalued = type.getPropertyDefinition(property.getId()).isMultivalued();
-
-         if (property.getType() == PropertyType.BOOLEAN)
-         {
-            List<Boolean> booleans = (List<Boolean>)property.getValues();
-            if (booleans.size() == 0)
-            {
-               data.setProperty(/*property.getLocalName()*/property.getId(), (Value)null);
-            }
-            else if (/*booleans.size() == 1 && */!multivalued)
-            {
-               data.setProperty(/*property.getLocalName()*/property.getId(), booleans.get(0));
-            }
-            else
-            {
-               Value[] jcrValue = new Value[property.getValues().size()];
-
-               for (int i = 0; i < jcrValue.length; i++)
-               {
-                  jcrValue[i] = new BooleanValue(booleans.get(i));
-               }
-
-               data.setProperty(/*property.getLocalName()*/property.getId(), jcrValue);
-            }
-         }
-         else if (property.getType() == PropertyType.DATETIME)
-         {
-            List<Calendar> datetime = (List<Calendar>)property.getValues();
-            if (datetime.size() == 0)
-            {
-               data.setProperty(/*property.getLocalName()*/property.getId(), (Value)null);
-            }
-            else if (/*datetime.size() == 1*/!multivalued)
-            {
-               data.setProperty(/*property.getLocalName()*/property.getId(), datetime.get(0));
-            }
-            else
-            {
-               Value[] jcrValue = new Value[property.getValues().size()];
-
-               for (int i = 0; i < jcrValue.length; i++)
-               {
-                  jcrValue[i] = new DateValue(datetime.get(i));
-               }
-
-               data.setProperty(/*property.getLocalName()*/property.getId(), jcrValue);
-            }
-         }
-         else if (property.getType() == PropertyType.DECIMAL)
-         {
-            List<BigDecimal> doubles = (List<BigDecimal>)property.getValues();
-            if (doubles.size() == 0)
-            {
-               data.setProperty(/*property.getLocalName()*/property.getId(), (Value)null);
-            }
-            else if (/*doubles.size() == 1*/!multivalued)
-            {
-               data.setProperty(/*property.getLocalName()*/property.getId(), doubles.get(0).doubleValue());
-            }
-            else
-            {
-               Value[] jcrValue = new Value[property.getValues().size()];
-
-               for (int i = 0; i < jcrValue.length; i++)
-               {
-                  jcrValue[i] = new DoubleValue(doubles.get(i).doubleValue());
-               }
-
-               data.setProperty(/*property.getLocalName()*/property.getId(), jcrValue);
-            }
-         }
-         else if (property.getType() == PropertyType.INTEGER)
-         {
-            List<BigInteger> integers = (List<BigInteger>)property.getValues();
-            if (integers.size() == 0)
-            {
-               data.setProperty(/*property.getLocalName()*/property.getId(), (Value)null);
-            }
-            else if (/*integers.size() == 1*/!multivalued)
-            {
-               data.setProperty(/*property.getLocalName()*/property.getId(), integers.get(0).longValue());
-            }
-            else
-            {
-               Value[] jcrValue = new Value[property.getValues().size()];
-
-               for (int i = 0; i < jcrValue.length; i++)
-               {
-                  jcrValue[i] = new LongValue(integers.get(i).longValue());
-               }
-
-               data.setProperty(/*property.getLocalName()*/property.getId(), jcrValue);
-            }
-         }
-         /*
-          * TODO : need to use different type, 'name' should be acceptable.
-          * ID (at least) must not be mixed with STRING and other it is
-          * important property type.
-          */
-         else if (property.getType() == PropertyType.HTML //
-            || property.getType() == PropertyType.ID //
-            || property.getType() == PropertyType.STRING)
-         {
-            List<String> text = (List<String>)property.getValues();
-            if (text.size() == 0)
-            {
-               data.setProperty(/*property.getLocalName()*/property.getId(), (Value)null);
-            }
-            else if (/*text.size() == 1*/!multivalued)
-            {
-               data.setProperty(/*property.getLocalName()*/property.getId(), text.get(0));
-            }
-            else
-            {
-               Value[] jcrValue = new Value[property.getValues().size()];
-
-               for (int i = 0; i < jcrValue.length; i++)
-               {
-                  jcrValue[i] = new StringValue(text.get(i));
-               }
-
-               data.setProperty(/*property.getLocalName()*/property.getId(), jcrValue);
-            }
-         }
-         else if (property.getType() == PropertyType.URI)
-         {
-            List<URI> uris = (List<URI>)property.getValues();
-            if (uris.size() == 0)
-            {
-               data.setProperty(/*property.getLocalName()*/property.getId(), (Value)null);
-            }
-            else if (/*uris.size() == 1*/!multivalued)
-            {
-               data.setProperty(/*property.getLocalName()*/property.getId(), uris.get(0).toString());
-            }
-            else
-            {
-               Value[] jcrValue = new Value[property.getValues().size()];
-
-               for (int i = 0; i < jcrValue.length; i++)
-               {
-                  jcrValue[i] = new StringValue(uris.get(i).toString());
-               }
-
-               data.setProperty(/*property.getLocalName()*/property.getId(), jcrValue);
-            }
-         }
-      }
-      catch (IOException io)
-      {
-         throw new CmisRuntimeException("Failed set or update property " + property.getId() + ". " + io.getMessage(),
-            io);
-      }
-   }
-
-   // -----------------
-
-   void delete() throws StorageException
-   {
-      if (isNew())
-      {
-         // Not need to do anything.
-         return;
-      }
-
-      try
-      {
-         if (getBaseType() == BaseType.DOCUMENT && getParents().size() == 0)
-         {
-            // unfiled document
-            node.getParent().remove();
-         }
-         else
-         {
-            node.remove();
-         }
-         session.save();
-      }
-      catch (javax.jcr.ReferentialIntegrityException rie)
-      {
-         // TODO !!! check is really ONLY relationships is in references.
-         // Should raise StorageException if is not relationship reference.
-         throw new ConstraintException("Object can't be deleted cause to storage referential integrity. "
-            + "Probably this object is source or target at least one Relationship. "
-            + "Those Relationship should be delted before.");
-      }
-      catch (RepositoryException re)
-      {
-         throw new StorageException("Unable delete object. " + re.getMessage(), re);
-      }
    }
 
    Node getNode()
    {
-      return node;
+      return jcrEntry.getNode();
    }
 
-   void save() throws StorageException, NameConstraintViolationException, UpdateConflictException
+   JcrNodeEntry getNodeEntry()
    {
-      if (isNew())
-      {
-         create();
-      }
-      else
-      {
-         try
-         {
-            Node parentNode = node.getParent();
-            // New name was set. Need rename Document.
-            // See setName(String), setProperty(Node, Property<?>).
-            if (name != null)
-            {
-               if (name.length() == 0)
-               {
-                  throw new NameConstraintViolationException("Name is empty.");
-               }
-
-               if (parentNode.hasNode(name))
-               {
-                  throw new NameConstraintViolationException("Object with name " + name + " already exists.");
-               }
-
-               String srcPath = node.getPath();
-               String destPath = srcPath.substring(0, srcPath.lastIndexOf('/') + 1) + name;
-
-               session.move(srcPath, destPath);
-
-               node = (Node)session.getItem(destPath);
-            }
-
-            node.setProperty(CmisConstants.LAST_MODIFICATION_DATE, Calendar.getInstance());
-            node.setProperty(CmisConstants.LAST_MODIFIED_BY, node.getSession().getUserID());
-            node.setProperty(CmisConstants.CHANGE_TOKEN, IdGenerator.generate());
-
-            session.save();
-         }
-         catch (RepositoryException re)
-         {
-            throw new StorageException("Unable save object. " + re.getMessage(), re);
-         }
-      }
+      return jcrEntry;
    }
 
-   void unfile()
+   protected void save() throws StorageException
    {
-      if (isNew())
+      boolean isNew = getNode().isNew();
+      jcrEntry.updateAndSave();
+      if (indexListener != null)
       {
-         throw new ConstraintException("Not supported for newly created objects.");
-      }
-
-      if (!getTypeDefinition().isFileable())
-      {
-         throw new ConstraintException("Object is not fileable.");
-      }
-
-      try
-      {
-         if (node.getParent().isNodeType("xcmis:unfiledObject"))
+         if (isNew)
          {
-            // Object is already in unfiled store.
-            return;
+            indexListener.created(this);
          }
-
-         // Remove all links.
-         for (PropertyIterator iterator = node.getReferences(); iterator.hasNext();)
+         else
          {
-            Node link = iterator.nextProperty().getParent();
-
-            if (link.isNodeType("nt:linkedFile"))
-            {
-               link.remove();
-            }
+            indexListener.updated(this);
          }
-
-         Node unfiledStore = (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_UNFILED);
-         Node unfiled = unfiledStore.addNode(getObjectId(), "xcmis:unfiledObject");
-
-         String destPath = unfiled.getPath() + "/" + node.getName();
-
-         session.move(node.getPath(), destPath);
-
-         session.save();
-      }
-      catch (RepositoryException re)
-      {
-         throw new CmisRuntimeException("Unexpected error. " + re.getMessage(), re);
       }
    }
+
+   protected abstract void delete() throws StorageException;
 
 }

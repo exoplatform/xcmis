@@ -25,13 +25,16 @@ import org.exoplatform.services.jcr.core.ExtendedSession;
 import org.exoplatform.services.jcr.core.nodetype.ExtendedNodeTypeManager;
 import org.exoplatform.services.jcr.core.nodetype.NodeTypeValue;
 import org.exoplatform.services.jcr.core.nodetype.PropertyDefinitionValue;
+import org.exoplatform.services.jcr.util.IdGenerator;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.exoplatform.services.security.ConversationState;
 import org.xcmis.sp.jcr.exo.index.IndexListener;
 import org.xcmis.spi.BaseItemsIterator;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
+import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.InvalidArgumentException;
@@ -40,6 +43,7 @@ import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.NotSupportedException;
 import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.ObjectNotFoundException;
+import org.xcmis.spi.PermissionService;
 import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.RenditionManager;
@@ -49,6 +53,7 @@ import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.model.ACLCapability;
+import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.AccessControlPropagation;
 import org.xcmis.spi.model.AllowableActions;
 import org.xcmis.spi.model.BaseType;
@@ -59,9 +64,9 @@ import org.xcmis.spi.model.CapabilityJoin;
 import org.xcmis.spi.model.CapabilityQuery;
 import org.xcmis.spi.model.CapabilityRendition;
 import org.xcmis.spi.model.ChangeEvent;
-import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.Permission;
 import org.xcmis.spi.model.PermissionMapping;
+import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.PropertyType;
 import org.xcmis.spi.model.Rendition;
@@ -70,11 +75,14 @@ import org.xcmis.spi.model.RepositoryInfo;
 import org.xcmis.spi.model.SupportedPermissions;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.UnfileObject;
+import org.xcmis.spi.model.Updatability;
 import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.model.Permission.BasicPermissions;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
+import org.xcmis.spi.utils.CmisUtils;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -88,7 +96,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
 
 import javax.jcr.Item;
@@ -97,6 +105,7 @@ import javax.jcr.ItemNotFoundException;
 import javax.jcr.ItemVisitor;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
+import javax.jcr.PathNotFoundException;
 import javax.jcr.PropertyIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -116,6 +125,306 @@ import javax.jcr.version.VersionIterator;
 public class StorageImpl implements Storage
 {
 
+   private class DeleteTreeLog
+   {
+      private final List<String> deleteObjects = new ArrayList<String>();
+
+      private final List<String> deleteLinks = new ArrayList<String>();
+
+      private final Map<String, String> moveMapping = new HashMap<String, String>();
+
+      public List<String> getDeleteLinks()
+      {
+         return deleteLinks;
+      }
+
+      public List<String> getDeleteObjects()
+      {
+         return deleteObjects;
+      }
+
+      public Map<String, String> getMoveMapping()
+      {
+         return moveMapping;
+      }
+
+   }
+
+   private class DeleteTreeVisitor implements ItemVisitor
+   {
+
+      private final String treePath;
+
+      private final UnfileObject unfileObject;
+
+      private final DeleteTreeLog deleteLog = new DeleteTreeLog();
+
+      DeleteTreeVisitor(String path, UnfileObject unfileObject)
+      {
+         this.treePath = path;
+         this.unfileObject = unfileObject != null ? unfileObject : UnfileObject.DELETE;
+      }
+
+      public DeleteTreeLog getDeleteLog()
+      {
+         return deleteLog;
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public void visit(javax.jcr.Property property) throws RepositoryException
+      {
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public void visit(Node node) throws RepositoryException
+      {
+         NodeType nt = node.getPrimaryNodeType();
+         String uuid = ((ExtendedNode)node).getIdentifier();
+         String path = node.getPath();
+
+         if (nt.isNodeType(JcrCMIS.NT_FOLDER) || nt.isNodeType(JcrCMIS.NT_UNSTRUCTURED))
+         {
+            for (NodeIterator children = node.getNodes(); children.hasNext();)
+            {
+               children.nextNode().accept(this);
+            }
+            deleteLog.getDeleteObjects().add(uuid);
+         }
+
+         if (nt.isNodeType("nt:linkedFile"))
+         {
+            // Met link in tree. Simply remove all links in current tree.
+            if (!deleteLog.getDeleteLinks().contains(uuid))
+            {
+               deleteLog.getDeleteLinks().add(uuid);
+            }
+
+            // Check target of link only if need delete all fileable objects.
+            if (unfileObject == UnfileObject.DELETE)
+            {
+               Node doc = node.getProperty("jcr:content").getNode();
+               String targetPath = doc.getPath();
+               String targetUuid = ((ExtendedNode)doc).getIdentifier();
+               if (!targetPath.startsWith(treePath) && !deleteLog.getDeleteObjects().contains(targetUuid))
+               {
+                  deleteLog.getDeleteObjects().add(targetUuid);
+               }
+               // Otherwise will met target of link in tree.
+            }
+         }
+         else if (nt.isNodeType(JcrCMIS.NT_FILE))
+         {
+            String moveTo = null;
+
+            // Check all link to current node.
+            // Need to find at least one that is not in deleted tree. It can be
+            // used as destination for unfiling document which has parent-folders
+            // outside of the current folder tree. If no link out of current tree then
+            // document will be moved to special store for unfiled objects.
+            for (PropertyIterator references = node.getReferences(); references.hasNext();)
+            {
+               Node link = references.nextProperty().getParent();
+
+               String linkPath = link.getPath();
+               String linkUuid = ((ExtendedNode)link).getIdentifier();
+
+               if ((unfileObject == UnfileObject.DELETE || linkPath.startsWith(treePath))
+                  && !deleteLog.getDeleteLinks().contains(linkUuid))
+               {
+                  deleteLog.getDeleteLinks().add(linkUuid);
+               }
+               else if (!linkPath.startsWith(treePath) && moveTo == null)
+               {
+                  moveTo = linkPath;
+               }
+            }
+
+            if ((unfileObject == UnfileObject.UNFILE || (unfileObject == UnfileObject.DELETESINGLEFILED && moveTo != null)))
+            {
+               deleteLog.getMoveMapping().put(path, moveTo);
+            }
+            else if (!deleteLog.getDeleteObjects().contains(uuid))
+            {
+               deleteLog.getDeleteObjects().add(uuid);
+            }
+         }
+      }
+
+   }
+
+   private class TreeVisitor implements ItemVisitor
+   {
+
+      private final Collection<String> allChildrenObjects = new HashSet<String>();
+
+      TreeVisitor()
+      {
+      }
+
+      public Collection<String> getDescendantsIds()
+      {
+         return allChildrenObjects;
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public void visit(javax.jcr.Property property) throws RepositoryException
+      {
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public void visit(Node node) throws RepositoryException
+      {
+         NodeType nt = node.getPrimaryNodeType();
+         String uuid = ((ExtendedNode)node).getIdentifier();
+
+         if (nt.isNodeType(JcrCMIS.NT_FOLDER) || nt.isNodeType(JcrCMIS.NT_UNSTRUCTURED))
+         {
+            for (NodeIterator children = node.getNodes(); children.hasNext();)
+            {
+               children.nextNode().accept(this);
+            }
+            allChildrenObjects.add(uuid);
+         }
+         else
+         {
+            if (!allChildrenObjects.contains(uuid))
+            {
+               allChildrenObjects.add(uuid);
+            }
+         }
+      }
+
+   }
+
+   /**
+    * Iterator over set of object's renditions.
+    */
+   private class RenditionIterator implements ItemsIterator<Rendition>
+   {
+
+      /** Source NodeIterator. */
+      protected final NodeIterator iter;
+
+      /** Next rendition. */
+      protected Rendition next;
+
+      /**
+       * Create RenditionIterator instance.
+       * 
+       * @param iter the node iterator
+       */
+      public RenditionIterator(NodeIterator iter)
+      {
+         this.iter = iter;
+         fetchNext();
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public boolean hasNext()
+      {
+         return next != null;
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public Rendition next()
+      {
+         if (next == null)
+         {
+            throw new NoSuchElementException();
+         }
+         Rendition n = next;
+         fetchNext();
+         return n;
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public void remove()
+      {
+         throw new UnsupportedOperationException("remove");
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public int size()
+      {
+         return -1;
+      }
+
+      /**
+       * {@inheritDoc}
+       */
+      public void skip(int skip) throws NoSuchElementException
+      {
+         while (skip-- > 0)
+         {
+            fetchNext();
+            if (next == null)
+            {
+               throw new NoSuchElementException();
+            }
+         }
+      }
+
+      /**
+       * Fetching next rendition.
+       */
+      protected void fetchNext()
+      {
+         next = null;
+         if (iter == null)
+         {
+            return;
+         }
+         while (next == null && iter.hasNext())
+         {
+            Node node = iter.nextNode();
+            try
+            {
+               if (node.isNodeType(JcrCMIS.CMIS_NT_RENDITION))
+               {
+                  Rendition rendition = new Rendition();
+                  rendition.setStreamId(node.getName());
+                  rendition.setKind(node.getProperty(JcrCMIS.CMIS_RENDITION_KIND).getString());
+                  rendition.setMimeType(node.getProperty(JcrCMIS.CMIS_RENDITION_MIME_TYPE).getString());
+                  rendition.setLength(node.getProperty(JcrCMIS.CMIS_RENDITION_STREAM).getLength());
+                  try
+                  {
+                     rendition.setHeight(Long.valueOf(node.getProperty(JcrCMIS.CMIS_RENDITION_HEIGHT).getLong())
+                        .intValue());
+                     rendition.setWidth(Long.valueOf(node.getProperty(JcrCMIS.CMIS_RENDITION_WIDTH).getLong())
+                        .intValue());
+                  }
+                  catch (PathNotFoundException pnfe)
+                  {
+                     // Height & Width is optional
+                  }
+                  next = rendition;
+               }
+            }
+            catch (javax.jcr.RepositoryException re)
+            {
+               String msg = "Unexpected error. Failed get next CMIS object. " + re.getMessage();
+               LOG.warn(msg);
+            }
+         }
+      }
+   }
+
    private static final Log LOG = ExoLogger.getLogger(StorageImpl.class);
 
    public static final String XCMIS_SYSTEM_PATH = "/xcmis:system";
@@ -132,12 +441,13 @@ public class StorageImpl implements Storage
 
    public static final Pattern XCMIS_PROPERTY_TYPE_PATTERN = Pattern.compile(".*" + StorageImpl.XCMIS_PROPERTY_TYPE);
 
-   static String latestLabel = "latest";
+   static String LATEST_LABEL = "latest";
 
-   static String pwcLabel = "pwc";
+   static String PWC_LABEL = "pwc";
 
    protected final Session session;
 
+   /** The storage configuration. */
    private final StorageConfiguration configuration;
 
    /** The rendition manager. */
@@ -147,49 +457,39 @@ public class StorageImpl implements Storage
 
    private RepositoryInfo repositoryInfo;
 
-   public StorageImpl(Session session, StorageConfiguration configuration)
-   {
-      this.session = session;
-      this.configuration = configuration;
-   }
-
-   public StorageImpl(Session session, StorageConfiguration configuration, RenditionManager renditionManager)
-   {
-      this.session = session;
-      this.configuration = configuration;
-      this.renditionManager = renditionManager;
-   }
-
-   /**
-    * @return the indexListener
-    */
-   public IndexListener getIndexListener()
-   {
-      return indexListener;
-   }
-
-   /**
-    * @param indexListener the indexListener to set
-    */
-   public void setIndexListener(IndexListener indexListener)
-   {
-      this.indexListener = indexListener;
-   }
+   private PermissionService permissionService;
 
    public StorageImpl(Session session, IndexListener indexListener, StorageConfiguration configuration,
-      RenditionManager renditionManager)
+      RenditionManager renditionManager, PermissionService permissionService)
    {
       this.session = session;
       this.indexListener = indexListener;
       this.configuration = configuration;
       this.renditionManager = renditionManager;
+      this.permissionService = permissionService;
+   }
+
+   public StorageImpl(Session session, StorageConfiguration configuration, PermissionService permissionService)
+   {
+      this.session = session;
+      this.configuration = configuration;
+      this.permissionService = permissionService;
+   }
+
+   public StorageImpl(Session session, StorageConfiguration configuration, RenditionManager renditionManager,
+      PermissionService permissionService)
+   {
+      this.session = session;
+      this.configuration = configuration;
+      this.renditionManager = renditionManager;
+      this.permissionService = permissionService;
    }
 
    /**
     * {@inheritDoc}
     */
    @SuppressWarnings("unchecked")
-   public String addType(TypeDefinition type) throws StorageException, CmisRuntimeException
+   public String addType(TypeDefinition type) throws ConstraintException, StorageException
    {
       try
       {
@@ -203,8 +503,16 @@ public class StorageImpl implements Storage
             throw new InvalidArgumentException(msg);
          }
 
-         // May throw exception if parent type is unknown or unsupported.
-         TypeDefinition parentType = getTypeDefinition(parentId, false);
+         TypeDefinition parentType = null;
+         try
+         {
+            // May throw exception if parent type is unknown or unsupported.
+            parentType = getTypeDefinition(parentId, false);
+         }
+         catch (TypeNotFoundException tnfe)
+         {
+            throw new ConstraintException("Parent type " + parentId + " does not exist");
+         }
 
          List<String> declaredSupertypeNames = new ArrayList<String>();
          declaredSupertypeNames.add(JcrTypeHelper.getNodeTypeName(parentId));
@@ -300,9 +608,7 @@ public class StorageImpl implements Storage
                      }
                      break;
 
-                  case ID : // TODO : need to separate ID type at least !!!
-                     //                     jcrPropDef.setRequiredType(javax.jcr.PropertyType.NAME);
-                     //                     break;
+                  case ID :
                   case HTML :
                   case URI :
                   case STRING :
@@ -343,7 +649,7 @@ public class StorageImpl implements Storage
 
                jcrPropDefintions.add(jcrPropDef);
 
-               // TODO replace with native types in JCR 2.x 
+               // TODO replace with native types in JCR 2.x
                // add type definition for ID, HTML, URI
                if (propDef.getPropertyType() == PropertyType.ID || propDef.getPropertyType() == PropertyType.HTML
                   || propDef.getPropertyType() == PropertyType.URI)
@@ -375,82 +681,10 @@ public class StorageImpl implements Storage
     */
    public AllowableActions calculateAllowableActions(ObjectData object)
    {
-      AllowableActions actions = new AllowableActions();
-      TypeDefinition type = object.getTypeDefinition();
-
-      RepositoryCapabilities capabilities = getRepositoryInfo().getCapabilities();
-
-      boolean isCheckedout = type.getBaseId() == BaseType.DOCUMENT //
-         && type.isVersionable() //
-         && ((DocumentData)object).isVersionSeriesCheckedOut();
-
-      actions.setCanGetProperties(true);
-
-      actions.setCanUpdateProperties(true); // TODO : need to check is it latest version ??
-
-      actions.setCanApplyACL(type.isControllableACL());
-
-      actions.setCanGetACL(type.isControllableACL());
-
-      actions.setCanApplyPolicy(type.isControllablePolicy());
-
-      actions.setCanGetAppliedPolicies(type.isControllablePolicy());
-
-      actions.setCanRemovePolicy(type.isControllablePolicy());
-
-      actions.setCanGetObjectParents(type.isFileable());
-
-      actions.setCanMoveObject(type.isFileable());
-
-      actions.setCanAddObjectToFolder(capabilities.isCapabilityMultifiling() //
-         && type.isFileable() //
-         && type.getBaseId() != BaseType.FOLDER);
-
-      actions.setCanRemoveObjectFromFolder(capabilities.isCapabilityUnfiling() //
-         && type.isFileable() //
-         && type.getBaseId() != BaseType.FOLDER);
-
-      actions.setCanGetDescendants(capabilities.isCapabilityGetDescendants() //
-         && type.getBaseId() == BaseType.FOLDER);
-
-      actions.setCanGetFolderTree(capabilities.isCapabilityGetFolderTree() //
-         && type.getBaseId() == BaseType.FOLDER);
-
-      actions.setCanCreateDocument(type.getBaseId() == BaseType.FOLDER);
-
-      actions.setCanCreateFolder(type.getBaseId() == BaseType.FOLDER);
-
-      actions.setCanDeleteTree(type.getBaseId() == BaseType.FOLDER);
-
-      actions.setCanGetChildren(type.getBaseId() == BaseType.FOLDER);
-
-      actions.setCanGetFolderParent(type.getBaseId() == BaseType.FOLDER);
-
-      actions.setCanGetContentStream(type.getBaseId() == BaseType.DOCUMENT //
-         && ((DocumentData)object).hasContent());
-
-      actions.setCanSetContentStream(type.getBaseId() == BaseType.DOCUMENT //
-         && type.getContentStreamAllowed() != ContentStreamAllowed.NOT_ALLOWED);
-
-      actions.setCanDeleteContentStream(type.getBaseId() == BaseType.DOCUMENT //
-         && type.getContentStreamAllowed() != ContentStreamAllowed.REQUIRED);
-
-      actions.setCanGetAllVersions(type.getBaseId() == BaseType.DOCUMENT);
-
-      actions.setCanGetRenditions(capabilities.getCapabilityRenditions() == CapabilityRendition.READ);
-
-      actions.setCanCheckIn(isCheckedout);
-
-      actions.setCanCancelCheckOut(isCheckedout);
-
-      actions.setCanCheckOut(!isCheckedout);
-
-      actions.setCanGetObjectRelationships(type.getBaseId() != BaseType.RELATIONSHIP);
-
-      actions.setCanCreateRelationship(type.getBaseId() != BaseType.RELATIONSHIP);
-
-      // TODO : applied policy, not empty folders, not latest versions may not be delete.
-      actions.setCanDeleteObject(true);
+      ConversationState state = ConversationState.getCurrent();
+      AllowableActions actions =
+         permissionService.calculateAllowableActions(object, state != null ? state.getIdentity() : null,
+            getRepositoryInfo());
 
       return actions;
    }
@@ -458,155 +692,446 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public DocumentData copyDocument(DocumentData source, FolderData parent, VersioningState versioningState)
-      throws ConstraintException, StorageException
+   public DocumentData copyDocument(DocumentData source, FolderData parent, Map<String, Property<?>> properties,
+      List<AccessControlEntry> acl, Collection<PolicyData> policies, VersioningState versioningState)
+      throws ConstraintException, NameConstraintViolationException, StorageException
    {
-      if (parent != null)
+      try
       {
-         if (parent.isNew())
+         String name = null;
+         Property<?> nameProperty = properties.get(CmisConstants.NAME);
+         if (nameProperty != null && nameProperty.getValues().size() > 0)
          {
-            throw new CmisRuntimeException("Unable create document in newly created folder.");
+            name = (String)nameProperty.getValues().get(0);
          }
-         if (!parent.isAllowedChildType(source.getTypeId()))
+         if (name == null || name.length() == 0)
          {
-            throw new ConstraintException("Type " + source.getTypeId()
-               + " is not in list of allowed child type for folder " + parent.getObjectId());
+            name = source.getName();
          }
-      }
 
-      if (source.isNew())
+         TypeDefinition typeDefinition = source.getTypeDefinition();
+         Node copyNode = null;
+         if (parent != null)
+         {
+            Node parentNode = ((FolderDataImpl)parent).getNode();
+            if (parentNode.hasNode(name))
+            {
+               throw new NameConstraintViolationException("Object with name " + name
+                  + " already exists in specified folder.");
+            }
+            copyNode = parentNode.addNode(name, typeDefinition.getLocalName());
+         }
+         else
+         {
+            Node unfiledStore = (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_UNFILED);
+            // wrapper around Document node with unique name.
+            Node unfiled = unfiledStore.addNode(IdGenerator.generate(), "xcmis:unfiledObject");
+            copyNode = unfiled.addNode(name, typeDefinition.getLocalName());
+         }
+
+         if (!copyNode.isNodeType(JcrCMIS.CMIS_MIX_DOCUMENT))
+         {
+            copyNode.addMixin(JcrCMIS.CMIS_MIX_DOCUMENT);
+         }
+         if (copyNode.canAddMixin(JcrCMIS.MIX_VERSIONABLE))
+         {
+            copyNode.addMixin(JcrCMIS.MIX_VERSIONABLE);
+         }
+
+         JcrNodeEntry copyNodeEntry = new JcrNodeEntry(copyNode, typeDefinition);
+
+         copyNodeEntry.setValue(CmisConstants.OBJECT_TYPE_ID, typeDefinition.getId());
+         copyNodeEntry.setValue(CmisConstants.BASE_TYPE_ID, typeDefinition.getBaseId().value());
+         String userId = session.getUserID();
+         copyNodeEntry.setValue(CmisConstants.CREATED_BY, userId);
+         Calendar cal = Calendar.getInstance();
+         copyNodeEntry.setValue(CmisConstants.CREATION_DATE, cal);
+         copyNodeEntry.setValue(CmisConstants.VERSION_SERIES_ID, copyNode.getProperty(JcrCMIS.JCR_VERSION_HISTORY)
+            .getString());
+         copyNodeEntry.setValue(CmisConstants.IS_LATEST_VERSION, true);
+         copyNodeEntry.setValue(CmisConstants.IS_MAJOR_VERSION, versioningState == VersioningState.MAJOR);
+
+         // TODO : support for checked-out initial state
+         copyNodeEntry.setValue(CmisConstants.VERSION_LABEL, LATEST_LABEL);
+
+         for (Property<?> property : properties.values())
+         {
+            PropertyDefinition<?> definition = typeDefinition.getPropertyDefinition(property.getId());
+            Updatability updatability = definition.getUpdatability();
+            if (updatability == Updatability.READWRITE || updatability == Updatability.ONCREATE)
+            {
+               copyNodeEntry.setProperty(property);
+            }
+         }
+
+         try
+         {
+            copyNodeEntry.setContentStream(source.getContentStream());
+         }
+         catch (IOException ioe)
+         {
+            throw new CmisRuntimeException("Unable copy content for new document. " + ioe.getMessage(), ioe);
+         }
+
+         if (acl != null && acl.size() > 0)
+         {
+            copyNodeEntry.setACL(acl);
+         }
+
+         if (policies != null && policies.size() > 0)
+         {
+            for (PolicyData policy : policies)
+            {
+               copyNodeEntry.applyPolicy(policy);
+            }
+         }
+
+         DocumentDataImpl copy = new DocumentDataImpl(copyNodeEntry, indexListener, renditionManager);
+         copy.save();
+         return copy;
+      }
+      catch (RepositoryException re)
       {
-         throw new CmisRuntimeException("Unable use newly created document as source.");
+         throw new StorageException("Unable to create a copy of document. " + re.getMessage(), re);
       }
-
-      if (source.getBaseType() != BaseType.DOCUMENT)
-      {
-         throw new ConstraintException("Source object has type whose base type is not Document.");
-      }
-
-      DocumentCopy copy =
-         new DocumentCopy(source, getTypeDefinition(source.getTypeId(), true), parent, session, versioningState,
-            indexListener);
-
-      return copy;
    }
 
    /**
     * {@inheritDoc}
     */
-   public DocumentData createDocument(FolderData parent, String typeId, VersioningState versioningState)
-      throws ConstraintException
+   public DocumentData createDocument(FolderData parent, TypeDefinition typeDefinition,
+      Map<String, Property<?>> properties, ContentStream content, List<AccessControlEntry> acl,
+      Collection<PolicyData> policies, VersioningState versioningState) throws ConstraintException,
+      NameConstraintViolationException, IOException, StorageException
    {
-      if (parent != null)
+      try
       {
-         if (parent.isNew())
+         String name = null;
+         Property<?> nameProperty = properties.get(CmisConstants.NAME);
+         if (nameProperty != null && nameProperty.getValues().size() > 0)
          {
-            throw new CmisRuntimeException("Unable create document in newly created folder.");
+            name = (String)nameProperty.getValues().get(0);
          }
-         if (!parent.isAllowedChildType(typeId))
+         if (name == null && content != null)
          {
-            throw new ConstraintException("Type " + typeId + " is not in list of allowed child type for folder "
-               + parent.getObjectId());
+            name = content.getFileName();
          }
+         if (name == null || name.length() == 0)
+         {
+            throw new NameConstraintViolationException("Name for new document must be provided.");
+         }
+
+         Node documentNode = null;
+         if (parent != null)
+         {
+            Node parentNode = ((FolderDataImpl)parent).getNode();
+            if (parentNode.hasNode(name))
+            {
+               throw new NameConstraintViolationException("Object with name " + name
+                  + " already exists in specified folder.");
+            }
+            documentNode = parentNode.addNode(name, typeDefinition.getLocalName());
+         }
+         else
+         {
+            Node unfiledStore = (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_UNFILED);
+            // wrapper around Document node with unique name.
+            Node unfiled = unfiledStore.addNode(IdGenerator.generate(), "xcmis:unfiledObject");
+            documentNode = unfiled.addNode(name, typeDefinition.getLocalName());
+         }
+
+         if (!documentNode.isNodeType(JcrCMIS.CMIS_MIX_DOCUMENT))
+         {
+            documentNode.addMixin(JcrCMIS.CMIS_MIX_DOCUMENT);
+         }
+         if (documentNode.canAddMixin(JcrCMIS.MIX_VERSIONABLE))
+         {
+            documentNode.addMixin(JcrCMIS.MIX_VERSIONABLE);
+         }
+
+         JcrNodeEntry documentNodeEntry = new JcrNodeEntry(documentNode, typeDefinition);
+
+         documentNodeEntry.setValue(CmisConstants.OBJECT_TYPE_ID, typeDefinition.getId());
+         documentNodeEntry.setValue(CmisConstants.BASE_TYPE_ID, typeDefinition.getBaseId().value());
+         String userId = session.getUserID();
+         documentNodeEntry.setValue(CmisConstants.CREATED_BY, userId);
+         Calendar cal = Calendar.getInstance();
+         documentNodeEntry.setValue(CmisConstants.CREATION_DATE, cal);
+         documentNodeEntry.setValue(CmisConstants.VERSION_SERIES_ID, documentNode.getProperty(
+            JcrCMIS.JCR_VERSION_HISTORY).getString());
+         documentNodeEntry.setValue(CmisConstants.IS_LATEST_VERSION, true);
+         documentNodeEntry.setValue(CmisConstants.IS_MAJOR_VERSION, versioningState == VersioningState.MAJOR);
+
+         // TODO : support for checked-out initial state
+         documentNodeEntry.setValue(CmisConstants.VERSION_LABEL, LATEST_LABEL);
+
+         for (Property<?> property : properties.values())
+         {
+            PropertyDefinition<?> definition = typeDefinition.getPropertyDefinition(property.getId());
+            Updatability updatability = definition.getUpdatability();
+            if (updatability == Updatability.READWRITE || updatability == Updatability.ONCREATE)
+            {
+               documentNodeEntry.setProperty(property);
+            }
+         }
+
+         documentNodeEntry.setContentStream(content);
+
+         if (acl != null && acl.size() > 0)
+         {
+            documentNodeEntry.setACL(acl);
+         }
+
+         if (policies != null && policies.size() > 0)
+         {
+            for (PolicyData policy : policies)
+            {
+               documentNodeEntry.applyPolicy(policy);
+            }
+         }
+
+         DocumentDataImpl document = new DocumentDataImpl(documentNodeEntry, indexListener, renditionManager);
+         document.save();
+         return document;
+      }
+      catch (RepositoryException re)
+      {
+         throw new StorageException("Unable to create Document. " + re.getMessage(), re);
       }
 
-      TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
-
-      if (typeDefinition.getBaseId() != BaseType.DOCUMENT)
-      {
-         throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Document.");
-      }
-
-      DocumentData document = new DocumentDataImpl(typeDefinition, parent, session, versioningState, indexListener);
-
-      return document;
    }
 
    /**
     * {@inheritDoc}
     */
-   public FolderData createFolder(FolderData parent, String typeId) throws ConstraintException
+   public FolderData createFolder(FolderData parent, TypeDefinition typeDefinition,
+      Map<String, Property<?>> properties, List<AccessControlEntry> acl, Collection<PolicyData> policies)
+      throws ConstraintException, NameConstraintViolationException, StorageException
    {
       if (parent == null)
       {
          throw new ConstraintException("Parent folder must be provided.");
       }
 
-      if (parent.isNew())
+      try
       {
-         throw new CmisRuntimeException("Unable create child folder in newly created folder.");
-      }
+         String name = null;
+         Property<?> nameProperty = properties.get(CmisConstants.NAME);
+         if (nameProperty != null && nameProperty.getValues().size() > 0)
+         {
+            name = (String)nameProperty.getValues().get(0);
+         }
+         if (name == null || name.length() == 0)
+         {
+            throw new NameConstraintViolationException("Name for new folder must be provided.");
+         }
 
-      if (!parent.isAllowedChildType(typeId))
+         Node parentNode = ((FolderDataImpl)parent).getNode();
+         if (parentNode.hasNode(name))
+         {
+            throw new NameConstraintViolationException("Object with name " + name
+               + " already exists in specified folder.");
+         }
+
+         Node folderNode = parentNode.addNode(name, typeDefinition.getLocalName());
+         if (!folderNode.isNodeType(JcrCMIS.CMIS_MIX_FOLDER))
+         {
+            folderNode.addMixin(JcrCMIS.CMIS_MIX_FOLDER);
+         }
+
+         JcrNodeEntry folderNodeEntry = new JcrNodeEntry(folderNode, typeDefinition);
+
+         folderNodeEntry.setValue(CmisConstants.OBJECT_TYPE_ID, typeDefinition.getId());
+         folderNodeEntry.setValue(CmisConstants.BASE_TYPE_ID, typeDefinition.getBaseId().value());
+         String userId = session.getUserID();
+         folderNodeEntry.setValue(CmisConstants.CREATED_BY, userId);
+         Calendar cal = Calendar.getInstance();
+         folderNodeEntry.setValue(CmisConstants.CREATION_DATE, cal);
+
+         for (Property<?> property : properties.values())
+         {
+            PropertyDefinition<?> definition = typeDefinition.getPropertyDefinition(property.getId());
+            Updatability updatability = definition.getUpdatability();
+            if (updatability == Updatability.READWRITE || updatability == Updatability.ONCREATE)
+            {
+               folderNodeEntry.setProperty(property);
+            }
+         }
+
+         if (acl != null && acl.size() > 0)
+         {
+            folderNodeEntry.setACL(acl);
+         }
+
+         if (policies != null && policies.size() > 0)
+         {
+            for (PolicyData policy : policies)
+            {
+               folderNodeEntry.applyPolicy(policy);
+            }
+         }
+
+         FolderDataImpl folder = new FolderDataImpl(folderNodeEntry, indexListener, renditionManager);
+         folder.save();
+         return folder;
+      }
+      catch (RepositoryException re)
       {
-         throw new ConstraintException("Type " + typeId + " is not in list of allowed child type for folder "
-            + parent.getObjectId());
+         throw new StorageException("Unable to create Folder. " + re.getMessage(), re);
       }
-
-      TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
-
-      if (typeDefinition.getBaseId() != BaseType.FOLDER)
-      {
-         throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Folder.");
-      }
-
-      FolderData newFolder = new FolderDataImpl(typeDefinition, parent, session, indexListener);
-
-      return newFolder;
    }
 
    /**
     * {@inheritDoc}
     */
-   public PolicyData createPolicy(FolderData parent, String typeId) throws ConstraintException
+   public PolicyData createPolicy(FolderData parent, TypeDefinition typeDefinition,
+      Map<String, Property<?>> properties, List<AccessControlEntry> acl, Collection<PolicyData> policies)
+      throws ConstraintException, NameConstraintViolationException, StorageException
    {
-      TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
-
-      if (typeDefinition.getBaseId() != BaseType.POLICY)
-      {
-         throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Policy.");
-      }
-
       // TODO : need raise exception if parent folder is provided ??
       // Do not use parent folder, policy is not fileable.
-      PolicyData policy = new PolicyDataImpl(typeDefinition, session, indexListener);
+      try
+      {
+         String name = null;
+         Property<?> nameProperty = properties.get(CmisConstants.NAME);
+         if (nameProperty != null && nameProperty.getValues().size() > 0)
+         {
+            name = (String)nameProperty.getValues().get(0);
+         }
+         if (name == null || name.length() == 0)
+         {
+            throw new NameConstraintViolationException("Name for new policy must be provided.");
+         }
 
-      return policy;
+         Node policiesStore = (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_POLICIES);
+         if (policiesStore.hasNode(name))
+         {
+            throw new NameConstraintViolationException("Policy with name " + name + " already exists.");
+         }
+
+         Node policyNode = policiesStore.addNode(name, typeDefinition.getLocalName());
+
+         JcrNodeEntry policyNodeEntry = new JcrNodeEntry(policyNode, typeDefinition);
+
+         policyNodeEntry.setValue(CmisConstants.OBJECT_TYPE_ID, typeDefinition.getId());
+         policyNodeEntry.setValue(CmisConstants.BASE_TYPE_ID, typeDefinition.getBaseId().value());
+         String userId = session.getUserID();
+         policyNodeEntry.setValue(CmisConstants.CREATED_BY, userId);
+         Calendar cal = Calendar.getInstance();
+         policyNodeEntry.setValue(CmisConstants.CREATION_DATE, cal);
+
+         for (Property<?> property : properties.values())
+         {
+            PropertyDefinition<?> definition = typeDefinition.getPropertyDefinition(property.getId());
+            Updatability updatability = definition.getUpdatability();
+            if (updatability == Updatability.READWRITE || updatability == Updatability.ONCREATE)
+            {
+               policyNodeEntry.setProperty(property);
+            }
+         }
+
+         if (acl != null && acl.size() > 0)
+         {
+            policyNodeEntry.setACL(acl);
+         }
+
+         if (policies != null && policies.size() > 0)
+         {
+            for (PolicyData policy : policies)
+            {
+               policyNodeEntry.applyPolicy(policy);
+            }
+         }
+
+         PolicyDataImpl policy = new PolicyDataImpl(policyNodeEntry, indexListener);
+         policy.save();
+         return policy;
+      }
+      catch (RepositoryException re)
+      {
+         throw new StorageException("Unable create new policy. " + re.getMessage(), re);
+      }
+
    }
 
    /**
     * {@inheritDoc}
     */
-   public RelationshipData createRelationship(ObjectData source, ObjectData target, String typeId)
-      throws ConstraintException
+   public RelationshipData createRelationship(ObjectData source, ObjectData target, TypeDefinition typeDefinition,
+      Map<String, Property<?>> properties, List<AccessControlEntry> acl, Collection<PolicyData> policies)
+      throws NameConstraintViolationException, StorageException
    {
-      if (source.isNew())
+      try
       {
-         throw new CmisRuntimeException("Unable use newly created object as relationship source.");
-      }
+         String name = null;
+         Property<?> nameProperty = properties.get(CmisConstants.NAME);
+         if (nameProperty != null)
+         {
+            name = (String)nameProperty.getValues().get(0);
+         }
+         if (name == null || name.length() == 0)
+         {
+            throw new NameConstraintViolationException("Name for new relationship must be provided.");
+         }
 
-      if (target.isNew())
+         Node relationships =
+            (Node)session.getItem(StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_RELATIONSHIPS);
+         if (relationships.hasNode(name))
+         {
+            throw new NameConstraintViolationException("Relationship with name " + name + " already exists.");
+         }
+
+         Node relationshipNode = relationships.addNode(name, typeDefinition.getLocalName());
+         relationshipNode.setProperty(CmisConstants.SOURCE_ID, ((BaseObjectData)source).getNode());
+         relationshipNode.setProperty(CmisConstants.TARGET_ID, ((BaseObjectData)target).getNode());
+
+         JcrNodeEntry relationshipNodeEntry = new JcrNodeEntry(relationshipNode);
+
+         relationshipNodeEntry.setValue(CmisConstants.OBJECT_TYPE_ID, typeDefinition.getId());
+         relationshipNodeEntry.setValue(CmisConstants.BASE_TYPE_ID, typeDefinition.getBaseId().value());
+         String userId = session.getUserID();
+         relationshipNodeEntry.setValue(CmisConstants.CREATED_BY, userId);
+         Calendar cal = Calendar.getInstance();
+         relationshipNodeEntry.setValue(CmisConstants.CREATION_DATE, cal);
+
+         for (Property<?> property : properties.values())
+         {
+            PropertyDefinition<?> definition = typeDefinition.getPropertyDefinition(property.getId());
+            Updatability updatability = definition.getUpdatability();
+            if (updatability == Updatability.READWRITE || updatability == Updatability.ONCREATE)
+            {
+               relationshipNodeEntry.setProperty(property);
+            }
+         }
+
+         if (acl != null && acl.size() > 0)
+         {
+            relationshipNodeEntry.setACL(acl);
+         }
+
+         if (policies != null && policies.size() > 0)
+         {
+            for (PolicyData policy : policies)
+            {
+               relationshipNodeEntry.applyPolicy(policy);
+            }
+         }
+
+         RelationshipDataImpl relationship = new RelationshipDataImpl(relationshipNodeEntry, indexListener);
+         relationship.save();
+         return relationship;
+      }
+      catch (RepositoryException re)
       {
-         throw new CmisRuntimeException("Unable use newly created object as relationship target.");
+         throw new StorageException("Unable create new policy. " + re.getMessage(), re);
       }
-
-      TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
-
-      if (typeDefinition.getBaseId() != BaseType.RELATIONSHIP)
-      {
-         throw new ConstraintException("Type " + typeId + " is ID of type whose base type is not Relationship.");
-      }
-
-      RelationshipData relationship = new RelationshipDataImpl(typeDefinition, source, target, session, indexListener);
-
-      return relationship;
    }
 
    /**
     * {@inheritDoc}
     */
-   public void deleteObject(ObjectData object, boolean deleteAllVersions) throws ConstraintException,
-      UpdateConflictException, StorageException
+   public void deleteObject(ObjectData object, boolean deleteAllVersions) throws UpdateConflictException,
+      VersioningException, StorageException
    {
       if (object.getBaseType() == BaseType.DOCUMENT)
       {
@@ -615,20 +1140,20 @@ public class StorageImpl implements Storage
          // versionable node, so have not common behavior.
          if (object.getTypeDefinition().isVersionable() && !deleteAllVersions)
          {
-            throw new CmisRuntimeException("Unable delete only specified version.");
+            throw new VersioningException("Unable delete only specified version.");
          }
       }
 
-      String objectId = object.getObjectId();
+      //      String objectId = object.getObjectId();
 
       ((BaseObjectData)object).delete();
-
-      if (indexListener != null)
-      {
-         Set<String> removed = new HashSet<String>();
-         removed.add(objectId);
-         indexListener.removed(removed);
-      }
+      //
+      //      if (indexListener != null)
+      //      {
+      //         Set<String> removed = new HashSet<String>();
+      //         removed.add(objectId);
+      //         indexListener.removed(removed);
+      //      }
    }
 
    /**
@@ -645,14 +1170,16 @@ public class StorageImpl implements Storage
          throw new CmisRuntimeException("Unable delete only specified version.");
       }
 
-      final Collection<String> failedToDelete = new ArrayList<String>();
-      DeleteTreeVisitor v = new DeleteTreeVisitor(folder.getPath(), unfileObject);
+      Collection<String> failedToDelete = new ArrayList<String>();
 
       try
       {
+         DeleteTreeVisitor v = new DeleteTreeVisitor(folder.getPath(), unfileObject);
          v.visit(((FolderDataImpl)folder).getNode());
 
-         for (String id : v.getDeleteLinks())
+         DeleteTreeLog deleteLog = v.getDeleteLog();
+
+         for (String id : deleteLog.getDeleteLinks())
          {
             if (LOG.isDebugEnabled())
             {
@@ -661,7 +1188,7 @@ public class StorageImpl implements Storage
             ((ExtendedSession)session).getNodeByIdentifier(id).remove();
          }
 
-         for (Map.Entry<String, String> e : v.getMoveMapping().entrySet())
+         for (Map.Entry<String, String> e : deleteLog.getMoveMapping().entrySet())
          {
             String scrPath = e.getKey();
             String destPath = e.getValue();
@@ -688,7 +1215,7 @@ public class StorageImpl implements Storage
             session.move(scrPath, destPath);
          }
 
-         for (String e : v.getDeleteObjects())
+         for (String e : deleteLog.getDeleteObjects())
          {
             if (LOG.isDebugEnabled())
             {
@@ -698,20 +1225,20 @@ public class StorageImpl implements Storage
          }
 
          session.save();
+
+         // FIXME : need update indexer for moved objects
          if (indexListener != null)
          {
-            indexListener.removed(new HashSet<String>(v.getDeleteObjects()));
+            indexListener.removed(new HashSet<String>(deleteLog.getDeleteObjects()));
          }
       }
       catch (RepositoryException re)
       {
-         // TODO : provide list of not deleted objects.
-         // If fact plain list of all items in current tree.
          try
          {
-            TreeVisitor vv = new TreeVisitor();
-            vv.visit(((FolderDataImpl)folder).getNode());
-            failedToDelete.addAll(vv.getAllChildrenObjects());
+            TreeVisitor v = new TreeVisitor();
+            v.visit(((FolderDataImpl)folder).getNode());
+            failedToDelete.addAll(v.getDescendantsIds());
          }
          catch (RepositoryException e)
          {
@@ -721,6 +1248,9 @@ public class StorageImpl implements Storage
       return failedToDelete;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    public Collection<DocumentData> getAllVersions(String versionSeriesId) throws ObjectNotFoundException
    {
       try
@@ -763,7 +1293,10 @@ public class StorageImpl implements Storage
       throw new NotSupportedException("Changes log feature is not supported.");
    }
 
-   public ItemsIterator<DocumentData> getCheckedOutDocuments(ObjectData folder, String orderBy)
+   /**
+    * {@inheritDoc}
+    */
+   public ItemsIterator<DocumentData> getCheckedOutDocuments(FolderData folder, String orderBy)
    {
       try
       {
@@ -782,17 +1315,15 @@ public class StorageImpl implements Storage
                continue;
             }
             Node node = wc.getNodes().nextNode();
-            TypeDefinition type = JcrTypeHelper.getTypeDefinition(node.getPrimaryNodeType(), true);
-            String latestVersion = node.getProperty("xcmis:latestVersionId").getString();
-            PWC pwc = new PWC(type, node, (DocumentData)getObjectById(latestVersion), indexListener);
+            PWC pwc = getPWC(node);
             if (folder != null)
             {
                for (FolderData parent : pwc.getParents())
                {
-                  // TODO equals and hashCode for objects
                   if (parent.getObjectId().equals(folder.getObjectId()))
                   {
                      checkedOut.add(pwc);
+                     break;
                   }
                }
             }
@@ -801,7 +1332,6 @@ public class StorageImpl implements Storage
                checkedOut.add(pwc);
             }
          }
-
          return new BaseItemsIterator<DocumentData>(checkedOut);
       }
       catch (RepositoryException re)
@@ -816,6 +1346,14 @@ public class StorageImpl implements Storage
    public String getId()
    {
       return configuration.getId();
+   }
+
+   /**
+    * @return the indexListener
+    */
+   public IndexListener getIndexListener()
+   {
+      return indexListener;
    }
 
    /**
@@ -834,41 +1372,7 @@ public class StorageImpl implements Storage
          {
             return getDocumentVersion(node);
          }
-         TypeDefinition type = JcrTypeHelper.getTypeDefinition(node.getPrimaryNodeType(), true);
-
-         if (type.getBaseId() == BaseType.DOCUMENT)
-         {
-            if (!node.isNodeType(JcrCMIS.CMIS_MIX_DOCUMENT))
-            {
-               return new JcrFile(type, node, renditionManager, indexListener);
-            }
-            if (node.getParent().isNodeType("xcmis:workingCopy"))
-            {
-               // TODO get smarter (simpler)
-               String latestVersion = node.getProperty("xcmis:latestVersionId").getString();
-               return new PWC(type, node, (DocumentData)getObjectById(latestVersion), indexListener);
-            }
-            return new DocumentDataImpl(type, node, renditionManager, indexListener);
-         }
-         else if (type.getBaseId() == BaseType.FOLDER)
-         {
-            if (!node.isNodeType(JcrCMIS.CMIS_MIX_FOLDER))
-            {
-               return new JcrFolder(type, node, indexListener);
-            }
-            return new FolderDataImpl(type, node, indexListener);
-         }
-         else if (type.getBaseId() == BaseType.POLICY)
-         {
-            return new PolicyDataImpl(type, node, indexListener);
-         }
-         else if (type.getBaseId() == BaseType.RELATIONSHIP)
-         {
-            return new RelationshipDataImpl(type, node, indexListener);
-         }
-
-         // Must never happen.
-         throw new CmisRuntimeException("Unknown base type. ");
+         return getObject(node);
       }
       catch (ItemNotFoundException nfe)
       {
@@ -878,15 +1382,6 @@ public class StorageImpl implements Storage
       {
          throw new CmisRuntimeException(re.getMessage(), re);
       }
-   }
-
-   private DocumentVersion getDocumentVersion(Node node) throws RepositoryException
-   {
-      TypeDefinition type =
-         JcrTypeHelper.getTypeDefinition(getNodeType(node.getProperty(JcrCMIS.JCR_FROZEN_PRIMARY_TYPE).getString()),
-            true);
-
-      return new DocumentVersion(type, node, indexListener);
    }
 
    /**
@@ -905,38 +1400,8 @@ public class StorageImpl implements Storage
          {
             throw new ObjectNotFoundException("Object '" + path + "' does not exist.");
          }
-
          Node node = (Node)item;
-
-         TypeDefinition type = JcrTypeHelper.getTypeDefinition(node.getPrimaryNodeType(), true);
-
-         if (type.getBaseId() == BaseType.DOCUMENT)
-         {
-            if (!node.isNodeType(JcrCMIS.CMIS_MIX_DOCUMENT))
-            {
-               return new JcrFile(type, node, renditionManager, indexListener);
-            }
-            return new DocumentDataImpl(type, node, renditionManager, indexListener);
-         }
-         else if (type.getBaseId() == BaseType.FOLDER)
-         {
-            if (!node.isNodeType(JcrCMIS.CMIS_MIX_FOLDER))
-            {
-               return new JcrFolder(type, node, indexListener);
-            }
-            return new FolderDataImpl(type, node, indexListener);
-         }
-         else if (type.getBaseId() == BaseType.POLICY)
-         {
-            return new PolicyDataImpl(type, node, indexListener);
-         }
-         else if (type.getBaseId() == BaseType.RELATIONSHIP)
-         {
-            return new RelationshipDataImpl(type, node, indexListener);
-         }
-
-         // Must never happen.
-         throw new CmisRuntimeException("Unknown base type. ");
+         return getObject(node);
       }
       catch (ItemNotFoundException nfe)
       {
@@ -958,29 +1423,24 @@ public class StorageImpl implements Storage
          RenditionIterator it = new RenditionIterator(((BaseObjectData)object).getNode().getNodes());
          if (it.hasNext())
          {
+            // if renditions persisted then use it.
+            // Observation listener must be configured.
             return it;
          }
          else
          {
             if (renditionManager != null)
             {
-               ArrayList<Rendition> renditionList = new ArrayList<Rendition>();
-               Rendition rend = renditionManager.getRenditions(object);
-               if (rend != null)
-               {
-                  renditionList.add(rend);
-               }
-               return new BaseItemsIterator<Rendition>(renditionList);
+               return renditionManager.getRenditions(object);
             }
          }
       }
       catch (javax.jcr.RepositoryException re)
       {
-         String msg =
-            "Unable get renditions for object " + object.getObjectId() + " Unexpected error " + re.getMessage();
-         throw new StorageException(msg, re);
+         throw new CmisRuntimeException("Unable get renditions for object " + object.getObjectId()
+            + ". Unexpected error " + re.getMessage(), re);
       }
-      return null;
+      return CmisUtils.emptyItemsIterator();
    }
 
    /**
@@ -993,6 +1453,8 @@ public class StorageImpl implements Storage
          PermissionMapping permissionMapping = new PermissionMapping();
 
          permissionMapping.put(PermissionMapping.CAN_GET_DESCENDENTS_FOLDER, //
+            Arrays.asList(BasicPermissions.CMIS_READ.value()));
+         permissionMapping.put(PermissionMapping.CAN_GET_FOLDER_TREE_FOLDER, //
             Arrays.asList(BasicPermissions.CMIS_READ.value()));
          permissionMapping.put(PermissionMapping.CAN_GET_CHILDREN_FOLDER, //
             Arrays.asList(BasicPermissions.CMIS_READ.value()));
@@ -1079,6 +1541,7 @@ public class StorageImpl implements Storage
                "eXo", "xCMIS (eXo JCR SP)", "1.0", null);
       }
 
+      // TODO update latestChangeLogToken when ChangeLogToken feature will be implemented
       return repositoryInfo;
    }
 
@@ -1086,7 +1549,7 @@ public class StorageImpl implements Storage
     * {@inheritDoc}
     */
    public ItemsIterator<TypeDefinition> getTypeChildren(String typeId, boolean includePropertyDefinitions)
-      throws TypeNotFoundException, CmisRuntimeException
+      throws TypeNotFoundException
    {
       try
       {
@@ -1144,98 +1607,6 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public ObjectData moveObject(ObjectData object, FolderData target, FolderData source) throws ConstraintException,
-      InvalidArgumentException, UpdateConflictException, VersioningException, NameConstraintViolationException,
-      StorageException
-   {
-      try
-      {
-         if (LOG.isDebugEnabled())
-         {
-            LOG.debug("Move object " + object + " to " + target + " from " + source);
-         }
-
-         String objectPath = ((BaseObjectData)object).getNode().getPath();
-         String destinationPath = ((BaseObjectData)target).getNode().getPath();
-         destinationPath += destinationPath.equals("/") ? object.getName() : ("/" + object.getName());
-         session.getWorkspace().move(objectPath, destinationPath);
-
-         if (LOG.isDebugEnabled())
-         {
-            LOG.debug("Object moved in " + destinationPath);
-         }
-
-         return getObjectByPath(destinationPath);
-      }
-      catch (ItemExistsException ie)
-      {
-         throw new NameConstraintViolationException("Object with the same name already exists in target folder.");
-      }
-      catch (javax.jcr.RepositoryException re)
-      {
-         throw new StorageException("Unable to move object. " + re.getMessage(), re);
-      }
-   }
-
-   public ItemsIterator<Result> query(Query query) throws InvalidArgumentException
-   {
-      throw new UnsupportedOperationException();
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public String saveObject(ObjectData object) throws StorageException, NameConstraintViolationException,
-      UpdateConflictException
-   {
-      boolean isNew = object.isNew();
-
-      ((BaseObjectData)object).save();
-
-      if (indexListener != null)
-      {
-         if (isNew)
-         {
-            indexListener.created(object);
-         }
-         else
-         {
-            indexListener.updated(object);
-         }
-      }
-
-      return object.getObjectId();
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public void removeType(String typeId) throws TypeNotFoundException, StorageException, CmisRuntimeException
-   {
-      // Throws exceptions if type with specified 'typeId' does not exist or is unsupported by CMIS.
-      getTypeDefinition(typeId, false);
-      try
-      {
-         ExtendedNodeTypeManager nodeTypeManager = (ExtendedNodeTypeManager)session.getWorkspace().getNodeTypeManager();
-         nodeTypeManager.unregisterNodeType(typeId);
-      }
-      catch (RepositoryException re)
-      {
-         throw new StorageException("Unable remove CMIS type " + typeId + ". " + re.getMessage(), re);
-      }
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public void unfileObject(ObjectData object)
-   {
-      ((BaseObjectData)object).unfile();
-   }
-
-   /**
-    * @see org.xcmis.spi.Storage#getUnfiledObjects()
-    */
    public Iterator<String> getUnfiledObjectsId() throws StorageException
    {
       try
@@ -1291,8 +1662,130 @@ public class StorageImpl implements Storage
    }
 
    /**
+    * {@inheritDoc}
+    */
+   public ObjectData moveObject(ObjectData object, FolderData target, FolderData source)
+      throws UpdateConflictException, VersioningException, NameConstraintViolationException, StorageException
+   {
+      try
+      {
+         String objectPath = ((BaseObjectData)object).getNode().getPath();
+         String destinationPath = ((BaseObjectData)target).getNode().getPath();
+         destinationPath += destinationPath.equals("/") ? object.getName() : ("/" + object.getName());
+         session.getWorkspace().move(objectPath, destinationPath);
+         if (LOG.isDebugEnabled())
+         {
+            LOG.debug("Object moved in " + destinationPath);
+         }
+         return getObject((Node)session.getItem(destinationPath));
+      }
+      catch (ItemExistsException ie)
+      {
+         throw new NameConstraintViolationException("Object with the same name already exists in target folder.");
+      }
+      catch (javax.jcr.RepositoryException re)
+      {
+         throw new StorageException("Unable to move object. " + re.getMessage(), re);
+      }
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public ItemsIterator<Result> query(Query query) throws InvalidArgumentException
+   {
+      // will be overridden
+      throw new UnsupportedOperationException();
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public void removeType(String typeId) throws TypeNotFoundException, StorageException, CmisRuntimeException
+   {
+      // Throws exceptions if type with specified 'typeId' does not exist or is unsupported by CMIS.
+      getTypeDefinition(typeId, false);
+      try
+      {
+         ExtendedNodeTypeManager nodeTypeManager = (ExtendedNodeTypeManager)session.getWorkspace().getNodeTypeManager();
+         nodeTypeManager.unregisterNodeType(typeId);
+      }
+      catch (RepositoryException re)
+      {
+         throw new StorageException("Unable remove CMIS type " + typeId + ". " + re.getMessage(), re);
+      }
+   }
+
+   /**
+    * @param indexListener the indexListener to set
+    */
+   public void setIndexListener(IndexListener indexListener)
+   {
+      this.indexListener = indexListener;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public void unfileObject(ObjectData object)
+   {
+      ((DocumentDataImpl)object).unfile();
+   }
+
+   private DocumentVersion getDocumentVersion(Node node) throws RepositoryException
+   {
+      TypeDefinition typeDefinition =
+         JcrTypeHelper.getTypeDefinition(getNodeType(node.getProperty(JcrCMIS.JCR_FROZEN_PRIMARY_TYPE).getString()),
+            true);
+
+      return new DocumentVersion(new JcrNodeEntry(node, typeDefinition), indexListener, renditionManager);
+   }
+
+   private PWC getPWC(Node node) throws RepositoryException
+   {
+      return new PWC(new JcrNodeEntry(node), indexListener, renditionManager);
+   }
+
+   private ObjectData getObject(Node node) throws RepositoryException
+   {
+      TypeDefinition typeDefinition = JcrTypeHelper.getTypeDefinition(node.getPrimaryNodeType(), true);
+
+      if (typeDefinition.getBaseId() == BaseType.DOCUMENT)
+      {
+         if (node.getParent().isNodeType("xcmis:workingCopy"))
+         {
+            return getPWC(node);
+         }
+         if (!node.isNodeType(JcrCMIS.CMIS_MIX_DOCUMENT))
+         {
+            return new JcrFile(new JcrNodeEntry(node, typeDefinition), indexListener, renditionManager);
+         }
+         return new DocumentDataImpl(new JcrNodeEntry(node, typeDefinition), indexListener, renditionManager);
+      }
+      else if (typeDefinition.getBaseId() == BaseType.FOLDER)
+      {
+         if (!node.isNodeType(JcrCMIS.CMIS_MIX_FOLDER))
+         {
+            return new JcrFolder(new JcrNodeEntry(node, typeDefinition), indexListener, renditionManager);
+         }
+         return new FolderDataImpl(new JcrNodeEntry(node, typeDefinition), indexListener, renditionManager);
+      }
+      else if (typeDefinition.getBaseId() == BaseType.POLICY)
+      {
+         return new PolicyDataImpl(new JcrNodeEntry(node, typeDefinition), indexListener);
+      }
+      else if (typeDefinition.getBaseId() == BaseType.RELATIONSHIP)
+      {
+         return new RelationshipDataImpl(new JcrNodeEntry(node, typeDefinition), indexListener);
+      }
+
+      // Must never happen.
+      throw new CmisRuntimeException("Unknown base type. ");
+   }
+
+   /**
     * Get the level of hierarchy.
-    *
+    * 
     * @param discovered the node type
     * @param match the name of the node type
     * @return hierarchical level for node type
@@ -1313,7 +1806,7 @@ public class StorageImpl implements Storage
 
    /**
     * Create String representation of date in format required by JCR.
-    *
+    * 
     * @param c Calendar
     * @return formated string date
     */
@@ -1329,172 +1822,5 @@ public class StorageImpl implements Storage
    {
       NodeType nt = session.getWorkspace().getNodeTypeManager().getNodeType(name);
       return nt;
-   }
-
-   private class DeleteTreeVisitor implements ItemVisitor
-   {
-
-      private final String treePath;
-
-      private final UnfileObject unfileObject;
-
-      private final List<String> deleteObjects = new ArrayList<String>();
-
-      private final List<String> deleteLinks = new ArrayList<String>();
-
-      private final Map<String, String> moveMapping = new HashMap<String, String>();
-
-      public DeleteTreeVisitor(String path, UnfileObject unfileObject)
-      {
-         this.treePath = path;
-         this.unfileObject = unfileObject != null ? unfileObject : UnfileObject.DELETE;
-      }
-
-      /**
-       * {@inheritDoc}
-       */
-      public void visit(javax.jcr.Property property) throws RepositoryException
-      {
-      }
-
-      /**
-       * {@inheritDoc}
-       */
-      public void visit(Node node) throws RepositoryException
-      {
-         NodeType nt = node.getPrimaryNodeType();
-         String uuid = ((ExtendedNode)node).getIdentifier();
-         String path = node.getPath();
-
-         if (nt.isNodeType(JcrCMIS.NT_FOLDER) || nt.isNodeType(JcrCMIS.NT_UNSTRUCTURED))
-         {
-            for (NodeIterator children = node.getNodes(); children.hasNext();)
-            {
-               children.nextNode().accept(this);
-            }
-            deleteObjects.add(uuid);
-         }
-
-         if (nt.isNodeType("nt:linkedFile"))
-         {
-            // Met link in tree. Simply remove all links in current tree.
-            if (!deleteLinks.contains(uuid))
-            {
-               deleteLinks.add(uuid);
-            }
-
-            // Check target of link only if need delete all fileable objects.
-            if (unfileObject == UnfileObject.DELETE)
-            {
-               Node doc = node.getProperty("jcr:content").getNode();
-               String targetPath = doc.getPath();
-               String targetUuid = ((ExtendedNode)doc).getIdentifier();
-               if (!targetPath.startsWith(treePath) && !deleteObjects.contains(targetUuid))
-               {
-                  deleteObjects.add(targetUuid);
-               }
-               // Otherwise will met target of link in tree.
-            }
-         }
-         else if (nt.isNodeType(JcrCMIS.NT_FILE))
-         {
-            String moveTo = null;
-
-            // Check all link to current node.
-            // Need to find at least one that is not in deleted tree. It can be
-            // used as destination for unfiling document which has parent-folders
-            // outside of the current folder tree. If no link out of current tree then
-            // document will be moved to special store for unfiled objects.
-            for (PropertyIterator references = node.getReferences(); references.hasNext();)
-            {
-               Node link = references.nextProperty().getParent();
-
-               String linkPath = link.getPath();
-               String linkUuid = ((ExtendedNode)link).getIdentifier();
-
-               if ((unfileObject == UnfileObject.DELETE || linkPath.startsWith(treePath))
-                  && !deleteLinks.contains(linkUuid))
-               {
-                  deleteLinks.add(linkUuid);
-               }
-               else if (!linkPath.startsWith(treePath) && moveTo == null)
-               {
-                  moveTo = linkPath;
-               }
-            }
-
-            if ((unfileObject == UnfileObject.UNFILE || (unfileObject == UnfileObject.DELETESINGLEFILED && moveTo != null)))
-            {
-               moveMapping.put(path, moveTo);
-            }
-            else if (!deleteObjects.contains(uuid))
-            {
-               deleteObjects.add(uuid);
-            }
-         }
-      }
-
-      public List<String> getDeleteObjects()
-      {
-         return deleteObjects;
-      }
-
-      public List<String> getDeleteLinks()
-      {
-         return deleteLinks;
-      }
-
-      public Map<String, String> getMoveMapping()
-      {
-         return moveMapping;
-      }
-   }
-
-   private class TreeVisitor implements ItemVisitor
-   {
-
-      private final Collection<String> allChildrenObjects = new HashSet<String>();
-
-      public TreeVisitor()
-      {
-      }
-
-      /**
-       * {@inheritDoc}
-       */
-      public void visit(javax.jcr.Property property) throws RepositoryException
-      {
-      }
-
-      /**
-       * {@inheritDoc}
-       */
-      public void visit(Node node) throws RepositoryException
-      {
-         NodeType nt = node.getPrimaryNodeType();
-         String uuid = ((ExtendedNode)node).getIdentifier();
-
-         if (nt.isNodeType(JcrCMIS.NT_FOLDER) || nt.isNodeType(JcrCMIS.NT_UNSTRUCTURED))
-         {
-            for (NodeIterator children = node.getNodes(); children.hasNext();)
-            {
-               children.nextNode().accept(this);
-            }
-            allChildrenObjects.add(uuid);
-         }
-         else
-         {
-            if (!allChildrenObjects.contains(uuid))
-            {
-               allChildrenObjects.add(uuid);
-            }
-         }
-      }
-
-      public Collection<String> getAllChildrenObjects()
-      {
-         return allChildrenObjects;
-      }
-
    }
 }

@@ -25,7 +25,7 @@ package org.xcmis.spi;
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id: ObjectNotFoundException.java 2 2010-02-04 17:21:49Z andrew00x $
  */
-public final class ObjectNotFoundException extends CmisRuntimeException
+public final class ObjectNotFoundException extends CmisException
 {
 
    /**

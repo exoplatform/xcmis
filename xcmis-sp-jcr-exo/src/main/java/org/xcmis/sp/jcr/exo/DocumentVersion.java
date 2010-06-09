@@ -30,8 +30,8 @@ import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.RelationshipData;
+import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.StorageException;
-import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.Property;
@@ -39,6 +39,7 @@ import org.xcmis.spi.model.RelationshipDirection;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.utils.CmisUtils;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -46,6 +47,7 @@ import java.util.Map;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 import javax.jcr.version.Version;
 import javax.jcr.version.VersionHistory;
 
@@ -59,35 +61,25 @@ public class DocumentVersion extends DocumentDataImpl
    /** Latest version of document. */
    private DocumentData document;
 
-   public DocumentVersion(TypeDefinition type, Node node, IndexListener indexListener)
+   public DocumentVersion(JcrNodeEntry jcrEntry, IndexListener indexListener, RenditionManager renditionManager)
    {
-
-      super(type, node /*frozen node*/, indexListener);
+      super(jcrEntry, indexListener, renditionManager);
    }
 
    /**
     * {@inheritDoc}
     */
    @Override
-   public void applyPolicy(PolicyData policy) throws ConstraintException
+   public void applyPolicy(PolicyData policy)
    {
-      throw new ConstraintException("Not supported for non current version of document.");
+      throw new CmisRuntimeException("Not supported for non current version of document.");
    }
 
    /**
     * {@inheritDoc}
     */
    @Override
-   public void cancelCheckout() throws StorageException
-   {
-      throw new VersioningException("Not supported for non current version of document.");
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   @Override
-   public DocumentData checkin(boolean major, String checkinComment) throws ConstraintException, StorageException
+   public void cancelCheckout() throws VersioningException, StorageException
    {
       throw new VersioningException("Not supported for non current version of document.");
    }
@@ -96,7 +88,17 @@ public class DocumentVersion extends DocumentDataImpl
     * {@inheritDoc}
     */
    @Override
-   public DocumentData checkout() throws ConstraintException, VersioningException, StorageException
+   public DocumentData checkin(boolean major, String checkinComment, Map<String, Property<?>> properties,
+      ContentStream content, List<AccessControlEntry> acl, Collection<PolicyData> policies) throws StorageException
+   {
+      throw new CmisRuntimeException("Not supported for non current version of document.");
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   @Override
+   public DocumentData checkout() throws VersioningException, StorageException
    {
       throw new VersioningException("Not supported for non current version of document.");
    }
@@ -164,7 +166,7 @@ public class DocumentVersion extends DocumentDataImpl
    {
       try
       {
-         return node.getParent().getName();
+         return getNode().getParent().getName();
       }
       catch (RepositoryException re)
       {
@@ -200,44 +202,25 @@ public class DocumentVersion extends DocumentDataImpl
    }
 
    @Override
-   public void removePolicy(PolicyData policy) throws ConstraintException
+   public void removePolicy(PolicyData policy)
    {
-      throw new ConstraintException("Not supported for non current version of document.");
+      throw new CmisRuntimeException("Not supported for non current version of document.");
    }
 
    /**
     * {@inheritDoc}
     */
    @Override
-   public void setACL(List<AccessControlEntry> aces) throws ConstraintException
+   public void setACL(List<AccessControlEntry> aces)
    {
-      throw new ConstraintException("Not supported for non current version of document.");
+      throw new CmisRuntimeException("Not supported for non current version of document.");
    }
 
    /**
     * {@inheritDoc}
     */
    @Override
-   public void setContentStream(ContentStream contentStream) throws ConstraintException
-   {
-      throw new VersioningException("Not supported for non current version of document.");
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   @Override
-   public void setName(String name) throws NameConstraintViolationException
-   {
-      throw new ConstraintException("Not supported for non current version of document.");
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   @Override
-   public void setProperties(Map<String, Property<?>> properties) throws ConstraintException,
-      NameConstraintViolationException
+   public void setContentStream(ContentStream contentStream) throws IOException, VersioningException, StorageException
    {
       throw new VersioningException("Not supported for non current version of document.");
    }
@@ -246,7 +229,17 @@ public class DocumentVersion extends DocumentDataImpl
     * {@inheritDoc}
     */
    @Override
-   public void setProperty(Property<?> property) throws ConstraintException
+   public void setProperties(Map<String, Property<?>> properties) throws NameConstraintViolationException,
+      VersioningException
+   {
+      throw new VersioningException("Not supported for non current version of document.");
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   @Override
+   public void setProperty(Property<?> property) throws VersioningException
    {
       throw new VersioningException("Not supported for non current version of document.");
    }
@@ -257,12 +250,14 @@ public class DocumentVersion extends DocumentDataImpl
       {
          try
          {
+            Node node = getNode();
+            Session session = node.getSession();
             Version version = (Version)node.getParent();
             VersionHistory versionHistory = version.getContainingHistory();
             Node latest = ((ExtendedSession)session).getNodeByIdentifier(versionHistory.getVersionableUUID());
             document =
-               new DocumentDataImpl(JcrTypeHelper.getTypeDefinition(latest.getPrimaryNodeType(), true), latest,
-                  indexListener);
+               new DocumentDataImpl(new JcrNodeEntry(latest, JcrTypeHelper.getTypeDefinition(latest
+                  .getPrimaryNodeType(), true)), indexListener, renditionManager);
          }
          catch (RepositoryException re)
          {
@@ -276,18 +271,18 @@ public class DocumentVersion extends DocumentDataImpl
     * {@inheritDoc}
     */
    @Override
-   void delete() throws StorageException
+   protected void delete() throws StorageException
    {
-      throw new ConstraintException("Not supported for non current version of document.");
+      throw new CmisRuntimeException("Not supported for non current version of document.");
    }
 
    /**
     * {@inheritDoc}
     */
    @Override
-   void save() throws StorageException, NameConstraintViolationException, UpdateConflictException
+   protected void save()
    {
-      throw new ConstraintException("Not supported for non current version of document.");
+      throw new CmisRuntimeException("Not supported for non current version of document.");
    }
 
    /**
@@ -296,7 +291,7 @@ public class DocumentVersion extends DocumentDataImpl
    @Override
    void unfile()
    {
-      throw new ConstraintException("Not supported for non current version of document.");
+      throw new CmisRuntimeException("Not supported for non current version of document.");
    }
 
 }

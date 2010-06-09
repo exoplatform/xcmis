@@ -43,6 +43,10 @@
 		</init-params>
 	</component>
 
+        <component>
+          <type>org.xcmis.spi.PermissionService</type>
+        </component>
+
 	<component>
 		<key>org.exoplatform.services.document.DocumentReaderService</key>
 		<type>org.xcmis.spi.utils.CmisDocumentReaderService</type>
@@ -67,41 +71,25 @@
 			<object-param>
 				<name>configs</name>
 				<object type="org.xcmis.sp.jcr.exo.StorageProviderImpl$StorageProviderConfig">
-					<field name="storages">
-						<collection type="java.util.ArrayList">
-							<value>
-								<object type="org.xcmis.sp.jcr.exo.StorageConfiguration">
-									<field name="id">
-										<string>cmis1</string>
-									</field>
-									<field name="repository">
-										<string>repository</string>
-									</field>
-									<field name="workspace">
-										<string>cmis</string>
-									</field>
-									<field name="indexConfiguration">
-										<object type="org.xcmis.search.config.IndexConfiguration">
-											<field name="indexDir">
-												<string>../temp/index/db1/ws1</string>
-											</field>
-										</object>
-									</field>
-									<field name="properties">
-										<map type="java.util.HashMap">
-											<entry>
-												<key>
-													<string>exo.cmis.changetoken.feature</string>
-												</key>
-												<value>
-													<boolean>false</boolean>
-												</value>
-											</entry>
-										</map>
+					<field name="storage">
+   						<object type="org.xcmis.sp.jcr.exo.StorageConfiguration">
+							<field name="id">
+								<string>cmis1</string>
+							</field>
+							<field name="repository">
+								<string>repository</string>
+							</field>
+							<field name="workspace">
+								<string>cmis</string>
+							</field>
+							<field name="indexConfiguration">
+								<object type="org.xcmis.search.config.IndexConfiguration">
+									<field name="indexDir">
+										<string>../temp/index/db1/ws1</string>
 									</field>
 								</object>
-							</value>
-						</collection>
+							</field>
+						</object>
 					</field>
 				</object>
 			</object-param>
@@ -115,30 +103,12 @@
 			<object-param>
 				<name>configs</name>
 				<object type="org.xcmis.sp.inmemory.StorageProviderImpl$StorageProviderConfig">
-					<field name="storages">
-						<collection type="java.util.ArrayList">
-							<value>
-								<object type="org.xcmis.sp.inmemory.StorageConfiguration">
-									<field name="id">
-										<!-- ID of CMIS repository -->
-										<string>cmis-inmem1</string>
-									</field>
-									<field name="properties">
-										<map type="java.util.HashMap">
-											<entry>
-												<key>
-													<string>exo.cmis.changetoken.feature</string>
-												</key>
-												<value>
-													<!-- Enable/Disable change token feature. -->
-													<boolean>false</boolean>
-												</value>
-											</entry>
-										</map>
-									</field>
-								</object>
-							</value>
-						</collection>
+					<field name="storage">
+						<object type="org.xcmis.sp.inmemory.StorageConfiguration">
+							<field name="id">
+								<string>cmis-inmem1</string>
+							</field>
+						</object>
 					</field>
 				</object>
 			</object-param>

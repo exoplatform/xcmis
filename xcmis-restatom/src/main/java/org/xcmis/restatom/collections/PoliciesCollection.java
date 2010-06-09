@@ -36,7 +36,6 @@ import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.StorageException;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.Property;
@@ -48,8 +47,7 @@ import java.util.Map;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
- * @version $Id: PoliciesCollection.java 2487 2009-07-31 14:14:34Z
- *          andrew00x $
+ * @version $Id: PoliciesCollection.java 2487 2009-07-31 14:14:34Z andrew00x $
  */
 public class PoliciesCollection extends CmisObjectCollection
 {
@@ -102,10 +100,6 @@ public class PoliciesCollection extends CmisObjectCollection
                addEntryDetails(request, e, feedIri, one);
             }
          }
-      }
-      catch (StorageException re)
-      {
-         throw new ResponseContextException(createErrorResponse(re, 500));
       }
       catch (FilterNotValidException fe)
       {
@@ -168,62 +162,43 @@ public class PoliciesCollection extends CmisObjectCollection
       try
       {
          conn = getConnection(request);
-         try
+         // apply policy
+         if (policyId != null)
          {
-            // apply policy
-            if (policyId != null)
-            {
-               conn.applyPolicy(policyId, objectId);
-            }
+            conn.applyPolicy(policyId, objectId);
          }
-         catch (ConstraintException cve)
-         {
-            return createErrorResponse(cve, 409);
-         }
-         catch (ObjectNotFoundException onfe)
-         {
-            return createErrorResponse(onfe, 404);
-         }
-         catch (InvalidArgumentException iae)
-         {
-            return createErrorResponse(iae, 400);
-         }
-         catch (StorageException re)
-         {
-            return createErrorResponse(re, 500);
-         }
-         catch (Throwable t)
-         {
-            return createErrorResponse(t, 500);
-         }
-
          entry = request.getAbdera().getFactory().newEntry();
-         try
-         {
-            // updated object
-            addEntryDetails(request, entry, request.getResolvedUri(), conn.getObject(policyId, true,
-               IncludeRelationships.BOTH, true, true, true, null, null));
-         }
-         catch (ResponseContextException rce)
-         {
-            return rce.getResponseContext();
-         }
-         catch (ObjectNotFoundException onfe)
-         {
-            return createErrorResponse(onfe, 404);
-         }
-         catch (FilterNotValidException fae)
-         {
-            return createErrorResponse(fae, 400);
-         }
-         catch (StorageException re)
-         {
-            return createErrorResponse(re, 500);
-         }
+         // updated object
+         addEntryDetails(request, entry, request.getResolvedUri(), conn.getObject(policyId, true,
+            IncludeRelationships.BOTH, true, true, true, null, null));
 
          Map<String, String> params = new HashMap<String, String>();
          String link = request.absoluteUrlFor(TargetType.ENTRY, params);
          return buildCreateEntryResponse(link, entry);
+      }
+      catch (ConstraintException cve)
+      {
+         return createErrorResponse(cve, 409);
+      }
+      catch (ObjectNotFoundException onfe)
+      {
+         return createErrorResponse(onfe, 404);
+      }
+      catch (InvalidArgumentException iae)
+      {
+         return createErrorResponse(iae, 400);
+      }
+      catch (ResponseContextException rce)
+      {
+         return rce.getResponseContext();
+      }
+      catch (FilterNotValidException fae)
+      {
+         return createErrorResponse(fae, 400);
+      }
+      catch (Throwable t)
+      {
+         return createErrorResponse(t, 500);
       }
       finally
       {
@@ -287,10 +262,6 @@ public class PoliciesCollection extends CmisObjectCollection
       catch (InvalidArgumentException iae)
       {
          return createErrorResponse(iae, 400);
-      }
-      catch (StorageException re)
-      {
-         return createErrorResponse(re, 500);
       }
       catch (Throwable t)
       {

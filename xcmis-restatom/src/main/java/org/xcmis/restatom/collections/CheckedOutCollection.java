@@ -60,9 +60,9 @@ public class CheckedOutCollection extends CmisObjectCollection
     * @param storageProvider TODO
     *
     */
-   public CheckedOutCollection(/*StorageProvider storageProvider*/)
+   public CheckedOutCollection()
    {
-      super(/*storageProvider*/);
+      super();
       setHref("/checkedout");
    }
 
@@ -120,10 +120,6 @@ public class CheckedOutCollection extends CmisObjectCollection
                addEntryDetails(request, e, feedIri, object);
             }
          }
-      }
-      catch (StorageException re)
-      {
-         throw new ResponseContextException(createErrorResponse(re, 500));
       }
       catch (FilterNotValidException fe)
       {

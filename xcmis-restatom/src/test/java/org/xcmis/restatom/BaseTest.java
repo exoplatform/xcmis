@@ -44,8 +44,11 @@ import org.xcmis.restatom.abdera.CMISExtensionFactory;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
+import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
+import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.ItemsList;
+import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.ObjectParent;
@@ -111,8 +114,6 @@ public abstract class BaseTest extends TestCase
       container = StandaloneContainer.getInstance();
       requestHandler = (RequestHandlerImpl)container.getComponentInstanceOfType(RequestHandlerImpl.class);
 
-      //      storageProvider = (StorageProvider)container.getComponentInstanceOfType(StorageProvider.class);
-
       Abdera abdera = new Abdera();
       factory = abdera.getFactory();
       factory.registerExtension(new CMISExtensionFactory());
@@ -120,7 +121,6 @@ public abstract class BaseTest extends TestCase
       ConversationState state = new ConversationState(new Identity("root"));
       ConversationState.setCurrent(state);
 
-      //      conn = storageProvider.getConnection(cmisRepositoryId);
       conn = CmisRegistry.getInstance().getConnection(cmisRepositoryId);
 
       rootFolderId = conn.getStorage().getRepositoryInfo().getRootFolderId();
@@ -155,24 +155,24 @@ public abstract class BaseTest extends TestCase
 
    private void clearRepository()
    {
-      try
-      {
-         // TODO to remove this "if" statement when it was fixed for JCR storage
-         if (conn.getCheckedOutDocs(rootFolderId, false, null, true, null, null, null, -1, 0) != null)
-         {
-            for (Iterator<CmisObject> iter =
-               conn.getCheckedOutDocs(rootFolderId, false, null, true, null, null, null, -1, 0).getItems().iterator(); iter
-               .hasNext();)
-            {
-               CmisObject cmisObj = iter.next();
-               conn.deleteObject(cmisObj.getObjectInfo().getId(), null);
-            }
-         }
-      }
-      catch (Exception e)
-      {
-         //e.printStackTrace();
-      }
+//      try
+//      {
+//         // TODO to remove this "if" statement when it was fixed for JCR storage
+//         if (conn.getCheckedOutDocs(rootFolderId, false, null, true, null, null, null, -1, 0) != null)
+//         {
+//            for (Iterator<CmisObject> iter =
+//               conn.getCheckedOutDocs(rootFolderId, false, null, true, null, null, null, -1, 0).getItems().iterator(); iter
+//               .hasNext();)
+//            {
+//               CmisObject cmisObj = iter.next();
+//               conn.deleteObject(cmisObj.getObjectInfo().getId(), null);
+//            }
+//         }
+//      }
+//      catch (Exception e)
+//      {
+//         e.printStackTrace();
+//      }
       /////////////////////////////////////////////////////////////////////////////////
       try
       {
@@ -184,17 +184,17 @@ public abstract class BaseTest extends TestCase
       }
       catch (Exception e)
       {
-         //e.printStackTrace();
+         e.printStackTrace();
       }
       ///////////////////////////////////////////////////////////////////////////////
-      try
-      {
-         conn.deleteObject(testFolderId, true);
-      }
-      catch (Exception e)
-      {
-         //e.printStackTrace();
-      }
+//      try
+//      {
+//         conn.deleteObject(testFolderId, true);
+//      }
+//      catch (Exception e)
+//      {
+//         e.printStackTrace();
+//      }
    }
 
    private void deleteObject(CmisObject obj)
@@ -405,17 +405,18 @@ public abstract class BaseTest extends TestCase
       return object.getObjectInfo().getId();
    }
 
-   protected CmisObject getCmisObject(String objectId)
+   protected CmisObject getCmisObject(String objectId) throws ObjectNotFoundException, FilterNotValidException
    {
       return conn.getObject(objectId, false, null, false, false, true, CmisConstants.WILDCARD, null);
    }
 
-   protected List<ObjectParent> getParents(String id)
+   protected List<ObjectParent> getParents(String id) throws ObjectNotFoundException, FilterNotValidException,
+      ConstraintException
    {
       return conn.getObjectParents(id, false, null, false, true, CmisConstants.WILDCARD, null);
    }
 
-   protected ItemsList<CmisObject> getChildren(String folderId)
+   protected ItemsList<CmisObject> getChildren(String folderId) throws ObjectNotFoundException, FilterNotValidException
    {
       return conn.getChildren(folderId, false, null, false, true, CmisConstants.WILDCARD, null, null, -1, 0);
    }

@@ -16,20 +16,25 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-
 package org.xcmis.spi;
 
+import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.AllowableActions;
 import org.xcmis.spi.model.ChangeEvent;
+import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.Rendition;
 import org.xcmis.spi.model.RepositoryInfo;
+import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.UnfileObject;
 import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
@@ -37,17 +42,16 @@ import java.util.Iterator;
  */
 public interface Storage extends TypeManager
 {
-
    /**
     * Get storage unique id.
-    *
+    * 
     * @return storage id
     */
    String getId();
 
    /**
     * Calculate allowable actions for specified object.
-    *
+    * 
     * @param object object
     * @return allowable actions for object
     */
@@ -55,7 +59,7 @@ public interface Storage extends TypeManager
 
    /**
     * Get checkedout objects (private working copies) that user has access to.
-    *
+    * 
     * @param folder folder, if <code>null</code> then get all checked out
     *        objects in any folders
     * @param orderBy comma-separated list of query names and the ascending
@@ -64,173 +68,177 @@ public interface Storage extends TypeManager
     *        and storage may ignore this parameter if it not able sort items
     * @return iterator over checked out objects
     */
-   ItemsIterator<DocumentData> getCheckedOutDocuments(ObjectData folder, String orderBy);
+   ItemsIterator<DocumentData> getCheckedOutDocuments(FolderData folder, String orderBy);
 
    /**
-    * Create new instance of document with type <code>typeId</code> using
-    * <code>folder</code> as parent. If <code>folder == null</code> then
+    * Create new document with type <code>typeDefinition</code> using
+    * <code>parent</code> as parent. If <code>parent == null</code> then
     * document created in unfiling state. If unfiling is not supported
-    * {@link ConstraintException} should be thrown. It is not persisted instance
-    * and has not ID (method {@link ObjectData#getObjectId()} returns
-    * <code>null</code>). To save this document method {@link ObjectData#save()}
-    * must be used.
-    *
+    * {@link ConstraintException} should be thrown.
+    * 
     * @param parent parent folder or <code>null</code> if document should be
     *        created in unfiling state
-    * @param typeId type id
+    * @param typeDefinition the document type definition
+    * @param properties the document properties
+    * @param content the document content
+    * @param acl the list of ACEs to be applied to newly create document. May be
+    *        <code>null</code> or empty list if no ACEs to be applied
+    * @param policies the list of policies. May be <code>null</code> or empty
+    *        collection if no policies to be applied
     * @param versioningState versioning state
-    * @return new unsaved instance of document
+    * @return newly created document
     * @throws ConstraintException if any of following condition are met:
     *         <ul>
-    *         <li><code>folder == null</code> and unfiling capability is not
-    *         supported</li>
-    *         <li><code>typeId</code> is id of type whose baseType is not
-    *         Document</li>
-    *         <li><code>typeId</code> is not in the list of
-    *         AllowedChildObjectTypeIds of the <code>folder</code> (method
-    *         {@link FolderData#isAllowedChildType(String)} returns
-    *         <code>false</code> for <code>typeId</code>)</li>
     *         <li>versionable attribute of the object type definition is
     *         <code>false</code> and a value of the versioningState parameter is
     *         other than <i>none</i></li>
     *         <li>versionable attribute of the object type definition is
     *         <code>true</code> and and the value of the versioningState
     *         parameter is <i>none</i></li>
+    *         <li>if <code>parent == null</code> and unfiling is not supported</li>
     *         </ul>
+    * @throws NameConstraintViolationException if property 'cmis:name' throws
+    *         conflict
+    * @throws IOException if any i/o error occurs when try to set document
+    *         content stream
+    * @throws StorageException if object can not be saved cause to storage
+    *         internal problem
     * @see VersioningState
     */
-   DocumentData createDocument(FolderData parent, String typeId, VersioningState versioningState)
-      throws ConstraintException;
+   DocumentData createDocument(FolderData parent, TypeDefinition typeDefinition, Map<String, Property<?>> properties,
+      ContentStream content, List<AccessControlEntry> acl, Collection<PolicyData> policies,
+      VersioningState versioningState) throws ConstraintException, NameConstraintViolationException, IOException,
+      StorageException;
 
    /**
     * Create new document as copy of the given <code>source</code> document and
-    * use <code>folder</code> as parent. If <code>folder == null</code> then
+    * use <code>parent</code> as parent. If <code>parent == null</code> then
     * document created in unfiling state. If unfiling is not supported
-    * {@link ConstraintException} should be thrown. New document may be
-    * persisted immediately and then updated to apply new properties or not
-    * persisted instance may be created. This behavior is implementation
-    * specific. In both cases caller may apply new properties and save it. See
-    * {@link ObjectData#save()}.
-    *
+    * {@link ConstraintException} should be thrown.
+    * 
     * @param source source document
     * @param parent parent folder or <code>null</code> if document should be
     *        created in unfiling state
+    * @param properties the document properties
+    * @param acl the list of ACEs to be applie dto newly created document. May
+    *        be <code>null</code> or empty list if no ACEs to be applied
+    * @param policies the list of policies. May be <code>null</code> or empty
+    *        collection if no policies to be applied
     * @param versioningState versioning state
-    * @return new instance of document
+    * @return newly created document
     * @throws ConstraintException if any of following condition are met:
     *         <ul>
-    *         <li><code>typeId</code> is id of type whose baseType is not
-    *         Document</li>
-    *         <li><code>typeId</code> is not in the list of
-    *         AllowedChildObjectTypeIds of the <code>folder</code> (method
-    *         {@link FolderData#isAllowedChildType(String)} returns
-    *         <code>false</code> for <code>typeId</code>)</li>
     *         <li>versionable attribute of the object type definition is
     *         <code>false</code> and a value of the versioningState parameter is
     *         other than <i>none</i></li>
     *         <li>versionable attribute of the object type definition is
     *         <code>true</code> and and the value of the versioningState
     *         parameter is <i>none</i></li>
+    *         <li>if <code>parent == null</code> and unfiling is not supported</li>
     *         </ul>
+    * @throws NameConstraintViolationException if property 'cmis:name' throws
+    *         conflict
     * @throws StorageException if new document can be saved cause to storage
     *         internal problem
     * @see VersioningState
     */
-   DocumentData copyDocument(DocumentData source, FolderData parent, VersioningState versioningState)
-      throws ConstraintException, StorageException;
+   DocumentData copyDocument(DocumentData source, FolderData parent, Map<String, Property<?>> properties,
+      List<AccessControlEntry> acl, Collection<PolicyData> policies, VersioningState versioningState)
+      throws ConstraintException, NameConstraintViolationException, StorageException;
 
    /**
-    * Create new instance of folder with type <code>typeId</code> using
-    * <code>folder</code> as parent. It is not persisted instance and has not ID
-    * (method {@link ObjectData#getObjectId()} returns <code>null</code>). To
-    * save this folder method {@link ObjectData#save()} must be used.
-    *
+    * Create new folder with type <code>typeDefinition</code> using
+    * <code>folder</code> as parent.
+    * 
     * @param parent parent folder
-    * @param typeId type id
-    * @return new unsaved instance of folder
-    * @throws ConstraintException if any of following condition are met:
-    *         <ul>
-    *         <li><code>typeId</code> is id of type whose baseType is not Folder
-    *         </li>
-    *         <li><code>typeId</code> is not in the list of
-    *         AllowedChildObjectTypeIds of the <code>folder</code> (method
-    *         {@link FolderData#isAllowedChildType(String)} returns
-    *         <code>false</code> for <code>typeId</code>)</li>
-    *         </ul>
+    * @param typeDefinition the folder type definition
+    * @param properties the folder properties
+    * @param acl the list of ACEs to be applied to newly created folder. May be
+    *        <code>null</code> or empty list if no ACEs to be applied
+    * @param policies the list of policies. May be <code>null</code> or empty
+    *        collection if no policies to be applied
+    * @return newly created folder
+    * @throws ConstraintException if <code>parent == null</code>
+    * @throws NameConstraintViolationException if property 'cmis:name' throws
+    *         conflict
+    * @throws StorageException if object can not be removed cause to storage
+    *         internal problem
     */
-   FolderData createFolder(FolderData parent, String typeId) throws ConstraintException;
+   FolderData createFolder(FolderData parent, TypeDefinition typeDefinition, Map<String, Property<?>> properties,
+      List<AccessControlEntry> acl, Collection<PolicyData> policies) throws ConstraintException,
+      NameConstraintViolationException, StorageException;
 
    /**
-    * Create new instance of policy with type <code>typeId</code> using
-    * <code>folder</code> as parent. If <code>folder == null</code> then policy
-    * created in unfiling state. It is not persisted instance and has not ID
-    * (method {@link ObjectData#getObjectId()} returns <code>null</code>). To
-    * save this policy method {@link ObjectData#save()} must be used.
-    *
+    * Create new policy with type <code>typeDefinition</code> using
+    * <code>parent</code> as parent. If <code>parent == null</code> then policy
+    * created in unfiling state.
+    * 
     * @param parent parent folder
-    * @param typeId type id
-    * @return new unsaved instance of policy
-    * @throws ConstraintException if any of following condition are met:
-    *         <ul>
-    *         <li><code>folder != null</code> and <code>typeId</code> is id of
-    *         not fileable type</li>
-    *         <li><code>typeId</code> is id of type whose baseType is not Policy
-    *         </li>
-    *         <li><code>typeId</code> is not in the list of
-    *         AllowedChildObjectTypeIds of the <code>folder</code> (method
-    *         {@link FolderData#isAllowedChildType(String)} returns
-    *         <code>false</code> for <code>typeId</code>)</li>
-    *         </ul>
+    * @param typeDefinition the policy type definition
+    * @param properties the policy properties
+    * @param acl the list of ACEs to be applied to newly created policy. May be
+    *        <code>null</code> or empty list if no ACEs to be applied
+    * @param policies the list of policies. May be <code>null</code> or empty
+    *        collection if no policies to be applied
+    * @return newly created policy
+    * @throws ConstraintException if <code>parent == null</code> and policy type
+    *         is fileable
+    * @throws NameConstraintViolationException if property 'cmis:name' throws
+    *         conflict
+    * @throws StorageException if object can not be saved cause to storage
+    *         internal problem
     */
-   PolicyData createPolicy(FolderData parent, String typeId) throws ConstraintException;
+   PolicyData createPolicy(FolderData parent, TypeDefinition typeDefinition, Map<String, Property<?>> properties,
+      List<AccessControlEntry> acl, Collection<PolicyData> policies) throws ConstraintException,
+      NameConstraintViolationException, StorageException;
 
    /**
-    * Create new instance of relationship for specified <code>source</code> and
-    * <code>target</code>. It is not persisted instance and has not ID (method
-    * {@link ObjectData#getObjectId()} returns <code>null</code>). To save this
-    * relationship method {@link ObjectData#save()} must be used.
-    *
+    * Create new relationship for specified <code>source</code> and
+    * <code>target</code>.
+    * 
     * @param source source of relationship
     * @param target target of relationship
-    * @param typeId type of relationship
-    * @return new unsaved instance of relationship
-    * @throws ConstraintException if any of following condition are met:
-    *         <ul>
-    *         <li><code>typeId</code> is id of type whose baseType is not
-    *         Relationship</li>
-    *         <li><code>source</code> has object type that is not in the list of
-    *         AllowedSourceTypes specified by the object type definition</li>
-    *         <li><code>target</code> has object type that is not in the list of
-    *         AllowedTargetTypes specified by the object type definition</li>
-    *         </ul>
+    * @param typeDefinition the relationship type definition
+    * @param properties the relationship properties
+    * @param acl the list of ACEs to be applied to newly created relationship.
+    *        May be <code>null</code> or empty list if no ACEs to be applied
+    * @param policies the list of policies. May be <code>null</code> or empty
+    *        collection if no policies to be applied
+    * @return newly created relationship
+    * @throws NameConstraintViolationException if property 'cmis:name' throws
+    *         conflict
+    * @throws StorageException if object can not be removed cause to storage
+    *         internal problem
     */
-   RelationshipData createRelationship(ObjectData source, ObjectData target, String typeId) throws ConstraintException;
+   RelationshipData createRelationship(ObjectData source, ObjectData target, TypeDefinition typeDefinition,
+      Map<String, Property<?>> properties, List<AccessControlEntry> acl, Collection<PolicyData> policies)
+      throws NameConstraintViolationException, StorageException;
 
    /**
     * Delete specified object. If multi-filed object is deleted then it is
     * removed from all folders it is filed in. If specified object is private
     * working copy the deletion object is the same as to cancel checkout
     * operation. See {@link DocumentData#cancelCheckout()}.
-    *
+    * 
     * @param object object to be deleted
     * @param deleteAllVersions if <code>false</code> then delete only the object
     *        specified, if <code>true</code> delete all versions of versionable
     *        document. This parameter must be ignored if specified object is not
     *        document or not versionable document
-    * @throws ConstraintException if specified object is folder that contains
-    *         one or more object or root folder
+    * @throws VersioningException if object can not be removed cause to
+    *         versioning conflict
     * @throws UpdateConflictException if specified object is not current any
     *         more
     * @throws StorageException if object can't be delete (persist operation)
     *         cause to storage internal problem
     */
-   void deleteObject(ObjectData object, boolean deleteAllVersions) throws ConstraintException, UpdateConflictException,
+   void deleteObject(ObjectData object, boolean deleteAllVersions) throws VersioningException, UpdateConflictException,
       StorageException;
 
    /**
     * Delete the specified folder object and all of its child- and
     * descendant-objects.
-    *
+    * 
     * @param folder folder to be deleted
     * @param deleteAllVersions if <code>true</code> then delete all versions of
     *        the document in this folder. If <code>false</code>, delete only the
@@ -248,8 +256,7 @@ public interface Storage extends TypeManager
     *        </ul>
     * @param continueOnFailure if <code>true</code>, then the stprage SHOULD
     *        continue attempting to perform this operation even if deletion of a
-    *        child object in the specified folder cannot be deleted. Default is
-    *        <code>false</code>.
+    *        child object in the specified folder cannot be deleted
     * @return list of id that were not deleted
     * @throws UpdateConflictException if object that is no longer current (as
     *         determined by the storage)
@@ -259,30 +266,15 @@ public interface Storage extends TypeManager
 
    /**
     * Remove non-folder fileable object from all folder where in which it is
-    * currently filed. This method never remove object itself .
-    *
+    * currently filed. <b>NOTE</b> This method never remove object itself.
+    * 
     * @param object object
     */
    void unfileObject(ObjectData object);
 
    /**
-    * Save updated object or newly created object.
-    *
-    * @param object object to be saved
-    * @return  object id String
-    * @throws StorageException if changes can't be saved cause storage internal
-    *         errors
-    * @throws NameConstraintViolationException if updated name (property
-    *         'cmis:name') cause name conflict, e.g. object with the same name
-    *         already exists
-    * @throws UpdateConflictException if saved object is not current any more
-    */
-   String saveObject(ObjectData object) throws StorageException, NameConstraintViolationException,
-      UpdateConflictException;
-
-   /**
     * Gets content changes.
-    *
+    * 
     * @param changeLogToken if value other than <code>null</code>, then change
     *        event corresponded to the value of the specified change log token
     *        will be returned as the first result in the output. If not
@@ -300,17 +292,17 @@ public interface Storage extends TypeManager
 
    /**
     * Handle specified SQL query.
-    *
+    * 
     * @param query SQL query
     * @return set of query results
     * @throws InvalidArgumentException if specified <code>query</code> is
     *         invalid
     */
-   ItemsIterator<Result> query(Query query) throws InvalidArgumentException;
+   ItemsIterator<Result> query(Query query);
 
    /**
     * Get object by unique identifier.
-    *
+    * 
     * @param objectId object's ID
     * @return object
     * @throws ObjectNotFoundException if object with specified ID was not found
@@ -319,7 +311,7 @@ public interface Storage extends TypeManager
 
    /**
     * Get object by path.
-    *
+    * 
     * @param path path
     * @return object
     * @throws ObjectNotFoundException if object with specified path was not
@@ -330,16 +322,11 @@ public interface Storage extends TypeManager
    /**
     * Move <code>object</code> from <code>source</code> to <code>target</code>.
     * If operation successful then changes saved immediately.
-    *
+    * 
     * @param object object to be moved
     * @param target destination folder
     * @param source folder from which object must be moved
     * @return
-    * @throws ConstraintException if type of the given object is NOT in the list
-    *         of AllowedChildObjectTypeIds of the <code>target</code>
-    * @throws InvalidArgumentException if <code>source</code> is not object's
-    *         parent folder (or one of the parent folders if the storage
-    *         supports multi-filing.).
     * @throws UpdateConflictException if object that is no longer current (as
     *         determined by the storage).
     * @throws VersioningException if object is a non-current document version
@@ -349,14 +336,13 @@ public interface Storage extends TypeManager
     * @throws StorageException if object can not be moved (save changes) cause
     *         to storage internal problem
     */
-   ObjectData moveObject(ObjectData object, FolderData target, FolderData source) throws ConstraintException,
-      InvalidArgumentException, UpdateConflictException, VersioningException, NameConstraintViolationException,
-      StorageException;
+   ObjectData moveObject(ObjectData object, FolderData target, FolderData source) throws UpdateConflictException,
+      VersioningException, NameConstraintViolationException, StorageException;
 
    /**
     * Get object renditions.
-    *
-    * @param object object
+    * 
+    * @param object the object
     * @return iterator over object's renditions. If object has not any
     *         renditions then empty iterator must be returned but never
     *         <code>null</code>
@@ -365,7 +351,7 @@ public interface Storage extends TypeManager
 
    /**
     * Get description of storage and its capabilities.
-    *
+    * 
     * @return storage description
     */
    RepositoryInfo getRepositoryInfo();
@@ -373,8 +359,8 @@ public interface Storage extends TypeManager
    /**
     * Collection of all Document in the specified version series, sorted by
     * cmis:creationDate descending.
-    *
-    * @param versionSeriesId id of version series
+    * 
+    * @param versionSeriesId the id of version series
     * @return document versions
     * @throws ObjectNotFoundException if version series with
     *         <code>versionSeriesId</code> does not exist

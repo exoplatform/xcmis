@@ -40,7 +40,7 @@ public class MultifilingUnfilingTest extends BaseQueryTest
    public void setUp() throws Exception
    {
       super.setUp();
-      testRoot = createFolder(rootFolder, "QueryUsecasesTest", "cmis:folder");
+      testRoot = createFolder(rootFolder, "QueryUsecasesTest");
       // create data
 
    }
@@ -48,12 +48,12 @@ public class MultifilingUnfilingTest extends BaseQueryTest
    public void testAddMultipleParents() throws Exception
    {
 
-      FolderData folder1 = createFolder(testRoot, "multifilingFolderTest1", "cmis:folder");
-      FolderData folder2 = createFolder(testRoot, "multifilingFolderTest2", "cmis:folder");
-      FolderData folder3 = createFolder(testRoot, "multifilingFolderTest3", "cmis:folder");
+      FolderData folder1 = createFolder(testRoot, "multifilingFolderTest1");
+      FolderData folder2 = createFolder(testRoot, "multifilingFolderTest2");
+      FolderData folder3 = createFolder(testRoot, "multifilingFolderTest3");
 
       DocumentData doc1 =
-         createDocument(folder1, "node1", NASA_DOCUMENT, "helloworld".getBytes(), new MimeType("plain", "text"));
+         createDocument(folder1, "node1", nasaDocumentTypeDefinition, "helloworld".getBytes(), new MimeType("plain", "text"));
       //check single parent.
       checkResult("SELECT * FROM " + NASA_DOCUMENT + " WHERE IN_TREE('" + folder1.getObjectId() + "')",
          new ObjectData[]{doc1});
@@ -78,12 +78,12 @@ public class MultifilingUnfilingTest extends BaseQueryTest
    public void testRemoveFromMultipleParents() throws Exception
    {
 
-      FolderData folder1 = createFolder(testRoot, "multifilingFolderTest1", "cmis:folder");
-      FolderData folder2 = createFolder(testRoot, "multifilingFolderTest2", "cmis:folder");
-      FolderData folder3 = createFolder(testRoot, "multifilingFolderTest3", "cmis:folder");
+      FolderData folder1 = createFolder(testRoot, "multifilingFolderTest1");
+      FolderData folder2 = createFolder(testRoot, "multifilingFolderTest2");
+      FolderData folder3 = createFolder(testRoot, "multifilingFolderTest3");
 
       DocumentData doc1 =
-         createDocument(folder1, "node1", NASA_DOCUMENT, "helloworld".getBytes(), new MimeType("plain", "text"));
+         createDocument(folder1, "node1", nasaDocumentTypeDefinition, "helloworld".getBytes(), new MimeType("plain", "text"));
       folder2.addObject(doc1);
       folder3.addObject(doc1);
       assertEquals(3, doc1.getParents().size());
@@ -107,12 +107,12 @@ public class MultifilingUnfilingTest extends BaseQueryTest
    public void testRemoveFromLastParent() throws Exception
    {
 
-      FolderData folder1 = createFolder(testRoot, "multifilingFolderTest1", "cmis:folder");
-      FolderData folder2 = createFolder(testRoot, "multifilingFolderTest2", "cmis:folder");
-      FolderData folder3 = createFolder(testRoot, "multifilingFolderTest3", "cmis:folder");
+      FolderData folder1 = createFolder(testRoot, "multifilingFolderTest1");
+      FolderData folder2 = createFolder(testRoot, "multifilingFolderTest2");
+      FolderData folder3 = createFolder(testRoot, "multifilingFolderTest3");
 
       DocumentData doc1 =
-         createDocument(folder1, "node1", NASA_DOCUMENT, "helloworld".getBytes(), new MimeType("plain", "text"));
+         createDocument(folder1, "node1", nasaDocumentTypeDefinition, "helloworld".getBytes(), new MimeType("plain", "text"));
       folder2.addObject(doc1);
       folder3.addObject(doc1);
       assertEquals(3, doc1.getParents().size());
@@ -137,7 +137,7 @@ public class MultifilingUnfilingTest extends BaseQueryTest
    {
       checkResult("SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"helloworld\")", new ObjectData[]{});
       DocumentData doc1 =
-         createDocument(testRoot, "node1", NASA_DOCUMENT, "helloworld".getBytes(), new MimeType("text", "plain"));
+         createDocument(testRoot, "node1", nasaDocumentTypeDefinition, "helloworld".getBytes(), new MimeType("text", "plain"));
 
       checkResult("SELECT * FROM " + NASA_DOCUMENT + " WHERE CONTAINS(\"helloworld\")", new ObjectData[]{doc1});
 

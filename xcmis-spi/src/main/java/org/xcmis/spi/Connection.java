@@ -16,7 +16,6 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-
 package org.xcmis.spi;
 
 import org.exoplatform.services.log.ExoLogger;
@@ -28,15 +27,19 @@ import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.CapabilityACL;
 import org.xcmis.spi.model.CapabilityRendition;
 import org.xcmis.spi.model.CmisObject;
+import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.ObjectInfo;
 import org.xcmis.spi.model.ObjectParent;
+import org.xcmis.spi.model.Permission;
 import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.RelationshipDirection;
 import org.xcmis.spi.model.Rendition;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.UnfileObject;
 import org.xcmis.spi.model.VersioningState;
+import org.xcmis.spi.model.Permission.BasicPermissions;
 import org.xcmis.spi.model.impl.DecimalProperty;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
@@ -45,12 +48,15 @@ import org.xcmis.spi.utils.CmisUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 /**
  * Connection to CMIS storage. It should be used for all operation with storage.
@@ -64,6 +70,13 @@ import java.util.NoSuchElementException;
  */
 public abstract class Connection
 {
+
+   protected static final int CREATE = 1;
+
+   protected static final int UPDATE = 2;
+
+   protected static final int VERSION = 4;
+
    private static final Log LOG = ExoLogger.getLogger(Connection.class);
 
    protected Storage storage;
@@ -82,14 +95,16 @@ public abstract class Connection
     *        storage supports version-specific filing
     * @throws ObjectNotFoundException if <code>objectId</code> or
     *         <code>folderId</code> were not found
+    * @throws ConstraintException if destination folder is not supported object
+    *         type that should be added
     * @throws InvalidArgumentException if <code>objectId</code> is id of object
     *         that is not fileable or if <code>folderId</code> is id of object
     *         that base type is not Folder
-    * @throws ConstraintException if destination folder is not supported object
-    *         type that should be added
+    * @throws NotSupportedException if multifiling feature is not supported by
+    *         backend storage
     */
-   public void addObjectToFolder(String objectId, String folderId, boolean allVersions) throws ObjectNotFoundException,
-      InvalidArgumentException, ConstraintException
+   public void addObjectToFolder(String objectId, String folderId, boolean allVersions /* Not in use at the moment */)
+      throws ObjectNotFoundException, ConstraintException
    {
       checkConnection();
 
@@ -103,16 +118,21 @@ public abstract class Connection
 
       if (folder.getBaseType() != BaseType.FOLDER)
       {
-         throw new InvalidArgumentException("Object " + folderId + " is not a Folder object.");
+         throw new InvalidArgumentException("Object " + folderId + " is not a folder object.");
       }
 
       if (!object.getTypeDefinition().isFileable())
       {
-         throw new ConstraintException("Object " + objectId + " is not fileable.");
+         throw new InvalidArgumentException("Object " + objectId + " is not fileable.");
+      }
+
+      if (!((FolderData)folder).isAllowedChildType(object.getTypeId()))
+      {
+         throw new ConstraintException("Object type " + object.getTypeId()
+            + " is not allowed as child for destination folder");
       }
 
       ((FolderData)folder).addObject(object);
-
    }
 
    /**
@@ -123,12 +143,11 @@ public abstract class Connection
     * @throws ConstraintException if any of the following conditions are met:
     *         <ul>
     *         <li>Storage already has type with the same id, see
-    *         {@link CmisTypeDefinitionType#getId()}</li>
+    *         {@link TypeDefinition#getId()}</li>
     *         <li>Base type is not specified or is one of optional type that is
-    *         not supported by storage, see
-    *         {@link CmisTypeDefinitionType#getBaseId()}</li>
+    *         not supported by storage, see {@link TypeDefinition#getBaseId()}</li>
     *         <li>Parent type is not specified or does not exist, see
-    *         {@link CmisTypeDefinitionType#getParentId()}</li>
+    *         {@link TypeDefinition#getParentId()}</li>
     *         <li>New type has at least one property definitions that has
     *         unsupported type, invalid id, so on</li>
     *         </ul>
@@ -138,7 +157,6 @@ public abstract class Connection
    public String addType(TypeDefinition type) throws ConstraintException, StorageException
    {
       checkConnection();
-
       String id = storage.addType(type);
       return id;
    }
@@ -147,10 +165,12 @@ public abstract class Connection
     * Adds or(and) remove the given Access Control Entries to(from) the Access
     * Control List of object.
     *
-    * @param objectId identifier of object for which should be added specified
+    * @param objectId identifier of object for which should be applied specified
     *        ACEs
-    * @param addACL ACEs that will be added from object's ACL
-    * @param removeACL ACEs that will be removed from object's ACL
+    * @param addACL ACEs that will be added from object's ACL. May be
+    *        <code>null</code> or empty list
+    * @param removeACL ACEs that will be removed from object's ACL. May be
+    *        <code>null</code> or empty list
     * @param propagation specifies how ACEs should be handled:
     *        <ul>
     *        <li>objectonly: ACEs must be applied without changing the ACLs of
@@ -160,8 +180,8 @@ public abstract class Connection
     *        <li>repositorydetermined: Indicates that the client leaves the
     *        behavior to the storage</li>
     *        </ul>
-    * @throws ObjectNotFoundException if <code>objectId</code> or does not
-    *         exists
+    * @throws ObjectNotFoundException if object with <code>objectId</code> does
+    *         not exist
     * @throws ConstraintException if any of the following conditions are met:
     *         <ul>
     *         <li>The specified object's Object-Type definition's attribute for
@@ -172,6 +192,8 @@ public abstract class Connection
     *         the ACEs does not match ANY of the permissionNames as returned by
     *         getACLCapability and is not a CMIS Basic permission</li>
     *         </ul>
+    * @throws NotSupportedException if managing of ACL is not supported by
+    *         backend storage
     */
    public void applyACL(String objectId, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
       AccessControlPropagation propagation) throws ObjectNotFoundException, ConstraintException
@@ -180,14 +202,15 @@ public abstract class Connection
       {
          return;
       }
-
       checkConnection();
 
       // TODO: check ACL propagation.
       ObjectData object = storage.getObjectById(objectId);
-      applyACL(object, addACL, removeACL);
-
-      storage.saveObject(object);
+      TypeDefinition typeDefinition = object.getTypeDefinition();
+      checkACL(typeDefinition, addACL, removeACL);
+      // Merge ACL include existed one. It may be inherited from parent even for newly created object .
+      List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(object.getACL(false), addACL, removeACL);
+      object.setACL(mergedACL);
    }
 
    /**
@@ -199,6 +222,8 @@ public abstract class Connection
     *         <code>policyId</code> does not exist
     * @throws ConstraintException if object with id <code>objectId</code> is not
     *         controllable by policy
+    * @throws InvalidArgumentException if object with id <code>policyId</code>
+    *         is not object which base type is Policy
     */
    public void applyPolicy(String policyId, String objectId) throws ConstraintException, ObjectNotFoundException
    {
@@ -210,9 +235,11 @@ public abstract class Connection
       {
          throw new InvalidArgumentException("Object " + policy.getObjectId() + " is not a Policy object.");
       }
+      if (!object.getTypeDefinition().isControllablePolicy())
+      {
+         throw new ConstraintException("Object type " + object.getTypeId() + " is not controllable by policy.");
+      }
       object.applyPolicy((PolicyData)policy);
-
-      storage.saveObject(object);
    }
 
    /**
@@ -221,23 +248,37 @@ public abstract class Connection
     *
     * @param documentId document id. May be PWC id or id of any other Document
     *        in Version Series
+    * @throws ObjectNotFoundException if object with <code>documentId</code>
+    *         does not exist
     * @throws ConstraintException if the object is not versionable
     * @throws UpdateConflictException if update an object that is no longer
     *         current
     * @throws VersioningException if object is a non-current document version
     * @throws StorageException if PWC can't be removed from storage cause to
     *         storage internal problem
+    * @throws InvalidArgumentException if object with <code>documentId</code> is
+    *         not Document or if PWC in version series does not exist
     */
-   public void cancelCheckout(String documentId) throws ConstraintException, UpdateConflictException,
-      VersioningException, StorageException
+   public void cancelCheckout(String documentId) throws ObjectNotFoundException, ConstraintException,
+      UpdateConflictException, VersioningException, StorageException
    {
       checkConnection();
 
       ObjectData document = storage.getObjectById(documentId);
+      if (!document.getTypeDefinition().isVersionable())
+      {
+         throw new ConstraintException("Type " + document.getTypeId() + " is not versionable.");
+      }
       if (document.getBaseType() != BaseType.DOCUMENT)
       {
+         // be sure it is realy document type
          throw new InvalidArgumentException("Object " + documentId + " is not a Document object.");
       }
+      if (!((DocumentData)document).isVersionSeriesCheckedOut())
+      {
+         throw new InvalidArgumentException("There is no Private Working Copy in version series.");
+      }
+
       // cancelCheckedOut may be invoked on any object in version series.
       // In other way 'cmis:versionSeriesCheckedOutId' may not reflect
       // current PWC id.
@@ -254,64 +295,66 @@ public abstract class Connection
     * @param content content of document
     * @param checkinComment check-in comment
     * @param addACL set Access Control Entry to be applied for newly created
-    *        document, either using the ACL from <code>folderId</code> if
-    *        specified, or being applied if no <code>folderId</code> is
-    *        specified
+    *        version of document. May be <code>null</code> or empty list
     * @param removeACL set Access Control Entry that MUST be removed from the
-    *        newly created document, either using the ACL from
-    *        <code>folderId</code> if specified, or being ignored if no
-    *        <code>folderId</code> is specified
+    *        newly created version of document. May be <code>null</code> or
+    *        empty list
     * @param policies list of policy id that MUST be applied to the newly
-    *        created document
+    *        created document. May be <code>null</code> or empty collection
     * @return ID of checked-in document
+    * @throws ObjectNotFoundException if object with <code>documentId</code>
+    *         does not exist
     * @throws ConstraintException if the object is not versionable
+    * @throws VersioningException if object is a not PWC
+    * @throws NameConstraintViolationException if <i>cmis:name</i> specified in
+    *         properties throws conflict
     * @throws UpdateConflictException if update an object that is no longer
     *         current
     * @throws StreamNotSupportedException if document does not supports content
     *         stream
-    * @throws IOException if any i/o error occurs when try to set document's
-    *         content stream
+    * @throws StorageException if changes can't be saved in storage cause to
+    *         storage internal problem
+    * @throws InvalidArgumentException if object with <code>documentId</code> is
+    *         not Document
     */
    public String checkin(String documentId, boolean major, Map<String, Property<?>> properties, ContentStream content,
       String checkinComment, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL,
-      Collection<String> policies) throws ConstraintException, UpdateConflictException, StreamNotSupportedException,
-      IOException
+      Collection<String> policies) throws ObjectNotFoundException, ConstraintException, VersioningException,
+      NameConstraintViolationException, UpdateConflictException, StreamNotSupportedException, StorageException
    {
       checkConnection();
 
       ObjectData pwc = storage.getObjectById(documentId);
 
+      if (!pwc.getTypeDefinition().isVersionable())
+      {
+         throw new ConstraintException("Type " + pwc.getTypeId() + " is not versionable.");
+      }
       if (pwc.getBaseType() != BaseType.DOCUMENT)
       {
+         // be sure it is realy document type
          throw new InvalidArgumentException("Object " + documentId + " is not a Document object.");
       }
-
       if (!((DocumentData)pwc).isPWC())
       {
          throw new VersioningException("Object " + documentId + " is not Private Working Copy.");
       }
 
-      if (properties != null)
-      {
-         pwc.setProperties(properties);
-      }
+      TypeDefinition typeDefinition = pwc.getTypeDefinition();
 
-      if (content != null)
+      checkProperties(typeDefinition, properties, VERSION);
+      // Do not use method 'checkContent' because stream may be null if content does not changed.
+      if (typeDefinition.getContentStreamAllowed() == ContentStreamAllowed.NOT_ALLOWED && content != null)
       {
-         ((DocumentData)pwc).setContentStream(content);
+         throw new StreamNotSupportedException("Content stream not allowed for object of type "
+            + typeDefinition.getId());
       }
+      checkACL(typeDefinition, addACL, removeACL);
+      checkPolicies(typeDefinition, policies);
 
-      if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
-      {
-         applyACL(pwc, addACL, removeACL);
-      }
-
-      if (policies != null && policies.size() > 0)
-      {
-         applyPolicies(pwc, policies);
-      }
-
-      DocumentData version = ((DocumentData)pwc).checkin(major, checkinComment);
+      DocumentData version =
+         ((DocumentData)pwc).checkin(major, checkinComment, properties, content, CmisUtils.mergeACLs(pwc.getACL(false),
+            addACL, removeACL), createPolicyList(policies));
 
       return version.getObjectId();
    }
@@ -322,22 +365,37 @@ public abstract class Connection
     * @param documentId document id. Storage MAY allow checked-out ONLY latest
     *        version of Document
     * @return ID of checked-out document (PWC)
+    * @throws ObjectNotFoundException if object with <code>documentId</code>
+    *         does not exist
     * @throws ConstraintException if the object is not versionable
     * @throws UpdateConflictException if update an object that is no longer
     *         current
-    * @throws VersioningException if object is a non-current document version
+    * @throws VersioningException if one of the following conditions are met:
+    *         <ul>
+    *         <li>object is not latest version of document version and it is not
+    *         supported to checked-out other then latest version</li>
+    *         <li>version series already have one checked-out document. It is
+    *         not possible to have more then one PWC at time</li>
+    *         </ul>
     * @throws StorageException if newly created PWC can't be saved in storage
     *         cause to storage internal problem
+    * @throws InvalidArgumentException if object with <code>documentId</code> is
+    *         not Document
     */
-   public String checkout(String documentId) throws ConstraintException, UpdateConflictException, VersioningException,
-      StorageException
+   public String checkout(String documentId) throws ObjectNotFoundException, ConstraintException,
+      UpdateConflictException, VersioningException, StorageException
    {
       checkConnection();
 
       ObjectData document = storage.getObjectById(documentId);
 
+      if (!document.getTypeDefinition().isVersionable())
+      {
+         throw new ConstraintException("Type " + document.getTypeId() + " is not versionable.");
+      }
       if (document.getBaseType() != BaseType.DOCUMENT)
       {
+         // be sure it is realy document type
          throw new InvalidArgumentException("Object " + documentId + " is not a Document object.");
       }
 
@@ -355,32 +413,36 @@ public abstract class Connection
    /**
     * Create a document object.
     *
-    * @param folderId parent folder id for object. May be null if storage
+    * @param parentId parent folder id for object. May be null if storage
     *        supports unfiling
-    * @param properties properties that MAY be applied to newly created document
+    * @param properties properties that will be applied to newly created
+    *        document
     * @param content document content
     * @param addACL Access Control Entries that MUST added for newly created
-    *        document, either using the ACL from <code>folderId</code> if
-    *        specified, or being applied if no <code>folderId</code> is
-    *        specified
+    *        document, either using the ACL from <code>parentId</code> if
+    *        specified, or being applied if no <code>parentId</code> is
+    *        specified. May be <code>null</code> or empty list
     * @param removeACL set Access Control Entries that MUST be removed from the
     *        newly created document, either using the ACL from
-    *        <code>folderId</code> if specified, or being ignored if no
-    *        <code>folderId</code> is specified
+    *        <code>parentId</code> if specified, or being ignored if no
+    *        <code>parentId</code> is specified. May be <code>null</code> or
+    *        empty list
     * @param policies list of policy id that MUST be applied to the newly
-    *        created document
+    *        created document. May be <code>null</code> or empty collection
     * @param versioningState enumeration specifying what the versioning state of
     *        the newly created object shall be
     * @return ID of newly created document
     * @throws ObjectNotFoundException if target folder with specified id
-    *         <code>folderId</code> does not exist
+    *         <code>parentId</code> does not exist
+    * @throws TypeNotFoundException if type specified by property
+    *         <code>cmis:objectTypeId</code> does not exist
     * @throws ConstraintException if any of following condition are met:
     *         <ul>
     *         <li><code>cmis:objectTypeId</code> property value is not an object
     *         type whose baseType is Document</li>
     *         <li><code>cmis:objectTypeId</code> property value is not in the
     *         list of AllowedChildObjectTypeIds of the parent-folder specified
-    *         by <code>folderId</code></li>
+    *         by <code>parentId</code></li>
     *         <li>value of any of the properties violates the
     *         min/max/required/length constraints specified in the property
     *         definition in the object type
@@ -405,8 +467,6 @@ public abstract class Connection
     *         <li>at least one of the permissions is used in an ACE provided
     *         which is not supported by the storage</li>
     *         </ul>
-    * @throws InvalidArgumentException if object with id <code>folderId</code>
-    *         is not a Folder
     * @throws StreamNotSupportedException if the contentStreamAllowed attribute
     *         of the object type definition specified by the
     *         <code>cmis:objectTypeId</code> property value is set to 'not
@@ -414,41 +474,35 @@ public abstract class Connection
     * @throws NameConstraintViolationException violation is detected with the
     *         given <code>cmis:name</code> property value. Storage MAY chose
     *         other name which does not conflict
-    * @throws IOException if any i/o error occurs when try to set document's
-    *         content stream
     * @throws StorageException if new Document can't be saved in storage cause
     *         to storage internal problem
     */
-   public String createDocument(String folderId, Map<String, Property<?>> properties, ContentStream content,
+   public String createDocument(String parentId, Map<String, Property<?>> properties, ContentStream content,
       List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<String> policies,
-      VersioningState versioningState) throws ObjectNotFoundException, ConstraintException, InvalidArgumentException,
-      StreamNotSupportedException, NameConstraintViolationException, IOException, StorageException
+      VersioningState versioningState) throws ObjectNotFoundException, TypeNotFoundException, ConstraintException,
+      StreamNotSupportedException, NameConstraintViolationException, StorageException
    {
+      checkConnection();
+
       if (properties == null)
       {
          throw new InvalidArgumentException("Properties may not by null.");
       }
 
-      checkConnection();
+      String typeId = getTypeId(properties);
+      TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
 
-      String typeId = null;
-      Property<?> typeProperty = properties.get(CmisConstants.OBJECT_TYPE_ID);
-      if (typeProperty != null && typeProperty.getValues().size() > 0)
+      ObjectData parent = null;
+      if (parentId != null)
       {
-         typeId = (String)typeProperty.getValues().get(0);
-      }
-      if (typeId == null)
-      {
-         throw new InvalidArgumentException("Type is not specified.");
-      }
-
-      ObjectData folder = null;
-      if (folderId != null)
-      {
-         folder = storage.getObjectById(folderId);
-         if (folder.getBaseType() != BaseType.FOLDER)
+         parent = storage.getObjectById(parentId);
+         if (parent.getBaseType() != BaseType.FOLDER)
          {
-            throw new InvalidArgumentException("Object " + folderId + " is not a Folder object.");
+            throw new InvalidArgumentException("Object " + parentId + " is not a Folder object.");
+         }
+         if (!((FolderData)parent).isAllowedChildType(typeId))
+         {
+            throw new ConstraintException("Object type " + typeId + " is not allowed as child for destination folder");
          }
       }
       else if (!storage.getRepositoryInfo().getCapabilities().isCapabilityUnfiling())
@@ -461,57 +515,64 @@ public abstract class Connection
          versioningState = VersioningState.MAJOR;
       }
 
-      DocumentData newDocument = storage.createDocument((FolderData)folder, typeId, versioningState);
+      // XXX : Do not throw ConstraintException if versioning is not supported
+      // and versioning state is othe than NONE. Some client may not specify
+      // this attribute and may not be able create documents. Lets backend storage
+      // to resolve this issue.
 
-      newDocument.setProperties(properties);
+      // check inputs
+      checkProperties(typeDefinition, properties, CREATE);
+      checkContent(typeDefinition, content);
+      checkACL(typeDefinition, addACL, removeACL);
+      checkPolicies(typeDefinition, policies);
 
-      newDocument.setContentStream(content);
-
-      if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
+      try
       {
-         applyACL(newDocument, addACL, removeACL);
-      }
+         DocumentData newDocument =
+            storage.createDocument((FolderData)parent, typeDefinition, properties, content, CmisUtils.mergeACLs(
+               parent != null ? parent.getACL(false) : null, addACL, removeACL), createPolicyList(policies),
+               versioningState);
 
-      if (policies != null && policies.size() > 0)
+         return newDocument.getObjectId();
+      }
+      catch (IOException ioe)
       {
-         applyPolicies(newDocument, policies);
+         throw new CmisRuntimeException(ioe.getMessage(), ioe);
       }
-
-      storage.saveObject(newDocument);
-
-      return newDocument.getObjectId();
    }
 
    /**
     * Create a document object as a copy of the given source document in the
-    * <code>folderId</code>.
+    * specified parent folder <code>parentId</code>.
     *
     * @param sourceId id for the source document
-    * @param folderId parent folder id for object. May be null if storage
+    * @param parentId parent folder id for object. May be null if storage
     *        supports unfiling
-    * @param properties properties that MAY be applied to newly created document
+    * @param properties properties that will be applied to newly created
+    *        document
     * @param addACL Access Control Entries that MUST added for newly created
-    *        document, either using the ACL from <code>folderId</code> if
-    *        specified, or being applied if no <code>folderId</code> is
-    *        specified
+    *        document, either using the ACL from <code>parentId</code> if
+    *        specified, or being applied if no <code>parentId</code> is
+    *        specified. May be <code>null</code> or empty list
     * @param removeACL set Access Control Entries that MUST be removed from the
     *        newly created document, either using the ACL from
-    *        <code>folderId</code> if specified, or being ignored if no
-    *        <code>folderId</code> is specified
+    *        <code>parentId</code> if specified, or being ignored if no
+    *        <code>parentId</code> is specified. May be <code>null</code> or
+    *        empty list
     * @param policies list of policy id that MUST be applied to the newly
-    *        created document
+    *        created document. May be <code>null</code> or empty collection
     * @param versioningState enumeration specifying what the versioning state of
     *        the newly created object shall be
     * @return ID of newly created document
     * @throws ObjectNotFoundException if target folder with specified id
-    *         <code>folderId</code> or source document with id
+    *         <code>parentId</code> or source document with id
     *         <code>sourceId</code> does not exist
     * @throws ConstraintException if any of following condition are met:
     *         <ul>
     *         <li>sourceId is not an Object whose baseType is Document</li>
     *         <li>source document's <code>cmis:objectTypeId</code> property
     *         value is NOT in the list of AllowedChildObjectTypeIds of the
-    *         parent-folder specified by <code>folderId</code></li>
+    *         parent-folder specified by <code>parentId</code></li>
     *         <li>versionable attribute of the object type definition specified
     *         by the <code>cmis:objectTypeId</code> property value is set to
     *         <code>false</code> and a value for the versioningState input
@@ -529,35 +590,38 @@ public abstract class Connection
     *         <li>At least one of the permissions is used in an ACE provided
     *         which is not supported by the storage</li>
     *         </ul>
-    * @throws InvalidArgumentException if object with id <code>folderId</code>
-    *         is not a Folder
     * @throws NameConstraintViolationException violation is detected with the
     *         given <code>cmis:name</code> property value. Storage MAY chose
     *         other name which does not conflict
     * @throws StorageException if new Document can't be saved in storage cause
     *         to storage internal problem
     */
-   public String createDocumentFromSource(String sourceId, String folderId, Map<String, Property<?>> properties,
+   public String createDocumentFromSource(String sourceId, String parentId, Map<String, Property<?>> properties,
       List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<String> policies,
-      VersioningState versioningState) throws ObjectNotFoundException, ConstraintException, InvalidArgumentException,
+      VersioningState versioningState) throws ObjectNotFoundException, ConstraintException,
       NameConstraintViolationException, StorageException
    {
       checkConnection();
 
       ObjectData source = storage.getObjectById(sourceId);
-
-      if (source.getBaseType() != BaseType.DOCUMENT)
+      TypeDefinition typeDefinition = source.getTypeDefinition();
+      if (typeDefinition.getBaseId() != BaseType.DOCUMENT)
       {
          throw new ConstraintException("Source object is not Document.");
       }
 
-      ObjectData folder = null;
-      if (folderId != null)
+      ObjectData parent = null;
+      if (parentId != null)
       {
-         folder = storage.getObjectById(folderId);
-         if (folder.getBaseType() != BaseType.FOLDER)
+         parent = storage.getObjectById(parentId);
+         if (parent.getBaseType() != BaseType.FOLDER)
          {
-            throw new InvalidArgumentException("Object " + folderId + " is not a Folder object.");
+            throw new InvalidArgumentException("Object " + parentId + " is not a Folder object.");
+         }
+         if (!((FolderData)parent).isAllowedChildType(typeDefinition.getId()))
+         {
+            throw new ConstraintException("Object type " + typeDefinition.getId()
+               + " is not allowed as child for destination folder");
          }
       }
       else if (!storage.getRepositoryInfo().getCapabilities().isCapabilityUnfiling())
@@ -565,24 +629,24 @@ public abstract class Connection
          throw new ConstraintException("Unfiling capability is not supported, parent folder must be provided.");
       }
 
-      DocumentData newDocument = storage.copyDocument((DocumentData)source, (FolderData)folder, versioningState);
-
-      if (properties != null)
+      if (versioningState == null)
       {
-         newDocument.setProperties(properties);
+         versioningState = VersioningState.MAJOR;
       }
 
-      if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
-      {
-         applyACL(newDocument, addACL, removeACL);
-      }
+      // XXX : Do not throw ConstraintException if versioning is not supported
+      // and versioning state is othe than NONE. Some client may not specify
+      // this attribute and may not be able create documents. Lets backend storage
+      // to resolve this issue.
 
-      if (policies != null && policies.size() > 0)
-      {
-         applyPolicies(newDocument, policies);
-      }
+      // check inputs
+      checkProperties(typeDefinition, properties, CREATE);
+      checkACL(typeDefinition, addACL, removeACL);
+      checkPolicies(typeDefinition, policies);
 
-      storage.saveObject(newDocument);
+      DocumentData newDocument =
+         storage.copyDocument((DocumentData)source, (FolderData)parent, properties, CmisUtils.mergeACLs(parent != null
+            ? parent.getACL(false) : null, addACL, removeACL), createPolicyList(policies), versioningState);
 
       return newDocument.getObjectId();
    }
@@ -590,21 +654,24 @@ public abstract class Connection
    /**
     * Create a folder object.
     *
-    * @param folderId parent folder id for new folder
-    * @param properties properties that MAY be applied to newly created folder
+    * @param parentId parent folder id for new folder
+    * @param properties properties that will be applied to newly created folder
     * @param addACL Access Control Entries that MUST added for newly created
-    *        Folder, either using the ACL from <code>folderId</code> if
-    *        specified, or being applied if no <code>folderId</code> is
-    *        specified
+    *        Folder, either using the ACL from <code>parentId</code> if
+    *        specified, or being applied if no <code>parentId</code> is
+    *        specified. May be <code>null</code> or empty list
     * @param removeACL set Access Control Entry that MUST be removed from the
     *        newly created folder, either using the ACL from
-    *        <code>folderId</code> if specified, or being ignored if no
-    *        <code>folderId</code> is specified
+    *        <code>parentId</code> if specified, or being ignored if no
+    *        <code>parentId</code> is specified. May be <code>null</code> or
+    *        empty list
     * @param policies list of policy id that MUST be applied to the newly
-    *        created folder
+    *        created folder. May be <code>null</code> or empty collection
     * @return ID of newly created folder
     * @throws ObjectNotFoundException if target folder with specified id
-    *         <code>folderId</code> does not exist
+    *         <code>parentId</code> does not exist
+    * @throws TypeNotFoundException if type specified by property
+    *         <code>cmis:objectTypeId</code> does not exist
     * @throws ConstraintException if any of following condition are met:
     *         <ul>
     *         <li><code>cmis:objectTypeId</code> property value is not an object
@@ -614,7 +681,7 @@ public abstract class Connection
     *         definition in the object type</li>
     *         <li><code>cmis:objectTypeId</code> property value is not in the
     *         list of AllowedChildObjectTypeIds of the parent-folder specified
-    *         by <code>folderId</code></li>
+    *         by <code>parentId</code></li>
     *         <li>controllablePolicy attribute of the object type definition
     *         specified by the <code>cmis:objectTypeId</code> property value is
     *         set to <code>false</code> and at least one policy is provided</li>
@@ -624,62 +691,47 @@ public abstract class Connection
     *         <li>at least one of the permissions is used in an ACE provided
     *         which is not supported by the storage</li>
     *         </ul>
-    * @throws InvalidArgumentException if object with id <code>folderId</code>
-    *         is not a Folder
     * @throws NameConstraintViolationException violation is detected with the
     *         given <code>cmis:name</code> property value. Storage MAY chose
     *         other name which does not conflict.
     * @throws StorageException if new Folder can't be saved in storage cause to
     *         storage internal problem
     */
-   public String createFolder(String folderId, Map<String, Property<?>> properties, List<AccessControlEntry> addACL,
+   public String createFolder(String parentId, Map<String, Property<?>> properties, List<AccessControlEntry> addACL,
       List<AccessControlEntry> removeACL, Collection<String> policies) throws ObjectNotFoundException,
-      ConstraintException, InvalidArgumentException, NameConstraintViolationException, StorageException
+      TypeNotFoundException, ConstraintException, NameConstraintViolationException, StorageException
    {
+      checkConnection();
+
       if (properties == null)
       {
          throw new InvalidArgumentException("Properties may not by null.");
       }
-
-      checkConnection();
-
-      String typeId = null;
-      Property<?> typeProperty = properties.get(CmisConstants.OBJECT_TYPE_ID);
-      if (typeProperty != null && typeProperty.getValues().size() > 0)
-      {
-         typeId = (String)typeProperty.getValues().get(0);
-      }
-      if (typeId == null)
-      {
-         throw new InvalidArgumentException("Type is not specified.");
-      }
-
-      if (folderId == null)
+      if (parentId == null)
       {
          throw new ConstraintException("Parent folder id is not specified.");
       }
 
-      ObjectData folder = storage.getObjectById(folderId);
-      if (folder.getBaseType() != BaseType.FOLDER)
+      String typeId = getTypeId(properties);
+      TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
+
+      ObjectData parent = storage.getObjectById(parentId);
+      if (parent.getBaseType() != BaseType.FOLDER)
       {
-         throw new InvalidArgumentException("Object " + folderId + " is not a Folder object.");
+         throw new InvalidArgumentException("Object " + parentId + " is not a Folder object.");
+      }
+      if (!((FolderData)parent).isAllowedChildType(typeId))
+      {
+         throw new ConstraintException("Object type " + typeId + " is not allowed as child for destination folder");
       }
 
-      ObjectData newFolder = storage.createFolder((FolderData)folder, typeId);
+      checkProperties(typeDefinition, properties, CREATE);
+      checkACL(typeDefinition, addACL, removeACL);
+      checkPolicies(typeDefinition, policies);
 
-      newFolder.setProperties(properties);
-
-      if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
-      {
-         applyACL(newFolder, addACL, removeACL);
-      }
-
-      if (policies != null && policies.size() > 0)
-      {
-         applyPolicies(newFolder, policies);
-      }
-
-      storage.saveObject(newFolder);
+      ObjectData newFolder =
+         storage.createFolder((FolderData)parent, typeDefinition, properties, CmisUtils.mergeACLs(parent.getACL(false),
+            addACL, removeACL), createPolicyList(policies));
 
       return newFolder.getObjectId();
    }
@@ -687,22 +739,25 @@ public abstract class Connection
    /**
     * Create a policy object.
     *
-    * @param folderId parent folder id may be null if policy object type is not
-    *        fileable
+    * @param parentId parent folder id should be <code>null</code> if policy
+    *        object type is not fileable
     * @param properties properties to be applied to newly created Policy
     * @param addACL Access Control Entries that MUST added for newly created
-    *        Policy, either using the ACL from <code>folderId</code> if
-    *        specified, or being applied if no <code>folderId</code> is
-    *        specified
+    *        Policy, either using the ACL from <code>parentId</code> if
+    *        specified, or being applied if no <code>parentId</code> is
+    *        specified. May be <code>null</code> or empty list
     * @param removeACL set Access Control Entry that MUST be removed from the
     *        newly created Policy, either using the ACL from
-    *        <code>folderId</code> if specified, or being ignored if no
-    *        <code>folderId</code> is specified
+    *        <code>parentId</code> if specified, or being ignored if no
+    *        <code>parentId</code> is specified. May be <code>null</code> or
+    *        empty list
     * @param policies list of policy id that MUST be applied to the newly
-    *        created policy
+    *        created policy. May be <code>null</code> or empty collection
     * @return ID of newly created policy
     * @throws ObjectNotFoundException if target folder with specified id
-    *         <code>folderId</code> does not exist
+    *         <code>parentId</code> does not exist
+    * @throws TypeNotFoundException if type specified by property
+    *         <code>cmis:objectTypeId</code> does not exist
     * @throws ConstraintException if any of following condition are met:
     *         <ul>
     *         <li><code>cmis:objectTypeId</code> property value is not an object
@@ -712,7 +767,7 @@ public abstract class Connection
     *         definition in the object type</li>
     *         <li><code>cmis:objectTypeId</code> property value is NOT in the
     *         list of AllowedChildObjectTypeIds of the parent-folder specified
-    *         by folderId</li>
+    *         by parentId</li>
     *         <li>controllablePolicy attribute of the object type definition
     *         specified by the <code>cmis:objectTypeId</code> property value is
     *         set to <code>false</code> and at least one policy is provided</li>
@@ -722,65 +777,51 @@ public abstract class Connection
     *         <li>at least one of the permissions is used in an ACE provided
     *         which is not supported by the storage</li>
     *         </ul>
-    * @throws InvalidArgumentException if object with id <code>folderId</code>
-    *         is not a Folder
     * @throws NameConstraintViolationException violation is detected with the
     *         given <code>cmis:name</code> property value. Storage MAY chose
     *         other name which does not conflict
     * @throws StorageException if new Policy can't be saved in storage cause to
     *         storage internal problem
     */
-   public String createPolicy(String folderId, Map<String, Property<?>> properties, List<AccessControlEntry> addACL,
+   public String createPolicy(String parentId, Map<String, Property<?>> properties, List<AccessControlEntry> addACL,
       List<AccessControlEntry> removeACL, Collection<String> policies) throws ObjectNotFoundException,
-      ConstraintException, InvalidArgumentException, NameConstraintViolationException, StorageException
+      TypeNotFoundException, ConstraintException, NameConstraintViolationException, StorageException
    {
+      checkConnection();
+
       if (properties == null)
       {
          throw new InvalidArgumentException("Properties may not by null.");
       }
 
-      checkConnection();
+      String typeId = getTypeId(properties);
+      TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
 
-      String typeId = null;
-      Property<?> typeProperty = properties.get(CmisConstants.OBJECT_TYPE_ID);
-      if (typeProperty != null && typeProperty.getValues().size() > 0)
+      ObjectData parent = null;
+      if (parentId != null)
       {
-         typeId = (String)typeProperty.getValues().get(0);
-      }
-      if (typeId == null)
-      {
-         throw new InvalidArgumentException("Type is not specified.");
-      }
-
-      ObjectData folder = null;
-      if (folderId != null)
-      {
-         folder = storage.getObjectById(folderId);
-         if (folder.getBaseType() != BaseType.FOLDER)
+         parent = storage.getObjectById(parentId);
+         if (parent.getBaseType() != BaseType.FOLDER)
          {
-            throw new InvalidArgumentException("Object " + folderId + " is not a Folder object.");
+            throw new InvalidArgumentException("Object " + parentId + " is not a Folder object.");
+         }
+         if (!((FolderData)parent).isAllowedChildType(typeId))
+         {
+            throw new ConstraintException("Object type " + typeId + " is not allowed as child for destination folder");
          }
       }
-      else if (!storage.getRepositoryInfo().getCapabilities().isCapabilityUnfiling())
+      else if (typeDefinition.isFileable())
       {
-         throw new ConstraintException("Unfiling capability is not supported, parent folder must be provided.");
+         throw new ConstraintException("Policy type is fileable. Parent folder must be provided.");
       }
 
-      ObjectData newPolicy = storage.createPolicy((FolderData)folder, typeId);
+      checkProperties(typeDefinition, properties, CREATE);
+      checkACL(typeDefinition, addACL, removeACL);
+      checkPolicies(typeDefinition, policies);
 
-      newPolicy.setProperties(properties);
-
-      if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
-      {
-         applyACL(newPolicy, addACL, removeACL);
-      }
-
-      if (policies != null && policies.size() > 0)
-      {
-         applyPolicies(newPolicy, policies);
-      }
-
-      storage.saveObject(newPolicy);
+      ObjectData newPolicy =
+         storage.createPolicy((FolderData)parent, typeDefinition, properties, CmisUtils.mergeACLs(parent != null
+            ? parent.getACL(false) : null, addACL, removeACL), createPolicyList(policies));
 
       return newPolicy.getObjectId();
    }
@@ -790,15 +831,17 @@ public abstract class Connection
     *
     * @param properties properties to be applied to newly created relationship
     * @param addACL set Access Control Entry to be applied for newly created
-    *        relationship
+    *        relationship. May be <code>null</code> or empty list
     * @param removeACL set Access Control Entry that MUST be removed from the
-    *        newly created relationship
+    *        newly created relationship. May be <code>null</code> or empty list
     * @param policies list of policy id that MUST be applied to the newly
-    *        created relationship.
+    *        created relationship. May be <code>null</code> or empty collection
     * @return ID of newly created relationship
     * @throws ObjectNotFoundException if <code>cmis:sourceId</code> or
     *         <code>cmis:targetId</code> property value is id of object that
     *         can't be found in storage
+    * @throws TypeNotFoundException if type specified by property
+    *         <code>cmis:objectTypeId</code> does not exist
     * @throws ConstraintException if any of following condition are met:
     *         <ul>
     *         <li><code>cmis:objectTypeId</code> property value is not an object
@@ -829,66 +872,85 @@ public abstract class Connection
     */
    public String createRelationship(Map<String, Property<?>> properties, List<AccessControlEntry> addACL,
       List<AccessControlEntry> removeACL, Collection<String> policies) throws ObjectNotFoundException,
-      ConstraintException, NameConstraintViolationException, StorageException
+      TypeNotFoundException, ConstraintException, NameConstraintViolationException, StorageException
    {
+      checkConnection();
+
       if (properties == null)
       {
          throw new InvalidArgumentException("Properties may not by null.");
       }
 
-      checkConnection();
+      String typeId = getTypeId(properties);
+      TypeDefinition typeDefinition = getTypeDefinition(typeId, true);
 
-      String typeId = null;
-      Property<?> typeProperty = properties.get(CmisConstants.OBJECT_TYPE_ID);
-      if (typeProperty != null && typeProperty.getValues().size() > 0)
-      {
-         typeId = (String)typeProperty.getValues().get(0);
-      }
-      if (typeId == null)
-      {
-         throw new InvalidArgumentException("Required Type property ('cmis:objectTypeId') is not specified.");
-      }
+      String sourceId = getSourceId(properties);
+      String targetId = getTargetId(properties);
 
-      String sourceId = null;
-      Property<?> sourceProperty = properties.get(CmisConstants.SOURCE_ID);
-      if (sourceProperty != null && sourceProperty.getValues().size() > 0)
+      // check is source and target object types are supported
+      ObjectData source = storage.getObjectById(sourceId);
+      if (typeDefinition.getAllowedSourceTypes() != null
+         && !(Arrays.asList(typeDefinition.getAllowedSourceTypes()).contains(source.getTypeId())))
       {
-         sourceId = (String)sourceProperty.getValues().get(0);
+         throw new ConstraintException("Source object type " + source.getTypeId() + " is not supported.");
       }
-      if (sourceId == null)
+      ObjectData target = storage.getObjectById(targetId);
+      if (typeDefinition.getAllowedTargetTypes() != null
+         && !(Arrays.asList(typeDefinition.getAllowedTargetTypes()).contains(target.getTypeId())))
       {
-         throw new InvalidArgumentException("Required Source Id property ('cmis:sourceId') is not specified.");
+         throw new ConstraintException("Target object type " + target.getTypeId() + " is not supported.");
       }
 
-      String targetId = null;
-      Property<?> targetProperty = properties.get(CmisConstants.TARGET_ID);
-      if (targetProperty != null && targetProperty.getValues().size() > 0)
-      {
-         targetId = (String)targetProperty.getValues().get(0);
-      }
-      if (targetId == null)
-      {
-         throw new InvalidArgumentException("Required Target Id property ('cmis:targetId') is not specified.");
-      }
+      checkProperties(typeDefinition, properties, CREATE);
+      checkACL(typeDefinition, addACL, removeACL);
+      checkPolicies(typeDefinition, policies);
 
       ObjectData newRelationship =
-         storage.createRelationship(storage.getObjectById(sourceId), storage.getObjectById(targetId), typeId);
-
-      newRelationship.setProperties(properties);
-
-      if ((addACL != null && addACL.size() > 0) || (removeACL != null && removeACL.size() > 0))
-      {
-         applyACL(newRelationship, addACL, removeACL);
-      }
-
-      if (policies != null && policies.size() > 0)
-      {
-         applyPolicies(newRelationship, policies);
-      }
-
-      storage.saveObject(newRelationship);
+         storage.createRelationship(source, target, typeDefinition, properties, CmisUtils.mergeACLs(null, addACL,
+            removeACL), createPolicyList(policies));
 
       return newRelationship.getObjectId();
+   }
+
+   private String getTypeId(Map<String, Property<?>> properties)
+   {
+      String typeId = getSingleValue(properties, CmisConstants.OBJECT_TYPE_ID);
+      if (typeId == null)
+      {
+         throw new InvalidArgumentException("Type Id ('cmis:objectTypeId') is not specified.");
+      }
+      return typeId;
+   }
+
+   private String getSourceId(Map<String, Property<?>> properties)
+   {
+      String typeId = getSingleValue(properties, CmisConstants.SOURCE_ID);
+      if (typeId == null)
+      {
+         throw new InvalidArgumentException("Source Id ('cmis:sourceId')  is not specified.");
+      }
+      return typeId;
+   }
+
+   private String getTargetId(Map<String, Property<?>> properties)
+   {
+      String typeId = getSingleValue(properties, CmisConstants.TARGET_ID);
+      if (typeId == null)
+      {
+         throw new InvalidArgumentException("Target Id ('cmis:targetId') is not specified.");
+      }
+      return typeId;
+   }
+
+   private String getSingleValue(Map<String, Property<?>> properties, String name)
+   {
+      String value = null;
+      Property<?> typeProperty = properties.get(name);
+      if (typeProperty != null && typeProperty.getValues().size() > 0)
+      {
+         value = (String)typeProperty.getValues().get(0);
+      }
+      return value;
    }
 
    /**
@@ -903,6 +965,8 @@ public abstract class Connection
     *        content stream <code>changeTokenHolder</code> may contains updated
     *        change token if backend support this feature
     * @return ID of updated object
+    * @throws NullPointerException if <code>changeTokenHolder</code> is
+    *         <code>null</code>
     * @throws ObjectNotFoundException if document with specified id
     *         <code>documentId</code> does not exist
     * @throws ConstraintException if object's type definition
@@ -918,27 +982,39 @@ public abstract class Connection
       throws ObjectNotFoundException, ConstraintException, UpdateConflictException, VersioningException,
       StorageException
    {
+      checkConnection();
+
       if (changeTokenHolder == null)
       {
-         throw new InvalidArgumentException("changeTokenHolder may not by null.");
+         throw new NullPointerException("changeTokenHolder may not by null.");
       }
-
-      checkConnection();
 
       ObjectData document = storage.getObjectById(documentId);
 
       if (document.getBaseType() != BaseType.DOCUMENT)
       {
+         // be sure object is document
          throw new InvalidArgumentException("Object " + documentId + " is not Document.");
+      }
+      if (document.getTypeDefinition().getContentStreamAllowed() == ContentStreamAllowed.REQUIRED)
+      {
+         throw new ConstraintException("Content stream is required for object and may not be removed.");
       }
 
       // Validate change token, object may be already updated.
       validateChangeToken(document, changeTokenHolder.getValue());
 
-      ((DocumentData)document).setContentStream(null);
+      try
+      {
+         ((DocumentData)document).setContentStream(null);
+      }
+      catch (IOException never)
+      {
+         // should never happen because to null content stream
+         throw new CmisRuntimeException("Unable delete document content stream. " + never.getMessage(), never);
+      }
 
-      storage.saveObject(document);
-
+      // Update change token
       String changeToken = document.getChangeToken();
       changeTokenHolder.setValue(changeToken);
 
@@ -957,11 +1033,11 @@ public abstract class Connection
     * @throws ObjectNotFoundException if object with specified id
     *         <code>objectId</code> does not exist
     * @throws ConstraintException if objectId is folder that contains one or
-    *         more children
+    *         more children or is root folder
     * @throws UpdateConflictException if object that is no longer current (as
     *         determined by the storage)
     * @throws VersioningException if object can not be removed cause to
-    *         versioning  conflict
+    *         versioning conflict
     * @throws StorageException if object can not be removed cause to storage
     *         internal problem
     */
@@ -971,6 +1047,19 @@ public abstract class Connection
       checkConnection();
 
       ObjectData object = storage.getObjectById(objectId);
+
+      if (object.getBaseType() == BaseType.FOLDER)
+      {
+         if (((FolderData)object).hasChildren())
+         {
+            throw new ConstraintException("Failed delete object. Object " + objectId
+               + " is Folder and contains one or more objects.");
+         }
+         if (((FolderData)object).isRoot())
+         {
+            throw new ConstraintException("Root folder can't be deleted.");
+         }
+      }
 
       if (deleteAllVersions == null)
       {
@@ -1006,11 +1095,13 @@ public abstract class Connection
     * @return list of id that were not deleted
     * @throws ObjectNotFoundException if folder with specified id
     *         <code>folderId</code> does not exist
-    * @throws UpdateConflictException if object that is no longer current (as
-    *         determined by the storage)
+    * @throws ConstraintException if folder with specified id
+    *         <code>folderId</code> is root folder
+    * @throws UpdateConflictException if some object(s) that is no longer
+    *         current (as determined by the storage)
     */
    public Collection<String> deleteTree(String folderId, Boolean deleteAllVersions, UnfileObject unfileObject,
-      Boolean continueOnFailure) throws ObjectNotFoundException, UpdateConflictException
+      Boolean continueOnFailure) throws ObjectNotFoundException, ConstraintException, UpdateConflictException
    {
       checkConnection();
 
@@ -1020,28 +1111,31 @@ public abstract class Connection
       {
          throw new ConstraintException("Failed delete tree. Object " + folderId + " is not a Folder.");
       }
-
       if (((FolderData)folder).isRoot())
       {
          throw new ConstraintException("Root folder can't be removed.");
       }
 
+      // Default values.
       if (unfileObject == null)
       {
-         unfileObject = UnfileObject.DELETE; // Default value.
+         unfileObject = UnfileObject.DELETE;
       }
-
       if (deleteAllVersions == null)
       {
-         deleteAllVersions = true; // Default value.
+         deleteAllVersions = true;
       }
-
       if (continueOnFailure == null)
       {
          continueOnFailure = false;
       }
 
-      // TODO : Check unfiling capability if 'unfileObject' is other then 'DELETE'
+      // Check unfiling capability if 'unfileObject' is other then 'DELETE'
+      if (unfileObject != UnfileObject.DELETE && !storage.getRepositoryInfo().getCapabilities().isCapabilityUnfiling())
+      {
+         throw new InvalidArgumentException(
+            "Unfiling capability is not supported. Parameter 'unfileObject' may not be other then 'DELETE'.");
+      }
 
       Collection<String> failedDelete =
          storage.deleteTree((FolderData)folder, deleteAllVersions, unfileObject, continueOnFailure);
@@ -1055,7 +1149,7 @@ public abstract class Connection
     * @param objectId identifier of object
     * @param onlyBasicPermissions if <code>true</code> then return only the CMIS
     *        Basic permissions
-    * @return actual ACL or <code>null</code> if no ACL applied to object
+    * @return actual ACL or empty list if no ACL applied to object
     * @throws ObjectNotFoundException if <code>objectId</code> or does not
     *         exists
     */
@@ -1069,9 +1163,7 @@ public abstract class Connection
       }
 
       ObjectData object = storage.getObjectById(objectId);
-
       List<AccessControlEntry> acl = object.getACL(onlyBasicPermissions);
-
       return acl;
    }
 
@@ -1105,7 +1197,8 @@ public abstract class Connection
     *        If empty string or <code>null</code> provided than storage MAY
     *        return storage specific set of properties
     * @return documents in the specified <code>versionSeriesId</code>sorted by
-    *         'cmis:creationDate' descending
+    *         'cmis:creationDate' descending. Even not versionable documents
+    *         must have exactly one document in version series
     * @throws ObjectNotFoundException if object with specified id
     *         <code>versionSeriesId</code> does not exist
     * @throws FilterNotValidException if <code>propertyFilter</code> has invalid
@@ -1118,16 +1211,13 @@ public abstract class Connection
       checkConnection();
 
       Collection<DocumentData> versions = storage.getAllVersions(versionSeriesId);
-
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
-      List<CmisObject> cmisVersions = new ArrayList<CmisObject>();
-
+      List<CmisObject> cmisVersions = new ArrayList<CmisObject>(versions.size());
       for (ObjectData objectData : versions)
       {
          cmisVersions.add(getCmisObject(objectData, includeAllowableActions, IncludeRelationships.NONE, false, false,
-            includeObjectInfo, parsedPropertyFilter, RenditionFilter.NONE));
+            includeObjectInfo, parsedPropertyFilter, RenditionFilter.NONE_FILTER));
       }
-
       return cmisVersions;
    }
 
@@ -1158,14 +1248,14 @@ public abstract class Connection
 
       ObjectData object = storage.getObjectById(objectId);
 
-      PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
       Collection<PolicyData> policies = object.getPolicies();
+      PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
       List<CmisObject> policyIDs = new ArrayList<CmisObject>(policies.size());
       for (ObjectData policy : policies)
       {
          CmisObject cmisPolicy =
             getCmisObject(policy, false, IncludeRelationships.NONE, false, false, includeObjectInfo,
-               parsedPropertyFilter, RenditionFilter.NONE);
+               parsedPropertyFilter, RenditionFilter.NONE_FILTER);
          policyIDs.add(cmisPolicy);
       }
       return policyIDs;
@@ -1244,7 +1334,6 @@ public abstract class Connection
       }
 
       ObjectData folder = null;
-
       if (folderId != null)
       {
          folder = storage.getObjectById(folderId);
@@ -1256,7 +1345,7 @@ public abstract class Connection
          }
       }
 
-      ItemsIterator<DocumentData> iterator = storage.getCheckedOutDocuments(folder, orderBy);
+      ItemsIterator<DocumentData> iterator = storage.getCheckedOutDocuments((FolderData)folder, orderBy);
 
       try
       {
@@ -1267,7 +1356,7 @@ public abstract class Connection
       }
       catch (NoSuchElementException nse)
       {
-         throw new InvalidArgumentException("skipCount parameter is greater then total number of argument");
+         throw new InvalidArgumentException("skipCount parameter is greater then total number of items");
       }
 
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
@@ -1278,7 +1367,6 @@ public abstract class Connection
       }
 
       ItemsList<CmisObject> checkedout = new ItemsList<CmisObject>();
-
       for (int count = 0; iterator.hasNext() && (maxItems < 0 || count < maxItems); count++)
       {
          ObjectData pwcData = iterator.next();
@@ -1292,7 +1380,6 @@ public abstract class Connection
 
       checkedout.setHasMoreItems(iterator.hasNext());
       checkedout.setNumItems(iterator.size()); // ItemsIterator gives -1 if total number is unknown
-
       return checkedout;
    }
 
@@ -1301,7 +1388,7 @@ public abstract class Connection
     *
     * @param folderId folder id
     * @param includeAllowableActions if <code>true</code> then allowable actions
-    *        for each should be included in response
+    *        for each child object should be included in response
     * @param includeRelationships indicates what relationships of object must be
     *        returned
     * @param includePathSegments if <code>true</code> then returns a PathSegment
@@ -1376,6 +1463,7 @@ public abstract class Connection
 
       /* TODO : orderBy in some more usable form */
       ItemsIterator<ObjectData> iterator = ((FolderData)folder).getChildren(orderBy);
+
       try
       {
          if (skipCount > 0)
@@ -1385,7 +1473,7 @@ public abstract class Connection
       }
       catch (NoSuchElementException nse)
       {
-         throw new InvalidArgumentException("'skipCount' parameter is greater then total number of argument");
+         throw new InvalidArgumentException("'skipCount' parameter is greater then total number of items");
       }
 
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
@@ -1410,7 +1498,6 @@ public abstract class Connection
       // Indicate that we have some more results.
       cmisChildren.setHasMoreItems(iterator.hasNext());
       cmisChildren.setNumItems(iterator.size()); // ItemsIterator gives -1 if total number is unknown.
-
       return cmisChildren;
    }
 
@@ -1458,7 +1545,7 @@ public abstract class Connection
       String propertyFilter, boolean includePolicyIDs, boolean includeAcl, boolean includeObjectInfo, int maxItems)
       throws ConstraintException, FilterNotValidException
    {
-      // TODO : implement
+      // lets storage implementor override this method
       throw new NotSupportedException("Changes log feature is not supported.");
    }
 
@@ -1470,44 +1557,45 @@ public abstract class Connection
     *        rendition stream. For Documents, if not provided then this method
     *        returns the content stream. For Folders (if Folders supports
     *        renditions) this parameter must be provided
-    * @param offset first byte of the content to retrieve
-    * @param length get exactly number of bytes from content stream
-    * @return object content or <code>null</code> if object has not content
-    *         stream
+    * @return object's content stream or throws {@link ConstraintException} if
+    *         object has not content stream. Never return null
     * @throws ObjectNotFoundException if object with specified id
     *         <code>objectId</code> does not exist
     * @throws ConstraintException if the object specified by objectId does NOT
     *         have a content stream or rendition stream
-    * @throws IOException if an I/O error occurs
     */
-   public ContentStream getContentStream(String objectId, String streamId, long offset, long length)
-      throws ObjectNotFoundException, ConstraintException, IOException
+   public ContentStream getContentStream(String objectId, String streamId) throws ObjectNotFoundException,
+      ConstraintException
    {
       checkConnection();
 
       ObjectData object = storage.getObjectById(objectId);
       ContentStream contentStream = null;
-
-      if (streamId != null)
+      try
       {
-         contentStream = object.getContentStream(streamId);
+         if (streamId != null)
+         {
+            contentStream = object.getContentStream(streamId);
+         }
+         else if (object.getBaseType() == BaseType.DOCUMENT)
+         {
+            contentStream = ((DocumentData)object).getContentStream();
+         }
       }
-      else
+      catch (IOException ioe)
       {
-         contentStream = ((DocumentData)object).getContentStream();
+         throw new CmisRuntimeException("Unable get content stream. " + ioe.getMessage(), ioe);
       }
-
       if (contentStream == null)
       {
          throw new ConstraintException("Object does not have content stream.");
       }
-
       return contentStream;
    }
 
    /**
     * Get the collection of descendant objects contained in the specified folder
-    * and any of its child-folders.
+    * and any (according to <code>depth</code>) of its child-folders.
     *
     * @param folderId folder id
     * @param depth depth for discover descendants if -1 then discovery
@@ -1556,7 +1644,7 @@ public abstract class Connection
     * @throws ObjectNotFoundException if object with <code>folderId</code> was
     *         not found
     * @throws InvalidArgumentException if object with id <code>folderId</code>
-    *         is not a Folder
+    *         is not a Folder or if <code>depth != -1 && !(depth >= 1)</code>
     * @throws FilterNotValidException if <code>propertyFilter</code> has invalid
     *         syntax or contains at least one property name that is not in
     *         object's property definition or <code>renditionFilter</code> has
@@ -1564,18 +1652,15 @@ public abstract class Connection
     */
    public List<ItemsTree<CmisObject>> getDescendants(String folderId, int depth, boolean includeAllowableActions,
       IncludeRelationships includeRelationships, boolean includePathSegments, boolean includeObjectInfo,
-      String propertyFilter, String renditionFilter) throws ObjectNotFoundException, InvalidArgumentException,
-      FilterNotValidException
+      String propertyFilter, String renditionFilter) throws ObjectNotFoundException, FilterNotValidException
    {
+      checkConnection();
       if (depth != -1 && !(depth >= 1))
       {
          throw new InvalidArgumentException("Invalid depth parameter. Must be 1 or greater then 1 or -1 but " + depth
             + " specified.");
       }
-
-      checkConnection();
-
-      return getTree(folderId, depth, null, includeAllowableActions, includeRelationships, includePathSegments,
+      return getObjectTree(folderId, depth, null, includeAllowableActions, includeRelationships, includePathSegments,
          includeObjectInfo, propertyFilter, renditionFilter);
    }
 
@@ -1602,7 +1687,7 @@ public abstract class Connection
     *         object's property definition
     */
    public CmisObject getFolderParent(String folderId, boolean includeObjectInfo, String propertyFilter)
-      throws ObjectNotFoundException, InvalidArgumentException, FilterNotValidException
+      throws ObjectNotFoundException, FilterNotValidException
    {
       checkConnection();
 
@@ -1611,26 +1696,35 @@ public abstract class Connection
       {
          throw new InvalidArgumentException("Object " + folderId + " is not a Folder.");
       }
-
       if (((FolderData)folder).isRoot())
       {
          throw new InvalidArgumentException("Can't get parent of root folder.");
       }
 
-      ObjectData parent = folder.getParent();
+      FolderData parent = null;
+      try
+      {
+         parent = folder.getParent();
+      }
+      catch (ConstraintException never)
+      {
+         // Should never happen because we already determined object is folder
+         // and it is not root folder so MUST have exactly one parent
+         throw new CmisRuntimeException(never.getMessage());
+      }
 
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
 
       CmisObject cmisParent =
          getCmisObject(parent, false, IncludeRelationships.NONE, false, false, includeObjectInfo, parsedPropertyFilter,
-            RenditionFilter.NONE);
+            RenditionFilter.NONE_FILTER);
 
       return cmisParent;
    }
 
    /**
     * Get the collection of descendant folder objects contained in the specified
-    * folder and any of its child-folders.
+    * folder and any (according to <code>depth</code>) of its child-folders.
     *
     * @param folderId folder id
     * @param depth depth for discover descendants if -1 then discovery
@@ -1679,7 +1773,7 @@ public abstract class Connection
     * @throws ObjectNotFoundException if object with <code>folderId</code> was
     *         not found
     * @throws InvalidArgumentException if object with id <code>folderId</code>
-    *         is not a Folder
+    *         is not a Folder or if <code>depth != -1 && !(depth >= 1)</code>
     * @throws FilterNotValidException if <code>propertyFilter</code> has invalid
     *         syntax or contains at least one property name that is not in
     *         object's property definition or <code>renditionFilter</code> has
@@ -1687,18 +1781,15 @@ public abstract class Connection
     */
    public List<ItemsTree<CmisObject>> getFolderTree(String folderId, int depth, boolean includeAllowableActions,
       IncludeRelationships includeRelationships, boolean includePathSegments, boolean includeObjectInfo,
-      String propertyFilter, String renditionFilter) throws ObjectNotFoundException, InvalidArgumentException,
-      FilterNotValidException
+      String propertyFilter, String renditionFilter) throws ObjectNotFoundException, FilterNotValidException
    {
+      checkConnection();
       if (depth != -1 && !(depth >= 1))
       {
          throw new InvalidArgumentException("Invalid depth parameter. Must be 1 or greater then 1 or -1 but " + depth
             + " specified.");
       }
-
-      checkConnection();
-
-      return getTree(folderId, depth, BaseType.FOLDER, includeAllowableActions, includeRelationships,
+      return getObjectTree(folderId, depth, BaseType.FOLDER, includeAllowableActions, includeRelationships,
          includePathSegments, includeObjectInfo, propertyFilter, renditionFilter);
    }
 
@@ -1901,9 +1992,9 @@ public abstract class Connection
     *        </ul>
     * @return object of latest version in version series
     * @throws ObjectNotFoundException if Version Series with id
-    *         <code>versionSeriesId</code> does not exist or the input
-    *         parameter <code>major</code> is <code>true</code> and the Version
-    *         Series contains no major versions.
+    *         <code>versionSeriesId</code> does not exist or the input parameter
+    *         <code>major</code> is <code>true</code> and the Version Series
+    *         contains no major versions.
     * @throws FilterNotValidException if <code>propertyFilter</code> has invalid
     *         syntax or contains at least one property name that is not in
     *         object's property definition or <code>renditionFilter</code> has
@@ -2022,11 +2113,11 @@ public abstract class Connection
 
       ObjectData object = storage.getObjectById(objectId);
 
-      String typeId = object.getTypeId();
-      TypeDefinition typeDefinition = getTypeDefinition(typeId, false);
+      TypeDefinition typeDefinition = object.getTypeDefinition();
+
       if (!typeDefinition.isFileable())
       {
-         throw new ConstraintException("Can't get parents. Object " + objectId + " has type " + typeId
+         throw new ConstraintException("Can't get parents. Object " + objectId + " has type " + object.getTypeId()
             + " that is not fileable");
       }
 
@@ -2046,12 +2137,9 @@ public abstract class Connection
          CmisObject cmisParent =
             getCmisObject(parent, includeAllowableActions, includeRelationships, false, false, includeObjectInfo,
                parsedPropertyFilter, parsedRenditionFilter);
-
          ObjectParent parentType = new ObjectParent(cmisParent, includeRelativePathSegment ? object.getName() : null);
-
          cmisParents.add(parentType);
       }
-
       return cmisParents;
    }
 
@@ -2078,13 +2166,16 @@ public abstract class Connection
     * @return object's relationships
     * @throws ObjectNotFoundException if object with <code>objectId</code> does
     *         not exist
+    * @throws TypeNotFoundException if <code>typeId != null</code> and type
+    *         <code>typeId</code> does not exist
     * @throws FilterNotValidException if <code>propertyFilter</code> has invalid
     *         syntax or contains at least one property name that is not in
     *         object's property definition
     */
    public ItemsList<CmisObject> getObjectRelationships(String objectId, RelationshipDirection direction, String typeId,
       boolean includeSubRelationshipTypes, boolean includeAllowableActions, boolean includeObjectInfo,
-      String propertyFilter, int maxItems, int skipCount) throws FilterNotValidException, ObjectNotFoundException
+      String propertyFilter, int maxItems, int skipCount) throws FilterNotValidException, ObjectNotFoundException,
+      TypeNotFoundException
    {
       checkConnection();
 
@@ -2118,7 +2209,7 @@ public abstract class Connection
       }
       catch (NoSuchElementException nse)
       {
-         throw new InvalidArgumentException("skipCount parameter is greater then total number of argument");
+         throw new InvalidArgumentException("skipCount parameter is greater then total number of items");
       }
 
       PropertyFilter parsedPropertyFilter = new PropertyFilter(propertyFilter);
@@ -2127,11 +2218,9 @@ public abstract class Connection
       for (int count = 0; iterator.hasNext() && (maxItems < 0 || count < maxItems); count++)
       {
          ObjectData rel = iterator.next();
-
          CmisObject cmis =
             getCmisObject(rel, includeAllowableActions, null, false, false, includeObjectInfo, parsedPropertyFilter,
-               RenditionFilter.NONE);
-
+               RenditionFilter.NONE_FILTER);
          relationships.getItems().add(cmis);
       }
 
@@ -2171,7 +2260,7 @@ public abstract class Connection
 
       CmisObject cmis =
          getCmisObject(object, false, IncludeRelationships.NONE, false, false, includeObjectInfo, parsedPropertyFilter,
-            RenditionFilter.NONE);
+            RenditionFilter.NONE_FILTER);
 
       return cmis;
    }
@@ -2197,9 +2286,9 @@ public abstract class Connection
     * @return CMIS object that contains properties of latest version of object
     *         in version series
     * @throws ObjectNotFoundException if Version Series with id
-    *         <code>versionSeriesId</code> does not exist or the input
-    *         parameter <code>major</code> is <code>true</code> and the Version
-    *         Series contains no major versions.
+    *         <code>versionSeriesId</code> does not exist or the input parameter
+    *         <code>major</code> is <code>true</code> and the Version Series
+    *         contains no major versions.
     * @throws FilterNotValidException if <code>propertyFilter</code> has invalid
     *         syntax or contains at least one property name that is not in
     *         object's property definition
@@ -2208,7 +2297,7 @@ public abstract class Connection
       String propertyFilter) throws FilterNotValidException, ObjectNotFoundException
    {
       return getObjectOfLatestVersion(versionSeriesId, major, false, null, false, false, includeObjectInfo,
-         propertyFilter, RenditionFilter.NONE_FILTER);
+         propertyFilter, RenditionFilter.NONE);
    }
 
    /**
@@ -2255,20 +2344,18 @@ public abstract class Connection
    {
       checkConnection();
 
-      if (storage.getRepositoryInfo().getCapabilities().getCapabilityRenditions() == CapabilityRendition.NONE)
-      {
-         throw new NotSupportedException("Renditions is not supported.");
-      }
-
       if (skipCount < 0)
       {
          throw new InvalidArgumentException("skipCount parameter is negative.");
       }
 
+      if (storage.getRepositoryInfo().getCapabilities().getCapabilityRenditions() == CapabilityRendition.NONE)
+      {
+         throw new NotSupportedException("Renditions is not supported.");
+      }
+
       ObjectData objectData = storage.getObjectById(objectId);
-
       ItemsIterator<Rendition> iterator = storage.getRenditions(objectData);
-
       try
       {
          if (skipCount > 0)
@@ -2278,7 +2365,7 @@ public abstract class Connection
       }
       catch (NoSuchElementException nse)
       {
-         throw new InvalidArgumentException("'skipCount' parameter is greater then total number of argument");
+         throw new InvalidArgumentException("skipCount parameter is greater then total number of items");
       }
 
       List<Rendition> renditions = new ArrayList<Rendition>();
@@ -2340,7 +2427,7 @@ public abstract class Connection
       }
       catch (NoSuchElementException nse)
       {
-         throw new InvalidArgumentException("skipCount parameter is greater then total number of argument");
+         throw new InvalidArgumentException("skipCount parameter is greater then total number of items");
       }
 
       ItemsList<TypeDefinition> typeChildren = new ItemsList<TypeDefinition>();
@@ -2383,7 +2470,6 @@ public abstract class Connection
       throws TypeNotFoundException
    {
       checkConnection();
-
       return storage.getTypeDefinition(typeId, includePropertyDefinition);
    }
 
@@ -2398,18 +2484,18 @@ public abstract class Connection
     *        included false otherwise
     * @return list of descendant types
     * @throws TypeNotFoundException if type <code>typeId</code> does not exist
+    * @throws InvalidArgumentException if
+    *         <code>depth != -1 && !(depth >= 1)</code>
     */
    public List<ItemsTree<TypeDefinition>> getTypeDescendants(String typeId, int depth, boolean includePropertyDefinition)
       throws TypeNotFoundException
    {
+      checkConnection();
       if (depth != -1 && !(depth >= 1))
       {
          throw new InvalidArgumentException("Invalid depth parameter. Must be 1 or greater then 1 or -1 but " + depth
             + " specified.");
       }
-
-      checkConnection();
-
       return getTypeTree(typeId, depth, includePropertyDefinition);
    }
 
@@ -2426,6 +2512,8 @@ public abstract class Connection
     * @throws ConstraintException if type of the given object is NOT in the list
     *         of AllowedChildObjectTypeIds of the parent-folder specified by
     *         <code>targetFolderId</code>
+    * @throws NameConstraintViolationException violation is detected with the
+    *         given <code>cmis:name</code> property value in destination folder
     * @throws InvalidArgumentException if the service is invoked with a missing
     *         <code>sourceFolderId</code> or the <code>sourceFolderId</code>
     *         doesn't match the specified object's parent folder (or one of the
@@ -2438,7 +2526,7 @@ public abstract class Connection
     *         to storage internal problem
     */
    public String moveObject(String objectId, String targetFolderId, String sourceFolderId)
-      throws ObjectNotFoundException, ConstraintException, InvalidArgumentException, UpdateConflictException,
+      throws ObjectNotFoundException, NameConstraintViolationException, ConstraintException, UpdateConflictException,
       VersioningException, StorageException
    {
       checkConnection();
@@ -2450,20 +2538,15 @@ public abstract class Connection
       {
          throw new InvalidArgumentException("Object " + targetFolderId + " is not a Folder object.");
       }
-
-      ObjectData source = null;
-      try
+      if (!((FolderData)target).isAllowedChildType(object.getTypeId()))
       {
-         source = storage.getObjectById(sourceFolderId);
-      }
-      catch (ObjectNotFoundException e)
-      {
-         throw new InvalidArgumentException("Object '" + sourceFolderId + "' does not exist.");
+         throw new ConstraintException("Object with type " + object.getTypeId()
+            + " is not allowed as child object fro target folder.");
       }
 
-      if (source.getBaseType() != BaseType.FOLDER)
+      if (sourceFolderId == null)
       {
-         throw new InvalidArgumentException("Object " + sourceFolderId + " is not a Folder object.");
+         throw new InvalidArgumentException("sourceFolderId parameter may not be null");
       }
 
       boolean found = false;
@@ -2472,12 +2555,19 @@ public abstract class Connection
          if (one.getObjectId().equals(sourceFolderId))
          {
             found = true;
+            break;
          }
       }
       if (!found)
       {
          throw new InvalidArgumentException("Specified source folder " + sourceFolderId + " is not a parent of "
             + objectId);
+      }
+
+      ObjectData source = storage.getObjectById(sourceFolderId);
+      if (source.getBaseType() != BaseType.FOLDER)
+      {
+         throw new InvalidArgumentException("Object " + sourceFolderId + " is not a Folder object.");
       }
 
       ObjectData movedObject = storage.moveObject(object, (FolderData)target, (FolderData)source);
@@ -2547,7 +2637,6 @@ public abstract class Connection
       }
 
       ItemsIterator<Result> iterator = storage.query(new Query(statement, searchAllVersions));
-
       try
       {
          if (skipCount > 0)
@@ -2557,8 +2646,7 @@ public abstract class Connection
       }
       catch (NoSuchElementException nse)
       {
-         String msg = "skipCount parameter is greater then total number of argument";
-         throw new InvalidArgumentException(msg);
+         throw new InvalidArgumentException("skipCount parameter is greater then total number of items");
       }
 
       if (includeRelationships == null)
@@ -2593,6 +2681,7 @@ public abstract class Connection
          }
          catch (ObjectNotFoundException e)
          {
+            // If object was removed but found in index
             LOG.warn("Object " + result.getObjectId() + " was removed.");
          }
 
@@ -2605,8 +2694,8 @@ public abstract class Connection
          {
             String scoreColumnName = score.getScoreColumnName();
             DecimalProperty scoreProperty =
-               new DecimalProperty(scoreColumnName, scoreColumnName, scoreColumnName, scoreColumnName, Collections
-                  .singletonList(score.getScoreValue()));
+               new DecimalProperty(scoreColumnName, scoreColumnName, scoreColumnName, scoreColumnName, score
+                  .getScoreValue());
             object.getProperties().put(scoreColumnName, scoreProperty);
          }
          list.getItems().add(object);
@@ -2615,7 +2704,6 @@ public abstract class Connection
       // Indicate that we have some more results.
       list.setHasMoreItems(iterator.hasNext());
       list.setNumItems(iterator.size()); // ItemsIterator gives -1 if total number is unknown
-
       return list;
    }
 
@@ -2628,6 +2716,11 @@ public abstract class Connection
     *        currently filed
     * @throws ObjectNotFoundException if <code>objectId</code> or
     *         <code>folderId</code> were not found
+    * @throws InvalidArgumentException if object <code>objectId</code> is not
+    *         fileable or is folder or if object <code>folderId</code> is not a
+    *         folder
+    * @throws NotSupportedException if unfiling capability is not supported by
+    *         backend storage
     */
    public void removeObjectFromFolder(String objectId, String folderId) throws ObjectNotFoundException
    {
@@ -2639,6 +2732,11 @@ public abstract class Connection
       }
 
       ObjectData object = storage.getObjectById(objectId);
+      if (!object.getTypeDefinition().isFileable() || object.getBaseType() == BaseType.FOLDER)
+      {
+         throw new InvalidArgumentException("Object " + objectId + " is not fileable or folder. Can't be unfiled.");
+      }
+
       if (folderId != null)
       {
          ObjectData folder = storage.getObjectById(folderId);
@@ -2666,22 +2764,26 @@ public abstract class Connection
     *         not exist
     * @throws ConstraintException if object with id <code>objectId</code> is not
     *         controllable by policy
+    * @throws InvalidArgumentException if object with <code>policyId</code> is
+    *         not object whose base type is Policy
     */
    public void removePolicy(String policyId, String objectId) throws ConstraintException, ObjectNotFoundException
    {
       checkConnection();
 
       ObjectData object = storage.getObjectById(objectId);
-      ObjectData policyData = storage.getObjectById(policyId);
+      if (!object.getTypeDefinition().isControllablePolicy())
+      {
+         throw new ConstraintException("Object is not controllable by policy.");
+      }
 
+      ObjectData policyData = storage.getObjectById(policyId);
       if (policyData.getBaseType() != BaseType.POLICY)
       {
          throw new InvalidArgumentException("Object " + policyId + " is not a Policy object.");
       }
 
       object.removePolicy((PolicyData)policyData);
-
-      storage.saveObject(object);
    }
 
    /**
@@ -2698,7 +2800,6 @@ public abstract class Connection
    public void removeType(String typeId) throws TypeNotFoundException, ConstraintException, StorageException
    {
       checkConnection();
-
       storage.removeType(typeId);
    }
 
@@ -2721,9 +2822,17 @@ public abstract class Connection
     * @return ID of updated object
     * @throws ObjectNotFoundException if document with specified id
     *         <code>documentId</code> does not exist
+    * @throws NullPointerException if <code>changeTokenHolder</code> is
+    *         <code>null</code>
     * @throws ContentAlreadyExistsException if the input parameter
     *         <code>overwriteFlag</code> is <code>false</code> and the Object
     *         already has a content-stream
+    * @throws ConstraintException if document type definition attribute
+    *         {@link TypeDefinition#getContentStreamAllowed()} is 'notallowed'
+    *         and specified <code>contentStream</code> is other then
+    *         <code>null</code> or if
+    *         {@link TypeDefinition#getContentStreamAllowed()} attribute is
+    *         'required' and <code>contentStream</code> is <code>null</code>
     * @throws StreamNotSupportedException will be thrown if the
     *         contentStreamAllowed attribute of the object type definition
     *         specified by the <code>cmis:objectTypeId</code> property value of
@@ -2732,21 +2841,19 @@ public abstract class Connection
     *         current. Storage determine this by using change token
     * @throws VersioningException if object is a non-current (latest) document
     *         version and updatiing other then latest version is not supported
-    * @throws IOException if any i/o error occurs when try to set document's
-    *         content stream
     * @throws StorageException if object's content stream can not be updated
     *         (save changes) cause to storage internal problem
     */
    public String setContentStream(String documentId, ContentStream content, ChangeTokenHolder changeTokenHolder,
-      boolean overwriteFlag) throws ObjectNotFoundException, ContentAlreadyExistsException,
-      StreamNotSupportedException, UpdateConflictException, VersioningException, IOException, StorageException
+      Boolean overwriteFlag) throws ObjectNotFoundException, ContentAlreadyExistsException, ConstraintException,
+      StreamNotSupportedException, UpdateConflictException, VersioningException, StorageException
    {
+      checkConnection();
+
       if (changeTokenHolder == null)
       {
-         throw new InvalidArgumentException("changeTokenHolder may not by null.");
+         throw new NullPointerException("changeTokenHolder may not by null.");
       }
-
-      checkConnection();
 
       ObjectData document = storage.getObjectById(documentId);
 
@@ -2755,6 +2862,12 @@ public abstract class Connection
          throw new InvalidArgumentException("Object " + documentId + " is not Document.");
       }
 
+      checkContent(document.getTypeDefinition(), content);
+
+      if (overwriteFlag == null)
+      {
+         overwriteFlag = true; // Default
+      }
       if (!overwriteFlag && ((DocumentData)document).hasContent())
       {
          throw new ContentAlreadyExistsException("Document already has content stream and 'overwriteFlag' is false.");
@@ -2763,9 +2876,14 @@ public abstract class Connection
       // Validate change token, object may be already updated.
       validateChangeToken(document, changeTokenHolder.getValue());
 
-      ((DocumentData)document).setContentStream(content);
-
-      storage.saveObject(document);
+      try
+      {
+         ((DocumentData)document).setContentStream(content);
+      }
+      catch (IOException ioe)
+      {
+         throw new CmisRuntimeException("Unable set document content stream. " + ioe.getMessage(), ioe);
+      }
 
       String changeToken = document.getChangeToken();
       changeTokenHolder.setValue(changeToken);
@@ -2810,26 +2928,24 @@ public abstract class Connection
       Map<String, Property<?>> properties) throws ObjectNotFoundException, ConstraintException,
       NameConstraintViolationException, UpdateConflictException, VersioningException, StorageException
    {
+      checkConnection();
+
       if (properties == null)
       {
          throw new InvalidArgumentException("Properties may not by null.");
       }
-
       if (changeTokenHolder == null)
       {
-         throw new InvalidArgumentException("changeTokenHolder may not by null.");
+         throw new NullPointerException("changeTokenHolder may not by null.");
       }
-
-      checkConnection();
 
       ObjectData object = storage.getObjectById(objectId);
 
       // Validate change token, object may be already updated.
       validateChangeToken(object, changeTokenHolder.getValue());
+      checkProperties(object.getTypeDefinition(), properties, UPDATE);
 
       object.setProperties(properties);
-
-      storage.saveObject(object);
 
       String changeToken = object.getChangeToken();
       changeTokenHolder.setValue(changeToken);
@@ -2837,58 +2953,7 @@ public abstract class Connection
       return object.getObjectId();
    }
 
-   /**
-    * Apply ACLs to specified object.
-    *
-    * @param object object
-    * @param addACL ACL to be added
-    * @param removeACL ACL to be removed
-    */
-   private void applyACL(ObjectData object, List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL)
-   {
-      CapabilityACL capabilityACL = storage.getRepositoryInfo().getCapabilities().getCapabilityACL();
-
-      if (capabilityACL == CapabilityACL.NONE)
-      {
-         throw new NotSupportedException("ACL capability is not supported.");
-      }
-      else if (capabilityACL == CapabilityACL.DISCOVER)
-      {
-         throw new NotSupportedException("ACL can be discovered but not managed via CMIS services.");
-      }
-
-      TypeDefinition typeDefinition = object.getTypeDefinition();
-      if (!typeDefinition.isControllableACL())
-      {
-         throw new ConstraintException("Type " + typeDefinition.getId() + " is not controllable by ACL.");
-      }
-
-      // Merge ACL include existed one. It may be inherited from parent even for newly created object .
-      List<AccessControlEntry> mergedACL = CmisUtils.mergeACLs(object.getACL(false), addACL, removeACL);
-
-      object.setACL(mergedACL);
-   }
-
-   private void applyPolicies(ObjectData object, Collection<String> policies)
-   {
-      TypeDefinition typeDefinition = object.getTypeDefinition();
-      if (!typeDefinition.isControllablePolicy())
-      {
-         throw new ConstraintException("Type " + typeDefinition.getId() + " is not controllable by Policy.");
-      }
-
-      for (String policyID : policies)
-      {
-         ObjectData policy = storage.getObjectById(policyID);
-         if (policy.getBaseType() != BaseType.POLICY)
-         {
-            throw new InvalidArgumentException("Object " + policyID + " is not a Policy object.");
-         }
-         object.applyPolicy((PolicyData)policy);
-      }
-   }
-
-   private List<ItemsTree<CmisObject>> getTree(String folderId, int depth, BaseType typeFilter,
+   private List<ItemsTree<CmisObject>> getObjectTree(String folderId, int depth, BaseType typeFilter,
       boolean includeAllowableActions, IncludeRelationships includeRelationships, boolean includePathSegments,
       boolean includeObjectInfo, String propertyFilter, String renditionFilter) throws ObjectNotFoundException,
       InvalidArgumentException, FilterNotValidException
@@ -2919,8 +2984,9 @@ public abstract class Connection
 
          List<ItemsTree<CmisObject>> subTree =
             (child.getBaseType() == BaseType.FOLDER && (depth > 1 || depth == -1)) //
-               ? getTree(child.getObjectId(), depth != -1 ? depth - 1 : depth, typeFilter, includeAllowableActions,
-                  includeRelationships, includePathSegments, includeObjectInfo, propertyFilter, renditionFilter) //
+               ? getObjectTree(child.getObjectId(), depth != -1 ? depth - 1 : depth, typeFilter,
+                  includeAllowableActions, includeRelationships, includePathSegments, includeObjectInfo,
+                  propertyFilter, renditionFilter) //
                : null;
 
          tree.add(new ItemsTree<CmisObject>(container, subTree));
@@ -2997,8 +3063,8 @@ public abstract class Connection
             {
                RelationshipData next = iter.next();
                cmis.getRelationship().add(
-                  getCmisObject(next, false, includeRelationships, false, false, includeObjectInfo, PropertyFilter.ALL,
-                     RenditionFilter.NONE));
+                  getCmisObject(next, false, includeRelationships, false, false, includeObjectInfo,
+                     PropertyFilter.ALL_FILTER, RenditionFilter.NONE_FILTER));
             }
          }
       }
@@ -3046,7 +3112,17 @@ public abstract class Connection
          objectInfo.setChangeToken(object.getChangeToken());
          if (baseType == BaseType.FOLDER)
          {
-            objectInfo.setParentId(((FolderData)object).isRoot() ? null : object.getParent().getObjectId());
+            try
+            {
+               objectInfo.setParentId(((FolderData)object).isRoot() ? null : object.getParent().getObjectId());
+            }
+            catch (ConstraintException never)
+            {
+               // object.getParent() expression should never throw
+               // ConstraintException becuase we already checked object is folder,
+               // not root folder so it has exactly one parent
+               throw new CmisRuntimeException(never.getMessage());
+            }
          }
          else if (baseType == BaseType.DOCUMENT)
          {
@@ -3058,7 +3134,7 @@ public abstract class Connection
             objectInfo.setVersionSeriesCheckedOutId(doc.getVersionSeriesCheckedOutId());
             objectInfo.setVersionSeriesCheckedOutBy(doc.getVersionSeriesCheckedOutBy());
             objectInfo.setVersionLabel(doc.getVersionLabel());
-            objectInfo.setContentStreamMimeType(doc.getContentStreamMimeType());;
+            objectInfo.setContentStreamMimeType(doc.getContentStreamMimeType());
          }
          else if (baseType == BaseType.RELATIONSHIP)
          {
@@ -3072,6 +3148,181 @@ public abstract class Connection
       return cmis;
    }
 
+   //   private void checkInputs(TypeDefinition typeDefinition, Map<String, Property<?>> properties, ContentStream content,
+   //      List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<String> policies) throws
+   //      ConstraintException, StreamNotSupportedException
+   //   {
+   //      checkContent(typeDefinition, content);
+   //      checkProperties(typeDefinition, properties);
+   //      checkACL(typeDefinition, addACL, removeACL);
+   //      checkPolicies(typeDefinition, policies);
+   //   }
+
+   private void checkContent(TypeDefinition typeDefinition, ContentStream content) throws ConstraintException,
+      StreamNotSupportedException
+   {
+      if (typeDefinition.getBaseId() == BaseType.DOCUMENT)
+      {
+         if (typeDefinition.getContentStreamAllowed() == ContentStreamAllowed.REQUIRED && content == null)
+         {
+            throw new ConstraintException("Content stream required for object of type " + typeDefinition.getId()
+               + ", it can't be null.");
+         }
+         if (typeDefinition.getContentStreamAllowed() == ContentStreamAllowed.NOT_ALLOWED && content != null)
+         {
+            throw new StreamNotSupportedException("Content stream not allowed for object of type "
+               + typeDefinition.getId());
+         }
+      }
+      else if (content != null)
+      {
+         throw new ConstraintException("Object type " + typeDefinition.getId() + " may not have content stream.");
+      }
+   }
+
+   private void checkProperties(TypeDefinition typeDefinition, Map<String, Property<?>> properties, int operation)
+      throws ConstraintException
+   {
+      // NOTE do not check is property updatable. Lets storage to do it.
+      // Some client may sent whole set of properties but storage should
+      // modify only read-write properties and ignore others.
+      for (PropertyDefinition<?> definition : typeDefinition.getPropertyDefinitions())
+      {
+         Property<?> property = null;
+         if (properties != null && properties.size() != 0)
+         {
+            property = properties.get(definition.getId());
+         }
+         if (definition.isRequired() && (3 & operation) > 0 && (property == null || property.getValues().size() == 0))
+         {
+            throw new ConstraintException("Required property " + definition.getId() + " can't be not set.");
+         }
+         else if (property != null)
+         {
+            if (property.getType() != definition.getPropertyType())
+            {
+               throw new ConstraintException("Property type is not match. Property id " + property.getId());
+            }
+            if (!definition.isMultivalued() && property.getValues().size() > 1)
+            {
+               throw new ConstraintException("Property " + property.getId() + " is not multi-valued.");
+            }
+         }
+         // TODO : validate min/max/length etc.
+      }
+      //      if (properties != null && properties.size() != 0)
+      //      {
+      //         for (Property<?> property : properties.values())
+      //         {
+      //            PropertyDefinition<?> definition = typeDefinition.getPropertyDefinition(property.getId());
+      //            if (definition == null)
+      //            {
+      //               throw new ConstraintException("Property " + property.getId()
+      //                  + " is not in property definitions list of type " + typeDefinition.getId());
+      //            }
+      //            if (property.getType() != definition.getPropertyType())
+      //            {
+      //               throw new ConstraintException("Property type is not match. Property id " + property.getId());
+      //            }
+      //            if (!definition.isMultivalued() && property.getValues().size() > 1)
+      //            {
+      //               throw new ConstraintException("Property " + property.getId() + " is not multi-valued.");
+      //            }
+      //            if (definition.isRequired() && property.getValues().size() == 0)
+      //            {
+      //               throw new ConstraintException("Required property " + property.getId() + " can't be not set.");
+      //            }
+      //         }
+      //      }
+   }
+
+   private void checkACL(TypeDefinition typeDefinition, List<AccessControlEntry> addACL,
+      List<AccessControlEntry> removeACL) throws ConstraintException
+   {
+      if ((addACL != null && addACL.size() != 0) || (removeACL != null && removeACL.size() != 0))
+      {
+         CapabilityACL capabilityACL = storage.getRepositoryInfo().getCapabilities().getCapabilityACL();
+         if (capabilityACL != CapabilityACL.MANAGE)
+         {
+            throw new NotSupportedException("Managing of ACL is not supported.");
+         }
+         if (!typeDefinition.isControllableACL())
+         {
+            throw new ConstraintException("Type " + typeDefinition.getId() + " is not controllable by ACL.");
+         }
+
+         List<Permission> permissions = storage.getRepositoryInfo().getAclCapability().getPermissions();
+         // create set of supported permissions
+         Set<String> supportedPermissions = new HashSet<String>();
+         if (permissions == null || permissions.size() == 0)
+         {
+            for (Permission perm : permissions)
+            {
+               supportedPermissions.add(perm.getPermission());
+            }
+         }
+
+         // check is all permissions is valid
+         validatePermissions(supportedPermissions, addACL);
+         validatePermissions(supportedPermissions, removeACL);
+      }
+   }
+
+   private void validatePermissions(Set<String> supportedPermissions, List<AccessControlEntry> acl)
+      throws ConstraintException
+   {
+      if (acl != null)
+      {
+         for (AccessControlEntry ace : acl)
+         {
+            for (String perm : ace.getPermissions())
+            {
+               // From spec it looks like 'bacis permissions' not need be in the
+               // list of permissions. So be tolerant if set does not contains
+               // basic permissions.
+               if (!supportedPermissions.contains(perm))
+               {
+                  try
+                  {
+                     BasicPermissions.fromValue(perm);
+                  }
+                  catch (IllegalArgumentException iae)
+                  {
+                     throw new ConstraintException("Unsupported permissions " + perm);
+                  }
+               }
+            }
+         }
+      }
+   }
+
+   private void checkPolicies(TypeDefinition typeDefinition, Collection<String> policies) throws ConstraintException
+   {
+      if (policies != null && policies.size() != 0 && !typeDefinition.isControllablePolicy())
+      {
+         throw new ConstraintException("Type " + typeDefinition.getId() + " is not controllable by Policy.");
+      }
+   }
+
+   private Collection<PolicyData> createPolicyList(Collection<String> policyIds) throws ObjectNotFoundException
+   {
+      if (policyIds == null)
+      {
+         return null;
+      }
+      Collection<PolicyData> policies = new HashSet<PolicyData>();
+      for (String policyID : policyIds)
+      {
+         ObjectData policy = storage.getObjectById(policyID);
+         if (policy.getBaseType() != BaseType.POLICY)
+         {
+            throw new InvalidArgumentException("Object " + policyID + " is not a Policy object.");
+         }
+         policies.add((PolicyData)policy);
+      }
+      return policies;
+   }
+
    /**
     * Validate change token provided by caller with current change token of
     * object.
@@ -3082,5 +3333,4 @@ public abstract class Connection
     *         to object change token
     */
    protected abstract void validateChangeToken(ObjectData object, String changeToken) throws UpdateConflictException;
-
 }

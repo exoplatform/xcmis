@@ -1,12 +1,11 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.xcmis</groupId>
 		<artifactId>xcmis-parent</artifactId>
-		<version>1.0</version>
+		<version>1.0-SNAPSHOT</version>
 	</parent>
-	
+
 	<artifactId>xcmis-client-gwt-restatom</artifactId>
 	<packaging>jar</packaging>
 	<name>xCMIS :: GWT Client Framework</name>
@@ -34,14 +33,14 @@
 	<build>
 		<sourceDirectory>src/main/java</sourceDirectory>
 		<plugins>
-		<plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-checkstyle-plugin</artifactId>
-            <configuration>
-               <configLocation>${basedir}/checkstyle-checker.xml</configLocation>
-               <suppressionsLocation>${project.parent.basedir}/checkstyle-suppressions.xml</suppressionsLocation>
-            </configuration>
-         </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<configuration>
+					<configLocation>${basedir}/checkstyle-checker.xml</configLocation>
+					<suppressionsLocation>${project.parent.basedir}/checkstyle-suppressions.xml</suppressionsLocation>
+				</configuration>
+			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -80,10 +79,9 @@
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>gwt-maven-plugin</artifactId>
-						<version>1.1</version>
 						<configuration>
-							<module>org.xcmis.gwtframework.CmisClientFrameworkJUnit</module>
-							<runTarget>org.xcmis.gwtframework.CmisClientFrameworkJUnit/CmisClientFrameworkJUnit.html</runTarget>
+							<module>org.xcmis.CmisClientFrameworkJUnit</module>
+							<runTarget>org.xcmis.CmisClientFrameworkJUnit/CmisClientFrameworkJUnit.html</runTarget>
 							<logLevel>INFO</logLevel>
 							<hostedWebapp>${basedir}/target/war</hostedWebapp>
 							<tomcat>${basedir}/target/tomcat</tomcat>
@@ -109,14 +107,14 @@
 			</activation>
 			<build>
 				<resources>
-          <resource>
-            <directory>src/main/resources</directory>
-          </resource>
-	<resource>
-            <directory>src/main/java</directory>
-          </resource>
+					<resource>
+						<directory>src/main/resources</directory>
+					</resource>
+					<resource>
+						<directory>src/main/java</directory>
+					</resource>
 
-        </resources>
+				</resources>
 				<plugins>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>

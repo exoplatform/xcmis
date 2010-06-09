@@ -31,7 +31,6 @@ import org.xcmis.spi.Connection;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ObjectNotFoundException;
-import org.xcmis.spi.StorageException;
 import org.xcmis.spi.model.CmisObject;
 
 import java.util.List;
@@ -48,11 +47,10 @@ public class AllVersionsCollection extends CmisObjectCollection
 
    /**
     * Instantiates a new all versions collection.
-    * @param storageProvider TODO
     */
-   public AllVersionsCollection(/*StorageProvider storageProvider*/)
+   public AllVersionsCollection()
    {
-      super(/*storageProvider*/);
+      super();
       setHref("/versions");
    }
 
@@ -95,10 +93,6 @@ public class AllVersionsCollection extends CmisObjectCollection
                addEntryDetails(request, entry, feedIri, one);
             }
          }
-      }
-      catch (StorageException re)
-      {
-         throw new ResponseContextException(createErrorResponse(re, 500));
       }
       catch (FilterNotValidException fe)
       {

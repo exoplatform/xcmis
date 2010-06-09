@@ -53,16 +53,13 @@ public class WebServiceLoader
     */
    private static final Log LOG = ExoLogger.getLogger(WebServiceLoader.class);
 
-   //   private StorageProvider storageProvider;
 
    /**
     * Constructs instance of WebServiceLoader.
     *
-    * @param containerContext the ExoContainer context.
     */
-   public WebServiceLoader(/*StorageProvider storageProvider*/)
+   public WebServiceLoader()
    {
-      //      this.storageProvider = storageProvider;
    }
 
    /**
@@ -83,16 +80,6 @@ public class WebServiceLoader
    public void init(String baseURL)
    {
       List<Object> services = new ArrayList<Object>();
-      //      services.add(new ACLServicePortImpl(storageProvider));
-      //      services.add(new DiscoveryServicePortImpl(storageProvider));
-      //      services.add(new MultiFilingServicePortImpl(storageProvider));
-      //      services.add(new NavigationServicePortImpl(storageProvider));
-      //      services.add(new ObjectServicePortImpl(storageProvider));
-      //      services.add(new PolicyServicePortImpl(storageProvider));
-      //      services.add(new RelationshipServicePortImpl(storageProvider));
-      //      services.add(new RepositoryServicePortImpl(storageProvider));
-      //      services.add(new VersioningServicePortImpl(storageProvider));
-
       services.add(new ACLServicePortImpl());
       services.add(new DiscoveryServicePortImpl());
       services.add(new MultiFilingServicePortImpl());
@@ -182,7 +169,6 @@ public class WebServiceLoader
          ServerImpl server = endpointImpl.getServer();
          server.getEndpoint().getInInterceptors().add(new LoggingInInterceptor());
          server.getEndpoint().getOutInterceptors().add(new LoggingOutInterceptor());
-         //    server.getEndpoint().getOutFaultInterceptors().add(new FaultThrowingInterceptor());
       }
 
       if (endpoint.isPublished())

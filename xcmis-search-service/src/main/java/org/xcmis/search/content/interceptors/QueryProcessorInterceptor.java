@@ -47,7 +47,7 @@ import java.util.List;
 
 /**
  * A query engine that is able to execute formal queries expressed in the
- * Abstract Query Model
+ * Abstract Query Model.
  */
 public class QueryProcessorInterceptor extends CommandInterceptor
 {
@@ -147,7 +147,7 @@ public class QueryProcessorInterceptor extends CommandInterceptor
    }
 
    /**
-    * Execute the supplied query by plann
+    * Execute the supplied query by plan.
     * @param ctx 
     * @param context
     * @param query

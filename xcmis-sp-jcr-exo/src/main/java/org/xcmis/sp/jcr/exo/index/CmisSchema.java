@@ -32,6 +32,7 @@ import org.xcmis.search.model.constraint.Operator;
 import org.xcmis.search.model.source.SelectorName;
 import org.xcmis.search.value.PropertyType;
 import org.xcmis.spi.TypeManager;
+import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.TypeDefinition;
 
@@ -42,7 +43,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author <a href="mailto:Sergey.Kabashnyuk@exoplatform.org">Sergey Kabashnyuk</a>
+ * @author <a href="mailto:Sergey.Kabashnyuk@exoplatform.org">Sergey
+ *         Kabashnyuk</a>
  * @version $Id: exo-jboss-codetemplates.xml 34360 2009-07-22 23:58:59Z ksm $
  *
  */
@@ -84,6 +86,7 @@ public class CmisSchema implements Schema
 
    /**
     * Constructor.
+    *
     * @param typeManager TypeManager
     */
    public CmisSchema(TypeManager typeManager)
@@ -97,12 +100,15 @@ public class CmisSchema implements Schema
     */
    public Table getTable(SelectorName name)
    {
-      TypeDefinition typeDefinition = typeManager.getTypeDefinition(name.getName(), true);
-      if (typeDefinition != null)
+      try
       {
+         TypeDefinition typeDefinition = typeManager.getTypeDefinition(name.getName(), true);
          return new CmisTableDefinition(name, typeDefinition);
       }
-      return null;
+      catch (TypeNotFoundException tnfe)
+      {
+         return null;
+      }
    }
 
    private static class CmisTableDefinition implements Table
@@ -112,7 +118,8 @@ public class CmisSchema implements Schema
       private final TypeDefinition typeDefinition;
 
       /**
-       * Instantiates new instance of CmisTableDefinition. 
+       * Instantiates new instance of CmisTableDefinition.
+       *
        * @param typeDefinition
        * @param name SelectorName
        */
