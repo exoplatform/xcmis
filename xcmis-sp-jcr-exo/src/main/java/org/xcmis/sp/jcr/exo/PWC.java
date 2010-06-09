@@ -58,12 +58,12 @@ class PWC extends DocumentDataImpl
    /** Latest version of document. */
    private DocumentDataImpl document;
 
-   public PWC(JcrNodeAdapter jcrNodeAdapter, IndexListener indexListener, RenditionManager renditionManager)
+   public PWC(JcrNodeEntry jcrNodeEntry, IndexListener indexListener, RenditionManager renditionManager)
    {
-      super(jcrNodeAdapter, indexListener, renditionManager);
+      super(jcrNodeEntry, indexListener, renditionManager);
    }
 
-   public PWC(JcrNodeAdapter jcrEntry, IndexListener indexListener, RenditionManager renditionManager,
+   public PWC(JcrNodeEntry jcrEntry, IndexListener indexListener, RenditionManager renditionManager,
       DocumentDataImpl document)
    {
       super(jcrEntry, indexListener, renditionManager);
@@ -78,7 +78,7 @@ class PWC extends DocumentDataImpl
    {
       // Reset versioning property on latest version
       DocumentDataImpl latestVersion = getLatestVersion();
-      JcrNodeAdapter latestNodeAdapter = latestVersion.getNodeAdapter();
+      JcrNodeEntry latestNodeAdapter = latestVersion.getNodeEntry();
       latestNodeAdapter.setValue(CmisConstants.IS_LATEST_VERSION, true);
       latestNodeAdapter.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, false);
       latestNodeAdapter.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, (Value)null);
@@ -110,7 +110,7 @@ class PWC extends DocumentDataImpl
       try
       {
          DocumentDataImpl latestVersion = getLatestVersion();
-         JcrNodeAdapter latestNodeAdapter = latestVersion.getNodeAdapter();
+         JcrNodeEntry latestNodeAdapter = latestVersion.getNodeEntry();
          Node latestNode = latestNodeAdapter.getNode();
          Session session = latestNode.getSession();
 
@@ -252,7 +252,7 @@ class PWC extends DocumentDataImpl
             Session session = node.getSession();
             String latestVersion = node.getProperty("xcmis:latestVersionId").getString();
             Node latestNode = ((ExtendedSession)session).getNodeByIdentifier(latestVersion);
-            document = new DocumentDataImpl(new JcrNodeAdapter(latestNode), indexListener, renditionManager);
+            document = new DocumentDataImpl(new JcrNodeEntry(latestNode), indexListener, renditionManager);
          }
          catch (RepositoryException re)
          {

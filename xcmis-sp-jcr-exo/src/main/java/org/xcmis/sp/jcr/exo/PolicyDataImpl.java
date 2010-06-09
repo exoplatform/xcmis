@@ -44,7 +44,7 @@ import javax.jcr.Session;
 class PolicyDataImpl extends BaseObjectData implements PolicyData
 {
 
-   public PolicyDataImpl(JcrNodeAdapter jcrEntry, IndexListener indexListener)
+   public PolicyDataImpl(JcrNodeEntry jcrEntry, IndexListener indexListener)
    {
       super(jcrEntry, indexListener);
    }

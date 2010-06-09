@@ -25,11 +25,8 @@ import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsIterator;
-import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.CapabilityJoin;
 import org.xcmis.spi.model.CapabilityQuery;
-import org.xcmis.spi.model.ContentStreamAllowed;
-import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.RepositoryCapabilities;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.UnfileObject;
@@ -42,7 +39,6 @@ import org.xcmis.spi.utils.MimeType;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -82,7 +78,6 @@ public class QueryUsecasesTest extends BaseQueryTest
       super.setUp();
       testRoot = createFolder(rootFolder, "QueryUsecasesTest");
       // create data
-
    }
 
    public void testSearchCapabilities() throws Exception

@@ -19,6 +19,7 @@
 
 package org.xcmis.sp.jcr.exo;
 
+import org.exoplatform.services.jcr.access.AccessControlList;
 import org.exoplatform.services.jcr.access.PermissionType;
 import org.exoplatform.services.jcr.core.ExtendedNode;
 import org.exoplatform.services.jcr.impl.core.value.BooleanValue;
@@ -61,6 +62,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -73,29 +76,28 @@ import javax.jcr.PropertyIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.Value;
+import javax.jcr.ValueFormatException;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-final class JcrNodeAdapter
+final class JcrNodeEntry
 {
 
-   private static final Log LOG = ExoLogger.getLogger(JcrNodeAdapter.class);
+   private static final Log LOG = ExoLogger.getLogger(JcrNodeEntry.class);
 
    private Node node;
 
    private final TypeDefinition type;
 
-   //   private Session session;
-
-   JcrNodeAdapter(Node node) throws RepositoryException
+   JcrNodeEntry(Node node) throws RepositoryException
    {
       this.node = node;
       this.type = JcrTypeHelper.getTypeDefinition(node.getPrimaryNodeType(), true);
    }
 
-   JcrNodeAdapter(Node node, TypeDefinition type)
+   JcrNodeEntry(Node node, TypeDefinition type)
    {
       this.node = node;
       this.type = type;
@@ -262,6 +264,69 @@ final class JcrNodeAdapter
       }
    }
 
+   List<AccessControlEntry> getACL()
+   {
+      try
+      {
+         if (getNode().isNodeType(JcrCMIS.EXO_PRIVILEGABLE))
+         {
+            AccessControlList jcrACL = ((ExtendedNode)getNode()).getACL();
+
+            Map<String, Set<String>> cache = new HashMap<String, Set<String>>();
+
+            // Merge JCR ACEs
+            List<org.exoplatform.services.jcr.access.AccessControlEntry> jcrACEs = jcrACL.getPermissionEntries();
+            for (org.exoplatform.services.jcr.access.AccessControlEntry ace : jcrACEs)
+            {
+               String identity = ace.getIdentity();
+
+               Set<String> permissions = cache.get(identity);
+               if (permissions == null)
+               {
+                  permissions = new HashSet<String>();
+                  cache.put(identity, permissions);
+               }
+
+               permissions.add(ace.getPermission());
+            }
+
+            List<AccessControlEntry> cmisACL = new ArrayList<AccessControlEntry>(cache.size());
+
+            for (String principal : cache.keySet())
+            {
+               AccessControlEntry cmisACE = new AccessControlEntry();
+               cmisACE.setPrincipal(principal);
+
+               Set<String> values = cache.get(principal);
+               // Represent JCR ACEs as CMIS ACEs.
+               if (values.size() == PermissionType.ALL.length)
+               {
+                  cmisACE.getPermissions().add(BasicPermissions.CMIS_ALL.value());
+               }
+               else if (values.contains(PermissionType.READ) && values.contains(PermissionType.ADD_NODE))
+               {
+                  cmisACE.getPermissions().add(BasicPermissions.CMIS_READ.value());
+               }
+               else if (values.contains(PermissionType.SET_PROPERTY) && values.contains(PermissionType.REMOVE))
+               {
+                  cmisACE.getPermissions().add(BasicPermissions.CMIS_WRITE.value());
+               }
+               cmisACE.setDirect(true);
+               cmisACL.add(cmisACE);
+            }
+            return Collections.unmodifiableList(cmisACL);
+         }
+
+         // Node has not "exo:privilegeable" mixin.
+         return Collections.emptyList();
+      }
+      catch (RepositoryException re)
+      {
+         throw new CmisRuntimeException("Unable get objects's ACL. " + re.getMessage(), re);
+      }
+
+   }
+
    BaseType getBaseType()
    {
       return type.getBaseId();
@@ -335,6 +400,40 @@ final class JcrNodeAdapter
       catch (RepositoryException re)
       {
          throw new CmisRuntimeException("Unable get object's path. " + re.getMessage(), re);
+      }
+   }
+
+   Collection<JcrNodeEntry> getPolicies()
+   {
+      Set<JcrNodeEntry> policies = new HashSet<JcrNodeEntry>();
+      try
+      {
+         for (PropertyIterator iter = getNode().getProperties(); iter.hasNext();)
+         {
+            javax.jcr.Property prop = iter.nextProperty();
+            if (prop.getType() == javax.jcr.PropertyType.REFERENCE)
+            {
+               try
+               {
+                  Node pol = prop.getNode();
+                  if (pol.getPrimaryNodeType().isNodeType(JcrCMIS.CMIS_NT_POLICY))
+                  {
+                     policies.add(new JcrNodeEntry(pol));
+                  }
+               }
+               catch (ValueFormatException ignored)
+               {
+                  // Can be thrown id met multi-valued property.
+                  // Not care about it cause policy reference may not be
+                  // multi-valued.
+               }
+            }
+         }
+         return policies;
+      }
+      catch (RepositoryException re)
+      {
+         throw new CmisRuntimeException("Unable get object's policies. " + re.getMessage(), re);
       }
    }
 

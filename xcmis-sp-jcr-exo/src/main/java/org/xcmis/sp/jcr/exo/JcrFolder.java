@@ -36,7 +36,7 @@ import javax.jcr.RepositoryException;
 class JcrFolder extends FolderDataImpl
 {
 
-   public JcrFolder(JcrNodeAdapter jcrEntry, IndexListener indexListener, RenditionManager renditionManager)
+   public JcrFolder(JcrNodeEntry jcrEntry, IndexListener indexListener, RenditionManager renditionManager)
    {
       super(jcrEntry, indexListener, renditionManager);
    }

@@ -50,7 +50,7 @@ import javax.jcr.Value;
 class JcrFile extends DocumentDataImpl
 {
 
-   public JcrFile(JcrNodeAdapter jcrEntry, IndexListener indexListener, RenditionManager renditionManager)
+   public JcrFile(JcrNodeEntry jcrEntry, IndexListener indexListener, RenditionManager renditionManager)
    {
       super(jcrEntry, indexListener, renditionManager);
       try

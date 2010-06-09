@@ -30,11 +30,11 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
@@ -43,82 +43,103 @@ import java.util.Set;
 final class Entry
 {
 
-   private final Map<String, Value> values;
+   private Map<String, Value> values;
 
-   private final Map<String, Set<String>> permissions;
+   private Map<String, Set<String>> permissions;
 
-   private final Set<String> policies;
+   private Set<String> policies;
 
    public Entry()
    {
-      this.values = new HashMap<String, Value>();
-      this.policies = new HashSet<String>();
-      this.permissions = new HashMap<String, Set<String>>();
    }
 
    public Entry(Map<String, Value> values, Set<String> policies, Map<String, Set<String>> permissions)
    {
-      this.values = values;
-      this.policies = policies;
-      this.permissions = permissions;
+      this.values = values != null ? new ConcurrentHashMap<String, Value>(values) : null;
+      this.policies = policies != null ? new CopyOnWriteArraySet<String>(policies) : null;
+      this.permissions = permissions != null ? new ConcurrentHashMap<String, Set<String>>(permissions) : null;
    }
 
    public void addPolicy(PolicyData policy)
    {
-      policies.add(policy.getObjectId());
+      getPolicies().add(policy.getObjectId());
    }
 
    public BaseType getBaseTypeId()
    {
-      Value value = values.get(CmisConstants.BASE_TYPE_ID);
-      return value == null ? null : BaseType.fromValue(value.getStrings()[0]);
-   }
-
-   public ByteArrayValue getContent()
-   {
-      return (ByteArrayValue)values.get(DocumentDataImpl.CONTENT);
+      Value value = getValues().get(CmisConstants.BASE_TYPE_ID);
+      if (value != null)
+      {
+         String[] strs = value.getStrings();
+         return strs.length > 0 ? BaseType.fromValue(strs[0]) : null;
+      }
+      return null;
    }
 
    public String getId()
    {
-      Value value = values.get(CmisConstants.OBJECT_ID);
-      return value == null ? null : value.getStrings()[0];
+      Value value = getValues().get(CmisConstants.OBJECT_ID);
+      if (value != null)
+      {
+         String[] strs = value.getStrings();
+         return strs.length > 0 ? strs[0] : null;
+      }
+      return null;
    }
 
    public Map<String, Set<String>> getPermissions()
    {
+      if (permissions == null)
+      {
+         permissions = new ConcurrentHashMap<String, Set<String>>();
+      }
       return permissions;
    }
 
    public Collection<String> getPolicies()
    {
+      if (policies == null)
+      {
+         policies = new CopyOnWriteArraySet<String>();
+      }
       return policies;
    }
 
    public String getTypeId()
    {
-      Value value = values.get(CmisConstants.OBJECT_TYPE_ID);
-      return value == null ? null : value.getStrings()[0];
+      Value value = getValues().get(CmisConstants.OBJECT_TYPE_ID);
+      if (value != null)
+      {
+         String[] strs = value.getStrings();
+         return strs.length > 0 ? strs[0] : null;
+      }
+      return null;
    }
 
    public Value getValue(String id)
    {
-      return values.get(id);
+      return getValues().get(id);
    }
 
    public Map<String, Value> getValues()
    {
+      if (values == null)
+      {
+         values = new ConcurrentHashMap<String, Value>();
+      }
       return values;
    }
 
    public void removePolicy(PolicyData policy)
    {
-      policies.remove(policy.getObjectId());
+      getPolicies().remove(policy.getObjectId());
    }
 
-   public void setContent(ByteArrayValue bytes)
+   public void setPermissions(Map<String, Set<String>> permissions)
    {
-      values.put(DocumentDataImpl.CONTENT, bytes);
+      Map<String, Set<String>> ps = getPermissions();
+      ps.clear();
+      ps.putAll(permissions);
    }
 
    @SuppressWarnings("unchecked")
@@ -159,12 +180,26 @@ final class Entry
 
    public void setValue(String id, Value value)
    {
-      values.put(id, value);
+      Map<String, Value> vs = getValues();
+      if (value == null)
+      {
+         vs.remove(id);
+      }
+      else
+      {
+         vs.put(id, value);
+      }
    }
 
    public void setValues(Map<String, Value> values)
    {
-      this.values.putAll(values);
+      if (values != null)
+      {
+         for (Map.Entry<String, Value> e : values.entrySet())
+         {
+            setValue(e.getKey(), e.getValue());
+         }
+      }
    }
 
    public String toString()

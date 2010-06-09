@@ -738,21 +738,21 @@ public class StorageImpl implements Storage
             copyNode.addMixin(JcrCMIS.MIX_VERSIONABLE);
          }
 
-         JcrNodeAdapter copyNodeAdapter = new JcrNodeAdapter(copyNode, typeDefinition);
+         JcrNodeEntry copyNodeEntry = new JcrNodeEntry(copyNode, typeDefinition);
 
-         copyNodeAdapter.setValue(CmisConstants.OBJECT_TYPE_ID, typeDefinition.getId());
-         copyNodeAdapter.setValue(CmisConstants.BASE_TYPE_ID, typeDefinition.getBaseId().value());
+         copyNodeEntry.setValue(CmisConstants.OBJECT_TYPE_ID, typeDefinition.getId());
+         copyNodeEntry.setValue(CmisConstants.BASE_TYPE_ID, typeDefinition.getBaseId().value());
          String userId = session.getUserID();
-         copyNodeAdapter.setValue(CmisConstants.CREATED_BY, userId);
+         copyNodeEntry.setValue(CmisConstants.CREATED_BY, userId);
          Calendar cal = Calendar.getInstance();
-         copyNodeAdapter.setValue(CmisConstants.CREATION_DATE, cal);
-         copyNodeAdapter.setValue(CmisConstants.VERSION_SERIES_ID, copyNode.getProperty(JcrCMIS.JCR_VERSION_HISTORY)
+         copyNodeEntry.setValue(CmisConstants.CREATION_DATE, cal);
+         copyNodeEntry.setValue(CmisConstants.VERSION_SERIES_ID, copyNode.getProperty(JcrCMIS.JCR_VERSION_HISTORY)
             .getString());
-         copyNodeAdapter.setValue(CmisConstants.IS_LATEST_VERSION, true);
-         copyNodeAdapter.setValue(CmisConstants.IS_MAJOR_VERSION, versioningState == VersioningState.MAJOR);
+         copyNodeEntry.setValue(CmisConstants.IS_LATEST_VERSION, true);
+         copyNodeEntry.setValue(CmisConstants.IS_MAJOR_VERSION, versioningState == VersioningState.MAJOR);
 
          // TODO : support for checked-out initial state
-         copyNodeAdapter.setValue(CmisConstants.VERSION_LABEL, LATEST_LABEL);
+         copyNodeEntry.setValue(CmisConstants.VERSION_LABEL, LATEST_LABEL);
 
          for (Property<?> property : properties.values())
          {
@@ -760,13 +760,13 @@ public class StorageImpl implements Storage
             Updatability updatability = definition.getUpdatability();
             if (updatability == Updatability.READWRITE || updatability == Updatability.ONCREATE)
             {
-               copyNodeAdapter.setProperty(property);
+               copyNodeEntry.setProperty(property);
             }
          }
 
          try
          {
-            copyNodeAdapter.setContentStream(source.getContentStream());
+            copyNodeEntry.setContentStream(source.getContentStream());
          }
          catch (IOException ioe)
          {
@@ -775,18 +775,18 @@ public class StorageImpl implements Storage
 
          if (acl != null && acl.size() > 0)
          {
-            copyNodeAdapter.setACL(acl);
+            copyNodeEntry.setACL(acl);
          }
 
          if (policies != null && policies.size() > 0)
          {
             for (PolicyData policy : policies)
             {
-               copyNodeAdapter.applyPolicy(policy);
+               copyNodeEntry.applyPolicy(policy);
             }
          }
 
-         DocumentDataImpl copy = new DocumentDataImpl(copyNodeAdapter, indexListener, renditionManager);
+         DocumentDataImpl copy = new DocumentDataImpl(copyNodeEntry, indexListener, renditionManager);
          copy.save();
          return copy;
       }
@@ -849,21 +849,21 @@ public class StorageImpl implements Storage
             documentNode.addMixin(JcrCMIS.MIX_VERSIONABLE);
          }
 
-         JcrNodeAdapter documentNodeAdapter = new JcrNodeAdapter(documentNode, typeDefinition);
+         JcrNodeEntry documentNodeEntry = new JcrNodeEntry(documentNode, typeDefinition);
 
-         documentNodeAdapter.setValue(CmisConstants.OBJECT_TYPE_ID, typeDefinition.getId());
-         documentNodeAdapter.setValue(CmisConstants.BASE_TYPE_ID, typeDefinition.getBaseId().value());
+         documentNodeEntry.setValue(CmisConstants.OBJECT_TYPE_ID, typeDefinition.getId());
+         documentNodeEntry.setValue(CmisConstants.BASE_TYPE_ID, typeDefinition.getBaseId().value());
          String userId = session.getUserID();
-         documentNodeAdapter.setValue(CmisConstants.CREATED_BY, userId);
+         documentNodeEntry.setValue(CmisConstants.CREATED_BY, userId);
          Calendar cal = Calendar.getInstance();
-         documentNodeAdapter.setValue(CmisConstants.CREATION_DATE, cal);
-         documentNodeAdapter.setValue(CmisConstants.VERSION_SERIES_ID, documentNode.getProperty(
+         documentNodeEntry.setValue(CmisConstants.CREATION_DATE, cal);
+         documentNodeEntry.setValue(CmisConstants.VERSION_SERIES_ID, documentNode.getProperty(
             JcrCMIS.JCR_VERSION_HISTORY).getString());
-         documentNodeAdapter.setValue(CmisConstants.IS_LATEST_VERSION, true);
-         documentNodeAdapter.setValue(CmisConstants.IS_MAJOR_VERSION, versioningState == VersioningState.MAJOR);
+         documentNodeEntry.setValue(CmisConstants.IS_LATEST_VERSION, true);
+         documentNodeEntry.setValue(CmisConstants.IS_MAJOR_VERSION, versioningState == VersioningState.MAJOR);
 
          // TODO : support for checked-out initial state
-         documentNodeAdapter.setValue(CmisConstants.VERSION_LABEL, LATEST_LABEL);
+         documentNodeEntry.setValue(CmisConstants.VERSION_LABEL, LATEST_LABEL);
 
          for (Property<?> property : properties.values())
          {
@@ -871,26 +871,26 @@ public class StorageImpl implements Storage
             Updatability updatability = definition.getUpdatability();
             if (updatability == Updatability.READWRITE || updatability == Updatability.ONCREATE)
             {
-               documentNodeAdapter.setProperty(property);
+               documentNodeEntry.setProperty(property);
             }
          }
 
-         documentNodeAdapter.setContentStream(content);
+         documentNodeEntry.setContentStream(content);
 
          if (acl != null && acl.size() > 0)
          {
-            documentNodeAdapter.setACL(acl);
+            documentNodeEntry.setACL(acl);
          }
 
          if (policies != null && policies.size() > 0)
          {
             for (PolicyData policy : policies)
             {
-               documentNodeAdapter.applyPolicy(policy);
+               documentNodeEntry.applyPolicy(policy);
             }
          }
 
-         DocumentDataImpl document = new DocumentDataImpl(documentNodeAdapter, indexListener, renditionManager);
+         DocumentDataImpl document = new DocumentDataImpl(documentNodeEntry, indexListener, renditionManager);
          document.save();
          return document;
       }
@@ -939,14 +939,14 @@ public class StorageImpl implements Storage
             folderNode.addMixin(JcrCMIS.CMIS_MIX_FOLDER);
          }
 
-         JcrNodeAdapter folderNodeAdapter = new JcrNodeAdapter(folderNode, typeDefinition);
+         JcrNodeEntry folderNodeEntry = new JcrNodeEntry(folderNode, typeDefinition);
 
-         folderNodeAdapter.setValue(CmisConstants.OBJECT_TYPE_ID, typeDefinition.getId());
-         folderNodeAdapter.setValue(CmisConstants.BASE_TYPE_ID, typeDefinition.getBaseId().value());
+         folderNodeEntry.setValue(CmisConstants.OBJECT_TYPE_ID, typeDefinition.getId());
+         folderNodeEntry.setValue(CmisConstants.BASE_TYPE_ID, typeDefinition.getBaseId().value());
          String userId = session.getUserID();
-         folderNodeAdapter.setValue(CmisConstants.CREATED_BY, userId);
+         folderNodeEntry.setValue(CmisConstants.CREATED_BY, userId);
          Calendar cal = Calendar.getInstance();
-         folderNodeAdapter.setValue(CmisConstants.CREATION_DATE, cal);
+         folderNodeEntry.setValue(CmisConstants.CREATION_DATE, cal);
 
          for (Property<?> property : properties.values())
          {
@@ -954,24 +954,24 @@ public class StorageImpl implements Storage
             Updatability updatability = definition.getUpdatability();
             if (updatability == Updatability.READWRITE || updatability == Updatability.ONCREATE)
             {
-               folderNodeAdapter.setProperty(property);
+               folderNodeEntry.setProperty(property);
             }
          }
 
          if (acl != null && acl.size() > 0)
          {
-            folderNodeAdapter.setACL(acl);
+            folderNodeEntry.setACL(acl);
          }
 
          if (policies != null && policies.size() > 0)
          {
             for (PolicyData policy : policies)
             {
-               folderNodeAdapter.applyPolicy(policy);
+               folderNodeEntry.applyPolicy(policy);
             }
          }
 
-         FolderDataImpl folder = new FolderDataImpl(folderNodeAdapter, indexListener, renditionManager);
+         FolderDataImpl folder = new FolderDataImpl(folderNodeEntry, indexListener, renditionManager);
          folder.save();
          return folder;
       }
@@ -1011,14 +1011,14 @@ public class StorageImpl implements Storage
 
          Node policyNode = policiesStore.addNode(name, typeDefinition.getLocalName());
 
-         JcrNodeAdapter policyNodeAdapter = new JcrNodeAdapter(policyNode, typeDefinition);
+         JcrNodeEntry policyNodeEntry = new JcrNodeEntry(policyNode, typeDefinition);
 
-         policyNodeAdapter.setValue(CmisConstants.OBJECT_TYPE_ID, typeDefinition.getId());
-         policyNodeAdapter.setValue(CmisConstants.BASE_TYPE_ID, typeDefinition.getBaseId().value());
+         policyNodeEntry.setValue(CmisConstants.OBJECT_TYPE_ID, typeDefinition.getId());
+         policyNodeEntry.setValue(CmisConstants.BASE_TYPE_ID, typeDefinition.getBaseId().value());
          String userId = session.getUserID();
-         policyNodeAdapter.setValue(CmisConstants.CREATED_BY, userId);
+         policyNodeEntry.setValue(CmisConstants.CREATED_BY, userId);
          Calendar cal = Calendar.getInstance();
-         policyNodeAdapter.setValue(CmisConstants.CREATION_DATE, cal);
+         policyNodeEntry.setValue(CmisConstants.CREATION_DATE, cal);
 
          for (Property<?> property : properties.values())
          {
@@ -1026,24 +1026,24 @@ public class StorageImpl implements Storage
             Updatability updatability = definition.getUpdatability();
             if (updatability == Updatability.READWRITE || updatability == Updatability.ONCREATE)
             {
-               policyNodeAdapter.setProperty(property);
+               policyNodeEntry.setProperty(property);
             }
          }
 
          if (acl != null && acl.size() > 0)
          {
-            policyNodeAdapter.setACL(acl);
+            policyNodeEntry.setACL(acl);
          }
 
          if (policies != null && policies.size() > 0)
          {
             for (PolicyData policy : policies)
             {
-               policyNodeAdapter.applyPolicy(policy);
+               policyNodeEntry.applyPolicy(policy);
             }
          }
 
-         PolicyDataImpl policy = new PolicyDataImpl(policyNodeAdapter, indexListener);
+         PolicyDataImpl policy = new PolicyDataImpl(policyNodeEntry, indexListener);
          policy.save();
          return policy;
       }
@@ -1085,14 +1085,14 @@ public class StorageImpl implements Storage
          relationshipNode.setProperty(CmisConstants.SOURCE_ID, ((BaseObjectData)source).getNode());
          relationshipNode.setProperty(CmisConstants.TARGET_ID, ((BaseObjectData)target).getNode());
 
-         JcrNodeAdapter relationshipNodeAdapter = new JcrNodeAdapter(relationshipNode);
+         JcrNodeEntry relationshipNodeEntry = new JcrNodeEntry(relationshipNode);
 
-         relationshipNodeAdapter.setValue(CmisConstants.OBJECT_TYPE_ID, typeDefinition.getId());
-         relationshipNodeAdapter.setValue(CmisConstants.BASE_TYPE_ID, typeDefinition.getBaseId().value());
+         relationshipNodeEntry.setValue(CmisConstants.OBJECT_TYPE_ID, typeDefinition.getId());
+         relationshipNodeEntry.setValue(CmisConstants.BASE_TYPE_ID, typeDefinition.getBaseId().value());
          String userId = session.getUserID();
-         relationshipNodeAdapter.setValue(CmisConstants.CREATED_BY, userId);
+         relationshipNodeEntry.setValue(CmisConstants.CREATED_BY, userId);
          Calendar cal = Calendar.getInstance();
-         relationshipNodeAdapter.setValue(CmisConstants.CREATION_DATE, cal);
+         relationshipNodeEntry.setValue(CmisConstants.CREATION_DATE, cal);
 
          for (Property<?> property : properties.values())
          {
@@ -1100,24 +1100,24 @@ public class StorageImpl implements Storage
             Updatability updatability = definition.getUpdatability();
             if (updatability == Updatability.READWRITE || updatability == Updatability.ONCREATE)
             {
-               relationshipNodeAdapter.setProperty(property);
+               relationshipNodeEntry.setProperty(property);
             }
          }
 
          if (acl != null && acl.size() > 0)
          {
-            relationshipNodeAdapter.setACL(acl);
+            relationshipNodeEntry.setACL(acl);
          }
 
          if (policies != null && policies.size() > 0)
          {
             for (PolicyData policy : policies)
             {
-               relationshipNodeAdapter.applyPolicy(policy);
+               relationshipNodeEntry.applyPolicy(policy);
             }
          }
 
-         RelationshipDataImpl relationship = new RelationshipDataImpl(relationshipNodeAdapter, indexListener);
+         RelationshipDataImpl relationship = new RelationshipDataImpl(relationshipNodeEntry, indexListener);
          relationship.save();
          return relationship;
       }
@@ -1738,12 +1738,12 @@ public class StorageImpl implements Storage
          JcrTypeHelper.getTypeDefinition(getNodeType(node.getProperty(JcrCMIS.JCR_FROZEN_PRIMARY_TYPE).getString()),
             true);
 
-      return new DocumentVersion(new JcrNodeAdapter(node, typeDefinition), indexListener, renditionManager);
+      return new DocumentVersion(new JcrNodeEntry(node, typeDefinition), indexListener, renditionManager);
    }
 
    private PWC getPWC(Node node) throws RepositoryException
    {
-      return new PWC(new JcrNodeAdapter(node), indexListener, renditionManager);
+      return new PWC(new JcrNodeEntry(node), indexListener, renditionManager);
    }
 
    private ObjectData getObject(Node node) throws RepositoryException
@@ -1758,25 +1758,25 @@ public class StorageImpl implements Storage
          }
          if (!node.isNodeType(JcrCMIS.CMIS_MIX_DOCUMENT))
          {
-            return new JcrFile(new JcrNodeAdapter(node, typeDefinition), indexListener, renditionManager);
+            return new JcrFile(new JcrNodeEntry(node, typeDefinition), indexListener, renditionManager);
          }
-         return new DocumentDataImpl(new JcrNodeAdapter(node, typeDefinition), indexListener, renditionManager);
+         return new DocumentDataImpl(new JcrNodeEntry(node, typeDefinition), indexListener, renditionManager);
       }
       else if (typeDefinition.getBaseId() == BaseType.FOLDER)
       {
          if (!node.isNodeType(JcrCMIS.CMIS_MIX_FOLDER))
          {
-            return new JcrFolder(new JcrNodeAdapter(node, typeDefinition), indexListener, renditionManager);
+            return new JcrFolder(new JcrNodeEntry(node, typeDefinition), indexListener, renditionManager);
          }
-         return new FolderDataImpl(new JcrNodeAdapter(node, typeDefinition), indexListener, renditionManager);
+         return new FolderDataImpl(new JcrNodeEntry(node, typeDefinition), indexListener, renditionManager);
       }
       else if (typeDefinition.getBaseId() == BaseType.POLICY)
       {
-         return new PolicyDataImpl(new JcrNodeAdapter(node, typeDefinition), indexListener);
+         return new PolicyDataImpl(new JcrNodeEntry(node, typeDefinition), indexListener);
       }
       else if (typeDefinition.getBaseId() == BaseType.RELATIONSHIP)
       {
-         return new RelationshipDataImpl(new JcrNodeAdapter(node, typeDefinition), indexListener);
+         return new RelationshipDataImpl(new JcrNodeEntry(node, typeDefinition), indexListener);
       }
 
       // Must never happen.

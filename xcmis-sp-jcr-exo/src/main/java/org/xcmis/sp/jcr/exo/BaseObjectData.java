@@ -18,9 +18,6 @@
  */
 package org.xcmis.sp.jcr.exo;
 
-import org.exoplatform.services.jcr.access.AccessControlList;
-import org.exoplatform.services.jcr.access.PermissionType;
-import org.exoplatform.services.jcr.core.ExtendedNode;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.sp.jcr.exo.index.IndexListener;
@@ -46,7 +43,6 @@ import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.RelationshipDirection;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.Updatability;
-import org.xcmis.spi.model.Permission.BasicPermissions;
 import org.xcmis.spi.model.impl.BooleanProperty;
 import org.xcmis.spi.model.impl.DateTimeProperty;
 import org.xcmis.spi.model.impl.IdProperty;
@@ -54,7 +50,6 @@ import org.xcmis.spi.model.impl.IntegerProperty;
 import org.xcmis.spi.model.impl.StringProperty;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -69,7 +64,6 @@ import java.util.Set;
 import javax.jcr.Node;
 import javax.jcr.PropertyIterator;
 import javax.jcr.RepositoryException;
-import javax.jcr.ValueFormatException;
 import javax.jcr.nodetype.NodeType;
 
 /**
@@ -177,7 +171,7 @@ abstract class BaseObjectData implements ObjectData
                   if (nodeType.getName().equals(type.getLocalName())
                      || (includeSubRelationshipTypes && nodeType.isNodeType(type.getLocalName())))
                   {
-                     next = new RelationshipDataImpl(new JcrNodeAdapter(relNode), indexListener);
+                     next = new RelationshipDataImpl(new JcrNodeEntry(relNode), indexListener);
                   }
                }
             }
@@ -193,9 +187,9 @@ abstract class BaseObjectData implements ObjectData
 
    protected IndexListener indexListener;
 
-   protected JcrNodeAdapter jcrEntry;
+   protected JcrNodeEntry jcrEntry;
 
-   public BaseObjectData(JcrNodeAdapter jcrEntry, IndexListener indexListener)
+   public BaseObjectData(JcrNodeEntry jcrEntry, IndexListener indexListener)
    {
       this.jcrEntry = jcrEntry;
       this.indexListener = indexListener;
@@ -218,8 +212,7 @@ abstract class BaseObjectData implements ObjectData
       jcrEntry.applyPolicy(policy);
       try
       {
-         // Apply/remove policy does not update 'last modification date', etc.
-         jcrEntry.save();
+         save();
       }
       catch (StorageException se)
       {
@@ -249,64 +242,7 @@ abstract class BaseObjectData implements ObjectData
       {
          return Collections.emptyList();
       }
-      try
-      {
-         if (getNode().isNodeType(JcrCMIS.EXO_PRIVILEGABLE))
-         {
-            AccessControlList jcrACL = ((ExtendedNode)getNode()).getACL();
-
-            Map<String, Set<String>> cache = new HashMap<String, Set<String>>();
-
-            // Merge JCR ACEs
-            List<org.exoplatform.services.jcr.access.AccessControlEntry> jcrACEs = jcrACL.getPermissionEntries();
-            for (org.exoplatform.services.jcr.access.AccessControlEntry ace : jcrACEs)
-            {
-               String identity = ace.getIdentity();
-
-               Set<String> permissions = cache.get(identity);
-               if (permissions == null)
-               {
-                  permissions = new HashSet<String>();
-                  cache.put(identity, permissions);
-               }
-
-               permissions.add(ace.getPermission());
-            }
-
-            List<AccessControlEntry> cmisACL = new ArrayList<AccessControlEntry>(cache.size());
-
-            for (String principal : cache.keySet())
-            {
-               AccessControlEntry cmisACE = new AccessControlEntry();
-               cmisACE.setPrincipal(principal);
-
-               Set<String> values = cache.get(principal);
-               // Represent JCR ACEs as CMIS ACEs.
-               if (values.size() == PermissionType.ALL.length)
-               {
-                  cmisACE.getPermissions().add(BasicPermissions.CMIS_ALL.value());
-               }
-               else if (values.contains(PermissionType.READ) && values.contains(PermissionType.ADD_NODE))
-               {
-                  cmisACE.getPermissions().add(BasicPermissions.CMIS_READ.value());
-               }
-               else if (values.contains(PermissionType.SET_PROPERTY) && values.contains(PermissionType.REMOVE))
-               {
-                  cmisACE.getPermissions().add(BasicPermissions.CMIS_WRITE.value());
-               }
-               cmisACE.setDirect(true);
-               cmisACL.add(cmisACE);
-            }
-            return Collections.unmodifiableList(cmisACL);
-         }
-
-         // Node has not "exo:privilegeable" mixin.
-         return Collections.emptyList();
-      }
-      catch (RepositoryException re)
-      {
-         throw new CmisRuntimeException("Unable get objects's ACL. " + re.getMessage(), re);
-      }
+      return jcrEntry.getACL();
    }
 
    /**
@@ -382,37 +318,13 @@ abstract class BaseObjectData implements ObjectData
       {
          return Collections.emptyList();
       }
-      Set<PolicyData> policies = new HashSet<PolicyData>();
-      try
+      Collection<JcrNodeEntry> policyEntries = jcrEntry.getPolicies();
+      Set<PolicyData> policies = new HashSet<PolicyData>(policyEntries.size());
+      for (JcrNodeEntry pe : policyEntries)
       {
-         for (PropertyIterator iter = getNode().getProperties(); iter.hasNext();)
-         {
-            javax.jcr.Property prop = iter.nextProperty();
-            if (prop.getType() == javax.jcr.PropertyType.REFERENCE)
-            {
-               try
-               {
-                  Node pol = prop.getNode();
-
-                  if (pol.getPrimaryNodeType().isNodeType(JcrCMIS.CMIS_NT_POLICY))
-                  {
-                     policies.add(new PolicyDataImpl(new JcrNodeAdapter(pol), indexListener));
-                  }
-               }
-               catch (ValueFormatException ignored)
-               {
-                  // Can be thrown id met multi-valued property.
-                  // Not care about it cause policy reference may not be
-                  // multi-valued.
-               }
-            }
-         }
-         return Collections.unmodifiableSet(policies);
+         policies.add(new PolicyDataImpl(pe, indexListener));
       }
-      catch (RepositoryException re)
-      {
-         throw new CmisRuntimeException("Unable get object's policies. " + re.getMessage(), re);
-      }
+      return policies;
    }
 
    /**
@@ -507,8 +419,7 @@ abstract class BaseObjectData implements ObjectData
       jcrEntry.removePolicy(policy);
       try
       {
-         // Apply/remove policy does not update 'last modification date', etc.
-         jcrEntry.save();
+         save();
       }
       catch (StorageException se)
       {
@@ -692,7 +603,7 @@ abstract class BaseObjectData implements ObjectData
       return jcrEntry.getNode();
    }
 
-   JcrNodeAdapter getNodeAdapter()
+   JcrNodeEntry getNodeEntry()
    {
       return jcrEntry;
    }

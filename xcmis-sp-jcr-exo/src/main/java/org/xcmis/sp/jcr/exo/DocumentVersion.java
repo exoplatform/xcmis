@@ -61,7 +61,7 @@ public class DocumentVersion extends DocumentDataImpl
    /** Latest version of document. */
    private DocumentData document;
 
-   public DocumentVersion(JcrNodeAdapter jcrEntry, IndexListener indexListener, RenditionManager renditionManager)
+   public DocumentVersion(JcrNodeEntry jcrEntry, IndexListener indexListener, RenditionManager renditionManager)
    {
       super(jcrEntry, indexListener, renditionManager);
    }
@@ -256,7 +256,7 @@ public class DocumentVersion extends DocumentDataImpl
             VersionHistory versionHistory = version.getContainingHistory();
             Node latest = ((ExtendedSession)session).getNodeByIdentifier(versionHistory.getVersionableUUID());
             document =
-               new DocumentDataImpl(new JcrNodeAdapter(latest, JcrTypeHelper.getTypeDefinition(latest.getPrimaryNodeType(), true)),
+               new DocumentDataImpl(new JcrNodeEntry(latest, JcrTypeHelper.getTypeDefinition(latest.getPrimaryNodeType(), true)),
                   indexListener, renditionManager);
          }
          catch (RepositoryException re)

@@ -44,7 +44,7 @@ import javax.jcr.Session;
 class RelationshipDataImpl extends BaseObjectData implements RelationshipData
 {
 
-   public RelationshipDataImpl(JcrNodeAdapter jcrEntry, IndexListener indexListener)
+   public RelationshipDataImpl(JcrNodeEntry jcrEntry, IndexListener indexListener)
    {
       super(jcrEntry, indexListener);
    }

@@ -54,12 +54,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 class DocumentDataImpl extends BaseObjectData implements DocumentData
 {
 
-   protected static final String LATEST_LABEL = "latest";
-
-   protected static final String PWC_LABEL = "pwc";
-
-   protected static final String CONTENT = "xcmis:content";
-
    public DocumentDataImpl(Entry entry, TypeDefinition type, StorageImpl storage)
    {
       super(entry, type, storage);
@@ -92,7 +86,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
             String version = iterator.next();
             Entry ventry = storage.entries.get(version);
             ventry.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(false));
-            ventry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue());
+            ventry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, /*new StringValue()*/null);
          }
       }
    }
@@ -118,10 +112,10 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
             String version = iterator.next();
             Entry ventry = storage.entries.get(version);
             ventry.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(false));
-            ventry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue());
             ventry.setValue(CmisConstants.IS_LATEST_VERSION, new BooleanValue(false));
             ventry.setValue(CmisConstants.IS_LATEST_MAJOR_VERSION, new BooleanValue(false));
-            ventry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, new StringValue());
+            ventry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, /*new StringValue()*/null);
+            ventry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, /*new StringValue()*/null);
             // update version labels
             ventry.setValue(CmisConstants.VERSION_LABEL, new StringValue("" + i++));
          }
@@ -146,13 +140,13 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
             throw new StorageException("Unable checkin PWC. " + ioe.getMessage(), ioe);
          }
 
-         entry.setValue(CmisConstants.VERSION_LABEL, new StringValue(LATEST_LABEL));
+         entry.setValue(CmisConstants.VERSION_LABEL, new StringValue(PropertyDefinitions.LATEST_LABEL));
          entry.setValue(CmisConstants.IS_LATEST_VERSION, new BooleanValue(true));
          entry.setValue(CmisConstants.IS_MAJOR_VERSION, new BooleanValue(major));
          entry.setValue(CmisConstants.IS_LATEST_MAJOR_VERSION, new BooleanValue(major));
          entry.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(false));
-         entry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue());
-         entry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, new StringValue());
+         entry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, /*new StringValue()*/null);
+         entry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, /*new StringValue()*/null);
          if (checkinComment != null)
          {
             entry.setValue(CmisConstants.CHECKIN_COMMENT, new StringValue(checkinComment));
@@ -190,12 +184,12 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
          pwc.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(cal));
          pwc.setValue(CmisConstants.IS_LATEST_VERSION, new BooleanValue(false));
          pwc.setValue(CmisConstants.IS_MAJOR_VERSION, new BooleanValue(false));
-         pwc.setValue(CmisConstants.VERSION_LABEL, new StringValue(PWC_LABEL));
+         pwc.setValue(CmisConstants.VERSION_LABEL, new StringValue(PropertyDefinitions.PWC_LABEL));
          pwc.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(true));
          pwc.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue(pwcId));
          pwc.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, new StringValue(userId));
 
-         ByteArrayValue contentValue = entry.getContent();
+         ByteArrayValue contentValue = (ByteArrayValue)entry.getValue(PropertyDefinitions.CONTENT);
          if (contentValue != null)
          {
             // check is max memory size reached
@@ -204,7 +198,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
 
             byte[] bytes = new byte[src.length];
             System.arraycopy(src, 0, bytes, 0, bytes.length);
-            pwc.setContent(new ByteArrayValue(bytes));
+            pwc.setValue(PropertyDefinitions.CONTENT, new ByteArrayValue(bytes));
 
             String mimeType = getContentStreamMimeType();
             if (mimeType != null)
@@ -258,8 +252,8 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
     */
    public ContentStream getContentStream()
    {
-      ByteArrayValue contentValue = entry.getContent();
-      if (contentValue != null && contentValue.getBytes().length > 0)
+      ByteArrayValue contentValue = (ByteArrayValue)entry.getValue(PropertyDefinitions.CONTENT);
+      if (contentValue != null/* && contentValue.getBytes().length > 0*/)
       {
          MimeType mimeType = MimeType.fromString(getString(CmisConstants.CONTENT_STREAM_MIME_TYPE));
          String charset = getString(CmisConstants.CHARSET);
@@ -340,7 +334,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
     */
    public boolean hasContent()
    {
-      return entry.getContent() != null;
+      return entry.getValue(PropertyDefinitions.CONTENT) != null;
    }
 
    /**
@@ -400,9 +394,9 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
    {
       if (contentStream == null || contentStream.getStream() == null)
       {
-         entry.setContent(new ByteArrayValue(new byte[0]));
-         entry.setValue(CmisConstants.CONTENT_STREAM_MIME_TYPE, new StringValue());
-         entry.setValue(CmisConstants.CHARSET, new StringValue());
+         entry.setValue(PropertyDefinitions.CONTENT, /*new ByteArrayValue(new byte[0])*/null);
+         entry.setValue(CmisConstants.CONTENT_STREAM_MIME_TYPE, /*new StringValue()*/null);
+         entry.setValue(CmisConstants.CHARSET, /*new StringValue()*/null);
          entry.setValue(CmisConstants.CONTENT_STREAM_LENGTH, new IntegerValue(BigInteger.valueOf(0)));
       }
       else
@@ -411,7 +405,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
          storage.validateMemSize(cv.getBytes());
 
          MimeType mimeType = contentStream.getMediaType();
-entry.setContent(cv);
+         entry.setValue(PropertyDefinitions.CONTENT, cv);
          entry.setValue(CmisConstants.CONTENT_STREAM_MIME_TYPE, new StringValue(mimeType.getBaseType()));
          String charset = mimeType.getParameter(CmisConstants.CHARSET);
          if (charset != null)

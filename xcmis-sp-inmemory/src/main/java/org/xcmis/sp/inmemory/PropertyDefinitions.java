@@ -188,6 +188,12 @@ public final class PropertyDefinitions
       }
    }
 
+   static final String CONTENT = "xcmis:content";
+
+   static final String LATEST_LABEL = "latest";
+
+   static final String PWC_LABEL = "pwc";
+
    /**
     * Get all property definitions for <code>objectTypeId</code>.
     *
@@ -202,22 +208,6 @@ public final class PropertyDefinitions
          return Collections.emptyMap();
       }
       return Collections.unmodifiableMap(defs);
-   }
-
-   /**
-    * Get all property IDs supported for <code>objectTypeId</code>.
-    *
-    * @param objectTypeId object type id
-    * @return set of object property definition IDs.
-    */
-   public static Set<String> getPropertyIds(String objectTypeId)
-   {
-      Map<String, PropertyDefinition<?>> defs = all.get(objectTypeId);
-      if (defs == null)
-      {
-         return Collections.emptySet();
-      }
-      return Collections.unmodifiableSet(defs.keySet());
    }
 
    /**
@@ -236,6 +226,22 @@ public final class PropertyDefinitions
          return null;
       }
       return defs.get(propDefId);
+   }
+
+   /**
+    * Get all property IDs supported for <code>objectTypeId</code>.
+    *
+    * @param objectTypeId object type id
+    * @return set of object property definition IDs.
+    */
+   public static Set<String> getPropertyIds(String objectTypeId)
+   {
+      Map<String, PropertyDefinition<?>> defs = all.get(objectTypeId);
+      if (defs == null)
+      {
+         return Collections.emptySet();
+      }
+      return Collections.unmodifiableSet(defs.keySet());
    }
 
    public static void put(String typeId, PropertyDefinition<?> propDef)
@@ -264,7 +270,6 @@ public final class PropertyDefinitions
    {
       all.remove(typeId);
    }
-
    private static <T> PropertyDefinition<T> createPropertyDefinition(String id, PropertyType propertyType,
       String queryName, String localName, String localNamespace, String displayName, boolean required,
       boolean queryable, boolean orderable, boolean inherited, boolean isMultivalued, Updatability updatability,

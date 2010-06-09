@@ -94,7 +94,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
 
    protected final RenditionManager renditionManager;
 
-   public DocumentDataImpl(JcrNodeAdapter jcrEntry, IndexListener indexListener, RenditionManager renditionManager)
+   public DocumentDataImpl(JcrNodeEntry jcrEntry, IndexListener indexListener, RenditionManager renditionManager)
    {
       super(jcrEntry, indexListener);
       this.renditionManager = renditionManager;
@@ -109,7 +109,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
       {
          Session session = getNode().getSession();
          Node pwcNode = ((ExtendedSession)session).getNodeByIdentifier(getVersionSeriesCheckedOutId());
-         PWC pwc = new PWC(new JcrNodeAdapter(pwcNode), indexListener, renditionManager, this);
+         PWC pwc = new PWC(new JcrNodeEntry(pwcNode), indexListener, renditionManager, this);
          pwc.delete();
       }
       catch (RepositoryException re)
@@ -158,27 +158,27 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
             pwcNode.addMixin(JcrCMIS.MIX_VERSIONABLE);
          }
 
-         JcrNodeAdapter pwcNodeAdapter = new JcrNodeAdapter(pwcNode);
+         JcrNodeEntry pwcNodeEntry = new JcrNodeEntry(pwcNode);
 
-         pwcNodeAdapter.setValue(CmisConstants.OBJECT_TYPE_ID, type.getId());
-         pwcNodeAdapter.setValue(CmisConstants.BASE_TYPE_ID, type.getBaseId().value());
+         pwcNodeEntry.setValue(CmisConstants.OBJECT_TYPE_ID, type.getId());
+         pwcNodeEntry.setValue(CmisConstants.BASE_TYPE_ID, type.getBaseId().value());
          String userId = session.getUserID();
-         pwcNodeAdapter.setValue(CmisConstants.CREATED_BY, userId);
-         pwcNodeAdapter.setValue(CmisConstants.LAST_MODIFIED_BY, userId);
+         pwcNodeEntry.setValue(CmisConstants.CREATED_BY, userId);
+         pwcNodeEntry.setValue(CmisConstants.LAST_MODIFIED_BY, userId);
          Calendar cal = Calendar.getInstance();
-         pwcNodeAdapter.setValue(CmisConstants.CREATION_DATE, cal);
-         pwcNodeAdapter.setValue(CmisConstants.LAST_MODIFICATION_DATE, cal);
-         pwcNodeAdapter.setValue(CmisConstants.VERSION_SERIES_ID, this.getVersionSeriesId());
-         pwcNodeAdapter.setValue(CmisConstants.IS_LATEST_VERSION, true);
-         pwcNodeAdapter.setValue(CmisConstants.IS_MAJOR_VERSION, false);
-         pwcNodeAdapter.setValue(CmisConstants.VERSION_LABEL, StorageImpl.PWC_LABEL);
-         pwcNodeAdapter.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, true);
-         pwcNodeAdapter.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, pwcNodeAdapter.getId());
-         pwcNodeAdapter.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, session.getUserID());
-         pwcNodeAdapter.setValue("xcmis:latestVersionId", this.getObjectId());
+         pwcNodeEntry.setValue(CmisConstants.CREATION_DATE, cal);
+         pwcNodeEntry.setValue(CmisConstants.LAST_MODIFICATION_DATE, cal);
+         pwcNodeEntry.setValue(CmisConstants.VERSION_SERIES_ID, this.getVersionSeriesId());
+         pwcNodeEntry.setValue(CmisConstants.IS_LATEST_VERSION, true);
+         pwcNodeEntry.setValue(CmisConstants.IS_MAJOR_VERSION, false);
+         pwcNodeEntry.setValue(CmisConstants.VERSION_LABEL, StorageImpl.PWC_LABEL);
+         pwcNodeEntry.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, true);
+         pwcNodeEntry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, pwcNodeEntry.getId());
+         pwcNodeEntry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, session.getUserID());
+         pwcNodeEntry.setValue("xcmis:latestVersionId", this.getObjectId());
 
          // copy content
-         pwcNodeAdapter.setContentStream(getContentStream());
+         pwcNodeEntry.setContentStream(getContentStream());
 
          // Copy the other properties from document.
          try
@@ -188,7 +188,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
                String pId = def.getId();
                if (!CHECKOUT_SKIP.contains(pId))
                {
-                  pwcNodeAdapter.setProperty(this.getProperty(pId));
+                  pwcNodeEntry.setProperty(this.getProperty(pId));
                }
             }
          }
@@ -201,12 +201,12 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
          // Update source document.
          jcrEntry.setValue(CmisConstants.IS_LATEST_VERSION, false);
          jcrEntry.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, true);
-         jcrEntry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, pwcNodeAdapter.getId());
+         jcrEntry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, pwcNodeEntry.getId());
          jcrEntry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, userId);
 
          session.save();
 
-         DocumentData pwc = new PWC(pwcNodeAdapter, indexListener, renditionManager, this);
+         DocumentData pwc = new PWC(pwcNodeEntry, indexListener, renditionManager, this);
          return pwc;
       }
       catch (IOException ioe)
@@ -324,13 +324,13 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
             if (link.isNodeType("nt:linkedFile"))
             {
                Node parent = link.getParent();
-               parents.add(new FolderDataImpl(new JcrNodeAdapter(parent), indexListener, renditionManager));
+               parents.add(new FolderDataImpl(new JcrNodeEntry(parent), indexListener, renditionManager));
             }
          }
          if (!node.getParent().isNodeType("xcmis:unfiledObject"))
          {
             Node parent = node.getParent();
-            parents.add(new FolderDataImpl(new JcrNodeAdapter(parent), indexListener, renditionManager));
+            parents.add(new FolderDataImpl(new JcrNodeEntry(parent), indexListener, renditionManager));
          }
          return parents;
       }

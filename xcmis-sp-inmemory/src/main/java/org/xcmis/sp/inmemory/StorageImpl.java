@@ -151,14 +151,10 @@ public class StorageImpl implements Storage
 
    private RepositoryInfo repositoryInfo;
 
-   /**
-    * Searching service.
-    */
+   /** Searche service. */
    final SearchService searchService;
 
-   /**
-    * Cmis query parser.
-    */
+   /** Cmis query parser. */
    final QueryParser cmisQueryParser;
 
    /** The rendition manager. */
@@ -309,13 +305,13 @@ public class StorageImpl implements Storage
 
       types.put("cmis:policy", //
          new TypeDefinition("cmis:policy", BaseType.POLICY, "cmis:policy", "cmis:policy", "", null, "cmis:policy",
-            "Cmis Policy type", true, false, false /*no query support*/, false, false, true, true, false, null, null,
+            "Cmis Policy type", true, false, true, false, true, true, true, false, null, null,
             ContentStreamAllowed.NOT_ALLOWED, null));
 
       types.put("cmis:relationship", //
          new TypeDefinition("cmis:relationship", BaseType.RELATIONSHIP, "cmis:relationship", "cmis:relationship", "",
-            null, "cmis:relationship", "Cmis Relationship type.", true, false, false /*no query support*/, false,
-            false, true, true, false, null, null, ContentStreamAllowed.NOT_ALLOWED, null));
+            null, "cmis:relationship", "Cmis Relationship type.", true, false, true, false, true, true, true, false,
+            null, null, ContentStreamAllowed.NOT_ALLOWED, null));
 
       typeChildren = new ConcurrentHashMap<String, Set<String>>();
       typeChildren.put("cmis:document", new HashSet<String>());
@@ -334,13 +330,13 @@ public class StorageImpl implements Storage
       root.put(CmisConstants.LAST_MODIFIED_BY, new StringValue("system"));
 
       // TODO : concurrent
-      Map<String, Set<String>> p = new HashMap<String, Set<String>>();
-      p.put("any", Collections.singleton("cmis:all"));
-      
-      
-      Entry rootEntry = new Entry(root, null, /*null*/p);
-      
-      
+      Map<String, Set<String>> pm = new HashMap<String, Set<String>>();
+      Set<String> perms = new HashSet<String>();
+      perms.add("cmis:all");
+      pm.put("any", perms);
+
+      Entry rootEntry = new Entry(root, null, pm);
+
       entries.put(rootEntry.getId(), rootEntry);
       parents.put(ROOT_FOLDER_ID, EMPTY_PARENTS);
       children.put(ROOT_FOLDER_ID, new CopyOnWriteArraySet<String>());
@@ -358,7 +354,6 @@ public class StorageImpl implements Storage
       AllowableActions actions =
          permissionService.calculateAllowableActions(object, ConversationState.getCurrent().getIdentity(),
             getRepositoryInfo());
-
       return actions;
    }
 
@@ -392,7 +387,7 @@ public class StorageImpl implements Storage
          }
       }
 
-      Entry docEntry = new Entry();
+      Entry copyEntry = new Entry();
 
       TypeDefinition sourceType = source.getTypeDefinition();
       TypeDefinition typeDefinition =
@@ -404,27 +399,28 @@ public class StorageImpl implements Storage
                .getAllowedTargetTypes(), sourceType.getContentStreamAllowed(), PropertyDefinitions.getAll(sourceType
                .getId()));
 
-      docEntry.setValue(CmisConstants.OBJECT_TYPE_ID, new StringValue(typeDefinition.getId()));
-      docEntry.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(typeDefinition.getBaseId().value()));
+      copyEntry.setValue(CmisConstants.OBJECT_TYPE_ID, new StringValue(typeDefinition.getId()));
+      copyEntry.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(typeDefinition.getBaseId().value()));
       String docId = StorageImpl.generateId();
       String verSerId = StorageImpl.generateId();
-      docEntry.setValue(CmisConstants.OBJECT_ID, new StringValue(docId));
-      docEntry.setValue(CmisConstants.VERSION_SERIES_ID, new StringValue(verSerId));
-      docEntry.setValue(CmisConstants.CREATED_BY, new StringValue());
-      docEntry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue());
+      copyEntry.setValue(CmisConstants.OBJECT_ID, new StringValue(docId));
+      copyEntry.setValue(CmisConstants.VERSION_SERIES_ID, new StringValue(verSerId));
+      String userId = getCurrentUser();
+      copyEntry.setValue(CmisConstants.CREATED_BY, new StringValue(userId));
+      copyEntry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue(userId));
       Calendar cal = Calendar.getInstance();
-      docEntry.setValue(CmisConstants.CREATION_DATE, new DateValue(cal));
-      docEntry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(cal));
-      docEntry.setValue(CmisConstants.IS_LATEST_VERSION, new BooleanValue(true));
-      docEntry.setValue(CmisConstants.IS_MAJOR_VERSION, new BooleanValue(versioningState == VersioningState.MAJOR));
-      docEntry.setValue(CmisConstants.IS_LATEST_MAJOR_VERSION, new BooleanValue(
+      copyEntry.setValue(CmisConstants.CREATION_DATE, new DateValue(cal));
+      copyEntry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(cal));
+      copyEntry.setValue(CmisConstants.IS_LATEST_VERSION, new BooleanValue(true));
+      copyEntry.setValue(CmisConstants.IS_MAJOR_VERSION, new BooleanValue(versioningState == VersioningState.MAJOR));
+      copyEntry.setValue(CmisConstants.IS_LATEST_MAJOR_VERSION, new BooleanValue(
          versioningState == VersioningState.MAJOR));
 
       // TODO : support for checked-out initial state
-      docEntry.setValue(CmisConstants.VERSION_LABEL, new StringValue(DocumentDataImpl.LATEST_LABEL));
-      docEntry.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(false));
-      docEntry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue());
-      docEntry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, new StringValue());
+      copyEntry.setValue(CmisConstants.VERSION_LABEL, new StringValue(PropertyDefinitions.LATEST_LABEL));
+      copyEntry.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(false));
+      //      copyEntry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue());
+      //      copyEntry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, new StringValue());
 
       try
       {
@@ -433,13 +429,13 @@ public class StorageImpl implements Storage
          {
             ByteArrayValue cv = ByteArrayValue.fromStream(content.getStream());
             MimeType mimeType = content.getMediaType();
-            docEntry.setValue(CmisConstants.CONTENT_STREAM_MIME_TYPE, new StringValue(mimeType.getBaseType()));
+            copyEntry.setValue(CmisConstants.CONTENT_STREAM_MIME_TYPE, new StringValue(mimeType.getBaseType()));
             String charset = mimeType.getParameter(CmisConstants.CHARSET);
             if (charset != null)
             {
-               docEntry.setValue(CmisConstants.CHARSET, new StringValue(charset));
+               copyEntry.setValue(CmisConstants.CHARSET, new StringValue(charset));
             }
-            docEntry.setValue(CmisConstants.CONTENT_STREAM_LENGTH, new IntegerValue(BigInteger
+            copyEntry.setValue(CmisConstants.CONTENT_STREAM_LENGTH, new IntegerValue(BigInteger
                .valueOf(cv.getBytes().length)));
          }
       }
@@ -454,7 +450,7 @@ public class StorageImpl implements Storage
          Updatability updatability = definition.getUpdatability();
          if (updatability == Updatability.READWRITE || updatability == Updatability.ONCREATE)
          {
-            docEntry.setProperty(property);
+            copyEntry.setProperty(property);
          }
       }
 
@@ -462,13 +458,13 @@ public class StorageImpl implements Storage
       {
          for (PolicyData policy : policies)
          {
-            docEntry.addPolicy(policy);
+            copyEntry.addPolicy(policy);
          }
       }
 
       if (acl != null && acl.size() > 0)
       {
-         CmisUtils.addAclToPermissionMap(docEntry.getPermissions(), acl);
+         CmisUtils.addAclToPermissionMap(copyEntry.getPermissions(), acl);
       }
 
       if (parent != null)
@@ -486,11 +482,16 @@ public class StorageImpl implements Storage
       List<String> set = new CopyOnWriteArrayList<String>();
       set.add(docId);
       versions.put(verSerId, set);
-      entries.put(docId, docEntry);
+      entries.put(docId, copyEntry);
 
-      // TODO index!!!!
+      DocumentDataImpl copy = new DocumentDataImpl(copyEntry, typeDefinition, this);
 
-      return new DocumentDataImpl(docEntry, typeDefinition, this);
+      if (indexListener != null)
+      {
+         indexListener.created(copy);
+      }
+
+      return copy;
    }
 
    /**
@@ -536,8 +537,9 @@ public class StorageImpl implements Storage
       String verSerId = StorageImpl.generateId();
       docEntry.setValue(CmisConstants.OBJECT_ID, new StringValue(docId));
       docEntry.setValue(CmisConstants.VERSION_SERIES_ID, new StringValue(verSerId));
-      docEntry.setValue(CmisConstants.CREATED_BY, new StringValue());
-      docEntry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue());
+      String userId = getCurrentUser();
+      docEntry.setValue(CmisConstants.CREATED_BY, new StringValue(userId));
+      docEntry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue(userId));
       Calendar cal = Calendar.getInstance();
       docEntry.setValue(CmisConstants.CREATION_DATE, new DateValue(cal));
       docEntry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(cal));
@@ -547,15 +549,15 @@ public class StorageImpl implements Storage
          versioningState == VersioningState.MAJOR));
 
       // TODO : support for checked-out initial state
-      docEntry.setValue(CmisConstants.VERSION_LABEL, new StringValue(DocumentDataImpl.LATEST_LABEL));
+      docEntry.setValue(CmisConstants.VERSION_LABEL, new StringValue(PropertyDefinitions.LATEST_LABEL));
       docEntry.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(false));
-      docEntry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue());
-      docEntry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, new StringValue());
+      //      docEntry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue());
+      //      docEntry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, new StringValue());
 
       if (content != null)
       {
          ByteArrayValue cv = ByteArrayValue.fromStream(content.getStream());
-         docEntry.setContent(cv);
+         docEntry.setValue(PropertyDefinitions.CONTENT, cv);
          MimeType mimeType = content.getMediaType();
          docEntry.setValue(CmisConstants.CONTENT_STREAM_MIME_TYPE, new StringValue(mimeType.getBaseType()));
          String charset = mimeType.getParameter(CmisConstants.CHARSET);
@@ -608,12 +610,11 @@ public class StorageImpl implements Storage
       entries.put(docId, docEntry);
 
       DocumentDataImpl document = new DocumentDataImpl(docEntry, typeDefinition, this);
+
       if (indexListener != null)
       {
          indexListener.created(document);
       }
-
-      // TODO index!!!!
 
       return document;
    }
@@ -655,8 +656,9 @@ public class StorageImpl implements Storage
       folderEntry.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(typeDefinition.getBaseId().value()));
       String folderId = StorageImpl.generateId();
       folderEntry.setValue(CmisConstants.OBJECT_ID, new StringValue(folderId));
-      folderEntry.setValue(CmisConstants.CREATED_BY, new StringValue());
-      folderEntry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue());
+      String userId = getCurrentUser();
+      folderEntry.setValue(CmisConstants.CREATED_BY, new StringValue(userId));
+      folderEntry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue(userId));
       Calendar cal = Calendar.getInstance();
       folderEntry.setValue(CmisConstants.CREATION_DATE, new DateValue(cal));
       folderEntry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(cal));
@@ -692,11 +694,11 @@ public class StorageImpl implements Storage
       children.put(folderId, new CopyOnWriteArraySet<String>());
 
       FolderDataImpl folder = new FolderDataImpl(folderEntry, typeDefinition, this);
+
       if (indexListener != null)
       {
          indexListener.created(folder);
       }
-      // TODO index!!!!
 
       return folder;
    }
@@ -704,7 +706,7 @@ public class StorageImpl implements Storage
    /**
     * {@inheritDoc}
     */
-   public PolicyData createPolicy(FolderData _parent, TypeDefinition typeDefinition,
+   public PolicyData createPolicy(FolderData parent, TypeDefinition typeDefinition,
       Map<String, Property<?>> properties, List<AccessControlEntry> acl, Collection<PolicyData> policies)
       throws ConstraintException, NameConstraintViolationException, StorageException
    {
@@ -725,8 +727,9 @@ public class StorageImpl implements Storage
       policyEntry.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(typeDefinition.getBaseId().value()));
       String policyId = StorageImpl.generateId();
       policyEntry.setValue(CmisConstants.OBJECT_ID, new StringValue(policyId));
-      policyEntry.setValue(CmisConstants.CREATED_BY, new StringValue());
-      policyEntry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue());
+      String userId = getCurrentUser();
+      policyEntry.setValue(CmisConstants.CREATED_BY, new StringValue(userId));
+      policyEntry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue(userId));
       Calendar cal = Calendar.getInstance();
       policyEntry.setValue(CmisConstants.CREATION_DATE, new DateValue(cal));
       policyEntry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(cal));
@@ -757,9 +760,14 @@ public class StorageImpl implements Storage
       parents.put(policyId, EMPTY_PARENTS);
       entries.put(policyId, policyEntry);
 
-      // TODO index!!!!
+      PolicyDataImpl policy = new PolicyDataImpl(policyEntry, typeDefinition, this);
 
-      return new PolicyDataImpl(policyEntry, typeDefinition, this);
+      if (indexListener != null)
+      {
+         indexListener.created(policy);
+      }
+
+      return policy;
    }
 
    /**
@@ -786,8 +794,9 @@ public class StorageImpl implements Storage
       relationshipEntry.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(typeDefinition.getBaseId().value()));
       String relationshipId = StorageImpl.generateId();
       relationshipEntry.setValue(CmisConstants.OBJECT_ID, new StringValue(relationshipId));
-      relationshipEntry.setValue(CmisConstants.CREATED_BY, new StringValue());
-      relationshipEntry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue());
+      String userId = getCurrentUser();
+      relationshipEntry.setValue(CmisConstants.CREATED_BY, new StringValue(userId));
+      relationshipEntry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue(userId));
       Calendar cal = Calendar.getInstance();
       relationshipEntry.setValue(CmisConstants.CREATION_DATE, new DateValue(cal));
       relationshipEntry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(cal));
@@ -834,9 +843,14 @@ public class StorageImpl implements Storage
       }
       targetRels.add(relationshipId);
 
-      // TODO index!!!!
+      RelationshipDataImpl relationship = new RelationshipDataImpl(relationshipEntry, typeDefinition, this);
 
-      return new RelationshipDataImpl(relationshipEntry, typeDefinition, this);
+      if (indexListener != null)
+      {
+         indexListener.created(relationship);
+      }
+
+      return relationship;
    }
 
    /**
@@ -995,7 +1009,6 @@ public class StorageImpl implements Storage
          {
             for (FolderData parent : pwc.getParents())
             {
-               // TODO equals and hashCode for objects
                if (parent.getObjectId().equals(folder.getObjectId()))
                {
                   checkedOut.add(pwc);
@@ -1156,7 +1169,6 @@ public class StorageImpl implements Storage
          //check if needed default sorting
          if (qom.getOrderings().size() == 0)
          {
-
             Set<SelectorName> selectorsReferencedBy = Visitors.getSelectorsReferencedBy(qom);
             Collections.sort(rows, new DocumentOrderResultSorter(selectorsReferencedBy.iterator().next().getName(),
                this));
@@ -1372,9 +1384,9 @@ public class StorageImpl implements Storage
       long size = 0;
       for (Entry c : entries.values())
       {
-         ByteArrayValue _content = c.getContent();
-         if (_content != null)
-            size += _content.getBytes().length;
+         ByteArrayValue contentValue = (ByteArrayValue)c.getValue(PropertyDefinitions.CONTENT);
+         if (contentValue != null)
+            size += contentValue.getBytes().length;
       }
       if ((size + content.length) > maxStorageMemSize)
       {
@@ -1431,7 +1443,7 @@ public class StorageImpl implements Storage
 
    }
 
-   public static class DocumentOrderResultSorter implements Comparator<ScoredRow>
+   private class DocumentOrderResultSorter implements Comparator<ScoredRow>
    {
 
       /** The selector name. */
@@ -1441,13 +1453,7 @@ public class StorageImpl implements Storage
 
       private final Storage storage;
 
-      /**
-       * The Constructor.
-       * 
-       * @param itemMgr the item mgr
-       * @param selectorName the selector name
-       */
-      public DocumentOrderResultSorter(final String selectorName, Storage storage)
+      DocumentOrderResultSorter(final String selectorName, Storage storage)
       {
          this.selectorName = selectorName;
          this.storage = storage;
@@ -1475,7 +1481,7 @@ public class StorageImpl implements Storage
 
       /**
        * Return comparable location of the object
-       * 
+       *
        * @param identifer
        * @return
        */
@@ -1514,7 +1520,7 @@ public class StorageImpl implements Storage
    /**
     * Single row from query result.
     */
-   public static class ResultImpl implements Result
+   private class ResultImpl implements Result
    {
 
       private final String id;
@@ -1523,7 +1529,7 @@ public class StorageImpl implements Storage
 
       private final Score score;
 
-      public ResultImpl(String id, String[] properties, Score score)
+      ResultImpl(String id, String[] properties, Score score)
       {
          this.id = id;
          this.properties = properties;
@@ -1550,7 +1556,7 @@ public class StorageImpl implements Storage
    /**
     * Iterator over query result's.
     */
-   private static class QueryResultIterator implements ItemsIterator<Result>
+   private class QueryResultIterator implements ItemsIterator<Result>
    {
 
       private final Iterator<ScoredRow> rows;
@@ -1563,7 +1569,7 @@ public class StorageImpl implements Storage
 
       private Result next;
 
-      public QueryResultIterator(List<ScoredRow> rows, org.xcmis.search.model.Query qom)
+      QueryResultIterator(List<ScoredRow> rows, org.xcmis.search.model.Query qom)
       {
          this.size = rows.size();
          this.rows = rows.iterator();
@@ -1657,79 +1663,12 @@ public class StorageImpl implements Storage
                      }
                   }
                }
-               next = new ResultImpl(objectId, //
-                  properties == null ? null : properties.toArray(new String[properties.size()]), //
-                  score);
+               next =
+                  new ResultImpl(objectId, properties == null ? null : properties
+                     .toArray(new String[properties.size()]), score);
             }
          }
       }
    }
 
-   //   public static class LazyDocumentIterator implements ItemsIterator<ObjectData>
-   //   {
-   //      private final Storage storage;
-   //
-   //      private final Iterator<String> documentIds;
-   //
-   //      /**
-   //       * @param storage
-   //       * @param documentIds
-   //       */
-   //      public LazyDocumentIterator(Storage storage, Iterator<String> documentIds)
-   //      {
-   //         super();
-   //         this.storage = storage;
-   //         this.documentIds = documentIds;
-   //      }
-   //
-   //      /**
-   //       * @see java.util.Iterator#hasNext()
-   //       */
-   //      public boolean hasNext()
-   //      {
-   //         return documentIds.hasNext();
-   //      }
-   //
-   //      /**
-   //       * @see java.util.Iterator#next()
-   //       */
-   //      public DocumentData next()
-   //      {
-   //         return (DocumentData)storage.getObjectById(documentIds.next());
-   //      }
-   //
-   //      /**
-   //       * @see java.util.Iterator#remove()
-   //       */
-   //      public void remove()
-   //      {
-   //         throw new UnsupportedOperationException();
-   //      }
-   //
-   //      /**
-   //       * @see org.xcmis.spi.ItemsIterator#size()
-   //       */
-   //      public int size()
-   //      {
-   //
-   //         return -1;
-   //      }
-   //
-   //      /**
-   //       * @see org.xcmis.spi.ItemsIterator#skip(int)
-   //       */
-   //      public void skip(int skip) throws NoSuchElementException
-   //      {
-   //         while (skip-- > 0)
-   //         {
-   //            if (!documentIds.hasNext())
-   //            {
-   //               throw new NoSuchElementException();
-   //            }
-   //            documentIds.next();
-   //         }
-   //
-   //      }
-   //
-   //   }
 }

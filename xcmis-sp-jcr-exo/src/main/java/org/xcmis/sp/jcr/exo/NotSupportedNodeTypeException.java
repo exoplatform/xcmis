@@ -24,11 +24,11 @@ import org.xcmis.spi.CmisRuntimeException;
 /**
  * Should be thrown if requested JCR node-type registered but that type is not
  * one of supported by xCMIS implementation.
- * 
+ *
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
-public class NotSupportedNodeTypeException extends CmisRuntimeException
+class NotSupportedNodeTypeException extends CmisRuntimeException
 {
 
    private static final long serialVersionUID = -2990445717857972378L;

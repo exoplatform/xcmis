@@ -181,22 +181,22 @@ class FolderDataImpl extends BaseObjectData implements FolderData
                {
                   if (!node.isNodeType(JcrCMIS.CMIS_MIX_DOCUMENT))
                   {
-                     next = new JcrFile(new JcrNodeAdapter(node, type), indexListener, renditionManager);
+                     next = new JcrFile(new JcrNodeEntry(node, type), indexListener, renditionManager);
                   }
                   else
                   {
-                     next = new DocumentDataImpl(new JcrNodeAdapter(node, type), indexListener, renditionManager);
+                     next = new DocumentDataImpl(new JcrNodeEntry(node, type), indexListener, renditionManager);
                   }
                }
                else if (type.getBaseId() == BaseType.FOLDER)
                {
                   if (!node.isNodeType(JcrCMIS.CMIS_MIX_FOLDER))
                   {
-                     next = new JcrFolder(new JcrNodeAdapter(node, type), indexListener, renditionManager);
+                     next = new JcrFolder(new JcrNodeEntry(node, type), indexListener, renditionManager);
                   }
                   else
                   {
-                     next = new FolderDataImpl(new JcrNodeAdapter(node, type), indexListener, renditionManager);
+                     next = new FolderDataImpl(new JcrNodeEntry(node, type), indexListener, renditionManager);
                   }
                }
             }
@@ -221,7 +221,7 @@ class FolderDataImpl extends BaseObjectData implements FolderData
 
    protected final RenditionManager renditionManager;
 
-   public FolderDataImpl(JcrNodeAdapter jcrEntry, IndexListener indexListener, RenditionManager renditionManager)
+   public FolderDataImpl(JcrNodeEntry jcrEntry, IndexListener indexListener, RenditionManager renditionManager)
    {
       super(jcrEntry, indexListener);
       this.renditionManager = renditionManager;
@@ -310,7 +310,7 @@ class FolderDataImpl extends BaseObjectData implements FolderData
             throw new ConstraintException("Unable get parent of root folder.");
          }
          Node parent = node.getParent();
-         return new FolderDataImpl(new JcrNodeAdapter(parent), indexListener, renditionManager);
+         return new FolderDataImpl(new JcrNodeEntry(parent), indexListener, renditionManager);
       }
       catch (RepositoryException re)
       {
@@ -332,7 +332,7 @@ class FolderDataImpl extends BaseObjectData implements FolderData
          }
          Node parent = node.getParent();
          List<FolderData> parents = new ArrayList<FolderData>(1);
-         parents.add(new FolderDataImpl(new JcrNodeAdapter(parent), indexListener, renditionManager));
+         parents.add(new FolderDataImpl(new JcrNodeEntry(parent), indexListener, renditionManager));
          return parents;
       }
       catch (RepositoryException re)
