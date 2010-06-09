@@ -26,6 +26,7 @@
 				<property name="log4j.appender.file.layout" value="org.apache.log4j.PatternLayout" />
 				<property name="log4j.appender.file.layout.ConversionPattern" value="%d{dd.MM.yyyy HH:mm:ss} *%-5p* [%t] %c{1}: %m (%F, line %L) %n" />
 				<!-- property name="log4j.category.jcr.FileCleaner" value="DEBUG" / -->
+				<property name="log4j.category.org.apache.pdfbox" value="WARN" />
 			</properties-param>
 		</init-params>
 	</component>
@@ -114,6 +115,7 @@
 
    <!-- Storage Provider InMemory -->
    <!-- Do not forget to add xcmis-sp-inmemory-x.y.jar to the webapps/xcmis.war/WEB-INF/lib -->
+<!--
 	<component>
 		<type>org.xcmis.sp.inmemory.StorageProviderImpl</type>
 		<init-params>
@@ -123,7 +125,6 @@
 					<field name="storage">
 						<object type="org.xcmis.sp.inmemory.StorageConfiguration">
 							<field name="id">
-								<!-- ID of CMIS repository -->
 								<string>cmis-inmem1</string>
 							</field>
 							<field name="properties">
@@ -133,7 +134,6 @@
 											<string>exo.cmis.changetoken.feature</string>
 										</key>
 										<value>
-											<!-- Enable/Disable change token feature. -->
 											<boolean>false</boolean>
 										</value>
 									</entry>
@@ -145,6 +145,7 @@
 			</object-param>
 		</init-params>
 	</component>
+-->
 
 	<component>
 		<key>org.exoplatform.services.jcr.RepositoryService</key>
