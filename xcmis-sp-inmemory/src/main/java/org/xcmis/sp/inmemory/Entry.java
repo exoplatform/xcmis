@@ -56,11 +56,11 @@ final class Entry
       this.permissions = new HashMap<String, Set<String>>();
    }
 
-   public Entry(Map<String, Value> values, Map<String, Set<String>> permissions, Set<String> policies)
+   public Entry(Map<String, Value> values, Set<String> policies, Map<String, Set<String>> permissions)
    {
       this.values = values;
-      this.permissions = permissions;
       this.policies = policies;
+      this.permissions = permissions;
    }
 
    public void addPolicy(PolicyData policy)

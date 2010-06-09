@@ -30,13 +30,12 @@ public class StorageConfiguration
 {
    /** Storage id. */
    private String id;
-   
+
    /** Storage name. */
    private String name;
-   
+
    /** Description. */
    private String description;
-   
 
    /** Additional properties. */
    private Map<String, Object> properties;
@@ -81,37 +80,37 @@ public class StorageConfiguration
       if (maxObjects != null)
          this.properties.put(MAX_ITEMS_NUMBER, maxObjects);
    }
-   
+
    /**
     * Get repository id.
-    *
+    * 
     * @return the repository id
     */
    public String getId()
    {
       return id;
    }
-   
+
    /**
     * Get repository description.
-    *
+    * 
     * @return the repository description
     */
    public String getDescription()
    {
       return description;
    }
-   
+
    /**
     * Get repository name.
-    *
+    * 
     * @return the repository name
     */
    public String getName()
    {
       return name;
    }
-   
+
    /**
     * @return properties
     */
@@ -139,7 +138,7 @@ public class StorageConfiguration
    {
       this.name = name;
    }
-   
+
    /**
     * @param properties properties
     */
@@ -147,7 +146,7 @@ public class StorageConfiguration
    {
       this.properties = properties;
    }
-   
+
    /**
     * @param description description
     */

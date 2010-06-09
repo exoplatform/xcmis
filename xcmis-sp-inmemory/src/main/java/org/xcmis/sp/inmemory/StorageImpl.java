@@ -131,10 +131,6 @@ public class StorageImpl implements Storage
       return UUID.randomUUID().toString();
    }
 
-   //final Map<String, Map<String, Value>> properties;
-
-   //final Map<String, byte[]> contents;
-
    final Map<String, Entry> entries;
 
    final Map<String, Set<String>> children;
@@ -142,10 +138,6 @@ public class StorageImpl implements Storage
    final Map<String, Set<String>> parents;
 
    final Set<String> unfiled;
-
-   //final Map<String, Set<String>> policies;
-
-   //final Map<String, Map<String, Set<String>>> permissions;
 
    final Map<String, Set<String>> relationships;
 
@@ -208,28 +200,15 @@ public class StorageImpl implements Storage
                (String)configuration.getProperties().get(StorageConfiguration.MAX_ITEMS_NUMBER)).intValue();
 
       this.entries = new ConcurrentHashMap<String, Entry>();
-
-      //this.properties = new ConcurrentHashMap<String, Map<String, Value>>();
       this.children = new ConcurrentHashMap<String, Set<String>>();
       this.parents = new ConcurrentHashMap<String, Set<String>>();
-
       this.versions = new ConcurrentHashMap<String, List<String>>();
       this.workingCopies = new ConcurrentHashMap<String, String>();
-
       this.unfiled = new CopyOnWriteArraySet<String>();
-
-      //this.contents = new ConcurrentHashMap<String, byte[]>();
-
       this.relationships = new ConcurrentHashMap<String, Set<String>>();
-
-      //this.policies = new ConcurrentHashMap<String, Set<String>>();
-
-      //this.permissions = new ConcurrentHashMap<String, Map<String, Set<String>>>();
-
       this.types = new ConcurrentHashMap<String, TypeDefinition>();
 
       PermissionMapping permissionMapping = new PermissionMapping();
-
       permissionMapping.put(PermissionMapping.CAN_GET_DESCENDENTS_FOLDER, //
          Arrays.asList(BasicPermissions.CMIS_READ.value()));
       permissionMapping.put(PermissionMapping.CAN_GET_FOLDER_TREE_FOLDER, //
@@ -354,7 +333,14 @@ public class StorageImpl implements Storage
       root.put(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(Calendar.getInstance()));
       root.put(CmisConstants.LAST_MODIFIED_BY, new StringValue("system"));
 
-      Entry rootEntry = new Entry(root, null, null);
+      // TODO : concurrent
+      Map<String, Set<String>> p = new HashMap<String, Set<String>>();
+      p.put("any", Collections.singleton("cmis:all"));
+      
+      
+      Entry rootEntry = new Entry(root, null, /*null*/p);
+      
+      
       entries.put(rootEntry.getId(), rootEntry);
       parents.put(ROOT_FOLDER_ID, EMPTY_PARENTS);
       children.put(ROOT_FOLDER_ID, new CopyOnWriteArraySet<String>());
@@ -431,6 +417,8 @@ public class StorageImpl implements Storage
       docEntry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(cal));
       docEntry.setValue(CmisConstants.IS_LATEST_VERSION, new BooleanValue(true));
       docEntry.setValue(CmisConstants.IS_MAJOR_VERSION, new BooleanValue(versioningState == VersioningState.MAJOR));
+      docEntry.setValue(CmisConstants.IS_LATEST_MAJOR_VERSION, new BooleanValue(
+         versioningState == VersioningState.MAJOR));
 
       // TODO : support for checked-out initial state
       docEntry.setValue(CmisConstants.VERSION_LABEL, new StringValue(DocumentDataImpl.LATEST_LABEL));
@@ -555,6 +543,8 @@ public class StorageImpl implements Storage
       docEntry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(cal));
       docEntry.setValue(CmisConstants.IS_LATEST_VERSION, new BooleanValue(true));
       docEntry.setValue(CmisConstants.IS_MAJOR_VERSION, new BooleanValue(versioningState == VersioningState.MAJOR));
+      docEntry.setValue(CmisConstants.IS_LATEST_MAJOR_VERSION, new BooleanValue(
+         versioningState == VersioningState.MAJOR));
 
       // TODO : support for checked-out initial state
       docEntry.setValue(CmisConstants.VERSION_LABEL, new StringValue(DocumentDataImpl.LATEST_LABEL));
@@ -829,6 +819,20 @@ public class StorageImpl implements Storage
 
       parents.put(relationshipId, EMPTY_PARENTS);
       entries.put(relationshipId, relationshipEntry);
+      Set<String> sourceRels = relationships.get(source.getObjectId());
+      if (sourceRels == null)
+      {
+         sourceRels = new CopyOnWriteArraySet<String>();
+         relationships.put(source.getObjectId(), sourceRels);
+      }
+      sourceRels.add(relationshipId);
+      Set<String> targetRels = relationships.get(target.getObjectId());
+      if (targetRels == null)
+      {
+         targetRels = new CopyOnWriteArraySet<String>();
+         relationships.put(target.getObjectId(), targetRels);
+      }
+      targetRels.add(relationshipId);
 
       // TODO index!!!!
 
@@ -955,6 +959,7 @@ public class StorageImpl implements Storage
       {
          v.add((DocumentData)getObjectById(vId));
       }
+      Collections.reverse(v);
       return v;
    }
 
@@ -1348,7 +1353,6 @@ public class StorageImpl implements Storage
       return getRepositoryInfo().getPrincipalAnonymous();
    }
 
-
    void validateMaxItemsNumber(ObjectData object) throws StorageException
    {
       if (entries.size() > maxItemsNumber)
@@ -1439,7 +1443,7 @@ public class StorageImpl implements Storage
 
       /**
        * The Constructor.
-       *
+       * 
        * @param itemMgr the item mgr
        * @param selectorName the selector name
        */
@@ -1471,7 +1475,7 @@ public class StorageImpl implements Storage
 
       /**
        * Return comparable location of the object
-       *
+       * 
        * @param identifer
        * @return
        */

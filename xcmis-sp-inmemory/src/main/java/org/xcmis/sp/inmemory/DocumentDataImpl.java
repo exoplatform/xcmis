@@ -120,6 +120,8 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
             ventry.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(false));
             ventry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue());
             ventry.setValue(CmisConstants.IS_LATEST_VERSION, new BooleanValue(false));
+            ventry.setValue(CmisConstants.IS_LATEST_MAJOR_VERSION, new BooleanValue(false));
+            ventry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, new StringValue());
             // update version labels
             ventry.setValue(CmisConstants.VERSION_LABEL, new StringValue("" + i++));
          }
@@ -144,18 +146,20 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
             throw new StorageException("Unable checkin PWC. " + ioe.getMessage(), ioe);
          }
 
-         entry.setValue(CmisConstants.IS_LATEST_VERSION, new BooleanValue(true));
          entry.setValue(CmisConstants.VERSION_LABEL, new StringValue(LATEST_LABEL));
+         entry.setValue(CmisConstants.IS_LATEST_VERSION, new BooleanValue(true));
          entry.setValue(CmisConstants.IS_MAJOR_VERSION, new BooleanValue(major));
+         entry.setValue(CmisConstants.IS_LATEST_MAJOR_VERSION, new BooleanValue(major));
+         entry.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(false));
+         entry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue());
+         entry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, new StringValue());
          if (checkinComment != null)
          {
             entry.setValue(CmisConstants.CHECKIN_COMMENT, new StringValue(checkinComment));
          }
-         save();
          storage.workingCopies.remove(getVersionSeriesId());
          storage.versions.get(getVersionSeriesId()).add(pwcId);
       }
-      this.save();
       return this;
    }
 
