@@ -334,7 +334,8 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
     */
    public boolean hasContent()
    {
-      return entry.getValue(PropertyDefinitions.CONTENT) != null;
+      ByteArrayValue cv = (ByteArrayValue)entry.getValue(PropertyDefinitions.CONTENT);
+      return cv != null && cv.getBytes().length > 0;
    }
 
    /**
