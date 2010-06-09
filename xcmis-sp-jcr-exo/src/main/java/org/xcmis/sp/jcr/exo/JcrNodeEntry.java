@@ -105,7 +105,7 @@ final class JcrNodeEntry
 
    /**
     * Create permission map which can be passed to JCR node.
-    *
+    * 
     * @param source source ACL
     * @return permission map
     */
@@ -810,7 +810,7 @@ final class JcrNodeEntry
 
    /**
     * Set new or remove (if <code>content == null</code>) content stream.
-    *
+    * 
     * @param content content
     * @throws IOException if any i/o error occurs
     */

@@ -118,6 +118,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
+ * In-memory implementation of xCMIS storage. This is storage is limited in
+ * number of items and total amount of content. Storage is not designed for high
+ * concurrency load. In some cases data in storage can be in inconsistency state.
+ *
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: StorageImpl.java 804 2010-04-16 16:48:59Z
  *          alexey.zavizionov@gmail.com $
@@ -1190,12 +1194,19 @@ public class StorageImpl implements Storage
     */
    public void unfileObject(ObjectData object)
    {
+      String objectId = object.getObjectId();
       Set<String> parentIds = parents.get(object.getObjectId());
       for (String id : parentIds)
       {
-         children.get(id).remove(object.getObjectId());
+         children.get(id).remove(objectId);
       }
       parents.clear();
+      unfiled.add(objectId);
+      if (indexListener != null)
+      {
+         indexListener.updated(object);
+      }
+
    }
 
    /**

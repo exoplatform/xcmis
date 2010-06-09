@@ -26,7 +26,7 @@ import java.util.Map;
 
 /**
  * CMIS repository configuration.
- *
+ * 
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id$
  */
@@ -38,7 +38,7 @@ public class StorageConfiguration
 
    /** Workspace name. */
    private String workspace;
-   
+
    /** Repository description. */
    private String description;
 
@@ -53,7 +53,7 @@ public class StorageConfiguration
 
    /**
     * Get repository id.
-    *
+    * 
     * @return the repository id
     */
    public String getId()
@@ -63,7 +63,7 @@ public class StorageConfiguration
 
    /**
     * Get index configuration.
-    *
+    * 
     * @return the index configuration
     */
    public IndexConfiguration getIndexConfiguration()
@@ -73,7 +73,7 @@ public class StorageConfiguration
 
    /**
     * Get additional repository's properties.
-    *
+    * 
     * @return properties
     */
    public Map<String, Object> getProperties()
@@ -87,7 +87,7 @@ public class StorageConfiguration
 
    /**
     * Get repository name.
-    *
+    * 
     * @return repository name.
     */
    public String getRepository()
@@ -97,17 +97,17 @@ public class StorageConfiguration
 
    /**
     * Get description.
-    *
+    * 
     * @return repository name.
     */
    public String getDescription()
    {
       return description;
    }
-   
+
    /**
     * Get workspace name.
-    *
+    * 
     * @return the workspace name
     */
    public String getWorkspace()
@@ -117,7 +117,7 @@ public class StorageConfiguration
 
    /**
     * Set CMIS repository id.
-    *
+    * 
     * @param id repository id
     */
    public void setId(String id)
@@ -127,7 +127,7 @@ public class StorageConfiguration
 
    /**
     * Set index configuration.
-    *
+    * 
     * @param indexConfiguration the index configuration
     */
    public void setIndexConfiguration(IndexConfiguration indexConfiguration)
@@ -137,7 +137,7 @@ public class StorageConfiguration
 
    /**
     * Set additional repository's properties.
-    *
+    * 
     * @param properties properties map
     */
    public void setProperties(Map<String, Object> properties)
@@ -147,7 +147,7 @@ public class StorageConfiguration
 
    /**
     * Set repository name.
-    *
+    * 
     * @param repository the repository name
     */
    public void setRepository(String repository)
@@ -157,17 +157,17 @@ public class StorageConfiguration
 
    /**
     * Sets description.
-    *
+    * 
     * @param description string description
     */
    public void setDescription(String description)
    {
       this.description = description;
    }
-   
+
    /**
     * Set workspace name.
-    *
+    * 
     * @param workspace the workspace name
     */
    public void setWorkspace(String workspace)

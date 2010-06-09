@@ -152,7 +152,10 @@ class FolderDataImpl extends BaseObjectData implements FolderData
       {
          storage.unfiled.add(object.getObjectId());
       }
-      storage.indexListener.updated(object);
+      if (storage.indexListener != null)
+      {
+         storage.indexListener.updated(object);
+      }
    }
 
    private String calculatePath()

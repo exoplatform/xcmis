@@ -259,7 +259,10 @@ class FolderDataImpl extends BaseObjectData implements FolderData
          }
 
          session.save();
-         indexListener.updated(object);
+         if (indexListener != null)
+         {
+            indexListener.updated(object);
+         }
       }
       catch (RepositoryException re)
       {
@@ -456,7 +459,10 @@ class FolderDataImpl extends BaseObjectData implements FolderData
          }
 
          session.save();
-         indexListener.updated(object);
+         if (indexListener != null)
+         {
+            indexListener.updated(object);
+         }
       }
       catch (PathNotFoundException pe)
       {

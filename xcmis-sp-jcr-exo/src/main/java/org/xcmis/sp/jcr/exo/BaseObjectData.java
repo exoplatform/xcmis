@@ -565,7 +565,7 @@ abstract class BaseObjectData implements ObjectData
 
    /**
     * Update properties, skip on-create and read-only properties
-    *
+    * 
     * @param property property to be updated
     */
    protected void doSetProperty(Property<?> property) throws NameConstraintViolationException

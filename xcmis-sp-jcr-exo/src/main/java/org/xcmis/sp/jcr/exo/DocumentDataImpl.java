@@ -206,6 +206,8 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
 
          session.save();
 
+         // TODO : indexing of newly created PWC
+
          DocumentData pwc = new PWC(pwcNodeEntry, indexListener, renditionManager, this);
          return pwc;
       }
@@ -512,5 +514,9 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
    void unfile()
    {
       jcrEntry.unfile();
+      if (indexListener != null)
+      {
+         indexListener.updated(this);
+      }
    }
 }

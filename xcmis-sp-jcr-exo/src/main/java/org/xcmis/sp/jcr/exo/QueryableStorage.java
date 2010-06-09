@@ -56,7 +56,7 @@ import java.util.Set;
 import javax.jcr.Session;
 
 /**
- * {@link Storage} with implemented Storage.query(Query query)  method.
+ * {@link Storage} with implemented Storage.query(Query query) method.
  */
 public class QueryableStorage extends StorageImpl
 {
@@ -75,15 +75,17 @@ public class QueryableStorage extends StorageImpl
     * @param configuration StorageConfiguration
     * @param searchService the search service
     */
-   public QueryableStorage(Session session, StorageConfiguration configuration, SearchService searchService, PermissionService permissionService)
+   public QueryableStorage(Session session, StorageConfiguration configuration, SearchService searchService,
+      PermissionService permissionService)
    {
-      super(session, configuration,permissionService);
+      super(session, configuration, permissionService);
       this.searchService = searchService;
       this.cmisQueryParser = new CmisQueryParser();
    }
 
    /**
     * Constructor.
+    * 
     * @param session Session
     * @param configuration StorageConfiguration
     * @param renditionManager RenditionManager
@@ -292,7 +294,7 @@ public class QueryableStorage extends StorageImpl
 
       /**
        * The Constructor.
-       *
+       * 
        * @param selectorName String selector name
        * @param storage the storage
        */
@@ -324,6 +326,7 @@ public class QueryableStorage extends StorageImpl
 
       /**
        * Return comparable location of the object.
+       * 
        * @param identifer String
        * @return path String
        */

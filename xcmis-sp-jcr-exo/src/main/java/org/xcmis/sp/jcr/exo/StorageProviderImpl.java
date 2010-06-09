@@ -70,7 +70,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
    {
 
       /**
-       * The  storage configuration.
+       * The storage configuration.
        */
       private StorageConfiguration storage;
 
@@ -100,7 +100,7 @@ public class StorageProviderImpl implements StorageProvider, Startable
    private RenditionManager renditionManager;
 
    private StorageConfiguration storageConfig = null;
-   
+
    private PermissionService permissionService;
 
    private final Map<String, SearchService> searchServices = new HashMap<String, SearchService>();
@@ -151,7 +151,8 @@ public class StorageProviderImpl implements StorageProvider, Startable
          Session session = repository.login(ws);
 
          SearchService searchService = getSearchService(storageConfig.getId());
-         Storage storage = new QueryableStorage(session, storageConfig, renditionManager, searchService, permissionService);
+         Storage storage =
+            new QueryableStorage(session, storageConfig, renditionManager, searchService, permissionService);
          IndexListener indexListener = new IndexListener(storage, searchService);
          //TODO make this method public
          ((StorageImpl)storage).setIndexListener(indexListener);
@@ -177,7 +178,8 @@ public class StorageProviderImpl implements StorageProvider, Startable
    }
 
    /**
-    * Gets the search service. 
+    * Gets the search service.
+    * 
     * @param id String
     * @return instance of {@link SearchService}
     * @throws SearchServiceException

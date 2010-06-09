@@ -89,7 +89,7 @@ public class DocumentVersion extends DocumentDataImpl
     */
    @Override
    public DocumentData checkin(boolean major, String checkinComment, Map<String, Property<?>> properties,
-                               ContentStream content, List<AccessControlEntry> acl, Collection<PolicyData> policies) throws StorageException
+      ContentStream content, List<AccessControlEntry> acl, Collection<PolicyData> policies) throws StorageException
    {
       throw new CmisRuntimeException("Not supported for non current version of document.");
    }
@@ -153,7 +153,7 @@ public class DocumentVersion extends DocumentDataImpl
     */
    @Override
    public ItemsIterator<RelationshipData> getRelationships(RelationshipDirection direction, TypeDefinition type,
-                                                           boolean includeSubRelationshipTypes)
+      boolean includeSubRelationshipTypes)
    {
       return CmisUtils.emptyItemsIterator();
    }
@@ -256,8 +256,8 @@ public class DocumentVersion extends DocumentDataImpl
             VersionHistory versionHistory = version.getContainingHistory();
             Node latest = ((ExtendedSession)session).getNodeByIdentifier(versionHistory.getVersionableUUID());
             document =
-               new DocumentDataImpl(new JcrNodeEntry(latest, JcrTypeHelper.getTypeDefinition(latest.getPrimaryNodeType(), true)),
-                  indexListener, renditionManager);
+               new DocumentDataImpl(new JcrNodeEntry(latest, JcrTypeHelper.getTypeDefinition(latest
+                  .getPrimaryNodeType(), true)), indexListener, renditionManager);
          }
          catch (RepositoryException re)
          {

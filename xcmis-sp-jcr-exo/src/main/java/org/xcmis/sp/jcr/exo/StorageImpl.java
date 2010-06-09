@@ -318,7 +318,7 @@ public class StorageImpl implements Storage
 
       /**
        * Create RenditionIterator instance.
-       *
+       * 
        * @param iter the node iterator
        */
       public RenditionIterator(NodeIterator iter)
@@ -1431,7 +1431,7 @@ public class StorageImpl implements Storage
          {
             if (renditionManager != null)
             {
-               return  renditionManager.getRenditions(object);
+               return renditionManager.getRenditions(object);
             }
          }
       }
@@ -1785,7 +1785,7 @@ public class StorageImpl implements Storage
 
    /**
     * Get the level of hierarchy.
-    *
+    * 
     * @param discovered the node type
     * @param match the name of the node type
     * @return hierarchical level for node type
@@ -1806,7 +1806,7 @@ public class StorageImpl implements Storage
 
    /**
     * Create String representation of date in format required by JCR.
-    *
+    * 
     * @param c Calendar
     * @return formated string date
     */

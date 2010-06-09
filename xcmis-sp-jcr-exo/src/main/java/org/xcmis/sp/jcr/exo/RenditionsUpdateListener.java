@@ -52,7 +52,7 @@ public class RenditionsUpdateListener implements EventListener
 
    /**
     * Instantiates a new update listener.
-    *
+    * 
     * @param repository the repository
     * @param workspace the workspace
     * @param renditionProviders the rendition providers
@@ -125,8 +125,8 @@ public class RenditionsUpdateListener implements EventListener
                   }
 
                   RenditionContentStream renditionContentStream =
-                     (RenditionContentStream)renditionManager.getStream(new BaseContentStream(fileContent.getStream(), length, null, mimeType),
-                        mimeType);
+                     (RenditionContentStream)renditionManager.getStream(new BaseContentStream(fileContent.getStream(),
+                        length, null, mimeType), mimeType);
                   if (renditionContentStream != null)
                   {
                      String id = IdGenerator.generate();

@@ -23,7 +23,7 @@ import org.xcmis.spi.CmisConstants;
 
 /**
  * Constants.
- *
+ * 
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
  * @version $Id$
  */
