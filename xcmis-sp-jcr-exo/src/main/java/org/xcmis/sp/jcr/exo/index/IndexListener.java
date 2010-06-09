@@ -84,11 +84,11 @@ public class IndexListener
       }
       catch (IndexModificationException e)
       {
-         LOG.error(e.getLocalizedMessage(), e);
+         LOG.error(e.getLocalizedMessage());
       }
       catch (IOException e)
       {
-         LOG.error(e.getLocalizedMessage(), e);
+         LOG.error(e.getLocalizedMessage());
       }
    }
 
@@ -112,11 +112,11 @@ public class IndexListener
       }
       catch (IndexModificationException e)
       {
-         LOG.error(e.getLocalizedMessage(), e);
+         LOG.error(e.getLocalizedMessage());
       }
       catch (IOException e)
       {
-         LOG.error(e.getLocalizedMessage(), e);
+         LOG.error(e.getLocalizedMessage());
       }
    }
 

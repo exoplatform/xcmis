@@ -1003,133 +1003,137 @@ final class JcrNodeEntry
                session.move(srcPath, destPath);
                node = (Node)session.getItem(destPath);
             }
+            // 'cmis:name' is not stored as property. This is virtual property in xcmis-jcr.
          }
-         boolean multivalued = type.getPropertyDefinition(property.getId()).isMultivalued();
-         if (property.getType() == PropertyType.BOOLEAN)
+         else
          {
-            List<Boolean> booleans = (List<Boolean>)property.getValues();
-            if (booleans.size() == 0)
+            boolean multivalued = type.getPropertyDefinition(property.getId()).isMultivalued();
+            if (property.getType() == PropertyType.BOOLEAN)
             {
-               node.setProperty(property.getId(), (Value)null);
-            }
-            else if (!multivalued)
-            {
-               node.setProperty(property.getId(), booleans.get(0));
-            }
-            else
-            {
-               Value[] jcrValue = new Value[property.getValues().size()];
-               for (int i = 0; i < jcrValue.length; i++)
+               List<Boolean> booleans = (List<Boolean>)property.getValues();
+               if (booleans.size() == 0)
                {
-                  jcrValue[i] = new BooleanValue(booleans.get(i));
+                  node.setProperty(property.getId(), (Value)null);
                }
-               node.setProperty(property.getId(), jcrValue);
-            }
-         }
-         else if (property.getType() == PropertyType.DATETIME)
-         {
-            List<Calendar> datetime = (List<Calendar>)property.getValues();
-            if (datetime.size() == 0)
-            {
-               node.setProperty(property.getId(), (Value)null);
-            }
-            else if (!multivalued)
-            {
-               node.setProperty(property.getId(), datetime.get(0));
-            }
-            else
-            {
-               Value[] jcrValue = new Value[property.getValues().size()];
-               for (int i = 0; i < jcrValue.length; i++)
+               else if (!multivalued)
                {
-                  jcrValue[i] = new DateValue(datetime.get(i));
+                  node.setProperty(property.getId(), booleans.get(0));
                }
-               node.setProperty(property.getId(), jcrValue);
-            }
-         }
-         else if (property.getType() == PropertyType.DECIMAL)
-         {
-            List<BigDecimal> doubles = (List<BigDecimal>)property.getValues();
-            if (doubles.size() == 0)
-            {
-               node.setProperty(property.getId(), (Value)null);
-            }
-            else if (!multivalued)
-            {
-               node.setProperty(property.getId(), doubles.get(0).doubleValue());
-            }
-            else
-            {
-               Value[] jcrValue = new Value[property.getValues().size()];
-               for (int i = 0; i < jcrValue.length; i++)
+               else
                {
-                  jcrValue[i] = new DoubleValue(doubles.get(i).doubleValue());
+                  Value[] jcrValue = new Value[property.getValues().size()];
+                  for (int i = 0; i < jcrValue.length; i++)
+                  {
+                     jcrValue[i] = new BooleanValue(booleans.get(i));
+                  }
+                  node.setProperty(property.getId(), jcrValue);
                }
-               node.setProperty(property.getId(), jcrValue);
             }
-         }
-         else if (property.getType() == PropertyType.INTEGER)
-         {
-            List<BigInteger> integers = (List<BigInteger>)property.getValues();
-            if (integers.size() == 0)
+            else if (property.getType() == PropertyType.DATETIME)
             {
-               node.setProperty(property.getId(), (Value)null);
-            }
-            else if (!multivalued)
-            {
-               node.setProperty(property.getId(), integers.get(0).longValue());
-            }
-            else
-            {
-               Value[] jcrValue = new Value[property.getValues().size()];
-               for (int i = 0; i < jcrValue.length; i++)
+               List<Calendar> datetime = (List<Calendar>)property.getValues();
+               if (datetime.size() == 0)
                {
-                  jcrValue[i] = new LongValue(integers.get(i).longValue());
+                  node.setProperty(property.getId(), (Value)null);
                }
-               node.setProperty(property.getId(), jcrValue);
-            }
-         }
-         else if (property.getType() == PropertyType.HTML || property.getType() == PropertyType.ID
-            || property.getType() == PropertyType.STRING)
-         {
-            List<String> text = (List<String>)property.getValues();
-            if (text.size() == 0)
-            {
-               node.setProperty(property.getId(), (Value)null);
-            }
-            else if (!multivalued)
-            {
-               node.setProperty(property.getId(), text.get(0));
-            }
-            else
-            {
-               Value[] jcrValue = new Value[property.getValues().size()];
-               for (int i = 0; i < jcrValue.length; i++)
+               else if (!multivalued)
                {
-                  jcrValue[i] = new StringValue(text.get(i));
+                  node.setProperty(property.getId(), datetime.get(0));
                }
-               node.setProperty(property.getId(), jcrValue);
-            }
-         }
-         else if (property.getType() == PropertyType.URI)
-         {
-            List<URI> uris = (List<URI>)property.getValues();
-            if (uris.size() == 0)
-            {
-               node.setProperty(property.getId(), (Value)null);
-            }
-            else if (!multivalued)
-            {
-               node.setProperty(property.getId(), uris.get(0).toString());
-            }
-            else
-            {
-               Value[] jcrValue = new Value[property.getValues().size()];
-               for (int i = 0; i < jcrValue.length; i++)
+               else
                {
-                  jcrValue[i] = new StringValue(uris.get(i).toString());
+                  Value[] jcrValue = new Value[property.getValues().size()];
+                  for (int i = 0; i < jcrValue.length; i++)
+                  {
+                     jcrValue[i] = new DateValue(datetime.get(i));
+                  }
+                  node.setProperty(property.getId(), jcrValue);
                }
-               node.setProperty(property.getId(), jcrValue);
+            }
+            else if (property.getType() == PropertyType.DECIMAL)
+            {
+               List<BigDecimal> doubles = (List<BigDecimal>)property.getValues();
+               if (doubles.size() == 0)
+               {
+                  node.setProperty(property.getId(), (Value)null);
+               }
+               else if (!multivalued)
+               {
+                  node.setProperty(property.getId(), doubles.get(0).doubleValue());
+               }
+               else
+               {
+                  Value[] jcrValue = new Value[property.getValues().size()];
+                  for (int i = 0; i < jcrValue.length; i++)
+                  {
+                     jcrValue[i] = new DoubleValue(doubles.get(i).doubleValue());
+                  }
+                  node.setProperty(property.getId(), jcrValue);
+               }
+            }
+            else if (property.getType() == PropertyType.INTEGER)
+            {
+               List<BigInteger> integers = (List<BigInteger>)property.getValues();
+               if (integers.size() == 0)
+               {
+                  node.setProperty(property.getId(), (Value)null);
+               }
+               else if (!multivalued)
+               {
+                  node.setProperty(property.getId(), integers.get(0).longValue());
+               }
+               else
+               {
+                  Value[] jcrValue = new Value[property.getValues().size()];
+                  for (int i = 0; i < jcrValue.length; i++)
+                  {
+                     jcrValue[i] = new LongValue(integers.get(i).longValue());
+                  }
+                  node.setProperty(property.getId(), jcrValue);
+               }
+            }
+            else if (property.getType() == PropertyType.HTML || property.getType() == PropertyType.ID
+               || property.getType() == PropertyType.STRING)
+            {
+               List<String> text = (List<String>)property.getValues();
+               if (text.size() == 0)
+               {
+                  node.setProperty(property.getId(), (Value)null);
+               }
+               else if (!multivalued)
+               {
+                  node.setProperty(property.getId(), text.get(0));
+               }
+               else
+               {
+                  Value[] jcrValue = new Value[property.getValues().size()];
+                  for (int i = 0; i < jcrValue.length; i++)
+                  {
+                     jcrValue[i] = new StringValue(text.get(i));
+                  }
+                  node.setProperty(property.getId(), jcrValue);
+               }
+            }
+            else if (property.getType() == PropertyType.URI)
+            {
+               List<URI> uris = (List<URI>)property.getValues();
+               if (uris.size() == 0)
+               {
+                  node.setProperty(property.getId(), (Value)null);
+               }
+               else if (!multivalued)
+               {
+                  node.setProperty(property.getId(), uris.get(0).toString());
+               }
+               else
+               {
+                  Value[] jcrValue = new Value[property.getValues().size()];
+                  for (int i = 0; i < jcrValue.length; i++)
+                  {
+                     jcrValue[i] = new StringValue(uris.get(i).toString());
+                  }
+                  node.setProperty(property.getId(), jcrValue);
+               }
             }
          }
       }
