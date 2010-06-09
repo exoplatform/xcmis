@@ -36,6 +36,12 @@
 
       <dependency>
          <groupId>org.xcmis</groupId>
+         <artifactId>xcmis-sp-inmemory</artifactId>
+         <scope>runtime</scope>
+      </dependency>
+
+      <dependency>
+         <groupId>org.xcmis</groupId>
          <artifactId>xcmis-restatom</artifactId>
          <scope>runtime</scope>
       </dependency>
