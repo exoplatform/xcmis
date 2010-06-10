@@ -1412,7 +1412,7 @@ public class StorageImpl implements Storage
          throw new CmisRuntimeException(re.getMessage(), re);
       }
    }
-
+   
    /**
     * {@inheritDoc}
     */
@@ -1752,6 +1752,10 @@ public class StorageImpl implements Storage
 
       if (typeDefinition.getBaseId() == BaseType.DOCUMENT)
       {
+         if (!node.isCheckedOut())
+         {
+            node.checkout();
+         }
          if (node.getParent().isNodeType("xcmis:workingCopy"))
          {
             return getPWC(node);
