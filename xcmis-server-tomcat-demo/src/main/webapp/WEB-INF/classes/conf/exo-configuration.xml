@@ -94,18 +94,6 @@
 									</field>
 								</object>
 							</field>
-							<field name="properties">
-								<map type="java.util.HashMap">
-									<entry>
-										<key>
-											<string>exo.cmis.changetoken.feature</string>
-										</key>
-										<value>
-											<boolean>false</boolean>
-										</value>
-									</entry>
-								</map>
-							</field>
 						</object>
 					</field>
 				</object>
@@ -126,18 +114,6 @@
 						<object type="org.xcmis.sp.inmemory.StorageConfiguration">
 							<field name="id">
 								<string>cmis-inmem1</string>
-							</field>
-							<field name="properties">
-								<map type="java.util.HashMap">
-									<entry>
-										<key>
-											<string>exo.cmis.changetoken.feature</string>
-										</key>
-										<value>
-											<boolean>false</boolean>
-										</value>
-									</entry>
-								</map>
 							</field>
 						</object>
 					</field>
