@@ -489,6 +489,14 @@ class FolderDataImpl extends BaseObjectData implements FolderData
          node.remove();
          session.save();
       }
+      catch (javax.jcr.ReferentialIntegrityException rie)
+      {
+         // TODO : Check is really ONLY relationships is in references.
+         // Should raise StorageException if is not relationship reference.
+         throw new StorageException("Object can't be deleted cause to storage referential integrity. "
+            + "Probably this object is source or target at least one Relationship. "
+            + "Those Relationship should be deleted before.");
+      }
       catch (RepositoryException re)
       {
          throw new StorageException("Unable delete object. " + re.getMessage(), re);
