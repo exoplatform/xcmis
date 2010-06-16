@@ -19,6 +19,11 @@
 
 package org.xcmis.sp.tck.exo;
 
+import org.xcmis.spi.ItemsList;
+import org.xcmis.spi.TypeNotFoundException;
+import org.xcmis.spi.model.TypeDefinition;
+
+import java.util.List;
 
 /**
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey Zavizionov</a>
@@ -31,12 +36,49 @@ public class StorageTest extends BaseTest
    public void setUp() throws Exception
    {
       super.setUp();
+   }
 
+   public void testGeneral() throws Exception
+   {
+      assertNotNull(storageProvider);
+      assertNotNull(storageProvider.getConnection());
+      assertNotNull(storageProvider.getConnection().getStorage());
+      assertNotNull(storageProvider.getConnection().getStorage().getId());
    }
 
    public void testRepositoryInfo() throws Exception
    {
+      assertNotNull(getStorage().getRepositoryInfo());
+      assertNotNull(getStorage().getRepositoryInfo().getRepositoryId());
+      assertNotNull(getStorage().getRepositoryInfo().getRootFolderId());
+      assertNotNull(getStorage().getRepositoryInfo().getCapabilities());
+   }
 
+   public void testGetTypeDescendants()
+   {
+      ItemsList<TypeDefinition> typeChildren = null;
+      try
+      {
+         typeChildren = getConnection().getTypeChildren("cmis:folder", true, -1, 0);
+      }
+      catch (TypeNotFoundException e)
+      {
+         e.printStackTrace();
+      }
+      assertNotNull(typeChildren);
+      assertFalse(typeChildren.isHasMoreItems());
+      
+      ItemsList<TypeDefinition> typeChildren2 = null;
+      try
+      {
+         typeChildren2 = getConnection().getTypeChildren("cmis:document", true, -1, 0);
+      }
+      catch (TypeNotFoundException e)
+      {
+         e.printStackTrace();
+      }
+      assertNotNull(typeChildren2);
+      assertFalse(typeChildren2.isHasMoreItems());
    }
 
 }

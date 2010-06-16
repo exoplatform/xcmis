@@ -24,6 +24,7 @@ import junit.framework.TestCase;
 import org.exoplatform.container.StandaloneContainer;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.xcmis.spi.Connection;
 import org.xcmis.spi.Storage;
 import org.xcmis.spi.StorageProvider;
 
@@ -36,16 +37,28 @@ public abstract class BaseTest extends TestCase
 
    private static final Log LOG = ExoLogger.getLogger(BaseTest.class);
 
+   protected StandaloneContainer container;
+
+   protected StorageProvider storageProvider;
+
    @Override
    public void setUp() throws Exception
    {
-//      String containerConf = getClass().getResource("/conf/standalone/test-configuration.xml").toString();
-//      StandaloneContainer.addConfigurationURL(containerConf);
-      
-      StandaloneContainer container = StandaloneContainer.getInstance();
+      String containerConf = getClass().getResource("/conf/standalone/test-jcr-sp-configuration.xml").toString();
+      StandaloneContainer.addConfigurationURL(containerConf);
+      container = StandaloneContainer.getInstance();
 
-      StorageProvider storageProvider = (StorageProvider)container.getComponentInstanceOfType(StorageProvider.class);
-      Storage storage = storageProvider.getConnection().getStorage();
+      storageProvider = (StorageProvider)container.getComponentInstanceOfType(StorageProvider.class);
+   }
+
+   protected Connection getConnection()
+   {
+      return storageProvider.getConnection();
+   }
+
+   protected Storage getStorage()
+   {
+      return storageProvider.getConnection().getStorage();
    }
 
 }
