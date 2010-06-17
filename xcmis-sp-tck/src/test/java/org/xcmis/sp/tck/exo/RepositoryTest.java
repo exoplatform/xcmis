@@ -23,6 +23,8 @@ import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.TypeNotFoundException;
+import org.xcmis.spi.model.CmisObject;
+import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.RepositoryShortInfo;
 import org.xcmis.spi.model.TypeDefinition;
@@ -182,5 +184,19 @@ public class RepositoryTest extends BaseTest
    //      
    //   }
 
-
+   public void testGetChildren() throws Exception
+   {
+      createFolderTree();
+      // include relationship:TRUE
+      try
+      {
+      ItemsList<CmisObject>  result = getConnection().getChildren(rootfolderID, true, IncludeRelationships.BOTH, true, true, "", "*", "", 10, 0);
+      assertTrue(result.getNumItems() == 5);
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
 }
