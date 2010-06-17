@@ -112,6 +112,7 @@ import javax.jcr.Session;
 import javax.jcr.nodetype.NoSuchNodeTypeException;
 import javax.jcr.nodetype.NodeType;
 import javax.jcr.nodetype.NodeTypeIterator;
+import javax.jcr.nodetype.NodeTypeManager;
 import javax.jcr.version.OnParentVersionAction;
 import javax.jcr.version.Version;
 import javax.jcr.version.VersionHistory;
@@ -318,7 +319,7 @@ public class StorageImpl implements Storage
 
       /**
        * Create RenditionIterator instance.
-       * 
+       *
        * @param iter the node iterator
        */
       public RenditionIterator(NodeIterator iter)
@@ -1564,7 +1565,17 @@ public class StorageImpl implements Storage
          else
          {
             String nodeTypeName = JcrTypeHelper.getNodeTypeName(typeId);
-            for (NodeTypeIterator iter = session.getWorkspace().getNodeTypeManager().getPrimaryNodeTypes(); iter
+            NodeTypeManager nodeTypeManager = session.getWorkspace().getNodeTypeManager();
+            try
+            {
+               nodeTypeManager.getNodeType(nodeTypeName);
+            }
+            catch (NoSuchNodeTypeException nsne)
+            {
+               throw new TypeNotFoundException("Type " + typeId + " is not supported.");
+            }
+
+            for (NodeTypeIterator iter = nodeTypeManager.getPrimaryNodeTypes(); iter
                .hasNext();)
             {
                NodeType nt = iter.nextNodeType();
@@ -1789,7 +1800,7 @@ public class StorageImpl implements Storage
 
    /**
     * Get the level of hierarchy.
-    * 
+    *
     * @param discovered the node type
     * @param match the name of the node type
     * @return hierarchical level for node type
@@ -1810,7 +1821,7 @@ public class StorageImpl implements Storage
 
    /**
     * Create String representation of date in format required by JCR.
-    * 
+    *
     * @param c Calendar
     * @return formated string date
     */
