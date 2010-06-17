@@ -2402,7 +2402,7 @@ public abstract class Connection
     * @param includePropertyDefinition <code>true</code> if property definition
     *        should be included <code>false</code> otherwise
     * @param maxItems max number of items in response
-    * @param skipCount skip items
+    * @param skipCount the skip items
     * @return list of all base types or specified object type and its direct
     *         children
     * @throws TypeNotFoundException if type <code>typeId</code> does not exist

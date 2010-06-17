@@ -168,7 +168,8 @@ abstract class BaseObjectData implements ObjectData
                {
                   Node relNode = prop.getParent();
                   NodeType nodeType = relNode.getPrimaryNodeType();
-                  if (nodeType.getName().equals(type.getLocalName())
+                  if (type == null //
+                     || nodeType.getName().equals(type.getLocalName()) //
                      || (includeSubRelationshipTypes && nodeType.isNodeType(type.getLocalName())))
                   {
                      next = new RelationshipDataImpl(new JcrNodeEntry(relNode), indexListener);

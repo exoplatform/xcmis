@@ -22,6 +22,7 @@ package org.xcmis.sp.tck.exo;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.ItemsList;
+import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.IncludeRelationships;
@@ -54,7 +55,7 @@ public class RepositoryTest extends BaseTest
       assertNotNull(storageProvider.getConnection().getStorage());
       assertNotNull(storageProvider.getConnection().getStorage().getId());
    }
-   
+
    public void testGetRepositories()
    {
       Set<RepositoryShortInfo> storageInfos = CmisRegistry.getInstance().getStorageInfos();
@@ -105,8 +106,7 @@ public class RepositoryTest extends BaseTest
          if (ll.size() > 0)
             assertTrue(ll.contains(typeDefinition.getId()));
          Collection<PropertyDefinition<?>> propertyDefinitions = typeDefinition.getPropertyDefinitions();
-         System.out.println(">>> alexey: StorageTest.testGetTypeChildren propertyDefinitions.size() = "
-            + propertyDefinitions.size());
+         assertNotNull(propertyDefinitions.size());
          ll.remove(typeDefinition.getId());
       }
 
@@ -170,19 +170,28 @@ public class RepositoryTest extends BaseTest
       try
       {
          getConnection().getTypeChildren("cmis:kino", false, -1, 0);
+         fail("The type definition \"cmis:kino\" shouldn't exist.'");
       }
       catch (TypeNotFoundException e)
       {
          // OK
       }
-      fail("The type definition \"cmis:kino\" shouldn't exist.'");
+
    }
-   
 
-   //   public void testGetTypeDescendants()
-   //   {
-   //      
-   //   }
+   public void testGetTypeDescendants()
+   {
+      List<ItemsTree<TypeDefinition>> typeDescendants = null;
+      try
+      {
+         typeDescendants = getConnection().getTypeDescendants(CmisConstants.DOCUMENT, 2, true);
+      }
+      catch (TypeNotFoundException e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
 
-   
+  
 }
