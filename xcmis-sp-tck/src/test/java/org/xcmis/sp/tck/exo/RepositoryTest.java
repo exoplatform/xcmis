@@ -36,7 +36,7 @@ import java.util.Set;
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey Zavizionov</a>
  * @version $Id:  $
  */
-public class StorageTest extends BaseTest
+public class RepositoryTest extends BaseTest
 {
 
    @Override
