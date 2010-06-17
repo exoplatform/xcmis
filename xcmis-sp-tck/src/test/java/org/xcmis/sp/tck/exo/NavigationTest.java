@@ -32,7 +32,7 @@ public class NavigationTest extends BaseTest
       try
       {
       ItemsList<CmisObject>  result = getConnection().getChildren(rootfolderID, true, IncludeRelationships.BOTH, true, true, "*", "*", "", 10, 0);
-      assertEquals(5, result.getItems().size());
+      assertEquals(4, result.getItems().size());
       }
       catch (Exception e)
       {
