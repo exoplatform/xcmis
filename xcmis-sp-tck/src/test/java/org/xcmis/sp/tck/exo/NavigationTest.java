@@ -31,8 +31,8 @@ public class NavigationTest extends BaseTest
       // include relationship:TRUE
       try
       {
-      ItemsList<CmisObject>  result = getConnection().getChildren(rootfolderID, true, IncludeRelationships.BOTH, true, true, "", "*", "", 10, 0);
-      assertTrue(result.getNumItems() == 5);
+      ItemsList<CmisObject>  result = getConnection().getChildren(rootfolderID, true, IncludeRelationships.BOTH, true, true, "*", "*", "", 10, 0);
+      assertEquals(5, result.getItems().size());
       }
       catch (Exception e)
       {

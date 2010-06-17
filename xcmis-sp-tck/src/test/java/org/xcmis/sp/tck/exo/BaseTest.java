@@ -109,28 +109,27 @@ public abstract class BaseTest extends TestCase
    
    protected void  createFolderTree() throws Exception
    {
-      Storage storage =  getStorage();
-      FolderData rootFolder = (FolderData)storage.getObjectById(rootfolderID);
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs =
          new BaseContentStream("1234567890".getBytes(),null, new MimeType("text", "plain"));
       
-      FolderData folder1 = storage.createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "folder1"), null, null);
+      FolderData folder1 = getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "folder1"), null, null);
 
-      DocumentData doc1 = storage.createDocument(rootFolder, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null, null, VersioningState.MAJOR);
+      DocumentData doc1 = getStorage().createDocument(rootFolder, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null, null, VersioningState.MAJOR);
       
-      DocumentData doc2 =storage.createDocument(rootFolder, documentTypeDefinition, getPropsMap("cmis:document", "doc2"), cs, null, null, VersioningState.MAJOR);
+      DocumentData doc2 =getStorage().createDocument(rootFolder, documentTypeDefinition, getPropsMap("cmis:document", "doc2"), cs, null, null, VersioningState.MAJOR);
 
-      FolderData folder2 = storage.createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "folder2"), null, null);
+      FolderData folder2 = getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "folder2"), null, null);
 
-      DocumentData doc3 = storage.createDocument(folder2, documentTypeDefinition, getPropsMap("cmis:document", "doc3"), cs, null, null, VersioningState.MAJOR);
+      DocumentData doc3 = getStorage().createDocument(folder2, documentTypeDefinition, getPropsMap("cmis:document", "doc3"), cs, null, null, VersioningState.MAJOR);
          
-      FolderData folder3 = storage.createFolder(folder2, folderTypeDefinition, getPropsMap("cmis:folder", "folder3"), null, null);
+      FolderData folder3 = getStorage().createFolder(folder2, folderTypeDefinition, getPropsMap("cmis:folder", "folder3"), null, null);
 
-      DocumentData doc4 = storage.createDocument(folder3, documentTypeDefinition, getPropsMap("cmis:document", "doc4"), cs, null, null, VersioningState.MAJOR);
+      DocumentData doc4 = getStorage().createDocument(folder3, documentTypeDefinition, getPropsMap("cmis:document", "doc4"), cs, null, null, VersioningState.MAJOR);
 
-      RelationshipData rel1    = storage.createRelationship(doc3, doc4, relationshipTypeDefinition, getPropsMap("cmis:relationship", "rel1"), null, null);
+      RelationshipData rel1    = getStorage().createRelationship(doc3, doc4, relationshipTypeDefinition, getPropsMap("cmis:relationship", "rel1"), null, null);
 
-      RelationshipData rel2    = storage.createRelationship(doc1, doc2, relationshipTypeDefinition, getPropsMap("cmis:relationship", "rel2"), null, null);
+      RelationshipData rel2    = getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition, getPropsMap("cmis:relationship", "rel2"), null, null);
       
    }
 
