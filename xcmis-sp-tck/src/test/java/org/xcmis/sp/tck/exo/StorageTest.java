@@ -23,10 +23,12 @@ import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.TypeNotFoundException;
+import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.RepositoryShortInfo;
 import org.xcmis.spi.model.TypeDefinition;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -100,6 +102,9 @@ public class StorageTest extends BaseTest
          assertEquals(typeDefinition.getId(), typeDefinition.getBaseId().value());
          if (ll.size() > 0)
             assertTrue(ll.contains(typeDefinition.getId()));
+         Collection<PropertyDefinition<?>> propertyDefinitions = typeDefinition.getPropertyDefinitions();
+         System.out.println(">>> alexey: StorageTest.testGetTypeChildren propertyDefinitions.size() = "
+            + propertyDefinitions.size());
          ll.remove(typeDefinition.getId());
       }
 
@@ -166,15 +171,16 @@ public class StorageTest extends BaseTest
       }
       catch (TypeNotFoundException e)
       {
-         e.printStackTrace();
+         // OK
       }
       fail("The type definition \"cmis:kino\" shouldn't exist.'");
    }
    
-//   public void testGetTypeDescendants()
-//   {
-//      
-//   }
+
+   //   public void testGetTypeDescendants()
+   //   {
+   //      
+   //   }
 
 
 }
