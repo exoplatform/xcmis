@@ -184,19 +184,5 @@ public class RepositoryTest extends BaseTest
    //      
    //   }
 
-   public void testGetChildren() throws Exception
-   {
-      createFolderTree();
-      // include relationship:TRUE
-      try
-      {
-      ItemsList<CmisObject>  result = getConnection().getChildren(rootfolderID, true, IncludeRelationships.BOTH, true, true, "", "*", "", 10, 0);
-      assertTrue(result.getNumItems() == 5);
-      }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-         fail(e.getMessage());
-      }
-   }
+   
 }
