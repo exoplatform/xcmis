@@ -131,6 +131,7 @@ public abstract class BaseTest extends TestCase
       RelationshipData rel1    = storage.createRelationship(doc3, doc4, relationshipTypeDefinition, getPropsMap("cmis:relationship", "rel1"), null, null);
 
       RelationshipData rel2    = storage.createRelationship(doc1, doc2, relationshipTypeDefinition, getPropsMap("cmis:relationship", "rel2"), null, null);
+      
    }
 
    
