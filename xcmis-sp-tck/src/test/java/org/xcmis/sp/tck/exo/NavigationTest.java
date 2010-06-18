@@ -19,25 +19,221 @@
 
 package org.xcmis.sp.tck.exo;
 
+import java.util.Map;
+
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.IncludeRelationships;
+import org.xcmis.spi.model.Property;
 
 public class NavigationTest extends BaseTest
 {
-   public void testGetChildren() throws Exception
+   public void testGetChildrenWithRelationships() throws Exception
    {
       createFolderTree();
-      // include relationship:TRUE
       try
       {
-      ItemsList<CmisObject>  result = getConnection().getChildren(rootfolderID, true, IncludeRelationships.BOTH, true, true, "*", "*", "", 10, 0);
-      assertEquals(4, result.getItems().size());
+         ItemsList<CmisObject> result =
+            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "*", "*", "", 10, 0);
+         assertEquals(4, result.getItems().size());
+         int relCount = 0;
+         for (CmisObject one : result.getItems())
+         {
+            if (one.getRelationship().size() > 0)
+               relCount++;
+         }
+         assertEquals(2, relCount); //two relationships are present
       }
       catch (Exception e)
       {
          e.printStackTrace();
          fail(e.getMessage());
       }
+   }
+
+   public void testGetChildrenWithOutRelationships() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         ItemsList<CmisObject> result =
+            getConnection().getChildren(testroot, true, IncludeRelationships.NONE, true, true, "*", "*", "", 10, 0);
+         int relCount = 0;
+         for (CmisObject one : result.getItems())
+         {
+            if (one.getRelationship().size() > 0)
+               relCount++;
+         }
+         assertEquals(0, relCount); //no relationships are present
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+
+   public void testGetChildrenWithAllowableActions() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         ItemsList<CmisObject> result =
+            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "*", "*", "", 10, 0);
+         for (CmisObject one : result.getItems())
+         {
+            assertNotNull(one.getAllowableActions()); //allowable actions are present
+         }
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+
+   public void testGetChildrenWithOutAllowableActions() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         ItemsList<CmisObject> result =
+            getConnection().getChildren(testroot, false, IncludeRelationships.BOTH, true, true, "*", "*", "", 10, 0);
+         for (CmisObject one : result.getItems())
+         {
+            assertNull(one.getAllowableActions()); // no allowable actions are present
+         }
+
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+
+   public void testGetChildrenWithPathSegments() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         ItemsList<CmisObject> result =
+            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "*", "*", "", 10, 0);
+         for (CmisObject one : result.getItems())
+         {
+            assertNotNull(one.getPathSegment()); //path segment is present
+         }
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+
+   public void testGetChildrenWithOutPathSegments() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         ItemsList<CmisObject> result =
+            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, false, true, "*", "*", "", 10, 0);
+         for (CmisObject one : result.getItems())
+         {
+            assertNull(one.getPathSegment()); //no path segments are present
+         }
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+
+   public void testGetChildrenWithObjectInfo() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         ItemsList<CmisObject> result =
+            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "*", "*", "", 10, 0);
+         for (CmisObject one : result.getItems())
+         {
+            assertNotNull(one.getObjectInfo()); //obj info is present
+         }
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+
+   public void testGetChildrenWithOutObjectInfo() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         ItemsList<CmisObject> result =
+            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, false, "*", "*", "", 10, 0);
+         for (CmisObject one : result.getItems())
+         {
+            assertNull(one.getObjectInfo()); //no obj info is present
+         }
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+
+   public void testGetChildrenNoRenditions() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         ItemsList<CmisObject> result =
+            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "*", "cmis:none", "",
+               10, 0);
+         for (CmisObject one : result.getItems())
+         {
+            assertEquals(0, one.getRenditions().size()); //no renditions are present
+         }
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+
+   public void testGetChildrenPropertyFiltered() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         ItemsList<CmisObject> result =
+            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "cmis:name,cmis:path",
+               "*", "", 10, 0);
+         for (CmisObject one : result.getItems())
+         {
+            for (Map.Entry<String, Property<?>> e : one.getProperties().entrySet())
+            {
+               assertTrue(e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")); //Other props must be ignored
+            }
+         }
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+
+   @Override
+   public void tearDown() throws Exception
+   {
+      clear();
    }
 }

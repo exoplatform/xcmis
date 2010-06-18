@@ -20,6 +20,7 @@
 package org.xcmis.sp.tck.exo;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
@@ -29,6 +30,7 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.model.UnfileObject;
 import org.xcmis.spi.model.Updatability;
 import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.model.impl.StringProperty;
@@ -66,6 +68,11 @@ public abstract class BaseTest extends TestCase
    
    protected String rootfolderID;
    
+   protected String testroot;
+   
+   protected List<String> passedTests;
+   protected List<String> failedTests;
+   
 
    @Override
    public void setUp() throws Exception
@@ -96,6 +103,8 @@ public abstract class BaseTest extends TestCase
    /**  
     *   root
     *     |
+    *   testroot
+    *     |
     *     |--------------------------------
     *         |                |              |                  |
     *     Folder1    Folder2  Doc1-<rel>--Doc2
@@ -113,13 +122,15 @@ public abstract class BaseTest extends TestCase
       ContentStream cs =
          new BaseContentStream("1234567890".getBytes(),null, new MimeType("text", "plain"));
       
-      FolderData folder1 = getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "folder1"), null, null);
-
-      DocumentData doc1 = getStorage().createDocument(rootFolder, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null, null, VersioningState.MAJOR);
+      FolderData testroot = getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "folder1"), null, null);
       
-      DocumentData doc2 =getStorage().createDocument(rootFolder, documentTypeDefinition, getPropsMap("cmis:document", "doc2"), cs, null, null, VersioningState.MAJOR);
+      FolderData folder1 = getStorage().createFolder(testroot, folderTypeDefinition, getPropsMap("cmis:folder", "folder1"), null, null);
 
-      FolderData folder2 = getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "folder2"), null, null);
+      DocumentData doc1 = getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null, null, VersioningState.MAJOR);
+      
+      DocumentData doc2 =getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc2"), cs, null, null, VersioningState.MAJOR);
+
+      FolderData folder2 = getStorage().createFolder(testroot, folderTypeDefinition, getPropsMap("cmis:folder", "folder2"), null, null);
 
       DocumentData doc3 = getStorage().createDocument(folder2, documentTypeDefinition, getPropsMap("cmis:document", "doc3"), cs, null, null, VersioningState.MAJOR);
          
@@ -131,8 +142,17 @@ public abstract class BaseTest extends TestCase
 
       RelationshipData rel2    = getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition, getPropsMap("cmis:relationship", "rel2"), null, null);
       
+      this.testroot = testroot.getObjectId();
    }
 
+   protected void clear(){
+      try {
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(testroot);
+      getStorage().deleteTree(rootFolder, true, UnfileObject.DELETE, true);
+      } catch (Exception e){
+         e.printStackTrace();
+      }
+   }
    
    private Map<String, Property<?>>  getPropsMap(String baseType, String name){
       org.xcmis.spi.model.PropertyDefinition<?> def = PropertyDefinitions.getPropertyDefinition(baseType, CmisConstants.NAME);
