@@ -21,7 +21,10 @@ package org.xcmis.sp.tck.exo;
 
 import java.util.Map;
 
+import org.xcmis.spi.FilterNotValidException;
+import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsList;
+import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.Property;
@@ -231,6 +234,132 @@ public class NavigationTest extends BaseTest
       }
    }
 
+   public void testGetChildrenOnHasMore() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         ItemsList<CmisObject> result =
+            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "", "*", "", 2, 0);
+         assertTrue(result.isHasMoreItems());
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+   
+   
+   public void testGetChildrenMaxItemsLimit() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         ItemsList<CmisObject> result =
+            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "", "*", "", 3, 0);
+         assertEquals(3, result.getItems().size());
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+   
+   
+   public void testGetChildrenNumItemsCorrect() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         ItemsList<CmisObject> result =
+            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "", "*", "", 2, 0);
+         if (result.getNumItems() == -1 || result.getNumItems() == 4){
+         }else{
+             fail("NumItems test failed");
+         }
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+   
+   
+   public void testGetChildrenSkipCount() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         ItemsList<CmisObject> result =
+            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "", "*", "", 10, 1);
+         assertEquals(3, result.getItems().size());
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+   
+   
+   public void testGetChildrenObjectNotFoundException() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         ItemsList<CmisObject> result =
+            getConnection().getChildren(testroot+"11", true, IncludeRelationships.BOTH, true, true, "", "*", "", 10, 0);
+         fail();
+      }
+      catch (ObjectNotFoundException ex)
+      {
+      }
+      catch (Exception e){
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+
+   public void testGetChildrenInvaliArgumentException() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         ItemsList<CmisObject> result =
+            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "", "*", "", 10, 10);
+         fail();
+      }
+      catch (InvalidArgumentException ex)
+      {
+      }
+      catch (Exception e){
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+
+   
+   public void testGetChildrenFilterNotValidException() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         ItemsList<CmisObject> result =
+            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "(,*", "", "", 10, 0);
+         fail();
+      }
+      catch (FilterNotValidException ex)
+      {
+      }
+      catch (Exception e){
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+   
    @Override
    public void tearDown() throws Exception
    {
