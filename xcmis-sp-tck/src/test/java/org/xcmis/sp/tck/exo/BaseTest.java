@@ -105,15 +105,15 @@ public abstract class BaseTest extends TestCase
     *     |
     *   testroot
     *     |
-    *     |--------------------------------
-    *         |                |              |                  |
-    *     Folder1    Folder2  Doc1-<rel>--Doc2
-    *                           |
-    *                           --------------
-    *                                  |                |     
-    *                            Folder3       Doc3
-    *                                  |               |
-    *                                 Doc4 --<rel>  
+    *     |------------------------------------------------
+    *         |                              |                      |                       |
+    *     Folder1               Folder2 -<rel>- Doc1-<rel>--Doc2
+    *                                     |
+    *                                      ----------------
+    *                                         |                      |     
+    *                                      Folder3          Doc3
+    *                                          |                     |
+    *                                        Doc4 --<rel>-  
     */   
    
    protected void  createFolderTree() throws Exception
@@ -122,7 +122,7 @@ public abstract class BaseTest extends TestCase
       ContentStream cs =
          new BaseContentStream("1234567890".getBytes(),null, new MimeType("text", "plain"));
       
-      FolderData testroot = getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "folder1"), null, null);
+      FolderData testroot = getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
       
       FolderData folder1 = getStorage().createFolder(testroot, folderTypeDefinition, getPropsMap("cmis:folder", "folder1"), null, null);
 
@@ -141,6 +141,8 @@ public abstract class BaseTest extends TestCase
       RelationshipData rel1    = getStorage().createRelationship(doc3, doc4, relationshipTypeDefinition, getPropsMap("cmis:relationship", "rel1"), null, null);
 
       RelationshipData rel2    = getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition, getPropsMap("cmis:relationship", "rel2"), null, null);
+      
+      RelationshipData rel3    = getStorage().createRelationship(folder2, doc1, relationshipTypeDefinition, getPropsMap("cmis:relationship", "rel3"), null, null);
       
       this.testroot = testroot.getObjectId();
    }

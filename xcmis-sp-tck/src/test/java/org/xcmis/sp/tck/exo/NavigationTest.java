@@ -27,6 +27,7 @@ import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ItemsTree;
+import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.IncludeRelationships;
@@ -34,6 +35,12 @@ import org.xcmis.spi.model.Property;
 
 public class NavigationTest extends BaseTest
 {
+   
+   /**
+    * getChildren() test suite;
+    * 
+    */
+   
    public void testGetChildrenWithRelationships() throws Exception
    {
       createFolderTree();
@@ -48,7 +55,7 @@ public class NavigationTest extends BaseTest
             if (one.getRelationship().size() > 0)
                relCount++;
          }
-         assertEquals(2, relCount); //two relationships are present
+         assertEquals(3, relCount); //two relationships are present
       }
       catch (Exception e)
       {
@@ -368,6 +375,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
+   
+   
+   /**
+    * getDescendants() test suite;
+    * 
+    */
+   
+   
    public void testGetDescendantsSimple() throws Exception
    {
       createFolderTree();
@@ -439,7 +454,7 @@ public class NavigationTest extends BaseTest
             if (one.getRelationship().size() > 0)
                relCount++;
          }
-         assertEquals(2, relCount);
+         assertEquals(3, relCount);
       }
       catch (Exception e)
       {
@@ -654,6 +669,404 @@ public class NavigationTest extends BaseTest
          fail(e.getMessage());
       }
    }
+   
+   
+   /**
+    * getFolderTree() test suite;
+    * 
+    */
+   
+   public void testGetFolderTreeSimple() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         List<ItemsTree<CmisObject>> result =
+            getConnection().getFolderTree(testroot, -1, true, IncludeRelationships.BOTH, true, true, "", "*");
+         assertEquals(3, objectTreeToList(result).size());
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+   
+   public void testGetFolderTreeWithAllowableActions() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         List<ItemsTree<CmisObject>> result =
+            getConnection().getFolderTree(testroot, -1, true, IncludeRelationships.BOTH, true, true, "", "*");
+         List<CmisObject> list = objectTreeToList(result);
+         for (CmisObject one : list)
+         {
+            assertNotNull(one.getAllowableActions()); //allowable actions are present
+         }
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+
+   public void testGetFolderTreeWithOutAllowableActions() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         List<ItemsTree<CmisObject>> result =
+            getConnection().getFolderTree(testroot, -1, false, IncludeRelationships.BOTH, true, true, "", "*");
+         List<CmisObject> list = objectTreeToList(result);
+         for (CmisObject one : list)
+         {
+            assertNull(one.getAllowableActions()); //no allowable actions are present
+         }
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+
+   
+   public void testGetFolderTreeWithRelationships() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         List<ItemsTree<CmisObject>> result =
+            getConnection().getFolderTree(testroot, -1, true, IncludeRelationships.SOURCE, true, true, "", "*");
+         List<CmisObject> list = objectTreeToList(result);
+         int relCount = 0;
+         for (CmisObject one : list)
+         {
+            if (one.getRelationship().size() > 0)
+               relCount++;
+         }
+         assertEquals(1, relCount);
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   } 
+   
+   public void testGetFolderTreeWithOutRelationships() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         List<ItemsTree<CmisObject>> result =
+            getConnection().getFolderTree(testroot, -1, true, IncludeRelationships.NONE, true, true, "", "*");
+         List<CmisObject> list = objectTreeToList(result);
+         int relCount = 0;
+         for (CmisObject one : list)
+         {
+            if (one.getRelationship().size() > 0)
+               relCount++;
+         }
+         assertEquals(0, relCount);
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   } 
+   
+   
+   public void testGetFolderTreeWithPathSegment() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         List<ItemsTree<CmisObject>> result =
+            getConnection().getFolderTree(testroot, -1, true, IncludeRelationships.NONE, true, true, "", "*");
+         List<CmisObject> list = objectTreeToList(result);
+         for (CmisObject one : list)
+         {
+            assertNotNull(one.getPathSegment());
+         }
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   } 
+   
+   
+   public void testGetFolderTreeWithOutPathSegment() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         List<ItemsTree<CmisObject>> result =
+            getConnection().getFolderTree(testroot, -1, true, IncludeRelationships.NONE, false, true, "", "*");
+         List<CmisObject> list = objectTreeToList(result);
+         for (CmisObject one : list)
+         {
+            assertNull(one.getPathSegment());
+         }
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+   
+
+   public void testGetFolderTreeWithObjectInfo() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         List<ItemsTree<CmisObject>> result =
+            getConnection().getFolderTree(testroot, -1, true, IncludeRelationships.NONE, true, true, "", "*");
+         List<CmisObject> list = objectTreeToList(result);
+         for (CmisObject one : list)
+         {
+            assertNotNull(one.getObjectInfo());
+         }
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   } 
+   
+   
+   public void testGetFolderTreeWithOutObjectInfo() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         List<ItemsTree<CmisObject>> result =
+            getConnection().getFolderTree(testroot, -1, true, IncludeRelationships.NONE, true, false, "", "*");
+         List<CmisObject> list = objectTreeToList(result);
+         for (CmisObject one : list)
+         {
+            assertNull(one.getObjectInfo());
+         }
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+   
+   
+   public void testGetFolderTreePropertiesFiltered() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         List<ItemsTree<CmisObject>> result =
+            getConnection().getFolderTree(testroot, -1, true, IncludeRelationships.NONE, true, true, "cmis:name,cmis:path", "*");
+         List<CmisObject> list = objectTreeToList(result);
+         for (CmisObject one : list)
+         {
+            for (Map.Entry<String, Property<?>> e : one.getProperties().entrySet())
+            {
+               assertTrue(e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")); //Other props must be ignored
+            }
+         }
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+   
+   
+   public void testGetFolderTreeRenditionsFiltered() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         List<ItemsTree<CmisObject>> result =
+            getConnection().getFolderTree(testroot, -1, true, IncludeRelationships.NONE, true, true, "", "cmis:none");
+         List<CmisObject> list = objectTreeToList(result);
+         for (CmisObject one : list)
+         {
+           assertEquals(0, one.getRenditions().size());
+         }
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+   
+   
+   public void testGetFolderTreeDepthLimit() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         List<ItemsTree<CmisObject>> result =
+            getConnection().getFolderTree(testroot, 1, true, IncludeRelationships.NONE, true, true, "", "cmis:none");
+         List<CmisObject> list = objectTreeToList(result);
+         assertEquals(2, list.size()); //skipping last level with Doc4
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+   
+   
+   public void testGetFolderTreeFilterNotValidException() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         List<ItemsTree<CmisObject>> result =
+            getConnection().getFolderTree(testroot, 2, true, IncludeRelationships.NONE, true, true, "(,*", "cmis:none");
+         fail();
+      }catch (FilterNotValidException ex){
+         
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+
+   public void testGetFolderTreeInvalidArgument() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         List<ItemsTree<CmisObject>> result =
+            getConnection().getFolderTree(testroot, 0, true, IncludeRelationships.NONE, true, true, "", "*");
+         fail();
+      }catch (InvalidArgumentException ex){
+         
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+   
+   
+   public void testGetFolderParentSimple() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         ObjectData fold = getStorage().getObjectByPath("/testroot/folder1");
+         CmisObject result = getConnection().getFolderParent(fold.getObjectId(), true, "");
+         assertNotNull(result);
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+   
+   
+   public void testGetFolderParentWithObjectInfo() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         ObjectData fold = getStorage().getObjectByPath("/testroot/folder1");
+         CmisObject result = getConnection().getFolderParent(fold.getObjectId(), true, "");
+         assertNotNull(result.getObjectInfo());
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+
+   public void testGetFolderParentWithOutObjectInfo() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         ObjectData fold = getStorage().getObjectByPath("/testroot/folder1");
+         CmisObject result = getConnection().getFolderParent(fold.getObjectId(), false, "");
+         assertNull(result.getObjectInfo());
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+   
+   public void testGetFolderParentWithPropertiesFiltered() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         ObjectData fold = getStorage().getObjectByPath("/testroot/folder1");
+         CmisObject result = getConnection().getFolderParent(fold.getObjectId(), true,"cmis:name,cmis:path");
+         for (Map.Entry<String, Property<?>> e : result.getProperties().entrySet())
+         {
+            assertTrue(e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")); //Other props must be ignored
+         }
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+   
+   public void testGetFolderParentFilterNotValid() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         ObjectData fold = getStorage().getObjectByPath("/testroot/folder1");
+         CmisObject result = getConnection().getFolderParent(fold.getObjectId(), false, "(,*");
+         fail();
+      }catch (FilterNotValidException ex){
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+
+   
+   public void testGetFolderParentInvalidArgument() throws Exception
+   {
+      createFolderTree();
+      try
+      {
+         ObjectData fold = getStorage().getObjectByPath("/");
+         CmisObject result = getConnection().getFolderParent(fold.getObjectId(), true, "");
+         fail();
+      }catch (InvalidArgumentException ex){
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         fail(e.getMessage());
+      }
+   }
+
    
    
    /// Helper methods
