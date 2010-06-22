@@ -1338,7 +1338,7 @@ public class NavigationTest extends BaseTest
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getCheckedOutDocs(testroot, true, IncludeRelationships.BOTH, true, "", "", "", -1, 0);
+            getConnection().getCheckedOutDocs(null, true, IncludeRelationships.BOTH, true, "", "", "", -1, 0);
          assertEquals(3, result.getItems().size());
       }
       catch (Exception e)
@@ -1354,7 +1354,7 @@ public class NavigationTest extends BaseTest
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getCheckedOutDocs(testroot, true, IncludeRelationships.BOTH, true, "", "", "", -1, 0);
+            getConnection().getCheckedOutDocs(null, true, IncludeRelationships.BOTH, true, "", "", "", -1, 0);
          for (CmisObject one : result.getItems())
          {
             assertNotNull(one.getAllowableActions());
@@ -1373,7 +1373,7 @@ public class NavigationTest extends BaseTest
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getCheckedOutDocs(testroot, false, IncludeRelationships.BOTH, true, "", "", "", -1, 0);
+            getConnection().getCheckedOutDocs(null, false, IncludeRelationships.BOTH, true, "", "", "", -1, 0);
          for (CmisObject one : result.getItems())
          {
             assertNull(one.getAllowableActions());
@@ -1396,6 +1396,7 @@ public class NavigationTest extends BaseTest
          boolean found = false;
          for (CmisObject one : result.getItems())
          {
+            System.out.println(one.getObjectInfo().getName());
             if (one.getRelationship().size() > 0)
                found = true;
          }
@@ -1468,15 +1469,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   
-   
    public void testGetCheckedOutDocsWithNoRenditions() throws Exception
    {
       createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getCheckedOutDocs(testroot, false, IncludeRelationships.NONE, true, "", "cmis:none", "", -1, 0);
+            getConnection().getCheckedOutDocs(testroot, false, IncludeRelationships.NONE, true, "", "cmis:none", "",
+               -1, 0);
          for (CmisObject one : result.getItems())
          {
             assertEquals(0, one.getRenditions().size());
@@ -1488,15 +1488,15 @@ public class NavigationTest extends BaseTest
          fail(e.getMessage());
       }
    }
-   
-   
+
    public void testGetCheckedOutDocsWithPropertyFiltered() throws Exception
    {
       createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getCheckedOutDocs(testroot, false, IncludeRelationships.NONE, true, "cmis:name,cmis:path", "*", "", -1, 0);
+            getConnection().getCheckedOutDocs(testroot, false, IncludeRelationships.NONE, true, "cmis:name,cmis:path",
+               "*", "", -1, 0);
          for (CmisObject one : result.getItems())
          {
             for (Map.Entry<String, Property<?>> e : one.getProperties().entrySet())
@@ -1511,9 +1511,7 @@ public class NavigationTest extends BaseTest
          fail(e.getMessage());
       }
    }
-   
-   
-   
+
    public void testGetCheckedOutDocsMaxItems() throws Exception
    {
       createFolderTree();
@@ -1529,8 +1527,7 @@ public class NavigationTest extends BaseTest
          fail(e.getMessage());
       }
    }
-   
-   
+
    public void testGetCheckedOutDocsSkipCount() throws Exception
    {
       createFolderTree();
@@ -1546,8 +1543,7 @@ public class NavigationTest extends BaseTest
          fail(e.getMessage());
       }
    }
-   
-   
+
    public void testGetCheckedOutDocsFilterNotValidException() throws Exception
    {
       createFolderTree();
@@ -1557,8 +1553,9 @@ public class NavigationTest extends BaseTest
             getConnection().getCheckedOutDocs(testroot, false, IncludeRelationships.NONE, true, ",*)", "*", "", -1, 0);
          fail();
       }
-      catch (FilterNotValidException ex){
-         
+      catch (FilterNotValidException ex)
+      {
+
       }
       catch (Exception e)
       {
@@ -1566,23 +1563,8 @@ public class NavigationTest extends BaseTest
          fail(e.getMessage());
       }
    }
-   
-   /// Helper methods
-   public List<CmisObject> objectTreeToList(List<ItemsTree<CmisObject>> source)
-   {
-      List<CmisObject> result = new ArrayList<CmisObject>();
-      for (ItemsTree<CmisObject> one : source)
-      {
-         CmisObject type = one.getContainer();
-         if (one.getChildren() != null)
-         {
-            result.addAll(objectTreeToList(one.getChildren()));
-         }
-         result.add(type);
-      }
 
-      return result;
-   }
+   /// Helper methods
 
    @Override
    public void tearDown() throws Exception
