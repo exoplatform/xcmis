@@ -957,6 +957,10 @@ public class NavigationTest extends BaseTest
       }
    }
 
+   /**
+    * getFolderParent() test suite;
+    * 
+    */
    public void testGetFolderParentSimple() throws Exception
    {
       createFolderTree();
@@ -1062,6 +1066,10 @@ public class NavigationTest extends BaseTest
       }
    }
 
+   /**
+    * getObjectParent() test suite;
+    * 
+    */
    public void testGetObjectParentsSimple() throws Exception
    {
       createFolderTree();
@@ -1332,6 +1340,10 @@ public class NavigationTest extends BaseTest
       }
    }
 
+   /**
+    * getCheckedOutDocs() test suite;
+    * 
+    */
    public void testGetCheckedOutDocsSimple() throws Exception
    {
       createFolderTree();
@@ -1563,8 +1575,6 @@ public class NavigationTest extends BaseTest
          fail(e.getMessage());
       }
    }
-
-   /// Helper methods
 
    @Override
    public void tearDown() throws Exception
