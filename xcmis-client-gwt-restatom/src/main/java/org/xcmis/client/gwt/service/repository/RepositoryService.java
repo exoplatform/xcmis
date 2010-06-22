@@ -152,7 +152,6 @@ public class RepositoryService
       String params = "";
       params += (depth < -1) ? "" : CmisArguments.DEPTH + "=" + depth + "&";
       params += CmisArguments.INCLUDE_PROPERTY_DEFINITIONS + "=" + includePropertyDefinition;
-
       AsyncRequestCallback callback = new AsyncRequestCallback(eventBus, unmarshaller, event, errorEvent);
       AsyncRequest.build(RequestBuilder.GET, url + "?" + params).send(callback);
    }

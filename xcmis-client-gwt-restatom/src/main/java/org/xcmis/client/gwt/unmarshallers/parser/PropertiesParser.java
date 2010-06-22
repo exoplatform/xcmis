@@ -74,84 +74,101 @@ public class PropertiesParser
 
       NodeList nodeList = node.getChildNodes();
 
+      if (nodeList.getLength() <= 0)
+      {
+         return properties;
+      }
+
       // Go throw all properties
       for (int i = 0; i < nodeList.getLength(); i++)
       {
          Node item = nodeList.item(i);
-         
-         NamedNodeMap nodeListOfAttributes = item.getAttributes();
-         String propertyDefinitionId = (nodeListOfAttributes.getNamedItem(CMIS.PROPERTY_DEFINITION_ID)!= null) ? nodeListOfAttributes.getNamedItem(CMIS.PROPERTY_DEFINITION_ID).getNodeValue() : null;
-         String localName = (nodeListOfAttributes.getNamedItem(CMIS.LOCAL_NAME)!= null) ? nodeListOfAttributes.getNamedItem(CMIS.LOCAL_NAME).getNodeValue() : null;
-         String queryName = (nodeListOfAttributes.getNamedItem(CMIS.QUERY_NAME)!= null) ? nodeListOfAttributes.getNamedItem(CMIS.QUERY_NAME).getNodeValue() : null;
-         String displayName = (nodeListOfAttributes.getNamedItem(CMIS.DISPLAY_NAME)!= null) ? nodeListOfAttributes.getNamedItem(CMIS.DISPLAY_NAME).getNodeValue() : null;
-         
-         List<String> values = getValues(item);
+         if (item.toString().trim().length() > 0)
+         {
+            NamedNodeMap nodeListOfAttributes = item.getAttributes();
 
-         if (item.getNodeName().equals(CMIS.CMIS_PROPERTY_STRING))
-         {
-            StringProperty property =
-               new StringProperty(propertyDefinitionId, queryName, localName, displayName, values);
-            properties.put(propertyDefinitionId, property);
-         }
-         else if (item.getNodeName().equals(CMIS.CMIS_PROPERTY_BOOLEAN))
-         {
-            List<Boolean> booleanValues = new ArrayList<Boolean>();
-            for (String value : values)
-            {
-               booleanValues.add(Boolean.parseBoolean(value));
-            }
-            BooleanProperty property =
-               new BooleanProperty(propertyDefinitionId, queryName, localName, displayName, booleanValues);
-            properties.put(propertyDefinitionId, property);
-         }
-         else if (item.getNodeName().equals(CMIS.CMIS_PROPERTY_INTEGER))
-         {
-            List<Long> longValues = new ArrayList<Long>();
-            for (String value : values)
-            {
-               longValues.add(Long.parseLong(value));
-            }
-            IntegerProperty property =
-               new IntegerProperty(propertyDefinitionId, queryName, localName, displayName, longValues);
-            properties.put(propertyDefinitionId, property);
-         }
-         else if (item.getNodeName().equals(CMIS.CMIS_PROPERTY_URI))
-         {
-            UriProperty property = new UriProperty(propertyDefinitionId, queryName, localName, displayName, values);
-            properties.put(propertyDefinitionId, property);
-         }
-         else if (item.getNodeName().equals(CMIS.CMIS_PROPERTY_ID))
-         {
-            IdProperty property = new IdProperty(propertyDefinitionId, queryName, localName, displayName, values);
-            properties.put(propertyDefinitionId, property);
-         }
-         else if (item.getNodeName().equals(CMIS.CMIS_PROPERTY_DATE_TIME))
-         {
-            List<Date> dateValues = new ArrayList<Date>();
-            for (String value : values)
-            {
-               dateValues.add(DateUtil.parseDate(value));
-            }
-            DateTimeProperty property =
-               new DateTimeProperty(propertyDefinitionId, queryName, localName, displayName, dateValues);
-            properties.put(propertyDefinitionId, property);
-         }
-         else if (item.getNodeName().equals(CMIS.CMIS_PROPERTY_DECIMAL))
-         {
-            List<Double> doubleValues = new ArrayList<Double>();
-            for (String value : values)
-            {
-               doubleValues.add(Double.parseDouble(value));
-            }
+            String propertyDefinitionId =
+               (nodeListOfAttributes.getNamedItem(CMIS.PROPERTY_DEFINITION_ID) != null) ? nodeListOfAttributes
+                  .getNamedItem(CMIS.PROPERTY_DEFINITION_ID).getNodeValue() : null;
+            String localName =
+               (nodeListOfAttributes.getNamedItem(CMIS.LOCAL_NAME) != null) ? nodeListOfAttributes.getNamedItem(
+                  CMIS.LOCAL_NAME).getNodeValue() : null;
+            String queryName =
+               (nodeListOfAttributes.getNamedItem(CMIS.QUERY_NAME) != null) ? nodeListOfAttributes.getNamedItem(
+                  CMIS.QUERY_NAME).getNodeValue() : null;
+            String displayName =
+               (nodeListOfAttributes.getNamedItem(CMIS.DISPLAY_NAME) != null) ? nodeListOfAttributes.getNamedItem(
+                  CMIS.DISPLAY_NAME).getNodeValue() : null;
 
-            DecimalProperty property =
-               new DecimalProperty(propertyDefinitionId, queryName, localName, displayName, Double.valueOf("1"));
-            properties.put(propertyDefinitionId, property);
-         }
-         else if (item.getNodeName().equals(CMIS.CMIS_PROPERTY_HTML))
-         {
-            HtmlProperty property = new HtmlProperty(propertyDefinitionId, queryName, localName, displayName, values);
-            properties.put(propertyDefinitionId, property);
+            List<String> values = getValues(item);
+
+            if (item.getNodeName().equals(CMIS.CMIS_PROPERTY_STRING))
+            {
+               StringProperty property =
+                  new StringProperty(propertyDefinitionId, queryName, localName, displayName, values);
+               properties.put(propertyDefinitionId, property);
+            }
+            else if (item.getNodeName().equals(CMIS.CMIS_PROPERTY_BOOLEAN))
+            {
+               List<Boolean> booleanValues = new ArrayList<Boolean>();
+               for (String value : values)
+               {
+                  booleanValues.add(Boolean.parseBoolean(value));
+               }
+               BooleanProperty property =
+                  new BooleanProperty(propertyDefinitionId, queryName, localName, displayName, booleanValues);
+               properties.put(propertyDefinitionId, property);
+            }
+            else if (item.getNodeName().equals(CMIS.CMIS_PROPERTY_INTEGER))
+            {
+               List<Long> longValues = new ArrayList<Long>();
+               for (String value : values)
+               {
+                  longValues.add(Long.parseLong(value));
+               }
+               IntegerProperty property =
+                  new IntegerProperty(propertyDefinitionId, queryName, localName, displayName, longValues);
+               properties.put(propertyDefinitionId, property);
+            }
+            else if (item.getNodeName().equals(CMIS.CMIS_PROPERTY_URI))
+            {
+               UriProperty property = new UriProperty(propertyDefinitionId, queryName, localName, displayName, values);
+               properties.put(propertyDefinitionId, property);
+            }
+            else if (item.getNodeName().equals(CMIS.CMIS_PROPERTY_ID))
+            {
+               IdProperty property = new IdProperty(propertyDefinitionId, queryName, localName, displayName, values);
+               properties.put(propertyDefinitionId, property);
+            }
+            else if (item.getNodeName().equals(CMIS.CMIS_PROPERTY_DATE_TIME))
+            {
+               List<Date> dateValues = new ArrayList<Date>();
+               for (String value : values)
+               {
+                  dateValues.add(DateUtil.parseDate(value));
+               }
+               DateTimeProperty property =
+                  new DateTimeProperty(propertyDefinitionId, queryName, localName, displayName, dateValues);
+               properties.put(propertyDefinitionId, property);
+            }
+            else if (item.getNodeName().equals(CMIS.CMIS_PROPERTY_DECIMAL))
+            {
+               List<Double> doubleValues = new ArrayList<Double>();
+               for (String value : values)
+               {
+                  doubleValues.add(Double.parseDouble(value));
+               }
+
+               DecimalProperty property =
+                  new DecimalProperty(propertyDefinitionId, queryName, localName, displayName, Double.valueOf("1"));
+               properties.put(propertyDefinitionId, property);
+            }
+            else if (item.getNodeName().equals(CMIS.CMIS_PROPERTY_HTML))
+            {
+               HtmlProperty property =
+                  new HtmlProperty(propertyDefinitionId, queryName, localName, displayName, values);
+               properties.put(propertyDefinitionId, property);
+            }
          }
       }
       return properties;
