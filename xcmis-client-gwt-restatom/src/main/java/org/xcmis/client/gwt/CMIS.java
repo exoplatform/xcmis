@@ -970,7 +970,7 @@ public class CMIS
    /**
     * Feed_type.
     */
-   public static final String FEED_TYPE = "application/atom+xml; type=feed";
+   public static final String FEED_TYPE = "application/atom+xml;type=feed";
 
    /**
     * Href.
