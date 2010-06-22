@@ -105,13 +105,13 @@ public abstract class BaseTest extends TestCase
     *     |
     *   testroot
     *     |
-    *     |------------------------------------------------
-    *         |                              |                      |                       |
-    *     Folder1               Folder2 -<rel>- Doc1-<rel>--Doc2
+    *     |-------------------------------------------------------------------
+    *         |                              |                      |                       |           
+    *     Folder1               Folder2 -<rel>- Doc1-<rel>--Doc2      Doc5   Doc6
     *                                     |
-    *                                      ----------------
-    *                                         |                      |     
-    *                                      Folder3          Doc3
+    *                                      ------------------
+    *                                         |                      |                
+    *                                      Folder3          Doc3          
     *                                          |                     |
     *                                        Doc4 --<rel>-  
     */   
@@ -129,14 +129,21 @@ public abstract class BaseTest extends TestCase
       DocumentData doc1 = getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null, null, VersioningState.MAJOR);
       
       DocumentData doc2 =getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc2"), cs, null, null, VersioningState.MAJOR);
+      doc2.checkout();
 
       FolderData folder2 = getStorage().createFolder(testroot, folderTypeDefinition, getPropsMap("cmis:folder", "folder2"), null, null);
 
       DocumentData doc3 = getStorage().createDocument(folder2, documentTypeDefinition, getPropsMap("cmis:document", "doc3"), cs, null, null, VersioningState.MAJOR);
-         
+
       FolderData folder3 = getStorage().createFolder(folder2, folderTypeDefinition, getPropsMap("cmis:folder", "folder3"), null, null);
 
       DocumentData doc4 = getStorage().createDocument(folder3, documentTypeDefinition, getPropsMap("cmis:document", "doc4"), cs, null, null, VersioningState.MAJOR);
+      
+      DocumentData doc5 =getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc5"), cs, null, null, VersioningState.MAJOR);
+      doc5.checkout();
+      
+      DocumentData doc6 =getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc6"), cs, null, null, VersioningState.MAJOR);
+      doc6.checkout();
 
       RelationshipData rel1    = getStorage().createRelationship(doc3, doc4, relationshipTypeDefinition, getPropsMap("cmis:relationship", "rel1"), null, null);
 
