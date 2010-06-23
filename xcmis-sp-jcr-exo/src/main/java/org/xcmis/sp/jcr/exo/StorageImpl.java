@@ -442,9 +442,17 @@ public class StorageImpl implements Storage
 
    public static final Pattern XCMIS_PROPERTY_TYPE_PATTERN = Pattern.compile(".*" + StorageImpl.XCMIS_PROPERTY_TYPE);
 
-   static String LATEST_LABEL = "latest";
+   public static final String LATEST_LABEL = "latest";
 
-   static String PWC_LABEL = "pwc";
+   public static final String PWC_LABEL = "pwc";
+
+   private static final String VENDOR_NAME = "eXo";
+
+   private static final String PRODUCT_NAME = "xCMIS (eXo JCR SP)";
+
+   private static final String PRODUCT_VERSION = "1.0";
+
+   private static final String REPOSITORY_DESCRIPTION = "xCMIS (eXo JCR SP)";
 
    protected final Session session;
 
@@ -1413,7 +1421,7 @@ public class StorageImpl implements Storage
          throw new CmisRuntimeException(re.getMessage(), re);
       }
    }
-   
+
    /**
     * {@inheritDoc}
     */
@@ -1538,8 +1546,8 @@ public class StorageImpl implements Storage
                   CapabilityContentStreamUpdatable.ANYTIME, CapabilityJoin.NONE, CapabilityQuery.BOTHCOMBINED,
                   CapabilityRendition.READ, false, true, true, true, false, true, true, false), new ACLCapability(
                   permissionMapping, Collections.unmodifiableList(permissions), AccessControlPropagation.OBJECTONLY,
-                  SupportedPermissions.BASIC), SystemIdentity.ANONIM, SystemIdentity.ANY, null, null, true, null,
-               "eXo", "xCMIS (eXo JCR SP)", "1.0", null);
+                  SupportedPermissions.BASIC), SystemIdentity.ANONIM, SystemIdentity.ANY, null, null, true,
+               REPOSITORY_DESCRIPTION, VENDOR_NAME, PRODUCT_NAME, PRODUCT_VERSION, null);
       }
 
       // TODO update latestChangeLogToken when ChangeLogToken feature will be implemented
@@ -1575,8 +1583,7 @@ public class StorageImpl implements Storage
                throw new TypeNotFoundException("Type " + typeId + " is not supported.");
             }
 
-            for (NodeTypeIterator iter = nodeTypeManager.getPrimaryNodeTypes(); iter
-               .hasNext();)
+            for (NodeTypeIterator iter = nodeTypeManager.getPrimaryNodeTypes(); iter.hasNext();)
             {
                NodeType nt = iter.nextNodeType();
                // Get only direct children of specified type.

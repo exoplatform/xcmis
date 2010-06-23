@@ -19,42 +19,36 @@
 
 package org.xcmis.sp.tck.exo;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.jcr.NodeIterator;
-
 import junit.framework.TestCase;
 
 import org.exoplatform.container.StandaloneContainer;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.xcmis.sp.jcr.exo.StorageImpl;
-import org.xcmis.spi.model.CmisObject;
-import org.xcmis.spi.model.IncludeRelationships;
-import org.xcmis.spi.model.Property;
-import org.xcmis.spi.model.TypeDefinition;
-import org.xcmis.spi.model.UnfileObject;
-import org.xcmis.spi.model.Updatability;
-import org.xcmis.spi.model.VersioningState;
-import org.xcmis.spi.model.impl.IdProperty;
-import org.xcmis.spi.model.impl.StringProperty;
-import org.xcmis.spi.utils.MimeType;
 import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
-import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.Storage;
 import org.xcmis.spi.StorageProvider;
+import org.xcmis.spi.model.CmisObject;
+import org.xcmis.spi.model.IncludeRelationships;
+import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.model.VersioningState;
+import org.xcmis.spi.model.impl.IdProperty;
+import org.xcmis.spi.model.impl.StringProperty;
+import org.xcmis.spi.utils.MimeType;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey Zavizionov</a>

@@ -172,6 +172,14 @@ public class StorageImpl implements Storage
 
    static final Set<String> EMPTY_PARENTS = Collections.emptySet();
 
+   private static final String VENDOR_NAME = "eXo";
+
+   private static final String REPOSITORY_DESCRIPTION = "xCMIS (eXo InMemory SP)";
+
+   private static final String PRODUCT_VERSION = "1.0";
+
+   private static final String PRODUCT_NAME = "xCMIS (eXo InMemory SP)";
+
    private final long maxStorageMemSize;
 
    private final int maxItemsNumber;
@@ -295,7 +303,7 @@ public class StorageImpl implements Storage
                CapabilityRendition.READ, false, true, true, true, false, true, true, false), new ACLCapability(
                permissionMapping, Collections.unmodifiableList(supportedPermissions),
                AccessControlPropagation.OBJECTONLY, SupportedPermissions.BASIC), "anonymous", "any", null, null, true,
-            null, "eXo", "xCMIS (eXo InMemory SP)", "1.0", null);
+            REPOSITORY_DESCRIPTION, VENDOR_NAME, PRODUCT_NAME, PRODUCT_VERSION, null);
 
       types.put("cmis:document", //
          new TypeDefinition("cmis:document", BaseType.DOCUMENT, "cmis:document", "cmis:document", "", null,
