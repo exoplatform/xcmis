@@ -128,7 +128,7 @@ public class NavigationTest extends BaseTest
          {
             assertNull(one.getAllowableActions()); // no allowable actions are present
          }
-       pass();
+         pass();
       }
       catch (Exception e)
       {
@@ -284,7 +284,7 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-          
+
          e.printStackTrace();
          doFail(e.getMessage());
       }
@@ -359,7 +359,7 @@ public class NavigationTest extends BaseTest
          ItemsList<CmisObject> result =
             getConnection().getChildren(testroot + "11", true, IncludeRelationships.BOTH, true, true, "", "*", "", 10,
                0);
-          
+
          doFail();
       }
       catch (ObjectNotFoundException ex)
@@ -381,7 +381,7 @@ public class NavigationTest extends BaseTest
       {
          ItemsList<CmisObject> result =
             getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "", "*", "", 10, 10);
-          
+
          doFail();
       }
       catch (InvalidArgumentException ex)
@@ -403,7 +403,7 @@ public class NavigationTest extends BaseTest
       {
          ItemsList<CmisObject> result =
             getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "(,*", "", "", 10, 0);
-          
+
          doFail();
       }
       catch (FilterNotValidException ex)
@@ -702,7 +702,7 @@ public class NavigationTest extends BaseTest
       }
       catch (FilterNotValidException ex)
       {
-        pass();
+         pass();
       }
       catch (Exception e)
       {
@@ -723,7 +723,7 @@ public class NavigationTest extends BaseTest
       }
       catch (InvalidArgumentException ex)
       {
-        pass();
+         pass();
       }
       catch (Exception e)
       {
@@ -1016,7 +1016,7 @@ public class NavigationTest extends BaseTest
       }
       catch (FilterNotValidException ex)
       {
-        pass();
+         pass();
       }
       catch (Exception e)
       {
@@ -1037,7 +1037,7 @@ public class NavigationTest extends BaseTest
       }
       catch (InvalidArgumentException ex)
       {
-        pass();
+         pass();
       }
       catch (Exception e)
       {

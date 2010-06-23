@@ -265,20 +265,23 @@ public abstract class BaseTest extends TestCase
 
       return properties;
    }
-   
-   protected  void doFail(String message) throws Exception{
+
+   protected void doFail(String message) throws Exception
+   {
       System.out.println("FAILED");
       //failedTests.add(arg0);
       fail(message);
    }
 
-   protected  void doFail() throws Exception{
+   protected void doFail() throws Exception
+   {
       System.out.println("FAILED");
       //failedTests.add(arg0);
       fail();
    }
-   
-   protected void pass(){
+
+   protected void pass()
+   {
       System.out.println("PASSED");
       //passedTests.add(o);
    }
