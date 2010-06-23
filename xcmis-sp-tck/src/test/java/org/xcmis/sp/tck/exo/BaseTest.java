@@ -251,7 +251,7 @@ public abstract class BaseTest extends TestCase
       return result;
    }
 
-   private Map<String, Property<?>> getPropsMap(String baseType, String name)
+   protected Map<String, Property<?>> getPropsMap(String baseType, String name)
    {
       org.xcmis.spi.model.PropertyDefinition<?> def =
          PropertyDefinitions.getPropertyDefinition(baseType, CmisConstants.NAME);
@@ -265,5 +265,21 @@ public abstract class BaseTest extends TestCase
 
       return properties;
    }
+   
+   protected  void doFail(String message) throws Exception{
+      System.out.println("FAILED");
+      //failedTests.add(arg0);
+      fail(message);
+   }
 
+   protected  void doFail() throws Exception{
+      System.out.println("FAILED");
+      //failedTests.add(arg0);
+      fail();
+   }
+   
+   protected void pass(){
+      System.out.println("PASSED");
+      //passedTests.add(o);
+   }
 }

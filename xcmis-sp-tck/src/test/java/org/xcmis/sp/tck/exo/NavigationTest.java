@@ -48,6 +48,7 @@ public class NavigationTest extends BaseTest
 
    public void testGetChildrenWithRelationships() throws Exception
    {
+      System.out.print("Running testGetChildrenWithRelationships....");
       createFolderTree();
       try
       {
@@ -61,16 +62,18 @@ public class NavigationTest extends BaseTest
                relCount++;
          }
          assertEquals(3, relCount); //two relationships are present
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetChildrenWithOutRelationships() throws Exception
    {
+      System.out.print("Running testGetChildrenWithOutRelationships....");
       createFolderTree();
       try
       {
@@ -83,16 +86,18 @@ public class NavigationTest extends BaseTest
                relCount++;
          }
          assertEquals(0, relCount); //no relationships are present
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetChildrenWithAllowableActions() throws Exception
    {
+      System.out.print("Running testGetChildrenWithAllowableActions....");
       createFolderTree();
       try
       {
@@ -102,16 +107,18 @@ public class NavigationTest extends BaseTest
          {
             assertNotNull(one.getAllowableActions()); //allowable actions are present
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetChildrenWithOutAllowableActions() throws Exception
    {
+      System.out.print("Running testGetChildrenWithOutAllowableActions....");
       createFolderTree();
       try
       {
@@ -121,17 +128,18 @@ public class NavigationTest extends BaseTest
          {
             assertNull(one.getAllowableActions()); // no allowable actions are present
          }
-
+       pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetChildrenWithPathSegments() throws Exception
    {
+      System.out.print("Running testGetChildrenWithPathSegments....");
       createFolderTree();
       try
       {
@@ -141,16 +149,18 @@ public class NavigationTest extends BaseTest
          {
             assertNotNull(one.getPathSegment()); //path segment is present
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetChildrenWithOutPathSegments() throws Exception
    {
+      System.out.print("Running testGetChildrenWithOutPathSegments....");
       createFolderTree();
       try
       {
@@ -160,16 +170,18 @@ public class NavigationTest extends BaseTest
          {
             assertNull(one.getPathSegment()); //no path segments are present
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetChildrenWithObjectInfo() throws Exception
    {
+      System.out.print("Running testGetChildrenWithObjectInfo....");
       createFolderTree();
       try
       {
@@ -179,16 +191,18 @@ public class NavigationTest extends BaseTest
          {
             assertNotNull(one.getObjectInfo()); //obj info is present
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetChildrenWithOutObjectInfo() throws Exception
    {
+      System.out.print("Running testGetChildrenWithOutObjectInfo....");
       createFolderTree();
       try
       {
@@ -198,16 +212,18 @@ public class NavigationTest extends BaseTest
          {
             assertNull(one.getObjectInfo()); //no obj info is present
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetChildrenPropertyFiltered() throws Exception
    {
+      System.out.print("Running testGetChildrenPropertyFiltered....");
       createFolderTree();
       try
       {
@@ -221,16 +237,18 @@ public class NavigationTest extends BaseTest
                assertTrue(e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")); //Other props must be ignored
             }
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetChildrenRenditionFiltered() throws Exception
    {
+      System.out.print("Running testGetChildrenRenditionFiltered....");
       createFolderTree();
       try
       {
@@ -244,48 +262,55 @@ public class NavigationTest extends BaseTest
                assertEquals(0, one.getRenditions().size());
             }
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetChildrenOnHasMore() throws Exception
    {
+      System.out.print("Running testGetChildrenOnHasMore....");
       createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
             getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "", "*", "", 2, 0);
          assertTrue(result.isHasMoreItems());
+         pass();
       }
       catch (Exception e)
       {
+          
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetChildrenMaxItemsLimit() throws Exception
    {
+      System.out.print("Running testGetChildrenMaxItemsLimit....");
       createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
             getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "", "*", "", 3, 0);
          assertEquals(3, result.getItems().size());
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetChildrenNumItemsCorrect() throws Exception
    {
+      System.out.print("Running testGetChildrenNumItemsCorrect....");
       createFolderTree();
       try
       {
@@ -293,90 +318,102 @@ public class NavigationTest extends BaseTest
             getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "", "*", "", 2, 0);
          if (result.getNumItems() == -1 || result.getNumItems() == 4)
          {
+            pass();
          }
          else
          {
-            fail("NumItems test failed");
+            doFail("NumItems test failed");
          }
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetChildrenSkipCount() throws Exception
    {
+      System.out.print("Running testGetChildrenSkipCount....");
       createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
             getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "", "*", "", 10, 1);
          assertEquals(5, result.getItems().size());
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetChildrenObjectNotFoundException() throws Exception
    {
+      System.out.print("Running testGetChildrenObjectNotFoundException....");
       createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
             getConnection().getChildren(testroot + "11", true, IncludeRelationships.BOTH, true, true, "", "*", "", 10,
                0);
-         fail();
+          
+         doFail();
       }
       catch (ObjectNotFoundException ex)
       {
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetChildrenInvaliArgumentException() throws Exception
    {
+      System.out.print("Running testGetChildrenInvaliArgumentException....");
       createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
             getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "", "*", "", 10, 10);
-         fail();
+          
+         doFail();
       }
       catch (InvalidArgumentException ex)
       {
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetChildrenFilterNotValidException() throws Exception
    {
+      System.out.print("Running testGetChildrenFilterNotValidException....");
       createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
             getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "(,*", "", "", 10, 0);
-         fail();
+          
+         doFail();
       }
       catch (FilterNotValidException ex)
       {
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
@@ -387,22 +424,25 @@ public class NavigationTest extends BaseTest
 
    public void testGetDescendantsSimple() throws Exception
    {
+      System.out.print("Running testGetDescendantsSimple....");
       createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
             getConnection().getDescendants(testroot, -1, true, IncludeRelationships.BOTH, true, true, "", "*");
          assertEquals(9, objectTreeToList(result).size());
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetDescendantsWithAllowableActions() throws Exception
    {
+      System.out.print("Running testGetDescendantsWithAllowableActions....");
       createFolderTree();
       try
       {
@@ -413,16 +453,18 @@ public class NavigationTest extends BaseTest
          {
             assertNotNull(one.getAllowableActions()); //allowable actions are present
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetDescendantsWithOutAllowableActions() throws Exception
    {
+      System.out.print("Running testGetDescendantsWithOutAllowableActions....");
       createFolderTree();
       try
       {
@@ -433,16 +475,18 @@ public class NavigationTest extends BaseTest
          {
             assertNull(one.getAllowableActions()); //no allowable actions are present
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetDescendantsWithRelationships() throws Exception
    {
+      System.out.print("Running testGetDescendantsWithRelationships....");
       createFolderTree();
       try
       {
@@ -456,16 +500,18 @@ public class NavigationTest extends BaseTest
                relCount++;
          }
          assertEquals(3, relCount);
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetDescendantsWithOutRelationships() throws Exception
    {
+      System.out.print("Running testGetDescendantsWithOutRelationships....");
       createFolderTree();
       try
       {
@@ -479,16 +525,18 @@ public class NavigationTest extends BaseTest
                relCount++;
          }
          assertEquals(0, relCount);
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetDescendantsWithPathSegment() throws Exception
    {
+      System.out.print("Running testGetDescendantsWithPathSegment....");
       createFolderTree();
       try
       {
@@ -499,16 +547,18 @@ public class NavigationTest extends BaseTest
          {
             assertNotNull(one.getPathSegment());
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetDescendantsWithOutPathSegment() throws Exception
    {
+      System.out.print("Running testGetDescendantsWithOutPathSegment....");
       createFolderTree();
       try
       {
@@ -519,16 +569,18 @@ public class NavigationTest extends BaseTest
          {
             assertNull(one.getPathSegment());
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetDescendantsWithObjectInfo() throws Exception
    {
+      System.out.print("Running testGetDescendantsWithObjectInfo....");
       createFolderTree();
       try
       {
@@ -539,16 +591,18 @@ public class NavigationTest extends BaseTest
          {
             assertNotNull(one.getObjectInfo());
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetDescendantsWithOutObjectInfo() throws Exception
    {
+      System.out.print("Running testGetDescendantsWithOutObjectInfo....");
       createFolderTree();
       try
       {
@@ -559,16 +613,18 @@ public class NavigationTest extends BaseTest
          {
             assertNull(one.getObjectInfo());
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetDescendantsPropertiesFiltered() throws Exception
    {
+      System.out.print("Running testGetDescendantsPropertiesFiltered....");
       createFolderTree();
       try
       {
@@ -583,16 +639,18 @@ public class NavigationTest extends BaseTest
                assertTrue(e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")); //Other props must be ignored
             }
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetDescendantsRenditionsFiltered() throws Exception
    {
+      System.out.print("Running testGetDescendantsRenditionsFiltered....");
       createFolderTree();
       try
       {
@@ -603,16 +661,18 @@ public class NavigationTest extends BaseTest
          {
             assertEquals(0, one.getRenditions().size());
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetDescendantsDepthLimit() throws Exception
    {
+      System.out.print("Running testGetDescendantsDepthLimit....");
       createFolderTree();
       try
       {
@@ -620,52 +680,55 @@ public class NavigationTest extends BaseTest
             getConnection().getDescendants(testroot, 2, true, IncludeRelationships.NONE, true, true, "", "cmis:none");
          List<CmisObject> list = objectTreeToList(result);
          assertEquals(8, list.size()); //skipping last level with Doc4
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetDescendantsFilterNotValidException() throws Exception
    {
+      System.out.print("Running testGetDescendantsFilterNotValidException....");
       createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
             getConnection()
                .getDescendants(testroot, 2, true, IncludeRelationships.NONE, true, true, "(,*", "cmis:none");
-         fail();
+         doFail();
       }
       catch (FilterNotValidException ex)
       {
-
+        pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetDescendantsInvalidArgument() throws Exception
    {
+      System.out.print("Running testGetDescendantsInvalidArgument....");
       createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
             getConnection().getDescendants(testroot, 0, true, IncludeRelationships.NONE, true, true, "", "*");
-         fail();
+         doFail();
       }
       catch (InvalidArgumentException ex)
       {
-
+        pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
@@ -676,22 +739,25 @@ public class NavigationTest extends BaseTest
 
    public void testGetFolderTreeSimple() throws Exception
    {
+      System.out.print("Running testGetFolderTreeSimple....");
       createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
             getConnection().getFolderTree(testroot, -1, true, IncludeRelationships.BOTH, true, true, "", "*");
          assertEquals(3, objectTreeToList(result).size());
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetFolderTreeWithAllowableActions() throws Exception
    {
+      System.out.print("Running testGetFolderTreeWithAllowableActions....");
       createFolderTree();
       try
       {
@@ -702,16 +768,18 @@ public class NavigationTest extends BaseTest
          {
             assertNotNull(one.getAllowableActions()); //allowable actions are present
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetFolderTreeWithOutAllowableActions() throws Exception
    {
+      System.out.print("Running testGetFolderTreeWithOutAllowableActions....");
       createFolderTree();
       try
       {
@@ -722,16 +790,18 @@ public class NavigationTest extends BaseTest
          {
             assertNull(one.getAllowableActions()); //no allowable actions are present
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetFolderTreeWithRelationships() throws Exception
    {
+      System.out.print("Running testGetFolderTreeWithRelationships....");
       createFolderTree();
       try
       {
@@ -745,16 +815,18 @@ public class NavigationTest extends BaseTest
                relCount++;
          }
          assertEquals(1, relCount);
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetFolderTreeWithOutRelationships() throws Exception
    {
+      System.out.print("Running testGetFolderTreeWithOutRelationships....");
       createFolderTree();
       try
       {
@@ -768,16 +840,18 @@ public class NavigationTest extends BaseTest
                relCount++;
          }
          assertEquals(0, relCount);
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetFolderTreeWithPathSegment() throws Exception
    {
+      System.out.print("Running testGetFolderTreeWithPathSegment....");
       createFolderTree();
       try
       {
@@ -788,16 +862,18 @@ public class NavigationTest extends BaseTest
          {
             assertNotNull(one.getPathSegment());
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetFolderTreeWithOutPathSegment() throws Exception
    {
+      System.out.print("Running testGetFolderTreeWithOutPathSegment....");
       createFolderTree();
       try
       {
@@ -808,16 +884,18 @@ public class NavigationTest extends BaseTest
          {
             assertNull(one.getPathSegment());
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetFolderTreeWithObjectInfo() throws Exception
    {
+      System.out.print("Running testGetFolderTreeWithObjectInfo....");
       createFolderTree();
       try
       {
@@ -828,16 +906,18 @@ public class NavigationTest extends BaseTest
          {
             assertNotNull(one.getObjectInfo());
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetFolderTreeWithOutObjectInfo() throws Exception
    {
+      System.out.print("Running testGetFolderTreeWithOutObjectInfo....");
       createFolderTree();
       try
       {
@@ -848,16 +928,18 @@ public class NavigationTest extends BaseTest
          {
             assertNull(one.getObjectInfo());
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetFolderTreePropertiesFiltered() throws Exception
    {
+      System.out.print("Running testGetFolderTreePropertiesFiltered....");
       createFolderTree();
       try
       {
@@ -872,16 +954,18 @@ public class NavigationTest extends BaseTest
                assertTrue(e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")); //Other props must be ignored
             }
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetFolderTreeRenditionsFiltered() throws Exception
    {
+      System.out.print("Running testGetFolderTreeRenditionsFiltered....");
       createFolderTree();
       try
       {
@@ -892,16 +976,18 @@ public class NavigationTest extends BaseTest
          {
             assertEquals(0, one.getRenditions().size());
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetFolderTreeDepthLimit() throws Exception
    {
+      System.out.print("Running testGetFolderTreeDepthLimit....");
       createFolderTree();
       try
       {
@@ -909,51 +995,54 @@ public class NavigationTest extends BaseTest
             getConnection().getFolderTree(testroot, 1, true, IncludeRelationships.NONE, true, true, "", "cmis:none");
          List<CmisObject> list = objectTreeToList(result);
          assertEquals(2, list.size()); //skipping last level with Doc4
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetFolderTreeFilterNotValidException() throws Exception
    {
+      System.out.print("Running testGetFolderTreeFilterNotValidException....");
       createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
             getConnection().getFolderTree(testroot, 2, true, IncludeRelationships.NONE, true, true, "(,*", "cmis:none");
-         fail();
+         doFail();
       }
       catch (FilterNotValidException ex)
       {
-
+        pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetFolderTreeInvalidArgument() throws Exception
    {
+      System.out.print("Running testGetFolderTreeInvalidArgument....");
       createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
             getConnection().getFolderTree(testroot, 0, true, IncludeRelationships.NONE, true, true, "", "*");
-         fail();
+         doFail();
       }
       catch (InvalidArgumentException ex)
       {
-
+        pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
@@ -963,54 +1052,61 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderParentSimple() throws Exception
    {
+      System.out.print("Running testGetFolderParentSimple....");
       createFolderTree();
       try
       {
          ObjectData fold = getStorage().getObjectByPath("/testroot/folder1");
          CmisObject result = getConnection().getFolderParent(fold.getObjectId(), true, "");
          assertNotNull(result);
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetFolderParentWithObjectInfo() throws Exception
    {
+      System.out.print("Running testGetFolderParentWithObjectInfo....");
       createFolderTree();
       try
       {
          ObjectData fold = getStorage().getObjectByPath("/testroot/folder1");
          CmisObject result = getConnection().getFolderParent(fold.getObjectId(), true, "");
          assertNotNull(result.getObjectInfo());
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetFolderParentWithOutObjectInfo() throws Exception
    {
+      System.out.print("Running testGetFolderParentWithOutObjectInfo....");
       createFolderTree();
       try
       {
          ObjectData fold = getStorage().getObjectByPath("/testroot/folder1");
          CmisObject result = getConnection().getFolderParent(fold.getObjectId(), false, "");
          assertNull(result.getObjectInfo());
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetFolderParentWithPropertiesFiltered() throws Exception
    {
+      System.out.print("Running testGetFolderParentWithPropertiesFiltered....");
       createFolderTree();
       try
       {
@@ -1020,49 +1116,54 @@ public class NavigationTest extends BaseTest
          {
             assertTrue(e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")); //Other props must be ignored
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetFolderParentFilterNotValid() throws Exception
    {
+      System.out.print("Running testGetFolderParentFilterNotValid....");
       createFolderTree();
       try
       {
          ObjectData fold = getStorage().getObjectByPath("/testroot/folder1");
          CmisObject result = getConnection().getFolderParent(fold.getObjectId(), false, "(,*");
-         fail();
+         doFail();
       }
       catch (FilterNotValidException ex)
       {
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetFolderParentInvalidArgument() throws Exception
    {
+      System.out.print("Running testGetFolderParentInvalidArgument....");
       createFolderTree();
       try
       {
          ObjectData fold = getStorage().getObjectByPath("/");
          CmisObject result = getConnection().getFolderParent(fold.getObjectId(), true, "");
-         fail();
+         doFail();
       }
       catch (InvalidArgumentException ex)
       {
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
@@ -1072,6 +1173,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetObjectParentsSimple() throws Exception
    {
+      System.out.print("Running testGetObjectParentsSimple....");
       createFolderTree();
       try
       {
@@ -1079,16 +1181,18 @@ public class NavigationTest extends BaseTest
          List<ObjectParent> result =
             getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true, "", "*");
          assertEquals(1, result.size());
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetObjectParentsIncludeRelatioships() throws Exception
    {
+      System.out.print("Running testGetObjectParentsIncludeRelatioships....");
       createFolderTree();
       try
       {
@@ -1099,16 +1203,18 @@ public class NavigationTest extends BaseTest
          {
             assertTrue(one.getObject().getRelationship().size() > 0);
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetObjectParentsWithOutRelatioships() throws Exception
    {
+      System.out.print("Running testGetObjectParentsWithOutRelatioships....");
       createFolderTree();
       try
       {
@@ -1119,16 +1225,18 @@ public class NavigationTest extends BaseTest
          {
             assertEquals(0, one.getObject().getRelationship().size());
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetObjectParentsWithAllowableActions() throws Exception
    {
+      System.out.print("Running testGetObjectParentsWithAllowableActions....");
       createFolderTree();
       try
       {
@@ -1139,16 +1247,18 @@ public class NavigationTest extends BaseTest
          {
             assertNotNull(one.getObject().getAllowableActions());
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetObjectParentsWithOutAllowableActions() throws Exception
    {
+      System.out.print("Running testGetObjectParentsWithOutAllowableActions....");
       createFolderTree();
       try
       {
@@ -1159,16 +1269,18 @@ public class NavigationTest extends BaseTest
          {
             assertNull(one.getObject().getAllowableActions());
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetObjectParentsWithPathSegment() throws Exception
    {
+      System.out.print("Running testGetObjectParentsWithPathSegment....");
       createFolderTree();
       try
       {
@@ -1179,16 +1291,18 @@ public class NavigationTest extends BaseTest
          {
             assertNotNull(one.getRelativePathSegment());
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetObjectParentsWithOutPathSegment() throws Exception
    {
+      System.out.print("Running testGetObjectParentsWithOutPathSegment....");
       createFolderTree();
       try
       {
@@ -1199,16 +1313,18 @@ public class NavigationTest extends BaseTest
          {
             assertNull(one.getRelativePathSegment());
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetObjectParentsWithObjectInfo() throws Exception
    {
+      System.out.print("Running testGetObjectParentsWithObjectInfo....");
       createFolderTree();
       try
       {
@@ -1219,16 +1335,18 @@ public class NavigationTest extends BaseTest
          {
             assertNotNull(one.getObject().getObjectInfo());
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetObjectParentsWithOutRenditions() throws Exception
    {
+      System.out.print("Running testGetObjectParentsWithOutRenditions....");
       createFolderTree();
       try
       {
@@ -1240,16 +1358,18 @@ public class NavigationTest extends BaseTest
          {
             assertEquals(0, one.getObject().getRenditions().size());
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetObjectParentsWithOutObjectInfo() throws Exception
    {
+      System.out.print("Running testGetObjectParentsWithOutObjectInfo....");
       createFolderTree();
       try
       {
@@ -1260,16 +1380,18 @@ public class NavigationTest extends BaseTest
          {
             assertNull(one.getObject().getObjectInfo());
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetObjectParentsPropertiesFIltered() throws Exception
    {
+      System.out.print("Running testGetObjectParentsPropertiesFIltered....");
       createFolderTree();
       try
       {
@@ -1284,16 +1406,18 @@ public class NavigationTest extends BaseTest
                assertTrue(e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")); //Other props must be ignored
             }
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetObjectParentsFilterNotValid() throws Exception
    {
+      System.out.print("Running testGetObjectParentsFilterNotValid....");
       createFolderTree();
       try
       {
@@ -1301,20 +1425,22 @@ public class NavigationTest extends BaseTest
          List<ObjectParent> result =
             getConnection()
                .getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true, "(,*", "*");
-         fail();
+         doFail();
       }
       catch (FilterNotValidException ex)
       {
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetObjectParentsConstraintException() throws Exception
    {
+      System.out.print("Running testGetObjectParentsConstraintException....");
       createFolderTree();
       try
       {
@@ -1326,17 +1452,18 @@ public class NavigationTest extends BaseTest
             List<ObjectParent> result =
                getConnection().getObjectParents(it.next().getObjectId(), true, IncludeRelationships.BOTH, true, true,
                   "", "*");
-            fail();
+            doFail();
          }
 
       }
       catch (ConstraintException ex)
       {
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
@@ -1346,22 +1473,25 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocsSimple() throws Exception
    {
+      System.out.print("Running testGetCheckedOutDocsSimple....");
       createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
             getConnection().getCheckedOutDocs(null, true, IncludeRelationships.BOTH, true, "", "", "", -1, 0);
          assertEquals(3, result.getItems().size());
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetCheckedOutDocsWithAllowableActions() throws Exception
    {
+      System.out.print("Running testGetCheckedOutDocsWithAllowableActions....");
       createFolderTree();
       try
       {
@@ -1371,16 +1501,18 @@ public class NavigationTest extends BaseTest
          {
             assertNotNull(one.getAllowableActions());
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetCheckedOutDocsWithOutAllowableActions() throws Exception
    {
+      System.out.print("Running testGetCheckedOutDocsWithOutAllowableActions....");
       createFolderTree();
       try
       {
@@ -1390,16 +1522,18 @@ public class NavigationTest extends BaseTest
          {
             assertNull(one.getAllowableActions());
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetCheckedOutDocsWithRelationships() throws Exception
    {
+      System.out.print("Running testGetCheckedOutDocsWithRelationships....");
       createFolderTree();
       try
       {
@@ -1408,21 +1542,22 @@ public class NavigationTest extends BaseTest
          boolean found = false;
          for (CmisObject one : result.getItems())
          {
-            System.out.println(one.getObjectInfo().getName());
             if (one.getRelationship().size() > 0)
                found = true;
          }
          assertTrue(found);
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetCheckedOutDocsWithOutRelationships() throws Exception
    {
+      System.out.print("Running testGetCheckedOutDocsWithOutRelationships....");
       createFolderTree();
       try
       {
@@ -1435,16 +1570,18 @@ public class NavigationTest extends BaseTest
                found = true;
          }
          assertFalse(found);
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetCheckedOutDocsWithObjectInfo() throws Exception
    {
+      System.out.print("Running testGetCheckedOutDocsWithObjectInfo....");
       createFolderTree();
       try
       {
@@ -1454,16 +1591,18 @@ public class NavigationTest extends BaseTest
          {
             assertNotNull(one.getObjectInfo());
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetCheckedOutDocsWithOutObjectInfo() throws Exception
    {
+      System.out.print("Running testGetCheckedOutDocsWithOutObjectInfo....");
       createFolderTree();
       try
       {
@@ -1473,16 +1612,18 @@ public class NavigationTest extends BaseTest
          {
             assertNull(one.getObjectInfo());
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetCheckedOutDocsWithNoRenditions() throws Exception
    {
+      System.out.print("Running testGetCheckedOutDocsWithNoRenditions....");
       createFolderTree();
       try
       {
@@ -1493,16 +1634,18 @@ public class NavigationTest extends BaseTest
          {
             assertEquals(0, one.getRenditions().size());
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetCheckedOutDocsWithPropertyFiltered() throws Exception
    {
+      System.out.print("Running testGetCheckedOutDocsWithPropertyFiltered....");
       createFolderTree();
       try
       {
@@ -1516,63 +1659,69 @@ public class NavigationTest extends BaseTest
                assertTrue(e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")); //Other props must be ignored
             }
          }
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetCheckedOutDocsMaxItems() throws Exception
    {
+      System.out.print("Running testGetCheckedOutDocsMaxItems....");
       createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
             getConnection().getCheckedOutDocs(testroot, true, IncludeRelationships.BOTH, true, "", "", "", 2, 0);
          assertEquals(2, result.getItems().size());
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetCheckedOutDocsSkipCount() throws Exception
    {
+      System.out.print("Running testGetCheckedOutDocsSkipCount....");
       createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
             getConnection().getCheckedOutDocs(testroot, true, IncludeRelationships.BOTH, true, "", "", "", -1, 1);
          assertEquals(2, result.getItems().size());
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
    public void testGetCheckedOutDocsFilterNotValidException() throws Exception
    {
+      System.out.print("Running testGetCheckedOutDocsFilterNotValidException....");
       createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
             getConnection().getCheckedOutDocs(testroot, false, IncludeRelationships.NONE, true, ",*)", "*", "", -1, 0);
-         fail();
+         doFail();
       }
       catch (FilterNotValidException ex)
       {
-
+         pass();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
    }
 
