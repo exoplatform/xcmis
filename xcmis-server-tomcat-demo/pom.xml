@@ -125,6 +125,17 @@
          <groupId>org.apache.shindig</groupId>
          <artifactId>shindig-gadgets</artifactId>
          <scope>runtime</scope>
+         <exclusions>
+            <exclusion>
+               <groupId>caja</groupId>
+               <artifactId>caja</artifactId>
+            </exclusion>
+         </exclusions>
+      </dependency>
+      <dependency>
+         <groupId>caja</groupId>
+         <artifactId>caja</artifactId>
+         <scope>runtime</scope>
       </dependency>
       <dependency>
          <groupId>org.apache.shindig</groupId>

@@ -482,6 +482,11 @@
             <artifactId>shindig-social-api</artifactId>
             <version>${shindig.version}</version>
          </dependency>
+        <dependency>
+           <groupId>caja</groupId>
+           <artifactId>caja</artifactId>
+           <version>r3828</version>
+        </dependency>
          <dependency>
             <groupId>com.google.code.guice</groupId>
             <artifactId>guice</artifactId>
