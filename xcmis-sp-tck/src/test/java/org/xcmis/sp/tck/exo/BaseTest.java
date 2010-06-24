@@ -123,19 +123,24 @@ public abstract class BaseTest extends TestCase
    }
 
    /**  
+    *  STRUCTURE:
+    *  
     *   root
-    *     |
-    *   testroot
-    *     |
-    *     |---------------------------------------------------------------
-    *         |                              |                      |                       |           |           |
-    *     Folder1               Folder2 -<rel>- Doc1-<rel>--Doc2    Doc5   Doc6
-    *                                     |                                                    \___Ch/O___/
-    *                                      -----------------
-    *                                         |                      |                
-    *                                      Folder3          Doc3          
-    *                                          |                     |
-    *                                        Doc4 --<rel>-  
+    *    - testroot
+    *       |- Folder1
+    *       |- Folder2
+    *       |   |- Folder3
+    *       |   |   |- Doc4
+    *       |   |- Doc3
+    *       |- Doc1
+    *       |- Doc2
+    *       |- Doc5
+    *       |- Doc6
+    *       
+    *   Rel1 = doc3, doc4
+    *   Rel2 = doc1, doc2
+    *   Rel3 = folder2, doc1
+    *  
     */
    protected void createFolderTree() throws Exception
    {
@@ -143,38 +148,25 @@ public abstract class BaseTest extends TestCase
 
       FolderData testroot = createFolder(rootFolder, "testroot");
 
-      FolderData folder1 =
-         getStorage().createFolder(testroot, folderTypeDefinition, getPropsMap("cmis:folder", "folder1"), null, null);
+      FolderData folder1 = createFolder(testroot, "folder1");
 
       DocumentData doc1 = createDocument(testroot, "doc1", "1234567890");
 
-      DocumentData doc2 =
-         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc2"), cs, null,
-            null, VersioningState.MAJOR);
+      DocumentData doc2 = createDocument(testroot, "doc2", "1234567890");
       doc2.checkout();
 
-      FolderData folder2 =
-         getStorage().createFolder(testroot, folderTypeDefinition, getPropsMap("cmis:folder", "folder2"), null, null);
+      FolderData folder2 = createFolder(testroot, "folder2");
 
-      DocumentData doc3 =
-         getStorage().createDocument(folder2, documentTypeDefinition, getPropsMap("cmis:document", "doc3"), cs, null,
-            null, VersioningState.MAJOR);
+      DocumentData doc3 = createDocument(folder2, "doc3", "1234567890");
 
-      FolderData folder3 =
-         getStorage().createFolder(folder2, folderTypeDefinition, getPropsMap("cmis:folder", "folder3"), null, null);
+      FolderData folder3 = createFolder(folder2, "folder3");
 
-      DocumentData doc4 =
-         getStorage().createDocument(folder3, documentTypeDefinition, getPropsMap("cmis:document", "doc4"), cs, null,
-            null, VersioningState.MAJOR);
+      DocumentData doc4 = createDocument(folder3, "doc4", "1234567890");
 
-      DocumentData doc5 =
-         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc5"), cs, null,
-            null, VersioningState.MAJOR);
+      DocumentData doc5 = createDocument(testroot, "doc5", "1234567890");
       doc5.checkout();
 
-      DocumentData doc6 =
-         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc6"), cs, null,
-            null, VersioningState.MAJOR);
+      DocumentData doc6 = createDocument(testroot, "doc6", "1234567890");
       doc6.checkout();
 
       RelationshipData rel1 =
