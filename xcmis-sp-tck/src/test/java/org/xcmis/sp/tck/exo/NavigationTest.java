@@ -1729,5 +1729,6 @@ public class NavigationTest extends BaseTest
    public void tearDown() throws Exception
    {
       clear();
+      super.tearDown();
    }
 }

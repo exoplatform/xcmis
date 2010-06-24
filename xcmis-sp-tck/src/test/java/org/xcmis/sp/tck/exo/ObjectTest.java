@@ -29,13 +29,15 @@ import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.PolicyData;
+import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.UnfileObject;
 import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.model.impl.StringProperty;
 import org.xcmis.spi.utils.MimeType;
 
-import static org.junit.Assert.*;
 
+import static org.junit.Assert.*;
 
 public class ObjectTest extends BaseTest
 {
@@ -73,7 +75,6 @@ public class ObjectTest extends BaseTest
          e.printStackTrace();
          doFail(e.getMessage());
       }
-
    }
 
    public void testCreateDocumentCheckProperties() throws Exception
@@ -95,13 +96,13 @@ public class ObjectTest extends BaseTest
          assertNotNull(res.getProperty("cmis:name"));
          assertEquals("doc1", (String)res.getProperty("cmis:name").getValues().get(0)); //TODO: test more properties
          pass();
+
       }
       catch (Exception e)
       {
          e.printStackTrace();
          doFail(e.getMessage());
       }
-
    }
 
    public void testCreateDocumentApplyPolicy() throws Exception
@@ -148,9 +149,53 @@ public class ObjectTest extends BaseTest
 
    }
 
-   @Override
-   public void tearDown() throws Exception
+      public void testCreateDocumentWithACL() throws Exception
+      {
+         System.out.print("Running testCreateDocumentWithACL....");
+         FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+         byte[] before = new byte[15];
+         before = "1234567890aBcDE".getBytes();
+         ContentStream cs = new BaseContentStream(before, null, new MimeType("text", "plain"));
+         AccessControlEntry acl = new AccessControlEntry();
+         acl.setPrincipal("Makis");
+         acl.getPermissions().add("cmis:read");
+         ArrayList<AccessControlEntry> addACL = new ArrayList<AccessControlEntry>();
+         addACL.add(acl);
+         FolderData testroot =
+            getStorage()
+               .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+         try
+         {
+            String docId =
+               getConnection().createDocument(testroot.getObjectId(), getPropsMap("cmis:document", "doc1"), cs,addACL ,
+                  null, null, VersioningState.MAJOR);
+            ObjectData res = getStorage().getObjectById(docId);
+            for (AccessControlEntry one : res.getACL(false)){
+               if (one.getPrincipal().equalsIgnoreCase("Makis"))
+                  assertEquals(1, one.getPermissions().size());
+               asserrtTrue(one.getPermissions().contains("cmis:read"));
+            }
+            pass();
+         }
+         catch (Exception e)
+         {
+            e.printStackTrace();
+            doFail(e.getMessage());
+         }
+   
+      }
+
+   protected void tearDown()
    {
-      clear();
+      try
+      {
+         FolderData testroot = (FolderData)getStorage().getObjectByPath("/testroot");
+         getStorage().deleteTree(testroot, true, UnfileObject.DELETE, true);
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+
    }
 }

@@ -40,6 +40,7 @@ import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.model.UnfileObject;
 import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.model.impl.IdProperty;
 import org.xcmis.spi.model.impl.StringProperty;
@@ -196,32 +197,34 @@ public abstract class BaseTest extends TestCase
    {
       try
       {
-         //FolderData rootFolder = (FolderData)getStorage().getObjectById(testroot);
-         List<CmisObject> stuff =
-            objectTreeToList(getConnection().getDescendants(rootfolderID, -1, true, IncludeRelationships.BOTH, false,
-               true, "", ""));
-         for (CmisObject one : stuff)
-         {
-            if (one.getRelationship().size() > 0)
-            {
-               for (CmisObject relation : one.getRelationship())
-               {
-                  String rel_id = relation.getObjectInfo().getId();
-                  try
-                  {
-                     ObjectData rel_data = getStorage().getObjectById(rel_id);
-                     getStorage().deleteObject(rel_data, true);
-                  }
-                  catch (ObjectNotFoundException ex)
-                  {
-                     continue;
-                  }
-               }
-            }
+         FolderData rootFolder = (FolderData)getStorage().getObjectById(testroot);
+//         List<CmisObject> stuff =
+//            objectTreeToList(getConnection().getDescendants(rootfolderID, -1, true, IncludeRelationships.BOTH, false,
+//               true, "", ""));
+//         for (CmisObject one : stuff)
+//         {
+//            if (one.getRelationship().size() > 0)
+//            {
+//               for (CmisObject relation : one.getRelationship())
+//               {
+//                  String rel_id = relation.getObjectInfo().getId();
+//                  try
+//                  {
+//                     ObjectData rel_data = getStorage().getObjectById(rel_id);
+//                     getStorage().deleteObject(rel_data, true);
+//                  }
+//                  catch (ObjectNotFoundException ex)
+//                  {
+//                     continue;
+//                  }
+//               }
+//            }
+//
+//            getStorage().deleteObject(getStorage().getObjectById(one.getObjectInfo().getId()), true);
+//         }
 
-            getStorage().deleteObject(getStorage().getObjectById(one.getObjectInfo().getId()), true);
-         }
-
+         getStorage().deleteTree(rootFolder, true, UnfileObject.DELETE, true);
+         
       }
       catch (Exception e)
       {
