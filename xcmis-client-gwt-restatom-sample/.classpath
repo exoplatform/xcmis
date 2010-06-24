@@ -17,6 +17,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/scannotation-1.0.2.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/slf4j-api-1.5.6.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/slf4j-log4j12-1.5.6.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/xcmis-client-gwt-restatom-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/xcmis-client-gwt-restatom-1.1-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
