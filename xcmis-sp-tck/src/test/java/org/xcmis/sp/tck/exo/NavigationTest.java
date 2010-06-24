@@ -46,9 +46,14 @@ public class NavigationTest extends BaseTest
     * 
     */
 
-   public void testGetChildrenWithRelationships() throws Exception
+   /**
+    * 2.2.3.2.1
+    * Value indicating what relationships in which the objects returned participate MUST be returned, if any.
+    * @throws Exception
+    */
+   public void testGetChildren_Relationships() throws Exception
    {
-      System.out.print("Running testGetChildrenWithRelationships....");
+      System.out.print("Running testGetChildren_Relationships....");
       createFolderTree();
       try
       {
@@ -71,9 +76,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetChildrenWithOutRelationships() throws Exception
+   /**
+    * 2.2.3.1.1
+    * Value indicating what relationships in which the objects returned participate MUST be returned, if any.
+    * @throws Exception
+    */
+   public void testGetChildren_NoRelationships() throws Exception
    {
-      System.out.print("Running testGetChildrenWithOutRelationships....");
+      System.out.print("Running testGetChildren_NoRelationships....");
       createFolderTree();
       try
       {
@@ -95,9 +105,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetChildrenWithAllowableActions() throws Exception
+   /**
+    * 2.2.3.1.1
+    * If TRUE, then the Repository MUST return the available actions for each object in the result set. 
+    * @throws Exception
+    */
+   public void testGetChildren_AllowableActions() throws Exception
    {
-      System.out.print("Running testGetChildrenWithAllowableActions....");
+      System.out.print("Running testGetChildren_AllowableActions....");
       createFolderTree();
       try
       {
@@ -116,9 +131,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetChildrenWithOutAllowableActions() throws Exception
+   /**
+    * 2.2.3.1.1
+    * If TRUE, then the Repository MUST return the available actions for each object in the result set. 
+    * @throws Exception
+    */
+   public void testGetChildren_NoAllowableActions() throws Exception
    {
-      System.out.print("Running testGetChildrenWithOutAllowableActions....");
+      System.out.print("Running testGetChildren_NoAllowableActions....");
       createFolderTree();
       try
       {
@@ -137,9 +157,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetChildrenWithPathSegments() throws Exception
+   /**
+    * 2.2.3.1.1
+    * If TRUE, returns a PathSegment for each child object for use in constructing that object’s path.
+    * @throws Exception
+    */
+   public void testGetChildren_PathSegments() throws Exception
    {
-      System.out.print("Running testGetChildrenWithPathSegments....");
+      System.out.print("Running testGetChildren_PathSegments....");
       createFolderTree();
       try
       {
@@ -158,9 +183,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetChildrenWithOutPathSegments() throws Exception
+   /**
+    * 2.2.3.1.1
+    * If TRUE, returns a PathSegment for each child object for use in constructing that object’s path.
+    * @throws Exception
+    */
+   public void testGetChildren_NoPathSegments() throws Exception
    {
-      System.out.print("Running testGetChildrenWithOutPathSegments....");
+      System.out.print("Running testGetChildren_NoPathSegments....");
       createFolderTree();
       try
       {
@@ -179,9 +209,9 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetChildrenWithObjectInfo() throws Exception
+   public void testGetChildren_ObjectInfo() throws Exception
    {
-      System.out.print("Running testGetChildrenWithObjectInfo....");
+      System.out.print("Running testGetChildren_ObjectInfo....");
       createFolderTree();
       try
       {
@@ -200,9 +230,9 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetChildrenWithOutObjectInfo() throws Exception
+   public void testGetChildren_NoObjectInfo() throws Exception
    {
-      System.out.print("Running testGetChildrenWithOutObjectInfo....");
+      System.out.print("Running testGetChildren_NoObjectInfo....");
       createFolderTree();
       try
       {
@@ -221,9 +251,15 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetChildrenPropertyFiltered() throws Exception
+   /**
+    * 2.2.3.1.1
+    * Repositories SHOULD return only the properties specified in the property filter 
+    * if they exist on the object’s type definition.
+    * @throws Exception
+    */
+   public void testGetChildren_PropertyFiltered() throws Exception
    {
-      System.out.print("Running testGetChildrenPropertyFiltered....");
+      System.out.print("Running testGetChildren_PropertyFiltered....");
       createFolderTree();
       try
       {
@@ -246,9 +282,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetChildrenRenditionFiltered() throws Exception
+   /**
+    * 2.2.3.1.1
+    * The Repository MUST return the set of renditions whose kind matches this filter.
+    * @throws Exception
+    */
+   public void testGetChildren_RenditionFiltered() throws Exception
    {
-      System.out.print("Running testGetChildrenRenditionFiltered....");
+      System.out.print("Running testGetChildren_RenditionFiltered....");
       createFolderTree();
       try
       {
@@ -271,9 +312,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetChildrenOnHasMore() throws Exception
+   /**
+    * 2.2.3.1.1
+    * TRUE if the Repository contains additional items after those contained in the response.  FALSE otherwise.
+    * @throws Exception
+    */
+   public void testGetChildren_HasMoreItems() throws Exception
    {
-      System.out.print("Running testGetChildrenOnHasMore....");
+      System.out.print("Running testGetChildren_HasMoreItems....");
       createFolderTree();
       try
       {
@@ -290,9 +336,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetChildrenMaxItemsLimit() throws Exception
+   /**
+    * 2.2.3.1.1.
+    * This is the maximum number of items to return in a response.  The repository MUST NOT exceed this maximum.
+    * @throws Exception
+    */
+   public void testGetChildren_MaxItems() throws Exception
    {
-      System.out.print("Running testGetChildrenMaxItemsLimit....");
+      System.out.print("Running testGetChildren_MaxItems....");
       createFolderTree();
       try
       {
@@ -308,9 +359,15 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetChildrenNumItemsCorrect() throws Exception
+   /**
+    * 2.2.3.1.1.
+    * If the repository knows the total number of items in a result set, the repository SHOULD include the number here. 
+    * If the repository does not know the number of items in a result set, this parameter SHOULD not be set.
+    * @throws Exception
+    */
+   public void testGetChildren_NumItems() throws Exception
    {
-      System.out.print("Running testGetChildrenNumItemsCorrect....");
+      System.out.print("Running testGetChildren_NumItems....");
       createFolderTree();
       try
       {
@@ -332,9 +389,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetChildrenSkipCount() throws Exception
+   /**
+    * 2.2.3.1.1.
+    * This is the number of potential results that the repository MUST skip/page over before returning any results.
+    * @throws Exception
+    */
+   public void testGetChildren_SkipCount() throws Exception
    {
-      System.out.print("Running testGetChildrenSkipCount....");
+      System.out.print("Running testGetChildren_SkipCount....");
       createFolderTree();
       try
       {
@@ -350,38 +412,20 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetChildrenObjectNotFoundException() throws Exception
+   /**
+    * 2.2.3.1.3
+    * The Repository MUST throw this exception if the specified folder is not a folder.
+    * @throws Exception
+    */
+   public void testGetChildren_InvalidArgumentException() throws Exception
    {
-      System.out.print("Running testGetChildrenObjectNotFoundException....");
+      System.out.print("Running testGetChildren_InvalidArgumentException....");
       createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getChildren(testroot + "11", true, IncludeRelationships.BOTH, true, true, "", "*", "", 10,
-               0);
-
-         doFail();
-      }
-      catch (ObjectNotFoundException ex)
-      {
-         pass();
-      }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-         doFail(e.getMessage());
-      }
-   }
-
-   public void testGetChildrenInvaliArgumentException() throws Exception
-   {
-      System.out.print("Running testGetChildrenInvaliArgumentException....");
-      createFolderTree();
-      try
-      {
-         ItemsList<CmisObject> result =
-            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "", "*", "", 10, 10);
-
+            getConnection().getChildren(getStorage().getObjectByPath("/testroot/doc1").getObjectId(), true,
+               IncludeRelationships.BOTH, true, true, "", "*", "", 10, 10);
          doFail();
       }
       catch (InvalidArgumentException ex)
@@ -395,9 +439,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetChildrenFilterNotValidException() throws Exception
+   /**
+    * 2.2.3.1.3
+    * The Repository MUST throw this exception if this property filter input parameter is not valid.
+    * @throws Exception
+    */
+   public void testGetChildren_FilterNotValidException() throws Exception
    {
-      System.out.print("Running testGetChildrenFilterNotValidException....");
+      System.out.print("Running testGetChildren_FilterNotValidException....");
       createFolderTree();
       try
       {
@@ -422,9 +471,14 @@ public class NavigationTest extends BaseTest
     * 
     */
 
-   public void testGetDescendantsSimple() throws Exception
+   /**
+    * 2.2.3.2
+    * Gets the set of descendant objects contained in the specified folder or any of its child-folders.
+    * @throws Exception
+    */
+   public void testGetDescendants_Simple() throws Exception
    {
-      System.out.print("Running testGetDescendantsSimple....");
+      System.out.print("Running testGetDescendants_Simple....");
       createFolderTree();
       try
       {
@@ -440,9 +494,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetDescendantsWithAllowableActions() throws Exception
+   /**
+    * 2.2.3.2.1
+    * If TRUE, then the Repository MUST return the available actions for each object in the result set. 
+    * @throws Exception
+    */
+   public void testGetDescendants_AllowableActions() throws Exception
    {
-      System.out.print("Running testGetDescendantsWithAllowableActions....");
+      System.out.print("Running testGetDescendants_AllowableActions....");
       createFolderTree();
       try
       {
@@ -462,9 +521,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetDescendantsWithOutAllowableActions() throws Exception
+   /**
+    * 2.2.3.2.1
+    * If TRUE, then the Repository MUST return the available actions for each object in the result set. 
+    * @throws Exception
+    */
+   public void testGetDescendants_NoAllowableActions() throws Exception
    {
-      System.out.print("Running testGetDescendantsWithOutAllowableActions....");
+      System.out.print("Running testGetDescendants_NoAllowableActions....");
       createFolderTree();
       try
       {
@@ -484,9 +548,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetDescendantsWithRelationships() throws Exception
+   /**
+    * 2.2.3.2.1
+    * Value indicating what relationships in which the objects returned participate MUST be returned, if any.
+    * @throws Exception
+    */
+   public void testGetDescendants_Relationships() throws Exception
    {
-      System.out.print("Running testGetDescendantsWithRelationships....");
+      System.out.print("Running testGetDescendants_Relationships....");
       createFolderTree();
       try
       {
@@ -509,9 +578,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetDescendantsWithOutRelationships() throws Exception
+   /**
+    * 2.2.3.2.1
+    * Value indicating what relationships in which the objects returned participate MUST be returned, if any.
+    * @throws Exception
+    */
+   public void testGetDescendants_NoRelationships() throws Exception
    {
-      System.out.print("Running testGetDescendantsWithOutRelationships....");
+      System.out.print("Running testGetDescendants_NoRelationships....");
       createFolderTree();
       try
       {
@@ -534,9 +608,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetDescendantsWithPathSegment() throws Exception
+   /**
+    * 2.2.3.2.1
+    * If TRUE, returns a PathSegment for each child object for use in constructing that object’s path.
+    * @throws Exception
+    */
+   public void testGetDescendants_PathSegment() throws Exception
    {
-      System.out.print("Running testGetDescendantsWithPathSegment....");
+      System.out.print("Running testGetDescendants_PathSegment....");
       createFolderTree();
       try
       {
@@ -556,9 +635,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetDescendantsWithOutPathSegment() throws Exception
+   /**
+    * 2.2.3.2.1
+    * If TRUE, returns a PathSegment for each child object for use in constructing that object’s path.
+    * @throws Exception
+    */
+   public void testGetDescendants_NoPathSegment() throws Exception
    {
-      System.out.print("Running testGetDescendantsWithOutPathSegment....");
+      System.out.print("Running testGetDescendants_NoPathSegment....");
       createFolderTree();
       try
       {
@@ -578,9 +662,9 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetDescendantsWithObjectInfo() throws Exception
+   public void testGetDescendants_ObjectInfo() throws Exception
    {
-      System.out.print("Running testGetDescendantsWithObjectInfo....");
+      System.out.print("Running testGetDescendants_ObjectInfo....");
       createFolderTree();
       try
       {
@@ -600,9 +684,9 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetDescendantsWithOutObjectInfo() throws Exception
+   public void testGetDescendants_NoObjectInfo() throws Exception
    {
-      System.out.print("Running testGetDescendantsWithOutObjectInfo....");
+      System.out.print("Running testGetDescendants_NoObjectInfo....");
       createFolderTree();
       try
       {
@@ -622,9 +706,15 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetDescendantsPropertiesFiltered() throws Exception
+   /**
+    * 2.2.3.2.1
+    * Repositories SHOULD return only the properties specified in the property filter 
+    * if they exist on the object’s type definition.
+    * @throws Exception
+    */
+   public void testGetDescendants_PropertyFiltered() throws Exception
    {
-      System.out.print("Running testGetDescendantsPropertiesFiltered....");
+      System.out.print("Running testGetDescendants_PropertyFiltered....");
       createFolderTree();
       try
       {
@@ -648,9 +738,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetDescendantsRenditionsFiltered() throws Exception
+   /**
+    * 2.2.3.2.1
+    * The Repository MUST return the set of renditions whose kind matches this filter. 
+    * @throws Exception
+    */
+   public void testGetDescendants_RenditionsFiltered() throws Exception
    {
-      System.out.print("Running testGetDescendantsRenditionsFiltered....");
+      System.out.print("Running testGetDescendants_RenditionsFiltered....");
       createFolderTree();
       try
       {
@@ -670,9 +765,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetDescendantsDepthLimit() throws Exception
+   /**
+    * 2.2.3.2.1
+    * The number of levels of depth in the folder hierarchy from which to return results.
+    * @throws Exception
+    */
+   public void testGetDescendants_DepthLimit() throws Exception
    {
-      System.out.print("Running testGetDescendantsDepthLimit....");
+      System.out.print("Running testGetDescendants_DepthLimit....");
       createFolderTree();
       try
       {
@@ -689,9 +789,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetDescendantsFilterNotValidException() throws Exception
+   /**
+    * 2.2.3.2.3
+    * The Repository MUST throw this exception if this property filter input parameter is not valid.
+    * @throws Exception
+    */
+   public void testGetDescendants_FilterNotValidException() throws Exception
    {
-      System.out.print("Running testGetDescendantsFilterNotValidException....");
+      System.out.print("Running testGetDescendants_FilterNotValidException....");
       createFolderTree();
       try
       {
@@ -711,9 +816,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetDescendantsInvalidArgument() throws Exception
+   /**
+    * 2.2.3.2.3
+    * The Repository MUST throw this exception if the service is invoked with “depth = 0”.
+    * @throws Exception
+    */
+   public void testGetDescendants_InvalidArgumentException() throws Exception
    {
-      System.out.print("Running testGetDescendantsInvalidArgument....");
+      System.out.print("Running testGetDescendants_InvalidArgumentException....");
       createFolderTree();
       try
       {
@@ -733,13 +843,45 @@ public class NavigationTest extends BaseTest
    }
 
    /**
+    * 2.2.3.2.3
+    * The Repository MUST throw this exception if the specified folder is not a folder.
+    * @throws Exception
+    */
+   public void testGetDescendants_InvalidArgumentException2() throws Exception
+   {
+      System.out.print("Running testGetDescendants_InvalidArgumentException2....");
+      createFolderTree();
+      try
+      {
+         List<ItemsTree<CmisObject>> result =
+            getConnection().getDescendants(getStorage().getObjectByPath("/testroot/doc1").getObjectId(), 0, true,
+               IncludeRelationships.NONE, true, true, "", "*");
+         doFail();
+      }
+      catch (InvalidArgumentException ex)
+      {
+         pass();
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         doFail(e.getMessage());
+      }
+   }
+
+   /**
     * getFolderTree() test suite;
     * 
     */
 
-   public void testGetFolderTreeSimple() throws Exception
+   /**
+    * 2.2.3.3
+    * Gets the set of descendant folder objects contained in the specified folder.
+    * @throws Exception
+    */
+   public void testGetFolderTree_Simple() throws Exception
    {
-      System.out.print("Running testGetFolderTreeSimple....");
+      System.out.print("Running testGetFolderTree_Simple....");
       createFolderTree();
       try
       {
@@ -755,9 +897,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetFolderTreeWithAllowableActions() throws Exception
+   /**
+    * 2.2.3.3.1
+    * If TRUE, then the Repository MUST return the available actions for each object in the result set.  Defaults to FALSE
+    * @throws Exception
+    */
+   public void testGetFolderTree_AllowableActions() throws Exception
    {
-      System.out.print("Running testGetFolderTreeWithAllowableActions....");
+      System.out.print("Running testGetFolderTree_AllowableActions....");
       createFolderTree();
       try
       {
@@ -777,9 +924,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetFolderTreeWithOutAllowableActions() throws Exception
+   /**
+    * 2.2.3.3.1
+    * If TRUE, then the Repository MUST return the available actions for each object in the result set.  Defaults to FALSE
+    * @throws Exception
+    */
+   public void testGetFolderTree_NoAllowableActions() throws Exception
    {
-      System.out.print("Running testGetFolderTreeWithOutAllowableActions....");
+      System.out.print("Running testGetFolderTree_NoAllowableActions....");
       createFolderTree();
       try
       {
@@ -799,9 +951,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetFolderTreeWithRelationships() throws Exception
+   /**
+    * 2.2.3.3.1
+    * Value indicating what relationships in which the objects returned participate MUST be returned, if any.
+    * @throws Exception
+    */
+   public void testGetFolderTree_Relationships() throws Exception
    {
-      System.out.print("Running testGetFolderTreeWithRelationships....");
+      System.out.print("Running testGetFolderTree_Relationships....");
       createFolderTree();
       try
       {
@@ -824,9 +981,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetFolderTreeWithOutRelationships() throws Exception
+   /**
+    * 2.2.3.3.1
+    * Value indicating what relationships in which the objects returned participate MUST be returned, if any.
+    * @throws Exception
+    */
+   public void testGetFolderTree_NoRelationships() throws Exception
    {
-      System.out.print("Running testGetFolderTreeWithOutRelationships....");
+      System.out.print("Running testGetFolderTree_NoRelationships....");
       createFolderTree();
       try
       {
@@ -849,9 +1011,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetFolderTreeWithPathSegment() throws Exception
+   /**
+    * 2.2.3.3.1
+    * If TRUE, returns a PathSegment for each child object for use in constructing that object’s path.
+    * @throws Exception
+    */
+   public void testGetFolderTree_PathSegment() throws Exception
    {
-      System.out.print("Running testGetFolderTreeWithPathSegment....");
+      System.out.print("Running testGetFolderTree_PathSegment....");
       createFolderTree();
       try
       {
@@ -871,9 +1038,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetFolderTreeWithOutPathSegment() throws Exception
+   /**
+    * 2.2.3.3.1
+    * If TRUE, returns a PathSegment for each child object for use in constructing that object’s path.
+    * @throws Exception
+    */
+   public void testGetFolderTree_NoPathSegment() throws Exception
    {
-      System.out.print("Running testGetFolderTreeWithOutPathSegment....");
+      System.out.print("Running testGetFolderTree_NoPathSegment....");
       createFolderTree();
       try
       {
@@ -893,9 +1065,9 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetFolderTreeWithObjectInfo() throws Exception
+   public void testGetFolderTree_ObjectInfo() throws Exception
    {
-      System.out.print("Running testGetFolderTreeWithObjectInfo....");
+      System.out.print("Running testGetFolderTree_ObjectInfo....");
       createFolderTree();
       try
       {
@@ -915,9 +1087,9 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetFolderTreeWithOutObjectInfo() throws Exception
+   public void testGetFolderTree_NoObjectInfo() throws Exception
    {
-      System.out.print("Running testGetFolderTreeWithOutObjectInfo....");
+      System.out.print("Running testGetFolderTree_NoObjectInfo....");
       createFolderTree();
       try
       {
@@ -937,9 +1109,15 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetFolderTreePropertiesFiltered() throws Exception
+   /**
+    * 2.2.3.3.1
+    * Repositories SHOULD return only the properties specified in the property filter 
+    * if they exist on the object’s type definition.
+    * @throws Exception
+    */
+   public void testGetFolderTree_PropertyFiltered() throws Exception
    {
-      System.out.print("Running testGetFolderTreePropertiesFiltered....");
+      System.out.print("Running testGetFolderTree_PropertyFiltered....");
       createFolderTree();
       try
       {
@@ -963,9 +1141,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetFolderTreeRenditionsFiltered() throws Exception
+   /**
+    * 2.2.3.3.1
+    * The Repository MUST return the set of renditions whose kind matches this filter.  
+    * @throws Exception
+    */
+   public void testGetFolderTree_RenditionsFiltered() throws Exception
    {
-      System.out.print("Running testGetFolderTreeRenditionsFiltered....");
+      System.out.print("Running testGetFolderTree_RenditionsFiltered....");
       createFolderTree();
       try
       {
@@ -985,9 +1168,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetFolderTreeDepthLimit() throws Exception
+   /**
+    * 2.2.3.3.1
+    * The number of levels of depth in the folder hierarchy from which to return results.
+    * @throws Exception
+    */
+   public void testGetFolderTree_DepthLimit() throws Exception
    {
-      System.out.print("Running testGetFolderTreeDepthLimit....");
+      System.out.print("Running testGetFolderTree_DepthLimit....");
       createFolderTree();
       try
       {
@@ -1004,9 +1192,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetFolderTreeFilterNotValidException() throws Exception
+   /**
+    * 2.2.3.3.3
+    * The Repository MUST throw this exception if this property filter input parameter is not valid.
+    * @throws Exception
+    */
+   public void testGetFolderTree_FilterNotValidException() throws Exception
    {
-      System.out.print("Running testGetFolderTreeFilterNotValidException....");
+      System.out.print("Running testGetFolderTree_FilterNotValidException....");
       createFolderTree();
       try
       {
@@ -1025,9 +1218,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetFolderTreeInvalidArgument() throws Exception
+   /**
+    * 2.2.3.3.3
+    * The Repository MUST throw this exception if the service is invoked with an invalid depth.
+    * @throws Exception
+    */
+   public void testGetFolderTree_InvalidArgumentException() throws Exception
    {
-      System.out.print("Running testGetFolderTreeInvalidArgument....");
+      System.out.print("Running testGetFolderTree_InvalidArgumentException....");
       createFolderTree();
       try
       {
@@ -1047,12 +1245,45 @@ public class NavigationTest extends BaseTest
    }
 
    /**
+    * 2.2.3.3.3
+    * The Repository MUST throw this exception if the specified folder is not a folder.
+    * @throws Exception
+    */
+   public void testGetFolderTree_InvalidArgumentException2() throws Exception
+   {
+      System.out.print("Running testGetFolderTree_InvalidArgumentException2....");
+      createFolderTree();
+      try
+      {
+         List<ItemsTree<CmisObject>> result =
+            getConnection().getFolderTree(getStorage().getObjectByPath("/testroot/doc1").getObjectId(), -1, true,
+               IncludeRelationships.NONE, true, true, "", "*");
+         doFail();
+      }
+      catch (InvalidArgumentException ex)
+      {
+         pass();
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         doFail(e.getMessage());
+      }
+   }
+
+   /**
     * getFolderParent() test suite;
     * 
     */
-   public void testGetFolderParentSimple() throws Exception
+
+   /**
+    * 2.2.3.4
+    * Gets the parent folder object for the specified folder object.  
+    * @throws Exception
+    */
+   public void testGetFolderParent_Simple() throws Exception
    {
-      System.out.print("Running testGetFolderParentSimple....");
+      System.out.print("Running testGetFolderParent_Simple....");
       createFolderTree();
       try
       {
@@ -1068,9 +1299,9 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetFolderParentWithObjectInfo() throws Exception
+   public void testGetFolderParent_IncludeObjectInfo() throws Exception
    {
-      System.out.print("Running testGetFolderParentWithObjectInfo....");
+      System.out.print("Running testGetFolderParent_IncludeObjectInfo....");
       createFolderTree();
       try
       {
@@ -1086,9 +1317,9 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetFolderParentWithOutObjectInfo() throws Exception
+   public void testGetFolderParent_NoIncludeObjectInfo() throws Exception
    {
-      System.out.print("Running testGetFolderParentWithOutObjectInfo....");
+      System.out.print("Running testGetFolderParent_NoIncludeObjectInfo....");
       createFolderTree();
       try
       {
@@ -1104,9 +1335,15 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetFolderParentWithPropertiesFiltered() throws Exception
+   /**
+    * 2.2.3.4.1 
+    * Repositories SHOULD return only the properties specified in the property filter 
+    * if they exist on the object’s type definition.
+    * @throws Exception
+    */
+   public void testGetFolderParent_PropertyFiltered() throws Exception
    {
-      System.out.print("Running testGetFolderParentWithPropertiesFiltered....");
+      System.out.print("Running testGetFolderParent_PropertyFiltered....");
       createFolderTree();
       try
       {
@@ -1125,9 +1362,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetFolderParentFilterNotValid() throws Exception
+   /**
+    * 2.2.3.4.3
+    * The Repository MUST throw this exception if this property filter input parameter is not valid.
+    * @throws Exception
+    */
+   public void testGetFolderParent_FilterNotValidException() throws Exception
    {
-      System.out.print("Running testGetFolderParentFilterNotValid....");
+      System.out.print("Running testGetFolderParent_FilterNotValidException....");
       createFolderTree();
       try
       {
@@ -1146,9 +1388,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetFolderParentInvalidArgument() throws Exception
+   /**
+    * 2.2.3.4.3
+    * The Repository MUST throw this exception if the folderId input is the root folder.
+    * @throws Exception
+    */
+   public void testGetFolderParent_InvalidArgumentException() throws Exception
    {
-      System.out.print("Running testGetFolderParentInvalidArgument....");
+      System.out.print("Running testGetFolderParent_InvalidArgumentException....");
       createFolderTree();
       try
       {
@@ -1168,12 +1415,18 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * getObjectParent() test suite;
+    * getObjectParents() test suite;
     * 
     */
-   public void testGetObjectParentsSimple() throws Exception
+
+   /**
+    * 2.2.3.5
+    * Gets the parent folder(s) for the specified non-folder, fileable object..
+    * @throws Exception
+    */
+   public void testGetObjectParents_Simple() throws Exception
    {
-      System.out.print("Running testGetObjectParentsSimple....");
+      System.out.print("Running testGetObjectParents_Simple....");
       createFolderTree();
       try
       {
@@ -1190,9 +1443,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetObjectParentsIncludeRelatioships() throws Exception
+   /**
+    * 2.2.3.5.1
+    * Value indicating what relationships in which the objects returned participate MUST be returned, if any.
+    * @throws Exception
+    */
+   public void testGetObjectParents_IncludeRelatioships() throws Exception
    {
-      System.out.print("Running testGetObjectParentsIncludeRelatioships....");
+      System.out.print("Running testGetObjectParents_IncludeRelatioships....");
       createFolderTree();
       try
       {
@@ -1212,9 +1470,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetObjectParentsWithOutRelatioships() throws Exception
+   /**
+    * 2.2.3.5.1
+    * Value indicating what relationships in which the objects returned participate MUST be returned, if any.
+    * @throws Exception
+    */
+   public void testGetObjectParents_NoRelatioships() throws Exception
    {
-      System.out.print("Running testGetObjectParentsWithOutRelatioships....");
+      System.out.print("Running testGetObjectParents_NoRelatioships....");
       createFolderTree();
       try
       {
@@ -1234,9 +1497,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetObjectParentsWithAllowableActions() throws Exception
+   /**
+    * 2.2.3.5.1
+    * If TRUE, then the Repository MUST return the available actions for each object in the result set.  Defaults to FALSE.
+    * @throws Exception
+    */
+   public void testGetObjectParents_AllowableActions() throws Exception
    {
-      System.out.print("Running testGetObjectParentsWithAllowableActions....");
+      System.out.print("Running testGetObjectParents_AllowableActions....");
       createFolderTree();
       try
       {
@@ -1256,9 +1524,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetObjectParentsWithOutAllowableActions() throws Exception
+   /**
+    * 2.2.3.5.1
+    * If TRUE, then the Repository MUST return the available actions for each object in the result set.  Defaults to FALSE.
+    * @throws Exception
+    */
+   public void testGetObjectParents_NoAllowableActions() throws Exception
    {
-      System.out.print("Running testGetObjectParentsWithOutAllowableActions....");
+      System.out.print("Running testGetObjectParents_NoAllowableActions....");
       createFolderTree();
       try
       {
@@ -1278,9 +1551,15 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetObjectParentsWithPathSegment() throws Exception
+   /**
+    * 2.2.3.5.1
+    * Folder and object path segments are specified by pathSegment 
+    * tokens which can be retrieved by all services that take an includePathSegments parameter. 
+    * @throws Exception
+    */
+   public void testGetObjectParents_IncludePathSegment() throws Exception
    {
-      System.out.print("Running testGetObjectParentsWithPathSegment....");
+      System.out.print("Running testGetObjectParents_IncludePathSegment....");
       createFolderTree();
       try
       {
@@ -1300,9 +1579,15 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetObjectParentsWithOutPathSegment() throws Exception
+   /**
+    * 2.2.3.5.1
+    * Folder and object path segments are specified by pathSegment 
+    * tokens which can be retrieved by all services that take an includePathSegments parameter. 
+    * @throws Exception
+    */
+   public void testGetObjectParents_NoPathSegment() throws Exception
    {
-      System.out.print("Running testGetObjectParentsWithOutPathSegment....");
+      System.out.print("Running testGetObjectParents_NoPathSegment....");
       createFolderTree();
       try
       {
@@ -1322,31 +1607,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetObjectParentsWithObjectInfo() throws Exception
+   /**
+    * 2.2.3.5.1
+    * The Repository MUST return the set of renditions whose kind matches this filter.  
+    * @throws Exception
+    */
+   public void testGetObjectParents_NoRenditions() throws Exception
    {
-      System.out.print("Running testGetObjectParentsWithObjectInfo....");
-      createFolderTree();
-      try
-      {
-         ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
-         List<ObjectParent> result =
-            getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true, "", "*");
-         for (ObjectParent one : result)
-         {
-            assertNotNull(one.getObject().getObjectInfo());
-         }
-         pass();
-      }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-         doFail(e.getMessage());
-      }
-   }
-
-   public void testGetObjectParentsWithOutRenditions() throws Exception
-   {
-      System.out.print("Running testGetObjectParentsWithOutRenditions....");
+      System.out.print("Running testGetObjectParents_NoRenditions...");
       createFolderTree();
       try
       {
@@ -1367,9 +1635,31 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetObjectParentsWithOutObjectInfo() throws Exception
+   public void testGetObjectParents_ObjectInfo() throws Exception
    {
-      System.out.print("Running testGetObjectParentsWithOutObjectInfo....");
+      System.out.print("Running testGetObjectParents_ObjectInfo....");
+      createFolderTree();
+      try
+      {
+         ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
+         List<ObjectParent> result =
+            getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true, "", "*");
+         for (ObjectParent one : result)
+         {
+            assertNotNull(one.getObject().getObjectInfo());
+         }
+         pass();
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         doFail(e.getMessage());
+      }
+   }
+
+   public void testGetObjectParents_NoObjectInfo() throws Exception
+   {
+      System.out.print("Running testGetObjectParents_NoObjectInfo()....");
       createFolderTree();
       try
       {
@@ -1389,9 +1679,15 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetObjectParentsPropertiesFIltered() throws Exception
+   /**
+    * 2.2.3.5.1
+    * Repositories SHOULD return only the properties specified in the property filter 
+    * if they exist on the object’s type definition.
+    * @throws Exception
+    */
+   public void testGetObjectParents_PropertiesFIlter() throws Exception
    {
-      System.out.print("Running testGetObjectParentsPropertiesFIltered....");
+      System.out.print("Running testGetObjectParents_PropertiesFIlter....");
       createFolderTree();
       try
       {
@@ -1415,9 +1711,15 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetObjectParentsFilterNotValid() throws Exception
+   /**
+    * 2.2.3.5.3
+    * The Repository MUST throw this exception if this property filter input parameter is not valid. 
+    * @throws Exception
+    */
+
+   public void testGetObjectParents_FilterNotValidException() throws Exception
    {
-      System.out.print("Running testGetObjectParentsFilterNotValid....");
+      System.out.print("Running testGetObjectParents_FilterNotValidException....");
       createFolderTree();
       try
       {
@@ -1438,9 +1740,16 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetObjectParentsConstraintException() throws Exception
+   /**
+    * 2.2.3.5.3
+    * The Repository MUST throw this exception if this method is invoked on an object who 
+    * Object-Type Definition specifies that it is not fileable.
+    * @throws Exception
+    */
+
+   public void testGetObjectParents_ConstraintException() throws Exception
    {
-      System.out.print("Running testGetObjectParentsConstraintException....");
+      System.out.print("Running testGetObjectParents_ConstraintException....");
       createFolderTree();
       try
       {
@@ -1471,9 +1780,15 @@ public class NavigationTest extends BaseTest
     * getCheckedOutDocs() test suite;
     * 
     */
-   public void testGetCheckedOutDocsSimple() throws Exception
+
+   /**
+    * 2.2.3.6
+    * Gets the list of documents that are checked out that the user has access to.
+    * @throws Exception
+    */
+   public void testGetCheckedOutDocs_Simple() throws Exception
    {
-      System.out.print("Running testGetCheckedOutDocsSimple....");
+      System.out.print("Running testGetCheckedOutDocs_Simple....");
       createFolderTree();
       try
       {
@@ -1489,9 +1804,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetCheckedOutDocsWithAllowableActions() throws Exception
+   /**
+    * 2.2.3.6.1
+    * If TRUE, then the Repository MUST return the available actions for each object in the result set.  Defaults to FALSE.
+    * @throws Exception
+    */
+   public void testGetCheckedOutDocs_AllowableActions() throws Exception
    {
-      System.out.print("Running testGetCheckedOutDocsWithAllowableActions....");
+      System.out.print("Running testGetCheckedOutDocs_AllowableActions....");
       createFolderTree();
       try
       {
@@ -1510,9 +1830,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetCheckedOutDocsWithOutAllowableActions() throws Exception
+   /**
+    * 2.2.3.6.1
+    * If TRUE, then the Repository MUST return the available actions for each object in the result set. 
+    * @throws Exception
+    */
+   public void testGetCheckedOutDocs_NoAllowableActions() throws Exception
    {
-      System.out.print("Running testGetCheckedOutDocsWithOutAllowableActions....");
+      System.out.print("Running testGetCheckedOutDocs_NoAllowableActions....");
       createFolderTree();
       try
       {
@@ -1531,9 +1856,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetCheckedOutDocsWithRelationships() throws Exception
+   /**
+    * 2.2.3.6.1
+    * Value indicating what relationships in which the objects returned participate MUST be returned, if any.
+    * @throws Exception
+    */
+   public void testGetCheckedOutDocs_Relationships() throws Exception
    {
-      System.out.print("Running testGetCheckedOutDocsWithRelationships....");
+      System.out.print("Running testGetCheckedOutDocs_Relationships....");
       createFolderTree();
       try
       {
@@ -1555,9 +1885,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetCheckedOutDocsWithOutRelationships() throws Exception
+   /**
+    * 2.2.3.6.1
+    * Value indicating what relationships in which the objects returned participate MUST be returned, if any.
+    * @throws Exception
+    */
+   public void testGetCheckedOutDocs_NoRelationships() throws Exception
    {
-      System.out.print("Running testGetCheckedOutDocsWithOutRelationships....");
+      System.out.print("Running testGetCheckedOutDocs_NoRelationships....");
       createFolderTree();
       try
       {
@@ -1579,9 +1914,9 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetCheckedOutDocsWithObjectInfo() throws Exception
+   public void testGetCheckedOutDocs_ObjectInfo() throws Exception
    {
-      System.out.print("Running testGetCheckedOutDocsWithObjectInfo....");
+      System.out.print("Running testGetCheckedOutDocs_ObjectInfo....");
       createFolderTree();
       try
       {
@@ -1600,9 +1935,9 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetCheckedOutDocsWithOutObjectInfo() throws Exception
+   public void testGetCheckedOutDocs_NoObjectInfo() throws Exception
    {
-      System.out.print("Running testGetCheckedOutDocsWithOutObjectInfo....");
+      System.out.print("Running testGetCheckedOutDocs_NoObjectInfo....");
       createFolderTree();
       try
       {
@@ -1621,9 +1956,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetCheckedOutDocsWithNoRenditions() throws Exception
+   /**
+    * 2.2.3.6.1 
+    * The Repository MUST return the set of renditions whose kind matches this filter.  
+    * @throws Exception
+    */
+   public void testGetCheckedOutDocs_NoRenditions() throws Exception
    {
-      System.out.print("Running testGetCheckedOutDocsWithNoRenditions....");
+      System.out.print("Running testGetCheckedOutDocs_NoRenditions....");
       createFolderTree();
       try
       {
@@ -1643,9 +1983,15 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetCheckedOutDocsWithPropertyFiltered() throws Exception
+   /**
+    * 2.2.3.6.1
+    * Repositories SHOULD return only the properties specified in the property filter 
+    * if they exist on the object’s type definition.
+    * @throws Exception
+    */
+   public void testGetCheckedOutDocs_PropertyFiltered() throws Exception
    {
-      System.out.print("Running testGetCheckedOutDocsWithPropertyFiltered....");
+      System.out.print("Running testGetCheckedOutDocs_PropertyFiltered....");
       createFolderTree();
       try
       {
@@ -1668,9 +2014,15 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetCheckedOutDocsMaxItems() throws Exception
+   /**
+    * 2.2.3.6.1
+    * This is the maximum number of items to return in a response.  
+    * The repository MUST NOT exceed this maximum.  Default is repository-specific
+    * @throws Exception
+    */
+   public void testGetCheckedOutDocs_MaxItems() throws Exception
    {
-      System.out.print("Running testGetCheckedOutDocsMaxItems....");
+      System.out.print("Running testGetCheckedOutDocs_MaxItems....");
       createFolderTree();
       try
       {
@@ -1686,9 +2038,15 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetCheckedOutDocsSkipCount() throws Exception
+   /**
+    * 2.2.3.6.1
+    * This is the number of potential results that the repository 
+    * MUST skip/page over before returning any results.  Defaults to 0.
+    * @throws Exception
+    */
+   public void testGetCheckedOutDocs_SkipCount() throws Exception
    {
-      System.out.print("Running testGetCheckedOutDocsSkipCount....");
+      System.out.print("Running testGetCheckedOutDocs_SkipCount....");
       createFolderTree();
       try
       {
@@ -1704,9 +2062,14 @@ public class NavigationTest extends BaseTest
       }
    }
 
-   public void testGetCheckedOutDocsFilterNotValidException() throws Exception
+   /**
+    * 2.2.3.6.3
+    * The Repository MUST throw this exception if this property filter input parameter is not valid.
+    * @throws Exception
+    */
+   public void testGetCheckedOutDocs_FilterNotValidException() throws Exception
    {
-      System.out.print("Running testGetCheckedOutDocsFilterNotValidException....");
+      System.out.print("Running testGetCheckedOutDocs_FilterNotValidException....");
       createFolderTree();
       try
       {
