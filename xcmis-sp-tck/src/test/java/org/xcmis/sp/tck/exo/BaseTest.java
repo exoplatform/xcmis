@@ -79,6 +79,8 @@ public abstract class BaseTest extends TestCase
 
    protected List<String> failedTests;
 
+   private Connection conn;
+
    @Override
    public void setUp() throws Exception
    {
@@ -96,20 +98,18 @@ public abstract class BaseTest extends TestCase
       relationshipTypeDefinition = getStorage().getTypeDefinition("cmis:relationship", true);
    }
 
-   protected Connection conn;
+   protected void tearDown() throws Exception
+   {
+      if (conn != null)
+         conn.close();
+      super.tearDown();
+   }
 
    protected Connection getConnection()
    {
       if (conn == null)
          conn = storageProvider.getConnection();
       return conn;
-   }
-
-   protected void tearDown() throws Exception
-   {
-      if (conn != null)
-         conn.close();
-      super.tearDown();
    }
 
    protected Storage getStorage()
