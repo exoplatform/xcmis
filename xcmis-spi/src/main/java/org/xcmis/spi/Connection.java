@@ -3059,12 +3059,26 @@ public abstract class Connection
          }
          if (direction != null)
          {
-            for (ItemsIterator<RelationshipData> iter = object.getRelationships(direction, null, true); iter.hasNext();)
+            TypeDefinition relBaseType = null;
+            try
             {
-               RelationshipData next = iter.next();
-               cmis.getRelationship().add(
-                  getCmisObject(next, false, includeRelationships, false, false, includeObjectInfo,
-                     PropertyFilter.ALL_FILTER, RenditionFilter.NONE_FILTER));
+               relBaseType = getTypeDefinition(BaseType.RELATIONSHIP.value());
+            }
+            catch (TypeNotFoundException e)
+            {
+               // If relationship is not supported
+            }
+
+            if (relBaseType != null)
+            {
+               for (ItemsIterator<RelationshipData> iter = object.getRelationships(direction, relBaseType, true); iter
+                  .hasNext();)
+               {
+                  RelationshipData next = iter.next();
+                  cmis.getRelationship().add(
+                     getCmisObject(next, false, includeRelationships, false, false, includeObjectInfo,
+                        PropertyFilter.ALL_FILTER, RenditionFilter.NONE_FILTER));
+               }
             }
          }
       }

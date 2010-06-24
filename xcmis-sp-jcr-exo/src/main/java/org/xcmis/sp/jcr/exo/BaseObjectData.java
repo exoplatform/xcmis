@@ -168,8 +168,7 @@ abstract class BaseObjectData implements ObjectData
                {
                   Node relNode = prop.getParent();
                   NodeType nodeType = relNode.getPrimaryNodeType();
-                  if (type == null //
-                     || nodeType.getName().equals(type.getLocalName()) //
+                  if (nodeType.getName().equals(type.getLocalName()) //
                      || (includeSubRelationshipTypes && nodeType.isNodeType(type.getLocalName())))
                   {
                      next = new RelationshipDataImpl(new JcrNodeEntry(relNode), indexListener);
@@ -566,7 +565,7 @@ abstract class BaseObjectData implements ObjectData
 
    /**
     * Update properties, skip on-create and read-only properties
-    * 
+    *
     * @param property property to be updated
     */
    protected void doSetProperty(Property<?> property) throws NameConstraintViolationException
