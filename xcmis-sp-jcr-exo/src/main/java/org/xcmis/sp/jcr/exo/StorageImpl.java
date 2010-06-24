@@ -252,9 +252,24 @@ public class StorageImpl implements Storage
             {
                deleteLog.getDeleteObjects().add(uuid);
             }
+
+            String workingCopyPath =
+               StorageImpl.XCMIS_SYSTEM_PATH + "/" + StorageImpl.XCMIS_WORKING_COPIES + "/" + uuid;
+            try
+            {
+               Node workingCopy = (Node)session.getItem(workingCopyPath);
+               String wcuuid = ((ExtendedNode)workingCopy).getIdentifier();
+               if (!deleteLog.getDeleteLinks().contains(wcuuid))
+               {
+                  deleteLog.getDeleteLinks().add(wcuuid);
+               }
+            }
+            catch (PathNotFoundException pnfe)
+            {
+               // if working copy does not exists
+            }
          }
       }
-
    }
 
    private class TreeVisitor implements ItemVisitor
