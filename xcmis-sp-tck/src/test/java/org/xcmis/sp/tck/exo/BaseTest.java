@@ -27,17 +27,17 @@ import org.exoplatform.services.log.Log;
 import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.Connection;
+import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsTree;
-import org.xcmis.spi.ObjectData;
-import org.xcmis.spi.ObjectNotFoundException;
+import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.Storage;
+import org.xcmis.spi.StorageException;
 import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.model.CmisObject;
-import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.UnfileObject;
@@ -46,6 +46,7 @@ import org.xcmis.spi.model.impl.IdProperty;
 import org.xcmis.spi.model.impl.StringProperty;
 import org.xcmis.spi.utils.MimeType;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -74,6 +75,8 @@ public abstract class BaseTest extends TestCase
 
    protected String rootfolderID;
 
+   protected FolderData rootFolder;
+
    protected String testroot;
 
    protected List<String> passedTests;
@@ -92,6 +95,7 @@ public abstract class BaseTest extends TestCase
       storageProvider = (StorageProvider)container.getComponentInstanceOfType(StorageProvider.class);
 
       rootfolderID = getStorage().getRepositoryInfo().getRootFolderId();
+      rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       documentTypeDefinition = getStorage().getTypeDefinition("cmis:document", true);
       folderTypeDefinition = getStorage().getTypeDefinition("cmis:folder", true);
@@ -133,23 +137,16 @@ public abstract class BaseTest extends TestCase
     *                                          |                     |
     *                                        Doc4 --<rel>-  
     */
-
    protected void createFolderTree() throws Exception
    {
-      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
-
       ContentStream cs = new BaseContentStream("1234567890".getBytes(), null, new MimeType("text", "plain"));
 
-      FolderData testroot =
-         getStorage()
-            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      FolderData testroot = createFolder(rootFolder, "testroot");
 
       FolderData folder1 =
          getStorage().createFolder(testroot, folderTypeDefinition, getPropsMap("cmis:folder", "folder1"), null, null);
 
-      DocumentData doc1 =
-         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
-            null, VersioningState.MAJOR);
+      DocumentData doc1 = createDocument(testroot, "doc1", "1234567890");
 
       DocumentData doc2 =
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc2"), cs, null,
@@ -193,38 +190,73 @@ public abstract class BaseTest extends TestCase
       this.testroot = testroot.getObjectId();
    }
 
+   /**
+    * @param testroot2
+    * @param string
+    * @param documentContent
+    * @param major
+    * @return
+    * @throws IOException 
+    * @throws StorageException 
+    * @throws NameConstraintViolationException 
+    * @throws ConstraintException 
+    */
+   protected DocumentData createDocument(FolderData parentFolder, String documentName, String documentContent)
+      throws ConstraintException, NameConstraintViolationException, StorageException, IOException
+   {
+      ContentStream cs = new BaseContentStream(documentContent.getBytes(), null, new MimeType("text", "plain"));
+      DocumentData doc =
+         getStorage().createDocument(parentFolder, documentTypeDefinition, getPropsMap("cmis:document", documentName),
+            cs, null, null, VersioningState.MAJOR);
+      return doc;
+   }
+
+   /**
+    * @param parentFolder
+    * @param folderTypeDefinition2
+    * @return
+    */
+   protected FolderData createFolder(FolderData parentFolder, String folderName) throws StorageException,
+      NameConstraintViolationException, ConstraintException
+   {
+      FolderData testroot =
+         getStorage().createFolder(parentFolder, folderTypeDefinition, getPropsMap("cmis:folder", folderName), null,
+            null);
+      return testroot;
+   }
+
    protected void clear()
    {
       try
       {
          FolderData rootFolder = (FolderData)getStorage().getObjectById(testroot);
-//         List<CmisObject> stuff =
-//            objectTreeToList(getConnection().getDescendants(rootfolderID, -1, true, IncludeRelationships.BOTH, false,
-//               true, "", ""));
-//         for (CmisObject one : stuff)
-//         {
-//            if (one.getRelationship().size() > 0)
-//            {
-//               for (CmisObject relation : one.getRelationship())
-//               {
-//                  String rel_id = relation.getObjectInfo().getId();
-//                  try
-//                  {
-//                     ObjectData rel_data = getStorage().getObjectById(rel_id);
-//                     getStorage().deleteObject(rel_data, true);
-//                  }
-//                  catch (ObjectNotFoundException ex)
-//                  {
-//                     continue;
-//                  }
-//               }
-//            }
-//
-//            getStorage().deleteObject(getStorage().getObjectById(one.getObjectInfo().getId()), true);
-//         }
+         //         List<CmisObject> stuff =
+         //            objectTreeToList(getConnection().getDescendants(rootfolderID, -1, true, IncludeRelationships.BOTH, false,
+         //               true, "", ""));
+         //         for (CmisObject one : stuff)
+         //         {
+         //            if (one.getRelationship().size() > 0)
+         //            {
+         //               for (CmisObject relation : one.getRelationship())
+         //               {
+         //                  String rel_id = relation.getObjectInfo().getId();
+         //                  try
+         //                  {
+         //                     ObjectData rel_data = getStorage().getObjectById(rel_id);
+         //                     getStorage().deleteObject(rel_data, true);
+         //                  }
+         //                  catch (ObjectNotFoundException ex)
+         //                  {
+         //                     continue;
+         //                  }
+         //               }
+         //            }
+         //
+         //            getStorage().deleteObject(getStorage().getObjectById(one.getObjectInfo().getId()), true);
+         //         }
 
          getStorage().deleteTree(rootFolder, true, UnfileObject.DELETE, true);
-         
+
       }
       catch (Exception e)
       {

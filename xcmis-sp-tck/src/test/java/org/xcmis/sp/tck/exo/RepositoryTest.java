@@ -125,7 +125,7 @@ public class RepositoryTest extends BaseTest
          assertNotNull(typeDefinition.getLocalName());
          assertNotNull(typeDefinition.getQueryName());
          checkPropertyDefinitions(typeDefinition.getPropertyDefinitions());
-         
+
          if (ll.size() > 0)
             assertTrue(ll.contains(typeDefinition.getId()));
          ll.remove(typeDefinition.getId());
@@ -256,7 +256,7 @@ public class RepositoryTest extends BaseTest
          assertNotNull(itemsTree.getContainer().getLocalName());
          assertNotNull(itemsTree.getContainer().getQueryName());
          assertNotNull(itemsTree.getContainer().getBaseId());
-         checkPropertyDefinitions( itemsTree.getContainer().getPropertyDefinitions());
+         checkPropertyDefinitions(itemsTree.getContainer().getPropertyDefinitions());
       }
    }
 
@@ -350,42 +350,22 @@ public class RepositoryTest extends BaseTest
 
    public void testGetTypeDefinition_Folder()
    {
-      TypeDefinition typeDefinition = null;
-      try
-      {
-         typeDefinition = getConnection().getTypeDefinition("cmis:folder", true);
-      }
-      catch (TypeNotFoundException e)
-      {
-         e.printStackTrace();
-         fail(e.getMessage());
-      }
-      assertNotNull(typeDefinition);
-      assertNotNull(typeDefinition.getId());
-      assertFalse(typeDefinition.getId().isEmpty());
-      assertNotNull(typeDefinition.getLocalName());
-      assertNotNull(typeDefinition.getQueryName());
-      checkPropertyDefinitions(typeDefinition.getPropertyDefinitions());
+      assertNotNull(folderTypeDefinition);
+      assertNotNull(folderTypeDefinition.getId());
+      assertFalse(folderTypeDefinition.getId().isEmpty());
+      assertNotNull(folderTypeDefinition.getLocalName());
+      assertNotNull(folderTypeDefinition.getQueryName());
+      checkPropertyDefinitions(folderTypeDefinition.getPropertyDefinitions());
    }
 
    public void testGetTypeDefinition_Document()
    {
-      TypeDefinition typeDefinition = null;
-      try
-      {
-         typeDefinition = getConnection().getTypeDefinition("cmis:document", true);
-      }
-      catch (TypeNotFoundException e)
-      {
-         e.printStackTrace();
-         fail(e.getMessage());
-      }
-      assertNotNull(typeDefinition);
-      assertNotNull(typeDefinition.getId());
-      assertFalse(typeDefinition.getId().isEmpty());
-      assertNotNull(typeDefinition.getLocalName());
-      assertNotNull(typeDefinition.getQueryName());
-      checkPropertyDefinitions(typeDefinition.getPropertyDefinitions());
+      assertNotNull(documentTypeDefinition);
+      assertNotNull(documentTypeDefinition.getId());
+      assertFalse(documentTypeDefinition.getId().isEmpty());
+      assertNotNull(documentTypeDefinition.getLocalName());
+      assertNotNull(documentTypeDefinition.getQueryName());
+      checkPropertyDefinitions(documentTypeDefinition.getPropertyDefinitions());
    }
 
    private void checkPropertyDefinitions(Collection<PropertyDefinition<?>> propertyDefinitions)

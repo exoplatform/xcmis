@@ -18,10 +18,7 @@
  */
 package org.xcmis.sp.tck.exo;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import static org.junit.Assert.assertArrayEquals;
 
 import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CmisConstants;
@@ -36,8 +33,9 @@ import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.model.impl.StringProperty;
 import org.xcmis.spi.utils.MimeType;
 
-
-import static org.junit.Assert.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
 
 public class ObjectTest extends BaseTest
 {
@@ -149,41 +147,42 @@ public class ObjectTest extends BaseTest
 
    }
 
-      public void testCreateDocumentWithACL() throws Exception
+   public void testCreateDocumentWithACL() throws Exception
+   {
+      System.out.print("Running testCreateDocumentWithACL....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      byte[] before = new byte[15];
+      before = "1234567890aBcDE".getBytes();
+      ContentStream cs = new BaseContentStream(before, null, new MimeType("text", "plain"));
+      AccessControlEntry acl = new AccessControlEntry();
+      acl.setPrincipal("Makis");
+      acl.getPermissions().add("cmis:read");
+      ArrayList<AccessControlEntry> addACL = new ArrayList<AccessControlEntry>();
+      addACL.add(acl);
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      try
       {
-         System.out.print("Running testCreateDocumentWithACL....");
-         FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
-         byte[] before = new byte[15];
-         before = "1234567890aBcDE".getBytes();
-         ContentStream cs = new BaseContentStream(before, null, new MimeType("text", "plain"));
-         AccessControlEntry acl = new AccessControlEntry();
-         acl.setPrincipal("Makis");
-         acl.getPermissions().add("cmis:read");
-         ArrayList<AccessControlEntry> addACL = new ArrayList<AccessControlEntry>();
-         addACL.add(acl);
-         FolderData testroot =
-            getStorage()
-               .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
-         try
+         String docId =
+            getConnection().createDocument(testroot.getObjectId(), getPropsMap("cmis:document", "doc1"), cs, addACL,
+               null, null, VersioningState.MAJOR);
+         ObjectData res = getStorage().getObjectById(docId);
+         for (AccessControlEntry one : res.getACL(false))
          {
-            String docId =
-               getConnection().createDocument(testroot.getObjectId(), getPropsMap("cmis:document", "doc1"), cs,addACL ,
-                  null, null, VersioningState.MAJOR);
-            ObjectData res = getStorage().getObjectById(docId);
-            for (AccessControlEntry one : res.getACL(false)){
-               if (one.getPrincipal().equalsIgnoreCase("Makis"))
-                  assertEquals(1, one.getPermissions().size());
-               asserrtTrue(one.getPermissions().contains("cmis:read"));
-            }
-            pass();
+            if (one.getPrincipal().equalsIgnoreCase("Makis"))
+               assertEquals(1, one.getPermissions().size());
+            assertTrue(one.getPermissions().contains("cmis:read"));
          }
-         catch (Exception e)
-         {
-            e.printStackTrace();
-            doFail(e.getMessage());
-         }
-   
+         pass();
       }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         doFail(e.getMessage());
+      }
+
+   }
 
    protected void tearDown()
    {
