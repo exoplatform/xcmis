@@ -171,7 +171,7 @@ public class ObjectTest extends BaseTest
     *   either using the ACL from folderId if specified, or being applied if no folderId is specified. 
     * @throws Exception
     */
-
+   /*
    public void testCreateDocument_ApplyACL() throws Exception
    {
       System.out.print("Running testCreateDocument_ApplyACL....");
@@ -207,7 +207,7 @@ public class ObjectTest extends BaseTest
       }
 
    }
-
+    */
    /**
     * 2.2.4.1.3 • nameConstraintViolation:   
     * If the repository detects a violation with the given cmis:name property value, 
