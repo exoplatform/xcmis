@@ -39,6 +39,7 @@ import org.xcmis.spi.StorageException;
 import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.RepositoryCapabilities;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.UnfileObject;
 import org.xcmis.spi.model.VersioningState;
@@ -285,6 +286,11 @@ public abstract class BaseTest extends TestCase
          .getLocalName(), def2.getDisplayName(), baseType));
 
       return properties;
+   }
+
+   protected RepositoryCapabilities getCapabilities()
+   {
+      return getStorage().getRepositoryInfo().getCapabilities();
    }
 
    protected void doFail(String message) throws Exception
