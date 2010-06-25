@@ -97,6 +97,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.jcr.Item;
@@ -556,12 +557,19 @@ public class StorageImpl implements Storage
          nodeTypeValue.setPrimaryItemName("");
 
          List<PropertyDefinitionValue> jcrPropDefintions = null;
+
+         Set<String> parentPropertyDefinitionIds = PropertyDefinitions.getPropertyIds(parentId);
+
          if (type.getPropertyDefinitions() != null && type.getPropertyDefinitions().size() > 0)
          {
             jcrPropDefintions = new ArrayList<PropertyDefinitionValue>();
 
             for (PropertyDefinition<?> propDef : type.getPropertyDefinitions())
             {
+               if (parentPropertyDefinitionIds.contains(propDef.getId()))
+               {
+                  throw new ConstraintException("Property " + propDef.getId() + " already determined in parent type.");
+               }
                if (propDef.getPropertyType() == null)
                {
                   String msg = "Property Type required.";
