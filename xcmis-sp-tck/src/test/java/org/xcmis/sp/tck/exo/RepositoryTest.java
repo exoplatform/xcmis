@@ -54,6 +54,11 @@ public class RepositoryTest extends BaseTest
       assertNotNull(storageProvider.getConnection().getStorage().getId());
    }
 
+   /**
+    * 2.2.2.1 getRepositories
+    * 
+    * Returns a list of CMIS repositories available from this CMIS service endpoint.
+    */
    public void testGetRepositories()
    {
       Set<RepositoryShortInfo> storageInfos = CmisRegistry.getInstance().getStorageInfos();
@@ -69,6 +74,13 @@ public class RepositoryTest extends BaseTest
       }
    }
 
+   /**
+    * 2.2.2.2 getRepositoryInfo
+    * 
+    * Returns information about the CMIS repository, the optional capabilities it supports and its Access Control information if applicable.
+    * 
+    * @throws Exception
+    */
    public void testGetRepositoryInfo() throws Exception
    {
       assertNotNull(getStorage().getRepositoryInfo());
@@ -95,6 +107,12 @@ public class RepositoryTest extends BaseTest
       assertNotNull(getStorage().getRepositoryInfo().getPrincipalAnyone());
    }
 
+   /**
+    * 2.2.2.3 getTypeChildren
+    * 
+    * Returns the list of Object-Types defined for the Repository 
+    * that are children of the specified Type.
+    */
    public void testGetTypeChildren_Root()
    {
       // root types
@@ -134,6 +152,12 @@ public class RepositoryTest extends BaseTest
          .isEmpty());
    }
 
+   /**
+    * 2.2.2.3 getTypeChildren With MaxItems
+    * 
+    * Returns the list of Object-Types defined for the Repository 
+    * that are children of the specified Type.
+    */
    public void testGetTypeChildren_RootWithMaxItems()
    {
       // root types with maxItems
@@ -151,6 +175,12 @@ public class RepositoryTest extends BaseTest
       assertEquals(1, typeChildren3.getItems().size());
    }
 
+   /**
+    * 2.2.2.3 getTypeChildren With SkipCount
+    * 
+    * Returns the list of Object-Types defined for the Repository 
+    * that are children of the specified Type.
+    */
    public void testGetTypeChildren_RootWithSkipCount()
    {
       // get size of root types
@@ -182,6 +212,12 @@ public class RepositoryTest extends BaseTest
       assertEquals(1, typeChildren4.getItems().size());
    }
 
+   /**
+    * 2.2.2.3 getTypeChildren for Folder type
+    * 
+    * Returns the list of Object-Types defined for the Repository 
+    * that are children of the specified Type.
+    */
    public void testGetTypeChildren_Folder()
    {
       // folder
@@ -199,6 +235,12 @@ public class RepositoryTest extends BaseTest
       assertFalse(typeChildren1.isHasMoreItems());
    }
 
+   /**
+    * 2.2.2.3 getTypeChildren for Document type
+    * 
+    * Returns the list of Object-Types defined for the Repository 
+    * that are children of the specified Type.
+    */
    public void testGetTypeChildren_Document()
    {
       // document
@@ -216,6 +258,12 @@ public class RepositoryTest extends BaseTest
       assertFalse(typeChildren2.isHasMoreItems());
    }
 
+   /**
+    * 2.2.2.3 getTypeChildren for Non existed type
+    * 
+    * Returns the list of Object-Types defined for the Repository 
+    * that are children of the specified Type.
+    */
    public void testGetTypeChildren_NonExistedType()
    {
       // to get children for nonexistent type "cmis:kino"
@@ -230,6 +278,11 @@ public class RepositoryTest extends BaseTest
       }
    }
 
+   /**
+    * 2.2.2.4 getTypeDescendants for root
+    * 
+    * Returns the set of descendant Object-Types defined for the Repository under the specified Type.
+    */
    public void testGetTypeDescendants()
    {
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
@@ -260,6 +313,11 @@ public class RepositoryTest extends BaseTest
       }
    }
 
+   /**
+    * 2.2.2.4 getTypeDescendants for Folder type
+    * 
+    * Returns the set of descendant Object-Types defined for the Repository under the specified Type.
+    */
    public void testGetTypeDescendants_Folder()
    {
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
@@ -276,6 +334,11 @@ public class RepositoryTest extends BaseTest
       assertTrue(typeDescendants.size() == 0);
    }
 
+   /**
+    * 2.2.2.4 getTypeDescendants for Document type
+    * 
+    * Returns the set of descendant Object-Types defined for the Repository under the specified Type.
+    */
    public void testGetTypeDescendants_Document()
    {
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
@@ -292,6 +355,11 @@ public class RepositoryTest extends BaseTest
       assertTrue(typeDescendants.size() == 0);
    }
 
+   /**
+    * 2.2.2.4 getTypeDescendants for root with IncludePropertyDefinition is false.
+    * 
+    * Returns the set of descendant Object-Types defined for the Repository under the specified Type.
+    */
    public void testGetTypeDescendants_IncludePropertyDefinitionFalse()
    {
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
@@ -314,6 +382,11 @@ public class RepositoryTest extends BaseTest
       }
    }
 
+   /**
+    * 2.2.2.4 getTypeDescendants for root with depth 1.
+    * 
+    * Returns the set of descendant Object-Types defined for the Repository under the specified Type.
+    */
    public void testGetTypeDescendants_RootWithDepth1()
    {
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
@@ -335,6 +408,11 @@ public class RepositoryTest extends BaseTest
       }
    }
 
+   /**
+    * 2.2.2.4 getTypeDescendants for non existed type.
+    * 
+    * Returns the set of descendant Object-Types defined for the Repository under the specified Type.
+    */
    public void testGetTypeDescendants_NonExistedType()
    {
       try
@@ -348,6 +426,11 @@ public class RepositoryTest extends BaseTest
       }
    }
 
+   /**
+    * 2.2.2.5 getTypeDefinition for Folder type
+    * 
+    * Gets the definition of the specified Object-Type.
+    */
    public void testGetTypeDefinition_Folder()
    {
       assertNotNull(folderTypeDefinition);
@@ -358,6 +441,11 @@ public class RepositoryTest extends BaseTest
       checkPropertyDefinitions(folderTypeDefinition.getPropertyDefinitions());
    }
 
+   /**
+    * 2.2.2.5 getTypeDefinition for Document type
+    * 
+    * Gets the definition of the specified Object-Type.
+    */
    public void testGetTypeDefinition_Document()
    {
       assertNotNull(documentTypeDefinition);
@@ -368,21 +456,11 @@ public class RepositoryTest extends BaseTest
       checkPropertyDefinitions(documentTypeDefinition.getPropertyDefinitions());
    }
 
-   private void checkPropertyDefinitions(Collection<PropertyDefinition<?>> propertyDefinitions)
-   {
-      assertNotNull(propertyDefinitions);
-      assertTrue(propertyDefinitions.size() > 0);
-      for (PropertyDefinition<?> propertyDefinition : propertyDefinitions)
-      {
-         assertNotNull(propertyDefinition);
-         assertNotNull(propertyDefinition.getId());
-         assertFalse(propertyDefinition.getId().isEmpty());
-         assertNotNull(propertyDefinition.getLocalName());
-         assertNotNull(propertyDefinition.getQueryName());
-         assertNotNull(propertyDefinition.getPropertyType());
-      }
-   }
-
+   /**
+    * 2.2.2.5 getTypeDefinition for non existed type
+    * 
+    * Gets the definition of the specified Object-Type.
+    */
    public void testGetTypeDefinition_NonExistedType()
    {
       try
@@ -396,6 +474,11 @@ public class RepositoryTest extends BaseTest
       }
    }
 
+   /**
+    * 2.2.2.5 getTypeDefinition for Folder type with IncludePropertyDefinition is false. 
+    * 
+    * Gets the definition of the specified Object-Type.
+    */
    public void testGetTypeDefinition_IncludePropertyDefinitionFalse()
    {
       TypeDefinition typeDefinition = null;
@@ -417,4 +500,18 @@ public class RepositoryTest extends BaseTest
       assertNull(propertyDefinitions);
    }
 
+   private void checkPropertyDefinitions(Collection<PropertyDefinition<?>> propertyDefinitions)
+   {
+      assertNotNull(propertyDefinitions);
+      assertTrue(propertyDefinitions.size() > 0);
+      for (PropertyDefinition<?> propertyDefinition : propertyDefinitions)
+      {
+         assertNotNull(propertyDefinition);
+         assertNotNull(propertyDefinition.getId());
+         assertFalse(propertyDefinition.getId().isEmpty());
+         assertNotNull(propertyDefinition.getLocalName());
+         assertNotNull(propertyDefinition.getQueryName());
+         assertNotNull(propertyDefinition.getPropertyType());
+      }
+   }
 }
