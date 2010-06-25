@@ -68,7 +68,8 @@ public class MultifillingTest extends BaseTest
    }
 
    /**
-    * 2.2.5.1 Adds an existing fileable non-folder object to a folder.
+    * 2.2.5.1 addObjectToFolder
+    * Adds an existing fileable non-folder object to a folder.
     * 
     * @throws Exception
     */
@@ -109,6 +110,9 @@ public class MultifillingTest extends BaseTest
    }
 
    /**
+    * 2.2.5.1 addObjectToFolder
+    * Adds an existing fileable non-folder object to a folder.
+    * 
     * The Repository MUST throw this exception if the cmis:objectTypeId property value of 
     * the given object is NOT in the list of AllowedChildObjectTypeIds of 
     * the parent-folder specified by folderId.
@@ -117,7 +121,7 @@ public class MultifillingTest extends BaseTest
     * 
     * @throws Exception
     */
-   public void testAddObjectToFolder_Exception() throws Exception
+   public void testAddObjectToFolder_ConstraintException() throws Exception
    {
       if (getCapabilities().isCapabilityMultifiling())
       {
@@ -126,7 +130,7 @@ public class MultifillingTest extends BaseTest
 
          FolderData folder1 = createFolder(rootFolder, "testFolder1");
 
-         // create folder2 for multifilling
+         // create folder2 for multifilling document
 
          FolderData folder2 = createFolder(rootFolder, "testFolder2");
 
@@ -212,7 +216,8 @@ public class MultifillingTest extends BaseTest
    }
 
    /**
-    * 2.2.5.1 Adds an existing fileable non-folder object to a folder.
+    * 2.2.5.1 addObjectToFolder
+    * Adds an existing fileable non-folder object to a folder.
     * 
     * @throws Exception
     */
@@ -251,6 +256,8 @@ public class MultifillingTest extends BaseTest
 
    /**
     * 2.2.5.2 removeObjectFromFolder
+    * Removes an existing fileable non-folder object from a folder.
+    * 
     * @throws Exception
     */
    public void testRemoveObjectFromFolder() throws Exception
@@ -299,6 +306,7 @@ public class MultifillingTest extends BaseTest
 
    /**
     * 2.2.5.2 removeObjectFromFolder
+    * Removes an existing fileable non-folder object from a folder.
     * @throws Exception
     */
    public void testRemoveObjectFromFolder_AlreadyAddedToAnotherFolder() throws Exception

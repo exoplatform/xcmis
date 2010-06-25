@@ -86,10 +86,19 @@ public abstract class BaseTest extends TestCase
 
    private Connection conn;
 
+   private static final String TCK_CONF_DEFAULT = "/conf/standalone/test-jcr-sp-configuration.xml";
+
    @Override
    public void setUp() throws Exception
    {
-      String containerConf = getClass().getResource("/conf/standalone/test-jcr-sp-configuration.xml").toString();
+
+      String propertyTckConf = System.getProperty("tck.conf");
+
+      String tck_conf =
+         propertyTckConf == null || propertyTckConf.length() == 0 || propertyTckConf.equalsIgnoreCase("${tck.conf}")
+            ? TCK_CONF_DEFAULT : propertyTckConf;
+
+      String containerConf = getClass().getResource(tck_conf).toString();
       StandaloneContainer.addConfigurationURL(containerConf);
       container = StandaloneContainer.getInstance();
 
