@@ -270,7 +270,7 @@ public final class PropertyDefinitions
    {
       all.remove(typeId);
    }
-   private static <T> PropertyDefinition<T> createPropertyDefinition(String id, PropertyType propertyType,
+   static <T> PropertyDefinition<T> createPropertyDefinition(String id, PropertyType propertyType,
       String queryName, String localName, String localNamespace, String displayName, boolean required,
       boolean queryable, boolean orderable, boolean inherited, boolean isMultivalued, Updatability updatability,
       String description, Boolean openChoice, List<Choice<T>> choices, T[] defValue)

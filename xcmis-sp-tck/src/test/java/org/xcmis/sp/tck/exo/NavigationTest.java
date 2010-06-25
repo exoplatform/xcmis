@@ -20,9 +20,11 @@
 package org.xcmis.sp.tck.exo;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
@@ -32,11 +34,17 @@ import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.RelationshipData;
+import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.CmisObject;
+import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.ObjectParent;
 import org.xcmis.spi.model.Property;
+import org.xcmis.spi.model.PropertyDefinition;
+import org.xcmis.spi.model.PropertyType;
 import org.xcmis.spi.model.RelationshipDirection;
+import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.model.Updatability;
 
 public class NavigationTest extends BaseTest
 {
@@ -53,8 +61,6 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_Relationships() throws Exception
    {
-      System.out.print("Running testGetChildren_Relationships....");
-      createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
