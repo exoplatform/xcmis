@@ -22,6 +22,7 @@ package org.xcmis.sp.inmemory;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.spi.BaseItemsIterator;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
@@ -39,6 +40,7 @@ import org.xcmis.spi.model.RelationshipDirection;
 import org.xcmis.spi.model.TypeDefinition;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -130,6 +132,11 @@ class FolderDataImpl extends BaseObjectData implements FolderData
     */
    public boolean isAllowedChildType(String typeId)
    {
+      Value value = entry.getValue(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS);
+      if (value != null && value.getStrings().length > 0 && !Arrays.asList(value.getStrings()).contains(typeId))
+      {
+         return false;
+      }
       return true;
    }
 

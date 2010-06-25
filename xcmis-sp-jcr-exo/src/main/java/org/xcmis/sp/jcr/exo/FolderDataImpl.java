@@ -24,6 +24,7 @@ import org.exoplatform.services.jcr.impl.core.NodeImpl;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.xcmis.sp.jcr.exo.index.IndexListener;
+import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
@@ -37,6 +38,7 @@ import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.TypeDefinition;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -374,8 +376,11 @@ class FolderDataImpl extends BaseObjectData implements FolderData
     */
    public boolean isAllowedChildType(String typeId)
    {
-      // There is no any restriction about types. Any fileable objects supported.
-      // Is type is fileable must be checked before calling this method.
+      String[] values = jcrEntry.getStrings(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS);
+      if (values != null && values.length > 0 && !Arrays.asList(values).contains(typeId))
+      {
+         return false;
+      }
       return true;
    }
 
