@@ -33,6 +33,7 @@ import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.NameConstraintViolationException;
+import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.Storage;
 import org.xcmis.spi.StorageException;
@@ -227,6 +228,19 @@ public abstract class BaseTest extends TestCase
       return testroot;
    }
 
+   
+   protected PolicyData createPolicy(FolderData where, String name) throws StorageException,
+   NameConstraintViolationException, ConstraintException
+{
+      org.xcmis.spi.model.PropertyDefinition<?> def =
+         PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
+      Map<String, Property<?>> properties2 = getPropsMap("cmis:policy", name);
+      properties2.put(CmisConstants.POLICY_TEXT, new StringProperty(def.getId(), def.getQueryName(),
+         def.getLocalName(), def.getDisplayName(), "testPolicyText"));
+      PolicyData policy = getStorage().createPolicy(where, policyTypeDefinition, properties2, null, null);
+      return policy;
+}
+   
    protected void clear()
    {
       try
@@ -319,8 +333,8 @@ public abstract class BaseTest extends TestCase
    protected void doFail(String message) throws Exception
    {
       System.out.println("FAILED");
-      //failedTests.add(arg0);
-      fail(message);
+      if (message != null)
+         fail(message);
    }
 
    protected void doFail() throws Exception

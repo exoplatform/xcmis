@@ -145,13 +145,7 @@ public class ObjectTest extends BaseTest
       FolderData testroot =
          getStorage()
             .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
-      org.xcmis.spi.model.PropertyDefinition<?> def =
-         PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
-      Map<String, Property<?>> properties = getPropsMap("cmis:policy", "policy1");
-      properties.put(CmisConstants.POLICY_TEXT, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(),
-         def.getDisplayName(), "testPolicyText"));
-
-      PolicyData policy = getStorage().createPolicy(testroot, policyTypeDefinition, properties, null, null);
+      PolicyData policy =createPolicy(testroot, "policy1");
 
       ArrayList<String> policies = new ArrayList<String>();
       policies.add(policy.getObjectId());
@@ -622,12 +616,7 @@ public class ObjectTest extends BaseTest
             ContentStreamAllowed.NOT_ALLOWED, kinoPropertyDefinitions);
       String typeID = getStorage().addType(newType);
 
-      org.xcmis.spi.model.PropertyDefinition<?> def =
-         PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
-      Map<String, Property<?>> properties2 = getPropsMap("cmis:policy", "policy1");
-      properties2.put(CmisConstants.POLICY_TEXT, new StringProperty(def.getId(), def.getQueryName(),
-         def.getLocalName(), def.getDisplayName(), "testPolicyText"));
-      PolicyData policy = getStorage().createPolicy(testroot, policyTypeDefinition, properties2, null, null);
+      PolicyData policy =createPolicy(testroot, "policy1");
 
       ArrayList<String> policies = new ArrayList<String>();
       policies.add(policy.getObjectId());
@@ -704,7 +693,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocumentFromSource_Properties() throws Exception
    {
-      System.out.print("Running testCreateDocumentFromSource_Simple....");
+      System.out.print("Running testCreateDocumentFromSource_Properties....");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       byte[] before = new byte[15];
       before = "1234567890aBcDE".getBytes();
@@ -751,14 +740,7 @@ public class ObjectTest extends BaseTest
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
             null, VersioningState.MAJOR);
 
-      org.xcmis.spi.model.PropertyDefinition<?> def =
-         PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
-      PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
-      Map<String, Property<?>> properties = getPropsMap("cmis:policy", "policy1");
-      properties.put(CmisConstants.POLICY_TEXT, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(),
-         def.getDisplayName(), "testPolicyText"));
-
-      PolicyData policy = getStorage().createPolicy(testroot, policyTypeDefinition, properties, null, null);
+      PolicyData policy =createPolicy(testroot, "policy1");
 
       ArrayList<String> policies = new ArrayList<String>();
       policies.add(policy.getObjectId());
@@ -1207,13 +1189,8 @@ public class ObjectTest extends BaseTest
             "cmis:kino", true, false, true, true, false, false, false, true, null, null,
             ContentStreamAllowed.NOT_ALLOWED, kinoPropertyDefinitions);
       String typeID = getStorage().addType(newType);
-    
-      org.xcmis.spi.model.PropertyDefinition<?> def =
-         PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
-      Map<String, Property<?>> properties2 = getPropsMap("cmis:policy", "policy1");
-      properties2.put(CmisConstants.POLICY_TEXT, new StringProperty(def.getId(), def.getQueryName(),
-         def.getLocalName(), def.getDisplayName(), "testPolicyText"));
-      PolicyData policy = getStorage().createPolicy(testroot, policyTypeDefinition, properties2, null, null);
+     
+      PolicyData policy =createPolicy(testroot, "policy1");
 
       ArrayList<String> policies = new ArrayList<String>();
       policies.add(policy.getObjectId());
@@ -1241,8 +1218,93 @@ public class ObjectTest extends BaseTest
       {
          clear(testroot.getObjectId());
          getStorage().removeType(typeID);
+         getStorage().deleteObject(policy, true);
       }
    }
+   
+   /**
+    * 2.2.4.3
+    * Creates a folder object of the specified type in the specified location.
+    * @throws Exception
+    */
+   public void testCreateFolder_Simple() throws Exception
+   {
+      System.out.print("Running testCreateFolder_Simple....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      try
+      {
+         String docId =
+            getConnection().createFolder(testroot.getObjectId(), getPropsMap("cmis:folder", "f1"), null, null, null);
+         ObjectData obj = getStorage().getObjectById(docId);
+         assertEquals("cmis:folder", obj.getTypeId());
+         assertEquals("/testroot/f1", ((FolderData)obj).getPath());
+         pass();
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         clear(testroot.getObjectId());
+      }
+   }
+   
+
+   /**
+    * 2.2.4.3.1
+    * A list of policy IDs that MUST be applied to the newly-created Folder object.
+    * @throws Exception
+    */
+   public void testCreateFolder_ApplyPolicy() throws Exception
+   {
+      System.out.print("Running testCreateFolder_Simple....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      
+      
+      PolicyData policy =createPolicy(testroot, "policy1");
+
+      ArrayList<String> policies = new ArrayList<String>();
+      policies.add(policy.getObjectId());
+      String docId = "";
+      try
+      {
+          docId =
+            getConnection().createFolder(testroot.getObjectId(), getPropsMap("cmis:folder", "f1"), null, null, policies);
+         ObjectData obj = getStorage().getObjectById(docId);
+         ObjectData res = getStorage().getObjectById(docId);
+         assertEquals(1, res.getPolicies().size());
+         Iterator<PolicyData> it = res.getPolicies().iterator();
+         while (it.hasNext())
+         {
+            PolicyData one = it.next();
+            assertEquals("policy1", one.getName());
+            assertEquals("testPolicyText", one.getPolicyText());
+         }
+         pass();
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         getStorage().deleteObject(getStorage().getObjectById(docId), true);
+         getStorage().deleteObject(policy, true);
+         clear(testroot.getObjectId());
+      }
+   }
+
    
    
    protected void tearDown()
