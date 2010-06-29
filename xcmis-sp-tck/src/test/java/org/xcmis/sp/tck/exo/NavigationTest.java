@@ -61,6 +61,8 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_Relationships() throws Exception
    {
+      System.out.print("Running testGetChildren_Relationships....");
+      createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
