@@ -1,0 +1,79 @@
+/**
+ * Copyright (C) 2010 eXo Platform SAS.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ */
+
+package org.xcmis.sp.tck.exo;
+
+import org.xcmis.spi.CmisConstants;
+import org.xcmis.spi.DocumentData;
+import org.xcmis.spi.FolderData;
+import org.xcmis.spi.ItemsList;
+import org.xcmis.spi.RenditionFilter;
+import org.xcmis.spi.model.CmisObject;
+import org.xcmis.spi.model.IncludeRelationships;
+
+import java.util.List;
+
+/**
+ * 2.2.6 Discovery Services
+ * The Discovery Services (query) are used to search for query-able objects within the Repository.
+ * 
+ * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey Zavizionov</a>
+ * @version $Id:  $
+ */
+public class DiscoveryTest extends BaseTest
+{
+
+   @Override
+   public void setUp() throws Exception
+   {
+      super.setUp();
+   }
+
+   /**
+    * 2.2.6.1 query.
+    * 
+    * Description: Executes a CMIS query statement against the contents of the Repository.
+    */
+   public void testQuery() throws Exception
+   {
+
+      FolderData parentFolder = createFolder(rootFolder, "folder1");;
+      DocumentData documentData = createDocument(parentFolder, "doc1", "Hello World!");
+      String statement = "SELECT * FROM " + CmisConstants.DOCUMENT + " WHERE CONTAINS(\"Hello\")";
+      ItemsList<CmisObject> query = null;
+
+      query =
+         getConnection().query(statement, true, false, IncludeRelationships.BOTH, true, RenditionFilter.ANY, -1, 0);
+
+      assertNotNull(query);
+      assertNotNull(query.getItems());
+      assertNotNull(query.getItems().size());
+      assertEquals(1, query.getItems().size());
+
+      List<CmisObject> result = query.getItems();
+      for (CmisObject cmisObject : result)
+      {
+         assertNotNull(cmisObject);
+         assertNotNull(cmisObject.getObjectInfo());
+         assertNotNull(cmisObject.getObjectInfo().getId());
+         assertEquals(documentData.getObjectId(), cmisObject.getObjectInfo().getId());
+         assertEquals(documentData.getName(), cmisObject.getObjectInfo().getName());
+      }
+   }
+}
