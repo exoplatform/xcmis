@@ -93,6 +93,8 @@ public class ObjectTest extends BaseTest
       {
          e.printStackTrace();
          doFail(e.getMessage());
+      } finally{
+         clear(testroot.getObjectId());
       }
    }
 
@@ -125,6 +127,8 @@ public class ObjectTest extends BaseTest
       {
          e.printStackTrace();
          doFail(e.getMessage());
+      }finally{
+         clear(testroot.getObjectId());
       }
    }
 
@@ -177,6 +181,7 @@ public class ObjectTest extends BaseTest
       {
          getStorage().deleteObject(getStorage().getObjectById(docId), true);
          getStorage().deleteObject(policy, true);
+         clear(testroot.getObjectId());
       }
 
    }
@@ -256,7 +261,10 @@ public class ObjectTest extends BaseTest
       {
          e.printStackTrace();
          doFail(e.getMessage());
+      }finally{
+         clear(testroot.getObjectId());
       }
+      
    }
 
    /**
@@ -319,7 +327,7 @@ public class ObjectTest extends BaseTest
       }
       finally
       {
-         tearDown();
+         clear(testroot.getObjectId());
          getStorage().removeType(typeID);
       }
    }
@@ -381,7 +389,7 @@ public class ObjectTest extends BaseTest
       }
       finally
       {
-         tearDown();
+         clear(testroot.getObjectId());
          getStorage().removeType(typeID);
       }
    }
@@ -442,7 +450,7 @@ public class ObjectTest extends BaseTest
       }
       finally
       {
-         tearDown();
+         clear(testroot.getObjectId());
          getStorage().removeType(typeID);
       }
    }
@@ -505,7 +513,7 @@ public class ObjectTest extends BaseTest
       }
       finally
       {
-         tearDown();
+         clear(testroot.getObjectId());
          getStorage().removeType(typeID);
       }
    }
@@ -568,7 +576,7 @@ public class ObjectTest extends BaseTest
       }
       finally
       {
-         tearDown();
+         clear(testroot.getObjectId());
          getStorage().removeType(typeID);
       }
    }
@@ -641,9 +649,9 @@ public class ObjectTest extends BaseTest
       }
       finally
       {
-         tearDown();
-         getStorage().removeType(typeID);
+         clear(testroot.getObjectId());
          getStorage().deleteObject(policy, true);
+         getStorage().removeType(typeID);
       }
    }
 
@@ -683,6 +691,8 @@ public class ObjectTest extends BaseTest
       {
          e.printStackTrace();
          doFail(e.getMessage());
+      }finally {
+         clear(testroot.getObjectId());
       }
    }
 
@@ -717,6 +727,8 @@ public class ObjectTest extends BaseTest
       {
          e.printStackTrace();
          doFail(e.getMessage());
+      }finally {
+         clear(testroot.getObjectId());
       }
    }
 
@@ -775,6 +787,7 @@ public class ObjectTest extends BaseTest
       finally
       {
          getStorage().deleteObject(policy, true);
+            clear(testroot.getObjectId());
       }
    }
 
@@ -861,6 +874,10 @@ public class ObjectTest extends BaseTest
          e.printStackTrace();
          doFail(e.getMessage());
       }
+      finally
+      {
+           clear(testroot.getObjectId());
+      }
    }
    
    
@@ -899,8 +916,9 @@ public class ObjectTest extends BaseTest
       }
       finally
       {
-         tearDown();
+           clear(testroot.getObjectId());
       }
+
    }
 
    
@@ -993,8 +1011,9 @@ public class ObjectTest extends BaseTest
       finally
       {
          getStorage().deleteObject(myfolder, true);
+         clear(testroot.getObjectId());
          getStorage().removeType(typeID);
-         tearDown();
+              
       }
    }
    
@@ -1065,8 +1084,8 @@ public class ObjectTest extends BaseTest
       }
       finally
       {
+         clear(testroot.getObjectId());
          getStorage().removeType(typeID);
-         tearDown();
       }
    }
    
@@ -1112,12 +1131,16 @@ public class ObjectTest extends BaseTest
       TypeDefinition newType =
          new TypeDefinition("cmis:kino", BaseType.DOCUMENT, "cmis:kino", "cmis:kino", "", "cmis:document", "cmis:kino",
             "cmis:kino", true, false, true, true, false, false, false, true, null, null,
-            ContentStreamAllowed.NOT_ALLOWED, kinoPropertyDefinitions);
+            ContentStreamAllowed.ALLOWED, kinoPropertyDefinitions);
       String typeID = getStorage().addType(newType);
-    
+      
       DocumentData doc1 =
-         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc"), cs, null,
+         getStorage().createDocument(testroot, newType, properties, cs, null,
             null, VersioningState.MAJOR);
+      
+      properties.put(CmisConstants.NAME, new StringProperty(kinoPropDefName2.getId(), kinoPropDefName2.getQueryName(),
+         kinoPropDefName2.getLocalName(), kinoPropDefName2.getDisplayName(), "doc2"));
+    
       try
       {
          String docId =
@@ -1136,8 +1159,9 @@ public class ObjectTest extends BaseTest
       }
       finally
       {
-         getStorage().removeType(typeID);
-         tearDown();
+         clear(testroot.getObjectId());
+         getStorage().removeType(typeID); 
+         
       }
    }
    
@@ -1158,8 +1182,6 @@ public class ObjectTest extends BaseTest
       FolderData testroot =
          getStorage()
             .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
-    
-      //Creating type from cmis:folder with overriden  ALLOWED_CHILD_OBJECT_TYPE_IDS;
       
       Map<String, PropertyDefinition<?>> kinoPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
       org.xcmis.spi.model.PropertyDefinition<?> kinoPropDefName2 =
@@ -1217,23 +1239,14 @@ public class ObjectTest extends BaseTest
       }
       finally
       {
+         clear(testroot.getObjectId());
          getStorage().removeType(typeID);
-         tearDown();
       }
    }
    
    
    protected void tearDown()
    {
-      try
-      {
-         FolderData testroot = (FolderData)getStorage().getObjectByPath("/testroot");
-         getStorage().deleteTree(testroot, true, UnfileObject.DELETE, true);
-      }
-      catch (Exception e)
-      {
-          //e.printStackTrace();
-      }
-
+    
    }
 }

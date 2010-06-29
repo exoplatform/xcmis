@@ -266,6 +266,20 @@ public abstract class BaseTest extends TestCase
       }
    }
 
+   protected void clear(String testroot)
+   {
+      try
+      {
+         FolderData rootFolder = (FolderData)getStorage().getObjectById(testroot);
+         getStorage().deleteTree(rootFolder, true, UnfileObject.DELETE, true);
+
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+   }
+   
    public List<CmisObject> objectTreeToList(List<ItemsTree<CmisObject>> source)
    {
       List<CmisObject> result = new ArrayList<CmisObject>();
