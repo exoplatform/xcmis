@@ -763,6 +763,7 @@ public class ObjectTest extends BaseTest
             PolicyData one = it.next();
             assertEquals("policy1", one.getName());
             assertEquals("testPolicyText", one.getPolicyText());
+            res.removePolicy(one);
          }
          pass();
       }
@@ -770,6 +771,10 @@ public class ObjectTest extends BaseTest
       {
          e.printStackTrace();
          doFail(e.getMessage());
+      }
+      finally
+      {
+         getStorage().deleteObject(policy, true);
       }
    }
 
@@ -857,7 +862,367 @@ public class ObjectTest extends BaseTest
          doFail(e.getMessage());
       }
    }
+   
+   
+   /**
+    * 2.2.4.2.3
+    * •  constraint: The Repository MUST throw this exception if  the sourceId is not an Object whose baseType is “Document”.
+    * @throws Exception
+    */
+   
+   public void testCreateDocumentFromSource_ConstraintException1() throws Exception
+   {
+      System.out.print("Running testCreateDocumentFromSource_ConstraintException1....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      
+      FolderData test = createFolder(testroot, "123");
 
+      try
+      {
+         String docId =
+            getConnection().createDocumentFromSource(test.getObjectId(), testroot.getObjectId(),
+               getPropsMap("cmis:document", "1"), null, null, null, VersioningState.MAJOR);
+         doFail();
+      }
+      catch (ConstraintException ex)
+      {
+         pass();
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         tearDown();
+      }
+   }
+
+   
+   
+   
+   
+   /**
+    * 2.2.4.2.3
+    * The source document’s cmis:objectTypeId property value is NOT in the list of AllowedChildObjectTypeIds 
+    * of the parent-folder specified by folderId.
+    * @throws Exception
+    */
+   
+   public void testCreateDocumentFromSource_ConstraintException2() throws Exception
+   {
+      System.out.print("Running testCreateDocumentFromSource_ConstraintException2....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+      
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+    
+      //Creating type from cmis:folder with overriden  ALLOWED_CHILD_OBJECT_TYPE_IDS;
+      
+    Map<String, PropertyDefinition<?>> folderPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
+    
+    org.xcmis.spi.model.PropertyDefinition<?> fPropDefName2 =
+       PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
+          CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
+          "myfolder", true, null, null);
+    
+    org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
+       PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
+          CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
+          false, false, false, false, Updatability.READONLY, "fold_type_id1", null, null, null);
+    
+    org.xcmis.spi.model.PropertyDefinition<?> fPropDefAllowedChild =
+       PropertyDefinitions.createPropertyDefinition(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, PropertyType.ID,
+          CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, null, CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, false,
+          false, false, false, false, Updatability.READONLY, "fold_type_chld_ids", null, null, null);
+    
+    folderPropertyDefinitions.put(CmisConstants.NAME, fPropDefName2);
+    folderPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefObjectTypeId);
+    folderPropertyDefinitions.put(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, fPropDefAllowedChild);
+
+    Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+    
+    properties.put(CmisConstants.NAME, new StringProperty(fPropDefName2.getId(), fPropDefName2.getQueryName(),
+       fPropDefName2.getLocalName(), fPropDefName2.getDisplayName(), "myfolder"));
+    
+    properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(),
+       fPropDefObjectTypeId.getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId
+          .getDisplayName(), "cmis:kino"));
+
+    properties.put(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, new IdProperty(fPropDefObjectTypeId.getId(),
+       fPropDefObjectTypeId.getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId
+          .getDisplayName(), "cmis:folder"));
+    
+    TypeDefinition newType =
+       new TypeDefinition("cmis:myfolder", BaseType.FOLDER, "cmis:myfolder", "cmis:myfolder", "", "cmis:folder", "cmis:myfolder",
+          "cmis:myfolder", true, false, true, true, false, false, false, false, null, null,
+          ContentStreamAllowed.NOT_ALLOWED, folderPropertyDefinitions);
+    String typeID = getStorage().addType(newType);
+
+    FolderData myfolder =
+         getStorage()
+            .createFolder(testroot, newType, properties, null, null);
+
+      DocumentData doc1 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc"), cs, null,
+            null, VersioningState.MAJOR);
+
+      try
+      {
+         String docId =
+            getConnection().createDocumentFromSource(doc1.getObjectId(), myfolder.getObjectId(),
+               getPropsMap("cmis:document", "1"), null, null, null, VersioningState.MAJOR);
+         doFail();
+      }
+      catch (ConstraintException ex)
+      {
+         pass();
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         getStorage().deleteObject(myfolder, true);
+         getStorage().removeType(typeID);
+         tearDown();
+      }
+   }
+   
+   
+   
+   /**
+    * 2.2.4.2.3
+    * The “versionable” attribute of the Object-Type definition specified by the cmis:objectTypeId property value is set to FALSE 
+    * and a value for the versioningState input parameter is provided that is something other than “none”.
+    * @throws Exception
+    */
+   
+   public void testCreateDocumentFromSource_ConstraintException3() throws Exception
+   {
+      System.out.print("Running testCreateDocumentFromSource_ConstraintException3....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+      
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+    
+      //Creating type from cmis:folder with overriden  ALLOWED_CHILD_OBJECT_TYPE_IDS;
+      
+      Map<String, PropertyDefinition<?>> kinoPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
+      org.xcmis.spi.model.PropertyDefinition<?> kinoPropDefName2 =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
+            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
+            "doc1", true, null, null);
+      org.xcmis.spi.model.PropertyDefinition<?> kinoPropDefObjectTypeId2 =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
+            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
+            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+      kinoPropertyDefinitions.put(CmisConstants.NAME, kinoPropDefName2);
+      kinoPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, kinoPropDefObjectTypeId2);
+
+      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+      properties.put(CmisConstants.NAME, new StringProperty(kinoPropDefName2.getId(), kinoPropDefName2.getQueryName(),
+         kinoPropDefName2.getLocalName(), kinoPropDefName2.getDisplayName(), "doc1"));
+      properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(kinoPropDefObjectTypeId2.getId(),
+         kinoPropDefObjectTypeId2.getQueryName(), kinoPropDefObjectTypeId2.getLocalName(), kinoPropDefObjectTypeId2
+            .getDisplayName(), "cmis:kino"));
+
+      TypeDefinition newType =
+         new TypeDefinition("cmis:kino", BaseType.DOCUMENT, "cmis:kino", "cmis:kino", "", "cmis:document", "cmis:kino",
+            "cmis:kino", true, false, true, true, false, false, false, false, null, null,
+            ContentStreamAllowed.NOT_ALLOWED, kinoPropertyDefinitions);
+      String typeID = getStorage().addType(newType);
+    
+      DocumentData doc1 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc"), cs, null,
+            null, VersioningState.MAJOR);
+      try
+      {
+         String docId =
+            getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(),
+               properties, null, null, null, VersioningState.MAJOR);
+         doFail();
+      }
+      catch (ConstraintException ex)
+      {
+         pass();
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         getStorage().removeType(typeID);
+         tearDown();
+      }
+   }
+   
+   
+   /**
+    * 2.2.4.2.3
+    * The “versionable” attribute of the Object-Type definition specified by the cmis:objectTypeId property value is set to TRUE and 
+    * the value for the versioningState input parameter is provided that is “none”.
+    * @throws Exception
+    */
+   
+   public void testCreateDocumentFromSource_ConstraintException4() throws Exception
+   {
+      System.out.print("Running testCreateDocumentFromSource_ConstraintException4....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+      
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+    
+      //Creating type from cmis:folder with overriden  ALLOWED_CHILD_OBJECT_TYPE_IDS;
+      
+      Map<String, PropertyDefinition<?>> kinoPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
+      org.xcmis.spi.model.PropertyDefinition<?> kinoPropDefName2 =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
+            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
+            "doc1", true, null, null);
+      org.xcmis.spi.model.PropertyDefinition<?> kinoPropDefObjectTypeId2 =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
+            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
+            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+      kinoPropertyDefinitions.put(CmisConstants.NAME, kinoPropDefName2);
+      kinoPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, kinoPropDefObjectTypeId2);
+
+      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+      properties.put(CmisConstants.NAME, new StringProperty(kinoPropDefName2.getId(), kinoPropDefName2.getQueryName(),
+         kinoPropDefName2.getLocalName(), kinoPropDefName2.getDisplayName(), "doc1"));
+      properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(kinoPropDefObjectTypeId2.getId(),
+         kinoPropDefObjectTypeId2.getQueryName(), kinoPropDefObjectTypeId2.getLocalName(), kinoPropDefObjectTypeId2
+            .getDisplayName(), "cmis:kino"));
+
+      TypeDefinition newType =
+         new TypeDefinition("cmis:kino", BaseType.DOCUMENT, "cmis:kino", "cmis:kino", "", "cmis:document", "cmis:kino",
+            "cmis:kino", true, false, true, true, false, false, false, true, null, null,
+            ContentStreamAllowed.NOT_ALLOWED, kinoPropertyDefinitions);
+      String typeID = getStorage().addType(newType);
+    
+      DocumentData doc1 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc"), cs, null,
+            null, VersioningState.MAJOR);
+      try
+      {
+         String docId =
+            getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(),
+               properties, null, null, null, VersioningState.NONE);
+         doFail();
+      }
+      catch (ConstraintException ex)
+      {
+         pass();
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         getStorage().removeType(typeID);
+         tearDown();
+      }
+   }
+   
+   /**
+    * 2.2.4.2.3
+    * The “controllablePolicy” attribute of the Object-Type definition 
+    * specified by the cmis:objectTypeId property value is set to FALSE and at least one policy is provided.
+    * 
+    * @throws Exception
+    */
+   
+   public void testCreateDocumentFromSource_ConstraintException5() throws Exception
+   {
+      System.out.print("Running testCreateDocumentFromSource_ConstraintException5...");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+      
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+    
+      //Creating type from cmis:folder with overriden  ALLOWED_CHILD_OBJECT_TYPE_IDS;
+      
+      Map<String, PropertyDefinition<?>> kinoPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
+      org.xcmis.spi.model.PropertyDefinition<?> kinoPropDefName2 =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
+            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
+            "doc1", true, null, null);
+      org.xcmis.spi.model.PropertyDefinition<?> kinoPropDefObjectTypeId2 =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
+            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
+            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+      kinoPropertyDefinitions.put(CmisConstants.NAME, kinoPropDefName2);
+      kinoPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, kinoPropDefObjectTypeId2);
+
+      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+      properties.put(CmisConstants.NAME, new StringProperty(kinoPropDefName2.getId(), kinoPropDefName2.getQueryName(),
+         kinoPropDefName2.getLocalName(), kinoPropDefName2.getDisplayName(), "doc1"));
+      properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(kinoPropDefObjectTypeId2.getId(),
+         kinoPropDefObjectTypeId2.getQueryName(), kinoPropDefObjectTypeId2.getLocalName(), kinoPropDefObjectTypeId2
+            .getDisplayName(), "cmis:kino"));
+
+      TypeDefinition newType =
+         new TypeDefinition("cmis:kino", BaseType.DOCUMENT, "cmis:kino", "cmis:kino", "", "cmis:document", "cmis:kino",
+            "cmis:kino", true, false, true, true, false, false, false, true, null, null,
+            ContentStreamAllowed.NOT_ALLOWED, kinoPropertyDefinitions);
+      String typeID = getStorage().addType(newType);
+    
+      org.xcmis.spi.model.PropertyDefinition<?> def =
+         PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
+      Map<String, Property<?>> properties2 = getPropsMap("cmis:policy", "policy1");
+      properties2.put(CmisConstants.POLICY_TEXT, new StringProperty(def.getId(), def.getQueryName(),
+         def.getLocalName(), def.getDisplayName(), "testPolicyText"));
+      PolicyData policy = getStorage().createPolicy(testroot, policyTypeDefinition, properties2, null, null);
+
+      ArrayList<String> policies = new ArrayList<String>();
+      policies.add(policy.getObjectId());
+      
+      DocumentData doc1 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc"), cs, null,
+            null, VersioningState.MAJOR);
+      try
+      {
+         String docId =
+            getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(),
+               properties, null, null, policies, VersioningState.NONE);
+         doFail();
+      }
+      catch (ConstraintException ex)
+      {
+         pass();
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         getStorage().removeType(typeID);
+         tearDown();
+      }
+   }
+   
+   
    protected void tearDown()
    {
       try
@@ -867,7 +1232,7 @@ public class ObjectTest extends BaseTest
       }
       catch (Exception e)
       {
-
+          //e.printStackTrace();
       }
 
    }
