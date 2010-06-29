@@ -52,6 +52,7 @@ public class DiscoveryTest extends BaseTest
     */
    public void testQuery() throws Exception
    {
+      String errSms = "\n 2.2.6.1 query. Doesn't work Query (Discovery service) with cmis:document to search content.";
 
       FolderData parentFolder = createFolder(rootFolder, "folder1");;
       DocumentData documentData = createDocument(parentFolder, "doc1", "Hello World!");
@@ -61,19 +62,19 @@ public class DiscoveryTest extends BaseTest
       query =
          getConnection().query(statement, true, false, IncludeRelationships.BOTH, true, RenditionFilter.ANY, -1, 0);
 
-      assertNotNull(query);
-      assertNotNull(query.getItems());
-      assertNotNull(query.getItems().size());
-      assertEquals(1, query.getItems().size());
+      assertNotNull(errSms, query);
+      assertNotNull(errSms, query.getItems());
+      assertNotNull(errSms, query.getItems().size());
+      assertEquals(errSms, 1, query.getItems().size());
 
       List<CmisObject> result = query.getItems();
       for (CmisObject cmisObject : result)
       {
-         assertNotNull(cmisObject);
-         assertNotNull(cmisObject.getObjectInfo());
-         assertNotNull(cmisObject.getObjectInfo().getId());
-         assertEquals(documentData.getObjectId(), cmisObject.getObjectInfo().getId());
-         assertEquals(documentData.getName(), cmisObject.getObjectInfo().getName());
+         assertNotNull(errSms, cmisObject);
+         assertNotNull(errSms, cmisObject.getObjectInfo());
+         assertNotNull(errSms, cmisObject.getObjectInfo().getId());
+         assertEquals(errSms, documentData.getObjectId(), cmisObject.getObjectInfo().getId());
+         assertEquals(errSms, documentData.getName(), cmisObject.getObjectInfo().getName());
       }
    }
 }
