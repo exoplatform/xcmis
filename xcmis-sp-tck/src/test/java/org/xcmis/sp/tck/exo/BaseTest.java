@@ -86,7 +86,7 @@ public abstract class BaseTest extends TestCase
 
    private Connection conn;
 
-   private static final String TCK_CONF_DEFAULT = "/conf/standalone/test-jcr-sp-configuration.xml";
+   private static final String TCK_CONF_DEFAULT = "/conf/sp_jcr_exo/test-jcr-sp-configuration.xml";
 
    @Override
    public void setUp() throws Exception

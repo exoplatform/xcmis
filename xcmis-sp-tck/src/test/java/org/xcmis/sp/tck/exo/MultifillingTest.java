@@ -51,12 +51,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey Zavizionov</a>
- * @version $Id:  $
- * 
  * 2.2.5 The Multi-filing services (addObjectToFolder, removeObjectFromFolder) are supported only 
  * if the repository supports the multifiling or unfiling optional capabilities. 
  * The Multi-filing Services are used to file/un-file objects into/from folders.
+ * 
+ * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey Zavizionov</a>
+ * @version $Id:  $
+ * 
  */
 public class MultifillingTest extends BaseTest
 {
@@ -307,6 +308,7 @@ public class MultifillingTest extends BaseTest
    /**
     * 2.2.5.2 removeObjectFromFolder
     * Removes an existing fileable non-folder object from a folder.
+    * 
     * @throws Exception
     */
    public void testRemoveObjectFromFolder_AlreadyAddedToAnotherFolder() throws Exception
@@ -370,16 +372,6 @@ public class MultifillingTest extends BaseTest
       super.tearDown();
    }
 
-   /**
-    * @param cmisObject
-    * @throws StorageException 
-    * @throws VersioningException 
-    * @throws UpdateConflictException 
-    * @throws ConstraintException 
-    * @throws ObjectNotFoundException 
-    * @throws FilterNotValidException 
-    * @throws InvalidArgumentException 
-    */
    private void remove(CmisObject cmisObject) throws ObjectNotFoundException, ConstraintException,
       UpdateConflictException, VersioningException, StorageException, InvalidArgumentException, FilterNotValidException
    {

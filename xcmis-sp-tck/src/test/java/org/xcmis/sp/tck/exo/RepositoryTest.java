@@ -34,6 +34,11 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * 2.2.2 Repository Services
+ * The Repository Services (getRepositories, getRepositoryInfo, getTypeChildren, getTypeDescendants,
+ * getTypeDefinition) are used to discover information about the repository, including information about the
+ * repository and the object-types defined for the repository.
+ * 
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey Zavizionov</a>
  * @version $Id:  $
  */
