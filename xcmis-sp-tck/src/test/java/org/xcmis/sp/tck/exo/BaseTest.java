@@ -335,6 +335,9 @@ public abstract class BaseTest extends TestCase
       System.out.println("FAILED");
       if (message != null)
          fail(message);
+      else
+         fail();
+
    }
 
    protected void doFail() throws Exception
