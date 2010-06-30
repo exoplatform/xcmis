@@ -77,4 +77,78 @@ public class DiscoveryTest extends BaseTest
          assertEquals(errSms, documentData.getName(), cmisObject.getObjectInfo().getName());
       }
    }
+
+   /**
+    * 2.2.6.1 query.
+    * 
+    * Description: Executes a CMIS query statement against the contents of the Repository.
+    */
+   public void testQuery2() throws Exception
+   {
+      String errSms = "\n 2.2.6.1 query. Doesn't work Query (Discovery service) with cmis:document to search content.";
+
+      FolderData parentFolder = createFolder(rootFolder, "folder1");;
+      DocumentData documentData = createDocument(parentFolder, "doc1", "Hello World!");
+      String statement = "SELECT * FROM " + CmisConstants.DOCUMENT + " WHERE CONTAINS(\"Hello\")";
+      ItemsList<CmisObject> query = null;
+
+      query =
+         getConnection().query(statement, false, false, IncludeRelationships.BOTH, true, RenditionFilter.ANY, -1, 0);
+
+      assertNotNull(errSms, query);
+      assertNotNull(errSms, query.getItems());
+      assertNotNull(errSms, query.getItems().size());
+      assertEquals(errSms, 1, query.getItems().size());
+
+      List<CmisObject> result = query.getItems();
+      for (CmisObject cmisObject : result)
+      {
+         assertNotNull(errSms, cmisObject);
+         assertNotNull(errSms, cmisObject.getObjectInfo());
+         assertNotNull(errSms, cmisObject.getObjectInfo().getId());
+         assertEquals(errSms, documentData.getObjectId(), cmisObject.getObjectInfo().getId());
+         assertEquals(errSms, documentData.getName(), cmisObject.getObjectInfo().getName());
+      }
+   }
+
+   //   /**
+   //    * @see org.xcmis.sp.tck.exo.BaseTest#tearDown()
+   //    */
+   //   @Override
+   //   protected void tearDown() throws Exception
+   //   {
+   //      ItemsList<CmisObject> children =
+   //         getConnection().getChildren(rootfolderID, false, null, false, true, null, null, null, -1, 0);
+   //      if (children != null && children.getItems() != null)
+   //      {
+   //         List<CmisObject> listChildren = children.getItems();
+   //         for (CmisObject cmisObject : listChildren)
+   //         {
+   //            remove(cmisObject);
+   //         }
+   //      }
+   //      super.tearDown();
+   //   }
+   //
+   //   private void remove(CmisObject cmisObject) throws ObjectNotFoundException, ConstraintException,
+   //      UpdateConflictException, VersioningException, StorageException, InvalidArgumentException, FilterNotValidException
+   //   {
+   //
+   //      if (cmisObject.getObjectInfo().getBaseType().equals(BaseType.FOLDER))
+   //      {
+   //         ItemsList<CmisObject> children =
+   //            getConnection().getChildren(cmisObject.getObjectInfo().getId(), false, null, false, true, null, null, null,
+   //               -1, 0);
+   //         if (children != null && children.getItems() != null)
+   //         {
+   //            List<CmisObject> listChildren = children.getItems();
+   //            for (CmisObject cmisObject0 : listChildren)
+   //            {
+   //               remove(cmisObject0);
+   //            }
+   //         }
+   //      }
+   //      getConnection().deleteObject(cmisObject.getObjectInfo().getId(), true);
+   //   }
+
 }
