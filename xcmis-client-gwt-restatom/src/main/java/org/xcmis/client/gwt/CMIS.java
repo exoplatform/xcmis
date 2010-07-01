@@ -449,12 +449,11 @@ public class CMIS
     * CMIS choice
     */
    public static final String CMIS_CHOICE = CMIS_PREFIX + "choice";
-   
+
    /**
     * CMIS default value
     */
    public static final String CMIS_DEFAULT_VALUE = CMIS_PREFIX + "defaultValue";
-
 
    /**
     * CMIS created by.
@@ -784,7 +783,7 @@ public class CMIS
     * CMIS resolution for date time property definition.
     */
    public static final String CMIS_RESOLUTION = CMIS_PREFIX + "resolution";
-   
+
    /**
     * CMIS repository relationship.
     */
@@ -968,9 +967,14 @@ public class CMIS
    public static final String FEED = "feed";
 
    /**
-    * Feed_type.
+    * Feed type.
     */
    public static final String FEED_TYPE = "application/atom+xml;type=feed";
+
+   /**
+    * Atom entry type.
+    */
+   public static final String ATOM_ENTRY_TYPE = "application/atom+xml;type=entry";
 
    /**
     * Href.

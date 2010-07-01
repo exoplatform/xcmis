@@ -94,8 +94,9 @@ public class ObjectXMLBuilder
       summary.appendChild(doc.createTextNode("Document creation"));
       Element content = doc.createElement(CMIS.CONTENT);
       /* Source for document content stream */
-      if (contentSourceUrl != null){
-        content.setAttribute(CMIS.SOURCE, contentSourceUrl);
+      if (contentSourceUrl != null)
+      {
+         content.setAttribute(CMIS.SOURCE, contentSourceUrl);
       }
 
       entry.appendChild(title);
@@ -172,6 +173,7 @@ public class ObjectXMLBuilder
       /* Title must also contain the name of new folder */
       Element title = doc.createElement(CMIS.TITLE);
       title.appendChild(doc.createTextNode(name));
+      title.setAttribute("type", "text");
       Element summary = doc.createElement(CMIS.SUMMARY);
       summary.appendChild(doc.createTextNode("Folder creation"));
 
@@ -322,7 +324,7 @@ public class ObjectXMLBuilder
       doc.appendChild(entry);
       return EntryXMLBuilder.createStringRequest(doc);
    }
-   
+
    /**
     * Create request for changing content stream by url.
     * 
@@ -335,9 +337,10 @@ public class ObjectXMLBuilder
       Element entry = EntryXMLBuilder.createEntryElement(doc);
 
       Element content = doc.createElement(CMIS.CONTENT);
-      
-      if (contentSourceUrl != null){
-        content.setAttribute(CMIS.SOURCE, contentSourceUrl);
+
+      if (contentSourceUrl != null)
+      {
+         content.setAttribute(CMIS.SOURCE, contentSourceUrl);
       }
       entry.appendChild(content);
       doc.appendChild(entry);
@@ -421,7 +424,6 @@ public class ObjectXMLBuilder
       doc.appendChild(entry);
       return EntryXMLBuilder.createStringRequest(doc);
    }
-   
 
    /**
     * Create check out request.
@@ -436,7 +438,8 @@ public class ObjectXMLBuilder
 
       Element object = doc.createElement(CMIS.CMISRA_OBJECT);
       Element properties = doc.createElement(CMIS.CMIS_PROPERTIES);
-      Element objectIdElement = createPropertyElement(doc, CMIS.CMIS_PROPERTY_ID, CMIS.CMIS_OBJECT_ID, checkout.getObjectId());
+      Element objectIdElement =
+         createPropertyElement(doc, CMIS.CMIS_PROPERTY_ID, CMIS.CMIS_OBJECT_ID, checkout.getObjectId());
       properties.appendChild(objectIdElement);
       object.appendChild(properties);
       entry.appendChild(object);

@@ -19,6 +19,7 @@
 
 package org.xcmis.client.gwt.service.object;
 
+import org.xcmis.client.gwt.CMIS;
 import org.xcmis.client.gwt.CmisArguments;
 import org.xcmis.client.gwt.marshallers.CreateDocumentFromSourceMarshaller;
 import org.xcmis.client.gwt.marshallers.CreateDocumentMarshaller;
@@ -113,7 +114,7 @@ public class ObjectService
             + createDocument.getVersioningState().value();
 
       AsyncRequestCallback callback = new AsyncRequestCallback(eventBus, unmarshaller, event, errorEvent);
-      AsyncRequest.build(RequestBuilder.POST, url + "?" + params).data(marshaller).send(callback);
+      AsyncRequest.build(RequestBuilder.POST, url + "?" + params).header(HTTPHeader.CONTENT_TYPE, CMIS.ATOM_ENTRY_TYPE).data(marshaller).send(callback);
    }
 
    
@@ -135,7 +136,7 @@ public class ObjectService
             + createDocument.getVersioningState().value();
 
       AsyncRequestCallback callback = new AsyncRequestCallback(eventBus, unmarshaller, event, errorEvent);
-      AsyncRequest.build(RequestBuilder.POST, url + "?" + params).data(marshaller).send(callback);
+      AsyncRequest.build(RequestBuilder.POST, url + "?" + params).header(HTTPHeader.CONTENT_TYPE, CMIS.ATOM_ENTRY_TYPE).data(marshaller).send(callback);
    }
    
    
@@ -154,7 +155,7 @@ public class ObjectService
       EntryUnmarshaller unmarshaller = new EntryUnmarshaller(document);
       UpdateDocumentContentMarshaller marshaller = new UpdateDocumentContentMarshaller(sourceUrl);
       AsyncRequestCallback callback = new AsyncRequestCallback(eventBus, unmarshaller, event, errorEvent);
-      AsyncRequest.build(RequestBuilder.POST, url).header(HTTPHeader.X_HTTP_METHOD_OVERRIDE, HTTPMethod.PUT).data(marshaller).send(callback);
+      AsyncRequest.build(RequestBuilder.POST, url).header(HTTPHeader.X_HTTP_METHOD_OVERRIDE, HTTPMethod.PUT).header(HTTPHeader.CONTENT_TYPE, CMIS.ATOM_ENTRY_TYPE).data(marshaller).send(callback);
    }
    
    
@@ -175,7 +176,7 @@ public class ObjectService
          (createDocument.getVersioningState() == null) ? "" : CmisArguments.VERSIONING_STATE + "="
             + createDocument.getVersioningState().value();
       AsyncRequestCallback callback = new AsyncRequestCallback(eventBus, unmarshaller, event, errorEvent);
-      AsyncRequest.build(RequestBuilder.POST, url + "?" + params).data(marshaller).send(callback);
+      AsyncRequest.build(RequestBuilder.POST, url + "?" + params).header(HTTPHeader.CONTENT_TYPE, CMIS.ATOM_ENTRY_TYPE).data(marshaller).send(callback);
    }
 
    /**
@@ -199,7 +200,7 @@ public class ObjectService
          (createDocumentFromSource.getVersioningState() == null) ? "" : CmisArguments.VERSIONING_STATE + "="
             + createDocumentFromSource.getVersioningState().value();
       AsyncRequestCallback callback = new AsyncRequestCallback(eventBus, unmarshaller, event, errorEvent);
-      AsyncRequest.build(RequestBuilder.POST, url + "?" + params).data(marshaller).send(callback);
+      AsyncRequest.build(RequestBuilder.POST, url + "?" + params).header(HTTPHeader.CONTENT_TYPE, CMIS.ATOM_ENTRY_TYPE).data(marshaller).send(callback);
    }
 
    /**
@@ -218,7 +219,7 @@ public class ObjectService
       EntryUnmarshaller unmarshaller = new EntryUnmarshaller(folder);
       CreateFolderMarshaller marshaller = new CreateFolderMarshaller(createFolder);
       AsyncRequestCallback callback = new AsyncRequestCallback(eventBus, unmarshaller, event, errorEvent);
-      AsyncRequest.build(RequestBuilder.POST, url).data(marshaller).send(callback);
+      AsyncRequest.build(RequestBuilder.POST, url).header(HTTPHeader.CONTENT_TYPE, CMIS.ATOM_ENTRY_TYPE).data(marshaller).send(callback);
    }
 
    /**
@@ -237,7 +238,7 @@ public class ObjectService
       EntryUnmarshaller unmarshaller = new EntryUnmarshaller(relationship);
       CreateRelationshipMarshaller marshaller = new CreateRelationshipMarshaller(createRelationship);
       AsyncRequestCallback callback = new AsyncRequestCallback(eventBus, unmarshaller, event, errorEvent);
-      AsyncRequest.build(RequestBuilder.POST, url).data(marshaller).send(callback);
+      AsyncRequest.build(RequestBuilder.POST, url).header(HTTPHeader.CONTENT_TYPE, CMIS.ATOM_ENTRY_TYPE).data(marshaller).send(callback);
    }
 
    /**
@@ -257,7 +258,7 @@ public class ObjectService
       ExceptionThrownEvent errorEvent = new ExceptionThrownEvent("Policy was not created.");
       CreatePolicyMarshaller marshaller = new CreatePolicyMarshaller(createPolicy);
       AsyncRequestCallback callback = new AsyncRequestCallback(eventBus, unmarshaller, event, errorEvent);
-      AsyncRequest.build(RequestBuilder.POST, url).data(marshaller).send(callback);
+      AsyncRequest.build(RequestBuilder.POST, url).header(HTTPHeader.CONTENT_TYPE, CMIS.ATOM_ENTRY_TYPE).data(marshaller).send(callback);
    }
 
    /**
@@ -371,7 +372,7 @@ public class ObjectService
       UpdatePropertiesMarshaller marshaller = new UpdatePropertiesMarshaller(updateProperties);
       AsyncRequestCallback callback = new AsyncRequestCallback(eventBus, unmarshaller, event, errorEvent);
       AsyncRequest.build(RequestBuilder.POST, url).header(HTTPHeader.X_HTTP_METHOD_OVERRIDE, HTTPMethod.PUT).header(
-         HTTPHeader.CONTENT_TYPE, "application/atom+xml;type=entry").data(marshaller).send(callback);
+         HTTPHeader.CONTENT_TYPE, CMIS.ATOM_ENTRY_TYPE).data(marshaller).send(callback);
    }
 
    /**
@@ -392,7 +393,7 @@ public class ObjectService
       String param = (moveObject.getSourceFolderId() == null)? "" : CmisArguments.SOURCE_FOLDER_ID + "="+moveObject.getSourceFolderId();
       
       AsyncRequestCallback callback = new AsyncRequestCallback(eventBus, unmarshaller, event, errorEvent);
-      AsyncRequest.build(RequestBuilder.POST, url+"?"+param).data(marshaller).send(callback);
+      AsyncRequest.build(RequestBuilder.POST, url+"?"+param).header(HTTPHeader.CONTENT_TYPE, CMIS.ATOM_ENTRY_TYPE).data(marshaller).send(callback);
    }
 
    /**
