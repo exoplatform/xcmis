@@ -34,6 +34,7 @@ import org.xcmis.spi.FolderData;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.PolicyData;
+import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.StreamNotSupportedException;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.BaseType;
@@ -191,7 +192,7 @@ public class ObjectTest extends BaseTest
     * @throws Exception
     */
 
-   public void testCreateDocument_ApplyACL() throws Exception
+   public void testCreateDocument_AddACL() throws Exception
    {
       System.out.print("Running testCreateDocument_ApplyACL....");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
@@ -214,8 +215,10 @@ public class ObjectTest extends BaseTest
          for (AccessControlEntry one : res.getACL(false))
          {
             if (one.getPrincipal().equalsIgnoreCase("Makis"))
+            {
                assertEquals(1, one.getPermissions().size());
-            assertTrue(one.getPermissions().contains("cmis:read"));
+               assertTrue(one.getPermissions().contains("cmis:read"));
+            }
          }
          pass();
       }
@@ -961,8 +964,10 @@ public class ObjectTest extends BaseTest
          for (AccessControlEntry one : res.getACL(false))
          {
             if (one.getPrincipal().equalsIgnoreCase("Makis"))
+            {
                assertEquals(1, one.getPermissions().size());
-            assertTrue(one.getPermissions().contains("cmis:read"));
+               assertTrue(one.getPermissions().contains("cmis:read"));
+            }
          }
          pass();
       }
@@ -2028,6 +2033,830 @@ public class ObjectTest extends BaseTest
       }
       finally
       {
+         clear(testroot.getObjectId());
+         getStorage().removeType(typeID);
+      }
+   }
+
+   /**
+    * 2.2.4.4
+    * Creates a relationship object of the specified type.
+    * @throws Exception
+    */
+   public void testCreateRelationship_Simple() throws Exception
+   {
+      System.out.print("Running testCreateRelationship_Simple....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      DocumentData doc1 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
+            null, VersioningState.MAJOR);
+      DocumentData doc2 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc2"), cs, null,
+            null, VersioningState.MAJOR);
+
+      Map<String, Property<?>> props = getPropsMap("cmis:relationship", "rel1");
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefSource =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.SOURCE_ID, PropertyType.ID,
+            CmisConstants.SOURCE_ID, CmisConstants.SOURCE_ID, null, CmisConstants.SOURCE_ID, true, false, false, false,
+            false, Updatability.READONLY, "SourceId", true, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefTarget =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.TARGET_ID, PropertyType.ID,
+            CmisConstants.TARGET_ID, CmisConstants.TARGET_ID, null, CmisConstants.TARGET_ID, false, false, false,
+            false, false, Updatability.READONLY, "TargetId", null, null, null);
+
+      props.put(CmisConstants.SOURCE_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
+         fPropDefTarget.getLocalName(), fPropDefTarget.getDisplayName(), doc1.getObjectId()));
+      props.put(CmisConstants.TARGET_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
+         fPropDefTarget.getLocalName(), fPropDefTarget.getDisplayName(), doc2.getObjectId()));
+      ObjectData obj = null;
+      try
+      {
+         String docId = getConnection().createRelationship(props, null, null, null);
+         obj = getStorage().getObjectById(docId);
+         assertEquals("cmis:relationship", obj.getTypeId());
+         assertEquals(doc1.getObjectId(), ((RelationshipData)obj).getSourceId());
+         assertEquals(doc2.getObjectId(), ((RelationshipData)obj).getTargetId());
+         pass();
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         if (obj != null)
+            getStorage().deleteObject(obj, true);
+         clear(testroot.getObjectId());
+      }
+   }
+
+   /**
+    * 2.2.4.4.1
+    * A list of policy IDs that MUST be applied to the newly-created Replationship object.
+    * @throws Exception
+    */
+
+   public void testCreateRelationship_ApplyPolicy() throws Exception
+   {
+      System.out.print("Running testCreateRelationship_ApplyPolicy....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      DocumentData doc1 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
+            null, VersioningState.MAJOR);
+      DocumentData doc2 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc2"), cs, null,
+            null, VersioningState.MAJOR);
+
+      Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
+      Map<String, Property<?>> props = new HashMap<String, Property<?>>();
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefSource =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.SOURCE_ID, PropertyType.ID,
+            CmisConstants.SOURCE_ID, CmisConstants.SOURCE_ID, null, CmisConstants.SOURCE_ID, true, false, false, false,
+            false, Updatability.READONLY, "SourceId", true, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefTarget =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.TARGET_ID, PropertyType.ID,
+            CmisConstants.TARGET_ID, CmisConstants.TARGET_ID, null, CmisConstants.TARGET_ID, false, false, false,
+            false, false, Updatability.READONLY, "TargetId", null, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
+            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
+            "rel1", true, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
+            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
+            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+
+      props.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(), fPropDefName
+         .getLocalName(), fPropDefName.getDisplayName(), "rel1"));
+
+      props.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
+         .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(), "cmis:kino2"));
+
+      props.put(CmisConstants.SOURCE_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
+         fPropDefTarget.getLocalName(), fPropDefTarget.getDisplayName(), doc1.getObjectId()));
+      props.put(CmisConstants.TARGET_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
+         fPropDefTarget.getLocalName(), fPropDefTarget.getDisplayName(), doc2.getObjectId()));
+
+      fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
+      fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefObjectTypeId);
+
+      TypeDefinition newType =
+         new TypeDefinition("cmis:kino2", BaseType.RELATIONSHIP, "cmis:kino2", "cmis:kino2", "", "cmis:relationship",
+            "cmis:kino2", "cmis:kino2", true, false, true, true, false, true, false, false, null, null,
+            ContentStreamAllowed.NOT_ALLOWED, fPropertyDefinitions);
+      String typeID = getStorage().addType(newType);
+
+      ObjectData obj = null;
+      PolicyData policy = createPolicy(testroot, "policy1");
+      ArrayList<String> policies = new ArrayList<String>();
+      policies.add(policy.getObjectId());
+      try
+      {
+         String docId = getConnection().createRelationship(props, null, null, policies);
+         obj = getStorage().getObjectById(docId);
+         assertEquals(1, obj.getPolicies().size());
+         Iterator<PolicyData> it = obj.getPolicies().iterator();
+         while (it.hasNext())
+         {
+            PolicyData one = it.next();
+            assertEquals("policy1", one.getName());
+            assertEquals("testPolicyText", one.getPolicyText());
+         }
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         if (obj != null)
+            getStorage().deleteObject(obj, true);
+         getStorage().deleteObject(policy, true);
+         clear(testroot.getObjectId());
+         getStorage().removeType(typeID);
+      }
+   }
+
+   /**
+    * 2.2.4.4.1
+    * A list of ACEs that MUST be added to the newly-created Relationship object, either using the 
+    * ACL from folderId if specified, or being applied if no folderId is specified. 
+    * @throws Exception
+    */
+   public void testCreateRelationship_AddACL() throws Exception
+   {
+      System.out.print("Running testCreateRelationship_AddACL....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      DocumentData doc1 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
+            null, VersioningState.MAJOR);
+      DocumentData doc2 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc2"), cs, null,
+            null, VersioningState.MAJOR);
+
+      Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
+      Map<String, Property<?>> props = new HashMap<String, Property<?>>();
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefSource =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.SOURCE_ID, PropertyType.ID,
+            CmisConstants.SOURCE_ID, CmisConstants.SOURCE_ID, null, CmisConstants.SOURCE_ID, true, false, false, false,
+            false, Updatability.READONLY, "SourceId", true, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefTarget =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.TARGET_ID, PropertyType.ID,
+            CmisConstants.TARGET_ID, CmisConstants.TARGET_ID, null, CmisConstants.TARGET_ID, false, false, false,
+            false, false, Updatability.READONLY, "TargetId", null, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
+            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
+            "rel1", true, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
+            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
+            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+
+      props.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(), fPropDefName
+         .getLocalName(), fPropDefName.getDisplayName(), "rel1"));
+
+      props.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
+         .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(), "cmis:kino"));
+
+      props.put(CmisConstants.SOURCE_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
+         fPropDefTarget.getLocalName(), fPropDefTarget.getDisplayName(), doc1.getObjectId()));
+      props.put(CmisConstants.TARGET_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
+         fPropDefTarget.getLocalName(), fPropDefTarget.getDisplayName(), doc2.getObjectId()));
+
+      fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
+      fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefObjectTypeId);
+
+      TypeDefinition newType =
+         new TypeDefinition("cmis:kino", BaseType.RELATIONSHIP, "cmis:kino", "cmis:kino", "", "cmis:relationship",
+            "cmis:kino", "cmis:kino", true, false, true, true, false, true, true, false, null, null,
+            ContentStreamAllowed.NOT_ALLOWED, fPropertyDefinitions);
+      String typeID = getStorage().addType(newType);
+
+      AccessControlEntry acl = new AccessControlEntry();
+      acl.setPrincipal("Makis");
+      acl.getPermissions().add("cmis:read");
+      ArrayList<AccessControlEntry> addACL = new ArrayList<AccessControlEntry>();
+      addACL.add(acl);
+
+      ObjectData obj = null;
+      try
+      {
+         String docId = getConnection().createRelationship(props, addACL, null, null);
+         obj = getStorage().getObjectById(docId);
+         for (AccessControlEntry one : obj.getACL(false))
+         {
+            if (one.getPrincipal().equalsIgnoreCase("Makis"))
+            {
+               assertEquals(1, one.getPermissions().size());
+               assertTrue(one.getPermissions().contains("cmis:read"));
+            }
+         }
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         if (obj != null)
+            getStorage().deleteObject(obj, true);
+         clear(testroot.getObjectId());
+         getStorage().removeType(typeID);
+      }
+   }
+
+   /**
+    * 2.2.4.4.3
+    * If the repository detects a violation with the given cmis:name property value, the repository MAY 
+    * throw this exception or chose a name which does not conflict.
+    * @throws Exception
+    */
+
+   public void testCreateRelationship_NameConstraintViolationException() throws Exception
+   {
+      System.out.print("Running testCreateRelationship_NameConstraintViolationException....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      DocumentData doc1 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
+            null, VersioningState.MAJOR);
+      DocumentData doc2 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc2"), cs, null,
+            null, VersioningState.MAJOR);
+
+      //Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
+      Map<String, Property<?>> props = new HashMap<String, Property<?>>();
+
+      Map<String, Property<?>> props2 = new HashMap<String, Property<?>>();
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefName1 =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
+            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
+            "rel", true, null, null);
+      props2.put(CmisConstants.NAME, new StringProperty(fPropDefName1.getId(), fPropDefName1.getQueryName(),
+         fPropDefName1.getLocalName(), fPropDefName1.getDisplayName(), "rel1"));
+
+      getStorage().createRelationship(doc2, doc1, relationshipTypeDefinition, props2, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefSource =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.SOURCE_ID, PropertyType.ID,
+            CmisConstants.SOURCE_ID, CmisConstants.SOURCE_ID, null, CmisConstants.SOURCE_ID, true, false, false, false,
+            false, Updatability.READONLY, "SourceId", true, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefTarget =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.TARGET_ID, PropertyType.ID,
+            CmisConstants.TARGET_ID, CmisConstants.TARGET_ID, null, CmisConstants.TARGET_ID, false, false, false,
+            false, false, Updatability.READONLY, "TargetId", null, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
+            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
+            "rel", true, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
+            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
+            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+
+      props.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(), fPropDefName
+         .getLocalName(), fPropDefName.getDisplayName(), "rel1"));
+
+      props.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
+         .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(),
+         "cmis:relationship"));
+
+      props.put(CmisConstants.SOURCE_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
+         fPropDefTarget.getLocalName(), fPropDefTarget.getDisplayName(), doc1.getObjectId()));
+      props.put(CmisConstants.TARGET_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
+         fPropDefTarget.getLocalName(), fPropDefTarget.getDisplayName(), doc2.getObjectId()));
+
+      ObjectData obj = null;
+      try
+      {
+         String docId = getConnection().createRelationship(props, null, null, null);
+         obj = getStorage().getObjectById(docId);
+         assertFalse(obj.getName().equals("doc1"));
+         pass();
+      }
+      catch (NameConstraintViolationException ex)
+      {
+
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         if (obj != null)
+            getStorage().deleteObject(obj, true);
+         clear(testroot.getObjectId());
+      }
+   }
+
+   /**
+    * 2.2.4.4.3
+    * The cmis:objectTypeId property value is not an Object-Type whose baseType is “Relationship”.
+    * @throws Exception
+    */
+   public void testCreateRelationship_ConstraintException1() throws Exception
+   {
+      System.out.print("Running testCreateRelationship_ConstraintException1....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      DocumentData doc1 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
+            null, VersioningState.MAJOR);
+      DocumentData doc2 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc2"), cs, null,
+            null, VersioningState.MAJOR);
+
+      Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
+      Map<String, Property<?>> props = new HashMap<String, Property<?>>();
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefSource =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.SOURCE_ID, PropertyType.ID,
+            CmisConstants.SOURCE_ID, CmisConstants.SOURCE_ID, null, CmisConstants.SOURCE_ID, true, false, false, false,
+            false, Updatability.READONLY, "SourceId", true, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefTarget =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.TARGET_ID, PropertyType.ID,
+            CmisConstants.TARGET_ID, CmisConstants.TARGET_ID, null, CmisConstants.TARGET_ID, false, false, false,
+            false, false, Updatability.READONLY, "TargetId", null, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
+            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
+            "rel", true, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
+            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
+            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+
+      props.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(), fPropDefName
+         .getLocalName(), fPropDefName.getDisplayName(), "rel1"));
+
+      props.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
+         .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(), "cmis:my"));
+
+      props.put(CmisConstants.SOURCE_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
+         fPropDefTarget.getLocalName(), fPropDefTarget.getDisplayName(), doc1.getObjectId()));
+      props.put(CmisConstants.TARGET_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
+         fPropDefTarget.getLocalName(), fPropDefTarget.getDisplayName(), doc2.getObjectId()));
+
+      fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
+      fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefObjectTypeId);
+
+      TypeDefinition newType =
+         new TypeDefinition("cmis:my", BaseType.FOLDER, "cmis:my", "cmis:my", "", "cmis:folder", "cmis:my", "cmis:my",
+            true, false, true, true, false, true, true, false, null, null, ContentStreamAllowed.NOT_ALLOWED,
+            fPropertyDefinitions);
+      String typeID = getStorage().addType(newType);
+
+      ObjectData obj = null;
+      try
+      {
+         String docId = getConnection().createRelationship(props, null, null, null);
+         obj = getStorage().getObjectById(docId);
+         doFail();
+      }
+      catch (ConstraintException ex)
+      {
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         if (obj != null)
+            getStorage().deleteObject(obj, true);
+         clear(testroot.getObjectId());
+         getStorage().removeType(typeID);
+      }
+   }
+
+   /**
+    * 2.2.4.4.3
+    * The sourceObjectId’s ObjectType is not in the list of “allowedSourceTypes” specified by 
+    * the Object-Type definition specified by cmis:objectTypeId property value.
+    * The targetObjectId’s ObjectType is not in the list of “allowedTargetTypes” specified by 
+    * the Object-Type definition specified by cmis:objectTypeId property value.
+    * @throws Exception
+    */
+   public void testCreateRelationship_ConstraintException2() throws Exception
+   {
+      System.out.print("Running testCreateRelationship_ConstraintException2....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      DocumentData doc1 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
+            null, VersioningState.MAJOR);
+      DocumentData doc2 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc2"), cs, null,
+            null, VersioningState.MAJOR);
+
+      Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
+      Map<String, Property<?>> props = new HashMap<String, Property<?>>();
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefSource =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.SOURCE_ID, PropertyType.ID,
+            CmisConstants.SOURCE_ID, CmisConstants.SOURCE_ID, null, CmisConstants.SOURCE_ID, true, false, false, false,
+            false, Updatability.READONLY, "SourceId", true, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefTarget =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.TARGET_ID, PropertyType.ID,
+            CmisConstants.TARGET_ID, CmisConstants.TARGET_ID, null, CmisConstants.TARGET_ID, false, false, false,
+            false, false, Updatability.READONLY, "TargetId", null, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
+            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
+            "rel", true, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
+            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
+            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+
+      props.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(), fPropDefName
+         .getLocalName(), fPropDefName.getDisplayName(), "rel1"));
+
+      props.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
+         .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(), "cmis:my"));
+
+      props.put(CmisConstants.SOURCE_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
+         fPropDefTarget.getLocalName(), fPropDefTarget.getDisplayName(), doc1.getObjectId()));
+      props.put(CmisConstants.TARGET_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
+         fPropDefTarget.getLocalName(), fPropDefTarget.getDisplayName(), doc2.getObjectId()));
+
+      fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
+      fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefObjectTypeId);
+      String[] allowed = {"cmis:folder"};
+
+      TypeDefinition newType =
+         new TypeDefinition("cmis:my", BaseType.RELATIONSHIP, "cmis:my", "cmis:my", "", "cmis:relationship", "cmis:my",
+            "cmis:my", true, false, true, true, false, true, true, false, allowed, allowed,
+            ContentStreamAllowed.NOT_ALLOWED, fPropertyDefinitions);
+      String typeID = getStorage().addType(newType);
+
+      ObjectData obj = null;
+      try
+      {
+         String docId = getConnection().createRelationship(props, null, null, null);
+         obj = getStorage().getObjectById(docId);
+         doFail();
+      }
+      catch (ConstraintException ex)
+      {
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         if (obj != null)
+            getStorage().deleteObject(obj, true);
+         clear(testroot.getObjectId());
+         getStorage().removeType(typeID);
+      }
+   }
+
+   /**
+    * 2.2.4.4.3
+    * The “controllablePolicy” attribute of the Object-Type definition specified by the 
+    * cmis:objectTypeId property value is set to FALSE and at least one policy is provided.
+    * @throws Exception
+    */
+   public void testCreateRelationship_ConstraintException3() throws Exception
+   {
+      System.out.print("Running testCreateRelationship_ConstraintException3....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      DocumentData doc1 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
+            null, VersioningState.MAJOR);
+      DocumentData doc2 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc2"), cs, null,
+            null, VersioningState.MAJOR);
+
+      Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
+      Map<String, Property<?>> props = new HashMap<String, Property<?>>();
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefSource =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.SOURCE_ID, PropertyType.ID,
+            CmisConstants.SOURCE_ID, CmisConstants.SOURCE_ID, null, CmisConstants.SOURCE_ID, true, false, false, false,
+            false, Updatability.READONLY, "SourceId", true, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefTarget =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.TARGET_ID, PropertyType.ID,
+            CmisConstants.TARGET_ID, CmisConstants.TARGET_ID, null, CmisConstants.TARGET_ID, false, false, false,
+            false, false, Updatability.READONLY, "TargetId", null, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
+            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
+            "rel1", true, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
+            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
+            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+
+      props.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(), fPropDefName
+         .getLocalName(), fPropDefName.getDisplayName(), "rel1"));
+
+      props.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
+         .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(), "cmis:kino2"));
+
+      props.put(CmisConstants.SOURCE_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
+         fPropDefTarget.getLocalName(), fPropDefTarget.getDisplayName(), doc1.getObjectId()));
+      props.put(CmisConstants.TARGET_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
+         fPropDefTarget.getLocalName(), fPropDefTarget.getDisplayName(), doc2.getObjectId()));
+
+      fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
+      fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefObjectTypeId);
+
+      TypeDefinition newType =
+         new TypeDefinition("cmis:kino2", BaseType.RELATIONSHIP, "cmis:kino2", "cmis:kino2", "", "cmis:relationship",
+            "cmis:kino2", "cmis:kino2", true, false, true, true, false, false, false, false, null, null,
+            ContentStreamAllowed.NOT_ALLOWED, fPropertyDefinitions);
+      String typeID = getStorage().addType(newType);
+
+      ObjectData obj = null;
+      PolicyData policy = createPolicy(testroot, "policy1");
+      ArrayList<String> policies = new ArrayList<String>();
+      policies.add(policy.getObjectId());
+      try
+      {
+         String docId = getConnection().createRelationship(props, null, null, policies);
+         obj = getStorage().getObjectById(docId);
+         doFail();
+      }
+      catch (ConstraintException xe)
+      {
+         //e.printStackTrace();
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         if (obj != null)
+            getStorage().deleteObject(obj, true);
+         getStorage().deleteObject(policy, true);
+         clear(testroot.getObjectId());
+         getStorage().removeType(typeID);
+      }
+   }
+
+   /**
+    * 2.2.4.4.3
+    * The “controllableACL” attribute of the Object-Type definition specified by the 
+    * cmis:objectTypeId property value is set to FALSE and at least one ACE is provided.
+    * @throws Exception
+    */
+   public void testCreateRelationship_ConstraintException4() throws Exception
+   {
+      System.out.print("Running testCreateRelationship_ConstraintException4....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      DocumentData doc1 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
+            null, VersioningState.MAJOR);
+      DocumentData doc2 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc2"), cs, null,
+            null, VersioningState.MAJOR);
+
+      Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
+      Map<String, Property<?>> props = new HashMap<String, Property<?>>();
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefSource =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.SOURCE_ID, PropertyType.ID,
+            CmisConstants.SOURCE_ID, CmisConstants.SOURCE_ID, null, CmisConstants.SOURCE_ID, true, false, false, false,
+            false, Updatability.READONLY, "SourceId", true, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefTarget =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.TARGET_ID, PropertyType.ID,
+            CmisConstants.TARGET_ID, CmisConstants.TARGET_ID, null, CmisConstants.TARGET_ID, false, false, false,
+            false, false, Updatability.READONLY, "TargetId", null, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
+            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
+            "rel1", true, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
+            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
+            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+
+      props.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(), fPropDefName
+         .getLocalName(), fPropDefName.getDisplayName(), "rel1"));
+
+      props.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
+         .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(), "cmis:kino"));
+
+      props.put(CmisConstants.SOURCE_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
+         fPropDefTarget.getLocalName(), fPropDefTarget.getDisplayName(), doc1.getObjectId()));
+      props.put(CmisConstants.TARGET_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
+         fPropDefTarget.getLocalName(), fPropDefTarget.getDisplayName(), doc2.getObjectId()));
+
+      fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
+      fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefObjectTypeId);
+
+      TypeDefinition newType =
+         new TypeDefinition("cmis:kino", BaseType.RELATIONSHIP, "cmis:kino", "cmis:kino", "", "cmis:relationship",
+            "cmis:kino", "cmis:kino", true, false, true, true, false, false, false, false, null, null,
+            ContentStreamAllowed.NOT_ALLOWED, fPropertyDefinitions);
+      String typeID = getStorage().addType(newType);
+
+      AccessControlEntry acl = new AccessControlEntry();
+      acl.setPrincipal("Makis");
+      acl.getPermissions().add("cmis:read");
+      ArrayList<AccessControlEntry> addACL = new ArrayList<AccessControlEntry>();
+      addACL.add(acl);
+
+      ObjectData obj = null;
+      try
+      {
+         String docId = getConnection().createRelationship(props, addACL, null, null);
+         obj = getStorage().getObjectById(docId);
+         doFail();
+      }
+      catch (ConstraintException e)
+      {
+         //e.printStackTrace();
+         pass();
+      }
+
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         if (obj != null)
+            getStorage().deleteObject(obj, true);
+         clear(testroot.getObjectId());
+         getStorage().removeType(typeID);
+      }
+   }
+
+   /**
+    * 2.2.4.4.3
+    * At least one of the permissions is used in an ACE provided which is not supported by the repository. 
+    * @throws Exception
+    */
+   public void testCreateRelationship_ConstraintException5() throws Exception
+   {
+      System.out.print("Running testCreateRelationship_ConstraintException5....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      DocumentData doc1 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
+            null, VersioningState.MAJOR);
+      DocumentData doc2 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc2"), cs, null,
+            null, VersioningState.MAJOR);
+
+      Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
+      Map<String, Property<?>> props = new HashMap<String, Property<?>>();
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefSource =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.SOURCE_ID, PropertyType.ID,
+            CmisConstants.SOURCE_ID, CmisConstants.SOURCE_ID, null, CmisConstants.SOURCE_ID, true, false, false, false,
+            false, Updatability.READONLY, "SourceId", true, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefTarget =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.TARGET_ID, PropertyType.ID,
+            CmisConstants.TARGET_ID, CmisConstants.TARGET_ID, null, CmisConstants.TARGET_ID, false, false, false,
+            false, false, Updatability.READONLY, "TargetId", null, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
+            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
+            "rel1", true, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
+            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
+            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+
+      props.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(), fPropDefName
+         .getLocalName(), fPropDefName.getDisplayName(), "rel1"));
+
+      props.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
+         .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(), "cmis:kino"));
+
+      props.put(CmisConstants.SOURCE_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
+         fPropDefTarget.getLocalName(), fPropDefTarget.getDisplayName(), doc1.getObjectId()));
+      props.put(CmisConstants.TARGET_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
+         fPropDefTarget.getLocalName(), fPropDefTarget.getDisplayName(), doc2.getObjectId()));
+
+      fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
+      fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefObjectTypeId);
+
+      TypeDefinition newType =
+         new TypeDefinition("cmis:kino", BaseType.RELATIONSHIP, "cmis:kino", "cmis:kino", "", "cmis:relationship",
+            "cmis:kino", "cmis:kino", true, false, true, true, false, false, true, false, null, null,
+            ContentStreamAllowed.NOT_ALLOWED, fPropertyDefinitions);
+      String typeID = getStorage().addType(newType);
+
+      AccessControlEntry acl = new AccessControlEntry();
+      acl.setPrincipal("Makis");
+      acl.getPermissions().add("cmis:unknown");
+      ArrayList<AccessControlEntry> addACL = new ArrayList<AccessControlEntry>();
+      addACL.add(acl);
+
+      ObjectData obj = null;
+      try
+      {
+         String docId = getConnection().createRelationship(props, addACL, null, null);
+         obj = getStorage().getObjectById(docId);
+         doFail();
+      }
+      catch (ConstraintException e)
+      {
+         //e.printStackTrace();
+         pass();
+      }
+
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         if (obj != null)
+            getStorage().deleteObject(obj, true);
          clear(testroot.getObjectId());
          getStorage().removeType(typeID);
       }
