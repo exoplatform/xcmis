@@ -37,8 +37,11 @@ import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.StreamNotSupportedException;
 import org.xcmis.spi.model.AccessControlEntry;
+import org.xcmis.spi.model.AllowableActions;
 import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.ContentStreamAllowed;
+import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.PropertyType;
@@ -2861,7 +2864,789 @@ public class ObjectTest extends BaseTest
          getStorage().removeType(typeID);
       }
    }
+   
+   
+   /**
+    * 2.2.4.5
+    * Creates a policy object of the specified type.
+    * @throws Exception
+    */
+   public void testCreatePolicy_Simple() throws Exception
+   {
+      System.out.print("Running testCreatePolicy_Simple....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> def =
+         PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
+      Map<String, Property<?>> properties = getPropsMap("cmis:policy", "policy");
+      properties.put(CmisConstants.POLICY_TEXT, new StringProperty(def.getId(), def.getQueryName(),
+         def.getLocalName(), def.getDisplayName(), "testPolicyText"));
+      
+      
+      ObjectData obj = null;
+      try
+      {
+         String docId = getConnection().createPolicy(testroot.getObjectId(), properties, null, null, null);
+         obj = getStorage().getObjectById(docId);
+         assertEquals("cmis:policy", obj.getTypeId());
+         assertEquals("testPolicyText", ((PolicyData)obj).getPolicyText());
+         pass();
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         if (obj != null)
+            getStorage().deleteObject(obj, true);
+         clear(testroot.getObjectId());
+      }
+   }
+
+   
+   /**
+    * 2.2.4.5.1
+    * A list of policy IDs that MUST be applied to the newly-created Policy object. 
+    * @throws Exception
+    */
+   public void testCreatePolicy_AddPolicy() throws Exception
+   {
+      System.out.print("Running testCreatePolicy_AddPolicy....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> def =
+         PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
+      Map<String, Property<?>> properties = getPropsMap("cmis:policy", "policy");
+      properties.put(CmisConstants.POLICY_TEXT, new StringProperty(def.getId(), def.getQueryName(),
+         def.getLocalName(), def.getDisplayName(), "testPolicyText1"));
+      
+      
+      PolicyData policy = createPolicy(testroot, "policy1");
+
+      ArrayList<String> policies = new ArrayList<String>();
+      policies.add(policy.getObjectId());
+      
+      ObjectData obj = null;
+      try
+      {
+         String docId = getConnection().createPolicy(testroot.getObjectId(), properties, null, null, policies);
+         obj = getStorage().getObjectById(docId);
+         Iterator<PolicyData> it = obj.getPolicies().iterator();
+         while (it.hasNext())
+         {
+            PolicyData one = it.next();
+            assertEquals("policy1", one.getName());
+            assertEquals("testPolicyText", one.getPolicyText());
+         }
+         pass();
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+
+         if (obj != null)
+            getStorage().deleteObject(obj, true);
+         getStorage().deleteObject(policy, true);
+         clear(testroot.getObjectId());
+      }
+   }
+   
+   
+   /**
+    * 2.2.4.5.1
+    * A list of ACEs that MUST be added to the newly-created Policy object. 
+    * @throws Exception
+    */
+   public void testCreatePolicy_AddACL() throws Exception
+   {
+      System.out.print("Running testCreatePolicy_Simple....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      
+      DocumentData doc1 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
+            null, VersioningState.MAJOR);
+
+      org.xcmis.spi.model.PropertyDefinition<?> def =
+         PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
+      Map<String, Property<?>> properties = getPropsMap("cmis:policy", "policy");
+      properties.put(CmisConstants.POLICY_TEXT, new StringProperty(def.getId(), def.getQueryName(),
+         def.getLocalName(), def.getDisplayName(), "testPolicyText"));
+      
+      
+      AccessControlEntry acl = new AccessControlEntry();
+      acl.setPrincipal("Makis");
+      acl.getPermissions().add("cmis:read");
+      ArrayList<AccessControlEntry> addACL = new ArrayList<AccessControlEntry>();
+      addACL.add(acl);
+      
+      ObjectData obj = null;
+      try
+      {
+         String docId = getConnection().createPolicy(doc1.getObjectId(), properties, addACL, null, null);
+         obj = getStorage().getObjectById(docId);
+         for (AccessControlEntry one : obj.getACL(false))
+         {
+            if (one.getPrincipal().equalsIgnoreCase("Makis"))
+            {
+               assertEquals(1, one.getPermissions().size());
+               assertTrue(one.getPermissions().contains("cmis:read"));
+            }
+         }
+         pass();
+      }
+      catch (Exception e)
+      {
+        // e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         if (obj != null)
+            getStorage().deleteObject(obj, true);
+         clear(testroot.getObjectId());
+      }
+   }
+
+   
+   
+   
+   /**
+    * 2.2.4.5.3
+    * If the repository detects a violation with the given cmis:name property value, the repository MAY 
+    * throw this exception or chose a name which does not conflict.
+    * @throws Exception
+    */
+   public void testCreatePolicy_NameConstraintViolationException() throws Exception
+   {
+      System.out.print("Running testCreatePolicy_NameConstraintViolationException....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> def =
+         PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
+      Map<String, Property<?>> properties = getPropsMap("cmis:policy", "policy1");
+      properties.put(CmisConstants.POLICY_TEXT, new StringProperty(def.getId(), def.getQueryName(),
+         def.getLocalName(), def.getDisplayName(), "testPolicyText1"));
+      PolicyData policy = createPolicy(testroot, "policy1");
+      ObjectData obj = null;
+      try
+      {
+         String docId = getConnection().createPolicy(testroot.getObjectId(), properties, null, null, null);
+         obj = getStorage().getObjectById(docId);
+         assertNotSame("policy1", obj.getName());
+         pass();
+      }
+      catch (NameConstraintViolationException ex) {
+        pass(); 
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+
+         if (obj != null)
+            getStorage().deleteObject(obj, true);
+         getStorage().deleteObject(policy, true);
+         clear(testroot.getObjectId());
+      }
+   }
+   
+   
+   
+   /**
+    * 2.2.4.3.3
+    * The Repository MUST throw this exception if  to  The cmis:objectTypeId 
+    * property value is not an Object-Type whose baseType is “Policy”.
+    * @throws Exception
+    */
+
+   public void testCreatePolicy_ConstraintException1() throws Exception
+   {
+      System.out.print("Running testCreatePolicy_ConstraintException1....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+      
+      DocumentData doc1 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
+            null, VersioningState.MAJOR);
+
+      Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
+            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
+            "f1", true, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
+            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
+            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> def =
+         PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
+      
+
+      fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
+      fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefObjectTypeId);
+
+      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+      properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
+         fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "policy1"));
+      properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
+         .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(), "cmis:kino"));
+     properties.put(CmisConstants.POLICY_TEXT, new StringProperty(def.getId(), def.getQueryName(),
+         def.getLocalName(), def.getDisplayName(), "testPolicyText1"));
+
+      TypeDefinition newType =
+         new TypeDefinition("cmis:kino", BaseType.FOLDER, "cmis:kino", "cmis:kino", "", "cmis:folder", "cmis:kino",
+            "cmis:kino", true, false, true, true, false, false, false, true, null, null,
+            ContentStreamAllowed.NOT_ALLOWED, fPropertyDefinitions);
+      String typeID = getStorage().addType(newType);
+
+      try
+      {
+         String docId = getConnection().createPolicy(doc1.getObjectId(), properties, null, null, null);
+         doFail();
+      }
+      catch (ConstraintException ex)
+      {
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         clear(testroot.getObjectId());
+         getStorage().removeType(typeID);
+      }
+   }
+   
+   
+   
+   /**
+    * 2.2.4.5.3
+    * The cmis:objectTypeId property value is NOT in the list of AllowedChildObjectTypeIds 
+    * of the parent-folder specified by folderId. 
+    * @throws Exception
+    */
+
+   public void testCreatePolicy_ConstraintException2() throws Exception
+   {
+      System.out.print("Running testCreatePolicy_ConstraintException2....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      Map<String, Property<?>> folderprops =  getPropsMap("cmis:folder", "testroot");
+      
+      org.xcmis.spi.model.PropertyDefinition<?> def =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, PropertyType.ID,
+            CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, null, CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, false,
+            false, false, false, false, Updatability.READONLY, "allowed", null, null, null);
+      folderprops.put(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, new IdProperty(def.getId(), def.getQueryName(),
+         def.getLocalName(), def.getDisplayName(), "cmis:document"));
+      
+      
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition,folderprops , null, null);
+
+      Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
+            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
+            "f1", true, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
+            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
+            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> def2=
+         PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
+      
+
+      fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
+      fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefObjectTypeId);
+
+      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+      properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
+         fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "policy1"));
+      properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
+         .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(), "cmis:kino"));
+     properties.put(CmisConstants.POLICY_TEXT, new StringProperty(def2.getId(), def2.getQueryName(),
+         def2.getLocalName(), def2.getDisplayName(), "testPolicyText1"));
+
+      TypeDefinition newType =
+         new TypeDefinition("cmis:kino", BaseType.FOLDER, "cmis:kino", "cmis:kino", "", "cmis:folder", "cmis:kino",
+            "cmis:kino", true, false, true, true, false, false, false, true, null, null,
+            ContentStreamAllowed.NOT_ALLOWED, fPropertyDefinitions);
+      String typeID = getStorage().addType(newType);
+
+      try
+      {
+         String docId = getConnection().createPolicy(testroot.getObjectId(), properties, null, null, null);
+         doFail();
+      }
+      catch (ConstraintException ex)
+      {
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         clear(testroot.getObjectId());
+         getStorage().removeType(typeID);
+      }
+   }
+   
+   
+   /**
+    * 2.2.4.5.3
+    * The “controllablePolicy” attribute of the Object-Type definition specified by 
+    * the cmis:objectTypeId property value is set to FALSE and at least one policy is provided.
+    * @throws Exception
+    */
+   public void testCreatePolicy_ConstraintException3() throws Exception
+   {
+      System.out.print("Running testCreatePolicy_ConstraintException3....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition,getPropsMap("cmis:folder", "testroot") , null, null);
+
+      Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
+            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
+            "f1", true, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
+            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
+            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> def2=
+         PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
+      
+
+      fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
+      fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefObjectTypeId);
+
+      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+      properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
+         fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "policy1"));
+      properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
+         .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(), "cmis:kino"));
+     properties.put(CmisConstants.POLICY_TEXT, new StringProperty(def2.getId(), def2.getQueryName(),
+         def2.getLocalName(), def2.getDisplayName(), "testPolicyText1"));
+
+      TypeDefinition newType =
+         new TypeDefinition("cmis:kino", BaseType.FOLDER, "cmis:kino", "cmis:kino", "", "cmis:folder", "cmis:kino",
+            "cmis:kino", true, false, true, true, false, false, false, false, null, null,
+            ContentStreamAllowed.NOT_ALLOWED, fPropertyDefinitions);
+      String typeID = getStorage().addType(newType);
+      
+      PolicyData policy = createPolicy(testroot, "policy2");
+
+      ArrayList<String> policies = new ArrayList<String>();
+      policies.add(policy.getObjectId());
+
+      try
+      {
+         String docId = getConnection().createPolicy(testroot.getObjectId(), properties, null, null, policies);
+         doFail();
+      }
+      catch (ConstraintException ex)
+      {
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         clear(testroot.getObjectId());
+         getStorage().removeType(typeID);
+      }
+   }
+   
+   
+   
+   /**
+    * 2.2.4.5.3
+    * The “controllableACL” attribute of the Object-Type definition specified by the cmis:objectTypeId 
+    * property value is set to FALSE and at least one ACE is provided.
+    * @throws Exception
+    */
+   public void testCreatePolicy_ConstraintException4() throws Exception
+   {
+      System.out.print("Running testCreatePolicy_ConstraintException4....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition,getPropsMap("cmis:folder", "testroot") , null, null);
+
+      Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
+            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
+            "f1", true, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
+            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
+            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> def2=
+         PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
+      
+
+      fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
+      fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefObjectTypeId);
+
+      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+      properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
+         fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "policy1"));
+      properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
+         .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(), "cmis:kino"));
+     properties.put(CmisConstants.POLICY_TEXT, new StringProperty(def2.getId(), def2.getQueryName(),
+         def2.getLocalName(), def2.getDisplayName(), "testPolicyText1"));
+
+      TypeDefinition newType =
+         new TypeDefinition("cmis:kino", BaseType.FOLDER, "cmis:kino", "cmis:kino", "", "cmis:folder", "cmis:kino",
+            "cmis:kino", true, false, true, true, false, false, false, false, null, null,
+            ContentStreamAllowed.NOT_ALLOWED, fPropertyDefinitions);
+      String typeID = getStorage().addType(newType);
+      
+      AccessControlEntry acl = new AccessControlEntry();
+      acl.setPrincipal("Makis");
+      acl.getPermissions().add("cmis:read");
+      ArrayList<AccessControlEntry> addACL = new ArrayList<AccessControlEntry>();
+      addACL.add(acl);
+      try
+      {
+         String docId = getConnection().createPolicy(testroot.getObjectId(), properties, addACL, null, null);
+         doFail();
+      }
+      catch (ConstraintException ex)
+      {
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         clear(testroot.getObjectId());
+         getStorage().removeType(typeID);
+      }
+   }
+   
+   
+   
+   /**
+    * 2.2.4.5.3
+    * The “controllableACL” attribute of the Object-Type definition specified by the cmis:objectTypeId 
+    * property value is set to FALSE and at least one ACE is provided.
+    * @throws Exception
+    */
+   public void testCreatePolicy_ConstraintException5() throws Exception
+   {
+      System.out.print("Running testCreatePolicy_ConstraintException5....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition,getPropsMap("cmis:folder", "testroot") , null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> def =
+         PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
+      Map<String, Property<?>> properties = getPropsMap("cmis:policy", "policy");
+      properties.put(CmisConstants.POLICY_TEXT, new StringProperty(def.getId(), def.getQueryName(),
+         def.getLocalName(), def.getDisplayName(), "testPolicyText"));
+      
+      
+      AccessControlEntry acl = new AccessControlEntry();
+      acl.setPrincipal("Makis");
+      acl.getPermissions().add("cmis:unknown");
+      ArrayList<AccessControlEntry> addACL = new ArrayList<AccessControlEntry>();
+      addACL.add(acl);
+      try
+      {
+         String docId = getConnection().createPolicy(testroot.getObjectId(), properties, addACL, null, null);
+         doFail();
+      }
+      catch (ConstraintException ex)
+      {
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         clear(testroot.getObjectId());
+         //getStorage().removeType(typeID);
+      }
+   }
+   
+   
+   /**
+    * 2.2.4.6
+    * Gets the list of allowable actions for an Object.
+    * @throws Exception
+    */
+   public void testGetAllowableActions_Simlpe() throws Exception
+   {
+      System.out.print("Running testGetAllowableActions_Simlpe....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      try
+      {
+         AllowableActions actions = getConnection().getAllowableActions(testroot.getObjectId());
+         assertNotNull(actions);
+         assertNotNull(actions.isCanAddObjectToFolder());
+         assertNotNull(actions.isCanApplyACL());
+         assertNotNull(actions.isCanApplyPolicy());
+         assertNotNull(actions.isCanCancelCheckOut());
+         assertNotNull(actions.isCanCreateDocument());
+         assertNotNull(actions.isCanCreateFolder());
+         assertNotNull(actions.isCanCreateRelationship());
+         assertNotNull(actions.isCanDeleteContentStream());
+         assertNotNull(actions.isCanDeleteObject());
+         assertNotNull(actions.isCanDeleteTree());
+         assertNotNull(actions.isCanGetACL());
+         assertNotNull(actions.isCanGetAllVersions());
+         assertNotNull(actions.isCanGetAppliedPolicies());
+         assertNotNull(actions.isCanGetChildren());
+         assertNotNull(actions.isCanGetContentStream());
+         assertNotNull(actions.isCanGetDescendants());
+         assertNotNull(actions.isCanGetFolderParent());
+         assertNotNull(actions.isCanGetFolderTree());
+         assertNotNull(actions.isCanGetObjectParents());
+         assertNotNull(actions.isCanGetObjectRelationships());
+         assertNotNull(actions.isCanGetProperties());
+         assertNotNull(actions.isCanGetRenditions());
+         assertNotNull(actions.isCanMoveObject());
+         assertNotNull(actions.isCanRemoveObjectFromFolder());
+         assertNotNull(actions.isCanRemovePolicy());
+         assertNotNull(actions.isCanSetContentStream());
+         assertNotNull(actions.isCanUpdateProperties());
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         clear(testroot.getObjectId());
+      }
+   }
+   
+   
+   
+   
+   /**
+    * 2.2.4.7
+    * Gets the specified information for the Object. 
+    * @throws Exception
+    */
+   public void testGetObject_Simlpe() throws Exception
+   {
+      System.out.print("Running testGetObject_Simlpe....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      try
+      {
+       CmisObject obj  = getConnection().getObject(testroot.getObjectId(), false, IncludeRelationships.NONE, false, false, true, "", "*");
+       assertEquals( "testroot", obj.getObjectInfo().getName());
+       assertEquals(testroot.getObjectId(), obj.getObjectInfo().getId());
+         pass();
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         clear(testroot.getObjectId());
+      }
+   }
+   
+   
+   /**
+    * 2.2.4.7
+    * Repositories SHOULD return only the properties specified in the property filter 
+    * if they exist on the object’s type definition.
+    * @throws Exception
+    */
+   public void testGetObject_PropertyFiltered() throws Exception
+   {
+      System.out.print("Running testGetObject_PropertyFiltered....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      try
+      {
+       CmisObject obj  = getConnection().getObject(testroot.getObjectId(), false, IncludeRelationships.NONE, false, false, false, "cmis:name,cmis:path", "*");
+       for (Map.Entry<String, Property<?>> e : obj.getProperties().entrySet())
+       {
+          assertTrue(e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")); //Other props must be ignored
+       }
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         clear(testroot.getObjectId());
+      }
+   }
+   
+   
+   
+   /**
+    * 2.2.4.7
+    * Value indicating what relationships in which the objects returned participate MUST be returned, if any.
+    * @throws Exception
+    */
+   public void testGetObject_IncludeRelationships() throws Exception
+   {
+      System.out.print("Running testGetObject_IncludeRelationships....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      
+     ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+      
+      DocumentData doc1 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
+            null, VersioningState.MAJOR);
+      
+     RelationshipData reldata =  getStorage().createRelationship(doc1, testroot, relationshipTypeDefinition , getPropsMap("cmis:relationship", "rel1"), null, null);
+      
+      try
+      {
+       CmisObject obj  = getConnection().getObject(testroot.getObjectId(), false, IncludeRelationships.TARGET, false, false, true, "", "*");
+       assertEquals(1, obj.getRelationship().size());
+       for (CmisObject e : obj.getRelationship())
+       {
+          assertEquals(reldata.getObjectId(),  e.getObjectInfo().getId());
+       }
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         clear(testroot.getObjectId());
+      }
+   }
+   
+   
+   /**
+    * 2.2.4.7
+    * The Repository MUST return the Ids of the policies applied to the object.  Defaults to FALSE.
+    * @throws Exception
+    */
+   public void testGetObject_IncludePolicyIDs() throws Exception
+   {
+      System.out.print("Running testGetObject_IncludePolicyIDs....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      PolicyData policy = createPolicy(testroot, "policy1");
+      try
+      {
+       getConnection().applyPolicy(policy.getObjectId(), testroot.getObjectId());
+       CmisObject obj  = getConnection().getObject(testroot.getObjectId(), false, IncludeRelationships.TARGET, true, false, true, "", "*");
+       assertEquals(1, obj.getPolicyIds().size());
+       for (String e : obj.getPolicyIds())
+       {
+          assertEquals(policy.getObjectId(),  e);
+       }
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         clear(testroot.getObjectId());
+      }
+   }
+   
    protected void tearDown()
    {
 
