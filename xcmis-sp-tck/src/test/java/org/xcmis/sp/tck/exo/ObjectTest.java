@@ -22,6 +22,7 @@ import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -33,6 +34,7 @@ import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.NameConstraintViolationException;
+import org.xcmis.spi.NotSupportedException;
 import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.RelationshipData;
@@ -40,12 +42,14 @@ import org.xcmis.spi.StreamNotSupportedException;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.AllowableActions;
 import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.CapabilityRendition;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.PropertyType;
+import org.xcmis.spi.model.Rendition;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.UnfileObject;
 import org.xcmis.spi.model.Updatability;
@@ -4202,7 +4206,6 @@ public class ObjectTest extends BaseTest
          getStorage()
             .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
 
-      //ContentStream cs = new BaseContentStream(before, null, new MimeType("text", "plain"));
       DocumentData doc1 =
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), null,
             null, null, VersioningState.MAJOR);
@@ -4213,6 +4216,89 @@ public class ObjectTest extends BaseTest
       }
       catch (ConstraintException ex)
       {
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         clear(testroot.getObjectId());
+      }
+   }
+   
+   /**
+    * 2.2.4.11
+    * Gets the list of associated Renditions for the specified object.
+    * @throws Exception
+    */
+   
+   public void testGetRenditions_Simple() throws Exception
+   {
+      System.out.print("Running testGetRenditions_Simple....");
+      if (!getStorage().getRepositoryInfo().getCapabilities().getCapabilityRenditions().equals(CapabilityRendition.READ)) {
+         pass();
+         return;
+      }
+      
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+
+      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+      DocumentData doc1 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
+            null, VersioningState.MAJOR);
+      try
+      {
+         List<Rendition> obj = getConnection().getRenditions(doc1.getObjectId(), "", -1, 0);
+         assertNotNull(obj);
+         pass();
+      }
+      catch (NotSupportedException ex){
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         clear(testroot.getObjectId());
+      }
+   }
+   
+   
+   
+   public void testGetRenditions_FilterNotValidException() throws Exception
+   {
+      System.out.print("Running testGetRenditions_FilterNotValidException....");
+      if (!getStorage().getRepositoryInfo().getCapabilities().getCapabilityRenditions().equals(CapabilityRendition.READ)) {
+         pass();
+         return;
+      }
+      
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+
+      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+      DocumentData doc1 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
+            null, VersioningState.MAJOR);
+      try
+      {
+         List<Rendition> obj = getConnection().getRenditions(doc1.getObjectId(), "(,*", -1, 0);
+         doFail();
+      }
+      catch (FilterNotValidException ex){
          pass();
       }
       catch (Exception e)
