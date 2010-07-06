@@ -3623,6 +3623,7 @@ public class ObjectTest extends BaseTest
       finally
       {
          clear(testroot.getObjectId());
+         getStorage().deleteObject(policy, true);
       }
    }
 
@@ -3738,7 +3739,6 @@ public class ObjectTest extends BaseTest
       }
    }
 
-   
    /**
     * 2.2.4.7.3
     * The Repository MUST throw this exception if this property filter input parameter is not valid.
@@ -3790,16 +3790,15 @@ public class ObjectTest extends BaseTest
             .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
       try
       {
-         CmisObject obj =
-            getConnection().getProperties(testroot.getObjectId(), true, "cmis:name,cmis:path");
+         CmisObject obj = getConnection().getProperties(testroot.getObjectId(), true, "cmis:name,cmis:path");
          assertNotNull(obj);
          for (Map.Entry<String, Property<?>> e : obj.getProperties().entrySet())
          {
             assertTrue(e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")); //Other props must be ignored
          }
-         pass();      
+         pass();
       }
-      
+
       catch (Exception e)
       {
          //e.printStackTrace();
@@ -3810,8 +3809,7 @@ public class ObjectTest extends BaseTest
          clear(testroot.getObjectId());
       }
    }
-   
-   
+
    /**
     * 2.2.4.8
     * The Repository MUST throw this exception if this property filter input parameter is not valid.
@@ -3828,11 +3826,393 @@ public class ObjectTest extends BaseTest
             .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
       try
       {
-         CmisObject obj =
-            getConnection().getProperties(testroot.getObjectId(), true, "(,*");
+         CmisObject obj = getConnection().getProperties(testroot.getObjectId(), true, "(,*");
          doFail();
       }
-      catch (FilterNotValidException ex){
+      catch (FilterNotValidException ex)
+      {
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         clear(testroot.getObjectId());
+      }
+   }
+
+   /**
+    * 2.2.4.9.1
+    * Gets the specified object. 
+    * @throws Exception
+    */
+   public void testGetObjectByPath_Simlpe() throws Exception
+   {
+      System.out.print("Running testGetObjectByPath_Simlpe....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      try
+      {
+         CmisObject obj =
+            getConnection().getObjectByPath("/testroot", false, IncludeRelationships.NONE, false, false, true, "", "*");
+         assertEquals("testroot", obj.getObjectInfo().getName());
+         assertEquals(testroot.getObjectId(), obj.getObjectInfo().getId());
+         pass();
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         clear(testroot.getObjectId());
+      }
+   }
+
+   /**
+    * 2.2.4.9.1
+    * Repositories SHOULD return only the properties specified in the property filter 
+    * if they exist on the object’s type definition.
+    * @throws Exception
+    */
+   public void testGetObjectByPath_PropertyFiltered() throws Exception
+   {
+      System.out.print("Running testGetObjectByPath_PropertyFiltered....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      try
+      {
+         CmisObject obj =
+            getConnection().getObjectByPath("/testroot", false, IncludeRelationships.NONE, false, false, false,
+               "cmis:name,cmis:path", "*");
+         for (Map.Entry<String, Property<?>> e : obj.getProperties().entrySet())
+         {
+            assertTrue(e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")); //Other props must be ignored
+         }
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         clear(testroot.getObjectId());
+      }
+   }
+
+   /**
+    * 2.2.4.9.1
+    * Value indicating what relationships in which the objects returned participate MUST be returned, if any.
+    * @throws Exception
+    */
+   public void testGetObjectByPath_IncludeRelationships() throws Exception
+   {
+      System.out.print("Running testGetObjectByPath_IncludeRelationships....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+
+      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+
+      DocumentData doc1 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
+            null, VersioningState.MAJOR);
+
+      RelationshipData reldata =
+         getStorage().createRelationship(doc1, testroot, relationshipTypeDefinition,
+            getPropsMap("cmis:relationship", "rel1"), null, null);
+
+      try
+      {
+         CmisObject obj =
+            getConnection().getObjectByPath("/testroot", false, IncludeRelationships.TARGET, false, false, true, "",
+               "*");
+         assertEquals(1, obj.getRelationship().size());
+         for (CmisObject e : obj.getRelationship())
+         {
+            assertEquals(reldata.getObjectId(), e.getObjectInfo().getId());
+         }
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         clear(testroot.getObjectId());
+      }
+   }
+
+   /**
+    * 2.2.4.9.1
+    * The Repository MUST return the Ids of the policies applied to the object.  Defaults to FALSE.
+    * @throws Exception
+    */
+   public void testGetObjectByPath_IncludePolicyIDs() throws Exception
+   {
+      System.out.print("Running testGetObjectByPath_IncludePolicyIDs....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      PolicyData policy = createPolicy(testroot, "policy1");
+      try
+      {
+         getConnection().applyPolicy(policy.getObjectId(), testroot.getObjectId());
+         CmisObject obj =
+            getConnection()
+               .getObjectByPath("/testroot", false, IncludeRelationships.TARGET, true, false, true, "", "*");
+         assertEquals(1, obj.getPolicyIds().size());
+         for (String e : obj.getPolicyIds())
+         {
+            assertEquals(policy.getObjectId(), e);
+         }
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         clear(testroot.getObjectId());
+         getStorage().deleteObject(policy, true);
+      }
+   }
+
+   /**
+    * 2.2.4.9.1
+    * If TRUE, then the Repository MUST return the ACLs for each object in the result set.
+    * @throws Exception
+    */
+   public void testGetObjectByPath_IncludeACLs() throws Exception
+   {
+      System.out.print("Running testGetObjectByPath_IncludeACLs....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+
+      AccessControlEntry acl = new AccessControlEntry();
+      acl.setPrincipal("Makis");
+      acl.getPermissions().add("cmis:read");
+      ArrayList<AccessControlEntry> addACL = new ArrayList<AccessControlEntry>();
+      addACL.add(acl);
+
+      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+
+      try
+      {
+         DocumentData doc1 =
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
+               addACL, null, VersioningState.MAJOR);
+
+         CmisObject obj =
+            getConnection().getObjectByPath("/testroot/doc1", false, IncludeRelationships.TARGET, true, true, true, "",
+               "*");
+         for (AccessControlEntry one : obj.getACL())
+         {
+            if (one.getPrincipal().equalsIgnoreCase("Makis"))
+            {
+               assertEquals(1, one.getPermissions().size());
+               assertTrue(one.getPermissions().contains("cmis:read"));
+            }
+         }
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         clear(testroot.getObjectId());
+      }
+   }
+
+   /**
+    * 2.2.4.9.1
+    * : If TRUE, then the Repository MUST return the available actions for each object in the result set. 
+    * @throws Exception
+    */
+   public void testGetObjectByPath_IncludeAllowableActions() throws Exception
+   {
+      System.out.print("Running testGetObjectByPath_IncludeAllowableActions....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      try
+      {
+         CmisObject obj =
+            getConnection()
+               .getObjectByPath("/testroot", true, IncludeRelationships.TARGET, false, false, true, "", "*");
+         AllowableActions actions = obj.getAllowableActions();
+         assertNotNull(actions);
+         assertNotNull(actions.isCanAddObjectToFolder());
+         assertNotNull(actions.isCanApplyACL());
+         assertNotNull(actions.isCanApplyPolicy());
+         assertNotNull(actions.isCanCancelCheckOut());
+         assertNotNull(actions.isCanCreateDocument());
+         assertNotNull(actions.isCanCreateFolder());
+         assertNotNull(actions.isCanCreateRelationship());
+         assertNotNull(actions.isCanDeleteContentStream());
+         assertNotNull(actions.isCanDeleteObject());
+         assertNotNull(actions.isCanDeleteTree());
+         assertNotNull(actions.isCanGetACL());
+         assertNotNull(actions.isCanGetAllVersions());
+         assertNotNull(actions.isCanGetAppliedPolicies());
+         assertNotNull(actions.isCanGetChildren());
+         assertNotNull(actions.isCanGetContentStream());
+         assertNotNull(actions.isCanGetDescendants());
+         assertNotNull(actions.isCanGetFolderParent());
+         assertNotNull(actions.isCanGetFolderTree());
+         assertNotNull(actions.isCanGetObjectParents());
+         assertNotNull(actions.isCanGetObjectRelationships());
+         assertNotNull(actions.isCanGetProperties());
+         assertNotNull(actions.isCanGetRenditions());
+         assertNotNull(actions.isCanMoveObject());
+         assertNotNull(actions.isCanRemoveObjectFromFolder());
+         assertNotNull(actions.isCanRemovePolicy());
+         assertNotNull(actions.isCanSetContentStream());
+         assertNotNull(actions.isCanUpdateProperties());
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         clear(testroot.getObjectId());
+      }
+   }
+
+   /**
+    * 2.2.4.9.3
+    * The Repository MUST throw this exception if this property filter input parameter is not valid.
+    * @throws Exception
+    */
+   public void testGetObjectByPath_FilterNotValidException() throws Exception
+   {
+      System.out.print("Running testGetObjectByPath_FilterNotValidException....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      try
+      {
+         CmisObject obj =
+            getConnection().getObject("/testroot", false, IncludeRelationships.NONE, false, false, false, "(,*", "*");
+         doFail();
+      }
+      catch (FilterNotValidException ex)
+      {
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         clear(testroot.getObjectId());
+      }
+   }
+
+   /**
+    * 2.2.4.10
+    * Gets the content stream for the specified Document object, or gets a 
+    * rendition stream for a specified rendition of a document or folder object.
+    * @throws Exception
+    */
+   public void testGetContentStream_Simple() throws Exception
+   {
+      System.out.print("Running testGetContentStream_Simple....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+
+      byte[] before = new byte[15];
+      before = "1234567890aBcDE".getBytes();
+
+      ContentStream cs = new BaseContentStream(before, null, new MimeType("text", "plain"));
+      DocumentData doc1 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
+            null, VersioningState.MAJOR);
+      try
+      {
+         ContentStream obj = getConnection().getContentStream(doc1.getObjectId(), null);
+         byte[] after = new byte[15];
+         obj.getStream().read(after);
+         assertArrayEquals(before, after);
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         clear(testroot.getObjectId());
+      }
+   }
+
+   
+   
+   /**
+    * 2.2.4.10.3
+    * The Repository MUST throw this exception if the object specified by objectId does 
+    * NOT have a content stream or rendition stream. 
+    * @throws Exception
+    */
+   public void testGetContentStream_ConstraintException() throws Exception
+   {
+      System.out.print("Running testGetContentStream_ConstraintException....");
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+
+      //ContentStream cs = new BaseContentStream(before, null, new MimeType("text", "plain"));
+      DocumentData doc1 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), null,
+            null, null, VersioningState.MAJOR);
+      try
+      {
+         ContentStream obj = getConnection().getContentStream(doc1.getObjectId(), null);
+         doFail();
+      }
+      catch (ConstraintException ex)
+      {
          pass();
       }
       catch (Exception e)
