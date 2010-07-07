@@ -29,7 +29,7 @@
 						</field>
 						<!-- The name of the realm -->
 						<field name="realmName">
-							<string>exo-domain</string>
+							<string>gatein-domain</string>
 						</field>
 						<!--
 							All the dependencies of the portal container ordered by loading
