@@ -47,7 +47,8 @@ import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.model.impl.IdProperty;
 import org.xcmis.spi.model.impl.StringProperty;
 import org.xcmis.spi.utils.MimeType;
-
+import org.exoplatform.services.security.ConversationState;
+import org.exoplatform.services.security.Identity;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -102,6 +103,9 @@ public abstract class BaseTest extends TestCase
       String containerConf = getClass().getResource(tck_conf).toString();
       StandaloneContainer.addConfigurationURL(containerConf);
       container = StandaloneContainer.getInstance();
+      
+      ConversationState state = new ConversationState(new Identity("__system"));
+      ConversationState.setCurrent(state);
 
       storageProvider = (StorageProvider)container.getComponentInstanceOfType(StorageProvider.class);
 
