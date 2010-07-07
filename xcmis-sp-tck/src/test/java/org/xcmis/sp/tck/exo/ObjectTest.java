@@ -4745,7 +4745,7 @@ public class ObjectTest extends BaseTest
    
    /**
     * 2.2.4.14
-    * Deletes the specified object.   
+    * The Repository MUST throw this exception if the method is invoked on a Folder object that contains one or more objects. 
     * @throws Exception
     */
     
