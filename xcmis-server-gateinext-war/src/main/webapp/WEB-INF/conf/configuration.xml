@@ -45,7 +45,7 @@ http://www.exoplaform.org/xml/ns/kernel_1_1.xsd"
 							<field name="indexConfiguration">
 								<object type="org.xcmis.search.config.IndexConfiguration">
 									<field name="indexDir">
-										<string>../temp/index/db1/ws1</string>
+										<string>${gatein.jcr.index.data.dir}/cmis-index${container.name.suffix}</string>
 									</field>
 								</object>
 							</field>
@@ -77,8 +77,6 @@ http://www.exoplaform.org/xml/ns/kernel_1_1.xsd"
 	</component>
 -->
 
-
-
    <external-component-plugins>
       <target-component>org.exoplatform.services.jcr.config.RepositoryServiceConfiguration</target-component>
       <component-plugin>
@@ -95,34 +93,4 @@ http://www.exoplaform.org/xml/ns/kernel_1_1.xsd"
       </component-plugin>
    </external-component-plugins>
 
-   <external-component-plugins>
-      <target-component>org.exoplatform.services.naming.InitialContextInitializer</target-component>
-      <component-plugin>
-         <name>bind.datasource</name>
-         <set-method>addPlugin</set-method>
-         <type>org.exoplatform.services.naming.BindReferencePlugin</type>
-         <init-params>
-            <value-param>
-               <name>bind-name</name>
-               <value>jdbcexo</value>
-            </value-param>
-            <value-param>
-               <name>class-name</name>
-               <value>javax.sql.DataSource</value>
-            </value-param>
-            <value-param>
-               <name>factory</name>
-               <value>org.apache.commons.dbcp.BasicDataSourceFactory</value>
-            </value-param>
-            <properties-param>
-               <name>ref-addresses</name>
-               <description>ref-addresses</description>
-               <property name="driverClassName" value="org.hsqldb.jdbcDriver" />
-               <property name="url" value="jdbc:hsqldb:file:../temp/data/exodb" />
-               <property name="username" value="sa" />
-               <property name="password" value="" />
-            </properties-param>
-         </init-params>
-      </component-plugin>
-   </external-component-plugins>
 </configuration>
