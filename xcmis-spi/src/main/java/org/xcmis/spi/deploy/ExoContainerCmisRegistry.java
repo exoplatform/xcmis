@@ -26,6 +26,7 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.picocontainer.Startable;
 import org.xcmis.spi.CmisRegistry;
+import org.xcmis.spi.CmisRegistryFactory;
 import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.StorageProvider;
 
@@ -35,7 +36,7 @@ import java.util.List;
 /**
  * @version $Id:$
  */
-public class ExoContainerCmisRegistry extends CmisRegistry implements Startable
+public class ExoContainerCmisRegistry extends CmisRegistry implements Startable, CmisRegistryFactory
 {
 
    private final ExoContainerContext containerContext;
@@ -76,7 +77,7 @@ public class ExoContainerCmisRegistry extends CmisRegistry implements Startable
       {
          addStorage(sp);
       }
-      setInstance(this);
+      setFactory(this);
    }
 
    /**
@@ -84,6 +85,11 @@ public class ExoContainerCmisRegistry extends CmisRegistry implements Startable
     */
    public void stop()
    {
+   }
+
+   public CmisRegistry getRegistry()
+   {
+      return (CmisRegistry)ExoContainerContext.getCurrentContainer().getComponentInstanceOfType(CmisRegistry.class);
    }
 
 }

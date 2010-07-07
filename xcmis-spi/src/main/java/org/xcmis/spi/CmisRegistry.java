@@ -38,25 +38,41 @@ import java.util.concurrent.atomic.AtomicReference;
 public class CmisRegistry
 {
 
-   private static AtomicReference<CmisRegistry> service = new AtomicReference<CmisRegistry>();
+   private static class SimpleCmisRegistryFactory implements CmisRegistryFactory
+   {
 
-   protected List<String> providers = new ArrayList<String>();
+      CmisRegistry registry;
+
+      public SimpleCmisRegistryFactory(CmisRegistry registry)
+      {
+         this.registry = registry;
+      }
+
+      public CmisRegistry getRegistry()
+      {
+         return registry;
+      }
+   };
+
+   private static AtomicReference<CmisRegistryFactory> service = new AtomicReference<CmisRegistryFactory>();
 
    public static CmisRegistry getInstance()
    {
-      CmisRegistry s = service.get();
-      if (s == null)
+      CmisRegistryFactory sf = service.get();
+      if (sf == null)
       {
-         service.compareAndSet(null, new CmisRegistry());
-         s = service.get();
+         service.compareAndSet(null, new SimpleCmisRegistryFactory(new CmisRegistry()));
+         sf = service.get();
       }
-      return s;
+      return sf.getRegistry();
    }
 
-   public static void setInstance(CmisRegistry inst)
+   public static void setFactory(CmisRegistryFactory inst)
    {
       service.set(inst);
    }
+
+   protected List<String> providers = new ArrayList<String>();
 
    protected Map<String, StorageProvider> storageProviders;
 
@@ -77,7 +93,7 @@ public class CmisRegistry
 
    /**
     * Create new connection. Delegated to appropriate StorageProvider method
-    * 
+    *
     * @param storageId storage id
     * @return connection
     * @throws InvalidArgumentException if storage with specified id is not
@@ -95,7 +111,7 @@ public class CmisRegistry
 
    /**
     * Get id of all available storages.
-    * 
+    *
     * @return storages iDs if no one storages configured than empty set returned
     *         never null
     */
@@ -116,9 +132,9 @@ public class CmisRegistry
 
    /**
     * Adds an extra rendition provider .
-    * 
+    *
     * @param provider String FQN of provider to add.
-    * 
+    *
     */
    public void addRenditionProvider(String provider)
    {
