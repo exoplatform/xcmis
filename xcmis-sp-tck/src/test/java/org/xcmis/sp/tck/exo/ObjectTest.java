@@ -20,6 +20,7 @@ package org.xcmis.sp.tck.exo;
 
 import java.io.StreamCorruptedException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -30,6 +31,7 @@ import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.ChangeTokenHolder;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ConstraintException;
+import org.xcmis.spi.ContentAlreadyExistsException;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FilterNotValidException;
@@ -2987,9 +2989,9 @@ public class ObjectTest extends BaseTest
          getStorage()
             .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
 
-//      DocumentData doc1 =
-//         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
-//            null, VersioningState.MAJOR);
+      //      DocumentData doc1 =
+      //         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
+      //            null, VersioningState.MAJOR);
 
       org.xcmis.spi.model.PropertyDefinition<?> def =
          PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
@@ -3095,11 +3097,11 @@ public class ObjectTest extends BaseTest
       FolderData testroot =
          getStorage()
             .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
-//      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-//
-//      DocumentData doc1 =
-//         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
-//            null, VersioningState.MAJOR);
+      //      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+      //
+      //      DocumentData doc1 =
+      //         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
+      //            null, VersioningState.MAJOR);
 
       Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
 
@@ -4193,8 +4195,6 @@ public class ObjectTest extends BaseTest
       }
    }
 
-   
-   
    /**
     * 2.2.4.10.3
     * The Repository MUST throw this exception if the object specified by objectId does 
@@ -4232,21 +4232,23 @@ public class ObjectTest extends BaseTest
          clear(testroot.getObjectId());
       }
    }
-   
+
    /**
     * 2.2.4.11
     * Gets the list of associated Renditions for the specified object.
     * @throws Exception
     */
-   
+
    public void testGetRenditions_Simple() throws Exception
    {
       System.out.print("Running testGetRenditions_Simple....");
-      if (!getStorage().getRepositoryInfo().getCapabilities().getCapabilityRenditions().equals(CapabilityRendition.READ)) {
+      if (!getStorage().getRepositoryInfo().getCapabilities().getCapabilityRenditions()
+         .equals(CapabilityRendition.READ))
+      {
          pass();
          return;
       }
-      
+
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -4263,7 +4265,8 @@ public class ObjectTest extends BaseTest
          assertNotNull(obj);
          pass();
       }
-      catch (NotSupportedException ex){
+      catch (NotSupportedException ex)
+      {
          pass();
       }
       catch (Exception e)
@@ -4276,21 +4279,23 @@ public class ObjectTest extends BaseTest
          clear(testroot.getObjectId());
       }
    }
-   
+
    /**
     * 2.2.4.11.3
     * The filter specified is not valid.
     * @throws Exception
     */
-   
+
    public void testGetRenditions_FilterNotValidException() throws Exception
    {
       System.out.print("Running testGetRenditions_FilterNotValidException....");
-      if (!getStorage().getRepositoryInfo().getCapabilities().getCapabilityRenditions().equals(CapabilityRendition.READ)) {
+      if (!getStorage().getRepositoryInfo().getCapabilities().getCapabilityRenditions()
+         .equals(CapabilityRendition.READ))
+      {
          pass();
          return;
       }
-      
+
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -4306,7 +4311,8 @@ public class ObjectTest extends BaseTest
          List<Rendition> obj = getConnection().getRenditions(doc1.getObjectId(), "(,*", -1, 0);
          doFail();
       }
-      catch (FilterNotValidException ex){
+      catch (FilterNotValidException ex)
+      {
          pass();
       }
       catch (Exception e)
@@ -4319,17 +4325,17 @@ public class ObjectTest extends BaseTest
          clear(testroot.getObjectId());
       }
    }
-   
+
    /**
     * 2.2.4.12
     * Updates properties of the specified object.
     * @throws Exception
     */
-   
+
    public void testUpdateProperties_Simple() throws Exception
    {
       System.out.print("Running testUpdateProperties_Simple....");
-      
+
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -4337,36 +4343,34 @@ public class ObjectTest extends BaseTest
             .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
 
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-     
-      
+
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
          PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
             CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
             "f1", true, null, null);
-      
+
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefCreated =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.CREATED_BY, PropertyType.STRING, CmisConstants.CREATED_BY,
-            CmisConstants.CREATED_BY, null, CmisConstants.CREATED_BY, true, false, false, false, false, Updatability.READWRITE,
-            "f2", true, null, null);
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.CREATED_BY, PropertyType.STRING,
+            CmisConstants.CREATED_BY, CmisConstants.CREATED_BY, null, CmisConstants.CREATED_BY, true, false, false,
+            false, false, Updatability.READWRITE, "f2", true, null, null);
 
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefType =
-      PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-         CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-         false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
-
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
+            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
+            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
 
       Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-      fPropertyDefinitions .put(CmisConstants.NAME, fPropDefName);
+      fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
       fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefType);
       fPropertyDefinitions.put(CmisConstants.CREATED_BY, fPropDefCreated);
-      
+
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
          fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "doc1"));
-      properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefType.getId(), fPropDefType
-         .getQueryName(), fPropDefType.getLocalName(), fPropDefType.getDisplayName(), "cmis:kino"));
-      properties.put(CmisConstants.CREATED_BY, new StringProperty(fPropDefCreated.getId(), fPropDefCreated.getQueryName(), fPropDefCreated
-         .getLocalName(), fPropDefCreated.getDisplayName(), "_anonimous"));
+      properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefType.getId(), fPropDefType.getQueryName(),
+         fPropDefType.getLocalName(), fPropDefType.getDisplayName(), "cmis:kino"));
+      properties.put(CmisConstants.CREATED_BY, new StringProperty(fPropDefCreated.getId(), fPropDefCreated
+         .getQueryName(), fPropDefCreated.getLocalName(), fPropDefCreated.getDisplayName(), "_anonimous"));
 
       TypeDefinition newType =
          new TypeDefinition("cmis:kino", BaseType.DOCUMENT, "cmis:kino", "cmis:kino", "", "cmis:document", "cmis:kino",
@@ -4375,28 +4379,26 @@ public class ObjectTest extends BaseTest
       String typeID = getStorage().addType(newType);
 
       DocumentData doc1 =
-         getStorage().createDocument(testroot, newType, properties, cs, null,
-            null, VersioningState.MAJOR);
-      
-      
+         getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.MAJOR);
+
       Map<String, Property<?>> properties2 = new HashMap<String, Property<?>>();
       properties2.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
          fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "new1"));
 
-      properties2.put(CmisConstants.CREATED_BY, new StringProperty(fPropDefCreated.getId(), fPropDefCreated.getQueryName(),
-         fPropDefCreated.getLocalName(), fPropDefCreated.getDisplayName(), "Makiz"));
-      
+      properties2.put(CmisConstants.CREATED_BY, new StringProperty(fPropDefCreated.getId(), fPropDefCreated
+         .getQueryName(), fPropDefCreated.getLocalName(), fPropDefCreated.getDisplayName(), "Makiz"));
+
       try
       {
-        String id =   getConnection().updateProperties(doc1.getObjectId(), new ChangeTokenHolder(), properties2);
-        ObjectData obj = getStorage().getObjectById(id);
-        assertEquals("new1", obj.getName());
-        assertEquals("Makiz", obj.getProperty(CmisConstants.CREATED_BY).getValues().get(0));
+         String id = getConnection().updateProperties(doc1.getObjectId(), new ChangeTokenHolder(), properties2);
+         ObjectData obj = getStorage().getObjectById(id);
+         assertEquals("new1", obj.getName());
+         assertEquals("Makiz", obj.getProperty(CmisConstants.CREATED_BY).getValues().get(0));
          pass();
       }
       catch (Exception e)
       {
-        //e.printStackTrace();
+         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -4405,18 +4407,18 @@ public class ObjectTest extends BaseTest
          getStorage().removeType(typeID);
       }
    }
-   
+
    /**
     * 2.2.4.12.3
     * The object is not checked out and ANY of the properties being updated are defined in their 
     * Object-Type definition have an attribute value of Updatability when checked-out.
     * @throws Exception
     */
-   
+
    public void testUpdateProperties_VersioningException() throws Exception
    {
       System.out.print("Running testUpdateProperties_VersioningException....");
-      
+
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -4424,19 +4426,18 @@ public class ObjectTest extends BaseTest
             .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
 
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-     
+
       DocumentData doc1 =
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
             null, VersioningState.MAJOR);
-      
-      
+
       Map<String, Property<?>> properties2 = new HashMap<String, Property<?>>();
-      
+
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefComment =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.CHECKIN_COMMENT, PropertyType.STRING, CmisConstants.CHECKIN_COMMENT,
-            CmisConstants.CHECKIN_COMMENT, null, CmisConstants.CHECKIN_COMMENT, true, false, false, false, false, Updatability.WHENCHECKEDOUT,
-            "f2", true, null, null);
-      
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.CHECKIN_COMMENT, PropertyType.STRING,
+            CmisConstants.CHECKIN_COMMENT, CmisConstants.CHECKIN_COMMENT, null, CmisConstants.CHECKIN_COMMENT, true,
+            false, false, false, false, Updatability.WHENCHECKEDOUT, "f2", true, null, null);
+
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
          PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
             CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
@@ -4444,21 +4445,23 @@ public class ObjectTest extends BaseTest
 
       properties2.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
          fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "new1"));
-      properties2.put(CmisConstants.CHECKIN_COMMENT, new StringProperty(fPropDefComment.getId(), fPropDefComment.getQueryName(),
-         fPropDefComment.getLocalName(), fPropDefComment.getDisplayName(), "comment"));
-      
+      properties2.put(CmisConstants.CHECKIN_COMMENT, new StringProperty(fPropDefComment.getId(), fPropDefComment
+         .getQueryName(), fPropDefComment.getLocalName(), fPropDefComment.getDisplayName(), "comment"));
+
       try
       {
-        String id =   getConnection().updateProperties(doc1.getObjectId(), new ChangeTokenHolder(), properties2);
-        ObjectData obj = getStorage().getObjectById(id);
-        doFail();
-      } catch (VersioningException ex){
+         String id = getConnection().updateProperties(doc1.getObjectId(), new ChangeTokenHolder(), properties2);
+         ObjectData obj = getStorage().getObjectById(id);
+         doFail();
+      }
+      catch (VersioningException ex)
+      {
          pass();
       }
-      
+
       catch (Exception e)
       {
-        //e.printStackTrace();
+         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -4466,7 +4469,7 @@ public class ObjectTest extends BaseTest
          clear(testroot.getObjectId());
       }
    }
-   
+
    /**
     * 2.2.4.13
     * Moves the specified file-able object from one folder to another. 
@@ -4475,31 +4478,30 @@ public class ObjectTest extends BaseTest
    public void testMoveObject_Simple() throws Exception
    {
       System.out.print("Running testMoveObject_Simple....");
-      
+
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
          getStorage()
             .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
       FolderData folder2 =
-         getStorage()
-            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "2"), null, null);
+         getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "2"), null, null);
 
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-     
+
       DocumentData doc1 =
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
             null, VersioningState.MAJOR);
-            
+
       try
       {
-        String id =   getConnection().moveObject(doc1.getObjectId(), folder2.getObjectId(), testroot.getObjectId());
-        ObjectData obj = getStorage().getObjectById(id);
-        assertEquals(folder2.getName(), obj.getParent().getName());
-      } 
+         String id = getConnection().moveObject(doc1.getObjectId(), folder2.getObjectId(), testroot.getObjectId());
+         ObjectData obj = getStorage().getObjectById(id);
+         assertEquals(folder2.getName(), obj.getParent().getName());
+      }
       catch (Exception e)
       {
-        //e.printStackTrace();
+         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -4508,44 +4510,45 @@ public class ObjectTest extends BaseTest
          clear(folder2.getObjectId());
       }
    }
-   
+
    /**
     * 2.2.4.13.3
     * The Repository MUST throw this exception if the service is invoked with a missing sourceFolderId or the 
     * sourceFolderId doesn’t match the specified object’s parent folder.
     * @throws Exception
     */
-   
+
    public void testMoveObject_InvalidArgumentException() throws Exception
    {
       System.out.print("Running testMoveObject_InvalidArgumentException....");
-      
+
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
          getStorage()
             .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
       FolderData folder2 =
-         getStorage()
-            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "2"), null, null);
+         getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "2"), null, null);
 
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-     
+
       DocumentData doc1 =
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
             null, VersioningState.MAJOR);
-            
+
       try
       {
-        String id =   getConnection().moveObject(doc1.getObjectId(),testroot.getObjectId(), folder2.getObjectId());
-        ObjectData obj = getStorage().getObjectById(id);
-        doFail();
-      }catch (InvalidArgumentException ex){
+         String id = getConnection().moveObject(doc1.getObjectId(), testroot.getObjectId(), folder2.getObjectId());
+         ObjectData obj = getStorage().getObjectById(id);
+         doFail();
+      }
+      catch (InvalidArgumentException ex)
+      {
          pass();
       }
       catch (Exception e)
       {
-        //e.printStackTrace();
+         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -4555,37 +4558,34 @@ public class ObjectTest extends BaseTest
       }
    }
 
-   
-   
    /**
     * 2.2.4.13.3
     * The Repository MUST throw this exception if the cmis:objectTypeId property value of the given object is NOT 
     * in the list of AllowedChildObjectTypeIds of the parent-folder specified by targetFolderId. 
     * @throws Exception
     */
-   
+
    public void testMoveObject_ConstraintException() throws Exception
    {
       System.out.print("Running testMoveObject_ConstraintException....");
-      
+
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
          getStorage()
             .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
-      
-      Map<String, Property<?>> props2  =   new HashMap<String, Property<?>>();
-      
+
+      Map<String, Property<?>> props2 = new HashMap<String, Property<?>>();
+
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
          PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
             CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
             "f1", true, null, null);
-      
-      
+
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefType =
-      PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-         CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-         false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
+            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
+            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
 
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefAllowedChild =
          PropertyDefinitions.createPropertyDefinition(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, PropertyType.ID,
@@ -4593,22 +4593,18 @@ public class ObjectTest extends BaseTest
             CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, false, false, false, false, false, Updatability.READONLY,
             "fold_type_chld_ids", null, null, null);
 
-      props2.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(),
-         fPropDefName.getQueryName(), fPropDefName.getLocalName(), fPropDefName
-            .getDisplayName(), "doc1"));
-      props2.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefAllowedChild.getId(),
-         fPropDefAllowedChild.getQueryName(), fPropDefAllowedChild.getLocalName(), fPropDefAllowedChild
-            .getDisplayName(), "cmis:kino"));
+      props2.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(), fPropDefName
+         .getLocalName(), fPropDefName.getDisplayName(), "doc1"));
+      props2.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefType.getId(), fPropDefType.getQueryName(),
+         fPropDefType.getLocalName(), fPropDefType.getDisplayName(), "cmis:kino"));
       props2.put(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, new IdProperty(fPropDefAllowedChild.getId(),
          fPropDefAllowedChild.getQueryName(), fPropDefAllowedChild.getLocalName(), fPropDefAllowedChild
             .getDisplayName(), "cmis:folder"));
-      
-      
+
       Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-      fPropertyDefinitions .put(CmisConstants.NAME, fPropDefName);
+      fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
       fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefType);
       fPropertyDefinitions.put(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, fPropDefAllowedChild);
-      
 
       TypeDefinition newType =
          new TypeDefinition("cmis:kino", BaseType.FOLDER, "cmis:kino", "cmis:kino", "", "cmis:folder", "cmis:kino",
@@ -4616,28 +4612,27 @@ public class ObjectTest extends BaseTest
             ContentStreamAllowed.NOT_ALLOWED, fPropertyDefinitions);
       String typeID = getStorage().addType(newType);
 
-      
-      FolderData folder2 =
-         getStorage()
-            .createFolder(rootFolder, newType, props2, null, null);
+      FolderData folder2 = getStorage().createFolder(rootFolder, newType, props2, null, null);
 
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-     
+
       DocumentData doc1 =
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
             null, VersioningState.MAJOR);
-            
+
       try
       {
-        String id =   getConnection().moveObject(doc1.getObjectId(),folder2.getObjectId(), testroot.getObjectId());
-        ObjectData obj = getStorage().getObjectById(id);
-        doFail();
-      }catch (ConstraintException ex){
+         String id = getConnection().moveObject(doc1.getObjectId(), folder2.getObjectId(), testroot.getObjectId());
+         ObjectData obj = getStorage().getObjectById(id);
+         doFail();
+      }
+      catch (ConstraintException ex)
+      {
          pass();
       }
       catch (Exception e)
       {
-        //e.printStackTrace();
+         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -4647,50 +4642,49 @@ public class ObjectTest extends BaseTest
          getStorage().removeType(typeID);
       }
    }
-   
-   
-   
+
    /**
     * 2.2.4.13.3
     * The Repository MUST throw this exception if the service is invoked with a missing sourceFolderId or the 
     * sourceFolderId doesn’t match the specified object’s parent folder.
     * @throws Exception
     */
-   
+
    public void testMoveObject_NameConstraintException() throws Exception
    {
       System.out.print("Running testMoveObject_NameConstraintException....");
-      
+
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
          getStorage()
             .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
-      
+
       FolderData folder2 =
-         getStorage()
-            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "folder2"), null, null);
+         getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "folder2"), null, null);
 
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-     
+
       DocumentData doc1 =
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
             null, VersioningState.MAJOR);
-            
+
       DocumentData doc2 =
          getStorage().createDocument(folder2, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
             null, VersioningState.MAJOR);
       try
       {
-        String id =   getConnection().moveObject(doc1.getObjectId(),folder2.getObjectId(), testroot.getObjectId());
-        ObjectData obj = getStorage().getObjectById(id);
-        assertFalse(obj.getName().equalsIgnoreCase(doc1.getName()));
-      }catch (NameConstraintViolationException ex){
+         String id = getConnection().moveObject(doc1.getObjectId(), folder2.getObjectId(), testroot.getObjectId());
+         ObjectData obj = getStorage().getObjectById(id);
+         assertFalse(obj.getName().equalsIgnoreCase(doc1.getName()));
+      }
+      catch (NameConstraintViolationException ex)
+      {
          pass();
       }
       catch (Exception e)
       {
-        //e.printStackTrace();
+         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -4699,19 +4693,17 @@ public class ObjectTest extends BaseTest
          clear(folder2.getObjectId());
       }
    }
-   
-   
-   
-  /**
-   * 2.2.4.14
-   * Deletes the specified object.   
-   * @throws Exception
-   */
-   
+
+   /**
+    * 2.2.4.14
+    * Deletes the specified object.   
+    * @throws Exception
+    */
+
    public void testDeleteObject_Simple() throws Exception
    {
       System.out.print("Running testDeleteObject_Simple....");
-      
+
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -4719,21 +4711,23 @@ public class ObjectTest extends BaseTest
             .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
 
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-     
+
       DocumentData doc1 =
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
             null, VersioningState.MAJOR);
       String id = doc1.getObjectId();
       try
       {
-        getConnection().deleteObject(doc1.getObjectId(), true);
-        ObjectData obj = getStorage().getObjectById(id);
-      }catch (ObjectNotFoundException ex){
+         getConnection().deleteObject(doc1.getObjectId(), true);
+         ObjectData obj = getStorage().getObjectById(id);
+      }
+      catch (ObjectNotFoundException ex)
+      {
          pass();
       }
       catch (Exception e)
       {
-        e.printStackTrace();
+         e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -4741,47 +4735,426 @@ public class ObjectTest extends BaseTest
          clear(testroot.getObjectId());
       }
    }
-   
-   
+
    /**
     * 2.2.4.14
     * The Repository MUST throw this exception if the method is invoked on a Folder object that contains one or more objects. 
     * @throws Exception
     */
-    
-    public void testDeleteObject_ConstraintException() throws Exception
-    {
-       System.out.print("Running testDeleteObject_ConstraintException....");
-       
-       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
-       FolderData testroot =
-          getStorage()
-             .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+   public void testDeleteObject_ConstraintException() throws Exception
+   {
+      System.out.print("Running testDeleteObject_ConstraintException....");
 
-       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-      
-       DocumentData doc1 =
-          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
-             null, VersioningState.MAJOR);
-       try
-       {
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+
+      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+
+      DocumentData doc1 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
+            null, VersioningState.MAJOR);
+      try
+      {
          getConnection().deleteObject(testroot.getObjectId(), true);
          doFail();
-       }catch (ConstraintException ex){
-          pass();
-       }
-       catch (Exception e)
-       {
+      }
+      catch (ConstraintException ex)
+      {
+         pass();
+      }
+      catch (Exception e)
+      {
          //e.printStackTrace();
-          doFail(e.getMessage());
-       }
-       finally
-       {
-          clear(testroot.getObjectId());
-       }
-    }
-   
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         clear(testroot.getObjectId());
+      }
+   }
+
+   /**
+    * 2.2.4.15
+    *  Deletes the specified folder object and all of its child- and descendant-objects.
+    * @throws Exception
+    */
+   public void testDeleteTree_Simple() throws Exception
+   {
+      System.out.print("Running testDeleteTree_Simple....");
+
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+
+      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+
+      DocumentData doc1 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
+            null, VersioningState.MAJOR);
+
+      DocumentData doc2 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc2"), cs, null,
+            null, VersioningState.MAJOR);
+
+      FolderData fol1 =
+         getStorage().createFolder(testroot, folderTypeDefinition, getPropsMap("cmis:folder", "fol1"), null, null);
+
+      String id = testroot.getObjectId();
+
+      try
+      {
+         Collection<String> str = getConnection().deleteTree(id, true, UnfileObject.DELETE, true);
+         ObjectData root = getStorage().getObjectById(id);
+      }
+      catch (ObjectNotFoundException ex)
+      {
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         //clear(testroot.getObjectId());
+      }
+   }
+
+   /**
+    * 2.2.4.15
+    *  Deletes the specified folder object and all of its child- and descendant-objects.
+    * @throws Exception
+    */
+   public void testDeleteTree_Unfile() throws Exception
+   {
+      System.out.print("Running testDeleteTree_Unfile....");
+      if (!getStorage().getRepositoryInfo().getCapabilities().isCapabilityUnfiling())
+      {
+         pass();
+         return;
+      }
+
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+
+      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+
+      DocumentData doc1 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
+            null, VersioningState.MAJOR);
+
+      DocumentData doc2 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc2"), cs, null,
+            null, VersioningState.MAJOR);
+
+      FolderData fol1 =
+         getStorage().createFolder(testroot, folderTypeDefinition, getPropsMap("cmis:folder", "fol1"), null, null);
+
+      String id1 = doc1.getObjectId();
+      String id2 = doc2.getObjectId();
+      boolean found1 = false;
+      boolean found2 = false;
+
+      try
+      {
+         Collection<String> str = getConnection().deleteTree(testroot.getObjectId(), true, UnfileObject.UNFILE, true);
+         Iterator<String> it = getStorage().getUnfiledObjectsId();
+         while (it.hasNext())
+         {
+            String one = it.next();
+            if (one.equals(id1))
+               found1 = true;
+            if (one.equals(id2))
+               found2 = true;
+         }
+         if (found1 && found2)
+            pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         //clear(testroot.getObjectId());
+      }
+   }
+
+   /**
+    * 2.2.4.16
+    * Sets the content stream for the specified Document object.
+    * @throws Exception
+    */
+   public void testSetContentStream_Simple() throws Exception
+   {
+      System.out.print("Running testSetContentStream_Simple....");
+
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      byte[] before = "1234567890aBcDE".getBytes();
+      byte[] after = "zzz".getBytes();
+      byte[] result = new byte[3];
+
+      ContentStream cs1 = new BaseContentStream(before, null, new MimeType("text", "plain"));
+      ContentStream cs2 = new BaseContentStream(after, null, new MimeType("text", "plain"));
+
+      DocumentData doc1 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs1, null,
+            null, VersioningState.MAJOR);
+
+      try
+      {
+         String docid = getConnection().setContentStream(doc1.getObjectId(), cs2, new ChangeTokenHolder(), true);
+         getStorage().getObjectById(docid).getContentStream(null).getStream().read(result);
+         assertArrayEquals(after, result);
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         clear(testroot.getObjectId());
+      }
+   }
+
+   /**
+    * 2.2.4.16.3
+    * The Repository MUST throw this exception if the input parameter overwriteFlag is FALSE and the Object already has a content-stream. 
+    * @throws Exception
+    */
+   public void testSetContentStream_ContentAlreadyExistsException() throws Exception
+   {
+      System.out.print("Running testSetContentStream_ContentAlreadyExistsException....");
+
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      byte[] before = "1234567890aBcDE".getBytes();
+      byte[] after = "zzz".getBytes();
+
+      ContentStream cs1 = new BaseContentStream(before, null, new MimeType("text", "plain"));
+      ContentStream cs2 = new BaseContentStream(after, null, new MimeType("text", "plain"));
+
+      DocumentData doc1 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs1, null,
+            null, VersioningState.MAJOR);
+
+      try
+      {
+         String docid = getConnection().setContentStream(doc1.getObjectId(), cs2, new ChangeTokenHolder(), false);
+         doFail();
+      }
+      catch (ContentAlreadyExistsException ex)
+      {
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         clear(testroot.getObjectId());
+      }
+   }
+
+   /**
+    * 2.2.4.16.3
+    * The Repository MUST throw this exception if the “contentStreamAllowed” attribute of the Object-Type 
+    * definition specified by the cmis:objectTypeId property value of the given document is set to “notallowed”. 
+    * @throws Exception
+    */
+   public void testSetContentStream_StreamNotSupportedException() throws Exception
+   {
+      System.out.print("Running testSetContentStream_StreamNotSupportedException....");
+
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      byte[] before = "1234567890aBcDE".getBytes();
+      byte[] after = "zzz".getBytes();
+
+      ContentStream cs1 = new BaseContentStream(before, null, new MimeType("text", "plain"));
+      ContentStream cs2 = new BaseContentStream(after, null, new MimeType("text", "plain"));
+
+      Map<String, Property<?>> props2 = new HashMap<String, Property<?>>();
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
+            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
+            "f1", true, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefType =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
+            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
+            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+
+      props2.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(), fPropDefName
+         .getLocalName(), fPropDefName.getDisplayName(), "doc1"));
+      props2.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefType.getId(), fPropDefType.getQueryName(),
+         fPropDefType.getLocalName(), fPropDefType.getDisplayName(), "cmis:kino"));
+
+      Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
+      fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
+      fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefType);
+
+      TypeDefinition newType =
+         new TypeDefinition("cmis:kino", BaseType.DOCUMENT, "cmis:kino", "cmis:kino", "", "cmis:document", "cmis:kino",
+            "cmis:kino", true, false, true, true, false, false, false, false, null, null,
+            ContentStreamAllowed.NOT_ALLOWED, fPropertyDefinitions);
+      String typeID = getStorage().addType(newType);
+
+      DocumentData doc1 =
+         getStorage().createDocument(testroot, newType, props2, null, null, null, VersioningState.MAJOR);
+
+      try
+      {
+         String docid = getConnection().setContentStream(doc1.getObjectId(), cs2, new ChangeTokenHolder(), false);
+         doFail();
+      }
+      catch (StreamNotSupportedException ex)
+      {
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         clear(testroot.getObjectId());
+         getStorage().removeType(typeID);
+      }
+   }
+
+   /**
+    * 2.2.4.17
+    * Deletes the content stream for the specified Document object.
+    * @throws Exception
+    */
+   public void testDeleteContentStream_Simple() throws Exception
+   {
+      System.out.print("Running testDeleteContentStream_Simple....");
+
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      byte[] before = "1234567890aBcDE".getBytes();
+      byte[] result = new byte[3];
+
+      ContentStream cs1 = new BaseContentStream(before, null, new MimeType("text", "plain"));
+
+      DocumentData doc1 =
+         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs1, null,
+            null, VersioningState.MAJOR);
+
+      try
+      {
+         String docid = getConnection().deleteContentStream(doc1.getObjectId(), new ChangeTokenHolder());
+         assertNull(getStorage().getObjectById(docid).getContentStream(null));
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         clear(testroot.getObjectId());
+      }
+   }
+
+   /**
+    * 2.2.4.17.3
+    * The Repository MUST throw this exception if the Object’s Object-Type definition “contentStreamAllowed” 
+    * attribute is set to “required”. 
+    * @throws Exception
+    */
+   public void testDeleteContentStream_ConstraintException() throws Exception
+   {
+      System.out.print("Running testDeleteContentStream_ConstraintException....");
+
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      FolderData testroot =
+         getStorage()
+            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
+      byte[] before = "1234567890aBcDE".getBytes();
+      byte[] after = "zzz".getBytes();
+
+      ContentStream cs1 = new BaseContentStream(before, null, new MimeType("text", "plain"));
+
+      Map<String, Property<?>> props2 = new HashMap<String, Property<?>>();
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
+            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
+            "f1", true, null, null);
+
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefType =
+         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
+            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
+            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+
+      props2.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(), fPropDefName
+         .getLocalName(), fPropDefName.getDisplayName(), "doc1"));
+      props2.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefType.getId(), fPropDefType.getQueryName(),
+         fPropDefType.getLocalName(), fPropDefType.getDisplayName(), "cmis:kino"));
+
+      Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
+      fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
+      fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefType);
+
+      TypeDefinition newType =
+         new TypeDefinition("cmis:kino", BaseType.DOCUMENT, "cmis:kino", "cmis:kino", "", "cmis:document", "cmis:kino",
+            "cmis:kino", true, false, true, true, false, false, false, false, null, null,
+            ContentStreamAllowed.REQUIRED, fPropertyDefinitions);
+      String typeID = getStorage().addType(newType);
+
+      DocumentData doc1 =
+         getStorage().createDocument(testroot, newType, props2, cs1, null, null, VersioningState.MAJOR);
+
+      try
+      {
+         String docid = getConnection().deleteContentStream(doc1.getObjectId(), new ChangeTokenHolder());
+         doFail();
+      }
+      catch (ConstraintException ex)
+      {
+         pass();
+      }
+      catch (Exception e)
+      {
+         //e.printStackTrace();
+         doFail(e.getMessage());
+      }
+      finally
+      {
+         clear(testroot.getObjectId());
+         getStorage().removeType(typeID);
+      }
+   }
+
    protected void tearDown()
    {
 
