@@ -106,7 +106,7 @@ public class ObjectTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -142,7 +142,7 @@ public class ObjectTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -187,7 +187,7 @@ public class ObjectTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -343,7 +343,7 @@ public class ObjectTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -388,7 +388,7 @@ public class ObjectTest extends BaseTest
             .getDisplayName(), "cmis:kino"));
 
       TypeDefinition newType =
-         new TypeDefinition("cmis:kino", BaseType.FOLDER, "cmis:kino", "cmis:kino", "", "cmis:document", "cmis:kino",
+         new TypeDefinition("cmis:kino", BaseType.FOLDER, "cmis:kino", "cmis:kino", "", "cmis:folder", "cmis:kino",
             "cmis:kino", true, false, true, true, false, false, false, true, null, null,
             ContentStreamAllowed.NOT_ALLOWED, kinoPropertyDefinitions);
       String typeID = getStorage().addType(newType);
@@ -405,7 +405,7 @@ public class ObjectTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -466,7 +466,7 @@ public class ObjectTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -479,7 +479,7 @@ public class ObjectTest extends BaseTest
    /**
     * 2.2.4.1.3
     * The “versionable” attribute of the Object-Type definition specified by the cmis:objectTypeId property value is set to TRUE 
-    * and the value for the versioningState input parameter is provided that is “none
+    * and the value for the versioningState input parameter is provided that is “none”.
     * @throws Exception
     */
 
@@ -514,7 +514,7 @@ public class ObjectTest extends BaseTest
       TypeDefinition newType =
          new TypeDefinition("cmis:kino", BaseType.DOCUMENT, "cmis:kino", "cmis:kino", "", "cmis:document", "cmis:kino",
             "cmis:kino", true, false, true, true, false, false, false, true, null, null,
-            ContentStreamAllowed.NOT_ALLOWED, kinoPropertyDefinitions);
+            ContentStreamAllowed.ALLOWED, kinoPropertyDefinitions);
       String typeID = getStorage().addType(newType);
       try
       {
@@ -529,7 +529,7 @@ public class ObjectTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -577,7 +577,7 @@ public class ObjectTest extends BaseTest
       TypeDefinition newType =
          new TypeDefinition("cmis:kino", BaseType.DOCUMENT, "cmis:kino", "cmis:kino", "", "cmis:document", "cmis:kino",
             "cmis:kino", true, false, true, true, false, false, false, false, null, null,
-            ContentStreamAllowed.NOT_ALLOWED, kinoPropertyDefinitions);
+            ContentStreamAllowed.ALLOWED, kinoPropertyDefinitions);
       String typeID = getStorage().addType(newType);
       try
       {
@@ -592,7 +592,7 @@ public class ObjectTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -660,7 +660,7 @@ public class ObjectTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -800,7 +800,7 @@ public class ObjectTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -844,7 +844,7 @@ public class ObjectTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -1041,7 +1041,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.2.3
-    * •  constraint: The Repository MUST throw this exception if  the sourceId is not an Object whose baseType is “Document”.
+    * constraint: The Repository MUST throw this exception if  the sourceId is not an Object whose baseType is “Document”.
     * @throws Exception
     */
 
@@ -1069,7 +1069,7 @@ public class ObjectTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -1126,7 +1126,7 @@ public class ObjectTest extends BaseTest
          fPropDefName2.getLocalName(), fPropDefName2.getDisplayName(), "myfolder"));
 
       properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
-         .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(), "cmis:kino"));
+         .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(), "cmis:myfolder"));
 
       properties.put(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, new IdProperty(fPropDefAllowedChild.getId(),
          fPropDefAllowedChild.getQueryName(), fPropDefAllowedChild.getLocalName(), fPropDefAllowedChild
@@ -1157,7 +1157,7 @@ public class ObjectTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -1210,7 +1210,7 @@ public class ObjectTest extends BaseTest
       TypeDefinition newType =
          new TypeDefinition("cmis:kino", BaseType.DOCUMENT, "cmis:kino", "cmis:kino", "", "cmis:document", "cmis:kino",
             "cmis:kino", true, false, true, true, false, false, false, false, null, null,
-            ContentStreamAllowed.NOT_ALLOWED, kinoPropertyDefinitions);
+            ContentStreamAllowed.ALLOWED, kinoPropertyDefinitions);
       String typeID = getStorage().addType(newType);
 
       DocumentData doc1 =
@@ -1229,7 +1229,7 @@ public class ObjectTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -1302,7 +1302,7 @@ public class ObjectTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -1353,7 +1353,7 @@ public class ObjectTest extends BaseTest
       TypeDefinition newType =
          new TypeDefinition("cmis:kino", BaseType.DOCUMENT, "cmis:kino", "cmis:kino", "", "cmis:document", "cmis:kino",
             "cmis:kino", true, false, true, true, false, false, false, true, null, null,
-            ContentStreamAllowed.NOT_ALLOWED, kinoPropertyDefinitions);
+            ContentStreamAllowed.ALLOWED, kinoPropertyDefinitions);
       String typeID = getStorage().addType(newType);
 
       PolicyData policy = createPolicy(testroot, "policy1");
@@ -1428,7 +1428,7 @@ public class ObjectTest extends BaseTest
       TypeDefinition newType =
          new TypeDefinition("cmis:kino", BaseType.DOCUMENT, "cmis:kino", "cmis:kino", "", "cmis:document", "cmis:kino",
             "cmis:kino", true, false, true, true, false, false, false, false, null, null,
-            ContentStreamAllowed.NOT_ALLOWED, kinoPropertyDefinitions);
+            ContentStreamAllowed.ALLOWED, kinoPropertyDefinitions);
       String typeID = getStorage().addType(newType);
 
       AccessControlEntry acl = new AccessControlEntry();
@@ -1453,7 +1453,7 @@ public class ObjectTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -1561,7 +1561,7 @@ public class ObjectTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+        // e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -1607,7 +1607,7 @@ public class ObjectTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -1623,7 +1623,7 @@ public class ObjectTest extends BaseTest
     * A list of ACEs that MUST be added to the newly-created Folder object.
     * @throws Exception
     */
-   /*
+   
    public void testCreateFolder_AddACL() throws Exception
    {
       System.out.print("Running testCreateFolder_AddACL....");
@@ -1643,7 +1643,7 @@ public class ObjectTest extends BaseTest
       try
       {
           docId =
-            getConnection().createFolder(testroot.getObjectId(), getPropsMap("cmis:folder", "f1"), null, null, policies);
+            getConnection().createFolder(testroot.getObjectId(), getPropsMap("cmis:folder", "f1"), addACL, null, null);
          ObjectData res = getStorage().getObjectById(docId);
          for (AccessControlEntry one : res.getACL(false))
          {
@@ -1655,7 +1655,7 @@ public class ObjectTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+//         e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -1664,7 +1664,7 @@ public class ObjectTest extends BaseTest
          clear(testroot.getObjectId());
       }
    }
-   */
+
 
    /**
     * 2.2.4.3
@@ -1694,7 +1694,7 @@ public class ObjectTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -1757,7 +1757,7 @@ public class ObjectTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -1833,7 +1833,7 @@ public class ObjectTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -1902,7 +1902,7 @@ public class ObjectTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -2261,8 +2261,8 @@ public class ObjectTest extends BaseTest
       props.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
          .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(), "cmis:kino"));
 
-      props.put(CmisConstants.SOURCE_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
-         fPropDefTarget.getLocalName(), fPropDefTarget.getDisplayName(), doc1.getObjectId()));
+      props.put(CmisConstants.SOURCE_ID, new IdProperty(fPropDefSource.getId(), fPropDefSource.getQueryName(),
+         fPropDefSource.getLocalName(), fPropDefSource.getDisplayName(), doc1.getObjectId()));
       props.put(CmisConstants.TARGET_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
          fPropDefTarget.getLocalName(), fPropDefTarget.getDisplayName(), doc2.getObjectId()));
 
@@ -2908,7 +2908,7 @@ public class ObjectTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
+         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
