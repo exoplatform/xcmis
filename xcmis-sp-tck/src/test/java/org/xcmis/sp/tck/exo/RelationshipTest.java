@@ -582,8 +582,8 @@ public class RelationshipTest extends BaseTest
    
    /**
     * 2.2.8.1.3
-    * If the repository knows the total number of items in a result set, the repository SHOULD include the number here.
-    * •  Boolean hasMoreItems: TRUE if the Repository contains additional items after those contained in the response.  FALSE otherwise. 
+    * Repositories SHOULD return only the properties specified in the property filter 
+    * if they exist on the object’s type definition.
     * @throws Exception
     */
    public void testGetObjectRelationships_PropertyFiltered() throws Exception
