@@ -2025,7 +2025,7 @@ public class NavigationTest extends BaseTest
    /**
     * 2.2.3.6.1
     * This is the maximum number of items to return in a response.  
-    * The repository MUST NOT exceed this maximum.  Default is repository-specific
+    * The repository MUST NOT exceed this maximum.  
     * @throws Exception
     */
    public void testGetCheckedOutDocs_MaxItems() throws Exception

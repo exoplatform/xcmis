@@ -3691,7 +3691,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.7
-    * : If TRUE, then the Repository MUST return the available actions for each object in the result set. 
+    * If TRUE, then the Repository MUST return the available actions for each object in the result set. 
     * @throws Exception
     */
    public void testGetObject_IncludeAllowableActions() throws Exception
