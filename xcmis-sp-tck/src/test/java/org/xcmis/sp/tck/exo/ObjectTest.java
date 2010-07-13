@@ -83,7 +83,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocument_CheckContent() throws Exception
    {
-      System.out.print("Running testCreateDocument_CheckContent....");
+      System.out.print("Running testCreateDocument_CheckContent....                                ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       byte[] before = new byte[15];
       before = "1234567890aBcDE".getBytes();
@@ -122,7 +122,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocument_CheckProperties() throws Exception
    {
-      System.out.print("Running testCreateDocument_CheckProperties....");
+      System.out.print("Running testCreateDocument_CheckProperties....                             ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
       FolderData testroot =
@@ -158,7 +158,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocument_ApplyPolicy() throws Exception
    {
-      System.out.print("Running testCreateDocument_ApplyPolicy....");
+      System.out.print("Running testCreateDocument_ApplyPolicy....                                 ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
       FolderData testroot =
@@ -208,7 +208,7 @@ public class ObjectTest extends BaseTest
 
    public void testCreateDocument_AddACL() throws Exception
    {
-      System.out.print("Running testCreateDocument_ApplyACL....");
+      System.out.print("Running testCreateDocument_ApplyACL....                                    ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
       AccessControlEntry acl = new AccessControlEntry();
@@ -256,7 +256,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocument_NameConstraintViolationException() throws Exception
    {
-      System.out.print("Running testCreateDocument_NameConstraintViolationException....");
+      System.out.print("Running testCreateDocument_NameConstraintViolationException....            ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
       FolderData testroot =
@@ -298,7 +298,7 @@ public class ObjectTest extends BaseTest
 
    public void testCreateDocument_StreamNotSupportedException() throws Exception
    {
-      System.out.print("Running testCreateDocument_StreamNotSupportedException....");
+      System.out.print("Running testCreateDocument_StreamNotSupportedException....                 ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
       FolderData testroot =
@@ -361,7 +361,7 @@ public class ObjectTest extends BaseTest
 
    public void testCreateDocument_ConstraintException1() throws Exception
    {
-      System.out.print("Running testCreateDocument_ConstraintException1....");
+      System.out.print("Running testCreateDocument_ConstraintException1....                        ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
       FolderData testroot =
@@ -423,7 +423,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocument_ConstraintException2() throws Exception
    {
-      System.out.print("Running testCreateDocument_ConstraintException2....");
+      System.out.print("Running testCreateDocument_ConstraintException2....                        ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       FolderData testroot =
          getStorage()
@@ -485,7 +485,7 @@ public class ObjectTest extends BaseTest
 
    public void testCreateDocument_ConstraintException3() throws Exception
    {
-      System.out.print("Running testCreateDocument_ConstraintException3....");
+      System.out.print("Running testCreateDocument_ConstraintException3....                        ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
       FolderData testroot =
@@ -548,7 +548,7 @@ public class ObjectTest extends BaseTest
 
    public void testCreateDocument_ConstraintException4() throws Exception
    {
-      System.out.print("Running testCreateDocument_ConstraintException4....");
+      System.out.print("Running testCreateDocument_ConstraintException4....                        ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
       FolderData testroot =
@@ -611,7 +611,7 @@ public class ObjectTest extends BaseTest
 
    public void testCreateDocument_ConstraintException5() throws Exception
    {
-      System.out.print("Running testCreateDocument_ConstraintException5....");
+      System.out.print("Running testCreateDocument_ConstraintException5....                        ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
       FolderData testroot =
@@ -680,7 +680,7 @@ public class ObjectTest extends BaseTest
 
    public void testCreateDocument_ConstraintException6() throws Exception
    {
-      System.out.print("Running testCreateDocument_ConstraintException6....");
+      System.out.print("Running testCreateDocument_ConstraintException6....                        ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
       FolderData testroot =
@@ -749,7 +749,7 @@ public class ObjectTest extends BaseTest
 
    public void testCreateDocument_ConstraintException7() throws Exception
    {
-      System.out.print("Running testCreateDocument_ConstraintException6....");
+      System.out.print("Running testCreateDocument_ConstraintException6....                        ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
       FolderData testroot =
@@ -817,7 +817,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocumentFromSource_Simple() throws Exception
    {
-      System.out.print("Running testCreateDocumentFromSource_Simple....");
+      System.out.print("Running testCreateDocumentFromSource_Simple....                            ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       byte[] before = new byte[15];
       before = "1234567890aBcDE".getBytes();
@@ -861,7 +861,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocumentFromSource_Properties() throws Exception
    {
-      System.out.print("Running testCreateDocumentFromSource_Properties....");
+      System.out.print("Running testCreateDocumentFromSource_Properties....                        ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       byte[] before = new byte[15];
       before = "1234567890aBcDE".getBytes();
@@ -898,7 +898,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocumentFromSource_ApplyPolicy() throws Exception
    {
-      System.out.print("Running testCreateDocumentFromSource_ApplyPolicy....");
+      System.out.print("Running testCreateDocumentFromSource_ApplyPolicy....                       ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       byte[] before = new byte[15];
       before = "1234567890aBcDE".getBytes();
@@ -952,7 +952,7 @@ public class ObjectTest extends BaseTest
 
    public void testCreateDocumentFromSource_addACL() throws Exception
    {
-      System.out.print("Running testCreateDocumentFromSource_ApplyPolicy....");
+      System.out.print("Running testCreateDocumentFromSource_ApplyPolicy....                       ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       byte[] before = new byte[15];
       before = "1234567890aBcDE".getBytes();
@@ -1005,7 +1005,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocumentFromSource_NameConstraintViolationException() throws Exception
    {
-      System.out.print("Running testCreateDocumentFromSource_NameConstraintViolationException....");
+      System.out.print("Running testCreateDocumentFromSource_NameConstraintViolationException....  ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       byte[] before = new byte[15];
       before = "1234567890aBcDE".getBytes();
@@ -1047,7 +1047,7 @@ public class ObjectTest extends BaseTest
 
    public void testCreateDocumentFromSource_ConstraintException1() throws Exception
    {
-      System.out.print("Running testCreateDocumentFromSource_ConstraintException1....");
+      System.out.print("Running testCreateDocumentFromSource_ConstraintException1....              ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
       FolderData testroot =
@@ -1088,7 +1088,7 @@ public class ObjectTest extends BaseTest
 
    public void testCreateDocumentFromSource_ConstraintException2() throws Exception
    {
-      System.out.print("Running testCreateDocumentFromSource_ConstraintException2....");
+      System.out.print("Running testCreateDocumentFromSource_ConstraintException2....              ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
@@ -1178,7 +1178,7 @@ public class ObjectTest extends BaseTest
 
    public void testCreateDocumentFromSource_ConstraintException3() throws Exception
    {
-      System.out.print("Running testCreateDocumentFromSource_ConstraintException3....");
+      System.out.print("Running testCreateDocumentFromSource_ConstraintException3....              ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
@@ -1248,7 +1248,7 @@ public class ObjectTest extends BaseTest
 
    public void testCreateDocumentFromSource_ConstraintException4() throws Exception
    {
-      System.out.print("Running testCreateDocumentFromSource_ConstraintException4....");
+      System.out.print("Running testCreateDocumentFromSource_ConstraintException4....              ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
@@ -1323,7 +1323,7 @@ public class ObjectTest extends BaseTest
 
    public void testCreateDocumentFromSource_ConstraintException5() throws Exception
    {
-      System.out.print("Running testCreateDocumentFromSource_ConstraintException5...");
+      System.out.print("Running testCreateDocumentFromSource_ConstraintException5...               ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
@@ -1398,7 +1398,7 @@ public class ObjectTest extends BaseTest
 
    public void testCreateDocumentFromSource_ConstraintException6() throws Exception
    {
-      System.out.print("Running testCreateDocumentFromSource_ConstraintException6...");
+      System.out.print("Running testCreateDocumentFromSource_ConstraintException6...               ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
@@ -1472,7 +1472,7 @@ public class ObjectTest extends BaseTest
 
    public void testCreateDocumentFromSource_ConstraintException7() throws Exception
    {
-      System.out.print("Running testCreateDocumentFromSource_ConstraintException7...");
+      System.out.print("Running testCreateDocumentFromSource_ConstraintException7...               ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
@@ -1544,7 +1544,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateFolder_Simple() throws Exception
    {
-      System.out.print("Running testCreateFolder_Simple....");
+      System.out.print("Running testCreateFolder_Simple....                                        ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -1577,7 +1577,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateFolder_ApplyPolicy() throws Exception
    {
-      System.out.print("Running testCreateFolder_ApplyPolicy....");
+      System.out.print("Running testCreateFolder_ApplyPolicy....                                   ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -1626,7 +1626,7 @@ public class ObjectTest extends BaseTest
    
    public void testCreateFolder_AddACL() throws Exception
    {
-      System.out.print("Running testCreateFolder_AddACL....");
+      System.out.print("Running testCreateFolder_AddACL....                                        ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -1673,7 +1673,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateFolder_NameConstraintViolationException() throws Exception
    {
-      System.out.print("Running testCreateFolder_Simple....");
+      System.out.print("Running testCreateFolder_Simple....                                        ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -1712,7 +1712,7 @@ public class ObjectTest extends BaseTest
 
    public void testCreateFolder_ConstraintException1() throws Exception
    {
-      System.out.print("Running testCreateFolder_ConstraintException1....");
+      System.out.print("Running testCreateFolder_ConstraintException1....                          ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -1775,7 +1775,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateFolder_ConstraintException2() throws Exception
    {
-      System.out.print("Running testCreateFolder_ConstraintException2....");
+      System.out.print("Running testCreateFolder_ConstraintException2....                          ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -1852,7 +1852,7 @@ public class ObjectTest extends BaseTest
 
    public void testCreateFolder_ConstraintException3() throws Exception
    {
-      System.out.print("Running testCreateFolder_ConstraintException3....");
+      System.out.print("Running testCreateFolder_ConstraintException3....                          ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -1922,7 +1922,7 @@ public class ObjectTest extends BaseTest
 
    public void testCreateFolder_ConstraintException4() throws Exception
    {
-      System.out.print("Running testCreateFolder_ConstraintException4....");
+      System.out.print("Running testCreateFolder_ConstraintException4....                          ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -1991,7 +1991,7 @@ public class ObjectTest extends BaseTest
 
    public void testCreateFolder_ConstraintException5() throws Exception
    {
-      System.out.print("Running testCreateFolder_ConstraintException5....");
+      System.out.print("Running testCreateFolder_ConstraintException5....                          ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -2059,7 +2059,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateRelationship_Simple() throws Exception
    {
-      System.out.print("Running testCreateRelationship_Simple....");
+      System.out.print("Running testCreateRelationship_Simple....                                  ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
@@ -2120,7 +2120,7 @@ public class ObjectTest extends BaseTest
 
    public void testCreateRelationship_ApplyPolicy() throws Exception
    {
-      System.out.print("Running testCreateRelationship_ApplyPolicy....");
+      System.out.print("Running testCreateRelationship_ApplyPolicy....                             ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
@@ -2218,7 +2218,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateRelationship_AddACL() throws Exception
    {
-      System.out.print("Running testCreateRelationship_AddACL....");
+      System.out.print("Running testCreateRelationship_AddACL....                                  ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
@@ -2319,7 +2319,7 @@ public class ObjectTest extends BaseTest
 
    public void testCreateRelationship_NameConstraintViolationException() throws Exception
    {
-      System.out.print("Running testCreateRelationship_NameConstraintViolationException....");
+      System.out.print("Running testCreateRelationship_NameConstraintViolationException....        ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
@@ -2411,7 +2411,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateRelationship_ConstraintException1() throws Exception
    {
-      System.out.print("Running testCreateRelationship_ConstraintException1....");
+      System.out.print("Running testCreateRelationship_ConstraintException1....                    ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
@@ -2503,7 +2503,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateRelationship_ConstraintException2() throws Exception
    {
-      System.out.print("Running testCreateRelationship_ConstraintException2....");
+      System.out.print("Running testCreateRelationship_ConstraintException2....                    ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
@@ -2594,7 +2594,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateRelationship_ConstraintException3() throws Exception
    {
-      System.out.print("Running testCreateRelationship_ConstraintException3....");
+      System.out.print("Running testCreateRelationship_ConstraintException3....                    ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
@@ -2689,7 +2689,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateRelationship_ConstraintException4() throws Exception
    {
-      System.out.print("Running testCreateRelationship_ConstraintException4....");
+      System.out.print("Running testCreateRelationship_ConstraintException4....                    ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
@@ -2786,7 +2786,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateRelationship_ConstraintException5() throws Exception
    {
-      System.out.print("Running testCreateRelationship_ConstraintException5....");
+      System.out.print("Running testCreateRelationship_ConstraintException5....                    ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
@@ -2883,7 +2883,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreatePolicy_Simple() throws Exception
    {
-      System.out.print("Running testCreatePolicy_Simple....");
+      System.out.print("Running testCreatePolicy_Simple....                                        ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
@@ -2926,7 +2926,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreatePolicy_AddPolicy() throws Exception
    {
-      System.out.print("Running testCreatePolicy_AddPolicy....");
+      System.out.print("Running testCreatePolicy_AddPolicy....                                     ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
@@ -2981,7 +2981,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreatePolicy_AddACL() throws Exception
    {
-      System.out.print("Running testCreatePolicy_AddACL....");
+      System.out.print("Running testCreatePolicy_AddACL....                                        ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
@@ -3041,7 +3041,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreatePolicy_NameConstraintViolationException() throws Exception
    {
-      System.out.print("Running testCreatePolicy_NameConstraintViolationException....");
+      System.out.print("Running testCreatePolicy_NameConstraintViolationException....              ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
@@ -3091,7 +3091,7 @@ public class ObjectTest extends BaseTest
 
    public void testCreatePolicy_ConstraintException1() throws Exception
    {
-      System.out.print("Running testCreatePolicy_ConstraintException1....");
+      System.out.print("Running testCreatePolicy_ConstraintException1....                          ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -3165,7 +3165,7 @@ public class ObjectTest extends BaseTest
 
    public void testCreatePolicy_ConstraintException2() throws Exception
    {
-      System.out.print("Running testCreatePolicy_ConstraintException2....");
+      System.out.print("Running testCreatePolicy_ConstraintException2....                          ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       Map<String, Property<?>> folderprops = getPropsMap("cmis:folder", "testroot");
 
@@ -3240,7 +3240,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreatePolicy_ConstraintException3() throws Exception
    {
-      System.out.print("Running testCreatePolicy_ConstraintException3....");
+      System.out.print("Running testCreatePolicy_ConstraintException3....                          ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -3313,7 +3313,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreatePolicy_ConstraintException4() throws Exception
    {
-      System.out.print("Running testCreatePolicy_ConstraintException4....");
+      System.out.print("Running testCreatePolicy_ConstraintException4....                          ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -3386,7 +3386,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreatePolicy_ConstraintException5() throws Exception
    {
-      System.out.print("Running testCreatePolicy_ConstraintException5....");
+      System.out.print("Running testCreatePolicy_ConstraintException5....                          ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -3432,7 +3432,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetAllowableActions_Simlpe() throws Exception
    {
-      System.out.print("Running testGetAllowableActions_Simlpe....");
+      System.out.print("Running testGetAllowableActions_Simlpe....                                 ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -3489,7 +3489,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetObject_Simlpe() throws Exception
    {
-      System.out.print("Running testGetObject_Simlpe....");
+      System.out.print("Running testGetObject_Simlpe....                                           ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -3523,7 +3523,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetObject_PropertyFiltered() throws Exception
    {
-      System.out.print("Running testGetObject_PropertyFiltered....");
+      System.out.print("Running testGetObject_PropertyFiltered....                                 ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -3558,7 +3558,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetObject_IncludeRelationships() throws Exception
    {
-      System.out.print("Running testGetObject_IncludeRelationships....");
+      System.out.print("Running testGetObject_IncludeRelationships....                             ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -3605,7 +3605,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetObject_IncludePolicyIDs() throws Exception
    {
-      System.out.print("Running testGetObject_IncludePolicyIDs....");
+      System.out.print("Running testGetObject_IncludePolicyIDs....                                 ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -3644,7 +3644,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetObject_IncludeACLs() throws Exception
    {
-      System.out.print("Running testGetObject_IncludeACLs....");
+      System.out.print("Running testGetObject_IncludeACLs....                                      ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -3696,7 +3696,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetObject_IncludeAllowableActions() throws Exception
    {
-      System.out.print("Running testGetObject_IncludeAllowableActions....");
+      System.out.print("Running testGetObject_IncludeAllowableActions....                          ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -3756,7 +3756,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetObject_FilterNotValidException() throws Exception
    {
-      System.out.print("Running testGetObject_FilterNotValidException....");
+      System.out.print("Running testGetObject_FilterNotValidException....                          ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -3792,7 +3792,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetProperties_Filter() throws Exception
    {
-      System.out.print("Running testGetProperties_Filter....");
+      System.out.print("Running testGetProperties_Filter....                                       ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -3828,7 +3828,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetProperties_FilterNotValidException() throws Exception
    {
-      System.out.print("Running testGetProperties_FilterNotValidException....");
+      System.out.print("Running testGetProperties_FilterNotValidException....                      ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -3861,7 +3861,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetObjectByPath_Simlpe() throws Exception
    {
-      System.out.print("Running testGetObjectByPath_Simlpe....");
+      System.out.print("Running testGetObjectByPath_Simlpe....                                     ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -3894,7 +3894,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetObjectByPath_PropertyFiltered() throws Exception
    {
-      System.out.print("Running testGetObjectByPath_PropertyFiltered....");
+      System.out.print("Running testGetObjectByPath_PropertyFiltered....                           ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -3929,7 +3929,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetObjectByPath_IncludeRelationships() throws Exception
    {
-      System.out.print("Running testGetObjectByPath_IncludeRelationships....");
+      System.out.print("Running testGetObjectByPath_IncludeRelationships....                       ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -3976,7 +3976,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetObjectByPath_IncludePolicyIDs() throws Exception
    {
-      System.out.print("Running testGetObjectByPath_IncludePolicyIDs....");
+      System.out.print("Running testGetObjectByPath_IncludePolicyIDs....                           ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -4015,7 +4015,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetObjectByPath_IncludeACLs() throws Exception
    {
-      System.out.print("Running testGetObjectByPath_IncludeACLs....");
+      System.out.print("Running testGetObjectByPath_IncludeACLs....                                ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -4067,7 +4067,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetObjectByPath_IncludeAllowableActions() throws Exception
    {
-      System.out.print("Running testGetObjectByPath_IncludeAllowableActions....");
+      System.out.print("Running testGetObjectByPath_IncludeAllowableActions....                    ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -4127,7 +4127,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetObjectByPath_FilterNotValidException() throws Exception
    {
-      System.out.print("Running testGetObjectByPath_FilterNotValidException....");
+      System.out.print("Running testGetObjectByPath_FilterNotValidException....                    ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -4162,7 +4162,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetContentStream_Simple() throws Exception
    {
-      System.out.print("Running testGetContentStream_Simple....");
+      System.out.print("Running testGetContentStream_Simple....                                    ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -4203,7 +4203,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetContentStream_ConstraintException() throws Exception
    {
-      System.out.print("Running testGetContentStream_ConstraintException....");
+      System.out.print("Running testGetContentStream_ConstraintException....                       ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -4241,7 +4241,7 @@ public class ObjectTest extends BaseTest
 
    public void testGetRenditions_Simple() throws Exception
    {
-      System.out.print("Running testGetRenditions_Simple....");
+      System.out.print("Running testGetRenditions_Simple....                                       ");
       if (!getStorage().getRepositoryInfo().getCapabilities().getCapabilityRenditions()
          .equals(CapabilityRendition.READ))
       {
@@ -4288,7 +4288,7 @@ public class ObjectTest extends BaseTest
 
    public void testGetRenditions_FilterNotValidException() throws Exception
    {
-      System.out.print("Running testGetRenditions_FilterNotValidException....");
+      System.out.print("Running testGetRenditions_FilterNotValidException....                      ");
       if (!getStorage().getRepositoryInfo().getCapabilities().getCapabilityRenditions()
          .equals(CapabilityRendition.READ))
       {
@@ -4334,7 +4334,7 @@ public class ObjectTest extends BaseTest
 
    public void testUpdateProperties_Simple() throws Exception
    {
-      System.out.print("Running testUpdateProperties_Simple....");
+      System.out.print("Running testUpdateProperties_Simple....                                    ");
 
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
@@ -4417,7 +4417,7 @@ public class ObjectTest extends BaseTest
 
    public void testUpdateProperties_VersioningException() throws Exception
    {
-      System.out.print("Running testUpdateProperties_VersioningException....");
+      System.out.print("Running testUpdateProperties_VersioningException....                       ");
 
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
@@ -4477,7 +4477,7 @@ public class ObjectTest extends BaseTest
     */
    public void testMoveObject_Simple() throws Exception
    {
-      System.out.print("Running testMoveObject_Simple....");
+      System.out.print("Running testMoveObject_Simple....                                          ");
 
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
@@ -4520,7 +4520,7 @@ public class ObjectTest extends BaseTest
 
    public void testMoveObject_InvalidArgumentException() throws Exception
    {
-      System.out.print("Running testMoveObject_InvalidArgumentException....");
+      System.out.print("Running testMoveObject_InvalidArgumentException....                        ");
 
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
@@ -4567,7 +4567,7 @@ public class ObjectTest extends BaseTest
 
    public void testMoveObject_ConstraintException() throws Exception
    {
-      System.out.print("Running testMoveObject_ConstraintException....");
+      System.out.print("Running testMoveObject_ConstraintException....                             ");
 
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
@@ -4652,7 +4652,7 @@ public class ObjectTest extends BaseTest
 
    public void testMoveObject_NameConstraintException() throws Exception
    {
-      System.out.print("Running testMoveObject_NameConstraintException....");
+      System.out.print("Running testMoveObject_NameConstraintException....                         ");
 
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
@@ -4702,7 +4702,7 @@ public class ObjectTest extends BaseTest
 
    public void testDeleteObject_Simple() throws Exception
    {
-      System.out.print("Running testDeleteObject_Simple....");
+      System.out.print("Running testDeleteObject_Simple....                                        ");
 
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
@@ -4744,7 +4744,7 @@ public class ObjectTest extends BaseTest
 
    public void testDeleteObject_ConstraintException() throws Exception
    {
-      System.out.print("Running testDeleteObject_ConstraintException....");
+      System.out.print("Running testDeleteObject_ConstraintException....                           ");
 
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
@@ -4784,8 +4784,7 @@ public class ObjectTest extends BaseTest
     */
    public void testDeleteTree_Simple() throws Exception
    {
-      System.out.print("Running testDeleteTree_Simple....");
-
+      System.out.print("Running testDeleteTree_Simple....                                          ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -4834,7 +4833,7 @@ public class ObjectTest extends BaseTest
     */
    public void testDeleteTree_Unfile() throws Exception
    {
-      System.out.print("Running testDeleteTree_Unfile....");
+      System.out.print("Running testDeleteTree_Unfile....                                          ");
       if (!getStorage().getRepositoryInfo().getCapabilities().isCapabilityUnfiling())
       {
          pass();
@@ -4897,7 +4896,7 @@ public class ObjectTest extends BaseTest
     */
    public void testSetContentStream_Simple() throws Exception
    {
-      System.out.print("Running testSetContentStream_Simple....");
+      System.out.print("Running testSetContentStream_Simple....                                    ");
 
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       FolderData testroot =
@@ -4939,7 +4938,7 @@ public class ObjectTest extends BaseTest
     */
    public void testSetContentStream_ContentAlreadyExistsException() throws Exception
    {
-      System.out.print("Running testSetContentStream_ContentAlreadyExistsException....");
+      System.out.print("Running testSetContentStream_ContentAlreadyExistsException....             ");
 
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       FolderData testroot =
@@ -4983,7 +4982,7 @@ public class ObjectTest extends BaseTest
     */
    public void testSetContentStream_StreamNotSupportedException() throws Exception
    {
-      System.out.print("Running testSetContentStream_StreamNotSupportedException....");
+      System.out.print("Running testSetContentStream_StreamNotSupportedException....               ");
 
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       FolderData testroot =
@@ -5053,7 +5052,7 @@ public class ObjectTest extends BaseTest
     */
    public void testDeleteContentStream_Simple() throws Exception
    {
-      System.out.print("Running testDeleteContentStream_Simple....");
+      System.out.print("Running testDeleteContentStream_Simple....                                 ");
 
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       FolderData testroot =
@@ -5093,7 +5092,7 @@ public class ObjectTest extends BaseTest
     */
    public void testDeleteContentStream_ConstraintException() throws Exception
    {
-      System.out.print("Running testDeleteContentStream_ConstraintException....");
+      System.out.print("Running testDeleteContentStream_ConstraintException....                    ");
 
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       FolderData testroot =

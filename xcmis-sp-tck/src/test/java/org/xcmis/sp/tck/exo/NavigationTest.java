@@ -61,7 +61,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_Relationships() throws Exception
    {
-      System.out.print("Running testGetChildren_Relationships....");
+      System.out.print("Running testGetChildren_Relationships....                                  ");
       createFolderTree();
       try
       {
@@ -91,7 +91,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_NoRelationships() throws Exception
    {
-      System.out.print("Running testGetChildren_NoRelationships....");
+      System.out.print("Running testGetChildren_NoRelationships....                                ");
       createFolderTree();
       try
       {
@@ -120,7 +120,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_AllowableActions() throws Exception
    {
-      System.out.print("Running testGetChildren_AllowableActions....");
+      System.out.print("Running testGetChildren_AllowableActions....                               ");
       createFolderTree();
       try
       {
@@ -146,7 +146,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_NoAllowableActions() throws Exception
    {
-      System.out.print("Running testGetChildren_NoAllowableActions....");
+      System.out.print("Running testGetChildren_NoAllowableActions....                             ");
       createFolderTree();
       try
       {
@@ -172,7 +172,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_PathSegments() throws Exception
    {
-      System.out.print("Running testGetChildren_PathSegments....");
+      System.out.print("Running testGetChildren_PathSegments....                                   ");
       createFolderTree();
       try
       {
@@ -198,7 +198,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_NoPathSegments() throws Exception
    {
-      System.out.print("Running testGetChildren_NoPathSegments....");
+      System.out.print("Running testGetChildren_NoPathSegments....                                 ");
       createFolderTree();
       try
       {
@@ -219,7 +219,7 @@ public class NavigationTest extends BaseTest
 
    public void testGetChildren_ObjectInfo() throws Exception
    {
-      System.out.print("Running testGetChildren_ObjectInfo....");
+      System.out.print("Running testGetChildren_ObjectInfo....                                     ");
       createFolderTree();
       try
       {
@@ -240,7 +240,7 @@ public class NavigationTest extends BaseTest
 
    public void testGetChildren_NoObjectInfo() throws Exception
    {
-      System.out.print("Running testGetChildren_NoObjectInfo....");
+      System.out.print("Running testGetChildren_NoObjectInfo....                                   ");
       createFolderTree();
       try
       {
@@ -267,7 +267,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_PropertyFiltered() throws Exception
    {
-      System.out.print("Running testGetChildren_PropertyFiltered....");
+      System.out.print("Running testGetChildren_PropertyFiltered....                               ");
       createFolderTree();
       try
       {
@@ -297,7 +297,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_RenditionFiltered() throws Exception
    {
-      System.out.print("Running testGetChildren_RenditionFiltered....");
+      System.out.print("Running testGetChildren_RenditionFiltered....                              ");
       createFolderTree();
       try
       {
@@ -327,7 +327,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_HasMoreItems() throws Exception
    {
-      System.out.print("Running testGetChildren_HasMoreItems....");
+      System.out.print("Running testGetChildren_HasMoreItems....                                   ");
       createFolderTree();
       try
       {
@@ -351,7 +351,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_MaxItems() throws Exception
    {
-      System.out.print("Running testGetChildren_MaxItems....");
+      System.out.print("Running testGetChildren_MaxItems....                                       ");
       createFolderTree();
       try
       {
@@ -375,7 +375,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_NumItems() throws Exception
    {
-      System.out.print("Running testGetChildren_NumItems....");
+      System.out.print("Running testGetChildren_NumItems....                                       ");
       createFolderTree();
       try
       {
@@ -404,7 +404,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_SkipCount() throws Exception
    {
-      System.out.print("Running testGetChildren_SkipCount....");
+      System.out.print("Running testGetChildren_SkipCount....                                      ");
       createFolderTree();
       try
       {
@@ -427,7 +427,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_InvalidArgumentException() throws Exception
    {
-      System.out.print("Running testGetChildren_InvalidArgumentException....");
+      System.out.print("Running testGetChildren_InvalidArgumentException....                       ");
       createFolderTree();
       try
       {
@@ -454,7 +454,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_FilterNotValidException() throws Exception
    {
-      System.out.print("Running testGetChildren_FilterNotValidException....");
+      System.out.print("Running testGetChildren_FilterNotValidException....                        ");
       createFolderTree();
       try
       {
@@ -486,7 +486,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_Simple() throws Exception
    {
-      System.out.print("Running testGetDescendants_Simple....");
+      System.out.print("Running testGetDescendants_Simple....                                      ");
       createFolderTree();
       try
       {
@@ -509,7 +509,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_AllowableActions() throws Exception
    {
-      System.out.print("Running testGetDescendants_AllowableActions....");
+      System.out.print("Running testGetDescendants_AllowableActions....                            ");
       createFolderTree();
       try
       {
@@ -536,7 +536,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_NoAllowableActions() throws Exception
    {
-      System.out.print("Running testGetDescendants_NoAllowableActions....");
+      System.out.print("Running testGetDescendants_NoAllowableActions....                          ");
       createFolderTree();
       try
       {
@@ -563,7 +563,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_Relationships() throws Exception
    {
-      System.out.print("Running testGetDescendants_Relationships....");
+      System.out.print("Running testGetDescendants_Relationships....                               ");
       createFolderTree();
       try
       {
@@ -593,7 +593,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_NoRelationships() throws Exception
    {
-      System.out.print("Running testGetDescendants_NoRelationships....");
+      System.out.print("Running testGetDescendants_NoRelationships....                             ");
       createFolderTree();
       try
       {
@@ -623,7 +623,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_PathSegment() throws Exception
    {
-      System.out.print("Running testGetDescendants_PathSegment....");
+      System.out.print("Running testGetDescendants_PathSegment....                                 ");
       createFolderTree();
       try
       {
@@ -650,7 +650,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_NoPathSegment() throws Exception
    {
-      System.out.print("Running testGetDescendants_NoPathSegment....");
+      System.out.print("Running testGetDescendants_NoPathSegment....                               ");
       createFolderTree();
       try
       {
@@ -672,7 +672,7 @@ public class NavigationTest extends BaseTest
 
    public void testGetDescendants_ObjectInfo() throws Exception
    {
-      System.out.print("Running testGetDescendants_ObjectInfo....");
+      System.out.print("Running testGetDescendants_ObjectInfo....                                  ");
       createFolderTree();
       try
       {
@@ -694,7 +694,7 @@ public class NavigationTest extends BaseTest
 
    public void testGetDescendants_NoObjectInfo() throws Exception
    {
-      System.out.print("Running testGetDescendants_NoObjectInfo....");
+      System.out.print("Running testGetDescendants_NoObjectInfo....                                ");
       createFolderTree();
       try
       {
@@ -722,7 +722,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_PropertyFiltered() throws Exception
    {
-      System.out.print("Running testGetDescendants_PropertyFiltered....");
+      System.out.print("Running testGetDescendants_PropertyFiltered....                            ");
       createFolderTree();
       try
       {
@@ -752,8 +752,8 @@ public class NavigationTest extends BaseTest
     * @throws Exception
     */
    public void testGetDescendants_RenditionsFiltered() throws Exception
-   {
-      System.out.print("Running testGetDescendants_RenditionsFiltered....");
+   { 
+      System.out.print("Running testGetDescendants_RenditionsFiltered....                          ");
       createFolderTree();
       try
       {
@@ -780,7 +780,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_DepthLimit() throws Exception
    {
-      System.out.print("Running testGetDescendants_DepthLimit....");
+      System.out.print("Running testGetDescendants_DepthLimit....                                            ");
       createFolderTree();
       try
       {
@@ -804,7 +804,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_FilterNotValidException() throws Exception
    {
-      System.out.print("Running testGetDescendants_FilterNotValidException....");
+      System.out.print("Running testGetDescendants_FilterNotValidException....                     ");
       createFolderTree();
       try
       {
@@ -831,7 +831,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_InvalidArgumentException() throws Exception
    {
-      System.out.print("Running testGetDescendants_InvalidArgumentException....");
+      System.out.print("Running testGetDescendants_InvalidArgumentException....                    ");
       createFolderTree();
       try
       {
@@ -857,7 +857,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_InvalidArgumentException2() throws Exception
    {
-      System.out.print("Running testGetDescendants_InvalidArgumentException2....");
+      System.out.print("Running testGetDescendants_InvalidArgumentException2....                   ");
       createFolderTree();
       try
       {
@@ -889,7 +889,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_Simple() throws Exception
    {
-      System.out.print("Running testGetFolderTree_Simple....");
+      System.out.print("Running testGetFolderTree_Simple....                                       ");
       createFolderTree();
       try
       {
@@ -912,7 +912,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_AllowableActions() throws Exception
    {
-      System.out.print("Running testGetFolderTree_AllowableActions....");
+      System.out.print("Running testGetFolderTree_AllowableActions....                             ");
       createFolderTree();
       try
       {
@@ -939,7 +939,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_NoAllowableActions() throws Exception
    {
-      System.out.print("Running testGetFolderTree_NoAllowableActions....");
+      System.out.print("Running testGetFolderTree_NoAllowableActions....                           ");
       createFolderTree();
       try
       {
@@ -966,7 +966,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_Relationships() throws Exception
    {
-      System.out.print("Running testGetFolderTree_Relationships....");
+      System.out.print("Running testGetFolderTree_Relationships....                                ");
       createFolderTree();
       try
       {
@@ -996,7 +996,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_NoRelationships() throws Exception
    {
-      System.out.print("Running testGetFolderTree_NoRelationships....");
+      System.out.print("Running testGetFolderTree_NoRelationships....                              ");
       createFolderTree();
       try
       {
@@ -1026,7 +1026,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_PathSegment() throws Exception
    {
-      System.out.print("Running testGetFolderTree_PathSegment....");
+      System.out.print("Running testGetFolderTree_PathSegment....                                  ");
       createFolderTree();
       try
       {
@@ -1053,7 +1053,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_NoPathSegment() throws Exception
    {
-      System.out.print("Running testGetFolderTree_NoPathSegment....");
+      System.out.print("Running testGetFolderTree_NoPathSegment....                                ");
       createFolderTree();
       try
       {
@@ -1075,7 +1075,7 @@ public class NavigationTest extends BaseTest
 
    public void testGetFolderTree_ObjectInfo() throws Exception
    {
-      System.out.print("Running testGetFolderTree_ObjectInfo....");
+      System.out.print("Running testGetFolderTree_ObjectInfo....                                   ");
       createFolderTree();
       try
       {
@@ -1097,7 +1097,7 @@ public class NavigationTest extends BaseTest
 
    public void testGetFolderTree_NoObjectInfo() throws Exception
    {
-      System.out.print("Running testGetFolderTree_NoObjectInfo....");
+      System.out.print("Running testGetFolderTree_NoObjectInfo....                                 ");
       createFolderTree();
       try
       {
@@ -1125,7 +1125,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_PropertyFiltered() throws Exception
    {
-      System.out.print("Running testGetFolderTree_PropertyFiltered....");
+      System.out.print("Running testGetFolderTree_PropertyFiltered....                             ");
       createFolderTree();
       try
       {
@@ -1156,7 +1156,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_RenditionsFiltered() throws Exception
    {
-      System.out.print("Running testGetFolderTree_RenditionsFiltered....");
+      System.out.print("Running testGetFolderTree_RenditionsFiltered....                           ");
       createFolderTree();
       try
       {
@@ -1183,7 +1183,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_DepthLimit() throws Exception
    {
-      System.out.print("Running testGetFolderTree_DepthLimit....");
+      System.out.print("Running testGetFolderTree_DepthLimit....                                   ");
       createFolderTree();
       try
       {
@@ -1207,7 +1207,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_FilterNotValidException() throws Exception
    {
-      System.out.print("Running testGetFolderTree_FilterNotValidException....");
+      System.out.print("Running testGetFolderTree_FilterNotValidException....                      ");
       createFolderTree();
       try
       {
@@ -1233,7 +1233,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_InvalidArgumentException() throws Exception
    {
-      System.out.print("Running testGetFolderTree_InvalidArgumentException....");
+      System.out.print("Running testGetFolderTree_InvalidArgumentException....                     ");
       createFolderTree();
       try
       {
@@ -1259,7 +1259,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_InvalidArgumentException2() throws Exception
    {
-      System.out.print("Running testGetFolderTree_InvalidArgumentException2....");
+      System.out.print("Running testGetFolderTree_InvalidArgumentException2....                    ");
       createFolderTree();
       try
       {
@@ -1291,7 +1291,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderParent_Simple() throws Exception
    {
-      System.out.print("Running testGetFolderParent_Simple....");
+      System.out.print("Running testGetFolderParent_Simple....                                     ");
       createFolderTree();
       try
       {
@@ -1309,7 +1309,7 @@ public class NavigationTest extends BaseTest
 
    public void testGetFolderParent_IncludeObjectInfo() throws Exception
    {
-      System.out.print("Running testGetFolderParent_IncludeObjectInfo....");
+      System.out.print("Running testGetFolderParent_IncludeObjectInfo....                          ");
       createFolderTree();
       try
       {
@@ -1327,7 +1327,7 @@ public class NavigationTest extends BaseTest
 
    public void testGetFolderParent_NoIncludeObjectInfo() throws Exception
    {
-      System.out.print("Running testGetFolderParent_NoIncludeObjectInfo....");
+      System.out.print("Running testGetFolderParent_NoIncludeObjectInfo....                        ");
       createFolderTree();
       try
       {
@@ -1351,7 +1351,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderParent_PropertyFiltered() throws Exception
    {
-      System.out.print("Running testGetFolderParent_PropertyFiltered....");
+      System.out.print("Running testGetFolderParent_PropertyFiltered....                           ");
       createFolderTree();
       try
       {
@@ -1377,7 +1377,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderParent_FilterNotValidException() throws Exception
    {
-      System.out.print("Running testGetFolderParent_FilterNotValidException....");
+      System.out.print("Running testGetFolderParent_FilterNotValidException....                    ");
       createFolderTree();
       try
       {
@@ -1403,7 +1403,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderParent_InvalidArgumentException() throws Exception
    {
-      System.out.print("Running testGetFolderParent_InvalidArgumentException....");
+      System.out.print("Running testGetFolderParent_InvalidArgumentException....                   ");
       createFolderTree();
       try
       {
@@ -1434,7 +1434,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetObjectParents_Simple() throws Exception
    {
-      System.out.print("Running testGetObjectParents_Simple....");
+      System.out.print("Running testGetObjectParents_Simple....                                    ");
       createFolderTree();
       try
       {
@@ -1458,7 +1458,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetObjectParents_IncludeRelatioships() throws Exception
    {
-      System.out.print("Running testGetObjectParents_IncludeRelatioships....");
+      System.out.print("Running testGetObjectParents_IncludeRelatioships....                       ");
       createFolderTree();
       try
       {
@@ -1485,7 +1485,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetObjectParents_NoRelatioships() throws Exception
    {
-      System.out.print("Running testGetObjectParents_NoRelatioships....");
+      System.out.print("Running testGetObjectParents_NoRelatioships....                            ");
       createFolderTree();
       try
       {
@@ -1512,7 +1512,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetObjectParents_AllowableActions() throws Exception
    {
-      System.out.print("Running testGetObjectParents_AllowableActions....");
+      System.out.print("Running testGetObjectParents_AllowableActions....                          ");
       createFolderTree();
       try
       {
@@ -1539,7 +1539,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetObjectParents_NoAllowableActions() throws Exception
    {
-      System.out.print("Running testGetObjectParents_NoAllowableActions....");
+      System.out.print("Running testGetObjectParents_NoAllowableActions....                        ");
       createFolderTree();
       try
       {
@@ -1567,7 +1567,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetObjectParents_IncludePathSegment() throws Exception
    {
-      System.out.print("Running testGetObjectParents_IncludePathSegment....");
+      System.out.print("Running testGetObjectParents_IncludePathSegment....                        ");
       createFolderTree();
       try
       {
@@ -1595,7 +1595,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetObjectParents_NoPathSegment() throws Exception
    {
-      System.out.print("Running testGetObjectParents_NoPathSegment....");
+      System.out.print("Running testGetObjectParents_NoPathSegment....                             ");
       createFolderTree();
       try
       {
@@ -1622,7 +1622,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetObjectParents_NoRenditions() throws Exception
    {
-      System.out.print("Running testGetObjectParents_NoRenditions...");
+      System.out.print("Running testGetObjectParents_NoRenditions...                               ");
       createFolderTree();
       try
       {
@@ -1645,7 +1645,7 @@ public class NavigationTest extends BaseTest
 
    public void testGetObjectParents_ObjectInfo() throws Exception
    {
-      System.out.print("Running testGetObjectParents_ObjectInfo....");
+      System.out.print("Running testGetObjectParents_ObjectInfo....                                ");
       createFolderTree();
       try
       {
@@ -1667,7 +1667,7 @@ public class NavigationTest extends BaseTest
 
    public void testGetObjectParents_NoObjectInfo() throws Exception
    {
-      System.out.print("Running testGetObjectParents_NoObjectInfo()....");
+      System.out.print("Running testGetObjectParents_NoObjectInfo()....                            ");
       createFolderTree();
       try
       {
@@ -1695,7 +1695,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetObjectParents_PropertiesFIlter() throws Exception
    {
-      System.out.print("Running testGetObjectParents_PropertiesFIlter....");
+      System.out.print("Running testGetObjectParents_PropertiesFIlter....                          ");
       createFolderTree();
       try
       {
@@ -1727,7 +1727,7 @@ public class NavigationTest extends BaseTest
 
    public void testGetObjectParents_FilterNotValidException() throws Exception
    {
-      System.out.print("Running testGetObjectParents_FilterNotValidException....");
+      System.out.print("Running testGetObjectParents_FilterNotValidException....                   ");
       createFolderTree();
       try
       {
@@ -1757,7 +1757,7 @@ public class NavigationTest extends BaseTest
 
    public void testGetObjectParents_ConstraintException() throws Exception
    {
-      System.out.print("Running testGetObjectParents_ConstraintException....");
+      System.out.print("Running testGetObjectParents_ConstraintException....                       ");
       createFolderTree();
       try
       {
@@ -1796,7 +1796,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocs_Simple() throws Exception
    {
-      System.out.print("Running testGetCheckedOutDocs_Simple....");
+      System.out.print("Running testGetCheckedOutDocs_Simple....                                   ");
       createFolderTree();
       try
       {
@@ -1819,7 +1819,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocs_AllowableActions() throws Exception
    {
-      System.out.print("Running testGetCheckedOutDocs_AllowableActions....");
+      System.out.print("Running testGetCheckedOutDocs_AllowableActions....                         ");
       createFolderTree();
       try
       {
@@ -1845,7 +1845,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocs_NoAllowableActions() throws Exception
    {
-      System.out.print("Running testGetCheckedOutDocs_NoAllowableActions....");
+      System.out.print("Running testGetCheckedOutDocs_NoAllowableActions....                       ");
       createFolderTree();
       try
       {
@@ -1871,7 +1871,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocs_Relationships() throws Exception
    {
-      System.out.print("Running testGetCheckedOutDocs_Relationships....");
+      System.out.print("Running testGetCheckedOutDocs_Relationships....                            ");
       createFolderTree();
       try
       {
@@ -1900,7 +1900,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocs_NoRelationships() throws Exception
    {
-      System.out.print("Running testGetCheckedOutDocs_NoRelationships....");
+      System.out.print("Running testGetCheckedOutDocs_NoRelationships....                          ");
       createFolderTree();
       try
       {
@@ -1924,7 +1924,7 @@ public class NavigationTest extends BaseTest
 
    public void testGetCheckedOutDocs_ObjectInfo() throws Exception
    {
-      System.out.print("Running testGetCheckedOutDocs_ObjectInfo....");
+      System.out.print("Running testGetCheckedOutDocs_ObjectInfo....                               ");
       createFolderTree();
       try
       {
@@ -1945,7 +1945,7 @@ public class NavigationTest extends BaseTest
 
    public void testGetCheckedOutDocs_NoObjectInfo() throws Exception
    {
-      System.out.print("Running testGetCheckedOutDocs_NoObjectInfo....");
+      System.out.print("Running testGetCheckedOutDocs_NoObjectInfo....                             ");
       createFolderTree();
       try
       {
@@ -1971,7 +1971,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocs_NoRenditions() throws Exception
    {
-      System.out.print("Running testGetCheckedOutDocs_NoRenditions....");
+      System.out.print("Running testGetCheckedOutDocs_NoRenditions....                             ");
       createFolderTree();
       try
       {
@@ -1999,7 +1999,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocs_PropertyFiltered() throws Exception
    {
-      System.out.print("Running testGetCheckedOutDocs_PropertyFiltered....");
+      System.out.print("Running testGetCheckedOutDocs_PropertyFiltered....                         ");
       createFolderTree();
       try
       {
@@ -2030,7 +2030,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocs_MaxItems() throws Exception
    {
-      System.out.print("Running testGetCheckedOutDocs_MaxItems....");
+      System.out.print("Running testGetCheckedOutDocs_MaxItems....                                 ");
       createFolderTree();
       try
       {
@@ -2054,7 +2054,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocs_SkipCount() throws Exception
    {
-      System.out.print("Running testGetCheckedOutDocs_SkipCount....");
+      System.out.print("Running testGetCheckedOutDocs_SkipCount....                                ");
       createFolderTree();
       try
       {
@@ -2077,7 +2077,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocs_FilterNotValidException() throws Exception
    {
-      System.out.print("Running testGetCheckedOutDocs_FilterNotValidException....");
+      System.out.print("Running testGetCheckedOutDocs_FilterNotValidException....                  ");
       createFolderTree();
       try
       {

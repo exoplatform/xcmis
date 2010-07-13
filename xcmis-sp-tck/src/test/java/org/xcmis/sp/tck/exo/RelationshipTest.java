@@ -45,12 +45,9 @@ import org.xcmis.spi.model.impl.IdProperty;
 import org.xcmis.spi.model.impl.StringProperty;
 import org.xcmis.spi.utils.MimeType;
 
-
-
-
 public class RelationshipTest extends BaseTest
 {
-  
+
    /**
     * 2.2.8.1
     * Gets all or a subset of relationships associated with an independent object.
@@ -58,7 +55,7 @@ public class RelationshipTest extends BaseTest
     */
    public void testGetObjectRelationships_Simple() throws Exception
    {
-      System.out.print("Running testGetObjectRelationships_Simple....");
+      System.out.print("Running testGetObjectRelationships_Simple....                              ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -71,7 +68,6 @@ public class RelationshipTest extends BaseTest
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
             null, VersioningState.MAJOR);
 
-      
       DocumentData doc2 =
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc2"), cs, null,
             null, VersioningState.MAJOR);
@@ -79,7 +75,7 @@ public class RelationshipTest extends BaseTest
       DocumentData doc3 =
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc3"), cs, null,
             null, VersioningState.MAJOR);
-      
+
       RelationshipData reldata =
          getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
             getPropsMap("cmis:relationship", "rel1"), null, null);
@@ -87,12 +83,13 @@ public class RelationshipTest extends BaseTest
       RelationshipData reldata2 =
          getStorage().createRelationship(doc2, doc3, relationshipTypeDefinition,
             getPropsMap("cmis:relationship", "rel2"), null, null);
-      
+
       try
       {
          ItemsList<CmisObject> obj =
-            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true, true, true, "", -1, 0);
-               assertEquals(2, obj.getItems().size());
+            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true, true,
+               true, "", -1, 0);
+         assertEquals(2, obj.getItems().size());
          pass();
       }
       catch (Exception e)
@@ -106,7 +103,6 @@ public class RelationshipTest extends BaseTest
       }
    }
 
-   
    /**
     * 2.2.8.1.1
     * An enumeration specifying whether the Repository MUST return relationships where the 
@@ -115,7 +111,7 @@ public class RelationshipTest extends BaseTest
     */
    public void testGetObjectRelationships_CheckDirection() throws Exception
    {
-      System.out.print("Running testGetObjectRelationships_CheckDirection....");
+      System.out.print("Running testGetObjectRelationships_CheckDirection....                      ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -128,7 +124,6 @@ public class RelationshipTest extends BaseTest
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
             null, VersioningState.MAJOR);
 
-      
       DocumentData doc2 =
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc2"), cs, null,
             null, VersioningState.MAJOR);
@@ -136,7 +131,7 @@ public class RelationshipTest extends BaseTest
       DocumentData doc3 =
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc3"), cs, null,
             null, VersioningState.MAJOR);
-      
+
       RelationshipData reldata =
          getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
             getPropsMap("cmis:relationship", "rel1"), null, null);
@@ -144,12 +139,13 @@ public class RelationshipTest extends BaseTest
       RelationshipData reldata2 =
          getStorage().createRelationship(doc2, doc3, relationshipTypeDefinition,
             getPropsMap("cmis:relationship", "rel2"), null, null);
-      
+
       try
       {
          ItemsList<CmisObject> obj =
-            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.TARGET, null, true, true, true, "", -1, 0);
-               assertEquals(1, obj.getItems().size());
+            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.TARGET, null, true, true,
+               true, "", -1, 0);
+         assertEquals(1, obj.getItems().size());
          pass();
       }
       catch (Exception e)
@@ -162,7 +158,6 @@ public class RelationshipTest extends BaseTest
          clear(testroot.getObjectId());
       }
    }
-   
 
    /**
     * 2.2.8.1.1
@@ -171,7 +166,7 @@ public class RelationshipTest extends BaseTest
     */
    public void testGetObjectRelationships_AllowableActions() throws Exception
    {
-      System.out.print("Running testGetObjectRelationships_AllowableActions....");
+      System.out.print("Running testGetObjectRelationships_AllowableActions....                    ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -184,7 +179,6 @@ public class RelationshipTest extends BaseTest
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
             null, VersioningState.MAJOR);
 
-      
       DocumentData doc2 =
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc2"), cs, null,
             null, VersioningState.MAJOR);
@@ -192,7 +186,7 @@ public class RelationshipTest extends BaseTest
       DocumentData doc3 =
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc3"), cs, null,
             null, VersioningState.MAJOR);
-      
+
       RelationshipData reldata =
          getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
             getPropsMap("cmis:relationship", "rel1"), null, null);
@@ -200,7 +194,7 @@ public class RelationshipTest extends BaseTest
       RelationshipData reldata2 =
          getStorage().createRelationship(doc2, doc3, relationshipTypeDefinition,
             getPropsMap("cmis:relationship", "rel2"), null, null);
-      
+
       try
       {
          ItemsList<CmisObject> obj =
@@ -223,7 +217,7 @@ public class RelationshipTest extends BaseTest
          clear(testroot.getObjectId());
       }
    }
-   
+
    /**
     * 2.2.8.1.1
     * If specified, then the Repository MUST return only relationships whose Object-Type is of the type specified.
@@ -231,7 +225,7 @@ public class RelationshipTest extends BaseTest
     */
    public void testGetObjectRelationships_TypeId() throws Exception
    {
-      System.out.print("Running testGetObjectRelationships_TypeId....");
+      System.out.print("Running testGetObjectRelationships_TypeId....                              ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -244,7 +238,6 @@ public class RelationshipTest extends BaseTest
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
             null, VersioningState.MAJOR);
 
-      
       DocumentData doc2 =
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc2"), cs, null,
             null, VersioningState.MAJOR);
@@ -252,9 +245,9 @@ public class RelationshipTest extends BaseTest
       DocumentData doc3 =
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc3"), cs, null,
             null, VersioningState.MAJOR);
-      
+
       Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-      
+
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
          PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
             CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
@@ -278,24 +271,22 @@ public class RelationshipTest extends BaseTest
          .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(), "cmis:kino"));
 
       TypeDefinition newType =
-         new TypeDefinition("cmis:kino", BaseType.RELATIONSHIP, "cmis:kino", "cmis:kino", "", "cmis:relationship", "cmis:kino",
-            "cmis:kino", true, false, true, true, false, false, false, false, null, null,
+         new TypeDefinition("cmis:kino", BaseType.RELATIONSHIP, "cmis:kino", "cmis:kino", "", "cmis:relationship",
+            "cmis:kino", "cmis:kino", true, false, true, true, false, false, false, false, null, null,
             ContentStreamAllowed.NOT_ALLOWED, fPropertyDefinitions);
       String typeID = getStorage().addType(newType);
-      
+
       RelationshipData reldata =
          getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
             getPropsMap("cmis:relationship", "rel1"), null, null);
 
-      RelationshipData reldata2 =
-         getStorage().createRelationship(doc2, doc3, newType,
-            properties, null, null);
-      
+      RelationshipData reldata2 = getStorage().createRelationship(doc2, doc3, newType, properties, null, null);
+
       try
       {
          ItemsList<CmisObject> obj =
-            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, "cmis:kino", true, true,
-               true, "", -1, 0);
+            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, "cmis:kino", true,
+               true, true, "", -1, 0);
          assertEquals(1, obj.getItems().size());
          pass();
       }
@@ -310,7 +301,7 @@ public class RelationshipTest extends BaseTest
          getStorage().removeType(typeID);
       }
    }
-   
+
    /**
     * 2.2.8.1.1
     * If TRUE, then the Repository MUST return all relationships whose Object-Types are descendant-types of the given object’s 
@@ -319,7 +310,7 @@ public class RelationshipTest extends BaseTest
     */
    public void testGetObjectRelationships_IncludeSubrelationshipTypes() throws Exception
    {
-      System.out.print("Running testGetObjectRelationships_IncludeSubrelationshipTypes....");
+      System.out.print("Running testGetObjectRelationships_IncludeSubrelationshipTypes....         ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -332,7 +323,6 @@ public class RelationshipTest extends BaseTest
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
             null, VersioningState.MAJOR);
 
-      
       DocumentData doc2 =
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc2"), cs, null,
             null, VersioningState.MAJOR);
@@ -340,9 +330,9 @@ public class RelationshipTest extends BaseTest
       DocumentData doc3 =
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc3"), cs, null,
             null, VersioningState.MAJOR);
-      
+
       Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-      
+
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
          PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
             CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
@@ -366,29 +356,27 @@ public class RelationshipTest extends BaseTest
          .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(), "cmis:kino"));
 
       TypeDefinition newType =
-         new TypeDefinition("cmis:kino", BaseType.RELATIONSHIP, "cmis:kino", "cmis:kino", "", "cmis:relationship", "cmis:kino",
-            "cmis:kino", true, false, true, true, false, false, false, false, null, null,
+         new TypeDefinition("cmis:kino", BaseType.RELATIONSHIP, "cmis:kino", "cmis:kino", "", "cmis:relationship",
+            "cmis:kino", "cmis:kino", true, false, true, true, false, false, false, false, null, null,
             ContentStreamAllowed.NOT_ALLOWED, fPropertyDefinitions);
       String typeID = getStorage().addType(newType);
-      
+
       RelationshipData reldata =
          getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
             getPropsMap("cmis:relationship", "rel1"), null, null);
 
-      RelationshipData reldata2 =
-         getStorage().createRelationship(doc2, doc3, newType,
-            properties, null, null);
-      
+      RelationshipData reldata2 = getStorage().createRelationship(doc2, doc3, newType, properties, null, null);
+
       try
       {
          ItemsList<CmisObject> obj =
-            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, "cmis:relationship", true, true,
-               true, "", -1, 0);
+            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER,
+               "cmis:relationship", true, true, true, "", -1, 0);
          assertEquals(2, obj.getItems().size());
-         
+
          ItemsList<CmisObject> obj2 =
-            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, "cmis:relationship", false, true,
-               true, "", -1, 0);
+            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER,
+               "cmis:relationship", false, true, true, "", -1, 0);
          assertEquals(1, obj2.getItems().size());
          pass();
       }
@@ -403,8 +391,7 @@ public class RelationshipTest extends BaseTest
          getStorage().removeType(typeID);
       }
    }
-   
-   
+
    /**
     * 2.2.8.1.1
     * This is the maximum number of items to return in a response.  
@@ -413,7 +400,7 @@ public class RelationshipTest extends BaseTest
     */
    public void testGetObjectRelationships_MaxItems() throws Exception
    {
-      System.out.print("Running testGetObjectRelationships_MaxItems....");
+      System.out.print("Running testGetObjectRelationships_MaxItems....                            ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -426,7 +413,6 @@ public class RelationshipTest extends BaseTest
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
             null, VersioningState.MAJOR);
 
-      
       DocumentData doc2 =
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc2"), cs, null,
             null, VersioningState.MAJOR);
@@ -434,7 +420,7 @@ public class RelationshipTest extends BaseTest
       DocumentData doc3 =
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc3"), cs, null,
             null, VersioningState.MAJOR);
-      
+
       RelationshipData reldata =
          getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
             getPropsMap("cmis:relationship", "rel1"), null, null);
@@ -442,7 +428,7 @@ public class RelationshipTest extends BaseTest
       RelationshipData reldata2 =
          getStorage().createRelationship(doc2, doc3, relationshipTypeDefinition,
             getPropsMap("cmis:relationship", "rel2"), null, null);
-      
+
       try
       {
          ItemsList<CmisObject> obj =
@@ -461,7 +447,7 @@ public class RelationshipTest extends BaseTest
          clear(testroot.getObjectId());
       }
    }
-   
+
    /**
     * 2.2.8.1.1
     * This is the number of potential results that the repository 
@@ -470,7 +456,7 @@ public class RelationshipTest extends BaseTest
     */
    public void testGetObjectRelationships_SkipCount() throws Exception
    {
-      System.out.print("Running testGetObjectRelationships_SkipCount....");
+      System.out.print("Running testGetObjectRelationships_SkipCount....                           ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -483,7 +469,6 @@ public class RelationshipTest extends BaseTest
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
             null, VersioningState.MAJOR);
 
-      
       DocumentData doc2 =
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc2"), cs, null,
             null, VersioningState.MAJOR);
@@ -491,7 +476,7 @@ public class RelationshipTest extends BaseTest
       DocumentData doc3 =
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc3"), cs, null,
             null, VersioningState.MAJOR);
-      
+
       RelationshipData reldata =
          getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
             getPropsMap("cmis:relationship", "rel1"), null, null);
@@ -499,7 +484,7 @@ public class RelationshipTest extends BaseTest
       RelationshipData reldata2 =
          getStorage().createRelationship(doc2, doc3, relationshipTypeDefinition,
             getPropsMap("cmis:relationship", "rel2"), null, null);
-      
+
       try
       {
          ItemsList<CmisObject> obj =
@@ -518,7 +503,7 @@ public class RelationshipTest extends BaseTest
          clear(testroot.getObjectId());
       }
    }
-   
+
    /**
     * 2.2.8.1.1
     * If the repository knows the total number of items in a result set, the repository SHOULD include the number here.
@@ -527,7 +512,7 @@ public class RelationshipTest extends BaseTest
     */
    public void testGetObjectRelationships_Paging() throws Exception
    {
-      System.out.print("Running testGetObjectRelationships_Paging....");
+      System.out.print("Running testGetObjectRelationships_Paging....                              ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -540,7 +525,6 @@ public class RelationshipTest extends BaseTest
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
             null, VersioningState.MAJOR);
 
-      
       DocumentData doc2 =
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc2"), cs, null,
             null, VersioningState.MAJOR);
@@ -548,7 +532,7 @@ public class RelationshipTest extends BaseTest
       DocumentData doc3 =
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc3"), cs, null,
             null, VersioningState.MAJOR);
-      
+
       RelationshipData reldata =
          getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
             getPropsMap("cmis:relationship", "rel1"), null, null);
@@ -556,7 +540,7 @@ public class RelationshipTest extends BaseTest
       RelationshipData reldata2 =
          getStorage().createRelationship(doc2, doc3, relationshipTypeDefinition,
             getPropsMap("cmis:relationship", "rel2"), null, null);
-      
+
       try
       {
          ItemsList<CmisObject> obj =
@@ -577,9 +561,7 @@ public class RelationshipTest extends BaseTest
          clear(testroot.getObjectId());
       }
    }
-   
-   
-   
+
    /**
     * 2.2.8.1.3
     * Repositories SHOULD return only the properties specified in the property filter 
@@ -588,7 +570,7 @@ public class RelationshipTest extends BaseTest
     */
    public void testGetObjectRelationships_PropertyFiltered() throws Exception
    {
-      System.out.print("Running testGetObjectRelationships_PropertyFiltered....");
+      System.out.print("Running testGetObjectRelationships_PropertyFiltered....                    ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -601,7 +583,6 @@ public class RelationshipTest extends BaseTest
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
             null, VersioningState.MAJOR);
 
-      
       DocumentData doc2 =
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc2"), cs, null,
             null, VersioningState.MAJOR);
@@ -609,7 +590,7 @@ public class RelationshipTest extends BaseTest
       DocumentData doc3 =
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc3"), cs, null,
             null, VersioningState.MAJOR);
-      
+
       RelationshipData reldata =
          getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
             getPropsMap("cmis:relationship", "rel1"), null, null);
@@ -617,7 +598,7 @@ public class RelationshipTest extends BaseTest
       RelationshipData reldata2 =
          getStorage().createRelationship(doc2, doc3, relationshipTypeDefinition,
             getPropsMap("cmis:relationship", "rel2"), null, null);
-      
+
       try
       {
          ItemsList<CmisObject> obj =
@@ -643,7 +624,7 @@ public class RelationshipTest extends BaseTest
          clear(testroot.getObjectId());
       }
    }
-   
+
    /**
     * 2.2.8.1.3
     * The Repository MUST throw this exception if this property filter input parameter is not valid.
@@ -651,7 +632,7 @@ public class RelationshipTest extends BaseTest
     */
    public void testGetObjectRelationships_FilterNotValidException() throws Exception
    {
-      System.out.print("Running testGetObjectRelationships_FilterNotValidException....");
+      System.out.print("Running testGetObjectRelationships_FilterNotValidException....             ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -664,7 +645,6 @@ public class RelationshipTest extends BaseTest
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
             null, VersioningState.MAJOR);
 
-      
       DocumentData doc2 =
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc2"), cs, null,
             null, VersioningState.MAJOR);
@@ -672,7 +652,7 @@ public class RelationshipTest extends BaseTest
       DocumentData doc3 =
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc3"), cs, null,
             null, VersioningState.MAJOR);
-      
+
       RelationshipData reldata =
          getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
             getPropsMap("cmis:relationship", "rel1"), null, null);
@@ -680,14 +660,16 @@ public class RelationshipTest extends BaseTest
       RelationshipData reldata2 =
          getStorage().createRelationship(doc2, doc3, relationshipTypeDefinition,
             getPropsMap("cmis:relationship", "rel2"), null, null);
-      
+
       try
       {
          ItemsList<CmisObject> obj =
-            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true, true, true, "(,*", -1, 0);
+            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true, true,
+               true, "(,*", -1, 0);
          doFail();
       }
-      catch (FilterNotValidException ex){
+      catch (FilterNotValidException ex)
+      {
          pass();
       }
       catch (Exception e)
