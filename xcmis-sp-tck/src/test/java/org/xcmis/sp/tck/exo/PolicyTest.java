@@ -66,10 +66,9 @@ public class PolicyTest extends BaseTest
       }
       catch (TypeNotFoundException ex)
       {
-         pass();
+         skip();
          return;
       }
-
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -99,7 +98,6 @@ public class PolicyTest extends BaseTest
       }
       catch (Exception e)
       {
-         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -125,7 +123,7 @@ public class PolicyTest extends BaseTest
       }
       catch (TypeNotFoundException ex)
       {
-         pass();
+         skip();
          return;
       }
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
@@ -145,7 +143,7 @@ public class PolicyTest extends BaseTest
             CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
             false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
       kinoPropertyDefinitions.put(CmisConstants.NAME, kinoPropDefName2);
-      kinoPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, kinoPropDefObjectTypeId2);
+      //kinoPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, kinoPropDefObjectTypeId2);
 
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties.put(CmisConstants.NAME, new StringProperty(kinoPropDefName2.getId(), kinoPropDefName2.getQueryName(),
@@ -159,6 +157,7 @@ public class PolicyTest extends BaseTest
             "cmis:kino", true, false, true, true, false, false, false, false, null, null, ContentStreamAllowed.ALLOWED,
             kinoPropertyDefinitions);
       String typeID = getStorage().addType(newType);
+      newType = getStorage().getTypeDefinition(typeID, true);
 
       DocumentData doc1 =
          getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.MAJOR);
@@ -174,10 +173,9 @@ public class PolicyTest extends BaseTest
       {
          pass();
       }
-      catch (Exception e)
+      catch (Exception other)
       {
-         //e.printStackTrace();
-         doFail(e.getMessage());
+         doFail(other.getMessage());
       }
       finally
       {
@@ -201,7 +199,7 @@ public class PolicyTest extends BaseTest
       }
       catch (TypeNotFoundException ex)
       {
-         pass();
+         skip();
          return;
       }
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
@@ -227,7 +225,6 @@ public class PolicyTest extends BaseTest
       }
       catch (Exception e)
       {
-         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -252,7 +249,7 @@ public class PolicyTest extends BaseTest
       }
       catch (TypeNotFoundException ex)
       {
-         pass();
+         skip();
          return;
       }
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
@@ -272,7 +269,7 @@ public class PolicyTest extends BaseTest
             CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
             false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
       kinoPropertyDefinitions.put(CmisConstants.NAME, kinoPropDefName2);
-      kinoPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, kinoPropDefObjectTypeId2);
+      //kinoPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, kinoPropDefObjectTypeId2);
 
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties.put(CmisConstants.NAME, new StringProperty(kinoPropDefName2.getId(), kinoPropDefName2.getQueryName(),
@@ -286,6 +283,7 @@ public class PolicyTest extends BaseTest
             "cmis:kino", true, false, true, true, false, false, false, false, null, null, ContentStreamAllowed.ALLOWED,
             kinoPropertyDefinitions);
       String typeID = getStorage().addType(newType);
+      newType = getStorage().getTypeDefinition(typeID, true);
 
       DocumentData doc1 =
          getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.MAJOR);
@@ -301,10 +299,9 @@ public class PolicyTest extends BaseTest
       {
          pass();
       }
-      catch (Exception e)
+      catch (Exception other)
       {
-         //e.printStackTrace();
-         doFail(e.getMessage());
+         doFail(other.getMessage());
       }
       finally
       {
@@ -348,7 +345,6 @@ public class PolicyTest extends BaseTest
       }
       catch (Exception e)
       {
-         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -394,7 +390,6 @@ public class PolicyTest extends BaseTest
       }
       catch (Exception e)
       {
-         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -434,10 +429,9 @@ public class PolicyTest extends BaseTest
       {
          pass();
       }
-      catch (Exception e)
+      catch (Exception other)
       {
-         //e.printStackTrace();
-         doFail(e.getMessage());
+         doFail(other.getMessage());
       }
       finally
       {

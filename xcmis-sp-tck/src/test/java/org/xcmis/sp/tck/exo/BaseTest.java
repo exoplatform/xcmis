@@ -103,7 +103,7 @@ public abstract class BaseTest extends TestCase
       String containerConf = getClass().getResource(tck_conf).toString();
       StandaloneContainer.addConfigurationURL(containerConf);
       container = StandaloneContainer.getInstance();
-      
+
       ConversationState state = new ConversationState(new Identity("__system"));
       ConversationState.setCurrent(state);
 
@@ -232,10 +232,9 @@ public abstract class BaseTest extends TestCase
       return testroot;
    }
 
-   
    protected PolicyData createPolicy(FolderData where, String name) throws StorageException,
-   NameConstraintViolationException, ConstraintException
-{
+      NameConstraintViolationException, ConstraintException
+   {
       org.xcmis.spi.model.PropertyDefinition<?> def =
          PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
       Map<String, Property<?>> properties2 = getPropsMap("cmis:policy", name);
@@ -243,40 +242,14 @@ public abstract class BaseTest extends TestCase
          def.getLocalName(), def.getDisplayName(), "testPolicyText"));
       PolicyData policy = getStorage().createPolicy(where, policyTypeDefinition, properties2, null, null);
       return policy;
-}
-   
+   }
+
    protected void clear()
    {
       try
       {
          FolderData rootFolder = (FolderData)getStorage().getObjectById(testroot);
-         //         List<CmisObject> stuff =
-         //            objectTreeToList(getConnection().getDescendants(rootfolderID, -1, true, IncludeRelationships.BOTH, false,
-         //               true, "", ""));
-         //         for (CmisObject one : stuff)
-         //         {
-         //            if (one.getRelationship().size() > 0)
-         //            {
-         //               for (CmisObject relation : one.getRelationship())
-         //               {
-         //                  String rel_id = relation.getObjectInfo().getId();
-         //                  try
-         //                  {
-         //                     ObjectData rel_data = getStorage().getObjectById(rel_id);
-         //                     getStorage().deleteObject(rel_data, true);
-         //                  }
-         //                  catch (ObjectNotFoundException ex)
-         //                  {
-         //                     continue;
-         //                  }
-         //               }
-         //            }
-         //
-         //            getStorage().deleteObject(getStorage().getObjectById(one.getObjectInfo().getId()), true);
-         //         }
-
          getStorage().deleteTree(rootFolder, true, UnfileObject.DELETE, true);
-
       }
       catch (Exception e)
       {
@@ -297,7 +270,7 @@ public abstract class BaseTest extends TestCase
          e.printStackTrace();
       }
    }
-   
+
    public List<CmisObject> objectTreeToList(List<ItemsTree<CmisObject>> source)
    {
       List<CmisObject> result = new ArrayList<CmisObject>();
@@ -341,7 +314,6 @@ public abstract class BaseTest extends TestCase
          fail(message);
       else
          fail();
-
    }
 
    protected void doFail() throws Exception
@@ -355,5 +327,11 @@ public abstract class BaseTest extends TestCase
    {
       System.out.println("PASSED");
       //passedTests.add(o);
+   }
+   
+   protected void skip()
+   {
+      System.out.println("SKIPPED");
+      //skippedTests.add(o);
    }
 }

@@ -53,10 +53,12 @@ public class RepositoryTest extends BaseTest
 
    public void testGeneral() throws Exception
    {
+      System.out.print("Running testGeneral....                                                    ");
       assertNotNull(storageProvider);
       assertNotNull(storageProvider.getConnection());
       assertNotNull(storageProvider.getConnection().getStorage());
       assertNotNull(storageProvider.getConnection().getStorage().getId());
+      pass();
    }
 
    /**
@@ -66,6 +68,7 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetRepositories()
    {
+      System.out.print("Running testGetRepositories....                                            ");
       Set<RepositoryShortInfo> storageInfos = CmisRegistry.getInstance().getStorageInfos();
       assertNotNull(storageInfos);
       assertFalse(storageInfos.isEmpty());
@@ -77,6 +80,7 @@ public class RepositoryTest extends BaseTest
          assertFalse(repositoryShortInfo.getRepositoryName().isEmpty());
          assertNotNull(repositoryShortInfo.getRootFolderId());
       }
+      pass();
    }
 
    /**
@@ -88,6 +92,7 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetRepositoryInfo() throws Exception
    {
+      System.out.print("Running testGetRepositoryInfo....                                          ");
       assertNotNull(getStorage().getRepositoryInfo());
       assertNotNull(getStorage().getRepositoryInfo().getRepositoryId());
       assertFalse(getStorage().getRepositoryInfo().getRepositoryId().isEmpty());
@@ -110,6 +115,7 @@ public class RepositoryTest extends BaseTest
       assertNotNull(getStorage().getRepositoryInfo().getAclCapability().getMapping());
       assertNotNull(getStorage().getRepositoryInfo().getPrincipalAnonymous());
       assertNotNull(getStorage().getRepositoryInfo().getPrincipalAnyone());
+      pass();
    }
 
    /**
@@ -118,18 +124,18 @@ public class RepositoryTest extends BaseTest
     * Returns the list of Object-Types defined for the Repository 
     * that are children of the specified Type.
     */
-   public void testGetTypeChildren_Root()
+   public void testGetTypeChildren_Root() throws Exception
    {
+      System.out.print("Running testGetTypeChildren_Root....                                       ");
       // root types
       ItemsList<TypeDefinition> typeChildren0 = null;
       try
       {
          typeChildren0 = getConnection().getTypeChildren(null, true, -1, 0);
       }
-      catch (TypeNotFoundException e)
+      catch (Exception e)
       {
-         e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
       assertNotNull(typeChildren0);
       List<TypeDefinition> typeChildrenList = typeChildren0.getItems();
@@ -155,6 +161,7 @@ public class RepositoryTest extends BaseTest
       }
       assertTrue("The prepared list of default types should be cleared. Some default type is missing:" + ll, ll
          .isEmpty());
+      pass();
    }
 
    /**
@@ -163,21 +170,22 @@ public class RepositoryTest extends BaseTest
     * Returns the list of Object-Types defined for the Repository 
     * that are children of the specified Type.
     */
-   public void testGetTypeChildren_RootWithMaxItems()
+   public void testGetTypeChildren_RootWithMaxItems() throws Exception
    {
+      System.out.print("Running testGetTypeChildren_RootWithMaxItems....                           ");
       // root types with maxItems
       ItemsList<TypeDefinition> typeChildren3 = null;
       try
       {
          typeChildren3 = getConnection().getTypeChildren(null, true, 1, 0);
       }
-      catch (TypeNotFoundException e)
+      catch (Exception e)
       {
-         e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
       assertNotNull(typeChildren3);
       assertEquals(1, typeChildren3.getItems().size());
+      pass();
    }
 
    /**
@@ -186,18 +194,18 @@ public class RepositoryTest extends BaseTest
     * Returns the list of Object-Types defined for the Repository 
     * that are children of the specified Type.
     */
-   public void testGetTypeChildren_RootWithSkipCount()
+   public void testGetTypeChildren_RootWithSkipCount() throws Exception
    {
+      System.out.print("Running testGetTypeChildren_RootWithSkipCount....                          ");
       // get size of root types
       ItemsList<TypeDefinition> typeChildren0 = null;
       try
       {
          typeChildren0 = getConnection().getTypeChildren(null, true, -1, 0);
       }
-      catch (TypeNotFoundException e)
+      catch (Exception e)
       {
-         e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
       List<TypeDefinition> typeChildrenList = typeChildren0.getItems();
       int sizeOfRootTypes = typeChildrenList.size();
@@ -208,13 +216,13 @@ public class RepositoryTest extends BaseTest
       {
          typeChildren4 = getConnection().getTypeChildren(null, true, -1, sizeOfRootTypes - 1);
       }
-      catch (TypeNotFoundException e)
+      catch (Exception e)
       {
-         e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
       assertNotNull(typeChildren4);
       assertEquals(1, typeChildren4.getItems().size());
+      pass();
    }
 
    /**
@@ -223,21 +231,22 @@ public class RepositoryTest extends BaseTest
     * Returns the list of Object-Types defined for the Repository 
     * that are children of the specified Type.
     */
-   public void testGetTypeChildren_Folder()
+   public void testGetTypeChildren_Folder() throws Exception
    {
+      System.out.print("Running testGetTypeChildren_Folder....                                     ");
       // folder
       ItemsList<TypeDefinition> typeChildren1 = null;
       try
       {
          typeChildren1 = getConnection().getTypeChildren("cmis:folder", true, -1, 0);
       }
-      catch (TypeNotFoundException e)
+      catch (Exception e)
       {
-         e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
       assertNotNull(typeChildren1);
       assertFalse(typeChildren1.isHasMoreItems());
+      pass();
    }
 
    /**
@@ -246,21 +255,22 @@ public class RepositoryTest extends BaseTest
     * Returns the list of Object-Types defined for the Repository 
     * that are children of the specified Type.
     */
-   public void testGetTypeChildren_Document()
+   public void testGetTypeChildren_Document() throws Exception
    {
+      System.out.print("Running testGetTypeChildren_Document....                                   ");
       // document
       ItemsList<TypeDefinition> typeChildren2 = null;
       try
       {
          typeChildren2 = getConnection().getTypeChildren("cmis:document", true, -1, 0);
       }
-      catch (TypeNotFoundException e)
+      catch (Exception e)
       {
-         e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
       assertNotNull(typeChildren2);
       assertFalse(typeChildren2.isHasMoreItems());
+      pass();
    }
 
    /**
@@ -269,17 +279,22 @@ public class RepositoryTest extends BaseTest
     * Returns the list of Object-Types defined for the Repository 
     * that are children of the specified Type.
     */
-   public void testGetTypeChildren_NonExistedType()
+   public void testGetTypeChildren_NonExistedType() throws Exception
    {
       // to get children for nonexistent type "cmis:kino"
+      System.out.print("Running testGetTypeChildren_NonExistedType....                             ");
       try
       {
          getConnection().getTypeChildren("cmis:kino", false, -1, 0);
-         fail("The type definition \"cmis:kino\" shouldn't exist.'");
+         doFail("The type definition \"cmis:kino\" shouldn't exist.'");
       }
       catch (TypeNotFoundException e)
       {
-         // OK
+         pass();
+      }
+      catch (Exception ex)
+      {
+         doFail(ex.getMessage());
       }
    }
 
@@ -288,17 +303,17 @@ public class RepositoryTest extends BaseTest
     * 
     * Returns the set of descendant Object-Types defined for the Repository under the specified Type.
     */
-   public void testGetTypeDescendants()
+   public void testGetTypeDescendants() throws Exception
    {
+      System.out.print("Running testGetTypeDescendants....                                         ");
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
       try
       {
          typeDescendants = getConnection().getTypeDescendants(null, 2, true);
       }
-      catch (TypeNotFoundException e)
+      catch (Exception e)
       {
-         e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
       assertNotNull(typeDescendants);
       assertTrue(typeDescendants.size() > 0);
@@ -316,6 +331,7 @@ public class RepositoryTest extends BaseTest
          assertNotNull(itemsTree.getContainer().getBaseId());
          checkPropertyDefinitions(itemsTree.getContainer().getPropertyDefinitions());
       }
+      pass();
    }
 
    /**
@@ -323,20 +339,21 @@ public class RepositoryTest extends BaseTest
     * 
     * Returns the set of descendant Object-Types defined for the Repository under the specified Type.
     */
-   public void testGetTypeDescendants_Folder()
+   public void testGetTypeDescendants_Folder() throws Exception
    {
+      System.out.print("Running testGetTypeDescendants_Folder....                                  ");
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
       try
       {
          typeDescendants = getConnection().getTypeDescendants("cmis:folder", 2, true);
       }
-      catch (TypeNotFoundException e)
+      catch (Exception e)
       {
-         e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
       assertNotNull(typeDescendants);
       assertTrue(typeDescendants.size() == 0);
+      pass();
    }
 
    /**
@@ -344,20 +361,21 @@ public class RepositoryTest extends BaseTest
     * 
     * Returns the set of descendant Object-Types defined for the Repository under the specified Type.
     */
-   public void testGetTypeDescendants_Document()
+   public void testGetTypeDescendants_Document() throws Exception
    {
+      System.out.print("Running testGetTypeDescendants_Document....                                ");
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
       try
       {
          typeDescendants = getConnection().getTypeDescendants("cmis:document", 2, true);
       }
-      catch (TypeNotFoundException e)
+      catch (Exception e)
       {
-         e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
       assertNotNull(typeDescendants);
       assertTrue(typeDescendants.size() == 0);
+      pass();
    }
 
    /**
@@ -365,17 +383,17 @@ public class RepositoryTest extends BaseTest
     * 
     * Returns the set of descendant Object-Types defined for the Repository under the specified Type.
     */
-   public void testGetTypeDescendants_IncludePropertyDefinitionFalse()
+   public void testGetTypeDescendants_IncludePropertyDefinitionFalse() throws Exception
    {
+      System.out.print("Running testGetTypeDescendants_IncludePropertyDefinitionFalse....          ");
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
       try
       {
          typeDescendants = getConnection().getTypeDescendants(null, 2, false);
       }
-      catch (TypeNotFoundException e)
+      catch (Exception e)
       {
-         e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
       assertNotNull(typeDescendants);
       assertTrue(typeDescendants.size() > 0);
@@ -385,6 +403,7 @@ public class RepositoryTest extends BaseTest
          assertNotNull(itemsTree.getContainer());
          assertNull(itemsTree.getContainer().getPropertyDefinitions());
       }
+      pass();
    }
 
    /**
@@ -392,17 +411,17 @@ public class RepositoryTest extends BaseTest
     * 
     * Returns the set of descendant Object-Types defined for the Repository under the specified Type.
     */
-   public void testGetTypeDescendants_RootWithDepth1()
+   public void testGetTypeDescendants_RootWithDepth1() throws Exception
    {
+      System.out.print("Running testGetTypeDescendants_RootWithDepth1....                          ");
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
       try
       {
          typeDescendants = getConnection().getTypeDescendants(null, 1, true);
       }
-      catch (TypeNotFoundException e)
+      catch (Exception e)
       {
-         e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
       assertNotNull(typeDescendants);
       assertTrue(typeDescendants.size() > 0);
@@ -411,6 +430,7 @@ public class RepositoryTest extends BaseTest
          assertNotNull(itemsTree);
          assertNull(itemsTree.getChildren());
       }
+      pass();
    }
 
    /**
@@ -418,16 +438,19 @@ public class RepositoryTest extends BaseTest
     * 
     * Returns the set of descendant Object-Types defined for the Repository under the specified Type.
     */
-   public void testGetTypeDescendants_NonExistedType()
+   public void testGetTypeDescendants_NonExistedType() throws Exception
    {
+      System.out.print("Running testGetTypeDescendants_NonExistedType....                          ");
       try
       {
          getConnection().getTypeDescendants("cmis:kino", 2, true);
-         fail("The type definition \"cmis:kino\" shouldn't exist.'");
+         doFail("The type definition \"cmis:kino\" shouldn't exist.'");
       }
       catch (TypeNotFoundException e)
       {
-         // OK
+         pass();
+      } catch (Exception other){
+         doFail(other.getMessage());
       }
    }
 
@@ -436,14 +459,16 @@ public class RepositoryTest extends BaseTest
     * 
     * Gets the definition of the specified Object-Type.
     */
-   public void testGetTypeDefinition_Folder()
+   public void testGetTypeDefinition_Folder() throws Exception
    {
+      System.out.print("Running testGetTypeDefinition_Folder....                                   ");
       assertNotNull(folderTypeDefinition);
       assertNotNull(folderTypeDefinition.getId());
       assertFalse(folderTypeDefinition.getId().isEmpty());
       assertNotNull(folderTypeDefinition.getLocalName());
       assertNotNull(folderTypeDefinition.getQueryName());
       checkPropertyDefinitions(folderTypeDefinition.getPropertyDefinitions());
+      pass();
    }
 
    /**
@@ -451,14 +476,16 @@ public class RepositoryTest extends BaseTest
     * 
     * Gets the definition of the specified Object-Type.
     */
-   public void testGetTypeDefinition_Document()
+   public void testGetTypeDefinition_Document() throws Exception
    {
+      System.out.print("Running testGetTypeDefinition_Document....                                 ");
       assertNotNull(documentTypeDefinition);
       assertNotNull(documentTypeDefinition.getId());
       assertFalse(documentTypeDefinition.getId().isEmpty());
       assertNotNull(documentTypeDefinition.getLocalName());
       assertNotNull(documentTypeDefinition.getQueryName());
       checkPropertyDefinitions(documentTypeDefinition.getPropertyDefinitions());
+      pass();
    }
 
    /**
@@ -466,16 +493,19 @@ public class RepositoryTest extends BaseTest
     * 
     * Gets the definition of the specified Object-Type.
     */
-   public void testGetTypeDefinition_NonExistedType()
+   public void testGetTypeDefinition_NonExistedType() throws Exception
    {
+      System.out.print("Running testGetTypeDefinition_NonExistedType....                           ");
       try
       {
          getConnection().getTypeDefinition("cmis:kino", false);
-         fail("The type definition \"cmis:kino\" shouldn't exist.'");
+         doFail("The type definition \"cmis:kino\" shouldn't exist.'");
       }
       catch (TypeNotFoundException e)
       {
-         // OK
+         pass();
+      }catch (Exception other){
+         doFail(other.getMessage());
       }
    }
 
@@ -484,17 +514,17 @@ public class RepositoryTest extends BaseTest
     * 
     * Gets the definition of the specified Object-Type.
     */
-   public void testGetTypeDefinition_IncludePropertyDefinitionFalse()
+   public void testGetTypeDefinition_IncludePropertyDefinitionFalse() throws Exception
    {
+      System.out.print("Running testGetTypeDefinition_IncludePropertyDefinitionFalse....           ");
       TypeDefinition typeDefinition = null;
       try
       {
          typeDefinition = getConnection().getTypeDefinition("cmis:folder", false);
       }
-      catch (TypeNotFoundException e)
+      catch (Exception e)
       {
-         e.printStackTrace();
-         fail(e.getMessage());
+         doFail(e.getMessage());
       }
       assertNotNull(typeDefinition);
       assertNotNull(typeDefinition.getId());
@@ -503,9 +533,10 @@ public class RepositoryTest extends BaseTest
       assertNotNull(typeDefinition.getQueryName());
       Collection<PropertyDefinition<?>> propertyDefinitions = typeDefinition.getPropertyDefinitions();
       assertNull(propertyDefinitions);
+      pass();
    }
 
-   private void checkPropertyDefinitions(Collection<PropertyDefinition<?>> propertyDefinitions)
+   private void checkPropertyDefinitions(Collection<PropertyDefinition<?>> propertyDefinitions) throws Exception
    {
       assertNotNull(propertyDefinitions);
       assertTrue(propertyDefinitions.size() > 0);

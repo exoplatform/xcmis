@@ -94,12 +94,13 @@ public class ACLTest extends BaseTest
       catch (NotSupportedException ex)
       {
          if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-            pass();
+            skip();
+         else
+            doFail();
       }
-      catch (Exception e)
+      catch (Exception other)
       {
-         //e.printStackTrace();
-         doFail(e.getMessage());
+         doFail(other.getMessage());
       }
       finally
       {
@@ -114,7 +115,7 @@ public class ACLTest extends BaseTest
     */
    public void testApplyACL_Simple() throws Exception
    {
-      System.out.print("Running testGetACL_Simple....                                              ");
+      System.out.print("Running testApplyACL_Simple....                                            ");
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
       FolderData testroot =
@@ -148,12 +149,13 @@ public class ACLTest extends BaseTest
       catch (NotSupportedException ex)
       {
          if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-            pass();
+            skip();
+         else
+            doFail();
       }
-      catch (Exception e)
+      catch (Exception other)
       {
-         //e.printStackTrace();
-         doFail(e.getMessage());
+         doFail(other.getMessage());
       }
       finally
       {
@@ -182,30 +184,31 @@ public class ACLTest extends BaseTest
       ArrayList<AccessControlEntry> addACL = new ArrayList<AccessControlEntry>();
       addACL.add(acl);
 
-      Map<String, PropertyDefinition<?>> kinoPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-      org.xcmis.spi.model.PropertyDefinition<?> kinoPropDefName2 =
+      Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
+      org.xcmis.spi.model.PropertyDefinition<?> propDefName =
          PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
             CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
             "doc1", true, null, null);
-      org.xcmis.spi.model.PropertyDefinition<?> kinoPropDefObjectTypeId2 =
+      org.xcmis.spi.model.PropertyDefinition<?> popDefObjectTypeId =
          PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
             CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
             false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
-      kinoPropertyDefinitions.put(CmisConstants.NAME, kinoPropDefName2);
-      kinoPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, kinoPropDefObjectTypeId2);
+      propertyDefinitions.put(CmisConstants.NAME, propDefName);
+      //propertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, popDefObjectTypeId);
 
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-      properties.put(CmisConstants.NAME, new StringProperty(kinoPropDefName2.getId(), kinoPropDefName2.getQueryName(),
-         kinoPropDefName2.getLocalName(), kinoPropDefName2.getDisplayName(), "doc1"));
-      properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(kinoPropDefObjectTypeId2.getId(),
-         kinoPropDefObjectTypeId2.getQueryName(), kinoPropDefObjectTypeId2.getLocalName(), kinoPropDefObjectTypeId2
+      properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
+         propDefName.getLocalName(), propDefName.getDisplayName(), "doc1"));
+      properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(popDefObjectTypeId.getId(),
+         popDefObjectTypeId.getQueryName(), popDefObjectTypeId.getLocalName(), popDefObjectTypeId
             .getDisplayName(), "cmis:kino"));
 
       TypeDefinition newType =
          new TypeDefinition("cmis:kino", BaseType.DOCUMENT, "cmis:kino", "cmis:kino", "", "cmis:document", "cmis:kino",
             "cmis:kino", true, false, true, true, false, false, false, false, null, null, ContentStreamAllowed.ALLOWED,
-            kinoPropertyDefinitions);
+            propertyDefinitions);
       String typeID = getStorage().addType(newType);
+      newType = getStorage().getTypeDefinition(typeID, true);
 
       DocumentData doc1 =
          getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.MAJOR);
@@ -225,12 +228,13 @@ public class ACLTest extends BaseTest
       catch (NotSupportedException ex)
       {
          if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-            pass();
+            skip();
+         else
+            doFail();
       }
-      catch (Exception e)
+      catch (Exception other)
       {
-         //e.printStackTrace();
-         doFail(e.getMessage());
+         doFail(other.getMessage());
       }
       finally
       {
@@ -271,16 +275,17 @@ public class ACLTest extends BaseTest
       catch (NotSupportedException ex)
       {
          if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-            pass();
+            skip();
+         else
+            doFail();
       }
       catch (ConstraintException ec)
       {
          pass();
       }
-      catch (Exception e)
+      catch (Exception other)
       {
-         //e.printStackTrace();
-         doFail(e.getMessage());
+         doFail(other.getMessage());
       }
       finally
       {
@@ -329,12 +334,13 @@ public class ACLTest extends BaseTest
       catch (NotSupportedException ex)
       {
          if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-            pass();
+            skip();
+         else
+            doFail();
       }
-      catch (Exception e)
+      catch (Exception other)
       {
-         //e.printStackTrace();
-         doFail(e.getMessage());
+         doFail(other.getMessage());
       }
       finally
       {
@@ -380,12 +386,13 @@ public class ACLTest extends BaseTest
       catch (NotSupportedException ex)
       {
          if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-            pass();
+            skip();
+         else
+            doFail();
       }
-      catch (Exception e)
+      catch (Exception other)
       {
-         //e.printStackTrace();
-         doFail(e.getMessage());
+         doFail(other.getMessage());
       }
       finally
       {

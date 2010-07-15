@@ -94,7 +94,6 @@ public class RelationshipTest extends BaseTest
       }
       catch (Exception e)
       {
-         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -150,7 +149,6 @@ public class RelationshipTest extends BaseTest
       }
       catch (Exception e)
       {
-         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -209,7 +207,6 @@ public class RelationshipTest extends BaseTest
       }
       catch (Exception e)
       {
-         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -262,7 +259,7 @@ public class RelationshipTest extends BaseTest
          PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
 
       fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
-      fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefObjectTypeId);
+      //fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefObjectTypeId);
 
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
@@ -275,6 +272,7 @@ public class RelationshipTest extends BaseTest
             "cmis:kino", "cmis:kino", true, false, true, true, false, false, false, false, null, null,
             ContentStreamAllowed.NOT_ALLOWED, fPropertyDefinitions);
       String typeID = getStorage().addType(newType);
+      newType = getStorage().getTypeDefinition(typeID, true);
 
       RelationshipData reldata =
          getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
@@ -292,7 +290,6 @@ public class RelationshipTest extends BaseTest
       }
       catch (Exception e)
       {
-         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -347,7 +344,7 @@ public class RelationshipTest extends BaseTest
          PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
 
       fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
-      fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefObjectTypeId);
+      //fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefObjectTypeId);
 
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
@@ -360,6 +357,7 @@ public class RelationshipTest extends BaseTest
             "cmis:kino", "cmis:kino", true, false, true, true, false, false, false, false, null, null,
             ContentStreamAllowed.NOT_ALLOWED, fPropertyDefinitions);
       String typeID = getStorage().addType(newType);
+      newType = getStorage().getTypeDefinition(typeID, true);
 
       RelationshipData reldata =
          getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
@@ -382,7 +380,6 @@ public class RelationshipTest extends BaseTest
       }
       catch (Exception e)
       {
-         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -439,7 +436,6 @@ public class RelationshipTest extends BaseTest
       }
       catch (Exception e)
       {
-         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -495,7 +491,6 @@ public class RelationshipTest extends BaseTest
       }
       catch (Exception e)
       {
-         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -553,7 +548,6 @@ public class RelationshipTest extends BaseTest
       }
       catch (Exception e)
       {
-         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -616,7 +610,6 @@ public class RelationshipTest extends BaseTest
       }
       catch (Exception e)
       {
-         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally
@@ -674,7 +667,6 @@ public class RelationshipTest extends BaseTest
       }
       catch (Exception e)
       {
-         //e.printStackTrace();
          doFail(e.getMessage());
       }
       finally

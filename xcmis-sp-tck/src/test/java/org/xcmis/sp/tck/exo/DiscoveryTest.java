@@ -52,6 +52,7 @@ public class DiscoveryTest extends BaseTest
     */
    public void testQuery() throws Exception
    {
+      System.out.print("Running testQuery....                                                      ");
       String errSms = "\n 2.2.6.1 query. Doesn't work Query (Discovery service) with cmis:document to search content.";
 
       FolderData parentFolder = createFolder(rootFolder, "folder1");;
@@ -76,6 +77,8 @@ public class DiscoveryTest extends BaseTest
          assertEquals(errSms, documentData.getObjectId(), cmisObject.getObjectInfo().getId());
          assertEquals(errSms, documentData.getName(), cmisObject.getObjectInfo().getName());
       }
+      pass();
+      clear(parentFolder.getObjectId());
    }
 
    /**
@@ -85,6 +88,7 @@ public class DiscoveryTest extends BaseTest
     */
    public void testQuery2() throws Exception
    {
+      System.out.print("Running testQuery2....                                                     ");
       String errSms = "\n 2.2.6.1 query. Doesn't work Query (Discovery service) with cmis:document to search content.";
 
       FolderData parentFolder = createFolder(rootFolder, "folder1");;
@@ -109,46 +113,7 @@ public class DiscoveryTest extends BaseTest
          assertEquals(errSms, documentData.getObjectId(), cmisObject.getObjectInfo().getId());
          assertEquals(errSms, documentData.getName(), cmisObject.getObjectInfo().getName());
       }
+      pass();
+      clear(parentFolder.getObjectId());
    }
-
-   //   /**
-   //    * @see org.xcmis.sp.tck.exo.BaseTest#tearDown()
-   //    */
-   //   @Override
-   //   protected void tearDown() throws Exception
-   //   {
-   //      ItemsList<CmisObject> children =
-   //         getConnection().getChildren(rootfolderID, false, null, false, true, null, null, null, -1, 0);
-   //      if (children != null && children.getItems() != null)
-   //      {
-   //         List<CmisObject> listChildren = children.getItems();
-   //         for (CmisObject cmisObject : listChildren)
-   //         {
-   //            remove(cmisObject);
-   //         }
-   //      }
-   //      super.tearDown();
-   //   }
-   //
-   //   private void remove(CmisObject cmisObject) throws ObjectNotFoundException, ConstraintException,
-   //      UpdateConflictException, VersioningException, StorageException, InvalidArgumentException, FilterNotValidException
-   //   {
-   //
-   //      if (cmisObject.getObjectInfo().getBaseType().equals(BaseType.FOLDER))
-   //      {
-   //         ItemsList<CmisObject> children =
-   //            getConnection().getChildren(cmisObject.getObjectInfo().getId(), false, null, false, true, null, null, null,
-   //               -1, 0);
-   //         if (children != null && children.getItems() != null)
-   //         {
-   //            List<CmisObject> listChildren = children.getItems();
-   //            for (CmisObject cmisObject0 : listChildren)
-   //            {
-   //               remove(cmisObject0);
-   //            }
-   //         }
-   //      }
-   //      getConnection().deleteObject(cmisObject.getObjectInfo().getId(), true);
-   //   }
-
 }

@@ -76,6 +76,7 @@ public class MultifillingTest extends BaseTest
     */
    public void testAddObjectToFolder() throws Exception
    {
+      System.out.print("Running testAddObjectToFolder....                                          ");
       if (getCapabilities().isCapabilityUnfiling() && getCapabilities().isCapabilityMultifiling())
       {
          FolderData folder1 = createFolder(rootFolder, "testFolder1");
@@ -107,7 +108,14 @@ public class MultifillingTest extends BaseTest
             assertNotNull(cmisObject.getObjectInfo().getId());
             assertEquals(doc1.getObjectId(), cmisObject.getObjectInfo().getId());
          }
+         pass();
+         clear(folder1.getObjectId());
       }
+      else
+      {
+         skip();
+      }
+
    }
 
    /**
@@ -124,15 +132,13 @@ public class MultifillingTest extends BaseTest
     */
    public void testAddObjectToFolder_ConstraintException() throws Exception
    {
+      System.out.print("Running testAddObjectToFolder_ConstraintException....                      ");
       if (getCapabilities().isCapabilityMultifiling())
       {
-
          // create folder1 for document
-
          FolderData folder1 = createFolder(rootFolder, "testFolder1");
 
          // create folder2 for multifilling document
-
          FolderData folder2 = createFolder(rootFolder, "testFolder2");
 
          //////////// CHECK the ALLOWED_CHILD_OBJECT_TYPE_IDS property
@@ -144,7 +150,6 @@ public class MultifillingTest extends BaseTest
          if (prop.getValues().size() != 0)
          {
             // create new document type "cmis:kino"
-
             Map<String, PropertyDefinition<?>> kinoPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
 
             TypeDefinition kinoType =
@@ -152,13 +157,12 @@ public class MultifillingTest extends BaseTest
                   "cmis:kino", "cmis:kino", true, false, true, true, false, false, false, true, null, null,
                   ContentStreamAllowed.ALLOWED, kinoPropertyDefinitions);
             getStorage().addType(kinoType);
+            
 
             // get the new type definition for "cmis:kino"
-
             kinoType = getConnection().getTypeDefinition("cmis:kino");
 
             // create document with the new type "cmis:kino"
-
             ContentStream cs = new BaseContentStream("doc1".getBytes(), null, new MimeType("text", "plain"));
 
             org.xcmis.spi.model.PropertyDefinition<?> def =
@@ -181,7 +185,6 @@ public class MultifillingTest extends BaseTest
                getStorage().createDocument(folder1, kinoType, properties, cs, null, null, VersioningState.MAJOR);
 
             // check folder2
-
             ItemsList<CmisObject> children0 =
                getConnection().getChildren(folder2.getObjectId(), false, null, false, true, null, null, null, -1, 0);
             assertNotNull(children0);
@@ -189,31 +192,30 @@ public class MultifillingTest extends BaseTest
             assertEquals("Should be no documents here", 0, children0.getItems().size());
 
             // add object to folder
-
             try
             {
                getConnection().addObjectToFolder(docKino.getObjectId(), folder2.getObjectId(), true);
-               fail("Should be the ConstraintException: The Repository MUST throw this exception "
-                  + "if the cmis:objectTypeId property value of the given object is NOT "
-                  + "in the list of AllowedChildObjectTypeIds of the parent-folder specified by folderId.");
+               doFail();
             }
             catch (ConstraintException e)
             {
-               // OK
+               pass();
+            }
+            catch (Exception other)
+            {
+               doFail(other.getMessage());
+            }
+            finally
+            {
+               clear(folder1.getObjectId());
+               clear(folder2.getObjectId());
             }
          }
       }
-   }
-
-   private static <T> PropertyDefinition<T> createPropertyDefinition(String id, PropertyType propertyType,
-      String queryName, String localName, String localNamespace, String displayName, boolean required,
-      boolean queryable, boolean orderable, boolean inherited, boolean isMultivalued, Updatability updatability,
-      String description, Boolean openChoice, List<Choice<T>> choices, T[] defValue)
-   {
-      PropertyDefinition<T> propertyDefinition =
-         new PropertyDefinition<T>(id, queryName, localName, localNamespace, displayName, description, propertyType,
-            updatability, inherited, required, queryable, orderable, openChoice, isMultivalued, choices, defValue);
-      return propertyDefinition;
+      else
+      {
+         skip();
+      }
    }
 
    /**
@@ -224,6 +226,7 @@ public class MultifillingTest extends BaseTest
     */
    public void testAddObjectToFolder_AlreadyAddedToAnotherFolder() throws Exception
    {
+      System.out.print("Running testAddObjectToFolder_AlreadyAddedToAnotherFolder....              ");
       if (getCapabilities().isCapabilityMultifiling())
       {
          FolderData folder1 = createFolder(rootFolder, "testFolder1");
@@ -252,6 +255,13 @@ public class MultifillingTest extends BaseTest
             assertNotNull(cmisObject.getObjectInfo().getId());
             assertEquals(doc1.getObjectId(), cmisObject.getObjectInfo().getId());
          }
+         pass();
+         clear(folder1.getObjectId());
+         clear(folder2.getObjectId());
+      }
+      else
+      {
+         skip();
       }
    }
 
@@ -263,6 +273,7 @@ public class MultifillingTest extends BaseTest
     */
    public void testRemoveObjectFromFolder() throws Exception
    {
+      System.out.print("Running testRemoveObjectFromFolder....                                     ");
       if (getCapabilities().isCapabilityUnfiling())
       {
          FolderData folder1 = createFolder(rootFolder, "testFolder1");
@@ -302,6 +313,12 @@ public class MultifillingTest extends BaseTest
          assertNotNull(children00);
          assertNotNull(children00.getItems());
          assertEquals("Should be no documents here", 0, children00.getItems().size());
+         pass();
+         clear(folder1.getObjectId());
+      }
+      else
+      {
+         skip();
       }
    }
 
@@ -313,6 +330,7 @@ public class MultifillingTest extends BaseTest
     */
    public void testRemoveObjectFromFolder_AlreadyAddedToAnotherFolder() throws Exception
    {
+      System.out.print("Running testRemoveObjectFromFolder_AlreadyAddedToAnotherFolder....         ");
       if (getCapabilities().isCapabilityUnfiling() && getCapabilities().isCapabilityMultifiling())
       {
 
@@ -350,6 +368,13 @@ public class MultifillingTest extends BaseTest
          assertNotNull(children00);
          assertNotNull(children00.getItems());
          assertEquals("Should be no documents here", 0, children00.getItems().size());
+         pass();
+         clear(folder1.getObjectId());
+         clear(folder2.getObjectId());
+      }
+      else
+      {
+         skip();
       }
    }
 
@@ -393,4 +418,14 @@ public class MultifillingTest extends BaseTest
       getConnection().deleteObject(cmisObject.getObjectInfo().getId(), true);
    }
 
+   private static <T> PropertyDefinition<T> createPropertyDefinition(String id, PropertyType propertyType,
+      String queryName, String localName, String localNamespace, String displayName, boolean required,
+      boolean queryable, boolean orderable, boolean inherited, boolean isMultivalued, Updatability updatability,
+      String description, Boolean openChoice, List<Choice<T>> choices, T[] defValue)
+   {
+      PropertyDefinition<T> propertyDefinition =
+         new PropertyDefinition<T>(id, queryName, localName, localNamespace, displayName, description, propertyType,
+            updatability, inherited, required, queryable, orderable, openChoice, isMultivalued, choices, defValue);
+      return propertyDefinition;
+   }
 }
