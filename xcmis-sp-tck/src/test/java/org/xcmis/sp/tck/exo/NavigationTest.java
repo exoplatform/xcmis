@@ -79,7 +79,6 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
          doFail(e.getMessage());
       }
    }
@@ -108,7 +107,6 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
          doFail(e.getMessage());
       }
    }
@@ -134,7 +132,6 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
          doFail(e.getMessage());
       }
    }
@@ -160,7 +157,6 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
          doFail(e.getMessage());
       }
    }
@@ -186,7 +182,6 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
          doFail(e.getMessage());
       }
    }
@@ -212,7 +207,6 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
          doFail(e.getMessage());
       }
    }
@@ -233,7 +227,6 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
          doFail(e.getMessage());
       }
    }
@@ -254,7 +247,6 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
          doFail(e.getMessage());
       }
    }
@@ -285,7 +277,6 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
          doFail(e.getMessage());
       }
    }
@@ -315,7 +306,6 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
          doFail(e.getMessage());
       }
    }
@@ -338,8 +328,6 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-
-         e.printStackTrace();
          doFail(e.getMessage());
       }
    }
@@ -362,7 +350,6 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
          doFail(e.getMessage());
       }
    }
@@ -392,7 +379,6 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
          doFail(e.getMessage());
       }
    }
@@ -415,7 +401,6 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
          doFail(e.getMessage());
       }
    }
@@ -442,7 +427,6 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
          doFail(e.getMessage());
       }
    }
@@ -469,7 +453,6 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
          doFail(e.getMessage());
       }
    }
@@ -497,7 +480,6 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
          doFail(e.getMessage());
       }
    }
@@ -524,7 +506,6 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
          doFail(e.getMessage());
       }
    }
@@ -551,7 +532,6 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
          doFail(e.getMessage());
       }
    }
@@ -581,7 +561,6 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
          doFail(e.getMessage());
       }
    }
@@ -658,7 +637,6 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
          doFail(e.getMessage());
       }
    }
@@ -680,7 +658,6 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
          doFail(e.getMessage());
       }
    }
@@ -712,7 +689,6 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         e.printStackTrace();
          doFail(e.getMessage());
       }
    }
@@ -723,7 +699,7 @@ public class NavigationTest extends BaseTest
     * @throws Exception
     */
    public void testGetDescendants_RenditionsFiltered() throws Exception
-   { 
+   {
       System.out.print("Running testGetDescendants_RenditionsFiltered....                          ");
       createFolderTree();
       try
@@ -1000,8 +976,6 @@ public class NavigationTest extends BaseTest
          doFail(e.getMessage());
       }
    }
-
-   
 
    public void testGetFolderTree_ObjectInfo() throws Exception
    {
@@ -1959,7 +1933,7 @@ public class NavigationTest extends BaseTest
    @Override
    public void tearDown() throws Exception
    {
-      clear();
+      clearTree();
       super.tearDown();
    }
 }

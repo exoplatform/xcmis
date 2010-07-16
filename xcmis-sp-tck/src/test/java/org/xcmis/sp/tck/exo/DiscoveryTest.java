@@ -54,31 +54,37 @@ public class DiscoveryTest extends BaseTest
    {
       System.out.print("Running testQuery....                                                      ");
       String errSms = "\n 2.2.6.1 query. Doesn't work Query (Discovery service) with cmis:document to search content.";
-
-      FolderData parentFolder = createFolder(rootFolder, "folder1");;
-      DocumentData documentData = createDocument(parentFolder, "doc1", "Hello World!");
-      String statement = "SELECT * FROM " + CmisConstants.DOCUMENT + " WHERE CONTAINS(\"Hello\")";
-      ItemsList<CmisObject> query = null;
-
-      query =
-         getConnection().query(statement, true, false, IncludeRelationships.BOTH, true, RenditionFilter.ANY, -1, 0);
-
-      assertNotNull(errSms, query);
-      assertNotNull(errSms, query.getItems());
-      assertNotNull(errSms, query.getItems().size());
-      assertEquals(errSms, 1, query.getItems().size());
-
-      List<CmisObject> result = query.getItems();
-      for (CmisObject cmisObject : result)
+      FolderData parentFolder = null;
+      try
       {
-         assertNotNull(errSms, cmisObject);
-         assertNotNull(errSms, cmisObject.getObjectInfo());
-         assertNotNull(errSms, cmisObject.getObjectInfo().getId());
-         assertEquals(errSms, documentData.getObjectId(), cmisObject.getObjectInfo().getId());
-         assertEquals(errSms, documentData.getName(), cmisObject.getObjectInfo().getName());
+         parentFolder = createFolder(rootFolder, "folder1");
+         DocumentData documentData = createDocument(parentFolder, "doc1", "Hello World!");
+         String statement = "SELECT * FROM " + CmisConstants.DOCUMENT + " WHERE CONTAINS(\"Hello\")";
+         ItemsList<CmisObject> query = null;
+
+         query =
+            getConnection().query(statement, true, false, IncludeRelationships.BOTH, true, RenditionFilter.ANY, -1, 0);
+
+         assertNotNull(errSms, query);
+         assertNotNull(errSms, query.getItems());
+         assertNotNull(errSms, query.getItems().size());
+         assertEquals(errSms, 1, query.getItems().size());
+
+         List<CmisObject> result = query.getItems();
+         for (CmisObject cmisObject : result)
+         {
+            assertNotNull(errSms, cmisObject);
+            assertNotNull(errSms, cmisObject.getObjectInfo());
+            assertNotNull(errSms, cmisObject.getObjectInfo().getId());
+            assertEquals(errSms, documentData.getObjectId(), cmisObject.getObjectInfo().getId());
+            assertEquals(errSms, documentData.getName(), cmisObject.getObjectInfo().getName());
+         }
+         pass();
       }
-      pass();
-      clear(parentFolder.getObjectId());
+      finally
+      {
+         clear(parentFolder.getObjectId());
+      }
    }
 
    /**
@@ -90,30 +96,40 @@ public class DiscoveryTest extends BaseTest
    {
       System.out.print("Running testQuery2....                                                     ");
       String errSms = "\n 2.2.6.1 query. Doesn't work Query (Discovery service) with cmis:document to search content.";
-
-      FolderData parentFolder = createFolder(rootFolder, "folder1");;
-      DocumentData documentData = createDocument(parentFolder, "doc1", "Hello World!");
-      String statement = "SELECT * FROM " + CmisConstants.DOCUMENT + " WHERE CONTAINS(\"Hello\")";
-      ItemsList<CmisObject> query = null;
-
-      query =
-         getConnection().query(statement, false, false, IncludeRelationships.BOTH, true, RenditionFilter.ANY, -1, 0);
-
-      assertNotNull(errSms, query);
-      assertNotNull(errSms, query.getItems());
-      assertNotNull(errSms, query.getItems().size());
-      assertEquals(errSms, 1, query.getItems().size());
-
-      List<CmisObject> result = query.getItems();
-      for (CmisObject cmisObject : result)
+      FolderData parentFolder = null;
+      try
       {
-         assertNotNull(errSms, cmisObject);
-         assertNotNull(errSms, cmisObject.getObjectInfo());
-         assertNotNull(errSms, cmisObject.getObjectInfo().getId());
-         assertEquals(errSms, documentData.getObjectId(), cmisObject.getObjectInfo().getId());
-         assertEquals(errSms, documentData.getName(), cmisObject.getObjectInfo().getName());
+         parentFolder = createFolder(rootFolder, "folder1");;
+         DocumentData documentData = createDocument(parentFolder, "doc1", "Hello World!");
+         String statement = "SELECT * FROM " + CmisConstants.DOCUMENT + " WHERE CONTAINS(\"Hello\")";
+         ItemsList<CmisObject> query = null;
+
+         query =
+            getConnection().query(statement, false, false, IncludeRelationships.BOTH, true, RenditionFilter.ANY, -1, 0);
+
+         assertNotNull(errSms, query);
+         assertNotNull(errSms, query.getItems());
+         assertNotNull(errSms, query.getItems().size());
+         assertEquals(errSms, 1, query.getItems().size());
+
+         List<CmisObject> result = query.getItems();
+         for (CmisObject cmisObject : result)
+         {
+            assertNotNull(errSms, cmisObject);
+            assertNotNull(errSms, cmisObject.getObjectInfo());
+            assertNotNull(errSms, cmisObject.getObjectInfo().getId());
+            assertEquals(errSms, documentData.getObjectId(), cmisObject.getObjectInfo().getId());
+            assertEquals(errSms, documentData.getName(), cmisObject.getObjectInfo().getName());
+         }
+         pass();
       }
-      pass();
-      clear(parentFolder.getObjectId());
+      catch (Exception ez)
+      {
+         doFail(ez.getMessage());
+      }
+      finally
+      {
+         clear(parentFolder.getObjectId());
+      }
    }
 }

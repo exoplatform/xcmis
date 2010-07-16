@@ -31,6 +31,7 @@ import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
+import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.PolicyData;
@@ -244,7 +245,7 @@ public abstract class BaseTest extends TestCase
       return policy;
    }
 
-   protected void clear()
+   protected void clearTree()
    {
       try
       {
@@ -263,7 +264,6 @@ public abstract class BaseTest extends TestCase
       {
          FolderData rootFolder = (FolderData)getStorage().getObjectById(testroot);
          getStorage().deleteTree(rootFolder, true, UnfileObject.DELETE, true);
-
       }
       catch (Exception e)
       {

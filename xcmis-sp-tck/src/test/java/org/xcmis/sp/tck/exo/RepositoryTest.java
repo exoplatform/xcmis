@@ -449,7 +449,9 @@ public class RepositoryTest extends BaseTest
       catch (TypeNotFoundException e)
       {
          pass();
-      } catch (Exception other){
+      }
+      catch (Exception other)
+      {
          doFail(other.getMessage());
       }
    }
@@ -504,7 +506,9 @@ public class RepositoryTest extends BaseTest
       catch (TypeNotFoundException e)
       {
          pass();
-      }catch (Exception other){
+      }
+      catch (Exception other)
+      {
          doFail(other.getMessage());
       }
    }

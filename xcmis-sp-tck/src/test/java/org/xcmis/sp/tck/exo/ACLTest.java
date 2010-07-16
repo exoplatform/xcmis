@@ -61,50 +61,59 @@ public class ACLTest extends BaseTest
    public void testGetACL_Simple() throws Exception
    {
       System.out.print("Running testGetACL_Simple....                                              ");
-      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
-
-      FolderData testroot =
-         getStorage()
-            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-      AccessControlEntry acl = new AccessControlEntry();
-      acl.setPrincipal("Makis");
-      acl.getPermissions().add("cmis:read");
-      ArrayList<AccessControlEntry> addACL = new ArrayList<AccessControlEntry>();
-      addACL.add(acl);
-
-      DocumentData doc1 =
-         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
-            addACL, null, VersioningState.MAJOR);
+      FolderData testroot = null;
       try
       {
-         List<AccessControlEntry> res = getConnection().getACL(doc1.getObjectId(), false);
-         assertNotNull(res);
-         for (AccessControlEntry one : res)
+         FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+
+         testroot =
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
+               null);
+         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+
+         AccessControlEntry acl = new AccessControlEntry();
+         acl.setPrincipal("Makis");
+         acl.getPermissions().add("cmis:read");
+         ArrayList<AccessControlEntry> addACL = new ArrayList<AccessControlEntry>();
+         addACL.add(acl);
+
+         DocumentData doc1 =
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
+               addACL, null, VersioningState.MAJOR);
+         try
          {
-            if (one.getPrincipal().equalsIgnoreCase("Makis"))
+            List<AccessControlEntry> res = getConnection().getACL(doc1.getObjectId(), false);
+            assertNotNull(res);
+            for (AccessControlEntry one : res)
             {
-               assertEquals(1, one.getPermissions().size());
-               assertTrue(one.getPermissions().contains("cmis:read"));
+               if (one.getPrincipal().equalsIgnoreCase("Makis"))
+               {
+                  assertEquals(1, one.getPermissions().size());
+                  assertTrue(one.getPermissions().contains("cmis:read"));
+               }
             }
+            pass();
          }
-         pass();
+         catch (NotSupportedException ex)
+         {
+            if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
+               skip();
+            else
+               doFail();
+         }
+         catch (Exception other)
+         {
+            doFail(other.getMessage());
+         }
       }
-      catch (NotSupportedException ex)
+      catch (Exception ez)
       {
-         if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-            skip();
-         else
-            doFail();
-      }
-      catch (Exception other)
-      {
-         doFail(other.getMessage());
+         doFail(ez.getMessage());
       }
       finally
       {
-         clear(testroot.getObjectId());
+         if (testroot != null)
+            clear(testroot.getObjectId());
       }
    }
 
@@ -116,50 +125,59 @@ public class ACLTest extends BaseTest
    public void testApplyACL_Simple() throws Exception
    {
       System.out.print("Running testApplyACL_Simple....                                            ");
-      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
-
-      FolderData testroot =
-         getStorage()
-            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-      AccessControlEntry acl = new AccessControlEntry();
-      acl.setPrincipal("Makis");
-      acl.getPermissions().add("cmis:read");
-      ArrayList<AccessControlEntry> addACL = new ArrayList<AccessControlEntry>();
-      addACL.add(acl);
-
-      DocumentData doc1 =
-         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
-            null, VersioningState.MAJOR);
+      FolderData testroot = null;
       try
       {
-         getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.OBJECTONLY);
-         ObjectData obj = getStorage().getObjectById(doc1.getObjectId());
-         for (AccessControlEntry one : obj.getACL(false))
+         FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+
+         testroot =
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
+               null);
+         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+
+         AccessControlEntry acl = new AccessControlEntry();
+         acl.setPrincipal("Makis");
+         acl.getPermissions().add("cmis:read");
+         ArrayList<AccessControlEntry> addACL = new ArrayList<AccessControlEntry>();
+         addACL.add(acl);
+
+         DocumentData doc1 =
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
+               null, null, VersioningState.MAJOR);
+         try
          {
-            if (one.getPrincipal().equalsIgnoreCase("Makis"))
+            getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.OBJECTONLY);
+            ObjectData obj = getStorage().getObjectById(doc1.getObjectId());
+            for (AccessControlEntry one : obj.getACL(false))
             {
-               assertEquals(1, one.getPermissions().size());
-               assertTrue(one.getPermissions().contains("cmis:read"));
+               if (one.getPrincipal().equalsIgnoreCase("Makis"))
+               {
+                  assertEquals(1, one.getPermissions().size());
+                  assertTrue(one.getPermissions().contains("cmis:read"));
+               }
             }
+            pass();
          }
-         pass();
+         catch (NotSupportedException ex)
+         {
+            if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
+               skip();
+            else
+               doFail();
+         }
+         catch (Exception other)
+         {
+            doFail(other.getMessage());
+         }
       }
-      catch (NotSupportedException ex)
+      catch (Exception ez)
       {
-         if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-            skip();
-         else
-            doFail();
-      }
-      catch (Exception other)
-      {
-         doFail(other.getMessage());
+         doFail(ez.getMessage());
       }
       finally
       {
-         clear(testroot.getObjectId());
+         if (testroot != null)
+            clear(testroot.getObjectId());
       }
    }
 
@@ -171,75 +189,85 @@ public class ACLTest extends BaseTest
    public void testApplyACL_RemoveACE() throws Exception
    {
       System.out.print("Running testApplyACL_RemoveACE....                                         ");
-      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
-
-      FolderData testroot =
-         getStorage()
-            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-      AccessControlEntry acl = new AccessControlEntry();
-      acl.setPrincipal("Makis");
-      acl.getPermissions().add("cmis:read");
-      ArrayList<AccessControlEntry> addACL = new ArrayList<AccessControlEntry>();
-      addACL.add(acl);
-
-      Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-      org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-            "doc1", true, null, null);
-      org.xcmis.spi.model.PropertyDefinition<?> popDefObjectTypeId =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
-      propertyDefinitions.put(CmisConstants.NAME, propDefName);
-      //propertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, popDefObjectTypeId);
-
-      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-      properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
-         propDefName.getLocalName(), propDefName.getDisplayName(), "doc1"));
-      properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(popDefObjectTypeId.getId(),
-         popDefObjectTypeId.getQueryName(), popDefObjectTypeId.getLocalName(), popDefObjectTypeId
-            .getDisplayName(), "cmis:kino"));
-
-      TypeDefinition newType =
-         new TypeDefinition("cmis:kino", BaseType.DOCUMENT, "cmis:kino", "cmis:kino", "", "cmis:document", "cmis:kino",
-            "cmis:kino", true, false, true, true, false, false, false, false, null, null, ContentStreamAllowed.ALLOWED,
-            propertyDefinitions);
-      String typeID = getStorage().addType(newType);
-      newType = getStorage().getTypeDefinition(typeID, true);
-
-      DocumentData doc1 =
-         getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.MAJOR);
+      FolderData testroot = null;
+      String typeID = null;
       try
       {
-         getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.OBJECTONLY);
-         ObjectData obj = getStorage().getObjectById(doc1.getObjectId());
-         for (AccessControlEntry one : obj.getACL(false))
+         FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+
+         testroot =
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
+               null);
+         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+
+         AccessControlEntry acl = new AccessControlEntry();
+         acl.setPrincipal("Makis");
+         acl.getPermissions().add("cmis:read");
+         ArrayList<AccessControlEntry> addACL = new ArrayList<AccessControlEntry>();
+         addACL.add(acl);
+
+         Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
+         org.xcmis.spi.model.PropertyDefinition<?> propDefName =
+            PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
+               CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
+               "doc1", true, null, null);
+         org.xcmis.spi.model.PropertyDefinition<?> popDefObjectTypeId =
+            PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
+               CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
+               false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+         //propertyDefinitions.put(CmisConstants.NAME, propDefName);
+         //propertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, popDefObjectTypeId);
+
+         Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+         properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
+            propDefName.getLocalName(), propDefName.getDisplayName(), "doc1"));
+         properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(popDefObjectTypeId.getId(), popDefObjectTypeId
+            .getQueryName(), popDefObjectTypeId.getLocalName(), popDefObjectTypeId.getDisplayName(), "cmis:kino"));
+
+         TypeDefinition newType =
+            new TypeDefinition("cmis:kino", BaseType.DOCUMENT, "cmis:kino", "cmis:kino", "", "cmis:document",
+               "cmis:kino", "cmis:kino", true, false, true, true, false, false, true, false, null, null,
+               ContentStreamAllowed.ALLOWED, propertyDefinitions);
+         typeID = getStorage().addType(newType);
+         newType = getStorage().getTypeDefinition(typeID, true);
+
+         DocumentData doc1 =
+            getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.MAJOR);
+         try
          {
-            if (one.getPrincipal().equalsIgnoreCase("Makis"))
+            getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.OBJECTONLY);
+            ObjectData obj = getStorage().getObjectById(doc1.getObjectId());
+            for (AccessControlEntry one : obj.getACL(false))
             {
-               doFail();
+               if (one.getPrincipal().equalsIgnoreCase("Makis"))
+               {
+                  doFail();
+               }
             }
+            pass();
          }
-         pass();
+         catch (NotSupportedException ex)
+         {
+            if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
+               skip();
+            else
+               doFail();
+         }
+         catch (Exception other)
+         {
+            doFail(other.getMessage());
+         }
       }
-      catch (NotSupportedException ex)
+      catch (Exception ez)
       {
-         if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-            skip();
-         else
-            doFail();
-      }
-      catch (Exception other)
-      {
-         doFail(other.getMessage());
+         doFail(ez.getMessage());
       }
       finally
       {
-         clear(testroot.getObjectId());
-         getStorage().removeType(typeID);
+         if (testroot != null)
+            clear(testroot.getObjectId());
+         if (typeID != null)
+            getStorage().removeType(typeID);
       }
    }
 
@@ -251,45 +279,54 @@ public class ACLTest extends BaseTest
    public void testApplyACL_ConstraintException() throws Exception
    {
       System.out.print("Running testApplyACL_ConstraintException....                               ");
-      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
-
-      FolderData testroot =
-         getStorage()
-            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-      AccessControlEntry acl = new AccessControlEntry();
-      acl.setPrincipal("Makis");
-      acl.getPermissions().add("cmis:read");
-      ArrayList<AccessControlEntry> addACL = new ArrayList<AccessControlEntry>();
-      addACL.add(acl);
-
-      DocumentData doc1 =
-         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
-            addACL, null, VersioningState.MAJOR);
+      FolderData testroot = null;
       try
       {
-         getConnection().applyACL(doc1.getObjectId(), null, addACL, AccessControlPropagation.OBJECTONLY);
-         doFail();
-      }
-      catch (NotSupportedException ex)
-      {
-         if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-            skip();
-         else
+         FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+
+         testroot =
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
+               null);
+         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+
+         AccessControlEntry acl = new AccessControlEntry();
+         acl.setPrincipal("Makis");
+         acl.getPermissions().add("cmis:read");
+         ArrayList<AccessControlEntry> addACL = new ArrayList<AccessControlEntry>();
+         addACL.add(acl);
+
+         DocumentData doc1 =
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
+               addACL, null, VersioningState.MAJOR);
+         try
+         {
+            getConnection().applyACL(doc1.getObjectId(), null, addACL, AccessControlPropagation.OBJECTONLY);
             doFail();
+         }
+         catch (NotSupportedException ex)
+         {
+            if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
+               skip();
+            else
+               doFail();
+         }
+         catch (ConstraintException ec)
+         {
+            pass();
+         }
+         catch (Exception other)
+         {
+            doFail(other.getMessage());
+         }
       }
-      catch (ConstraintException ec)
+      catch (Exception ez)
       {
-         pass();
-      }
-      catch (Exception other)
-      {
-         doFail(other.getMessage());
+         doFail(ez.getMessage());
       }
       finally
       {
-         clear(testroot.getObjectId());
+         if (testroot != null)
+            clear(testroot.getObjectId());
       }
    }
 
@@ -301,53 +338,62 @@ public class ACLTest extends BaseTest
    public void testApplyACL_ConstraintException2() throws Exception
    {
       System.out.print("Running testApplyACL_ConstraintException2....                              ");
-      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
-
-      FolderData testroot =
-         getStorage()
-            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-      AccessControlEntry acl = new AccessControlEntry();
-      acl.setPrincipal("Makis");
-      acl.getPermissions().add("cmis:read");
-      ArrayList<AccessControlEntry> addACL = new ArrayList<AccessControlEntry>();
-      addACL.add(acl);
-
-      ACLCapability capability = getStorage().getRepositoryInfo().getAclCapability();
-
-      DocumentData doc1 =
-         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
-            null, VersioningState.MAJOR);
+      FolderData testroot = null;
       try
       {
-         if (capability.getPropagation().equals(AccessControlPropagation.OBJECTONLY)
-            || capability.getPropagation().equals(AccessControlPropagation.REPOSITORYDETERMINED))
-            getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.PROPAGATE);
-         else if (capability.getPropagation().equals(AccessControlPropagation.PROPAGATE))
-            getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.OBJECTONLY);
+         FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+
+         testroot =
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
+               null);
+         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+
+         AccessControlEntry acl = new AccessControlEntry();
+         acl.setPrincipal("Makis");
+         acl.getPermissions().add("cmis:read");
+         ArrayList<AccessControlEntry> addACL = new ArrayList<AccessControlEntry>();
+         addACL.add(acl);
+
+         ACLCapability capability = getStorage().getRepositoryInfo().getAclCapability();
+
+         DocumentData doc1 =
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
+               null, null, VersioningState.MAJOR);
+         try
+         {
+            if (capability.getPropagation().equals(AccessControlPropagation.OBJECTONLY)
+               || capability.getPropagation().equals(AccessControlPropagation.REPOSITORYDETERMINED))
+               getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.PROPAGATE);
+            else if (capability.getPropagation().equals(AccessControlPropagation.PROPAGATE))
+               getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.OBJECTONLY);
+         }
+         catch (ConstraintException ec)
+         {
+            pass();
+         }
+         catch (NotSupportedException ex)
+         {
+            if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
+               skip();
+            else
+               doFail();
+         }
+         catch (Exception other)
+         {
+            doFail(other.getMessage());
+         }
       }
-      catch (ConstraintException ec)
+      catch (Exception ez)
       {
-         pass();
-      }
-      catch (NotSupportedException ex)
-      {
-         if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-            skip();
-         else
-            doFail();
-      }
-      catch (Exception other)
-      {
-         doFail(other.getMessage());
+         doFail(ez.getMessage());
       }
       finally
       {
-         clear(testroot.getObjectId());
+         if (testroot != null)
+            clear(testroot.getObjectId());
       }
    }
-   
+
    /**
     * 2.2.10.2.3
     * At least one of the specified values for permission in ANY of the ACEs does not match ANY of the permissionNames as 
@@ -357,46 +403,55 @@ public class ACLTest extends BaseTest
    public void testApplyACL_ConstraintException3() throws Exception
    {
       System.out.print("Running testApplyACL_ConstraintException3....                              ");
-      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
-
-      FolderData testroot =
-         getStorage()
-            .createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null, null);
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-      AccessControlEntry acl = new AccessControlEntry();
-      acl.setPrincipal("Makis");
-      acl.getPermissions().add("cmis:unknown");
-      ArrayList<AccessControlEntry> addACL = new ArrayList<AccessControlEntry>();
-      addACL.add(acl);
-
-      ACLCapability capability = getStorage().getRepositoryInfo().getAclCapability();
-
-      DocumentData doc1 =
-         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs, null,
-            null, VersioningState.MAJOR);
+      FolderData testroot = null;
       try
       {
+         FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+
+         testroot =
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
+               null);
+         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
+
+         AccessControlEntry acl = new AccessControlEntry();
+         acl.setPrincipal("Makis");
+         acl.getPermissions().add("cmis:unknown");
+         ArrayList<AccessControlEntry> addACL = new ArrayList<AccessControlEntry>();
+         addACL.add(acl);
+
+         ACLCapability capability = getStorage().getRepositoryInfo().getAclCapability();
+
+         DocumentData doc1 =
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
+               null, null, VersioningState.MAJOR);
+         try
+         {
             getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.OBJECTONLY);
+         }
+         catch (ConstraintException ec)
+         {
+            pass();
+         }
+         catch (NotSupportedException ex)
+         {
+            if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
+               skip();
+            else
+               doFail();
+         }
+         catch (Exception other)
+         {
+            doFail(other.getMessage());
+         }
       }
-      catch (ConstraintException ec)
+      catch (Exception ez)
       {
-         pass();
-      }
-      catch (NotSupportedException ex)
-      {
-         if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-            skip();
-         else
-            doFail();
-      }
-      catch (Exception other)
-      {
-         doFail(other.getMessage());
+         doFail(ez.getMessage());
       }
       finally
       {
-         clear(testroot.getObjectId());
+         if (testroot != null)
+            clear(testroot.getObjectId());
       }
    }
 }
