@@ -14,6 +14,17 @@
       <developerConnection>scm:svn:http://xcmis.googlecode.com/svn/trunk</developerConnection>
    </scm>
 
+  <distributionManagement>
+    <repository>
+      <id>repository.exoplatform.org</id>
+      <url>${xcmis.releases.repo.url}</url>
+    </repository>
+    <snapshotRepository>
+      <id>repository.exoplatform.org</id>
+      <url>${xcmis.snapshots.repo.url}</url>
+    </snapshotRepository>
+  </distributionManagement>  
+
    <organization>
       <name>eXo Platform SAS</name>
       <url>http://www.exoplatform.com</url>
@@ -25,7 +36,12 @@
          <url>http://www.opensource.org/licenses/lgpl-license.php</url>
       </license>
    </licenses>
+
    <properties>
+      <!-- Repositories URLs -->
+      <xcmis.releases.repo.url>http://repository.exoplatform.org/service/local/staging/deploy/maven2/</xcmis.releases.repo.url>
+      <xcmis.snapshots.repo.url>http://repository.exoplatform.org/content/repositories/xcmis-snapshots/</xcmis.snapshots.repo.url>
+     
       <exo.product.name>xcmis</exo.product.name>
       <exo.product.specification>1.0</exo.product.specification>
 
