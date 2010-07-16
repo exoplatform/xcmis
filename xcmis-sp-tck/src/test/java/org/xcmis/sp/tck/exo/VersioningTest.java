@@ -319,7 +319,7 @@ public class VersioningTest extends BaseTest
          {
             String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, null);
             assertNotNull(chIn);
-            getStorage().getObjectById(doc1.getObjectId()).getContentStream(null).getStream().read(after);
+            getStorage().getObjectById(chIn).getContentStream(null).getStream().read(after);
             assertArrayEquals(before, after);
             pass();
          }
@@ -552,6 +552,7 @@ public class VersioningTest extends BaseTest
    {
       System.out.print("Running testCheckIn_ConstraintException2....                               ");
       FolderData testroot = null;
+      String pwcID = null;
       String typeID = new String();
       try
       {
@@ -592,7 +593,7 @@ public class VersioningTest extends BaseTest
             getStorage().createDocument(testroot, newType, properties, null, null, null, VersioningState.MAJOR);
          try
          {
-            String pwcID = getConnection().checkout(doc1.getObjectId());
+             pwcID = getConnection().checkout(doc1.getObjectId());
             String chIn = getConnection().checkin(pwcID, true, null, cs, "", null, null, null);
             doFail();
          }
@@ -603,7 +604,9 @@ public class VersioningTest extends BaseTest
          catch (Exception e)
          {
             doFail(e.getMessage());
-         }
+         } 
+//        getStorage().deleteObject(getStorage().getObjectById(pwcID), true);
+        getStorage().deleteObject(doc1, true);
       }
       catch (Exception ez)
       {
@@ -613,6 +616,7 @@ public class VersioningTest extends BaseTest
       {
          if (testroot != null)
             clear(testroot.getObjectId());
+         if (typeID != null)
          getStorage().removeType(typeID);
       }
    }
