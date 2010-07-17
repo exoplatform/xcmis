@@ -113,60 +113,6 @@
       <!-- module>xcmis-sp-tck</module -->
    </modules>
 
-   <repositories>
-      <repository>
-         <id>repository.jboss.com</id>
-         <url>http://repository.jboss.com/maven2</url>
-      </repository>
-      <repository>
-         <id>exo-int</id>
-         <name>exoplatform.org internal repository</name>
-         <url>http://maven2.exoplatform.org/rest/maven2</url>
-      </repository>
-      <repository>
-         <id>repo.jfrog.org-releases</id>
-         <name>repo.jfrog.org-releases</name>
-         <url>http://repo.jfrog.org/artifactory/plugins-releases-local</url>
-      </repository>
-      <repository>
-         <id>download.java.net</id>
-         <name>download.java.net repository</name>
-         <url>http://download.java.net/maven/2</url>
-      </repository>
-      <repository>
-         <id>mc-release</id>
-         <name>Local Maven repository of releases</name>
-         <url>http://mc-repo.googlecode.com/svn/maven2/releases</url>
-      </repository>
-   </repositories>
-   <pluginRepositories>
-      <pluginRepository>
-         <id>repository.jboss.com</id>
-         <url>http://repository.jboss.com/maven2</url>
-      </pluginRepository>
-      <pluginRepository>
-         <id>exo-int</id>
-         <name>exoplatform.org internal repository</name>
-         <url>http://maven2.exoplatform.org/rest/maven2</url>
-      </pluginRepository>
-      <pluginRepository>
-         <id>repo.jfrog.org-releases</id>
-         <name>repo.jfrog.org-releases</name>
-         <url>http://repo.jfrog.org/artifactory/plugins-releases-local</url>
-      </pluginRepository>
-      <pluginRepository>
-         <id>download.java.net</id>
-         <name>download.java.net repository</name>
-         <url>http://download.java.net/maven/2</url>
-      </pluginRepository>
-      <!-- Used for maven-license-plugin -->
-      <pluginRepository>
-         <id>mc-release</id>
-         <name>Local Maven repository of releases</name>
-         <url>http://mc-repo.googlecode.com/svn/maven2/releases</url>
-      </pluginRepository>
-   </pluginRepositories>
-
    <dependencyManagement>
       <dependencies>
          <!-- eXo dependencies -->
@@ -776,5 +722,69 @@
          </plugin>
       </plugins>
    </reporting>
+
+   <profiles>
+      <profile>
+         <id>external-repositories</id>
+         <activation>
+            <property>
+               <name>!deactivate-ext-repos</name>
+            </property>
+         </activation>
+         <repositories>
+            <repository>
+               <id>repository.jboss.com</id>
+               <url>http://repository.jboss.com/maven2</url>
+            </repository>
+            <repository>
+               <id>exo-int</id>
+               <name>exoplatform.org internal repository</name>
+               <url>http://maven2.exoplatform.org/rest/maven2</url>
+            </repository>
+            <repository>
+               <id>repo.jfrog.org-releases</id>
+               <name>repo.jfrog.org-releases</name>
+               <url>http://repo.jfrog.org/artifactory/plugins-releases-local</url>
+            </repository>
+            <repository>
+               <id>download.java.net</id>
+               <name>download.java.net repository</name>
+               <url>http://download.java.net/maven/2</url>
+            </repository>
+            <repository>
+               <id>mc-release</id>
+               <name>Local Maven repository of releases</name>
+               <url>http://mc-repo.googlecode.com/svn/maven2/releases</url>
+            </repository>
+         </repositories>
+         <pluginRepositories>
+            <pluginRepository>
+               <id>repository.jboss.com</id>
+               <url>http://repository.jboss.com/maven2</url>
+            </pluginRepository>
+            <pluginRepository>
+               <id>exo-int</id>
+               <name>exoplatform.org internal repository</name>
+               <url>http://maven2.exoplatform.org/rest/maven2</url>
+            </pluginRepository>
+            <pluginRepository>
+               <id>repo.jfrog.org-releases</id>
+               <name>repo.jfrog.org-releases</name>
+               <url>http://repo.jfrog.org/artifactory/plugins-releases-local</url>
+            </pluginRepository>
+            <pluginRepository>
+               <id>download.java.net</id>
+               <name>download.java.net repository</name>
+               <url>http://download.java.net/maven/2</url>
+            </pluginRepository>
+            <!-- Used for maven-license-plugin -->
+            <pluginRepository>
+               <id>mc-release</id>
+               <name>Local Maven repository of releases</name>
+               <url>http://mc-repo.googlecode.com/svn/maven2/releases</url>
+            </pluginRepository>
+         </pluginRepositories>
+      </profile>
+   </profiles>
 
 </project>
