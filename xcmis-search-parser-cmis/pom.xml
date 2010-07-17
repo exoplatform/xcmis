@@ -1,59 +1,49 @@
-<project
-   xmlns="http://maven.apache.org/POM/4.0.0"
-   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd "
->
-   <modelVersion>4.0.0</modelVersion>
-   <parent>
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd " xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.xcmis</groupId>
+    <artifactId>xcmis-parent</artifactId>
+    <version>1.1-SNAPSHOT</version>
+  </parent>
+  <artifactId>xcmis-search-parser-cmis</artifactId>
+  <packaging>jar</packaging>
+  <name>xCMIS :: Search :: Parser CMIS</name>
+  <dependencies>
+    <dependency>
+      <groupId>org.antlr</groupId>
+      <artifactId>antlr-runtime</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
       <groupId>org.xcmis</groupId>
-      <artifactId>xcmis-parent</artifactId>
-      <version>1.1-SNAPSHOT</version>
-   </parent>
-
-   <artifactId>xcmis-search-parser-cmis</artifactId>
-   <packaging>jar</packaging>
-   <name>xCMIS :: Search :: Parser CMIS</name>
-
-   <dependencies>
-      <dependency>
-         <groupId>org.antlr</groupId>
-         <artifactId>antlr-runtime</artifactId>
-         <scope>compile</scope>
-      </dependency>
-
-      <dependency>
-         <groupId>org.xcmis</groupId>
-         <artifactId>xcmis-search-model</artifactId>
-      </dependency>
-
-      <!-- Time parsing -->
-      <dependency>
-         <groupId>org.exoplatform.kernel</groupId>
-         <artifactId>exo.kernel.commons</artifactId>
-      </dependency>
-
-      <dependency>
-         <groupId>junit</groupId>
-         <artifactId>junit</artifactId>
-         <scope>test</scope>
-      </dependency>
-
-   </dependencies>
-
-   <build>
-      <plugins>
-         <plugin>
-            <groupId>org.antlr</groupId>
-            <artifactId>antlr3-maven-plugin</artifactId>
-            <version>3.2</version>
-            <executions>
-               <execution>
-                  <goals>
-                     <goal>antlr</goal>
-                  </goals>
-               </execution>
-            </executions>
-         </plugin>
-      </plugins>
-   </build>
+      <artifactId>xcmis-search-model</artifactId>
+    </dependency>
+    <!-- Time parsing -->
+    <dependency>
+      <groupId>org.exoplatform.kernel</groupId>
+      <artifactId>exo.kernel.commons</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.antlr</groupId>
+        <artifactId>antlr3-maven-plugin</artifactId>
+        <version>3.2</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>antlr</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>
