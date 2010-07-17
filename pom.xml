@@ -58,7 +58,7 @@
     <maven.compiler.target>1.5</maven.compiler.target>
     <!-- Default release Settings -->
     <useReleaseProfile>false</useReleaseProfile>
-    <arguments>-Prelease -Dmaven.test.skip=true</arguments>
+    <arguments>-Prelease,sign-artifacts -Dmaven.test.skip=true</arguments>
     <autoVersionSubmodules>true</autoVersionSubmodules>
     <!-- Encoding used for files in the project -->
     <!-- Standard property supported by many plugins : compiler, resources, ... -->
@@ -563,6 +563,11 @@
           <artifactId>buildnumber-maven-plugin</artifactId>
           <version>1.0-beta-4</version>
         </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-gpg-plugin</artifactId>
+          <version>1.1</version>
+        </plugin>        
       </plugins>
     </pluginManagement>
     <plugins>
@@ -699,6 +704,25 @@
         </pluginRepository>
       </pluginRepositories>
     </profile>
+    <profile>
+      <id>sign-artifacts</id>
+      <build>
+        <plugins>
+          <!-- We want to sign the artifact, the POM, and all attached artifacts -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>    
   </profiles>
   <reporting>
     <plugins>
