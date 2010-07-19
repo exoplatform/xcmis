@@ -443,6 +443,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
          storage.parents.remove(objectId);
          storage.unfiled.remove(objectId);
          storage.versions.get(vsId).remove(objectId);
+         storage.workingCopies.remove(vsId);
       }
    }
 }
