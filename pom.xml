@@ -40,6 +40,14 @@
     <url>http://code.google.com/p/xcmis/source/browse/</url>
   </scm>
 
+  <developers>
+    <developer>
+      <id>xcmis</id>
+      <name>xCMIS Team</name>
+      <email>xcmis@googlegroups.com</email>
+    </developer>
+  </developers>
+
    <properties>
       <!-- Repositories URLs -->
       <xcmis.releases.repo.url>http://repository.exoplatform.org/service/local/staging/deploy/maven2/</xcmis.releases.repo.url>
