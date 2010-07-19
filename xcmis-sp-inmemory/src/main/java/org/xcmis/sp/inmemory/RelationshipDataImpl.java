@@ -101,7 +101,7 @@ class RelationshipDataImpl extends BaseObjectData implements RelationshipData
       String objectId = getObjectId();
       String sourceId = getSourceId();
       String targetId = getTargetId();
-      storage.parents.remove(objectId);
+      storage.entries.remove(objectId);
       storage.relationships.get(sourceId).remove(objectId);
       storage.relationships.get(targetId).remove(objectId);
    }

@@ -908,7 +908,7 @@ public class StorageImpl implements Storage
          {
             try
             {
-               deleteObject(object, false);
+               deleteObject(object, deleteAllVersions);
             }
             catch (StorageException e)
             {
