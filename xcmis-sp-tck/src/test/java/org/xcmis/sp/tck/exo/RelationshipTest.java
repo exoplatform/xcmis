@@ -331,7 +331,6 @@ public class RelationshipTest extends BaseTest
       }
       finally
       {
-
          if (testroot != null)
             clear(testroot.getObjectId());
          if (typeID != null)

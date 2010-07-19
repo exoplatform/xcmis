@@ -81,15 +81,13 @@ public abstract class BaseTest extends TestCase
 
    protected FolderData rootFolder;
 
-   protected String testroot;
-
    protected List<String> passedTests;
 
    protected List<String> failedTests;
 
    private Connection conn;
 
-   private static final String TCK_CONF_DEFAULT = "/conf/sp_jcr_exo/test-jcr-sp-configuration.xml";
+   private static final String TCK_CONF_DEFAULT = "/conf/sp_jcr_exo/test-inmem-sp-configuration.xml";
 
    @Override
    public void setUp() throws Exception
@@ -158,7 +156,7 @@ public abstract class BaseTest extends TestCase
     *   Rel3 = folder2, doc1
     *  
     */
-   protected void createFolderTree() throws Exception
+   protected String createFolderTree() throws Exception
    {
       ContentStream cs = new BaseContentStream("1234567890".getBytes(), null, new MimeType("text", "plain"));
 
@@ -195,7 +193,7 @@ public abstract class BaseTest extends TestCase
          getStorage().createRelationship(folder2, doc1, relationshipTypeDefinition,
             getPropsMap("cmis:relationship", "rel3"), null, null);
 
-      this.testroot = testroot.getObjectId();
+      return testroot.getObjectId();
    }
 
    /**
@@ -245,7 +243,7 @@ public abstract class BaseTest extends TestCase
       return policy;
    }
 
-   protected void clearTree()
+   protected void clearTree(String testroot)
    {
       try
       {
@@ -263,7 +261,10 @@ public abstract class BaseTest extends TestCase
       try
       {
          FolderData rootFolder = (FolderData)getStorage().getObjectById(testroot);
-         getStorage().deleteTree(rootFolder, true, UnfileObject.DELETE, true);
+        List<String> failed =  (List<String>)getStorage().deleteTree(rootFolder, true, UnfileObject.DELETE, true);
+        for (String one:failed){
+           System.out.println("~~~~~" + one);
+        }
       }
       catch (Exception e)
       {
