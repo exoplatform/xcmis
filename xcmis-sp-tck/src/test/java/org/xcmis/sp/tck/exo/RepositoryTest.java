@@ -70,7 +70,7 @@ public class RepositoryTest extends BaseTest
     * 
     * Returns a list of CMIS repositories available from this CMIS service endpoint.
     */
-   public void testGetRepositories()
+   public void testGetRepositories() throws Exception
    {
       System.out.print("Running testGetRepositories....                                            ");
       Set<RepositoryShortInfo> storageInfos = CmisRegistry.getInstance().getStorageInfos();
