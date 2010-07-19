@@ -53,6 +53,7 @@ public class RepositoryTest extends BaseTest
 
    public void testGeneral() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGeneral....                                                    ");
       if (storageProvider == null)
          doFail("Storage provider is null;");
@@ -62,7 +63,7 @@ public class RepositoryTest extends BaseTest
          doFail("Storage  is null;");
       if (storageProvider.getConnection().getStorage().getId() == null)
          doFail("Storage  ID is null;");
-      pass();
+      pass(testname);
    }
 
    /**
@@ -72,6 +73,7 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetRepositories() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetRepositories....                                            ");
       Set<RepositoryShortInfo> storageInfos = CmisRegistry.getInstance().getStorageInfos();
       if (storageInfos == null)
@@ -91,7 +93,7 @@ public class RepositoryTest extends BaseTest
          if (repositoryShortInfo.getRootFolderId() == null)
             doFail("Root folder ID  is null");
       }
-      pass();
+      pass(testname);
    }
 
    /**
@@ -103,6 +105,7 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetRepositoryInfo() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetRepositoryInfo....                                          ");
       if (getStorage().getRepositoryInfo() == null)
          doFail("Repository Info  is null;");
@@ -146,7 +149,7 @@ public class RepositoryTest extends BaseTest
          doFail("Repository principal anonymous  is null;");
       if (getStorage().getRepositoryInfo().getPrincipalAnyone() == null)
          doFail("Repository principal anyone  is null;");
-      pass();
+      pass(testname);
    }
 
    /**
@@ -157,6 +160,7 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetTypeChildren_Root() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetTypeChildren_Root....                                       ");
       // root types
       ItemsList<TypeDefinition> typeChildren0 = null;
@@ -199,12 +203,12 @@ public class RepositoryTest extends BaseTest
 
          if (ll.size() > 0)
             if (!ll.contains(typeDefinition.getId()))
-         doFail("Mandatory type definition not found;");
+               doFail("Mandatory type definition not found;");
          ll.remove(typeDefinition.getId());
       }
       if (!ll.isEmpty())
          doFail("Not all mandatory types found;");
-      pass();
+      pass(testname);
    }
 
    /**
@@ -215,6 +219,7 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetTypeChildren_RootWithMaxItems() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetTypeChildren_RootWithMaxItems....                           ");
       // root types with maxItems
       ItemsList<TypeDefinition> typeChildren3 = null;
@@ -230,7 +235,7 @@ public class RepositoryTest extends BaseTest
          doFail("Root type childrens is null;");
       if (typeChildren3.getItems().size() != 1)
          doFail("Incorrect Root type childrens size;");
-      pass();
+      pass(testname);
    }
 
    /**
@@ -241,6 +246,7 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetTypeChildren_RootWithSkipCount() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetTypeChildren_RootWithSkipCount....                          ");
       // get size of root types
       ItemsList<TypeDefinition> typeChildren0 = null;
@@ -269,7 +275,7 @@ public class RepositoryTest extends BaseTest
          doFail("Root type childrens is null;");
       if (typeChildren4.getItems().size() != 1)
          doFail("Incorrect Root type childrens size;");
-      pass();
+      pass(testname);
    }
 
    /**
@@ -280,6 +286,7 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetTypeChildren_Folder() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetTypeChildren_Folder....                                     ");
       // folder
       ItemsList<TypeDefinition> typeChildren1 = null;
@@ -295,7 +302,7 @@ public class RepositoryTest extends BaseTest
          doFail("Root type childrens is null;");
       if (!typeChildren1.isHasMoreItems())
          doFail("Has more items not set in result;");
-      pass();
+      pass(testname);
    }
 
    /**
@@ -306,6 +313,7 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetTypeChildren_Document() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetTypeChildren_Document....                                   ");
       // document
       ItemsList<TypeDefinition> typeChildren2 = null;
@@ -321,7 +329,7 @@ public class RepositoryTest extends BaseTest
          doFail("Root type childrens is null;");
       if (!typeChildren2.isHasMoreItems())
          doFail("Has more items not set in result;");
-      pass();
+      pass(testname);
    }
 
    /**
@@ -333,6 +341,7 @@ public class RepositoryTest extends BaseTest
    public void testGetTypeChildren_NonExistedType() throws Exception
    {
       // to get children for nonexistent type "cmis:kino"
+      String testname = "";
       System.out.print("Running testGetTypeChildren_NonExistedType....                             ");
       try
       {
@@ -341,7 +350,7 @@ public class RepositoryTest extends BaseTest
       }
       catch (TypeNotFoundException e)
       {
-         pass();
+         pass(testname);
       }
       catch (Exception ex)
       {
@@ -356,6 +365,7 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetTypeDescendants() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetTypeDescendants....                                         ");
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
       try
@@ -394,7 +404,7 @@ public class RepositoryTest extends BaseTest
             doFail("Items tree container BaseId is empty;");
          checkPropertyDefinitions(itemsTree.getContainer().getPropertyDefinitions());
       }
-      pass();
+      pass(testname);
    }
 
    /**
@@ -404,6 +414,7 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetTypeDescendants_Folder() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetTypeDescendants_Folder....                                  ");
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
       try
@@ -418,7 +429,7 @@ public class RepositoryTest extends BaseTest
          doFail("Type Descendants is null;");
       if (typeDescendants.size() != 0)
          doFail("Type Descendants is not empty;");
-      pass();
+      pass(testname);
    }
 
    /**
@@ -428,6 +439,7 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetTypeDescendants_Document() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetTypeDescendants_Document....                                ");
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
       try
@@ -442,7 +454,7 @@ public class RepositoryTest extends BaseTest
          doFail("Type Descendants is null;");
       if (typeDescendants.size() != 0)
          doFail("Type Descendants is not empty;");
-      pass();
+      pass(testname);
    }
 
    /**
@@ -452,6 +464,7 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetTypeDescendants_IncludePropertyDefinitionFalse() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetTypeDescendants_IncludePropertyDefinitionFalse....          ");
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
       try
@@ -475,7 +488,7 @@ public class RepositoryTest extends BaseTest
          if (itemsTree.getContainer().getPropertyDefinitions() != null)
             doFail("Property definitions must be empty;");
       }
-      pass();
+      pass(testname);
    }
 
    /**
@@ -485,6 +498,7 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetTypeDescendants_RootWithDepth1() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetTypeDescendants_RootWithDepth1....                          ");
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
       try
@@ -506,7 +520,7 @@ public class RepositoryTest extends BaseTest
          if (itemsTree.getChildren() != null)
             doFail("Childrens must be empty;");
       }
-      pass();
+      pass(testname);
    }
 
    /**
@@ -516,6 +530,7 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetTypeDescendants_NonExistedType() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetTypeDescendants_NonExistedType....                          ");
       try
       {
@@ -524,7 +539,7 @@ public class RepositoryTest extends BaseTest
       }
       catch (TypeNotFoundException e)
       {
-         pass();
+         pass(testname);
       }
       catch (Exception other)
       {
@@ -539,6 +554,7 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetTypeDefinition_Folder() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetTypeDefinition_Folder....                                   ");
       if (folderTypeDefinition == null)
          doFail("Folder type definition is null;");
@@ -551,7 +567,7 @@ public class RepositoryTest extends BaseTest
       if (folderTypeDefinition.getQueryName() == null)
          doFail("Folder type definition query name is empty;");
       checkPropertyDefinitions(folderTypeDefinition.getPropertyDefinitions());
-      pass();
+      pass(testname);
    }
 
    /**
@@ -561,6 +577,7 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetTypeDefinition_Document() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetTypeDefinition_Document....                                 ");
       if (documentTypeDefinition == null)
          doFail("Document type definition is null;");
@@ -573,7 +590,7 @@ public class RepositoryTest extends BaseTest
       if (documentTypeDefinition.getQueryName() == null)
          doFail("Document type definition query name is empty;");
       checkPropertyDefinitions(documentTypeDefinition.getPropertyDefinitions());
-      pass();
+      pass(testname);
    }
 
    /**
@@ -583,6 +600,7 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetTypeDefinition_NonExistedType() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetTypeDefinition_NonExistedType....                           ");
       try
       {
@@ -591,7 +609,7 @@ public class RepositoryTest extends BaseTest
       }
       catch (TypeNotFoundException e)
       {
-         pass();
+         pass(testname);
       }
       catch (Exception other)
       {
@@ -606,6 +624,7 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetTypeDefinition_IncludePropertyDefinitionFalse() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetTypeDefinition_IncludePropertyDefinitionFalse....           ");
       TypeDefinition typeDefinition = null;
       try
@@ -629,7 +648,7 @@ public class RepositoryTest extends BaseTest
       Collection<PropertyDefinition<?>> propertyDefinitions = typeDefinition.getPropertyDefinitions();
       if (propertyDefinitions != null)
          doFail("Property definitions must not be included;");
-      pass();
+      pass(testname);
    }
 
    private void checkPropertyDefinitions(Collection<PropertyDefinition<?>> propertyDefinitions) throws Exception
@@ -653,5 +672,10 @@ public class RepositoryTest extends BaseTest
          if (propertyDefinition.getPropertyType() == null)
             doFail("Type definition property type is empty;");
       }
+   }
+
+   protected void pass(String method) throws Exception
+   { 
+      super.pass("RepositoryTest." + method);
    }
 }

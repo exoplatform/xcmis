@@ -55,6 +55,7 @@ public class RelationshipTest extends BaseTest
     */
    public void testGetObjectRelationships_Simple() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectRelationships_Simple....                              ");
       FolderData testroot = null;
       RelationshipData reldata = null;
@@ -95,7 +96,7 @@ public class RelationshipTest extends BaseTest
                getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true,
                   true, true, "", -1, 0);
             if (obj.getItems().size() == 2)
-               pass();
+               pass(testname);
             else
                doFail("Unexpected items number;");
          }
@@ -110,6 +111,8 @@ public class RelationshipTest extends BaseTest
       }
       finally
       {
+         getStorage().deleteObject(reldata, true);
+         getStorage().deleteObject(reldata2, true);
          if (testroot != null)
             clear(testroot.getObjectId());
       }
@@ -123,6 +126,7 @@ public class RelationshipTest extends BaseTest
     */
    public void testGetObjectRelationships_CheckDirection() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectRelationships_CheckDirection....                      ");
       FolderData testroot = null;
       RelationshipData reldata = null;
@@ -163,7 +167,7 @@ public class RelationshipTest extends BaseTest
                getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.TARGET, null, true,
                   true, true, "", -1, 0);
             if (obj.getItems().size() == 1)
-               pass();
+               pass(testname);
             else
                doFail("Unexpected items number;");
          }
@@ -178,6 +182,8 @@ public class RelationshipTest extends BaseTest
       }
       finally
       {
+         getStorage().deleteObject(reldata, true);
+         getStorage().deleteObject(reldata2, true);
          if (testroot != null)
             clear(testroot.getObjectId());
       }
@@ -190,6 +196,7 @@ public class RelationshipTest extends BaseTest
     */
    public void testGetObjectRelationships_AllowableActions() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectRelationships_AllowableActions....                    ");
       FolderData testroot = null;
       RelationshipData reldata = null;
@@ -237,7 +244,7 @@ public class RelationshipTest extends BaseTest
                else
                   doFail("Allowable actions not found");
             }
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -250,6 +257,8 @@ public class RelationshipTest extends BaseTest
       }
       finally
       {
+         getStorage().deleteObject(reldata, true);
+         getStorage().deleteObject(reldata2, true);
          if (testroot != null)
             clear(testroot.getObjectId());
       }
@@ -262,6 +271,7 @@ public class RelationshipTest extends BaseTest
     */
    public void testGetObjectRelationships_TypeId() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectRelationships_TypeId....                              ");
       FolderData testroot = null;
       String typeID = null;
@@ -326,7 +336,7 @@ public class RelationshipTest extends BaseTest
                getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, "cmis:kino",
                   true, true, true, "", -1, 0);
             if (obj.getItems().size() == 1)
-               pass();
+               pass(testname);
             else
                doFail("Unexpected items number;");
          }
@@ -341,6 +351,8 @@ public class RelationshipTest extends BaseTest
       }
       finally
       {
+         getStorage().deleteObject(reldata, true);
+         getStorage().deleteObject(reldata2, true);
          if (testroot != null)
             clear(testroot.getObjectId());
          if (typeID != null)
@@ -356,6 +368,7 @@ public class RelationshipTest extends BaseTest
     */
    public void testGetObjectRelationships_IncludeSubrelationshipTypes() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectRelationships_IncludeSubrelationshipTypes....         ");
       FolderData testroot = null;
       String typeID = null;
@@ -433,7 +446,7 @@ public class RelationshipTest extends BaseTest
                   "cmis:relationship", false, true, true, "", -1, 0);
             if (obj.getItems().size() != 1)
                doFail("Unexpected items number;");
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -446,6 +459,8 @@ public class RelationshipTest extends BaseTest
       }
       finally
       {
+         getStorage().deleteObject(reldata, true);
+         getStorage().deleteObject(reldata2, true);
          if (testroot != null)
             clear(testroot.getObjectId());
          if (typeID != null)
@@ -461,6 +476,7 @@ public class RelationshipTest extends BaseTest
     */
    public void testGetObjectRelationships_MaxItems() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectRelationships_MaxItems....                            ");
       FolderData testroot = null;
       RelationshipData reldata = null;
@@ -501,7 +517,7 @@ public class RelationshipTest extends BaseTest
                getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true,
                   true, true, "", 1, 0);
             if (obj.getItems().size() == 1)
-               pass();
+               pass(testname);
             else
                doFail("Unexpected items number;");
          }
@@ -516,6 +532,8 @@ public class RelationshipTest extends BaseTest
       }
       finally
       {
+         getStorage().deleteObject(reldata, true);
+         getStorage().deleteObject(reldata2, true);
          if (testroot != null)
             clear(testroot.getObjectId());
       }
@@ -529,6 +547,7 @@ public class RelationshipTest extends BaseTest
     */
    public void testGetObjectRelationships_SkipCount() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectRelationships_SkipCount....                           ");
       FolderData testroot = null;
       RelationshipData reldata = null;
@@ -569,7 +588,7 @@ public class RelationshipTest extends BaseTest
                getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true,
                   true, true, "", -1, 1);
             if (obj.getItems().size() == 1)
-               pass();
+               pass(testname);
             else
                doFail("Unexpected items number;");
          }
@@ -584,6 +603,8 @@ public class RelationshipTest extends BaseTest
       }
       finally
       {
+         getStorage().deleteObject(reldata, true);
+         getStorage().deleteObject(reldata2, true);
          if (testroot != null)
             clear(testroot.getObjectId());
       }
@@ -597,6 +618,7 @@ public class RelationshipTest extends BaseTest
     */
    public void testGetObjectRelationships_Paging() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectRelationships_Paging....                              ");
       FolderData testroot = null;
       RelationshipData reldata = null;
@@ -647,7 +669,7 @@ public class RelationshipTest extends BaseTest
                doFail("Unexpected items number;");
             if (!obj.isHasMoreItems())
                doFail("Has more items value is incorrect");
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -660,6 +682,8 @@ public class RelationshipTest extends BaseTest
       }
       finally
       {
+         getStorage().deleteObject(reldata, true);
+         getStorage().deleteObject(reldata2, true);
          if (testroot != null)
             clear(testroot.getObjectId());
       }
@@ -673,6 +697,7 @@ public class RelationshipTest extends BaseTest
     */
    public void testGetObjectRelationships_PropertyFiltered() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectRelationships_PropertyFiltered....                    ");
       FolderData testroot = null;
       RelationshipData reldata = null;
@@ -725,7 +750,7 @@ public class RelationshipTest extends BaseTest
                      doFail("Property filter works incorrect");
                }
             }
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -738,6 +763,8 @@ public class RelationshipTest extends BaseTest
       }
       finally
       {
+         getStorage().deleteObject(reldata, true);
+         getStorage().deleteObject(reldata2, true);
          if (testroot != null)
             clear(testroot.getObjectId());
       }
@@ -750,6 +777,7 @@ public class RelationshipTest extends BaseTest
     */
    public void testGetObjectRelationships_FilterNotValidException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectRelationships_FilterNotValidException....             ");
       FolderData testroot = null;
       RelationshipData reldata = null;
@@ -793,7 +821,7 @@ public class RelationshipTest extends BaseTest
          }
          catch (FilterNotValidException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -806,8 +834,15 @@ public class RelationshipTest extends BaseTest
       }
       finally
       {
+         getStorage().deleteObject(reldata, true);
+         getStorage().deleteObject(reldata2, true);
          if (testroot != null)
             clear(testroot.getObjectId());
       }
+   }
+
+   protected void pass(String method) throws Exception
+   {
+      super.pass("relationshipTest." + method);
    }
 }

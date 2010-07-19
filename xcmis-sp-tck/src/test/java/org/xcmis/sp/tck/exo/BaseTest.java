@@ -85,9 +85,11 @@ public abstract class BaseTest extends TestCase
 
    protected FolderData rootFolder;
 
-   protected List<String> passedTests;
+   protected List<String> passedTests = new ArrayList<String>();
 
-   protected List<String> failedTests;
+   protected List<String> failedTests = new ArrayList<String>();
+   
+   protected List<String> skippedTests = new ArrayList<String>();
 
    private Connection conn;
 
@@ -268,7 +270,7 @@ public abstract class BaseTest extends TestCase
          FolderData rootFolder = (FolderData)getStorage().getObjectById(testroot);
         List<String> failed =  (List<String>)getStorage().deleteTree(rootFolder, true, UnfileObject.DELETE, true);
         for (String one:failed){
-           System.out.println("~~~~~" + one);
+           System.out.println("~~~~~" + getStorage().getObjectById(one).getName());
         }
       }
       catch (Exception e)
@@ -329,16 +331,22 @@ public abstract class BaseTest extends TestCase
       fail();
    }
 
-   protected void pass()
+   protected void pass() throws Exception
    {
       System.out.println("PASSED");
       //passedTests.add(o);
    }
    
-   protected void skip()
+   
+   protected void pass(String o) throws Exception
+   {
+      System.out.println("PASSED");
+      passedTests.add(o);
+   }
+   protected void skip(String o)
    {
       System.out.println("SKIPPED");
-      //skippedTests.add(o);
+      skippedTests.add(o);
    }
    
    protected void removeRelationships(String testroot)

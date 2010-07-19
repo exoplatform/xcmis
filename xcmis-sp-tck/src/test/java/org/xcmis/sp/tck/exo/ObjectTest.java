@@ -64,8 +64,6 @@ import org.xcmis.spi.model.impl.IdProperty;
 import org.xcmis.spi.model.impl.StringProperty;
 import org.xcmis.spi.utils.MimeType;
 
-
-
 public class ObjectTest extends BaseTest
 {
 
@@ -77,6 +75,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocument_CheckContent() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateDocument_CheckContent....                                ");
       FolderData testroot = null;
       try
@@ -100,7 +99,7 @@ public class ObjectTest extends BaseTest
             byte[] after = new byte[15];
             c.getStream().read(after);
             assertArrayEquals(before, after);
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -125,6 +124,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocument_CheckProperties() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateDocument_CheckProperties....                             ");
       FolderData testroot = null;
       try
@@ -146,7 +146,7 @@ public class ObjectTest extends BaseTest
                doFail("NAME property is null;");
             if (!((String)res.getProperty(CmisConstants.NAME).getValues().get(0)).equals("doc1")) //TODO: test more properties
                doFail("Names does not match;");
-            pass();
+            pass(testname);
 
          }
          catch (Exception e)
@@ -172,6 +172,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocument_ApplyPolicy() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateDocument_ApplyPolicy....                                 ");
       FolderData testroot = null;
       PolicyData policy = null;
@@ -205,7 +206,7 @@ public class ObjectTest extends BaseTest
                if (!one.getPolicyText().equals("testPolicyText"))
                   doFail("Policy text does not match");
             }
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -236,6 +237,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocument_AddACL() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateDocument_ApplyACL....                                    ");
       FolderData testroot = null;
       try
@@ -266,7 +268,7 @@ public class ObjectTest extends BaseTest
                      doFail("Permissions does not match");
                }
             }
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -294,6 +296,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocument_NameConstraintViolationException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateDocument_NameConstraintViolationException....            ");
       FolderData testroot = null;
       try
@@ -315,7 +318,7 @@ public class ObjectTest extends BaseTest
          }
          catch (NameConstraintViolationException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -343,6 +346,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocument_StreamNotSupportedException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateDocument_StreamNotSupportedException....                 ");
       FolderData testroot = null;
       String typeID = null;
@@ -388,7 +392,7 @@ public class ObjectTest extends BaseTest
          }
          catch (StreamNotSupportedException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -415,6 +419,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocument_ConstraintException1() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateDocument_ConstraintException1....                        ");
       FolderData testroot = null;
       String typeID = null;
@@ -459,7 +464,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -487,6 +492,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocument_ConstraintException2() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateDocument_ConstraintException2....                        ");
       FolderData testroot = null;
       String typeID = null;
@@ -530,7 +536,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -558,6 +564,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocument_ConstraintException3() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateDocument_ConstraintException3....                        ");
       FolderData testroot = null;
       String typeID = null;
@@ -602,7 +609,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -630,6 +637,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocument_ConstraintException4() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateDocument_ConstraintException4....                        ");
       FolderData testroot = null;
       String typeID = null;
@@ -674,7 +682,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -702,6 +710,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocument_ConstraintException5() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateDocument_ConstraintException5....                        ");
       FolderData testroot = null;
       String typeID = null;
@@ -752,7 +761,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -782,6 +791,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocument_ConstraintException6() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateDocument_ConstraintException6....                        ");
       FolderData testroot = null;
       String typeID = null;
@@ -833,7 +843,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -860,6 +870,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocument_ConstraintException7() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateDocument_ConstraintException6....                        ");
       FolderData testroot = null;
       String typeID = null;
@@ -911,7 +922,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -938,6 +949,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocumentFromSource_Simple() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateDocumentFromSource_Simple....                            ");
       FolderData testroot = null;
       try
@@ -966,7 +978,7 @@ public class ObjectTest extends BaseTest
             assertArrayEquals(before, after);
             if (!testroot.getName().equals(getStorage().getObjectById(docId).getParent().getName()))
                doFail("Names doen not match;");
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -992,6 +1004,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocumentFromSource_Properties() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateDocumentFromSource_Properties....                        ");
       FolderData testroot = null;
       try
@@ -1013,7 +1026,7 @@ public class ObjectTest extends BaseTest
                   getPropsMap("cmis:document", "doc2"), null, null, null, VersioningState.MAJOR);
             if (!getStorage().getObjectById(docId).getProperty(CmisConstants.NAME).getValues().get(0).equals("doc2"))
                doFail("Names doen not match;");
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -1038,6 +1051,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocumentFromSource_ApplyPolicy() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateDocumentFromSource_ApplyPolicy....                       ");
       FolderData testroot = null;
       PolicyData policy = null;
@@ -1076,7 +1090,7 @@ public class ObjectTest extends BaseTest
                   doFail("Policy text does not match");
                res.removePolicy(one);
             }
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -1105,6 +1119,7 @@ public class ObjectTest extends BaseTest
 
    public void testCreateDocumentFromSource_addACL() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateDocumentFromSource_ApplyPolicy....                       ");
       FolderData testroot = null;
       try
@@ -1141,7 +1156,7 @@ public class ObjectTest extends BaseTest
                      doFail("Permissions does not match");
                }
             }
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -1168,6 +1183,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocumentFromSource_NameConstraintViolationException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateDocumentFromSource_NameConstraintViolationException....  ");
       FolderData testroot = null;
       try
@@ -1193,7 +1209,7 @@ public class ObjectTest extends BaseTest
          }
          catch (NameConstraintViolationException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -1218,6 +1234,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocumentFromSource_ConstraintException1() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateDocumentFromSource_ConstraintException1....              ");
       FolderData testroot = null;
       try
@@ -1239,7 +1256,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -1266,6 +1283,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocumentFromSource_ConstraintException2() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateDocumentFromSource_ConstraintException2....              ");
       FolderData testroot = null;
       String typeID = null;
@@ -1338,7 +1356,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -1368,6 +1386,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocumentFromSource_ConstraintException3() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateDocumentFromSource_ConstraintException3....              ");
       FolderData testroot = null;
       String typeID = null;
@@ -1419,7 +1438,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -1447,6 +1466,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocumentFromSource_ConstraintException4() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateDocumentFromSource_ConstraintException4....              ");
       FolderData testroot = null;
       String typeID = null;
@@ -1499,7 +1519,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -1529,6 +1549,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocumentFromSource_ConstraintException5() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateDocumentFromSource_ConstraintException5...               ");
       FolderData testroot = null;
       String typeID = null;
@@ -1584,7 +1605,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -1615,6 +1636,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocumentFromSource_ConstraintException6() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateDocumentFromSource_ConstraintException6...               ");
       FolderData testroot = null;
       String typeID = null;
@@ -1670,7 +1692,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -1697,6 +1719,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateDocumentFromSource_ConstraintException7() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateDocumentFromSource_ConstraintException7...               ");
       FolderData testroot = null;
       String typeID = null;
@@ -1752,7 +1775,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -1779,6 +1802,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateFolder_Simple() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateFolder_Simple....                                        ");
       FolderData testroot = null;
       try
@@ -1797,7 +1821,7 @@ public class ObjectTest extends BaseTest
                doFail("Object types doen not match;");
             if (!((FolderData)obj).getPath().equals("/testroot/f1"))
                doFail("Path is not correct;");
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -1822,6 +1846,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateFolder_ApplyPolicy() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateFolder_ApplyPolicy....                                   ");
       FolderData testroot = null;
       PolicyData policy = null;
@@ -1856,7 +1881,7 @@ public class ObjectTest extends BaseTest
                if (!one.getPolicyText().equals("testPolicyText"))
                   doFail("Policy text does not match");
             }
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -1886,6 +1911,7 @@ public class ObjectTest extends BaseTest
 
    public void testCreateFolder_AddACL() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateFolder_AddACL....                                        ");
       FolderData testroot = null;
       String docId = null;
@@ -1917,7 +1943,7 @@ public class ObjectTest extends BaseTest
                if (!one.getPermissions().contains("cmis:read"))
                   doFail("Permissions does not match");
             }
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -1944,6 +1970,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateFolder_NameConstraintViolationException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateFolder_Simple....                                        ");
       FolderData testroot = null;
       try
@@ -1965,7 +1992,7 @@ public class ObjectTest extends BaseTest
          }
          catch (NameConstraintViolationException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -1991,6 +2018,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateFolder_ConstraintException1() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateFolder_ConstraintException1....                          ");
       FolderData testroot = null;
       String typeID = null;
@@ -2037,7 +2065,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -2065,6 +2093,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateFolder_ConstraintException2() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateFolder_ConstraintException2....                          ");
       FolderData testroot = null;
       String typeID = null;
@@ -2124,7 +2153,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -2152,6 +2181,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateFolder_ConstraintException3() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateFolder_ConstraintException3....                          ");
       FolderData testroot = null;
       PolicyData policy = null;
@@ -2204,7 +2234,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -2234,6 +2264,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateFolder_ConstraintException4() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateFolder_ConstraintException4....                          ");
       FolderData testroot = null;
       String typeID = null;
@@ -2286,7 +2317,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -2314,6 +2345,7 @@ public class ObjectTest extends BaseTest
 
    public void testCreateFolder_ConstraintException5() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateFolder_ConstraintException5....                          ");
       FolderData testroot = null;
       String typeID = null;
@@ -2366,7 +2398,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -2393,6 +2425,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateRelationship_Simple() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateRelationship_Simple....                                  ");
       FolderData testroot = null;
       ObjectData obj = null;
@@ -2439,7 +2472,7 @@ public class ObjectTest extends BaseTest
             if (!doc2.getObjectId().equals(((RelationshipData)obj).getTargetId()))
                ;
             doFail("Cmis objects  does not match;");
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -2467,6 +2500,7 @@ public class ObjectTest extends BaseTest
 
    public void testCreateRelationship_ApplyPolicy() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateRelationship_ApplyPolicy....                             ");
       FolderData testroot = null;
       ObjectData obj = null;
@@ -2550,7 +2584,7 @@ public class ObjectTest extends BaseTest
                   doFail("Policy text does not match");
                obj.removePolicy(one);
             }
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -2582,6 +2616,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateRelationship_AddACL() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateRelationship_AddACL....                                  ");
       FolderData testroot = null;
       ObjectData obj = null;
@@ -2665,7 +2700,7 @@ public class ObjectTest extends BaseTest
                      doFail("Permissions does not match");
                }
             }
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -2696,6 +2731,7 @@ public class ObjectTest extends BaseTest
 
    public void testCreateRelationship_NameConstraintViolationException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateRelationship_NameConstraintViolationException....        ");
       FolderData testroot = null;
       ObjectData obj = null;
@@ -2765,11 +2801,11 @@ public class ObjectTest extends BaseTest
             obj = getStorage().getObjectById(docId);
             if (obj.getName().equals("rel1"))
                doFail("Names must not match;");
-            pass();
+            pass(testname);
          }
          catch (NameConstraintViolationException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -2796,6 +2832,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateRelationship_ConstraintException1() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateRelationship_ConstraintException1....                    ");
       FolderData testroot = null;
       ObjectData obj = null;
@@ -2867,7 +2904,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -2899,6 +2936,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateRelationship_ConstraintException2() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateRelationship_ConstraintException2....                    ");
       FolderData testroot = null;
       ObjectData obj = null;
@@ -2971,7 +3009,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -3001,6 +3039,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateRelationship_ConstraintException3() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateRelationship_ConstraintException3....                    ");
       FolderData testroot = null;
       ObjectData obj = null;
@@ -3073,7 +3112,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException xe)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -3105,6 +3144,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateRelationship_ConstraintException4() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateRelationship_ConstraintException4....                    ");
       FolderData testroot = null;
       ObjectData obj = null;
@@ -3182,7 +3222,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException e)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -3211,6 +3251,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreateRelationship_ConstraintException5() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreateRelationship_ConstraintException5....                    ");
       FolderData testroot = null;
       ObjectData obj = null;
@@ -3287,7 +3328,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException e)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -3316,6 +3357,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreatePolicy_Simple() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreatePolicy_Simple....                                        ");
       FolderData testroot = null;
       ObjectData obj = null;
@@ -3342,7 +3384,7 @@ public class ObjectTest extends BaseTest
                doFail("Cmis object types does not match");
             if (!((PolicyData)obj).getPolicyText().equals("testPolicyText"))
                doFail("Cmis policy text does not match");
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -3369,6 +3411,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreatePolicy_AddPolicy() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreatePolicy_AddPolicy....                                     ");
       FolderData testroot = null;
       ObjectData obj = null;
@@ -3406,7 +3449,7 @@ public class ObjectTest extends BaseTest
                   doFail("Policy text does not match");
                obj.removePolicy(one);
             }
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -3435,6 +3478,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreatePolicy_AddACL() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreatePolicy_AddACL....                                        ");
       FolderData testroot = null;
       ObjectData obj = null;
@@ -3473,7 +3517,7 @@ public class ObjectTest extends BaseTest
                      doFail("Permissions does not match");
                }
             }
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -3501,6 +3545,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreatePolicy_NameConstraintViolationException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreatePolicy_NameConstraintViolationException....              ");
       FolderData testroot = null;
       ObjectData obj = null;
@@ -3527,11 +3572,11 @@ public class ObjectTest extends BaseTest
             obj = getStorage().getObjectById(docId);
             if (obj.getName().equals("policy1"))
                doFail("Names must not match;");
-            pass();
+            pass(testname);
          }
          catch (NameConstraintViolationException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -3561,6 +3606,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreatePolicy_ConstraintException1() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreatePolicy_ConstraintException1....                          ");
       FolderData testroot = null;
       String typeID = null;
@@ -3612,7 +3658,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -3641,6 +3687,7 @@ public class ObjectTest extends BaseTest
 
    public void testCreatePolicy_ConstraintException2() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreatePolicy_ConstraintException2....                          ");
       FolderData testroot = null;
       String typeID = null;
@@ -3699,7 +3746,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -3727,6 +3774,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreatePolicy_ConstraintException3() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreatePolicy_ConstraintException3....                          ");
       FolderData testroot = null;
       String typeID = null;
@@ -3783,7 +3831,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -3811,6 +3859,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreatePolicy_ConstraintException4() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreatePolicy_ConstraintException4....                          ");
       FolderData testroot = null;
       String typeID = null;
@@ -3867,7 +3916,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -3895,6 +3944,7 @@ public class ObjectTest extends BaseTest
     */
    public void testCreatePolicy_ConstraintException5() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCreatePolicy_ConstraintException5....                          ");
       FolderData testroot = null;
       try
@@ -3923,7 +3973,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -3948,6 +3998,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetAllowableActions_Simlpe() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetAllowableActions_Simlpe....                                 ");
       FolderData testroot = null;
       try
@@ -3991,7 +4042,7 @@ public class ObjectTest extends BaseTest
             if(actions.isCanSetContentStream());
             if(actions.isCanUpdateProperties());
             */
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -4016,6 +4067,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetObject_Simlpe() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObject_Simlpe....                                           ");
       FolderData testroot = null;
       try
@@ -4034,7 +4086,7 @@ public class ObjectTest extends BaseTest
                doFail("Names does not match;");
             if (!testroot.getObjectId().equals(obj.getObjectInfo().getId()))
                doFail("Object ID's does not match;");
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -4060,6 +4112,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetObject_PropertyFiltered() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObject_PropertyFiltered....                                 ");
       FolderData testroot = null;
       try
@@ -4081,7 +4134,7 @@ public class ObjectTest extends BaseTest
                else
                   doFail("Property filter does not work;");
             }
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -4106,6 +4159,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetObject_IncludeRelationships() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObject_IncludeRelationships....                             ");
       FolderData testroot = null;
       try
@@ -4140,7 +4194,7 @@ public class ObjectTest extends BaseTest
                if (!reldata.getObjectId().equals(e.getObjectInfo().getId()))
                   doFail("Object ID's does not match;");
             }
-            pass();
+            pass(testname);
             getStorage().deleteObject(reldata, true);
          }
          catch (Exception e)
@@ -4166,6 +4220,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetObject_IncludePolicyIDs() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObject_IncludePolicyIDs....                                 ");
       FolderData testroot = null;
       PolicyData policy = null;
@@ -4190,7 +4245,7 @@ public class ObjectTest extends BaseTest
                if (!policy.getObjectId().equals(e))
                   doFail("Object ID's does not match;");
             }
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -4217,6 +4272,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetObject_IncludeACLs() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObject_IncludeACLs....                                      ");
       FolderData testroot = null;
       try
@@ -4254,7 +4310,7 @@ public class ObjectTest extends BaseTest
                      doFail("Permissions does not match");
                }
             }
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -4279,6 +4335,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetObject_IncludeAllowableActions() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObject_IncludeAllowableActions....                          ");
       FolderData testroot = null;
       try
@@ -4325,7 +4382,7 @@ public class ObjectTest extends BaseTest
             if(actions.isCanSetContentStream());
             if(actions.isCanUpdateProperties());
             */
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -4350,6 +4407,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetObject_FilterNotValidException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObject_FilterNotValidException....                          ");
       FolderData testroot = null;
       try
@@ -4368,7 +4426,7 @@ public class ObjectTest extends BaseTest
          }
          catch (FilterNotValidException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -4394,6 +4452,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetProperties_Filter() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetProperties_Filter....                                       ");
       FolderData testroot = null;
       try
@@ -4417,7 +4476,7 @@ public class ObjectTest extends BaseTest
                else
                   doFail("Property filter does not work;");
             }
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -4443,6 +4502,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetProperties_FilterNotValidException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetProperties_FilterNotValidException....                      ");
       FolderData testroot = null;
       try
@@ -4459,7 +4519,7 @@ public class ObjectTest extends BaseTest
          }
          catch (FilterNotValidException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -4484,6 +4544,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetObjectByPath_Simlpe() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectByPath_Simlpe....                                     ");
       FolderData testroot = null;
       try
@@ -4502,7 +4563,7 @@ public class ObjectTest extends BaseTest
                doFail("Names does not match;");
             if (!testroot.getObjectId().equals(obj.getObjectInfo().getId()))
                doFail("Object ID's does not match;");
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -4528,6 +4589,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetObjectByPath_PropertyFiltered() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectByPath_PropertyFiltered....                           ");
       FolderData testroot = null;
       try
@@ -4549,7 +4611,7 @@ public class ObjectTest extends BaseTest
                else
                   doFail("Property filter does not work;");
             }
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -4574,6 +4636,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetObjectByPath_IncludeRelationships() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectByPath_IncludeRelationships....                       ");
       FolderData testroot = null;
       try
@@ -4607,7 +4670,7 @@ public class ObjectTest extends BaseTest
                   doFail("Object ID's does not match;");
             }
             getStorage().deleteObject(reldata, true);
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -4633,6 +4696,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetObjectByPath_IncludePolicyIDs() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectByPath_IncludePolicyIDs....                           ");
       FolderData testroot = null;
       PolicyData policy = null;
@@ -4658,7 +4722,7 @@ public class ObjectTest extends BaseTest
                if (!policy.getObjectId().equals(e))
                   doFail("Object ID's does not match; ");
             }
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -4685,6 +4749,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetObjectByPath_IncludeACLs() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectByPath_IncludeACLs....                                ");
       FolderData testroot = null;
       try
@@ -4722,7 +4787,7 @@ public class ObjectTest extends BaseTest
                      doFail("Permissions does not match");
                }
             }
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -4747,6 +4812,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetObjectByPath_IncludeAllowableActions() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectByPath_IncludeAllowableActions....                    ");
       FolderData testroot = null;
       try
@@ -4793,7 +4859,7 @@ public class ObjectTest extends BaseTest
             if(actions.isCanSetContentStream());
             if(actions.isCanUpdateProperties());
             */
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -4818,6 +4884,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetObjectByPath_FilterNotValidException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectByPath_FilterNotValidException....                    ");
       FolderData testroot = null;
       try
@@ -4836,7 +4903,7 @@ public class ObjectTest extends BaseTest
          }
          catch (FilterNotValidException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -4862,6 +4929,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetContentStream_Simple() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetContentStream_Simple....                                    ");
       FolderData testroot = null;
       try
@@ -4885,7 +4953,7 @@ public class ObjectTest extends BaseTest
             byte[] after = new byte[15];
             obj.getStream().read(after);
             assertArrayEquals(before, after);
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -4911,6 +4979,7 @@ public class ObjectTest extends BaseTest
     */
    public void testGetContentStream_ConstraintException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetContentStream_ConstraintException....                       ");
       FolderData testroot = null;
       try
@@ -4931,7 +5000,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -4957,11 +5026,12 @@ public class ObjectTest extends BaseTest
 
    public void testGetRenditions_Simple() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetRenditions_Simple....                                       ");
       if (!getStorage().getRepositoryInfo().getCapabilities().getCapabilityRenditions()
          .equals(CapabilityRendition.READ))
       {
-         skip();
+         skip("ObjectTest.testGetRenditions_Simple");
          return;
       }
 
@@ -4983,11 +5053,11 @@ public class ObjectTest extends BaseTest
             List<Rendition> obj = getConnection().getRenditions(doc1.getObjectId(), "", -1, 0);
             if (obj == null)
                doFail("Get renditions result is null;");
-            pass();
+            pass(testname);
          }
          catch (NotSupportedException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -5012,11 +5082,12 @@ public class ObjectTest extends BaseTest
     */
    public void testGetRenditions_FilterNotValidException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetRenditions_FilterNotValidException....                      ");
       if (!getStorage().getRepositoryInfo().getCapabilities().getCapabilityRenditions()
          .equals(CapabilityRendition.READ))
       {
-         skip();
+         skip("ObjectTest.testGetRenditions_FilterNotValidException");
          return;
       }
 
@@ -5040,7 +5111,7 @@ public class ObjectTest extends BaseTest
          }
          catch (FilterNotValidException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -5066,6 +5137,7 @@ public class ObjectTest extends BaseTest
 
    public void testUpdateProperties_Simple() throws Exception
    {
+      String testname = "";
       System.out.print("Running testUpdateProperties_Simple....                                    ");
       FolderData testroot = null;
       String typeID = null;
@@ -5132,7 +5204,7 @@ public class ObjectTest extends BaseTest
                doFail("Names does not match;");
             if (!obj.getProperty(CmisConstants.CREATED_BY).getValues().get(0).equals("Makiz"))
                doFail("Property values does not match");
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -5161,6 +5233,7 @@ public class ObjectTest extends BaseTest
 
    public void testUpdateProperties_VersioningException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testUpdateProperties_VersioningException....                       ");
       FolderData testroot = null;
       try
@@ -5200,7 +5273,7 @@ public class ObjectTest extends BaseTest
          }
          catch (VersioningException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -5225,6 +5298,7 @@ public class ObjectTest extends BaseTest
     */
    public void testMoveObject_Simple() throws Exception
    {
+      String testname = "";
       System.out.print("Running testMoveObject_Simple....                                          ");
       FolderData testroot = null;
       FolderData folder2 = null;
@@ -5277,6 +5351,7 @@ public class ObjectTest extends BaseTest
     */
    public void testMoveObject_InvalidArgumentException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testMoveObject_InvalidArgumentException....                        ");
       FolderData testroot = null;
       FolderData folder2 = null;
@@ -5304,7 +5379,7 @@ public class ObjectTest extends BaseTest
          }
          catch (InvalidArgumentException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -5332,6 +5407,7 @@ public class ObjectTest extends BaseTest
     */
    public void testMoveObject_ConstraintException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testMoveObject_ConstraintException....                             ");
       FolderData testroot = null;
       FolderData folder2 = null;
@@ -5398,7 +5474,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -5428,6 +5504,7 @@ public class ObjectTest extends BaseTest
     */
    public void testMoveObject_NameConstraintException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testMoveObject_NameConstraintException....                         ");
       FolderData testroot = null;
       FolderData folder2 = null;
@@ -5461,7 +5538,7 @@ public class ObjectTest extends BaseTest
          }
          catch (NameConstraintViolationException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -5488,6 +5565,7 @@ public class ObjectTest extends BaseTest
     */
    public void testDeleteObject_Simple() throws Exception
    {
+      String testname = "";
       System.out.print("Running testDeleteObject_Simple....                                        ");
       FolderData testroot = null;
       try
@@ -5511,7 +5589,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ObjectNotFoundException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -5536,6 +5614,7 @@ public class ObjectTest extends BaseTest
     */
    public void testDeleteObject_ConstraintException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testDeleteObject_ConstraintException....                           ");
       FolderData testroot = null;
       try
@@ -5558,7 +5637,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -5583,6 +5662,7 @@ public class ObjectTest extends BaseTest
     */
    public void testDeleteTree_Simple() throws Exception
    {
+      String testname = "";
       System.out.print("Running testDeleteTree_Simple....                                          ");
       FolderData testroot = null;
       try
@@ -5615,7 +5695,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ObjectNotFoundException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -5639,10 +5719,11 @@ public class ObjectTest extends BaseTest
     */
    public void testDeleteTree_Unfile() throws Exception
    {
+      String testname = "";
       System.out.print("Running testDeleteTree_Unfile....                                          ");
       if (!getStorage().getRepositoryInfo().getCapabilities().isCapabilityUnfiling())
       {
-         skip();
+         skip("ObjectTest.testDeleteTree_Unfile");
          return;
       }
 
@@ -5686,7 +5767,7 @@ public class ObjectTest extends BaseTest
                   found2 = true;
             }
             if (found1 && found2)
-               pass();
+               pass(testname);
          }
          catch (Exception e)
          {
@@ -5710,6 +5791,7 @@ public class ObjectTest extends BaseTest
     */
    public void testSetContentStream_Simple() throws Exception
    {
+      String testname = "";
       System.out.print("Running testSetContentStream_Simple....                                    ");
 
       FolderData testroot = null;
@@ -5735,7 +5817,7 @@ public class ObjectTest extends BaseTest
             String docid = getConnection().setContentStream(doc1.getObjectId(), cs2, new ChangeTokenHolder(), true);
             getStorage().getObjectById(docid).getContentStream(null).getStream().read(result);
             assertArrayEquals(after, result);
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -5760,6 +5842,7 @@ public class ObjectTest extends BaseTest
     */
    public void testSetContentStream_ContentAlreadyExistsException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testSetContentStream_ContentAlreadyExistsException....             ");
 
       FolderData testroot = null;
@@ -5786,7 +5869,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ContentAlreadyExistsException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -5812,6 +5895,7 @@ public class ObjectTest extends BaseTest
     */
    public void testSetContentStream_StreamNotSupportedException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testSetContentStream_StreamNotSupportedException....               ");
 
       FolderData testroot = null;
@@ -5866,7 +5950,7 @@ public class ObjectTest extends BaseTest
          }
          catch (StreamNotSupportedException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -5893,6 +5977,7 @@ public class ObjectTest extends BaseTest
     */
    public void testDeleteContentStream_Simple() throws Exception
    {
+      String testname = "";
       System.out.print("Running testDeleteContentStream_Simple....                                 ");
 
       FolderData testroot = null;
@@ -5916,7 +6001,7 @@ public class ObjectTest extends BaseTest
             String docid = getConnection().deleteContentStream(doc1.getObjectId(), new ChangeTokenHolder());
             if (getStorage().getObjectById(docid).getContentStream(null) != null)
                doFail("Content stream must be null;");
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -5942,6 +6027,7 @@ public class ObjectTest extends BaseTest
     */
    public void testDeleteContentStream_ConstraintException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testDeleteContentStream_ConstraintException....                    ");
 
       FolderData testroot = null;
@@ -5995,7 +6081,7 @@ public class ObjectTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -6013,6 +6099,11 @@ public class ObjectTest extends BaseTest
          if (typeID != null)
             getStorage().removeType(typeID);
       }
+   }
+
+   protected void pass(String method) throws Exception
+   {
+      super.pass("ObjectTest." + method);
    }
 
    protected void tearDown()

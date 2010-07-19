@@ -52,6 +52,7 @@ public class DiscoveryTest extends BaseTest
     */
    public void testQuery() throws Exception
    {
+      String testname = "";
       System.out.print("Running testQuery....                                                      ");
       String errSms = "\n 2.2.6.1 query. Doesn't work Query (Discovery service) with cmis:document to search content.";
       FolderData parentFolder = null;
@@ -75,18 +76,21 @@ public class DiscoveryTest extends BaseTest
          List<CmisObject> result = query.getItems();
          for (CmisObject cmisObject : result)
          {
-            if(cmisObject == null)
+            if (cmisObject == null)
                doFail("Query result not found;");
-               if(cmisObject.getObjectInfo() == null)
-                  doFail("ObjectInfo not found in query result;");
-               if(cmisObject.getObjectInfo().getId() == null);
-                  doFail("ObjectId not found in query result;");
-               if (!documentData.getObjectId().equals(cmisObject.getObjectInfo().getId()));
-                 doFail("ObjectId's does not match;");
-              if(!documentData.getName().equals(cmisObject.getObjectInfo().getName()));
-              doFail("Object names does not match;");
+            if (cmisObject.getObjectInfo() == null)
+               doFail("ObjectInfo not found in query result;");
+            if (cmisObject.getObjectInfo().getId() == null)
+               ;
+            doFail("ObjectId not found in query result;");
+            if (!documentData.getObjectId().equals(cmisObject.getObjectInfo().getId()))
+               ;
+            doFail("ObjectId's does not match;");
+            if (!documentData.getName().equals(cmisObject.getObjectInfo().getName()))
+               ;
+            doFail("Object names does not match;");
          }
-         pass();
+         pass(testname);
       }
       finally
       {
@@ -101,6 +105,7 @@ public class DiscoveryTest extends BaseTest
     */
    public void testQuery2() throws Exception
    {
+      String testname = "";
       System.out.print("Running testQuery2....                                                     ");
       FolderData parentFolder = null;
       try
@@ -123,18 +128,21 @@ public class DiscoveryTest extends BaseTest
          List<CmisObject> result = query.getItems();
          for (CmisObject cmisObject : result)
          {
-            if(cmisObject == null)
-            doFail("Query result not found;");
-            if(cmisObject.getObjectInfo() == null)
+            if (cmisObject == null)
+               doFail("Query result not found;");
+            if (cmisObject.getObjectInfo() == null)
                doFail("ObjectInfo not found in query result;");
-            if(cmisObject.getObjectInfo().getId() == null);
-               doFail("ObjectId not found in query result;");
-            if (!documentData.getObjectId().equals(cmisObject.getObjectInfo().getId()));
-              doFail("ObjectId's does not match;");
-           if(!documentData.getName().equals(cmisObject.getObjectInfo().getName()));
-           doFail("Object names does not match;");
+            if (cmisObject.getObjectInfo().getId() == null)
+               ;
+            doFail("ObjectId not found in query result;");
+            if (!documentData.getObjectId().equals(cmisObject.getObjectInfo().getId()))
+               ;
+            doFail("ObjectId's does not match;");
+            if (!documentData.getName().equals(cmisObject.getObjectInfo().getName()))
+               ;
+            doFail("Object names does not match;");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception ez)
       {
@@ -144,5 +152,10 @@ public class DiscoveryTest extends BaseTest
       {
          clear(parentFolder.getObjectId());
       }
+   }
+
+   protected void pass(String method) throws Exception
+   {
+      super.pass("DiscoveryTest." + method);
    }
 }

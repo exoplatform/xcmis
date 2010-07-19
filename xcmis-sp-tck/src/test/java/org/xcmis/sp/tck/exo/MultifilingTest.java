@@ -76,6 +76,7 @@ public class MultifilingTest extends BaseTest
     */
    public void testAddObjectToFolder() throws Exception
    {
+      String testname = "";
       System.out.print("Running testAddObjectToFolder....                                          ");
       if (getCapabilities().isCapabilityUnfiling() && getCapabilities().isCapabilityMultifiling())
       {
@@ -125,7 +126,7 @@ public class MultifilingTest extends BaseTest
                if (!doc1.getObjectId().equals(cmisObject.getObjectInfo().getId()))
                   doFail("Objects doen not match;");
             }
-            pass();
+            pass(testname);
          }
          catch (Exception ez)
          {
@@ -138,7 +139,7 @@ public class MultifilingTest extends BaseTest
       }
       else
       {
-         skip();
+         skip("MultifilingTest.testAddObjectToFolder");
       }
 
    }
@@ -157,6 +158,7 @@ public class MultifilingTest extends BaseTest
     */
    public void testAddObjectToFolder_ConstraintException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testAddObjectToFolder_ConstraintException....                      ");
       if (getCapabilities().isCapabilityMultifiling())
       {
@@ -234,7 +236,7 @@ public class MultifilingTest extends BaseTest
                }
                catch (ConstraintException e)
                {
-                  pass();
+                  pass(testname);
                }
                catch (Exception other)
                {
@@ -258,7 +260,7 @@ public class MultifilingTest extends BaseTest
       }
       else
       {
-         skip();
+         skip("MultifilingTest.testAddObjectToFolder_ConstraintException");
       }
    }
 
@@ -270,6 +272,7 @@ public class MultifilingTest extends BaseTest
     */
    public void testAddObjectToFolder_AlreadyAddedToAnotherFolder() throws Exception
    {
+      String testname = "";
       System.out.print("Running testAddObjectToFolder_AlreadyAddedToAnotherFolder....              ");
       if (getCapabilities().isCapabilityMultifiling())
       {
@@ -313,7 +316,7 @@ public class MultifilingTest extends BaseTest
                if (!doc1.getObjectId().equals(cmisObject.getObjectInfo().getId()))
                   doFail("Objects doen not match;");
             }
-            pass();
+            pass(testname);
          }
          catch (Exception ez)
          {
@@ -329,7 +332,7 @@ public class MultifilingTest extends BaseTest
       }
       else
       {
-         skip();
+         skip("MultifilingTest.testAddObjectToFolder_AlreadyAddedToAnotherFolder");
       }
    }
 
@@ -341,6 +344,7 @@ public class MultifilingTest extends BaseTest
     */
    public void testRemoveObjectFromFolder() throws Exception
    {
+      String testname = "";
       System.out.print("Running testRemoveObjectFromFolder....                                     ");
       FolderData folder1 = null;
       if (getCapabilities().isCapabilityUnfiling())
@@ -401,7 +405,7 @@ public class MultifilingTest extends BaseTest
                doFail("Get children items list is null;");
             if (children00.getItems().size() != 0)
                doFail("Get children items doen not empty;");
-            pass();
+            pass(testname);
          }
          catch (Exception ez)
          {
@@ -415,7 +419,7 @@ public class MultifilingTest extends BaseTest
       }
       else
       {
-         skip();
+         skip("MultifilingTest.testRemoveObjectFromFolder");
       }
    }
 
@@ -427,6 +431,7 @@ public class MultifilingTest extends BaseTest
     */
    public void testRemoveObjectFromFolder_AlreadyAddedToAnotherFolder() throws Exception
    {
+      String testname = "";
       System.out.print("Running testRemoveObjectFromFolder_AlreadyAddedToAnotherFolder....         ");
       FolderData folder1 = null;
       FolderData folder2 = null;
@@ -480,7 +485,7 @@ public class MultifilingTest extends BaseTest
                doFail("Get children items list is null;");
             if (children00.getItems().size() != 0)
                doFail("Get children items doen not empty;");
-            pass();
+            pass(testname);
          }
          catch (Exception ez)
          {
@@ -496,7 +501,7 @@ public class MultifilingTest extends BaseTest
       }
       else
       {
-         skip();
+         skip("MultifilingTest.testRemoveObjectFromFolder_AlreadyAddedToAnotherFolder");
       }
    }
 
@@ -549,5 +554,10 @@ public class MultifilingTest extends BaseTest
          new PropertyDefinition<T>(id, queryName, localName, localNamespace, displayName, description, propertyType,
             updatability, inherited, required, queryable, orderable, openChoice, isMultivalued, choices, defValue);
       return propertyDefinition;
+   }
+
+   protected void pass(String method) throws Exception
+   {
+      super.pass("MultifilingTest." + method);
    }
 }

@@ -59,6 +59,7 @@ public class VersioningTest extends BaseTest
     */
    public void testCheckOut_Simple() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCheckOut_Simple....                                            ");
       FolderData testroot = null;
       try
@@ -79,7 +80,7 @@ public class VersioningTest extends BaseTest
                doFail("Checkout failed;");
             if (getStorage().getObjectById(pwcID) == null)
                doFail("Object not found;");
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -104,6 +105,7 @@ public class VersioningTest extends BaseTest
     */
    public void testCheckOut_ConstraintException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCheckOut_ConstraintException....                               ");
       FolderData testroot = null;
       String typeID = new String();
@@ -150,7 +152,7 @@ public class VersioningTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -177,6 +179,7 @@ public class VersioningTest extends BaseTest
     */
    public void testCancelCheckOut_Simple() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCancelCheckOut_Simple....                                      ");
       FolderData testroot = null;
       try
@@ -201,7 +204,7 @@ public class VersioningTest extends BaseTest
             }
             catch (ObjectNotFoundException ex)
             {
-               pass();
+               pass(testname);
             }
          }
          catch (Exception e)
@@ -227,6 +230,7 @@ public class VersioningTest extends BaseTest
     */
    public void testCancelCheckOut_ConstraintException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCancelCheckOut_ConstraintException....                         ");
       FolderData testroot = null;
       String typeID = new String();
@@ -274,7 +278,7 @@ public class VersioningTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -300,6 +304,7 @@ public class VersioningTest extends BaseTest
     */
    public void testCheckIn_Simple() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCheckIn_Simple....                                             ");
       FolderData testroot = null;
       try
@@ -324,7 +329,7 @@ public class VersioningTest extends BaseTest
                doFail("Check-in failed;");
             getStorage().getObjectById(chIn).getContentStream(null).getStream().read(after);
             assertArrayEquals(before, after);
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -349,6 +354,7 @@ public class VersioningTest extends BaseTest
     */
    public void testCheckIn_AddACL() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCheckIn_AddACL....                                             ");
       FolderData testroot = null;
       try
@@ -390,7 +396,7 @@ public class VersioningTest extends BaseTest
                      doFail("ACL adding failed;");
                }
             }
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -415,6 +421,7 @@ public class VersioningTest extends BaseTest
     */
    public void testCheckIn_ApplyPolicy() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCheckIn_ApplyPolicy....                                        ");
       FolderData testroot = null;
       PolicyData policy = null;
@@ -458,7 +465,7 @@ public class VersioningTest extends BaseTest
                   doFail("Policy adding failed;");
                obj.removePolicy(one);
             }
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -485,6 +492,7 @@ public class VersioningTest extends BaseTest
     */
    public void testCheckIn_ConstraintException1() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCheckIn_ConstraintException1....                               ");
       FolderData testroot = null;
       String typeID = new String();
@@ -534,7 +542,7 @@ public class VersioningTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -561,6 +569,7 @@ public class VersioningTest extends BaseTest
     */
    public void testCheckIn_ConstraintException2() throws Exception
    {
+      String testname = "";
       System.out.print("Running testCheckIn_ConstraintException2....                               ");
       FolderData testroot = null;
       String pwcID = null;
@@ -610,7 +619,7 @@ public class VersioningTest extends BaseTest
          }
          catch (ConstraintException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -639,6 +648,7 @@ public class VersioningTest extends BaseTest
     */
    public void testGetObjectOfLatestVersion_Simple() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectOfLatestVersion_Simple....                            ");
       FolderData testroot = null;
       try
@@ -662,9 +672,9 @@ public class VersioningTest extends BaseTest
                getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true,
                   IncludeRelationships.BOTH, true, true, true, "", "");
             if (obj == null)
-            doFail("GetObjectOfLatestVersion failed;");
+               doFail("GetObjectOfLatestVersion failed;");
 
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -689,6 +699,7 @@ public class VersioningTest extends BaseTest
     */
    public void testGetObjectOfLatestVersion_AllowableActions() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectOfLatestVersion_AllowableActions....                  ");
       FolderData testroot = null;
       try
@@ -712,10 +723,10 @@ public class VersioningTest extends BaseTest
                getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true,
                   IncludeRelationships.BOTH, true, true, true, "", "");
             if (obj == null)
-            doFail("GetObjectOfLatestVersion failed;");
+               doFail("GetObjectOfLatestVersion failed;");
             if (obj.getAllowableActions() == null)
-            doFail(" AllowableActions must be present in result;");
-            pass();
+               doFail(" AllowableActions must be present in result;");
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -740,6 +751,7 @@ public class VersioningTest extends BaseTest
     */
    public void testGetObjectOfLatestVersion_IncludePolicies() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectOfLatestVersion_IncludePolicies....                   ");
       FolderData testroot = null;
       PolicyData policy = null;
@@ -773,13 +785,15 @@ public class VersioningTest extends BaseTest
             while (it.hasNext())
             {
                PolicyData one = (PolicyData)getStorage().getObjectById(it.next());
-               if (!one.getName().equals("policy1")){
+               if (!one.getName().equals("policy1"))
+               {
                   doFail("Policy adding failed;");
                }
-               if(! one.getPolicyText().equals("testPolicyText"));
-                   doFail("Policy text failed;");
+               if (!one.getPolicyText().equals("testPolicyText"))
+                  ;
+               doFail("Policy text failed;");
             }
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -806,6 +820,7 @@ public class VersioningTest extends BaseTest
     */
    public void testGetObjectOfLatestVersion_IncludeACL() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectOfLatestVersion_IncludeACL....                        ");
       FolderData testroot = null;
       try
@@ -842,10 +857,10 @@ public class VersioningTest extends BaseTest
                   if (one.getPermissions().size() != 1)
                      doFail("Permission setting failed;");
                   if (!one.getPermissions().contains("cmis:read"))
-                  doFail("Permission setting failed;");
+                     doFail("Permission setting failed;");
                }
             }
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -871,6 +886,7 @@ public class VersioningTest extends BaseTest
     */
    public void testGetObjectOfLatestVersion_PropertiesFiltered() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectOfLatestVersion_PropertiesFiltered....                ");
       FolderData testroot = null;
       try
@@ -903,12 +919,12 @@ public class VersioningTest extends BaseTest
                doFail("GetObjectOfLatestVersion failed;");
             for (Map.Entry<String, Property<?>> e : obj.getProperties().entrySet())
             {
-               if(e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path"))//Other props must be ignored
-               continue;
+               if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path"))//Other props must be ignored
+                  continue;
                else
                   doFail("Property filter works incorrect");
             }
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -933,6 +949,7 @@ public class VersioningTest extends BaseTest
     */
    public void testGetObjectOfLatestVersion_FilterNotValidException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectOfLatestVersion_FilterNotValidException....           ");
       FolderData testroot = null;
       try
@@ -959,7 +976,7 @@ public class VersioningTest extends BaseTest
          }
          catch (FilterNotValidException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -984,6 +1001,7 @@ public class VersioningTest extends BaseTest
     */
    public void testGetObjectOfLatestVersion_ObjectNotFoundException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectOfLatestVersion_ObjectNotFoundException....           ");
       FolderData testroot = null;
       try
@@ -1010,7 +1028,7 @@ public class VersioningTest extends BaseTest
          }
          catch (ObjectNotFoundException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -1035,6 +1053,7 @@ public class VersioningTest extends BaseTest
     */
    public void testGetPropertiesOfLatestVersion_Simple() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectOfLatestVersion_Simple....                            ");
       FolderData testroot = null;
       try
@@ -1055,11 +1074,11 @@ public class VersioningTest extends BaseTest
          try
          {
             CmisObject obj = getConnection().getPropertiesOfLatestVersion(doc1.getVersionSeriesId(), true, true, "");
-            if(obj == null)
+            if (obj == null)
                doFail("GetPropertiesOfLatestVersion failed;");
-            if(obj.getObjectInfo() == null)
+            if (obj.getObjectInfo() == null)
                doFail("ObjectInfo must be present in result;");
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -1085,6 +1104,7 @@ public class VersioningTest extends BaseTest
     */
    public void testGetPropertiesOfLatestVersion_PropertiesFiltered() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetPropertiesOfLatestVersion_PropertiesFiltered....            ");
       FolderData testroot = null;
       try
@@ -1107,16 +1127,16 @@ public class VersioningTest extends BaseTest
             CmisObject obj =
                getConnection().getPropertiesOfLatestVersion(doc1.getVersionSeriesId(), true, true,
                   "cmis:name,cmis:path");
-            if(obj == null)
+            if (obj == null)
                doFail("GetPropertiesOfLatestVersion failed;");
             for (Map.Entry<String, Property<?>> e : obj.getProperties().entrySet())
             {
-               if(e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
+               if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
                   continue;
                else
                   doFail("Property filter works incorrect");
             }
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -1141,6 +1161,7 @@ public class VersioningTest extends BaseTest
     */
    public void testGetPropertiesOfLatestVersion_FilterNotValidException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetPropertiesOfLatestVersion_FilterNotValidException....       ");
       FolderData testroot = null;
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
@@ -1164,7 +1185,7 @@ public class VersioningTest extends BaseTest
          }
          catch (FilterNotValidException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -1189,6 +1210,7 @@ public class VersioningTest extends BaseTest
     */
    public void testGetPropertiesOfLatestVersion_ObjectNotFoundException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetPropertiesOfLatestVersion_ObjectNotFoundException....       ");
       FolderData testroot = null;
       try
@@ -1213,7 +1235,7 @@ public class VersioningTest extends BaseTest
          }
          catch (ObjectNotFoundException ex)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception e)
          {
@@ -1229,5 +1251,10 @@ public class VersioningTest extends BaseTest
          if (testroot != null)
             clear(testroot.getObjectId());
       }
+   }
+
+   protected void pass(String method) throws Exception
+   {
+      super.pass("VesioningTest." + method);
    }
 }

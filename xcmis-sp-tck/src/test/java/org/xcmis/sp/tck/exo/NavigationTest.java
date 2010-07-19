@@ -58,6 +58,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_Relationships() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetChildren_Relationships....                                  ");
       this.testroot = createFolderTree();
       try
@@ -74,7 +75,7 @@ public class NavigationTest extends BaseTest
          }
          if (relCount != 3)
             doFail("Unexpected items number;");//two relationships are present
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -89,6 +90,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_NoRelationships() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetChildren_NoRelationships....                                ");
       this.testroot = createFolderTree();
       try
@@ -102,7 +104,7 @@ public class NavigationTest extends BaseTest
                relCount++;
          }
          if (relCount == 0) //no relationships are present
-            pass();
+            pass(testname);
          else
             doFail("Unexpected items number;");
       }
@@ -119,6 +121,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_AllowableActions() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetChildren_AllowableActions....                               ");
       this.testroot = createFolderTree();
       try
@@ -132,7 +135,7 @@ public class NavigationTest extends BaseTest
             else
                doFail("Allowable actions must be present in result;");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -147,6 +150,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_NoAllowableActions() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetChildren_NoAllowableActions....                             ");
       this.testroot = createFolderTree();
       try
@@ -160,7 +164,7 @@ public class NavigationTest extends BaseTest
             else
                doFail("Allowable actions must not be present in result;");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -175,6 +179,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_PathSegments() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetChildren_PathSegments....                                   ");
       this.testroot = createFolderTree();
       try
@@ -188,7 +193,7 @@ public class NavigationTest extends BaseTest
             else
                doFail("Path segment must be present in result");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -203,6 +208,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_NoPathSegments() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetChildren_NoPathSegments....                                 ");
       this.testroot = createFolderTree();
       try
@@ -216,7 +222,7 @@ public class NavigationTest extends BaseTest
             else
                doFail("Path segment must not be present in result");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -226,6 +232,7 @@ public class NavigationTest extends BaseTest
 
    public void testGetChildren_ObjectInfo() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetChildren_ObjectInfo....                                     ");
       this.testroot = createFolderTree();
       try
@@ -239,7 +246,7 @@ public class NavigationTest extends BaseTest
             else
                doFail("ObjectInfo must be present in result");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -249,6 +256,7 @@ public class NavigationTest extends BaseTest
 
    public void testGetChildren_NoObjectInfo() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetChildren_NoObjectInfo....                                   ");
       this.testroot = createFolderTree();
       try
@@ -262,7 +270,7 @@ public class NavigationTest extends BaseTest
             else
                doFail("ObjectInfo must not be present in result");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -278,6 +286,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_PropertyFiltered() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetChildren_PropertyFiltered....                               ");
       this.testroot = createFolderTree();
       try
@@ -295,7 +304,7 @@ public class NavigationTest extends BaseTest
                   doFail("Property filter works incorrect;");
             }
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -310,6 +319,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_RenditionFiltered() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetChildren_RenditionFiltered....                              ");
       this.testroot = createFolderTree();
       try
@@ -325,7 +335,7 @@ public class NavigationTest extends BaseTest
                   doFail("Rendition filter works incorrect;");
             }
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -340,6 +350,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_HasMoreItems() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetChildren_HasMoreItems....                                   ");
       this.testroot = createFolderTree();
       try
@@ -348,7 +359,7 @@ public class NavigationTest extends BaseTest
             getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "", "*", "", 2, 0);
          if (!result.isHasMoreItems())
             doFail("Has more items property is incorrect;");
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -363,6 +374,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_MaxItems() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetChildren_MaxItems....                                       ");
       this.testroot = createFolderTree();
       try
@@ -372,7 +384,7 @@ public class NavigationTest extends BaseTest
          if (result.getItems().size() != 3)
             ;
          doFail("Items number is incorrect;");
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -388,6 +400,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_NumItems() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetChildren_NumItems....                                       ");
       this.testroot = createFolderTree();
       try
@@ -396,7 +409,7 @@ public class NavigationTest extends BaseTest
             getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "", "*", "", 2, 0);
          if (result.getNumItems() == -1 || result.getNumItems() == 4)
          {
-            pass();
+            pass(testname);
          }
          else
          {
@@ -416,6 +429,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_SkipCount() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetChildren_SkipCount....                                      ");
       this.testroot = createFolderTree();
       try
@@ -424,7 +438,7 @@ public class NavigationTest extends BaseTest
             getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "", "*", "", 10, 1);
          if (result.getItems().size() != 5)
             doFail("Items number is incorrect;");
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -439,6 +453,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_InvalidArgumentException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetChildren_InvalidArgumentException....                       ");
       this.testroot = createFolderTree();
       try
@@ -450,7 +465,7 @@ public class NavigationTest extends BaseTest
       }
       catch (InvalidArgumentException ex)
       {
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -465,6 +480,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_FilterNotValidException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetChildren_FilterNotValidException....                        ");
       this.testroot = createFolderTree();
       try
@@ -476,7 +492,7 @@ public class NavigationTest extends BaseTest
       }
       catch (FilterNotValidException ex)
       {
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -496,6 +512,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_Simple() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetDescendants_Simple....                                      ");
       this.testroot = createFolderTree();
       try
@@ -504,7 +521,7 @@ public class NavigationTest extends BaseTest
             getConnection().getDescendants(testroot, -1, true, IncludeRelationships.BOTH, true, true, "", "*");
          if (objectTreeToList(result).size() != 9)
             doFail("Items number is incorrect;");
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -519,6 +536,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_AllowableActions() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetDescendants_AllowableActions....                            ");
       this.testroot = createFolderTree();
       try
@@ -533,7 +551,7 @@ public class NavigationTest extends BaseTest
             else
                doFail("Allowable actions must be present in result;");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -548,6 +566,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_NoAllowableActions() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetDescendants_NoAllowableActions....                          ");
       this.testroot = createFolderTree();
       try
@@ -562,7 +581,7 @@ public class NavigationTest extends BaseTest
             else
                doFail("Allowable actions must not be present in result;");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -577,6 +596,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_Relationships() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetDescendants_Relationships....                               ");
       this.testroot = createFolderTree();
       try
@@ -593,7 +613,7 @@ public class NavigationTest extends BaseTest
          if (relCount != 3)
             ;
          doFail("Items number is incorrect;");
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -608,6 +628,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_NoRelationships() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetDescendants_NoRelationships....                             ");
       this.testroot = createFolderTree();
       try
@@ -624,7 +645,7 @@ public class NavigationTest extends BaseTest
          if (relCount != 0)
             ;
          doFail("Items number is incorrect;");
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -639,6 +660,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_PathSegment() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetDescendants_PathSegment....                                 ");
       this.testroot = createFolderTree();
       try
@@ -653,7 +675,7 @@ public class NavigationTest extends BaseTest
             else
                doFail();
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -663,6 +685,7 @@ public class NavigationTest extends BaseTest
 
    public void testGetDescendants_ObjectInfo() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetDescendants_ObjectInfo....                                  ");
       this.testroot = createFolderTree();
       try
@@ -677,7 +700,7 @@ public class NavigationTest extends BaseTest
             else
                doFail("Object info must be present in result;");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -687,6 +710,7 @@ public class NavigationTest extends BaseTest
 
    public void testGetDescendants_NoObjectInfo() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetDescendants_NoObjectInfo....                                ");
       this.testroot = createFolderTree();
       try
@@ -701,7 +725,7 @@ public class NavigationTest extends BaseTest
             else
                doFail("Object info must not be present in result;");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -717,6 +741,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_PropertyFiltered() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetDescendants_PropertyFiltered....                            ");
       this.testroot = createFolderTree();
       try
@@ -735,7 +760,7 @@ public class NavigationTest extends BaseTest
                   doFail("Property filter works incorrect;");
             }
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -750,6 +775,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_RenditionsFiltered() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetDescendants_RenditionsFiltered....                          ");
       this.testroot = createFolderTree();
       try
@@ -762,7 +788,7 @@ public class NavigationTest extends BaseTest
             if (one.getRenditions().size() != 0)
                doFail("Rendition filter works incorrect;");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -777,6 +803,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_DepthLimit() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetDescendants_DepthLimit....                                  ");
       this.testroot = createFolderTree();
       try
@@ -786,7 +813,7 @@ public class NavigationTest extends BaseTest
          List<CmisObject> list = objectTreeToList(result);
          if (list.size() != 8) //skipping last level with Doc4
             doFail("Unexpected items number;");
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -801,6 +828,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_FilterNotValidException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetDescendants_FilterNotValidException....                     ");
       this.testroot = createFolderTree();
       try
@@ -812,7 +840,7 @@ public class NavigationTest extends BaseTest
       }
       catch (FilterNotValidException ex)
       {
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -827,6 +855,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_InvalidArgumentException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetDescendants_InvalidArgumentException....                    ");
       this.testroot = createFolderTree();
       try
@@ -837,7 +866,7 @@ public class NavigationTest extends BaseTest
       }
       catch (InvalidArgumentException ex)
       {
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -852,6 +881,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_InvalidArgumentException2() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetDescendants_InvalidArgumentException2....                   ");
       this.testroot = createFolderTree();
       try
@@ -863,7 +893,7 @@ public class NavigationTest extends BaseTest
       }
       catch (InvalidArgumentException ex)
       {
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -878,6 +908,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_Simple() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetFolderTree_Simple....                                       ");
       this.testroot = createFolderTree();
       try
@@ -886,7 +917,7 @@ public class NavigationTest extends BaseTest
             getConnection().getFolderTree(testroot, -1, true, IncludeRelationships.BOTH, true, true, "", "*");
          if (objectTreeToList(result).size() != 3)
             doFail("Unexpected number of items;");
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -901,6 +932,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_AllowableActions() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetFolderTree_AllowableActions....                             ");
       this.testroot = createFolderTree();
       try
@@ -915,7 +947,7 @@ public class NavigationTest extends BaseTest
             else
                doFail("Allowable actions must be present in result");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -930,6 +962,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_NoAllowableActions() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetFolderTree_NoAllowableActions....                           ");
       this.testroot = createFolderTree();
       try
@@ -944,7 +977,7 @@ public class NavigationTest extends BaseTest
             else
                doFail("Allowable actions must not be present in result");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -959,6 +992,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_Relationships() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetFolderTree_Relationships....                                ");
       this.testroot = createFolderTree();
       try
@@ -976,7 +1010,7 @@ public class NavigationTest extends BaseTest
          {
             doFail("Incorrect items number in result;");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -991,6 +1025,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_NoRelationships() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetFolderTree_NoRelationships....                              ");
       this.testroot = createFolderTree();
       try
@@ -1008,7 +1043,7 @@ public class NavigationTest extends BaseTest
          {
             doFail("Incorrect items number in result;");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1023,6 +1058,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_PathSegment() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetFolderTree_PathSegment....                                  ");
       this.testroot = createFolderTree();
       try
@@ -1037,7 +1073,7 @@ public class NavigationTest extends BaseTest
             else
                doFail();
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1047,6 +1083,7 @@ public class NavigationTest extends BaseTest
 
    public void testGetFolderTree_ObjectInfo() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetFolderTree_ObjectInfo....                                   ");
       this.testroot = createFolderTree();
       try
@@ -1061,7 +1098,7 @@ public class NavigationTest extends BaseTest
             else
                doFail("Object info must be present in result;");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1077,6 +1114,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_PropertyFiltered() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetFolderTree_PropertyFiltered....                             ");
       this.testroot = createFolderTree();
       try
@@ -1095,7 +1133,7 @@ public class NavigationTest extends BaseTest
                   doFail("Property filter works incorrect;");
             }
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1110,6 +1148,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_RenditionsFiltered() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetFolderTree_RenditionsFiltered....                           ");
       this.testroot = createFolderTree();
       try
@@ -1124,7 +1163,7 @@ public class NavigationTest extends BaseTest
             else
                doFail("Rendition filter works incorrect;");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1139,6 +1178,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_DepthLimit() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetFolderTree_DepthLimit....                                   ");
       this.testroot = createFolderTree();
       try
@@ -1148,7 +1188,7 @@ public class NavigationTest extends BaseTest
          List<CmisObject> list = objectTreeToList(result);
          if (list.size() != 2) //skipping last level with Doc4
             doFail("Incorrect items number in result;");
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1163,6 +1203,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_FilterNotValidException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetFolderTree_FilterNotValidException....                      ");
       this.testroot = createFolderTree();
       try
@@ -1173,7 +1214,7 @@ public class NavigationTest extends BaseTest
       }
       catch (FilterNotValidException ex)
       {
-         pass();
+         pass(testname);
       }
       catch (Exception other)
       {
@@ -1188,6 +1229,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_InvalidArgumentException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetFolderTree_InvalidArgumentException....                     ");
       this.testroot = createFolderTree();
       try
@@ -1198,7 +1240,7 @@ public class NavigationTest extends BaseTest
       }
       catch (InvalidArgumentException ex)
       {
-         pass();
+         pass(testname);
       }
       catch (Exception other)
       {
@@ -1213,6 +1255,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_InvalidArgumentException2() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetFolderTree_InvalidArgumentException2....                    ");
       this.testroot = createFolderTree();
       try
@@ -1224,7 +1267,7 @@ public class NavigationTest extends BaseTest
       }
       catch (InvalidArgumentException ex)
       {
-         pass();
+         pass(testname);
       }
       catch (Exception other)
       {
@@ -1244,6 +1287,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderParent_Simple() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetFolderParent_Simple....                                     ");
       this.testroot = createFolderTree();
       try
@@ -1252,7 +1296,7 @@ public class NavigationTest extends BaseTest
          CmisObject result = getConnection().getFolderParent(fold.getObjectId(), true, "");
          if (result == null)
             doFail("Result is empty");
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1262,6 +1306,7 @@ public class NavigationTest extends BaseTest
 
    public void testGetFolderParent_IncludeObjectInfo() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetFolderParent_IncludeObjectInfo....                          ");
       this.testroot = createFolderTree();
       try
@@ -1270,7 +1315,7 @@ public class NavigationTest extends BaseTest
          CmisObject result = getConnection().getFolderParent(fold.getObjectId(), true, "");
          if (result.getObjectInfo() == null)
             doFail("ObjectInfo must be present in result;");
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1280,6 +1325,7 @@ public class NavigationTest extends BaseTest
 
    public void testGetFolderParent_NoIncludeObjectInfo() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetFolderParent_NoIncludeObjectInfo....                        ");
       this.testroot = createFolderTree();
       try
@@ -1288,7 +1334,7 @@ public class NavigationTest extends BaseTest
          CmisObject result = getConnection().getFolderParent(fold.getObjectId(), false, "");
          if (result.getObjectInfo() != null)
             doFail("ObjectInfo must  not be present in result;");
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1304,6 +1350,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderParent_PropertyFiltered() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetFolderParent_PropertyFiltered....                           ");
       this.testroot = createFolderTree();
       try
@@ -1317,7 +1364,7 @@ public class NavigationTest extends BaseTest
             else
                doFail("Property filter works incorrect");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1332,6 +1379,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderParent_FilterNotValidException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetFolderParent_FilterNotValidException....                    ");
       this.testroot = createFolderTree();
       try
@@ -1342,7 +1390,7 @@ public class NavigationTest extends BaseTest
       }
       catch (FilterNotValidException ex)
       {
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1357,6 +1405,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderParent_InvalidArgumentException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetFolderParent_InvalidArgumentException....                   ");
       this.testroot = createFolderTree();
       try
@@ -1367,7 +1416,7 @@ public class NavigationTest extends BaseTest
       }
       catch (InvalidArgumentException ex)
       {
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1382,6 +1431,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetObjectParents_Simple() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectParents_Simple....                                    ");
       this.testroot = createFolderTree();
       try
@@ -1391,7 +1441,7 @@ public class NavigationTest extends BaseTest
             getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true, "", "*");
          if (result.size() != 1)
             doFail("Incorrect items number in result;");
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1406,6 +1456,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetObjectParents_IncludeRelatioships() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectParents_IncludeRelatioships....                       ");
       this.testroot = createFolderTree();
       try
@@ -1418,7 +1469,7 @@ public class NavigationTest extends BaseTest
             if (!(one.getObject().getRelationship().size() > 0))
                doFail("Incorrect items number in result;");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1433,6 +1484,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetObjectParents_NoRelationships() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectParents_NoRelationships....                            ");
       this.testroot = createFolderTree();
       try
@@ -1446,7 +1498,7 @@ public class NavigationTest extends BaseTest
                ;
             doFail("Incorrect items number in result;");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1461,6 +1513,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetObjectParents_AllowableActions() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectParents_AllowableActions....                          ");
       this.testroot = createFolderTree();
       try
@@ -1475,7 +1528,7 @@ public class NavigationTest extends BaseTest
             else
                doFail("AllowableActions must be present in result;");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1490,6 +1543,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetObjectParents_NoAllowableActions() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectParents_NoAllowableActions....                        ");
       this.testroot = createFolderTree();
       try
@@ -1504,7 +1558,7 @@ public class NavigationTest extends BaseTest
             else
                doFail("AllowableActions must not be present in result;");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1520,6 +1574,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetObjectParents_IncludePathSegment() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectParents_IncludePathSegment....                        ");
       this.testroot = createFolderTree();
       try
@@ -1534,7 +1589,7 @@ public class NavigationTest extends BaseTest
             else
                doFail("RelativePathSegment must be present in result;");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1550,6 +1605,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetObjectParents_NoPathSegment() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectParents_NoPathSegment....                             ");
       this.testroot = createFolderTree();
       try
@@ -1562,7 +1618,7 @@ public class NavigationTest extends BaseTest
             if (one.getRelativePathSegment() != null)
                doFail("RelativePathSegment must not be present in result;");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1577,6 +1633,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetObjectParents_NoRenditions() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectParents_NoRenditions...                               ");
       this.testroot = createFolderTree();
       try
@@ -1590,7 +1647,7 @@ public class NavigationTest extends BaseTest
             if (one.getObject().getRenditions().size() != 0)
                doFail("Renditions filter works incorrect;");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1600,6 +1657,7 @@ public class NavigationTest extends BaseTest
 
    public void testGetObjectParents_ObjectInfo() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectParents_ObjectInfo....                                ");
       this.testroot = createFolderTree();
       try
@@ -1612,7 +1670,7 @@ public class NavigationTest extends BaseTest
             if (one.getObject().getObjectInfo() == null)
                doFail("ObjectInfo must be present in result;");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1622,6 +1680,7 @@ public class NavigationTest extends BaseTest
 
    public void testGetObjectParents_NoObjectInfo() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectParents_NoObjectInfo()....                            ");
       this.testroot = createFolderTree();
       try
@@ -1634,7 +1693,7 @@ public class NavigationTest extends BaseTest
             if (one.getObject().getObjectInfo() != null)
                doFail("ObjectInfo must not be present in result;");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1650,6 +1709,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetObjectParents_PropertiesFIlter() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectParents_PropertiesFIlter....                          ");
       this.testroot = createFolderTree();
       try
@@ -1668,7 +1728,7 @@ public class NavigationTest extends BaseTest
                   doFail("Property filter works incorrect;");
             }
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1684,6 +1744,7 @@ public class NavigationTest extends BaseTest
 
    public void testGetObjectParents_FilterNotValidException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectParents_FilterNotValidException....                   ");
       this.testroot = createFolderTree();
       try
@@ -1696,7 +1757,7 @@ public class NavigationTest extends BaseTest
       }
       catch (FilterNotValidException ex)
       {
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1713,6 +1774,7 @@ public class NavigationTest extends BaseTest
 
    public void testGetObjectParents_ConstraintException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetObjectParents_ConstraintException....                       ");
       this.testroot = createFolderTree();
       try
@@ -1731,7 +1793,7 @@ public class NavigationTest extends BaseTest
       }
       catch (ConstraintException ex)
       {
-         pass();
+         pass(testname);
       }
       catch (Exception other)
       {
@@ -1746,6 +1808,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocs_Simple() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetCheckedOutDocs_Simple....                                   ");
       this.testroot = createFolderTree();
       try
@@ -1753,10 +1816,10 @@ public class NavigationTest extends BaseTest
          ItemsList<CmisObject> result =
             getConnection().getCheckedOutDocs(null, true, IncludeRelationships.BOTH, true, "", "", "", -1, 0);
          if (result.getItems().size() == 3)
-            pass();
+            pass(testname);
          else
             doFail("Unexpected items number;");
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1771,6 +1834,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocs_AllowableActions() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetCheckedOutDocs_AllowableActions....                         ");
       this.testroot = createFolderTree();
       try
@@ -1782,7 +1846,7 @@ public class NavigationTest extends BaseTest
             if (one.getAllowableActions() == null)
                doFail("AllowableActions must be present in result;");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1797,6 +1861,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocs_NoAllowableActions() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetCheckedOutDocs_NoAllowableActions....                       ");
       this.testroot = createFolderTree();
       try
@@ -1808,7 +1873,7 @@ public class NavigationTest extends BaseTest
             if (one.getAllowableActions() != null)
                doFail("AllowableActions must not be present in result;");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1823,6 +1888,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocs_Relationships() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetCheckedOutDocs_Relationships....                            ");
       this.testroot = createFolderTree();
       try
@@ -1836,7 +1902,7 @@ public class NavigationTest extends BaseTest
                found = true;
          }
          if (found)
-            pass();
+            pass(testname);
          else
             doFail("Relationship not found in result;");
       }
@@ -1853,6 +1919,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocs_NoRelationships() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetCheckedOutDocs_NoRelationships....                          ");
       this.testroot = createFolderTree();
       try
@@ -1866,7 +1933,7 @@ public class NavigationTest extends BaseTest
                found = true;
          }
          if (!found)
-            pass();
+            pass(testname);
          else
             doFail("Relationship must not not found in result;");
       }
@@ -1878,6 +1945,7 @@ public class NavigationTest extends BaseTest
 
    public void testGetCheckedOutDocs_ObjectInfo() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetCheckedOutDocs_ObjectInfo....                               ");
       this.testroot = createFolderTree();
       try
@@ -1889,7 +1957,7 @@ public class NavigationTest extends BaseTest
             if (one.getObjectInfo() == null)
                doFail("ObjectInfo must be present in result;");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1899,6 +1967,7 @@ public class NavigationTest extends BaseTest
 
    public void testGetCheckedOutDocs_NoObjectInfo() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetCheckedOutDocs_NoObjectInfo....                             ");
       this.testroot = createFolderTree();
       try
@@ -1910,7 +1979,7 @@ public class NavigationTest extends BaseTest
             if (one.getObjectInfo() != null)
                doFail("ObjectInfo must not be present in result;");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1925,6 +1994,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocs_NoRenditions() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetCheckedOutDocs_NoRenditions....                             ");
       this.testroot = createFolderTree();
       try
@@ -1937,7 +2007,7 @@ public class NavigationTest extends BaseTest
             if (one.getRenditions().size() != 0)
                doFail("rendition filter works incorrect;");
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1953,6 +2023,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocs_PropertyFiltered() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetCheckedOutDocs_PropertyFiltered....                         ");
       this.testroot = createFolderTree();
       try
@@ -1970,7 +2041,7 @@ public class NavigationTest extends BaseTest
                   doFail("Property filter works incorrect;");
             }
          }
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -1986,6 +2057,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocs_MaxItems() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetCheckedOutDocs_MaxItems....                                 ");
       this.testroot = createFolderTree();
       try
@@ -1994,7 +2066,7 @@ public class NavigationTest extends BaseTest
             getConnection().getCheckedOutDocs(testroot, true, IncludeRelationships.BOTH, true, "", "", "", 2, 0);
          if (result.getItems().size() != 2)
             doFail("Items nimber incorrect in result;");
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
@@ -2010,6 +2082,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocs_SkipCount() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetCheckedOutDocs_SkipCount....                                ");
       this.testroot = createFolderTree();
       try
@@ -2017,7 +2090,7 @@ public class NavigationTest extends BaseTest
          ItemsList<CmisObject> result =
             getConnection().getCheckedOutDocs(testroot, true, IncludeRelationships.BOTH, true, "", "", "", -1, 1);
          if (result.getItems().size() == 2)
-            pass();
+            pass(testname);
          else
             doFail("Unexpected items number;");
       }
@@ -2034,6 +2107,7 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocs_FilterNotValidException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetCheckedOutDocs_FilterNotValidException....                  ");
       this.testroot = createFolderTree();
       try
@@ -2044,12 +2118,17 @@ public class NavigationTest extends BaseTest
       }
       catch (FilterNotValidException ex)
       {
-         pass();
+         pass(testname);
       }
       catch (Exception e)
       {
          doFail(e.getMessage());
       }
+   }
+
+   protected void pass(String method) throws Exception
+   {
+      super.pass("NavigationTest." + method);
    }
 
    @Override

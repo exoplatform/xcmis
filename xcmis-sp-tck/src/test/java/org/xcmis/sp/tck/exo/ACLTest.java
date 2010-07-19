@@ -60,6 +60,7 @@ public class ACLTest extends BaseTest
     */
    public void testGetACL_Simple() throws Exception
    {
+      String testname = "";
       System.out.print("Running testGetACL_Simple....                                              ");
       FolderData testroot = null;
       try
@@ -89,18 +90,18 @@ public class ACLTest extends BaseTest
             {
                if (one.getPrincipal().equalsIgnoreCase("Makis"))
                {
-                  if(one.getPermissions().size() != 1)
+                  if (one.getPermissions().size() != 1)
                      doFail("Incorrect items number in result;");
-                  if(!one.getPermissions().contains("cmis:read"))
+                  if (!one.getPermissions().contains("cmis:read"))
                      doFail("Setting ACL failed");
                }
             }
-            pass();
+            pass(testname);
          }
          catch (NotSupportedException ex)
          {
             if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-               skip();
+               skip("ACLTest.testGetACL_Simple");
             else
                doFail();
          }
@@ -127,6 +128,7 @@ public class ACLTest extends BaseTest
     */
    public void testApplyACL_Simple() throws Exception
    {
+      String testname = "";
       System.out.print("Running testApplyACL_Simple....                                            ");
       FolderData testroot = null;
       try
@@ -155,18 +157,18 @@ public class ACLTest extends BaseTest
             {
                if (one.getPrincipal().equalsIgnoreCase("Makis"))
                {
-                  if(one.getPermissions().size() != 1)
+                  if (one.getPermissions().size() != 1)
                      doFail("Incorrect items number in result;");
-                  if(!one.getPermissions().contains("cmis:read"))
-                  doFail("Setting ACL failed");
+                  if (!one.getPermissions().contains("cmis:read"))
+                     doFail("Setting ACL failed");
                }
             }
-            pass();
+            pass(testname);
          }
          catch (NotSupportedException ex)
          {
             if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-               skip();
+               skip("ACLTest.testApplyACL_Simple");
             else
                doFail();
          }
@@ -193,6 +195,7 @@ public class ACLTest extends BaseTest
     */
    public void testApplyACL_RemoveACE() throws Exception
    {
+      String testname = "";
       System.out.print("Running testApplyACL_RemoveACE....                                         ");
       FolderData testroot = null;
       String typeID = null;
@@ -249,12 +252,12 @@ public class ACLTest extends BaseTest
                   doFail();
                }
             }
-            pass();
+            pass(testname);
          }
          catch (NotSupportedException ex)
          {
             if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-               skip();
+               skip("ACLTest.testApplyACL_RemoveACE");
             else
                doFail();
          }
@@ -283,6 +286,7 @@ public class ACLTest extends BaseTest
     */
    public void testApplyACL_ConstraintException() throws Exception
    {
+      String testname = "";
       System.out.print("Running testApplyACL_ConstraintException....                               ");
       FolderData testroot = null;
       try
@@ -311,13 +315,13 @@ public class ACLTest extends BaseTest
          catch (NotSupportedException ex)
          {
             if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-               skip();
+               skip("ACLTest.testApplyACL_ConstraintException");
             else
                doFail();
          }
          catch (ConstraintException ec)
          {
-            pass();
+            pass(testname);
          }
          catch (Exception other)
          {
@@ -342,6 +346,7 @@ public class ACLTest extends BaseTest
     */
    public void testApplyACL_ConstraintException2() throws Exception
    {
+      String testname = "";
       System.out.print("Running testApplyACL_ConstraintException2....                              ");
       FolderData testroot = null;
       try
@@ -374,12 +379,12 @@ public class ACLTest extends BaseTest
          }
          catch (ConstraintException ec)
          {
-            pass();
+            pass(testname);
          }
          catch (NotSupportedException ex)
          {
             if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-               skip();
+               skip("ACLTest.testApplyACL_ConstraintException2");
             else
                doFail();
          }
@@ -407,6 +412,7 @@ public class ACLTest extends BaseTest
     */
    public void testApplyACL_ConstraintException3() throws Exception
    {
+      String testname = "";
       System.out.print("Running testApplyACL_ConstraintException3....                              ");
       FolderData testroot = null;
       try
@@ -435,12 +441,12 @@ public class ACLTest extends BaseTest
          }
          catch (ConstraintException ec)
          {
-            pass();
+            pass(testname);
          }
          catch (NotSupportedException ex)
          {
             if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-               skip();
+               skip("ACLTest.testApplyACL_ConstraintException3");
             else
                doFail();
          }
@@ -458,5 +464,10 @@ public class ACLTest extends BaseTest
          if (testroot != null)
             clear(testroot.getObjectId());
       }
+   }
+
+   protected void pass(String method) throws Exception
+   {
+      super.pass("ACLTest." + method);
    }
 }
