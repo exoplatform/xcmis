@@ -96,7 +96,8 @@ public class ObjectTest extends BaseTest
                getConnection().createDocument(testroot.getObjectId(), getPropsMap("cmis:document", "doc1"), cs, null,
                   null, null, VersioningState.MAJOR);
             ContentStream c = getStorage().getObjectById(docId).getContentStream(null);
-            assertEquals(cs.getMediaType(), c.getMediaType());
+            if (!cs.getMediaType().equals(c.getMediaType()))
+               doFail("Media types does not match");
 
             byte[] after = new byte[15];
             c.getStream().read(after);
@@ -143,8 +144,10 @@ public class ObjectTest extends BaseTest
                getConnection().createDocument(testroot.getObjectId(), properties, cs, null, null, null,
                   VersioningState.MAJOR);
             ObjectData res = getStorage().getObjectById(docId);
-            assertNotNull(res.getProperty(CmisConstants.NAME));
-            assertEquals("doc1", (String)res.getProperty(CmisConstants.NAME).getValues().get(0)); //TODO: test more properties
+            if (res.getProperty(CmisConstants.NAME) == null)
+               doFail("NAME property is null;");
+            if (!((String)res.getProperty(CmisConstants.NAME).getValues().get(0)).equals("doc1")) //TODO: test more properties
+               doFail("Names does not match;");
             pass();
 
          }
@@ -193,13 +196,16 @@ public class ObjectTest extends BaseTest
                getConnection().createDocument(testroot.getObjectId(), getPropsMap("cmis:document", "doc1"), cs, null,
                   null, policies, VersioningState.MAJOR);
             ObjectData res = getStorage().getObjectById(docId);
-            assertEquals(1, res.getPolicies().size());
+            if (res.getPolicies().size() != 1)
+               doFail("Properties size iz incorrect");
             Iterator<PolicyData> it = res.getPolicies().iterator();
             while (it.hasNext())
             {
                PolicyData one = it.next();
-               assertEquals("policy1", one.getName());
-               assertEquals("testPolicyText", one.getPolicyText());
+               if (!one.getName().equals("policy1"))
+                  doFail("Policy names does not match");
+               if (!one.getPolicyText().equals("testPolicyText"))
+                  doFail("Policy text does not match");
             }
             pass();
          }
@@ -256,8 +262,10 @@ public class ObjectTest extends BaseTest
             {
                if (one.getPrincipal().equalsIgnoreCase("Makis"))
                {
-                  assertEquals(1, one.getPermissions().size());
-                  assertTrue(one.getPermissions().contains("cmis:read"));
+                  if (one.getPermissions().size() != 1)
+                     doFail("Permissions size is incorrect");
+                  if (!one.getPermissions().contains("cmis:read"))
+                     doFail("Permissions does not match");
                }
             }
             pass();
@@ -952,12 +960,14 @@ public class ObjectTest extends BaseTest
                getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(),
                   getPropsMap("cmis:document", "doc2"), null, null, null, VersioningState.MAJOR);
             ContentStream c = getStorage().getObjectById(docId).getContentStream(null);
-            assertEquals(cs.getMediaType(), c.getMediaType());
+            if (!cs.getMediaType().equals(c.getMediaType()))
+               doFail("Media types does not match");
 
             byte[] after = new byte[15];
             c.getStream().read(after);
             assertArrayEquals(before, after);
-            assertEquals(testroot.getName(), getStorage().getObjectById(docId).getParent().getName());
+            if (!testroot.getName().equals(getStorage().getObjectById(docId).getParent().getName()))
+               doFail("Names doen not match;");
             pass();
          }
          catch (Exception e)
@@ -1003,7 +1013,8 @@ public class ObjectTest extends BaseTest
             String docId =
                getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(),
                   getPropsMap("cmis:document", "doc2"), null, null, null, VersioningState.MAJOR);
-            assertEquals("doc2", getStorage().getObjectById(docId).getProperty(CmisConstants.NAME).getValues().get(0));
+            if (!getStorage().getObjectById(docId).getProperty(CmisConstants.NAME).getValues().get(0).equals("doc2"))
+               doFail("Names doen not match;");
             pass();
          }
          catch (Exception e)
@@ -1055,13 +1066,16 @@ public class ObjectTest extends BaseTest
                getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(),
                   getPropsMap("cmis:document", "doc2"), null, null, policies, VersioningState.MAJOR);
             ObjectData res = getStorage().getObjectById(docId);
-            assertEquals(1, res.getPolicies().size());
+            if (res.getPolicies().size() != 1)
+               doFail("Properties size iz incorrect");
             Iterator<PolicyData> it = res.getPolicies().iterator();
             while (it.hasNext())
             {
                PolicyData one = it.next();
-               assertEquals("policy1", one.getName());
-               assertEquals("testPolicyText", one.getPolicyText());
+               if (!one.getName().equals("policy1"))
+                  doFail("POlicy names does not match");
+               if (!one.getPolicyText().equals("testPolicyText"))
+                  doFail("Policy text does not match");
                res.removePolicy(one);
             }
             pass();
@@ -1123,8 +1137,10 @@ public class ObjectTest extends BaseTest
             {
                if (one.getPrincipal().equalsIgnoreCase("Makis"))
                {
-                  assertEquals(1, one.getPermissions().size());
-                  assertTrue(one.getPermissions().contains("cmis:read"));
+                  if (one.getPermissions().size() != 1)
+                     doFail("Permissions size is incorrect");
+                  if (!one.getPermissions().contains("cmis:read"))
+                     doFail("Permissions does not match");
                }
             }
             pass();
@@ -1174,7 +1190,8 @@ public class ObjectTest extends BaseTest
                getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(),
                   getPropsMap("cmis:document", "doc1"), null, null, null, VersioningState.MAJOR);
             ObjectData res = getStorage().getObjectById(docId);
-            assertNotSame("doc1", res.getName());
+            if (res.getName().equals("doc1"))
+               doFail("Names must not match;");
          }
          catch (NameConstraintViolationException ex)
          {
@@ -1778,8 +1795,10 @@ public class ObjectTest extends BaseTest
             String docId =
                getConnection().createFolder(testroot.getObjectId(), getPropsMap("cmis:folder", "f1"), null, null, null);
             ObjectData obj = getStorage().getObjectById(docId);
-            assertEquals("cmis:folder", obj.getTypeId());
-            assertEquals("/testroot/f1", ((FolderData)obj).getPath());
+            if (!obj.getTypeId().equals(BaseType.FOLDER))
+               doFail("Object types doen not match;");
+            if (!((FolderData)obj).getPath().equals("/testroot/f1"))
+               doFail("Path is not correct;");
             pass();
          }
          catch (Exception e)
@@ -1828,13 +1847,16 @@ public class ObjectTest extends BaseTest
                getConnection().createFolder(testroot.getObjectId(), getPropsMap("cmis:folder", "f1"), null, null,
                   policies);
             ObjectData res = getStorage().getObjectById(docId);
-            assertEquals(1, res.getPolicies().size());
+            if (res.getPolicies().size() != 1)
+               doFail("Properties size iz incorrect");
             Iterator<PolicyData> it = res.getPolicies().iterator();
             while (it.hasNext())
             {
                PolicyData one = it.next();
-               assertEquals("policy1", one.getName());
-               assertEquals("testPolicyText", one.getPolicyText());
+               if (!one.getName().equals("policy1"))
+                  doFail("POlicy names does not match");
+               if (!one.getPolicyText().equals("testPolicyText"))
+                  doFail("Policy text does not match");
             }
             pass();
          }
@@ -1892,8 +1914,10 @@ public class ObjectTest extends BaseTest
             for (AccessControlEntry one : res.getACL(false))
             {
                if (one.getPrincipal().equalsIgnoreCase("Makis"))
-                  assertEquals(1, one.getPermissions().size());
-               assertTrue(one.getPermissions().contains("cmis:read"));
+                  if (one.getPermissions().size() != 1)
+                     doFail("Permissions size is incorrect");
+               if (!one.getPermissions().contains("cmis:read"))
+                  doFail("Permissions does not match");
             }
             pass();
          }
@@ -1938,7 +1962,8 @@ public class ObjectTest extends BaseTest
             String docId =
                getConnection().createFolder(testroot.getObjectId(), getPropsMap("cmis:folder", "f1"), null, null, null);
             ObjectData res = getStorage().getObjectById(docId);
-            assertNotSame("f1", res.getName());
+            if (!res.getName().equals("f1"))
+               doFail("Names does not match;");
          }
          catch (NameConstraintViolationException ex)
          {
@@ -2409,9 +2434,13 @@ public class ObjectTest extends BaseTest
          {
             String docId = getConnection().createRelationship(props, null, null, null);
             obj = getStorage().getObjectById(docId);
-            assertEquals("cmis:relationship", obj.getTypeId());
-            assertEquals(doc1.getObjectId(), ((RelationshipData)obj).getSourceId());
-            assertEquals(doc2.getObjectId(), ((RelationshipData)obj).getTargetId());
+            if (!obj.getTypeId().equals("cmis:relationship"))
+               doFail("Cmis object types does not match;");
+            if (!doc1.getObjectId().equals(((RelationshipData)obj).getSourceId()))
+               doFail("Cmis objects  does not match;");
+            if (!doc2.getObjectId().equals(((RelationshipData)obj).getTargetId()))
+               ;
+            doFail("Cmis objects  does not match;");
             pass();
          }
          catch (Exception e)
@@ -2511,13 +2540,16 @@ public class ObjectTest extends BaseTest
          {
             String docId = getConnection().createRelationship(props, null, null, policies);
             obj = getStorage().getObjectById(docId);
-            assertEquals(1, obj.getPolicies().size());
+            if (obj.getPolicies().size() != 1)
+               doFail("Object policies size is incorrect;");
             Iterator<PolicyData> it = obj.getPolicies().iterator();
             while (it.hasNext())
             {
                PolicyData one = it.next();
-               assertEquals("policy1", one.getName());
-               assertEquals("testPolicyText", one.getPolicyText());
+               if (!one.getName().equals("policy1"))
+                  doFail("POlicy names does not match");
+               if (!one.getPolicyText().equals("testPolicyText"))
+                  doFail("Policy text does not match");
                obj.removePolicy(one);
             }
             pass();
@@ -2629,8 +2661,10 @@ public class ObjectTest extends BaseTest
             {
                if (one.getPrincipal().equalsIgnoreCase("Makis"))
                {
-                  assertEquals(1, one.getPermissions().size());
-                  assertTrue(one.getPermissions().contains("cmis:read"));
+                  if (one.getPermissions().size() != 1)
+                     doFail("Permissions size is incorrect");
+                  if (!one.getPermissions().contains("cmis:read"))
+                     doFail("Permissions does not match");
                }
             }
             pass();
@@ -2731,7 +2765,8 @@ public class ObjectTest extends BaseTest
          {
             String docId = getConnection().createRelationship(props, null, null, null);
             obj = getStorage().getObjectById(docId);
-            assertFalse(obj.getName().equals("rel1"));
+            if (obj.getName().equals("rel1"))
+               doFail("Names must not match;");
             pass();
          }
          catch (NameConstraintViolationException ex)
@@ -3305,8 +3340,10 @@ public class ObjectTest extends BaseTest
          {
             String docId = getConnection().createPolicy(testroot.getObjectId(), properties, null, null, null);
             obj = getStorage().getObjectById(docId);
-            assertEquals("cmis:policy", obj.getTypeId());
-            assertEquals("testPolicyText", ((PolicyData)obj).getPolicyText());
+            if (!obj.getTypeId().equals("cmis:policy"))
+               doFail("Cmis object types does not match");
+            if (!((PolicyData)obj).getPolicyText().equals("testPolicyText"))
+               doFail("Cmis policy text does not match");
             pass();
          }
          catch (Exception e)
@@ -3365,8 +3402,10 @@ public class ObjectTest extends BaseTest
             while (it.hasNext())
             {
                PolicyData one = it.next();
-               assertEquals("policy1", one.getName());
-               assertEquals("testPolicyText", one.getPolicyText());
+               if (!one.getName().equals("policy1"))
+                  doFail("POlicy names does not match");
+               if (!one.getPolicyText().equals("testPolicyText"))
+                  doFail("Policy text does not match");
                obj.removePolicy(one);
             }
             pass();
@@ -3430,8 +3469,10 @@ public class ObjectTest extends BaseTest
             {
                if (one.getPrincipal().equalsIgnoreCase("Makis"))
                {
-                  assertEquals(1, one.getPermissions().size());
-                  assertTrue(one.getPermissions().contains("cmis:read"));
+                  if (one.getPermissions().size() != 1)
+                     doFail("Permissions size is incorrect");
+                  if (!one.getPermissions().contains("cmis:read"))
+                     doFail("Permissions does not match");
                }
             }
             pass();
@@ -3486,7 +3527,8 @@ public class ObjectTest extends BaseTest
          {
             String docId = getConnection().createPolicy(testroot.getObjectId(), properties, null, null, null);
             obj = getStorage().getObjectById(docId);
-            assertNotSame("policy1", obj.getName());
+            if (obj.getName().equals("policy1"))
+               doFail("Names must not match;");
             pass();
          }
          catch (NameConstraintViolationException ex)
@@ -3920,34 +3962,37 @@ public class ObjectTest extends BaseTest
          try
          {
             AllowableActions actions = getConnection().getAllowableActions(testroot.getObjectId());
-            assertNotNull(actions);
-            assertNotNull(actions.isCanAddObjectToFolder());
-            assertNotNull(actions.isCanApplyACL());
-            assertNotNull(actions.isCanApplyPolicy());
-            assertNotNull(actions.isCanCancelCheckOut());
-            assertNotNull(actions.isCanCreateDocument());
-            assertNotNull(actions.isCanCreateFolder());
-            assertNotNull(actions.isCanCreateRelationship());
-            assertNotNull(actions.isCanDeleteContentStream());
-            assertNotNull(actions.isCanDeleteObject());
-            assertNotNull(actions.isCanDeleteTree());
-            assertNotNull(actions.isCanGetACL());
-            assertNotNull(actions.isCanGetAllVersions());
-            assertNotNull(actions.isCanGetAppliedPolicies());
-            assertNotNull(actions.isCanGetChildren());
-            assertNotNull(actions.isCanGetContentStream());
-            assertNotNull(actions.isCanGetDescendants());
-            assertNotNull(actions.isCanGetFolderParent());
-            assertNotNull(actions.isCanGetFolderTree());
-            assertNotNull(actions.isCanGetObjectParents());
-            assertNotNull(actions.isCanGetObjectRelationships());
-            assertNotNull(actions.isCanGetProperties());
-            assertNotNull(actions.isCanGetRenditions());
-            assertNotNull(actions.isCanMoveObject());
-            assertNotNull(actions.isCanRemoveObjectFromFolder());
-            assertNotNull(actions.isCanRemovePolicy());
-            assertNotNull(actions.isCanSetContentStream());
-            assertNotNull(actions.isCanUpdateProperties());
+            if (actions == null)
+               doFail("Allowable actions is null;");
+            /*
+            if(actions.isCanAddObjectToFolder())
+            if(actions.isCanApplyACL());
+            if(actions.isCanApplyPolicy());
+            if(actions.isCanCancelCheckOut());
+            if(actions.isCanCreateDocument());
+            if(actions.isCanCreateFolder());
+            if(actions.isCanCreateRelationship());
+            if(actions.isCanDeleteContentStream());
+            if(actions.isCanDeleteObject());
+            if(actions.isCanDeleteTree());
+            if(actions.isCanGetACL());
+            if(actions.isCanGetAllVersions());
+            if(actions.isCanGetAppliedPolicies());
+            if(actions.isCanGetChildren());
+            if(actions.isCanGetContentStream());
+            if(actions.isCanGetDescendants());
+            if(actions.isCanGetFolderParent());
+            if(actions.isCanGetFolderTree());
+            if(actions.isCanGetObjectParents());
+            if(actions.isCanGetObjectRelationships());
+            if(actions.isCanGetProperties());
+            if(actions.isCanGetRenditions());
+            if(actions.isCanMoveObject());
+            if(actions.isCanRemoveObjectFromFolder());
+            if(actions.isCanRemovePolicy());
+            if(actions.isCanSetContentStream());
+            if(actions.isCanUpdateProperties());
+            */
             pass();
          }
          catch (Exception e)
@@ -3987,8 +4032,10 @@ public class ObjectTest extends BaseTest
             CmisObject obj =
                getConnection().getObject(testroot.getObjectId(), false, IncludeRelationships.NONE, false, false, true,
                   "", "*");
-            assertEquals("testroot", obj.getObjectInfo().getName());
-            assertEquals(testroot.getObjectId(), obj.getObjectInfo().getId());
+            if (!obj.getObjectInfo().getName().equals("testroot"))
+               doFail("Names does not match;");
+            if (!testroot.getObjectId().equals(obj.getObjectInfo().getId()))
+               doFail("Object ID's does not match;");
             pass();
          }
          catch (Exception e)
@@ -4031,7 +4078,10 @@ public class ObjectTest extends BaseTest
                   "cmis:name,cmis:path", "*");
             for (Map.Entry<String, Property<?>> e : obj.getProperties().entrySet())
             {
-               assertTrue(e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")); //Other props must be ignored
+               if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
+                  continue;
+               else
+                  doFail("Property filter does not work;");
             }
             pass();
          }
@@ -4083,10 +4133,14 @@ public class ObjectTest extends BaseTest
             CmisObject obj =
                getConnection().getObject(testroot.getObjectId(), false, IncludeRelationships.TARGET, false, false,
                   true, "", "*");
-            assertEquals(1, obj.getRelationship().size());
+            if (obj.getRelationship().size() != 1)
+            {
+               doFail("Relationships count is incorrect;");
+            }
             for (CmisObject e : obj.getRelationship())
             {
-               assertEquals(reldata.getObjectId(), e.getObjectInfo().getId());
+               if (!reldata.getObjectId().equals(e.getObjectInfo().getId()))
+                  doFail("Object ID's does not match;");
             }
             pass();
             getStorage().deleteObject(reldata, true);
@@ -4131,10 +4185,12 @@ public class ObjectTest extends BaseTest
             CmisObject obj =
                getConnection().getObject(testroot.getObjectId(), false, IncludeRelationships.TARGET, true, false, true,
                   "", "*");
-            assertEquals(1, obj.getPolicyIds().size());
+            if (obj.getPolicyIds().size() != 1)
+               doFail("Pilicy count is incorrect;");
             for (String e : obj.getPolicyIds())
             {
-               assertEquals(policy.getObjectId(), e);
+               if (!policy.getObjectId().equals(e))
+                  doFail("Object ID's does not match;");
             }
             pass();
          }
@@ -4194,8 +4250,10 @@ public class ObjectTest extends BaseTest
             {
                if (one.getPrincipal().equalsIgnoreCase("Makis"))
                {
-                  assertEquals(1, one.getPermissions().size());
-                  assertTrue(one.getPermissions().contains("cmis:read"));
+                  if (one.getPermissions().size() != 1)
+                     doFail("Permissions size is incorrect");
+                  if (!one.getPermissions().contains("cmis:read"))
+                     doFail("Permissions does not match");
                }
             }
             pass();
@@ -4238,34 +4296,37 @@ public class ObjectTest extends BaseTest
                getConnection().getObject(testroot.getObjectId(), true, IncludeRelationships.TARGET, false, false, true,
                   "", "*");
             AllowableActions actions = obj.getAllowableActions();
-            assertNotNull(actions);
-            assertNotNull(actions.isCanAddObjectToFolder());
+            if (actions == null)
+               doFail("AllowableActions is null;");
+            /*
+            if(actions.isCanAddObjectToFolder());
             assertNotNull(actions.isCanApplyACL());
             assertNotNull(actions.isCanApplyPolicy());
             assertNotNull(actions.isCanCancelCheckOut());
-            assertNotNull(actions.isCanCreateDocument());
-            assertNotNull(actions.isCanCreateFolder());
-            assertNotNull(actions.isCanCreateRelationship());
-            assertNotNull(actions.isCanDeleteContentStream());
-            assertNotNull(actions.isCanDeleteObject());
-            assertNotNull(actions.isCanDeleteTree());
-            assertNotNull(actions.isCanGetACL());
-            assertNotNull(actions.isCanGetAllVersions());
-            assertNotNull(actions.isCanGetAppliedPolicies());
-            assertNotNull(actions.isCanGetChildren());
-            assertNotNull(actions.isCanGetContentStream());
-            assertNotNull(actions.isCanGetDescendants());
-            assertNotNull(actions.isCanGetFolderParent());
-            assertNotNull(actions.isCanGetFolderTree());
-            assertNotNull(actions.isCanGetObjectParents());
-            assertNotNull(actions.isCanGetObjectRelationships());
-            assertNotNull(actions.isCanGetProperties());
-            assertNotNull(actions.isCanGetRenditions());
-            assertNotNull(actions.isCanMoveObject());
-            assertNotNull(actions.isCanRemoveObjectFromFolder());
-            assertNotNull(actions.isCanRemovePolicy());
-            assertNotNull(actions.isCanSetContentStream());
-            assertNotNull(actions.isCanUpdateProperties());
+            if(actions.isCanCreateDocument());
+            if(actions.isCanCreateFolder());
+            if(actions.isCanCreateRelationship());
+            if(actions.isCanDeleteContentStream());
+            if(actions.isCanDeleteObject());
+            if(actions.isCanDeleteTree());
+            if(actions.isCanGetACL());
+            if(actions.isCanGetAllVersions());
+            if(actions.isCanGetAppliedPolicies());
+            if(actions.isCanGetChildren());
+            if(actions.isCanGetContentStream());
+            if(actions.isCanGetDescendants());
+            if(actions.isCanGetFolderParent());
+            if(actions.isCanGetFolderTree());
+            if(actions.isCanGetObjectParents());
+            if(actions.isCanGetObjectRelationships());
+            if(actions.isCanGetProperties());
+            if(actions.isCanGetRenditions());
+            if(actions.isCanMoveObject());
+            if(actions.isCanRemoveObjectFromFolder());
+            if(actions.isCanRemovePolicy());
+            if(actions.isCanSetContentStream());
+            if(actions.isCanUpdateProperties());
+            */
             pass();
          }
          catch (Exception e)
@@ -4323,7 +4384,7 @@ public class ObjectTest extends BaseTest
       finally
       {
          if (testroot != null)
-            clear(testroot.getObjectId());;
+            clear(testroot.getObjectId());
       }
    }
 
@@ -4347,10 +4408,16 @@ public class ObjectTest extends BaseTest
          try
          {
             CmisObject obj = getConnection().getProperties(testroot.getObjectId(), true, "cmis:name,cmis:path");
-            assertNotNull(obj);
+            if (obj == null)
+            {
+               doFail("Get properties result is null");
+            }
             for (Map.Entry<String, Property<?>> e : obj.getProperties().entrySet())
             {
-               assertTrue(e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")); //Other props must be ignored
+               if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
+                  continue;
+               else
+                  doFail("Property filter does not work;");
             }
             pass();
          }
@@ -4433,8 +4500,10 @@ public class ObjectTest extends BaseTest
             CmisObject obj =
                getConnection().getObjectByPath("/testroot", false, IncludeRelationships.NONE, false, false, true, "",
                   "*");
-            assertEquals("testroot", obj.getObjectInfo().getName());
-            assertEquals(testroot.getObjectId(), obj.getObjectInfo().getId());
+            if (!obj.getObjectInfo().getName().equals("testroot"))
+               doFail("Names does not match;");
+            if (!testroot.getObjectId().equals(obj.getObjectInfo().getId()))
+               doFail("Object ID's does not match;");
             pass();
          }
          catch (Exception e)
@@ -4477,7 +4546,10 @@ public class ObjectTest extends BaseTest
                   "cmis:name,cmis:path", "*");
             for (Map.Entry<String, Property<?>> e : obj.getProperties().entrySet())
             {
-               assertTrue(e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")); //Other props must be ignored
+               if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
+                  continue;
+               else
+                  doFail("Property filter does not work;");
             }
             pass();
          }
@@ -4529,10 +4601,12 @@ public class ObjectTest extends BaseTest
             CmisObject obj =
                getConnection().getObjectByPath("/testroot", false, IncludeRelationships.TARGET, false, false, true, "",
                   "*");
-            assertEquals(1, obj.getRelationship().size());
+            if (obj.getRelationship().size() != 1)
+               doFail("Incorect relationship size;");
             for (CmisObject e : obj.getRelationship())
             {
-               assertEquals(reldata.getObjectId(), e.getObjectInfo().getId());
+               if (!reldata.getObjectId().equals(e.getObjectInfo().getId()))
+                  doFail("Object ID's does not match;");
             }
             getStorage().deleteObject(reldata, true);
             pass();
@@ -4578,10 +4652,13 @@ public class ObjectTest extends BaseTest
             CmisObject obj =
                getConnection().getObjectByPath("/testroot", false, IncludeRelationships.TARGET, true, false, true, "",
                   "*");
-            assertEquals(1, obj.getPolicyIds().size());
+            if (obj.getPolicyIds().size() != 1)
+               doFail("Incorect policyIds size;");
+
             for (String e : obj.getPolicyIds())
             {
-               assertEquals(policy.getObjectId(), e);
+               if (!policy.getObjectId().equals(e))
+                  doFail("Object ID's does not match; ");
             }
             pass();
          }
@@ -4641,8 +4718,10 @@ public class ObjectTest extends BaseTest
             {
                if (one.getPrincipal().equalsIgnoreCase("Makis"))
                {
-                  assertEquals(1, one.getPermissions().size());
-                  assertTrue(one.getPermissions().contains("cmis:read"));
+                  if (one.getPermissions().size() != 1)
+                     doFail("Permissions size is incorrect");
+                  if (!one.getPermissions().contains("cmis:read"))
+                     doFail("Permissions does not match");
                }
             }
             pass();
@@ -4685,34 +4764,37 @@ public class ObjectTest extends BaseTest
                getConnection().getObjectByPath("/testroot", true, IncludeRelationships.TARGET, false, false, true, "",
                   "*");
             AllowableActions actions = obj.getAllowableActions();
-            assertNotNull(actions);
-            assertNotNull(actions.isCanAddObjectToFolder());
-            assertNotNull(actions.isCanApplyACL());
-            assertNotNull(actions.isCanApplyPolicy());
-            assertNotNull(actions.isCanCancelCheckOut());
-            assertNotNull(actions.isCanCreateDocument());
-            assertNotNull(actions.isCanCreateFolder());
-            assertNotNull(actions.isCanCreateRelationship());
-            assertNotNull(actions.isCanDeleteContentStream());
-            assertNotNull(actions.isCanDeleteObject());
-            assertNotNull(actions.isCanDeleteTree());
-            assertNotNull(actions.isCanGetACL());
-            assertNotNull(actions.isCanGetAllVersions());
-            assertNotNull(actions.isCanGetAppliedPolicies());
-            assertNotNull(actions.isCanGetChildren());
-            assertNotNull(actions.isCanGetContentStream());
-            assertNotNull(actions.isCanGetDescendants());
-            assertNotNull(actions.isCanGetFolderParent());
-            assertNotNull(actions.isCanGetFolderTree());
-            assertNotNull(actions.isCanGetObjectParents());
-            assertNotNull(actions.isCanGetObjectRelationships());
-            assertNotNull(actions.isCanGetProperties());
-            assertNotNull(actions.isCanGetRenditions());
-            assertNotNull(actions.isCanMoveObject());
-            assertNotNull(actions.isCanRemoveObjectFromFolder());
-            assertNotNull(actions.isCanRemovePolicy());
-            assertNotNull(actions.isCanSetContentStream());
-            assertNotNull(actions.isCanUpdateProperties());
+            if (actions == null)
+               doFail("AllowableActions must not be null");
+            /*
+            if(actions.isCanAddObjectToFolder());
+            if(actions.isCanApplyACL());
+            if(actions.isCanApplyPolicy());
+            if(actions.isCanCancelCheckOut());
+            if(actions.isCanCreateDocument());
+            if(actions.isCanCreateFolder());
+            if(actions.isCanCreateRelationship());
+            if(actions.isCanDeleteContentStream());
+            if(actions.isCanDeleteObject());
+            if(actions.isCanDeleteTree());
+            if(actions.isCanGetACL());
+            if(actions.isCanGetAllVersions());
+            if(actions.isCanGetAppliedPolicies());
+            if(actions.isCanGetChildren());
+            if(actions.isCanGetContentStream());
+            if(actions.isCanGetDescendants());
+            if(actions.isCanGetFolderParent());
+            if(actions.isCanGetFolderTree());
+            if(actions.isCanGetObjectParents());
+            if(actions.isCanGetObjectRelationships());
+            if(actions.isCanGetProperties());
+            if(actions.isCanGetRenditions());
+            if(actions.isCanMoveObject());
+            if(actions.isCanRemoveObjectFromFolder());
+            if(actions.isCanRemovePolicy());
+            if(actions.isCanSetContentStream());
+            if(actions.isCanUpdateProperties());
+            */
             pass();
          }
          catch (Exception e)
@@ -4901,7 +4983,8 @@ public class ObjectTest extends BaseTest
          try
          {
             List<Rendition> obj = getConnection().getRenditions(doc1.getObjectId(), "", -1, 0);
-            assertNotNull(obj);
+            if (obj == null)
+               doFail("Get renditions result is null;");
             pass();
          }
          catch (NotSupportedException ex)
@@ -5047,8 +5130,10 @@ public class ObjectTest extends BaseTest
          {
             String id = getConnection().updateProperties(doc1.getObjectId(), new ChangeTokenHolder(), properties2);
             ObjectData obj = getStorage().getObjectById(id);
-            assertEquals("new1", obj.getName());
-            assertEquals("Makiz", obj.getProperty(CmisConstants.CREATED_BY).getValues().get(0));
+            if (!obj.getName().equals("new1"))
+               doFail("Names does not match;");
+            if (!obj.getProperty(CmisConstants.CREATED_BY).getValues().get(0).equals("Makiz"))
+               doFail("Property values does not match");
             pass();
          }
          catch (Exception e)
@@ -5165,7 +5250,8 @@ public class ObjectTest extends BaseTest
          {
             String id = getConnection().moveObject(doc1.getObjectId(), folder2.getObjectId(), testroot.getObjectId());
             ObjectData obj = getStorage().getObjectById(id);
-            assertEquals(folder2.getName(), obj.getParent().getName());
+            if (!folder2.getName().equals(obj.getParent().getName()))
+               doFail("Names does not match;");
          }
          catch (Exception e)
          {
@@ -5372,7 +5458,8 @@ public class ObjectTest extends BaseTest
          {
             String id = getConnection().moveObject(doc1.getObjectId(), folder2.getObjectId(), testroot.getObjectId());
             ObjectData obj = getStorage().getObjectById(id);
-            assertFalse(obj.getName().equalsIgnoreCase(doc1.getName()));
+            if (obj.getName().equalsIgnoreCase(doc1.getName()))
+               doFail("Names must not match;");
          }
          catch (NameConstraintViolationException ex)
          {
@@ -5829,7 +5916,8 @@ public class ObjectTest extends BaseTest
          try
          {
             String docid = getConnection().deleteContentStream(doc1.getObjectId(), new ChangeTokenHolder());
-            assertNull(getStorage().getObjectById(docid).getContentStream(null));
+            if (getStorage().getObjectById(docid).getContentStream(null) != null)
+               doFail("Content stream must be null;");
             pass();
          }
          catch (Exception e)

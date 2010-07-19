@@ -89,13 +89,16 @@ public class PolicyTest extends BaseTest
          {
             getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
             ObjectData res = getStorage().getObjectById(doc1.getObjectId());
-            assertEquals(1, res.getPolicies().size());
+            if(res.getPolicies().size() != 1)
+              doFail("Policies number incorrect;");
             Iterator<PolicyData> it = res.getPolicies().iterator();
             while (it.hasNext())
             {
                PolicyData one = it.next();
-               assertEquals("policy1", one.getName());
-               assertEquals("testPolicyText", one.getPolicyText());
+               if(!one.getName().equals("policy1"))
+                  doFail("Policy name does not match;");
+               if(one.getPolicyText().equals("testPolicyText"))
+                 doFail("Policy text does not match;");
                res.removePolicy(one);
             }
             pass();
@@ -245,8 +248,10 @@ public class PolicyTest extends BaseTest
          {
             getConnection().removePolicy(policy.getObjectId(), doc1.getObjectId());
             ObjectData res = getStorage().getObjectById(doc1.getObjectId());
-            assertEquals(0, res.getPolicies().size());
-            assertNotNull(getStorage().getObjectById(policy.getObjectId()));
+            if (res.getPolicies().size() != 0)
+               doFail("Policy removing error;");
+            if(getStorage().getObjectById(policy.getObjectId()) == null)
+               doFail("Policy object deleted;");
             pass();
          }
          catch (Exception e)
@@ -383,11 +388,14 @@ public class PolicyTest extends BaseTest
          try
          {
             List<CmisObject> res = getConnection().getAppliedPolicies(doc1.getObjectId(), true, "");
-            assertNotNull(res);
+            if(res == null)
+               doFail("getAppliedPolicies() failed;");
             for (CmisObject one : res)
             {
-               assertNotNull(one.getObjectInfo());
-               assertEquals("cmis:policy", one.getObjectInfo().getTypeId());
+               if(one.getObjectInfo() == null)
+                  doFail("ObjectInfo is not present in result;");
+               if(!one.getObjectInfo().getTypeId().equals("cmis:policy"))
+                  doFail("Not a policy type object;");
             }
             pass();
          }
@@ -441,7 +449,10 @@ public class PolicyTest extends BaseTest
             {
                for (Map.Entry<String, Property<?>> e : one.getProperties().entrySet())
                {
-                  assertTrue(e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")); //Other props must be ignored
+                  if(e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
+                     continue;
+                  else
+                     doFail("Property filter works incorrect;");
                }
             }
             pass();
