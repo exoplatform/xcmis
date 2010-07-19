@@ -8,6 +8,9 @@
    <version>1.0</version>
    <packaging>pom</packaging>
 
+   <description>An extensible implementation of OASIS's Content Management Interoperability Services (CMIS) specification.</description>
+   <url>http://code.google.com/p/xcmis</url>
+
    <organization>
       <name>eXo Platform SAS</name>
       <url>http://www.exoplatform.com</url>
@@ -30,6 +33,12 @@
       <url>${xcmis.snapshots.repo.url}</url>
     </snapshotRepository>
   </distributionManagement>  
+
+  <scm>
+    <connection>scm:svn:http://xcmis.googlecode.com/svn/trunk/</connection>
+    <developerConnection>scm:svn:https://xcmis.googlecode.com/svn/trunk/</developerConnection>
+    <url>http://code.google.com/p/xcmis/source/browse/</url>
+  </scm>
 
    <properties>
       <!-- Repositories URLs -->
