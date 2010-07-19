@@ -64,14 +64,16 @@ public class NavigationTest extends BaseTest
       {
          ItemsList<CmisObject> result =
             getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "*", "*", "", 10, 0);
-         assertEquals(6, result.getItems().size());
+         if (result.getItems().size() != 6)
+            doFail("Unexpected items number;");
          int relCount = 0;
          for (CmisObject one : result.getItems())
          {
             if (one.getRelationship().size() > 0)
                relCount++;
          }
-         assertEquals(3, relCount); //two relationships are present
+         if (relCount != 3)
+            doFail("Unexpected items number;");//two relationships are present
          pass();
       }
       catch (Exception e)
@@ -99,8 +101,10 @@ public class NavigationTest extends BaseTest
             if (one.getRelationship().size() > 0)
                relCount++;
          }
-         assertEquals(0, relCount); //no relationships are present
-         pass();
+         if (relCount == 0) //no relationships are present
+            pass();
+         else
+            doFail("Unexpected items number;");
       }
       catch (Exception e)
       {
@@ -123,7 +127,10 @@ public class NavigationTest extends BaseTest
             getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "*", "*", "", 10, 0);
          for (CmisObject one : result.getItems())
          {
-            assertNotNull(one.getAllowableActions()); //allowable actions are present
+            if (one.getAllowableActions() != null) //allowable actions are present
+               continue;
+            else
+               doFail("Allowable actions must be present in result;");
          }
          pass();
       }
@@ -148,7 +155,10 @@ public class NavigationTest extends BaseTest
             getConnection().getChildren(testroot, false, IncludeRelationships.BOTH, true, true, "*", "*", "", 10, 0);
          for (CmisObject one : result.getItems())
          {
-            assertNull(one.getAllowableActions()); // no allowable actions are present
+            if (one.getAllowableActions() == null) //allowable actions are not present
+               continue;
+            else
+               doFail("Allowable actions must not be present in result;");
          }
          pass();
       }
@@ -174,9 +184,9 @@ public class NavigationTest extends BaseTest
          for (CmisObject one : result.getItems())
          {
             if (one.getPathSegment() != null) //path segment is present
-             continue;
+               continue;
             else
-             doFail();
+               doFail("Path segment must be present in result");
          }
          pass();
       }
@@ -204,7 +214,7 @@ public class NavigationTest extends BaseTest
             if (one.getPathSegment() == null) //no path segments are present
                continue;
             else
-               doFail();
+               doFail("Path segment must not be present in result");
          }
          pass();
       }
@@ -224,7 +234,10 @@ public class NavigationTest extends BaseTest
             getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "*", "*", "", 10, 0);
          for (CmisObject one : result.getItems())
          {
-            assertNotNull(one.getObjectInfo()); //obj info is present
+            if (one.getObjectInfo() != null) //obj info is present
+               continue;
+            else
+               doFail("ObjectInfo must be present in result");
          }
          pass();
       }
@@ -244,7 +257,10 @@ public class NavigationTest extends BaseTest
             getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, false, "*", "*", "", 10, 0);
          for (CmisObject one : result.getItems())
          {
-            assertNull(one.getObjectInfo()); //no obj info is present
+            if (one.getObjectInfo() == null) // no obj info present
+               continue;
+            else
+               doFail("ObjectInfo must not be present in result");
          }
          pass();
       }
@@ -273,7 +289,10 @@ public class NavigationTest extends BaseTest
          {
             for (Map.Entry<String, Property<?>> e : one.getProperties().entrySet())
             {
-               assertTrue(e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")); //Other props must be ignored
+               if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
+                  continue;
+               else
+                  doFail("Property filter works incorrect;");
             }
          }
          pass();
@@ -302,7 +321,8 @@ public class NavigationTest extends BaseTest
          {
             for (Map.Entry<String, Property<?>> e : one.getProperties().entrySet())
             {
-               assertEquals(0, one.getRenditions().size());
+               if (one.getRenditions().size() != 0)
+                  doFail("Rendition filter works incorrect;");
             }
          }
          pass();
@@ -326,7 +346,8 @@ public class NavigationTest extends BaseTest
       {
          ItemsList<CmisObject> result =
             getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "", "*", "", 2, 0);
-         assertTrue(result.isHasMoreItems());
+         if (!result.isHasMoreItems())
+            doFail("Has more items property is incorrect;");
          pass();
       }
       catch (Exception e)
@@ -348,7 +369,9 @@ public class NavigationTest extends BaseTest
       {
          ItemsList<CmisObject> result =
             getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "", "*", "", 3, 0);
-         assertEquals(3, result.getItems().size());
+         if (result.getItems().size() != 3)
+            ;
+         doFail("Items number is incorrect;");
          pass();
       }
       catch (Exception e)
@@ -399,7 +422,8 @@ public class NavigationTest extends BaseTest
       {
          ItemsList<CmisObject> result =
             getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "", "*", "", 10, 1);
-         assertEquals(5, result.getItems().size());
+         if (result.getItems().size() != 5)
+            doFail("Items number is incorrect;");
          pass();
       }
       catch (Exception e)
@@ -478,7 +502,8 @@ public class NavigationTest extends BaseTest
       {
          List<ItemsTree<CmisObject>> result =
             getConnection().getDescendants(testroot, -1, true, IncludeRelationships.BOTH, true, true, "", "*");
-         assertEquals(9, objectTreeToList(result).size());
+         if (objectTreeToList(result).size() != 9)
+            doFail("Items number is incorrect;");
          pass();
       }
       catch (Exception e)
@@ -503,7 +528,10 @@ public class NavigationTest extends BaseTest
          List<CmisObject> list = objectTreeToList(result);
          for (CmisObject one : list)
          {
-            assertNotNull(one.getAllowableActions()); //allowable actions are present
+            if (one.getAllowableActions() != null) //allowable actions are present
+               continue;
+            else
+               doFail("Allowable actions must be present in result;");
          }
          pass();
       }
@@ -529,7 +557,10 @@ public class NavigationTest extends BaseTest
          List<CmisObject> list = objectTreeToList(result);
          for (CmisObject one : list)
          {
-            assertNull(one.getAllowableActions()); //no allowable actions are present
+            if (one.getAllowableActions() == null) //allowable actions are present
+               continue;
+            else
+               doFail("Allowable actions must not be present in result;");
          }
          pass();
       }
@@ -559,7 +590,9 @@ public class NavigationTest extends BaseTest
             if (one.getRelationship().size() > 0)
                relCount++;
          }
-         assertEquals(3, relCount);
+         if (relCount != 3)
+            ;
+         doFail("Items number is incorrect;");
          pass();
       }
       catch (Exception e)
@@ -588,7 +621,9 @@ public class NavigationTest extends BaseTest
             if (one.getRelationship().size() > 0)
                relCount++;
          }
-         assertEquals(0, relCount);
+         if (relCount != 0)
+            ;
+         doFail("Items number is incorrect;");
          pass();
       }
       catch (Exception e)
@@ -614,7 +649,7 @@ public class NavigationTest extends BaseTest
          for (CmisObject one : list)
          {
             if (one.getPathSegment() != null)
-            continue;
+               continue;
             else
                doFail();
          }
@@ -637,7 +672,10 @@ public class NavigationTest extends BaseTest
          List<CmisObject> list = objectTreeToList(result);
          for (CmisObject one : list)
          {
-            assertNotNull(one.getObjectInfo());
+            if (one.getObjectInfo() != null)
+               continue;
+            else
+               doFail("Object info must be present in result;");
          }
          pass();
       }
@@ -658,7 +696,10 @@ public class NavigationTest extends BaseTest
          List<CmisObject> list = objectTreeToList(result);
          for (CmisObject one : list)
          {
-            assertNull(one.getObjectInfo());
+            if (one.getObjectInfo() == null)
+               continue;
+            else
+               doFail("Object info must not be present in result;");
          }
          pass();
       }
@@ -688,7 +729,10 @@ public class NavigationTest extends BaseTest
          {
             for (Map.Entry<String, Property<?>> e : one.getProperties().entrySet())
             {
-               assertTrue(e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")); //Other props must be ignored
+               if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
+                  continue;
+               else
+                  doFail("Property filter works incorrect;");
             }
          }
          pass();
@@ -715,7 +759,8 @@ public class NavigationTest extends BaseTest
          List<CmisObject> list = objectTreeToList(result);
          for (CmisObject one : list)
          {
-            assertEquals(0, one.getRenditions().size());
+            if (one.getRenditions().size() != 0)
+               doFail("Rendition filter works incorrect;");
          }
          pass();
       }
@@ -739,7 +784,8 @@ public class NavigationTest extends BaseTest
          List<ItemsTree<CmisObject>> result =
             getConnection().getDescendants(testroot, 2, true, IncludeRelationships.NONE, true, true, "", "cmis:none");
          List<CmisObject> list = objectTreeToList(result);
-         assertEquals(8, list.size()); //skipping last level with Doc4
+         if (list.size() != 8) //skipping last level with Doc4
+            doFail("Unexpected items number;");
          pass();
       }
       catch (Exception e)
@@ -838,7 +884,8 @@ public class NavigationTest extends BaseTest
       {
          List<ItemsTree<CmisObject>> result =
             getConnection().getFolderTree(testroot, -1, true, IncludeRelationships.BOTH, true, true, "", "*");
-         assertEquals(3, objectTreeToList(result).size());
+         if (objectTreeToList(result).size() != 3)
+            doFail("Unexpected number of items;");
          pass();
       }
       catch (Exception e)
@@ -863,7 +910,10 @@ public class NavigationTest extends BaseTest
          List<CmisObject> list = objectTreeToList(result);
          for (CmisObject one : list)
          {
-            assertNotNull(one.getAllowableActions()); //allowable actions are present
+            if (one.getAllowableActions() != null) //allowable actions are present
+               continue;
+            else
+               doFail("Allowable actions must be present in result");
          }
          pass();
       }
@@ -889,7 +939,10 @@ public class NavigationTest extends BaseTest
          List<CmisObject> list = objectTreeToList(result);
          for (CmisObject one : list)
          {
-            assertNull(one.getAllowableActions()); //no allowable actions are present
+            if (one.getAllowableActions() == null) //allowable actions not present
+               continue;
+            else
+               doFail("Allowable actions must not be present in result");
          }
          pass();
       }
@@ -919,7 +972,10 @@ public class NavigationTest extends BaseTest
             if (one.getRelationship().size() > 0)
                relCount++;
          }
-         assertEquals(1, relCount);
+         if (relCount != 1)
+         {
+            doFail("Incorrect items number in result;");
+         }
          pass();
       }
       catch (Exception e)
@@ -948,7 +1004,10 @@ public class NavigationTest extends BaseTest
             if (one.getRelationship().size() > 0)
                relCount++;
          }
-         assertEquals(0, relCount);
+         if (relCount != 0)
+         {
+            doFail("Incorrect items number in result;");
+         }
          pass();
       }
       catch (Exception e)
@@ -997,7 +1056,10 @@ public class NavigationTest extends BaseTest
          List<CmisObject> list = objectTreeToList(result);
          for (CmisObject one : list)
          {
-            assertNotNull(one.getObjectInfo());
+            if (one.getObjectInfo() != null)
+               continue;
+            else
+               doFail("Object info must be present in result;");
          }
          pass();
       }
@@ -1027,7 +1089,10 @@ public class NavigationTest extends BaseTest
          {
             for (Map.Entry<String, Property<?>> e : one.getProperties().entrySet())
             {
-               assertTrue(e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")); //Other props must be ignored
+               if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
+                  continue;
+               else
+                  doFail("Property filter works incorrect;");
             }
          }
          pass();
@@ -1054,7 +1119,10 @@ public class NavigationTest extends BaseTest
          List<CmisObject> list = objectTreeToList(result);
          for (CmisObject one : list)
          {
-            assertEquals(0, one.getRenditions().size());
+            if (one.getRenditions().size() == 0)
+               continue;
+            else
+               doFail("Rendition filter works incorrect;");
          }
          pass();
       }
@@ -1078,7 +1146,8 @@ public class NavigationTest extends BaseTest
          List<ItemsTree<CmisObject>> result =
             getConnection().getFolderTree(testroot, 1, true, IncludeRelationships.NONE, true, true, "", "cmis:none");
          List<CmisObject> list = objectTreeToList(result);
-         assertEquals(2, list.size()); //skipping last level with Doc4
+         if (list.size() != 2) //skipping last level with Doc4
+            doFail("Incorrect items number in result;");
          pass();
       }
       catch (Exception e)
@@ -1181,7 +1250,8 @@ public class NavigationTest extends BaseTest
       {
          ObjectData fold = getStorage().getObjectByPath("/testroot/folder1");
          CmisObject result = getConnection().getFolderParent(fold.getObjectId(), true, "");
-         assertNotNull(result);
+         if (result == null)
+            doFail("Result is empty");
          pass();
       }
       catch (Exception e)
@@ -1198,7 +1268,8 @@ public class NavigationTest extends BaseTest
       {
          ObjectData fold = getStorage().getObjectByPath("/testroot/folder1");
          CmisObject result = getConnection().getFolderParent(fold.getObjectId(), true, "");
-         assertNotNull(result.getObjectInfo());
+         if (result.getObjectInfo() == null)
+            doFail("ObjectInfo must be present in result;");
          pass();
       }
       catch (Exception e)
@@ -1215,7 +1286,8 @@ public class NavigationTest extends BaseTest
       {
          ObjectData fold = getStorage().getObjectByPath("/testroot/folder1");
          CmisObject result = getConnection().getFolderParent(fold.getObjectId(), false, "");
-         assertNull(result.getObjectInfo());
+         if (result.getObjectInfo() != null)
+            doFail("ObjectInfo must  not be present in result;");
          pass();
       }
       catch (Exception e)
@@ -1240,7 +1312,10 @@ public class NavigationTest extends BaseTest
          CmisObject result = getConnection().getFolderParent(fold.getObjectId(), true, "cmis:name,cmis:path");
          for (Map.Entry<String, Property<?>> e : result.getProperties().entrySet())
          {
-            assertTrue(e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")); //Other props must be ignored
+            if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
+               continue;
+            else
+               doFail("Property filter works incorrect");
          }
          pass();
       }
@@ -1314,7 +1389,8 @@ public class NavigationTest extends BaseTest
          ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
          List<ObjectParent> result =
             getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true, "", "*");
-         assertEquals(1, result.size());
+         if (result.size() != 1)
+            doFail("Incorrect items number in result;");
          pass();
       }
       catch (Exception e)
@@ -1339,7 +1415,8 @@ public class NavigationTest extends BaseTest
             getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true, "", "*");
          for (ObjectParent one : result)
          {
-            assertTrue(one.getObject().getRelationship().size() > 0);
+            if (!(one.getObject().getRelationship().size() > 0))
+               doFail("Incorrect items number in result;");
          }
          pass();
       }
@@ -1354,9 +1431,9 @@ public class NavigationTest extends BaseTest
     * Value indicating what relationships in which the objects returned participate MUST be returned, if any.
     * @throws Exception
     */
-   public void testGetObjectParents_NoRelatioships() throws Exception
+   public void testGetObjectParents_NoRelationships() throws Exception
    {
-      System.out.print("Running testGetObjectParents_NoRelatioships....                            ");
+      System.out.print("Running testGetObjectParents_NoRelationships....                            ");
       this.testroot = createFolderTree();
       try
       {
@@ -1365,7 +1442,9 @@ public class NavigationTest extends BaseTest
             getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.NONE, true, true, "", "*");
          for (ObjectParent one : result)
          {
-            assertEquals(0, one.getObject().getRelationship().size());
+            if (one.getObject().getRelationship().size() != 0)
+               ;
+            doFail("Incorrect items number in result;");
          }
          pass();
       }
@@ -1391,7 +1470,10 @@ public class NavigationTest extends BaseTest
             getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true, "", "*");
          for (ObjectParent one : result)
          {
-            assertNotNull(one.getObject().getAllowableActions());
+            if (one.getObject().getAllowableActions() != null)
+               continue;
+            else
+               doFail("AllowableActions must be present in result;");
          }
          pass();
       }
@@ -1417,7 +1499,10 @@ public class NavigationTest extends BaseTest
             getConnection().getObjectParents(doc.getObjectId(), false, IncludeRelationships.BOTH, true, true, "", "*");
          for (ObjectParent one : result)
          {
-            assertNull(one.getObject().getAllowableActions());
+            if (one.getObject().getAllowableActions() == null)
+               continue;
+            else
+               doFail("AllowableActions must not be present in result;");
          }
          pass();
       }
@@ -1444,7 +1529,10 @@ public class NavigationTest extends BaseTest
             getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true, "", "*");
          for (ObjectParent one : result)
          {
-            assertNotNull(one.getRelativePathSegment());
+            if (one.getRelativePathSegment() != null)
+               continue;
+            else
+               doFail("RelativePathSegment must be present in result;");
          }
          pass();
       }
@@ -1471,7 +1559,8 @@ public class NavigationTest extends BaseTest
             getConnection().getObjectParents(doc.getObjectId(), false, IncludeRelationships.BOTH, false, true, "", "*");
          for (ObjectParent one : result)
          {
-            assertNull(one.getRelativePathSegment());
+            if (one.getRelativePathSegment() != null)
+               doFail("RelativePathSegment must not be present in result;");
          }
          pass();
       }
@@ -1498,7 +1587,8 @@ public class NavigationTest extends BaseTest
                "cmis:none");
          for (ObjectParent one : result)
          {
-            assertEquals(0, one.getObject().getRenditions().size());
+            if (one.getObject().getRenditions().size() != 0)
+               doFail("Renditions filter works incorrect;");
          }
          pass();
       }
@@ -1519,7 +1609,8 @@ public class NavigationTest extends BaseTest
             getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true, "", "*");
          for (ObjectParent one : result)
          {
-            assertNotNull(one.getObject().getObjectInfo());
+            if (one.getObject().getObjectInfo() == null)
+               doFail("ObjectInfo must be present in result;");
          }
          pass();
       }
@@ -1540,7 +1631,8 @@ public class NavigationTest extends BaseTest
             getConnection().getObjectParents(doc.getObjectId(), false, IncludeRelationships.BOTH, true, false, "", "*");
          for (ObjectParent one : result)
          {
-            assertNull(one.getObject().getObjectInfo());
+            if (one.getObject().getObjectInfo() != null)
+               doFail("ObjectInfo must not be present in result;");
          }
          pass();
       }
@@ -1570,7 +1662,10 @@ public class NavigationTest extends BaseTest
          {
             for (Map.Entry<String, Property<?>> e : one.getObject().getProperties().entrySet())
             {
-               assertTrue(e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")); //Other props must be ignored
+               if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
+                  continue;
+               else
+                  doFail("Property filter works incorrect;");
             }
          }
          pass();
@@ -1657,7 +1752,10 @@ public class NavigationTest extends BaseTest
       {
          ItemsList<CmisObject> result =
             getConnection().getCheckedOutDocs(null, true, IncludeRelationships.BOTH, true, "", "", "", -1, 0);
-         assertEquals(3, result.getItems().size());
+         if (result.getItems().size() == 3)
+            pass();
+         else
+            doFail("Unexpected items number;");
          pass();
       }
       catch (Exception e)
@@ -1681,7 +1779,8 @@ public class NavigationTest extends BaseTest
             getConnection().getCheckedOutDocs(null, true, IncludeRelationships.BOTH, true, "", "", "", -1, 0);
          for (CmisObject one : result.getItems())
          {
-            assertNotNull(one.getAllowableActions());
+            if (one.getAllowableActions() == null)
+               doFail("AllowableActions must be present in result;");
          }
          pass();
       }
@@ -1706,7 +1805,8 @@ public class NavigationTest extends BaseTest
             getConnection().getCheckedOutDocs(null, false, IncludeRelationships.BOTH, true, "", "", "", -1, 0);
          for (CmisObject one : result.getItems())
          {
-            assertNull(one.getAllowableActions());
+            if (one.getAllowableActions() != null)
+               doFail("AllowableActions must not be present in result;");
          }
          pass();
       }
@@ -1735,8 +1835,10 @@ public class NavigationTest extends BaseTest
             if (one.getRelationship().size() > 0)
                found = true;
          }
-         assertTrue(found);
-         pass();
+         if (found)
+            pass();
+         else
+            doFail("Relationship not found in result;");
       }
       catch (Exception e)
       {
@@ -1763,8 +1865,10 @@ public class NavigationTest extends BaseTest
             if (one.getRelationship().size() > 0)
                found = true;
          }
-         assertFalse(found);
-         pass();
+         if (!found)
+            pass();
+         else
+            doFail("Relationship must not not found in result;");
       }
       catch (Exception e)
       {
@@ -1782,7 +1886,8 @@ public class NavigationTest extends BaseTest
             getConnection().getCheckedOutDocs(testroot, false, IncludeRelationships.BOTH, true, "", "*", "", -1, 0);
          for (CmisObject one : result.getItems())
          {
-            assertNotNull(one.getObjectInfo());
+            if (one.getObjectInfo() == null)
+               doFail("ObjectInfo must be present in result;");
          }
          pass();
       }
@@ -1802,7 +1907,8 @@ public class NavigationTest extends BaseTest
             getConnection().getCheckedOutDocs(testroot, false, IncludeRelationships.NONE, false, "", "*", "", -1, 0);
          for (CmisObject one : result.getItems())
          {
-            assertNull(one.getObjectInfo());
+            if (one.getObjectInfo() != null)
+               doFail("ObjectInfo must not be present in result;");
          }
          pass();
       }
@@ -1828,7 +1934,8 @@ public class NavigationTest extends BaseTest
                -1, 0);
          for (CmisObject one : result.getItems())
          {
-            assertEquals(0, one.getRenditions().size());
+            if (one.getRenditions().size() != 0)
+               doFail("rendition filter works incorrect;");
          }
          pass();
       }
@@ -1857,7 +1964,10 @@ public class NavigationTest extends BaseTest
          {
             for (Map.Entry<String, Property<?>> e : one.getProperties().entrySet())
             {
-               assertTrue(e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")); //Other props must be ignored
+               if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
+                  continue;
+               else
+                  doFail("Property filter works incorrect;");
             }
          }
          pass();
@@ -1882,7 +1992,8 @@ public class NavigationTest extends BaseTest
       {
          ItemsList<CmisObject> result =
             getConnection().getCheckedOutDocs(testroot, true, IncludeRelationships.BOTH, true, "", "", "", 2, 0);
-         assertEquals(2, result.getItems().size());
+         if (result.getItems().size() != 2)
+            doFail("Items nimber incorrect in result;");
          pass();
       }
       catch (Exception e)
@@ -1905,8 +2016,10 @@ public class NavigationTest extends BaseTest
       {
          ItemsList<CmisObject> result =
             getConnection().getCheckedOutDocs(testroot, true, IncludeRelationships.BOTH, true, "", "", "", -1, 1);
-         assertEquals(2, result.getItems().size());
-         pass();
+         if (result.getItems().size() == 2)
+            pass();
+         else
+            doFail("Unexpected items number;");
       }
       catch (Exception e)
       {

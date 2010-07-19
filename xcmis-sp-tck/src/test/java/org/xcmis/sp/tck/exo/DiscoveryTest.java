@@ -65,19 +65,26 @@ public class DiscoveryTest extends BaseTest
          query =
             getConnection().query(statement, true, false, IncludeRelationships.BOTH, true, RenditionFilter.ANY, -1, 0);
 
-         assertNotNull(errSms, query);
-         assertNotNull(errSms, query.getItems());
-         assertNotNull(errSms, query.getItems().size());
-         assertEquals(errSms, 1, query.getItems().size());
+         if (query == null)
+            doFail("Quary failed;");
+         if (query.getItems() == null)
+            doFail("Quary failed - no items;");
+         if (query.getItems().size() != 1)
+            doFail("Quary failed -  incorrect items number;");
 
          List<CmisObject> result = query.getItems();
          for (CmisObject cmisObject : result)
          {
-            assertNotNull(errSms, cmisObject);
-            assertNotNull(errSms, cmisObject.getObjectInfo());
-            assertNotNull(errSms, cmisObject.getObjectInfo().getId());
-            assertEquals(errSms, documentData.getObjectId(), cmisObject.getObjectInfo().getId());
-            assertEquals(errSms, documentData.getName(), cmisObject.getObjectInfo().getName());
+            if(cmisObject == null)
+               doFail("Query result not found;");
+               if(cmisObject.getObjectInfo() == null)
+                  doFail("ObjectInfo not found in query result;");
+               if(cmisObject.getObjectInfo().getId() == null);
+                  doFail("ObjectId not found in query result;");
+               if (!documentData.getObjectId().equals(cmisObject.getObjectInfo().getId()));
+                 doFail("ObjectId's does not match;");
+              if(!documentData.getName().equals(cmisObject.getObjectInfo().getName()));
+              doFail("Object names does not match;");
          }
          pass();
       }
@@ -95,7 +102,6 @@ public class DiscoveryTest extends BaseTest
    public void testQuery2() throws Exception
    {
       System.out.print("Running testQuery2....                                                     ");
-      String errSms = "\n 2.2.6.1 query. Doesn't work Query (Discovery service) with cmis:document to search content.";
       FolderData parentFolder = null;
       try
       {
@@ -107,19 +113,26 @@ public class DiscoveryTest extends BaseTest
          query =
             getConnection().query(statement, false, false, IncludeRelationships.BOTH, true, RenditionFilter.ANY, -1, 0);
 
-         assertNotNull(errSms, query);
-         assertNotNull(errSms, query.getItems());
-         assertNotNull(errSms, query.getItems().size());
-         assertEquals(errSms, 1, query.getItems().size());
+         if (query == null)
+            doFail("Quary failed;");
+         if (query.getItems() == null)
+            doFail("Quary failed - no items;");
+         if (query.getItems().size() == 0)
+            doFail("Quary failed - no items;");
 
          List<CmisObject> result = query.getItems();
          for (CmisObject cmisObject : result)
          {
-            assertNotNull(errSms, cmisObject);
-            assertNotNull(errSms, cmisObject.getObjectInfo());
-            assertNotNull(errSms, cmisObject.getObjectInfo().getId());
-            assertEquals(errSms, documentData.getObjectId(), cmisObject.getObjectInfo().getId());
-            assertEquals(errSms, documentData.getName(), cmisObject.getObjectInfo().getName());
+            if(cmisObject == null)
+            doFail("Query result not found;");
+            if(cmisObject.getObjectInfo() == null)
+               doFail("ObjectInfo not found in query result;");
+            if(cmisObject.getObjectInfo().getId() == null);
+               doFail("ObjectId not found in query result;");
+            if (!documentData.getObjectId().equals(cmisObject.getObjectInfo().getId()));
+              doFail("ObjectId's does not match;");
+           if(!documentData.getName().equals(cmisObject.getObjectInfo().getName()));
+           doFail("Object names does not match;");
          }
          pass();
       }

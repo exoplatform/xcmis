@@ -75,8 +75,10 @@ public class VersioningTest extends BaseTest
          try
          {
             String pwcID = getConnection().checkout(doc1.getObjectId());
-            assertNotNull(pwcID);
-            assertNotNull(getStorage().getObjectById(pwcID));
+            if (pwcID == null)
+               doFail("Checkout failed;");
+            if (getStorage().getObjectById(pwcID) == null)
+               doFail("Object not found;");
             pass();
          }
          catch (Exception other)
@@ -318,7 +320,8 @@ public class VersioningTest extends BaseTest
          try
          {
             String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, null);
-            assertNotNull(chIn);
+            if (chIn == null)
+               doFail("Check-in failed;");
             getStorage().getObjectById(chIn).getContentStream(null).getStream().read(after);
             assertArrayEquals(before, after);
             pass();
@@ -374,14 +377,17 @@ public class VersioningTest extends BaseTest
          try
          {
             String chIn = getConnection().checkin(pwcID, true, null, cs2, "", addACL, null, null);
-            assertNotNull(chIn);
+            if (chIn == null)
+               doFail("Check-in failed;");
             ObjectData obj = getStorage().getObjectById(chIn);
             for (AccessControlEntry one : obj.getACL(false))
             {
                if (one.getPrincipal().equalsIgnoreCase("Makis"))
                {
-                  assertEquals(1, one.getPermissions().size());
-                  assertTrue(one.getPermissions().contains("cmis:read"));
+                  if (one.getPermissions().size() != 1)
+                     doFail("Items number incorrect in result;");
+                  if (!one.getPermissions().contains("cmis:read"))
+                     doFail("ACL adding failed;");
                }
             }
             pass();
@@ -437,14 +443,19 @@ public class VersioningTest extends BaseTest
          try
          {
             String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, policies);
-            assertNotNull(chIn);
+            if (chIn == null)
+               doFail("Check-in failed;");
             ObjectData obj = getStorage().getObjectById(chIn);
             Iterator<PolicyData> it = obj.getPolicies().iterator();
             while (it.hasNext())
             {
                PolicyData one = it.next();
-               assertEquals("policy1", one.getName());
-               assertEquals("testPolicyText", one.getPolicyText());
+               if (!one.getName().equals("policy1"))
+               {
+                  doFail("Policy adding failed;");
+               }
+               if (!one.getPolicyText().equals("testPolicyText"))
+                  doFail("Policy adding failed;");
                obj.removePolicy(one);
             }
             pass();
@@ -593,7 +604,7 @@ public class VersioningTest extends BaseTest
             getStorage().createDocument(testroot, newType, properties, null, null, null, VersioningState.MAJOR);
          try
          {
-             pwcID = getConnection().checkout(doc1.getObjectId());
+            pwcID = getConnection().checkout(doc1.getObjectId());
             String chIn = getConnection().checkin(pwcID, true, null, cs, "", null, null, null);
             doFail();
          }
@@ -604,9 +615,9 @@ public class VersioningTest extends BaseTest
          catch (Exception e)
          {
             doFail(e.getMessage());
-         } 
-//        getStorage().deleteObject(getStorage().getObjectById(pwcID), true);
-        getStorage().deleteObject(doc1, true);
+         }
+         //        getStorage().deleteObject(getStorage().getObjectById(pwcID), true);
+         getStorage().deleteObject(doc1, true);
       }
       catch (Exception ez)
       {
@@ -617,7 +628,7 @@ public class VersioningTest extends BaseTest
          if (testroot != null)
             clear(testroot.getObjectId());
          if (typeID != null)
-         getStorage().removeType(typeID);
+            getStorage().removeType(typeID);
       }
    }
 
@@ -650,7 +661,8 @@ public class VersioningTest extends BaseTest
             CmisObject obj =
                getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true,
                   IncludeRelationships.BOTH, true, true, true, "", "");
-            assertNotNull(obj);
+            if (obj == null)
+            doFail("GetObjectOfLatestVersion failed;");
 
             pass();
          }
@@ -699,8 +711,10 @@ public class VersioningTest extends BaseTest
             CmisObject obj =
                getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true,
                   IncludeRelationships.BOTH, true, true, true, "", "");
-            assertNotNull(obj);
-            assertNotNull(obj.getAllowableActions());
+            if (obj == null)
+            doFail("GetObjectOfLatestVersion failed;");
+            if (obj.getAllowableActions() == null)
+            doFail(" AllowableActions must be present in result;");
             pass();
          }
          catch (Exception e)
@@ -753,13 +767,17 @@ public class VersioningTest extends BaseTest
             CmisObject obj =
                getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true,
                   IncludeRelationships.BOTH, true, true, true, "", "");
-            assertNotNull(obj);
+            if (obj == null)
+               doFail("GetObjectOfLatestVersion failed;");
             Iterator<String> it = obj.getPolicyIds().iterator();
             while (it.hasNext())
             {
                PolicyData one = (PolicyData)getStorage().getObjectById(it.next());
-               assertEquals("policy1", one.getName());
-               assertEquals("testPolicyText", one.getPolicyText());
+               if (!one.getName().equals("policy1")){
+                  doFail("Policy adding failed;");
+               }
+               if(! one.getPolicyText().equals("testPolicyText"));
+                   doFail("Policy text failed;");
             }
             pass();
          }
@@ -815,13 +833,16 @@ public class VersioningTest extends BaseTest
             CmisObject obj =
                getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true,
                   IncludeRelationships.BOTH, true, true, true, "", "");
-            assertNotNull(obj);
+            if (obj == null)
+               doFail("GetObjectOfLatestVersion failed;");
             for (AccessControlEntry one : obj.getACL())
             {
                if (one.getPrincipal().equalsIgnoreCase("Makis"))
                {
-                  assertEquals(1, one.getPermissions().size());
-                  assertTrue(one.getPermissions().contains("cmis:read"));
+                  if (one.getPermissions().size() != 1)
+                     doFail("Permission setting failed;");
+                  if (!one.getPermissions().contains("cmis:read"))
+                  doFail("Permission setting failed;");
                }
             }
             pass();
@@ -878,10 +899,14 @@ public class VersioningTest extends BaseTest
             CmisObject obj =
                getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true,
                   IncludeRelationships.BOTH, true, true, true, "cmis:name,cmis:path", "");
-            assertNotNull(obj);
+            if (obj == null)
+               doFail("GetObjectOfLatestVersion failed;");
             for (Map.Entry<String, Property<?>> e : obj.getProperties().entrySet())
             {
-               assertTrue(e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")); //Other props must be ignored
+               if(e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path"))//Other props must be ignored
+               continue;
+               else
+                  doFail("Property filter works incorrect");
             }
             pass();
          }
@@ -1030,8 +1055,10 @@ public class VersioningTest extends BaseTest
          try
          {
             CmisObject obj = getConnection().getPropertiesOfLatestVersion(doc1.getVersionSeriesId(), true, true, "");
-            assertNotNull(obj);
-            assertNotNull(obj.getObjectInfo());
+            if(obj == null)
+               doFail("GetPropertiesOfLatestVersion failed;");
+            if(obj.getObjectInfo() == null)
+               doFail("ObjectInfo must be present in result;");
             pass();
          }
          catch (Exception e)
@@ -1080,10 +1107,14 @@ public class VersioningTest extends BaseTest
             CmisObject obj =
                getConnection().getPropertiesOfLatestVersion(doc1.getVersionSeriesId(), true, true,
                   "cmis:name,cmis:path");
-            assertNotNull(obj);
+            if(obj == null)
+               doFail("GetPropertiesOfLatestVersion failed;");
             for (Map.Entry<String, Property<?>> e : obj.getProperties().entrySet())
             {
-               assertTrue(e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")); //Other props must be ignored
+               if(e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
+                  continue;
+               else
+                  doFail("Property filter works incorrect");
             }
             pass();
          }

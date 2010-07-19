@@ -34,12 +34,16 @@ import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.NameConstraintViolationException;
+import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.PolicyData;
+import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.RelationshipData;
+import org.xcmis.spi.RenditionFilter;
 import org.xcmis.spi.Storage;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.model.CmisObject;
+import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.RepositoryCapabilities;
 import org.xcmis.spi.model.TypeDefinition;
@@ -87,7 +91,7 @@ public abstract class BaseTest extends TestCase
 
    private Connection conn;
 
-   private static final String TCK_CONF_DEFAULT = "/conf/sp_jcr_exo/test-inmem-sp-configuration.xml";
+   private static final String TCK_CONF_DEFAULT = "/conf/sp_inmem_exo/test-inmem-sp-configuration.xml";
 
    @Override
    public void setUp() throws Exception
@@ -260,6 +264,7 @@ public abstract class BaseTest extends TestCase
    {
       try
       {
+         removeRelationships(testroot);
          FolderData rootFolder = (FolderData)getStorage().getObjectById(testroot);
         List<String> failed =  (List<String>)getStorage().deleteTree(rootFolder, true, UnfileObject.DELETE, true);
         for (String one:failed){
@@ -334,5 +339,36 @@ public abstract class BaseTest extends TestCase
    {
       System.out.println("SKIPPED");
       //skippedTests.add(o);
+   }
+   
+   protected void removeRelationships(String testroot)
+   {
+      try
+      {
+         Connection connection = getConnection();
+         List<ItemsTree<CmisObject>> descendants =
+            connection.getDescendants(testroot, -1, false, IncludeRelationships.BOTH, false, true, PropertyFilter.ALL,
+               RenditionFilter.NONE);
+         for (ItemsTree<CmisObject> tr : descendants)
+         {
+            for (CmisObject relationship : tr.getContainer().getRelationship())
+            {
+               connection.deleteObject(relationship.getObjectInfo().getId(), null);
+            }
+            List<ItemsTree<CmisObject>> children = tr.getChildren();
+            if (children != null && children.size() > 0)
+            {
+               removeRelationships(tr.getContainer().getObjectInfo().getId());
+            }
+         }
+      }
+      catch (ObjectNotFoundException e)
+      {
+
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
    }
 }

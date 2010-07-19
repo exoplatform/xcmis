@@ -83,13 +83,16 @@ public class ACLTest extends BaseTest
          try
          {
             List<AccessControlEntry> res = getConnection().getACL(doc1.getObjectId(), false);
-            assertNotNull(res);
+            if (res == null)
+               doFail("Getting ACL failed;");
             for (AccessControlEntry one : res)
             {
                if (one.getPrincipal().equalsIgnoreCase("Makis"))
                {
-                  assertEquals(1, one.getPermissions().size());
-                  assertTrue(one.getPermissions().contains("cmis:read"));
+                  if(one.getPermissions().size() != 1)
+                     doFail("Incorrect items number in result;");
+                  if(!one.getPermissions().contains("cmis:read"))
+                     doFail("Setting ACL failed");
                }
             }
             pass();
@@ -152,8 +155,10 @@ public class ACLTest extends BaseTest
             {
                if (one.getPrincipal().equalsIgnoreCase("Makis"))
                {
-                  assertEquals(1, one.getPermissions().size());
-                  assertTrue(one.getPermissions().contains("cmis:read"));
+                  if(one.getPermissions().size() != 1)
+                     doFail("Incorrect items number in result;");
+                  if(!one.getPermissions().contains("cmis:read"))
+                  doFail("Setting ACL failed");
                }
             }
             pass();

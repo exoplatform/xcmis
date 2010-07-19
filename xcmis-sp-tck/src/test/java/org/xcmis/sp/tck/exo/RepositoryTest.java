@@ -54,10 +54,14 @@ public class RepositoryTest extends BaseTest
    public void testGeneral() throws Exception
    {
       System.out.print("Running testGeneral....                                                    ");
-      assertNotNull(storageProvider);
-      assertNotNull(storageProvider.getConnection());
-      assertNotNull(storageProvider.getConnection().getStorage());
-      assertNotNull(storageProvider.getConnection().getStorage().getId());
+      if (storageProvider == null)
+         doFail("Storage provider is null;");
+      if (storageProvider.getConnection() == null)
+         doFail("Connection is null;");
+      if (storageProvider.getConnection().getStorage() == null)
+         doFail("Storage  is null;");
+      if (storageProvider.getConnection().getStorage().getId() == null)
+         doFail("Storage  ID is null;");
       pass();
    }
 
@@ -70,15 +74,22 @@ public class RepositoryTest extends BaseTest
    {
       System.out.print("Running testGetRepositories....                                            ");
       Set<RepositoryShortInfo> storageInfos = CmisRegistry.getInstance().getStorageInfos();
-      assertNotNull(storageInfos);
-      assertFalse(storageInfos.isEmpty());
+      if (storageInfos == null)
+         doFail("StorageInfo  is null;");
+      if (storageInfos.isEmpty())
+         doFail("StorageInfo  is empty;");
       for (RepositoryShortInfo repositoryShortInfo : storageInfos)
       {
-         assertNotNull(repositoryShortInfo.getRepositoryId());
-         assertFalse(repositoryShortInfo.getRepositoryId().isEmpty());
-         assertNotNull(repositoryShortInfo.getRepositoryName());
-         assertFalse(repositoryShortInfo.getRepositoryName().isEmpty());
-         assertNotNull(repositoryShortInfo.getRootFolderId());
+         if (repositoryShortInfo.getRepositoryId() == null)
+            doFail("Repository Short Info  is null;");
+         if (repositoryShortInfo.getRepositoryId().isEmpty())
+            doFail("Repository Short Info  is empty;");
+         if (repositoryShortInfo.getRepositoryName() == null)
+            doFail("Repository name  is null;");
+         if (repositoryShortInfo.getRepositoryName().isEmpty())
+            doFail("Repository name  is empty;");
+         if (repositoryShortInfo.getRootFolderId() == null)
+            doFail("Root folder ID  is null");
       }
       pass();
    }
@@ -93,28 +104,48 @@ public class RepositoryTest extends BaseTest
    public void testGetRepositoryInfo() throws Exception
    {
       System.out.print("Running testGetRepositoryInfo....                                          ");
-      assertNotNull(getStorage().getRepositoryInfo());
-      assertNotNull(getStorage().getRepositoryInfo().getRepositoryId());
-      assertFalse(getStorage().getRepositoryInfo().getRepositoryId().isEmpty());
-      assertNotNull(getStorage().getRepositoryInfo().getRepositoryName());
-      assertNotNull(getStorage().getRepositoryInfo().getRepositoryDescription());
-      assertNotNull(getStorage().getRepositoryInfo().getVendorName());
-      assertNotNull(getStorage().getRepositoryInfo().getProductName());
-      assertNotNull(getStorage().getRepositoryInfo().getProductVersion());
-      assertNotNull(getStorage().getRepositoryInfo().getRootFolderId());
-      assertNotNull(getStorage().getRepositoryInfo().getCapabilities());
+      if (getStorage().getRepositoryInfo() == null)
+         doFail("Repository Info  is null;");
+      if (getStorage().getRepositoryInfo().getRepositoryId() == null)
+         doFail("Repository Info ID  is null;");
+      if (getStorage().getRepositoryInfo().getRepositoryId().isEmpty())
+         doFail("Repository Info ID  is empty;");
+      if (getStorage().getRepositoryInfo().getRepositoryName() == null)
+         doFail("Repository Info Name  is null;");
+      if (getStorage().getRepositoryInfo().getRepositoryDescription() == null)
+         doFail("Repository Description  is null;");
+      if (getStorage().getRepositoryInfo().getVendorName() == null)
+         doFail("Repository VendorName  is null;");
+      if (getStorage().getRepositoryInfo().getProductName() == null)
+         doFail("Repository ProductName  is null;");
+      if (getStorage().getRepositoryInfo().getProductVersion() == null)
+         doFail("Repository PropductVersion  is null;");
+      if (getStorage().getRepositoryInfo().getRootFolderId() == null)
+         doFail("Repository Root folder ID  is null;");
+      if (getStorage().getRepositoryInfo().getCapabilities() == null)
+         doFail("Repository Capabilities  is null;");
       //      assertNotNull(getStorage().getRepositoryInfo().getLatestChangeLogToken());
-      assertNotNull(getStorage().getRepositoryInfo().getCmisVersionSupported());
+      if (getStorage().getRepositoryInfo().getCmisVersionSupported() == null)
+         doFail("Repository version supported  is null;");
       //      assertNotNull(getStorage().getRepositoryInfo().getThinClientURI());
-      assertNotNull(getStorage().getRepositoryInfo().isChangesIncomplete());
-      assertNotNull(getStorage().getRepositoryInfo().getChangesOnType());
-      assertNotNull(getStorage().getRepositoryInfo().getAclCapability());
-      assertNotNull(getStorage().getRepositoryInfo().getAclCapability().getSupportedPermissions());
-      assertNotNull(getStorage().getRepositoryInfo().getAclCapability().getPropagation());
-      assertNotNull(getStorage().getRepositoryInfo().getAclCapability().getPermissions());
-      assertNotNull(getStorage().getRepositoryInfo().getAclCapability().getMapping());
-      assertNotNull(getStorage().getRepositoryInfo().getPrincipalAnonymous());
-      assertNotNull(getStorage().getRepositoryInfo().getPrincipalAnyone());
+      //      if(getStorage().getRepositoryInfo().isChangesIncomplete().)
+      //         doFail("Repository Description  is null;");
+      if (getStorage().getRepositoryInfo().getChangesOnType() == null)
+         doFail("Repository Changes on type  is null;");
+      if (getStorage().getRepositoryInfo().getAclCapability() == null)
+         doFail("Repository ACL capability  is null;");
+      if (getStorage().getRepositoryInfo().getAclCapability().getSupportedPermissions() == null)
+         doFail("Repository supported permissions  is null;");
+      if (getStorage().getRepositoryInfo().getAclCapability().getPropagation() == null)
+         doFail("Repository ACL propagation  is null;");
+      if (getStorage().getRepositoryInfo().getAclCapability().getPermissions() == null)
+         doFail("Repository ACL permissions  is null;");
+      if (getStorage().getRepositoryInfo().getAclCapability().getMapping() == null)
+         doFail("Repository ACL mapping  is null;");
+      if (getStorage().getRepositoryInfo().getPrincipalAnonymous() == null)
+         doFail("Repository principal anonymous  is null;");
+      if (getStorage().getRepositoryInfo().getPrincipalAnyone() == null)
+         doFail("Repository principal anyone  is null;");
       pass();
    }
 
@@ -137,30 +168,43 @@ public class RepositoryTest extends BaseTest
       {
          doFail(e.getMessage());
       }
-      assertNotNull(typeChildren0);
+      if (typeChildren0 == null)
+         doFail("Root typer childrens is null;");
       List<TypeDefinition> typeChildrenList = typeChildren0.getItems();
-      assertNotNull(typeChildrenList);
+      if (typeChildrenList == null)
+         ;
+      doFail("Root typer childrens is empty;");
       List<String> ll = new ArrayList<String>();
       ll.add(CmisConstants.DOCUMENT);
       ll.add(CmisConstants.FOLDER);
       for (TypeDefinition typeDefinition : typeChildrenList)
       {
-         assertNotNull(typeDefinition);
-         assertNotNull(typeDefinition.getId());
-         assertFalse(typeDefinition.getId().isEmpty());
-         assertNotNull(typeDefinition.getBaseId());
-         assertEquals(typeDefinition.getId(), typeDefinition.getBaseId().value());
-         assertNotNull(typeDefinition.getDisplayName());
-         assertNotNull(typeDefinition.getLocalName());
-         assertNotNull(typeDefinition.getQueryName());
+         if (typeDefinition == null)
+            doFail("TypeDefinition is null;");
+         if (typeDefinition.getId() == null)
+            doFail("TypeDefinition  ID is null;");
+         if (typeDefinition.getId().isEmpty())
+            doFail("TypeDefinition  ID is empty;");
+         if (typeDefinition.getBaseId() == null)
+            doFail("TypeDefinition  BaseId is empty;");
+         if (!typeDefinition.getId().equals(typeDefinition.getBaseId().value()))
+            doFail("TypeDefinition  BaseId  does not match;");
+         if (typeDefinition.getDisplayName() == null)
+            doFail("TypeDefinition  display name is null;");
+         if (typeDefinition.getLocalName() == null)
+            doFail("TypeDefinition  local name is null;");
+         if (typeDefinition.getQueryName() == null)
+            doFail("TypeDefinition query name is null;");
          checkPropertyDefinitions(typeDefinition.getPropertyDefinitions());
 
          if (ll.size() > 0)
-            assertTrue(ll.contains(typeDefinition.getId()));
+            if (!ll.contains(typeDefinition.getId()))
+               ;
+         doFail("Mandatory type definition not found;");
          ll.remove(typeDefinition.getId());
       }
-      assertTrue("The prepared list of default types should be cleared. Some default type is missing:" + ll, ll
-         .isEmpty());
+      if (!ll.isEmpty())
+         doFail("Not all mandatory types found;");
       pass();
    }
 
@@ -183,8 +227,10 @@ public class RepositoryTest extends BaseTest
       {
          doFail(e.getMessage());
       }
-      assertNotNull(typeChildren3);
-      assertEquals(1, typeChildren3.getItems().size());
+      if (typeChildren3 == null)
+         doFail("Root type childrens is null;");
+      if (typeChildren3.getItems().size() != 1)
+         doFail("Incorrect Root type childrens size;");
       pass();
    }
 
@@ -220,8 +266,10 @@ public class RepositoryTest extends BaseTest
       {
          doFail(e.getMessage());
       }
-      assertNotNull(typeChildren4);
-      assertEquals(1, typeChildren4.getItems().size());
+      if (typeChildren4 == null)
+         doFail("Root type childrens is null;");
+      if (typeChildren4.getItems().size() != 1)
+         doFail("Incorrect Root type childrens size;");
       pass();
    }
 
@@ -244,8 +292,10 @@ public class RepositoryTest extends BaseTest
       {
          doFail(e.getMessage());
       }
-      assertNotNull(typeChildren1);
-      assertFalse(typeChildren1.isHasMoreItems());
+      if (typeChildren1 == null)
+         doFail("Root type childrens is null;");
+      if (!typeChildren1.isHasMoreItems())
+         doFail("Has more items not set in result;");
       pass();
    }
 
@@ -268,8 +318,10 @@ public class RepositoryTest extends BaseTest
       {
          doFail(e.getMessage());
       }
-      assertNotNull(typeChildren2);
-      assertFalse(typeChildren2.isHasMoreItems());
+      if (typeChildren2 == null)
+         doFail("Root type childrens is null;");
+      if (!typeChildren2.isHasMoreItems())
+         doFail("Has more items not set in result;");
       pass();
    }
 
