@@ -866,7 +866,7 @@ public class ObjectTest extends BaseTest
                null);
 
          Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-         org.xcmis.spi.model.PropertyDefinition<?> çropDefName =
+         org.xcmis.spi.model.PropertyDefinition<?> propDefName =
             PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
                CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
                "doc1", true, null, null);
@@ -878,8 +878,8 @@ public class ObjectTest extends BaseTest
          //propertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, propDefObjectTypeId);
 
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-         properties.put(CmisConstants.NAME, new StringProperty(çropDefName.getId(), çropDefName.getQueryName(),
-            çropDefName.getLocalName(), çropDefName.getDisplayName(), "doc1"));
+         properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
+            propDefName.getLocalName(), propDefName.getDisplayName(), "doc1"));
          properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(propDefObjectTypeId.getId(), propDefObjectTypeId
             .getQueryName(), propDefObjectTypeId.getLocalName(), propDefObjectTypeId.getDisplayName(), "cmis:kino"));
 
