@@ -199,7 +199,6 @@ public class RepositoryTest extends BaseTest
 
          if (ll.size() > 0)
             if (!ll.contains(typeDefinition.getId()))
-               ;
          doFail("Mandatory type definition not found;");
          ll.remove(typeDefinition.getId());
       }
@@ -367,20 +366,32 @@ public class RepositoryTest extends BaseTest
       {
          doFail(e.getMessage());
       }
-      assertNotNull(typeDescendants);
-      assertTrue(typeDescendants.size() > 0);
+      if (typeDescendants == null)
+         doFail("Type Descendants is null;");
+      if (!(typeDescendants.size() > 0))
+         doFail("Type Descendants is empty;");
       for (ItemsTree<TypeDefinition> itemsTree : typeDescendants)
       {
-         assertNotNull(itemsTree);
-         assertNotNull(itemsTree.getChildren());
-         assertTrue(itemsTree.getChildren().size() == 0);
-         assertNotNull(itemsTree.getContainer());
-         assertNotNull(itemsTree.getContainer().getId());
-         assertFalse(itemsTree.getContainer().getId().isEmpty());
-         assertNotNull(itemsTree.getContainer().getDisplayName());
-         assertNotNull(itemsTree.getContainer().getLocalName());
-         assertNotNull(itemsTree.getContainer().getQueryName());
-         assertNotNull(itemsTree.getContainer().getBaseId());
+         if (itemsTree == null)
+            doFail("Items tree is null;");
+         if (itemsTree.getChildren() == null)
+            doFail("Items tree children is null;");
+         if (itemsTree.getChildren().size() != 0)
+            doFail("Items tree children is not empty;");
+         if (itemsTree.getContainer() == null)
+            doFail("Items tree container is null;");
+         if (itemsTree.getContainer().getId() == null)
+            doFail("Items tree container ID is null;");
+         if (itemsTree.getContainer().getId().isEmpty())
+            doFail("Items tree container ID is empty;");
+         if (itemsTree.getContainer().getDisplayName() == null)
+            doFail("Items tree container DisplayName is empty;");
+         if (itemsTree.getContainer().getLocalName() == null)
+            doFail("Items tree container LocalName is empty;");
+         if (itemsTree.getContainer().getQueryName() == null)
+            doFail("Items tree container QueryName is empty;");
+         if (itemsTree.getContainer().getBaseId() == null)
+            doFail("Items tree container BaseId is empty;");
          checkPropertyDefinitions(itemsTree.getContainer().getPropertyDefinitions());
       }
       pass();
@@ -403,8 +414,10 @@ public class RepositoryTest extends BaseTest
       {
          doFail(e.getMessage());
       }
-      assertNotNull(typeDescendants);
-      assertTrue(typeDescendants.size() == 0);
+      if (typeDescendants == null)
+         doFail("Type Descendants is null;");
+      if (typeDescendants.size() != 0)
+         doFail("Type Descendants is not empty;");
       pass();
    }
 
@@ -425,8 +438,10 @@ public class RepositoryTest extends BaseTest
       {
          doFail(e.getMessage());
       }
-      assertNotNull(typeDescendants);
-      assertTrue(typeDescendants.size() == 0);
+      if (typeDescendants == null)
+         doFail("Type Descendants is null;");
+      if (typeDescendants.size() != 0)
+         doFail("Type Descendants is not empty;");
       pass();
    }
 
@@ -447,13 +462,18 @@ public class RepositoryTest extends BaseTest
       {
          doFail(e.getMessage());
       }
-      assertNotNull(typeDescendants);
-      assertTrue(typeDescendants.size() > 0);
+      if (typeDescendants == null)
+         doFail("Type Descendants is null;");
+      if (!(typeDescendants.size() > 0))
+         doFail("Type Descendants is empty;");
       for (ItemsTree<TypeDefinition> itemsTree : typeDescendants)
       {
-         assertNotNull(itemsTree);
-         assertNotNull(itemsTree.getContainer());
-         assertNull(itemsTree.getContainer().getPropertyDefinitions());
+         if (itemsTree == null)
+            doFail("Items tree is null;");
+         if (itemsTree.getContainer() == null)
+            doFail("Items tree container is null;");
+         if (itemsTree.getContainer().getPropertyDefinitions() != null)
+            doFail("Property definitions must be empty;");
       }
       pass();
    }
@@ -475,12 +495,16 @@ public class RepositoryTest extends BaseTest
       {
          doFail(e.getMessage());
       }
-      assertNotNull(typeDescendants);
-      assertTrue(typeDescendants.size() > 0);
+      if (typeDescendants == null)
+         doFail("Type Descendants is null;");
+      if (!(typeDescendants.size() > 0))
+         doFail("Type Descendants is empty;");
       for (ItemsTree<TypeDefinition> itemsTree : typeDescendants)
       {
-         assertNotNull(itemsTree);
-         assertNull(itemsTree.getChildren());
+         if (itemsTree == null)
+            doFail("Items tree is null;");
+         if (itemsTree.getChildren() != null)
+            doFail("Childrens must be empty;");
       }
       pass();
    }
@@ -516,11 +540,16 @@ public class RepositoryTest extends BaseTest
    public void testGetTypeDefinition_Folder() throws Exception
    {
       System.out.print("Running testGetTypeDefinition_Folder....                                   ");
-      assertNotNull(folderTypeDefinition);
-      assertNotNull(folderTypeDefinition.getId());
-      assertFalse(folderTypeDefinition.getId().isEmpty());
-      assertNotNull(folderTypeDefinition.getLocalName());
-      assertNotNull(folderTypeDefinition.getQueryName());
+      if (folderTypeDefinition == null)
+         doFail("Folder type definition is null;");
+      if (folderTypeDefinition.getId() == null)
+         doFail("Folder type definition ID is null;");
+      if (folderTypeDefinition.getId().isEmpty())
+         doFail("Folder type definition ID is empty;");
+      if (folderTypeDefinition.getLocalName() == null)
+         doFail("Folder type definition local name is empty;");
+      if (folderTypeDefinition.getQueryName() == null)
+         doFail("Folder type definition query name is empty;");
       checkPropertyDefinitions(folderTypeDefinition.getPropertyDefinitions());
       pass();
    }
@@ -533,11 +562,16 @@ public class RepositoryTest extends BaseTest
    public void testGetTypeDefinition_Document() throws Exception
    {
       System.out.print("Running testGetTypeDefinition_Document....                                 ");
-      assertNotNull(documentTypeDefinition);
-      assertNotNull(documentTypeDefinition.getId());
-      assertFalse(documentTypeDefinition.getId().isEmpty());
-      assertNotNull(documentTypeDefinition.getLocalName());
-      assertNotNull(documentTypeDefinition.getQueryName());
+      if (documentTypeDefinition == null)
+         doFail("Document type definition is null;");
+      if (documentTypeDefinition.getId() == null)
+         doFail("Document type definition ID is null;");
+      if (documentTypeDefinition.getId().isEmpty())
+         doFail("Document type definition ID is empty;");
+      if (documentTypeDefinition.getLocalName() == null)
+         doFail("Document type definition local name is empty;");
+      if (documentTypeDefinition.getQueryName() == null)
+         doFail("Document type definition query name is empty;");
       checkPropertyDefinitions(documentTypeDefinition.getPropertyDefinitions());
       pass();
    }
@@ -582,28 +616,42 @@ public class RepositoryTest extends BaseTest
       {
          doFail(e.getMessage());
       }
-      assertNotNull(typeDefinition);
-      assertNotNull(typeDefinition.getId());
-      assertFalse(typeDefinition.getId().isEmpty());
-      assertNotNull(typeDefinition.getLocalName());
-      assertNotNull(typeDefinition.getQueryName());
+      if (typeDefinition == null)
+         doFail("Type definition is null;");
+      if (typeDefinition.getId() == null)
+         doFail("Type definition ID is null;");
+      if (typeDefinition.getId().isEmpty())
+         doFail("Type definition ID is empty;");
+      if (typeDefinition.getLocalName() == null)
+         doFail("Type definition local name is empty;");
+      if (typeDefinition.getQueryName() == null)
+         doFail("Type definition query name is empty;");
       Collection<PropertyDefinition<?>> propertyDefinitions = typeDefinition.getPropertyDefinitions();
-      assertNull(propertyDefinitions);
+      if (propertyDefinitions != null)
+         doFail("Property definitions must not be included;");
       pass();
    }
 
    private void checkPropertyDefinitions(Collection<PropertyDefinition<?>> propertyDefinitions) throws Exception
    {
-      assertNotNull(propertyDefinitions);
-      assertTrue(propertyDefinitions.size() > 0);
+      if (propertyDefinitions == null)
+         doFail("propertyDefinitions is null;");
+      if (!(propertyDefinitions.size() > 0))
+         doFail("propertyDefinitions is not empty;");
       for (PropertyDefinition<?> propertyDefinition : propertyDefinitions)
       {
-         assertNotNull(propertyDefinition);
-         assertNotNull(propertyDefinition.getId());
-         assertFalse(propertyDefinition.getId().isEmpty());
-         assertNotNull(propertyDefinition.getLocalName());
-         assertNotNull(propertyDefinition.getQueryName());
-         assertNotNull(propertyDefinition.getPropertyType());
+         if (propertyDefinition == null)
+            doFail("Type definition is null;");
+         if (propertyDefinition.getId() == null)
+            doFail("Type definition ID is null;");
+         if (propertyDefinition.getId().isEmpty())
+            doFail("Type definition ID is empty;");
+         if (propertyDefinition.getLocalName() == null)
+            doFail("Type definition local name is empty;");
+         if (propertyDefinition.getQueryName() == null)
+            doFail("Type definition query name is empty;");
+         if (propertyDefinition.getPropertyType() == null)
+            doFail("Type definition property type is empty;");
       }
    }
 }

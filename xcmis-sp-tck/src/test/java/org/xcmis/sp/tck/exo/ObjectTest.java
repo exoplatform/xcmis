@@ -64,9 +64,7 @@ import org.xcmis.spi.model.impl.IdProperty;
 import org.xcmis.spi.model.impl.StringProperty;
 import org.xcmis.spi.utils.MimeType;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Map;
+
 
 public class ObjectTest extends BaseTest
 {
