@@ -334,7 +334,7 @@ abstract class BaseObjectData implements ObjectData
          return CmisUtils.emptyItemsIterator();
       }
 
-      List<RelationshipData> relationships = new ArrayList<RelationshipData>();
+      Set<RelationshipData> relationships = new java.util.HashSet<RelationshipData>();
       for (String id : relationshipIds)
       {
          RelationshipData relationship = null;

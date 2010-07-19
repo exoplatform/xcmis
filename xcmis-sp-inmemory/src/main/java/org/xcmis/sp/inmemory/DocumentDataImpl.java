@@ -442,8 +442,16 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
          }
          storage.parents.remove(objectId);
          storage.unfiled.remove(objectId);
-         storage.versions.get(vsId).remove(objectId);
-         storage.workingCopies.remove(vsId);
+         for (String version : storage.versions.get(getVersionSeriesId()))
+         {
+            storage.entries.remove(version);
+         }
+         storage.versions.remove(vsId);
+         String pwcId = storage.workingCopies.remove(vsId);
+         if (pwcId != null)
+         {
+            storage.entries.remove(pwcId);
+         }
       }
    }
 }

@@ -871,6 +871,7 @@ public class StorageImpl implements Storage
    public void deleteObject(ObjectData object, boolean deleteAllVersions) throws VersioningException,
       UpdateConflictException, StorageException
    {
+      // TODO support for 'deleteAllVersions'
       String objectId = object.getObjectId();
 
       ((BaseObjectData)object).delete();
