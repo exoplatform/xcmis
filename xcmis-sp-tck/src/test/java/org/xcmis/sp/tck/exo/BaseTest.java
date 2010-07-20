@@ -67,8 +67,6 @@ import java.util.Map;
 public abstract class BaseTest extends TestCase
 {
 
-   //private static final Log LOG = ExoLogger.getLogger(BaseTest.class);
-
    protected StandaloneContainer container;
 
    protected StorageProvider storageProvider;

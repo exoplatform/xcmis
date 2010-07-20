@@ -103,7 +103,7 @@ public class ACLTest extends BaseTest
             if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
                skip("ACLTest.testGetACL_Simple");
             else
-               doFail(testname, "Capability ACL is supported but not supported exception thrown");
+               doFail(testname, "Capability ACL is supported but not supported exception thrown;");
          }
          catch (Exception other)
          {
