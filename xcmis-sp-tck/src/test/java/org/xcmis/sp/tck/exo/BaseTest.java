@@ -67,7 +67,7 @@ import java.util.Map;
 public abstract class BaseTest extends TestCase
 {
 
-   private static final Log LOG = ExoLogger.getLogger(BaseTest.class);
+   //private static final Log LOG = ExoLogger.getLogger(BaseTest.class);
 
    protected StandaloneContainer container;
 
@@ -93,7 +93,7 @@ public abstract class BaseTest extends TestCase
 
    private Connection conn;
 
-   private static final String TCK_CONF_DEFAULT = "/conf/sp_jcr_exo/test-jcr-sp-configuration.xml";
+   private static final String TCK_CONF_DEFAULT = "/conf/sp_inmem_exo/test-inmem-sp-configuration.xml";
 
    @Override
    public void setUp() throws Exception
@@ -321,19 +321,6 @@ public abstract class BaseTest extends TestCase
       else
          fail();
    }
-
-//   protected void doFail(String mtd) throws Exception
-//   {
-//      System.out.println("FAILED");
-//      failedTests.add(mtd);
-//      fail();
-//   }
-
-//   protected void pass() throws Exception
-//   {
-//      System.out.println("PASSED");
-//      //passedTests.add(o);
-//   }
 
    protected void pass(String o) throws Exception
    {

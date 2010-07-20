@@ -5328,6 +5328,7 @@ public class ObjectTest extends BaseTest
          {
             doFail(testname, e.getMessage());
          }
+         pass(testname);
       }
       catch (Exception ez)
       {
