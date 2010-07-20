@@ -33,6 +33,8 @@ import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.PolicyData;
+import org.xcmis.spi.PropertyFilter;
+import org.xcmis.spi.RenditionFilter;
 import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.BaseType;
@@ -59,20 +61,20 @@ public class VersioningTest extends BaseTest
     */
    public void testCheckOut_Simple() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testCheckOut_Simple....                                            ");
+      String testname = "testCheckOut_Simple";
+      System.out.print("Running " + testname + "....                                            ");
       FolderData testroot = null;
       try
       {
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
          testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
-               null);
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
+               null, null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
          DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
-               null, null, VersioningState.MAJOR);
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
+               cs, null, null, VersioningState.MAJOR);
          try
          {
             String pwcID = getConnection().checkout(doc1.getObjectId());
@@ -105,16 +107,16 @@ public class VersioningTest extends BaseTest
     */
    public void testCheckOut_ConstraintException() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testCheckOut_ConstraintException....                               ");
+      String testname = "testCheckOut_ConstraintException";
+      System.out.print("Running " + testname + "....                               ");
       FolderData testroot = null;
       String typeID = new String();
       try
       {
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
          testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
-               null);
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
+               null, null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
          Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
@@ -126,8 +128,6 @@ public class VersioningTest extends BaseTest
             PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
                CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
                false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
-         //propertyDefinitions.put(CmisConstants.NAME, kinoPropDefName);
-         //propertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, kinoPropDefObjectTypeId);
 
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
          properties.put(CmisConstants.NAME, new StringProperty(kinoPropDefName.getId(), kinoPropDefName.getQueryName(),
@@ -179,21 +179,21 @@ public class VersioningTest extends BaseTest
     */
    public void testCancelCheckOut_Simple() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testCancelCheckOut_Simple....                                      ");
+      String testname = "testCancelCheckOut_Simple";
+      System.out.print("Running " + testname + "....                                      ");
       FolderData testroot = null;
       try
       {
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
          testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
-               null);
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
+               null, null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
          DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
-               null, null, VersioningState.MAJOR);
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
+               cs, null, null, VersioningState.MAJOR);
          String pwcID = getConnection().checkout(doc1.getObjectId());
          try
          {
@@ -230,16 +230,16 @@ public class VersioningTest extends BaseTest
     */
    public void testCancelCheckOut_ConstraintException() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testCancelCheckOut_ConstraintException....                         ");
+      String testname = "testCancelCheckOut_ConstraintException";
+      System.out.print("Running " + testname + "....                         ");
       FolderData testroot = null;
       String typeID = new String();
       try
       {
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
          testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
-               null);
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
+               null, null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
          Map<String, PropertyDefinition<?>> kinoPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
@@ -251,8 +251,6 @@ public class VersioningTest extends BaseTest
             PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
                CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
                false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
-         //kinoPropertyDefinitions.put(CmisConstants.NAME, kinoPropDefName2);
-         //kinoPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, kinoPropDefObjectTypeId2);
 
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
          properties.put(CmisConstants.NAME, new StringProperty(kinoPropDefName2.getId(), kinoPropDefName2
@@ -304,23 +302,23 @@ public class VersioningTest extends BaseTest
     */
    public void testCheckIn_Simple() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testCheckIn_Simple....                                             ");
+      String testname = "testCheckIn_Simple";
+      System.out.print("Running " + testname + "....                                             ");
       FolderData testroot = null;
       try
       {
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
          testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
-               null);
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
+               null, null);
          byte[] before = "zzz".getBytes();
          byte[] after = new byte[3];
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          ContentStream cs2 = new BaseContentStream(before, null, new MimeType("text", "plain"));
 
          DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
-               null, null, VersioningState.MAJOR);
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
+               cs, null, null, VersioningState.MAJOR);
          String pwcID = getConnection().checkout(doc1.getObjectId());
          try
          {
@@ -354,24 +352,24 @@ public class VersioningTest extends BaseTest
     */
    public void testCheckIn_AddACL() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testCheckIn_AddACL....                                             ");
+      String testname = "testCheckIn_AddACL";
+      System.out.print("Running " + testname + "....                                             ");
       FolderData testroot = null;
       try
       {
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
          testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
-               null);
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
+               null, null);
          byte[] before = "zzz".getBytes();
          byte[] after = new byte[3];
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          ContentStream cs2 = new BaseContentStream(after, null, new MimeType("text", "plain"));
 
          DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
-               null, null, VersioningState.MAJOR);
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
+               cs, null, null, VersioningState.MAJOR);
 
          AccessControlEntry acl = new AccessControlEntry();
          acl.setPrincipal("Makis");
@@ -421,8 +419,8 @@ public class VersioningTest extends BaseTest
     */
    public void testCheckIn_ApplyPolicy() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testCheckIn_ApplyPolicy....                                        ");
+      String testname = "testCheckIn_ApplyPolicy";
+      System.out.print("Running " + testname + "....                                        ");
       FolderData testroot = null;
       PolicyData policy = null;
       try
@@ -430,16 +428,16 @@ public class VersioningTest extends BaseTest
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
          testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
-               null);
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
+               null, null);
          byte[] before = "zzz".getBytes();
          byte[] after = new byte[3];
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          ContentStream cs2 = new BaseContentStream(after, null, new MimeType("text", "plain"));
 
          DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
-               null, null, VersioningState.MAJOR);
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
+               cs, null, null, VersioningState.MAJOR);
 
          policy = createPolicy(testroot, "policy1");
 
@@ -492,8 +490,8 @@ public class VersioningTest extends BaseTest
     */
    public void testCheckIn_ConstraintException1() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testCheckIn_ConstraintException1....                               ");
+      String testname = "testCheckIn_ConstraintException1";
+      System.out.print("Running " + testname + "....                               ");
       FolderData testroot = null;
       String typeID = new String();
       try
@@ -501,8 +499,8 @@ public class VersioningTest extends BaseTest
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
          testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
-               null);
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
+               null, null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
          Map<String, PropertyDefinition<?>> kinoPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
@@ -514,8 +512,6 @@ public class VersioningTest extends BaseTest
             PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
                CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
                false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
-         //kinoPropertyDefinitions.put(CmisConstants.NAME, kinoPropDefName2);
-         //kinoPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, kinoPropDefObjectTypeId2);
 
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
          properties.put(CmisConstants.NAME, new StringProperty(kinoPropDefName2.getId(), kinoPropDefName2
@@ -569,8 +565,8 @@ public class VersioningTest extends BaseTest
     */
    public void testCheckIn_ConstraintException2() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testCheckIn_ConstraintException2....                               ");
+      String testname = "testCheckIn_ConstraintException2";
+      System.out.print("Running " + testname + "....                               ");
       FolderData testroot = null;
       String pwcID = null;
       String typeID = new String();
@@ -579,8 +575,8 @@ public class VersioningTest extends BaseTest
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
          testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
-               null);
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
+               null, null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
          Map<String, PropertyDefinition<?>> kinoPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
@@ -592,8 +588,6 @@ public class VersioningTest extends BaseTest
             PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
                CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
                false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
-         //kinoPropertyDefinitions.put(CmisConstants.NAME, kinoPropDefName2);
-         //kinoPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, kinoPropDefObjectTypeId2);
 
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
          properties.put(CmisConstants.NAME, new StringProperty(kinoPropDefName2.getId(), kinoPropDefName2
@@ -625,7 +619,6 @@ public class VersioningTest extends BaseTest
          {
             doFail(e.getMessage());
          }
-         //        getStorage().deleteObject(getStorage().getObjectById(pwcID), true);
          getStorage().deleteObject(doc1, true);
       }
       catch (Exception ez)
@@ -648,29 +641,29 @@ public class VersioningTest extends BaseTest
     */
    public void testGetObjectOfLatestVersion_Simple() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetObjectOfLatestVersion_Simple....                            ");
+      String testname = "testGetObjectOfLatestVersion_Simple";
+      System.out.print("Running " + testname + "....                            ");
       FolderData testroot = null;
       try
       {
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
          testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
-               null);
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
+               null, null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
 
          DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
-               null, null, VersioningState.MAJOR);
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
+               cs, null, null, VersioningState.MAJOR);
          String pwcID = getConnection().checkout(doc1.getObjectId());
          String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, null);
          try
          {
             CmisObject obj =
                getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true,
-                  IncludeRelationships.BOTH, true, true, true, "", "");
+                  IncludeRelationships.BOTH, true, true, true, PropertyFilter.ALL, RenditionFilter.NONE);
             if (obj == null)
                doFail("GetObjectOfLatestVersion failed;");
 
@@ -699,29 +692,29 @@ public class VersioningTest extends BaseTest
     */
    public void testGetObjectOfLatestVersion_AllowableActions() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetObjectOfLatestVersion_AllowableActions....                  ");
+      String testname = "testGetObjectOfLatestVersion_AllowableActions";
+      System.out.print("Running " + testname + "....                  ");
       FolderData testroot = null;
       try
       {
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
          testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
-               null);
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
+               null, null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
 
          DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
-               null, null, VersioningState.MAJOR);
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
+               cs, null, null, VersioningState.MAJOR);
          String pwcID = getConnection().checkout(doc1.getObjectId());
          String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, null);
          try
          {
             CmisObject obj =
                getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true,
-                  IncludeRelationships.BOTH, true, true, true, "", "");
+                  IncludeRelationships.BOTH, true, true, true, PropertyFilter.ALL, RenditionFilter.NONE);
             if (obj == null)
                doFail("GetObjectOfLatestVersion failed;");
             if (obj.getAllowableActions() == null)
@@ -751,8 +744,8 @@ public class VersioningTest extends BaseTest
     */
    public void testGetObjectOfLatestVersion_IncludePolicies() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetObjectOfLatestVersion_IncludePolicies....                   ");
+      String testname = "testGetObjectOfLatestVersion_IncludePolicies";
+      System.out.print("Running " + testname + "....                   ");
       FolderData testroot = null;
       PolicyData policy = null;
       try
@@ -760,8 +753,8 @@ public class VersioningTest extends BaseTest
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
          testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
-               null);
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
+               null, null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
 
@@ -770,15 +763,15 @@ public class VersioningTest extends BaseTest
          policies.add(policy.getObjectId());
 
          DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
-               null, null, VersioningState.MAJOR);
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
+               cs, null, null, VersioningState.MAJOR);
          String pwcID = getConnection().checkout(doc1.getObjectId());
          String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, policies);
          try
          {
             CmisObject obj =
                getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true,
-                  IncludeRelationships.BOTH, true, true, true, "", "");
+                  IncludeRelationships.BOTH, true, true, true, PropertyFilter.ALL, RenditionFilter.NONE);
             if (obj == null)
                doFail("GetObjectOfLatestVersion failed;");
             Iterator<String> it = obj.getPolicyIds().iterator();
@@ -790,8 +783,7 @@ public class VersioningTest extends BaseTest
                   doFail("Policy adding failed;");
                }
                if (!one.getPolicyText().equals("testPolicyText"))
-                  ;
-               doFail("Policy text failed;");
+                  doFail("Policy text failed;");
             }
             pass(testname);
          }
@@ -820,15 +812,15 @@ public class VersioningTest extends BaseTest
     */
    public void testGetObjectOfLatestVersion_IncludeACL() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetObjectOfLatestVersion_IncludeACL....                        ");
+      String testname = "testGetObjectOfLatestVersion_IncludeACL";
+      System.out.print("Running " + testname + "....                        ");
       FolderData testroot = null;
       try
       {
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
          testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
-               null);
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
+               null, null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
 
@@ -839,15 +831,15 @@ public class VersioningTest extends BaseTest
          addACL.add(acl);
 
          DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
-               null, null, VersioningState.MAJOR);
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
+               cs, null, null, VersioningState.MAJOR);
          String pwcID = getConnection().checkout(doc1.getObjectId());
          String chIn = getConnection().checkin(pwcID, true, null, cs2, "", addACL, null, null);
          try
          {
             CmisObject obj =
                getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true,
-                  IncludeRelationships.BOTH, true, true, true, "", "");
+                  IncludeRelationships.BOTH, true, true, true, PropertyFilter.ALL, RenditionFilter.NONE);
             if (obj == null)
                doFail("GetObjectOfLatestVersion failed;");
             for (AccessControlEntry one : obj.getACL())
@@ -886,16 +878,16 @@ public class VersioningTest extends BaseTest
     */
    public void testGetObjectOfLatestVersion_PropertiesFiltered() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetObjectOfLatestVersion_PropertiesFiltered....                ");
+      String testname = "testGetObjectOfLatestVersion_PropertiesFiltered";
+      System.out.print("Running " + testname + "....                ");
       FolderData testroot = null;
       try
       {
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
          testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
-               null);
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
+               null, null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
 
@@ -906,15 +898,15 @@ public class VersioningTest extends BaseTest
          addACL.add(acl);
 
          DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
-               null, null, VersioningState.MAJOR);
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
+               cs, null, null, VersioningState.MAJOR);
          String pwcID = getConnection().checkout(doc1.getObjectId());
          String chIn = getConnection().checkin(pwcID, true, null, cs2, "", addACL, null, null);
          try
          {
             CmisObject obj =
                getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true,
-                  IncludeRelationships.BOTH, true, true, true, "cmis:name,cmis:path", "");
+                  IncludeRelationships.BOTH, true, true, true, "cmis:name,cmis:path", RenditionFilter.NONE);
             if (obj == null)
                doFail("GetObjectOfLatestVersion failed;");
             for (Map.Entry<String, Property<?>> e : obj.getProperties().entrySet())
@@ -922,7 +914,7 @@ public class VersioningTest extends BaseTest
                if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path"))//Other props must be ignored
                   continue;
                else
-                  doFail("Property filter works incorrect");
+                  doFail("Property filter works incorrect;");
             }
             pass(testname);
          }
@@ -949,29 +941,29 @@ public class VersioningTest extends BaseTest
     */
    public void testGetObjectOfLatestVersion_FilterNotValidException() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetObjectOfLatestVersion_FilterNotValidException....           ");
+      String testname = "testGetObjectOfLatestVersion_FilterNotValidException";
+      System.out.print("Running " + testname + "....           ");
       FolderData testroot = null;
       try
       {
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
          testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
-               null);
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
+               null, null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
 
          DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
-               null, null, VersioningState.MAJOR);
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
+               cs, null, null, VersioningState.MAJOR);
          String pwcID = getConnection().checkout(doc1.getObjectId());
          String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, null);
          try
          {
             CmisObject obj =
                getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true,
-                  IncludeRelationships.BOTH, true, true, true, "(,*", "");
+                  IncludeRelationships.BOTH, true, true, true, "(,*", RenditionFilter.NONE);
             doFail();
          }
          catch (FilterNotValidException ex)
@@ -1001,29 +993,29 @@ public class VersioningTest extends BaseTest
     */
    public void testGetObjectOfLatestVersion_ObjectNotFoundException() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetObjectOfLatestVersion_ObjectNotFoundException....           ");
+      String testname = "testGetObjectOfLatestVersion_ObjectNotFoundException";
+      System.out.print("Running " + testname + "....           ");
       FolderData testroot = null;
       try
       {
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
          testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
-               null);
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
+               null, null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
 
          DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
-               null, null, VersioningState.MINOR);
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
+               cs, null, null, VersioningState.MINOR);
          String pwcID = getConnection().checkout(doc1.getObjectId());
          String chIn = getConnection().checkin(pwcID, false, null, cs2, "", null, null, null);
          try
          {
             CmisObject obj =
                getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), true, true,
-                  IncludeRelationships.BOTH, true, true, true, "", "");
+                  IncludeRelationships.BOTH, true, true, true, PropertyFilter.ALL, RenditionFilter.NONE);
             doFail();
          }
          catch (ObjectNotFoundException ex)
@@ -1053,27 +1045,28 @@ public class VersioningTest extends BaseTest
     */
    public void testGetPropertiesOfLatestVersion_Simple() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetObjectOfLatestVersion_Simple....                            ");
+      String testname = "testGetPropertiesOfLatestVersion_Simple";
+      System.out.print("Running " + testname + "....                            ");
       FolderData testroot = null;
       try
       {
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
          testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
-               null);
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
+               null, null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
 
          DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
-               null, null, VersioningState.MAJOR);
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
+               cs, null, null, VersioningState.MAJOR);
          String pwcID = getConnection().checkout(doc1.getObjectId());
          String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, null);
          try
          {
-            CmisObject obj = getConnection().getPropertiesOfLatestVersion(doc1.getVersionSeriesId(), true, true, "");
+            CmisObject obj =
+               getConnection().getPropertiesOfLatestVersion(doc1.getVersionSeriesId(), true, true, PropertyFilter.ALL);
             if (obj == null)
                doFail("GetPropertiesOfLatestVersion failed;");
             if (obj.getObjectInfo() == null)
@@ -1104,22 +1097,22 @@ public class VersioningTest extends BaseTest
     */
    public void testGetPropertiesOfLatestVersion_PropertiesFiltered() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetPropertiesOfLatestVersion_PropertiesFiltered....            ");
+      String testname = "testGetPropertiesOfLatestVersion_PropertiesFiltered";
+      System.out.print("Running " + testname + "....            ");
       FolderData testroot = null;
       try
       {
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
          testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
-               null);
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
+               null, null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
 
          DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
-               null, null, VersioningState.MAJOR);
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
+               cs, null, null, VersioningState.MAJOR);
          String pwcID = getConnection().checkout(doc1.getObjectId());
          String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, null);
          try
@@ -1161,27 +1154,27 @@ public class VersioningTest extends BaseTest
     */
    public void testGetPropertiesOfLatestVersion_FilterNotValidException() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetPropertiesOfLatestVersion_FilterNotValidException....       ");
+      String testname = "testGetPropertiesOfLatestVersion_FilterNotValidException";
+      System.out.print("Running " + testname + "....       ");
       FolderData testroot = null;
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       try
       {
          testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
-               null);
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
+               null, null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
 
          DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
-               null, null, VersioningState.MAJOR);
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
+               cs, null, null, VersioningState.MAJOR);
          String pwcID = getConnection().checkout(doc1.getObjectId());
          String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, null);
          try
          {
             CmisObject obj = getConnection().getPropertiesOfLatestVersion(doc1.getVersionSeriesId(), true, true, "(,*");
-            doFail();
+            doFail("FilterNotValidException must be thrown;");
          }
          catch (FilterNotValidException ex)
          {
@@ -1210,28 +1203,29 @@ public class VersioningTest extends BaseTest
     */
    public void testGetPropertiesOfLatestVersion_ObjectNotFoundException() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetPropertiesOfLatestVersion_ObjectNotFoundException....       ");
+      String testname = "testGetPropertiesOfLatestVersion_ObjectNotFoundException";
+      System.out.print("Running " + testname + "....       ");
       FolderData testroot = null;
       try
       {
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
          testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
-               null);
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
+               null, null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
 
          DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
-               null, null, VersioningState.MINOR);
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
+               cs, null, null, VersioningState.MINOR);
          String pwcID = getConnection().checkout(doc1.getObjectId());
          String chIn = getConnection().checkin(pwcID, false, null, cs2, "", null, null, null);
          try
          {
-            CmisObject obj = getConnection().getPropertiesOfLatestVersion(doc1.getVersionSeriesId(), true, true, "");
-            doFail();
+            CmisObject obj =
+               getConnection().getPropertiesOfLatestVersion(doc1.getVersionSeriesId(), true, true, PropertyFilter.ALL);
+            doFail("ObjectNotFoundException must be thrown;");
          }
          catch (ObjectNotFoundException ex)
          {

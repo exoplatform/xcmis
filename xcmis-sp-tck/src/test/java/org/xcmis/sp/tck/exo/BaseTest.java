@@ -88,12 +88,12 @@ public abstract class BaseTest extends TestCase
    protected List<String> passedTests = new ArrayList<String>();
 
    protected List<String> failedTests = new ArrayList<String>();
-   
+
    protected List<String> skippedTests = new ArrayList<String>();
 
    private Connection conn;
 
-   private static final String TCK_CONF_DEFAULT = "/conf/sp_inmem_exo/test-inmem-sp-configuration.xml";
+   private static final String TCK_CONF_DEFAULT = "/conf/sp_jcr_exo/test-jcr-sp-configuration.xml";
 
    @Override
    public void setUp() throws Exception
@@ -117,10 +117,10 @@ public abstract class BaseTest extends TestCase
       rootfolderID = getStorage().getRepositoryInfo().getRootFolderId();
       rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
-      documentTypeDefinition = getStorage().getTypeDefinition("cmis:document", true);
-      folderTypeDefinition = getStorage().getTypeDefinition("cmis:folder", true);
-      policyTypeDefinition = getStorage().getTypeDefinition("cmis:policy", true);
-      relationshipTypeDefinition = getStorage().getTypeDefinition("cmis:relationship", true);
+      documentTypeDefinition = getStorage().getTypeDefinition(CmisConstants.DOCUMENT, true);
+      folderTypeDefinition = getStorage().getTypeDefinition(CmisConstants.FOLDER, true);
+      policyTypeDefinition = getStorage().getTypeDefinition(CmisConstants.POLICY, true);
+      relationshipTypeDefinition = getStorage().getTypeDefinition(CmisConstants.RELATIONSHIP, true);
    }
 
    protected void tearDown() throws Exception
@@ -191,13 +191,13 @@ public abstract class BaseTest extends TestCase
 
       RelationshipData rel1 =
          getStorage().createRelationship(doc3, doc4, relationshipTypeDefinition,
-            getPropsMap("cmis:relationship", "rel1"), null, null);
+            getPropsMap(CmisConstants.RELATIONSHIP, "rel1"), null, null);
       RelationshipData rel2 =
          getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
-            getPropsMap("cmis:relationship", "rel2"), null, null);
+            getPropsMap(CmisConstants.RELATIONSHIP, "rel2"), null, null);
       RelationshipData rel3 =
          getStorage().createRelationship(folder2, doc1, relationshipTypeDefinition,
-            getPropsMap("cmis:relationship", "rel3"), null, null);
+            getPropsMap(CmisConstants.RELATIONSHIP, "rel3"), null, null);
 
       return testroot.getObjectId();
    }
@@ -218,8 +218,8 @@ public abstract class BaseTest extends TestCase
    {
       ContentStream cs = new BaseContentStream(documentContent.getBytes(), null, new MimeType("text", "plain"));
       DocumentData doc =
-         getStorage().createDocument(parentFolder, documentTypeDefinition, getPropsMap("cmis:document", documentName),
-            cs, null, null, VersioningState.MAJOR);
+         getStorage().createDocument(parentFolder, documentTypeDefinition,
+            getPropsMap(CmisConstants.DOCUMENT, documentName), cs, null, null, VersioningState.MAJOR);
       return doc;
    }
 
@@ -232,8 +232,8 @@ public abstract class BaseTest extends TestCase
       NameConstraintViolationException, ConstraintException
    {
       FolderData testroot =
-         getStorage().createFolder(parentFolder, folderTypeDefinition, getPropsMap("cmis:folder", folderName), null,
-            null);
+         getStorage().createFolder(parentFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, folderName),
+            null, null);
       return testroot;
    }
 
@@ -241,8 +241,8 @@ public abstract class BaseTest extends TestCase
       NameConstraintViolationException, ConstraintException
    {
       org.xcmis.spi.model.PropertyDefinition<?> def =
-         PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
-      Map<String, Property<?>> properties2 = getPropsMap("cmis:policy", name);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.POLICY, CmisConstants.POLICY_TEXT);
+      Map<String, Property<?>> properties2 = getPropsMap(CmisConstants.POLICY, name);
       properties2.put(CmisConstants.POLICY_TEXT, new StringProperty(def.getId(), def.getQueryName(),
          def.getLocalName(), def.getDisplayName(), "testPolicyText"));
       PolicyData policy = getStorage().createPolicy(where, policyTypeDefinition, properties2, null, null);
@@ -268,10 +268,11 @@ public abstract class BaseTest extends TestCase
       {
          removeRelationships(testroot);
          FolderData rootFolder = (FolderData)getStorage().getObjectById(testroot);
-        List<String> failed =  (List<String>)getStorage().deleteTree(rootFolder, true, UnfileObject.DELETE, true);
-        for (String one:failed){
-           System.out.println("~~~~~" + getStorage().getObjectById(one).getName());
-        }
+         List<String> failed = (List<String>)getStorage().deleteTree(rootFolder, true, UnfileObject.DELETE, true);
+         for (String one : failed)
+         {
+            System.out.println("~~~~~" + getStorage().getObjectById(one).getName());
+         }
       }
       catch (Exception e)
       {
@@ -336,19 +337,19 @@ public abstract class BaseTest extends TestCase
       System.out.println("PASSED");
       //passedTests.add(o);
    }
-   
-   
+
    protected void pass(String o) throws Exception
    {
       System.out.println("PASSED");
       passedTests.add(o);
    }
+
    protected void skip(String o)
    {
       System.out.println("SKIPPED");
       skippedTests.add(o);
    }
-   
+
    protected void removeRelationships(String testroot)
    {
       try

@@ -76,8 +76,8 @@ public class MultifilingTest extends BaseTest
     */
    public void testAddObjectToFolder() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testAddObjectToFolder....                                          ");
+      String testname = "testAddObjectToFolder";
+      System.out.print("Running " + testname + "....                                          ");
       if (getCapabilities().isCapabilityUnfiling() && getCapabilities().isCapabilityMultifiling())
       {
          FolderData folder1 = null;
@@ -158,8 +158,8 @@ public class MultifilingTest extends BaseTest
     */
    public void testAddObjectToFolder_ConstraintException() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testAddObjectToFolder_ConstraintException....                      ");
+      String testname = "testAddObjectToFolder_ConstraintException";
+      System.out.print("Running " + testname + "....                      ");
       if (getCapabilities().isCapabilityMultifiling())
       {
          FolderData folder1 = null;
@@ -167,14 +167,10 @@ public class MultifilingTest extends BaseTest
          String typeId = null;
          try
          {
-            // create folder1 for document
             folder1 = createFolder(rootFolder, "testFolder1");
-
-            // create folder2 for multifilling document
             folder2 = createFolder(rootFolder, "testFolder2");
 
             //////////// CHECK the ALLOWED_CHILD_OBJECT_TYPE_IDS property
-
             IdProperty prop = (IdProperty)folder2.getProperties().get("cmis:allowedChildObjectTypeIds");
             if (prop == null)
                doFail("Properties is null;");
@@ -272,8 +268,8 @@ public class MultifilingTest extends BaseTest
     */
    public void testAddObjectToFolder_AlreadyAddedToAnotherFolder() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testAddObjectToFolder_AlreadyAddedToAnotherFolder....              ");
+      String testname = "testAddObjectToFolder_AlreadyAddedToAnotherFolder";
+      System.out.print("Running " + testname + "....              ");
       if (getCapabilities().isCapabilityMultifiling())
       {
          FolderData folder1 = null;
@@ -344,8 +340,8 @@ public class MultifilingTest extends BaseTest
     */
    public void testRemoveObjectFromFolder() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testRemoveObjectFromFolder....                                     ");
+      String testname = "testRemoveObjectFromFolder";
+      System.out.print("Running " + testname + "....                                     ");
       FolderData folder1 = null;
       if (getCapabilities().isCapabilityUnfiling())
       {
@@ -431,8 +427,8 @@ public class MultifilingTest extends BaseTest
     */
    public void testRemoveObjectFromFolder_AlreadyAddedToAnotherFolder() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testRemoveObjectFromFolder_AlreadyAddedToAnotherFolder....         ");
+      String testname = "testRemoveObjectFromFolder_AlreadyAddedToAnotherFolder";
+      System.out.print("Running " + testname + "....         ");
       FolderData folder1 = null;
       FolderData folder2 = null;
       if (getCapabilities().isCapabilityUnfiling() && getCapabilities().isCapabilityMultifiling())

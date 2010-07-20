@@ -60,15 +60,15 @@ public class ACLTest extends BaseTest
     */
    public void testGetACL_Simple() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetACL_Simple....                                              ");
+      String testname = "testGetACL_Simple";
+      System.out.print("Running "+testname+"....                                              ");
       FolderData testroot = null;
       try
       {
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
          testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"), null,
                null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
@@ -79,7 +79,7 @@ public class ACLTest extends BaseTest
          addACL.add(acl);
 
          DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"), cs,
                addACL, null, VersioningState.MAJOR);
          try
          {
@@ -103,7 +103,7 @@ public class ACLTest extends BaseTest
             if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
                skip("ACLTest.testGetACL_Simple");
             else
-               doFail();
+               doFail("Capability ACL is supported but not supported exception thrown");
          }
          catch (Exception other)
          {
@@ -128,15 +128,15 @@ public class ACLTest extends BaseTest
     */
    public void testApplyACL_Simple() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testApplyACL_Simple....                                            ");
+      String testname = "testApplyACL_Simple";
+      System.out.print("Running "+testname+"....                                            ");
       FolderData testroot = null;
       try
       {
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
          testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"), null,
                null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
@@ -147,7 +147,7 @@ public class ACLTest extends BaseTest
          addACL.add(acl);
 
          DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"), cs,
                null, null, VersioningState.MAJOR);
          try
          {
@@ -170,7 +170,7 @@ public class ACLTest extends BaseTest
             if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
                skip("ACLTest.testApplyACL_Simple");
             else
-               doFail();
+               doFail("Capability ACL is supported but not supported exception thrown");
          }
          catch (Exception other)
          {
@@ -195,8 +195,8 @@ public class ACLTest extends BaseTest
     */
    public void testApplyACL_RemoveACE() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testApplyACL_RemoveACE....                                         ");
+      String testname = "testApplyACL_RemoveACE";
+      System.out.print("Running "+testname+"....                                         ");
       FolderData testroot = null;
       String typeID = null;
       try
@@ -204,7 +204,7 @@ public class ACLTest extends BaseTest
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
          testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"), null,
                null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
@@ -223,8 +223,6 @@ public class ACLTest extends BaseTest
             PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
                CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
                false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
-         //propertyDefinitions.put(CmisConstants.NAME, propDefName);
-         //propertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, popDefObjectTypeId);
 
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
          properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
@@ -259,7 +257,7 @@ public class ACLTest extends BaseTest
             if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
                skip("ACLTest.testApplyACL_RemoveACE");
             else
-               doFail();
+               doFail("Capability ACL is supported but not supported exception thrown");
          }
          catch (Exception other)
          {
@@ -286,15 +284,15 @@ public class ACLTest extends BaseTest
     */
    public void testApplyACL_ConstraintException() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testApplyACL_ConstraintException....                               ");
+      String testname = "testApplyACL_ConstraintException";
+      System.out.print("Running "+testname+"....                               ");
       FolderData testroot = null;
       try
       {
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
          testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"), null,
                null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
@@ -305,7 +303,7 @@ public class ACLTest extends BaseTest
          addACL.add(acl);
 
          DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"), cs,
                addACL, null, VersioningState.MAJOR);
          try
          {
@@ -317,7 +315,7 @@ public class ACLTest extends BaseTest
             if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
                skip("ACLTest.testApplyACL_ConstraintException");
             else
-               doFail();
+               doFail("Capability ACL is supported but not supported exception thrown");
          }
          catch (ConstraintException ec)
          {
@@ -346,15 +344,15 @@ public class ACLTest extends BaseTest
     */
    public void testApplyACL_ConstraintException2() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testApplyACL_ConstraintException2....                              ");
+      String testname = "testApplyACL_ConstraintException2";
+      System.out.print("Running "+testname+"....                              ");
       FolderData testroot = null;
       try
       {
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
          testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"), null,
                null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
@@ -367,7 +365,7 @@ public class ACLTest extends BaseTest
          ACLCapability capability = getStorage().getRepositoryInfo().getAclCapability();
 
          DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"), cs,
                null, null, VersioningState.MAJOR);
          try
          {
@@ -386,7 +384,7 @@ public class ACLTest extends BaseTest
             if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
                skip("ACLTest.testApplyACL_ConstraintException2");
             else
-               doFail();
+               doFail("Capability ACL is supported but not supported exception thrown");
          }
          catch (Exception other)
          {
@@ -412,8 +410,8 @@ public class ACLTest extends BaseTest
     */
    public void testApplyACL_ConstraintException3() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testApplyACL_ConstraintException3....                              ");
+      String testname = "testApplyACL_ConstraintException3";
+      System.out.print("Running " +testname+ "....                              ");
       FolderData testroot = null;
       try
       {
@@ -448,7 +446,7 @@ public class ACLTest extends BaseTest
             if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
                skip("ACLTest.testApplyACL_ConstraintException3");
             else
-               doFail();
+               doFail("Capability ACL is supported but not supported exception thrown");
          }
          catch (Exception other)
          {

@@ -52,8 +52,8 @@ public class DiscoveryTest extends BaseTest
     */
    public void testQuery() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testQuery....                                                      ");
+      String testname = "testQuery";
+      System.out.print("Running " + testname + "....                                                      ");
       String errSms = "\n 2.2.6.1 query. Doesn't work Query (Discovery service) with cmis:document to search content.";
       FolderData parentFolder = null;
       try
@@ -81,14 +81,11 @@ public class DiscoveryTest extends BaseTest
             if (cmisObject.getObjectInfo() == null)
                doFail("ObjectInfo not found in query result;");
             if (cmisObject.getObjectInfo().getId() == null)
-               ;
-            doFail("ObjectId not found in query result;");
+               doFail("ObjectId not found in query result;");
             if (!documentData.getObjectId().equals(cmisObject.getObjectInfo().getId()))
-               ;
-            doFail("ObjectId's does not match;");
+               doFail("ObjectId's does not match;");
             if (!documentData.getName().equals(cmisObject.getObjectInfo().getName()))
-               ;
-            doFail("Object names does not match;");
+               doFail("Object names does not match;");
          }
          pass(testname);
       }
@@ -105,8 +102,8 @@ public class DiscoveryTest extends BaseTest
     */
    public void testQuery2() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testQuery2....                                                     ");
+      String testname = "testQuery2";
+      System.out.print("Running " + testname + "....                                                     ");
       FolderData parentFolder = null;
       try
       {
@@ -133,14 +130,11 @@ public class DiscoveryTest extends BaseTest
             if (cmisObject.getObjectInfo() == null)
                doFail("ObjectInfo not found in query result;");
             if (cmisObject.getObjectInfo().getId() == null)
-               ;
-            doFail("ObjectId not found in query result;");
+               doFail("ObjectId not found in query result;");
             if (!documentData.getObjectId().equals(cmisObject.getObjectInfo().getId()))
-               ;
-            doFail("ObjectId's does not match;");
+               doFail("ObjectId's does not match;");
             if (!documentData.getName().equals(cmisObject.getObjectInfo().getName()))
-               ;
-            doFail("Object names does not match;");
+               doFail("Object names does not match;");
          }
          pass(testname);
       }

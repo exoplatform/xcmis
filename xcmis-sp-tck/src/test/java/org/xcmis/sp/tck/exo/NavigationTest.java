@@ -33,7 +33,9 @@ import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.ObjectNotFoundException;
+import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.RelationshipData;
+import org.xcmis.spi.RenditionFilter;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.ContentStreamAllowed;
@@ -58,13 +60,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_Relationships() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetChildren_Relationships....                                  ");
+      String testname = "testGetChildren_Relationships";
+      System.out.print("Running " + testname + "....                                  ");
       this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "*", "*", "", 10, 0);
+            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, PropertyFilter.ALL,
+               RenditionFilter.ANY, "", 10, 0);
          if (result.getItems().size() != 6)
             doFail("Unexpected items number;");
          int relCount = 0;
@@ -90,13 +93,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_NoRelationships() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetChildren_NoRelationships....                                ");
+      String testname = "testGetChildren_NoRelationships";
+      System.out.print("Running " + testname + "....                                ");
       this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getChildren(testroot, true, IncludeRelationships.NONE, true, true, "*", "*", "", 10, 0);
+            getConnection().getChildren(testroot, true, IncludeRelationships.NONE, true, true, PropertyFilter.ALL,
+               RenditionFilter.ANY, "", 10, 0);
          int relCount = 0;
          for (CmisObject one : result.getItems())
          {
@@ -121,13 +125,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_AllowableActions() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetChildren_AllowableActions....                               ");
+      String testname = "testGetChildren_AllowableActions";
+      System.out.print("Running " + testname + "....                               ");
       this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "*", "*", "", 10, 0);
+            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, PropertyFilter.ALL,
+               RenditionFilter.ANY, "", 10, 0);
          for (CmisObject one : result.getItems())
          {
             if (one.getAllowableActions() != null) //allowable actions are present
@@ -150,13 +155,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_NoAllowableActions() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetChildren_NoAllowableActions....                             ");
+      String testname = "testGetChildren_NoAllowableActions";
+      System.out.print("Running " + testname + "....                             ");
       this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getChildren(testroot, false, IncludeRelationships.BOTH, true, true, "*", "*", "", 10, 0);
+            getConnection().getChildren(testroot, false, IncludeRelationships.BOTH, true, true, PropertyFilter.ALL,
+               RenditionFilter.ANY, "", 10, 0);
          for (CmisObject one : result.getItems())
          {
             if (one.getAllowableActions() == null) //allowable actions are not present
@@ -179,13 +185,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_PathSegments() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetChildren_PathSegments....                                   ");
+      String testname = "testGetChildren_PathSegments";
+      System.out.print("Running " + testname + "....                                   ");
       this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "*", "*", "", 10, 0);
+            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, PropertyFilter.ALL,
+               RenditionFilter.ANY, "", 10, 0);
          for (CmisObject one : result.getItems())
          {
             if (one.getPathSegment() != null) //path segment is present
@@ -208,13 +215,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_NoPathSegments() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetChildren_NoPathSegments....                                 ");
+      String testname = "testGetChildren_NoPathSegments";
+      System.out.print("Running " + testname + "....                                 ");
       this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, false, true, "*", "*", "", 10, 0);
+            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, false, true, PropertyFilter.ALL,
+               RenditionFilter.ANY, "", 10, 0);
          for (CmisObject one : result.getItems())
          {
             if (one.getPathSegment() == null) //no path segments are present
@@ -232,13 +240,14 @@ public class NavigationTest extends BaseTest
 
    public void testGetChildren_ObjectInfo() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetChildren_ObjectInfo....                                     ");
+      String testname = "testGetChildren_ObjectInfo";
+      System.out.print("Running " + testname + "....                                     ");
       this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "*", "*", "", 10, 0);
+            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, PropertyFilter.ALL,
+               RenditionFilter.ANY, "", 10, 0);
          for (CmisObject one : result.getItems())
          {
             if (one.getObjectInfo() != null) //obj info is present
@@ -256,13 +265,14 @@ public class NavigationTest extends BaseTest
 
    public void testGetChildren_NoObjectInfo() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetChildren_NoObjectInfo....                                   ");
+      String testname = "testGetChildren_NoObjectInfo";
+      System.out.print("Running " + testname + "....                                   ");
       this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, false, "*", "*", "", 10, 0);
+            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, false, PropertyFilter.ALL,
+               RenditionFilter.ANY, "", 10, 0);
          for (CmisObject one : result.getItems())
          {
             if (one.getObjectInfo() == null) // no obj info present
@@ -286,14 +296,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_PropertyFiltered() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetChildren_PropertyFiltered....                               ");
+      String testname = "testGetChildren_PropertyFiltered";
+      System.out.print("Running " + testname + "....                               ");
       this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
             getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "cmis:name,cmis:path",
-               "*", "", 10, 0);
+               RenditionFilter.NONE, "", 10, 0);
          for (CmisObject one : result.getItems())
          {
             for (Map.Entry<String, Property<?>> e : one.getProperties().entrySet())
@@ -319,14 +329,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_RenditionFiltered() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetChildren_RenditionFiltered....                              ");
+      String testname = "testGetChildren_RenditionFiltered";
+      System.out.print("Running " + testname + "....                              ");
       this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "", "cmis:none", "", 10,
-               0);
+            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, PropertyFilter.ALL,
+               RenditionFilter.NONE, "", 10, 0);
          for (CmisObject one : result.getItems())
          {
             for (Map.Entry<String, Property<?>> e : one.getProperties().entrySet())
@@ -350,13 +360,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_HasMoreItems() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetChildren_HasMoreItems....                                   ");
+      String testname = "testGetChildren_HasMoreItems";
+      System.out.print("Running " + testname + "....                                   ");
       this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "", "*", "", 2, 0);
+            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, PropertyFilter.ALL,
+               RenditionFilter.ANY, "", 2, 0);
          if (!result.isHasMoreItems())
             doFail("Has more items property is incorrect;");
          pass(testname);
@@ -374,13 +385,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_MaxItems() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetChildren_MaxItems....                                       ");
+      String testname = "testGetChildren_MaxItems";
+      System.out.print("Running " + testname + "....                                       ");
       this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "", "*", "", 3, 0);
+            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, PropertyFilter.ALL,
+               RenditionFilter.ANY, "", 3, 0);
          if (result.getItems().size() != 3)
             ;
          doFail("Items number is incorrect;");
@@ -400,13 +412,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_NumItems() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetChildren_NumItems....                                       ");
+      String testname = "testGetChildren_NumItems";
+      System.out.print("Running " + testname + "....                                       ");
       this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "", "*", "", 2, 0);
+            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, PropertyFilter.ALL,
+               RenditionFilter.ANY, "", 2, 0);
          if (result.getNumItems() == -1 || result.getNumItems() == 4)
          {
             pass(testname);
@@ -429,13 +442,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_SkipCount() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetChildren_SkipCount....                                      ");
+      String testname = "testGetChildren_SkipCount";
+      System.out.print("Running " + testname + "....                                      ");
       this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "", "*", "", 10, 1);
+            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, PropertyFilter.ALL,
+               RenditionFilter.ANY, "", 10, 1);
          if (result.getItems().size() != 5)
             doFail("Items number is incorrect;");
          pass(testname);
@@ -453,15 +467,15 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_InvalidArgumentException() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetChildren_InvalidArgumentException....                       ");
+      String testname = "testGetChildren_InvalidArgumentException";
+      System.out.print("Running " + testname + "....                       ");
       this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
             getConnection().getChildren(getStorage().getObjectByPath("/testroot/doc1").getObjectId(), true,
-               IncludeRelationships.BOTH, true, true, "", "*", "", 10, 10);
-         doFail();
+               IncludeRelationships.BOTH, true, true, PropertyFilter.ALL, RenditionFilter.ANY, "", 10, 10);
+         doFail("InvalidArgumentException must be thrown;");
       }
       catch (InvalidArgumentException ex)
       {
@@ -480,15 +494,15 @@ public class NavigationTest extends BaseTest
     */
    public void testGetChildren_FilterNotValidException() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetChildren_FilterNotValidException....                        ");
+      String testname = "testGetChildren_FilterNotValidException";
+      System.out.print("Running " + testname + "....                        ");
       this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "(,*", "", "", 10, 0);
-
-         doFail();
+            getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "(,*",
+               RenditionFilter.NONE, "", 10, 0);
+         doFail("FilterNotValidException must be thrown;");
       }
       catch (FilterNotValidException ex)
       {
@@ -512,13 +526,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_Simple() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetDescendants_Simple....                                      ");
+      String testname = "testGetDescendants_Simple";
+      System.out.print("Running " + testname + "....                                      ");
       this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
-            getConnection().getDescendants(testroot, -1, true, IncludeRelationships.BOTH, true, true, "", "*");
+            getConnection().getDescendants(testroot, -1, true, IncludeRelationships.BOTH, true, true,
+               PropertyFilter.ALL, RenditionFilter.ANY);
          if (objectTreeToList(result).size() != 9)
             doFail("Items number is incorrect;");
          pass(testname);
@@ -536,13 +551,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_AllowableActions() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetDescendants_AllowableActions....                            ");
+      String testname = "testGetDescendants_AllowableActions";
+      System.out.print("Running " + testname + "....                            ");
       this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
-            getConnection().getDescendants(testroot, -1, true, IncludeRelationships.BOTH, true, true, "", "*");
+            getConnection().getDescendants(testroot, -1, true, IncludeRelationships.BOTH, true, true,
+               PropertyFilter.ALL, RenditionFilter.ANY);
          List<CmisObject> list = objectTreeToList(result);
          for (CmisObject one : list)
          {
@@ -566,13 +582,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_NoAllowableActions() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetDescendants_NoAllowableActions....                          ");
+      String testname = "testGetDescendants_NoAllowableActions";
+      System.out.print("Running " + testname + "....                          ");
       this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
-            getConnection().getDescendants(testroot, -1, false, IncludeRelationships.BOTH, true, true, "", "*");
+            getConnection().getDescendants(testroot, -1, false, IncludeRelationships.BOTH, true, true,
+               PropertyFilter.ALL, RenditionFilter.ANY);
          List<CmisObject> list = objectTreeToList(result);
          for (CmisObject one : list)
          {
@@ -596,13 +613,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_Relationships() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetDescendants_Relationships....                               ");
+      String testname = "testGetDescendants_Relationships";
+      System.out.print("Running " + testname + "....                               ");
       this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
-            getConnection().getDescendants(testroot, -1, true, IncludeRelationships.SOURCE, true, true, "", "*");
+            getConnection().getDescendants(testroot, -1, true, IncludeRelationships.SOURCE, true, true,
+               PropertyFilter.ALL, RenditionFilter.ANY);
          List<CmisObject> list = objectTreeToList(result);
          int relCount = 0;
          for (CmisObject one : list)
@@ -628,13 +646,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_NoRelationships() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetDescendants_NoRelationships....                             ");
+      String testname = "testGetDescendants_NoRelationships";
+      System.out.print("Running " + testname + "....                             ");
       this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
-            getConnection().getDescendants(testroot, -1, true, IncludeRelationships.NONE, true, true, "", "*");
+            getConnection().getDescendants(testroot, -1, true, IncludeRelationships.NONE, true, true,
+               PropertyFilter.ALL, RenditionFilter.ANY);
          List<CmisObject> list = objectTreeToList(result);
          int relCount = 0;
          for (CmisObject one : list)
@@ -660,13 +679,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_PathSegment() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetDescendants_PathSegment....                                 ");
+      String testname = "testGetDescendants_PathSegment";
+      System.out.print("Running " + testname + "....                                 ");
       this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
-            getConnection().getDescendants(testroot, -1, true, IncludeRelationships.NONE, true, true, "", "*");
+            getConnection().getDescendants(testroot, -1, true, IncludeRelationships.NONE, true, true,
+               PropertyFilter.ALL, RenditionFilter.ANY);
          List<CmisObject> list = objectTreeToList(result);
          for (CmisObject one : list)
          {
@@ -685,13 +705,14 @@ public class NavigationTest extends BaseTest
 
    public void testGetDescendants_ObjectInfo() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetDescendants_ObjectInfo....                                  ");
+      String testname = "testGetDescendants_ObjectInfo";
+      System.out.print("Running " + testname + "....                                  ");
       this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
-            getConnection().getDescendants(testroot, -1, true, IncludeRelationships.NONE, true, true, "", "*");
+            getConnection().getDescendants(testroot, -1, true, IncludeRelationships.NONE, true, true,
+               PropertyFilter.ALL, RenditionFilter.ANY);
          List<CmisObject> list = objectTreeToList(result);
          for (CmisObject one : list)
          {
@@ -710,13 +731,14 @@ public class NavigationTest extends BaseTest
 
    public void testGetDescendants_NoObjectInfo() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetDescendants_NoObjectInfo....                                ");
+      String testname = "testGetDescendants_NoObjectInfo";
+      System.out.print("Running " + testname + "....                                ");
       this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
-            getConnection().getDescendants(testroot, -1, true, IncludeRelationships.NONE, true, false, "", "*");
+            getConnection().getDescendants(testroot, -1, true, IncludeRelationships.NONE, true, false,
+               PropertyFilter.ALL, RenditionFilter.ANY);
          List<CmisObject> list = objectTreeToList(result);
          for (CmisObject one : list)
          {
@@ -741,14 +763,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_PropertyFiltered() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetDescendants_PropertyFiltered....                            ");
+      String testname = "testGetDescendants_PropertyFiltered";
+      System.out.print("Running " + testname + "....                            ");
       this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
             getConnection().getDescendants(testroot, -1, true, IncludeRelationships.NONE, true, true,
-               "cmis:name,cmis:path", "*");
+               "cmis:name,cmis:path", RenditionFilter.ANY);
          List<CmisObject> list = objectTreeToList(result);
          for (CmisObject one : list)
          {
@@ -775,13 +797,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_RenditionsFiltered() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetDescendants_RenditionsFiltered....                          ");
+      String testname = "testGetDescendants_RenditionsFiltered";
+      System.out.print("Running " + testname + "....                          ");
       this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
-            getConnection().getDescendants(testroot, -1, true, IncludeRelationships.NONE, true, true, "", "cmis:none");
+            getConnection().getDescendants(testroot, -1, true, IncludeRelationships.NONE, true, true,
+               PropertyFilter.ALL, RenditionFilter.NONE);
          List<CmisObject> list = objectTreeToList(result);
          for (CmisObject one : list)
          {
@@ -803,13 +826,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_DepthLimit() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetDescendants_DepthLimit....                                  ");
+      String testname = "testGetDescendants_DepthLimit";
+      System.out.print("Running " + testname + "....                                  ");
       this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
-            getConnection().getDescendants(testroot, 2, true, IncludeRelationships.NONE, true, true, "", "cmis:none");
+            getConnection().getDescendants(testroot, 2, true, IncludeRelationships.NONE, true, true,
+               PropertyFilter.ALL, RenditionFilter.NONE);
          List<CmisObject> list = objectTreeToList(result);
          if (list.size() != 8) //skipping last level with Doc4
             doFail("Unexpected items number;");
@@ -828,15 +852,15 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_FilterNotValidException() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetDescendants_FilterNotValidException....                     ");
+      String testname = "testGetDescendants_FilterNotValidException";
+      System.out.print("Running " + testname + "....                     ");
       this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
-            getConnection()
-               .getDescendants(testroot, 2, true, IncludeRelationships.NONE, true, true, "(,*", "cmis:none");
-         doFail();
+            getConnection().getDescendants(testroot, 2, true, IncludeRelationships.NONE, true, true, "(,*",
+               RenditionFilter.NONE);
+         doFail("FilterNotValidException must be thrown;");
       }
       catch (FilterNotValidException ex)
       {
@@ -855,14 +879,15 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_InvalidArgumentException() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetDescendants_InvalidArgumentException....                    ");
+      String testname = "testGetDescendants_InvalidArgumentException";
+      System.out.print("Running " + testname + "....                    ");
       this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
-            getConnection().getDescendants(testroot, 0, true, IncludeRelationships.NONE, true, true, "", "*");
-         doFail();
+            getConnection().getDescendants(testroot, 0, true, IncludeRelationships.NONE, true, true,
+               PropertyFilter.ALL, RenditionFilter.NONE);
+         doFail("InvalidArgumentException must be thrown;");
       }
       catch (InvalidArgumentException ex)
       {
@@ -881,15 +906,15 @@ public class NavigationTest extends BaseTest
     */
    public void testGetDescendants_InvalidArgumentException2() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetDescendants_InvalidArgumentException2....                   ");
+      String testname = "testGetDescendants_InvalidArgumentException2";
+      System.out.print("Running " + testname + "....                   ");
       this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
             getConnection().getDescendants(getStorage().getObjectByPath("/testroot/doc1").getObjectId(), 0, true,
-               IncludeRelationships.NONE, true, true, "", "*");
-         doFail();
+               IncludeRelationships.NONE, true, true, PropertyFilter.ALL, RenditionFilter.ANY);
+         doFail("InvalidArgumentException must be thrown;");
       }
       catch (InvalidArgumentException ex)
       {
@@ -908,13 +933,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_Simple() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetFolderTree_Simple....                                       ");
+      String testname = "testGetFolderTree_Simple";
+      System.out.print("Running " + testname + "....                                       ");
       this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
-            getConnection().getFolderTree(testroot, -1, true, IncludeRelationships.BOTH, true, true, "", "*");
+            getConnection().getFolderTree(testroot, -1, true, IncludeRelationships.BOTH, true, true,
+               PropertyFilter.ALL, RenditionFilter.ANY);
          if (objectTreeToList(result).size() != 3)
             doFail("Unexpected number of items;");
          pass(testname);
@@ -932,13 +958,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_AllowableActions() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetFolderTree_AllowableActions....                             ");
+      String testname = "testGetFolderTree_AllowableActions";
+      System.out.print("Running " + testname + "....                             ");
       this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
-            getConnection().getFolderTree(testroot, -1, true, IncludeRelationships.BOTH, true, true, "", "*");
+            getConnection().getFolderTree(testroot, -1, true, IncludeRelationships.BOTH, true, true,
+               PropertyFilter.ALL, RenditionFilter.ANY);
          List<CmisObject> list = objectTreeToList(result);
          for (CmisObject one : list)
          {
@@ -962,13 +989,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_NoAllowableActions() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetFolderTree_NoAllowableActions....                           ");
+      String testname = "testGetFolderTree_NoAllowableActions";
+      System.out.print("Running " + testname + "....                           ");
       this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
-            getConnection().getFolderTree(testroot, -1, false, IncludeRelationships.BOTH, true, true, "", "*");
+            getConnection().getFolderTree(testroot, -1, false, IncludeRelationships.BOTH, true, true,
+               PropertyFilter.ALL, RenditionFilter.ANY);
          List<CmisObject> list = objectTreeToList(result);
          for (CmisObject one : list)
          {
@@ -992,13 +1020,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_Relationships() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetFolderTree_Relationships....                                ");
+      String testname = "testGetFolderTree_Relationships";
+      System.out.print("Running " + testname + "....                                ");
       this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
-            getConnection().getFolderTree(testroot, -1, true, IncludeRelationships.SOURCE, true, true, "", "*");
+            getConnection().getFolderTree(testroot, -1, true, IncludeRelationships.SOURCE, true, true,
+               PropertyFilter.ALL, RenditionFilter.ANY);
          List<CmisObject> list = objectTreeToList(result);
          int relCount = 0;
          for (CmisObject one : list)
@@ -1025,13 +1054,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_NoRelationships() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetFolderTree_NoRelationships....                              ");
+      String testname = "testGetFolderTree_NoRelationships";
+      System.out.print("Running " + testname + "....                              ");
       this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
-            getConnection().getFolderTree(testroot, -1, true, IncludeRelationships.NONE, true, true, "", "*");
+            getConnection().getFolderTree(testroot, -1, true, IncludeRelationships.NONE, true, true,
+               PropertyFilter.ALL, RenditionFilter.ANY);
          List<CmisObject> list = objectTreeToList(result);
          int relCount = 0;
          for (CmisObject one : list)
@@ -1058,13 +1088,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_PathSegment() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetFolderTree_PathSegment....                                  ");
+      String testname = "testGetFolderTree_PathSegment";
+      System.out.print("Running " + testname + "....                                  ");
       this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
-            getConnection().getFolderTree(testroot, -1, true, IncludeRelationships.NONE, true, true, "", "*");
+            getConnection().getFolderTree(testroot, -1, true, IncludeRelationships.NONE, true, true,
+               PropertyFilter.ALL, RenditionFilter.ANY);
          List<CmisObject> list = objectTreeToList(result);
          for (CmisObject one : list)
          {
@@ -1083,13 +1114,14 @@ public class NavigationTest extends BaseTest
 
    public void testGetFolderTree_ObjectInfo() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetFolderTree_ObjectInfo....                                   ");
+      String testname = "testGetFolderTree_ObjectInfo";
+      System.out.print("Running " + testname + "....                                   ");
       this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
-            getConnection().getFolderTree(testroot, -1, true, IncludeRelationships.NONE, true, true, "", "*");
+            getConnection().getFolderTree(testroot, -1, true, IncludeRelationships.NONE, true, true,
+               PropertyFilter.ALL, RenditionFilter.ANY);
          List<CmisObject> list = objectTreeToList(result);
          for (CmisObject one : list)
          {
@@ -1114,14 +1146,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_PropertyFiltered() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetFolderTree_PropertyFiltered....                             ");
+      String testname = "testGetFolderTree_PropertyFiltered";
+      System.out.print("Running " + testname + "....                             ");
       this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
             getConnection().getFolderTree(testroot, -1, true, IncludeRelationships.NONE, true, true,
-               "cmis:name,cmis:path", "*");
+               "cmis:name,cmis:path", RenditionFilter.ANY);
          List<CmisObject> list = objectTreeToList(result);
          for (CmisObject one : list)
          {
@@ -1148,13 +1180,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_RenditionsFiltered() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetFolderTree_RenditionsFiltered....                           ");
+      String testname = "testGetFolderTree_RenditionsFiltered";
+      System.out.print("Running " + testname + "....                           ");
       this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
-            getConnection().getFolderTree(testroot, -1, true, IncludeRelationships.NONE, true, true, "", "cmis:none");
+            getConnection().getFolderTree(testroot, -1, true, IncludeRelationships.NONE, true, true,
+               PropertyFilter.ALL, RenditionFilter.NONE);
          List<CmisObject> list = objectTreeToList(result);
          for (CmisObject one : list)
          {
@@ -1178,13 +1211,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_DepthLimit() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetFolderTree_DepthLimit....                                   ");
+      String testname = "testGetFolderTree_DepthLimit";
+      System.out.print("Running " + testname + "....                                   ");
       this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
-            getConnection().getFolderTree(testroot, 1, true, IncludeRelationships.NONE, true, true, "", "cmis:none");
+            getConnection().getFolderTree(testroot, 1, true, IncludeRelationships.NONE, true, true, PropertyFilter.ALL,
+               RenditionFilter.NONE);
          List<CmisObject> list = objectTreeToList(result);
          if (list.size() != 2) //skipping last level with Doc4
             doFail("Incorrect items number in result;");
@@ -1203,14 +1237,15 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_FilterNotValidException() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetFolderTree_FilterNotValidException....                      ");
+      String testname = "testGetFolderTree_FilterNotValidException";
+      System.out.print("Running " + testname + "....                      ");
       this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
-            getConnection().getFolderTree(testroot, 2, true, IncludeRelationships.NONE, true, true, "(,*", "cmis:none");
-         doFail();
+            getConnection().getFolderTree(testroot, 2, true, IncludeRelationships.NONE, true, true, "(,*",
+               RenditionFilter.NONE);
+         doFail("FilterNotValidException must be thrown;");
       }
       catch (FilterNotValidException ex)
       {
@@ -1229,14 +1264,15 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_InvalidArgumentException() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetFolderTree_InvalidArgumentException....                     ");
+      String testname = "testGetFolderTree_InvalidArgumentException";
+      System.out.print("Running " + testname + "....                     ");
       this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
-            getConnection().getFolderTree(testroot, 0, true, IncludeRelationships.NONE, true, true, "", "*");
-         doFail();
+            getConnection().getFolderTree(testroot, 0, true, IncludeRelationships.NONE, true, true, PropertyFilter.ALL,
+               RenditionFilter.ANY);
+         doFail("InvalidArgumentException must be thrown;");
       }
       catch (InvalidArgumentException ex)
       {
@@ -1255,15 +1291,15 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderTree_InvalidArgumentException2() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetFolderTree_InvalidArgumentException2....                    ");
+      String testname = "testGetFolderTree_InvalidArgumentException2";
+      System.out.print("Running " + testname + "....                    ");
       this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
             getConnection().getFolderTree(getStorage().getObjectByPath("/testroot/doc1").getObjectId(), -1, true,
-               IncludeRelationships.NONE, true, true, "", "*");
-         doFail();
+               IncludeRelationships.NONE, true, true, PropertyFilter.ALL, RenditionFilter.ANY);
+         doFail("InvalidArgumentException must be thrown;");
       }
       catch (InvalidArgumentException ex)
       {
@@ -1287,13 +1323,13 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderParent_Simple() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetFolderParent_Simple....                                     ");
+      String testname = "testGetFolderParent_Simple";
+      System.out.print("Running " + testname + "....                                     ");
       this.testroot = createFolderTree();
       try
       {
          ObjectData fold = getStorage().getObjectByPath("/testroot/folder1");
-         CmisObject result = getConnection().getFolderParent(fold.getObjectId(), true, "");
+         CmisObject result = getConnection().getFolderParent(fold.getObjectId(), true, PropertyFilter.ALL);
          if (result == null)
             doFail("Result is empty");
          pass(testname);
@@ -1306,13 +1342,13 @@ public class NavigationTest extends BaseTest
 
    public void testGetFolderParent_IncludeObjectInfo() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetFolderParent_IncludeObjectInfo....                          ");
+      String testname = "testGetFolderParent_IncludeObjectInfo";
+      System.out.print("Running " + testname + "....                          ");
       this.testroot = createFolderTree();
       try
       {
          ObjectData fold = getStorage().getObjectByPath("/testroot/folder1");
-         CmisObject result = getConnection().getFolderParent(fold.getObjectId(), true, "");
+         CmisObject result = getConnection().getFolderParent(fold.getObjectId(), true, PropertyFilter.ALL);
          if (result.getObjectInfo() == null)
             doFail("ObjectInfo must be present in result;");
          pass(testname);
@@ -1325,13 +1361,13 @@ public class NavigationTest extends BaseTest
 
    public void testGetFolderParent_NoIncludeObjectInfo() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetFolderParent_NoIncludeObjectInfo....                        ");
+      String testname = "testGetFolderParent_NoIncludeObjectInfo";
+      System.out.print("Running " + testname + "....                        ");
       this.testroot = createFolderTree();
       try
       {
          ObjectData fold = getStorage().getObjectByPath("/testroot/folder1");
-         CmisObject result = getConnection().getFolderParent(fold.getObjectId(), false, "");
+         CmisObject result = getConnection().getFolderParent(fold.getObjectId(), false, PropertyFilter.ALL);
          if (result.getObjectInfo() != null)
             doFail("ObjectInfo must  not be present in result;");
          pass(testname);
@@ -1350,8 +1386,8 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderParent_PropertyFiltered() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetFolderParent_PropertyFiltered....                           ");
+      String testname = "testGetFolderParent_PropertyFiltered";
+      System.out.print("Running " + testname + "....                           ");
       this.testroot = createFolderTree();
       try
       {
@@ -1379,14 +1415,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderParent_FilterNotValidException() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetFolderParent_FilterNotValidException....                    ");
+      String testname = "testGetFolderParent_FilterNotValidException";
+      System.out.print("Running " + testname + "....                    ");
       this.testroot = createFolderTree();
       try
       {
          ObjectData fold = getStorage().getObjectByPath("/testroot/folder1");
          CmisObject result = getConnection().getFolderParent(fold.getObjectId(), false, "(,*");
-         doFail();
+         doFail("FilterNotValidException must be thrown;");
       }
       catch (FilterNotValidException ex)
       {
@@ -1405,14 +1441,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetFolderParent_InvalidArgumentException() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetFolderParent_InvalidArgumentException....                   ");
+      String testname = "testGetFolderParent_InvalidArgumentException";
+      System.out.print("Running " + testname + "....                   ");
       this.testroot = createFolderTree();
       try
       {
          ObjectData fold = getStorage().getObjectByPath("/");
-         CmisObject result = getConnection().getFolderParent(fold.getObjectId(), true, "");
-         doFail();
+         CmisObject result = getConnection().getFolderParent(fold.getObjectId(), true, PropertyFilter.ALL);
+         doFail("InvalidArgumentException must be thrown;");
       }
       catch (InvalidArgumentException ex)
       {
@@ -1431,14 +1467,15 @@ public class NavigationTest extends BaseTest
     */
    public void testGetObjectParents_Simple() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetObjectParents_Simple....                                    ");
+      String testname = "testGetObjectParents_Simple";
+      System.out.print("Running " + testname + "....                                    ");
       this.testroot = createFolderTree();
       try
       {
          ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
          List<ObjectParent> result =
-            getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true, "", "*");
+            getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true,
+               PropertyFilter.ALL, RenditionFilter.ANY);
          if (result.size() != 1)
             doFail("Incorrect items number in result;");
          pass(testname);
@@ -1456,14 +1493,15 @@ public class NavigationTest extends BaseTest
     */
    public void testGetObjectParents_IncludeRelatioships() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetObjectParents_IncludeRelatioships....                       ");
+      String testname = "testGetObjectParents_IncludeRelatioships";
+      System.out.print("Running " + testname + "....                       ");
       this.testroot = createFolderTree();
       try
       {
          ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
          List<ObjectParent> result =
-            getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true, "", "*");
+            getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true,
+               PropertyFilter.ALL, RenditionFilter.ANY);
          for (ObjectParent one : result)
          {
             if (!(one.getObject().getRelationship().size() > 0))
@@ -1484,14 +1522,15 @@ public class NavigationTest extends BaseTest
     */
    public void testGetObjectParents_NoRelationships() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetObjectParents_NoRelationships....                            ");
+      String testname = "testGetObjectParents_NoRelationships";
+      System.out.print("Running " + testname + "....                            ");
       this.testroot = createFolderTree();
       try
       {
          ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
          List<ObjectParent> result =
-            getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.NONE, true, true, "", "*");
+            getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.NONE, true, true,
+               PropertyFilter.ALL, RenditionFilter.ANY);
          for (ObjectParent one : result)
          {
             if (one.getObject().getRelationship().size() != 0)
@@ -1513,14 +1552,15 @@ public class NavigationTest extends BaseTest
     */
    public void testGetObjectParents_AllowableActions() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetObjectParents_AllowableActions....                          ");
+      String testname = "testGetObjectParents_AllowableActions";
+      System.out.print("Running " + testname + "....                          ");
       this.testroot = createFolderTree();
       try
       {
          ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
          List<ObjectParent> result =
-            getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true, "", "*");
+            getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true,
+               PropertyFilter.ALL, RenditionFilter.ANY);
          for (ObjectParent one : result)
          {
             if (one.getObject().getAllowableActions() != null)
@@ -1543,14 +1583,15 @@ public class NavigationTest extends BaseTest
     */
    public void testGetObjectParents_NoAllowableActions() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetObjectParents_NoAllowableActions....                        ");
+      String testname = "testGetObjectParents_NoAllowableActions";
+      System.out.print("Running " + testname + "....                        ");
       this.testroot = createFolderTree();
       try
       {
          ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
          List<ObjectParent> result =
-            getConnection().getObjectParents(doc.getObjectId(), false, IncludeRelationships.BOTH, true, true, "", "*");
+            getConnection().getObjectParents(doc.getObjectId(), false, IncludeRelationships.BOTH, true, true,
+               PropertyFilter.ALL, RenditionFilter.ANY);
          for (ObjectParent one : result)
          {
             if (one.getObject().getAllowableActions() == null)
@@ -1574,14 +1615,15 @@ public class NavigationTest extends BaseTest
     */
    public void testGetObjectParents_IncludePathSegment() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetObjectParents_IncludePathSegment....                        ");
+      String testname = "testGetObjectParents_IncludePathSegment";
+      System.out.print("Running " + testname + "....                        ");
       this.testroot = createFolderTree();
       try
       {
          ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
          List<ObjectParent> result =
-            getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true, "", "*");
+            getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true,
+               PropertyFilter.ALL, RenditionFilter.ANY);
          for (ObjectParent one : result)
          {
             if (one.getRelativePathSegment() != null)
@@ -1605,14 +1647,15 @@ public class NavigationTest extends BaseTest
     */
    public void testGetObjectParents_NoPathSegment() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetObjectParents_NoPathSegment....                             ");
+      String testname = "testGetObjectParents_NoPathSegment";
+      System.out.print("Running " + testname + "....                             ");
       this.testroot = createFolderTree();
       try
       {
          ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
          List<ObjectParent> result =
-            getConnection().getObjectParents(doc.getObjectId(), false, IncludeRelationships.BOTH, false, true, "", "*");
+            getConnection().getObjectParents(doc.getObjectId(), false, IncludeRelationships.BOTH, false, true,
+               PropertyFilter.ALL, RenditionFilter.ANY);
          for (ObjectParent one : result)
          {
             if (one.getRelativePathSegment() != null)
@@ -1633,15 +1676,15 @@ public class NavigationTest extends BaseTest
     */
    public void testGetObjectParents_NoRenditions() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetObjectParents_NoRenditions...                               ");
+      String testname = "testGetObjectParents_NoRenditions";
+      System.out.print("Running " + testname + "...                               ");
       this.testroot = createFolderTree();
       try
       {
          ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
          List<ObjectParent> result =
-            getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true, "",
-               "cmis:none");
+            getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true,
+               PropertyFilter.ALL, RenditionFilter.NONE);
          for (ObjectParent one : result)
          {
             if (one.getObject().getRenditions().size() != 0)
@@ -1657,14 +1700,15 @@ public class NavigationTest extends BaseTest
 
    public void testGetObjectParents_ObjectInfo() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetObjectParents_ObjectInfo....                                ");
+      String testname = "testGetObjectParents_ObjectInfo";
+      System.out.print("Running " + testname + "....                                ");
       this.testroot = createFolderTree();
       try
       {
          ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
          List<ObjectParent> result =
-            getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true, "", "*");
+            getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true,
+               PropertyFilter.ALL, RenditionFilter.ANY);
          for (ObjectParent one : result)
          {
             if (one.getObject().getObjectInfo() == null)
@@ -1680,14 +1724,15 @@ public class NavigationTest extends BaseTest
 
    public void testGetObjectParents_NoObjectInfo() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetObjectParents_NoObjectInfo()....                            ");
+      String testname = "testGetObjectParents_NoObjectInfo";
+      System.out.print("Running " + testname + "....                            ");
       this.testroot = createFolderTree();
       try
       {
          ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
          List<ObjectParent> result =
-            getConnection().getObjectParents(doc.getObjectId(), false, IncludeRelationships.BOTH, true, false, "", "*");
+            getConnection().getObjectParents(doc.getObjectId(), false, IncludeRelationships.BOTH, true, false,
+               PropertyFilter.ALL, RenditionFilter.ANY);
          for (ObjectParent one : result)
          {
             if (one.getObject().getObjectInfo() != null)
@@ -1709,15 +1754,15 @@ public class NavigationTest extends BaseTest
     */
    public void testGetObjectParents_PropertiesFIlter() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetObjectParents_PropertiesFIlter....                          ");
+      String testname = "testGetObjectParents_PropertiesFIlter";
+      System.out.print("Running " + testname + "....                          ");
       this.testroot = createFolderTree();
       try
       {
          ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
          List<ObjectParent> result =
             getConnection().getObjectParents(doc.getObjectId(), false, IncludeRelationships.BOTH, true, false,
-               "cmis:name,cmis:path", "*");
+               "cmis:name,cmis:path", RenditionFilter.ANY);
          for (ObjectParent one : result)
          {
             for (Map.Entry<String, Property<?>> e : one.getObject().getProperties().entrySet())
@@ -1744,16 +1789,16 @@ public class NavigationTest extends BaseTest
 
    public void testGetObjectParents_FilterNotValidException() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetObjectParents_FilterNotValidException....                   ");
+      String testname = "testGetObjectParents_FilterNotValidException";
+      System.out.print("Running " + testname + "....                   ");
       this.testroot = createFolderTree();
       try
       {
          ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
          List<ObjectParent> result =
-            getConnection()
-               .getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true, "(,*", "*");
-         doFail();
+            getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true, "(,*",
+               RenditionFilter.ANY);
+         doFail("FilterNotValidException must be thrown;");
       }
       catch (FilterNotValidException ex)
       {
@@ -1774,8 +1819,8 @@ public class NavigationTest extends BaseTest
 
    public void testGetObjectParents_ConstraintException() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetObjectParents_ConstraintException....                       ");
+      String testname = "testGetObjectParents_ConstraintException";
+      System.out.print("Running " + testname + "....                       ");
       this.testroot = createFolderTree();
       try
       {
@@ -1786,8 +1831,8 @@ public class NavigationTest extends BaseTest
          {
             List<ObjectParent> result =
                getConnection().getObjectParents(it.next().getObjectId(), true, IncludeRelationships.BOTH, true, true,
-                  "", "*");
-            doFail();
+                  PropertyFilter.ALL, RenditionFilter.ANY);
+            doFail("ConstraintException must be thrown;");
          }
 
       }
@@ -1808,13 +1853,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocs_Simple() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetCheckedOutDocs_Simple....                                   ");
+      String testname = "testGetCheckedOutDocs_Simple";
+      System.out.print("Running " + testname + "....                                   ");
       this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getCheckedOutDocs(null, true, IncludeRelationships.BOTH, true, "", "", "", -1, 0);
+            getConnection().getCheckedOutDocs(null, true, IncludeRelationships.BOTH, true, PropertyFilter.ALL,
+               RenditionFilter.ANY, "", -1, 0);
          if (result.getItems().size() == 3)
             pass(testname);
          else
@@ -1834,13 +1880,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocs_AllowableActions() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetCheckedOutDocs_AllowableActions....                         ");
+      String testname = "testGetCheckedOutDocs_AllowableActions";
+      System.out.print("Running " + testname + "....                         ");
       this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getCheckedOutDocs(null, true, IncludeRelationships.BOTH, true, "", "", "", -1, 0);
+            getConnection().getCheckedOutDocs(null, true, IncludeRelationships.BOTH, true, PropertyFilter.ALL,
+               RenditionFilter.ANY, "", -1, 0);
          for (CmisObject one : result.getItems())
          {
             if (one.getAllowableActions() == null)
@@ -1861,13 +1908,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocs_NoAllowableActions() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetCheckedOutDocs_NoAllowableActions....                       ");
+      String testname = "testGetCheckedOutDocs_NoAllowableActions";
+      System.out.print("Running " + testname + "....                       ");
       this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getCheckedOutDocs(null, false, IncludeRelationships.BOTH, true, "", "", "", -1, 0);
+            getConnection().getCheckedOutDocs(null, false, IncludeRelationships.BOTH, true, PropertyFilter.ALL,
+               RenditionFilter.ANY, "", -1, 0);
          for (CmisObject one : result.getItems())
          {
             if (one.getAllowableActions() != null)
@@ -1888,13 +1936,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocs_Relationships() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetCheckedOutDocs_Relationships....                            ");
+      String testname = "testGetCheckedOutDocs_Relationships";
+      System.out.print("Running " + testname + "....                            ");
       this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getCheckedOutDocs(testroot, false, IncludeRelationships.BOTH, true, "", "", "", -1, 0);
+            getConnection().getCheckedOutDocs(testroot, false, IncludeRelationships.BOTH, true, PropertyFilter.ALL,
+               RenditionFilter.ANY, "", -1, 0);
          boolean found = false;
          for (CmisObject one : result.getItems())
          {
@@ -1919,13 +1968,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocs_NoRelationships() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetCheckedOutDocs_NoRelationships....                          ");
+      String testname = "testGetCheckedOutDocs_NoRelationships";
+      System.out.print("Running " + testname + "....                          ");
       this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getCheckedOutDocs(testroot, false, IncludeRelationships.NONE, true, "", "", "", -1, 0);
+            getConnection().getCheckedOutDocs(testroot, false, IncludeRelationships.NONE, true, PropertyFilter.ALL,
+               RenditionFilter.ANY, "", -1, 0);
          boolean found = false;
          for (CmisObject one : result.getItems())
          {
@@ -1945,13 +1995,14 @@ public class NavigationTest extends BaseTest
 
    public void testGetCheckedOutDocs_ObjectInfo() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetCheckedOutDocs_ObjectInfo....                               ");
+      String testname = "testGetCheckedOutDocs_ObjectInfo";
+      System.out.print("Running " + testname + "....                               ");
       this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getCheckedOutDocs(testroot, false, IncludeRelationships.BOTH, true, "", "*", "", -1, 0);
+            getConnection().getCheckedOutDocs(testroot, false, IncludeRelationships.BOTH, true, PropertyFilter.ALL,
+               RenditionFilter.ANY, "", -1, 0);
          for (CmisObject one : result.getItems())
          {
             if (one.getObjectInfo() == null)
@@ -1967,13 +2018,14 @@ public class NavigationTest extends BaseTest
 
    public void testGetCheckedOutDocs_NoObjectInfo() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetCheckedOutDocs_NoObjectInfo....                             ");
+      String testname = "testGetCheckedOutDocs_NoObjectInfo";
+      System.out.print("Running " + testname + "....                             ");
       this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getCheckedOutDocs(testroot, false, IncludeRelationships.NONE, false, "", "*", "", -1, 0);
+            getConnection().getCheckedOutDocs(testroot, false, IncludeRelationships.NONE, false, PropertyFilter.ALL,
+               RenditionFilter.ANY, "", -1, 0);
          for (CmisObject one : result.getItems())
          {
             if (one.getObjectInfo() != null)
@@ -1994,14 +2046,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocs_NoRenditions() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetCheckedOutDocs_NoRenditions....                             ");
+      String testname = "testGetCheckedOutDocs_NoRenditions";
+      System.out.print("Running " + testname + "....                             ");
       this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getCheckedOutDocs(testroot, false, IncludeRelationships.NONE, true, "", "cmis:none", "",
-               -1, 0);
+            getConnection().getCheckedOutDocs(testroot, false, IncludeRelationships.NONE, true, PropertyFilter.ALL,
+               RenditionFilter.NONE, "", -1, 0);
          for (CmisObject one : result.getItems())
          {
             if (one.getRenditions().size() != 0)
@@ -2023,14 +2075,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocs_PropertyFiltered() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetCheckedOutDocs_PropertyFiltered....                         ");
+      String testname = "testGetCheckedOutDocs_PropertyFiltered";
+      System.out.print("Running " + testname + "....                         ");
       this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
             getConnection().getCheckedOutDocs(testroot, false, IncludeRelationships.NONE, true, "cmis:name,cmis:path",
-               "*", "", -1, 0);
+               RenditionFilter.ANY, "", -1, 0);
          for (CmisObject one : result.getItems())
          {
             for (Map.Entry<String, Property<?>> e : one.getProperties().entrySet())
@@ -2057,13 +2109,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocs_MaxItems() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetCheckedOutDocs_MaxItems....                                 ");
+      String testname = "testGetCheckedOutDocs_MaxItems";
+      System.out.print("Running " + testname + "....                                 ");
       this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getCheckedOutDocs(testroot, true, IncludeRelationships.BOTH, true, "", "", "", 2, 0);
+            getConnection().getCheckedOutDocs(testroot, true, IncludeRelationships.BOTH, true, PropertyFilter.ALL,
+               RenditionFilter.ANY, "", 2, 0);
          if (result.getItems().size() != 2)
             doFail("Items nimber incorrect in result;");
          pass(testname);
@@ -2082,13 +2135,14 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocs_SkipCount() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetCheckedOutDocs_SkipCount....                                ");
+      String testname = "testGetCheckedOutDocs_SkipCount";
+      System.out.print("Running " + testname + "....                                ");
       this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getCheckedOutDocs(testroot, true, IncludeRelationships.BOTH, true, "", "", "", -1, 1);
+            getConnection().getCheckedOutDocs(testroot, true, IncludeRelationships.BOTH, true, PropertyFilter.ALL,
+               RenditionFilter.ANY, "", -1, 1);
          if (result.getItems().size() == 2)
             pass(testname);
          else
@@ -2107,14 +2161,15 @@ public class NavigationTest extends BaseTest
     */
    public void testGetCheckedOutDocs_FilterNotValidException() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetCheckedOutDocs_FilterNotValidException....                  ");
+      String testname = "testGetCheckedOutDocs_FilterNotValidException";
+      System.out.print("Running " + testname + "....                  ");
       this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getCheckedOutDocs(testroot, false, IncludeRelationships.NONE, true, ",*)", "*", "", -1, 0);
-         doFail();
+            getConnection().getCheckedOutDocs(testroot, false, IncludeRelationships.NONE, true, ",*)",
+               RenditionFilter.ANY, "", -1, 0);
+         doFail("FilterNotValidException must be thrown;");
       }
       catch (FilterNotValidException ex)
       {

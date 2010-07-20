@@ -53,8 +53,8 @@ public class RepositoryTest extends BaseTest
 
    public void testGeneral() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGeneral....                                                    ");
+      String testname = "testGeneral";
+      System.out.print("Running " + testname + "....                                                    ");
       if (storageProvider == null)
          doFail("Storage provider is null;");
       if (storageProvider.getConnection() == null)
@@ -73,8 +73,8 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetRepositories() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetRepositories....                                            ");
+      String testname = "testGetRepositories";
+      System.out.print("Running " + testname + "....                                            ");
       Set<RepositoryShortInfo> storageInfos = CmisRegistry.getInstance().getStorageInfos();
       if (storageInfos == null)
          doFail("StorageInfo  is null;");
@@ -105,8 +105,8 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetRepositoryInfo() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetRepositoryInfo....                                          ");
+      String testname = "testGetRepositoryInfo";
+      System.out.print("Running " + testname + "....                                          ");
       if (getStorage().getRepositoryInfo() == null)
          doFail("Repository Info  is null;");
       if (getStorage().getRepositoryInfo().getRepositoryId() == null)
@@ -160,8 +160,8 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetTypeChildren_Root() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetTypeChildren_Root....                                       ");
+      String testname = "testGetTypeChildren_Root";
+      System.out.print("Running " + testname + "....                                       ");
       // root types
       ItemsList<TypeDefinition> typeChildren0 = null;
       try
@@ -176,8 +176,7 @@ public class RepositoryTest extends BaseTest
          doFail("Root typer childrens is null;");
       List<TypeDefinition> typeChildrenList = typeChildren0.getItems();
       if (typeChildrenList == null)
-         ;
-      doFail("Root typer childrens is empty;");
+         doFail("Root typer childrens is empty;");
       List<String> ll = new ArrayList<String>();
       ll.add(CmisConstants.DOCUMENT);
       ll.add(CmisConstants.FOLDER);
@@ -219,8 +218,8 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetTypeChildren_RootWithMaxItems() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetTypeChildren_RootWithMaxItems....                           ");
+      String testname = "testGetTypeChildren_RootWithMaxItems";
+      System.out.print("Running " + testname + "....                           ");
       // root types with maxItems
       ItemsList<TypeDefinition> typeChildren3 = null;
       try
@@ -246,8 +245,8 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetTypeChildren_RootWithSkipCount() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetTypeChildren_RootWithSkipCount....                          ");
+      String testname = "testGetTypeChildren_RootWithSkipCount";
+      System.out.print("Running " + testname + "....                          ");
       // get size of root types
       ItemsList<TypeDefinition> typeChildren0 = null;
       try
@@ -286,8 +285,8 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetTypeChildren_Folder() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetTypeChildren_Folder....                                     ");
+      String testname = "testGetTypeChildren_Folder";
+      System.out.print("Running " + testname + "....                                     ");
       // folder
       ItemsList<TypeDefinition> typeChildren1 = null;
       try
@@ -313,8 +312,8 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetTypeChildren_Document() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetTypeChildren_Document....                                   ");
+      String testname = "testGetTypeChildren_Document";
+      System.out.print("Running " + testname + "....                                   ");
       // document
       ItemsList<TypeDefinition> typeChildren2 = null;
       try
@@ -341,8 +340,8 @@ public class RepositoryTest extends BaseTest
    public void testGetTypeChildren_NonExistedType() throws Exception
    {
       // to get children for nonexistent type "cmis:kino"
-      String testname = "";
-      System.out.print("Running testGetTypeChildren_NonExistedType....                             ");
+      String testname = "testGetTypeChildren_NonExistedType";
+      System.out.print("Running " + testname + "....                             ");
       try
       {
          getConnection().getTypeChildren("cmis:kino", false, -1, 0);
@@ -365,8 +364,8 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetTypeDescendants() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetTypeDescendants....                                         ");
+      String testname = "testGetTypeDescendants";
+      System.out.print("Running " + testname + "....                                         ");
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
       try
       {
@@ -414,8 +413,8 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetTypeDescendants_Folder() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetTypeDescendants_Folder....                                  ");
+      String testname = "testGetTypeDescendants_Folder";
+      System.out.print("Running " + testname + "....                                  ");
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
       try
       {
@@ -439,8 +438,8 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetTypeDescendants_Document() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetTypeDescendants_Document....                                ");
+      String testname = "testGetTypeDescendants_Document";
+      System.out.print("Running " + testname + "....                                ");
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
       try
       {
@@ -464,8 +463,8 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetTypeDescendants_IncludePropertyDefinitionFalse() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetTypeDescendants_IncludePropertyDefinitionFalse....          ");
+      String testname = "testGetTypeDescendants_IncludePropertyDefinitionFalse";
+      System.out.print("Running " + testname + "....          ");
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
       try
       {
@@ -498,8 +497,8 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetTypeDescendants_RootWithDepth1() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetTypeDescendants_RootWithDepth1....                          ");
+      String testname = "testGetTypeDescendants_RootWithDepth1";
+      System.out.print("Running " + testname + "....                          ");
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
       try
       {
@@ -530,8 +529,8 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetTypeDescendants_NonExistedType() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetTypeDescendants_NonExistedType....                          ");
+      String testname = "testGetTypeDescendants_NonExistedType";
+      System.out.print("Running " + testname + "....                          ");
       try
       {
          getConnection().getTypeDescendants("cmis:kino", 2, true);
@@ -554,8 +553,8 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetTypeDefinition_Folder() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetTypeDefinition_Folder....                                   ");
+      String testname = "testGetTypeDefinition_Folder";
+      System.out.print("Running " + testname + "....                                   ");
       if (folderTypeDefinition == null)
          doFail("Folder type definition is null;");
       if (folderTypeDefinition.getId() == null)
@@ -577,8 +576,8 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetTypeDefinition_Document() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetTypeDefinition_Document....                                 ");
+      String testname = "testGetTypeDefinition_Document";
+      System.out.print("Running " + testname + "....                                 ");
       if (documentTypeDefinition == null)
          doFail("Document type definition is null;");
       if (documentTypeDefinition.getId() == null)
@@ -600,8 +599,8 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetTypeDefinition_NonExistedType() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetTypeDefinition_NonExistedType....                           ");
+      String testname = "testGetTypeDefinition_NonExistedType";
+      System.out.print("Running " + testname + "....                           ");
       try
       {
          getConnection().getTypeDefinition("cmis:kino", false);
@@ -624,8 +623,8 @@ public class RepositoryTest extends BaseTest
     */
    public void testGetTypeDefinition_IncludePropertyDefinitionFalse() throws Exception
    {
-      String testname = "";
-      System.out.print("Running testGetTypeDefinition_IncludePropertyDefinitionFalse....           ");
+      String testname = "testGetTypeDefinition_IncludePropertyDefinitionFalse";
+      System.out.print("Running " + testname + "....           ");
       TypeDefinition typeDefinition = null;
       try
       {
@@ -675,7 +674,7 @@ public class RepositoryTest extends BaseTest
    }
 
    protected void pass(String method) throws Exception
-   { 
+   {
       super.pass("RepositoryTest." + method);
    }
 }
