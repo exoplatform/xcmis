@@ -24,6 +24,7 @@ import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.RenditionFilter;
+import org.xcmis.spi.model.CapabilityQuery;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.IncludeRelationships;
 
@@ -54,6 +55,8 @@ public class DiscoveryTest extends BaseTest
    {
       String testname = "testQuery";
       System.out.print("Running " + testname + "....                                                      ");
+      if (getStorage().getRepositoryInfo().getCapabilities().getCapabilityQuery().equals(CapabilityQuery.NONE))
+         skip("DiscoveryTest.testQuery");
       String errSms = "\n 2.2.6.1 query. Doesn't work Query (Discovery service) with cmis:document to search content.";
       FolderData parentFolder = null;
       try
@@ -104,6 +107,8 @@ public class DiscoveryTest extends BaseTest
    {
       String testname = "testQuery2";
       System.out.print("Running " + testname + "....                                                     ");
+      if (getStorage().getRepositoryInfo().getCapabilities().getCapabilityQuery().equals(CapabilityQuery.NONE))
+         skip("testQuery2");
       FolderData parentFolder = null;
       try
       {
