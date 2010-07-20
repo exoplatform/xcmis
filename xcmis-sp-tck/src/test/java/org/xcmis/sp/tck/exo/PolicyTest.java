@@ -98,7 +98,7 @@ public class PolicyTest extends BaseTest
                PolicyData one = it.next();
                if (!one.getName().equals("policy1"))
                   doFail(testname, "Policy name does not match;");
-               if (one.getPolicyText().equals("testPolicyText"))
+               if (!one.getPolicyText().equals("testPolicyText"))
                   doFail(testname, "Policy text does not match;");
                res.removePolicy(one);
             }

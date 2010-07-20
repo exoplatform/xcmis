@@ -394,8 +394,7 @@ public class NavigationTest extends BaseTest
             getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, PropertyFilter.ALL,
                RenditionFilter.ANY, "", 3, 0);
          if (result.getItems().size() != 3)
-            ;
-         doFail(testname, "Items number is incorrect;");
+           doFail(testname, "Items number is incorrect;");
          pass(testname);
       }
       catch (Exception e)
@@ -629,8 +628,7 @@ public class NavigationTest extends BaseTest
                relCount++;
          }
          if (relCount != 3)
-            ;
-         doFail(testname, "Items number is incorrect;");
+            doFail(testname, "Items number is incorrect;");
          pass(testname);
       }
       catch (Exception e)
@@ -662,8 +660,7 @@ public class NavigationTest extends BaseTest
                relCount++;
          }
          if (relCount != 0)
-            ;
-         doFail(testname, "Items number is incorrect;");
+           doFail(testname, "Items number is incorrect;");
          pass(testname);
       }
       catch (Exception e)
@@ -1534,8 +1531,7 @@ public class NavigationTest extends BaseTest
          for (ObjectParent one : result)
          {
             if (one.getObject().getRelationship().size() != 0)
-               ;
-            doFail(testname, "Incorrect items number in result;");
+              doFail(testname, "Incorrect items number in result;");
          }
          pass(testname);
       }
@@ -1862,8 +1858,6 @@ public class NavigationTest extends BaseTest
             getConnection().getCheckedOutDocs(null, true, IncludeRelationships.BOTH, true, PropertyFilter.ALL,
                RenditionFilter.ANY, "", -1, 0);
          if (result.getItems().size() != 3)
-            doFail(testname, "Items size is incorrect;");
-         else
             doFail(testname, "Unexpected items number;");
          pass(testname);
       }

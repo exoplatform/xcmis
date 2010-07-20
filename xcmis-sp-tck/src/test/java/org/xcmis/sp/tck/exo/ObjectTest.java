@@ -1818,7 +1818,7 @@ public class ObjectTest extends BaseTest
                getConnection().createFolder(testroot.getObjectId(), getPropsMap(CmisConstants.FOLDER, "f1"), null, null, null);
             ObjectData obj = getStorage().getObjectById(docId);
             if (!obj.getTypeId().equals(BaseType.FOLDER))
-               doFail(testname, "Object types doen not match;");
+               doFail(testname, "Object types does not match;");
             if (!((FolderData)obj).getPath().equals("/testroot/f1"))
                doFail(testname, "Path is not correct;");
             pass(testname);
@@ -2468,10 +2468,9 @@ public class ObjectTest extends BaseTest
             if (!obj.getTypeId().equals("cmis:relationship"))
                doFail(testname, "Cmis object types does not match;");
             if (!doc1.getObjectId().equals(((RelationshipData)obj).getSourceId()))
-               doFail(testname, "Cmis objects  does not match;");
+               doFail(testname, "Cmis objects ID does not match;");
             if (!doc2.getObjectId().equals(((RelationshipData)obj).getTargetId()))
-               ;
-            doFail(testname, "Cmis objects  does not match;");
+               doFail(testname, "Cmis object ID  does not match;");
             pass(testname);
          }
          catch (Exception e)

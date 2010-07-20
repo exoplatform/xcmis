@@ -245,7 +245,7 @@ public class ACLTest extends BaseTest
             ObjectData obj = getStorage().getObjectById(doc1.getObjectId());
             for (AccessControlEntry one : obj.getACL(false))
             {
-               if (one.getPrincipal().equalsIgnoreCase("Makis"))
+               if (!one.getPrincipal().equalsIgnoreCase("Makis"))
                {
                   doFail(testname, "Remove ACE failed;");
                }
