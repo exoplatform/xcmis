@@ -99,16 +99,16 @@ public class RelationshipTest extends BaseTest
             if (obj.getItems().size() == 2)
                pass(testname);
             else
-               doFail("Unexpected items number;");
+               doFail(testname, "Unexpected items number;");
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -170,16 +170,16 @@ public class RelationshipTest extends BaseTest
             if (obj.getItems().size() == 1)
                pass(testname);
             else
-               doFail("Unexpected items number;");
+               doFail(testname, "Unexpected items number;");
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -243,18 +243,18 @@ public class RelationshipTest extends BaseTest
                if (actions != null)
                   continue;
                else
-                  doFail("Allowable actions not found;");
+                  doFail(testname, "Allowable actions not found;");
             }
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -339,16 +339,16 @@ public class RelationshipTest extends BaseTest
             if (obj.getItems().size() == 1)
                pass(testname);
             else
-               doFail("Unexpected items number;");
+               doFail(testname, "Unexpected items number;");
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -437,23 +437,23 @@ public class RelationshipTest extends BaseTest
                getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER,
                   CmisConstants.RELATIONSHIP, true, true, true, "", -1, 0);
             if (obj.getItems().size() != 2)
-               doFail("Unexpected items number;");
+               doFail(testname, "Unexpected items number;");
 
             ItemsList<CmisObject> obj2 =
                getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER,
                   CmisConstants.RELATIONSHIP, false, true, true, "", -1, 0);
             if (obj.getItems().size() != 1)
-               doFail("Unexpected items number;");
+               doFail(testname, "Unexpected items number;");
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -517,16 +517,16 @@ public class RelationshipTest extends BaseTest
             if (obj.getItems().size() == 1)
                pass(testname);
             else
-               doFail("Unexpected items number;");
+               doFail(testname, "Unexpected items number;");
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -588,16 +588,16 @@ public class RelationshipTest extends BaseTest
             if (obj.getItems().size() == 1)
                pass(testname);
             else
-               doFail("Unexpected items number;");
+               doFail(testname, "Unexpected items number;");
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -657,26 +657,26 @@ public class RelationshipTest extends BaseTest
                getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true,
                   true, true, "", 1, 0);
             if (obj.getItems().size() != 1)
-               doFail("Unexpected items number;");
+               doFail(testname, "Unexpected items number;");
 
             if (obj.getNumItems() == 2 || obj.getNumItems() == -1)
             {
                //OK
             }
             else
-               doFail("Unexpected items number;");
+               doFail(testname, "Unexpected items number;");
             if (!obj.isHasMoreItems())
-               doFail("Has more items value is incorrect");
+               doFail(testname, "Has more items value is incorrect");
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -736,7 +736,7 @@ public class RelationshipTest extends BaseTest
                getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true,
                   true, true, "cmis:name,cmis:path", -1, 0);
             if (obj.getItems().size() != 2)
-               doFail("Unexpected items number;");
+               doFail(testname, "Unexpected items number;");
 
             for (CmisObject one : obj.getItems())
             {
@@ -745,19 +745,19 @@ public class RelationshipTest extends BaseTest
                   if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path"))
                      continue;//Other props must be ignored
                   else
-                     doFail("Property filter works incorrect");
+                     doFail(testname, "Property filter works incorrect");
                }
             }
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -815,7 +815,7 @@ public class RelationshipTest extends BaseTest
             ItemsList<CmisObject> obj =
                getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true,
                   true, true, "(,*", -1, 0);
-            doFail();
+            doFail(testname,  "FilterNotValidException must be thrown;");
          }
          catch (FilterNotValidException ex)
          {
@@ -823,12 +823,12 @@ public class RelationshipTest extends BaseTest
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -842,5 +842,10 @@ public class RelationshipTest extends BaseTest
    protected void pass(String method) throws Exception
    {
       super.pass("RelationshipTest." + method);
+   }
+   
+   protected void doFail( String method,  String message) throws Exception
+   {
+      super.doFail( "RelationshipTest." + method,  message);
    }
 }

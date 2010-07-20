@@ -85,15 +85,15 @@ public class ACLTest extends BaseTest
          {
             List<AccessControlEntry> res = getConnection().getACL(doc1.getObjectId(), false);
             if (res == null)
-               doFail("Getting ACL failed;");
+               doFail(testname,"Getting ACL failed;");
             for (AccessControlEntry one : res)
             {
                if (one.getPrincipal().equalsIgnoreCase("Makis"))
                {
                   if (one.getPermissions().size() != 1)
-                     doFail("Incorrect items number in result;");
+                     doFail(testname, "Incorrect items number in result;");
                   if (!one.getPermissions().contains("cmis:read"))
-                     doFail("Setting ACL failed");
+                     doFail(testname, "Setting ACL failed");
                }
             }
             pass(testname);
@@ -103,16 +103,16 @@ public class ACLTest extends BaseTest
             if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
                skip("ACLTest.testGetACL_Simple");
             else
-               doFail("Capability ACL is supported but not supported exception thrown");
+               doFail(testname, "Capability ACL is supported but not supported exception thrown");
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -158,9 +158,9 @@ public class ACLTest extends BaseTest
                if (one.getPrincipal().equalsIgnoreCase("Makis"))
                {
                   if (one.getPermissions().size() != 1)
-                     doFail("Incorrect items number in result;");
+                     doFail(testname, "Incorrect items number in result;");
                   if (!one.getPermissions().contains("cmis:read"))
-                     doFail("Setting ACL failed");
+                     doFail(testname, "Setting ACL failed");
                }
             }
             pass(testname);
@@ -170,16 +170,16 @@ public class ACLTest extends BaseTest
             if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
                skip("ACLTest.testApplyACL_Simple");
             else
-               doFail("Capability ACL is supported but not supported exception thrown");
+               doFail(testname, "Capability ACL is supported but not supported exception thrown");
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -247,7 +247,7 @@ public class ACLTest extends BaseTest
             {
                if (one.getPrincipal().equalsIgnoreCase("Makis"))
                {
-                  doFail();
+                  doFail(testname, "Remove ACE failed;");
                }
             }
             pass(testname);
@@ -257,16 +257,16 @@ public class ACLTest extends BaseTest
             if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
                skip("ACLTest.testApplyACL_RemoveACE");
             else
-               doFail("Capability ACL is supported but not supported exception thrown");
+               doFail(testname, "Capability ACL is supported but not supported exception thrown");
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -308,14 +308,14 @@ public class ACLTest extends BaseTest
          try
          {
             getConnection().applyACL(doc1.getObjectId(), null, addACL, AccessControlPropagation.OBJECTONLY);
-            doFail();
+            doFail(testname, "Constraint exception must be thrown;");
          }
          catch (NotSupportedException ex)
          {
             if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
                skip("ACLTest.testApplyACL_ConstraintException");
             else
-               doFail("Capability ACL is supported but not supported exception thrown");
+               doFail(testname, "Capability ACL is supported but not supported exception thrown");
          }
          catch (ConstraintException ec)
          {
@@ -323,12 +323,12 @@ public class ACLTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -384,16 +384,16 @@ public class ACLTest extends BaseTest
             if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
                skip("ACLTest.testApplyACL_ConstraintException2");
             else
-               doFail("Capability ACL is supported but not supported exception thrown");
+               doFail(testname, "Capability ACL is supported but not supported exception thrown");
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -446,16 +446,16 @@ public class ACLTest extends BaseTest
             if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
                skip("ACLTest.testApplyACL_ConstraintException3");
             else
-               doFail("Capability ACL is supported but not supported exception thrown");
+               doFail(testname, "Capability ACL is supported but not supported exception thrown");
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -467,5 +467,10 @@ public class ACLTest extends BaseTest
    protected void pass(String method) throws Exception
    {
       super.pass("ACLTest." + method);
+   }
+   
+   protected void doFail(String method,  String message) throws Exception
+   {
+      super.doFail("ACLTest." + method,  message);
    }
 }

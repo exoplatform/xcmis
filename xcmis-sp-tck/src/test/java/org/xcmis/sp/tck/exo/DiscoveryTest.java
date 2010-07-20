@@ -67,25 +67,25 @@ public class DiscoveryTest extends BaseTest
             getConnection().query(statement, true, false, IncludeRelationships.BOTH, true, RenditionFilter.ANY, -1, 0);
 
          if (query == null)
-            doFail("Quary failed;");
+            doFail(testname, "Quary failed;");
          if (query.getItems() == null)
-            doFail("Quary failed - no items;");
+            doFail(testname, "Quary failed - no items;");
          if (query.getItems().size() != 1)
-            doFail("Quary failed -  incorrect items number;");
+            doFail(testname, "Quary failed -  incorrect items number;");
 
          List<CmisObject> result = query.getItems();
          for (CmisObject cmisObject : result)
          {
             if (cmisObject == null)
-               doFail("Query result not found;");
+               doFail(testname, "Query result not found;");
             if (cmisObject.getObjectInfo() == null)
-               doFail("ObjectInfo not found in query result;");
+               doFail(testname, "ObjectInfo not found in query result;");
             if (cmisObject.getObjectInfo().getId() == null)
-               doFail("ObjectId not found in query result;");
+               doFail(testname, "ObjectId not found in query result;");
             if (!documentData.getObjectId().equals(cmisObject.getObjectInfo().getId()))
-               doFail("ObjectId's does not match;");
+               doFail(testname, "ObjectId's does not match;");
             if (!documentData.getName().equals(cmisObject.getObjectInfo().getName()))
-               doFail("Object names does not match;");
+               doFail(testname, "Object names does not match;");
          }
          pass(testname);
       }
@@ -116,31 +116,31 @@ public class DiscoveryTest extends BaseTest
             getConnection().query(statement, false, false, IncludeRelationships.BOTH, true, RenditionFilter.ANY, -1, 0);
 
          if (query == null)
-            doFail("Quary failed;");
+            doFail(testname, "Quary failed;");
          if (query.getItems() == null)
-            doFail("Quary failed - no items;");
+            doFail(testname, "Quary failed - no items;");
          if (query.getItems().size() == 0)
-            doFail("Quary failed - no items;");
+            doFail(testname, "Quary failed - no items;");
 
          List<CmisObject> result = query.getItems();
          for (CmisObject cmisObject : result)
          {
             if (cmisObject == null)
-               doFail("Query result not found;");
+               doFail(testname, "Query result not found;");
             if (cmisObject.getObjectInfo() == null)
-               doFail("ObjectInfo not found in query result;");
+               doFail(testname, "ObjectInfo not found in query result;");
             if (cmisObject.getObjectInfo().getId() == null)
-               doFail("ObjectId not found in query result;");
+               doFail(testname, "ObjectId not found in query result;");
             if (!documentData.getObjectId().equals(cmisObject.getObjectInfo().getId()))
-               doFail("ObjectId's does not match;");
+               doFail(testname, "ObjectId's does not match;");
             if (!documentData.getName().equals(cmisObject.getObjectInfo().getName()))
-               doFail("Object names does not match;");
+               doFail(testname, "Object names does not match;");
          }
          pass(testname);
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -152,4 +152,10 @@ public class DiscoveryTest extends BaseTest
    {
       super.pass("DiscoveryTest." + method);
    }
+   
+   protected void doFail(String method,  String message) throws Exception
+   {
+      super.doFail("DiscoveryTest." + method,  message);
+   }
+
 }

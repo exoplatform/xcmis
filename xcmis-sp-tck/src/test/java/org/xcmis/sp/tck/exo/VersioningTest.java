@@ -79,19 +79,19 @@ public class VersioningTest extends BaseTest
          {
             String pwcID = getConnection().checkout(doc1.getObjectId());
             if (pwcID == null)
-               doFail("Checkout failed;");
+               doFail(testname, "Checkout failed;");
             if (getStorage().getObjectById(pwcID) == null)
-               doFail("Object not found;");
+               doFail(testname, "Object not found;");
             pass(testname);
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -148,7 +148,7 @@ public class VersioningTest extends BaseTest
          try
          {
             String pwcID = getConnection().checkout(doc1.getObjectId());
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -156,12 +156,12 @@ public class VersioningTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -209,12 +209,12 @@ public class VersioningTest extends BaseTest
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -272,7 +272,7 @@ public class VersioningTest extends BaseTest
          {
             String pwcID = getConnection().checkout(doc1.getObjectId());
             getConnection().cancelCheckout(pwcID);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -280,12 +280,12 @@ public class VersioningTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -324,19 +324,19 @@ public class VersioningTest extends BaseTest
          {
             String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, null);
             if (chIn == null)
-               doFail("Check-in failed;");
+               doFail(testname, "Check-in failed;");
             getStorage().getObjectById(chIn).getContentStream(null).getStream().read(after);
             assertArrayEquals(before, after);
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -382,28 +382,28 @@ public class VersioningTest extends BaseTest
          {
             String chIn = getConnection().checkin(pwcID, true, null, cs2, "", addACL, null, null);
             if (chIn == null)
-               doFail("Check-in failed;");
+               doFail(testname, "Check-in failed;");
             ObjectData obj = getStorage().getObjectById(chIn);
             for (AccessControlEntry one : obj.getACL(false))
             {
                if (one.getPrincipal().equalsIgnoreCase("Makis"))
                {
                   if (one.getPermissions().size() != 1)
-                     doFail("Items number incorrect in result;");
+                     doFail(testname, "Items number incorrect in result;");
                   if (!one.getPermissions().contains("cmis:read"))
-                     doFail("ACL adding failed;");
+                     doFail(testname, "ACL adding failed;");
                }
             }
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -449,7 +449,7 @@ public class VersioningTest extends BaseTest
          {
             String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, policies);
             if (chIn == null)
-               doFail("Check-in failed;");
+               doFail(testname, "Check-in failed;");
             ObjectData obj = getStorage().getObjectById(chIn);
             Iterator<PolicyData> it = obj.getPolicies().iterator();
             while (it.hasNext())
@@ -457,22 +457,22 @@ public class VersioningTest extends BaseTest
                PolicyData one = it.next();
                if (!one.getName().equals("policy1"))
                {
-                  doFail("Policy adding failed;");
+                  doFail(testname, "Policy adding failed;");
                }
                if (!one.getPolicyText().equals("testPolicyText"))
-                  doFail("Policy adding failed;");
+                  doFail(testname, "Policy adding failed;");
                obj.removePolicy(one);
             }
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -534,7 +534,7 @@ public class VersioningTest extends BaseTest
          {
             String pwcID = getConnection().checkout(doc1.getObjectId());
             String chIn = getConnection().checkin(pwcID, true, null, cs, "", null, null, null);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -542,12 +542,12 @@ public class VersioningTest extends BaseTest
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -609,7 +609,7 @@ public class VersioningTest extends BaseTest
          {
             pwcID = getConnection().checkout(doc1.getObjectId());
             String chIn = getConnection().checkin(pwcID, true, null, cs, "", null, null, null);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -617,13 +617,13 @@ public class VersioningTest extends BaseTest
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
          getStorage().deleteObject(doc1, true);
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -665,18 +665,18 @@ public class VersioningTest extends BaseTest
                getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true,
                   IncludeRelationships.BOTH, true, true, true, PropertyFilter.ALL, RenditionFilter.NONE);
             if (obj == null)
-               doFail("GetObjectOfLatestVersion failed;");
+               doFail(testname, "GetObjectOfLatestVersion failed;");
 
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -716,19 +716,19 @@ public class VersioningTest extends BaseTest
                getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true,
                   IncludeRelationships.BOTH, true, true, true, PropertyFilter.ALL, RenditionFilter.NONE);
             if (obj == null)
-               doFail("GetObjectOfLatestVersion failed;");
+               doFail(testname, "GetObjectOfLatestVersion failed;");
             if (obj.getAllowableActions() == null)
-               doFail(" AllowableActions must be present in result;");
+               doFail(testname, " AllowableActions must be present in result;");
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -773,28 +773,28 @@ public class VersioningTest extends BaseTest
                getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true,
                   IncludeRelationships.BOTH, true, true, true, PropertyFilter.ALL, RenditionFilter.NONE);
             if (obj == null)
-               doFail("GetObjectOfLatestVersion failed;");
+               doFail(testname, "GetObjectOfLatestVersion failed;");
             Iterator<String> it = obj.getPolicyIds().iterator();
             while (it.hasNext())
             {
                PolicyData one = (PolicyData)getStorage().getObjectById(it.next());
                if (!one.getName().equals("policy1"))
                {
-                  doFail("Policy adding failed;");
+                  doFail(testname, "Policy adding failed;");
                }
                if (!one.getPolicyText().equals("testPolicyText"))
-                  doFail("Policy text failed;");
+                  doFail(testname, "Policy text failed;");
             }
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -841,27 +841,27 @@ public class VersioningTest extends BaseTest
                getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true,
                   IncludeRelationships.BOTH, true, true, true, PropertyFilter.ALL, RenditionFilter.NONE);
             if (obj == null)
-               doFail("GetObjectOfLatestVersion failed;");
+               doFail(testname, "GetObjectOfLatestVersion failed;");
             for (AccessControlEntry one : obj.getACL())
             {
                if (one.getPrincipal().equalsIgnoreCase("Makis"))
                {
                   if (one.getPermissions().size() != 1)
-                     doFail("Permission setting failed;");
+                     doFail(testname, "Permission setting failed;");
                   if (!one.getPermissions().contains("cmis:read"))
-                     doFail("Permission setting failed;");
+                     doFail(testname, "Permission setting failed;");
                }
             }
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -908,24 +908,24 @@ public class VersioningTest extends BaseTest
                getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true,
                   IncludeRelationships.BOTH, true, true, true, "cmis:name,cmis:path", RenditionFilter.NONE);
             if (obj == null)
-               doFail("GetObjectOfLatestVersion failed;");
+               doFail(testname, "GetObjectOfLatestVersion failed;");
             for (Map.Entry<String, Property<?>> e : obj.getProperties().entrySet())
             {
                if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path"))//Other props must be ignored
                   continue;
                else
-                  doFail("Property filter works incorrect;");
+                  doFail(testname, "Property filter works incorrect;");
             }
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -964,7 +964,7 @@ public class VersioningTest extends BaseTest
             CmisObject obj =
                getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true,
                   IncludeRelationships.BOTH, true, true, true, "(,*", RenditionFilter.NONE);
-            doFail();
+            doFail(testname, "FilterNotValidException must be thrown;");
          }
          catch (FilterNotValidException ex)
          {
@@ -972,12 +972,12 @@ public class VersioningTest extends BaseTest
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -1016,7 +1016,7 @@ public class VersioningTest extends BaseTest
             CmisObject obj =
                getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), true, true,
                   IncludeRelationships.BOTH, true, true, true, PropertyFilter.ALL, RenditionFilter.NONE);
-            doFail();
+            doFail(testname, "ObjectNotFoundException must be thrown;");
          }
          catch (ObjectNotFoundException ex)
          {
@@ -1024,12 +1024,12 @@ public class VersioningTest extends BaseTest
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -1068,19 +1068,19 @@ public class VersioningTest extends BaseTest
             CmisObject obj =
                getConnection().getPropertiesOfLatestVersion(doc1.getVersionSeriesId(), true, true, PropertyFilter.ALL);
             if (obj == null)
-               doFail("GetPropertiesOfLatestVersion failed;");
+               doFail(testname, "GetPropertiesOfLatestVersion failed;");
             if (obj.getObjectInfo() == null)
-               doFail("ObjectInfo must be present in result;");
+               doFail(testname, "ObjectInfo must be present in result;");
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -1121,24 +1121,24 @@ public class VersioningTest extends BaseTest
                getConnection().getPropertiesOfLatestVersion(doc1.getVersionSeriesId(), true, true,
                   "cmis:name,cmis:path");
             if (obj == null)
-               doFail("GetPropertiesOfLatestVersion failed;");
+               doFail(testname, "GetPropertiesOfLatestVersion failed;");
             for (Map.Entry<String, Property<?>> e : obj.getProperties().entrySet())
             {
                if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
                   continue;
                else
-                  doFail("Property filter works incorrect");
+                  doFail(testname, "Property filter works incorrect");
             }
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -1174,7 +1174,7 @@ public class VersioningTest extends BaseTest
          try
          {
             CmisObject obj = getConnection().getPropertiesOfLatestVersion(doc1.getVersionSeriesId(), true, true, "(,*");
-            doFail("FilterNotValidException must be thrown;");
+            doFail(testname, "FilterNotValidException must be thrown;");
          }
          catch (FilterNotValidException ex)
          {
@@ -1182,12 +1182,12 @@ public class VersioningTest extends BaseTest
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -1225,7 +1225,7 @@ public class VersioningTest extends BaseTest
          {
             CmisObject obj =
                getConnection().getPropertiesOfLatestVersion(doc1.getVersionSeriesId(), true, true, PropertyFilter.ALL);
-            doFail("ObjectNotFoundException must be thrown;");
+            doFail(testname, "ObjectNotFoundException must be thrown;");
          }
          catch (ObjectNotFoundException ex)
          {
@@ -1233,12 +1233,12 @@ public class VersioningTest extends BaseTest
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -1250,5 +1250,10 @@ public class VersioningTest extends BaseTest
    protected void pass(String method) throws Exception
    {
       super.pass("VesioningTest." + method);
+   }
+   
+   protected void doFail(String method,  String message) throws Exception
+   {
+      super.doFail("VesioningTest." + method,  message);
    }
 }

@@ -94,7 +94,7 @@ public class ObjectTest extends BaseTest
                   null, null, VersioningState.MAJOR);
             ContentStream c = getStorage().getObjectById(docId).getContentStream(null);
             if (!cs.getMediaType().equals(c.getMediaType()))
-               doFail("Media types does not match");
+               doFail(testname, "Media types does not match");
 
             byte[] after = new byte[15];
             c.getStream().read(after);
@@ -103,12 +103,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -143,20 +143,20 @@ public class ObjectTest extends BaseTest
                   VersioningState.MAJOR);
             ObjectData res = getStorage().getObjectById(docId);
             if (res.getProperty(CmisConstants.NAME) == null)
-               doFail("NAME property is null;");
+               doFail(testname, "NAME property is null;");
             if (!((String)res.getProperty(CmisConstants.NAME).getValues().get(0)).equals("doc1")) //TODO: test more properties
-               doFail("Names does not match;");
+               doFail(testname, "Names does not match;");
             pass(testname);
 
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -196,26 +196,26 @@ public class ObjectTest extends BaseTest
                   null, policies, VersioningState.MAJOR);
             ObjectData res = getStorage().getObjectById(docId);
             if (res.getPolicies().size() != 1)
-               doFail("Properties size iz incorrect");
+               doFail(testname, "Properties size iz incorrect");
             Iterator<PolicyData> it = res.getPolicies().iterator();
             while (it.hasNext())
             {
                PolicyData one = it.next();
                if (!one.getName().equals("policy1"))
-                  doFail("Policy names does not match");
+                  doFail(testname, "Policy names does not match");
                if (!one.getPolicyText().equals("testPolicyText"))
-                  doFail("Policy text does not match");
+                  doFail(testname, "Policy text does not match");
             }
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -263,21 +263,21 @@ public class ObjectTest extends BaseTest
                if (one.getPrincipal().equalsIgnoreCase("Makis"))
                {
                   if (one.getPermissions().size() != 1)
-                     doFail("Permissions size is incorrect");
+                     doFail(testname, "Permissions size is incorrect");
                   if (!one.getPermissions().contains("cmis:read"))
-                     doFail("Permissions does not match");
+                     doFail(testname, "Permissions does not match");
                }
             }
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -314,7 +314,7 @@ public class ObjectTest extends BaseTest
             String docId =
                getConnection().createDocument(testroot.getObjectId(), getPropsMap(CmisConstants.DOCUMENT, "doc1"), cs, null,
                   null, null, VersioningState.MAJOR);
-            doFail();
+            doFail(testname, "NameConstraintViolationException must be thrown;");
          }
          catch (NameConstraintViolationException ex)
          {
@@ -322,12 +322,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -387,7 +387,7 @@ public class ObjectTest extends BaseTest
             String docId =
                getConnection().createDocument(testroot.getObjectId(), properties, cs, null, null, null,
                   VersioningState.MAJOR);
-            doFail();
+            doFail(testname, "StreamNotSupportedException must be thrown;");
 
          }
          catch (StreamNotSupportedException ex)
@@ -396,12 +396,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -460,7 +460,7 @@ public class ObjectTest extends BaseTest
             String docId =
                getConnection().createDocument(testroot.getObjectId(), properties, cs, null, null, null,
                   VersioningState.MAJOR);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -468,12 +468,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -532,7 +532,7 @@ public class ObjectTest extends BaseTest
             String docId =
                getConnection().createDocument(testroot.getObjectId(), properties, null, null, null, null,
                   VersioningState.MAJOR);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -540,12 +540,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -605,7 +605,7 @@ public class ObjectTest extends BaseTest
             String docId =
                getConnection().createDocument(testroot.getObjectId(), properties, cs, null, null, null,
                   VersioningState.NONE);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -613,12 +613,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -678,7 +678,7 @@ public class ObjectTest extends BaseTest
             String docId =
                getConnection().createDocument(testroot.getObjectId(), properties, cs, null, null, null,
                   VersioningState.MAJOR);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -686,12 +686,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -757,7 +757,7 @@ public class ObjectTest extends BaseTest
             String docId =
                getConnection().createDocument(testroot.getObjectId(), properties, cs, null, null, policies,
                   VersioningState.MAJOR);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -765,12 +765,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -839,7 +839,7 @@ public class ObjectTest extends BaseTest
             String docId =
                getConnection().createDocument(testroot.getObjectId(), properties, cs, addACL, null, null,
                   VersioningState.MAJOR);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -847,12 +847,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -918,7 +918,7 @@ public class ObjectTest extends BaseTest
             String docId =
                getConnection().createDocument(testroot.getObjectId(), properties, cs, addACL, null, null,
                   VersioningState.MAJOR);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -926,12 +926,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -971,23 +971,23 @@ public class ObjectTest extends BaseTest
                   getPropsMap(CmisConstants.DOCUMENT, "doc2"), null, null, null, VersioningState.MAJOR);
             ContentStream c = getStorage().getObjectById(docId).getContentStream(null);
             if (!cs.getMediaType().equals(c.getMediaType()))
-               doFail("Media types does not match");
+               doFail(testname, "Media types does not match");
 
             byte[] after = new byte[15];
             c.getStream().read(after);
             assertArrayEquals(before, after);
             if (!testroot.getName().equals(getStorage().getObjectById(docId).getParent().getName()))
-               doFail("Names doen not match;");
+               doFail(testname, "Names doen not match;");
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -1025,17 +1025,17 @@ public class ObjectTest extends BaseTest
                getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(),
                   getPropsMap(CmisConstants.DOCUMENT, "doc2"), null, null, null, VersioningState.MAJOR);
             if (!getStorage().getObjectById(docId).getProperty(CmisConstants.NAME).getValues().get(0).equals("doc2"))
-               doFail("Names doen not match;");
+               doFail(testname, "Names doen not match;");
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -1079,27 +1079,27 @@ public class ObjectTest extends BaseTest
                   getPropsMap(CmisConstants.DOCUMENT, "doc2"), null, null, policies, VersioningState.MAJOR);
             ObjectData res = getStorage().getObjectById(docId);
             if (res.getPolicies().size() != 1)
-               doFail("Properties size iz incorrect");
+               doFail(testname, "Properties size iz incorrect");
             Iterator<PolicyData> it = res.getPolicies().iterator();
             while (it.hasNext())
             {
                PolicyData one = it.next();
                if (!one.getName().equals("policy1"))
-                  doFail("POlicy names does not match");
+                  doFail(testname, "POlicy names does not match");
                if (!one.getPolicyText().equals("testPolicyText"))
-                  doFail("Policy text does not match");
+                  doFail(testname, "Policy text does not match");
                res.removePolicy(one);
             }
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -1151,21 +1151,21 @@ public class ObjectTest extends BaseTest
                if (one.getPrincipal().equalsIgnoreCase("Makis"))
                {
                   if (one.getPermissions().size() != 1)
-                     doFail("Permissions size is incorrect");
+                     doFail(testname, "Permissions size is incorrect");
                   if (!one.getPermissions().contains("cmis:read"))
-                     doFail("Permissions does not match");
+                     doFail(testname, "Permissions does not match");
                }
             }
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -1205,7 +1205,7 @@ public class ObjectTest extends BaseTest
                   getPropsMap(CmisConstants.DOCUMENT, "doc1"), null, null, null, VersioningState.MAJOR);
             ObjectData res = getStorage().getObjectById(docId);
             if (res.getName().equals("doc1"))
-               doFail("Names must not match;");
+               doFail(testname, "Names must not match;");
          }
          catch (NameConstraintViolationException ex)
          {
@@ -1213,12 +1213,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -1252,7 +1252,7 @@ public class ObjectTest extends BaseTest
             String docId =
                getConnection().createDocumentFromSource(test.getObjectId(), testroot.getObjectId(),
                   getPropsMap(CmisConstants.DOCUMENT, "1"), null, null, null, VersioningState.MAJOR);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -1260,12 +1260,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -1352,7 +1352,7 @@ public class ObjectTest extends BaseTest
             String docId =
                getConnection().createDocumentFromSource(doc1.getObjectId(), myfolder.getObjectId(),
                   getPropsMap(CmisConstants.DOCUMENT, "1"), null, null, null, VersioningState.MAJOR);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -1360,12 +1360,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -1434,7 +1434,7 @@ public class ObjectTest extends BaseTest
             String docId =
                getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(), properties, null,
                   null, null, VersioningState.MAJOR);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -1442,12 +1442,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -1515,7 +1515,7 @@ public class ObjectTest extends BaseTest
             String docId =
                getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(), properties, null,
                   null, null, VersioningState.NONE);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -1523,12 +1523,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -1601,7 +1601,7 @@ public class ObjectTest extends BaseTest
             String docId =
                getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(), properties, null,
                   null, policies, VersioningState.NONE);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -1609,12 +1609,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -1688,7 +1688,7 @@ public class ObjectTest extends BaseTest
             String docId =
                getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(), properties, addACL,
                   null, null, VersioningState.NONE);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -1696,12 +1696,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -1771,7 +1771,7 @@ public class ObjectTest extends BaseTest
             String docId =
                getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(), properties, addACL,
                   null, null, VersioningState.NONE);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -1779,12 +1779,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -1818,19 +1818,19 @@ public class ObjectTest extends BaseTest
                getConnection().createFolder(testroot.getObjectId(), getPropsMap(CmisConstants.FOLDER, "f1"), null, null, null);
             ObjectData obj = getStorage().getObjectById(docId);
             if (!obj.getTypeId().equals(BaseType.FOLDER))
-               doFail("Object types doen not match;");
+               doFail(testname, "Object types doen not match;");
             if (!((FolderData)obj).getPath().equals("/testroot/f1"))
-               doFail("Path is not correct;");
+               doFail(testname, "Path is not correct;");
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -1871,26 +1871,26 @@ public class ObjectTest extends BaseTest
                   policies);
             ObjectData res = getStorage().getObjectById(docId);
             if (res.getPolicies().size() != 1)
-               doFail("Properties size iz incorrect");
+               doFail(testname, "Properties size iz incorrect");
             Iterator<PolicyData> it = res.getPolicies().iterator();
             while (it.hasNext())
             {
                PolicyData one = it.next();
                if (!one.getName().equals("policy1"))
-                  doFail("POlicy names does not match");
+                  doFail(testname, "POlicy names does not match");
                if (!one.getPolicyText().equals("testPolicyText"))
-                  doFail("Policy text does not match");
+                  doFail(testname, "Policy text does not match");
             }
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -1939,20 +1939,20 @@ public class ObjectTest extends BaseTest
             {
                if (one.getPrincipal().equalsIgnoreCase("Makis"))
                   if (one.getPermissions().size() != 1)
-                     doFail("Permissions size is incorrect");
+                     doFail(testname, "Permissions size is incorrect");
                if (!one.getPermissions().contains("cmis:read"))
-                  doFail("Permissions does not match");
+                  doFail(testname, "Permissions does not match");
             }
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -1988,7 +1988,7 @@ public class ObjectTest extends BaseTest
                getConnection().createFolder(testroot.getObjectId(), getPropsMap(CmisConstants.FOLDER, "f1"), null, null, null);
             ObjectData res = getStorage().getObjectById(docId);
             if (!res.getName().equals("f1"))
-               doFail("Names does not match;");
+               doFail(testname, "Names does not match;");
          }
          catch (NameConstraintViolationException ex)
          {
@@ -1996,12 +1996,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -2061,7 +2061,7 @@ public class ObjectTest extends BaseTest
          try
          {
             String docId = getConnection().createFolder(testroot.getObjectId(), properties, null, null, null);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -2069,12 +2069,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -2149,7 +2149,7 @@ public class ObjectTest extends BaseTest
          {
             String docId =
                getConnection().createFolder(f1.getObjectId(), getPropsMap(CmisConstants.FOLDER, "f2"), null, null, null);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -2157,12 +2157,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -2230,7 +2230,7 @@ public class ObjectTest extends BaseTest
          try
          {
             String docId = getConnection().createFolder(testroot.getObjectId(), properties, null, null, policies);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -2238,12 +2238,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -2313,7 +2313,7 @@ public class ObjectTest extends BaseTest
          try
          {
             String docId = getConnection().createFolder(testroot.getObjectId(), properties, addACL, null, null);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -2321,12 +2321,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -2394,7 +2394,7 @@ public class ObjectTest extends BaseTest
          try
          {
             String docId = getConnection().createFolder(testroot.getObjectId(), properties, addACL, null, null);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -2402,12 +2402,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -2466,22 +2466,22 @@ public class ObjectTest extends BaseTest
             String docId = getConnection().createRelationship(props, null, null, null);
             obj = getStorage().getObjectById(docId);
             if (!obj.getTypeId().equals("cmis:relationship"))
-               doFail("Cmis object types does not match;");
+               doFail(testname, "Cmis object types does not match;");
             if (!doc1.getObjectId().equals(((RelationshipData)obj).getSourceId()))
-               doFail("Cmis objects  does not match;");
+               doFail(testname, "Cmis objects  does not match;");
             if (!doc2.getObjectId().equals(((RelationshipData)obj).getTargetId()))
                ;
-            doFail("Cmis objects  does not match;");
+            doFail(testname, "Cmis objects  does not match;");
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -2573,27 +2573,27 @@ public class ObjectTest extends BaseTest
             String docId = getConnection().createRelationship(props, null, null, policies);
             obj = getStorage().getObjectById(docId);
             if (obj.getPolicies().size() != 1)
-               doFail("Object policies size is incorrect;");
+               doFail(testname, "Object policies size is incorrect;");
             Iterator<PolicyData> it = obj.getPolicies().iterator();
             while (it.hasNext())
             {
                PolicyData one = it.next();
                if (!one.getName().equals("policy1"))
-                  doFail("POlicy names does not match");
+                  doFail(testname, "POlicy names does not match");
                if (!one.getPolicyText().equals("testPolicyText"))
-                  doFail("Policy text does not match");
+                  doFail(testname, "Policy text does not match");
                obj.removePolicy(one);
             }
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -2695,21 +2695,21 @@ public class ObjectTest extends BaseTest
                if (one.getPrincipal().equalsIgnoreCase("Makis"))
                {
                   if (one.getPermissions().size() != 1)
-                     doFail("Permissions size is incorrect");
+                     doFail(testname, "Permissions size is incorrect");
                   if (!one.getPermissions().contains("cmis:read"))
-                     doFail("Permissions does not match");
+                     doFail(testname, "Permissions does not match");
                }
             }
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -2800,7 +2800,7 @@ public class ObjectTest extends BaseTest
             String docId = getConnection().createRelationship(props, null, null, null);
             obj = getStorage().getObjectById(docId);
             if (obj.getName().equals("rel1"))
-               doFail("Names must not match;");
+               doFail(testname, "Names must not match;");
             pass(testname);
          }
          catch (NameConstraintViolationException ex)
@@ -2809,12 +2809,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -2900,7 +2900,7 @@ public class ObjectTest extends BaseTest
          {
             String docId = getConnection().createRelationship(props, null, null, null);
             obj = getStorage().getObjectById(docId);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -2908,12 +2908,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -3005,7 +3005,7 @@ public class ObjectTest extends BaseTest
          {
             String docId = getConnection().createRelationship(props, null, null, null);
             obj = getStorage().getObjectById(docId);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -3013,12 +3013,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -3108,7 +3108,7 @@ public class ObjectTest extends BaseTest
          {
             String docId = getConnection().createRelationship(props, null, null, policies);
             obj = getStorage().getObjectById(docId);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException xe)
          {
@@ -3116,12 +3116,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -3218,7 +3218,7 @@ public class ObjectTest extends BaseTest
          {
             String docId = getConnection().createRelationship(props, addACL, null, null);
             obj = getStorage().getObjectById(docId);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException e)
          {
@@ -3226,12 +3226,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -3324,7 +3324,7 @@ public class ObjectTest extends BaseTest
          {
             String docId = getConnection().createRelationship(props, addACL, null, null);
             obj = getStorage().getObjectById(docId);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException e)
          {
@@ -3332,12 +3332,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -3381,19 +3381,19 @@ public class ObjectTest extends BaseTest
             String docId = getConnection().createPolicy(testroot.getObjectId(), properties, null, null, null);
             obj = getStorage().getObjectById(docId);
             if (!obj.getTypeId().equals("cmis:policy"))
-               doFail("Cmis object types does not match");
+               doFail(testname, "Cmis object types does not match");
             if (!((PolicyData)obj).getPolicyText().equals("testPolicyText"))
-               doFail("Cmis policy text does not match");
+               doFail(testname, "Cmis policy text does not match");
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -3444,21 +3444,21 @@ public class ObjectTest extends BaseTest
             {
                PolicyData one = it.next();
                if (!one.getName().equals("policy1"))
-                  doFail("POlicy names does not match");
+                  doFail(testname, "POlicy names does not match");
                if (!one.getPolicyText().equals("testPolicyText"))
-                  doFail("Policy text does not match");
+                  doFail(testname, "Policy text does not match");
                obj.removePolicy(one);
             }
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -3512,21 +3512,21 @@ public class ObjectTest extends BaseTest
                if (one.getPrincipal().equalsIgnoreCase("Makis"))
                {
                   if (one.getPermissions().size() != 1)
-                     doFail("Permissions size is incorrect");
+                     doFail(testname, "Permissions size is incorrect");
                   if (!one.getPermissions().contains("cmis:read"))
-                     doFail("Permissions does not match");
+                     doFail(testname, "Permissions does not match");
                }
             }
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -3571,7 +3571,7 @@ public class ObjectTest extends BaseTest
             String docId = getConnection().createPolicy(testroot.getObjectId(), properties, null, null, null);
             obj = getStorage().getObjectById(docId);
             if (obj.getName().equals("policy1"))
-               doFail("Names must not match;");
+               doFail(testname, "Names must not match;");
             pass(testname);
          }
          catch (NameConstraintViolationException ex)
@@ -3580,12 +3580,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -3654,7 +3654,7 @@ public class ObjectTest extends BaseTest
          try
          {
             String docId = getConnection().createPolicy(testroot.getObjectId(), properties, null, null, null);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -3662,12 +3662,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -3742,7 +3742,7 @@ public class ObjectTest extends BaseTest
          try
          {
             String docId = getConnection().createPolicy(testroot.getObjectId(), properties, null, null, null);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -3750,12 +3750,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -3827,7 +3827,7 @@ public class ObjectTest extends BaseTest
          try
          {
             String docId = getConnection().createPolicy(testroot.getObjectId(), properties, null, null, policies);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -3835,12 +3835,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -3912,7 +3912,7 @@ public class ObjectTest extends BaseTest
          try
          {
             String docId = getConnection().createPolicy(testroot.getObjectId(), properties, addACL, null, null);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -3920,12 +3920,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -3969,7 +3969,7 @@ public class ObjectTest extends BaseTest
          try
          {
             String docId = getConnection().createPolicy(testroot.getObjectId(), properties, addACL, null, null);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -3977,12 +3977,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -4012,7 +4012,7 @@ public class ObjectTest extends BaseTest
          {
             AllowableActions actions = getConnection().getAllowableActions(testroot.getObjectId());
             if (actions == null)
-               doFail("Allowable actions is null;");
+               doFail(testname, "Allowable actions is null;");
             /*
             if(actions.isCanAddObjectToFolder())
             if(actions.isCanApplyACL());
@@ -4046,12 +4046,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -4083,19 +4083,19 @@ public class ObjectTest extends BaseTest
                getConnection().getObject(testroot.getObjectId(), false, IncludeRelationships.NONE, false, false, true,
                   "", "*");
             if (!obj.getObjectInfo().getName().equals("testroot"))
-               doFail("Names does not match;");
+               doFail(testname, "Names does not match;");
             if (!testroot.getObjectId().equals(obj.getObjectInfo().getId()))
-               doFail("Object ID's does not match;");
+               doFail(testname, "Object ID's does not match;");
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -4132,18 +4132,18 @@ public class ObjectTest extends BaseTest
                if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
                   continue;
                else
-                  doFail("Property filter does not work;");
+                  doFail(testname, "Property filter does not work;");
             }
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -4187,24 +4187,24 @@ public class ObjectTest extends BaseTest
                   true, "", "*");
             if (obj.getRelationship().size() != 1)
             {
-               doFail("Relationships count is incorrect;");
+               doFail(testname, "Relationships count is incorrect;");
             }
             for (CmisObject e : obj.getRelationship())
             {
                if (!reldata.getObjectId().equals(e.getObjectInfo().getId()))
-                  doFail("Object ID's does not match;");
+                  doFail(testname, "Object ID's does not match;");
             }
             pass(testname);
             getStorage().deleteObject(reldata, true);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -4239,22 +4239,22 @@ public class ObjectTest extends BaseTest
                getConnection().getObject(testroot.getObjectId(), false, IncludeRelationships.TARGET, true, false, true,
                   "", "*");
             if (obj.getPolicyIds().size() != 1)
-               doFail("Pilicy count is incorrect;");
+               doFail(testname, "Pilicy count is incorrect;");
             for (String e : obj.getPolicyIds())
             {
                if (!policy.getObjectId().equals(e))
-                  doFail("Object ID's does not match;");
+                  doFail(testname, "Object ID's does not match;");
             }
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -4305,21 +4305,21 @@ public class ObjectTest extends BaseTest
                if (one.getPrincipal().equalsIgnoreCase("Makis"))
                {
                   if (one.getPermissions().size() != 1)
-                     doFail("Permissions size is incorrect");
+                     doFail(testname, "Permissions size is incorrect");
                   if (!one.getPermissions().contains("cmis:read"))
-                     doFail("Permissions does not match");
+                     doFail(testname, "Permissions does not match");
                }
             }
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -4352,7 +4352,7 @@ public class ObjectTest extends BaseTest
                   "", "*");
             AllowableActions actions = obj.getAllowableActions();
             if (actions == null)
-               doFail("AllowableActions is null;");
+               doFail(testname, "AllowableActions is null;");
             /*
             if(actions.isCanAddObjectToFolder());
             assertNotNull(actions.isCanApplyACL());
@@ -4386,12 +4386,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -4422,7 +4422,7 @@ public class ObjectTest extends BaseTest
             CmisObject obj =
                getConnection().getObject(testroot.getObjectId(), false, IncludeRelationships.NONE, false, false, false,
                   "(,*", "*");
-            doFail();
+            doFail(testname, "FilterNotValidException must be thrown;");
          }
          catch (FilterNotValidException ex)
          {
@@ -4430,12 +4430,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -4467,25 +4467,25 @@ public class ObjectTest extends BaseTest
             CmisObject obj = getConnection().getProperties(testroot.getObjectId(), true, "cmis:name,cmis:path");
             if (obj == null)
             {
-               doFail("Get properties result is null");
+               doFail(testname, "Get properties result is null");
             }
             for (Map.Entry<String, Property<?>> e : obj.getProperties().entrySet())
             {
                if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
                   continue;
                else
-                  doFail("Property filter does not work;");
+                  doFail(testname, "Property filter does not work;");
             }
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -4515,7 +4515,7 @@ public class ObjectTest extends BaseTest
          try
          {
             CmisObject obj = getConnection().getProperties(testroot.getObjectId(), true, "(,*");
-            doFail();
+            doFail(testname, "FilterNotValidException must be thrown;");
          }
          catch (FilterNotValidException ex)
          {
@@ -4523,12 +4523,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -4560,19 +4560,19 @@ public class ObjectTest extends BaseTest
                getConnection().getObjectByPath("/testroot", false, IncludeRelationships.NONE, false, false, true, "",
                   "*");
             if (!obj.getObjectInfo().getName().equals("testroot"))
-               doFail("Names does not match;");
+               doFail(testname, "Names does not match;");
             if (!testroot.getObjectId().equals(obj.getObjectInfo().getId()))
-               doFail("Object ID's does not match;");
+               doFail(testname, "Object ID's does not match;");
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -4609,18 +4609,18 @@ public class ObjectTest extends BaseTest
                if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
                   continue;
                else
-                  doFail("Property filter does not work;");
+                  doFail(testname, "Property filter does not work;");
             }
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -4663,11 +4663,11 @@ public class ObjectTest extends BaseTest
                getConnection().getObjectByPath("/testroot", false, IncludeRelationships.TARGET, false, false, true, "",
                   "*");
             if (obj.getRelationship().size() != 1)
-               doFail("Incorect relationship size;");
+               doFail(testname, "Incorect relationship size;");
             for (CmisObject e : obj.getRelationship())
             {
                if (!reldata.getObjectId().equals(e.getObjectInfo().getId()))
-                  doFail("Object ID's does not match;");
+                  doFail(testname, "Object ID's does not match;");
             }
             getStorage().deleteObject(reldata, true);
             pass(testname);
@@ -4675,12 +4675,12 @@ public class ObjectTest extends BaseTest
          catch (Exception e)
          {
             //e.printStackTrace();
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -4715,23 +4715,23 @@ public class ObjectTest extends BaseTest
                getConnection().getObjectByPath("/testroot", false, IncludeRelationships.TARGET, true, false, true, "",
                   "*");
             if (obj.getPolicyIds().size() != 1)
-               doFail("Incorect policyIds size;");
+               doFail(testname, "Incorect policyIds size;");
 
             for (String e : obj.getPolicyIds())
             {
                if (!policy.getObjectId().equals(e))
-                  doFail("Object ID's does not match; ");
+                  doFail(testname, "Object ID's does not match; ");
             }
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -4782,21 +4782,21 @@ public class ObjectTest extends BaseTest
                if (one.getPrincipal().equalsIgnoreCase("Makis"))
                {
                   if (one.getPermissions().size() != 1)
-                     doFail("Permissions size is incorrect");
+                     doFail(testname, "Permissions size is incorrect");
                   if (!one.getPermissions().contains("cmis:read"))
-                     doFail("Permissions does not match");
+                     doFail(testname, "Permissions does not match");
                }
             }
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -4829,7 +4829,7 @@ public class ObjectTest extends BaseTest
                   "*");
             AllowableActions actions = obj.getAllowableActions();
             if (actions == null)
-               doFail("AllowableActions must not be null");
+               doFail(testname, "AllowableActions must not be null");
             /*
             if(actions.isCanAddObjectToFolder());
             if(actions.isCanApplyACL());
@@ -4863,12 +4863,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -4899,7 +4899,7 @@ public class ObjectTest extends BaseTest
             CmisObject obj =
                getConnection()
                   .getObject("/testroot", false, IncludeRelationships.NONE, false, false, false, "(,*", "*");
-            doFail();
+            doFail(testname, "FilterNotValidException must be thrown;");
          }
          catch (FilterNotValidException ex)
          {
@@ -4907,12 +4907,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -4957,12 +4957,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -4996,7 +4996,7 @@ public class ObjectTest extends BaseTest
          try
          {
             ContentStream obj = getConnection().getContentStream(doc1.getObjectId(), null);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -5004,12 +5004,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -5052,7 +5052,7 @@ public class ObjectTest extends BaseTest
          {
             List<Rendition> obj = getConnection().getRenditions(doc1.getObjectId(), "", -1, 0);
             if (obj == null)
-               doFail("Get renditions result is null;");
+               doFail(testname, "Get renditions result is null;");
             pass(testname);
          }
          catch (NotSupportedException ex)
@@ -5061,12 +5061,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -5107,7 +5107,7 @@ public class ObjectTest extends BaseTest
          try
          {
             List<Rendition> obj = getConnection().getRenditions(doc1.getObjectId(), "(,*", -1, 0);
-            doFail();
+            doFail(testname, "FilterNotValidException must be thrown;");
          }
          catch (FilterNotValidException ex)
          {
@@ -5115,12 +5115,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -5201,19 +5201,19 @@ public class ObjectTest extends BaseTest
             String id = getConnection().updateProperties(doc1.getObjectId(), new ChangeTokenHolder(), properties2);
             ObjectData obj = getStorage().getObjectById(id);
             if (!obj.getName().equals("new1"))
-               doFail("Names does not match;");
+               doFail(testname, "Names does not match;");
             if (!obj.getProperty(CmisConstants.CREATED_BY).getValues().get(0).equals("Makiz"))
-               doFail("Property values does not match");
+               doFail(testname, "Property values does not match");
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -5269,7 +5269,7 @@ public class ObjectTest extends BaseTest
          {
             String id = getConnection().updateProperties(doc1.getObjectId(), new ChangeTokenHolder(), properties2);
             ObjectData obj = getStorage().getObjectById(id);
-            doFail();
+            doFail(testname, "VersioningException must be thrown;");
          }
          catch (VersioningException ex)
          {
@@ -5277,12 +5277,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -5323,16 +5323,16 @@ public class ObjectTest extends BaseTest
             String id = getConnection().moveObject(doc1.getObjectId(), folder2.getObjectId(), testroot.getObjectId());
             ObjectData obj = getStorage().getObjectById(id);
             if (!folder2.getName().equals(obj.getParent().getName()))
-               doFail("Names does not match;");
+               doFail(testname, "Names does not match;");
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -5375,7 +5375,7 @@ public class ObjectTest extends BaseTest
          {
             String id = getConnection().moveObject(doc1.getObjectId(), testroot.getObjectId(), folder2.getObjectId());
             ObjectData obj = getStorage().getObjectById(id);
-            doFail();
+            doFail(testname, "InvalidArgumentException must be thrown;");
          }
          catch (InvalidArgumentException ex)
          {
@@ -5383,12 +5383,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -5470,7 +5470,7 @@ public class ObjectTest extends BaseTest
          {
             String id = getConnection().moveObject(doc1.getObjectId(), folder2.getObjectId(), testroot.getObjectId());
             ObjectData obj = getStorage().getObjectById(id);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -5478,12 +5478,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -5534,7 +5534,7 @@ public class ObjectTest extends BaseTest
             String id = getConnection().moveObject(doc1.getObjectId(), folder2.getObjectId(), testroot.getObjectId());
             ObjectData obj = getStorage().getObjectById(id);
             if (obj.getName().equalsIgnoreCase(doc1.getName()))
-               doFail("Names must not match;");
+               doFail(testname, "Names must not match;");
          }
          catch (NameConstraintViolationException ex)
          {
@@ -5542,12 +5542,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -5593,12 +5593,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -5633,7 +5633,7 @@ public class ObjectTest extends BaseTest
          try
          {
             getConnection().deleteObject(testroot.getObjectId(), true);
-            doFail();
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -5641,12 +5641,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -5699,12 +5699,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -5771,12 +5771,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -5821,12 +5821,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -5865,7 +5865,7 @@ public class ObjectTest extends BaseTest
          try
          {
             String docid = getConnection().setContentStream(doc1.getObjectId(), cs2, new ChangeTokenHolder(), false);
-            doFail();
+            doFail(testname, "ContentAlreadyExistsException must be thrown;");
          }
          catch (ContentAlreadyExistsException ex)
          {
@@ -5873,12 +5873,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -5946,7 +5946,7 @@ public class ObjectTest extends BaseTest
          try
          {
             String docid = getConnection().setContentStream(doc1.getObjectId(), cs2, new ChangeTokenHolder(), false);
-            doFail();
+            doFail(testname, "StreamNotSupportedException must be thrown;" );
          }
          catch (StreamNotSupportedException ex)
          {
@@ -5954,12 +5954,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -6000,17 +6000,17 @@ public class ObjectTest extends BaseTest
          {
             String docid = getConnection().deleteContentStream(doc1.getObjectId(), new ChangeTokenHolder());
             if (getStorage().getObjectById(docid).getContentStream(null) != null)
-               doFail("Content stream must be null;");
+               doFail(testname, "Content stream must be null;");
             pass(testname);
          }
          catch (Exception e)
          {
-            doFail(e.getMessage());
+            doFail(testname, e.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());
+         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -6077,7 +6077,7 @@ public class ObjectTest extends BaseTest
          try
          {
             String docid = getConnection().deleteContentStream(doc1.getObjectId(), new ChangeTokenHolder());
-            doFail();
+            doFail(testname,  "ConstraintException must be thrown;");
          }
          catch (ConstraintException ex)
          {
@@ -6085,12 +6085,12 @@ public class ObjectTest extends BaseTest
          }
          catch (Exception other)
          {
-            doFail(other.getMessage());
+            doFail(testname, other.getMessage());
          }
       }
       catch (Exception ez)
       {
-         doFail(ez.getMessage());;
+         doFail(testname, ez.getMessage());;
       }
       finally
       {
@@ -6104,6 +6104,11 @@ public class ObjectTest extends BaseTest
    protected void pass(String method) throws Exception
    {
       super.pass("ObjectTest." + method);
+   }
+   
+   protected void doFail(String method,  String message) throws Exception
+   {
+      super.doFail("ObjectTest." + method,  message);
    }
 
    protected void tearDown()

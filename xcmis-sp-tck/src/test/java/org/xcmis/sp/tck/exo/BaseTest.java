@@ -269,10 +269,6 @@ public abstract class BaseTest extends TestCase
          removeRelationships(testroot);
          FolderData rootFolder = (FolderData)getStorage().getObjectById(testroot);
          List<String> failed = (List<String>)getStorage().deleteTree(rootFolder, true, UnfileObject.DELETE, true);
-         for (String one : failed)
-         {
-            System.out.println("~~~~~" + getStorage().getObjectById(one).getName());
-         }
       }
       catch (Exception e)
       {
@@ -316,27 +312,28 @@ public abstract class BaseTest extends TestCase
       return getStorage().getRepositoryInfo().getCapabilities();
    }
 
-   protected void doFail(String message) throws Exception
+   protected void doFail(String mtd, String message) throws Exception
    {
       System.out.println("FAILED");
+      failedTests.add(mtd);
       if (message != null)
          fail(message);
       else
          fail();
    }
 
-   protected void doFail() throws Exception
-   {
-      System.out.println("FAILED");
-      //failedTests.add(arg0);
-      fail();
-   }
+//   protected void doFail(String mtd) throws Exception
+//   {
+//      System.out.println("FAILED");
+//      failedTests.add(mtd);
+//      fail();
+//   }
 
-   protected void pass() throws Exception
-   {
-      System.out.println("PASSED");
-      //passedTests.add(o);
-   }
+//   protected void pass() throws Exception
+//   {
+//      System.out.println("PASSED");
+//      //passedTests.add(o);
+//   }
 
    protected void pass(String o) throws Exception
    {

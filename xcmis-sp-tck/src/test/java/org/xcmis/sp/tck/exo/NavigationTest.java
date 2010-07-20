@@ -69,7 +69,7 @@ public class NavigationTest extends BaseTest
             getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, PropertyFilter.ALL,
                RenditionFilter.ANY, "", 10, 0);
          if (result.getItems().size() != 6)
-            doFail("Unexpected items number;");
+            doFail(testname, "Unexpected items number;");
          int relCount = 0;
          for (CmisObject one : result.getItems())
          {
@@ -77,12 +77,12 @@ public class NavigationTest extends BaseTest
                relCount++;
          }
          if (relCount != 3)
-            doFail("Unexpected items number;");//two relationships are present
+            doFail(testname, "Unexpected items number;");//two relationships are present
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -110,11 +110,11 @@ public class NavigationTest extends BaseTest
          if (relCount == 0) //no relationships are present
             pass(testname);
          else
-            doFail("Unexpected items number;");
+            doFail(testname, "Unexpected items number;");
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -138,13 +138,13 @@ public class NavigationTest extends BaseTest
             if (one.getAllowableActions() != null) //allowable actions are present
                continue;
             else
-               doFail("Allowable actions must be present in result;");
+               doFail(testname, "Allowable actions must be present in result;");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -168,13 +168,13 @@ public class NavigationTest extends BaseTest
             if (one.getAllowableActions() == null) //allowable actions are not present
                continue;
             else
-               doFail("Allowable actions must not be present in result;");
+               doFail(testname, "Allowable actions must not be present in result;");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -198,13 +198,13 @@ public class NavigationTest extends BaseTest
             if (one.getPathSegment() != null) //path segment is present
                continue;
             else
-               doFail("Path segment must be present in result");
+               doFail(testname, "Path segment must be present in result");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -228,13 +228,13 @@ public class NavigationTest extends BaseTest
             if (one.getPathSegment() == null) //no path segments are present
                continue;
             else
-               doFail("Path segment must not be present in result");
+               doFail(testname, "Path segment must not be present in result");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -253,13 +253,13 @@ public class NavigationTest extends BaseTest
             if (one.getObjectInfo() != null) //obj info is present
                continue;
             else
-               doFail("ObjectInfo must be present in result");
+               doFail(testname, "ObjectInfo must be present in result");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -278,13 +278,13 @@ public class NavigationTest extends BaseTest
             if (one.getObjectInfo() == null) // no obj info present
                continue;
             else
-               doFail("ObjectInfo must not be present in result");
+               doFail(testname, "ObjectInfo must not be present in result");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -311,14 +311,14 @@ public class NavigationTest extends BaseTest
                if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
                   continue;
                else
-                  doFail("Property filter works incorrect;");
+                  doFail(testname, "Property filter works incorrect;");
             }
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -342,14 +342,14 @@ public class NavigationTest extends BaseTest
             for (Map.Entry<String, Property<?>> e : one.getProperties().entrySet())
             {
                if (one.getRenditions().size() != 0)
-                  doFail("Rendition filter works incorrect;");
+                  doFail(testname, "Rendition filter works incorrect;");
             }
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -369,12 +369,12 @@ public class NavigationTest extends BaseTest
             getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, PropertyFilter.ALL,
                RenditionFilter.ANY, "", 2, 0);
          if (!result.isHasMoreItems())
-            doFail("Has more items property is incorrect;");
+            doFail(testname, "Has more items property is incorrect;");
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -395,12 +395,12 @@ public class NavigationTest extends BaseTest
                RenditionFilter.ANY, "", 3, 0);
          if (result.getItems().size() != 3)
             ;
-         doFail("Items number is incorrect;");
+         doFail(testname, "Items number is incorrect;");
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -426,12 +426,12 @@ public class NavigationTest extends BaseTest
          }
          else
          {
-            doFail("NumItems test failed");
+            doFail(testname, "NumItems test failed");
          }
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -451,12 +451,12 @@ public class NavigationTest extends BaseTest
             getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, PropertyFilter.ALL,
                RenditionFilter.ANY, "", 10, 1);
          if (result.getItems().size() != 5)
-            doFail("Items number is incorrect;");
+            doFail(testname, "Items number is incorrect;");
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -475,7 +475,7 @@ public class NavigationTest extends BaseTest
          ItemsList<CmisObject> result =
             getConnection().getChildren(getStorage().getObjectByPath("/testroot/doc1").getObjectId(), true,
                IncludeRelationships.BOTH, true, true, PropertyFilter.ALL, RenditionFilter.ANY, "", 10, 10);
-         doFail("InvalidArgumentException must be thrown;");
+         doFail(testname, "InvalidArgumentException must be thrown;");
       }
       catch (InvalidArgumentException ex)
       {
@@ -483,7 +483,7 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -502,7 +502,7 @@ public class NavigationTest extends BaseTest
          ItemsList<CmisObject> result =
             getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, "(,*",
                RenditionFilter.NONE, "", 10, 0);
-         doFail("FilterNotValidException must be thrown;");
+         doFail(testname, "FilterNotValidException must be thrown;");
       }
       catch (FilterNotValidException ex)
       {
@@ -510,7 +510,7 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -535,12 +535,12 @@ public class NavigationTest extends BaseTest
             getConnection().getDescendants(testroot, -1, true, IncludeRelationships.BOTH, true, true,
                PropertyFilter.ALL, RenditionFilter.ANY);
          if (objectTreeToList(result).size() != 9)
-            doFail("Items number is incorrect;");
+            doFail(testname, "Items number is incorrect;");
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -565,13 +565,13 @@ public class NavigationTest extends BaseTest
             if (one.getAllowableActions() != null) //allowable actions are present
                continue;
             else
-               doFail("Allowable actions must be present in result;");
+               doFail(testname, "Allowable actions must be present in result;");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -596,13 +596,13 @@ public class NavigationTest extends BaseTest
             if (one.getAllowableActions() == null) //allowable actions are present
                continue;
             else
-               doFail("Allowable actions must not be present in result;");
+               doFail(testname, "Allowable actions must not be present in result;");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -630,12 +630,12 @@ public class NavigationTest extends BaseTest
          }
          if (relCount != 3)
             ;
-         doFail("Items number is incorrect;");
+         doFail(testname, "Items number is incorrect;");
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -663,12 +663,12 @@ public class NavigationTest extends BaseTest
          }
          if (relCount != 0)
             ;
-         doFail("Items number is incorrect;");
+         doFail(testname, "Items number is incorrect;");
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -693,13 +693,13 @@ public class NavigationTest extends BaseTest
             if (one.getPathSegment() != null)
                continue;
             else
-               doFail();
+               doFail(testname, "Path segment must be present in result;");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -719,13 +719,13 @@ public class NavigationTest extends BaseTest
             if (one.getObjectInfo() != null)
                continue;
             else
-               doFail("Object info must be present in result;");
+               doFail(testname, "Object info must be present in result;");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -745,13 +745,13 @@ public class NavigationTest extends BaseTest
             if (one.getObjectInfo() == null)
                continue;
             else
-               doFail("Object info must not be present in result;");
+               doFail(testname, "Object info must not be present in result;");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -779,14 +779,14 @@ public class NavigationTest extends BaseTest
                if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
                   continue;
                else
-                  doFail("Property filter works incorrect;");
+                  doFail(testname, "Property filter works incorrect;");
             }
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -809,13 +809,13 @@ public class NavigationTest extends BaseTest
          for (CmisObject one : list)
          {
             if (one.getRenditions().size() != 0)
-               doFail("Rendition filter works incorrect;");
+               doFail(testname, "Rendition filter works incorrect;");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -836,12 +836,12 @@ public class NavigationTest extends BaseTest
                PropertyFilter.ALL, RenditionFilter.NONE);
          List<CmisObject> list = objectTreeToList(result);
          if (list.size() != 8) //skipping last level with Doc4
-            doFail("Unexpected items number;");
+            doFail(testname, "Unexpected items number;");
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -860,7 +860,7 @@ public class NavigationTest extends BaseTest
          List<ItemsTree<CmisObject>> result =
             getConnection().getDescendants(testroot, 2, true, IncludeRelationships.NONE, true, true, "(,*",
                RenditionFilter.NONE);
-         doFail("FilterNotValidException must be thrown;");
+         doFail(testname, "FilterNotValidException must be thrown;");
       }
       catch (FilterNotValidException ex)
       {
@@ -868,7 +868,7 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -887,7 +887,7 @@ public class NavigationTest extends BaseTest
          List<ItemsTree<CmisObject>> result =
             getConnection().getDescendants(testroot, 0, true, IncludeRelationships.NONE, true, true,
                PropertyFilter.ALL, RenditionFilter.NONE);
-         doFail("InvalidArgumentException must be thrown;");
+         doFail(testname, "InvalidArgumentException must be thrown;");
       }
       catch (InvalidArgumentException ex)
       {
@@ -895,7 +895,7 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -914,7 +914,7 @@ public class NavigationTest extends BaseTest
          List<ItemsTree<CmisObject>> result =
             getConnection().getDescendants(getStorage().getObjectByPath("/testroot/doc1").getObjectId(), 0, true,
                IncludeRelationships.NONE, true, true, PropertyFilter.ALL, RenditionFilter.ANY);
-         doFail("InvalidArgumentException must be thrown;");
+         doFail(testname, "InvalidArgumentException must be thrown;");
       }
       catch (InvalidArgumentException ex)
       {
@@ -922,7 +922,7 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -942,12 +942,12 @@ public class NavigationTest extends BaseTest
             getConnection().getFolderTree(testroot, -1, true, IncludeRelationships.BOTH, true, true,
                PropertyFilter.ALL, RenditionFilter.ANY);
          if (objectTreeToList(result).size() != 3)
-            doFail("Unexpected number of items;");
+            doFail(testname, "Unexpected number of items;");
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -972,13 +972,13 @@ public class NavigationTest extends BaseTest
             if (one.getAllowableActions() != null) //allowable actions are present
                continue;
             else
-               doFail("Allowable actions must be present in result");
+               doFail(testname, "Allowable actions must be present in result");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1003,13 +1003,13 @@ public class NavigationTest extends BaseTest
             if (one.getAllowableActions() == null) //allowable actions not present
                continue;
             else
-               doFail("Allowable actions must not be present in result");
+               doFail(testname, "Allowable actions must not be present in result");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1037,13 +1037,13 @@ public class NavigationTest extends BaseTest
          }
          if (relCount != 1)
          {
-            doFail("Incorrect items number in result;");
+            doFail(testname, "Incorrect items number in result;");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1071,13 +1071,13 @@ public class NavigationTest extends BaseTest
          }
          if (relCount != 0)
          {
-            doFail("Incorrect items number in result;");
+            doFail(testname, "Incorrect items number in result;");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1102,13 +1102,13 @@ public class NavigationTest extends BaseTest
             if (one.getPathSegment() != null)
                continue;
             else
-               doFail();
+               doFail(testname, "Path segment must be present in result;");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1128,13 +1128,13 @@ public class NavigationTest extends BaseTest
             if (one.getObjectInfo() != null)
                continue;
             else
-               doFail("Object info must be present in result;");
+               doFail(testname, "Object info must be present in result;");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1162,14 +1162,14 @@ public class NavigationTest extends BaseTest
                if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
                   continue;
                else
-                  doFail("Property filter works incorrect;");
+                  doFail(testname, "Property filter works incorrect;");
             }
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1194,13 +1194,13 @@ public class NavigationTest extends BaseTest
             if (one.getRenditions().size() == 0)
                continue;
             else
-               doFail("Rendition filter works incorrect;");
+               doFail(testname, "Rendition filter works incorrect;");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1221,12 +1221,12 @@ public class NavigationTest extends BaseTest
                RenditionFilter.NONE);
          List<CmisObject> list = objectTreeToList(result);
          if (list.size() != 2) //skipping last level with Doc4
-            doFail("Incorrect items number in result;");
+            doFail(testname, "Incorrect items number in result;");
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1245,7 +1245,7 @@ public class NavigationTest extends BaseTest
          List<ItemsTree<CmisObject>> result =
             getConnection().getFolderTree(testroot, 2, true, IncludeRelationships.NONE, true, true, "(,*",
                RenditionFilter.NONE);
-         doFail("FilterNotValidException must be thrown;");
+         doFail(testname, "FilterNotValidException must be thrown;");
       }
       catch (FilterNotValidException ex)
       {
@@ -1253,7 +1253,7 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception other)
       {
-         doFail(other.getMessage());
+         doFail(testname, other.getMessage());
       }
    }
 
@@ -1272,7 +1272,7 @@ public class NavigationTest extends BaseTest
          List<ItemsTree<CmisObject>> result =
             getConnection().getFolderTree(testroot, 0, true, IncludeRelationships.NONE, true, true, PropertyFilter.ALL,
                RenditionFilter.ANY);
-         doFail("InvalidArgumentException must be thrown;");
+         doFail(testname, "InvalidArgumentException must be thrown;");
       }
       catch (InvalidArgumentException ex)
       {
@@ -1280,7 +1280,7 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception other)
       {
-         doFail(other.getMessage());
+         doFail(testname, other.getMessage());
       }
    }
 
@@ -1299,7 +1299,7 @@ public class NavigationTest extends BaseTest
          List<ItemsTree<CmisObject>> result =
             getConnection().getFolderTree(getStorage().getObjectByPath("/testroot/doc1").getObjectId(), -1, true,
                IncludeRelationships.NONE, true, true, PropertyFilter.ALL, RenditionFilter.ANY);
-         doFail("InvalidArgumentException must be thrown;");
+         doFail(testname, "InvalidArgumentException must be thrown;");
       }
       catch (InvalidArgumentException ex)
       {
@@ -1307,7 +1307,7 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception other)
       {
-         doFail(other.getMessage());
+         doFail(testname, other.getMessage());
       }
    }
 
@@ -1331,12 +1331,12 @@ public class NavigationTest extends BaseTest
          ObjectData fold = getStorage().getObjectByPath("/testroot/folder1");
          CmisObject result = getConnection().getFolderParent(fold.getObjectId(), true, PropertyFilter.ALL);
          if (result == null)
-            doFail("Result is empty");
+            doFail(testname, "Result is empty");
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1350,12 +1350,12 @@ public class NavigationTest extends BaseTest
          ObjectData fold = getStorage().getObjectByPath("/testroot/folder1");
          CmisObject result = getConnection().getFolderParent(fold.getObjectId(), true, PropertyFilter.ALL);
          if (result.getObjectInfo() == null)
-            doFail("ObjectInfo must be present in result;");
+            doFail(testname, "ObjectInfo must be present in result;");
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1369,12 +1369,12 @@ public class NavigationTest extends BaseTest
          ObjectData fold = getStorage().getObjectByPath("/testroot/folder1");
          CmisObject result = getConnection().getFolderParent(fold.getObjectId(), false, PropertyFilter.ALL);
          if (result.getObjectInfo() != null)
-            doFail("ObjectInfo must  not be present in result;");
+            doFail(testname, "ObjectInfo must  not be present in result;");
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1398,13 +1398,13 @@ public class NavigationTest extends BaseTest
             if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
                continue;
             else
-               doFail("Property filter works incorrect");
+               doFail(testname, "Property filter works incorrect");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1422,7 +1422,7 @@ public class NavigationTest extends BaseTest
       {
          ObjectData fold = getStorage().getObjectByPath("/testroot/folder1");
          CmisObject result = getConnection().getFolderParent(fold.getObjectId(), false, "(,*");
-         doFail("FilterNotValidException must be thrown;");
+         doFail(testname, "FilterNotValidException must be thrown;");
       }
       catch (FilterNotValidException ex)
       {
@@ -1430,7 +1430,7 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1448,7 +1448,7 @@ public class NavigationTest extends BaseTest
       {
          ObjectData fold = getStorage().getObjectByPath("/");
          CmisObject result = getConnection().getFolderParent(fold.getObjectId(), true, PropertyFilter.ALL);
-         doFail("InvalidArgumentException must be thrown;");
+         doFail(testname, "InvalidArgumentException must be thrown;");
       }
       catch (InvalidArgumentException ex)
       {
@@ -1456,7 +1456,7 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1477,12 +1477,12 @@ public class NavigationTest extends BaseTest
             getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true,
                PropertyFilter.ALL, RenditionFilter.ANY);
          if (result.size() != 1)
-            doFail("Incorrect items number in result;");
+            doFail(testname, "Incorrect items number in result;");
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1505,13 +1505,13 @@ public class NavigationTest extends BaseTest
          for (ObjectParent one : result)
          {
             if (!(one.getObject().getRelationship().size() > 0))
-               doFail("Incorrect items number in result;");
+               doFail(testname, "Incorrect items number in result;");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1535,13 +1535,13 @@ public class NavigationTest extends BaseTest
          {
             if (one.getObject().getRelationship().size() != 0)
                ;
-            doFail("Incorrect items number in result;");
+            doFail(testname, "Incorrect items number in result;");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1566,13 +1566,13 @@ public class NavigationTest extends BaseTest
             if (one.getObject().getAllowableActions() != null)
                continue;
             else
-               doFail("AllowableActions must be present in result;");
+               doFail(testname, "AllowableActions must be present in result;");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1597,13 +1597,13 @@ public class NavigationTest extends BaseTest
             if (one.getObject().getAllowableActions() == null)
                continue;
             else
-               doFail("AllowableActions must not be present in result;");
+               doFail(testname, "AllowableActions must not be present in result;");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1629,13 +1629,13 @@ public class NavigationTest extends BaseTest
             if (one.getRelativePathSegment() != null)
                continue;
             else
-               doFail("RelativePathSegment must be present in result;");
+               doFail(testname, "RelativePathSegment must be present in result;");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1659,13 +1659,13 @@ public class NavigationTest extends BaseTest
          for (ObjectParent one : result)
          {
             if (one.getRelativePathSegment() != null)
-               doFail("RelativePathSegment must not be present in result;");
+               doFail(testname, "RelativePathSegment must not be present in result;");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1688,13 +1688,13 @@ public class NavigationTest extends BaseTest
          for (ObjectParent one : result)
          {
             if (one.getObject().getRenditions().size() != 0)
-               doFail("Renditions filter works incorrect;");
+               doFail(testname, "Renditions filter works incorrect;");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1712,13 +1712,13 @@ public class NavigationTest extends BaseTest
          for (ObjectParent one : result)
          {
             if (one.getObject().getObjectInfo() == null)
-               doFail("ObjectInfo must be present in result;");
+               doFail(testname, "ObjectInfo must be present in result;");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1736,13 +1736,13 @@ public class NavigationTest extends BaseTest
          for (ObjectParent one : result)
          {
             if (one.getObject().getObjectInfo() != null)
-               doFail("ObjectInfo must not be present in result;");
+               doFail(testname, "ObjectInfo must not be present in result;");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1770,14 +1770,14 @@ public class NavigationTest extends BaseTest
                if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
                   continue;
                else
-                  doFail("Property filter works incorrect;");
+                  doFail(testname, "Property filter works incorrect;");
             }
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1798,7 +1798,7 @@ public class NavigationTest extends BaseTest
          List<ObjectParent> result =
             getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true, "(,*",
                RenditionFilter.ANY);
-         doFail("FilterNotValidException must be thrown;");
+         doFail(testname, "FilterNotValidException must be thrown;");
       }
       catch (FilterNotValidException ex)
       {
@@ -1806,7 +1806,7 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1832,7 +1832,7 @@ public class NavigationTest extends BaseTest
             List<ObjectParent> result =
                getConnection().getObjectParents(it.next().getObjectId(), true, IncludeRelationships.BOTH, true, true,
                   PropertyFilter.ALL, RenditionFilter.ANY);
-            doFail("ConstraintException must be thrown;");
+            doFail(testname, "ConstraintException must be thrown;");
          }
 
       }
@@ -1842,7 +1842,7 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception other)
       {
-         doFail(other.getMessage());
+         doFail(testname, other.getMessage());
       }
    }
 
@@ -1861,15 +1861,15 @@ public class NavigationTest extends BaseTest
          ItemsList<CmisObject> result =
             getConnection().getCheckedOutDocs(null, true, IncludeRelationships.BOTH, true, PropertyFilter.ALL,
                RenditionFilter.ANY, "", -1, 0);
-         if (result.getItems().size() == 3)
-            pass(testname);
+         if (result.getItems().size() != 3)
+            doFail(testname, "Items size is incorrect;");
          else
-            doFail("Unexpected items number;");
+            doFail(testname, "Unexpected items number;");
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1891,13 +1891,13 @@ public class NavigationTest extends BaseTest
          for (CmisObject one : result.getItems())
          {
             if (one.getAllowableActions() == null)
-               doFail("AllowableActions must be present in result;");
+               doFail(testname, "AllowableActions must be present in result;");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1919,13 +1919,13 @@ public class NavigationTest extends BaseTest
          for (CmisObject one : result.getItems())
          {
             if (one.getAllowableActions() != null)
-               doFail("AllowableActions must not be present in result;");
+               doFail(testname, "AllowableActions must not be present in result;");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1953,11 +1953,11 @@ public class NavigationTest extends BaseTest
          if (found)
             pass(testname);
          else
-            doFail("Relationship not found in result;");
+            doFail(testname, "Relationship not found in result;");
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -1985,11 +1985,11 @@ public class NavigationTest extends BaseTest
          if (!found)
             pass(testname);
          else
-            doFail("Relationship must not not found in result;");
+            doFail(testname, "Relationship must not not found in result;");
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -2006,13 +2006,13 @@ public class NavigationTest extends BaseTest
          for (CmisObject one : result.getItems())
          {
             if (one.getObjectInfo() == null)
-               doFail("ObjectInfo must be present in result;");
+               doFail(testname, "ObjectInfo must be present in result;");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -2029,13 +2029,13 @@ public class NavigationTest extends BaseTest
          for (CmisObject one : result.getItems())
          {
             if (one.getObjectInfo() != null)
-               doFail("ObjectInfo must not be present in result;");
+               doFail(testname, "ObjectInfo must not be present in result;");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -2057,13 +2057,13 @@ public class NavigationTest extends BaseTest
          for (CmisObject one : result.getItems())
          {
             if (one.getRenditions().size() != 0)
-               doFail("rendition filter works incorrect;");
+               doFail(testname, "rendition filter works incorrect;");
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -2090,14 +2090,14 @@ public class NavigationTest extends BaseTest
                if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
                   continue;
                else
-                  doFail("Property filter works incorrect;");
+                  doFail(testname, "Property filter works incorrect;");
             }
          }
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -2118,12 +2118,12 @@ public class NavigationTest extends BaseTest
             getConnection().getCheckedOutDocs(testroot, true, IncludeRelationships.BOTH, true, PropertyFilter.ALL,
                RenditionFilter.ANY, "", 2, 0);
          if (result.getItems().size() != 2)
-            doFail("Items nimber incorrect in result;");
+            doFail(testname, "Items nimber incorrect in result;");
          pass(testname);
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -2146,11 +2146,11 @@ public class NavigationTest extends BaseTest
          if (result.getItems().size() == 2)
             pass(testname);
          else
-            doFail("Unexpected items number;");
+            doFail(testname, "Unexpected items number;");
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
@@ -2169,7 +2169,7 @@ public class NavigationTest extends BaseTest
          ItemsList<CmisObject> result =
             getConnection().getCheckedOutDocs(testroot, false, IncludeRelationships.NONE, true, ",*)",
                RenditionFilter.ANY, "", -1, 0);
-         doFail("FilterNotValidException must be thrown;");
+         doFail(testname, "FilterNotValidException must be thrown;");
       }
       catch (FilterNotValidException ex)
       {
@@ -2177,13 +2177,18 @@ public class NavigationTest extends BaseTest
       }
       catch (Exception e)
       {
-         doFail(e.getMessage());
+         doFail(testname, e.getMessage());
       }
    }
 
    protected void pass(String method) throws Exception
    {
       super.pass("NavigationTest." + method);
+   }
+   
+   protected void doFail(String method,  String message) throws Exception
+   {
+      super.doFail("NavigationTest." + method,  message);
    }
 
    @Override
