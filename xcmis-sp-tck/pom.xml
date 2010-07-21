@@ -48,13 +48,16 @@
                      <value>${tck.conf}</value>
                   </property>
                </systemProperties>
-           <includes>
-            <include>**/AllTests.java</include>
-          </includes>
-
+               <includes>
+                <include>**/AllTests.java</include>
+              </includes>
             </configuration>
          </plugin>
       </plugins>
    </build>
+
+   <reporting>
+     <excludeDefaults>true</excludeDefaults>
+   </reporting>
 
 </project>
