@@ -19,6 +19,8 @@
 
 package org.xcmis.sp.tck.exo;
 
+import org.junit.Test;
+import org.junit.Before;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
@@ -40,7 +42,7 @@ import java.util.List;
 public class DiscoveryTest extends BaseTest
 {
 
-   @Override
+   @Before
    public void setUp() throws Exception
    {
       super.setUp();
@@ -51,6 +53,7 @@ public class DiscoveryTest extends BaseTest
     * 
     * Description: Executes a CMIS query statement against the contents of the Repository.
     */
+   @Test
    public void testQuery() throws Exception
    {
       String testname = "testQuery";
@@ -103,6 +106,7 @@ public class DiscoveryTest extends BaseTest
     * 
     * Description: Executes a CMIS query statement against the contents of the Repository.
     */
+   @Test
    public void testQuery2() throws Exception
    {
       String testname = "testQuery2";

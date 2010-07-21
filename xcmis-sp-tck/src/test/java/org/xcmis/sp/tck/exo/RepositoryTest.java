@@ -32,6 +32,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import org.junit.Test;
+import org.junit.Before;
 
 /**
  * 2.2.2 Repository Services
@@ -45,12 +47,13 @@ import java.util.Set;
 public class RepositoryTest extends BaseTest
 {
 
-   @Override
+   @Before
    public void setUp() throws Exception
    {
       super.setUp();
    }
 
+   @Test
    public void testGeneral() throws Exception
    {
       String testname = "testGeneral";
@@ -71,6 +74,7 @@ public class RepositoryTest extends BaseTest
     * 
     * Returns a list of CMIS repositories available from this CMIS service endpoint.
     */
+   @Test
    public void testGetRepositories() throws Exception
    {
       String testname = "testGetRepositories";
@@ -103,6 +107,7 @@ public class RepositoryTest extends BaseTest
     * 
     * @throws Exception
     */
+   @Test
    public void testGetRepositoryInfo() throws Exception
    {
       String testname = "testGetRepositoryInfo";
@@ -158,6 +163,7 @@ public class RepositoryTest extends BaseTest
     * Returns the list of Object-Types defined for the Repository 
     * that are children of the specified Type.
     */
+   @Test
    public void testGetTypeChildren_Root() throws Exception
    {
       String testname = "testGetTypeChildren_Root";
@@ -216,6 +222,7 @@ public class RepositoryTest extends BaseTest
     * Returns the list of Object-Types defined for the Repository 
     * that are children of the specified Type.
     */
+   @Test
    public void testGetTypeChildren_RootWithMaxItems() throws Exception
    {
       String testname = "testGetTypeChildren_RootWithMaxItems";
@@ -243,6 +250,7 @@ public class RepositoryTest extends BaseTest
     * Returns the list of Object-Types defined for the Repository 
     * that are children of the specified Type.
     */
+   @Test
    public void testGetTypeChildren_RootWithSkipCount() throws Exception
    {
       String testname = "testGetTypeChildren_RootWithSkipCount";
@@ -283,6 +291,7 @@ public class RepositoryTest extends BaseTest
     * Returns the list of Object-Types defined for the Repository 
     * that are children of the specified Type.
     */
+   @Test
    public void testGetTypeChildren_Folder() throws Exception
    {
       String testname = "testGetTypeChildren_Folder";
@@ -310,6 +319,7 @@ public class RepositoryTest extends BaseTest
     * Returns the list of Object-Types defined for the Repository 
     * that are children of the specified Type.
     */
+   @Test
    public void testGetTypeChildren_Document() throws Exception
    {
       String testname = "testGetTypeChildren_Document";
@@ -337,6 +347,7 @@ public class RepositoryTest extends BaseTest
     * Returns the list of Object-Types defined for the Repository 
     * that are children of the specified Type.
     */
+   @Test
    public void testGetTypeChildren_NonExistedType() throws Exception
    {
       // to get children for nonexistent type "cmis:kino"
@@ -362,6 +373,7 @@ public class RepositoryTest extends BaseTest
     * 
     * Returns the set of descendant Object-Types defined for the Repository under the specified Type.
     */
+   @Test
    public void testGetTypeDescendants() throws Exception
    {
       String testname = "testGetTypeDescendants";
@@ -411,6 +423,7 @@ public class RepositoryTest extends BaseTest
     * 
     * Returns the set of descendant Object-Types defined for the Repository under the specified Type.
     */
+   @Test
    public void testGetTypeDescendants_Folder() throws Exception
    {
       String testname = "testGetTypeDescendants_Folder";
@@ -436,6 +449,7 @@ public class RepositoryTest extends BaseTest
     * 
     * Returns the set of descendant Object-Types defined for the Repository under the specified Type.
     */
+   @Test
    public void testGetTypeDescendants_Document() throws Exception
    {
       String testname = "testGetTypeDescendants_Document";
@@ -461,6 +475,7 @@ public class RepositoryTest extends BaseTest
     * 
     * Returns the set of descendant Object-Types defined for the Repository under the specified Type.
     */
+   @Test
    public void testGetTypeDescendants_IncludePropertyDefinitionFalse() throws Exception
    {
       String testname = "testGetTypeDescendants_IncludePropertyDefinitionFalse";
@@ -495,6 +510,7 @@ public class RepositoryTest extends BaseTest
     * 
     * Returns the set of descendant Object-Types defined for the Repository under the specified Type.
     */
+   @Test
    public void testGetTypeDescendants_RootWithDepth1() throws Exception
    {
       String testname = "testGetTypeDescendants_RootWithDepth1";
@@ -527,6 +543,7 @@ public class RepositoryTest extends BaseTest
     * 
     * Returns the set of descendant Object-Types defined for the Repository under the specified Type.
     */
+   @Test
    public void testGetTypeDescendants_NonExistedType() throws Exception
    {
       String testname = "testGetTypeDescendants_NonExistedType";
@@ -551,6 +568,7 @@ public class RepositoryTest extends BaseTest
     * 
     * Gets the definition of the specified Object-Type.
     */
+   @Test
    public void testGetTypeDefinition_Folder() throws Exception
    {
       String testname = "testGetTypeDefinition_Folder";
@@ -574,6 +592,7 @@ public class RepositoryTest extends BaseTest
     * 
     * Gets the definition of the specified Object-Type.
     */
+   @Test
    public void testGetTypeDefinition_Document() throws Exception
    {
       String testname = "testGetTypeDefinition_Document";
@@ -597,6 +616,7 @@ public class RepositoryTest extends BaseTest
     * 
     * Gets the definition of the specified Object-Type.
     */
+   @Test
    public void testGetTypeDefinition_NonExistedType() throws Exception
    {
       String testname = "testGetTypeDefinition_NonExistedType";
@@ -621,6 +641,7 @@ public class RepositoryTest extends BaseTest
     * 
     * Gets the definition of the specified Object-Type.
     */
+   @Test
    public void testGetTypeDefinition_IncludePropertyDefinitionFalse() throws Exception
    {
       String testname = "testGetTypeDefinition_IncludePropertyDefinitionFalse";
@@ -649,6 +670,7 @@ public class RepositoryTest extends BaseTest
          doFail(testname, "Property definitions must not be included;");
       pass(testname);
    }
+
 
    private void checkPropertyDefinitions(Collection<PropertyDefinition<?>> propertyDefinitions) throws Exception
    {

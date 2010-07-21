@@ -20,6 +20,7 @@ package org.xcmis.sp.tck.exo;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.Test;
 
 import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CmisConstants;
@@ -54,6 +55,7 @@ public class RelationshipTest extends BaseTest
     * Gets all or a subset of relationships associated with an independent object.
     * @throws Exception
     */
+   @Test
    public void testGetObjectRelationships_Simple() throws Exception
    {
       String testname = "testGetObjectRelationships_Simple";
@@ -125,6 +127,7 @@ public class RelationshipTest extends BaseTest
     * specified Object is the source of the relationship, the target of the relationship, or both.
     * @throws Exception
     */
+   @Test
    public void testGetObjectRelationships_CheckDirection() throws Exception
    {
       String testname = "testGetObjectRelationships_CheckDirection";
@@ -195,6 +198,7 @@ public class RelationshipTest extends BaseTest
     * If TRUE, then the Repository MUST return the available actions for each object in the result set.
     * @throws Exception
     */
+   @Test
    public void testGetObjectRelationships_AllowableActions() throws Exception
    {
       String testname = "testGetObjectRelationships_AllowableActions";
@@ -270,6 +274,7 @@ public class RelationshipTest extends BaseTest
     * If specified, then the Repository MUST return only relationships whose Object-Type is of the type specified.
     * @throws Exception
     */
+   @Test
    public void testGetObjectRelationships_TypeId() throws Exception
    {
       String testname = "testGetObjectRelationships_TypeId";
@@ -367,6 +372,7 @@ public class RelationshipTest extends BaseTest
     * cmis:objectTypeId property value as well as relationships of the specified type. 
     * @throws Exception
     */
+   @Test
    public void testGetObjectRelationships_IncludeSubrelationshipTypes() throws Exception
    {
       String testname = "testGetObjectRelationships_IncludeSubrelationshipTypes";
@@ -472,6 +478,7 @@ public class RelationshipTest extends BaseTest
     * The repository MUST NOT exceed this maximum.
     * @throws Exception
     */
+   @Test
    public void testGetObjectRelationships_MaxItems() throws Exception
    {
       String testname = "testGetObjectRelationships_MaxItems";
@@ -543,6 +550,7 @@ public class RelationshipTest extends BaseTest
     * MUST skip/page over before returning any results.  
     * @throws Exception
     */
+   @Test
    public void testGetObjectRelationships_SkipCount() throws Exception
    {
       String testname = "testGetObjectRelationships_SkipCount";
@@ -614,6 +622,7 @@ public class RelationshipTest extends BaseTest
     * •  Boolean hasMoreItems: TRUE if the Repository contains additional items after those contained in the response.  FALSE otherwise. 
     * @throws Exception
     */
+   @Test
    public void testGetObjectRelationships_Paging() throws Exception
    {
       String testname = "testGetObjectRelationships_Paging";
@@ -693,6 +702,7 @@ public class RelationshipTest extends BaseTest
     * if they exist on the object’s type definition.
     * @throws Exception
     */
+   @Test
    public void testGetObjectRelationships_PropertyFiltered() throws Exception
    {
       String testname = "testGetObjectRelationships_PropertyFiltered";
@@ -773,6 +783,7 @@ public class RelationshipTest extends BaseTest
     * The Repository MUST throw this exception if this property filter input parameter is not valid.
     * @throws Exception
     */
+   @Test
    public void testGetObjectRelationships_FilterNotValidException() throws Exception
    {
       String testname = "testGetObjectRelationships_FilterNotValidException";

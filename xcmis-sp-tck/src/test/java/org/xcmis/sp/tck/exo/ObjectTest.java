@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertArrayEquals;
+import org.junit.Test;
+import org.junit.After;
 import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.ChangeTokenHolder;
 import org.xcmis.spi.CmisConstants;
@@ -73,6 +75,7 @@ public class ObjectTest extends BaseTest
     * newly-created Document Object. The method of passing the contentStream 
     * to the server and the encoding mechanism will be specified by each specific binding. 
     */
+   @Test
    public void testCreateDocument_CheckContent() throws Exception
    {
       String testname = "testCreateDocument_CheckContent";
@@ -122,6 +125,7 @@ public class ObjectTest extends BaseTest
     * The property values that MUST be applied to the newly-created Document Object.
     * @throws Exception
     */
+   @Test
    public void testCreateDocument_CheckProperties() throws Exception
    {
       String testname = "testCreateDocument_CheckProperties";
@@ -170,6 +174,7 @@ public class ObjectTest extends BaseTest
     * A list of policy IDs that MUST be applied to the newly-created Document object. 
     * @throws Exception
     */
+   @Test
    public void testCreateDocument_ApplyPolicy() throws Exception
    {
       String testname = "testCreateDocument_ApplyPolicy";
@@ -235,6 +240,7 @@ public class ObjectTest extends BaseTest
     *   either using the ACL from folderId if specified, or being applied if no folderId is specified. 
     * @throws Exception
     */
+   @Test
    public void testCreateDocument_AddACL() throws Exception
    {
       String testname = "testCreateDocument_AddACL";
@@ -294,6 +300,7 @@ public class ObjectTest extends BaseTest
     * the repository MAY throw this exception or chose a name which does not conflict.  
     * @throws Exception
     */
+   @Test
    public void testCreateDocument_NameConstraintViolationException() throws Exception
    {
       String testname = "testCreateDocument_NameConstraintViolationException";
@@ -344,6 +351,7 @@ public class ObjectTest extends BaseTest
     * value is set to “not allowed” and a contentStream input parameter is provided.
     * @throws Exception
     */
+   @Test
    public void testCreateDocument_StreamNotSupportedException() throws Exception
    {
       String testname = "testCreateDocument_StreamNotSupportedException";
@@ -417,6 +425,7 @@ public class ObjectTest extends BaseTest
     * The cmis:objectTypeId property value is not an Object-Type whose baseType is “Document”.
     * @throws Exception
     */
+   @Test
    public void testCreateDocument_ConstraintException1() throws Exception
    {
       String testname = "testCreateDocument_ConstraintException1";
@@ -490,6 +499,7 @@ public class ObjectTest extends BaseTest
     * the cmis:objectTypeId property value is set to “required” and no contentStream input parameter is provided.  
     * @throws Exception
     */
+   @Test
    public void testCreateDocument_ConstraintException2() throws Exception
    {
       String testname = "testCreateDocument_ConstraintException2";
@@ -562,6 +572,7 @@ public class ObjectTest extends BaseTest
     * and the value for the versioningState input parameter is provided that is “none”.
     * @throws Exception
     */
+   @Test
    public void testCreateDocument_ConstraintException3() throws Exception
    {
       String testname = "testCreateDocument_ConstraintException3";
@@ -635,6 +646,7 @@ public class ObjectTest extends BaseTest
     * property value is set to FALSE and a value for the versioningState input parameter is provided that is something other than “none”.
     * @throws Exception
     */
+   @Test
    public void testCreateDocument_ConstraintException4() throws Exception
    {
       String testname = "testCreateDocument_ConstraintException4";
@@ -708,6 +720,7 @@ public class ObjectTest extends BaseTest
     * cmis:objectTypeId property value is set to FALSE and at least one policy is provided.
     * @throws Exception
     */
+   @Test
    public void testCreateDocument_ConstraintException5() throws Exception
    {
       String testname = "testCreateDocument_ConstraintException5";
@@ -789,6 +802,7 @@ public class ObjectTest extends BaseTest
     * property value is set to FALSE and at least one ACE is provided.
     * @throws Exception
     */
+   @Test
    public void testCreateDocument_ConstraintException6() throws Exception
    {
       String testname = "testCreateDocument_ConstraintException6";
@@ -868,6 +882,7 @@ public class ObjectTest extends BaseTest
     * At least one of the permissions is used in an ACE provided which is not supported by the repository.
     * @throws Exception
     */
+   @Test
    public void testCreateDocument_ConstraintException7() throws Exception
    {
       String testname = "testCreateDocument_ConstraintException7";
@@ -947,6 +962,7 @@ public class ObjectTest extends BaseTest
     * Creates a document object as a copy of the given source document in the (optionally) specified location.
     * @throws Exception
     */
+   @Test
    public void testCreateDocumentFromSource_Simple() throws Exception
    {
       String testname = "testCreateDocumentFromSource_Simple";
@@ -1002,6 +1018,7 @@ public class ObjectTest extends BaseTest
     * This list of properties SHOULD only contain properties whose values differ from the source document.
     * @throws Exception
     */
+   @Test
    public void testCreateDocumentFromSource_Properties() throws Exception
    {
       String testname = "testCreateDocumentFromSource_Properties";
@@ -1049,6 +1066,7 @@ public class ObjectTest extends BaseTest
     * A list of policy IDs that MUST be applied to the newly-created Document object. 
     * @throws Exception
     */
+   @Test
    public void testCreateDocumentFromSource_ApplyPolicy() throws Exception
    {
       String testname = "testCreateDocumentFromSource_ApplyPolicy";
@@ -1116,7 +1134,7 @@ public class ObjectTest extends BaseTest
     *  either using the ACL from folderId if specified, or being applied if no folderId is specified.  
     * @throws Exception
     */
-
+   @Test
    public void testCreateDocumentFromSource_addACL() throws Exception
    {
       String testname = "testCreateDocumentFromSource_addACL";
@@ -1181,6 +1199,7 @@ public class ObjectTest extends BaseTest
     *  the repository MAY throw this exception or chose a name which does not conflict.
     * @throws Exception
     */
+   @Test
    public void testCreateDocumentFromSource_NameConstraintViolationException() throws Exception
    {
       String testname = "testCreateDocumentFromSource_NameConstraintViolationException";
@@ -1232,6 +1251,7 @@ public class ObjectTest extends BaseTest
     * constraint: The Repository MUST throw this exception if  the sourceId is not an Object whose baseType is “Document”.
     * @throws Exception
     */
+   @Test
    public void testCreateDocumentFromSource_ConstraintException1() throws Exception
    {
       String testname = "testCreateDocumentFromSource_ConstraintException1";
@@ -1281,6 +1301,7 @@ public class ObjectTest extends BaseTest
     * of the parent-folder specified by folderId.
     * @throws Exception
     */
+   @Test
    public void testCreateDocumentFromSource_ConstraintException2() throws Exception
    {
       String testname = "testCreateDocumentFromSource_ConstraintException2";
@@ -1384,6 +1405,7 @@ public class ObjectTest extends BaseTest
     * and a value for the versioningState input parameter is provided that is something other than “none”.
     * @throws Exception
     */
+   @Test
    public void testCreateDocumentFromSource_ConstraintException3() throws Exception
    {
       String testname = "testCreateDocumentFromSource_ConstraintException3";
@@ -1464,6 +1486,7 @@ public class ObjectTest extends BaseTest
     * the value for the versioningState input parameter is provided that is “none”.
     * @throws Exception
     */
+   @Test
    public void testCreateDocumentFromSource_ConstraintException4() throws Exception
    {
       String testname = "testCreateDocumentFromSource_ConstraintException4";
@@ -1547,6 +1570,7 @@ public class ObjectTest extends BaseTest
     * 
     * @throws Exception
     */
+   @Test
    public void testCreateDocumentFromSource_ConstraintException5() throws Exception
    {
       String testname = "testCreateDocumentFromSource_ConstraintException5";
@@ -1634,6 +1658,7 @@ public class ObjectTest extends BaseTest
     * 
     * @throws Exception
     */
+   @Test
    public void testCreateDocumentFromSource_ConstraintException6() throws Exception
    {
       String testname = "testCreateDocumentFromSource_ConstraintException6";
@@ -1717,6 +1742,7 @@ public class ObjectTest extends BaseTest
     * At least one of the permissions is used in an ACE provided which is not supported by the repository.
     * @throws Exception
     */
+   @Test
    public void testCreateDocumentFromSource_ConstraintException7() throws Exception
    {
       String testname = "testCreateDocumentFromSource_ConstraintException7";
@@ -1800,6 +1826,7 @@ public class ObjectTest extends BaseTest
     * Creates a folder object of the specified type in the specified location.
     * @throws Exception
     */
+   @Test
    public void testCreateFolder_Simple() throws Exception
    {
       String testname = "testCreateFolder_Simple";
@@ -1844,6 +1871,7 @@ public class ObjectTest extends BaseTest
     * A list of policy IDs that MUST be applied to the newly-created Folder object.
     * @throws Exception
     */
+   @Test
    public void testCreateFolder_ApplyPolicy() throws Exception
    {
       String testname = "testCreateFolder_ApplyPolicy";
@@ -1908,11 +1936,11 @@ public class ObjectTest extends BaseTest
     * A list of ACEs that MUST be added to the newly-created Folder object.
     * @throws Exception
     */
-
+   @Test
    public void testCreateFolder_AddACL() throws Exception
    {
       String testname = "testCreateFolder_AddACL";
-      System.out.print("Running " + testname + "....                                        ");
+      System.out.print("Running " + testname + "....                            ");
       FolderData testroot = null;
       String docId = null;
       try
@@ -1968,6 +1996,7 @@ public class ObjectTest extends BaseTest
     * Creates a folder object of the specified type in the specified location.
     * @throws Exception
     */
+   @Test
    public void testCreateFolder_NameConstraintViolationException() throws Exception
    {
       String testname = "testCreateFolder_NameConstraintViolationException";
@@ -2016,6 +2045,7 @@ public class ObjectTest extends BaseTest
     * value is not an Object-Type whose baseType is “Folder”.
     * @throws Exception
     */
+   @Test
    public void testCreateFolder_ConstraintException1() throws Exception
    {
       String testname = "testCreateFolder_ConstraintException1";
@@ -2091,6 +2121,7 @@ public class ObjectTest extends BaseTest
     * AllowedChildObjectTypeIds of the parent-folder specified by folderId. 
     * @throws Exception
     */
+   @Test
    public void testCreateFolder_ConstraintException2() throws Exception
    {
       String testname = "testCreateFolder_ConstraintException2";
@@ -2179,6 +2210,7 @@ public class ObjectTest extends BaseTest
     * cmis:objectTypeId property value is set to FALSE and at least one policy is provided.
     * @throws Exception
     */
+   @Test
    public void testCreateFolder_ConstraintException3() throws Exception
    {
       String testname = "testCreateFolder_ConstraintException3";
@@ -2262,6 +2294,7 @@ public class ObjectTest extends BaseTest
     * by the cmis:objectTypeId property value is set to FALSE and at least one ACE is provided.
     * @throws Exception
     */
+   @Test
    public void testCreateFolder_ConstraintException4() throws Exception
    {
       String testname = "testCreateFolder_ConstraintException4";
@@ -2342,7 +2375,7 @@ public class ObjectTest extends BaseTest
     * At least one of the permissions is used in an ACE provided which is not supported by the repository.
     * @throws Exception
     */
-
+   @Test
    public void testCreateFolder_ConstraintException5() throws Exception
    {
       String testname = "testCreateFolder_ConstraintException5";
@@ -2423,6 +2456,7 @@ public class ObjectTest extends BaseTest
     * Creates a relationship object of the specified type.
     * @throws Exception
     */
+   @Test
    public void testCreateRelationship_Simple() throws Exception
    {
       String testname = "testCreateRelationship_Simple";
@@ -2496,7 +2530,7 @@ public class ObjectTest extends BaseTest
     * A list of policy IDs that MUST be applied to the newly-created Replationship object.
     * @throws Exception
     */
-
+   @Test
    public void testCreateRelationship_ApplyPolicy() throws Exception
    {
       String testname = "testCreateRelationship_ApplyPolicy";
@@ -2613,6 +2647,7 @@ public class ObjectTest extends BaseTest
     * ACL from folderId if specified, or being applied if no folderId is specified. 
     * @throws Exception
     */
+   @Test
    public void testCreateRelationship_AddACL() throws Exception
    {
       String testname = "testCreateRelationship_AddACL";
@@ -2727,7 +2762,7 @@ public class ObjectTest extends BaseTest
     * throw this exception or chose a name which does not conflict.
     * @throws Exception
     */
-
+   @Test
    public void testCreateRelationship_NameConstraintViolationException() throws Exception
    {
       String testname = "testCreateRelationship_NameConstraintViolationException";
@@ -2829,6 +2864,7 @@ public class ObjectTest extends BaseTest
     * The cmis:objectTypeId property value is not an Object-Type whose baseType is “Relationship”.
     * @throws Exception
     */
+   @Test
    public void testCreateRelationship_ConstraintException1() throws Exception
    {
       String testname = "testCreateRelationship_ConstraintException1";
@@ -2933,6 +2969,7 @@ public class ObjectTest extends BaseTest
     * the Object-Type definition specified by cmis:objectTypeId property value.
     * @throws Exception
     */
+   @Test
    public void testCreateRelationship_ConstraintException2() throws Exception
    {
       String testname = "testCreateRelationship_ConstraintException2";
@@ -3036,6 +3073,7 @@ public class ObjectTest extends BaseTest
     * cmis:objectTypeId property value is set to FALSE and at least one policy is provided.
     * @throws Exception
     */
+   @Test
    public void testCreateRelationship_ConstraintException3() throws Exception
    {
       String testname = "testCreateRelationship_ConstraintException3";
@@ -3141,6 +3179,7 @@ public class ObjectTest extends BaseTest
     * cmis:objectTypeId property value is set to FALSE and at least one ACE is provided.
     * @throws Exception
     */
+   @Test
    public void testCreateRelationship_ConstraintException4() throws Exception
    {
       String testname = "testCreateRelationship_ConstraintException4";
@@ -3248,6 +3287,7 @@ public class ObjectTest extends BaseTest
     * At least one of the permissions is used in an ACE provided which is not supported by the repository. 
     * @throws Exception
     */
+   @Test
    public void testCreateRelationship_ConstraintException5() throws Exception
    {
       String testname = "testCreateRelationship_ConstraintException5";
@@ -3354,6 +3394,7 @@ public class ObjectTest extends BaseTest
     * Creates a policy object of the specified type.
     * @throws Exception
     */
+   @Test
    public void testCreatePolicy_Simple() throws Exception
    {
       String testname = "testCreatePolicy_Simple";
@@ -3408,6 +3449,7 @@ public class ObjectTest extends BaseTest
     * A list of policy IDs that MUST be applied to the newly-created Policy object. 
     * @throws Exception
     */
+   @Test
    public void testCreatePolicy_AddPolicy() throws Exception
    {
       String testname = "testCreatePolicy_AddPolicy";
@@ -3475,6 +3517,7 @@ public class ObjectTest extends BaseTest
     * A list of ACEs that MUST be added to the newly-created Policy object. 
     * @throws Exception
     */
+   @Test
    public void testCreatePolicy_AddACL() throws Exception
    {
       String testname = "testCreatePolicy_AddACL";
@@ -3542,6 +3585,7 @@ public class ObjectTest extends BaseTest
     * throw this exception or chose a name which does not conflict.
     * @throws Exception
     */
+   @Test
    public void testCreatePolicy_NameConstraintViolationException() throws Exception
    {
       String testname = "testCreatePolicy_NameConstraintViolationException";
@@ -3603,6 +3647,7 @@ public class ObjectTest extends BaseTest
     * property value is not an Object-Type whose baseType is “Policy”.
     * @throws Exception
     */
+   @Test
    public void testCreatePolicy_ConstraintException1() throws Exception
    {
       String testname = "testCreatePolicy_ConstraintException1";
@@ -3683,7 +3728,7 @@ public class ObjectTest extends BaseTest
     * of the parent-folder specified by folderId. 
     * @throws Exception
     */
-
+   @Test
    public void testCreatePolicy_ConstraintException2() throws Exception
    {
       String testname = "testCreatePolicy_ConstraintException2";
@@ -3771,6 +3816,7 @@ public class ObjectTest extends BaseTest
     * the cmis:objectTypeId property value is set to FALSE and at least one policy is provided.
     * @throws Exception
     */
+   @Test
    public void testCreatePolicy_ConstraintException3() throws Exception
    {
       String testname = "testCreatePolicy_ConstraintException3";
@@ -3856,6 +3902,7 @@ public class ObjectTest extends BaseTest
     * property value is set to FALSE and at least one ACE is provided.
     * @throws Exception
     */
+   @Test
    public void testCreatePolicy_ConstraintException4() throws Exception
    {
       String testname = "testCreatePolicy_ConstraintException4";
@@ -3941,6 +3988,7 @@ public class ObjectTest extends BaseTest
     * property value is set to FALSE and at least one ACE is provided.
     * @throws Exception
     */
+   @Test
    public void testCreatePolicy_ConstraintException5() throws Exception
    {
       String testname = "testCreatePolicy_ConstraintException5";
@@ -3995,6 +4043,7 @@ public class ObjectTest extends BaseTest
     * Gets the list of allowable actions for an Object.
     * @throws Exception
     */
+   @Test
    public void testGetAllowableActions_Simlpe() throws Exception
    {
       String testname = "testGetAllowableActions_Simlpe";
@@ -4064,6 +4113,7 @@ public class ObjectTest extends BaseTest
     * Gets the specified information for the Object. 
     * @throws Exception
     */
+   @Test
    public void testGetObject_Simlpe() throws Exception
    {
       String testname = "testGetObject_Simlpe";
@@ -4109,6 +4159,7 @@ public class ObjectTest extends BaseTest
     * if they exist on the object’s type definition.
     * @throws Exception
     */
+   @Test
    public void testGetObject_PropertyFiltered() throws Exception
    {
       String testname = "testGetObject_PropertyFiltered";
@@ -4156,6 +4207,7 @@ public class ObjectTest extends BaseTest
     * Value indicating what relationships in which the objects returned participate MUST be returned, if any.
     * @throws Exception
     */
+   @Test
    public void testGetObject_IncludeRelationships() throws Exception
    {
       String testname = "testGetObject_IncludeRelationships";
@@ -4217,6 +4269,7 @@ public class ObjectTest extends BaseTest
     * The Repository MUST return the Ids of the policies applied to the object.  Defaults to FALSE.
     * @throws Exception
     */
+   @Test
    public void testGetObject_IncludePolicyIDs() throws Exception
    {
       String testname = "testGetObject_IncludePolicyIDs";
@@ -4269,6 +4322,7 @@ public class ObjectTest extends BaseTest
     * If TRUE, then the Repository MUST return the ACLs for each object in the result set.
     * @throws Exception
     */
+   @Test
    public void testGetObject_IncludeACLs() throws Exception
    {
       String testname = "testGetObject_IncludeACLs";
@@ -4332,9 +4386,10 @@ public class ObjectTest extends BaseTest
     * If TRUE, then the Repository MUST return the available actions for each object in the result set. 
     * @throws Exception
     */
+   @Test
    public void testGetObject_IncludeAllowableActions() throws Exception
    {
-      String testname = "testGetObject_IncludeACLs";
+      String testname = "testGetObject_IncludeAllowableActions";
       System.out.print("Running " + testname + "....                          ");
       FolderData testroot = null;
       try
@@ -4404,6 +4459,7 @@ public class ObjectTest extends BaseTest
     * The Repository MUST throw this exception if this property filter input parameter is not valid.
     * @throws Exception
     */
+   @Test
    public void testGetObject_FilterNotValidException() throws Exception
    {
       String testname = "testGetObject_FilterNotValidException";
@@ -4449,6 +4505,7 @@ public class ObjectTest extends BaseTest
     * 
     * @throws Exception
     */
+   @Test
    public void testGetProperties_Filter() throws Exception
    {
       String testname = "testGetProperties_Filter";
@@ -4499,6 +4556,7 @@ public class ObjectTest extends BaseTest
     * 
     * @throws Exception
     */
+   @Test
    public void testGetProperties_FilterNotValidException() throws Exception
    {
       String testname = "testGetProperties_FilterNotValidException";
@@ -4541,6 +4599,7 @@ public class ObjectTest extends BaseTest
     * Gets the specified object. 
     * @throws Exception
     */
+   @Test
    public void testGetObjectByPath_Simlpe() throws Exception
    {
       String testname = "testGetObjectByPath_Simlpe";
@@ -4586,6 +4645,7 @@ public class ObjectTest extends BaseTest
     * if they exist on the object’s type definition.
     * @throws Exception
     */
+   @Test
    public void testGetObjectByPath_PropertyFiltered() throws Exception
    {
       String testname = "testGetObjectByPath_PropertyFiltered";
@@ -4633,6 +4693,7 @@ public class ObjectTest extends BaseTest
     * Value indicating what relationships in which the objects returned participate MUST be returned, if any.
     * @throws Exception
     */
+   @Test
    public void testGetObjectByPath_IncludeRelationships() throws Exception
    {
       String testname = "testGetObjectByPath_IncludeRelationships";
@@ -4693,6 +4754,7 @@ public class ObjectTest extends BaseTest
     * The Repository MUST return the Ids of the policies applied to the object.  Defaults to FALSE.
     * @throws Exception
     */
+   @Test
    public void testGetObjectByPath_IncludePolicyIDs() throws Exception
    {
       String testname = "testGetObjectByPath_IncludePolicyIDs";
@@ -4746,6 +4808,7 @@ public class ObjectTest extends BaseTest
     * If TRUE, then the Repository MUST return the ACLs for each object in the result set.
     * @throws Exception
     */
+   @Test
    public void testGetObjectByPath_IncludeACLs() throws Exception
    {
       String testname = "testGetObjectByPath_IncludeACLs";
@@ -4809,6 +4872,7 @@ public class ObjectTest extends BaseTest
     * : If TRUE, then the Repository MUST return the available actions for each object in the result set. 
     * @throws Exception
     */
+   @Test
    public void testGetObjectByPath_IncludeAllowableActions() throws Exception
    {
       String testname = "testGetObjectByPath_IncludeAllowableActions";
@@ -4881,6 +4945,7 @@ public class ObjectTest extends BaseTest
     * The Repository MUST throw this exception if this property filter input parameter is not valid.
     * @throws Exception
     */
+   @Test
    public void testGetObjectByPath_FilterNotValidException() throws Exception
    {
       String testname = "testGetObjectByPath_FilterNotValidException";
@@ -4926,6 +4991,7 @@ public class ObjectTest extends BaseTest
     * rendition stream for a specified rendition of a document or folder object.
     * @throws Exception
     */
+   @Test
    public void testGetContentStream_Simple() throws Exception
    {
       String testname = "testGetContentStream_Simple";
@@ -4976,6 +5042,7 @@ public class ObjectTest extends BaseTest
     * NOT have a content stream or rendition stream. 
     * @throws Exception
     */
+   @Test
    public void testGetContentStream_ConstraintException() throws Exception
    {
       String testname = "testGetContentStream_ConstraintException";
@@ -5022,7 +5089,7 @@ public class ObjectTest extends BaseTest
     * Gets the list of associated Renditions for the specified object.
     * @throws Exception
     */
-
+   @Test
    public void testGetRenditions_Simple() throws Exception
    {
       String testname = "testGetRenditions_Simple";
@@ -5079,6 +5146,7 @@ public class ObjectTest extends BaseTest
     * The filter specified is not valid.
     * @throws Exception
     */
+   @Test
    public void testGetRenditions_FilterNotValidException() throws Exception
    {
       String testname = "testGetRenditions_FilterNotValidException";
@@ -5133,7 +5201,7 @@ public class ObjectTest extends BaseTest
     * Updates properties of the specified object.
     * @throws Exception
     */
-
+   @Test
    public void testUpdateProperties_Simple() throws Exception
    {
       String testname = "testUpdateProperties_Simple";
@@ -5229,7 +5297,7 @@ public class ObjectTest extends BaseTest
     * Object-Type definition have an attribute value of Updatability when checked-out.
     * @throws Exception
     */
-
+   @Test
    public void testUpdateProperties_VersioningException() throws Exception
    {
       String testname = "testUpdateProperties_VersioningException";
@@ -5295,6 +5363,7 @@ public class ObjectTest extends BaseTest
     * Moves the specified file-able object from one folder to another. 
     * @throws Exception
     */
+   @Test
    public void testMoveObject_Simple() throws Exception
    {
       String testname = "testMoveObject_Simple";
@@ -5349,6 +5418,7 @@ public class ObjectTest extends BaseTest
     * sourceFolderId doesn’t match the specified object’s parent folder.
     * @throws Exception
     */
+   @Test
    public void testMoveObject_InvalidArgumentException() throws Exception
    {
       String testname = "testMoveObject_InvalidArgumentException";
@@ -5405,6 +5475,7 @@ public class ObjectTest extends BaseTest
     * in the list of AllowedChildObjectTypeIds of the parent-folder specified by targetFolderId. 
     * @throws Exception
     */
+   @Test
    public void testMoveObject_ConstraintException() throws Exception
    {
       String testname = "testMoveObject_ConstraintException";
@@ -5502,6 +5573,7 @@ public class ObjectTest extends BaseTest
     * sourceFolderId doesn’t match the specified object’s parent folder.
     * @throws Exception
     */
+   @Test
    public void testMoveObject_NameConstraintException() throws Exception
    {
       String testname = "testMoveObject_NameConstraintException";
@@ -5563,6 +5635,7 @@ public class ObjectTest extends BaseTest
     * Deletes the specified object.   
     * @throws Exception
     */
+   @Test
    public void testDeleteObject_Simple() throws Exception
    {
       String testname = "testDeleteObject_Simple";
@@ -5612,6 +5685,7 @@ public class ObjectTest extends BaseTest
     * The Repository MUST throw this exception if the method is invoked on a Folder object that contains one or more objects. 
     * @throws Exception
     */
+   @Test
    public void testDeleteObject_ConstraintException() throws Exception
    {
       String testname = "testDeleteObject_ConstraintException";
@@ -5660,6 +5734,7 @@ public class ObjectTest extends BaseTest
     *  Deletes the specified folder object and all of its child- and descendant-objects.
     * @throws Exception
     */
+   @Test
    public void testDeleteTree_Simple() throws Exception
    {
       String testname = "testDeleteTree_Simple";
@@ -5717,6 +5792,7 @@ public class ObjectTest extends BaseTest
     *  Deletes the specified folder object and all of its child- and descendant-objects.
     * @throws Exception
     */
+   @Test
    public void testDeleteTree_Unfile() throws Exception
    {
       String testname = "testDeleteTree_Unfile";
@@ -5768,6 +5844,8 @@ public class ObjectTest extends BaseTest
             }
             if (found1 && found2)
                pass(testname);
+            else
+               doFail(testname, "Not all objects was unfiled;");
          }
          catch (Exception e)
          {
@@ -5789,6 +5867,7 @@ public class ObjectTest extends BaseTest
     * Sets the content stream for the specified Document object.
     * @throws Exception
     */
+   @Test
    public void testSetContentStream_Simple() throws Exception
    {
       String testname = "testSetContentStream_Simple";
@@ -5840,6 +5919,7 @@ public class ObjectTest extends BaseTest
     * The Repository MUST throw this exception if the input parameter overwriteFlag is FALSE and the Object already has a content-stream. 
     * @throws Exception
     */
+   @Test
    public void testSetContentStream_ContentAlreadyExistsException() throws Exception
    {
       String testname = "testSetContentStream_ContentAlreadyExistsException";
@@ -5893,6 +5973,7 @@ public class ObjectTest extends BaseTest
     * definition specified by the cmis:objectTypeId property value of the given document is set to “notallowed”. 
     * @throws Exception
     */
+   @Test
    public void testSetContentStream_StreamNotSupportedException() throws Exception
    {
       String testname = "testSetContentStream_StreamNotSupportedException";
@@ -5975,6 +6056,7 @@ public class ObjectTest extends BaseTest
     * Deletes the content stream for the specified Document object.
     * @throws Exception
     */
+   @Test
    public void testDeleteContentStream_Simple() throws Exception
    {
       String testname = "testDeleteContentStream_Simple";
@@ -6025,6 +6107,7 @@ public class ObjectTest extends BaseTest
     * attribute is set to “required”. 
     * @throws Exception
     */
+   @Test
    public void testDeleteContentStream_ConstraintException() throws Exception
    {
       String testname = "testDeleteContentStream_ConstraintException";
@@ -6111,7 +6194,8 @@ public class ObjectTest extends BaseTest
       super.doFail("ObjectTest." + method,  message);
    }
 
-   protected void tearDown()
+   
+   public void tearDown()
    {
 
    }

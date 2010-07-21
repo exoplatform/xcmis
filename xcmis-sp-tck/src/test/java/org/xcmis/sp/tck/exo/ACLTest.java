@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.junit.Test;
 
 import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CmisConstants;
@@ -58,6 +59,7 @@ public class ACLTest extends BaseTest
     * Get the ACL currently applied to the specified document or folder object.
     * @throws Exception
     */
+   @Test
    public void testGetACL_Simple() throws Exception
    {
       String testname = "testGetACL_Simple";
@@ -126,6 +128,7 @@ public class ACLTest extends BaseTest
     * Adds or removes the given ACEs to or from the ACL of document or folder object.
     * @throws Exception
     */
+   @Test
    public void testApplyACL_Simple() throws Exception
    {
       String testname = "testApplyACL_Simple";
@@ -193,6 +196,7 @@ public class ACLTest extends BaseTest
     * Adds or removes the given ACEs to or from the ACL of document or folder object.
     * @throws Exception
     */
+   @Test
    public void testApplyACL_RemoveACE() throws Exception
    {
       String testname = "testApplyACL_RemoveACE";
@@ -282,6 +286,7 @@ public class ACLTest extends BaseTest
     * The specified object’s Object-Type definition’s attribute for controllableACL is FALSE.
     * @throws Exception
     */
+   @Test
    public void testApplyACL_ConstraintException() throws Exception
    {
       String testname = "testApplyACL_ConstraintException";
@@ -342,6 +347,7 @@ public class ACLTest extends BaseTest
     * The value for ACLPropagation does not match the values as returned via getACLCapabilities.
     * @throws Exception
     */
+   @Test
    public void testApplyACL_ConstraintException2() throws Exception
    {
       String testname = "testApplyACL_ConstraintException2";
@@ -374,6 +380,7 @@ public class ACLTest extends BaseTest
                getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.PROPAGATE);
             else if (capability.getPropagation().equals(AccessControlPropagation.PROPAGATE))
                getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.OBJECTONLY);
+          doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ec)
          {
@@ -408,6 +415,7 @@ public class ACLTest extends BaseTest
     * returned by getACLCapability and is not a CMIS Basic permission
     * @throws Exception
     */
+   @Test
    public void testApplyACL_ConstraintException3() throws Exception
    {
       String testname = "testApplyACL_ConstraintException3";

@@ -20,6 +20,13 @@
 package org.xcmis.sp.tck.exo;
 
 import junit.framework.TestCase;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.After;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import static org.junit.Assert.*;
 
 import org.exoplatform.container.StandaloneContainer;
 import org.exoplatform.services.log.ExoLogger;
@@ -64,7 +71,9 @@ import java.util.Map;
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey Zavizionov</a>
  * @version $Id:  $
  */
-public abstract class BaseTest extends TestCase
+
+
+public  class BaseTest 
 {
 
    protected StandaloneContainer container;
@@ -83,17 +92,17 @@ public abstract class BaseTest extends TestCase
 
    protected FolderData rootFolder;
 
-   protected List<String> passedTests = new ArrayList<String>();
-
-   protected List<String> failedTests = new ArrayList<String>();
-
-   protected List<String> skippedTests = new ArrayList<String>();
+//   protected List<String> passedTests = new ArrayList<String>();
+//
+//   protected List<String> failedTests = new ArrayList<String>();
+//
+//   protected List<String> skippedTests = new ArrayList<String>();
 
    private Connection conn;
 
    private static final String TCK_CONF_DEFAULT = "/conf/sp_inmem_exo/test-inmem-sp-configuration.xml";
 
-   @Override
+   @Before
    public void setUp() throws Exception
    {
 
@@ -119,13 +128,16 @@ public abstract class BaseTest extends TestCase
       folderTypeDefinition = getStorage().getTypeDefinition(CmisConstants.FOLDER, true);
       policyTypeDefinition = getStorage().getTypeDefinition(CmisConstants.POLICY, true);
       relationshipTypeDefinition = getStorage().getTypeDefinition(CmisConstants.RELATIONSHIP, true);
+      
+      
    }
 
-   protected void tearDown() throws Exception
+   @After
+   public void tearDown() throws Exception
    {
       if (conn != null)
          conn.close();
-      super.tearDown();
+      //super.tearDown();
    }
 
    protected Connection getConnection()
@@ -313,7 +325,7 @@ public abstract class BaseTest extends TestCase
    protected void doFail(String mtd, String message) throws Exception
    {
       System.out.println("FAILED");
-      failedTests.add(mtd);
+      AllTests.failedTests.add(mtd);
       if (message != null)
          fail(message);
       else
@@ -323,13 +335,13 @@ public abstract class BaseTest extends TestCase
    protected void pass(String o) throws Exception
    {
       System.out.println("PASSED");
-      passedTests.add(o);
+      AllTests.passedTests.add(o);
    }
 
    protected void skip(String o)
    {
       System.out.println("SKIPPED");
-      skippedTests.add(o);
+      AllTests.skippedTests.add(o);
    }
 
    protected void removeRelationships(String testroot)
@@ -362,4 +374,6 @@ public abstract class BaseTest extends TestCase
          e.printStackTrace();
       }
    }
+   
+   
 }

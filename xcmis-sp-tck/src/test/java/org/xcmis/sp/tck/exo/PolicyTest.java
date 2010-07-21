@@ -19,6 +19,7 @@
 package org.xcmis.sp.tck.exo;
 
 import java.util.HashMap;
+import org.junit.Test;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,7 @@ public class PolicyTest extends BaseTest
     * Applies a specified policy to an object.
     * @throws Exception
     */
+   @Test
    public void testApplyPolicy_Simple() throws Exception
    {
       String testname = "testApplyPolicy_Simple";
@@ -127,7 +129,7 @@ public class PolicyTest extends BaseTest
     * definition’s attribute for controllablePolicy is FALSE.
     * @throws Exception
     */
-
+   @Test
    public void testApplyPolicy_ConstraintException() throws Exception
    {
       String testname = "testApplyPolicy_ConstraintException";
@@ -213,6 +215,7 @@ public class PolicyTest extends BaseTest
     * Removes a specified policy from an object.
     * @throws Exception
     */
+   @Test
    public void testRemovePolicy_Simple() throws Exception
    {
       String testname = "testRemovePolicy_Simple";
@@ -276,6 +279,7 @@ public class PolicyTest extends BaseTest
     *  definition’s attribute for controllablePolicy is FALSE.
     * @throws Exception
     */
+   @Test
    public void testRemovePolicy_ConstraintException() throws Exception
    {
       String testname = "testRemovePolicy_ConstraintException";
@@ -363,6 +367,7 @@ public class PolicyTest extends BaseTest
     * Gets the list of policies currently applied to the specified object.
     * @throws Exception
     */
+   @Test
    public void testGetAppliedPolicies_Simple() throws Exception
    {
       String testname = "testGetAppliedPolicies_Simple";
@@ -430,6 +435,7 @@ public class PolicyTest extends BaseTest
     * if they exist on the object’s type definition.
     * @throws Exception
     */
+   @Test
    public void testGetAppliedPolicies_PropertiesFiltered() throws Exception
    {
       String testname = "testGetAppliedPolicies_PropertiesFiltered";
@@ -497,6 +503,7 @@ public class PolicyTest extends BaseTest
     * •   filterNotValid: The Repository MUST throw this exception if this property filter input parameter is not valid.
     * @throws Exception
     */
+   @Test
    public void testGetAppliedPolicies_FilterNotValidException() throws Exception
    {
       String testname = "testGetAppliedPolicies_FilterNotValidException";

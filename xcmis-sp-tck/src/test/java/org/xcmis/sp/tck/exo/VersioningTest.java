@@ -51,6 +51,7 @@ import org.xcmis.spi.model.impl.IdProperty;
 import org.xcmis.spi.model.impl.StringProperty;
 import org.xcmis.spi.utils.MimeType;
 import static org.junit.Assert.assertArrayEquals;
+import org.junit.Test;
 
 public class VersioningTest extends BaseTest
 {
@@ -59,6 +60,7 @@ public class VersioningTest extends BaseTest
     * Create a private working copy of the document.
     * @throws Exception
     */
+   @Test
    public void testCheckOut_Simple() throws Exception
    {
       String testname = "testCheckOut_Simple";
@@ -105,6 +107,7 @@ public class VersioningTest extends BaseTest
     * •  constraint: The Repository MUST throw this exception if the Document’s Object-Type definition’s versionable attribute is FALSE. 
     * @throws Exception
     */
+   @Test
    public void testCheckOut_ConstraintException() throws Exception
    {
       String testname = "testCheckOut_ConstraintException";
@@ -177,6 +180,7 @@ public class VersioningTest extends BaseTest
     * in the version series to be checked out again.
     * @throws Exception
     */
+   @Test
    public void testCancelCheckOut_Simple() throws Exception
    {
       String testname = "testCancelCheckOut_Simple";
@@ -201,6 +205,7 @@ public class VersioningTest extends BaseTest
             try
             {
                getStorage().getObjectById(pwcID);
+               doFail(testname, "PWC must be deleted after cancel checkout;");
             }
             catch (ObjectNotFoundException ex)
             {
@@ -228,6 +233,7 @@ public class VersioningTest extends BaseTest
     * •  constraint: The Repository MUST throw this exception if the Document’s Object-Type definition’s versionable attribute is FALSE. 
     * @throws Exception
     */
+   @Test
    public void testCancelCheckOut_ConstraintException() throws Exception
    {
       String testname = "testCancelCheckOut_ConstraintException";
@@ -300,6 +306,7 @@ public class VersioningTest extends BaseTest
     * Checks-in the Private Working Copy document.
     * @throws Exception
     */
+   @Test
    public void testCheckIn_Simple() throws Exception
    {
       String testname = "testCheckIn_Simple";
@@ -350,6 +357,7 @@ public class VersioningTest extends BaseTest
     * Checks-in the Private Working Copy document.
     * @throws Exception
     */
+   @Test
    public void testCheckIn_AddACL() throws Exception
    {
       String testname = "testCheckIn_AddACL";
@@ -417,6 +425,7 @@ public class VersioningTest extends BaseTest
     * Checks-in the Private Working Copy document.
     * @throws Exception
     */
+   @Test
    public void testCheckIn_ApplyPolicy() throws Exception
    {
       String testname = "testCheckIn_ApplyPolicy";
@@ -488,6 +497,7 @@ public class VersioningTest extends BaseTest
     * •  constraint: The Repository MUST throw this exception if the Document’s Object-Type definition’s versionable attribute is FALSE. 
     * @throws Exception
     */
+   @Test
    public void testCheckIn_ConstraintException1() throws Exception
    {
       String testname = "testCheckIn_ConstraintException1";
@@ -563,6 +573,7 @@ public class VersioningTest extends BaseTest
     * property value is set to “not allowed” and a contentStream input parameter is provided.
     * @throws Exception
     */
+   @Test
    public void testCheckIn_ConstraintException2() throws Exception
    {
       String testname = "testCheckIn_ConstraintException2";
@@ -639,6 +650,7 @@ public class VersioningTest extends BaseTest
     * Get a the latest Document object in the Version Series.
     * @throws Exception
     */
+   @Test
    public void testGetObjectOfLatestVersion_Simple() throws Exception
    {
       String testname = "testGetObjectOfLatestVersion_Simple";
@@ -690,6 +702,7 @@ public class VersioningTest extends BaseTest
     * Get a the latest Document object in the Version Series.
     * @throws Exception
     */
+   @Test
    public void testGetObjectOfLatestVersion_AllowableActions() throws Exception
    {
       String testname = "testGetObjectOfLatestVersion_AllowableActions";
@@ -742,6 +755,7 @@ public class VersioningTest extends BaseTest
     * Get a the latest Document object in the Version Series.
     * @throws Exception
     */
+   @Test
    public void testGetObjectOfLatestVersion_IncludePolicies() throws Exception
    {
       String testname = "testGetObjectOfLatestVersion_IncludePolicies";
@@ -810,6 +824,7 @@ public class VersioningTest extends BaseTest
     * Get a the latest Document object in the Version Series.
     * @throws Exception
     */
+   @Test
    public void testGetObjectOfLatestVersion_IncludeACL() throws Exception
    {
       String testname = "testGetObjectOfLatestVersion_IncludeACL";
@@ -876,6 +891,7 @@ public class VersioningTest extends BaseTest
     * if they exist on the object’s type definition.
     * @throws Exception
     */
+   @Test
    public void testGetObjectOfLatestVersion_PropertiesFiltered() throws Exception
    {
       String testname = "testGetObjectOfLatestVersion_PropertiesFiltered";
@@ -939,6 +955,7 @@ public class VersioningTest extends BaseTest
     * • filterNotValid: The Repository MUST throw this exception if this property filter input parameter is not valid.
     * @throws Exception
     */
+   @Test
    public void testGetObjectOfLatestVersion_FilterNotValidException() throws Exception
    {
       String testname = "testGetObjectOfLatestVersion_FilterNotValidException";
@@ -991,6 +1008,7 @@ public class VersioningTest extends BaseTest
     * •  objectNotFound:  The Repository MUST throw this exception if the input parameter major is TRUE and the Version Series contains no major versions.
     * @throws Exception
     */
+   @Test
    public void testGetObjectOfLatestVersion_ObjectNotFoundException() throws Exception
    {
       String testname = "testGetObjectOfLatestVersion_ObjectNotFoundException";
@@ -1043,10 +1061,11 @@ public class VersioningTest extends BaseTest
     * Get a subset of the properties for the latest Document Object in the Version Series.  
     * @throws Exception
     */
+   @Test
    public void testGetPropertiesOfLatestVersion_Simple() throws Exception
    {
       String testname = "testGetPropertiesOfLatestVersion_Simple";
-      System.out.print("Running " + testname + "....                            ");
+      System.out.print("Running " + testname + "....                        ");
       FolderData testroot = null;
       try
       {
@@ -1095,6 +1114,7 @@ public class VersioningTest extends BaseTest
     * if they exist on the object’s type definition.
     * @throws Exception
     */
+   @Test
    public void testGetPropertiesOfLatestVersion_PropertiesFiltered() throws Exception
    {
       String testname = "testGetPropertiesOfLatestVersion_PropertiesFiltered";
@@ -1152,6 +1172,7 @@ public class VersioningTest extends BaseTest
     * •  filterNotValid: The Repository MUST throw this exception if this property filter input parameter is not valid.
     * @throws Exception
     */
+   @Test
    public void testGetPropertiesOfLatestVersion_FilterNotValidException() throws Exception
    {
       String testname = "testGetPropertiesOfLatestVersion_FilterNotValidException";
@@ -1201,6 +1222,7 @@ public class VersioningTest extends BaseTest
     * •  objectNotFound:  The Repository MUST throw this exception if the input parameter major is TRUE and the Version Series contains no major versions.
     * @throws Exception
     */
+   @Test
    public void testGetPropertiesOfLatestVersion_ObjectNotFoundException() throws Exception
    {
       String testname = "testGetPropertiesOfLatestVersion_ObjectNotFoundException";
