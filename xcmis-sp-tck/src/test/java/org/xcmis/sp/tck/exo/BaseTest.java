@@ -92,12 +92,6 @@ public  class BaseTest
 
    protected FolderData rootFolder;
 
-//   protected List<String> passedTests = new ArrayList<String>();
-//
-//   protected List<String> failedTests = new ArrayList<String>();
-//
-//   protected List<String> skippedTests = new ArrayList<String>();
-
    private Connection conn;
 
    private static final String TCK_CONF_DEFAULT = "/conf/sp_inmem_exo/test-inmem-sp-configuration.xml";
@@ -137,7 +131,6 @@ public  class BaseTest
    {
       if (conn != null)
          conn.close();
-      //super.tearDown();
    }
 
    protected Connection getConnection()
