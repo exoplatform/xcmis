@@ -71,10 +71,18 @@ public abstract class BaseTest extends TestCase
 
    protected String testFolderId;
 
+   private static final String SP_CONF_DEFAULT = "/conf/standalone/test-sp-inmemory-configuration.xml";
+
    @Override
    public void setUp() throws Exception
    {
-      String containerConf = getClass().getResource("/conf/standalone/test-configuration.xml").toString();
+      String propertySpConf = System.getProperty("sp.conf");
+
+      String sp_conf =
+         propertySpConf == null || propertySpConf.length() == 0 || propertySpConf.equalsIgnoreCase("${sp.conf}")
+            ? SP_CONF_DEFAULT : propertySpConf;
+
+      String containerConf = getClass().getResource(sp_conf).toString();
       StandaloneContainer.addConfigurationURL(containerConf);
       container = StandaloneContainer.getInstance();
 
@@ -308,15 +316,11 @@ public abstract class BaseTest extends TestCase
    {
       try
       {
-         for (Iterator<CmisObject> iter = getChildren(rootFolderId).getItems().iterator(); iter.hasNext();)
-         {
-            CmisObject obj = iter.next();
-            deleteObject(obj);
-         }
+         conn.deleteTree(testFolderId, true, null, true);
       }
-      catch (Exception ex)
+      catch (Exception e)
       {
-         ex.printStackTrace();
+         e.printStackTrace();
       }
    }
 }

@@ -16,13 +16,14 @@
          <properties-param>
             <name>properties</name>
             <description>Log4J properties</description>
-            <property name="log4j.rootLogger" value="INFO, stdout" />
+            <property name="log4j.rootLogger" value="INFO, stdout, file" />
             <property name="log4j.appender.stdout" value="org.apache.log4j.ConsoleAppender" />
-            <property name="log4j.appender.stdout.threshold" value="DEBUG" />
+            <property name="log4j.appender.stdout.threshold" value="INFO, stdout" />
             <property name="log4j.appender.stdout.layout" value="org.apache.log4j.PatternLayout" />
             <property name="log4j.appender.stdout.layout.ConversionPattern" value="%d{dd.MM.yyyy HH:mm:ss} *%-5p* [%t] %c{1}: %m (%F, line %L) %n" />
             <property name="log4j.appender.file" value="org.apache.log4j.FileAppender" />
-            <property name="log4j.appender.file.File" value="target/container.log" />
+            <property name="log4j.appender.file.File" value="target/wssoap.log" />
+            <property name="log4j.appender.stdout.threshold" value="DEBUG" />
             <property name="log4j.appender.file.layout" value="org.apache.log4j.PatternLayout" />
             <property name="log4j.appender.file.layout.ConversionPattern" value="%d{dd.MM.yyyy HH:mm:ss} *%-5p* [%t] %c{1}: %m (%F, line %L) %n" />
          </properties-param>
@@ -35,11 +36,6 @@
 
    <component>
       <type>org.xcmis.spi.PermissionService</type>
-   </component>
-
-   <component>
-      <key>org.exoplatform.services.document.DocumentReaderService</key>
-      <type>org.xcmis.spi.utils.CmisDocumentReaderService</type>
    </component>
 
    <!-- JCR components -->
@@ -55,15 +51,15 @@
          <value-param>
             <name>conf-path</name>
             <description>JCR configuration file</description>
-            <value>jar:/conf/standalone/test-jcr-cmis-config.xml</value>
+            <value>jar:/conf/standalone/test-sp-jcr-repo-config.xml</value>
          </value-param>
       </init-params>
    </component>
 
    <component>
-      <type>org.xcmis.sp.jcr.exo.index.IndexListenerFactory</type>
+      <key>org.exoplatform.services.document.DocumentReaderService</key>
+      <type>org.xcmis.spi.utils.CmisDocumentReaderService</type>
    </component>
-
 
    <!-- Storage Provider -->
    <component>
@@ -111,10 +107,10 @@
       </init-params>
    </component>
 
-
    <component>
       <type>org.exoplatform.services.organization.impl.mock.DummyOrganizationService</type>
    </component>
+   
    <component>
       <key>org.exoplatform.services.security.Authenticator</key>
       <type>org.exoplatform.services.organization.auth.OrganizationAuthenticatorImpl</type>
@@ -178,6 +174,5 @@
          </init-params>
       </component-plugin>
    </external-component-plugins>
-
 
 </configuration>
