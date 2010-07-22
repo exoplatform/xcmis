@@ -64,6 +64,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -234,7 +235,7 @@ abstract class BaseObjectData implements ObjectData
    public Collection<FolderData> getParents()
    {
       Set<String> parentIds = storage.parents.get(getObjectId());
-      List<FolderData> parents = new ArrayList<FolderData>(parentIds.size());
+      Set<FolderData> parents = new HashSet<FolderData>(parentIds.size());
 
       if (parentIds != null)
       {

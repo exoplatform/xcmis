@@ -74,7 +74,7 @@ class RelationshipDataImpl extends BaseObjectData implements RelationshipData
    @Override
    public Collection<FolderData> getParents()
    {
-      return Collections.emptyList();
+      return Collections.emptySet();
    }
 
    /**

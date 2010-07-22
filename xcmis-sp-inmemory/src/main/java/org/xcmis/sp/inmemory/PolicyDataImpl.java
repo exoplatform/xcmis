@@ -73,7 +73,7 @@ class PolicyDataImpl extends BaseObjectData implements PolicyData
    @Override
    public Collection<FolderData> getParents()
    {
-      return Collections.emptyList();
+      return Collections.emptySet();
    }
 
    /**

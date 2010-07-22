@@ -96,6 +96,8 @@ public abstract class BaseTest extends TestCase
 
    protected XPath xp;
 
+   private static final String SP_CONF_DEFAULT = "/conf/standalone/test-sp-inmemory-configuration.xml";
+
    //   protected StorageProvider storageProvider;
 
    protected Connection conn;
@@ -109,7 +111,13 @@ public abstract class BaseTest extends TestCase
    @Override
    public void setUp() throws Exception
    {
-      String containerConf = getClass().getResource("/conf/standalone/test-configuration.xml").toString();
+      String propertySpConf = System.getProperty("sp.conf");
+
+      String sp_conf =
+         propertySpConf == null || propertySpConf.length() == 0 || propertySpConf.equalsIgnoreCase("${sp.conf}")
+            ? SP_CONF_DEFAULT : propertySpConf;
+
+      String containerConf = getClass().getResource(sp_conf).toString();
       StandaloneContainer.addConfigurationURL(containerConf);
       container = StandaloneContainer.getInstance();
       requestHandler = (RequestHandlerImpl)container.getComponentInstanceOfType(RequestHandlerImpl.class);
@@ -155,46 +163,57 @@ public abstract class BaseTest extends TestCase
 
    private void clearRepository()
    {
-//      try
-//      {
-//         // TODO to remove this "if" statement when it was fixed for JCR storage
-//         if (conn.getCheckedOutDocs(rootFolderId, false, null, true, null, null, null, -1, 0) != null)
-//         {
-//            for (Iterator<CmisObject> iter =
-//               conn.getCheckedOutDocs(rootFolderId, false, null, true, null, null, null, -1, 0).getItems().iterator(); iter
-//               .hasNext();)
-//            {
-//               CmisObject cmisObj = iter.next();
-//               conn.deleteObject(cmisObj.getObjectInfo().getId(), null);
-//            }
-//         }
-//      }
-//      catch (Exception e)
-//      {
-//         e.printStackTrace();
-//      }
+      //      try
+      //      {
+      //         // TODO to remove this "if" statement when it was fixed for JCR storage
+      //         if (conn.getCheckedOutDocs(rootFolderId, false, null, true, null, null, null, -1, 0) != null)
+      //         {
+      //            for (Iterator<CmisObject> iter =
+      //               conn.getCheckedOutDocs(rootFolderId, false, null, true, null, null, null, -1, 0).getItems().iterator(); iter
+      //               .hasNext();)
+      //            {
+      //               CmisObject cmisObj = iter.next();
+      //               conn.deleteObject(cmisObj.getObjectInfo().getId(), null);
+      //            }
+      //         }
+      //      }
+      //      catch (Exception e)
+      //      {
+      //         e.printStackTrace();
+      //      }
       /////////////////////////////////////////////////////////////////////////////////
+
       try
       {
-         for (Iterator<CmisObject> iter = getChildren(rootFolderId).getItems().iterator(); iter.hasNext();)
-         {
-            CmisObject obj = iter.next();
-            deleteObject(obj);
-         }
+         conn.deleteTree(testFolderId, true, null, true);
       }
       catch (Exception e)
       {
          e.printStackTrace();
       }
+
+      //      try
+      //      {
+      //         for (Iterator<CmisObject> iter = getChildren(rootFolderId).getItems().iterator(); iter.hasNext();)
+      //         {
+      //            CmisObject obj = iter.next();
+      //            deleteObject(obj);
+      //         }
+      //      }
+      //      catch (Exception e)
+      //      {
+      //         e.printStackTrace();
+      //      }
+
       ///////////////////////////////////////////////////////////////////////////////
-//      try
-//      {
-//         conn.deleteObject(testFolderId, true);
-//      }
-//      catch (Exception e)
-//      {
-//         e.printStackTrace();
-//      }
+      //      try
+      //      {
+      //         conn.deleteObject(testFolderId, true);
+      //      }
+      //      catch (Exception e)
+      //      {
+      //         e.printStackTrace();
+      //      }
    }
 
    private void deleteObject(CmisObject obj)
@@ -523,12 +542,12 @@ public abstract class BaseTest extends TestCase
       {
          try
          {
-            assertTrue("Not found xml element " + el, hasElementValue(el, xmlEntry));
+            assertTrue("Not found xml element '" + el + "'", hasElementValue(el, xmlEntry));
          }
          catch (AssertionFailedError e)
          {
             String elNew = el.substring("atom:".length());
-            assertTrue("Not found xml element " + elNew, hasElementValue(elNew, xmlEntry));
+            assertTrue("Not found xml element '" + elNew + "'", hasElementValue(elNew, xmlEntry));
          }
       }
    }
