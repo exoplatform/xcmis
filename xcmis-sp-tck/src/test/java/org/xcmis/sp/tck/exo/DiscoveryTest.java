@@ -25,6 +25,8 @@ import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsList;
+import org.xcmis.spi.NotSupportedException;
+import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.RenditionFilter;
 import org.xcmis.spi.model.CapabilityQuery;
 import org.xcmis.spi.model.CmisObject;
@@ -157,6 +159,51 @@ public class DiscoveryTest extends BaseTest
       }
    }
 
+   
+   
+   /**
+    * 2.2.6.1 query.
+    * 
+    * Description: Executes a CMIS query statement against the contents of the Repository.
+    */
+   @Test
+   public void testContentChanges() throws Exception
+   {
+      String testname = "testContentChanges";
+      System.out.print("Running " + testname + "....                                             ");
+      if (getStorage().getRepositoryInfo().getCapabilities().getCapabilityQuery().equals(CapabilityQuery.NONE))
+         skip("testQuery2");
+      FolderData parentFolder = null;
+      try
+      {
+         parentFolder = createFolder(rootFolder, "folder1");
+         DocumentData documentData = createDocument(parentFolder, "doc1", "Hello World!");
+         String statement = "SELECT * FROM " + CmisConstants.DOCUMENT + " WHERE CONTAINS(\"Hello\")";
+         ItemsList<CmisObject> query = null;
+
+         query =
+            getConnection().getContentChanges(null, true, PropertyFilter.ALL, true, true, true, -1);
+
+         if (query == null)
+            doFail(testname, "Quary failed;");
+         if (query.getItems() == null)
+            doFail(testname, "Quary failed - no items;");
+         pass(testname);
+      }
+      catch (NotSupportedException nse){
+         skip(testname);
+      }
+      catch (Exception ez)
+      {
+         doFail(testname, ez.getMessage());
+      }
+      finally
+      {
+         clear(parentFolder.getObjectId());
+      }
+   }
+   
+   
    protected void pass(String method) throws Exception
    {
       super.pass("DiscoveryTest." + method);
