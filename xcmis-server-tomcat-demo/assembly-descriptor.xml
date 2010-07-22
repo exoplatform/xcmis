@@ -19,7 +19,7 @@
       <outputDirectory>/</outputDirectory>
 
       <includes>
-        <include>org.xcmis:xcmis-server-demo-war</include>
+        <include>org.xcmis:xcmis-server-tomcat-demo</include>
       </includes>
 
     </dependencySet>
