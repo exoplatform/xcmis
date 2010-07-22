@@ -191,7 +191,7 @@ public class DiscoveryTest extends BaseTest
          pass(testname);
       }
       catch (NotSupportedException nse){
-         skip(testname);
+         skip("DiscoveryTest." +testname);
       }
       catch (Exception ez)
       {

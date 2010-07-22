@@ -125,8 +125,8 @@ public class PolicyTest extends BaseTest
 
    /**
     * 2.2.9.1.2
-    * constraint : The Repository MUST throw this exception if the specified object’s Object-Type 
-    * definition’s attribute for controllablePolicy is FALSE.
+    * constraint : The Repository MUST throw this exception if the specified object's Object-Type 
+    * definition's attribute for controllablePolicy is FALSE.
     * @throws Exception
     */
    @Test
@@ -275,8 +275,8 @@ public class PolicyTest extends BaseTest
 
    /**
     * 2.2.9.2.2
-    * •  constraint: The Repository MUST throw this exception if the specified object’s Object-Type 
-    *  definition’s attribute for controllablePolicy is FALSE.
+    * •  constraint: The Repository MUST throw this exception if the specified object's Object-Type 
+    *  definition's attribute for controllablePolicy is FALSE.
     * @throws Exception
     */
    @Test

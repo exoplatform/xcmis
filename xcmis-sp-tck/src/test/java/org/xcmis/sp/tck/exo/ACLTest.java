@@ -283,7 +283,7 @@ public class ACLTest extends BaseTest
 
    /**
     * 2.2.10.2.3
-    * The specified object’s Object-Type definition’s attribute for controllableACL is FALSE.
+    * The specified object's Object-Type definition's attribute for controllableACL is FALSE.
     * @throws Exception
     */
    @Test
