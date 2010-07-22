@@ -96,7 +96,6 @@
       </init-params>
    </component>
 
-
    <component>
       <type>org.exoplatform.services.jcr.ext.app.ThreadLocalSessionProviderService</type>
    </component>
@@ -137,7 +136,6 @@
       <type>org.exoplatform.services.rest.impl.provider.JAXBContextResolver</type>
    </component>
 
-
    <external-component-plugins>
       <target-component>org.exoplatform.services.rest.impl.provider.JAXBContextResolver</target-component>
       <component-plugin>
@@ -152,7 +150,6 @@
          </init-params>
       </component-plugin>
    </external-component-plugins>
-
 
    <!-- JCR conf -->
    <external-component-plugins>
