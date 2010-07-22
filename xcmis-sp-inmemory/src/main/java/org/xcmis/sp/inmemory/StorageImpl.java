@@ -1209,7 +1209,7 @@ public class StorageImpl implements Storage
       {
          children.get(id).remove(objectId);
       }
-      parents.clear();
+      parentIds.clear();
       unfiled.add(objectId);
       if (indexListener != null)
       {
