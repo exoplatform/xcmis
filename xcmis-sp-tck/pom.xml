@@ -57,7 +57,16 @@
    </build>
 
    <reporting>
-     <excludeDefaults>true</excludeDefaults>
-   </reporting>
+        <excludeDefaults>true</excludeDefaults>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+          <configuration>
+            <siteDirectory>${basedir}/target/classes</siteDirectory>
+          </configuration>
+        </plugin>
+    </plugins>
+  </reporting>
 
 </project>
