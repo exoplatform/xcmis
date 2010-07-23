@@ -1,4 +1,4 @@
-<project name="My Site Title">
+<project name="SP : SPI : TCK">
 <skin>
     <groupId>org.apache.maven.skins</groupId>
     <artifactId>maven-classic-skin</artifactId>
