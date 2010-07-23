@@ -23,7 +23,10 @@ import java.io.FileOutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -54,10 +57,21 @@ public class AllTests
    protected static List<String> failedTests = new ArrayList<String>();
 
    protected static List<String> skippedTests = new ArrayList<String>();
+   
+   protected static Map<String, String> results = new TreeMap<String,String>();
 
    @AfterClass
    public static void doReport()
    {
+      for (Map.Entry<String, String> e : results.entrySet()){
+         if (e.getValue() == null)
+            passedTests.add(e.getKey());
+         else if (e.getValue().equalsIgnoreCase("Not supported by storage;"))
+            skippedTests.add(e.getKey());
+         else
+            failedTests.add(e.getKey());
+      }      
+      
       System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
       System.out.println("          TCK RESULTS : ");
       System.out.println("          Passed tests:  " + passedTests.size());
@@ -108,53 +122,125 @@ public class AllTests
         b2.setTextContent("Test Result");
         font2.appendChild(b2);
         td2.appendChild(font2);
+        
+        Element td3 = dataDoc.createElement("td");
+        Element font3 = dataDoc.createElement("font");
+        font3.setAttribute("color", "#1209b8");
+        Element b3 = dataDoc.createElement("b");
+        b3.setTextContent("Reason");
+        font3.appendChild(b3);
+        td3.appendChild(font3);
+        
         tr1.appendChild(td1);
         tr1.appendChild(td2);
+        tr1.appendChild(td3);
         table.appendChild(tr1);
         
-
-        for (String one : passedTests){
-           Element tr = dataDoc.createElement("tr");
-           Element td = dataDoc.createElement("td");
-           td.setTextContent(one);
-           Element tdd = dataDoc.createElement("td");
-           Element font3 = dataDoc.createElement("font");
-           font3.setAttribute("color", "#09b822");
-           font3.setTextContent("PASSED");
-           tdd.appendChild(font3);
-           tr.appendChild(td);
-           tr.appendChild(tdd);
-           table.appendChild(tr);
-        }
         
-        for (String one : failedTests){
-           Element tr = dataDoc.createElement("tr");
-           Element td = dataDoc.createElement("td");
-           td.setTextContent(one);
-           Element tdd = dataDoc.createElement("td");
-           Element font3 = dataDoc.createElement("font");
-           font3.setAttribute("color", "#c40000");
-           font3.setTextContent("FAILED");
-           tdd.appendChild(font3);
-           tr.appendChild(td);
-           tr.appendChild(tdd);
-           table.appendChild(tr);
-        }
+        
+        for (Map.Entry<String, String> e : results.entrySet()){
+           if (e.getValue() == null)
+           {
+            Element tr = dataDoc.createElement("tr");
+            Element td = dataDoc.createElement("td");
+            td.setTextContent(e.getKey());
+            Element tdd = dataDoc.createElement("td");
+            Element tdd2 = dataDoc.createElement("td");
+            tdd2.setTextContent(" - ");
+            Element font5 = dataDoc.createElement("font");
+            font5.setAttribute("color", "#09b822");
+            font5.setTextContent("PASSED");
+            tdd.appendChild(font5);
+            
+            tr.appendChild(td);
+            tr.appendChild(tdd);
+            tr.appendChild(tdd2);
+            table.appendChild(tr);
+           }
+              
+           else if (e.getValue().equalsIgnoreCase("Not supported by storage;"))
+           {
+              Element tr = dataDoc.createElement("tr");
+              Element td = dataDoc.createElement("td");
+              td.setTextContent(e.getKey());
+              Element tdd = dataDoc.createElement("td");
+              Element tdd2 = dataDoc.createElement("td");
+              tdd2.setTextContent("Not supported by storage;");
+              Element font5 = dataDoc.createElement("font");
+              font5.setAttribute("color", "#837d7d");
+              font5.setTextContent("SKIPPED");
+              tdd.appendChild(font5);
+              
+              tr.appendChild(td);
+              tr.appendChild(tdd);
+              tr.appendChild(tdd2);
+              table.appendChild(tr);
+           }
+              
+           else
+           {
+              Element tr = dataDoc.createElement("tr");
+              Element td = dataDoc.createElement("td");
+              td.setTextContent(e.getKey());
+              Element tdd = dataDoc.createElement("td");
+              Element tdd2 = dataDoc.createElement("td");
+              tdd2.setTextContent(e.getValue());
+              Element font5 = dataDoc.createElement("font");
+              font5.setAttribute("color", "#c40000");
+              font5.setTextContent("FAILED");
+              tdd.appendChild(font5);
+              
+              tr.appendChild(td);
+              tr.appendChild(tdd);
+              tr.appendChild(tdd2);
+              table.appendChild(tr);
+           }
+        }      
 
-
-        for (String one : skippedTests){
-           Element tr = dataDoc.createElement("tr");
-           Element td = dataDoc.createElement("td");
-           td.setTextContent(one);
-           Element tdd = dataDoc.createElement("td");
-           Element font3 = dataDoc.createElement("font");
-           font3.setAttribute("color", "#837d7d");
-           font3.setTextContent("SKIPPED");
-           tdd.appendChild(font3);
-           tr.appendChild(td);
-           tr.appendChild(tdd);
-           table.appendChild(tr);
-        }
+//        for (String one : passedTests){
+//           Element tr = dataDoc.createElement("tr");
+//           Element td = dataDoc.createElement("td");
+//           td.setTextContent(one);
+//           Element tdd = dataDoc.createElement("td");
+//           Element font5 = dataDoc.createElement("font");
+//           font5.setAttribute("color", "#09b822");
+//           font5.setTextContent("PASSED");
+//           tdd.appendChild(font5);
+//           
+//           tr.appendChild(td);
+//           tr.appendChild(tdd);
+//           
+//           table.appendChild(tr);
+//        }
+//        
+//        for (String one : failedTests){
+//           Element tr = dataDoc.createElement("tr");
+//           Element td = dataDoc.createElement("td");
+//           td.setTextContent(one);
+//           Element tdd = dataDoc.createElement("td");
+//           Element font3 = dataDoc.createElement("font");
+//           font3.setAttribute("color", "#c40000");
+//           font3.setTextContent("FAILED");
+//           tdd.appendChild(font3);
+//           tr.appendChild(td);
+//           tr.appendChild(tdd);
+//           table.appendChild(tr);
+//        }
+//
+//
+//        for (String one : skippedTests){
+//           Element tr = dataDoc.createElement("tr");
+//           Element td = dataDoc.createElement("td");
+//           td.setTextContent(one);
+//           Element tdd = dataDoc.createElement("td");
+//           Element font3 = dataDoc.createElement("font");
+//           font3.setAttribute("color", "#837d7d");
+//           font3.setTextContent("SKIPPED");
+//           tdd.appendChild(font3);
+//           tr.appendChild(td);
+//           tr.appendChild(tdd);
+//           table.appendChild(tr);
+//        }
 
         body.appendChild(table);
         root.appendChild(body);

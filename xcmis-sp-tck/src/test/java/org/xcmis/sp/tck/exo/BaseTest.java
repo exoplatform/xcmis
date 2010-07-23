@@ -318,23 +318,28 @@ public  class BaseTest
    protected void doFail(String mtd, String message) throws Exception
    {
       System.out.println("FAILED");
-      AllTests.failedTests.add(mtd);
-      if (message != null)
+      
+      if (message != null) {
+         AllTests.results.put(mtd, message);
          fail(message);
-      else
+      }
+      else{
+         AllTests.results.put(mtd, "Unknown reason;");
          fail();
+      }
    }
 
-   protected void pass(String o) throws Exception
+   protected void pass(String mtd) throws Exception
    {
       System.out.println("PASSED");
-      AllTests.passedTests.add(o);
+      //AllTests.passedTests.add(o);
+      AllTests.results.put(mtd, null);
    }
 
-   protected void skip(String o)
+   protected void skip(String mtd)
    {
       System.out.println("SKIPPED");
-      AllTests.skippedTests.add(o);
+      AllTests.results.put(mtd, "Not supported by storage;");
    }
 
    protected void removeRelationships(String testroot)
