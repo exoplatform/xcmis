@@ -3677,7 +3677,7 @@ public class ObjectTest extends BaseTest
          org.xcmis.spi.model.PropertyDefinition<?> def =
             PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
 
-         fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
+         //fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
          //fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefObjectTypeId);
 
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
@@ -3765,7 +3765,7 @@ public class ObjectTest extends BaseTest
          org.xcmis.spi.model.PropertyDefinition<?> def2 =
             PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
 
-         fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
+         //fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
          //fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefObjectTypeId);
 
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
@@ -3846,7 +3846,7 @@ public class ObjectTest extends BaseTest
          org.xcmis.spi.model.PropertyDefinition<?> def2 =
             PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
 
-         fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
+         //fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
          //fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefObjectTypeId);
 
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
@@ -3932,7 +3932,7 @@ public class ObjectTest extends BaseTest
          org.xcmis.spi.model.PropertyDefinition<?> def2 =
             PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
 
-         fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
+         //fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
          //fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefObjectTypeId);
 
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
@@ -5518,9 +5518,9 @@ public class ObjectTest extends BaseTest
                .getDisplayName(), "cmis:folder"));
 
          Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-         fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
+         //fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
          //fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefType);
-         fPropertyDefinitions.put(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, fPropDefAllowedChild);
+        // fPropertyDefinitions.put(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, fPropDefAllowedChild);
 
          TypeDefinition newType =
             new TypeDefinition("cmis:kino", BaseType.FOLDER, "cmis:kino", "cmis:kino", "", "cmis:folder", "cmis:kino",
