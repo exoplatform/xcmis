@@ -430,13 +430,13 @@ public class NavigationTest extends BaseTest
          ItemsList<CmisObject> result =
             getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, PropertyFilter.ALL,
                RenditionFilter.ANY, "", 2, 0);
-         if (result.getNumItems() == -1 || result.getNumItems() == 4)
+         if (result.getNumItems() == -1 || result.getNumItems() == 6)
          {
             pass(testname);
          }
          else
          {
-            doFail(testname, "NumItems test failed");
+            doFail(testname, "NumItems test failed;");
          }
       }
       catch (Exception e)

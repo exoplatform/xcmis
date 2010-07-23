@@ -178,9 +178,9 @@ public class MultifilingTest extends BaseTest
             org.xcmis.spi.model.PropertyDefinition<?> def2 =
                PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.OBJECT_TYPE_ID);
             org.xcmis.spi.model.PropertyDefinition<?> def3 =
-               
                PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS);
             Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+            
             properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
                .getDisplayName(), "testFolder1"));
             properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(def2.getId(), def2.getQueryName(), def2
@@ -204,7 +204,7 @@ public class MultifilingTest extends BaseTest
              folder2 =
                getStorage().createFolder(rootFolder, folderTypeDefinition, properties2, null, null);
             //////////// CHECK the ALLOWED_CHILD_OBJECT_TYPE_IDS property
-            IdProperty prop = (IdProperty)folder2.getProperties().get("cmis:allowedChildObjectTypeIds");
+            IdProperty prop = (IdProperty)folder2.getProperties().get(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS);
             if (prop == null)
                doFail(testname, "Properties is null;");
             if (prop.getValues() == null)
