@@ -6,9 +6,9 @@
       <artifactId>xcmis-parent</artifactId>
       <version>1.1-SNAPSHOT</version>
    </parent>
-   <artifactId>xcmis-sp-tck</artifactId>
+   <artifactId>xcmis-spi-tck</artifactId>
    <packaging>jar</packaging>
-   <name>xCMIS :: SP :: TCK</name>
+   <name>xCMIS :: SPI :: TCK</name>
    <dependencies>
       <dependency>
          <groupId>org.xcmis</groupId>

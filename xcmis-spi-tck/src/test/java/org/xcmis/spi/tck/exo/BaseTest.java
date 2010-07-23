@@ -17,7 +17,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.xcmis.sp.tck.exo;
+package org.xcmis.spi.tck.exo;
 
 import junit.framework.TestCase;
 import org.junit.AfterClass;
