@@ -62,7 +62,6 @@ public class DiscoveryTest extends BaseTest
       System.out.print("Running " + testname + "....                                                      ");
       if (getStorage().getRepositoryInfo().getCapabilities().getCapabilityQuery().equals(CapabilityQuery.NONE))
          skip("DiscoveryTest.testQuery");
-      String errSms = "\n 2.2.6.1 query. Doesn't work Query (Discovery service) with cmis:document to search content.";
       FolderData parentFolder = null;
       try
       {

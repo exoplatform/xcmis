@@ -22,8 +22,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -40,8 +38,6 @@ import org.w3c.dom.Element;
 
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.dom.DOMSource; 
 import javax.xml.transform.stream.StreamResult; 
 

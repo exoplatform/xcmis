@@ -19,18 +19,11 @@
 
 package org.xcmis.spi.tck;
 
-import junit.framework.TestCase;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.After;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
 import static org.junit.Assert.*;
 
 import org.exoplatform.container.StandaloneContainer;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.Connection;
@@ -38,7 +31,6 @@ import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
-import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectNotFoundException;
@@ -49,6 +41,7 @@ import org.xcmis.spi.RenditionFilter;
 import org.xcmis.spi.Storage;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.StorageProvider;
+import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.Property;
@@ -72,8 +65,7 @@ import java.util.Map;
  * @version $Id$
  */
 
-
-public  class BaseTest 
+public class BaseTest
 {
 
    protected StandaloneContainer container;
@@ -95,6 +87,10 @@ public  class BaseTest
    private Connection conn;
 
    private static final String TCK_CONF_DEFAULT = "/conf/sp_inmem_exo/test-inmem-sp-configuration.xml";
+
+   protected boolean IS_RELATIONSHIPS_SUPPORTED = false;
+
+   protected boolean IS_POLICIES_SUPPORTED = false;
 
    @Before
    public void setUp() throws Exception
@@ -118,12 +114,34 @@ public  class BaseTest
       rootfolderID = getStorage().getRepositoryInfo().getRootFolderId();
       rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
+      try
+      {
+         if (getStorage().getTypeDefinition(CmisConstants.POLICY, false) != null)
+            IS_POLICIES_SUPPORTED = true;
+      }
+      catch (TypeNotFoundException ex)
+      {
+         // Not supp;  
+      }
+
+      try
+      {
+         if (getStorage().getTypeDefinition(CmisConstants.RELATIONSHIP, false) != null)
+            IS_RELATIONSHIPS_SUPPORTED = true;
+      }
+      catch (TypeNotFoundException ex)
+      {
+         //Not supp;
+      }
+
       documentTypeDefinition = getStorage().getTypeDefinition(CmisConstants.DOCUMENT, true);
       folderTypeDefinition = getStorage().getTypeDefinition(CmisConstants.FOLDER, true);
-      policyTypeDefinition = getStorage().getTypeDefinition(CmisConstants.POLICY, true);
-      relationshipTypeDefinition = getStorage().getTypeDefinition(CmisConstants.RELATIONSHIP, true);
-      
-      
+
+      if (IS_POLICIES_SUPPORTED)
+         policyTypeDefinition = getStorage().getTypeDefinition(CmisConstants.POLICY, true);
+      if (IS_RELATIONSHIPS_SUPPORTED)
+         relationshipTypeDefinition = getStorage().getTypeDefinition(CmisConstants.RELATIONSHIP, true);
+
    }
 
    @After
@@ -167,8 +185,6 @@ public  class BaseTest
     */
    protected String createFolderTree() throws Exception
    {
-      ContentStream cs = new BaseContentStream("1234567890".getBytes(), null, new MimeType("text", "plain"));
-
       FolderData testroot = createFolder(rootFolder, "testroot");
 
       FolderData folder1 = createFolder(testroot, "folder1");
@@ -192,6 +208,7 @@ public  class BaseTest
       DocumentData doc6 = createDocument(testroot, "doc6", "1234567890");
       doc6.checkout();
 
+      if (IS_RELATIONSHIPS_SUPPORTED) {
       RelationshipData rel1 =
          getStorage().createRelationship(doc3, doc4, relationshipTypeDefinition,
             getPropsMap(CmisConstants.RELATIONSHIP, "rel1"), null, null);
@@ -201,6 +218,7 @@ public  class BaseTest
       RelationshipData rel3 =
          getStorage().createRelationship(folder2, doc1, relationshipTypeDefinition,
             getPropsMap(CmisConstants.RELATIONSHIP, "rel3"), null, null);
+      }
 
       return testroot.getObjectId();
    }
@@ -243,6 +261,7 @@ public  class BaseTest
    protected PolicyData createPolicy(FolderData where, String name) throws StorageException,
       NameConstraintViolationException, ConstraintException
    {
+      if (IS_POLICIES_SUPPORTED) {
       org.xcmis.spi.model.PropertyDefinition<?> def =
          PropertyDefinitions.getPropertyDefinition(CmisConstants.POLICY, CmisConstants.POLICY_TEXT);
       Map<String, Property<?>> properties2 = getPropsMap(CmisConstants.POLICY, name);
@@ -250,6 +269,9 @@ public  class BaseTest
          def.getLocalName(), def.getDisplayName(), "testPolicyText"));
       PolicyData policy = getStorage().createPolicy(where, policyTypeDefinition, properties2, null, null);
       return policy;
+      } else {
+         return null;
+      }
    }
 
    protected void clearTree(String testroot)
@@ -269,7 +291,8 @@ public  class BaseTest
    {
       try
       {
-         removeRelationships(testroot);
+         if (IS_RELATIONSHIPS_SUPPORTED)
+           removeRelationships(testroot);
          FolderData rootFolder = (FolderData)getStorage().getObjectById(testroot);
          List<String> failed = (List<String>)getStorage().deleteTree(rootFolder, true, UnfileObject.DELETE, true);
       }
@@ -318,12 +341,14 @@ public  class BaseTest
    protected void doFail(String mtd, String message) throws Exception
    {
       System.out.println("FAILED");
-      
-      if (message != null) {
+
+      if (message != null)
+      {
          AllTests.results.put(mtd, message);
          fail(message);
       }
-      else{
+      else
+      {
          AllTests.results.put(mtd, "Unknown reason;");
          fail();
       }
@@ -372,6 +397,5 @@ public  class BaseTest
          e.printStackTrace();
       }
    }
-   
-   
+
 }

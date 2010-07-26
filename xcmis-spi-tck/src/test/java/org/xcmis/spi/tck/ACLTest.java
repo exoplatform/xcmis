@@ -20,7 +20,6 @@ package org.xcmis.spi.tck;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.junit.Test;
@@ -33,8 +32,6 @@ import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.NotSupportedException;
 import org.xcmis.spi.ObjectData;
-import org.xcmis.spi.PolicyData;
-import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.model.ACLCapability;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.AccessControlPropagation;

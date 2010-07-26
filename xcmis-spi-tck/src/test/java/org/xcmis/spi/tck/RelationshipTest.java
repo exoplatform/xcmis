@@ -35,7 +35,6 @@ import org.xcmis.spi.model.AllowableActions;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.ContentStreamAllowed;
-import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.PropertyType;
@@ -60,6 +59,11 @@ public class RelationshipTest extends BaseTest
    {
       String testname = "testGetObjectRelationships_Simple";
       System.out.print("Running " + testname + "....                              ");
+      if (!IS_RELATIONSHIPS_SUPPORTED)
+      {
+         skip("RelationshipTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       RelationshipData reldata = null;
       RelationshipData reldata2 = null;
@@ -132,6 +136,12 @@ public class RelationshipTest extends BaseTest
    {
       String testname = "testGetObjectRelationships_CheckDirection";
       System.out.print("Running " + testname + "....                      ");
+      if (!IS_RELATIONSHIPS_SUPPORTED)
+      {
+         skip("RelationshipTest." + testname);
+         return;
+      }
+
       FolderData testroot = null;
       RelationshipData reldata = null;
       RelationshipData reldata2 = null;
@@ -203,6 +213,11 @@ public class RelationshipTest extends BaseTest
    {
       String testname = "testGetObjectRelationships_AllowableActions";
       System.out.print("Running " + testname + "....                    ");
+      if (!IS_RELATIONSHIPS_SUPPORTED)
+      {
+         skip("RelationshipTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       RelationshipData reldata = null;
       RelationshipData reldata2 = null;
@@ -279,6 +294,11 @@ public class RelationshipTest extends BaseTest
    {
       String testname = "testGetObjectRelationships_TypeId";
       System.out.print("Running " + testname + "....                              ");
+      if (!IS_RELATIONSHIPS_SUPPORTED)
+      {
+         skip("RelationshipTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       String typeID = null;
       RelationshipData reldata = null;
@@ -377,6 +397,11 @@ public class RelationshipTest extends BaseTest
    {
       String testname = "testGetObjectRelationships_IncludeSubrelationshipTypes";
       System.out.print("Running " + testname + "....         ");
+      if (!IS_RELATIONSHIPS_SUPPORTED)
+      {
+         skip("RelationshipTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       String typeID = null;
       RelationshipData reldata = null;
@@ -483,6 +508,11 @@ public class RelationshipTest extends BaseTest
    {
       String testname = "testGetObjectRelationships_MaxItems";
       System.out.print("Running " + testname + "....                            ");
+      if (!IS_RELATIONSHIPS_SUPPORTED)
+      {
+         skip("RelationshipTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       RelationshipData reldata = null;
       RelationshipData reldata2 = null;
@@ -555,6 +585,11 @@ public class RelationshipTest extends BaseTest
    {
       String testname = "testGetObjectRelationships_SkipCount";
       System.out.print("Running " + testname + "....                           ");
+      if (!IS_RELATIONSHIPS_SUPPORTED)
+      {
+         skip("RelationshipTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       RelationshipData reldata = null;
       RelationshipData reldata2 = null;
@@ -627,6 +662,11 @@ public class RelationshipTest extends BaseTest
    {
       String testname = "testGetObjectRelationships_Paging";
       System.out.print("Running " + testname + "....                              ");
+      if (!IS_RELATIONSHIPS_SUPPORTED)
+      {
+         skip("RelationshipTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       RelationshipData reldata = null;
       RelationshipData reldata2 = null;
@@ -707,6 +747,11 @@ public class RelationshipTest extends BaseTest
    {
       String testname = "testGetObjectRelationships_PropertyFiltered";
       System.out.print("Running " + testname + "....                    ");
+      if (!IS_RELATIONSHIPS_SUPPORTED)
+      {
+         skip("RelationshipTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       RelationshipData reldata = null;
       RelationshipData reldata2 = null;
@@ -788,6 +833,11 @@ public class RelationshipTest extends BaseTest
    {
       String testname = "testGetObjectRelationships_FilterNotValidException";
       System.out.print("Running " + testname + "....             ");
+      if (!IS_RELATIONSHIPS_SUPPORTED)
+      {
+         skip("RelationshipTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       RelationshipData reldata = null;
       RelationshipData reldata2 = null;

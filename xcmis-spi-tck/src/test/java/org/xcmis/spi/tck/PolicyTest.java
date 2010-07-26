@@ -31,18 +31,14 @@ import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.FolderData;
-import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.PolicyData;
-import org.xcmis.spi.RelationshipData;
-import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.PropertyType;
-import org.xcmis.spi.model.RelationshipDirection;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.Updatability;
 import org.xcmis.spi.model.VersioningState;
@@ -63,11 +59,7 @@ public class PolicyTest extends BaseTest
    {
       String testname = "testApplyPolicy_Simple";
       System.out.print("Running " + testname + "....                                         ");
-      try
-      {
-         getStorage().getTypeDefinition(CmisConstants.POLICY, false);
-      }
-      catch (TypeNotFoundException ex)
+      if (!IS_POLICIES_SUPPORTED)
       {
          skip("PolicyTest.testApplyPolicy_Simple");
          return;
@@ -134,11 +126,7 @@ public class PolicyTest extends BaseTest
    {
       String testname = "testApplyPolicy_ConstraintException";
       System.out.print("Running " + testname + "....                            ");
-      try
-      {
-         getStorage().getTypeDefinition(CmisConstants.POLICY, false);
-      }
-      catch (TypeNotFoundException ex)
+      if (!IS_POLICIES_SUPPORTED)
       {
          skip("PolicyTest.testApplyPolicy_ConstraintException");
          return;
@@ -220,13 +208,9 @@ public class PolicyTest extends BaseTest
    {
       String testname = "testRemovePolicy_Simple";
       System.out.print("Running " + testname + "....                                        ");
-      try
+      if (!IS_POLICIES_SUPPORTED)
       {
-         getStorage().getTypeDefinition(CmisConstants.POLICY, false);
-      }
-      catch (TypeNotFoundException ex)
-      {
-         skip("PolicyTest.testRemovePolicy_Simple");
+         skip("PolicyTest.testApplyPolicy_ConstraintException");
          return;
       }
       FolderData testroot = null;
@@ -284,13 +268,9 @@ public class PolicyTest extends BaseTest
    {
       String testname = "testRemovePolicy_ConstraintException";
       System.out.print("Running " + testname + "....                           ");
-      try
+      if (!IS_POLICIES_SUPPORTED)
       {
-         getStorage().getTypeDefinition(CmisConstants.POLICY, false);
-      }
-      catch (TypeNotFoundException ex)
-      {
-         skip("PolicyTest.testRemovePolicy_ConstraintException");
+         skip("PolicyTest.testApplyPolicy_ConstraintException");
          return;
       }
       FolderData testroot = null;
@@ -372,13 +352,9 @@ public class PolicyTest extends BaseTest
    {
       String testname = "testGetAppliedPolicies_Simple";
       System.out.print("Running " + testname + "....                                  ");
-      try
+      if (!IS_POLICIES_SUPPORTED)
       {
-         getStorage().getTypeDefinition(CmisConstants.POLICY, false);
-      }
-      catch (TypeNotFoundException ex)
-      {
-         skip("PolicyTest.testRemovePolicy_ConstraintException");
+         skip("PolicyTest.testGetAppliedPolicies_Simple");
          return;
       }
       FolderData testroot = null;
@@ -440,13 +416,9 @@ public class PolicyTest extends BaseTest
    {
       String testname = "testGetAppliedPolicies_PropertiesFiltered";
       System.out.print("Running " + testname + "....                      ");
-      try
+      if (!IS_POLICIES_SUPPORTED)
       {
-         getStorage().getTypeDefinition(CmisConstants.POLICY, false);
-      }
-      catch (TypeNotFoundException ex)
-      {
-         skip("PolicyTest.testRemovePolicy_ConstraintException");
+         skip("PolicyTest.testGetAppliedPolicies_PropertiesFiltered");
          return;
       }
       FolderData testroot = null;
@@ -508,13 +480,9 @@ public class PolicyTest extends BaseTest
    {
       String testname = "testGetAppliedPolicies_FilterNotValidException";
       System.out.print("Running " + testname + "....                 ");
-      try
+      if (!IS_POLICIES_SUPPORTED)
       {
-         getStorage().getTypeDefinition(CmisConstants.POLICY, false);
-      }
-      catch (TypeNotFoundException ex)
-      {
-         skip("PolicyTest.testRemovePolicy_ConstraintException");
+         skip("PolicyTest.testGetAppliedPolicies_FilterNotValidException");
          return;
       }
       FolderData testroot = null;

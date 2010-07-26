@@ -18,7 +18,6 @@
  */
 package org.xcmis.spi.tck;
 
-import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -28,7 +27,6 @@ import java.util.Map;
 
 import static org.junit.Assert.assertArrayEquals;
 import org.junit.Test;
-import org.junit.After;
 import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.ChangeTokenHolder;
 import org.xcmis.spi.CmisConstants;
@@ -50,6 +48,7 @@ import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.AllowableActions;
 import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.CapabilityACL;
 import org.xcmis.spi.model.CapabilityRendition;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.ContentStreamAllowed;
@@ -179,6 +178,11 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreateDocument_ApplyPolicy";
       System.out.print("Running " + testname + "....                                 ");
+      if (!IS_POLICIES_SUPPORTED)
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       PolicyData policy = null;
       String docId = null;
@@ -245,6 +249,8 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreateDocument_AddACL";
       System.out.print("Running " + testname + "....                                    ");
+      if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
+         skip("ObjectTest."  + testname);
       FolderData testroot = null;
       try
       {
@@ -670,8 +676,6 @@ public class ObjectTest extends BaseTest
             PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
                CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
                false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
-         //propertyDefinitions.put(CmisConstants.NAME, propDefName);
-         //propertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, propDefObjectTypeId);
 
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
          properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
@@ -725,6 +729,11 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreateDocument_ConstraintException5";
       System.out.print("Running " + testname + "....                        ");
+      if (!IS_POLICIES_SUPPORTED)
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       String typeID = null;
       PolicyData policy = null;
@@ -807,6 +816,8 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreateDocument_ConstraintException6";
       System.out.print("Running " + testname + "....                        ");
+      if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
+         skip("ObjectTest."  + testname);
       FolderData testroot = null;
       String typeID = null;
       try
@@ -887,6 +898,8 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreateDocument_ConstraintException7";
       System.out.print("Running " + testname + "....                        ");
+      if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
+         skip("ObjectTest."  + testname);
       FolderData testroot = null;
       String typeID = null;
       try
@@ -1071,6 +1084,11 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreateDocumentFromSource_ApplyPolicy";
       System.out.print("Running " + testname + "....                       ");
+      if (!IS_POLICIES_SUPPORTED)
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       PolicyData policy = null;
       try
@@ -1139,6 +1157,8 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreateDocumentFromSource_addACL";
       System.out.print("Running " + testname + "....                            ");
+      if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
+         skip("ObjectTest."  + testname);
       FolderData testroot = null;
       try
       {
@@ -1575,6 +1595,11 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreateDocumentFromSource_ConstraintException5";
       System.out.print("Running " + testname + "...               ");
+      if (!IS_POLICIES_SUPPORTED)
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       String typeID = null;
       PolicyData policy = null;
@@ -1663,6 +1688,8 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreateDocumentFromSource_ConstraintException6";
       System.out.print("Running " + testname + "...               ");
+      if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
+         skip("ObjectTest."  + testname);
       FolderData testroot = null;
       String typeID = null;
       try
@@ -1747,6 +1774,8 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreateDocumentFromSource_ConstraintException7";
       System.out.print("Running " + testname + "....              ");
+      if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
+         skip("ObjectTest."  + testname);
       FolderData testroot = null;
       String typeID = null;
       try
@@ -1877,6 +1906,11 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreateFolder_ApplyPolicy";
       System.out.print("Running " + testname + "....                                   ");
+      if (!IS_POLICIES_SUPPORTED)
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       PolicyData policy = null;
       String docId = null;
@@ -1942,6 +1976,8 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreateFolder_AddACL";
       System.out.print("Running " + testname + "....                                      ");
+      if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
+         skip("ObjectTest."  + testname);
       FolderData testroot = null;
       String docId = null;
       try
@@ -2218,6 +2254,11 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreateFolder_ConstraintException3";
       System.out.print("Running " + testname + "....                          ");
+      if (!IS_POLICIES_SUPPORTED)
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       PolicyData policy = null;
       String typeID = null;
@@ -2302,6 +2343,8 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreateFolder_ConstraintException4";
       System.out.print("Running " + testname + "....                          ");
+      if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
+         skip("ObjectTest."  + testname);
       FolderData testroot = null;
       String typeID = null;
       try
@@ -2383,6 +2426,8 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreateFolder_ConstraintException5";
       System.out.print("Running " + testname + "....                          ");
+      if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
+         skip("ObjectTest."  + testname);
       FolderData testroot = null;
       String typeID = null;
       try
@@ -2464,6 +2509,11 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreateRelationship_Simple";
       System.out.print("Running " + testname + "....                                  ");
+      if (!IS_RELATIONSHIPS_SUPPORTED)
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       ObjectData obj = null;
       try
@@ -2538,6 +2588,12 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreateRelationship_ApplyPolicy";
       System.out.print("Running " + testname + "....                             ");
+      if (!IS_POLICIES_SUPPORTED || !IS_RELATIONSHIPS_SUPPORTED)
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
+
       FolderData testroot = null;
       ObjectData obj = null;
       PolicyData policy = null;
@@ -2655,6 +2711,13 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreateRelationship_AddACL";
       System.out.print("Running " + testname + "....                                  ");
+      if (!IS_RELATIONSHIPS_SUPPORTED)
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
+      if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
+         skip("ObjectTest."  + testname);
       FolderData testroot = null;
       ObjectData obj = null;
       String typeID = null;
@@ -2770,6 +2833,11 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreateRelationship_NameConstraintViolationException";
       System.out.print("Running " + testname + "....        ");
+      if (!IS_RELATIONSHIPS_SUPPORTED)
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       ObjectData obj = null;
       try
@@ -2872,6 +2940,11 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreateRelationship_ConstraintException1";
       System.out.print("Running " + testname + "....                    ");
+      if (!IS_RELATIONSHIPS_SUPPORTED)
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       ObjectData obj = null;
       String typeID = null;
@@ -2977,6 +3050,11 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreateRelationship_ConstraintException2";
       System.out.print("Running " + testname + "....                    ");
+      if (!IS_RELATIONSHIPS_SUPPORTED)
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       ObjectData obj = null;
       String typeID = null;
@@ -3081,6 +3159,12 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreateRelationship_ConstraintException3";
       System.out.print("Running " + testname + "....                    ");
+      if (!IS_POLICIES_SUPPORTED || !IS_RELATIONSHIPS_SUPPORTED)
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
+
       FolderData testroot = null;
       ObjectData obj = null;
       String typeID = null;
@@ -3187,6 +3271,13 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreateRelationship_ConstraintException4";
       System.out.print("Running " + testname + "....                    ");
+      if (!IS_RELATIONSHIPS_SUPPORTED)
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
+      if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
+         skip("ObjectTest."  + testname);
       FolderData testroot = null;
       ObjectData obj = null;
       String typeID = null;
@@ -3295,6 +3386,13 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreateRelationship_ConstraintException5";
       System.out.print("Running " + testname + "....                    ");
+      if (!IS_RELATIONSHIPS_SUPPORTED)
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
+      if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
+         skip("ObjectTest."  + testname);
       FolderData testroot = null;
       ObjectData obj = null;
       String typeID = null;
@@ -3402,6 +3500,11 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreatePolicy_Simple";
       System.out.print("Running " + testname + "....                                        ");
+      if (!IS_POLICIES_SUPPORTED)
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       ObjectData obj = null;
       try
@@ -3457,6 +3560,11 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreatePolicy_AddPolicy";
       System.out.print("Running " + testname + "....                                     ");
+      if (!IS_POLICIES_SUPPORTED)
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       ObjectData obj = null;
       PolicyData policy = null;
@@ -3525,6 +3633,13 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreatePolicy_AddACL";
       System.out.print("Running " + testname + "....                                        ");
+      if (!IS_POLICIES_SUPPORTED)
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
+      if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
+         skip("ObjectTest."  + testname);
       FolderData testroot = null;
       ObjectData obj = null;
       try
@@ -3593,6 +3708,11 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreatePolicy_NameConstraintViolationException";
       System.out.print("Running " + testname + "....              ");
+      if (!IS_POLICIES_SUPPORTED)
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       ObjectData obj = null;
       PolicyData policy = null;
@@ -3655,6 +3775,11 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreatePolicy_ConstraintException1";
       System.out.print("Running " + testname + "....                          ");
+      if (!IS_POLICIES_SUPPORTED)
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       String typeID = null;
       try
@@ -3733,6 +3858,11 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreatePolicy_ConstraintException2";
       System.out.print("Running " + testname + "....                          ");
+      if (!IS_POLICIES_SUPPORTED)
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       String typeID = null;
       try
@@ -3818,6 +3948,11 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreatePolicy_ConstraintException3";
       System.out.print("Running " + testname + "....                          ");
+      if (!IS_POLICIES_SUPPORTED)
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       String typeID = null;
       try
@@ -3901,6 +4036,13 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreatePolicy_ConstraintException4";
       System.out.print("Running " + testname + "....                          ");
+      if (!IS_POLICIES_SUPPORTED)
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
+      if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
+         skip("ObjectTest."  + testname);
       FolderData testroot = null;
       String typeID = null;
       try
@@ -3984,6 +4126,13 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testCreatePolicy_ConstraintException5";
       System.out.print("Running " + testname + "....                          ");
+      if (!IS_POLICIES_SUPPORTED)
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
+      if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
+         skip("ObjectTest."  + testname);
       FolderData testroot = null;
       try
       {
@@ -4236,6 +4385,11 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testGetObject_IncludePolicyIDs";
       System.out.print("Running " + testname + "....                                 ");
+      if (!IS_POLICIES_SUPPORTED)
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       PolicyData policy = null;
       try
@@ -4289,6 +4443,8 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testGetObject_IncludeACLs";
       System.out.print("Running " + testname + "....                                      ");
+      if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
+         skip("ObjectTest."  + testname);
       FolderData testroot = null;
       try
       {
@@ -4692,6 +4848,11 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testGetObjectByPath_IncludePolicyIDs";
       System.out.print("Running " + testname + "....                           ");
+      if (!IS_POLICIES_SUPPORTED)
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       PolicyData policy = null;
       try
@@ -4746,6 +4907,8 @@ public class ObjectTest extends BaseTest
    {
       String testname = "testGetObjectByPath_IncludeACLs";
       System.out.print("Running " + testname + "....                                ");
+      if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
+         skip("ObjectTest."  + testname);
       FolderData testroot = null;
       try
       {

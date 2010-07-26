@@ -35,9 +35,9 @@ import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.RenditionFilter;
-import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.CapabilityACL;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.IncludeRelationships;
@@ -362,6 +362,8 @@ public class VersioningTest extends BaseTest
    {
       String testname = "testCheckIn_AddACL";
       System.out.print("Running " + testname + "....                                             ");
+      if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
+         skip("VersioningTest."  + testname);
       FolderData testroot = null;
       try
       {
@@ -430,6 +432,11 @@ public class VersioningTest extends BaseTest
    {
       String testname = "testCheckIn_ApplyPolicy";
       System.out.print("Running " + testname + "....                                        ");
+      if (!IS_POLICIES_SUPPORTED)
+      {
+         skip("VersioningTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       PolicyData policy = null;
       try
@@ -760,6 +767,11 @@ public class VersioningTest extends BaseTest
    {
       String testname = "testGetObjectOfLatestVersion_IncludePolicies";
       System.out.print("Running " + testname + "....                   ");
+      if (!IS_POLICIES_SUPPORTED)
+      {
+         skip("VersioningTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       PolicyData policy = null;
       try

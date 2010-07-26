@@ -22,7 +22,6 @@ package org.xcmis.spi.tck;
 import java.util.List;
 import java.util.Map;
 
-import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
@@ -65,14 +64,17 @@ public class NavigationTest extends BaseTest
          if (result.getItems().size() != 6)
             doFail(testname, "Unexpected items number;");
          int relCount = 0;
-         for (CmisObject one : result.getItems())
+         if (IS_RELATIONSHIPS_SUPPORTED)
          {
-            if (one.getRelationship().size() > 0)
-               relCount++;
+            for (CmisObject one : result.getItems())
+            {
+               if (one.getRelationship().size() > 0)
+                  relCount++;
+            }
+            if (relCount != 3)
+               doFail(testname, "Unexpected items number;");//two relationships are present
+            pass(testname);
          }
-         if (relCount != 3)
-            doFail(testname, "Unexpected items number;");//two relationships are present
-         pass(testname);
       }
       catch (Exception e)
       {
@@ -90,6 +92,8 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetChildren_NoRelationships";
       System.out.print("Running " + testname + "....                                ");
+      if (!IS_RELATIONSHIPS_SUPPORTED)
+         skip("NavigationTest." + testname);
       this.testroot = createFolderTree();
       try
       {
@@ -236,7 +240,7 @@ public class NavigationTest extends BaseTest
          doFail(testname, e.getMessage());
       }
    }
-   
+
    /**
     * 2.2.3.1.1
     * If TRUE, returns a object info  for each child object.s
@@ -404,7 +408,7 @@ public class NavigationTest extends BaseTest
             getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, PropertyFilter.ALL,
                RenditionFilter.ANY, "", 3, 0);
          if (result.getItems().size() != 3)
-           doFail(testname, "Items number is incorrect;");
+            doFail(testname, "Items number is incorrect;");
          pass(testname);
       }
       catch (Exception e)
@@ -632,6 +636,8 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetDescendants_Relationships";
       System.out.print("Running " + testname + "....                               ");
+      if (!IS_RELATIONSHIPS_SUPPORTED)
+         skip("NavigationTest." + testname);
       this.testroot = createFolderTree();
       try
       {
@@ -665,6 +671,8 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetDescendants_NoRelationships";
       System.out.print("Running " + testname + "....                             ");
+      if (!IS_RELATIONSHIPS_SUPPORTED)
+         skip("NavigationTest." + testname);
       this.testroot = createFolderTree();
       try
       {
@@ -679,7 +687,7 @@ public class NavigationTest extends BaseTest
                relCount++;
          }
          if (relCount != 0)
-           doFail(testname, "Items number is incorrect;");
+            doFail(testname, "Items number is incorrect;");
          pass(testname);
       }
       catch (Exception e)
@@ -1051,6 +1059,8 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetFolderTree_Relationships";
       System.out.print("Running " + testname + "....                                ");
+      if (!IS_RELATIONSHIPS_SUPPORTED)
+         skip("NavigationTest." + testname);
       this.testroot = createFolderTree();
       try
       {
@@ -1086,6 +1096,8 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetFolderTree_NoRelationships";
       System.out.print("Running " + testname + "....                              ");
+      if (!IS_RELATIONSHIPS_SUPPORTED)
+         skip("NavigationTest." + testname);
       this.testroot = createFolderTree();
       try
       {
@@ -1349,11 +1361,11 @@ public class NavigationTest extends BaseTest
       }
    }
 
-    /**
-    * 2.2.3.4
-    * Gets the parent folder object for the specified folder object.  
-    * @throws Exception
-    */
+   /**
+   * 2.2.3.4
+   * Gets the parent folder object for the specified folder object.  
+   * @throws Exception
+   */
    @Test
    public void testGetFolderParent_Simple() throws Exception
    {
@@ -1536,6 +1548,8 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetObjectParents_IncludeRelatioships";
       System.out.print("Running " + testname + "....                       ");
+      if (!IS_RELATIONSHIPS_SUPPORTED)
+         skip("NavigationTest." + testname);
       this.testroot = createFolderTree();
       try
       {
@@ -1566,6 +1580,8 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetObjectParents_NoRelationships";
       System.out.print("Running " + testname + "....                            ");
+      if (!IS_RELATIONSHIPS_SUPPORTED)
+         skip("NavigationTest." + testname);
       this.testroot = createFolderTree();
       try
       {
@@ -1576,7 +1592,7 @@ public class NavigationTest extends BaseTest
          for (ObjectParent one : result)
          {
             if (one.getObject().getRelationship().size() != 0)
-              doFail(testname, "Incorrect items number in result;");
+               doFail(testname, "Incorrect items number in result;");
          }
          pass(testname);
       }
@@ -1989,6 +2005,8 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetCheckedOutDocs_Relationships";
       System.out.print("Running " + testname + "....                            ");
+      if (!IS_RELATIONSHIPS_SUPPORTED)
+         skip("NavigationTest." + testname);
       this.testroot = createFolderTree();
       try
       {
@@ -2022,6 +2040,8 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetCheckedOutDocs_NoRelationships";
       System.out.print("Running " + testname + "....                          ");
+      if (!IS_RELATIONSHIPS_SUPPORTED)
+         skip("NavigationTest." + testname);
       this.testroot = createFolderTree();
       try
       {
@@ -2244,10 +2264,10 @@ public class NavigationTest extends BaseTest
    {
       super.pass("NavigationTest." + method);
    }
-   
-   protected void doFail(String method,  String message) throws Exception
+
+   protected void doFail(String method, String message) throws Exception
    {
-      super.doFail("NavigationTest." + method,  message);
+      super.doFail("NavigationTest." + method, message);
    }
 
    @After
