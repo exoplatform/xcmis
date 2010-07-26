@@ -17,7 +17,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.xcmis.spi.tck.exo;
+package org.xcmis.spi.tck;
 
 import org.junit.Test;
 import org.junit.Before;
@@ -39,7 +39,7 @@ import java.util.List;
  * The Discovery Services (query) are used to search for query-able objects within the Repository.
  * 
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey Zavizionov</a>
- * @version $Id:  $
+ * @version $Id$
  */
 public class DiscoveryTest extends BaseTest
 {

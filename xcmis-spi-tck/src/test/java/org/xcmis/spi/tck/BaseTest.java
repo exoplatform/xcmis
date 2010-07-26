@@ -17,7 +17,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.xcmis.spi.tck.exo;
+package org.xcmis.spi.tck;
 
 import junit.framework.TestCase;
 import org.junit.AfterClass;
@@ -69,7 +69,7 @@ import java.util.Map;
 
 /**
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey Zavizionov</a>
- * @version $Id:  $
+ * @version $Id$
  */
 
 

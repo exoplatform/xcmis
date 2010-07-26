@@ -17,7 +17,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.xcmis.spi.tck.exo;
+package org.xcmis.spi.tck;
 
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRegistry;
@@ -42,7 +42,7 @@ import org.junit.Before;
  * repository and the object-types defined for the repository.
  * 
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey Zavizionov</a>
- * @version $Id:  $
+ * @version $Id$
  */
 public class RepositoryTest extends BaseTest
 {
