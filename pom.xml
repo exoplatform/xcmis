@@ -831,7 +831,7 @@
     <!-- module>xcmis-server-tomcat</module -->
     <!-- module>xcmis-server-tomcat-demo</module -->
     <!-- module>xcmis-client-gwt-restatom-sample</module -->
-    <!-- module>xcmis-sp-tck</module -->
+    <!-- module>xcmis-spi-tck</module -->
   </modules>
   <prerequisites>
     <maven>2.2.0</maven>
