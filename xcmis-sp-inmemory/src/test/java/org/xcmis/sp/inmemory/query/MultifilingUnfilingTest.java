@@ -34,7 +34,7 @@ public class MultifilingUnfilingTest extends BaseQueryTest
    private FolderData testRoot;
 
    /**
-    * @see org.xcmis.sp.jcr.exo.query.BaseQueryTest#setUp()
+    * @see org.exoplatform.ecms.xcmis.sp.jcr.exo.query.BaseQueryTest#setUp()
     */
    @Override
    public void setUp() throws Exception

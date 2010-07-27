@@ -41,7 +41,7 @@ public class AvailableQueryOperatorsTest extends BaseQueryTest
    private CmisSchema cmisSchema;
 
    /**
-    * @see org.xcmis.sp.jcr.exo.query.BaseQueryTest#setUp()
+    * @see org.exoplatform.ecms.xcmis.sp.jcr.exo.query.BaseQueryTest#setUp()
     */
    @Override
    public void setUp() throws Exception
