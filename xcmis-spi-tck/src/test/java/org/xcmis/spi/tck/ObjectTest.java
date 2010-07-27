@@ -937,8 +937,6 @@ public class ObjectTest extends BaseTest
             PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
                CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
                false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
-         //propertyDefinitions.put(CmisConstants.NAME, çropDefName);
-         //propertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, propDefObjectTypeId);
 
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
          properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),

@@ -40,7 +40,6 @@ import org.xcmis.spi.model.RelationshipDirection;
 import org.junit.Test;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Before;
 
 public class NavigationTest extends BaseTest
 {
@@ -59,7 +58,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetChildren_Relationships";
       System.out.print("Running " + testname + "....                                  ");
-      //this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
@@ -101,7 +99,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
@@ -134,7 +131,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetChildren_AllowableActions";
       System.out.print("Running " + testname + "....                               ");
-      // this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
@@ -165,7 +161,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetChildren_NoAllowableActions";
       System.out.print("Running " + testname + "....                             ");
-      // this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
@@ -196,7 +191,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetChildren_PathSegments";
       System.out.print("Running " + testname + "....                                   ");
-      // this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
@@ -227,7 +221,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetChildren_NoPathSegments";
       System.out.print("Running " + testname + "....                                 ");
-      // this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
@@ -258,7 +251,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetChildren_ObjectInfo";
       System.out.print("Running " + testname + "....                                     ");
-      // this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
@@ -284,7 +276,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetChildren_NoObjectInfo";
       System.out.print("Running " + testname + "....                                   ");
-      // this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
@@ -316,7 +307,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetChildren_PropertyFiltered";
       System.out.print("Running " + testname + "....                               ");
-      // this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
@@ -350,7 +340,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetChildren_RenditionFiltered";
       System.out.print("Running " + testname + "....                              ");
-      // this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
@@ -382,7 +371,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetChildren_HasMoreItems";
       System.out.print("Running " + testname + "....                                   ");
-      // this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
@@ -408,7 +396,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetChildren_MaxItems";
       System.out.print("Running " + testname + "....                                       ");
-      // this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
@@ -435,7 +422,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetChildren_NumItems";
       System.out.print("Running " + testname + "....                                       ");
-      // this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
@@ -466,7 +452,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetChildren_SkipCount";
       System.out.print("Running " + testname + "....                                      ");
-      // this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
@@ -492,7 +477,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetChildren_InvalidArgumentException";
       System.out.print("Running " + testname + "....                       ");
-      // this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
@@ -520,7 +504,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetChildren_FilterNotValidException";
       System.out.print("Running " + testname + "....                        ");
-      // this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
@@ -539,11 +522,6 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * getDescendants() test suite;
-    * 
-    */
-
-   /**
     * 2.2.3.2
     * Gets the set of descendant objects contained in the specified folder or any of its child-folders.
     * @throws Exception
@@ -558,7 +536,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
@@ -589,7 +566,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
@@ -626,7 +602,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
@@ -668,7 +643,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
@@ -706,7 +680,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
@@ -744,7 +717,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
@@ -776,7 +748,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
@@ -808,7 +779,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
@@ -846,7 +816,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
@@ -886,7 +855,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
@@ -921,7 +889,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
@@ -953,7 +920,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
@@ -986,7 +952,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
@@ -1019,7 +984,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
@@ -1052,7 +1016,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
@@ -1083,7 +1046,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
@@ -1120,7 +1082,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
@@ -1162,7 +1123,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
@@ -1207,7 +1167,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
@@ -1247,7 +1206,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
@@ -1279,7 +1237,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
@@ -1317,7 +1274,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
@@ -1357,7 +1313,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
@@ -1394,7 +1349,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
@@ -1426,7 +1380,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
@@ -1459,7 +1412,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
@@ -1492,7 +1444,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          List<ItemsTree<CmisObject>> result =
@@ -1520,7 +1471,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetFolderParent_Simple";
       System.out.print("Running " + testname + "....                                     ");
-      // this.testroot = createFolderTree();
       try
       {
          ObjectData fold = getStorage().getObjectByPath("/testroot/folder1");
@@ -1540,7 +1490,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetFolderParent_IncludeObjectInfo";
       System.out.print("Running " + testname + "....                          ");
-      // this.testroot = createFolderTree();
       try
       {
          ObjectData fold = getStorage().getObjectByPath("/testroot/folder1");
@@ -1560,7 +1509,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetFolderParent_NoIncludeObjectInfo";
       System.out.print("Running " + testname + "....                        ");
-      // this.testroot = createFolderTree();
       try
       {
          ObjectData fold = getStorage().getObjectByPath("/testroot/folder1");
@@ -1586,7 +1534,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetFolderParent_PropertyFiltered";
       System.out.print("Running " + testname + "....                           ");
-      // this.testroot = createFolderTree();
       try
       {
          ObjectData fold = getStorage().getObjectByPath("/testroot/folder1");
@@ -1616,7 +1563,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetFolderParent_FilterNotValidException";
       System.out.print("Running " + testname + "....                    ");
-      // this.testroot = createFolderTree();
       try
       {
          ObjectData fold = getStorage().getObjectByPath("/testroot/folder1");
@@ -1643,7 +1589,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetFolderParent_InvalidArgumentException";
       System.out.print("Running " + testname + "....                   ");
-      // this.testroot = createFolderTree();
       try
       {
          ObjectData fold = getStorage().getObjectByPath("/");
@@ -1670,7 +1615,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetObjectParents_Simple";
       System.out.print("Running " + testname + "....                                    ");
-      // this.testroot = createFolderTree();
       try
       {
          ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
@@ -1702,7 +1646,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
@@ -1737,7 +1680,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
@@ -1767,7 +1709,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetObjectParents_AllowableActions";
       System.out.print("Running " + testname + "....                          ");
-      // this.testroot = createFolderTree();
       try
       {
          ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
@@ -1799,7 +1740,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetObjectParents_NoAllowableActions";
       System.out.print("Running " + testname + "....                        ");
-      // this.testroot = createFolderTree();
       try
       {
          ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
@@ -1832,7 +1772,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetObjectParents_IncludePathSegment";
       System.out.print("Running " + testname + "....                        ");
-      // this.testroot = createFolderTree();
       try
       {
          ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
@@ -1865,7 +1804,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetObjectParents_NoPathSegment";
       System.out.print("Running " + testname + "....                             ");
-      // this.testroot = createFolderTree();
       try
       {
          ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
@@ -1895,7 +1833,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetObjectParents_NoRenditions";
       System.out.print("Running " + testname + "...                               ");
-      // this.testroot = createFolderTree();
       try
       {
          ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
@@ -1920,7 +1857,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetObjectParents_ObjectInfo";
       System.out.print("Running " + testname + "....                                ");
-      // this.testroot = createFolderTree();
       try
       {
          ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
@@ -1945,7 +1881,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetObjectParents_NoObjectInfo";
       System.out.print("Running " + testname + "....                            ");
-      // this.testroot = createFolderTree();
       try
       {
          ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
@@ -1976,7 +1911,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetObjectParents_PropertiesFIlter";
       System.out.print("Running " + testname + "....                          ");
-      // this.testroot = createFolderTree();
       try
       {
          ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
@@ -2011,7 +1945,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetObjectParents_FilterNotValidException";
       System.out.print("Running " + testname + "....                   ");
-      // this.testroot = createFolderTree();
       try
       {
          ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
@@ -2041,7 +1974,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetObjectParents_ConstraintException";
       System.out.print("Running " + testname + "....                       ");
-      // this.testroot = createFolderTree();
       try
       {
          ObjectData folder = getStorage().getObjectByPath("/testroot/folder2");
@@ -2076,7 +2008,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetCheckedOutDocs_Simple";
       System.out.print("Running " + testname + "....                                   ");
-      // this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
@@ -2102,7 +2033,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetCheckedOutDocs_AllowableActions";
       System.out.print("Running " + testname + "....                         ");
-      // this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
@@ -2131,7 +2061,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetCheckedOutDocs_NoAllowableActions";
       System.out.print("Running " + testname + "....                       ");
-      // this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
@@ -2165,7 +2094,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
@@ -2203,7 +2131,6 @@ public class NavigationTest extends BaseTest
          skip("NavigationTest." + testname);
          return;
       }
-      // this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
@@ -2231,7 +2158,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetCheckedOutDocs_ObjectInfo";
       System.out.print("Running " + testname + "....                               ");
-      // this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
@@ -2255,7 +2181,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetCheckedOutDocs_NoObjectInfo";
       System.out.print("Running " + testname + "....                             ");
-      // this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
@@ -2284,7 +2209,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetCheckedOutDocs_NoRenditions";
       System.out.print("Running " + testname + "....                             ");
-      // this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
@@ -2314,7 +2238,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetCheckedOutDocs_PropertyFiltered";
       System.out.print("Running " + testname + "....                         ");
-      // this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
@@ -2349,7 +2272,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetCheckedOutDocs_MaxItems";
       System.out.print("Running " + testname + "....                                 ");
-      // this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
@@ -2376,7 +2298,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetCheckedOutDocs_SkipCount";
       System.out.print("Running " + testname + "....                                ");
-      // this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
@@ -2403,7 +2324,6 @@ public class NavigationTest extends BaseTest
    {
       String testname = "testGetCheckedOutDocs_FilterNotValidException";
       System.out.print("Running " + testname + "....                  ");
-      // this.testroot = createFolderTree();
       try
       {
          ItemsList<CmisObject> result =
@@ -2439,6 +2359,5 @@ public class NavigationTest extends BaseTest
 
       if (BaseTest.conn != null)
          BaseTest.conn.close();
-
    }
 }

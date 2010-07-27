@@ -91,11 +91,11 @@ public class RepositoryTest extends BaseTest
       {
          if (repositoryShortInfo.getRepositoryId() == null)
             doFail(testname, "Repository Short Info  is null;");
-         if (repositoryShortInfo.getRepositoryId().isEmpty())
+         if (repositoryShortInfo.getRepositoryId().equals(""))
             doFail(testname, "Repository Short Info  is empty;");
          if (repositoryShortInfo.getRepositoryName() == null)
             doFail(testname, "Repository name  is null;");
-         if (repositoryShortInfo.getRepositoryName().isEmpty())
+         if (repositoryShortInfo.getRepositoryName().equals(""))
             doFail(testname, "Repository name  is empty;");
          if (repositoryShortInfo.getRootFolderId() == null)
             doFail(testname, "Root folder ID  is null");
@@ -119,7 +119,7 @@ public class RepositoryTest extends BaseTest
          doFail(testname, "Repository Info  is null;");
       if (getStorage().getRepositoryInfo().getRepositoryId() == null)
          doFail(testname, "Repository Info ID  is null;");
-      if (getStorage().getRepositoryInfo().getRepositoryId().isEmpty())
+      if (getStorage().getRepositoryInfo().getRepositoryId().equals(""))
          doFail(testname, "Repository Info ID  is empty;");
       if (getStorage().getRepositoryInfo().getRepositoryName() == null)
          doFail(testname, "Repository Info Name  is null;");
@@ -195,7 +195,7 @@ public class RepositoryTest extends BaseTest
             doFail(testname, "TypeDefinition is null;");
          if (typeDefinition.getId() == null)
             doFail(testname, "TypeDefinition  ID is null;");
-         if (typeDefinition.getId().isEmpty())
+         if (typeDefinition.getId().equals(""))
             doFail(testname, "TypeDefinition  ID is empty;");
          if (typeDefinition.getBaseId() == null)
             doFail(testname, "TypeDefinition  BaseId is empty;");
@@ -406,7 +406,7 @@ public class RepositoryTest extends BaseTest
             doFail(testname, "Items tree container is null;");
          if (itemsTree.getContainer().getId() == null)
             doFail(testname, "Items tree container ID is null;");
-         if (itemsTree.getContainer().getId().isEmpty())
+         if (itemsTree.getContainer().getId().equals(""))
             doFail(testname, "Items tree container ID is empty;");
          if (itemsTree.getContainer().getDisplayName() == null)
             doFail(testname, "Items tree container DisplayName is empty;");
@@ -580,7 +580,7 @@ public class RepositoryTest extends BaseTest
          doFail(testname, "Folder type definition is null;");
       if (folderTypeDefinition.getId() == null)
          doFail(testname, "Folder type definition ID is null;");
-      if (folderTypeDefinition.getId().isEmpty())
+      if (folderTypeDefinition.getId().equals(""))
          doFail(testname, "Folder type definition ID is empty;");
       if (folderTypeDefinition.getLocalName() == null)
          doFail(testname, "Folder type definition local name is empty;");
@@ -604,7 +604,7 @@ public class RepositoryTest extends BaseTest
          doFail(testname, "Document type definition is null;");
       if (documentTypeDefinition.getId() == null)
          doFail(testname, "Document type definition ID is null;");
-      if (documentTypeDefinition.getId().isEmpty())
+      if (documentTypeDefinition.getId().equals(""))
          doFail(testname, "Document type definition ID is empty;");
       if (documentTypeDefinition.getLocalName() == null)
          doFail(testname, "Document type definition local name is empty;");
@@ -662,7 +662,7 @@ public class RepositoryTest extends BaseTest
          doFail(testname, "Type definition is null;");
       if (typeDefinition.getId() == null)
          doFail(testname, "Type definition ID is null;");
-      if (typeDefinition.getId().isEmpty())
+      if (typeDefinition.getId().equals(""))
          doFail(testname, "Type definition ID is empty;");
       if (typeDefinition.getLocalName() == null)
          doFail(testname, "Type definition local name is empty;");
@@ -687,7 +687,7 @@ public class RepositoryTest extends BaseTest
             doFail(testname, "Type definition is null;");
          if (propertyDefinition.getId() == null)
             doFail(testname, "Type definition ID is null;");
-         if (propertyDefinition.getId().isEmpty())
+         if (propertyDefinition.getId().equals(""))
             doFail(testname, "Type definition ID is empty;");
          if (propertyDefinition.getLocalName() == null)
             doFail(testname, "Type definition local name is empty;");
