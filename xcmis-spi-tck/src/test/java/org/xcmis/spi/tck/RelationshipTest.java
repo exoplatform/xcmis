@@ -20,6 +20,9 @@ package org.xcmis.spi.tck;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import org.xcmis.spi.BaseContentStream;
@@ -48,6 +51,12 @@ import org.xcmis.spi.utils.MimeType;
 
 public class RelationshipTest extends BaseTest
 {
+
+   @BeforeClass
+   public static void start() throws Exception
+   {
+      BaseTest.setUp();
+   }
 
    /**
     * 2.2.8.1
@@ -876,7 +885,7 @@ public class RelationshipTest extends BaseTest
             ItemsList<CmisObject> obj =
                getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true,
                   true, true, "(,*", -1, 0);
-            doFail(testname,  "FilterNotValidException must be thrown;");
+            doFail(testname, "FilterNotValidException must be thrown;");
          }
          catch (FilterNotValidException ex)
          {
@@ -900,13 +909,20 @@ public class RelationshipTest extends BaseTest
       }
    }
 
+   @AfterClass
+   public static void stop() throws Exception
+   {
+      if (BaseTest.conn != null)
+         BaseTest.conn.close();
+   }
+
    protected void pass(String method) throws Exception
    {
       super.pass("RelationshipTest." + method);
    }
-   
-   protected void doFail( String method,  String message) throws Exception
+
+   protected void doFail(String method, String message) throws Exception
    {
-      super.doFail( "RelationshipTest." + method,  message);
+      super.doFail("RelationshipTest." + method, message);
    }
 }

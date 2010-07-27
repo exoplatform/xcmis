@@ -26,6 +26,9 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertArrayEquals;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.ChangeTokenHolder;
@@ -67,6 +70,12 @@ import org.xcmis.spi.utils.MimeType;
 
 public class ObjectTest extends BaseTest
 {
+
+   @BeforeClass
+   public static void start() throws Exception
+   {
+      BaseTest.setUp();
+   }
 
    /**
     * 2.2.4.1.1
@@ -250,7 +259,10 @@ public class ObjectTest extends BaseTest
       String testname = "testCreateDocument_AddACL";
       System.out.print("Running " + testname + "....                                    ");
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-         skip("ObjectTest."  + testname);
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       try
       {
@@ -817,7 +829,10 @@ public class ObjectTest extends BaseTest
       String testname = "testCreateDocument_ConstraintException6";
       System.out.print("Running " + testname + "....                        ");
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-         skip("ObjectTest."  + testname);
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       String typeID = null;
       try
@@ -899,7 +914,10 @@ public class ObjectTest extends BaseTest
       String testname = "testCreateDocument_ConstraintException7";
       System.out.print("Running " + testname + "....                        ");
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-         skip("ObjectTest."  + testname);
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       String typeID = null;
       try
@@ -1158,7 +1176,10 @@ public class ObjectTest extends BaseTest
       String testname = "testCreateDocumentFromSource_addACL";
       System.out.print("Running " + testname + "....                            ");
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-         skip("ObjectTest."  + testname);
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       try
       {
@@ -1357,11 +1378,6 @@ public class ObjectTest extends BaseTest
                CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, null,
                CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, false, false, false, false, false, Updatability.READONLY,
                "fold_type_chld_ids", null, null, null);
-
-         //folderPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
-         //folderPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefObjectTypeId);
-         // folderPropertyDefinitions.put(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, fPropDefAllowedChild);
-
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
 
          properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
@@ -1689,7 +1705,10 @@ public class ObjectTest extends BaseTest
       String testname = "testCreateDocumentFromSource_ConstraintException6";
       System.out.print("Running " + testname + "...               ");
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-         skip("ObjectTest."  + testname);
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       String typeID = null;
       try
@@ -1775,7 +1794,10 @@ public class ObjectTest extends BaseTest
       String testname = "testCreateDocumentFromSource_ConstraintException7";
       System.out.print("Running " + testname + "....              ");
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-         skip("ObjectTest."  + testname);
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       String typeID = null;
       try
@@ -1977,7 +1999,10 @@ public class ObjectTest extends BaseTest
       String testname = "testCreateFolder_AddACL";
       System.out.print("Running " + testname + "....                                      ");
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-         skip("ObjectTest."  + testname);
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       String docId = null;
       try
@@ -2344,7 +2369,10 @@ public class ObjectTest extends BaseTest
       String testname = "testCreateFolder_ConstraintException4";
       System.out.print("Running " + testname + "....                          ");
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-         skip("ObjectTest."  + testname);
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       String typeID = null;
       try
@@ -2427,7 +2455,10 @@ public class ObjectTest extends BaseTest
       String testname = "testCreateFolder_ConstraintException5";
       System.out.print("Running " + testname + "....                          ");
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-         skip("ObjectTest."  + testname);
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       String typeID = null;
       try
@@ -2717,7 +2748,10 @@ public class ObjectTest extends BaseTest
          return;
       }
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-         skip("ObjectTest."  + testname);
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       ObjectData obj = null;
       String typeID = null;
@@ -3277,7 +3311,10 @@ public class ObjectTest extends BaseTest
          return;
       }
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-         skip("ObjectTest."  + testname);
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       ObjectData obj = null;
       String typeID = null;
@@ -3392,7 +3429,10 @@ public class ObjectTest extends BaseTest
          return;
       }
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-         skip("ObjectTest."  + testname);
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       ObjectData obj = null;
       String typeID = null;
@@ -3639,7 +3679,10 @@ public class ObjectTest extends BaseTest
          return;
       }
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-         skip("ObjectTest."  + testname);
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       ObjectData obj = null;
       try
@@ -4042,7 +4085,10 @@ public class ObjectTest extends BaseTest
          return;
       }
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-         skip("ObjectTest."  + testname);
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       String typeID = null;
       try
@@ -4132,7 +4178,10 @@ public class ObjectTest extends BaseTest
          return;
       }
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-         skip("ObjectTest."  + testname);
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       try
       {
@@ -4444,7 +4493,10 @@ public class ObjectTest extends BaseTest
       String testname = "testGetObject_IncludeACLs";
       System.out.print("Running " + testname + "....                                      ");
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-         skip("ObjectTest."  + testname);
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       try
       {
@@ -4908,7 +4960,10 @@ public class ObjectTest extends BaseTest
       String testname = "testGetObjectByPath_IncludeACLs";
       System.out.print("Running " + testname + "....                                ");
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-         skip("ObjectTest."  + testname);
+      {
+         skip("ObjectTest." + testname);
+         return;
+      }
       FolderData testroot = null;
       try
       {
@@ -5582,9 +5637,6 @@ public class ObjectTest extends BaseTest
                .getDisplayName(), "cmis:folder"));
 
          Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-         //fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
-         //fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefType);
-         // fPropertyDefinitions.put(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, fPropDefAllowedChild);
 
          TypeDefinition newType =
             new TypeDefinition("cmis:kino", BaseType.FOLDER, "cmis:kino", "cmis:kino", "", "cmis:folder", "cmis:kino",
@@ -6250,6 +6302,13 @@ public class ObjectTest extends BaseTest
       }
    }
 
+   @AfterClass
+   public static void stop() throws Exception
+   {
+      if (BaseTest.conn != null)
+         BaseTest.conn.close();
+   }
+
    protected void pass(String method) throws Exception
    {
       super.pass("ObjectTest." + method);
@@ -6258,10 +6317,5 @@ public class ObjectTest extends BaseTest
    protected void doFail(String method, String message) throws Exception
    {
       super.doFail("ObjectTest." + method, message);
-   }
-
-   public void tearDown()
-   {
-
    }
 }

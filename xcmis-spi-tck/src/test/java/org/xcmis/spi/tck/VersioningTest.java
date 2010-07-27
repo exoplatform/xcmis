@@ -51,10 +51,20 @@ import org.xcmis.spi.model.impl.IdProperty;
 import org.xcmis.spi.model.impl.StringProperty;
 import org.xcmis.spi.utils.MimeType;
 import static org.junit.Assert.assertArrayEquals;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class VersioningTest extends BaseTest
 {
+
+   @BeforeClass
+   public static void start() throws Exception
+   {
+      BaseTest.setUp();
+   }
+
    /**
     * 2.2.7.1
     * Create a private working copy of the document.
@@ -363,7 +373,7 @@ public class VersioningTest extends BaseTest
       String testname = "testCheckIn_AddACL";
       System.out.print("Running " + testname + "....                                             ");
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-         skip("VersioningTest."  + testname);
+         skip("VersioningTest." + testname);
       FolderData testroot = null;
       try
       {
@@ -1281,13 +1291,20 @@ public class VersioningTest extends BaseTest
       }
    }
 
+   @AfterClass
+   public static void stop() throws Exception
+   {
+      if (BaseTest.conn != null)
+         BaseTest.conn.close();
+   }
+
    protected void pass(String method) throws Exception
    {
       super.pass("VesioningTest." + method);
    }
-   
-   protected void doFail(String method,  String message) throws Exception
+
+   protected void doFail(String method, String message) throws Exception
    {
-      super.doFail("VesioningTest." + method,  message);
+      super.doFail("VesioningTest." + method, message);
    }
 }

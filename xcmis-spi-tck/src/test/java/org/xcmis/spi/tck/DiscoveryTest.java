@@ -19,6 +19,8 @@
 
 package org.xcmis.spi.tck;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Before;
 import org.xcmis.spi.CmisConstants;
@@ -44,10 +46,10 @@ import java.util.List;
 public class DiscoveryTest extends BaseTest
 {
 
-   @Before
-   public void setUp() throws Exception
+   @BeforeClass
+   public static void start() throws Exception
    {
-      super.setUp();
+      BaseTest.setUp();
    }
 
    /**
@@ -61,7 +63,10 @@ public class DiscoveryTest extends BaseTest
       String testname = "testQuery";
       System.out.print("Running " + testname + "....                                                      ");
       if (getStorage().getRepositoryInfo().getCapabilities().getCapabilityQuery().equals(CapabilityQuery.NONE))
+      {
          skip("DiscoveryTest.testQuery");
+         return;
+      }
       FolderData parentFolder = null;
       try
       {
@@ -113,7 +118,10 @@ public class DiscoveryTest extends BaseTest
       String testname = "testQuery2";
       System.out.print("Running " + testname + "....                                                     ");
       if (getStorage().getRepositoryInfo().getCapabilities().getCapabilityQuery().equals(CapabilityQuery.NONE))
+      {
          skip("testQuery2");
+         return;
+      }
       FolderData parentFolder = null;
       try
       {
@@ -158,8 +166,6 @@ public class DiscoveryTest extends BaseTest
       }
    }
 
-   
-   
    /**
     * 2.2.6.1 query.
     * 
@@ -180,8 +186,7 @@ public class DiscoveryTest extends BaseTest
          String statement = "SELECT * FROM " + CmisConstants.DOCUMENT + " WHERE CONTAINS(\"Hello\")";
          ItemsList<CmisObject> query = null;
 
-         query =
-            getConnection().getContentChanges(null, true, PropertyFilter.ALL, true, true, true, -1);
+         query = getConnection().getContentChanges(null, true, PropertyFilter.ALL, true, true, true, -1);
 
          if (query == null)
             doFail(testname, "Quary failed;");
@@ -189,8 +194,9 @@ public class DiscoveryTest extends BaseTest
             doFail(testname, "Quary failed - no items;");
          pass(testname);
       }
-      catch (NotSupportedException nse){
-         skip("DiscoveryTest." +testname);
+      catch (NotSupportedException nse)
+      {
+         skip("DiscoveryTest." + testname);
       }
       catch (Exception ez)
       {
@@ -201,16 +207,22 @@ public class DiscoveryTest extends BaseTest
          clear(parentFolder.getObjectId());
       }
    }
-   
-   
+
+   @AfterClass
+   public static void stop() throws Exception
+   {
+      if (BaseTest.conn != null)
+         BaseTest.conn.close();
+   }
+
    protected void pass(String method) throws Exception
    {
       super.pass("DiscoveryTest." + method);
    }
-   
-   protected void doFail(String method,  String message) throws Exception
+
+   protected void doFail(String method, String message) throws Exception
    {
-      super.doFail("DiscoveryTest." + method,  message);
+      super.doFail("DiscoveryTest." + method, message);
    }
 
 }

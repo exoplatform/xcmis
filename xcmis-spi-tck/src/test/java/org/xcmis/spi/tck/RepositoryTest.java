@@ -32,6 +32,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Before;
 
@@ -47,10 +50,10 @@ import org.junit.Before;
 public class RepositoryTest extends BaseTest
 {
 
-   @Before
-   public void setUp() throws Exception
+   @BeforeClass
+   public static void start() throws Exception
    {
-      super.setUp();
+      BaseTest.setUp();
    }
 
    @Test
@@ -671,7 +674,6 @@ public class RepositoryTest extends BaseTest
       pass(testname);
    }
 
-
    private void checkPropertyDefinitions(Collection<PropertyDefinition<?>> propertyDefinitions) throws Exception
    {
       String testname = "checkPropertyDefinitions";
@@ -696,13 +698,20 @@ public class RepositoryTest extends BaseTest
       }
    }
 
+   @AfterClass
+   public static void stop() throws Exception
+   {
+      if (BaseTest.conn != null)
+         BaseTest.conn.close();
+   }
+
    protected void pass(String method) throws Exception
    {
       super.pass("RepositoryTest." + method);
    }
-   
-   protected void doFail( String method,  String message) throws Exception
+
+   protected void doFail(String method, String message) throws Exception
    {
-      super.doFail( "RepositoryTest." + method,  message);
+      super.doFail("RepositoryTest." + method, message);
    }
 }

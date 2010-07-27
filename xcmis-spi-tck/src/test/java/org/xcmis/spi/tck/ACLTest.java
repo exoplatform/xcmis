@@ -22,6 +22,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.junit.BeforeClass;
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import org.xcmis.spi.BaseContentStream;
@@ -51,6 +54,12 @@ import org.xcmis.spi.utils.MimeType;
 public class ACLTest extends BaseTest
 {
 
+   @BeforeClass
+   public static void start() throws Exception
+   {
+      BaseTest.setUp();
+   }
+
    /**
     * 2.2.10.1
     * Get the ACL currently applied to the specified document or folder object.
@@ -60,15 +69,15 @@ public class ACLTest extends BaseTest
    public void testGetACL_Simple() throws Exception
    {
       String testname = "testGetACL_Simple";
-      System.out.print("Running "+testname+"....                                              ");
+      System.out.print("Running " + testname + "....                                              ");
       FolderData testroot = null;
       try
       {
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
          testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"), null,
-               null);
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
+               null, null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
          AccessControlEntry acl = new AccessControlEntry();
@@ -78,13 +87,13 @@ public class ACLTest extends BaseTest
          addACL.add(acl);
 
          DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"), cs,
-               addACL, null, VersioningState.MAJOR);
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
+               cs, addACL, null, VersioningState.MAJOR);
          try
          {
             List<AccessControlEntry> res = getConnection().getACL(doc1.getObjectId(), false);
             if (res == null)
-               doFail(testname,"Getting ACL failed;");
+               doFail(testname, "Getting ACL failed;");
             for (AccessControlEntry one : res)
             {
                if (one.getPrincipal().equalsIgnoreCase("Makis"))
@@ -129,15 +138,15 @@ public class ACLTest extends BaseTest
    public void testApplyACL_Simple() throws Exception
    {
       String testname = "testApplyACL_Simple";
-      System.out.print("Running "+testname+"....                                            ");
+      System.out.print("Running " + testname + "....                                            ");
       FolderData testroot = null;
       try
       {
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
          testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"), null,
-               null);
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
+               null, null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
          AccessControlEntry acl = new AccessControlEntry();
@@ -147,8 +156,8 @@ public class ACLTest extends BaseTest
          addACL.add(acl);
 
          DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"), cs,
-               null, null, VersioningState.MAJOR);
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
+               cs, null, null, VersioningState.MAJOR);
          try
          {
             getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.OBJECTONLY);
@@ -197,7 +206,7 @@ public class ACLTest extends BaseTest
    public void testApplyACL_RemoveACE() throws Exception
    {
       String testname = "testApplyACL_RemoveACE";
-      System.out.print("Running "+testname+"....                                         ");
+      System.out.print("Running " + testname + "....                                         ");
       FolderData testroot = null;
       String typeID = null;
       try
@@ -205,8 +214,8 @@ public class ACLTest extends BaseTest
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
          testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"), null,
-               null);
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
+               null, null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
          AccessControlEntry acl = new AccessControlEntry();
@@ -287,15 +296,15 @@ public class ACLTest extends BaseTest
    public void testApplyACL_ConstraintException() throws Exception
    {
       String testname = "testApplyACL_ConstraintException";
-      System.out.print("Running "+testname+"....                               ");
+      System.out.print("Running " + testname + "....                               ");
       FolderData testroot = null;
       try
       {
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
          testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"), null,
-               null);
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
+               null, null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
          AccessControlEntry acl = new AccessControlEntry();
@@ -305,8 +314,8 @@ public class ACLTest extends BaseTest
          addACL.add(acl);
 
          DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"), cs,
-               addACL, null, VersioningState.MAJOR);
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
+               cs, addACL, null, VersioningState.MAJOR);
          try
          {
             getConnection().applyACL(doc1.getObjectId(), null, addACL, AccessControlPropagation.OBJECTONLY);
@@ -348,15 +357,15 @@ public class ACLTest extends BaseTest
    public void testApplyACL_ConstraintException2() throws Exception
    {
       String testname = "testApplyACL_ConstraintException2";
-      System.out.print("Running "+testname+"....                              ");
+      System.out.print("Running " + testname + "....                              ");
       FolderData testroot = null;
       try
       {
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
          testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"), null,
-               null);
+            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
+               null, null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
          AccessControlEntry acl = new AccessControlEntry();
@@ -368,8 +377,8 @@ public class ACLTest extends BaseTest
          ACLCapability capability = getStorage().getRepositoryInfo().getAclCapability();
 
          DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"), cs,
-               null, null, VersioningState.MAJOR);
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
+               cs, null, null, VersioningState.MAJOR);
          try
          {
             if (capability.getPropagation().equals(AccessControlPropagation.OBJECTONLY)
@@ -377,7 +386,7 @@ public class ACLTest extends BaseTest
                getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.PROPAGATE);
             else if (capability.getPropagation().equals(AccessControlPropagation.PROPAGATE))
                getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.OBJECTONLY);
-          doFail(testname, "ConstraintException must be thrown;");
+            doFail(testname, "ConstraintException must be thrown;");
          }
          catch (ConstraintException ec)
          {
@@ -416,7 +425,7 @@ public class ACLTest extends BaseTest
    public void testApplyACL_ConstraintException3() throws Exception
    {
       String testname = "testApplyACL_ConstraintException3";
-      System.out.print("Running " +testname+ "....                              ");
+      System.out.print("Running " + testname + "....                              ");
       FolderData testroot = null;
       try
       {
@@ -473,9 +482,16 @@ public class ACLTest extends BaseTest
    {
       super.pass("ACLTest." + method);
    }
-   
-   protected void doFail(String method,  String message) throws Exception
+
+   protected void doFail(String method, String message) throws Exception
    {
-      super.doFail("ACLTest." + method,  message);
+      super.doFail("ACLTest." + method, message);
+   }
+
+   @AfterClass
+   public static void stop() throws Exception
+   {
+      if (BaseTest.conn != null)
+         BaseTest.conn.close();
    }
 }

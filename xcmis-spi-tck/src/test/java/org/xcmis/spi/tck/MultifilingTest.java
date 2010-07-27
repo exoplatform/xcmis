@@ -49,6 +49,9 @@ import org.xcmis.spi.utils.MimeType;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Before;
 import org.junit.After;
@@ -65,10 +68,10 @@ import org.junit.After;
 public class MultifilingTest extends BaseTest
 {
 
-   @Before
-   public void setUp() throws Exception
+   @BeforeClass
+   public static void start() throws Exception
    {
-      super.setUp();
+      BaseTest.setUp();
    }
 
    /**
@@ -172,37 +175,36 @@ public class MultifilingTest extends BaseTest
          String typeId = null;
          try
          {
-            
+
             org.xcmis.spi.model.PropertyDefinition<?> def =
                PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.NAME);
             org.xcmis.spi.model.PropertyDefinition<?> def2 =
                PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.OBJECT_TYPE_ID);
             org.xcmis.spi.model.PropertyDefinition<?> def3 =
-               PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS);
+               PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER,
+                  CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS);
             Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-            
-            properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
-               .getDisplayName(), "testFolder1"));
+
+            properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(),
+               def.getDisplayName(), "testFolder1"));
             properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(def2.getId(), def2.getQueryName(), def2
                .getLocalName(), def2.getDisplayName(), CmisConstants.FOLDER));
-            properties.put(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, new IdProperty(def3.getId(), def3.getQueryName(), def3
-               .getLocalName(), def3.getDisplayName(), CmisConstants.FOLDER));
-            
+            properties.put(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, new IdProperty(def3.getId(), def3
+               .getQueryName(), def3.getLocalName(), def3.getDisplayName(), CmisConstants.FOLDER));
+
             Map<String, Property<?>> properties2 = new HashMap<String, Property<?>>();
-            properties2.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(), def
-               .getDisplayName(), "testFolder2"));
+            properties2.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(),
+               def.getDisplayName(), "testFolder2"));
             properties2.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(def2.getId(), def2.getQueryName(), def2
                .getLocalName(), def2.getDisplayName(), CmisConstants.FOLDER));
-            properties2.put(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, new IdProperty(def3.getId(), def3.getQueryName(), def3
-               .getLocalName(), def3.getDisplayName(), CmisConstants.FOLDER));
-            
-//            folder1 = createFolder(rootFolder, "testFolder1");
-//            folder2 = createFolder(rootFolder, "testFolder2");
+            properties2.put(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, new IdProperty(def3.getId(), def3
+               .getQueryName(), def3.getLocalName(), def3.getDisplayName(), CmisConstants.FOLDER));
 
-             folder1 =
-               getStorage().createFolder(rootFolder, folderTypeDefinition, properties, null, null);
-             folder2 =
-               getStorage().createFolder(rootFolder, folderTypeDefinition, properties2, null, null);
+            //            folder1 = createFolder(rootFolder, "testFolder1");
+            //            folder2 = createFolder(rootFolder, "testFolder2");
+
+            folder1 = getStorage().createFolder(rootFolder, folderTypeDefinition, properties, null, null);
+            folder2 = getStorage().createFolder(rootFolder, folderTypeDefinition, properties2, null, null);
             //////////// CHECK the ALLOWED_CHILD_OBJECT_TYPE_IDS property
             IdProperty prop = (IdProperty)folder2.getProperties().get(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS);
             if (prop == null)
@@ -539,11 +541,8 @@ public class MultifilingTest extends BaseTest
       }
    }
 
-   /**
-    * @see org.xcmis.sp.tck.exo.BaseTest#tearDown()
-    */
    @After
-   public void tearDown() throws Exception
+   public void shutDown() throws Exception
    {
       ItemsList<CmisObject> children =
          getConnection().getChildren(rootfolderID, false, null, false, true, null, null, null, -1, 0);
@@ -555,7 +554,6 @@ public class MultifilingTest extends BaseTest
             remove(cmisObject);
          }
       }
-      super.tearDown();
    }
 
    private void remove(CmisObject cmisObject) throws ObjectNotFoundException, ConstraintException,
@@ -594,10 +592,16 @@ public class MultifilingTest extends BaseTest
    {
       super.pass("MultifilingTest." + method);
    }
-   
-   protected void doFail(String method,  String message) throws Exception
+
+   protected void doFail(String method, String message) throws Exception
    {
-      super.doFail("MultifilingTest." + method,  message);
+      super.doFail("MultifilingTest." + method, message);
    }
 
+   @AfterClass
+   public static void stop() throws Exception
+   {
+      if (BaseTest.conn != null)
+         BaseTest.conn.close();
+   }
 }

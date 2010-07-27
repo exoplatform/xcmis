@@ -19,8 +19,6 @@
 
 package org.xcmis.spi.tck;
 
-import org.junit.Before;
-import org.junit.After;
 import static org.junit.Assert.*;
 
 import org.exoplatform.container.StandaloneContainer;
@@ -68,41 +66,43 @@ import java.util.Map;
 public class BaseTest
 {
 
-   protected StandaloneContainer container;
+   protected static StandaloneContainer container;
 
-   protected StorageProvider storageProvider;
+   protected static StorageProvider storageProvider;
 
-   protected TypeDefinition documentTypeDefinition;
+   protected static TypeDefinition documentTypeDefinition;
 
-   protected TypeDefinition folderTypeDefinition;
+   protected static TypeDefinition folderTypeDefinition;
 
-   protected TypeDefinition policyTypeDefinition;
+   protected static TypeDefinition policyTypeDefinition;
 
-   protected TypeDefinition relationshipTypeDefinition;
+   protected static TypeDefinition relationshipTypeDefinition;
 
-   protected String rootfolderID;
+   protected static String rootfolderID;
 
-   protected FolderData rootFolder;
+   protected static FolderData rootFolder;
 
-   private Connection conn;
+   protected static Connection conn;
 
    private static final String TCK_CONF_DEFAULT = "/conf/sp_inmem_exo/test-inmem-sp-configuration.xml";
 
-   protected boolean IS_RELATIONSHIPS_SUPPORTED = false;
+   protected static boolean IS_RELATIONSHIPS_SUPPORTED = false;
 
-   protected boolean IS_POLICIES_SUPPORTED = false;
+   protected static boolean IS_POLICIES_SUPPORTED = false;
 
-   @Before
-   public void setUp() throws Exception
+   protected static boolean IS_CAPABILITY_FOLDER_TREE = false;
+
+   protected static boolean IS_CAPABILITY_DESCENDANTS = false;
+
+   public static void setUp() throws Exception
    {
-
       String propertyTckConf = System.getProperty("tck.conf");
 
       String tck_conf =
          propertyTckConf == null || propertyTckConf.length() == 0 || propertyTckConf.equalsIgnoreCase("${tck.conf}")
             ? TCK_CONF_DEFAULT : propertyTckConf;
 
-      String containerConf = getClass().getResource(tck_conf).toString();
+      String containerConf = BaseTest.class.getResource(tck_conf).toString();
       StandaloneContainer.addConfigurationURL(containerConf);
       container = StandaloneContainer.getInstance();
 
@@ -114,6 +114,7 @@ public class BaseTest
       rootfolderID = getStorage().getRepositoryInfo().getRootFolderId();
       rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
+      System.out.println(storageProvider);
       try
       {
          if (getStorage().getTypeDefinition(CmisConstants.POLICY, false) != null)
@@ -134,6 +135,12 @@ public class BaseTest
          //Not supp;
       }
 
+      if (getStorage().getRepositoryInfo().getCapabilities().isCapabilityGetFolderTree())
+         IS_CAPABILITY_FOLDER_TREE = true;
+
+      if (getStorage().getRepositoryInfo().getCapabilities().isCapabilityGetDescendants())
+         IS_CAPABILITY_DESCENDANTS = true;
+
       documentTypeDefinition = getStorage().getTypeDefinition(CmisConstants.DOCUMENT, true);
       folderTypeDefinition = getStorage().getTypeDefinition(CmisConstants.FOLDER, true);
 
@@ -144,21 +151,13 @@ public class BaseTest
 
    }
 
-   @After
-   public void tearDown() throws Exception
+   protected static Connection getConnection()
    {
-      if (conn != null)
-         conn.close();
-   }
-
-   protected Connection getConnection()
-   {
-      if (conn == null)
-         conn = storageProvider.getConnection();
+      conn = storageProvider.getConnection();
       return conn;
    }
 
-   protected Storage getStorage()
+   protected static Storage getStorage()
    {
       return getConnection().getStorage();
    }
@@ -183,7 +182,7 @@ public class BaseTest
     *   Rel3 = folder2, doc1
     *  
     */
-   protected String createFolderTree() throws Exception
+   protected static String createFolderTree() throws Exception
    {
       FolderData testroot = createFolder(rootFolder, "testroot");
 
@@ -208,16 +207,17 @@ public class BaseTest
       DocumentData doc6 = createDocument(testroot, "doc6", "1234567890");
       doc6.checkout();
 
-      if (IS_RELATIONSHIPS_SUPPORTED) {
-      RelationshipData rel1 =
-         getStorage().createRelationship(doc3, doc4, relationshipTypeDefinition,
-            getPropsMap(CmisConstants.RELATIONSHIP, "rel1"), null, null);
-      RelationshipData rel2 =
-         getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
-            getPropsMap(CmisConstants.RELATIONSHIP, "rel2"), null, null);
-      RelationshipData rel3 =
-         getStorage().createRelationship(folder2, doc1, relationshipTypeDefinition,
-            getPropsMap(CmisConstants.RELATIONSHIP, "rel3"), null, null);
+      if (IS_RELATIONSHIPS_SUPPORTED)
+      {
+         RelationshipData rel1 =
+            getStorage().createRelationship(doc3, doc4, relationshipTypeDefinition,
+               getPropsMap(CmisConstants.RELATIONSHIP, "rel1"), null, null);
+         RelationshipData rel2 =
+            getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
+               getPropsMap(CmisConstants.RELATIONSHIP, "rel2"), null, null);
+         RelationshipData rel3 =
+            getStorage().createRelationship(folder2, doc1, relationshipTypeDefinition,
+               getPropsMap(CmisConstants.RELATIONSHIP, "rel3"), null, null);
       }
 
       return testroot.getObjectId();
@@ -234,7 +234,7 @@ public class BaseTest
     * @throws NameConstraintViolationException 
     * @throws ConstraintException 
     */
-   protected DocumentData createDocument(FolderData parentFolder, String documentName, String documentContent)
+   protected static DocumentData createDocument(FolderData parentFolder, String documentName, String documentContent)
       throws ConstraintException, NameConstraintViolationException, StorageException, IOException
    {
       ContentStream cs = new BaseContentStream(documentContent.getBytes(), null, new MimeType("text", "plain"));
@@ -249,7 +249,7 @@ public class BaseTest
     * @param folderTypeDefinition2
     * @return
     */
-   protected FolderData createFolder(FolderData parentFolder, String folderName) throws StorageException,
+   protected static FolderData createFolder(FolderData parentFolder, String folderName) throws StorageException,
       NameConstraintViolationException, ConstraintException
    {
       FolderData testroot =
@@ -261,20 +261,23 @@ public class BaseTest
    protected PolicyData createPolicy(FolderData where, String name) throws StorageException,
       NameConstraintViolationException, ConstraintException
    {
-      if (IS_POLICIES_SUPPORTED) {
-      org.xcmis.spi.model.PropertyDefinition<?> def =
-         PropertyDefinitions.getPropertyDefinition(CmisConstants.POLICY, CmisConstants.POLICY_TEXT);
-      Map<String, Property<?>> properties2 = getPropsMap(CmisConstants.POLICY, name);
-      properties2.put(CmisConstants.POLICY_TEXT, new StringProperty(def.getId(), def.getQueryName(),
-         def.getLocalName(), def.getDisplayName(), "testPolicyText"));
-      PolicyData policy = getStorage().createPolicy(where, policyTypeDefinition, properties2, null, null);
-      return policy;
-      } else {
+      if (IS_POLICIES_SUPPORTED)
+      {
+         org.xcmis.spi.model.PropertyDefinition<?> def =
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.POLICY, CmisConstants.POLICY_TEXT);
+         Map<String, Property<?>> properties2 = getPropsMap(CmisConstants.POLICY, name);
+         properties2.put(CmisConstants.POLICY_TEXT, new StringProperty(def.getId(), def.getQueryName(), def
+            .getLocalName(), def.getDisplayName(), "testPolicyText"));
+         PolicyData policy = getStorage().createPolicy(where, policyTypeDefinition, properties2, null, null);
+         return policy;
+      }
+      else
+      {
          return null;
       }
    }
 
-   protected void clearTree(String testroot)
+   protected static void clearTree(String testroot)
    {
       try
       {
@@ -292,7 +295,7 @@ public class BaseTest
       try
       {
          if (IS_RELATIONSHIPS_SUPPORTED)
-           removeRelationships(testroot);
+            removeRelationships(testroot);
          FolderData rootFolder = (FolderData)getStorage().getObjectById(testroot);
          List<String> failed = (List<String>)getStorage().deleteTree(rootFolder, true, UnfileObject.DELETE, true);
       }
@@ -318,7 +321,7 @@ public class BaseTest
       return result;
    }
 
-   protected Map<String, Property<?>> getPropsMap(String baseType, String name)
+   protected static Map<String, Property<?>> getPropsMap(String baseType, String name)
    {
       org.xcmis.spi.model.PropertyDefinition<?> def =
          PropertyDefinitions.getPropertyDefinition(baseType, CmisConstants.NAME);
