@@ -826,8 +826,6 @@
     <module>xcmis-restatom</module>
     <module>xcmis-wssoap</module>
     <module>xcmis-server-war</module>
-    <module>xcmis-server-gateinext-war</module>
-    <module>xcmis-server-gateinext-config</module>
     <module>xcmis-client-gwt-restatom</module>
     <!-- The list of excluded modules from common build. Do not uncomment it. Build them by yourself. -->
     <!-- module>xcmis-server-tomcat</module -->
