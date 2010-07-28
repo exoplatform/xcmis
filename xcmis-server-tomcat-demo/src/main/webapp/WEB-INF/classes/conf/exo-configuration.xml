@@ -64,7 +64,7 @@
 			<value-param>
 				<name>conf-path</name>
 				<description>JCR configuration file</description>
-				<value>war:/conf/jcr-cmis-config.xml</value>
+				<value>war:/conf/portal/jcr-cmis-config.xml</value>
 			</value-param>
 		</init-params>
 	</component>
