@@ -29,6 +29,7 @@ import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
+import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectNotFoundException;
@@ -40,6 +41,7 @@ import org.xcmis.spi.Storage;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.TypeNotFoundException;
+import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.Property;
@@ -370,24 +372,27 @@ public class BaseTest
       AllTests.results.put(mtd, "Not supported by storage;");
    }
 
-   protected void removeRelationships(String testroot)
+   protected void removeRelationships(String folderId)
    {
       try
       {
          Connection connection = getConnection();
-         List<ItemsTree<CmisObject>> descendants =
-            connection.getDescendants(testroot, -1, false, IncludeRelationships.BOTH, false, true, PropertyFilter.ALL,
-               RenditionFilter.NONE);
-         for (ItemsTree<CmisObject> tr : descendants)
+         ItemsList<CmisObject> childs =
+            connection.getChildren(folderId, false, IncludeRelationships.BOTH, false, true, PropertyFilter.ALL,
+               RenditionFilter.NONE, "", -1, 0);
+         for (CmisObject one : childs.getItems())
          {
-            for (CmisObject relationship : tr.getContainer().getRelationship())
+
+            if (one.getObjectInfo().getBaseType().equals(BaseType.FOLDER))
             {
-               connection.deleteObject(relationship.getObjectInfo().getId(), null);
+               removeRelationships(one.getObjectInfo().getId());
             }
-            List<ItemsTree<CmisObject>> children = tr.getChildren();
-            if (children != null && children.size() > 0)
+            else
             {
-               removeRelationships(tr.getContainer().getObjectInfo().getId());
+               for (CmisObject relationship : one.getRelationship())
+               {
+                  connection.deleteObject(relationship.getObjectInfo().getId(), null);
+               }
             }
          }
       }
@@ -400,5 +405,4 @@ public class BaseTest
          e.printStackTrace();
       }
    }
-
 }
