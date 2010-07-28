@@ -482,7 +482,7 @@ public class RelationshipTest extends BaseTest
             ItemsList<CmisObject> obj2 =
                getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER,
                   CmisConstants.RELATIONSHIP, false, true, true, "", -1, 0);
-            if (obj.getItems().size() != 1)
+            if (obj2.getItems().size() != 1)
                doFail(testname, "Unexpected items number;");
             pass(testname);
          }
