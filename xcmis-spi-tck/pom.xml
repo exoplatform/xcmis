@@ -54,6 +54,18 @@
                      <includes>
                         <include>**/AllTests.java</include>
                      </includes>
+                     <testFailureIgnore>true</testFailureIgnore>
+                     <!--
+                     <additionalClasspathElements>
+                       <additionalClasspathElement>${basedir}/lib/xcmis-sp-inmemory-1.1-SNAPSHOT.jar</additionalClasspathElement>
+                       <additionalClasspathElement>${basedir}/lib/xcmis-search-service-1.1-SNAPSHOT.jar</additionalClasspathElement>
+                       <additionalClasspathElement>${basedir}/lib/xcmis-search-model-1.1-SNAPSHOT.jar</additionalClasspathElement>
+                       <additionalClasspathElement>${basedir}/lib/xcmis-search-parser-cmis-1.1-SNAPSHOT.jar</additionalClasspathElement>
+                       <additionalClasspathElement>${basedir}/lib/lucene-core-2.4.1.jar</additionalClasspathElement>
+                       <additionalClasspathElement>${basedir}/lib/lucene-regex-2.4.1.jar</additionalClasspathElement>
+                       <additionalClasspathElement>${basedir}/lib/antlr-runtime-3.2.jar</additionalClasspathElement>
+                     </additionalClasspathElements>
+                     -->
                   </configuration>
                </plugin>
             </plugins>
@@ -86,6 +98,7 @@
                      <includes>
                         <include>**/AllTests.java</include>
                      </includes>
+                   <testFailureIgnore>true</testFailureIgnore>
                   </configuration>
                </plugin>
             </plugins>
