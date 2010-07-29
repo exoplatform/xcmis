@@ -293,9 +293,9 @@ public class ACLTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testApplyACL_ConstraintException() throws Exception
+   public void testApplyACL_ConstraintExceptionACL() throws Exception
    {
-      String testname = "testApplyACL_ConstraintException";
+      String testname = "testApplyACL_ConstraintExceptionACL";
       System.out.print("Running " + testname + "....                               ");
       FolderData testroot = null;
       try
@@ -324,7 +324,7 @@ public class ACLTest extends BaseTest
          catch (NotSupportedException ex)
          {
             if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-               skip("ACLTest.testApplyACL_ConstraintException");
+               skip("ACLTest." + testname);
             else
                doFail(testname, "Capability ACL is supported but not supported exception thrown");
          }
@@ -354,9 +354,9 @@ public class ACLTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testApplyACL_ConstraintException2() throws Exception
+   public void testApplyACL_ConstraintExceptionACLPropagation() throws Exception
    {
-      String testname = "testApplyACL_ConstraintException2";
+      String testname = "testApplyACL_ConstraintExceptionACLPropagation";
       System.out.print("Running " + testname + "....                              ");
       FolderData testroot = null;
       try
@@ -395,7 +395,7 @@ public class ACLTest extends BaseTest
          catch (NotSupportedException ex)
          {
             if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-               skip("ACLTest.testApplyACL_ConstraintException2");
+               skip("ACLTest." + testname);
             else
                doFail(testname, "Capability ACL is supported but not supported exception thrown");
          }
@@ -422,10 +422,10 @@ public class ACLTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testApplyACL_ConstraintException3() throws Exception
+   public void testApplyACL_ConstraintExceptionACLNotMatch() throws Exception
    {
-      String testname = "testApplyACL_ConstraintException3";
-      System.out.print("Running " + testname + "....                              ");
+      String testname = "testApplyACL_ConstraintExceptionACLNotMatch";
+      System.out.print("Running " + testname + "....                        ");
       FolderData testroot = null;
       try
       {
@@ -458,7 +458,7 @@ public class ACLTest extends BaseTest
          catch (NotSupportedException ex)
          {
             if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-               skip("ACLTest.testApplyACL_ConstraintException3");
+               skip("ACLTest." + testname);
             else
                doFail(testname, "Capability ACL is supported but not supported exception thrown");
          }

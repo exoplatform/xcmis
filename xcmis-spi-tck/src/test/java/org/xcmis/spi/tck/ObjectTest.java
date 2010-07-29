@@ -444,10 +444,10 @@ public class ObjectTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testCreateDocument_ConstraintException1() throws Exception
+   public void testCreateDocument_ConstraintExceptionWrongObjectType() throws Exception
    {
-      String testname = "testCreateDocument_ConstraintException1";
-      System.out.print("Running " + testname + "....                        ");
+      String testname = "testCreateDocument_ConstraintExceptionWrongObjectType";
+      System.out.print("Running " + testname + "....            ");
       FolderData testroot = null;
       String typeID = null;
       try
@@ -518,10 +518,10 @@ public class ObjectTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testCreateDocument_ConstraintException2() throws Exception
+   public void testCreateDocument_ConstraintExceptionContentAllowed() throws Exception
    {
-      String testname = "testCreateDocument_ConstraintException2";
-      System.out.print("Running " + testname + "....                        ");
+      String testname = "testCreateDocument_ConstraintExceptionContentAllowed";
+      System.out.print("Running " + testname + "....         ");
       FolderData testroot = null;
       String typeID = null;
       try
@@ -591,10 +591,10 @@ public class ObjectTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testCreateDocument_ConstraintException3() throws Exception
+   public void testCreateDocument_ConstraintExceptionVersionable() throws Exception
    {
-      String testname = "testCreateDocument_ConstraintException3";
-      System.out.print("Running " + testname + "....                        ");
+      String testname = "testCreateDocument_ConstraintExceptionVersionable";
+      System.out.print("Running " + testname + "....            ");
       FolderData testroot = null;
       String typeID = null;
       try
@@ -665,10 +665,10 @@ public class ObjectTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testCreateDocument_ConstraintException4() throws Exception
+   public void testCreateDocument_ConstraintExceptionNonVersinable() throws Exception
    {
-      String testname = "testCreateDocument_ConstraintException4";
-      System.out.print("Running " + testname + "....                        ");
+      String testname = "testCreateDocument_ConstraintExceptionNonVersinable";
+      System.out.print("Running " + testname + "....  ");
       FolderData testroot = null;
       String typeID = null;
       try
@@ -737,10 +737,10 @@ public class ObjectTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testCreateDocument_ConstraintException5() throws Exception
+   public void testCreateDocument_ConstraintExceptionNotControllablePolicy() throws Exception
    {
-      String testname = "testCreateDocument_ConstraintException5";
-      System.out.print("Running " + testname + "....                        ");
+      String testname = "testCreateDocument_ConstraintExceptionNotControllablePolicy";
+      System.out.print("Running " + testname + "....   ");
       if (!IS_POLICIES_SUPPORTED)
       {
          skip("ObjectTest." + testname);
@@ -824,10 +824,10 @@ public class ObjectTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testCreateDocument_ConstraintException6() throws Exception
+   public void testCreateDocument_ConstraintExceptionNotControllableACL() throws Exception
    {
-      String testname = "testCreateDocument_ConstraintException6";
-      System.out.print("Running " + testname + "....                        ");
+      String testname = "testCreateDocument_ConstraintExceptionNotControllableACL";
+      System.out.print("Running " + testname + "....  ");
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
       {
          skip("ObjectTest." + testname);
@@ -909,10 +909,10 @@ public class ObjectTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testCreateDocument_ConstraintException7() throws Exception
+   public void testCreateDocument_ConstraintExceptionACENotSupp() throws Exception
    {
-      String testname = "testCreateDocument_ConstraintException7";
-      System.out.print("Running " + testname + "....                        ");
+      String testname = "testCreateDocument_ConstraintExceptionACENotSupp";
+      System.out.print("Running " + testname + "....       ");
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
       {
          skip("ObjectTest." + testname);
@@ -2107,10 +2107,10 @@ public class ObjectTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testCreateFolder_ConstraintException1() throws Exception
+   public void testCreateFolder_ConstraintExceptionWrongBaseType() throws Exception
    {
-      String testname = "testCreateFolder_ConstraintException1";
-      System.out.print("Running " + testname + "....                          ");
+      String testname = "testCreateFolder_ConstraintExceptionWrongBaseType";
+      System.out.print("Running " + testname + "....  ");
       FolderData testroot = null;
       String typeID = null;
       try
@@ -2183,10 +2183,10 @@ public class ObjectTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testCreateFolder_ConstraintException2() throws Exception
+   public void testCreateFolder_ConstraintExceptionNotAllowedChild() throws Exception
    {
-      String testname = "testCreateFolder_ConstraintException2";
-      System.out.print("Running " + testname + "....                          ");
+      String testname = "testCreateFolder_ConstraintExceptionNotAllowedChild";
+      System.out.print("Running " + testname + "....        ");
       FolderData testroot = null;
       String typeID = null;
       try
@@ -2214,10 +2214,6 @@ public class ObjectTest extends BaseTest
                CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, null,
                CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, false, false, false, false, false, Updatability.READONLY,
                "Allowed childs", null, null, null);
-
-         //fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
-         //fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefObjectTypeId);
-         // fPropertyDefinitions.put(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, fPropDefAllowedChilds);
 
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
          properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
@@ -2273,10 +2269,10 @@ public class ObjectTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testCreateFolder_ConstraintException3() throws Exception
+   public void testCreateFolder_ConstraintExceptionNotControllablePolicy() throws Exception
    {
-      String testname = "testCreateFolder_ConstraintException3";
-      System.out.print("Running " + testname + "....                          ");
+      String testname = "testCreateFolder_ConstraintExceptionNotControllablePolicy";
+      System.out.print("Running " + testname + "....  ");
       if (!IS_POLICIES_SUPPORTED)
       {
          skip("ObjectTest." + testname);
@@ -2347,7 +2343,7 @@ public class ObjectTest extends BaseTest
       finally
       {
          if (testroot != null)
-            clear(testroot.getObjectId());;
+            clear(testroot.getObjectId());
          if (policy != null)
             getStorage().deleteObject(policy, true);
          if (typeID != null)
@@ -2362,9 +2358,9 @@ public class ObjectTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testCreateFolder_ConstraintException4() throws Exception
+   public void testCreateFolder_ConstraintExceptionNotControllableACL() throws Exception
    {
-      String testname = "testCreateFolder_ConstraintException4";
+      String testname = "testCreateFolder_ConstraintExceptionNotControllableACL";
       System.out.print("Running " + testname + "....                          ");
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
       {
@@ -2448,9 +2444,9 @@ public class ObjectTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testCreateFolder_ConstraintException5() throws Exception
+   public void testCreateFolder_ConstraintExceptionUnknownACE() throws Exception
    {
-      String testname = "testCreateFolder_ConstraintException5";
+      String testname = "testCreateFolder_ConstraintExceptionUnknownACE";
       System.out.print("Running " + testname + "....                          ");
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
       {
@@ -2968,10 +2964,10 @@ public class ObjectTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testCreateRelationship_ConstraintException1() throws Exception
+   public void testCreateRelationship_ConstraintExceptionWrongBaseType() throws Exception
    {
-      String testname = "testCreateRelationship_ConstraintException1";
-      System.out.print("Running " + testname + "....                    ");
+      String testname = "testCreateRelationship_ConstraintExceptionWrongBaseType";
+      System.out.print("Running " + testname + "....   ");
       if (!IS_RELATIONSHIPS_SUPPORTED)
       {
          skip("ObjectTest." + testname);
@@ -3029,9 +3025,6 @@ public class ObjectTest extends BaseTest
          props.put(CmisConstants.TARGET_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
             fPropDefTarget.getLocalName(), fPropDefTarget.getDisplayName(), doc2.getObjectId()));
 
-         //fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
-         //fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefObjectTypeId);
-
          TypeDefinition newType =
             new TypeDefinition("cmis:my", BaseType.FOLDER, "cmis:my", "cmis:my", "", "cmis:folder", "cmis:my",
                "cmis:my", true, false, true, true, false, true, true, false, null, null,
@@ -3078,10 +3071,10 @@ public class ObjectTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testCreateRelationship_ConstraintException2() throws Exception
+   public void testCreateRelationship_ConstraintExceptionNotAllowedTypes() throws Exception
    {
-      String testname = "testCreateRelationship_ConstraintException2";
-      System.out.print("Running " + testname + "....                    ");
+      String testname = "testCreateRelationship_ConstraintExceptionNotAllowedTypes";
+      System.out.print("Running " + testname + ".... ");
       if (!IS_RELATIONSHIPS_SUPPORTED)
       {
          skip("ObjectTest." + testname);
@@ -3187,10 +3180,10 @@ public class ObjectTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testCreateRelationship_ConstraintException3() throws Exception
+   public void testCreateRelationship_ConstraintExceptionNotControllablePolicy() throws Exception
    {
-      String testname = "testCreateRelationship_ConstraintException3";
-      System.out.print("Running " + testname + "....                    ");
+      String testname = "testCreateRelationship_ConstraintExceptionNotAllowedTypes";
+      System.out.print("Running " + testname + ".... ");
       if (!IS_POLICIES_SUPPORTED || !IS_RELATIONSHIPS_SUPPORTED)
       {
          skip("ObjectTest." + testname);
@@ -3299,10 +3292,10 @@ public class ObjectTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testCreateRelationship_ConstraintException4() throws Exception
+   public void testCreateRelationship_ConstraintExceptionNotControllableACL() throws Exception
    {
-      String testname = "testCreateRelationship_ConstraintException4";
-      System.out.print("Running " + testname + "....                    ");
+      String testname = "testCreateRelationship_ConstraintExceptionNotControllableACL";
+      System.out.print("Running " + testname + "....");
       if (!IS_RELATIONSHIPS_SUPPORTED)
       {
          skip("ObjectTest." + testname);
@@ -3417,10 +3410,10 @@ public class ObjectTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testCreateRelationship_ConstraintException5() throws Exception
+   public void testCreateRelationship_ConstraintExceptionUnknownACE() throws Exception
    {
-      String testname = "testCreateRelationship_ConstraintException5";
-      System.out.print("Running " + testname + "....                    ");
+      String testname = "testCreateRelationship_ConstraintExceptionUnknownACE";
+      System.out.print("Running " + testname + ".... ");
       if (!IS_RELATIONSHIPS_SUPPORTED)
       {
          skip("ObjectTest." + testname);
@@ -3812,10 +3805,10 @@ public class ObjectTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testCreatePolicy_ConstraintException1() throws Exception
+   public void testCreatePolicy_ConstraintExceptionWrongBaseType() throws Exception
    {
-      String testname = "testCreatePolicy_ConstraintException1";
-      System.out.print("Running " + testname + "....                          ");
+      String testname = "testCreatePolicy_ConstraintExceptionWrongBaseType";
+      System.out.print("Running " + testname + "....  ");
       if (!IS_POLICIES_SUPPORTED)
       {
          skip("ObjectTest." + testname);
@@ -3895,10 +3888,10 @@ public class ObjectTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testCreatePolicy_ConstraintException2() throws Exception
+   public void testCreatePolicy_ConstraintExceptionNotAllowedChild() throws Exception
    {
-      String testname = "testCreatePolicy_ConstraintException2";
-      System.out.print("Running " + testname + "....                          ");
+      String testname = "testCreatePolicy_ConstraintExceptionNotAllowedChild";
+      System.out.print("Running " + testname + "....    ");
       if (!IS_POLICIES_SUPPORTED)
       {
          skip("ObjectTest." + testname);
@@ -3985,10 +3978,10 @@ public class ObjectTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testCreatePolicy_ConstraintException3() throws Exception
+   public void testCreatePolicy_ConstraintExceptionNotControllablePolicy() throws Exception
    {
-      String testname = "testCreatePolicy_ConstraintException3";
-      System.out.print("Running " + testname + "....                          ");
+      String testname = "testCreatePolicy_ConstraintExceptionNotControllablePolicy";
+      System.out.print("Running " + testname + "....  ");
       if (!IS_POLICIES_SUPPORTED)
       {
          skip("ObjectTest." + testname);
@@ -4073,10 +4066,10 @@ public class ObjectTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testCreatePolicy_ConstraintException4() throws Exception
+   public void testCreatePolicy_ConstraintExceptionNotControllableACL() throws Exception
    {
-      String testname = "testCreatePolicy_ConstraintException4";
-      System.out.print("Running " + testname + "....                          ");
+      String testname = "testCreatePolicy_ConstraintExceptionNotControllableACL";
+      System.out.print("Running " + testname + "....   ");
       if (!IS_POLICIES_SUPPORTED)
       {
          skip("ObjectTest." + testname);
@@ -4161,14 +4154,13 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.5.3
-    * The “controllableACL” attribute of the Object-Type definition specified by the cmis:objectTypeId 
-    * property value is set to FALSE and at least one ACE is provided.
+    * At least one of the permissions is used in an ACE provided which is not supported by the repository. 
     * @throws Exception
     */
    @Test
-   public void testCreatePolicy_ConstraintException5() throws Exception
+   public void testCreatePolicy_ConstraintExceptionUnknownACE() throws Exception
    {
-      String testname = "testCreatePolicy_ConstraintException5";
+      String testname = "testCreatePolicy_ConstraintExceptionUnknownACE";
       System.out.print("Running " + testname + "....                          ");
       if (!IS_POLICIES_SUPPORTED)
       {

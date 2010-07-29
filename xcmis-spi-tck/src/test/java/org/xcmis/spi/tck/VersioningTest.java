@@ -515,10 +515,10 @@ public class VersioningTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testCheckIn_ConstraintException1() throws Exception
+   public void testCheckIn_ConstraintExceptionNotVersionable() throws Exception
    {
-      String testname = "testCheckIn_ConstraintException1";
-      System.out.print("Running " + testname + "....                               ");
+      String testname = "testCheckIn_ConstraintExceptionNotVersionable";
+      System.out.print("Running " + testname + "....                        ");
       FolderData testroot = null;
       String typeID = new String();
       try
@@ -591,10 +591,10 @@ public class VersioningTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testCheckIn_ConstraintException2() throws Exception
+   public void testCheckIn_ConstraintExceptionContentNotAllowed() throws Exception
    {
-      String testname = "testCheckIn_ConstraintException2";
-      System.out.print("Running " + testname + "....                               ");
+      String testname = "testCheckIn_ConstraintExceptionContentNotAllowed";
+      System.out.print("Running " + testname + "....                    ");
       FolderData testroot = null;
       String pwcID = null;
       String typeID = new String();
