@@ -1291,10 +1291,10 @@ public class ObjectTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testCreateDocumentFromSource_ConstraintException1() throws Exception
+   public void testCreateDocumentFromSource_ConstraintExceptionWrongBaseType() throws Exception
    {
-      String testname = "testCreateDocumentFromSource_ConstraintException1";
-      System.out.print("Running " + testname + "....              ");
+      String testname = "testCreateDocumentFromSource_ConstraintExceptionWrongBaseType";
+      System.out.print("Running " + testname + "....");
       FolderData testroot = null;
       try
       {
@@ -1329,7 +1329,7 @@ public class ObjectTest extends BaseTest
       finally
       {
          if (testroot != null)
-            clear(testroot.getObjectId());;
+            clear(testroot.getObjectId());
       }
 
    }
@@ -1341,10 +1341,10 @@ public class ObjectTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testCreateDocumentFromSource_ConstraintException2() throws Exception
+   public void testCreateDocumentFromSource_ConstraintExceptionNotAllowedChild() throws Exception
    {
-      String testname = "testCreateDocumentFromSource_ConstraintException2";
-      System.out.print("Running " + testname + "....              ");
+      String testname = "testCreateDocumentFromSource_ConstraintExceptionNotAllowedChild";
+      System.out.print("Running " + testname + "....");
       FolderData testroot = null;
       String typeID = null;
       FolderData myfolder = null;
@@ -1440,10 +1440,10 @@ public class ObjectTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testCreateDocumentFromSource_ConstraintException3() throws Exception
+   public void testCreateDocumentFromSource_ConstraintExceptionNotVersionable() throws Exception
    {
-      String testname = "testCreateDocumentFromSource_ConstraintException3";
-      System.out.print("Running " + testname + "....              ");
+      String testname = "testCreateDocumentFromSource_ConstraintExceptionNotVersionable";
+      System.out.print("Running " + testname + "....");
       FolderData testroot = null;
       String typeID = null;
       try
@@ -1466,8 +1466,6 @@ public class ObjectTest extends BaseTest
             PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
                CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
                false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
-         //propertyDefinitions.put(CmisConstants.NAME, propDefName);
-         //propertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, propDefObjectTypeId);
 
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
          properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
@@ -1521,10 +1519,10 @@ public class ObjectTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testCreateDocumentFromSource_ConstraintException4() throws Exception
+   public void testCreateDocumentFromSource_ConstraintExceptionIsVesrionable() throws Exception
    {
-      String testname = "testCreateDocumentFromSource_ConstraintException4";
-      System.out.print("Running " + testname + "....              ");
+      String testname = "testCreateDocumentFromSource_ConstraintExceptionIsVesrionable";
+      System.out.print("Running " + testname + "....");
       FolderData testroot = null;
       String typeID = null;
       try
@@ -1605,10 +1603,10 @@ public class ObjectTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testCreateDocumentFromSource_ConstraintException5() throws Exception
+   public void testCreateDocumentFromSource_ConstraintExceptionNotControllablePolicy() throws Exception
    {
-      String testname = "testCreateDocumentFromSource_ConstraintException5";
-      System.out.print("Running " + testname + "...               ");
+      String testname = "testCreateDocumentFromSource_ConstraintExceptionNotControllablePolicy";
+      System.out.print("Running " + testname + "...");
       if (!IS_POLICIES_SUPPORTED)
       {
          skip("ObjectTest." + testname);
@@ -1698,10 +1696,10 @@ public class ObjectTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testCreateDocumentFromSource_ConstraintException6() throws Exception
+   public void testCreateDocumentFromSource_ConstraintExceptionNotControllableACL() throws Exception
    {
-      String testname = "testCreateDocumentFromSource_ConstraintException6";
-      System.out.print("Running " + testname + "...               ");
+      String testname = "testCreateDocumentFromSource_ConstraintExceptionNotControllableACL";
+      System.out.print("Running " + testname + "...");
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
       {
          skip("ObjectTest." + testname);
@@ -1787,10 +1785,10 @@ public class ObjectTest extends BaseTest
     * @throws Exception
     */
    @Test
-   public void testCreateDocumentFromSource_ConstraintException7() throws Exception
+   public void testCreateDocumentFromSource_ConstraintExceptionUnknownACE() throws Exception
    {
-      String testname = "testCreateDocumentFromSource_ConstraintException7";
-      System.out.print("Running " + testname + "....              ");
+      String testname = "testCreateDocumentFromSource_ConstraintExceptionUnknownACE";
+      System.out.print("Running " + testname + "....");
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
       {
          skip("ObjectTest." + testname);
