@@ -1486,11 +1486,16 @@ public abstract class Connection
       ItemsList<CmisObject> cmisChildren = new ItemsList<CmisObject>();
       for (int count = 0; iterator.hasNext() && (maxItems < 0 || count < maxItems); count++)
       {
-         ObjectData chilData = iterator.next();
+         ObjectData childData = iterator.next();
 
          CmisObject child =
-            getCmisObject(chilData, includeAllowableActions, includeRelationships, false, false, includeObjectInfo,
+            getCmisObject(childData, includeAllowableActions, includeRelationships, false, false, includeObjectInfo,
                parsedPropertyFilter, parsedRenditionFilter);
+
+         if (includePathSegments)
+         {
+            child.setPathSegment(childData.getName());
+         }
 
          cmisChildren.getItems().add(child);
       }
@@ -2971,20 +2976,25 @@ public abstract class Connection
 
       for (ItemsIterator<ObjectData> children = ((FolderData)folder).getChildren(null); children.hasNext();)
       {
-         ObjectData child = children.next();
+         ObjectData childData = children.next();
 
-         if (typeFilter != null && child.getBaseType() != typeFilter)
+         if (typeFilter != null && childData.getBaseType() != typeFilter)
          {
             continue;
          }
 
          CmisObject container =
-            getCmisObject(child, includeAllowableActions, includeRelationships, false, false, includeObjectInfo,
+            getCmisObject(childData, includeAllowableActions, includeRelationships, false, false, includeObjectInfo,
                parsedPropertyFilter, parsedRenditionFilter);
 
+         if (includePathSegments)
+         {
+            container.setPathSegment(childData.getName());
+         }
+
          List<ItemsTree<CmisObject>> subTree =
-            (child.getBaseType() == BaseType.FOLDER && (depth > 1 || depth == -1)) //
-               ? getObjectTree(child.getObjectId(), depth != -1 ? depth - 1 : depth, typeFilter,
+            (childData.getBaseType() == BaseType.FOLDER && (depth > 1 || depth == -1)) //
+               ? getObjectTree(childData.getObjectId(), depth != -1 ? depth - 1 : depth, typeFilter,
                   includeAllowableActions, includeRelationships, includePathSegments, includeObjectInfo,
                   propertyFilter, renditionFilter) //
                : null;
@@ -3207,7 +3217,7 @@ public abstract class Connection
          {
             property = properties.get(definition.getId());
          }
-         if (definition.isRequired() && (3 & operation) > 0 && (property == null || property.getValues().size() == 0))
+         if (definition.isRequired() && operation == CREATE && (property == null || property.getValues().size() == 0))
          {
             throw new ConstraintException("Required property " + definition.getId() + " can't be not set.");
          }
