@@ -1014,9 +1014,11 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       String service = getServiceLink(request);
       feed.addLink(service, AtomCMIS.LINK_SERVICE, AtomCMIS.MEDIATYPE_ATOM_SERVICE, null, null, -1);
 
-      String self = getObjectLink(getId(request), request);
+      String self = getSelfLink(getId(request), request);
       feed.addLink(self, AtomCMIS.LINK_SELF, AtomCMIS.MEDIATYPE_ATOM_FEED, null, null, -1);
-      feed.addLink(self, AtomCMIS.LINK_VIA, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null, null, -1);
+
+      String via = getObjectLink(getId(request), request);
+      feed.addLink(via, AtomCMIS.LINK_VIA, AtomCMIS.MEDIATYPE_ATOM_ENTRY, null, null, -1);
 
       return feed;
    }
@@ -1104,7 +1106,7 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
     * Get link to AtomPub document that describes folder's children.
     *
     * @param id folder id
-    * @param request request context
+    * @param request the request context
     * @return link to AtomPub document that describes folder's children
     */
    protected String getChildrenLink(String id, RequestContext request)
@@ -1114,6 +1116,27 @@ public abstract class CmisObjectCollection extends AbstractCmisCollection<CmisOb
       params.put("atomdoctype", "children");
       params.put("id", id);
       String children = request.absoluteUrlFor(TargetType.ENTRY, params);
+      return children;
+   }
+
+   /**
+    * Get self link which provides the URI to retrieve this resource again.
+    * 
+    * The atom:link with relation self MUST be generated to return the URI of the feed. If paging or any
+    * other mechanism is used to filter, sort, or change the representation of the feed, the URI MUST
+    * point back a resource with the same representation.
+    * 
+    * @param id the object id
+    * @param request the request context
+    * @return link which provides the URI to retrieve this resource again.
+    */
+   protected String getSelfLink(String id, RequestContext request)
+   {
+      Map<String, String> params = new HashMap<String, String>();
+      params.put("repoid", getRepositoryId(request));
+      params.put("atomdoctype", getHref().substring(1));
+      params.put("id", id);
+      String children = request.absoluteUrlFor(TargetType.ENTRY, params) + "?" + request.getUri().getQuery();
       return children;
    }
 
