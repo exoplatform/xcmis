@@ -89,32 +89,25 @@ public class PolicyTest extends BaseTest
                cs, null, null, VersioningState.MAJOR);
 
          policy = createPolicy(testroot, "policy1");
-         try
+         getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
+         ObjectData res = getStorage().getObjectById(doc1.getObjectId());
+         if (res.getPolicies().size() != 1)
+            doFail(testname, "Policies number incorrect;");
+         Iterator<PolicyData> it = res.getPolicies().iterator();
+         while (it.hasNext())
          {
-            getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
-            ObjectData res = getStorage().getObjectById(doc1.getObjectId());
-            if (res.getPolicies().size() != 1)
-               doFail(testname, "Policies number incorrect;");
-            Iterator<PolicyData> it = res.getPolicies().iterator();
-            while (it.hasNext())
-            {
-               PolicyData one = it.next();
-               if (!one.getName().equals("policy1"))
-                  doFail(testname, "Policy name does not match;");
-               if (!one.getPolicyText().equals("testPolicyText"))
-                  doFail(testname, "Policy text does not match;");
-               res.removePolicy(one);
-            }
-            pass(testname);
+            PolicyData one = it.next();
+            if (!one.getName().equals("policy1"))
+               doFail(testname, "Policy name does not match;");
+            if (!one.getPolicyText().equals("testPolicyText"))
+               doFail(testname, "Policy text does not match;");
+            res.removePolicy(one);
          }
-         catch (Exception e)
-         {
-            doFail(testname, e.getMessage());
-         }
+         pass(testname);
       }
-      catch (Exception ez)
+      catch (Exception e)
       {
-         doFail(testname, ez.getMessage());
+         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -180,23 +173,16 @@ public class PolicyTest extends BaseTest
             getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.MAJOR);
 
          policy = createPolicy(testroot, "policy1");
-         try
-         {
-            getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
-            doFail(testname, "ConstraintException must be thrown;");
-         }
-         catch (ConstraintException ex)
-         {
-            pass(testname);
-         }
-         catch (Exception other)
-         {
-            doFail(testname, other.getMessage());
-         }
+         getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
+         doFail(testname, "ConstraintException must be thrown;");
       }
-      catch (Exception ez)
+      catch (ConstraintException ex)
       {
-         doFail(testname, ez.getMessage());
+         pass(testname);
+      }
+      catch (Exception other)
+      {
+         doFail(testname, other.getMessage());
       }
       finally
       {
@@ -239,24 +225,17 @@ public class PolicyTest extends BaseTest
 
          policy = createPolicy(testroot, "policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
-         try
-         {
-            getConnection().removePolicy(policy.getObjectId(), doc1.getObjectId());
-            ObjectData res = getStorage().getObjectById(doc1.getObjectId());
-            if (res.getPolicies().size() != 0)
-               doFail(testname, "Policy removing error;");
-            if (getStorage().getObjectById(policy.getObjectId()) == null)
-               doFail(testname, "Policy object deleted;");
-            pass(testname);
-         }
-         catch (Exception e)
-         {
-            doFail(testname, e.getMessage());
-         }
+         getConnection().removePolicy(policy.getObjectId(), doc1.getObjectId());
+         ObjectData res = getStorage().getObjectById(doc1.getObjectId());
+         if (res.getPolicies().size() != 0)
+            doFail(testname, "Policy removing error;");
+         if (getStorage().getObjectById(policy.getObjectId()) == null)
+            doFail(testname, "Policy object deleted;");
+         pass(testname);
       }
-      catch (Exception ez)
+      catch (Exception e)
       {
-         doFail(testname, ez.getMessage());
+         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -323,23 +302,16 @@ public class PolicyTest extends BaseTest
 
          policy = createPolicy(testroot, "policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
-         try
-         {
-            getConnection().removePolicy(policy.getObjectId(), doc1.getObjectId());
-            doFail(testname, "Constraint exception must be thrown;");
-         }
-         catch (ConstraintException ex)
-         {
-            pass(testname);
-         }
-         catch (Exception other)
-         {
-            doFail(testname, other.getMessage());
-         }
+         getConnection().removePolicy(policy.getObjectId(), doc1.getObjectId());
+         doFail(testname, "Constraint exception must be thrown;");
       }
-      catch (Exception ez)
+      catch (ConstraintException ex)
       {
-         doFail(testname, ez.getMessage());
+         pass(testname);
+      }
+      catch (Exception other)
+      {
+         doFail(testname, other.getMessage());
       }
       finally
       {
@@ -383,28 +355,21 @@ public class PolicyTest extends BaseTest
 
          policy = createPolicy(testroot, "policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
-         try
+         List<CmisObject> res = getConnection().getAppliedPolicies(doc1.getObjectId(), true, "");
+         if (res == null)
+            doFail(testname, "getAppliedPolicies() failed;");
+         for (CmisObject one : res)
          {
-            List<CmisObject> res = getConnection().getAppliedPolicies(doc1.getObjectId(), true, "");
-            if (res == null)
-               doFail(testname, "getAppliedPolicies() failed;");
-            for (CmisObject one : res)
-            {
-               if (one.getObjectInfo() == null)
-                  doFail(testname, "ObjectInfo is not present in result;");
-               if (!one.getObjectInfo().getTypeId().equals("cmis:policy"))
-                  doFail(testname, "Not a policy type object;");
-            }
-            pass(testname);
+            if (one.getObjectInfo() == null)
+               doFail(testname, "ObjectInfo is not present in result;");
+            if (!one.getObjectInfo().getTypeId().equals("cmis:policy"))
+               doFail(testname, "Not a policy type object;");
          }
-         catch (Exception e)
-         {
-            doFail(testname, e.getMessage());
-         }
+         pass(testname);
       }
-      catch (Exception ez)
+      catch (Exception e)
       {
-         doFail(testname, ez.getMessage());
+         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -447,29 +412,22 @@ public class PolicyTest extends BaseTest
 
          policy = createPolicy(testroot, "policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
-         try
+         List<CmisObject> res = getConnection().getAppliedPolicies(doc1.getObjectId(), true, "cmis:name, cmis:path");
+         for (CmisObject one : res)
          {
-            List<CmisObject> res = getConnection().getAppliedPolicies(doc1.getObjectId(), true, "cmis:name, cmis:path");
-            for (CmisObject one : res)
+            for (Map.Entry<String, Property<?>> e : one.getProperties().entrySet())
             {
-               for (Map.Entry<String, Property<?>> e : one.getProperties().entrySet())
-               {
-                  if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
-                     continue;
-                  else
-                     doFail(testname, "Property filter works incorrect;");
-               }
+               if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
+                  continue;
+               else
+                  doFail(testname, "Property filter works incorrect;");
             }
-            pass(testname);
          }
-         catch (Exception e)
-         {
-            doFail(testname, e.getMessage());
-         }
+         pass(testname);
       }
-      catch (Exception ez)
+      catch (Exception e)
       {
-         doFail(testname, ez.getMessage());
+         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -511,23 +469,16 @@ public class PolicyTest extends BaseTest
 
          policy = createPolicy(testroot, "policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
-         try
-         {
-            List<CmisObject> res = getConnection().getAppliedPolicies(doc1.getObjectId(), true, "(,*");
-            doFail(testname, "FilterNotValidException must be thrown;");
-         }
-         catch (FilterNotValidException ex)
-         {
-            pass(testname);
-         }
-         catch (Exception other)
-         {
-            doFail(testname, other.getMessage());
-         }
+         List<CmisObject> res = getConnection().getAppliedPolicies(doc1.getObjectId(), true, "(,*");
+         doFail(testname, "FilterNotValidException must be thrown;");
       }
-      catch (Exception ez)
+      catch (FilterNotValidException ex)
       {
-         doFail(testname, ez.getMessage());
+         pass(testname);
+      }
+      catch (Exception other)
+      {
+         doFail(testname, other.getMessage());
       }
       finally
       {

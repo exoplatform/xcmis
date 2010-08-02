@@ -106,24 +106,17 @@ public class RelationshipTest extends BaseTest
             getStorage().createRelationship(doc2, doc3, relationshipTypeDefinition,
                getPropsMap(CmisConstants.RELATIONSHIP, "rel2"), null, null);
 
-         try
-         {
-            ItemsList<CmisObject> obj =
-               getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true,
-                  true, true, "", -1, 0);
-            if (obj.getItems().size() == 2)
-               pass(testname);
-            else
-               doFail(testname, "Unexpected items number;");
-         }
-         catch (Exception e)
-         {
-            doFail(testname, e.getMessage());
-         }
+         ItemsList<CmisObject> obj =
+            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true, true,
+               true, "", -1, 0);
+         if (obj.getItems().size() == 2)
+            pass(testname);
+         else
+            doFail(testname, "Unexpected items number;");
       }
-      catch (Exception ez)
+      catch (Exception e)
       {
-         doFail(testname, ez.getMessage());
+         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -184,24 +177,17 @@ public class RelationshipTest extends BaseTest
             getStorage().createRelationship(doc2, doc3, relationshipTypeDefinition,
                getPropsMap(CmisConstants.RELATIONSHIP, "rel2"), null, null);
 
-         try
-         {
-            ItemsList<CmisObject> obj =
-               getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.TARGET, null, true,
-                  true, true, PropertyFilter.ALL, -1, 0);
-            if (obj.getItems().size() == 1)
-               pass(testname);
-            else
-               doFail(testname, "Unexpected items number;");
-         }
-         catch (Exception e)
-         {
-            doFail(testname, e.getMessage());
-         }
+         ItemsList<CmisObject> obj =
+            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.TARGET, null, true, true,
+               true, PropertyFilter.ALL, -1, 0);
+         if (obj.getItems().size() == 1)
+            pass(testname);
+         else
+            doFail(testname, "Unexpected items number;");
       }
-      catch (Exception ez)
+      catch (Exception e)
       {
-         doFail(testname, ez.getMessage());
+         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -260,29 +246,22 @@ public class RelationshipTest extends BaseTest
             getStorage().createRelationship(doc2, doc3, relationshipTypeDefinition,
                getPropsMap(CmisConstants.RELATIONSHIP, "rel2"), null, null);
 
-         try
+         ItemsList<CmisObject> obj =
+            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.TARGET, null, true, true,
+               true, "", -1, 0);
+         for (CmisObject one : obj.getItems())
          {
-            ItemsList<CmisObject> obj =
-               getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.TARGET, null, true,
-                  true, true, "", -1, 0);
-            for (CmisObject one : obj.getItems())
-            {
-               AllowableActions actions = one.getAllowableActions();
-               if (actions != null)
-                  continue;
-               else
-                  doFail(testname, "Allowable actions not found;");
-            }
-            pass(testname);
+            AllowableActions actions = one.getAllowableActions();
+            if (actions != null)
+               continue;
+            else
+               doFail(testname, "Allowable actions not found;");
          }
-         catch (Exception e)
-         {
-            doFail(testname, e.getMessage());
-         }
+         pass(testname);
       }
-      catch (Exception ez)
+      catch (Exception e)
       {
-         doFail(testname, ez.getMessage());
+         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -365,24 +344,17 @@ public class RelationshipTest extends BaseTest
 
          reldata2 = getStorage().createRelationship(doc2, doc3, newType, properties, null, null);
 
-         try
-         {
-            ItemsList<CmisObject> obj =
-               getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, "cmis:kino",
-                  true, true, true, "", -1, 0);
-            if (obj.getItems().size() == 1)
-               pass(testname);
-            else
-               doFail(testname, "Unexpected items number;");
-         }
-         catch (Exception e)
-         {
-            doFail(testname, e.getMessage());
-         }
+         ItemsList<CmisObject> obj =
+            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, "cmis:kino", true,
+               true, true, "", -1, 0);
+         if (obj.getItems().size() == 1)
+            pass(testname);
+         else
+            doFail(testname, "Unexpected items number;");
       }
-      catch (Exception ez)
+      catch (Exception e)
       {
-         doFail(testname, ez.getMessage());
+         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -471,29 +443,22 @@ public class RelationshipTest extends BaseTest
 
          reldata2 = getStorage().createRelationship(doc2, doc3, newType, properties, null, null);
 
-         try
-         {
-            ItemsList<CmisObject> obj =
-               getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER,
-                  CmisConstants.RELATIONSHIP, true, true, true, "", -1, 0);
-            if (obj.getItems().size() != 2)
-               doFail(testname, "Unexpected items number;");
+         ItemsList<CmisObject> obj =
+            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER,
+               CmisConstants.RELATIONSHIP, true, true, true, "", -1, 0);
+         if (obj.getItems().size() != 2)
+            doFail(testname, "Unexpected items number;");
 
-            ItemsList<CmisObject> obj2 =
-               getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER,
-                  CmisConstants.RELATIONSHIP, false, true, true, "", -1, 0);
-            if (obj2.getItems().size() != 1)
-               doFail(testname, "Unexpected items number;");
-            pass(testname);
-         }
-         catch (Exception e)
-         {
-            doFail(testname, e.getMessage());
-         }
+         ItemsList<CmisObject> obj2 =
+            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER,
+               CmisConstants.RELATIONSHIP, false, true, true, "", -1, 0);
+         if (obj2.getItems().size() != 1)
+            doFail(testname, "Unexpected items number;");
+         pass(testname);
       }
-      catch (Exception ez)
+      catch (Exception e)
       {
-         doFail(testname, ez.getMessage());
+         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -555,24 +520,17 @@ public class RelationshipTest extends BaseTest
             getStorage().createRelationship(doc2, doc3, relationshipTypeDefinition,
                getPropsMap(CmisConstants.RELATIONSHIP, "rel2"), null, null);
 
-         try
-         {
-            ItemsList<CmisObject> obj =
-               getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true,
-                  true, true, "", 1, 0);
-            if (obj.getItems().size() == 1)
-               pass(testname);
-            else
-               doFail(testname, "Unexpected items number;");
-         }
-         catch (Exception e)
-         {
-            doFail(testname, e.getMessage());
-         }
+         ItemsList<CmisObject> obj =
+            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true, true,
+               true, "", 1, 0);
+         if (obj.getItems().size() == 1)
+            pass(testname);
+         else
+            doFail(testname, "Unexpected items number;");
       }
-      catch (Exception ez)
+      catch (Exception e)
       {
-         doFail(testname, ez.getMessage());
+         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -632,24 +590,17 @@ public class RelationshipTest extends BaseTest
             getStorage().createRelationship(doc2, doc3, relationshipTypeDefinition,
                getPropsMap(CmisConstants.RELATIONSHIP, "rel2"), null, null);
 
-         try
-         {
-            ItemsList<CmisObject> obj =
-               getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true,
-                  true, true, "", -1, 1);
-            if (obj.getItems().size() == 1)
-               pass(testname);
-            else
-               doFail(testname, "Unexpected items number;");
-         }
-         catch (Exception e)
-         {
-            doFail(testname, e.getMessage());
-         }
+         ItemsList<CmisObject> obj =
+            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true, true,
+               true, "", -1, 1);
+         if (obj.getItems().size() == 1)
+            pass(testname);
+         else
+            doFail(testname, "Unexpected items number;");
       }
-      catch (Exception ez)
+      catch (Exception e)
       {
-         doFail(testname, ez.getMessage());
+         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -709,32 +660,25 @@ public class RelationshipTest extends BaseTest
             getStorage().createRelationship(doc2, doc3, relationshipTypeDefinition,
                getPropsMap(CmisConstants.RELATIONSHIP, "rel2"), null, null);
 
-         try
-         {
-            ItemsList<CmisObject> obj =
-               getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true,
-                  true, true, "", 1, 0);
-            if (obj.getItems().size() != 1)
-               doFail(testname, "Unexpected items number;");
+         ItemsList<CmisObject> obj =
+            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true, true,
+               true, "", 1, 0);
+         if (obj.getItems().size() != 1)
+            doFail(testname, "Unexpected items number;");
 
-            if (obj.getNumItems() == 2 || obj.getNumItems() == -1)
-            {
-               //OK
-            }
-            else
-               doFail(testname, "Unexpected items number;");
-            if (!obj.isHasMoreItems())
-               doFail(testname, "Has more items value is incorrect");
-            pass(testname);
-         }
-         catch (Exception e)
+         if (obj.getNumItems() == 2 || obj.getNumItems() == -1)
          {
-            doFail(testname, e.getMessage());
+            //OK
          }
+         else
+            doFail(testname, "Unexpected items number;");
+         if (!obj.isHasMoreItems())
+            doFail(testname, "Has more items value is incorrect");
+         pass(testname);
       }
-      catch (Exception ez)
+      catch (Exception e)
       {
-         doFail(testname, ez.getMessage());
+         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -794,34 +738,27 @@ public class RelationshipTest extends BaseTest
             getStorage().createRelationship(doc2, doc3, relationshipTypeDefinition,
                getPropsMap(CmisConstants.RELATIONSHIP, "rel2"), null, null);
 
-         try
-         {
-            ItemsList<CmisObject> obj =
-               getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true,
-                  true, true, "cmis:name,cmis:path", -1, 0);
-            if (obj.getItems().size() != 2)
-               doFail(testname, "Unexpected items number;");
+         ItemsList<CmisObject> obj =
+            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true, true,
+               true, "cmis:name,cmis:path", -1, 0);
+         if (obj.getItems().size() != 2)
+            doFail(testname, "Unexpected items number;");
 
-            for (CmisObject one : obj.getItems())
-            {
-               for (Map.Entry<String, Property<?>> e : one.getProperties().entrySet())
-               {
-                  if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path"))
-                     continue;//Other props must be ignored
-                  else
-                     doFail(testname, "Property filter works incorrect");
-               }
-            }
-            pass(testname);
-         }
-         catch (Exception e)
+         for (CmisObject one : obj.getItems())
          {
-            doFail(testname, e.getMessage());
+            for (Map.Entry<String, Property<?>> e : one.getProperties().entrySet())
+            {
+               if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path"))
+                  continue;//Other props must be ignored
+               else
+                  doFail(testname, "Property filter works incorrect");
+            }
          }
+         pass(testname);
       }
-      catch (Exception ez)
+      catch (Exception e)
       {
-         doFail(testname, ez.getMessage());
+         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -880,25 +817,18 @@ public class RelationshipTest extends BaseTest
             getStorage().createRelationship(doc2, doc3, relationshipTypeDefinition,
                getPropsMap(CmisConstants.RELATIONSHIP, "rel2"), null, null);
 
-         try
-         {
-            ItemsList<CmisObject> obj =
-               getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true,
-                  true, true, "(,*", -1, 0);
-            doFail(testname, "FilterNotValidException must be thrown;");
-         }
-         catch (FilterNotValidException ex)
-         {
-            pass(testname);
-         }
-         catch (Exception e)
-         {
-            doFail(testname, e.getMessage());
-         }
+         ItemsList<CmisObject> obj =
+            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true, true,
+               true, "(,*", -1, 0);
+         doFail(testname, "FilterNotValidException must be thrown;");
       }
-      catch (Exception ez)
+      catch (FilterNotValidException ex)
       {
-         doFail(testname, ez.getMessage());
+         pass(testname);
+      }
+      catch (Exception e)
+      {
+         doFail(testname, e.getMessage());
       }
       finally
       {

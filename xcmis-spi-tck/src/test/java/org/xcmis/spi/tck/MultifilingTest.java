@@ -260,26 +260,19 @@ public class MultifilingTest extends BaseTest
                   doFail(testname, "Clildren list is not empty;");
 
                // add object to folder
-               try
-               {
-                  getConnection().addObjectToFolder(docKino.getObjectId(), folder2.getObjectId(), true);
-                  doFail(testname, "ConstraintException must be thrown;");
-               }
-               catch (ConstraintException e)
-               {
-                  pass(testname);
-               }
-               catch (Exception other)
-               {
-                  doFail(testname, other.getMessage());
-               }
+               getConnection().addObjectToFolder(docKino.getObjectId(), folder2.getObjectId(), true);
+               doFail(testname, "ConstraintException must be thrown;");
             }
             else
                doFail(testname, "cmis:allowedChildObjectTypeIds is empty;");
          }
-         catch (Exception ez)
+         catch (ConstraintException e)
          {
-            doFail(testname, ez.getMessage());
+            pass(testname);
+         }
+         catch (Exception other)
+         {
+            doFail(testname, other.getMessage());
          }
          finally
          {

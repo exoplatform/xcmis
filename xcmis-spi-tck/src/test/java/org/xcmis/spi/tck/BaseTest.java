@@ -41,6 +41,7 @@ import org.xcmis.spi.Storage;
 import org.xcmis.spi.StorageException;
 import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.TypeNotFoundException;
+import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.IncludeRelationships;
@@ -279,6 +280,16 @@ public class BaseTest
       }
    }
 
+   protected static List<AccessControlEntry> createACL(String name, String permission)
+   {
+      AccessControlEntry acl = new AccessControlEntry();
+      acl.setPrincipal(name);
+      acl.getPermissions().add(permission);
+      ArrayList<AccessControlEntry> addACL = new ArrayList<AccessControlEntry>();
+      addACL.add(acl);
+      return addACL;
+   }
+
    protected static void clearTree(String testroot)
    {
       try
@@ -292,7 +303,7 @@ public class BaseTest
       }
    }
 
-   protected void clear(String testroot)
+   protected static void clear(String testroot)
    {
       try
       {
@@ -372,7 +383,7 @@ public class BaseTest
       AllTests.results.put(mtd, "Not supported by storage;");
    }
 
-   protected void removeRelationships(String folderId)
+   protected static void removeRelationships(String folderId)
    {
       try
       {
