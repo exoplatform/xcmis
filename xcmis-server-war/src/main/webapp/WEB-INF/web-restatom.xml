@@ -12,11 +12,6 @@
    </filter>
 
    <filter>
-      <filter-name>ThreadLocalSessionProviderInitializedFilter</filter-name>
-      <filter-class>org.exoplatform.frameworks.jcr.web.ThreadLocalSessionProviderInitializedFilter</filter-class>
-   </filter>
-
-   <filter>
       <filter-name>RestContentFilter</filter-name>
       <filter-class>org.exoplatform.services.rest.servlet.RestEncodingFilter</filter-class>
       <init-param>
@@ -33,11 +28,6 @@
    <filter-mapping>
       <filter-name>RestContentFilter</filter-name>
       <servlet-name>RestServer</servlet-name>
-   </filter-mapping>
-
-   <filter-mapping>
-      <filter-name>ThreadLocalSessionProviderInitializedFilter</filter-name>
-      <url-pattern>/*</url-pattern>
    </filter-mapping>
 
    <listener>

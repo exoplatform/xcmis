@@ -15,14 +15,6 @@
       <artifactId>servlet-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.exoplatform.kernel</groupId>
-      <artifactId>exo.kernel.component.common</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.exoplatform.kernel</groupId>
-      <artifactId>exo.kernel.container</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.xcmis</groupId>
       <artifactId>xcmis-restatom</artifactId>
       <scope>runtime</scope>
@@ -31,6 +23,23 @@
       <groupId>org.xcmis</groupId>
       <artifactId>xcmis-wssoap</artifactId>
       <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.xcmis</groupId>
+      <artifactId>xcmis-renditions</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.exoplatform.core</groupId>
+      <artifactId>exo.core.component.organization.api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.exoplatform.kernel</groupId>
+      <artifactId>exo.kernel.component.common</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.exoplatform.kernel</groupId>
+      <artifactId>exo.kernel.container</artifactId>
     </dependency>
     <dependency>
       <groupId>org.exoplatform.ws</groupId>
@@ -247,7 +256,7 @@
   </build>
   <profiles>
     <profile>
-      <id>inmemory-sp</id>
+      <id>inmemory</id>
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>
@@ -255,12 +264,11 @@
          <dependency>
             <groupId>org.xcmis</groupId>
             <artifactId>xcmis-sp-inmemory</artifactId>
-            <scope>test</scope>
          </dependency>
       </dependencies>
     </profile>
     <profile>
-      <id>ecms-sp</id>
+      <id>exo</id>
       <activation>
         <activeByDefault>false</activeByDefault>
       </activation>
@@ -268,7 +276,6 @@
           <dependency>
             <groupId>org.exoplatform.ecms</groupId>
             <artifactId>exo-ecms-ext-xcmis-sp</artifactId>
-            <scope>test</scope>
           </dependency>
       </dependencies>
      </profile>

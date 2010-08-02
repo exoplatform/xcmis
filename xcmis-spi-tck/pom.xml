@@ -28,7 +28,7 @@
 
    <profiles>
       <profile>
-         <id>inmemory-sp</id>
+         <id>inmemory</id>
          <activation>
             <activeByDefault>true</activeByDefault>
          </activation>
@@ -72,7 +72,7 @@
          </build>
       </profile>
       <profile>
-         <id>ecms-sp</id>
+         <id>exo</id>
          <activation>
             <activeByDefault>false</activeByDefault>
          </activation>

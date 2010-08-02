@@ -31,6 +31,15 @@
 		</init-params>
 	</component>
 
+        <component>
+          <type>org.xcmis.spi.PermissionService</type>
+        </component>
+
+	<component>
+		<key>org.exoplatform.services.document.DocumentReaderService</key>
+		<type>org.xcmis.spi.utils.CmisDocumentReaderService</type>
+	</component>
+
 	<component>
 		<type>org.xcmis.spi.deploy.ExoContainerCmisRegistry</type>
                  <init-params>
@@ -43,60 +52,7 @@
 		</init-params>
 	</component>
 
-        <component>
-          <type>org.xcmis.spi.PermissionService</type>
-        </component>
-
-	<component>
-		<key>org.exoplatform.services.document.DocumentReaderService</key>
-		<type>org.xcmis.spi.utils.CmisDocumentReaderService</type>
-	</component>
-
-	<component>
-		<key>org.exoplatform.services.jcr.config.RepositoryServiceConfiguration</key>
-		<type>org.exoplatform.services.jcr.impl.config.RepositoryServiceConfigurationImpl</type>
-		<init-params>
-			<value-param>
-				<name>conf-path</name>
-				<description>JCR configuration file</description>
-				<value>war:/conf/portal/jcr-cmis-config.xml</value>
-			</value-param>
-		</init-params>
-	</component>
-
-	<!-- Storage Provider JCR -->
-	<component>
-		<type>org.exoplatform.ecms.xcmis.sp.jcr.exo.StorageProviderImpl</type>
-		<init-params>
-			<object-param>
-				<name>configs</name>
-				<object type="org.exoplatform.ecms.xcmis.sp.jcr.exo.StorageProviderImpl$StorageProviderConfig">
-					<field name="storage">
-   						<object type="org.exoplatform.ecms.xcmis.sp.jcr.exo.StorageConfiguration">
-							<field name="id">
-								<string>cmis1</string>
-							</field>
-							<field name="repository">
-								<string>repository</string>
-							</field>
-							<field name="workspace">
-								<string>cmis</string>
-							</field>
-							<field name="indexConfiguration">
-								<object type="org.xcmis.search.config.IndexConfiguration">
-									<field name="indexDir">
-										<string>../temp/index/db1/ws1</string>
-									</field>
-								</object>
-							</field>
-						</object>
-					</field>
-				</object>
-			</object-param>
-		</init-params>
-	</component>
-
-   <!-- Storage Provider InMemory -->
+        <!-- Storage Provider InMemory -->
 	<component>
 		<type>org.xcmis.sp.inmemory.StorageProviderImpl</type>
 		<init-params>
@@ -116,6 +72,24 @@
 	</component>
 
 	<component>
+		<key>org.exoplatform.services.organization.OrganizationService</key>
+		<type>org.exoplatform.services.organization.impl.mock.DummyOrganizationService</type>
+	</component>
+
+<!--
+	<component>
+		<key>org.exoplatform.services.jcr.config.RepositoryServiceConfiguration</key>
+		<type>org.exoplatform.services.jcr.impl.config.RepositoryServiceConfigurationImpl</type>
+		<init-params>
+			<value-param>
+				<name>conf-path</name>
+				<description>JCR configuration file</description>
+				<value>war:/conf/portal/jcr-cmis-config.xml</value>
+			</value-param>
+		</init-params>
+	</component>
+
+	<component>
 		<key>org.exoplatform.services.jcr.RepositoryService</key>
 		<type>org.exoplatform.services.jcr.impl.RepositoryServiceImpl</type>
 	</component>
@@ -131,14 +105,8 @@
 	</component>
 
 	<component>
-		<key>org.exoplatform.services.organization.OrganizationService</key>
-		<type>org.exoplatform.services.organization.impl.mock.DummyOrganizationService</type>
-	</component>
-
-	<component>
 		<type>org.exoplatform.services.jcr.ext.registry.RESTRegistryService</type>
 	</component>
-
 
 	<component>
 		<key>org.exoplatform.services.jcr.webdav.WebDavServiceImpl</key>
@@ -190,7 +158,6 @@
 					<name>autoCreatedInNewRepository</name>
 					<description>Node types configuration file</description>
 					<value>jar:/conf/ext-nodetypes-config.xml</value>
-					<!--            <value>jar:/conf/organization-nodetypes.xml</value>-->
 					<value>jar:/conf/webdav-nodetypes.xml</value>
 				</values-param>
 			</init-params>
@@ -227,5 +194,6 @@
 			</init-params>
 		</component-plugin>
 	</external-component-plugins>
+-->
 
 </configuration>
