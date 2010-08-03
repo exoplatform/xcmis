@@ -19,6 +19,8 @@
 
 package org.xcmis.spi.tck;
 
+import static org.junit.Assert.*;
+
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.ItemsList;
@@ -59,17 +61,10 @@ public class RepositoryTest extends BaseTest
    @Test
    public void testGeneral() throws Exception
    {
-      String testname = "testGeneral";
-      System.out.print("Running " + testname + "....                                                    ");
-      if (storageProvider == null)
-         doFail(testname, "Storage provider is null;");
-      if (storageProvider.getConnection() == null)
-         doFail(testname, "Connection is null;");
-      if (storageProvider.getConnection().getStorage() == null)
-         doFail(testname, "Storage  is null;");
-      if (storageProvider.getConnection().getStorage().getId() == null)
-         doFail(testname, "Storage  ID is null;");
-      pass(testname);
+      assertNotNull("Storage provider is null;",storageProvider);
+      assertNotNull("Connection is null;", storageProvider.getConnection());
+      assertNotNull("Storage  is null;", storageProvider.getConnection().getStorage());
+      assertNotNull("Storage  ID is null;", storageProvider.getConnection().getStorage().getId());
    }
 
    /**
@@ -80,27 +75,17 @@ public class RepositoryTest extends BaseTest
    @Test
    public void testGetRepositories() throws Exception
    {
-      String testname = "testGetRepositories";
-      System.out.print("Running " + testname + "....                                            ");
       Set<RepositoryShortInfo> storageInfos = CmisRegistry.getInstance().getStorageInfos();
-      if (storageInfos == null)
-         doFail(testname, "StorageInfo  is null;");
-      if (storageInfos.isEmpty())
-         doFail(testname, "StorageInfo  is empty;");
+      assertNotNull("StorageInfo  is null;", storageInfos);
+      assertTrue("StorageInfo  is empty;", !storageInfos.isEmpty());
       for (RepositoryShortInfo repositoryShortInfo : storageInfos)
       {
-         if (repositoryShortInfo.getRepositoryId() == null)
-            doFail(testname, "Repository Short Info  is null;");
-         if (repositoryShortInfo.getRepositoryId().equals(""))
-            doFail(testname, "Repository Short Info  is empty;");
-         if (repositoryShortInfo.getRepositoryName() == null)
-            doFail(testname, "Repository name  is null;");
-         if (repositoryShortInfo.getRepositoryName().equals(""))
-            doFail(testname, "Repository name  is empty;");
-         if (repositoryShortInfo.getRootFolderId() == null)
-            doFail(testname, "Root folder ID  is null");
+         assertNotNull("Repository Short Info  is null;", repositoryShortInfo.getRepositoryId());
+         assertTrue("Repository Short Info  is empty;", !repositoryShortInfo.getRepositoryId().equals(""));
+         assertNotNull("Repository name  is null;",repositoryShortInfo.getRepositoryName());
+         assertTrue("Repository name  is empty;",!repositoryShortInfo.getRepositoryName().equals(""));
+         assertNotNull("Root folder ID  is null", repositoryShortInfo.getRootFolderId());
       }
-      pass(testname);
    }
 
    /**
@@ -113,51 +98,33 @@ public class RepositoryTest extends BaseTest
    @Test
    public void testGetRepositoryInfo() throws Exception
    {
-      String testname = "testGetRepositoryInfo";
-      System.out.print("Running " + testname + "....                                          ");
-      if (getStorage().getRepositoryInfo() == null)
-         doFail(testname, "Repository Info  is null;");
-      if (getStorage().getRepositoryInfo().getRepositoryId() == null)
-         doFail(testname, "Repository Info ID  is null;");
-      if (getStorage().getRepositoryInfo().getRepositoryId().equals(""))
-         doFail(testname, "Repository Info ID  is empty;");
-      if (getStorage().getRepositoryInfo().getRepositoryName() == null)
-         doFail(testname, "Repository Info Name  is null;");
-      if (getStorage().getRepositoryInfo().getRepositoryDescription() == null)
-         doFail(testname, "Repository Description  is null;");
-      if (getStorage().getRepositoryInfo().getVendorName() == null)
-         doFail(testname, "Repository VendorName  is null;");
-      if (getStorage().getRepositoryInfo().getProductName() == null)
-         doFail(testname, "Repository ProductName  is null;");
-      if (getStorage().getRepositoryInfo().getProductVersion() == null)
-         doFail(testname, "Repository PropductVersion  is null;");
-      if (getStorage().getRepositoryInfo().getRootFolderId() == null)
-         doFail(testname, "Repository Root folder ID  is null;");
-      if (getStorage().getRepositoryInfo().getCapabilities() == null)
-         doFail(testname, "Repository Capabilities  is null;");
+      assertNotNull("Repository Info  is null;", getStorage().getRepositoryInfo());
+      assertNotNull("Repository Info ID  is null;", getStorage().getRepositoryInfo().getRepositoryId());
+      assertTrue("Repository Info ID  is empty;", !getStorage().getRepositoryInfo().getRepositoryId().equals(""));
+      assertNotNull("Repository Info Name  is null;", getStorage().getRepositoryInfo().getRepositoryName());
+      assertNotNull("Repository Description  is null;", getStorage().getRepositoryInfo().getRepositoryDescription());
+         
+      assertNotNull("Repository VendorName  is null;", getStorage().getRepositoryInfo().getVendorName());
+      assertNotNull("Repository ProductName  is null;", getStorage().getRepositoryInfo().getProductName());
+      assertNotNull("Repository PropductVersion  is null;", getStorage().getRepositoryInfo().getProductVersion());
+      assertNotNull("Repository Root folder ID  is null;", getStorage().getRepositoryInfo().getRootFolderId());
+      assertNotNull("Repository Capabilities  is null;", getStorage().getRepositoryInfo().getCapabilities());
+
       //      assertNotNull(getStorage().getRepositoryInfo().getLatestChangeLogToken());
-      if (getStorage().getRepositoryInfo().getCmisVersionSupported() == null)
-         doFail(testname, "Repository version supported  is null;");
+      assertNotNull("Repository version supported  is null;", getStorage().getRepositoryInfo().getCmisVersionSupported());
       //      assertNotNull(getStorage().getRepositoryInfo().getThinClientURI());
       //      if(getStorage().getRepositoryInfo().isChangesIncomplete().)
       //         doFail(testname, "Repository Description  is null;");
-      if (getStorage().getRepositoryInfo().getChangesOnType() == null)
-         doFail(testname, "Repository Changes on type  is null;");
-      if (getStorage().getRepositoryInfo().getAclCapability() == null)
-         doFail(testname, "Repository ACL capability  is null;");
-      if (getStorage().getRepositoryInfo().getAclCapability().getSupportedPermissions() == null)
-         doFail(testname, "Repository supported permissions  is null;");
-      if (getStorage().getRepositoryInfo().getAclCapability().getPropagation() == null)
-         doFail(testname, "Repository ACL propagation  is null;");
-      if (getStorage().getRepositoryInfo().getAclCapability().getPermissions() == null)
-         doFail(testname, "Repository ACL permissions  is null;");
-      if (getStorage().getRepositoryInfo().getAclCapability().getMapping() == null)
-         doFail(testname, "Repository ACL mapping  is null;");
-      if (getStorage().getRepositoryInfo().getPrincipalAnonymous() == null)
-         doFail(testname, "Repository principal anonymous  is null;");
-      if (getStorage().getRepositoryInfo().getPrincipalAnyone() == null)
-         doFail(testname, "Repository principal anyone  is null;");
-      pass(testname);
+      assertNotNull("Repository Changes on type  is null;", getStorage().getRepositoryInfo().getChangesOnType());
+      assertNotNull("Repository ACL capability  is null;", getStorage().getRepositoryInfo().getAclCapability());
+         
+      assertNotNull("Repository supported permissions  is null;", getStorage().getRepositoryInfo().getAclCapability().getSupportedPermissions());
+      assertNotNull("Repository ACL propagation  is null;", getStorage().getRepositoryInfo().getAclCapability().getPropagation());
+      assertNotNull("Repository ACL permissions  is null;", getStorage().getRepositoryInfo().getAclCapability().getPermissions());
+      assertNotNull("Repository ACL mapping  is null;", getStorage().getRepositoryInfo().getAclCapability().getMapping());
+      assertNotNull("Repository principal anonymous  is null;", getStorage().getRepositoryInfo().getPrincipalAnonymous());
+      assertNotNull("Repository principal anyone  is null;", getStorage().getRepositoryInfo().getPrincipalAnyone());
+
    }
 
    /**
@@ -169,54 +136,36 @@ public class RepositoryTest extends BaseTest
    @Test
    public void testGetTypeChildren_Root() throws Exception
    {
-      String testname = "testGetTypeChildren_Root";
-      System.out.print("Running " + testname + "....                                       ");
       // root types
       ItemsList<TypeDefinition> typeChildren0 = null;
-      try
-      {
-         typeChildren0 = getConnection().getTypeChildren(null, true, -1, 0);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
-      }
-      if (typeChildren0 == null)
-         doFail(testname, "Root typer childrens is null;");
+      typeChildren0 = getConnection().getTypeChildren(null, true, -1, 0);
+      assertNotNull("Root typer childrens is null;", typeChildren0);
+         
       List<TypeDefinition> typeChildrenList = typeChildren0.getItems();
-      if (typeChildrenList == null)
-         doFail(testname, "Root typer childrens is empty;");
+      assertNotNull("Root typer childrens is empty;", typeChildrenList);
       List<String> ll = new ArrayList<String>();
       ll.add(CmisConstants.DOCUMENT);
       ll.add(CmisConstants.FOLDER);
       for (TypeDefinition typeDefinition : typeChildrenList)
       {
-         if (typeDefinition == null)
-            doFail(testname, "TypeDefinition is null;");
-         if (typeDefinition.getId() == null)
-            doFail(testname, "TypeDefinition  ID is null;");
-         if (typeDefinition.getId().equals(""))
-            doFail(testname, "TypeDefinition  ID is empty;");
-         if (typeDefinition.getBaseId() == null)
-            doFail(testname, "TypeDefinition  BaseId is empty;");
-         if (!typeDefinition.getId().equals(typeDefinition.getBaseId().value()))
-            doFail(testname, "TypeDefinition  BaseId  does not match;");
-         if (typeDefinition.getDisplayName() == null)
-            doFail(testname, "TypeDefinition  display name is null;");
-         if (typeDefinition.getLocalName() == null)
-            doFail(testname, "TypeDefinition  local name is null;");
-         if (typeDefinition.getQueryName() == null)
-            doFail(testname, "TypeDefinition query name is null;");
+         assertNotNull("TypeDefinition is null;", typeDefinition);
+         assertNotNull("TypeDefinition  ID is null;", typeDefinition.getId());
+         assertTrue("TypeDefinition  ID is empty;", !typeDefinition.getId().equals(""));
+         assertNotNull("TypeDefinition  BaseId is empty;", typeDefinition.getBaseId());
+         assertTrue("TypeDefinition  BaseId  does not match;", typeDefinition.getId().equals(typeDefinition.getBaseId().value()));
+            
+         assertNotNull("TypeDefinition  display name is null;", typeDefinition.getDisplayName());
+         assertNotNull("TypeDefinition  local name is null;", typeDefinition.getLocalName());
+         assertNotNull("TypeDefinition query name is null;", typeDefinition.getQueryName());
          checkPropertyDefinitions(typeDefinition.getPropertyDefinitions());
 
          if (ll.size() > 0)
             if (!ll.contains(typeDefinition.getId()))
-               doFail(testname, "Mandatory type definition not found;");
+               fail("Mandatory type definition not found;");
          ll.remove(typeDefinition.getId());
       }
       if (!ll.isEmpty())
-         doFail(testname, "Not all mandatory types found;");
-      pass(testname);
+         fail("Not all mandatory types found;");
    }
 
    /**
@@ -228,23 +177,11 @@ public class RepositoryTest extends BaseTest
    @Test
    public void testGetTypeChildren_RootWithMaxItems() throws Exception
    {
-      String testname = "testGetTypeChildren_RootWithMaxItems";
-      System.out.print("Running " + testname + "....                           ");
       // root types with maxItems
       ItemsList<TypeDefinition> typeChildren3 = null;
-      try
-      {
          typeChildren3 = getConnection().getTypeChildren(null, true, 1, 0);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
-      }
-      if (typeChildren3 == null)
-         doFail(testname, "Root type childrens is null;");
-      if (typeChildren3.getItems().size() != 1)
-         doFail(testname, "Incorrect Root type childrens size;");
-      pass(testname);
+      assertNotNull("Root type childrens is null;", typeChildren3);
+      assertTrue("Incorrect Root type childrens size;", typeChildren3.getItems().size() == 1);
    }
 
    /**
@@ -256,36 +193,17 @@ public class RepositoryTest extends BaseTest
    @Test
    public void testGetTypeChildren_RootWithSkipCount() throws Exception
    {
-      String testname = "testGetTypeChildren_RootWithSkipCount";
-      System.out.print("Running " + testname + "....                          ");
       // get size of root types
       ItemsList<TypeDefinition> typeChildren0 = null;
-      try
-      {
          typeChildren0 = getConnection().getTypeChildren(null, true, -1, 0);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
-      }
       List<TypeDefinition> typeChildrenList = typeChildren0.getItems();
       int sizeOfRootTypes = typeChildrenList.size();
 
       // root types with skipCount
       ItemsList<TypeDefinition> typeChildren4 = null;
-      try
-      {
          typeChildren4 = getConnection().getTypeChildren(null, true, -1, sizeOfRootTypes - 1);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
-      }
-      if (typeChildren4 == null)
-         doFail(testname, "Root type childrens is null;");
-      if (typeChildren4.getItems().size() != 1)
-         doFail(testname, "Incorrect Root type childrens size;");
-      pass(testname);
+         assertNotNull("Root type childrens is null;", typeChildren4);
+         assertTrue("Incorrect Root type childrens size;", typeChildren4.getItems().size() == 1);
    }
 
    /**
@@ -297,23 +215,11 @@ public class RepositoryTest extends BaseTest
    @Test
    public void testGetTypeChildren_Folder() throws Exception
    {
-      String testname = "testGetTypeChildren_Folder";
-      System.out.print("Running " + testname + "....                                     ");
       // folder
       ItemsList<TypeDefinition> typeChildren1 = null;
-      try
-      {
          typeChildren1 = getConnection().getTypeChildren("cmis:folder", true, -1, 0);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
-      }
-      if (typeChildren1 == null)
-         doFail(testname, "Root type childrens is null;");
-      if (!typeChildren1.isHasMoreItems())
-         doFail(testname, "Has more items not set in result;");
-      pass(testname);
+      assertNotNull("Root type childrens is null;", typeChildren1);
+      assertTrue("Has more items not set in result;", typeChildren1.isHasMoreItems());
    }
 
    /**
@@ -325,23 +231,11 @@ public class RepositoryTest extends BaseTest
    @Test
    public void testGetTypeChildren_Document() throws Exception
    {
-      String testname = "testGetTypeChildren_Document";
-      System.out.print("Running " + testname + "....                                   ");
       // document
       ItemsList<TypeDefinition> typeChildren2 = null;
-      try
-      {
          typeChildren2 = getConnection().getTypeChildren("cmis:document", true, -1, 0);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
-      }
-      if (typeChildren2 == null)
-         doFail(testname, "Root type childrens is null;");
-      if (!typeChildren2.isHasMoreItems())
-         doFail(testname, "Has more items not set in result;");
-      pass(testname);
+         assertNotNull("Root type childrens is null;", typeChildren2);
+         assertTrue("Has more items not set in result;", typeChildren2.isHasMoreItems());
    }
 
    /**
@@ -354,20 +248,14 @@ public class RepositoryTest extends BaseTest
    public void testGetTypeChildren_NonExistedType() throws Exception
    {
       // to get children for nonexistent type "cmis:kino"
-      String testname = "testGetTypeChildren_NonExistedType";
-      System.out.print("Running " + testname + "....                             ");
       try
       {
          getConnection().getTypeChildren("cmis:kino", false, -1, 0);
-         doFail(testname, "The type definition \"cmis:kino\" shouldn't exist.'");
+         fail("The type definition \"cmis:kino\" shouldn't exist.'");
       }
       catch (TypeNotFoundException e)
       {
-         pass(testname);
-      }
-      catch (Exception ex)
-      {
-         doFail(testname, ex.getMessage());
+         //OK
       }
    }
 
@@ -379,46 +267,26 @@ public class RepositoryTest extends BaseTest
    @Test
    public void testGetTypeDescendants() throws Exception
    {
-      String testname = "testGetTypeDescendants";
-      System.out.print("Running " + testname + "....                                         ");
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
-      try
-      {
          typeDescendants = getConnection().getTypeDescendants(null, 2, true);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
-      }
-      if (typeDescendants == null)
-         doFail(testname, "Type Descendants is null;");
-      if (!(typeDescendants.size() > 0))
-         doFail(testname, "Type Descendants is empty;");
+      assertNotNull("Type Descendants is null;", typeDescendants);
+      assertTrue("Type Descendants is empty;", typeDescendants.size() > 0);
+
       for (ItemsTree<TypeDefinition> itemsTree : typeDescendants)
       {
-         if (itemsTree == null)
-            doFail(testname, "Items tree is null;");
-         if (itemsTree.getChildren() == null)
-            doFail(testname, "Items tree children is null;");
-         if (itemsTree.getChildren().size() != 0)
-            doFail(testname, "Items tree children is not empty;");
-         if (itemsTree.getContainer() == null)
-            doFail(testname, "Items tree container is null;");
-         if (itemsTree.getContainer().getId() == null)
-            doFail(testname, "Items tree container ID is null;");
-         if (itemsTree.getContainer().getId().equals(""))
-            doFail(testname, "Items tree container ID is empty;");
-         if (itemsTree.getContainer().getDisplayName() == null)
-            doFail(testname, "Items tree container DisplayName is empty;");
-         if (itemsTree.getContainer().getLocalName() == null)
-            doFail(testname, "Items tree container LocalName is empty;");
-         if (itemsTree.getContainer().getQueryName() == null)
-            doFail(testname, "Items tree container QueryName is empty;");
-         if (itemsTree.getContainer().getBaseId() == null)
-            doFail(testname, "Items tree container BaseId is empty;");
+         assertNotNull("Items tree is null;", itemsTree);
+         assertNotNull("Items tree children is null;", itemsTree.getChildren());
+         assertTrue("Items tree children is not empty;", itemsTree.getChildren().size() == 0);
+         assertNotNull("Items tree container is null;", itemsTree.getContainer());
+         assertNotNull("Items tree container ID is null;",itemsTree.getContainer().getId());
+            
+         assertTrue("Items tree container ID is empty;", !itemsTree.getContainer().getId().equals(""));
+         assertNotNull ("Items tree container DisplayName is empty;", itemsTree.getContainer().getDisplayName());
+         assertNotNull("Items tree container LocalName is empty;", itemsTree.getContainer().getLocalName());
+         assertNotNull("Items tree container QueryName is empty;", itemsTree.getContainer().getQueryName() == null);
+         assertNotNull("Items tree container BaseId is empty;", itemsTree.getContainer().getBaseId());
          checkPropertyDefinitions(itemsTree.getContainer().getPropertyDefinitions());
       }
-      pass(testname);
    }
 
    /**
@@ -429,22 +297,10 @@ public class RepositoryTest extends BaseTest
    @Test
    public void testGetTypeDescendants_Folder() throws Exception
    {
-      String testname = "testGetTypeDescendants_Folder";
-      System.out.print("Running " + testname + "....                                  ");
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
-      try
-      {
          typeDescendants = getConnection().getTypeDescendants("cmis:folder", 2, true);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
-      }
-      if (typeDescendants == null)
-         doFail(testname, "Type Descendants is null;");
-      if (typeDescendants.size() != 0)
-         doFail(testname, "Type Descendants is not empty;");
-      pass(testname);
+         assertNotNull("Type Descendants is null;", typeDescendants);
+         assertTrue("Type Descendants is not empty;", typeDescendants.size() == 0);
    }
 
    /**
@@ -455,22 +311,10 @@ public class RepositoryTest extends BaseTest
    @Test
    public void testGetTypeDescendants_Document() throws Exception
    {
-      String testname = "testGetTypeDescendants_Document";
-      System.out.print("Running " + testname + "....                                ");
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
-      try
-      {
          typeDescendants = getConnection().getTypeDescendants("cmis:document", 2, true);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
-      }
-      if (typeDescendants == null)
-         doFail(testname, "Type Descendants is null;");
-      if (typeDescendants.size() != 0)
-         doFail(testname, "Type Descendants is not empty;");
-      pass(testname);
+         assertNotNull("Type Descendants is null;", typeDescendants);
+         assertTrue("Type Descendants is not empty;", typeDescendants.size() == 0);
    }
 
    /**
@@ -481,31 +325,16 @@ public class RepositoryTest extends BaseTest
    @Test
    public void testGetTypeDescendants_IncludePropertyDefinitionFalse() throws Exception
    {
-      String testname = "testGetTypeDescendants_IncludePropertyDefinitionFalse";
-      System.out.print("Running " + testname + "....          ");
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
-      try
-      {
          typeDescendants = getConnection().getTypeDescendants(null, 2, false);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
-      }
-      if (typeDescendants == null)
-         doFail(testname, "Type Descendants is null;");
-      if (!(typeDescendants.size() > 0))
-         doFail(testname, "Type Descendants is empty;");
+         assertNotNull("Type Descendants is null;", typeDescendants);
+         assertTrue("Type Descendants is  empty;", typeDescendants.size() > 0);
       for (ItemsTree<TypeDefinition> itemsTree : typeDescendants)
       {
-         if (itemsTree == null)
-            doFail(testname, "Items tree is null;");
-         if (itemsTree.getContainer() == null)
-            doFail(testname, "Items tree container is null;");
-         if (itemsTree.getContainer().getPropertyDefinitions() != null)
-            doFail(testname, "Property definitions must be empty;");
+         assertNotNull("Items tree is null;", itemsTree);
+         assertNotNull("Items tree container is null;", itemsTree.getContainer());
+         assertNull("Property definitions must be empty;", itemsTree.getContainer().getPropertyDefinitions());
       }
-      pass(testname);
    }
 
    /**
@@ -516,29 +345,15 @@ public class RepositoryTest extends BaseTest
    @Test
    public void testGetTypeDescendants_RootWithDepth1() throws Exception
    {
-      String testname = "testGetTypeDescendants_RootWithDepth1";
-      System.out.print("Running " + testname + "....                          ");
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
-      try
-      {
          typeDescendants = getConnection().getTypeDescendants(null, 1, true);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
-      }
-      if (typeDescendants == null)
-         doFail(testname, "Type Descendants is null;");
-      if (!(typeDescendants.size() > 0))
-         doFail(testname, "Type Descendants is empty;");
+      assertNotNull("Type Descendants is null;", typeDescendants);
+      assertTrue("Type Descendants is empty;", typeDescendants.size() > 0);
       for (ItemsTree<TypeDefinition> itemsTree : typeDescendants)
       {
-         if (itemsTree == null)
-            doFail(testname, "Items tree is null;");
-         if (itemsTree.getChildren() != null)
-            doFail(testname, "Childrens must be empty;");
+         assertNotNull("Items tree is null;", itemsTree);
+         assertNull("Childrens must be empty;", itemsTree.getChildren());
       }
-      pass(testname);
    }
 
    /**
@@ -549,20 +364,14 @@ public class RepositoryTest extends BaseTest
    @Test
    public void testGetTypeDescendants_NonExistedType() throws Exception
    {
-      String testname = "testGetTypeDescendants_NonExistedType";
-      System.out.print("Running " + testname + "....                          ");
       try
       {
          getConnection().getTypeDescendants("cmis:kino", 2, true);
-         doFail(testname, "The type definition \"cmis:kino\" shouldn't exist.'");
+        fail("The type definition \"cmis:kino\" shouldn't exist.'");
       }
       catch (TypeNotFoundException e)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
    }
 
@@ -574,20 +383,13 @@ public class RepositoryTest extends BaseTest
    @Test
    public void testGetTypeDefinition_Folder() throws Exception
    {
-      String testname = "testGetTypeDefinition_Folder";
-      System.out.print("Running " + testname + "....                                   ");
-      if (folderTypeDefinition == null)
-         doFail(testname, "Folder type definition is null;");
-      if (folderTypeDefinition.getId() == null)
-         doFail(testname, "Folder type definition ID is null;");
-      if (folderTypeDefinition.getId().equals(""))
-         doFail(testname, "Folder type definition ID is empty;");
-      if (folderTypeDefinition.getLocalName() == null)
-         doFail(testname, "Folder type definition local name is empty;");
-      if (folderTypeDefinition.getQueryName() == null)
-         doFail(testname, "Folder type definition query name is empty;");
+      assertNotNull("Folder type definition is null;", folderTypeDefinition);
+      assertNotNull("Folder type definition ID is null;", folderTypeDefinition.getId());
+
+      assertTrue("Folder type definition ID is empty;", !folderTypeDefinition.getId().equals(""));
+      assertNotNull("Folder type definition local name is empty;", folderTypeDefinition.getLocalName());
+      assertNotNull("Folder type definition query name is empty;", folderTypeDefinition.getQueryName());
       checkPropertyDefinitions(folderTypeDefinition.getPropertyDefinitions());
-      pass(testname);
    }
 
    /**
@@ -598,20 +400,13 @@ public class RepositoryTest extends BaseTest
    @Test
    public void testGetTypeDefinition_Document() throws Exception
    {
-      String testname = "testGetTypeDefinition_Document";
-      System.out.print("Running " + testname + "....                                 ");
-      if (documentTypeDefinition == null)
-         doFail(testname, "Document type definition is null;");
-      if (documentTypeDefinition.getId() == null)
-         doFail(testname, "Document type definition ID is null;");
-      if (documentTypeDefinition.getId().equals(""))
-         doFail(testname, "Document type definition ID is empty;");
-      if (documentTypeDefinition.getLocalName() == null)
-         doFail(testname, "Document type definition local name is empty;");
-      if (documentTypeDefinition.getQueryName() == null)
-         doFail(testname, "Document type definition query name is empty;");
+      assertNotNull("Document type definition is null;",documentTypeDefinition);
+      assertNotNull("Document type definition ID is null;", documentTypeDefinition.getId());
+         
+      assertTrue("Document type definition ID is empty;", !documentTypeDefinition.getId().equals(""));
+      assertNotNull("Document type definition local name is empty;", documentTypeDefinition.getLocalName());
+      assertNotNull("Document type definition query name is empty;", documentTypeDefinition.getQueryName());
       checkPropertyDefinitions(documentTypeDefinition.getPropertyDefinitions());
-      pass(testname);
    }
 
    /**
@@ -622,20 +417,14 @@ public class RepositoryTest extends BaseTest
    @Test
    public void testGetTypeDefinition_NonExistedType() throws Exception
    {
-      String testname = "testGetTypeDefinition_NonExistedType";
-      System.out.print("Running " + testname + "....                           ");
       try
       {
          getConnection().getTypeDefinition("cmis:kino", false);
-         doFail(testname, "The type definition \"cmis:kino\" shouldn't exist.'");
+         fail("The type definition \"cmis:kino\" shouldn't exist.'");
       }
       catch (TypeNotFoundException e)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
    }
 
@@ -647,54 +436,32 @@ public class RepositoryTest extends BaseTest
    @Test
    public void testGetTypeDefinition_IncludePropertyDefinitionFalse() throws Exception
    {
-      String testname = "testGetTypeDefinition_IncludePropertyDefinitionFalse";
-      System.out.print("Running " + testname + "....           ");
       TypeDefinition typeDefinition = null;
-      try
-      {
-         typeDefinition = getConnection().getTypeDefinition("cmis:folder", false);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
-      }
-      if (typeDefinition == null)
-         doFail(testname, "Type definition is null;");
-      if (typeDefinition.getId() == null)
-         doFail(testname, "Type definition ID is null;");
-      if (typeDefinition.getId().equals(""))
-         doFail(testname, "Type definition ID is empty;");
-      if (typeDefinition.getLocalName() == null)
-         doFail(testname, "Type definition local name is empty;");
-      if (typeDefinition.getQueryName() == null)
-         doFail(testname, "Type definition query name is empty;");
+      typeDefinition = getConnection().getTypeDefinition("cmis:folder", false);
+      assertNotNull("Type definition is null;", typeDefinition);
+      assertNotNull("Type definition ID is null;", typeDefinition.getId());
+
+      assertFalse("Type definition ID is empty;", typeDefinition.getId().equals(""));
+      assertNotNull("Type definition local name is empty;", typeDefinition.getLocalName());
+      assertNotNull("Type definition query name is empty;", typeDefinition.getQueryName());
+
       Collection<PropertyDefinition<?>> propertyDefinitions = typeDefinition.getPropertyDefinitions();
-      if (propertyDefinitions != null)
-         doFail(testname, "Property definitions must not be included;");
-      pass(testname);
+      assertNull("Property definitions must not be included;", propertyDefinitions);
    }
 
    private void checkPropertyDefinitions(Collection<PropertyDefinition<?>> propertyDefinitions) throws Exception
    {
-      String testname = "checkPropertyDefinitions";
-      if (propertyDefinitions == null)
-         doFail(testname, "propertyDefinitions is null;");
-      if (!(propertyDefinitions.size() > 0))
-         doFail(testname, "propertyDefinitions is not empty;");
+      assertNotNull("PropertyDefinitions is null;", propertyDefinitions);
+      assertTrue("PropertyDefinitions is not empty;", propertyDefinitions.size() == 0);
+         
       for (PropertyDefinition<?> propertyDefinition : propertyDefinitions)
       {
-         if (propertyDefinition == null)
-            doFail(testname, "Type definition is null;");
-         if (propertyDefinition.getId() == null)
-            doFail(testname, "Type definition ID is null;");
-         if (propertyDefinition.getId().equals(""))
-            doFail(testname, "Type definition ID is empty;");
-         if (propertyDefinition.getLocalName() == null)
-            doFail(testname, "Type definition local name is empty;");
-         if (propertyDefinition.getQueryName() == null)
-            doFail(testname, "Type definition query name is empty;");
-         if (propertyDefinition.getPropertyType() == null)
-            doFail(testname, "Type definition property type is empty;");
+         assertNotNull("Type definition is null;", propertyDefinition);
+         assertNotNull("Type definition ID is null;", propertyDefinition.getId());
+         assertFalse("Type definition ID is empty;", propertyDefinition.getId().equals(""));
+         assertNotNull("Type definition local name is empty;", propertyDefinition.getLocalName());
+         assertNotNull("Type definition query name is empty;", propertyDefinition.getQueryName());
+         assertNotNull("Type definition property type is empty;", propertyDefinition.getPropertyType());
       }
    }
 
@@ -703,15 +470,5 @@ public class RepositoryTest extends BaseTest
    {
       if (BaseTest.conn != null)
          BaseTest.conn.close();
-   }
-
-   protected void pass(String method) throws Exception
-   {
-      super.pass("RepositoryTest." + method);
-   }
-
-   protected void doFail(String method, String message) throws Exception
-   {
-      super.doFail("RepositoryTest." + method, message);
    }
 }

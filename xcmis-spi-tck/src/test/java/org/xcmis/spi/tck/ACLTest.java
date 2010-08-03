@@ -18,6 +18,8 @@
  */
 package org.xcmis.spi.tck;
 
+import static org.junit.Assert.*;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,8 +56,8 @@ public class ACLTest extends BaseTest
 {
 
    static FolderData testroot = null;
-
    String username = "username";
+   static CapabilityACL capability = null;
 
    @BeforeClass
    public static void start() throws Exception
@@ -65,6 +67,7 @@ public class ACLTest extends BaseTest
       testroot =
          getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
             null, null);
+      capability = getCapabilities().getCapabilityACL();
    }
 
    /**
@@ -75,8 +78,6 @@ public class ACLTest extends BaseTest
    @Test
    public void testGetACL_Simple() throws Exception
    {
-      String testname = "testGetACL_Simple";
-      System.out.print("Running " + testname + "....                                              ");
       try
       {
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
@@ -86,30 +87,19 @@ public class ACLTest extends BaseTest
             getStorage().createDocument(testroot, documentTypeDefinition,
                getPropsMap(CmisConstants.DOCUMENT, "testGetACL_Simple"), cs, addACL, null, VersioningState.MAJOR);
          List<AccessControlEntry> res = getConnection().getACL(doc1.getObjectId(), false);
-         if (res == null)
-            doFail(testname, "Getting ACL failed;");
+         assertNotNull("Getting ACL failed;", res);
          for (AccessControlEntry one : res)
          {
             if (one.getPrincipal().equalsIgnoreCase(username))
             {
-               if (one.getPermissions().size() != 1)
-                  doFail(testname, "Incorrect items number in result;");
-               if (!one.getPermissions().contains("cmis:read"))
-                  doFail(testname, "Setting ACL failed");
+               assertTrue("Incorrect items number in result;", one.getPermissions().size() == 1);
+               assertTrue("Setting ACL failed", one.getPermissions().contains("cmis:read"));
             }
          }
-         pass(testname);
       }
       catch (NotSupportedException ex)
       {
-         if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-            skip("ACLTest.testGetACL_Simple");
-         else
-            doFail(testname, "Capability ACL is supported but not supported exception thrown;");
-      }
-      catch (Exception ez)
-      {
-         doFail(testname, ez.getMessage());
+         //SKIP
       }
    }
 
@@ -121,12 +111,9 @@ public class ACLTest extends BaseTest
    @Test
    public void testApplyACL_Simple() throws Exception
    {
-      String testname = "testApplyACL_Simple";
-      System.out.print("Running " + testname + "....                                            ");
       try
       {
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
          List<AccessControlEntry> addACL = createACL(username, "cmis:read");
 
          DocumentData doc1 =
@@ -138,24 +125,14 @@ public class ACLTest extends BaseTest
          {
             if (one.getPrincipal().equalsIgnoreCase(username))
             {
-               if (one.getPermissions().size() != 1)
-                  doFail(testname, "Incorrect items number in result;");
-               if (!one.getPermissions().contains("cmis:read"))
-                  doFail(testname, "Setting ACL failed");
+               assertTrue("Incorrect items number in result;", one.getPermissions().size() == 1);
+               assertTrue("Setting ACL failed", one.getPermissions().contains("cmis:read"));
             }
          }
-         pass(testname);
       }
       catch (NotSupportedException ex)
       {
-         if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-            skip("ACLTest.testApplyACL_Simple");
-         else
-            doFail(testname, "Capability ACL is supported but not supported exception thrown");
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+          //SKIP
       }
    }
 
@@ -167,13 +144,10 @@ public class ACLTest extends BaseTest
    @Test
    public void testApplyACL_RemoveACE() throws Exception
    {
-      String testname = "testApplyACL_RemoveACE";
-      System.out.print("Running " + testname + "....                                         ");
       String typeID = null;
       try
       {
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
          List<AccessControlEntry> addACL = createACL(username, "cmis:read");
 
          Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
@@ -205,25 +179,14 @@ public class ACLTest extends BaseTest
          ObjectData obj = getStorage().getObjectById(doc1.getObjectId());
          for (AccessControlEntry one : obj.getACL(false))
          {
-            if (!one.getPrincipal().equalsIgnoreCase(username))
-            {
-               doFail(testname, "Remove ACE failed;");
-            }
+            assertTrue("Remove ACE failed;", one.getPrincipal().equalsIgnoreCase(username));
          }
-         pass(testname);
          getStorage().deleteObject(doc1, true);
          getStorage().removeType(typeID);
       }
       catch (NotSupportedException ex)
       {
-         if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-            skip("ACLTest.testApplyACL_RemoveACE");
-         else
-            doFail(testname, "Capability ACL is supported but not supported exception thrown");
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+        //SKIP
       }
    }
 
@@ -235,12 +198,9 @@ public class ACLTest extends BaseTest
    @Test
    public void testApplyACL_ConstraintExceptionACL() throws Exception
    {
-      String testname = "testApplyACL_ConstraintExceptionACL";
-      System.out.print("Running " + testname + "....                               ");
       try
       {
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
          List<AccessControlEntry> addACL = createACL(username, "cmis:read");
 
          DocumentData doc1 =
@@ -248,22 +208,19 @@ public class ACLTest extends BaseTest
                getPropsMap(CmisConstants.DOCUMENT, "testApplyACL_ConstraintExceptionACL"), cs, addACL, null,
                VersioningState.MAJOR);
          getConnection().applyACL(doc1.getObjectId(), null, addACL, AccessControlPropagation.OBJECTONLY);
-         doFail(testname, "Constraint exception must be thrown;");
+        fail("Constraint exception must be thrown;");
       }
       catch (NotSupportedException ex)
       {
-         if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-            skip("ACLTest." + testname);
+         if (capability.equals(CapabilityACL.NONE)){
+            //SKIP
+         }
          else
-            doFail(testname, "Capability ACL is supported but not supported exception thrown");
+            fail("Capability ACL is supported but not supported exception thrown");
       }
       catch (ConstraintException ec)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
    }
 
@@ -275,15 +232,11 @@ public class ACLTest extends BaseTest
    @Test
    public void testApplyACL_ConstraintExceptionACLPropagation() throws Exception
    {
-      String testname = "testApplyACL_ConstraintExceptionACLPropagation";
-      System.out.print("Running " + testname + "....                              ");
       FolderData testroot = null;
       try
       {
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
          List<AccessControlEntry> addACL = createACL(username, "cmis:read");
-
          ACLCapability capability = getStorage().getRepositoryInfo().getAclCapability();
 
          DocumentData doc1 =
@@ -295,22 +248,19 @@ public class ACLTest extends BaseTest
             getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.PROPAGATE);
          else if (capability.getPropagation().equals(AccessControlPropagation.PROPAGATE))
             getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.OBJECTONLY);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ec)
       {
-         pass(testname);
+         //OK
       }
       catch (NotSupportedException ex)
       {
-         if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-            skip("ACLTest." + testname);
+         if (capability.equals(CapabilityACL.NONE)){
+          //SKIP
+         }
          else
-            doFail(testname, "Capability ACL is supported but not supported exception thrown");
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+            fail("Capability ACL is supported but not supported exception thrown");
       }
    }
 
@@ -323,13 +273,10 @@ public class ACLTest extends BaseTest
    @Test
    public void testApplyACL_ConstraintExceptionACLNotMatch() throws Exception
    {
-      String testname = "testApplyACL_ConstraintExceptionACLNotMatch";
-      System.out.print("Running " + testname + "....                        ");
       FolderData testroot = null;
       try
       {
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
          List<AccessControlEntry> addACL = createACL(username, "cmis:unknown");
 
          DocumentData doc1 =
@@ -340,38 +287,24 @@ public class ACLTest extends BaseTest
       }
       catch (ConstraintException ec)
       {
-         pass(testname);
+         //OK
       }
       catch (NotSupportedException ex)
       {
-         if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-            skip("ACLTest." + testname);
+         if (capability.equals(CapabilityACL.NONE))
+         {
+            //SKIP
+         }
          else
-            doFail(testname, "Capability ACL is supported but not supported exception thrown");
+            fail("Capability ACL is supported but not supported exception thrown");
       }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
-      }
-   }
-
-   protected void pass(String method) throws Exception
-   {
-      super.pass("ACLTest." + method);
-   }
-
-   protected void doFail(String method, String message) throws Exception
-   {
-      super.doFail("ACLTest." + method, message);
    }
 
    @AfterClass
    public static void stop() throws Exception
    {
-
       if (testroot != null)
          clear(testroot.getObjectId());
-
       if (BaseTest.conn != null)
          BaseTest.conn.close();
    }

@@ -19,6 +19,8 @@
 
 package org.xcmis.spi.tck;
 
+import static org.junit.Assert.*;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -60,11 +62,9 @@ public class DiscoveryTest extends BaseTest
    @Test
    public void testQuery() throws Exception
    {
-      String testname = "testQuery";
-      System.out.print("Running " + testname + "....                                                      ");
       if (getStorage().getRepositoryInfo().getCapabilities().getCapabilityQuery().equals(CapabilityQuery.NONE))
       {
-         skip("DiscoveryTest.testQuery");
+         //SKIP
          return;
       }
       FolderData parentFolder = null;
@@ -78,28 +78,19 @@ public class DiscoveryTest extends BaseTest
          query =
             getConnection().query(statement, true, false, IncludeRelationships.BOTH, true, RenditionFilter.ANY, -1, 0);
 
-         if (query == null)
-            doFail(testname, "Quary failed;");
-         if (query.getItems() == null)
-            doFail(testname, "Quary failed - no items;");
-         if (query.getItems().size() != 1)
-            doFail(testname, "Quary failed -  incorrect items number;");
+         assertNotNull("Quary failed;", query);
+         assertNotNull("Quary failed - no items;", query.getItems());
+         assertTrue("Quary failed -  incorrect items number;", query.getItems().size() == 1);
 
          List<CmisObject> result = query.getItems();
          for (CmisObject cmisObject : result)
          {
-            if (cmisObject == null)
-               doFail(testname, "Query result not found;");
-            if (cmisObject.getObjectInfo() == null)
-               doFail(testname, "ObjectInfo not found in query result;");
-            if (cmisObject.getObjectInfo().getId() == null)
-               doFail(testname, "ObjectId not found in query result;");
-            if (!documentData.getObjectId().equals(cmisObject.getObjectInfo().getId()))
-               doFail(testname, "ObjectId's does not match;");
-            if (!documentData.getName().equals(cmisObject.getObjectInfo().getName()))
-               doFail(testname, "Object names does not match;");
+            assertNotNull ("Query result not found;", cmisObject);
+            assertNotNull("ObjectInfo not found in query result;", cmisObject.getObjectInfo());
+            assertNotNull ("ObjectId not found in query result;", cmisObject.getObjectInfo().getId());
+            assertTrue ("ObjectId's does not match;", documentData.getObjectId().equals(cmisObject.getObjectInfo().getId()));
+            assertTrue("Object names does not match;", documentData.getName().equals(cmisObject.getObjectInfo().getName()));
          }
-         pass(testname);
       }
       finally
       {
@@ -115,11 +106,9 @@ public class DiscoveryTest extends BaseTest
    @Test
    public void testQuery2() throws Exception
    {
-      String testname = "testQuery2";
-      System.out.print("Running " + testname + "....                                                     ");
       if (getStorage().getRepositoryInfo().getCapabilities().getCapabilityQuery().equals(CapabilityQuery.NONE))
       {
-         skip("testQuery2");
+         //SKIP
          return;
       }
       FolderData parentFolder = null;
@@ -133,32 +122,21 @@ public class DiscoveryTest extends BaseTest
          query =
             getConnection().query(statement, false, false, IncludeRelationships.BOTH, true, RenditionFilter.ANY, -1, 0);
 
-         if (query == null)
-            doFail(testname, "Quary failed;");
-         if (query.getItems() == null)
-            doFail(testname, "Quary failed - no items;");
+         assertNotNull("Quary failed;", query);
+         assertNotNull("Quary failed - no items;", query.getItems());
          if (query.getItems().size() == 0)
-            doFail(testname, "Quary failed - no items;");
+            fail("Quary failed - no items;");
 
          List<CmisObject> result = query.getItems();
          for (CmisObject cmisObject : result)
          {
-            if (cmisObject == null)
-               doFail(testname, "Query result not found;");
-            if (cmisObject.getObjectInfo() == null)
-               doFail(testname, "ObjectInfo not found in query result;");
-            if (cmisObject.getObjectInfo().getId() == null)
-               doFail(testname, "ObjectId not found in query result;");
-            if (!documentData.getObjectId().equals(cmisObject.getObjectInfo().getId()))
-               doFail(testname, "ObjectId's does not match;");
-            if (!documentData.getName().equals(cmisObject.getObjectInfo().getName()))
-               doFail(testname, "Object names does not match;");
+            assertNotNull("Query result not found;", cmisObject);
+            assertNotNull("ObjectInfo not found in query result;", cmisObject.getObjectInfo());
+            
+            assertNotNull("ObjectId not found in query result;", cmisObject.getObjectInfo().getId());
+            assertTrue("ObjectId's does not match;", documentData.getObjectId().equals(cmisObject.getObjectInfo().getId()));
+            assertTrue("Object names does not match;", documentData.getName().equals(cmisObject.getObjectInfo().getName()));
          }
-         pass(testname);
-      }
-      catch (Exception ez)
-      {
-         doFail(testname, ez.getMessage());
       }
       finally
       {
@@ -174,10 +152,10 @@ public class DiscoveryTest extends BaseTest
    @Test
    public void testContentChanges() throws Exception
    {
-      String testname = "testContentChanges";
-      System.out.print("Running " + testname + "....                                             ");
       if (getStorage().getRepositoryInfo().getCapabilities().getCapabilityQuery().equals(CapabilityQuery.NONE))
-         skip("testQuery2");
+      {
+         //SKIP
+      }
       FolderData parentFolder = null;
       try
       {
@@ -187,20 +165,12 @@ public class DiscoveryTest extends BaseTest
          ItemsList<CmisObject> query = null;
 
          query = getConnection().getContentChanges(null, true, PropertyFilter.ALL, true, true, true, -1);
-
-         if (query == null)
-            doFail(testname, "Quary failed;");
-         if (query.getItems() == null)
-            doFail(testname, "Quary failed - no items;");
-         pass(testname);
+         assertNotNull("Quary failed;", query);
+         assertNotNull("Quary failed - no items;", query.getItems());
       }
       catch (NotSupportedException nse)
       {
-         skip("DiscoveryTest." + testname);
-      }
-      catch (Exception ez)
-      {
-         doFail(testname, ez.getMessage());
+         //SKIP
       }
       finally
       {
@@ -214,15 +184,4 @@ public class DiscoveryTest extends BaseTest
       if (BaseTest.conn != null)
          BaseTest.conn.close();
    }
-
-   protected void pass(String method) throws Exception
-   {
-      super.pass("DiscoveryTest." + method);
-   }
-
-   protected void doFail(String method, String message) throws Exception
-   {
-      super.doFail("DiscoveryTest." + method, message);
-   }
-
 }

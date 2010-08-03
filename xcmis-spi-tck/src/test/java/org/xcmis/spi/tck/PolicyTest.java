@@ -18,6 +18,8 @@
  */
 package org.xcmis.spi.tck;
 
+import static org.junit.Assert.*;
+
 import java.util.HashMap;
 
 import org.junit.AfterClass;
@@ -66,11 +68,9 @@ public class PolicyTest extends BaseTest
    @Test
    public void testApplyPolicy_Simple() throws Exception
    {
-      String testname = "testApplyPolicy_Simple";
-      System.out.print("Running " + testname + "....                                         ");
       if (!IS_POLICIES_SUPPORTED)
       {
-         skip("PolicyTest.testApplyPolicy_Simple");
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -78,12 +78,10 @@ public class PolicyTest extends BaseTest
       try
       {
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
-
          testroot =
             getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
                null, null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
                cs, null, null, VersioningState.MAJOR);
@@ -91,23 +89,15 @@ public class PolicyTest extends BaseTest
          policy = createPolicy(testroot, "policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
          ObjectData res = getStorage().getObjectById(doc1.getObjectId());
-         if (res.getPolicies().size() != 1)
-            doFail(testname, "Policies number incorrect;");
+         assertTrue("Policies number incorrect;", res.getPolicies().size() == 1);
          Iterator<PolicyData> it = res.getPolicies().iterator();
          while (it.hasNext())
          {
             PolicyData one = it.next();
-            if (!one.getName().equals("policy1"))
-               doFail(testname, "Policy name does not match;");
-            if (!one.getPolicyText().equals("testPolicyText"))
-               doFail(testname, "Policy text does not match;");
+            assertTrue("Policy name does not match;",one.getName().equals("policy1"));
+            assertTrue("Policy text does not match;",one.getPolicyText().equals("testPolicyText"));
             res.removePolicy(one);
          }
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -126,11 +116,9 @@ public class PolicyTest extends BaseTest
    @Test
    public void testApplyPolicy_ConstraintException() throws Exception
    {
-      String testname = "testApplyPolicy_ConstraintException";
-      System.out.print("Running " + testname + "....                            ");
       if (!IS_POLICIES_SUPPORTED)
       {
-         skip("PolicyTest.testApplyPolicy_ConstraintException");
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -174,15 +162,11 @@ public class PolicyTest extends BaseTest
 
          policy = createPolicy(testroot, "policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -201,11 +185,9 @@ public class PolicyTest extends BaseTest
    @Test
    public void testRemovePolicy_Simple() throws Exception
    {
-      String testname = "testRemovePolicy_Simple";
-      System.out.print("Running " + testname + "....                                        ");
       if (!IS_POLICIES_SUPPORTED)
       {
-         skip("PolicyTest.testApplyPolicy_ConstraintException");
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -227,15 +209,8 @@ public class PolicyTest extends BaseTest
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
          getConnection().removePolicy(policy.getObjectId(), doc1.getObjectId());
          ObjectData res = getStorage().getObjectById(doc1.getObjectId());
-         if (res.getPolicies().size() != 0)
-            doFail(testname, "Policy removing error;");
-         if (getStorage().getObjectById(policy.getObjectId()) == null)
-            doFail(testname, "Policy object deleted;");
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
+         assertTrue("Policy removing error;", res.getPolicies().size() == 0);
+         assertNotNull("Policy object deleted;",getStorage().getObjectById(policy.getObjectId()));
       }
       finally
       {
@@ -254,11 +229,9 @@ public class PolicyTest extends BaseTest
    @Test
    public void testRemovePolicy_ConstraintException() throws Exception
    {
-      String testname = "testRemovePolicy_ConstraintException";
-      System.out.print("Running " + testname + "....                           ");
       if (!IS_POLICIES_SUPPORTED)
       {
-         skip("PolicyTest.testApplyPolicy_ConstraintException");
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -303,15 +276,11 @@ public class PolicyTest extends BaseTest
          policy = createPolicy(testroot, "policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
          getConnection().removePolicy(policy.getObjectId(), doc1.getObjectId());
-         doFail(testname, "Constraint exception must be thrown;");
+         fail("Constraint exception must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+        //OK
       }
       finally
       {
@@ -331,11 +300,9 @@ public class PolicyTest extends BaseTest
    @Test
    public void testGetAppliedPolicies_Simple() throws Exception
    {
-      String testname = "testGetAppliedPolicies_Simple";
-      System.out.print("Running " + testname + "....                                  ");
       if (!IS_POLICIES_SUPPORTED)
       {
-         skip("PolicyTest.testGetAppliedPolicies_Simple");
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -356,20 +323,12 @@ public class PolicyTest extends BaseTest
          policy = createPolicy(testroot, "policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
          List<CmisObject> res = getConnection().getAppliedPolicies(doc1.getObjectId(), true, "");
-         if (res == null)
-            doFail(testname, "getAppliedPolicies() failed;");
+         assertNotNull("getAppliedPolicies() failed;", res);
          for (CmisObject one : res)
          {
-            if (one.getObjectInfo() == null)
-               doFail(testname, "ObjectInfo is not present in result;");
-            if (!one.getObjectInfo().getTypeId().equals("cmis:policy"))
-               doFail(testname, "Not a policy type object;");
-         }
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
+            assertNotNull("ObjectInfo is not present in result;", one.getObjectInfo());
+            assertTrue("Not a policy type object;", one.getObjectInfo().getTypeId().equals(CmisConstants.POLICY));
+        }
       }
       finally
       {
@@ -388,11 +347,9 @@ public class PolicyTest extends BaseTest
    @Test
    public void testGetAppliedPolicies_PropertiesFiltered() throws Exception
    {
-      String testname = "testGetAppliedPolicies_PropertiesFiltered";
-      System.out.print("Running " + testname + "....                      ");
       if (!IS_POLICIES_SUPPORTED)
       {
-         skip("PolicyTest.testGetAppliedPolicies_PropertiesFiltered");
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -420,14 +377,9 @@ public class PolicyTest extends BaseTest
                if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
                   continue;
                else
-                  doFail(testname, "Property filter works incorrect;");
+                 fail("Property filter works incorrect;");
             }
          }
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -445,11 +397,9 @@ public class PolicyTest extends BaseTest
    @Test
    public void testGetAppliedPolicies_FilterNotValidException() throws Exception
    {
-      String testname = "testGetAppliedPolicies_FilterNotValidException";
-      System.out.print("Running " + testname + "....                 ");
       if (!IS_POLICIES_SUPPORTED)
       {
-         skip("PolicyTest.testGetAppliedPolicies_FilterNotValidException");
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -470,15 +420,11 @@ public class PolicyTest extends BaseTest
          policy = createPolicy(testroot, "policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
          List<CmisObject> res = getConnection().getAppliedPolicies(doc1.getObjectId(), true, "(,*");
-         doFail(testname, "FilterNotValidException must be thrown;");
+        fail("FilterNotValidException must be thrown;");
       }
       catch (FilterNotValidException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -495,13 +441,4 @@ public class PolicyTest extends BaseTest
          BaseTest.conn.close();
    }
 
-   protected void pass(String method) throws Exception
-   {
-      super.pass("PolicyTest." + method);
-   }
-
-   protected void doFail(String method, String message) throws Exception
-   {
-      super.doFail("PolicyTest." + method, message);
-   }
 }

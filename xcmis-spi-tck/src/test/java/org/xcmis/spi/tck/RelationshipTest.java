@@ -18,6 +18,8 @@
  */
 package org.xcmis.spi.tck;
 
+import static org.junit.Assert.*;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -66,11 +68,9 @@ public class RelationshipTest extends BaseTest
    @Test
    public void testGetObjectRelationships_Simple() throws Exception
    {
-      String testname = "testGetObjectRelationships_Simple";
-      System.out.print("Running " + testname + "....                              ");
       if (!IS_RELATIONSHIPS_SUPPORTED)
       {
-         skip("RelationshipTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -79,21 +79,17 @@ public class RelationshipTest extends BaseTest
       try
       {
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
-
          testroot =
             getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
                null, null);
 
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
                cs, null, null, VersioningState.MAJOR);
-
          DocumentData doc2 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc2"),
                cs, null, null, VersioningState.MAJOR);
-
          DocumentData doc3 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc3"),
                cs, null, null, VersioningState.MAJOR);
@@ -109,14 +105,7 @@ public class RelationshipTest extends BaseTest
          ItemsList<CmisObject> obj =
             getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true, true,
                true, "", -1, 0);
-         if (obj.getItems().size() == 2)
-            pass(testname);
-         else
-            doFail(testname, "Unexpected items number;");
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
+         assertTrue("Unexpected items number;", obj.getItems().size() == 2);
       }
       finally
       {
@@ -136,14 +125,11 @@ public class RelationshipTest extends BaseTest
    @Test
    public void testGetObjectRelationships_CheckDirection() throws Exception
    {
-      String testname = "testGetObjectRelationships_CheckDirection";
-      System.out.print("Running " + testname + "....                      ");
       if (!IS_RELATIONSHIPS_SUPPORTED)
       {
-         skip("RelationshipTest." + testname);
+         //SKIP
          return;
       }
-
       FolderData testroot = null;
       RelationshipData reldata = null;
       RelationshipData reldata2 = null;
@@ -180,14 +166,7 @@ public class RelationshipTest extends BaseTest
          ItemsList<CmisObject> obj =
             getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.TARGET, null, true, true,
                true, PropertyFilter.ALL, -1, 0);
-         if (obj.getItems().size() == 1)
-            pass(testname);
-         else
-            doFail(testname, "Unexpected items number;");
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
+         assertTrue("Unexpected items number;", obj.getItems().size() == 1);
       }
       finally
       {
@@ -206,11 +185,9 @@ public class RelationshipTest extends BaseTest
    @Test
    public void testGetObjectRelationships_AllowableActions() throws Exception
    {
-      String testname = "testGetObjectRelationships_AllowableActions";
-      System.out.print("Running " + testname + "....                    ");
       if (!IS_RELATIONSHIPS_SUPPORTED)
       {
-         skip("RelationshipTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -252,16 +229,8 @@ public class RelationshipTest extends BaseTest
          for (CmisObject one : obj.getItems())
          {
             AllowableActions actions = one.getAllowableActions();
-            if (actions != null)
-               continue;
-            else
-               doFail(testname, "Allowable actions not found;");
+            assertNotNull("Allowable actions not found;", actions);
          }
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -280,11 +249,9 @@ public class RelationshipTest extends BaseTest
    @Test
    public void testGetObjectRelationships_TypeId() throws Exception
    {
-      String testname = "testGetObjectRelationships_TypeId";
-      System.out.print("Running " + testname + "....                              ");
       if (!IS_RELATIONSHIPS_SUPPORTED)
       {
-         skip("RelationshipTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -347,14 +314,7 @@ public class RelationshipTest extends BaseTest
          ItemsList<CmisObject> obj =
             getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, "cmis:kino", true,
                true, true, "", -1, 0);
-         if (obj.getItems().size() == 1)
-            pass(testname);
-         else
-            doFail(testname, "Unexpected items number;");
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
+         assertTrue("Unexpected items number;", obj.getItems().size() == 1);
       }
       finally
       {
@@ -376,11 +336,9 @@ public class RelationshipTest extends BaseTest
    @Test
    public void testGetObjectRelationships_IncludeSubrelationshipTypes() throws Exception
    {
-      String testname = "testGetObjectRelationships_IncludeSubrelationshipTypes";
-      System.out.print("Running " + testname + "....         ");
       if (!IS_RELATIONSHIPS_SUPPORTED)
       {
-         skip("RelationshipTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -446,19 +404,12 @@ public class RelationshipTest extends BaseTest
          ItemsList<CmisObject> obj =
             getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER,
                CmisConstants.RELATIONSHIP, true, true, true, "", -1, 0);
-         if (obj.getItems().size() != 2)
-            doFail(testname, "Unexpected items number;");
+         assertTrue("Unexpected items number;",obj.getItems().size() == 2);
 
          ItemsList<CmisObject> obj2 =
             getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER,
                CmisConstants.RELATIONSHIP, false, true, true, "", -1, 0);
-         if (obj2.getItems().size() != 1)
-            doFail(testname, "Unexpected items number;");
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
+         assertTrue("Unexpected items number;", obj2.getItems().size() == 1);
       }
       finally
       {
@@ -480,11 +431,9 @@ public class RelationshipTest extends BaseTest
    @Test
    public void testGetObjectRelationships_MaxItems() throws Exception
    {
-      String testname = "testGetObjectRelationships_MaxItems";
-      System.out.print("Running " + testname + "....                            ");
       if (!IS_RELATIONSHIPS_SUPPORTED)
       {
-         skip("RelationshipTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -523,14 +472,7 @@ public class RelationshipTest extends BaseTest
          ItemsList<CmisObject> obj =
             getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true, true,
                true, "", 1, 0);
-         if (obj.getItems().size() == 1)
-            pass(testname);
-         else
-            doFail(testname, "Unexpected items number;");
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
+         assertTrue("Unexpected items number;",obj.getItems().size() == 1);
       }
       finally
       {
@@ -550,11 +492,9 @@ public class RelationshipTest extends BaseTest
    @Test
    public void testGetObjectRelationships_SkipCount() throws Exception
    {
-      String testname = "testGetObjectRelationships_SkipCount";
-      System.out.print("Running " + testname + "....                           ");
       if (!IS_RELATIONSHIPS_SUPPORTED)
       {
-         skip("RelationshipTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -593,14 +533,7 @@ public class RelationshipTest extends BaseTest
          ItemsList<CmisObject> obj =
             getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true, true,
                true, "", -1, 1);
-         if (obj.getItems().size() == 1)
-            pass(testname);
-         else
-            doFail(testname, "Unexpected items number;");
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
+         assertTrue("Unexpected items number;",obj.getItems().size() == 1);
       }
       finally
       {
@@ -620,11 +553,9 @@ public class RelationshipTest extends BaseTest
    @Test
    public void testGetObjectRelationships_Paging() throws Exception
    {
-      String testname = "testGetObjectRelationships_Paging";
-      System.out.print("Running " + testname + "....                              ");
       if (!IS_RELATIONSHIPS_SUPPORTED)
       {
-         skip("RelationshipTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -663,22 +594,16 @@ public class RelationshipTest extends BaseTest
          ItemsList<CmisObject> obj =
             getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true, true,
                true, "", 1, 0);
-         if (obj.getItems().size() != 1)
-            doFail(testname, "Unexpected items number;");
+         assertTrue("Unexpected items number;",obj.getItems().size() == 1);
 
          if (obj.getNumItems() == 2 || obj.getNumItems() == -1)
          {
             //OK
          }
          else
-            doFail(testname, "Unexpected items number;");
+            fail("Unexpected items number;");
          if (!obj.isHasMoreItems())
-            doFail(testname, "Has more items value is incorrect");
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
+            fail("Has more items value is incorrect");
       }
       finally
       {
@@ -698,11 +623,9 @@ public class RelationshipTest extends BaseTest
    @Test
    public void testGetObjectRelationships_PropertyFiltered() throws Exception
    {
-      String testname = "testGetObjectRelationships_PropertyFiltered";
-      System.out.print("Running " + testname + "....                    ");
       if (!IS_RELATIONSHIPS_SUPPORTED)
       {
-         skip("RelationshipTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -741,8 +664,7 @@ public class RelationshipTest extends BaseTest
          ItemsList<CmisObject> obj =
             getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true, true,
                true, "cmis:name,cmis:path", -1, 0);
-         if (obj.getItems().size() != 2)
-            doFail(testname, "Unexpected items number;");
+         assertTrue("Unexpected items number;", obj.getItems().size() == 2);
 
          for (CmisObject one : obj.getItems())
          {
@@ -751,14 +673,9 @@ public class RelationshipTest extends BaseTest
                if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path"))
                   continue;//Other props must be ignored
                else
-                  doFail(testname, "Property filter works incorrect");
+                  fail("Property filter works incorrect");
             }
          }
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -777,11 +694,9 @@ public class RelationshipTest extends BaseTest
    @Test
    public void testGetObjectRelationships_FilterNotValidException() throws Exception
    {
-      String testname = "testGetObjectRelationships_FilterNotValidException";
-      System.out.print("Running " + testname + "....             ");
       if (!IS_RELATIONSHIPS_SUPPORTED)
       {
-         skip("RelationshipTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -820,15 +735,11 @@ public class RelationshipTest extends BaseTest
          ItemsList<CmisObject> obj =
             getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true, true,
                true, "(,*", -1, 0);
-         doFail(testname, "FilterNotValidException must be thrown;");
+         fail("FilterNotValidException must be thrown;");
       }
       catch (FilterNotValidException ex)
       {
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
+        //OK
       }
       finally
       {
@@ -846,13 +757,4 @@ public class RelationshipTest extends BaseTest
          BaseTest.conn.close();
    }
 
-   protected void pass(String method) throws Exception
-   {
-      super.pass("RelationshipTest." + method);
-   }
-
-   protected void doFail(String method, String message) throws Exception
-   {
-      super.doFail("RelationshipTest." + method, message);
-   }
 }

@@ -117,7 +117,6 @@ public class BaseTest
       rootfolderID = getStorage().getRepositoryInfo().getRootFolderId();
       rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
-      System.out.println(storageProvider);
       try
       {
          if (getStorage().getTypeDefinition(CmisConstants.POLICY, false) != null)
@@ -349,67 +348,99 @@ public class BaseTest
       return properties;
    }
 
-   protected RepositoryCapabilities getCapabilities()
+   protected static RepositoryCapabilities getCapabilities()
    {
       return getStorage().getRepositoryInfo().getCapabilities();
    }
 
-   protected void doFail(String mtd, String message) throws Exception
-   {
-      System.out.println("FAILED");
+//   protected void doFail(String mtd, String message) throws Exception
+//   {
+//      System.out.println("FAILED");
+//
+//      if (message != null)
+//      {
+//         AllTests.results.put(mtd, message);
+//         fail(message);
+//      }
+//      else
+//      {
+//         AllTests.results.put(mtd, "Unknown reason;");
+//         fail();
+//      }
+//   }
 
-      if (message != null)
-      {
-         AllTests.results.put(mtd, message);
-         fail(message);
-      }
-      else
-      {
-         AllTests.results.put(mtd, "Unknown reason;");
-         fail();
-      }
-   }
+//   protected void pass(String mtd) throws Exception
+//   {
+//      System.out.println("PASSED");
+//      AllTests.results.put(mtd, null);
+//   }
+//
+//   protected void skip(String mtd)
+//   {
+//      System.out.println("SKIPPED");
+//      AllTests.results.put(mtd, "Not supported by storage;");
+//   }
 
-   protected void pass(String mtd) throws Exception
-   {
-      System.out.println("PASSED");
-      //AllTests.passedTests.add(o);
-      AllTests.results.put(mtd, null);
-   }
-
-   protected void skip(String mtd)
-   {
-      System.out.println("SKIPPED");
-      AllTests.results.put(mtd, "Not supported by storage;");
-   }
-
-   protected static void removeRelationships(String folderId)
+//   protected static void removeRelationships(String folderId)
+//   {
+//      try
+//      {
+//         Connection connection = getConnection();
+//         ItemsList<CmisObject> childs =
+//            connection.getChildren(folderId, false, IncludeRelationships.BOTH, false, true, PropertyFilter.ALL,
+//               RenditionFilter.NONE, "", -1, 0);
+//         for (CmisObject one : childs.getItems())
+//         {
+//
+//            if (one.getObjectInfo().getBaseType().equals(BaseType.FOLDER))
+//            {
+//               removeRelationships(one.getObjectInfo().getId());
+//            }
+//            else
+//            {
+//               for (CmisObject relationship : one.getRelationship())
+//               {
+//                  connection.deleteObject(relationship.getObjectInfo().getId(), null);
+//               }
+//            }
+//         }
+//      }
+//      catch (ObjectNotFoundException e)
+//      {
+//
+//      }
+//      catch (Exception e)
+//      {
+//         e.printStackTrace();
+//      }
+//   }
+   
+   protected static void removeRelationships(String testroot)
    {
       try
       {
          Connection connection = getConnection();
-         ItemsList<CmisObject> childs =
-            connection.getChildren(folderId, false, IncludeRelationships.BOTH, false, true, PropertyFilter.ALL,
-               RenditionFilter.NONE, "", -1, 0);
-         for (CmisObject one : childs.getItems())
+         List<ItemsTree<CmisObject>> descendants =
+            connection.getDescendants(testroot, -1, false, IncludeRelationships.BOTH, false, true, PropertyFilter.ALL,
+               RenditionFilter.NONE);
+         for (ItemsTree<CmisObject> tr : descendants)
          {
-
-            if (one.getObjectInfo().getBaseType().equals(BaseType.FOLDER))
+            for (CmisObject relationship : tr.getContainer().getRelationship())
             {
-               removeRelationships(one.getObjectInfo().getId());
-            }
-            else
-            {
-               for (CmisObject relationship : one.getRelationship())
+               try
                {
                   connection.deleteObject(relationship.getObjectInfo().getId(), null);
                }
+               catch (ObjectNotFoundException e)
+               {
+               }
+            }
+            List<ItemsTree<CmisObject>> children = tr.getChildren();
+            if (children != null && children.size() > 0)
+            {
+               removeRelationships(tr.getContainer().getObjectInfo().getId());
             }
          }
-      }
-      catch (ObjectNotFoundException e)
-      {
-
       }
       catch (Exception e)
       {

@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertArrayEquals;
 
 import org.junit.AfterClass;
@@ -86,8 +87,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateDocument_CheckContent() throws Exception
    {
-      String testname = "testCreateDocument_CheckContent";
-      System.out.print("Running " + testname + "....                                ");
       FolderData testroot = null;
       try
       {
@@ -102,17 +101,10 @@ public class ObjectTest extends BaseTest
             getConnection().createDocument(testroot.getObjectId(), getPropsMap(CmisConstants.DOCUMENT, "doc1"), cs,
                null, null, null, VersioningState.MAJOR);
          ContentStream c = getStorage().getObjectById(docId).getContentStream(null);
-         if (!cs.getMediaType().equals(c.getMediaType()))
-            doFail(testname, "Media types does not match");
-
+         assertTrue("Media types does not match", cs.getMediaType().equals(c.getMediaType()));
          byte[] after = new byte[15];
          c.getStream().read(after);
          assertArrayEquals(before, after);
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -129,8 +121,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateDocument_CheckProperties() throws Exception
    {
-      String testname = "testCreateDocument_CheckProperties";
-      System.out.print("Running " + testname + "....                             ");
       FolderData testroot = null;
       try
       {
@@ -145,16 +135,9 @@ public class ObjectTest extends BaseTest
             getConnection().createDocument(testroot.getObjectId(), properties, cs, null, null, null,
                VersioningState.MAJOR);
          ObjectData res = getStorage().getObjectById(docId);
-         if (res.getProperty(CmisConstants.NAME) == null)
-            doFail(testname, "NAME property is null;");
+         assertNotNull("NAME property is null;", res.getProperty(CmisConstants.NAME));
          if (!((String)res.getProperty(CmisConstants.NAME).getValues().get(0)).equals("doc1")) //TODO: test more properties
-            doFail(testname, "Names does not match;");
-         pass(testname);
-
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
+            fail("Names does not match;");
       }
       finally
       {
@@ -171,11 +154,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateDocument_ApplyPolicy() throws Exception
    {
-      String testname = "testCreateDocument_ApplyPolicy";
-      System.out.print("Running " + testname + "....                                 ");
       if (!IS_POLICIES_SUPPORTED)
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -197,22 +178,14 @@ public class ObjectTest extends BaseTest
             getConnection().createDocument(testroot.getObjectId(), getPropsMap(CmisConstants.DOCUMENT, "doc1"), cs,
                null, null, policies, VersioningState.MAJOR);
          ObjectData res = getStorage().getObjectById(docId);
-         if (res.getPolicies().size() != 1)
-            doFail(testname, "Properties size iz incorrect");
+         assertTrue("Properties size iz incorrect", res.getPolicies().size() == 1);
          Iterator<PolicyData> it = res.getPolicies().iterator();
          while (it.hasNext())
          {
             PolicyData one = it.next();
-            if (!one.getName().equals("policy1"))
-               doFail(testname, "Policy names does not match");
-            if (!one.getPolicyText().equals("testPolicyText"))
-               doFail(testname, "Policy text does not match");
+            assertTrue("Policy names does not match", one.getName().equals("policy1"));
+            assertTrue("Policy text does not match", one.getPolicyText().equals("testPolicyText"));
          }
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -223,7 +196,6 @@ public class ObjectTest extends BaseTest
          if (testroot != null)
             clear(testroot.getObjectId());;
       }
-
    }
 
    /**
@@ -235,11 +207,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateDocument_AddACL() throws Exception
    {
-      String testname = "testCreateDocument_AddACL";
-      System.out.print("Running " + testname + "....                                    ");
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -261,24 +231,16 @@ public class ObjectTest extends BaseTest
          {
             if (one.getPrincipal().equalsIgnoreCase(username))
             {
-               if (one.getPermissions().size() != 1)
-                  doFail(testname, "Permissions size is incorrect");
-               if (!one.getPermissions().contains("cmis:read"))
-                  doFail(testname, "Permissions does not match");
+               assertTrue("Permissions size is incorrect", one.getPermissions().size() == 1);
+               assertTrue("Permissions does not match", one.getPermissions().contains("cmis:read"));
             }
          }
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
       }
       finally
       {
          if (testroot != null)
             clear(testroot.getObjectId());
       }
-
    }
 
    /**
@@ -291,8 +253,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateDocument_NameConstraintViolationException() throws Exception
    {
-      String testname = "testCreateDocument_NameConstraintViolationException";
-      System.out.print("Running " + testname + "....            ");
       FolderData testroot = null;
       try
       {
@@ -307,15 +267,11 @@ public class ObjectTest extends BaseTest
          String docId =
             getConnection().createDocument(testroot.getObjectId(), getPropsMap(CmisConstants.DOCUMENT, "doc1"), cs,
                null, null, null, VersioningState.MAJOR);
-         doFail(testname, "NameConstraintViolationException must be thrown;");
+         fail("NameConstraintViolationException must be thrown;");
       }
       catch (NameConstraintViolationException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -334,8 +290,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateDocument_StreamNotSupportedException() throws Exception
    {
-      String testname = "testCreateDocument_StreamNotSupportedException";
-      System.out.print("Running " + testname + "....                 ");
       FolderData testroot = null;
       String typeID = null;
       try
@@ -373,16 +327,11 @@ public class ObjectTest extends BaseTest
          String docId =
             getConnection().createDocument(testroot.getObjectId(), properties, cs, null, null, null,
                VersioningState.MAJOR);
-         doFail(testname, "StreamNotSupportedException must be thrown;");
-
+         fail("StreamNotSupportedException must be thrown;");
       }
       catch (StreamNotSupportedException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -401,8 +350,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateDocument_ConstraintExceptionWrongObjectType() throws Exception
    {
-      String testname = "testCreateDocument_ConstraintExceptionWrongObjectType";
-      System.out.print("Running " + testname + "....            ");
       FolderData testroot = null;
       String typeID = null;
       try
@@ -440,15 +387,11 @@ public class ObjectTest extends BaseTest
          String docId =
             getConnection().createDocument(testroot.getObjectId(), properties, cs, null, null, null,
                VersioningState.MAJOR);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -468,8 +411,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateDocument_ConstraintExceptionContentAllowed() throws Exception
    {
-      String testname = "testCreateDocument_ConstraintExceptionContentAllowed";
-      System.out.print("Running " + testname + "....         ");
       FolderData testroot = null;
       String typeID = null;
       try
@@ -488,8 +429,6 @@ public class ObjectTest extends BaseTest
             PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
                CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
                false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
-         //propertyDefinitions.put(CmisConstants.NAME, propDefName);
-         //propertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, propDefObjectTypeId);
 
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
          properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
@@ -506,15 +445,11 @@ public class ObjectTest extends BaseTest
          String docId =
             getConnection().createDocument(testroot.getObjectId(), properties, null, null, null, null,
                VersioningState.MAJOR);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -534,8 +469,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateDocument_ConstraintExceptionVersionable() throws Exception
    {
-      String testname = "testCreateDocument_ConstraintExceptionVersionable";
-      System.out.print("Running " + testname + "....            ");
       FolderData testroot = null;
       String typeID = null;
       try
@@ -573,15 +506,11 @@ public class ObjectTest extends BaseTest
          String docId =
             getConnection().createDocument(testroot.getObjectId(), properties, cs, null, null, null,
                VersioningState.NONE);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -601,8 +530,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateDocument_ConstraintExceptionNonVersinable() throws Exception
    {
-      String testname = "testCreateDocument_ConstraintExceptionNonVersinable";
-      System.out.print("Running " + testname + "....  ");
       FolderData testroot = null;
       String typeID = null;
       try
@@ -638,15 +565,11 @@ public class ObjectTest extends BaseTest
          String docId =
             getConnection().createDocument(testroot.getObjectId(), properties, cs, null, null, null,
                VersioningState.MAJOR);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -666,11 +589,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateDocument_ConstraintExceptionNotControllablePolicy() throws Exception
    {
-      String testname = "testCreateDocument_ConstraintExceptionNotControllablePolicy";
-      System.out.print("Running " + testname + "....   ");
       if (!IS_POLICIES_SUPPORTED)
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -716,15 +637,11 @@ public class ObjectTest extends BaseTest
          String docId =
             getConnection().createDocument(testroot.getObjectId(), properties, cs, null, null, policies,
                VersioningState.MAJOR);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -746,11 +663,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateDocument_ConstraintExceptionNotControllableACL() throws Exception
    {
-      String testname = "testCreateDocument_ConstraintExceptionNotControllableACL";
-      System.out.print("Running " + testname + "....  ");
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -772,8 +687,6 @@ public class ObjectTest extends BaseTest
             PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
                CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
                false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
-         //propertyDefinitions.put(CmisConstants.NAME, propDefName);
-         //propertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, propDefObjectTypeId);
 
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
          properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
@@ -793,15 +706,11 @@ public class ObjectTest extends BaseTest
          String docId =
             getConnection().createDocument(testroot.getObjectId(), properties, cs, addACL, null, null,
                VersioningState.MAJOR);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+        //OK 
       }
       finally
       {
@@ -820,11 +729,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateDocument_ConstraintExceptionACENotSupp() throws Exception
    {
-      String testname = "testCreateDocument_ConstraintExceptionACENotSupp";
-      System.out.print("Running " + testname + "....       ");
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -865,15 +772,11 @@ public class ObjectTest extends BaseTest
          String docId =
             getConnection().createDocument(testroot.getObjectId(), properties, cs, addACL, null, null,
                VersioningState.MAJOR);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -892,8 +795,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateDocumentFromSource_Simple() throws Exception
    {
-      String testname = "testCreateDocumentFromSource_Simple";
-      System.out.print("Running " + testname + "....                            ");
       FolderData testroot = null;
       try
       {
@@ -911,19 +812,13 @@ public class ObjectTest extends BaseTest
             getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(),
                getPropsMap(CmisConstants.DOCUMENT, "doc2"), null, null, null, VersioningState.MAJOR);
          ContentStream c = getStorage().getObjectById(docId).getContentStream(null);
-         if (!cs.getMediaType().equals(c.getMediaType()))
-            doFail(testname, "Media types does not match");
+         assertTrue("Media types does not match", cs.getMediaType().equals(c.getMediaType()));
 
          byte[] after = new byte[15];
          c.getStream().read(after);
          assertArrayEquals(before, after);
          if (!testroot.getName().equals(getStorage().getObjectById(docId).getParent().getName()))
-            doFail(testname, "Names does not match;");
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
+            fail("Names does not match;");
       }
       finally
       {
@@ -941,8 +836,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateDocumentFromSource_Properties() throws Exception
    {
-      String testname = "testCreateDocumentFromSource_Properties";
-      System.out.print("Running " + testname + "....                        ");
       FolderData testroot = null;
       try
       {
@@ -960,12 +853,7 @@ public class ObjectTest extends BaseTest
             getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(),
                getPropsMap(CmisConstants.DOCUMENT, "doc2"), null, null, null, VersioningState.MAJOR);
          if (!getStorage().getObjectById(docId).getProperty(CmisConstants.NAME).getValues().get(0).equals("doc2"))
-            doFail(testname, "Names doen not match;");
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
+            fail("Names does not match;");
       }
       finally
       {
@@ -982,11 +870,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateDocumentFromSource_ApplyPolicy() throws Exception
    {
-      String testname = "testCreateDocumentFromSource_ApplyPolicy";
-      System.out.print("Running " + testname + "....                       ");
       if (!IS_POLICIES_SUPPORTED)
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -1012,23 +898,15 @@ public class ObjectTest extends BaseTest
             getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(),
                getPropsMap(CmisConstants.DOCUMENT, "doc2"), null, null, policies, VersioningState.MAJOR);
          ObjectData res = getStorage().getObjectById(docId);
-         if (res.getPolicies().size() != 1)
-            doFail(testname, "Properties size iz incorrect");
+         assertTrue("Properties size is incorrect" , res.getPolicies().size() == 1);
          Iterator<PolicyData> it = res.getPolicies().iterator();
          while (it.hasNext())
          {
             PolicyData one = it.next();
-            if (!one.getName().equals("policy1"))
-               doFail(testname, "POlicy names does not match");
-            if (!one.getPolicyText().equals("testPolicyText"))
-               doFail(testname, "Policy text does not match");
+            assertTrue("POlicy names does not match", one.getName().equals("policy1"));
+            assertTrue("Policy text does not match", one.getPolicyText().equals("testPolicyText"));
             res.removePolicy(one);
          }
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -1048,11 +926,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateDocumentFromSource_addACL() throws Exception
    {
-      String testname = "testCreateDocumentFromSource_addACL";
-      System.out.print("Running " + testname + "....                            ");
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -1080,17 +956,11 @@ public class ObjectTest extends BaseTest
          {
             if (one.getPrincipal().equalsIgnoreCase(username))
             {
-               if (one.getPermissions().size() != 1)
-                  doFail(testname, "Permissions size is incorrect");
-               if (!one.getPermissions().contains("cmis:read"))
-                  doFail(testname, "Permissions does not match");
+               assertTrue("Permissions size is incorrect" , one.getPermissions().size() == 1);
+               assertTrue("Permissions does not match", one.getPermissions().contains("cmis:read"));
             }
          }
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
+         
       }
       finally
       {
@@ -1109,8 +979,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateDocumentFromSource_NameConstraintViolationException() throws Exception
    {
-      String testname = "testCreateDocumentFromSource_NameConstraintViolationException";
-      System.out.print("Running " + testname + "....  ");
       FolderData testroot = null;
       try
       {
@@ -1128,16 +996,11 @@ public class ObjectTest extends BaseTest
             getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(),
                getPropsMap(CmisConstants.DOCUMENT, "doc1"), null, null, null, VersioningState.MAJOR);
          ObjectData res = getStorage().getObjectById(docId);
-         if (res.getName().equals("doc1"))
-            doFail(testname, "Names must not match;");
+         assertFalse("Names must not match;", res.getName().equals("doc1"));
       }
       catch (NameConstraintViolationException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -1154,8 +1017,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateDocumentFromSource_ConstraintExceptionWrongBaseType() throws Exception
    {
-      String testname = "testCreateDocumentFromSource_ConstraintExceptionWrongBaseType";
-      System.out.print("Running " + testname + "....");
       FolderData testroot = null;
       try
       {
@@ -1169,15 +1030,11 @@ public class ObjectTest extends BaseTest
          String docId =
             getConnection().createDocumentFromSource(test.getObjectId(), testroot.getObjectId(),
                getPropsMap(CmisConstants.DOCUMENT, "1"), null, null, null, VersioningState.MAJOR);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -1196,8 +1053,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateDocumentFromSource_ConstraintExceptionNotAllowedChild() throws Exception
    {
-      String testname = "testCreateDocumentFromSource_ConstraintExceptionNotAllowedChild";
-      System.out.print("Running " + testname + "....");
       FolderData testroot = null;
       String typeID = null;
       FolderData myfolder = null;
@@ -1258,15 +1113,11 @@ public class ObjectTest extends BaseTest
          String docId =
             getConnection().createDocumentFromSource(doc1.getObjectId(), myfolder.getObjectId(),
                getPropsMap(CmisConstants.DOCUMENT, "1"), null, null, null, VersioningState.MAJOR);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -1288,8 +1139,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateDocumentFromSource_ConstraintExceptionNotVersionable() throws Exception
    {
-      String testname = "testCreateDocumentFromSource_ConstraintExceptionNotVersionable";
-      System.out.print("Running " + testname + "....");
       FolderData testroot = null;
       String typeID = null;
       try
@@ -1332,15 +1181,11 @@ public class ObjectTest extends BaseTest
          String docId =
             getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(), properties, null,
                null, null, VersioningState.MAJOR);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -1360,8 +1205,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateDocumentFromSource_ConstraintExceptionIsVesrionable() throws Exception
    {
-      String testname = "testCreateDocumentFromSource_ConstraintExceptionIsVesrionable";
-      System.out.print("Running " + testname + "....");
       FolderData testroot = null;
       String typeID = null;
       try
@@ -1407,15 +1250,11 @@ public class ObjectTest extends BaseTest
          String docId =
             getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(), properties, null,
                null, null, VersioningState.NONE);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -1437,11 +1276,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateDocumentFromSource_ConstraintExceptionNotControllablePolicy() throws Exception
    {
-      String testname = "testCreateDocumentFromSource_ConstraintExceptionNotControllablePolicy";
-      System.out.print("Running " + testname + "...");
       if (!IS_POLICIES_SUPPORTED)
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -1465,8 +1302,6 @@ public class ObjectTest extends BaseTest
             PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
                CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
                false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
-         //propertyDefinitions.put(CmisConstants.NAME, propDefName);
-         //propertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, propDefObjectTypeId);
 
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
          properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
@@ -1492,15 +1327,11 @@ public class ObjectTest extends BaseTest
          String docId =
             getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(), properties, null,
                null, policies, VersioningState.NONE);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -1523,11 +1354,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateDocumentFromSource_ConstraintExceptionNotControllableACL() throws Exception
    {
-      String testname = "testCreateDocumentFromSource_ConstraintExceptionNotControllableACL";
-      System.out.print("Running " + testname + "...");
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -1575,15 +1404,11 @@ public class ObjectTest extends BaseTest
          String docId =
             getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(), properties, addACL,
                null, null, VersioningState.NONE);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -1602,11 +1427,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateDocumentFromSource_ConstraintExceptionUnknownACE() throws Exception
    {
-      String testname = "testCreateDocumentFromSource_ConstraintExceptionUnknownACE";
-      System.out.print("Running " + testname + "....");
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -1629,8 +1452,6 @@ public class ObjectTest extends BaseTest
             PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
                CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
                false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
-         //propertyDefinitions.put(CmisConstants.NAME, propDefName);
-         //propertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, propDefObjectTypeId);
 
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
          properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
@@ -1654,15 +1475,11 @@ public class ObjectTest extends BaseTest
          String docId =
             getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(), properties, addACL,
                null, null, VersioningState.NONE);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -1681,8 +1498,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateFolder_Simple() throws Exception
    {
-      String testname = "testCreateFolder_Simple";
-      System.out.print("Running " + testname + "....                                        ");
       FolderData testroot = null;
       try
       {
@@ -1695,15 +1510,8 @@ public class ObjectTest extends BaseTest
             getConnection().createFolder(testroot.getObjectId(), getPropsMap(CmisConstants.FOLDER, "f1"), null, null,
                null);
          ObjectData obj = getStorage().getObjectById(docId);
-         if (!obj.getTypeId().equals(CmisConstants.FOLDER))
-            doFail(testname, "Object types does not match;");
-         if (!((FolderData)obj).getPath().equals("/testroot/f1"))
-            doFail(testname, "Path is not correct;");
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
+         assertTrue("Object types does not match;", obj.getTypeId().equals(CmisConstants.FOLDER));
+         assertTrue("Path is not correct;", ((FolderData)obj).getPath().equals("/testroot/f1"));
       }
       finally
       {
@@ -1720,11 +1528,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateFolder_ApplyPolicy() throws Exception
    {
-      String testname = "testCreateFolder_ApplyPolicy";
-      System.out.print("Running " + testname + "....                                   ");
       if (!IS_POLICIES_SUPPORTED)
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -1747,22 +1553,14 @@ public class ObjectTest extends BaseTest
             getConnection().createFolder(testroot.getObjectId(), getPropsMap(CmisConstants.FOLDER, "f1"), null, null,
                policies);
          ObjectData res = getStorage().getObjectById(docId);
-         if (res.getPolicies().size() != 1)
-            doFail(testname, "Properties size iz incorrect");
+         assertTrue("Properties size is incorrect;", res.getPolicies().size() == 1);
          Iterator<PolicyData> it = res.getPolicies().iterator();
          while (it.hasNext())
          {
             PolicyData one = it.next();
-            if (!one.getName().equals("policy1"))
-               doFail(testname, "POlicy names does not match");
-            if (!one.getPolicyText().equals("testPolicyText"))
-               doFail(testname, "Policy text does not match");
+            assertTrue("POlicy names does not match", one.getName().equals("policy1"));
+            assertTrue("Policy text does not match" , one.getPolicyText().equals("testPolicyText"));
          }
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -1783,11 +1581,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateFolder_AddACL() throws Exception
    {
-      String testname = "testCreateFolder_AddACL";
-      System.out.print("Running " + testname + "....                                      ");
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -1810,16 +1606,9 @@ public class ObjectTest extends BaseTest
          for (AccessControlEntry one : res.getACL(false))
          {
             if (one.getPrincipal().equalsIgnoreCase(username))
-               if (one.getPermissions().size() != 1)
-                  doFail(testname, "Permissions size is incorrect");
-            if (!one.getPermissions().contains("cmis:read"))
-               doFail(testname, "Permissions does not match");
+            assertTrue("Permissions size is incorrect", one.getPermissions().size() == 1);
+            assertTrue("Permissions does not match", one.getPermissions().contains("cmis:read"));
          }
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -1838,8 +1627,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateFolder_NameConstraintViolationException() throws Exception
    {
-      String testname = "testCreateFolder_NameConstraintViolationException";
-      System.out.print("Running " + testname + "....                                        ");
       FolderData testroot = null;
       try
       {
@@ -1854,16 +1641,11 @@ public class ObjectTest extends BaseTest
             getConnection().createFolder(testroot.getObjectId(), getPropsMap(CmisConstants.FOLDER, "f1"), null, null,
                null);
          ObjectData res = getStorage().getObjectById(docId);
-         if (!res.getName().equals("f1"))
-            doFail(testname, "Names does not match;");
+         assertFalse("Names must not match;" , res.getName().equals("f1"));
       }
       catch (NameConstraintViolationException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -1881,8 +1663,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateFolder_ConstraintExceptionWrongBaseType() throws Exception
    {
-      String testname = "testCreateFolder_ConstraintExceptionWrongBaseType";
-      System.out.print("Running " + testname + "....  ");
       FolderData testroot = null;
       String typeID = null;
       try
@@ -1905,9 +1685,6 @@ public class ObjectTest extends BaseTest
                CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
                false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
 
-         //fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
-         //fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefObjectTypeId);
-
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
          properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
             fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "f1"));
@@ -1922,15 +1699,11 @@ public class ObjectTest extends BaseTest
          newType = getStorage().getTypeDefinition(typeID, true);
 
          String docId = getConnection().createFolder(testroot.getObjectId(), properties, null, null, null);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -1950,8 +1723,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateFolder_ConstraintExceptionNotAllowedChild() throws Exception
    {
-      String testname = "testCreateFolder_ConstraintExceptionNotAllowedChild";
-      System.out.print("Running " + testname + "....        ");
       FolderData testroot = null;
       String typeID = null;
       try
@@ -2000,15 +1771,11 @@ public class ObjectTest extends BaseTest
 
          String docId =
             getConnection().createFolder(f1.getObjectId(), getPropsMap(CmisConstants.FOLDER, "f2"), null, null, null);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -2028,11 +1795,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateFolder_ConstraintExceptionNotControllablePolicy() throws Exception
    {
-      String testname = "testCreateFolder_ConstraintExceptionNotControllablePolicy";
-      System.out.print("Running " + testname + "....  ");
       if (!IS_POLICIES_SUPPORTED)
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -2080,15 +1845,11 @@ public class ObjectTest extends BaseTest
          policies.add(policy.getObjectId());
 
          String docId = getConnection().createFolder(testroot.getObjectId(), properties, null, null, policies);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -2110,11 +1871,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateFolder_ConstraintExceptionNotControllableACL() throws Exception
    {
-      String testname = "testCreateFolder_ConstraintExceptionNotControllableACL";
-      System.out.print("Running " + testname + "....                          ");
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -2138,9 +1897,6 @@ public class ObjectTest extends BaseTest
             PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
                CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
                false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
-
-         //fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
-         //fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefObjectTypeId);
 
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
          properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
@@ -2159,15 +1915,11 @@ public class ObjectTest extends BaseTest
          List<AccessControlEntry> addACL = createACL(username, "cmis:read");
 
          String docId = getConnection().createFolder(testroot.getObjectId(), properties, addACL, null, null);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -2186,11 +1938,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateFolder_ConstraintExceptionUnknownACE() throws Exception
    {
-      String testname = "testCreateFolder_ConstraintExceptionUnknownACE";
-      System.out.print("Running " + testname + "....                          ");
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -2215,9 +1965,6 @@ public class ObjectTest extends BaseTest
                CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
                false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
 
-         //fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
-         //fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefObjectTypeId);
-
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
          properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
             fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "f1"));
@@ -2235,15 +1982,11 @@ public class ObjectTest extends BaseTest
          List<AccessControlEntry> addACL = createACL(username, "cmis:unknown");
 
          String docId = getConnection().createFolder(testroot.getObjectId(), properties, addACL, null, null);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+        //OK 
       }
       finally
       {
@@ -2262,11 +2005,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateRelationship_Simple() throws Exception
    {
-      String testname = "testCreateRelationship_Simple";
-      System.out.print("Running " + testname + "....                                  ");
       if (!IS_RELATIONSHIPS_SUPPORTED)
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -2305,17 +2046,9 @@ public class ObjectTest extends BaseTest
 
          String docId = getConnection().createRelationship(props, null, null, null);
          obj = getStorage().getObjectById(docId);
-         if (!obj.getTypeId().equals("cmis:relationship"))
-            doFail(testname, "Cmis object types does not match;");
-         if (!doc1.getObjectId().equals(((RelationshipData)obj).getSourceId()))
-            doFail(testname, "Cmis objects ID does not match;");
-         if (!doc2.getObjectId().equals(((RelationshipData)obj).getTargetId()))
-            doFail(testname, "Cmis object ID  does not match;");
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
+         assertTrue("Cmis object types does not match;" , obj.getTypeId().equals("cmis:relationship"));
+         assertTrue("Cmis objects ID does not match;", doc1.getObjectId().equals(((RelationshipData)obj).getSourceId()));
+         assertTrue("Cmis object ID  does not match;" , doc2.getObjectId().equals(((RelationshipData)obj).getTargetId()));
       }
       finally
       {
@@ -2334,11 +2067,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateRelationship_ApplyPolicy() throws Exception
    {
-      String testname = "testCreateRelationship_ApplyPolicy";
-      System.out.print("Running " + testname + "....                             ");
       if (!IS_POLICIES_SUPPORTED || !IS_RELATIONSHIPS_SUPPORTED)
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
 
@@ -2395,9 +2126,6 @@ public class ObjectTest extends BaseTest
          props.put(CmisConstants.TARGET_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
             fPropDefTarget.getLocalName(), fPropDefTarget.getDisplayName(), doc2.getObjectId()));
 
-         //fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
-         //fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefObjectTypeId);
-
          TypeDefinition newType =
             new TypeDefinition("cmis:kino2", BaseType.RELATIONSHIP, "cmis:kino2", "cmis:kino2", "",
                "cmis:relationship", "cmis:kino2", "cmis:kino2", true, false, true, true, false, true, false, false,
@@ -2410,23 +2138,15 @@ public class ObjectTest extends BaseTest
          policies.add(policy.getObjectId());
          String docId = getConnection().createRelationship(props, null, null, policies);
          obj = getStorage().getObjectById(docId);
-         if (obj.getPolicies().size() != 1)
-            doFail(testname, "Object policies size is incorrect;");
+         assertTrue("Object policies size is incorrect;", obj.getPolicies().size() == 1);
          Iterator<PolicyData> it = obj.getPolicies().iterator();
          while (it.hasNext())
          {
             PolicyData one = it.next();
-            if (!one.getName().equals("policy1"))
-               doFail(testname, "POlicy names does not match");
-            if (!one.getPolicyText().equals("testPolicyText"))
-               doFail(testname, "Policy text does not match");
+            assertTrue("POlicy names does not match", one.getName().equals("policy1"));
+            assertTrue("Policy text does not match", one.getPolicyText().equals("testPolicyText"));
             obj.removePolicy(one);
          }
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -2450,16 +2170,14 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateRelationship_AddACL() throws Exception
    {
-      String testname = "testCreateRelationship_AddACL";
-      System.out.print("Running " + testname + "....                                  ");
       if (!IS_RELATIONSHIPS_SUPPORTED)
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -2514,9 +2232,6 @@ public class ObjectTest extends BaseTest
          props.put(CmisConstants.TARGET_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
             fPropDefTarget.getLocalName(), fPropDefTarget.getDisplayName(), doc2.getObjectId()));
 
-         //fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
-         //fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefObjectTypeId);
-
          TypeDefinition newType =
             new TypeDefinition("cmis:kino", BaseType.RELATIONSHIP, "cmis:kino", "cmis:kino", "", "cmis:relationship",
                "cmis:kino", "cmis:kino", true, false, true, true, false, true, true, false, null, null,
@@ -2533,17 +2248,10 @@ public class ObjectTest extends BaseTest
          {
             if (one.getPrincipal().equalsIgnoreCase(username))
             {
-               if (one.getPermissions().size() != 1)
-                  doFail(testname, "Permissions size is incorrect");
-               if (!one.getPermissions().contains("cmis:read"))
-                  doFail(testname, "Permissions does not match");
+               assertTrue("Permissions size is incorrect", one.getPermissions().size() == 1);
+               assertTrue("Permissions does not match" , one.getPermissions().contains("cmis:read"));
             }
          }
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -2565,11 +2273,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateRelationship_NameConstraintViolationException() throws Exception
    {
-      String testname = "testCreateRelationship_NameConstraintViolationException";
-      System.out.print("Running " + testname + "....        ");
       if (!IS_RELATIONSHIPS_SUPPORTED)
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -2636,17 +2342,11 @@ public class ObjectTest extends BaseTest
 
          String docId = getConnection().createRelationship(props, null, null, null);
          obj = getStorage().getObjectById(docId);
-         if (obj.getName().equals("rel1"))
-            doFail(testname, "Names must not match;");
-         pass(testname);
+         assertFalse("Names must not match;", obj.getName().equals("rel1"));
       }
       catch (NameConstraintViolationException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -2665,11 +2365,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateRelationship_ConstraintExceptionWrongBaseType() throws Exception
    {
-      String testname = "testCreateRelationship_ConstraintExceptionWrongBaseType";
-      System.out.print("Running " + testname + "....   ");
       if (!IS_RELATIONSHIPS_SUPPORTED)
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -2733,15 +2431,11 @@ public class ObjectTest extends BaseTest
 
          String docId = getConnection().createRelationship(props, null, null, null);
          obj = getStorage().getObjectById(docId);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -2765,11 +2459,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateRelationship_ConstraintExceptionNotAllowedTypes() throws Exception
    {
-      String testname = "testCreateRelationship_ConstraintExceptionNotAllowedTypes";
-      System.out.print("Running " + testname + ".... ");
       if (!IS_RELATIONSHIPS_SUPPORTED)
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -2837,15 +2529,11 @@ public class ObjectTest extends BaseTest
 
          String docId = getConnection().createRelationship(props, null, null, null);
          obj = getStorage().getObjectById(docId);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -2867,11 +2555,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateRelationship_ConstraintExceptionNotControllablePolicy() throws Exception
    {
-      String testname = "testCreateRelationship_ConstraintExceptionNotAllowedTypes";
-      System.out.print("Running " + testname + ".... ");
       if (!IS_POLICIES_SUPPORTED || !IS_RELATIONSHIPS_SUPPORTED)
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
 
@@ -2940,15 +2626,11 @@ public class ObjectTest extends BaseTest
          policies.add(policy.getObjectId());
          String docId = getConnection().createRelationship(props, null, null, policies);
          obj = getStorage().getObjectById(docId);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException xe)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+        //OK 
       }
       finally
       {
@@ -2972,16 +2654,14 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateRelationship_ConstraintExceptionNotControllableACL() throws Exception
    {
-      String testname = "testCreateRelationship_ConstraintExceptionNotControllableACL";
-      System.out.print("Running " + testname + "....");
       if (!IS_RELATIONSHIPS_SUPPORTED)
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -3036,9 +2716,6 @@ public class ObjectTest extends BaseTest
          props.put(CmisConstants.TARGET_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
             fPropDefTarget.getLocalName(), fPropDefTarget.getDisplayName(), doc2.getObjectId()));
 
-         //fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
-         //fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefObjectTypeId);
-
          TypeDefinition newType =
             new TypeDefinition("cmis:kino", BaseType.RELATIONSHIP, "cmis:kino", "cmis:kino", "", "cmis:relationship",
                "cmis:kino", "cmis:kino", true, false, true, true, false, false, false, false, null, null,
@@ -3051,15 +2728,11 @@ public class ObjectTest extends BaseTest
 
          String docId = getConnection().createRelationship(props, addACL, null, null);
          obj = getStorage().getObjectById(docId);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException e)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -3080,16 +2753,14 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreateRelationship_ConstraintExceptionUnknownACE() throws Exception
    {
-      String testname = "testCreateRelationship_ConstraintExceptionUnknownACE";
-      System.out.print("Running " + testname + ".... ");
       if (!IS_RELATIONSHIPS_SUPPORTED)
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -3158,15 +2829,11 @@ public class ObjectTest extends BaseTest
 
          String docId = getConnection().createRelationship(props, addACL, null, null);
          obj = getStorage().getObjectById(docId);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException e)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -3187,11 +2854,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreatePolicy_Simple() throws Exception
    {
-      String testname = "testCreatePolicy_Simple";
-      System.out.print("Running " + testname + "....                                        ");
       if (!IS_POLICIES_SUPPORTED)
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -3213,22 +2878,15 @@ public class ObjectTest extends BaseTest
 
          String docId = getConnection().createPolicy(testroot.getObjectId(), properties, null, null, null);
          obj = getStorage().getObjectById(docId);
-         if (!obj.getTypeId().equals("cmis:policy"))
-            doFail(testname, "Cmis object types does not match");
-         if (!((PolicyData)obj).getPolicyText().equals("testPolicyText"))
-            doFail(testname, "Cmis policy text does not match");
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
+         assertTrue("Cmis object types does not match", obj.getTypeId().equals("cmis:policy"));
+         assertTrue("Cmis policy text does not match" , ((PolicyData)obj).getPolicyText().equals("testPolicyText"));
       }
       finally
       {
          if (obj != null)
             getStorage().deleteObject(obj, true);
          if (testroot != null)
-            clear(testroot.getObjectId());;
+            clear(testroot.getObjectId());
       }
    }
 
@@ -3240,11 +2898,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreatePolicy_AddPolicy() throws Exception
    {
-      String testname = "testCreatePolicy_AddPolicy";
-      System.out.print("Running " + testname + "....                                     ");
       if (!IS_POLICIES_SUPPORTED)
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -3275,17 +2931,10 @@ public class ObjectTest extends BaseTest
          while (it.hasNext())
          {
             PolicyData one = it.next();
-            if (!one.getName().equals("policy1"))
-               doFail(testname, "POlicy names does not match");
-            if (!one.getPolicyText().equals("testPolicyText"))
-               doFail(testname, "Policy text does not match");
+            assertTrue("POlicy names does not match;", one.getName().equals("policy1"));
+            assertTrue("Policy text does not match", one.getPolicyText().equals("testPolicyText"));
             obj.removePolicy(one);
          }
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -3306,16 +2955,14 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreatePolicy_AddACL() throws Exception
    {
-      String testname = "testCreatePolicy_AddACL";
-      System.out.print("Running " + testname + "....                                        ");
       if (!IS_POLICIES_SUPPORTED)
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -3344,24 +2991,17 @@ public class ObjectTest extends BaseTest
          {
             if (one.getPrincipal().equalsIgnoreCase(username))
             {
-               if (one.getPermissions().size() != 1)
-                  doFail(testname, "Permissions size is incorrect");
-               if (!one.getPermissions().contains("cmis:read"))
-                  doFail(testname, "Permissions does not match");
+               assertTrue("Permissions size is incorrect", one.getPermissions().size() == 1);
+               assertTrue("Permissions does not match", one.getPermissions().contains("cmis:read"));
             }
          }
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
       }
       finally
       {
          if (obj != null)
             getStorage().deleteObject(obj, true);
          if (testroot != null)
-            clear(testroot.getObjectId());;
+            clear(testroot.getObjectId());
       }
    }
 
@@ -3374,11 +3014,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreatePolicy_NameConstraintViolationException() throws Exception
    {
-      String testname = "testCreatePolicy_NameConstraintViolationException";
-      System.out.print("Running " + testname + "....              ");
       if (!IS_POLICIES_SUPPORTED)
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -3402,17 +3040,11 @@ public class ObjectTest extends BaseTest
          obj = null;
          String docId = getConnection().createPolicy(testroot.getObjectId(), properties, null, null, null);
          obj = getStorage().getObjectById(docId);
-         if (obj.getName().equals("policy1"))
-            doFail(testname, "Names must not match;");
-         pass(testname);
+         assertFalse("Names must not match;" , obj.getName().equals("policy1"));
       }
       catch (NameConstraintViolationException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -3434,11 +3066,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreatePolicy_ConstraintExceptionWrongBaseType() throws Exception
    {
-      String testname = "testCreatePolicy_ConstraintExceptionWrongBaseType";
-      System.out.print("Running " + testname + "....  ");
       if (!IS_POLICIES_SUPPORTED)
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -3482,15 +3112,11 @@ public class ObjectTest extends BaseTest
          newType = getStorage().getTypeDefinition(typeID, true);
 
          String docId = getConnection().createPolicy(testroot.getObjectId(), properties, null, null, null);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -3510,11 +3136,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreatePolicy_ConstraintExceptionNotAllowedChild() throws Exception
    {
-      String testname = "testCreatePolicy_ConstraintExceptionNotAllowedChild";
-      System.out.print("Running " + testname + "....    ");
       if (!IS_POLICIES_SUPPORTED)
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -3565,15 +3189,11 @@ public class ObjectTest extends BaseTest
          newType = getStorage().getTypeDefinition(typeID, true);
 
          String docId = getConnection().createPolicy(testroot.getObjectId(), properties, null, null, null);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -3593,11 +3213,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreatePolicy_ConstraintExceptionNotControllablePolicy() throws Exception
    {
-      String testname = "testCreatePolicy_ConstraintExceptionNotControllablePolicy";
-      System.out.print("Running " + testname + "....  ");
       if (!IS_POLICIES_SUPPORTED)
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -3646,15 +3264,11 @@ public class ObjectTest extends BaseTest
          policies.add(policy.getObjectId());
 
          String docId = getConnection().createPolicy(testroot.getObjectId(), properties, null, null, policies);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -3674,16 +3288,14 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreatePolicy_ConstraintExceptionNotControllableACL() throws Exception
    {
-      String testname = "testCreatePolicy_ConstraintExceptionNotControllableACL";
-      System.out.print("Running " + testname + "....   ");
       if (!IS_POLICIES_SUPPORTED)
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -3729,15 +3341,11 @@ public class ObjectTest extends BaseTest
          String username = "username";
          List<AccessControlEntry> addACL = createACL(username, "cmis:read");
          String docId = getConnection().createPolicy(testroot.getObjectId(), properties, addACL, null, null);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -3756,16 +3364,14 @@ public class ObjectTest extends BaseTest
    @Test
    public void testCreatePolicy_ConstraintExceptionUnknownACE() throws Exception
    {
-      String testname = "testCreatePolicy_ConstraintExceptionUnknownACE";
-      System.out.print("Running " + testname + "....                          ");
       if (!IS_POLICIES_SUPPORTED)
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -3786,15 +3392,11 @@ public class ObjectTest extends BaseTest
          String username = "username";
          List<AccessControlEntry> addACL = createACL(username, "cmis:unknown");
          String docId = getConnection().createPolicy(testroot.getObjectId(), properties, addACL, null, null);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -3811,8 +3413,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testGetAllowableActions_Simlpe() throws Exception
    {
-      String testname = "testGetAllowableActions_Simlpe";
-      System.out.print("Running " + testname + "....                                 ");
       FolderData testroot = null;
       try
       {
@@ -3822,13 +3422,7 @@ public class ObjectTest extends BaseTest
             getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
                null, null);
          AllowableActions actions = getConnection().getAllowableActions(testroot.getObjectId());
-         if (actions == null)
-            doFail(testname, "Allowable actions is null;");
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
+         assertNotNull("Allowable actions is null;", actions);
       }
       finally
       {
@@ -3845,8 +3439,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testGetObject_Simlpe() throws Exception
    {
-      String testname = "testGetObject_Simlpe";
-      System.out.print("Running " + testname + "....                                           ");
       FolderData testroot = null;
       try
       {
@@ -3858,15 +3450,8 @@ public class ObjectTest extends BaseTest
          CmisObject obj =
             getConnection().getObject(testroot.getObjectId(), false, IncludeRelationships.NONE, false, false, true, "",
                "*");
-         if (!obj.getObjectInfo().getName().equals("testroot"))
-            doFail(testname, "Names does not match;");
-         if (!testroot.getObjectId().equals(obj.getObjectInfo().getId()))
-            doFail(testname, "Object ID's does not match;");
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
+         assertTrue("Names does not match;", obj.getObjectInfo().getName().equals("testroot"));
+         assertTrue ("Object ID's does not match;" , testroot.getObjectId().equals(obj.getObjectInfo().getId()));
       }
       finally
       {
@@ -3884,8 +3469,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testGetObject_PropertyFiltered() throws Exception
    {
-      String testname = "testGetObject_PropertyFiltered";
-      System.out.print("Running " + testname + "....                                 ");
       FolderData testroot = null;
       try
       {
@@ -3902,18 +3485,13 @@ public class ObjectTest extends BaseTest
             if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
                continue;
             else
-               doFail(testname, "Property filter does not work;");
+               fail("Property filter does not work;");
          }
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
       }
       finally
       {
          if (testroot != null)
-            clear(testroot.getObjectId());;
+            clear(testroot.getObjectId());
       }
    }
 
@@ -3925,8 +3503,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testGetObject_IncludeRelationships() throws Exception
    {
-      String testname = "testGetObject_IncludeRelationships";
-      System.out.print("Running " + testname + "....                             ");
       FolderData testroot = null;
       try
       {
@@ -3949,21 +3525,12 @@ public class ObjectTest extends BaseTest
          CmisObject obj =
             getConnection().getObject(testroot.getObjectId(), false, IncludeRelationships.TARGET, false, false, true,
                "", "*");
-         if (obj.getRelationship().size() != 1)
-         {
-            doFail(testname, "Relationships count is incorrect;");
-         }
+         assertTrue("Relationships count is incorrect;" , obj.getRelationship().size() == 1);
          for (CmisObject e : obj.getRelationship())
          {
-            if (!reldata.getObjectId().equals(e.getObjectInfo().getId()))
-               doFail(testname, "Object ID's does not match;");
+            assertTrue("Object ID's does not match;" , reldata.getObjectId().equals(e.getObjectInfo().getId()));
          }
-         pass(testname);
          getStorage().deleteObject(reldata, true);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -3980,11 +3547,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testGetObject_IncludePolicyIDs() throws Exception
    {
-      String testname = "testGetObject_IncludePolicyIDs";
-      System.out.print("Running " + testname + "....                                 ");
       if (!IS_POLICIES_SUPPORTED)
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -4001,18 +3566,11 @@ public class ObjectTest extends BaseTest
          CmisObject obj =
             getConnection().getObject(testroot.getObjectId(), false, IncludeRelationships.TARGET, true, false, true,
                "", "*");
-         if (obj.getPolicyIds().size() != 1)
-            doFail(testname, "Pilicy count is incorrect;");
+         assertTrue("Policy count is incorrect;" , obj.getPolicyIds().size() == 1);
          for (String e : obj.getPolicyIds())
          {
-            if (!policy.getObjectId().equals(e))
-               doFail(testname, "Object ID's does not match;");
+            assertTrue("Object ID's does not match;", policy.getObjectId().equals(e));
          }
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -4031,11 +3589,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testGetObject_IncludeACLs() throws Exception
    {
-      String testname = "testGetObject_IncludeACLs";
-      System.out.print("Running " + testname + "....                                      ");
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -4063,17 +3619,10 @@ public class ObjectTest extends BaseTest
          {
             if (one.getPrincipal().equalsIgnoreCase(username))
             {
-               if (one.getPermissions().size() != 1)
-                  doFail(testname, "Permissions size is incorrect");
-               if (!one.getPermissions().contains("cmis:read"))
-                  doFail(testname, "Permissions does not match");
+               assertTrue("Permissions size is incorrect", one.getPermissions().size() == 1);
+               assertTrue("Permissions does not match", one.getPermissions().contains("cmis:read"));
             }
          }
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -4090,8 +3639,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testGetObject_IncludeAllowableActions() throws Exception
    {
-      String testname = "testGetObject_IncludeAllowableActions";
-      System.out.print("Running " + testname + "....                          ");
       FolderData testroot = null;
       try
       {
@@ -4104,13 +3651,7 @@ public class ObjectTest extends BaseTest
             getConnection().getObject(testroot.getObjectId(), true, IncludeRelationships.TARGET, false, false, true,
                "", "*");
          AllowableActions actions = obj.getAllowableActions();
-         if (actions == null)
-            doFail(testname, "AllowableActions is null;");
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
+         assertNotNull("AllowableActions is null;" , actions);
       }
       finally
       {
@@ -4127,8 +3668,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testGetObject_FilterNotValidException() throws Exception
    {
-      String testname = "testGetObject_FilterNotValidException";
-      System.out.print("Running " + testname + "....                          ");
       FolderData testroot = null;
       try
       {
@@ -4140,15 +3679,11 @@ public class ObjectTest extends BaseTest
          CmisObject obj =
             getConnection().getObject(testroot.getObjectId(), false, IncludeRelationships.NONE, false, false, false,
                "(,*", "*");
-         doFail(testname, "FilterNotValidException must be thrown;");
+         fail("FilterNotValidException must be thrown;");
       }
       catch (FilterNotValidException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+        //OK 
       }
       finally
       {
@@ -4166,8 +3701,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testGetProperties_Filter() throws Exception
    {
-      String testname = "testGetProperties_Filter";
-      System.out.print("Running " + testname + " ....                                       ");
       FolderData testroot = null;
       try
       {
@@ -4177,27 +3710,19 @@ public class ObjectTest extends BaseTest
             getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
                null, null);
          CmisObject obj = getConnection().getProperties(testroot.getObjectId(), true, "cmis:name,cmis:path");
-         if (obj == null)
-         {
-            doFail(testname, "Get properties result is null");
-         }
+         assertNotNull("Get properties result is null", obj);
          for (Map.Entry<String, Property<?>> e : obj.getProperties().entrySet())
          {
             if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
                continue;
             else
-               doFail(testname, "Property filter does not work;");
+               fail("Property filter does not work;");
          }
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
       }
       finally
       {
          if (testroot != null)
-            clear(testroot.getObjectId());;
+            clear(testroot.getObjectId());
       }
    }
 
@@ -4210,8 +3735,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testGetProperties_FilterNotValidException() throws Exception
    {
-      String testname = "testGetProperties_FilterNotValidException";
-      System.out.print("Running " + testname + "....                      ");
       FolderData testroot = null;
       try
       {
@@ -4221,20 +3744,16 @@ public class ObjectTest extends BaseTest
             getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
                null, null);
          CmisObject obj = getConnection().getProperties(testroot.getObjectId(), true, "(,*");
-         doFail(testname, "FilterNotValidException must be thrown;");
+         fail("FilterNotValidException must be thrown;");
       }
       catch (FilterNotValidException ex)
       {
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
+         
       }
       finally
       {
          if (testroot != null)
-            clear(testroot.getObjectId());;
+            clear(testroot.getObjectId());
       }
    }
 
@@ -4246,8 +3765,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testGetObjectByPath_Simlpe() throws Exception
    {
-      String testname = "testGetObjectByPath_Simlpe";
-      System.out.print("Running " + testname + "....                                     ");
       FolderData testroot = null;
       try
       {
@@ -4258,15 +3775,8 @@ public class ObjectTest extends BaseTest
                null, null);
          CmisObject obj =
             getConnection().getObjectByPath("/testroot", false, IncludeRelationships.NONE, false, false, true, "", "*");
-         if (!obj.getObjectInfo().getName().equals("testroot"))
-            doFail(testname, "Names does not match;");
-         if (!testroot.getObjectId().equals(obj.getObjectInfo().getId()))
-            doFail(testname, "Object ID's does not match;");
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
+         assertTrue("Names does not match;", obj.getObjectInfo().getName().equals("testroot"));
+         assertTrue("Object ID's does not match;", testroot.getObjectId().equals(obj.getObjectInfo().getId()));
       }
       finally
       {
@@ -4284,8 +3794,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testGetObjectByPath_PropertyFiltered() throws Exception
    {
-      String testname = "testGetObjectByPath_PropertyFiltered";
-      System.out.print("Running " + testname + "....                           ");
       FolderData testroot = null;
       try
       {
@@ -4302,18 +3810,13 @@ public class ObjectTest extends BaseTest
             if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
                continue;
             else
-               doFail(testname, "Property filter does not work;");
+               fail("Property filter does not work;");
          }
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
       }
       finally
       {
          if (testroot != null)
-            clear(testroot.getObjectId());;
+            clear(testroot.getObjectId());
       }
    }
 
@@ -4325,8 +3828,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testGetObjectByPath_IncludeRelationships() throws Exception
    {
-      String testname = "testGetObjectByPath_IncludeRelationships";
-      System.out.print("Running " + testname + "....                       ");
       FolderData testroot = null;
       try
       {
@@ -4349,20 +3850,12 @@ public class ObjectTest extends BaseTest
          CmisObject obj =
             getConnection().getObjectByPath("/testroot", false, IncludeRelationships.TARGET, false, false, true, "",
                "*");
-         if (obj.getRelationship().size() != 1)
-            doFail(testname, "Incorect relationship size;");
+         assertTrue("Incorect relationship size;" ,obj.getRelationship().size() == 1);
          for (CmisObject e : obj.getRelationship())
          {
-            if (!reldata.getObjectId().equals(e.getObjectInfo().getId()))
-               doFail(testname, "Object ID's does not match;");
+            assertTrue("Object ID's does not match;", reldata.getObjectId().equals(e.getObjectInfo().getId()));
          }
          getStorage().deleteObject(reldata, true);
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         //e.printStackTrace();
-         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -4379,11 +3872,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testGetObjectByPath_IncludePolicyIDs() throws Exception
    {
-      String testname = "testGetObjectByPath_IncludePolicyIDs";
-      System.out.print("Running " + testname + "....                           ");
       if (!IS_POLICIES_SUPPORTED)
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -4400,19 +3891,11 @@ public class ObjectTest extends BaseTest
          CmisObject obj =
             getConnection()
                .getObjectByPath("/testroot", false, IncludeRelationships.TARGET, true, false, true, "", "*");
-         if (obj.getPolicyIds().size() != 1)
-            doFail(testname, "Incorect policyIds size;");
-
+         assertTrue("Incorect policyIds size;", obj.getPolicyIds().size() == 1);
          for (String e : obj.getPolicyIds())
          {
-            if (!policy.getObjectId().equals(e))
-               doFail(testname, "Object ID's does not match; ");
+            assertTrue("Object ID's does not match; ", policy.getObjectId().equals(e));
          }
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -4431,11 +3914,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testGetObjectByPath_IncludeACLs() throws Exception
    {
-      String testname = "testGetObjectByPath_IncludeACLs";
-      System.out.print("Running " + testname + "....                                ");
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
       {
-         skip("ObjectTest." + testname);
+         //SKIP
          return;
       }
       FolderData testroot = null;
@@ -4463,17 +3944,10 @@ public class ObjectTest extends BaseTest
          {
             if (one.getPrincipal().equalsIgnoreCase(username))
             {
-               if (one.getPermissions().size() != 1)
-                  doFail(testname, "Permissions size is incorrect");
-               if (!one.getPermissions().contains("cmis:read"))
-                  doFail(testname, "Permissions does not match");
+               assertTrue("Permissions size is incorrect", one.getPermissions().size() == 1);
+               assertTrue("Permissions does not match", one.getPermissions().contains("cmis:read"));
             }
          }
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -4490,8 +3964,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testGetObjectByPath_IncludeAllowableActions() throws Exception
    {
-      String testname = "testGetObjectByPath_IncludeAllowableActions";
-      System.out.print("Running " + testname + "....                    ");
       FolderData testroot = null;
       try
       {
@@ -4505,13 +3977,7 @@ public class ObjectTest extends BaseTest
             getConnection()
                .getObjectByPath("/testroot", true, IncludeRelationships.TARGET, false, false, true, "", "*");
          AllowableActions actions = obj.getAllowableActions();
-         if (actions == null)
-            doFail(testname, "AllowableActions must not be null");
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
+         assertNotNull("AllowableActions must not be null", actions);
       }
       finally
       {
@@ -4528,8 +3994,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testGetObjectByPath_FilterNotValidException() throws Exception
    {
-      String testname = "testGetObjectByPath_FilterNotValidException";
-      System.out.print("Running " + testname + "....                    ");
       FolderData testroot = null;
       try
       {
@@ -4540,15 +4004,11 @@ public class ObjectTest extends BaseTest
                null, null);
          CmisObject obj =
             getConnection().getObject("/testroot", false, IncludeRelationships.NONE, false, false, false, "(,*", "*");
-         doFail(testname, "FilterNotValidException must be thrown;");
+         fail("FilterNotValidException must be thrown;");
       }
       catch (FilterNotValidException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -4566,8 +4026,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testGetContentStream_Simple() throws Exception
    {
-      String testname = "testGetContentStream_Simple";
-      System.out.print("Running " + testname + "....                                    ");
       FolderData testroot = null;
       try
       {
@@ -4588,11 +4046,6 @@ public class ObjectTest extends BaseTest
          byte[] after = new byte[15];
          obj.getStream().read(after);
          assertArrayEquals(before, after);
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -4610,8 +4063,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testGetContentStream_ConstraintException() throws Exception
    {
-      String testname = "testGetContentStream_ConstraintException";
-      System.out.print("Running " + testname + "....                       ");
       FolderData testroot = null;
       try
       {
@@ -4625,15 +4076,11 @@ public class ObjectTest extends BaseTest
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
                null, null, null, VersioningState.MAJOR);
          ContentStream obj = getConnection().getContentStream(doc1.getObjectId(), null);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -4650,15 +4097,12 @@ public class ObjectTest extends BaseTest
    @Test
    public void testGetRenditions_Simple() throws Exception
    {
-      String testname = "testGetRenditions_Simple";
-      System.out.print("Running " + testname + "....                                       ");
       if (!getStorage().getRepositoryInfo().getCapabilities().getCapabilityRenditions()
          .equals(CapabilityRendition.READ))
       {
-         skip("ObjectTest.testGetRenditions_Simple");
+         //SKIP
          return;
       }
-
       FolderData testroot = null;
       try
       {
@@ -4673,17 +4117,11 @@ public class ObjectTest extends BaseTest
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
                cs, null, null, VersioningState.MAJOR);
          List<Rendition> obj = getConnection().getRenditions(doc1.getObjectId(), "", -1, 0);
-         if (obj == null)
-            doFail(testname, "Get renditions result is null;");
-         pass(testname);
+         assertNotNull("Get renditions result is null;", obj);
       }
       catch (NotSupportedException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+       //SKIP    
       }
       finally
       {
@@ -4700,12 +4138,10 @@ public class ObjectTest extends BaseTest
    @Test
    public void testGetRenditions_FilterNotValidException() throws Exception
    {
-      String testname = "testGetRenditions_FilterNotValidException";
-      System.out.print("Running " + testname + "....                      ");
       if (!getStorage().getRepositoryInfo().getCapabilities().getCapabilityRenditions()
          .equals(CapabilityRendition.READ))
       {
-         skip("ObjectTest.testGetRenditions_FilterNotValidException");
+         //SKIP
          return;
       }
 
@@ -4723,20 +4159,16 @@ public class ObjectTest extends BaseTest
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
                cs, null, null, VersioningState.MAJOR);
          List<Rendition> obj = getConnection().getRenditions(doc1.getObjectId(), "(,*", -1, 0);
-         doFail(testname, "FilterNotValidException must be thrown;");
+         fail("FilterNotValidException must be thrown;");
       }
       catch (FilterNotValidException ex)
       {
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
+         //OK
       }
       finally
       {
          if (testroot != null)
-            clear(testroot.getObjectId());;
+            clear(testroot.getObjectId());
       }
    }
 
@@ -4748,8 +4180,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testUpdateProperties_Simple() throws Exception
    {
-      String testname = "testUpdateProperties_Simple";
-      System.out.print("Running " + testname + "....                                    ");
       FolderData testroot = null;
       String typeID = null;
       try
@@ -4806,13 +4236,7 @@ public class ObjectTest extends BaseTest
 
          String id = getConnection().updateProperties(doc1.getObjectId(), new ChangeTokenHolder(), properties2);
          ObjectData obj = getStorage().getObjectById(id);
-         if (!obj.getName().equals("new1"))
-            doFail(testname, "Names does not match;");
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
+         assertTrue("Names does not match;", obj.getName().equals("new1"));
       }
       finally
       {
@@ -4832,8 +4256,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testUpdateProperties_VersioningException() throws Exception
    {
-      String testname = "testUpdateProperties_VersioningException";
-      System.out.print("Running " + testname + "....                       ");
       FolderData testroot = null;
       try
       {
@@ -4866,20 +4288,16 @@ public class ObjectTest extends BaseTest
 
          String id = getConnection().updateProperties(doc1.getObjectId(), new ChangeTokenHolder(), properties2);
          ObjectData obj = getStorage().getObjectById(id);
-         doFail(testname, "VersioningException must be thrown;");
+         fail("VersioningException must be thrown;");
       }
       catch (VersioningException ex)
       {
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
+         //OK
       }
       finally
       {
          if (testroot != null)
-            clear(testroot.getObjectId());;
+            clear(testroot.getObjectId());
       }
    }
 
@@ -4891,8 +4309,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testMoveObject_Simple() throws Exception
    {
-      String testname = "testMoveObject_Simple";
-      System.out.print("Running " + testname + "....                                          ");
       FolderData testroot = null;
       FolderData folder2 = null;
       try
@@ -4914,13 +4330,7 @@ public class ObjectTest extends BaseTest
 
          String id = getConnection().moveObject(doc1.getObjectId(), folder2.getObjectId(), testroot.getObjectId());
          ObjectData obj = getStorage().getObjectById(id);
-         if (!folder2.getName().equals(obj.getParent().getName()))
-            doFail(testname, "Names does not match;");
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
+         assertTrue("Names does not match;", folder2.getName().equals(obj.getParent().getName()));
       }
       finally
       {
@@ -4940,8 +4350,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testMoveObject_InvalidArgumentException() throws Exception
    {
-      String testname = "testMoveObject_InvalidArgumentException";
-      System.out.print("Running " + testname + "....                        ");
       FolderData testroot = null;
       FolderData folder2 = null;
       try
@@ -4963,20 +4371,16 @@ public class ObjectTest extends BaseTest
 
          String id = getConnection().moveObject(doc1.getObjectId(), testroot.getObjectId(), folder2.getObjectId());
          ObjectData obj = getStorage().getObjectById(id);
-         doFail(testname, "InvalidArgumentException must be thrown;");
+         fail("InvalidArgumentException must be thrown;");
       }
       catch (InvalidArgumentException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+        //OK 
       }
       finally
       {
          if (testroot != null)
-            clear(testroot.getObjectId());;
+            clear(testroot.getObjectId());
          if (folder2 != null)
             clear(folder2.getObjectId());
       }
@@ -4991,8 +4395,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testMoveObject_ConstraintException() throws Exception
    {
-      String testname = "testMoveObject_ConstraintException";
-      System.out.print("Running " + testname + "....                             ");
       FolderData testroot = null;
       FolderData folder2 = null;
       String typeID = null;
@@ -5049,15 +4451,11 @@ public class ObjectTest extends BaseTest
 
          String id = getConnection().moveObject(doc1.getObjectId(), folder2.getObjectId(), testroot.getObjectId());
          ObjectData obj = getStorage().getObjectById(id);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -5079,8 +4477,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testMoveObject_NameConstraintException() throws Exception
    {
-      String testname = "testMoveObject_NameConstraintException";
-      System.out.print("Running " + testname + "....                         ");
       FolderData testroot = null;
       FolderData folder2 = null;
       try
@@ -5106,21 +4502,16 @@ public class ObjectTest extends BaseTest
                cs, null, null, VersioningState.MAJOR);
          String id = getConnection().moveObject(doc1.getObjectId(), folder2.getObjectId(), testroot.getObjectId());
          ObjectData obj = getStorage().getObjectById(id);
-         if (obj.getName().equalsIgnoreCase(doc1.getName()))
-            doFail(testname, "Names must not match;");
+         assertFalse( "Names must not match;", obj.getName().equalsIgnoreCase(doc1.getName()));
       }
       catch (NameConstraintViolationException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
          if (testroot != null)
-            clear(testroot.getObjectId());;
+            clear(testroot.getObjectId());
          if (folder2 != null)
             clear(folder2.getObjectId());
       }
@@ -5134,8 +4525,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testDeleteObject_Simple() throws Exception
    {
-      String testname = "testDeleteObject_Simple";
-      System.out.print("Running " + testname + "....                                        ");
       FolderData testroot = null;
       try
       {
@@ -5156,11 +4545,7 @@ public class ObjectTest extends BaseTest
       }
       catch (ObjectNotFoundException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -5177,8 +4562,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testDeleteObject_ConstraintException() throws Exception
    {
-      String testname = "testDeleteObject_ConstraintException";
-      System.out.print("Running " + testname + "....                           ");
       FolderData testroot = null;
       try
       {
@@ -5194,20 +4577,16 @@ public class ObjectTest extends BaseTest
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
                cs, null, null, VersioningState.MAJOR);
          getConnection().deleteObject(testroot.getObjectId(), true);
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
          if (testroot != null)
-            clear(testroot.getObjectId());;
+            clear(testroot.getObjectId());
       }
    }
 
@@ -5219,8 +4598,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testDeleteTree_Simple() throws Exception
    {
-      String testname = "testDeleteTree_Simple";
-      System.out.print("Running " + testname + "....                                          ");
       FolderData testroot = null;
       try
       {
@@ -5251,11 +4628,7 @@ public class ObjectTest extends BaseTest
       }
       catch (ObjectNotFoundException ex)
       {
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
+         
       }
       finally
       {
@@ -5271,11 +4644,9 @@ public class ObjectTest extends BaseTest
    @Test
    public void testDeleteTree_Unfile() throws Exception
    {
-      String testname = "testDeleteTree_Unfile";
-      System.out.print("Running " + testname + "....                                          ");
       if (!getStorage().getRepositoryInfo().getCapabilities().isCapabilityUnfiling())
       {
-         skip("ObjectTest.testDeleteTree_Unfile");
+         //SKIP
          return;
       }
 
@@ -5316,14 +4687,8 @@ public class ObjectTest extends BaseTest
             if (one.equals(id2))
                found2 = true;
          }
-         if (found1 && found2)
-            pass(testname);
-         else
-            doFail(testname, "Not all objects was unfiled;");
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
+         assertTrue(found1);
+         assertTrue(found2); 
       }
       finally
       {
@@ -5339,9 +4704,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testSetContentStream_Simple() throws Exception
    {
-      String testname = "testSetContentStream_Simple";
-      System.out.print("Running " + testname + "....                                    ");
-
       FolderData testroot = null;
       try
       {
@@ -5363,11 +4725,6 @@ public class ObjectTest extends BaseTest
          String docid = getConnection().setContentStream(doc1.getObjectId(), cs2, new ChangeTokenHolder(), true);
          getStorage().getObjectById(docid).getContentStream(null).getStream().read(result);
          assertArrayEquals(after, result);
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
       }
       finally
       {
@@ -5384,9 +4741,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testSetContentStream_ContentAlreadyExistsException() throws Exception
    {
-      String testname = "testSetContentStream_ContentAlreadyExistsException";
-      System.out.print("Running " + testname + "....             ");
-
       FolderData testroot = null;
       try
       {
@@ -5405,15 +4759,11 @@ public class ObjectTest extends BaseTest
                cs1, null, null, VersioningState.MAJOR);
 
          String docid = getConnection().setContentStream(doc1.getObjectId(), cs2, new ChangeTokenHolder(), false);
-         doFail(testname, "ContentAlreadyExistsException must be thrown;");
+         fail("ContentAlreadyExistsException must be thrown;");
       }
       catch (ContentAlreadyExistsException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         
       }
       finally
       {
@@ -5431,9 +4781,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testSetContentStream_StreamNotSupportedException() throws Exception
    {
-      String testname = "testSetContentStream_StreamNotSupportedException";
-      System.out.print("Running " + testname + "....               ");
-
       FolderData testroot = null;
       String typeID = null;
       try
@@ -5466,8 +4813,6 @@ public class ObjectTest extends BaseTest
             fPropDefType.getLocalName(), fPropDefType.getDisplayName(), "cmis:kino"));
 
          Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-         //fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
-         //fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefType);
 
          TypeDefinition newType =
             new TypeDefinition("cmis:kino", BaseType.DOCUMENT, "cmis:kino", "cmis:kino", "", "cmis:document",
@@ -5480,15 +4825,11 @@ public class ObjectTest extends BaseTest
             getStorage().createDocument(testroot, newType, props2, null, null, null, VersioningState.MAJOR);
 
          String docid = getConnection().setContentStream(doc1.getObjectId(), cs2, new ChangeTokenHolder(), false);
-         doFail(testname, "StreamNotSupportedException must be thrown;");
+        fail("StreamNotSupportedException must be thrown;");
       }
       catch (StreamNotSupportedException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -5507,9 +4848,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testDeleteContentStream_Simple() throws Exception
    {
-      String testname = "testDeleteContentStream_Simple";
-      System.out.print("Running " + testname + "....                                 ");
-
       FolderData testroot = null;
       try
       {
@@ -5527,13 +4865,7 @@ public class ObjectTest extends BaseTest
                cs1, null, null, VersioningState.MAJOR);
 
          String docid = getConnection().deleteContentStream(doc1.getObjectId(), new ChangeTokenHolder());
-         if (getStorage().getObjectById(docid).getContentStream(null) != null)
-            doFail(testname, "Content stream must be null;");
-         pass(testname);
-      }
-      catch (Exception e)
-      {
-         doFail(testname, e.getMessage());
+         assertNull("Content stream must be null;", getStorage().getObjectById(docid).getContentStream(null));
       }
       finally
       {
@@ -5551,9 +4883,6 @@ public class ObjectTest extends BaseTest
    @Test
    public void testDeleteContentStream_ConstraintException() throws Exception
    {
-      String testname = "testDeleteContentStream_ConstraintException";
-      System.out.print("Running " + testname + "....                    ");
-
       FolderData testroot = null;
       String typeID = null;
       try
@@ -5599,15 +4928,11 @@ public class ObjectTest extends BaseTest
             getStorage().createDocument(testroot, newType, props2, cs1, null, null, VersioningState.MAJOR);
 
          String docid = getConnection().deleteContentStream(doc1.getObjectId(), new ChangeTokenHolder());
-         doFail(testname, "ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
       {
-         pass(testname);
-      }
-      catch (Exception other)
-      {
-         doFail(testname, other.getMessage());
+         //OK
       }
       finally
       {
@@ -5623,15 +4948,5 @@ public class ObjectTest extends BaseTest
    {
       if (BaseTest.conn != null)
          BaseTest.conn.close();
-   }
-
-   protected void pass(String method) throws Exception
-   {
-      super.pass("ObjectTest." + method);
-   }
-
-   protected void doFail(String method, String message) throws Exception
-   {
-      super.doFail("ObjectTest." + method, message);
    }
 }
