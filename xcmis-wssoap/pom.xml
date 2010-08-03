@@ -193,7 +193,8 @@
                               <extraarg>-p</extraarg>
                               <extraarg>org.xcmis.soap</extraarg>
                               <extraarg>-nexclude</extraarg>
-                              <extraarg>http://docs.oasis-open.org/ns/cmis/core/200908/=org.xcmis.core</extraarg>
+                              <extraarg>http://docs.oasis-open.org/ns/cmis/core/200908/=org.xcmis.core
+                              </extraarg>
                               <extraarg>-nexclude</extraarg>
                               <extraarg>http://docs.oasis-open.org/ns/cmis/messaging/200908/=org.xcmis.messaging
                               </extraarg>

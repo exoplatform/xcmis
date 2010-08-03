@@ -1,39 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.xcmis</groupId>
-    <artifactId>xcmis-parent</artifactId>
-    <version>1.1-SNAPSHOT</version>
-  </parent>
-  <artifactId>xcmis-sp-inmemory</artifactId>
-  <packaging>jar</packaging>
-  <name>xCMIS :: SP :: InMemory</name>
-  <dependencies>
-    <dependency>
+   <modelVersion>4.0.0</modelVersion>
+   <parent>
       <groupId>org.xcmis</groupId>
-      <artifactId>xcmis-spi</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.exoplatform.kernel</groupId>
-      <artifactId>exo.kernel.component.common</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.exoplatform.core</groupId>
-      <artifactId>exo.core.component.security.core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.xcmis</groupId>
-      <artifactId>xcmis-search-service</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.xcmis</groupId>
-      <artifactId>xcmis-search-parser-cmis</artifactId>
-    </dependency>
-  </dependencies>
+      <artifactId>xcmis-parent</artifactId>
+      <version>1.1-SNAPSHOT</version>
+   </parent>
+   <artifactId>xcmis-sp-inmemory</artifactId>
+   <packaging>jar</packaging>
+   <name>xCMIS :: SP :: InMemory</name>
+   <dependencies>
+      <dependency>
+         <groupId>org.xcmis</groupId>
+         <artifactId>xcmis-spi</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.exoplatform.kernel</groupId>
+         <artifactId>exo.kernel.component.common</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.slf4j</groupId>
+         <artifactId>slf4j-log4j12</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.exoplatform.core</groupId>
+         <artifactId>exo.core.component.security.core</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.xcmis</groupId>
+         <artifactId>xcmis-search-service</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.xcmis</groupId>
+         <artifactId>xcmis-search-parser-cmis</artifactId>
+      </dependency>
+   </dependencies>
 </project>
