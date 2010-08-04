@@ -52,7 +52,7 @@
          </build>
       </profile>
       <profile>
-         <id>inmemory-sp</id>
+         <id>inmemory</id>
          <activation>
             <activeByDefault>false</activeByDefault>
          </activation>
@@ -105,7 +105,7 @@
                                  <fileset dir="target/surefire-reports">
                                     <include name="**/*.xml" />
                                  </fileset>
-                                 <report format="noframes" todir="target/surefire-reports" />
+                                 <report format="noframes" todir="target" />
                               </junitreport>
                            </tasks>
                         </configuration>
@@ -126,7 +126,7 @@
          </build>
       </profile>
       <profile>
-         <id>ecms-sp</id>
+         <id>exo</id>
          <activation>
             <activeByDefault>false</activeByDefault>
          </activation>
@@ -168,7 +168,7 @@
                                  <fileset dir="target/surefire-reports">
                                     <include name="**/*.xml" />
                                  </fileset>
-                                 <report format="noframes" todir="target/surefire-reports" />
+                                 <report format="noframes" todir="target" />
                               </junitreport>
                            </tasks>
                         </configuration>
