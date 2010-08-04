@@ -49,7 +49,7 @@ import java.util.Set;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
- * @version $Id: IndexListener.java 578 2010-04-02 12:25:27Z andrew00x $
+ * @version $Id: IndexListener.java 1261 2010-06-09 09:52:06Z andrew00x $
  */
 public class IndexListener
 {
@@ -62,11 +62,11 @@ public class IndexListener
    private final SearchService searchService;
 
    /**
-    * Content storage
+    * Content storage.
     */
    private final Storage storage;
 
-   private ContentEntryAdapter contentEntryAdapter;
+   private final ContentEntryAdapter contentEntryAdapter;
 
    public IndexListener(Storage storage, SearchService searchService)
    {
@@ -78,19 +78,23 @@ public class IndexListener
 
    public void created(ObjectData object)
    {
-
-      //LOG.info(object.getObjectId() + " " + object.getParent().getPath() + "/" + object.getName());
       try
       {
          searchService.update(contentEntryAdapter.createEntry(object), null);
       }
       catch (IndexModificationException e)
       {
-         LOG.error(e.getLocalizedMessage(), e);
+         if (LOG.isDebugEnabled())
+         {
+            LOG.debug(e.getLocalizedMessage());
+         }
       }
       catch (IOException e)
       {
-         LOG.error(e.getLocalizedMessage(), e);
+         if (LOG.isDebugEnabled())
+         {
+            LOG.debug(e.getLocalizedMessage());
+         }
       }
    }
 
@@ -102,7 +106,10 @@ public class IndexListener
       }
       catch (IndexModificationException e)
       {
-         LOG.error(e.getLocalizedMessage(), e);
+         if (LOG.isDebugEnabled())
+         {
+            LOG.debug(e.getLocalizedMessage());
+         }
       }
    }
 
@@ -114,25 +121,32 @@ public class IndexListener
       }
       catch (IndexModificationException e)
       {
-         LOG.error(e.getLocalizedMessage(), e);
+         if (LOG.isDebugEnabled())
+         {
+            LOG.debug(e.getLocalizedMessage());
+         }
       }
       catch (IOException e)
       {
-         LOG.error(e.getLocalizedMessage(), e);
+         if (LOG.isDebugEnabled())
+         {
+            LOG.debug(e.getLocalizedMessage());
+         }
       }
    }
 
    /**
-    * Adapt changes produced by CMIS SPI to {@link ContentEntry} acceptable for
+    * Adapt changes produced by CMIS SPI to {@link ContentEntry} acceptable for.
     * {@link SearchService}
     */
    public static class ContentEntryAdapter
    {
       /**
        * Convert {@link ObjectData} to {@link ContentEntry}.
-       *
+       * 
        * @param objectData
-       * @return
+       *           ObjectData
+       * @return contentEntry ContentEntry
        * @throws IOException
        */
       public ContentEntry createEntry(ObjectData objectData) throws IOException
@@ -159,7 +173,8 @@ public class IndexListener
 
       /**
        * @param objectData
-       * @return
+       *           RelationshipData
+       * @return ContentEntry ContentEntry;
        */
       private ContentEntry createFromRelationship(RelationshipData objectData)
       {
@@ -172,7 +187,8 @@ public class IndexListener
 
       /**
        * @param objectData
-       * @return
+       *           PolicyData
+       * @return contentEntry ContentEntry
        */
       private ContentEntry createFromPolicy(PolicyData objectData)
       {
@@ -217,9 +233,10 @@ public class IndexListener
 
       /**
        * Convert {@link FolderData} to {@link ContentEntry}.
-       *
+       * 
        * @param objectData
-       * @return
+       *           FolderData
+       * @return contentEntry ContentEntry
        */
       private ContentEntry createFromFolder(FolderData objectData)
       {
@@ -230,9 +247,10 @@ public class IndexListener
 
       /**
        * Convert {@link DocumentData} to {@link ContentEntry}.
-       *
+       * 
        * @param objectData
-       * @return
+       *           DocumentData
+       * @return contentEntry ContentEntry.
        * @throws IOException
        */
       private ContentEntry createFromDocument(DocumentData objectData) throws IOException
@@ -255,17 +273,17 @@ public class IndexListener
    private static class MockContentEntry
    {
       /**
-       * List of table names which identifies this content
+       * List of table names which identifies this content.
        */
       List<String> tableNames;
 
       /**
-       * Name of the entry
+       * Name of the entry.
        */
       String name;
 
       /**
-       * List of parent entry identifiers
+       * List of parent entry identifiers.
        */
       List<String> parentIdentifiers;
 
@@ -275,7 +293,7 @@ public class IndexListener
       String identifier;
 
       /**
-       * List of entry properties
+       * List of entry properties.
        */
       List<Property> properties;
 
