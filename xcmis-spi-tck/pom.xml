@@ -27,9 +27,34 @@
   </dependencies>
   <profiles>
     <profile>
-      <id>inmemory-sp</id>
+      <id>default</id>
       <activation>
         <activeByDefault>true</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <systemProperties>
+                <property>
+                  <name>tck.conf</name>
+                  <value>${tck.conf}</value>
+                </property>
+              </systemProperties>
+              <includes>
+                <include>**/NoTests.java</include>
+              </includes>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>inmemory-sp</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
       </activation>
       <dependencies>
         <dependency>
