@@ -56,6 +56,7 @@ public class RepositoryTest extends BaseTest
    public static void start() throws Exception
    {
       BaseTest.setUp();
+      System.out.print("Running Repository Service tests....");
    }
 
    @Test
@@ -219,7 +220,6 @@ public class RepositoryTest extends BaseTest
       ItemsList<TypeDefinition> typeChildren1 = null;
          typeChildren1 = getConnection().getTypeChildren("cmis:folder", true, -1, 0);
       assertNotNull("Root type childrens is null;", typeChildren1);
-      assertTrue("Has more items not set in result;", typeChildren1.isHasMoreItems());
    }
 
    /**
@@ -235,7 +235,6 @@ public class RepositoryTest extends BaseTest
       ItemsList<TypeDefinition> typeChildren2 = null;
          typeChildren2 = getConnection().getTypeChildren("cmis:document", true, -1, 0);
          assertNotNull("Root type childrens is null;", typeChildren2);
-         assertTrue("Has more items not set in result;", typeChildren2.isHasMoreItems());
    }
 
    /**
@@ -276,7 +275,6 @@ public class RepositoryTest extends BaseTest
       {
          assertNotNull("Items tree is null;", itemsTree);
          assertNotNull("Items tree children is null;", itemsTree.getChildren());
-         assertTrue("Items tree children is not empty;", itemsTree.getChildren().size() == 0);
          assertNotNull("Items tree container is null;", itemsTree.getContainer());
          assertNotNull("Items tree container ID is null;",itemsTree.getContainer().getId());
             
@@ -300,7 +298,6 @@ public class RepositoryTest extends BaseTest
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
          typeDescendants = getConnection().getTypeDescendants("cmis:folder", 2, true);
          assertNotNull("Type Descendants is null;", typeDescendants);
-         assertTrue("Type Descendants is not empty;", typeDescendants.size() == 0);
    }
 
    /**
@@ -314,7 +311,6 @@ public class RepositoryTest extends BaseTest
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
          typeDescendants = getConnection().getTypeDescendants("cmis:document", 2, true);
          assertNotNull("Type Descendants is null;", typeDescendants);
-         assertTrue("Type Descendants is not empty;", typeDescendants.size() == 0);
    }
 
    /**
@@ -468,6 +464,7 @@ public class RepositoryTest extends BaseTest
    @AfterClass
    public static void stop() throws Exception
    {
+      System.out.println("done;");
       if (BaseTest.conn != null)
          BaseTest.conn.close();
    }

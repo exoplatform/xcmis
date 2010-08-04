@@ -53,6 +53,7 @@ public class NavigationTest extends BaseTest
    {
       BaseTest.setUp();
       testroot = BaseTest.createFolderTree();
+      System.out.print("Running Navigation Service tests....");
    }
 
    @Test
@@ -141,8 +142,6 @@ public class NavigationTest extends BaseTest
    @Test
    public void testGetChildren_PathSegments() throws Exception
    {
-      String testname = "testGetChildren_PathSegments";
-      System.out.print("Running " + testname + "....                                   ");
          ItemsList<CmisObject> result =
             getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, true, true, PropertyFilter.ALL,
                RenditionFilter.ANY, "", 10, 0);
@@ -160,8 +159,6 @@ public class NavigationTest extends BaseTest
    @Test
    public void testGetChildren_NoPathSegments() throws Exception
    {
-      String testname = "testGetChildren_NoPathSegments";
-      System.out.print("Running " + testname + "....                                 ");
          ItemsList<CmisObject> result =
             getConnection().getChildren(testroot, true, IncludeRelationships.BOTH, false, true, PropertyFilter.ALL,
                RenditionFilter.ANY, "", 10, 0);
@@ -494,8 +491,6 @@ public class NavigationTest extends BaseTest
    @Test
    public void testGetDescendants_ObjectInfo() throws Exception
    {
-      String testname = "testGetDescendants_ObjectInfo";
-      System.out.print("Running " + testname + "....                                  ");
       if (!IS_CAPABILITY_DESCENDANTS)
       {
          //SKIP
@@ -1564,9 +1559,9 @@ public class NavigationTest extends BaseTest
    @AfterClass
    public static void shutDown() throws Exception
    {
+      System.out.println("done;");
       clearTree(testroot);
       testroot = null;
-
       if (BaseTest.conn != null)
          BaseTest.conn.close();
    }

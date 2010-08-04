@@ -68,6 +68,7 @@ public class ACLTest extends BaseTest
          getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
             null, null);
       capability = getCapabilities().getCapabilityACL();
+      System.out.print("Running ACL Service tests....");
    }
 
    /**
@@ -164,11 +165,11 @@ public class ACLTest extends BaseTest
          properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
             propDefName.getLocalName(), propDefName.getDisplayName(), "testApplyACL_RemoveACE"));
          properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(popDefObjectTypeId.getId(), popDefObjectTypeId
-            .getQueryName(), popDefObjectTypeId.getLocalName(), popDefObjectTypeId.getDisplayName(), "cmis:kino"));
+            .getQueryName(), popDefObjectTypeId.getLocalName(), popDefObjectTypeId.getDisplayName(), "cmis:acl2"));
 
          TypeDefinition newType =
-            new TypeDefinition("cmis:kino", BaseType.DOCUMENT, "cmis:kino", "cmis:kino", "", "cmis:document",
-               "cmis:kino", "cmis:kino", true, false, true, true, false, false, true, false, null, null,
+            new TypeDefinition("cmis:acl2", BaseType.DOCUMENT, "cmis:acl2", "cmis:acl2", "", "cmis:document",
+               "cmis:acl2", "cmis:acl2", true, false, true, true, false, false, true, false, null, null,
                ContentStreamAllowed.ALLOWED, propertyDefinitions);
          typeID = getStorage().addType(newType);
          newType = getStorage().getTypeDefinition(typeID, true);
@@ -198,16 +199,41 @@ public class ACLTest extends BaseTest
    @Test
    public void testApplyACL_ConstraintExceptionACL() throws Exception
    {
+      String typeID = null;
+      DocumentData doc1 = null;
       try
       {
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          List<AccessControlEntry> addACL = createACL(username, "cmis:read");
+         
+         Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
+         org.xcmis.spi.model.PropertyDefinition<?> propDefName =
+            PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
+               CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
+               "doc1", true, null, null);
+         org.xcmis.spi.model.PropertyDefinition<?> popDefObjectTypeId =
+            PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
+               CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
+               false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
 
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testApplyACL_ConstraintExceptionACL"), cs, addACL, null,
+         Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+         properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
+            propDefName.getLocalName(), propDefName.getDisplayName(), "testApplyACL_RemoveACE"));
+         properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(popDefObjectTypeId.getId(), popDefObjectTypeId
+            .getQueryName(), popDefObjectTypeId.getLocalName(), popDefObjectTypeId.getDisplayName(), "cmis:acl1"));
+
+         TypeDefinition newType =
+            new TypeDefinition("cmis:acl1", BaseType.DOCUMENT, "cmis:acl1", "cmis:acl1", "", "cmis:document",
+               "cmis:acl1", "cmis:acl1", true, false, true, true, false, false, false, false, null, null,
+               ContentStreamAllowed.ALLOWED, propertyDefinitions);
+         typeID = getStorage().addType(newType);
+         newType = getStorage().getTypeDefinition(typeID, true);
+
+         doc1 =
+            getStorage().createDocument(testroot, newType,
+               properties, cs, null, null,
                VersioningState.MAJOR);
-         getConnection().applyACL(doc1.getObjectId(), null, addACL, AccessControlPropagation.OBJECTONLY);
+         getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.OBJECTONLY);
         fail("Constraint exception must be thrown;");
       }
       catch (NotSupportedException ex)
@@ -221,6 +247,10 @@ public class ACLTest extends BaseTest
       catch (ConstraintException ec)
       {
          //OK
+      }
+      finally{
+         getStorage().deleteObject(doc1, true);
+         getStorage().removeType(typeID);
       }
    }
 
@@ -307,5 +337,6 @@ public class ACLTest extends BaseTest
          clear(testroot.getObjectId());
       if (BaseTest.conn != null)
          BaseTest.conn.close();
+      System.out.println("done;");
    }
 }

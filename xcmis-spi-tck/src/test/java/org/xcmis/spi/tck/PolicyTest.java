@@ -58,6 +58,7 @@ public class PolicyTest extends BaseTest
    public static void start() throws Exception
    {
       BaseTest.setUp();
+      System.out.print("Running Policy Service tests....");
    }
 
    /**
@@ -437,6 +438,7 @@ public class PolicyTest extends BaseTest
    @AfterClass
    public static void stop() throws Exception
    {
+      System.out.println("done;");
       if (BaseTest.conn != null)
          BaseTest.conn.close();
    }

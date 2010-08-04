@@ -58,6 +58,7 @@ public class RelationshipTest extends BaseTest
    public static void start() throws Exception
    {
       BaseTest.setUp();
+      System.out.print("Running Relationship Service tests....");
    }
 
    /**
@@ -753,6 +754,7 @@ public class RelationshipTest extends BaseTest
    @AfterClass
    public static void stop() throws Exception
    {
+      System.out.println("done;");
       if (BaseTest.conn != null)
          BaseTest.conn.close();
    }

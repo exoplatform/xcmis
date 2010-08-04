@@ -73,6 +73,7 @@ public class MultifilingTest extends BaseTest
    public static void start() throws Exception
    {
       BaseTest.setUp();
+      System.out.print("Running Multifiling Service tests....");
    }
 
    /**
@@ -237,8 +238,6 @@ public class MultifilingTest extends BaseTest
                getConnection().addObjectToFolder(docKino.getObjectId(), folder2.getObjectId(), true);
                fail("ConstraintException must be thrown;");
             }
-            else
-              fail("cmis:allowedChildObjectTypeIds is empty;");
          }
          catch (ConstraintException e)
          {
@@ -294,7 +293,7 @@ public class MultifilingTest extends BaseTest
             assertNotNull("Children list is null;", children.getItems());
             List<CmisObject> listChildren = children.getItems();
 
-            assertTrue("Clildren list elements does not match;", children0.getItems().size() == 1);
+            assertTrue("Clildren list elements does not match;", children.getItems().size() == 1);
             for (CmisObject cmisObject : listChildren)
             {
                assertNotNull("Cannot get cmis object;",cmisObject);
@@ -498,6 +497,7 @@ public class MultifilingTest extends BaseTest
    @AfterClass
    public static void stop() throws Exception
    {
+      System.out.println("done;");
       if (BaseTest.conn != null)
          BaseTest.conn.close();
    }
