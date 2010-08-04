@@ -18,20 +18,15 @@ package org.xcmis.spi.deploy;
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-import org.exoplatform.container.ExoContainer;
 import org.exoplatform.container.ExoContainerContext;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.container.xml.ValuesParam;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.picocontainer.Startable;
 import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.CmisRegistryFactory;
 import org.xcmis.spi.RenditionManager;
-import org.xcmis.spi.StorageProvider;
 
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * @version $Id:$
@@ -39,14 +34,21 @@ import java.util.List;
 public class ExoContainerCmisRegistry extends CmisRegistry implements Startable, CmisRegistryFactory
 {
 
-   private final ExoContainerContext containerContext;
+   //   private static final Log LOG = ExoLogger.getLogger(ExoContainerCmisRegistry.class);
 
-   private static final Log LOG = ExoLogger.getLogger(ExoContainerCmisRegistry.class);
+   protected final InitParams initParams;
 
-   public ExoContainerCmisRegistry(ExoContainerContext containerContext, InitParams initParams)
+   public ExoContainerCmisRegistry(InitParams initParams)
    {
-      this.containerContext = containerContext;
+      this.initParams = initParams;
+   }
 
+   /**
+    * {@inheritDoc}
+    */
+   @SuppressWarnings("unchecked")
+   public void start()
+   {
       if (initParams != null)
       {
          Iterator<ValuesParam> vparams = initParams.getValuesParamIterator();
@@ -59,24 +61,8 @@ public class ExoContainerCmisRegistry extends CmisRegistry implements Startable,
             }
          }
       }
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   public void start()
-   {
-      ExoContainer container = containerContext.getContainer();
-
-      @SuppressWarnings("unchecked")
-      List<StorageProvider> sps = container.getComponentInstancesOfType(StorageProvider.class);
       RenditionManager manager = RenditionManager.getInstance();
       manager.addRenditionProviders(providers);
-
-      for (StorageProvider sp : sps)
-      {
-         addStorage(sp);
-      }
       setFactory(this);
    }
 

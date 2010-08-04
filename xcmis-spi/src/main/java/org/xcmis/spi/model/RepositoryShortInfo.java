@@ -18,19 +18,19 @@
  */
 package org.xcmis.spi.model;
 
-public class RepositoryShortInfo
+public class RepositoryShortInfo implements Comparable<RepositoryShortInfo>
 {
 
    protected String repositoryId;
-   
+
    protected String repositoryName;
-   
+
    protected String rootFolderId;
 
    public RepositoryShortInfo(String repositoryId){
       this.repositoryId = repositoryId;
    }
-   
+
    public RepositoryShortInfo(String storageId, String storageName){
       this.repositoryId = storageId;
       this.repositoryName = storageName;
@@ -45,7 +45,7 @@ public class RepositoryShortInfo
    {
       return repositoryName;
    }
-   
+
    public String getRootFolderId()
    {
       return rootFolderId;
@@ -55,5 +55,14 @@ public class RepositoryShortInfo
    {
       this.rootFolderId = rootFolderId;
    }
-   
+
+   /**
+    * {@inheritDoc}
+    */
+   public int compareTo(RepositoryShortInfo o)
+   {
+      String id = o.getRepositoryId();
+      return repositoryId.compareTo(id);
+   }
+
 }

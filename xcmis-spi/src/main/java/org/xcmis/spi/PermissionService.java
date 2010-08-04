@@ -38,6 +38,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * Common service for resolve CMIS object permissions.
+ *
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id$
  */
@@ -46,7 +48,7 @@ public class PermissionService
 
    /**
     * Calculate allowable actions for specified object.
-    * 
+    *
     * @param object object
     * @param userIdentity user's identity
     * @param repositoryInfo RepositoryInfo

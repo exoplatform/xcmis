@@ -23,12 +23,13 @@ import org.xcmis.spi.model.RepositoryShortInfo;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -78,10 +79,10 @@ public class CmisRegistry
 
    protected CmisRegistry()
    {
-      this.storageProviders = new HashMap<String, StorageProvider>();
+      this.storageProviders = new TreeMap<String, StorageProvider>();
    }
 
-   public final void addStorage(StorageProvider storageProvider)
+   public void addStorage(StorageProvider storageProvider)
    {
       String id = storageProvider.getStorageID();
       if (this.storageProviders.get(id) != null)
@@ -99,7 +100,7 @@ public class CmisRegistry
     * @throws InvalidArgumentException if storage with specified id is not
     *         registered
     */
-   public final Connection getConnection(String storageId)
+   public Connection getConnection(String storageId)
    {
       StorageProvider storageProvider = storageProviders.get(storageId);
       if (storageProvider == null)
@@ -112,12 +113,12 @@ public class CmisRegistry
    /**
     * Get id of all available storages.
     *
-    * @return storages iDs if no one storages configured than empty set returned
-    *         never null
+    * @return short information about storages, see {@link RepositoryShortInfo}.
+    *         If no one storages configured than empty set returned never null
     */
-   public final Set<RepositoryShortInfo> getStorageInfos()
+   public Set<RepositoryShortInfo> getStorageInfos()
    {
-      Set<RepositoryShortInfo> set = new HashSet<RepositoryShortInfo>();
+      SortedSet<RepositoryShortInfo> set = new TreeSet<RepositoryShortInfo>();
       Iterator<String> it = storageProviders.keySet().iterator();
       while (it.hasNext())
       {
@@ -127,7 +128,7 @@ public class CmisRegistry
             .getRootFolderId());
          set.add(info);
       }
-      return Collections.unmodifiableSet(set);
+      return Collections.unmodifiableSortedSet(set);
    }
 
    /**
