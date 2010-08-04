@@ -440,6 +440,7 @@ public class StorageImpl implements Storage
          if (content != null)
          {
             ByteArrayValue cv = ByteArrayValue.fromStream(content.getStream());
+            copyEntry.setValue(PropertyDefinitions.CONTENT, cv);
             MimeType mimeType = content.getMediaType();
             copyEntry.setValue(CmisConstants.CONTENT_STREAM_MIME_TYPE, new StringValue(mimeType.getBaseType()));
             String charset = mimeType.getParameter(CmisConstants.CHARSET);
