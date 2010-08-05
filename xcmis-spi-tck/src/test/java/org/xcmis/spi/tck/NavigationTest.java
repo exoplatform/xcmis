@@ -1559,10 +1559,9 @@ public class NavigationTest extends BaseTest
    @AfterClass
    public static void shutDown() throws Exception
    {
-      System.out.println("done;");
       clearTree(testroot);
-      testroot = null;
       if (BaseTest.conn != null)
          BaseTest.conn.close();
+      System.out.println("done;");
    }
 }

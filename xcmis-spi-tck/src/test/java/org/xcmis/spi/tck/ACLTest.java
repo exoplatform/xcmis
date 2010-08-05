@@ -120,7 +120,7 @@ public class ACLTest extends BaseTest
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition,
                getPropsMap(CmisConstants.DOCUMENT, "testApplyACL_Simple"), cs, null, null, VersioningState.MAJOR);
-         getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.OBJECTONLY);
+         getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.REPOSITORYDETERMINED);
          ObjectData obj = getStorage().getObjectById(doc1.getObjectId());
          for (AccessControlEntry one : obj.getACL(false))
          {
@@ -176,7 +176,7 @@ public class ACLTest extends BaseTest
 
          DocumentData doc1 =
             getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.MAJOR);
-         getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.OBJECTONLY);
+         getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.REPOSITORYDETERMINED);
          ObjectData obj = getStorage().getObjectById(doc1.getObjectId());
          for (AccessControlEntry one : obj.getACL(false))
          {

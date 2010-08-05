@@ -24,11 +24,13 @@ import static org.junit.Assert.*;
 import org.exoplatform.container.StandaloneContainer;
 import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CmisConstants;
+import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
+import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.NameConstraintViolationException;
@@ -87,8 +89,6 @@ public class BaseTest
 
    protected static Connection conn;
 
-   private static final String TCK_CONF_DEFAULT = "/conf/sp_inmem_exo/test-inmem-sp-configuration.xml";
-
    protected static boolean IS_RELATIONSHIPS_SUPPORTED = false;
 
    protected static boolean IS_POLICIES_SUPPORTED = false;
@@ -96,24 +96,38 @@ public class BaseTest
    protected static boolean IS_CAPABILITY_FOLDER_TREE = false;
 
    protected static boolean IS_CAPABILITY_DESCENDANTS = false;
+   
+   protected static boolean useConf = false;
 
    public static void setUp() throws Exception
    {
-      String propertyTckConf = System.getProperty("tck.conf");
+      //String propertyTckConf = System.getProperty("tck.conf");
+      //String factory = System.getProperty("org.xcmis.CmisRegistryFactory");
 
-      String tck_conf =
-         propertyTckConf == null || propertyTckConf.length() == 0 || propertyTckConf.equalsIgnoreCase("${tck.conf}")
-            ? TCK_CONF_DEFAULT : propertyTckConf;
-
-      String containerConf = BaseTest.class.getResource(tck_conf).toString();
-      StandaloneContainer.addConfigurationURL(containerConf);
-      container = StandaloneContainer.getInstance();
-
+//      String tck_conf =
+//         propertyTckConf == null || propertyTckConf.length() == 0 || propertyTckConf.equalsIgnoreCase("${tck.conf}")
+//            ? TCK_CONF_DEFAULT : propertyTckConf;
+      
+      
+//      if (propertyTckConf == null || propertyTckConf.length() == 0 || propertyTckConf.equalsIgnoreCase("${tck.conf}"))
+//      {
+//         if (factory == null || factory.length() == 0){
+//            throw new InvalidArgumentException("You must specify an factory class or configuration file.");
+//         }
+//      }
+//      else
+//      {
+//      String tck_conf = propertyTckConf;
+//      String containerConf = BaseTest.class.getResource(tck_conf).toString();
+//      StandaloneContainer.addConfigurationURL(containerConf);
+//      container = StandaloneContainer.getInstance();
+//      storageProvider = (StorageProvider)container.getComponentInstanceOfType(StorageProvider.class);
+//      useConf = true;
+//      }
       ConversationState state = new ConversationState(new Identity("__system"));
       ConversationState.setCurrent(state);
 
-      storageProvider = (StorageProvider)container.getComponentInstanceOfType(StorageProvider.class);
-
+     
       rootfolderID = getStorage().getRepositoryInfo().getRootFolderId();
       rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
 
@@ -155,7 +169,7 @@ public class BaseTest
 
    protected static Connection getConnection()
    {
-      conn = storageProvider.getConnection();
+      conn = CmisRegistry.getInstance().getConnection("cmis1");
       return conn;
    }
 
@@ -400,14 +414,16 @@ public class BaseTest
 //            {
 //               for (CmisObject relationship : one.getRelationship())
 //               {
-//                  connection.deleteObject(relationship.getObjectInfo().getId(), null);
+//                  try
+//                  {
+//                     connection.deleteObject(relationship.getObjectInfo().getId(), null);
+//                  }
+//                  catch (ObjectNotFoundException e)
+//                  {
+//                  }
 //               }
 //            }
 //         }
-//      }
-//      catch (ObjectNotFoundException e)
-//      {
-//
 //      }
 //      catch (Exception e)
 //      {

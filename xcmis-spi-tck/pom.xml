@@ -31,31 +31,6 @@
          <activation>
             <activeByDefault>true</activeByDefault>
          </activation>
-         <build>
-            <plugins>
-               <plugin>
-                  <groupId>org.apache.maven.plugins</groupId>
-                  <artifactId>maven-surefire-plugin</artifactId>
-                  <configuration>
-                     <systemProperties>
-                        <property>
-                           <name>tck.conf</name>
-                           <value>${tck.conf}</value>
-                        </property>
-                     </systemProperties>
-                     <includes>
-                        <include>**/NoTests.java</include>
-                     </includes>
-                  </configuration>
-               </plugin>
-            </plugins>
-         </build>
-      </profile>
-      <profile>
-         <id>inmemory</id>
-         <activation>
-            <activeByDefault>false</activeByDefault>
-         </activation>
          <dependencies>
             <dependency>
                <groupId>org.xcmis</groupId>
@@ -71,82 +46,8 @@
                   <configuration>
                      <systemProperties>
                         <property>
-                           <name>tck.conf</name>
-                           <value>${tck.conf}</value>
-                        </property>
-                     </systemProperties>
-                     <includes>
-                        <include>**/AllTests.java</include>
-                     </includes>
-                     <testFailureIgnore>true</testFailureIgnore>
-                     <!--
-                        <additionalClasspathElements>
-                        <additionalClasspathElement>${basedir}/lib/xcmis-sp-inmemory-1.1-SNAPSHOT.jar</additionalClasspathElement>
-                        <additionalClasspathElement>${basedir}/lib/xcmis-search-service-1.1-SNAPSHOT.jar</additionalClasspathElement>
-                        <additionalClasspathElement>${basedir}/lib/xcmis-search-model-1.1-SNAPSHOT.jar</additionalClasspathElement>
-                        <additionalClasspathElement>${basedir}/lib/xcmis-search-parser-cmis-1.1-SNAPSHOT.jar</additionalClasspathElement>
-                        <additionalClasspathElement>${basedir}/lib/lucene-core-2.4.1.jar</additionalClasspathElement>
-                        <additionalClasspathElement>${basedir}/lib/lucene-regex-2.4.1.jar</additionalClasspathElement>
-                        <additionalClasspathElement>${basedir}/lib/antlr-runtime-3.2.jar</additionalClasspathElement>
-                        </additionalClasspathElements>
-                     -->
-                  </configuration>
-               </plugin>
-               <plugin>
-                  <groupId>org.apache.maven.plugins</groupId>
-                  <artifactId>maven-antrun-plugin</artifactId>
-                  <executions>
-                     <execution>
-                        <id>test-reports</id>
-                        <phase>package</phase>
-                        <configuration>
-                           <tasks>
-                              <junitreport todir="target/surefire-reports">
-                                 <fileset dir="target/surefire-reports">
-                                    <include name="**/*.xml" />
-                                 </fileset>
-                                 <report format="noframes" todir="target" />
-                              </junitreport>
-                           </tasks>
-                        </configuration>
-                        <goals>
-                           <goal>run</goal>
-                        </goals>
-                     </execution>
-                  </executions>
-                  <dependencies>
-                     <dependency>
-                        <groupId>ant</groupId>
-                        <artifactId>ant-junit</artifactId>
-                        <version>1.6.2</version>
-                     </dependency>
-                  </dependencies>
-               </plugin>
-            </plugins>
-         </build>
-      </profile>
-      <profile>
-         <id>exo</id>
-         <activation>
-            <activeByDefault>false</activeByDefault>
-         </activation>
-         <dependencies>
-            <dependency>
-               <groupId>org.exoplatform.ecms</groupId>
-               <artifactId>exo-ecms-ext-xcmis-sp</artifactId>
-               <scope>test</scope>
-            </dependency>
-         </dependencies>
-         <build>
-            <plugins>
-               <plugin>
-                  <groupId>org.apache.maven.plugins</groupId>
-                  <artifactId>maven-surefire-plugin</artifactId>
-                  <configuration>
-                     <systemProperties>
-                        <property>
-                           <name>tck.conf</name>
-                           <value>${tck.conf}</value>
+                           <name>org.xcmis.CmisRegistryFactory</name>
+                           <value>org.xcmis.sp.inmemory.tck.InmemoryCmisRegistryFactory</value>
                         </property>
                      </systemProperties>
                      <includes>
