@@ -97,6 +97,10 @@
                            <name>sp.conf</name>
                            <value>/conf/standalone/test-sp-inmemory-configuration.xml</value>
                         </property>
+                        <property>
+                           <name>org.xcmis.CmisRegistryFactory</name>
+                           <value>org.xcmis.sp.inmemory.tck.InmemoryCmisRegistryFactory</value>
+                        </property>
                      </systemProperties>
                      <argLine>-Xms150m -Xmx150m</argLine>
                      <testFailureIgnore>false</testFailureIgnore>
