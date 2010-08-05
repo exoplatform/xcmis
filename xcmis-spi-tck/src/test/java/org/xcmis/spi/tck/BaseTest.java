@@ -49,6 +49,7 @@ import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.RepositoryCapabilities;
+import org.xcmis.spi.model.RepositoryShortInfo;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.UnfileObject;
 import org.xcmis.spi.model.VersioningState;
@@ -60,6 +61,7 @@ import org.exoplatform.services.security.Identity;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -169,7 +171,9 @@ public class BaseTest
 
    protected static Connection getConnection()
    {
-      conn = CmisRegistry.getInstance().getConnection("cmis1");
+      CmisRegistry reg =CmisRegistry.getInstance(); 
+      Iterator<RepositoryShortInfo> it = reg.getStorageInfos().iterator();
+      conn = reg.getConnection(it.next().getRepositoryId());
       return conn;
    }
 
@@ -200,7 +204,7 @@ public class BaseTest
     */
    protected static String createFolderTree() throws Exception
    {
-      FolderData testroot = createFolder(rootFolder, "testroot");
+      FolderData testroot = createFolder(rootFolder, "navigation_testroot");
 
       FolderData folder1 = createFolder(testroot, "folder1");
 

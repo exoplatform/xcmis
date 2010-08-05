@@ -48,10 +48,16 @@ import java.util.List;
 public class DiscoveryTest extends BaseTest
 {
 
+   static FolderData testroot = null;
+   
    @BeforeClass
    public static void start() throws Exception
    {
       BaseTest.setUp();
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      testroot =
+         getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "discovery_testroot"),
+            null, null);
       System.out.print("Running Discovery Service tests....");
    }
 
@@ -68,11 +74,7 @@ public class DiscoveryTest extends BaseTest
          //SKIP
          return;
       }
-      FolderData parentFolder = null;
-      try
-      {
-         parentFolder = createFolder(rootFolder, "folder1");
-         DocumentData documentData = createDocument(parentFolder, "doc1", "Hello World!");
+         DocumentData documentData = createDocument(testroot, "testQuery1", "Hello World!");
          String statement = "SELECT * FROM " + CmisConstants.DOCUMENT + " WHERE CONTAINS(\"Hello\")";
          ItemsList<CmisObject> query = null;
 
@@ -91,12 +93,8 @@ public class DiscoveryTest extends BaseTest
             assertNotNull ("ObjectId not found in query result;", cmisObject.getObjectInfo().getId());
             assertTrue ("ObjectId's does not match;", documentData.getObjectId().equals(cmisObject.getObjectInfo().getId()));
             assertTrue("Object names does not match;", documentData.getName().equals(cmisObject.getObjectInfo().getName()));
+            getStorage().deleteObject(documentData, true);
          }
-      }
-      finally
-      {
-         clear(parentFolder.getObjectId());
-      }
    }
 
    /**
@@ -112,11 +110,7 @@ public class DiscoveryTest extends BaseTest
          //SKIP
          return;
       }
-      FolderData parentFolder = null;
-      try
-      {
-         parentFolder = createFolder(rootFolder, "folder1");;
-         DocumentData documentData = createDocument(parentFolder, "doc1", "Hello World!");
+         DocumentData documentData = createDocument(testroot, "testQuery2", "Hello World!");
          String statement = "SELECT * FROM " + CmisConstants.DOCUMENT + " WHERE CONTAINS(\"Hello\")";
          ItemsList<CmisObject> query = null;
 
@@ -138,11 +132,7 @@ public class DiscoveryTest extends BaseTest
             assertTrue("ObjectId's does not match;", documentData.getObjectId().equals(cmisObject.getObjectInfo().getId()));
             assertTrue("Object names does not match;", documentData.getName().equals(cmisObject.getObjectInfo().getName()));
          }
-      }
-      finally
-      {
-         clear(parentFolder.getObjectId());
-      }
+         getStorage().deleteObject(documentData, true);
    }
 
    /**
@@ -153,15 +143,14 @@ public class DiscoveryTest extends BaseTest
    @Test
    public void testContentChanges() throws Exception
    {
+      DocumentData documentData = null;
       if (getStorage().getRepositoryInfo().getCapabilities().getCapabilityQuery().equals(CapabilityQuery.NONE))
       {
          //SKIP
       }
-      FolderData parentFolder = null;
       try
       {
-         parentFolder = createFolder(rootFolder, "folder1");
-         DocumentData documentData = createDocument(parentFolder, "doc1", "Hello World!");
+         documentData = createDocument(testroot, "testContentChanges", "Hello World!");
          String statement = "SELECT * FROM " + CmisConstants.DOCUMENT + " WHERE CONTAINS(\"Hello\")";
          ItemsList<CmisObject> query = null;
 
@@ -173,17 +162,18 @@ public class DiscoveryTest extends BaseTest
       {
          //SKIP
       }
-      finally
-      {
-         clear(parentFolder.getObjectId());
+      finally{
+         getStorage().deleteObject(documentData, true);
       }
    }
 
    @AfterClass
    public static void stop() throws Exception
    {
-      System.out.println("done;");
+      if (testroot != null)
+         clear(testroot.getObjectId());
       if (BaseTest.conn != null)
          BaseTest.conn.close();
+      System.out.println("done;");
    }
 }

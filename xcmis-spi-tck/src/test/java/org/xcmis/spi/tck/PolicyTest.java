@@ -54,10 +54,16 @@ import org.xcmis.spi.utils.MimeType;
 public class PolicyTest extends BaseTest
 {
 
+   static FolderData testroot = null;
+   
    @BeforeClass
    public static void start() throws Exception
    {
       BaseTest.setUp();
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      testroot =
+         getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "policy_testroot"),
+            null, null);
       System.out.print("Running Policy Service tests....");
    }
 
@@ -74,20 +80,16 @@ public class PolicyTest extends BaseTest
          //SKIP
          return;
       }
-      FolderData testroot = null;
       PolicyData policy = null;
       try
       {
-         FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
-         testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
-               null, null);
+         String policyName = "testApplyPolicy_Simple_policy1";
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testApplyPolicy_Simple"),
                cs, null, null, VersioningState.MAJOR);
 
-         policy = createPolicy(testroot, "policy1");
+         policy = createPolicy(testroot, policyName);
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
          ObjectData res = getStorage().getObjectById(doc1.getObjectId());
          assertTrue("Policies number incorrect;", res.getPolicies().size() == 1);
@@ -95,15 +97,13 @@ public class PolicyTest extends BaseTest
          while (it.hasNext())
          {
             PolicyData one = it.next();
-            assertTrue("Policy name does not match;",one.getName().equals("policy1"));
+            assertTrue("Policy name does not match;",one.getName().equals(policyName));
             assertTrue("Policy text does not match;",one.getPolicyText().equals("testPolicyText"));
             res.removePolicy(one);
          }
       }
       finally
       {
-         if (testroot != null)
-            clear(testroot.getObjectId());
          getStorage().deleteObject(policy, false);
       }
    }
@@ -122,16 +122,11 @@ public class PolicyTest extends BaseTest
          //SKIP
          return;
       }
-      FolderData testroot = null;
+      DocumentData doc1 = null;
       PolicyData policy = null;
       String typeID = null;
       try
       {
-         FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
-
-         testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
-               null, null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
          Map<String, PropertyDefinition<?>> kinoPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
@@ -146,22 +141,22 @@ public class PolicyTest extends BaseTest
 
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
          properties.put(CmisConstants.NAME, new StringProperty(kinoPropDefName2.getId(), kinoPropDefName2
-            .getQueryName(), kinoPropDefName2.getLocalName(), kinoPropDefName2.getDisplayName(), "doc1"));
+            .getQueryName(), kinoPropDefName2.getLocalName(), kinoPropDefName2.getDisplayName(), "testApplyPolicy_ConstraintException"));
          properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(kinoPropDefObjectTypeId2.getId(),
             kinoPropDefObjectTypeId2.getQueryName(), kinoPropDefObjectTypeId2.getLocalName(), kinoPropDefObjectTypeId2
-               .getDisplayName(), "cmis:kino"));
+               .getDisplayName(), "cmis:policytype1"));
 
          TypeDefinition newType =
-            new TypeDefinition("cmis:kino", BaseType.DOCUMENT, "cmis:kino", "cmis:kino", "", "cmis:document",
-               "cmis:kino", "cmis:kino", true, false, true, true, false, false, false, false, null, null,
+            new TypeDefinition("cmis:policytype1", BaseType.DOCUMENT, "cmis:policytype1", "cmis:policytype1", "", "cmis:document",
+               "cmis:policytype1", "cmis:policytype1", true, false, true, true, false, false, false, false, null, null,
                ContentStreamAllowed.ALLOWED, kinoPropertyDefinitions);
          typeID = getStorage().addType(newType);
          newType = getStorage().getTypeDefinition(typeID, true);
 
-         DocumentData doc1 =
+          doc1 =
             getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.MAJOR);
 
-         policy = createPolicy(testroot, "policy1");
+         policy = createPolicy(testroot, "testApplyPolicy_ConstraintException_policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
          fail("ConstraintException must be thrown;");
       }
@@ -171,8 +166,7 @@ public class PolicyTest extends BaseTest
       }
       finally
       {
-         if (testroot != null)
-            clear(testroot.getObjectId());
+         getStorage().deleteObject(doc1, false);
          getStorage().deleteObject(policy, false);
          getStorage().removeType(typeID);
       }
@@ -191,22 +185,16 @@ public class PolicyTest extends BaseTest
          //SKIP
          return;
       }
-      FolderData testroot = null;
       PolicyData policy = null;
       try
       {
-         FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
-
-         testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
-               null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
                null, null, VersioningState.MAJOR);
 
-         policy = createPolicy(testroot, "policy1");
+         policy = createPolicy(testroot, "testRemovePolicy_Simple_policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
          getConnection().removePolicy(policy.getObjectId(), doc1.getObjectId());
          ObjectData res = getStorage().getObjectById(doc1.getObjectId());
@@ -215,8 +203,6 @@ public class PolicyTest extends BaseTest
       }
       finally
       {
-         if (testroot != null)
-            clear(testroot.getObjectId());
          getStorage().deleteObject(policy, false);
       }
    }
@@ -235,16 +221,11 @@ public class PolicyTest extends BaseTest
          //SKIP
          return;
       }
-      FolderData testroot = null;
       String typeID = null;
       PolicyData policy = null;
+      DocumentData doc1 = null;
       try
       {
-         FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
-
-         testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
-               null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
          Map<String, PropertyDefinition<?>> kinoPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
@@ -259,22 +240,22 @@ public class PolicyTest extends BaseTest
 
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
          properties.put(CmisConstants.NAME, new StringProperty(kinoPropDefName2.getId(), kinoPropDefName2
-            .getQueryName(), kinoPropDefName2.getLocalName(), kinoPropDefName2.getDisplayName(), "doc1"));
+            .getQueryName(), kinoPropDefName2.getLocalName(), kinoPropDefName2.getDisplayName(), "testRemovePolicy_ConstraintException1"));
          properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(kinoPropDefObjectTypeId2.getId(),
             kinoPropDefObjectTypeId2.getQueryName(), kinoPropDefObjectTypeId2.getLocalName(), kinoPropDefObjectTypeId2
-               .getDisplayName(), "cmis:kino"));
+               .getDisplayName(), "cmis:policytype2"));
 
          TypeDefinition newType =
-            new TypeDefinition("cmis:kino", BaseType.DOCUMENT, "cmis:kino", "cmis:kino", "", "cmis:document",
-               "cmis:kino", "cmis:kino", true, false, true, true, false, true, false, false, null, null,
+            new TypeDefinition("cmis:policytype2", BaseType.DOCUMENT, "cmis:policytype2", "cmis:policytype2", "", "cmis:document",
+               "cmis:policytype2", "cmis:policytype2", true, false, true, true, false, true, false, false, null, null,
                ContentStreamAllowed.ALLOWED, kinoPropertyDefinitions);
          typeID = getStorage().addType(newType);
          newType = getStorage().getTypeDefinition(typeID, true);
 
-         DocumentData doc1 =
+         doc1 =
             getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.MAJOR);
 
-         policy = createPolicy(testroot, "policy1");
+         policy = createPolicy(testroot, "testRemovePolicy_ConstraintException_policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
          getConnection().removePolicy(policy.getObjectId(), doc1.getObjectId());
          fail("Constraint exception must be thrown;");
@@ -285,8 +266,7 @@ public class PolicyTest extends BaseTest
       }
       finally
       {
-         if (testroot != null)
-            clear(testroot.getObjectId());
+         getStorage().deleteObject(doc1, true);
          if (policy != null)
             getStorage().deleteObject(policy, false);
          getStorage().removeType(typeID);
@@ -306,22 +286,17 @@ public class PolicyTest extends BaseTest
          //SKIP
          return;
       }
-      FolderData testroot = null;
       PolicyData policy = null;
+      DocumentData doc1 = null;
       try
       {
-         FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
-
-         testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
-               null, null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
+          doc1 =
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetAppliedPolicies_Simple1"),
                cs, null, null, VersioningState.MAJOR);
 
-         policy = createPolicy(testroot, "policy1");
+         policy = createPolicy(testroot, "testGetAppliedPolicies_Simple_policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
          List<CmisObject> res = getConnection().getAppliedPolicies(doc1.getObjectId(), true, "");
          assertNotNull("getAppliedPolicies() failed;", res);
@@ -333,8 +308,7 @@ public class PolicyTest extends BaseTest
       }
       finally
       {
-         if (testroot != null)
-            clear(testroot.getObjectId());
+         getStorage().deleteObject(doc1, true);
          getStorage().deleteObject(policy, false);
       }
    }
@@ -353,8 +327,8 @@ public class PolicyTest extends BaseTest
          //SKIP
          return;
       }
-      FolderData testroot = null;
       PolicyData policy = null;
+      DocumentData doc1 = null;
       try
       {
          FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
@@ -364,11 +338,11 @@ public class PolicyTest extends BaseTest
                null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
+         doc1 =
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "testGetAppliedPolicies_PropertiesFiltered1"), cs,
                null, null, VersioningState.MAJOR);
 
-         policy = createPolicy(testroot, "policy1");
+         policy = createPolicy(testroot, "testGetAppliedPolicies_PropertiesFiltered_policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
          List<CmisObject> res = getConnection().getAppliedPolicies(doc1.getObjectId(), true, "cmis:name, cmis:path");
          for (CmisObject one : res)
@@ -384,8 +358,7 @@ public class PolicyTest extends BaseTest
       }
       finally
       {
-         if (testroot != null)
-            clear(testroot.getObjectId());
+         getStorage().deleteObject(doc1, true);
          getStorage().deleteObject(policy, false);
       }
    }
@@ -403,22 +376,17 @@ public class PolicyTest extends BaseTest
          //SKIP
          return;
       }
-      FolderData testroot = null;
       PolicyData policy = null;
+      DocumentData doc1 = null;
       try
       {
-         FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
-
-         testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
-               null, null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
+         doc1 =
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetAppliedPolicies_FilterNotValidException1"),
                cs, null, null, VersioningState.MAJOR);
 
-         policy = createPolicy(testroot, "policy1");
+         policy = createPolicy(testroot, "testGetAppliedPolicies_FilterNotValidException_policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
          List<CmisObject> res = getConnection().getAppliedPolicies(doc1.getObjectId(), true, "(,*");
         fail("FilterNotValidException must be thrown;");
@@ -429,8 +397,7 @@ public class PolicyTest extends BaseTest
       }
       finally
       {
-         if (testroot != null)
-            clear(testroot.getObjectId());
+         getStorage().deleteObject(doc1, true);
          getStorage().deleteObject(policy, false);
       }
    }
@@ -438,9 +405,11 @@ public class PolicyTest extends BaseTest
    @AfterClass
    public static void stop() throws Exception
    {
-      System.out.println("done;");
+      if (testroot != null)
+         clear(testroot.getObjectId());
       if (BaseTest.conn != null)
          BaseTest.conn.close();
+      System.out.println("done;");
    }
 
 }

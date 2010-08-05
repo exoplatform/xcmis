@@ -312,7 +312,7 @@ public class NavigationTest extends BaseTest
       try
       {
          ItemsList<CmisObject> result =
-            getConnection().getChildren(getStorage().getObjectByPath("/testroot/doc1").getObjectId(), true,
+            getConnection().getChildren(getStorage().getObjectByPath("/navigation_testroot/doc1").getObjectId(), true,
                IncludeRelationships.BOTH, true, true, PropertyFilter.ALL, RenditionFilter.ANY, "", 10, 10);
          fail("InvalidArgumentException must be thrown;");
       }
@@ -665,7 +665,7 @@ public class NavigationTest extends BaseTest
       try
       {
          List<ItemsTree<CmisObject>> result =
-            getConnection().getDescendants(getStorage().getObjectByPath("/testroot/doc1").getObjectId(), 0, true,
+            getConnection().getDescendants(getStorage().getObjectByPath("/navigation_testroot/doc1").getObjectId(), 0, true,
                IncludeRelationships.NONE, true, true, PropertyFilter.ALL, RenditionFilter.ANY);
          fail("InvalidArgumentException must be thrown;");
       }
@@ -985,7 +985,7 @@ public class NavigationTest extends BaseTest
       try
       {
          List<ItemsTree<CmisObject>> result =
-            getConnection().getFolderTree(getStorage().getObjectByPath("/testroot/doc1").getObjectId(), -1, true,
+            getConnection().getFolderTree(getStorage().getObjectByPath("/navigation_testroot/doc1").getObjectId(), -1, true,
                IncludeRelationships.NONE, true, true, PropertyFilter.ALL, RenditionFilter.ANY);
          fail("InvalidArgumentException must be thrown;");
       }
@@ -1003,7 +1003,7 @@ public class NavigationTest extends BaseTest
    @Test
    public void testGetFolderParent_Simple() throws Exception
    {
-         ObjectData fold = getStorage().getObjectByPath("/testroot/folder1");
+         ObjectData fold = getStorage().getObjectByPath("/navigation_testroot/folder1");
          CmisObject result = getConnection().getFolderParent(fold.getObjectId(), true, PropertyFilter.ALL);
          assertNotNull("Result is empty", result);
    }
@@ -1011,7 +1011,7 @@ public class NavigationTest extends BaseTest
    @Test
    public void testGetFolderParent_IncludeObjectInfo() throws Exception
    {
-         ObjectData fold = getStorage().getObjectByPath("/testroot/folder1");
+         ObjectData fold = getStorage().getObjectByPath("/navigation_testroot/folder1");
          CmisObject result = getConnection().getFolderParent(fold.getObjectId(), true, PropertyFilter.ALL);
          assertNotNull("ObjectInfo must be present in result;", result.getObjectInfo());
    }
@@ -1019,7 +1019,7 @@ public class NavigationTest extends BaseTest
    @Test
    public void testGetFolderParent_NoIncludeObjectInfo() throws Exception
    {
-         ObjectData fold = getStorage().getObjectByPath("/testroot/folder1");
+         ObjectData fold = getStorage().getObjectByPath("/navigation_testroot/folder1");
          CmisObject result = getConnection().getFolderParent(fold.getObjectId(), false, PropertyFilter.ALL);
          assertNull("ObjectInfo must  not be present in result;", result.getObjectInfo());
    }
@@ -1033,7 +1033,7 @@ public class NavigationTest extends BaseTest
    @Test
    public void testGetFolderParent_PropertyFiltered() throws Exception
    {
-         ObjectData fold = getStorage().getObjectByPath("/testroot/folder1");
+         ObjectData fold = getStorage().getObjectByPath("/navigation_testroot/folder1");
          CmisObject result = getConnection().getFolderParent(fold.getObjectId(), true, "cmis:name,cmis:path");
          for (Map.Entry<String, Property<?>> e : result.getProperties().entrySet())
          {
@@ -1055,7 +1055,7 @@ public class NavigationTest extends BaseTest
    {
       try
       {
-         ObjectData fold = getStorage().getObjectByPath("/testroot/folder1");
+         ObjectData fold = getStorage().getObjectByPath("/navigation_testroot/folder1");
          CmisObject result = getConnection().getFolderParent(fold.getObjectId(), false, "(,*");
          fail("FilterNotValidException must be thrown;");
       }
@@ -1094,7 +1094,7 @@ public class NavigationTest extends BaseTest
    @Test
    public void testGetObjectParents_Simple() throws Exception
    {
-         ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
+         ObjectData doc = getStorage().getObjectByPath("/navigation_testroot/folder2/doc3");
          List<ObjectParent> result =
             getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true,
                PropertyFilter.ALL, RenditionFilter.ANY);
@@ -1114,7 +1114,7 @@ public class NavigationTest extends BaseTest
          //SKIP
          return;
       }
-         ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
+         ObjectData doc = getStorage().getObjectByPath("/navigation_testroot/folder2/doc3");
          List<ObjectParent> result =
             getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true,
                PropertyFilter.ALL, RenditionFilter.ANY);
@@ -1137,7 +1137,7 @@ public class NavigationTest extends BaseTest
          //SKIP
          return;
       }
-         ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
+         ObjectData doc = getStorage().getObjectByPath("/navigation_testroot/folder2/doc3");
          List<ObjectParent> result =
             getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.NONE, true, true,
                PropertyFilter.ALL, RenditionFilter.ANY);
@@ -1155,7 +1155,7 @@ public class NavigationTest extends BaseTest
    @Test
    public void testGetObjectParents_AllowableActions() throws Exception
    {
-         ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
+         ObjectData doc = getStorage().getObjectByPath("/navigation_testroot/folder2/doc3");
          List<ObjectParent> result =
             getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true,
                PropertyFilter.ALL, RenditionFilter.ANY);
@@ -1174,7 +1174,7 @@ public class NavigationTest extends BaseTest
    @Test
    public void testGetObjectParents_NoAllowableActions() throws Exception
    {
-         ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
+         ObjectData doc = getStorage().getObjectByPath("/navigation_testroot/folder2/doc3");
          List<ObjectParent> result =
             getConnection().getObjectParents(doc.getObjectId(), false, IncludeRelationships.BOTH, true, true,
                PropertyFilter.ALL, RenditionFilter.ANY);
@@ -1193,7 +1193,7 @@ public class NavigationTest extends BaseTest
    @Test
    public void testGetObjectParents_IncludePathSegment() throws Exception
    {
-         ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
+         ObjectData doc = getStorage().getObjectByPath("/navigation_testroot/folder2/doc3");
          List<ObjectParent> result =
             getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true,
                PropertyFilter.ALL, RenditionFilter.ANY);
@@ -1212,7 +1212,7 @@ public class NavigationTest extends BaseTest
    @Test
    public void testGetObjectParents_NoPathSegment() throws Exception
    {
-         ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
+         ObjectData doc = getStorage().getObjectByPath("/navigation_testroot/folder2/doc3");
          List<ObjectParent> result =
             getConnection().getObjectParents(doc.getObjectId(), false, IncludeRelationships.BOTH, false, true,
                PropertyFilter.ALL, RenditionFilter.ANY);
@@ -1230,7 +1230,7 @@ public class NavigationTest extends BaseTest
    @Test
    public void testGetObjectParents_NoRenditions() throws Exception
    {
-         ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
+         ObjectData doc = getStorage().getObjectByPath("/navigation_testroot/folder2/doc3");
          List<ObjectParent> result =
             getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true,
                PropertyFilter.ALL, RenditionFilter.NONE);
@@ -1243,7 +1243,7 @@ public class NavigationTest extends BaseTest
    @Test
    public void testGetObjectParents_ObjectInfo() throws Exception
    {
-         ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
+         ObjectData doc = getStorage().getObjectByPath("/navigation_testroot/folder2/doc3");
          List<ObjectParent> result =
             getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true,
                PropertyFilter.ALL, RenditionFilter.ANY);
@@ -1256,7 +1256,7 @@ public class NavigationTest extends BaseTest
    @Test
    public void testGetObjectParents_NoObjectInfo() throws Exception
    {
-         ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
+         ObjectData doc = getStorage().getObjectByPath("/navigation_testroot/folder2/doc3");
          List<ObjectParent> result =
             getConnection().getObjectParents(doc.getObjectId(), false, IncludeRelationships.BOTH, true, false,
                PropertyFilter.ALL, RenditionFilter.ANY);
@@ -1275,7 +1275,7 @@ public class NavigationTest extends BaseTest
    @Test
    public void testGetObjectParents_PropertiesFIlter() throws Exception
    {
-         ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
+         ObjectData doc = getStorage().getObjectByPath("/navigation_testroot/folder2/doc3");
          List<ObjectParent> result =
             getConnection().getObjectParents(doc.getObjectId(), false, IncludeRelationships.BOTH, true, false,
                "cmis:name,cmis:path", RenditionFilter.ANY);
@@ -1301,7 +1301,7 @@ public class NavigationTest extends BaseTest
    {
       try
       {
-         ObjectData doc = getStorage().getObjectByPath("/testroot/folder2/doc3");
+         ObjectData doc = getStorage().getObjectByPath("/navigation_testroot/folder2/doc3");
          List<ObjectParent> result =
             getConnection().getObjectParents(doc.getObjectId(), true, IncludeRelationships.BOTH, true, true, "(,*",
                RenditionFilter.ANY);
@@ -1324,7 +1324,7 @@ public class NavigationTest extends BaseTest
    {
       try
       {
-         ObjectData folder = getStorage().getObjectByPath("/testroot/folder2");
+         ObjectData folder = getStorage().getObjectByPath("/navigation_testroot/folder2");
          ItemsIterator<RelationshipData> it =
             folder.getRelationships(RelationshipDirection.EITHER, relationshipTypeDefinition, true);
          if (it.hasNext())

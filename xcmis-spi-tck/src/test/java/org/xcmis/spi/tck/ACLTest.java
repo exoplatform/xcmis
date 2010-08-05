@@ -65,7 +65,7 @@ public class ACLTest extends BaseTest
       BaseTest.setUp();
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       testroot =
-         getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "testroot"),
+         getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "acl_testroot"),
             null, null);
       capability = getCapabilities().getCapabilityACL();
       System.out.print("Running ACL Service tests....");
@@ -262,7 +262,6 @@ public class ACLTest extends BaseTest
    @Test
    public void testApplyACL_ConstraintExceptionACLPropagation() throws Exception
    {
-      FolderData testroot = null;
       try
       {
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
@@ -303,7 +302,6 @@ public class ACLTest extends BaseTest
    @Test
    public void testApplyACL_ConstraintExceptionACLNotMatch() throws Exception
    {
-      FolderData testroot = null;
       try
       {
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
