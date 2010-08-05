@@ -24,20 +24,18 @@ import org.xcmis.spi.CmisRegistryFactory;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
- * @version $Id$
+ * @version $Id: InmemoryCmisRegistryFactory.java 1500 2010-08-05 09:00:58Z
+ *          andrew00x $
  */
 public class InmemoryCmisRegistryFactory implements CmisRegistryFactory
 {
 
-   class CmisRegistry0 extends CmisRegistry
-   {
-      public CmisRegistry0()
-      {
-         addStorage(new org.xcmis.sp.inmemory.StorageProviderImpl("cmis1", "cmis1", "", null, null));
-      }
-   }
+   private CmisRegistry reg = new CmisRegistry();
 
-   private CmisRegistry reg = new CmisRegistry0();
+   public InmemoryCmisRegistryFactory()
+   {
+      reg.addStorage(new org.xcmis.sp.inmemory.StorageProviderImpl("cmis1", "cmis1", "", null, null));
+   }
 
    public CmisRegistry getRegistry()
    {
