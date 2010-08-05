@@ -39,12 +39,14 @@ import java.util.concurrent.atomic.AtomicReference;
 public class CmisRegistry
 {
 
-   private static class SimpleCmisRegistryFactory implements CmisRegistryFactory
+   static final String XCMIS_REGISTRY_FACTORY = "org.xcmis.CmisRegistryFactory";
+
+   private static class CmisRegistryFactory0 implements CmisRegistryFactory
    {
 
       CmisRegistry registry;
 
-      public SimpleCmisRegistryFactory(CmisRegistry registry)
+      public CmisRegistryFactory0(CmisRegistry registry)
       {
          this.registry = registry;
       }
@@ -55,22 +57,35 @@ public class CmisRegistry
       }
    };
 
-   private static AtomicReference<CmisRegistryFactory> service = new AtomicReference<CmisRegistryFactory>();
+   private static AtomicReference<CmisRegistryFactory> crfs = new AtomicReference<CmisRegistryFactory>();
 
    public static CmisRegistry getInstance()
    {
-      CmisRegistryFactory sf = service.get();
-      if (sf == null)
+      CmisRegistryFactory crf = crfs.get();
+      if (crf != null)
       {
-         service.compareAndSet(null, new SimpleCmisRegistryFactory(new CmisRegistry()));
-         sf = service.get();
+         return crf.getRegistry();
       }
-      return sf.getRegistry();
+      synchronized (crfs)
+      {
+         crf = crfs.get();
+         if (crf != null)
+         {
+            return crf.getRegistry();
+         }
+         crf = CmisRegistryFactoryFinder.findCmisRegistry();
+         if (crf == null)
+         {
+            crf = new CmisRegistryFactory0(new CmisRegistry());
+         }
+         crfs.compareAndSet(null, crf);
+      }
+      return crfs.get().getRegistry();
    }
 
    public static void setFactory(CmisRegistryFactory inst)
    {
-      service.set(inst);
+      crfs.set(inst);
    }
 
    protected List<String> providers = new ArrayList<String>();
