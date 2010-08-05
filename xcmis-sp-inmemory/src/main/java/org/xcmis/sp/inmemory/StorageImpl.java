@@ -120,7 +120,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
 /**
  * In-memory implementation of xCMIS storage. This is storage is limited in
  * number of items and total amount of content. Storage is not designed for high
- * concurrency load. In some cases data in storage can be in inconsistency state.
+ * concurrency load. In some cases data in storage can be in inconsistency
+ * state.
  *
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: StorageImpl.java 804 2010-04-16 16:48:59Z
@@ -302,8 +303,8 @@ public class StorageImpl implements Storage
                CapabilityContentStreamUpdatable.ANYTIME, CapabilityJoin.NONE, CapabilityQuery.BOTHCOMBINED,
                CapabilityRendition.READ, false, true, true, true, false, true, true, false), new ACLCapability(
                permissionMapping, Collections.unmodifiableList(supportedPermissions),
-               AccessControlPropagation.OBJECTONLY, SupportedPermissions.BASIC), "anonymous", "any", null, null, true,
-            REPOSITORY_DESCRIPTION, VENDOR_NAME, PRODUCT_NAME, PRODUCT_VERSION, null);
+               AccessControlPropagation.REPOSITORYDETERMINED, SupportedPermissions.BASIC), "anonymous", "any", null,
+            null, true, REPOSITORY_DESCRIPTION, VENDOR_NAME, PRODUCT_NAME, PRODUCT_VERSION, null);
 
       types.put("cmis:document", //
          new TypeDefinition("cmis:document", BaseType.DOCUMENT, "cmis:document", "cmis:document", "", null,
