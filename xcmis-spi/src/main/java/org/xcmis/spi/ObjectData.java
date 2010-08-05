@@ -203,7 +203,7 @@ public interface ObjectData
     *        <code>typeId</code>.
     * @return relationships if object has not any relationships then empty
     *         {@link ItemsIterator} must be returned, never <code>null</code>
-    * @throws NotSupportedException if rendition feature is not supported by
+    * @throws NotSupportedException if relationship feature is not supported by
     *         storage
     * @see RelationshipDirection
     */
