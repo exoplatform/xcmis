@@ -139,9 +139,21 @@ public class CmisRegistry
       {
          String id = it.next();
          RepositoryShortInfo info = new RepositoryShortInfo(id, id);
-         info.setRootFolderId(storageProviders.get(id).getConnection().getStorage().getRepositoryInfo()
-            .getRootFolderId());
-         set.add(info);
+         Connection connection = null;
+         try
+         {
+            connection = storageProviders.get(id).getConnection();
+            info.setRootFolderId(connection.getStorage().getRepositoryInfo()
+               .getRootFolderId());
+            set.add(info);
+         }
+         finally
+         {
+            if (connection != null)
+            {
+               connection.close();
+            }
+         }
       }
       return Collections.unmodifiableSortedSet(set);
    }
