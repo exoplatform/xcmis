@@ -92,7 +92,7 @@ public class CmisRegistry
 
    protected Map<String, StorageProvider> storageProviders;
 
-   protected CmisRegistry()
+   public CmisRegistry()
    {
       this.storageProviders = new TreeMap<String, StorageProvider>();
    }
