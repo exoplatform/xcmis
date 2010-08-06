@@ -343,9 +343,6 @@ public class RelationshipTest extends BaseTest
                CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
                false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
 
-         org.xcmis.spi.model.PropertyDefinition<?> def2 =
-            PropertyDefinitions.getPropertyDefinition(CmisConstants.POLICY, CmisConstants.POLICY_TEXT);
-
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
          properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
             fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "testGetObjectRelationships_IncludeSubrelationshipTypes_rel2"));

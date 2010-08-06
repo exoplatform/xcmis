@@ -54,9 +54,10 @@ import org.xcmis.spi.utils.MimeType;
 
 public class ACLTest extends BaseTest
 {
-
    static FolderData testroot = null;
+
    String username = "username";
+
    static CapabilityACL capability = null;
 
    @BeforeClass
@@ -133,7 +134,7 @@ public class ACLTest extends BaseTest
       }
       catch (NotSupportedException ex)
       {
-          //SKIP
+         //SKIP
       }
    }
 
@@ -187,7 +188,7 @@ public class ACLTest extends BaseTest
       }
       catch (NotSupportedException ex)
       {
-        //SKIP
+         //SKIP
       }
    }
 
@@ -205,7 +206,7 @@ public class ACLTest extends BaseTest
       {
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          List<AccessControlEntry> addACL = createACL(username, "cmis:read");
-         
+
          Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
          org.xcmis.spi.model.PropertyDefinition<?> propDefName =
             PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
@@ -229,16 +230,14 @@ public class ACLTest extends BaseTest
          typeID = getStorage().addType(newType);
          newType = getStorage().getTypeDefinition(typeID, true);
 
-         doc1 =
-            getStorage().createDocument(testroot, newType,
-               properties, cs, null, null,
-               VersioningState.MAJOR);
+         doc1 = getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.MAJOR);
          getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.OBJECTONLY);
-        fail("Constraint exception must be thrown;");
+         fail("Constraint exception must be thrown;");
       }
       catch (NotSupportedException ex)
       {
-         if (capability.equals(CapabilityACL.NONE)){
+         if (capability.equals(CapabilityACL.NONE))
+         {
             //SKIP
          }
          else
@@ -248,7 +247,8 @@ public class ACLTest extends BaseTest
       {
          //OK
       }
-      finally{
+      finally
+      {
          getStorage().deleteObject(doc1, true);
          getStorage().removeType(typeID);
       }
@@ -285,8 +285,9 @@ public class ACLTest extends BaseTest
       }
       catch (NotSupportedException ex)
       {
-         if (capability.equals(CapabilityACL.NONE)){
-          //SKIP
+         if (capability.equals(CapabilityACL.NONE))
+         {
+            //SKIP
          }
          else
             fail("Capability ACL is supported but not supported exception thrown");

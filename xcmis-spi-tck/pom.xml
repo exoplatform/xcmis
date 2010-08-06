@@ -53,8 +53,8 @@
                      <systemProperties>
                         <property>
                            <name>org.xcmis.CmisRegistryFactory</name>
-                           <value>org.exoplatform.ecms.xcmis.sp.jcr.exo.tck.JcrCmisRegistryFactory</value>
-                           <!--                           <value>org.xcmis.sp.inmemory.tck.InmemoryCmisRegistryFactory</value>-->
+                           <!--   <value>org.exoplatform.ecms.xcmis.sp.jcr.exo.tck.JcrCmisRegistryFactory</value> -->
+                           <value>org.xcmis.sp.inmemory.tck.InmemoryCmisRegistryFactory</value>
                         </property>
                      </systemProperties>
                      <includes>

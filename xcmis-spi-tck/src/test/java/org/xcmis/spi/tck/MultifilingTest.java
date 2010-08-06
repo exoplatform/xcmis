@@ -156,7 +156,6 @@ public class MultifilingTest extends BaseTest
          String typeId = null;
          try
          {
-
             org.xcmis.spi.model.PropertyDefinition<?> def =
                PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.NAME);
             org.xcmis.spi.model.PropertyDefinition<?> def2 =
@@ -167,7 +166,7 @@ public class MultifilingTest extends BaseTest
             Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
 
             properties.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(),
-               def.getDisplayName(), "testFolder1"));
+               def.getDisplayName(), "testMultifilingFolder1"));
             properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(def2.getId(), def2.getQueryName(), def2
                .getLocalName(), def2.getDisplayName(), CmisConstants.FOLDER));
             properties.put(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, new IdProperty(def3.getId(), def3
@@ -175,7 +174,7 @@ public class MultifilingTest extends BaseTest
 
             Map<String, Property<?>> properties2 = new HashMap<String, Property<?>>();
             properties2.put(CmisConstants.NAME, new StringProperty(def.getId(), def.getQueryName(), def.getLocalName(),
-               def.getDisplayName(), "testFolder2"));
+               def.getDisplayName(), "testMultifilingFolder2"));
             properties2.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(def2.getId(), def2.getQueryName(), def2
                .getLocalName(), def2.getDisplayName(), CmisConstants.FOLDER));
             properties2.put(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, new IdProperty(def3.getId(), def3
@@ -196,13 +195,13 @@ public class MultifilingTest extends BaseTest
                   new HashMap<String, PropertyDefinition<?>>();
 
                TypeDefinition kinoType =
-                  new TypeDefinition("cmis:kino", BaseType.DOCUMENT, "cmis:kino", "cmis:kino", "", "cmis:document",
-                     "cmis:kino", "cmis:kino", true, false, true, true, false, false, false, true, null, null,
+                  new TypeDefinition("cmis:multifilingtype1", BaseType.DOCUMENT, "cmis:multifilingtype1", "cmis:multifilingtype1", "", "cmis:document",
+                     "cmis:multifilingtype1", "cmis:multifilingtype1", true, false, true, true, false, false, false, true, null, null,
                      ContentStreamAllowed.ALLOWED, kinoPropertyDefinitions);
                typeId = getStorage().addType(kinoType);
 
                // get the new type definition for "cmis:kino"
-               kinoType = getConnection().getTypeDefinition("cmis:kino");
+               kinoType = getConnection().getTypeDefinition("cmis:multifilingtype1");
 
                // create document with the new type "cmis:kino"
                ContentStream cs = new BaseContentStream("doc1".getBytes(), null, new MimeType("text", "plain"));
@@ -219,9 +218,9 @@ public class MultifilingTest extends BaseTest
 
                Map<String, Property<?>> dproperties = new HashMap<String, Property<?>>();
                dproperties.put(CmisConstants.NAME, new StringProperty(ddef.getId(), ddef.getQueryName(), ddef
-                  .getLocalName(), ddef.getDisplayName(), "doc1"));
+                  .getLocalName(), ddef.getDisplayName(), "testMultifilingdoc1"));
                dproperties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(ddef2.getId(), ddef2.getQueryName(), ddef2
-                  .getLocalName(), ddef2.getDisplayName(), "cmis:kino"));
+                  .getLocalName(), ddef2.getDisplayName(), "cmis:multifilingtype1"));
 
                DocumentData docKino =
                   getStorage().createDocument(folder1, kinoType, dproperties, cs, null, null, VersioningState.MAJOR);
@@ -274,9 +273,9 @@ public class MultifilingTest extends BaseTest
          FolderData folder2 = null;
          try
          {
-            folder1 = createFolder(rootFolder, "testFolder1");
-            folder2 = createFolder(rootFolder, "testFolder2");
-            DocumentData doc1 = createDocument(folder1, "doc1", "doc1");
+            folder1 = createFolder(rootFolder, "testAddObjectToFolder1");
+            folder2 = createFolder(rootFolder, "testAddObjectToFolder2");
+            DocumentData doc1 = createDocument(folder1, "testAddObjectToFolder_doc1", "doc1");
 
             ItemsList<CmisObject> children0 =
                getConnection().getChildren(folder2.getObjectId(), false, null, false, true, null, null, null, -1, 0);
@@ -330,8 +329,8 @@ public class MultifilingTest extends BaseTest
       {
          try
          {
-            folder1 = createFolder(rootFolder, "testFolder1");
-            DocumentData doc1 = createDocument(null, "doc1", "doc1");// unfiled document
+            folder1 = createFolder(rootFolder, "testRemoveObjectFolder1");
+            DocumentData doc1 = createDocument(null, "testRemoveObjectDoc1", "doc1");// unfiled document
 
             assertNull("Unfiling failed;", doc1.getParent());
             assertNotNull("Parents list is null;",doc1.getParents());
@@ -359,7 +358,7 @@ public class MultifilingTest extends BaseTest
                assertNotNull("Cannot get cmis object;",cmisObject);
                assertNotNull("Cannot get cmis object info;", cmisObject.getObjectInfo());
                assertNotNull("Cannot get cmis object ID;", cmisObject.getObjectInfo().getId());
-               assertTrue("Objects doen not match;", doc1.getObjectId().equals(cmisObject.getObjectInfo().getId()));
+               assertTrue("Objects does not match;", doc1.getObjectId().equals(cmisObject.getObjectInfo().getId()));
             }
 
             getConnection().removeObjectFromFolder(doc1.getObjectId(), folder1.getObjectId());
@@ -398,9 +397,9 @@ public class MultifilingTest extends BaseTest
       {
          try
          {
-            folder1 = createFolder(rootFolder, "testFolder1");
-            folder2 = createFolder(rootFolder, "testFolder2");
-            DocumentData doc1 = createDocument(folder1, "doc1", "doc1");
+            folder1 = createFolder(rootFolder, "testRemoveObjectFromFolderFolder1");
+            folder2 = createFolder(rootFolder, "testRemoveObjectFromFolderFolder2");
+            DocumentData doc1 = createDocument(folder1, "testRemoveObjectFromFolderDoc1", "doc1");
 
             ItemsList<CmisObject> children0 =
                getConnection().getChildren(folder2.getObjectId(), false, null, false, true, null, null, null, -1, 0);
@@ -497,8 +496,8 @@ public class MultifilingTest extends BaseTest
    @AfterClass
    public static void stop() throws Exception
    {
-      System.out.println("done;");
       if (BaseTest.conn != null)
          BaseTest.conn.close();
+      System.out.println("done;");
    }
 }

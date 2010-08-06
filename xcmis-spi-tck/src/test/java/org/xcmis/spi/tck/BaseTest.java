@@ -19,8 +19,6 @@
 
 package org.xcmis.spi.tck;
 
-import static org.junit.Assert.*;
-
 import org.exoplatform.container.StandaloneContainer;
 import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CmisConstants;
@@ -30,8 +28,6 @@ import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.ContentStream;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
-import org.xcmis.spi.InvalidArgumentException;
-import org.xcmis.spi.ItemsList;
 import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectNotFoundException;
@@ -44,7 +40,6 @@ import org.xcmis.spi.StorageException;
 import org.xcmis.spi.StorageProvider;
 import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.model.AccessControlEntry;
-import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.Property;
@@ -103,30 +98,7 @@ public class BaseTest
 
    public static void setUp() throws Exception
    {
-      //String propertyTckConf = System.getProperty("tck.conf");
-      //String factory = System.getProperty("org.xcmis.CmisRegistryFactory");
-
-//      String tck_conf =
-//         propertyTckConf == null || propertyTckConf.length() == 0 || propertyTckConf.equalsIgnoreCase("${tck.conf}")
-//            ? TCK_CONF_DEFAULT : propertyTckConf;
-      
-      
-//      if (propertyTckConf == null || propertyTckConf.length() == 0 || propertyTckConf.equalsIgnoreCase("${tck.conf}"))
-//      {
-//         if (factory == null || factory.length() == 0){
-//            throw new InvalidArgumentException("You must specify an factory class or configuration file.");
-//         }
-//      }
-//      else
-//      {
-//      String tck_conf = propertyTckConf;
-//      String containerConf = BaseTest.class.getResource(tck_conf).toString();
-//      StandaloneContainer.addConfigurationURL(containerConf);
-//      container = StandaloneContainer.getInstance();
-//      storageProvider = (StorageProvider)container.getComponentInstanceOfType(StorageProvider.class);
-//      useConf = true;
-//      }
-      ConversationState state = new ConversationState(new Identity("__system"));
+      ConversationState state = new ConversationState(new Identity("root"));
       ConversationState.setCurrent(state);
 
      
@@ -371,33 +343,6 @@ public class BaseTest
       return getStorage().getRepositoryInfo().getCapabilities();
    }
 
-//   protected void doFail(String mtd, String message) throws Exception
-//   {
-//      System.out.println("FAILED");
-//
-//      if (message != null)
-//      {
-//         AllTests.results.put(mtd, message);
-//         fail(message);
-//      }
-//      else
-//      {
-//         AllTests.results.put(mtd, "Unknown reason;");
-//         fail();
-//      }
-//   }
-
-//   protected void pass(String mtd) throws Exception
-//   {
-//      System.out.println("PASSED");
-//      AllTests.results.put(mtd, null);
-//   }
-//
-//   protected void skip(String mtd)
-//   {
-//      System.out.println("SKIPPED");
-//      AllTests.results.put(mtd, "Not supported by storage;");
-//   }
 
 //   protected static void removeRelationships(String folderId)
 //   {

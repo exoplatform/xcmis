@@ -24,7 +24,6 @@ import static org.junit.Assert.*;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.Before;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
@@ -49,15 +48,15 @@ public class DiscoveryTest extends BaseTest
 {
 
    static FolderData testroot = null;
-   
+
    @BeforeClass
    public static void start() throws Exception
    {
       BaseTest.setUp();
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       testroot =
-         getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "discovery_testroot"),
-            null, null);
+         getStorage().createFolder(rootFolder, folderTypeDefinition,
+            getPropsMap(CmisConstants.FOLDER, "discovery_testroot"), null, null);
       System.out.print("Running Discovery Service tests....");
    }
 
@@ -74,27 +73,27 @@ public class DiscoveryTest extends BaseTest
          //SKIP
          return;
       }
-         DocumentData documentData = createDocument(testroot, "testQuery1", "Hello World!");
-         String statement = "SELECT * FROM " + CmisConstants.DOCUMENT + " WHERE CONTAINS(\"Hello\")";
-         ItemsList<CmisObject> query = null;
+      DocumentData documentData = createDocument(testroot, "testQuery1", "Hello World!");
+      String statement = "SELECT * FROM " + CmisConstants.DOCUMENT + " WHERE CONTAINS(\"Hello\")";
+      ItemsList<CmisObject> query = null;
 
-         query =
-            getConnection().query(statement, true, false, IncludeRelationships.BOTH, true, RenditionFilter.ANY, -1, 0);
+      query =
+         getConnection().query(statement, true, false, IncludeRelationships.BOTH, true, RenditionFilter.ANY, -1, 0);
 
-         assertNotNull("Quary failed;", query);
-         assertNotNull("Quary failed - no items;", query.getItems());
-         assertTrue("Quary failed -  incorrect items number;", query.getItems().size() == 1);
+      assertNotNull("Quary failed;", query);
+      assertNotNull("Quary failed - no items;", query.getItems());
+      assertTrue("Quary failed -  incorrect items number;", query.getItems().size() == 1);
 
-         List<CmisObject> result = query.getItems();
-         for (CmisObject cmisObject : result)
-         {
-            assertNotNull ("Query result not found;", cmisObject);
-            assertNotNull("ObjectInfo not found in query result;", cmisObject.getObjectInfo());
-            assertNotNull ("ObjectId not found in query result;", cmisObject.getObjectInfo().getId());
-            assertTrue ("ObjectId's does not match;", documentData.getObjectId().equals(cmisObject.getObjectInfo().getId()));
-            assertTrue("Object names does not match;", documentData.getName().equals(cmisObject.getObjectInfo().getName()));
-            getStorage().deleteObject(documentData, true);
-         }
+      List<CmisObject> result = query.getItems();
+      for (CmisObject cmisObject : result)
+      {
+         assertNotNull("Query result not found;", cmisObject);
+         assertNotNull("ObjectInfo not found in query result;", cmisObject.getObjectInfo());
+         assertNotNull("ObjectId not found in query result;", cmisObject.getObjectInfo().getId());
+         assertTrue("ObjectId's does not match;", documentData.getObjectId().equals(cmisObject.getObjectInfo().getId()));
+         assertTrue("Object names does not match;", documentData.getName().equals(cmisObject.getObjectInfo().getName()));
+         getStorage().deleteObject(documentData, true);
+      }
    }
 
    /**
@@ -110,29 +109,27 @@ public class DiscoveryTest extends BaseTest
          //SKIP
          return;
       }
-         DocumentData documentData = createDocument(testroot, "testQuery2", "Hello World!");
-         String statement = "SELECT * FROM " + CmisConstants.DOCUMENT + " WHERE CONTAINS(\"Hello\")";
-         ItemsList<CmisObject> query = null;
+      DocumentData documentData = createDocument(testroot, "testQuery2", "Hello World!");
+      String statement = "SELECT * FROM " + CmisConstants.DOCUMENT + " WHERE CONTAINS(\"Hello\")";
+      ItemsList<CmisObject> query = null;
+      query =
+         getConnection().query(statement, false, false, IncludeRelationships.BOTH, true, RenditionFilter.ANY, -1, 0);
 
-         query =
-            getConnection().query(statement, false, false, IncludeRelationships.BOTH, true, RenditionFilter.ANY, -1, 0);
+      assertNotNull("Quary failed;", query);
+      assertNotNull("Quary failed - no items;", query.getItems());
+      if (query.getItems().size() == 0)
+         fail("Quary failed - no items;");
+      List<CmisObject> result = query.getItems();
+      for (CmisObject cmisObject : result)
+      {
+         assertNotNull("Query result not found;", cmisObject);
+         assertNotNull("ObjectInfo not found in query result;", cmisObject.getObjectInfo());
 
-         assertNotNull("Quary failed;", query);
-         assertNotNull("Quary failed - no items;", query.getItems());
-         if (query.getItems().size() == 0)
-            fail("Quary failed - no items;");
-
-         List<CmisObject> result = query.getItems();
-         for (CmisObject cmisObject : result)
-         {
-            assertNotNull("Query result not found;", cmisObject);
-            assertNotNull("ObjectInfo not found in query result;", cmisObject.getObjectInfo());
-            
-            assertNotNull("ObjectId not found in query result;", cmisObject.getObjectInfo().getId());
-            assertTrue("ObjectId's does not match;", documentData.getObjectId().equals(cmisObject.getObjectInfo().getId()));
-            assertTrue("Object names does not match;", documentData.getName().equals(cmisObject.getObjectInfo().getName()));
-         }
-         getStorage().deleteObject(documentData, true);
+         assertNotNull("ObjectId not found in query result;", cmisObject.getObjectInfo().getId());
+         assertTrue("ObjectId's does not match;", documentData.getObjectId().equals(cmisObject.getObjectInfo().getId()));
+         assertTrue("Object names does not match;", documentData.getName().equals(cmisObject.getObjectInfo().getName()));
+      }
+      getStorage().deleteObject(documentData, true);
    }
 
    /**
@@ -162,7 +159,8 @@ public class DiscoveryTest extends BaseTest
       {
          //SKIP
       }
-      finally{
+      finally
+      {
          getStorage().deleteObject(documentData, true);
       }
    }

@@ -331,18 +331,13 @@ public class PolicyTest extends BaseTest
       DocumentData doc1 = null;
       try
       {
-         FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
-
-         testroot =
-            getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap("cmis:folder", "testroot"), null,
-               null);
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
          doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "testGetAppliedPolicies_PropertiesFiltered1"), cs,
+            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetAppliedPolicies_PropertiesFiltered1"), cs,
                null, null, VersioningState.MAJOR);
 
-         policy = createPolicy(testroot, "testGetAppliedPolicies_PropertiesFiltered_policy1");
+         policy = createPolicy(testroot, "testGetAppliedPolicies_policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
          List<CmisObject> res = getConnection().getAppliedPolicies(doc1.getObjectId(), true, "cmis:name, cmis:path");
          for (CmisObject one : res)
@@ -358,7 +353,9 @@ public class PolicyTest extends BaseTest
       }
       finally
       {
+         if (doc1 != null)
          getStorage().deleteObject(doc1, true);
+         if (policy != null)
          getStorage().deleteObject(policy, false);
       }
    }
