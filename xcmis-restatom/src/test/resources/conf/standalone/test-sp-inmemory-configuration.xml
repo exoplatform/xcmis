@@ -33,10 +33,6 @@
       </init-params>
    </component>
 
-<!--   <component>-->
-<!--      <type>org.xcmis.spi.deploy.ExoContainerCmisRegistry</type>-->
-<!--   </component>-->
-
    <component>
       <type>org.xcmis.spi.PermissionService</type>
    </component>
