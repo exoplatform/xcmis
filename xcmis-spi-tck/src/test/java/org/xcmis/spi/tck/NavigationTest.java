@@ -1338,6 +1338,10 @@ public class NavigationTest extends BaseTest
    @Test
    public void testGetCheckedOutDocs_Simple() throws Exception
    {
+      if (!IS_CAN_CHECKOUT){
+         //SKIP
+         return;
+      }
       ItemsList<CmisObject> result =
          getConnection().getCheckedOutDocs(null, true, IncludeRelationships.BOTH, true, PropertyFilter.ALL,
             RenditionFilter.ANY, "", -1, 0);
@@ -1352,6 +1356,10 @@ public class NavigationTest extends BaseTest
    @Test
    public void testGetCheckedOutDocs_AllowableActions() throws Exception
    {
+      if (!IS_CAN_CHECKOUT){
+         //SKIP
+         return;
+      }
       ItemsList<CmisObject> result =
          getConnection().getCheckedOutDocs(null, true, IncludeRelationships.BOTH, true, PropertyFilter.ALL,
             RenditionFilter.ANY, "", -1, 0);
@@ -1369,6 +1377,10 @@ public class NavigationTest extends BaseTest
    @Test
    public void testGetCheckedOutDocs_NoAllowableActions() throws Exception
    {
+      if (!IS_CAN_CHECKOUT){
+         //SKIP
+         return;
+      }
       ItemsList<CmisObject> result =
          getConnection().getCheckedOutDocs(null, false, IncludeRelationships.BOTH, true, PropertyFilter.ALL,
             RenditionFilter.ANY, "", -1, 0);
@@ -1386,7 +1398,7 @@ public class NavigationTest extends BaseTest
    @Test
    public void testGetCheckedOutDocs_Relationships() throws Exception
    {
-      if (!IS_RELATIONSHIPS_SUPPORTED)
+      if (!IS_RELATIONSHIPS_SUPPORTED || !IS_CAN_CHECKOUT)
       {
          //SKIP
          return;
@@ -1411,7 +1423,7 @@ public class NavigationTest extends BaseTest
    @Test
    public void testGetCheckedOutDocs_NoRelationships() throws Exception
    {
-      if (!IS_RELATIONSHIPS_SUPPORTED)
+      if (!IS_RELATIONSHIPS_SUPPORTED || !IS_CAN_CHECKOUT)
       {
          //SKIP
          return;
@@ -1431,6 +1443,10 @@ public class NavigationTest extends BaseTest
    @Test
    public void testGetCheckedOutDocs_ObjectInfo() throws Exception
    {
+      if (!IS_CAN_CHECKOUT){
+         //SKIP
+         return;
+      }
       ItemsList<CmisObject> result =
          getConnection().getCheckedOutDocs(testroot, false, IncludeRelationships.BOTH, true, PropertyFilter.ALL,
             RenditionFilter.ANY, "", -1, 0);
@@ -1443,6 +1459,10 @@ public class NavigationTest extends BaseTest
    @Test
    public void testGetCheckedOutDocs_NoObjectInfo() throws Exception
    {
+      if (!IS_CAN_CHECKOUT){
+         //SKIP
+         return;
+      }
       ItemsList<CmisObject> result =
          getConnection().getCheckedOutDocs(testroot, false, IncludeRelationships.NONE, false, PropertyFilter.ALL,
             RenditionFilter.ANY, "", -1, 0);
@@ -1460,6 +1480,10 @@ public class NavigationTest extends BaseTest
    @Test
    public void testGetCheckedOutDocs_NoRenditions() throws Exception
    {
+      if (!IS_CAN_CHECKOUT){
+         //SKIP
+         return;
+      }
       ItemsList<CmisObject> result =
          getConnection().getCheckedOutDocs(testroot, false, IncludeRelationships.NONE, true, PropertyFilter.ALL,
             RenditionFilter.NONE, "", -1, 0);
@@ -1478,6 +1502,10 @@ public class NavigationTest extends BaseTest
    @Test
    public void testGetCheckedOutDocs_PropertyFiltered() throws Exception
    {
+      if (!IS_CAN_CHECKOUT){
+         //SKIP
+         return;
+      }
       ItemsList<CmisObject> result =
          getConnection().getCheckedOutDocs(testroot, false, IncludeRelationships.NONE, true, "cmis:name,cmis:path",
             RenditionFilter.ANY, "", -1, 0);
@@ -1502,6 +1530,10 @@ public class NavigationTest extends BaseTest
    @Test
    public void testGetCheckedOutDocs_MaxItems() throws Exception
    {
+      if (!IS_CAN_CHECKOUT){
+         //SKIP
+         return;
+      }
       ItemsList<CmisObject> result =
          getConnection().getCheckedOutDocs(testroot, true, IncludeRelationships.BOTH, true, PropertyFilter.ALL,
             RenditionFilter.ANY, "", 2, 0);
@@ -1517,6 +1549,10 @@ public class NavigationTest extends BaseTest
    @Test
    public void testGetCheckedOutDocs_SkipCount() throws Exception
    {
+      if (!IS_CAN_CHECKOUT){
+         //SKIP
+         return;
+      }
       ItemsList<CmisObject> result =
          getConnection().getCheckedOutDocs(testroot, true, IncludeRelationships.BOTH, true, PropertyFilter.ALL,
             RenditionFilter.ANY, "", -1, 1);
@@ -1531,6 +1567,10 @@ public class NavigationTest extends BaseTest
    @Test
    public void testGetCheckedOutDocs_FilterNotValidException() throws Exception
    {
+      if (!IS_CAN_CHECKOUT){
+         //SKIP
+         return;
+      }
       try
       {
          getConnection().getCheckedOutDocs(testroot, false, IncludeRelationships.NONE, true, ",*)",

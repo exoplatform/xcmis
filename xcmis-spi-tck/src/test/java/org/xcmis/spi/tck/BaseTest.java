@@ -30,6 +30,7 @@ import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.NameConstraintViolationException;
+import org.xcmis.spi.NotSupportedException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.PropertyFilter;
@@ -94,7 +95,7 @@ public class BaseTest
 
    protected static boolean IS_CAPABILITY_DESCENDANTS = false;
    
-   protected static boolean useConf = false;
+   protected static boolean IS_CAN_CHECKOUT = true;
 
    public static void setUp() throws Exception
    {
@@ -183,7 +184,6 @@ public class BaseTest
       DocumentData doc1 = createDocument(testroot, "doc1", "1234567890");
 
       DocumentData doc2 = createDocument(testroot, "doc2", "1234567890");
-      doc2.checkout();
 
       FolderData folder2 = createFolder(testroot, "folder2");
 
@@ -194,10 +194,19 @@ public class BaseTest
       DocumentData doc4 = createDocument(folder3, "doc4", "1234567890");
 
       DocumentData doc5 = createDocument(testroot, "doc5", "1234567890");
-      doc5.checkout();
 
       DocumentData doc6 = createDocument(testroot, "doc6", "1234567890");
-      doc6.checkout();
+      
+      try
+      {
+         getConnection().checkout(doc2.getObjectId());
+         getConnection().checkout(doc5.getObjectId());
+         getConnection().checkout(doc6.getObjectId());
+      }
+      catch (ConstraintException e)
+      {
+         IS_CAN_CHECKOUT = false;
+      }
 
       if (IS_RELATIONSHIPS_SUPPORTED)
       {
