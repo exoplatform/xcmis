@@ -24,6 +24,7 @@ import org.exoplatform.services.security.MembershipEntry;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.AllowableActions;
 import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.model.CapabilityACL;
 import org.xcmis.spi.model.PermissionMapping;
 import org.xcmis.spi.model.RepositoryCapabilities;
 import org.xcmis.spi.model.RepositoryInfo;
@@ -58,6 +59,9 @@ public class PermissionService
    public AllowableActions calculateAllowableActions(ObjectData object, Identity userIdentity,
       RepositoryInfo repositoryInfo)
    {
+     
+      if(repositoryInfo.getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
+        return AllowableActions.ALL();
 
       if (userIdentity == null)
       {

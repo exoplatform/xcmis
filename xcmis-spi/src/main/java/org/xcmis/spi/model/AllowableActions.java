@@ -98,9 +98,18 @@ public class AllowableActions
          CAN_ADD_TO_FOLDER, CAN_REMOVE_OBJECT_FROM_FOLDER, CAN_CHECKOUT, CAN_CANCEL_CHECKOUT, CAN_CHECKIN,
          CAN_GET_ALL_VERSIONS, CAN_GET_OBJECT_RELATIONSHIPS, CAN_ADD_POLICY, CAN_REMOVE_POLICY,
          CAN_GET_APPLIED_POLICIES, CAN_GET_ACL, CAN_APPLY_ACL));
+   
 
    private final Set<String> actions = new HashSet<String>();
-
+   
+   public static final AllowableActions ALL() {
+     
+     AllowableActions as = new AllowableActions();
+     as.actions.addAll(DEFAULT);
+     return as;
+     
+   }
+ 
    /**
     * Add <code>action</code> in allowed actions list.
     *
