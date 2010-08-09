@@ -59,11 +59,6 @@ public class PolicyTest extends BaseTest
    @BeforeClass
    public static void start() throws Exception
    {
-//      if(policyTypeDefinition == null) 
-//      {
-//        System.out.print("Relationships are not supported. Relationships tests skipped....");
-//        throw new Exception("Relationships is not Supported. Skip Relationships tests."); 
-//      }
       BaseTest.setUp();
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       testroot =
@@ -92,7 +87,7 @@ public class PolicyTest extends BaseTest
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testApplyPolicy_Simple"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          policy = createPolicy(testroot, policyName);
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
@@ -159,7 +154,7 @@ public class PolicyTest extends BaseTest
          newType = getStorage().getTypeDefinition(typeID, true);
 
           doc1 =
-            getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.MAJOR);
+            getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.NONE);
 
          policy = createPolicy(testroot, "testApplyPolicy_ConstraintException_policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
@@ -197,7 +192,7 @@ public class PolicyTest extends BaseTest
 
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
-               null, null, VersioningState.MAJOR);
+               null, null, VersioningState.NONE);
 
          policy = createPolicy(testroot, "testRemovePolicy_Simple_policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
@@ -258,7 +253,7 @@ public class PolicyTest extends BaseTest
          newType = getStorage().getTypeDefinition(typeID, true);
 
          doc1 =
-            getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.MAJOR);
+            getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.NONE);
 
          policy = createPolicy(testroot, "testRemovePolicy_ConstraintException_policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
@@ -299,7 +294,7 @@ public class PolicyTest extends BaseTest
 
           doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetAppliedPolicies_Simple1"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          policy = createPolicy(testroot, "testGetAppliedPolicies_Simple_policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
@@ -340,7 +335,7 @@ public class PolicyTest extends BaseTest
 
          doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetAppliedPolicies_PropertiesFiltered1"), cs,
-               null, null, VersioningState.MAJOR);
+               null, null, VersioningState.NONE);
 
          policy = createPolicy(testroot, "testGetAppliedPolicies_policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
@@ -386,7 +381,7 @@ public class PolicyTest extends BaseTest
 
          doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetAppliedPolicies_FilterNotValidException1"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          policy = createPolicy(testroot, "testGetAppliedPolicies_FilterNotValidException_policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());

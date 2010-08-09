@@ -86,13 +86,13 @@ public class RelationshipTest extends BaseTest
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_Simple1"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
          DocumentData doc2 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_Simple2"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
          DocumentData doc3 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_Simple3"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          reldata =
             getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
@@ -136,15 +136,15 @@ public class RelationshipTest extends BaseTest
 
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_CheckDirection1"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          DocumentData doc2 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_CheckDirection2"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          DocumentData doc3 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_CheckDirection3"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          reldata =
             getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
@@ -187,15 +187,15 @@ public class RelationshipTest extends BaseTest
 
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_AllowableActions1"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          DocumentData doc2 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_AllowableActions2"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          DocumentData doc3 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_AllowableActions3"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          reldata =
             getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
@@ -243,15 +243,15 @@ public class RelationshipTest extends BaseTest
 
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_TypeId1"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          DocumentData doc2 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_TypeId2"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          DocumentData doc3 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_TypeId3"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
 
@@ -321,15 +321,15 @@ public class RelationshipTest extends BaseTest
 
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_IncludeSubrelationshipTypes1"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          DocumentData doc2 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_IncludeSubrelationshipTypes2"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          DocumentData doc3 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_IncludeSubrelationshipTypes3"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
 
@@ -403,15 +403,15 @@ public class RelationshipTest extends BaseTest
 
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_MaxItems1"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          DocumentData doc2 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_MaxItems2"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          DocumentData doc3 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_MaxItems3"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          reldata =
             getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
@@ -455,15 +455,15 @@ public class RelationshipTest extends BaseTest
 
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_SkipCount1"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          DocumentData doc2 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_SkipCount2"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          DocumentData doc3 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_SkipCount3"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          reldata =
             getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
@@ -507,15 +507,15 @@ public class RelationshipTest extends BaseTest
 
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_Paging1"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          DocumentData doc2 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_Paging2"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          DocumentData doc3 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_Paging3"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          reldata =
             getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
@@ -568,15 +568,15 @@ public class RelationshipTest extends BaseTest
 
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_PropertyFiltered1"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          DocumentData doc2 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_PropertyFiltered2"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          DocumentData doc3 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_PropertyFiltered3"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          reldata =
             getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
@@ -630,15 +630,15 @@ public class RelationshipTest extends BaseTest
 
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_FilterNotValidException1"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          DocumentData doc2 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_FilterNotValidException2"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          DocumentData doc3 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_FilterNotValidException3"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          reldata =
             getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,

@@ -101,7 +101,7 @@ public class ObjectTest extends BaseTest
       String docId =
          getConnection().createDocument(testroot.getObjectId(),
             getPropsMap(CmisConstants.DOCUMENT, "testCreateDocument_CheckContent.txt"), cs, null, null, null,
-            VersioningState.MAJOR);
+            VersioningState.NONE);
       ContentStream c = getStorage().getObjectById(docId).getContentStream(null);
       assertTrue("Media types does not match", cs.getMediaType().equals(c.getMediaType()));
       byte[] after = new byte[15];
@@ -122,7 +122,7 @@ public class ObjectTest extends BaseTest
       Map<String, Property<?>> properties = getPropsMap(CmisConstants.DOCUMENT, docname);
       String docId =
          getConnection()
-            .createDocument(testroot.getObjectId(), properties, cs, null, null, null, VersioningState.MAJOR);
+            .createDocument(testroot.getObjectId(), properties, cs, null, null, null, VersioningState.NONE);
       ObjectData res = getStorage().getObjectById(docId);
       assertNotNull("NAME property is null;", res.getProperty(CmisConstants.NAME));
       if (!((String)res.getProperty(CmisConstants.NAME).getValues().get(0)).equals(docname))
@@ -155,7 +155,7 @@ public class ObjectTest extends BaseTest
          docId =
             getConnection().createDocument(testroot.getObjectId(),
                getPropsMap(CmisConstants.DOCUMENT, "testCreateDocument_ApplyPolicy"), cs, null, null, policies,
-               VersioningState.MAJOR);
+               VersioningState.NONE);
          ObjectData res = getStorage().getObjectById(docId);
          assertTrue("Properties size iz incorrect", res.getPolicies().size() == 1);
          Iterator<PolicyData> it = res.getPolicies().iterator();
@@ -196,7 +196,7 @@ public class ObjectTest extends BaseTest
       String docId =
          getConnection().createDocument(testroot.getObjectId(),
             getPropsMap(CmisConstants.DOCUMENT, "testCreateDocument_AddACL"), cs, addACL, null, null,
-            VersioningState.MAJOR);
+            VersioningState.NONE);
       ObjectData res = getStorage().getObjectById(docId);
       for (AccessControlEntry one : res.getACL(false))
       {
@@ -227,7 +227,7 @@ public class ObjectTest extends BaseTest
       {
          String docId =
             getConnection().createDocument(testroot.getObjectId(), getPropsMap(CmisConstants.DOCUMENT, filename), cs,
-               null, null, null, VersioningState.MAJOR);
+               null, null, null, VersioningState.NONE);
          fail("NameConstraintViolationException must be thrown;");
       }
       catch (NameConstraintViolationException ex)
@@ -238,9 +238,9 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.1.3
-    * The Repository MUST throw this exception if the “contentStreamAllowed” attribute 
+    * The Repository MUST throw this exception if the "contentStreamAllowed" attribute 
     * of the Object-Type definition specified by the cmis:objectTypeId property 
-    * value is set to “not allowed” and a contentStream input parameter is provided.
+    * value is set to "not allowed" and a contentStream input parameter is provided.
     * @throws Exception
     */
    @Test
@@ -298,7 +298,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.1.3
-    * The cmis:objectTypeId property value is not an Object-Type whose baseType is “Document”.
+    * The cmis:objectTypeId property value is not an Object-Type whose baseType is "Document".
     * @throws Exception
     */
    @Test
@@ -338,7 +338,7 @@ public class ObjectTest extends BaseTest
       {
          docId =
             getConnection().createDocument(testroot.getObjectId(), properties, cs, null, null, null,
-               VersioningState.MAJOR);
+               VersioningState.NONE);
          fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
@@ -356,8 +356,8 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.1.3 
-    * The “contentStreamAllowed” attribute of the Object-Type definition specified by 
-    * the cmis:objectTypeId property value is set to “required” and no contentStream input parameter is provided.  
+    * The "contentStreamAllowed" attribute of the Object-Type definition specified by 
+    * the cmis:objectTypeId property value is set to "required" and no contentStream input parameter is provided.  
     * @throws Exception
     */
    @Test
@@ -395,7 +395,7 @@ public class ObjectTest extends BaseTest
       {
          docId =
             getConnection().createDocument(testroot.getObjectId(), properties, null, null, null, null,
-               VersioningState.MAJOR);
+               VersioningState.NONE);
          fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
@@ -413,8 +413,8 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.1.3
-    * The “versionable” attribute of the Object-Type definition specified by the cmis:objectTypeId property value is set to TRUE 
-    * and the value for the versioningState input parameter is provided that is “none”.
+    * The "versionable" attribute of the Object-Type definition specified by the cmis:objectTypeId property value is set to TRUE 
+    * and the value for the versioningState input parameter is provided that is "none".
     * @throws Exception
     */
    @Test
@@ -472,8 +472,8 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.1.3
-    * The “versionable” attribute of the Object-Type definition specified by the cmis:objectTypeId 
-    * property value is set to FALSE and a value for the versioningState input parameter is provided that is something other than “none”.
+    * The "versionable" attribute of the Object-Type definition specified by the cmis:objectTypeId 
+    * property value is set to FALSE and a value for the versioningState input parameter is provided that is something other than "none".
     * @throws Exception
     */
    @Test
@@ -531,7 +531,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.1.3
-    * The “controllablePolicy” attribute of the Object-Type definition specified by the 
+    * The "controllablePolicy" attribute of the Object-Type definition specified by the 
     * cmis:objectTypeId property value is set to FALSE and at least one policy is provided.
     * @throws Exception
     */
@@ -583,7 +583,7 @@ public class ObjectTest extends BaseTest
       {
          docId =
             getConnection().createDocument(testroot.getObjectId(), properties, cs, null, null, policies,
-               VersioningState.MAJOR);
+               VersioningState.NONE);
          fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
@@ -603,7 +603,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.1.3
-    * The “controllableACL” attribute of the Object-Type definition specified by the cmis:objectTypeId 
+    * The "controllableACL" attribute of the Object-Type definition specified by the cmis:objectTypeId 
     * property value is set to FALSE and at least one ACE is provided.
     * @throws Exception
     */
@@ -651,7 +651,7 @@ public class ObjectTest extends BaseTest
       {
          docId =
             getConnection().createDocument(testroot.getObjectId(), properties, cs, addACL, null, null,
-               VersioningState.MAJOR);
+               VersioningState.NONE);
          fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
@@ -716,7 +716,7 @@ public class ObjectTest extends BaseTest
       {
          docId =
             getConnection().createDocument(testroot.getObjectId(), properties, cs, addACL, null, null,
-               VersioningState.MAJOR);
+               VersioningState.NONE);
          fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
@@ -746,11 +746,11 @@ public class ObjectTest extends BaseTest
       DocumentData doc1 =
          getStorage().createDocument(testroot, documentTypeDefinition,
             getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_Simple1"), cs, null, null,
-            VersioningState.MAJOR);
+            VersioningState.NONE);
       String docId =
          getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(),
             getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_Simple2.txt"), null, null, null,
-            VersioningState.MAJOR);
+            VersioningState.NONE);
       ContentStream c = getStorage().getObjectById(docId).getContentStream(null);
       assertTrue("Media types does not match", cs.getMediaType().equals(c.getMediaType()));
 
@@ -777,10 +777,10 @@ public class ObjectTest extends BaseTest
       DocumentData doc1 =
          getStorage().createDocument(testroot, documentTypeDefinition,
             getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_Properties1"), cs, null, null,
-            VersioningState.MAJOR);
+            VersioningState.NONE);
       String docId =
          getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(),
-            getPropsMap(CmisConstants.DOCUMENT, name), null, null, null, VersioningState.MAJOR);
+            getPropsMap(CmisConstants.DOCUMENT, name), null, null, null, VersioningState.NONE);
       if (!getStorage().getObjectById(docId).getProperty(CmisConstants.NAME).getValues().get(0).equals(name))
          fail("Names does not match;");
    }
@@ -808,7 +808,7 @@ public class ObjectTest extends BaseTest
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition,
                getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_ApplyPolicy1"), cs, null, null,
-               VersioningState.MAJOR);
+               VersioningState.NONE);
 
          policy = createPolicy(testroot, "object_policy2");
 
@@ -817,7 +817,7 @@ public class ObjectTest extends BaseTest
          String docId =
             getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(),
                getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_ApplyPolicy2"), null, null, policies,
-               VersioningState.MAJOR);
+               VersioningState.NONE);
          ObjectData res = getStorage().getObjectById(docId);
          assertTrue("Properties size is incorrect", res.getPolicies().size() == 1);
          Iterator<PolicyData> it = res.getPolicies().iterator();
@@ -856,7 +856,7 @@ public class ObjectTest extends BaseTest
       DocumentData doc1 =
          getStorage().createDocument(testroot, documentTypeDefinition,
             getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_addACL1"), cs, null, null,
-            VersioningState.MAJOR);
+            VersioningState.NONE);
 
       String username = "username";
       List<AccessControlEntry> addACL = createACL(username, "cmis:read");
@@ -864,7 +864,7 @@ public class ObjectTest extends BaseTest
       String docId =
          getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(),
             getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_addACL2"), addACL, null, null,
-            VersioningState.MAJOR);
+            VersioningState.NONE);
       ObjectData res = getStorage().getObjectById(docId);
       for (AccessControlEntry one : res.getACL(false))
       {
@@ -891,12 +891,12 @@ public class ObjectTest extends BaseTest
       ContentStream cs = new BaseContentStream(before, null, new MimeType("text", "plain"));
       DocumentData doc1 =
          getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, name), cs,
-            null, null, VersioningState.MAJOR);
+            null, null, VersioningState.NONE);
       try
       {
          String docId =
             getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(),
-               getPropsMap(CmisConstants.DOCUMENT, name), null, null, null, VersioningState.MAJOR);
+               getPropsMap(CmisConstants.DOCUMENT, name), null, null, null, VersioningState.NONE);
          ObjectData res = getStorage().getObjectById(docId);
          assertFalse("Names must not match;", res.getName().equals(name));
       }
@@ -908,7 +908,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.2.3
-    * constraint: The Repository MUST throw this exception if  the sourceId is not an Object whose baseType is “Document”.
+    * constraint: The Repository MUST throw this exception if  the sourceId is not an Object whose baseType is "Document".
     * @throws Exception
     */
    @Test
@@ -920,7 +920,7 @@ public class ObjectTest extends BaseTest
          String docId =
             getConnection().createDocumentFromSource(test.getObjectId(), testroot.getObjectId(),
                getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_ConstraintExceptionWrongBaseType1"),
-               null, null, null, VersioningState.MAJOR);
+               null, null, null, VersioningState.NONE);
          fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
@@ -989,12 +989,12 @@ public class ObjectTest extends BaseTest
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition,
                getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_ConstraintExceptionNotAllowedChild"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          docId =
             getConnection().createDocumentFromSource(doc1.getObjectId(), myfolder.getObjectId(),
                getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_ConstraintExceptionNotAllowedChild1"),
-               null, null, null, VersioningState.MAJOR);
+               null, null, null, VersioningState.NONE);
          fail("ConstraintException must be thrown;");
       }
       catch (ConstraintException ex)
@@ -1014,8 +1014,8 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.2.3
-    * The “versionable” attribute of the Object-Type definition specified by the cmis:objectTypeId property value is set to FALSE 
-    * and a value for the versioningState input parameter is provided that is something other than “none”.
+    * The "versionable" attribute of the Object-Type definition specified by the cmis:objectTypeId property value is set to FALSE 
+    * and a value for the versioningState input parameter is provided that is something other than "none".
     * @throws Exception
     */
    @Test
@@ -1079,8 +1079,8 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.2.3
-    * The “versionable” attribute of the Object-Type definition specified by the cmis:objectTypeId property value is set to TRUE and 
-    * the value for the versioningState input parameter is provided that is “none”.
+    * The "versionable" attribute of the Object-Type definition specified by the cmis:objectTypeId property value is set to TRUE and 
+    * the value for the versioningState input parameter is provided that is "none".
     * @throws Exception
     */
    @Test
@@ -1146,7 +1146,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.2.3
-    * The “controllablePolicy” attribute of the Object-Type definition 
+    * The "controllablePolicy" attribute of the Object-Type definition 
     * specified by the cmis:objectTypeId property value is set to FALSE and at least one policy is provided.
     * 
     * @throws Exception
@@ -1225,7 +1225,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.2.3
-    * The “controllableACL” attribute of the Object-Type definition 
+    * The "controllableACL" attribute of the Object-Type definition 
     * specified by the cmis:objectTypeId property value is set to FALSE and at least one ACE is provided.
     * 
     * @throws Exception
@@ -1273,7 +1273,7 @@ public class ObjectTest extends BaseTest
       DocumentData doc1 =
          getStorage().createDocument(testroot, newType,
             getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_ConstraintExceptionNotControllableACL1"),
-            cs, null, null, VersioningState.MAJOR);
+            cs, null, null, VersioningState.NONE);
       try
       {
          docId =
@@ -1343,7 +1343,7 @@ public class ObjectTest extends BaseTest
       DocumentData doc1 =
          getStorage().createDocument(testroot, newType,
             getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_ConstraintExceptionUnknownACE1"), cs,
-            null, null, VersioningState.MAJOR);
+            null, null, VersioningState.NONE);
       try
       {
          docId =
@@ -1490,7 +1490,7 @@ public class ObjectTest extends BaseTest
    /**
     * 2.2.4.3.3
     * The Repository MUST throw this exception if the cmis:objectTypeId property 
-    * value is not an Object-Type whose baseType is “Folder”.
+    * value is not an Object-Type whose baseType is "Folder".
     * @throws Exception
     */
    @Test
@@ -1617,7 +1617,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.3.3
-    * The “controllablePolicy” attribute of the Object-Type definition specified by the 
+    * The "controllablePolicy" attribute of the Object-Type definition specified by the 
     * cmis:objectTypeId property value is set to FALSE and at least one policy is provided.
     * @throws Exception
     */
@@ -1688,7 +1688,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.3.3
-    * The “controllableACL” attribute of the Object-Type definition specified 
+    * The "controllableACL" attribute of the Object-Type definition specified 
     * by the cmis:objectTypeId property value is set to FALSE and at least one ACE is provided.
     * @throws Exception
     */
@@ -1832,11 +1832,11 @@ public class ObjectTest extends BaseTest
       DocumentData doc1 =
          getStorage().createDocument(testroot, documentTypeDefinition,
             getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_Simple1"), cs, null, null,
-            VersioningState.MAJOR);
+            VersioningState.NONE);
       DocumentData doc2 =
          getStorage().createDocument(testroot, documentTypeDefinition,
             getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_Simple2"), cs, null, null,
-            VersioningState.MAJOR);
+            VersioningState.NONE);
 
       Map<String, Property<?>> props = getPropsMap("cmis:relationship", "objecttest_rel1");
 
@@ -1884,11 +1884,11 @@ public class ObjectTest extends BaseTest
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition,
                getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ApplyPolicy1"), cs, null, null,
-               VersioningState.MAJOR);
+               VersioningState.NONE);
          DocumentData doc2 =
             getStorage().createDocument(testroot, documentTypeDefinition,
                getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ApplyPolicy2"), cs, null, null,
-               VersioningState.MAJOR);
+               VersioningState.NONE);
 
          Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
          Map<String, Property<?>> props = new HashMap<String, Property<?>>();
@@ -1986,11 +1986,11 @@ public class ObjectTest extends BaseTest
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition,
                getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_AddACL1"), cs, null, null,
-               VersioningState.MAJOR);
+               VersioningState.NONE);
          DocumentData doc2 =
             getStorage().createDocument(testroot, documentTypeDefinition,
                getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_AddACL2"), cs, null, null,
-               VersioningState.MAJOR);
+               VersioningState.NONE);
 
          Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
          Map<String, Property<?>> props = new HashMap<String, Property<?>>();
@@ -2077,11 +2077,11 @@ public class ObjectTest extends BaseTest
       DocumentData doc1 =
          getStorage().createDocument(testroot, documentTypeDefinition,
             getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_NameConstraintViolationException1"), cs, null,
-            null, VersioningState.MAJOR);
+            null, VersioningState.NONE);
       DocumentData doc2 =
          getStorage().createDocument(testroot, documentTypeDefinition,
             getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_NameConstraintViolationException2"), cs, null,
-            null, VersioningState.MAJOR);
+            null, VersioningState.NONE);
       Map<String, Property<?>> props = new HashMap<String, Property<?>>();
 
       Map<String, Property<?>> props2 = new HashMap<String, Property<?>>();
@@ -2144,7 +2144,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.4.3
-    * The cmis:objectTypeId property value is not an Object-Type whose baseType is “Relationship”.
+    * The cmis:objectTypeId property value is not an Object-Type whose baseType is "Relationship".
     * @throws Exception
     */
    @Test
@@ -2161,11 +2161,11 @@ public class ObjectTest extends BaseTest
       DocumentData doc1 =
          getStorage().createDocument(testroot, documentTypeDefinition,
             getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ConstraintExceptionWrongBaseType1"), cs, null,
-            null, VersioningState.MAJOR);
+            null, VersioningState.NONE);
       DocumentData doc2 =
          getStorage().createDocument(testroot, documentTypeDefinition,
             getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ConstraintExceptionWrongBaseType2"), cs, null,
-            null, VersioningState.MAJOR);
+            null, VersioningState.NONE);
 
       Map<String, Property<?>> props = new HashMap<String, Property<?>>();
 
@@ -2220,9 +2220,9 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.4.3
-    * The sourceObjectId’s ObjectType is not in the list of “allowedSourceTypes” specified by 
+    * The sourceObjectId’s ObjectType is not in the list of "allowedSourceTypes" specified by 
     * the Object-Type definition specified by cmis:objectTypeId property value.
-    * The targetObjectId’s ObjectType is not in the list of “allowedTargetTypes” specified by 
+    * The targetObjectId’s ObjectType is not in the list of "allowedTargetTypes" specified by 
     * the Object-Type definition specified by cmis:objectTypeId property value.
     * @throws Exception
     */
@@ -2243,11 +2243,11 @@ public class ObjectTest extends BaseTest
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition,
                getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ConstraintExceptionNotAllowedTypes1"), cs,
-               null, null, VersioningState.MAJOR);
+               null, null, VersioningState.NONE);
          DocumentData doc2 =
             getStorage().createDocument(testroot, documentTypeDefinition,
                getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ConstraintExceptionNotAllowedTypes2"), cs,
-               null, null, VersioningState.MAJOR);
+               null, null, VersioningState.NONE);
 
          Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
          Map<String, Property<?>> props = new HashMap<String, Property<?>>();
@@ -2310,7 +2310,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.4.3
-    * The “controllablePolicy” attribute of the Object-Type definition specified by the 
+    * The "controllablePolicy" attribute of the Object-Type definition specified by the 
     * cmis:objectTypeId property value is set to FALSE and at least one policy is provided.
     * @throws Exception
     */
@@ -2330,11 +2330,11 @@ public class ObjectTest extends BaseTest
       DocumentData doc1 =
          getStorage().createDocument(testroot, documentTypeDefinition,
             getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ConstraintExceptionNotControllablePolicy1"),
-            cs, null, null, VersioningState.MAJOR);
+            cs, null, null, VersioningState.NONE);
       DocumentData doc2 =
          getStorage().createDocument(testroot, documentTypeDefinition,
             getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ConstraintExceptionNotControllablePolicy2"),
-            cs, null, null, VersioningState.MAJOR);
+            cs, null, null, VersioningState.NONE);
 
       Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
       Map<String, Property<?>> props = new HashMap<String, Property<?>>();
@@ -2404,7 +2404,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.4.3
-    * The “controllableACL” attribute of the Object-Type definition specified by the 
+    * The "controllableACL" attribute of the Object-Type definition specified by the 
     * cmis:objectTypeId property value is set to FALSE and at least one ACE is provided.
     * @throws Exception
     */
@@ -2430,11 +2430,11 @@ public class ObjectTest extends BaseTest
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition,
                getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ConstraintExceptionNotControllableACL1"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
          DocumentData doc2 =
             getStorage().createDocument(testroot, documentTypeDefinition,
                getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ConstraintExceptionNotControllableACL2"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
          Map<String, Property<?>> props = new HashMap<String, Property<?>>();
@@ -2525,11 +2525,11 @@ public class ObjectTest extends BaseTest
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition,
                getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ConstraintExceptionUnknownACE1"), cs, null,
-               null, VersioningState.MAJOR);
+               null, VersioningState.NONE);
          DocumentData doc2 =
             getStorage().createDocument(testroot, documentTypeDefinition,
                getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ConstraintExceptionUnknownACE2"), cs, null,
-               null, VersioningState.MAJOR);
+               null, VersioningState.NONE);
 
          Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
          Map<String, Property<?>> props = new HashMap<String, Property<?>>();
@@ -2763,7 +2763,7 @@ public class ObjectTest extends BaseTest
    /**
     * 2.2.4.3.3
     * The Repository MUST throw this exception if  to  The cmis:objectTypeId 
-    * property value is not an Object-Type whose baseType is “Policy”.
+    * property value is not an Object-Type whose baseType is "Policy".
     * @throws Exception
     */
    @Test
@@ -2888,7 +2888,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.5.3
-    * The “controllablePolicy” attribute of the Object-Type definition specified by 
+    * The "controllablePolicy" attribute of the Object-Type definition specified by 
     * the cmis:objectTypeId property value is set to FALSE and at least one policy is provided.
     * @throws Exception
     */
@@ -2956,7 +2956,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.5.3
-    * The “controllableACL” attribute of the Object-Type definition specified by the cmis:objectTypeId 
+    * The "controllableACL" attribute of the Object-Type definition specified by the cmis:objectTypeId 
     * property value is set to FALSE and at least one ACE is provided.
     * @throws Exception
     */
@@ -3114,7 +3114,7 @@ public class ObjectTest extends BaseTest
       DocumentData doc1 =
          getStorage().createDocument(testroot, documentTypeDefinition,
             getPropsMap(CmisConstants.DOCUMENT, "testGetObject_IncludeRelationships1"), cs, null, null,
-            VersioningState.MAJOR);
+            VersioningState.NONE);
 
       RelationshipData reldata =
          getStorage().createRelationship(doc1, testroot, relationshipTypeDefinition,
@@ -3191,7 +3191,7 @@ public class ObjectTest extends BaseTest
 
       DocumentData doc1 =
          getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testGetObject_IncludeACLs1"), cs, addACL, null, VersioningState.MAJOR);
+            getPropsMap(CmisConstants.DOCUMENT, "testGetObject_IncludeACLs1"), cs, addACL, null, VersioningState.NONE);
 
       CmisObject obj =
          getConnection().getObject(doc1.getObjectId(), false, IncludeRelationships.TARGET, true, true, true, "", "*");
@@ -3333,7 +3333,7 @@ public class ObjectTest extends BaseTest
       DocumentData doc1 =
          getStorage().createDocument(folder2, documentTypeDefinition,
             getPropsMap(CmisConstants.DOCUMENT, "testGetObjectByPath_IncludeRelationships"), cs, null, null,
-            VersioningState.MAJOR);
+            VersioningState.NONE);
 
       RelationshipData reldata =
          getStorage().createRelationship(doc1, folder2, relationshipTypeDefinition,
@@ -3410,7 +3410,7 @@ public class ObjectTest extends BaseTest
       DocumentData doc1 =
          getStorage().createDocument(testroot, documentTypeDefinition,
             getPropsMap(CmisConstants.DOCUMENT, "testGetObjectByPath_IncludeACLs"), cs, addACL, null,
-            VersioningState.MAJOR);
+            VersioningState.NONE);
 
       CmisObject obj =
          getConnection().getObjectByPath("/object_testroot/testGetObjectByPath_IncludeACLs", false,
@@ -3476,7 +3476,7 @@ public class ObjectTest extends BaseTest
       ContentStream cs = new BaseContentStream(before, null, new MimeType("text", "plain"));
       DocumentData doc1 =
          getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testGetContentStream_Simple"), cs, null, null, VersioningState.MAJOR);
+            getPropsMap(CmisConstants.DOCUMENT, "testGetContentStream_Simple"), cs, null, null, VersioningState.NONE);
       ContentStream obj = getConnection().getContentStream(doc1.getObjectId(), null);
       byte[] after = new byte[15];
       obj.getStream().read(after);
@@ -3497,7 +3497,7 @@ public class ObjectTest extends BaseTest
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition,
                getPropsMap(CmisConstants.DOCUMENT, "testGetContentStream_ConstraintException"), null, null, null,
-               VersioningState.MAJOR);
+               VersioningState.NONE);
          getConnection().getContentStream(doc1.getObjectId(), null);
          fail("ConstraintException must be thrown;");
       }
@@ -3527,7 +3527,7 @@ public class ObjectTest extends BaseTest
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testGetRenditions_Simple"), cs, null, null, VersioningState.MAJOR);
+               getPropsMap(CmisConstants.DOCUMENT, "testGetRenditions_Simple"), cs, null, null, VersioningState.NONE);
          List<Rendition> obj = getConnection().getRenditions(doc1.getObjectId(), "", -1, 0);
          assertNotNull("Get renditions result is null;", obj);
       }
@@ -3557,7 +3557,7 @@ public class ObjectTest extends BaseTest
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition,
                getPropsMap(CmisConstants.DOCUMENT, "testGetRenditions_FilterNotValidException"), cs, null, null,
-               VersioningState.MAJOR);
+               VersioningState.NONE);
          getConnection().getRenditions(doc1.getObjectId(), "(,*", -1, 0);
          fail("FilterNotValidException must be thrown;");
       }
@@ -3613,7 +3613,7 @@ public class ObjectTest extends BaseTest
          typeID = getStorage().addType(newType);
          newType = getStorage().getTypeDefinition(typeID, true);
 
-         doc1 = getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.MAJOR);
+         doc1 = getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.NONE);
 
          Map<String, Property<?>> properties2 = new HashMap<String, Property<?>>();
          properties2.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
@@ -3650,7 +3650,7 @@ public class ObjectTest extends BaseTest
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
          Map<String, Property<?>> properties2 = new HashMap<String, Property<?>>();
 
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefComment =
@@ -3697,7 +3697,7 @@ public class ObjectTest extends BaseTest
 
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testMoveObject_Simple"), cs, null, null, VersioningState.MAJOR);
+               getPropsMap(CmisConstants.DOCUMENT, "testMoveObject_Simple"), cs, null, null, VersioningState.NONE);
 
          String id = getConnection().moveObject(doc1.getObjectId(), folder2.getObjectId(), testroot.getObjectId());
          ObjectData obj = getStorage().getObjectById(id);
@@ -3732,7 +3732,7 @@ public class ObjectTest extends BaseTest
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition,
                getPropsMap(CmisConstants.DOCUMENT, "testMoveObject_InvalidArgumentException"), cs, null, null,
-               VersioningState.MAJOR);
+               VersioningState.NONE);
 
          String id = getConnection().moveObject(doc1.getObjectId(), testroot.getObjectId(), folder2.getObjectId());
          ObjectData obj = getStorage().getObjectById(id);
@@ -3804,7 +3804,7 @@ public class ObjectTest extends BaseTest
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition,
                getPropsMap(CmisConstants.DOCUMENT, "testMoveObject_ConstraintException"), cs, null, null,
-               VersioningState.MAJOR);
+               VersioningState.NONE);
 
          String id = getConnection().moveObject(doc1.getObjectId(), folder2.getObjectId(), testroot.getObjectId());
          ObjectData obj = getStorage().getObjectById(id);
@@ -3844,12 +3844,12 @@ public class ObjectTest extends BaseTest
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition,
                getPropsMap(CmisConstants.DOCUMENT, "testMoveObject_NameConstraintException"), cs, null, null,
-               VersioningState.MAJOR);
+               VersioningState.NONE);
 
          DocumentData doc2 =
             getStorage().createDocument(folder2, documentTypeDefinition,
                getPropsMap(CmisConstants.DOCUMENT, "testMoveObject_NameConstraintException"), cs, null, null,
-               VersioningState.MAJOR);
+               VersioningState.NONE);
          String id = getConnection().moveObject(doc1.getObjectId(), folder2.getObjectId(), testroot.getObjectId());
          ObjectData obj = getStorage().getObjectById(id);
          assertFalse("Names must not match;", obj.getName().equalsIgnoreCase(doc1.getName()));
@@ -3879,7 +3879,7 @@ public class ObjectTest extends BaseTest
 
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testDeleteObject_Simple"), cs, null, null, VersioningState.MAJOR);
+               getPropsMap(CmisConstants.DOCUMENT, "testDeleteObject_Simple"), cs, null, null, VersioningState.NONE);
          String id = doc1.getObjectId();
          getConnection().deleteObject(doc1.getObjectId(), true);
          ObjectData obj = getStorage().getObjectById(id);
@@ -3909,7 +3909,7 @@ public class ObjectTest extends BaseTest
          DocumentData doc1 =
             getStorage().createDocument(testroot2, documentTypeDefinition,
                getPropsMap(CmisConstants.DOCUMENT, "testDeleteObject_ConstraintException"), cs, null, null,
-               VersioningState.MAJOR);
+               VersioningState.NONE);
          getConnection().deleteObject(testroot2.getObjectId(), true);
          fail("ConstraintException must be thrown;");
       }
@@ -3934,10 +3934,10 @@ public class ObjectTest extends BaseTest
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
       getStorage().createDocument(testroot2, documentTypeDefinition,
-         getPropsMap(CmisConstants.DOCUMENT, "testDeleteTree_Simple1"), cs, null, null, VersioningState.MAJOR);
+         getPropsMap(CmisConstants.DOCUMENT, "testDeleteTree_Simple1"), cs, null, null, VersioningState.NONE);
 
       getStorage().createDocument(testroot2, documentTypeDefinition,
-         getPropsMap(CmisConstants.DOCUMENT, "testDeleteTree_Simple2"), cs, null, null, VersioningState.MAJOR);
+         getPropsMap(CmisConstants.DOCUMENT, "testDeleteTree_Simple2"), cs, null, null, VersioningState.NONE);
 
       getStorage().createFolder(testroot2, folderTypeDefinition,
          getPropsMap(CmisConstants.FOLDER, "testDeleteTree_Simple_fol1"), null, null);
@@ -3977,11 +3977,11 @@ public class ObjectTest extends BaseTest
 
       DocumentData doc1 =
          getStorage().createDocument(testroot2, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testDeleteTree_Unfile1"), cs, null, null, VersioningState.MAJOR);
+            getPropsMap(CmisConstants.DOCUMENT, "testDeleteTree_Unfile1"), cs, null, null, VersioningState.NONE);
 
       DocumentData doc2 =
          getStorage().createDocument(testroot2, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testDeleteTree_Unfile2"), cs, null, null, VersioningState.MAJOR);
+            getPropsMap(CmisConstants.DOCUMENT, "testDeleteTree_Unfile2"), cs, null, null, VersioningState.NONE);
 
       FolderData fol1 =
          getStorage().createFolder(testroot2, folderTypeDefinition,
@@ -4025,7 +4025,7 @@ public class ObjectTest extends BaseTest
 
       DocumentData doc1 =
          getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testSetContentStream_Simple"), cs1, null, null, VersioningState.MAJOR);
+            getPropsMap(CmisConstants.DOCUMENT, "testSetContentStream_Simple"), cs1, null, null, VersioningState.NONE);
 
       String docid = getConnection().setContentStream(doc1.getObjectId(), cs2, new ChangeTokenHolder(), true);
       getStorage().getObjectById(docid).getContentStream(null).getStream().read(result);
@@ -4051,7 +4051,7 @@ public class ObjectTest extends BaseTest
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition,
                getPropsMap(CmisConstants.DOCUMENT, "testSetContentStream_ContentAlreadyExistsException"), cs1, null,
-               null, VersioningState.MAJOR);
+               null, VersioningState.NONE);
 
          String docid = getConnection().setContentStream(doc1.getObjectId(), cs2, new ChangeTokenHolder(), false);
          fail("ContentAlreadyExistsException must be thrown;");
@@ -4064,8 +4064,8 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.16.3
-    * The Repository MUST throw this exception if the “contentStreamAllowed” attribute of the Object-Type 
-    * definition specified by the cmis:objectTypeId property value of the given document is set to “notallowed”. 
+    * The Repository MUST throw this exception if the "contentStreamAllowed" attribute of the Object-Type 
+    * definition specified by the cmis:objectTypeId property value of the given document is set to "notallowed". 
     * @throws Exception
     */
    @Test
@@ -4108,7 +4108,7 @@ public class ObjectTest extends BaseTest
          typeID = getStorage().addType(newType);
          newType = getStorage().getTypeDefinition(typeID, true);
 
-         doc1 = getStorage().createDocument(testroot, newType, props2, null, null, null, VersioningState.MAJOR);
+         doc1 = getStorage().createDocument(testroot, newType, props2, null, null, null, VersioningState.NONE);
 
          docid = getConnection().setContentStream(doc1.getObjectId(), cs2, new ChangeTokenHolder(), false);
          fail("StreamNotSupportedException must be thrown;");
@@ -4142,7 +4142,7 @@ public class ObjectTest extends BaseTest
       DocumentData doc1 =
          getStorage().createDocument(testroot, documentTypeDefinition,
             getPropsMap(CmisConstants.DOCUMENT, "testDeleteContentStream_Simple"), cs1, null, null,
-            VersioningState.MAJOR);
+            VersioningState.NONE);
 
       String docid = getConnection().deleteContentStream(doc1.getObjectId(), new ChangeTokenHolder());
       assertNull("Content stream must be null;", getStorage().getObjectById(docid).getContentStream(null));
@@ -4150,8 +4150,8 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.17.3
-    * The Repository MUST throw this exception if the Object’s Object-Type definition “contentStreamAllowed” 
-    * attribute is set to “required”. 
+    * The Repository MUST throw this exception if the Object’s Object-Type definition "contentStreamAllowed" 
+    * attribute is set to "required". 
     * @throws Exception
     */
    @Test
@@ -4192,7 +4192,7 @@ public class ObjectTest extends BaseTest
          typeID = getStorage().addType(newType);
          newType = getStorage().getTypeDefinition(typeID, true);
 
-         doc1 = getStorage().createDocument(testroot, newType, props2, cs1, null, null, VersioningState.MAJOR);
+         doc1 = getStorage().createDocument(testroot, newType, props2, cs1, null, null, VersioningState.NONE);
 
          String docid = getConnection().deleteContentStream(doc1.getObjectId(), new ChangeTokenHolder());
          fail("ConstraintException must be thrown;");

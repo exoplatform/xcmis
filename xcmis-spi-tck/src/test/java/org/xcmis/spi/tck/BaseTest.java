@@ -247,7 +247,7 @@ public class BaseTest
       ContentStream cs = new BaseContentStream(documentContent.getBytes(), null, new MimeType("text", "plain"));
       DocumentData doc =
          getStorage().createDocument(parentFolder, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, documentName), cs, null, null, VersioningState.MAJOR);
+            getPropsMap(CmisConstants.DOCUMENT, documentName), cs, null, null, VersioningState.NONE);
       return doc;
    }
 

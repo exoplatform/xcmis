@@ -90,7 +90,7 @@ public class VersioningTest extends BaseTest
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testCheckOut_Simple"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
          String pwcID = getConnection().checkout(doc1.getObjectId());
          assertNotNull("Checkout failed;", pwcID);
          assertNotNull("Object not found;", getStorage().getObjectById(pwcID));
@@ -167,7 +167,7 @@ public class VersioningTest extends BaseTest
 
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testCancelCheckOut_Simple"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
          String pwcID = getConnection().checkout(doc1.getObjectId());
          getConnection().cancelCheckout(pwcID);
          try
@@ -255,7 +255,7 @@ public class VersioningTest extends BaseTest
 
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testCheckIn_Simple"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
          String pwcID = getConnection().checkout(doc1.getObjectId());
          String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, null);
          assertNotNull("Check-in failed;", chIn);
@@ -283,7 +283,7 @@ public class VersioningTest extends BaseTest
 
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testCheckIn_AddACL"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          String username = "username";
          List<AccessControlEntry> addACL = createACL(username, "cmis:read");
@@ -327,7 +327,7 @@ public class VersioningTest extends BaseTest
 
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testCheckIn_ApplyPolicy"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          policy = createPolicy(testroot, "testCheckIn_ApplyPolicy_policy1");
 
@@ -414,8 +414,8 @@ public class VersioningTest extends BaseTest
 
    /**
     * 2.2.7.3.3
-    * •  constraint: The Repository MUST throw this exception if the “contentStreamAllowed” attribute of the Object-Type definition specified by the cmis:objectTypeId 
-    * property value is set to “not allowed” and a contentStream input parameter is provided.
+    * •  constraint: The Repository MUST throw this exception if the "contentStreamAllowed" attribute of the Object-Type definition specified by the cmis:objectTypeId 
+    * property value is set to "not allowed" and a contentStream input parameter is provided.
     * @throws Exception
     */
    @Test
@@ -487,7 +487,7 @@ public class VersioningTest extends BaseTest
 
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectOfLatestVersion_Simple"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
          String pwcID = getConnection().checkout(doc1.getObjectId());
          String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, null);
          CmisObject obj =
@@ -510,7 +510,7 @@ public class VersioningTest extends BaseTest
 
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectOfLatestVersion_AllowableActions"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
          String pwcID = getConnection().checkout(doc1.getObjectId());
          String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, null);
          CmisObject obj =
@@ -548,7 +548,7 @@ public class VersioningTest extends BaseTest
 
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectOfLatestVersion_IncludePolicies"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
          String pwcID = getConnection().checkout(doc1.getObjectId());
          String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, policies);
          CmisObject obj =
@@ -588,7 +588,7 @@ public class VersioningTest extends BaseTest
 
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectOfLatestVersion_IncludeACL"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
          String pwcID = getConnection().checkout(doc1.getObjectId());
          String chIn = getConnection().checkin(pwcID, true, null, cs2, "", addACL, null, null);
          CmisObject obj =
@@ -621,7 +621,7 @@ public class VersioningTest extends BaseTest
 
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectOfLatestVersion_PropertiesFiltered"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
          String pwcID = getConnection().checkout(doc1.getObjectId());
          String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, null);
          CmisObject obj =
@@ -652,7 +652,7 @@ public class VersioningTest extends BaseTest
 
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectOfLatestVersion_FilterNotValidException"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
          String pwcID = getConnection().checkout(doc1.getObjectId());
          String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, null);
          try {
@@ -712,7 +712,7 @@ public class VersioningTest extends BaseTest
 
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetPropertiesOfLatestVersion_Simple"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
          String pwcID = getConnection().checkout(doc1.getObjectId());
          String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, null);
          CmisObject obj =
@@ -737,7 +737,7 @@ public class VersioningTest extends BaseTest
 
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetPropertiesOfLatestVersion_PropertiesFiltered"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
          String pwcID = getConnection().checkout(doc1.getObjectId());
          String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, null);
          CmisObject obj =
@@ -768,7 +768,7 @@ public class VersioningTest extends BaseTest
 
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetPropertiesOfLatestVersion_FilterNotValidException"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
          String pwcID = getConnection().checkout(doc1.getObjectId());
          String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, null);
          try {

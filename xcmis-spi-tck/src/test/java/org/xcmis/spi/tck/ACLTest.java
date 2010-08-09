@@ -87,7 +87,7 @@ public class ACLTest extends BaseTest
 
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testGetACL_Simple"), cs, addACL, null, VersioningState.MAJOR);
+               getPropsMap(CmisConstants.DOCUMENT, "testGetACL_Simple"), cs, addACL, null, VersioningState.NONE);
          List<AccessControlEntry> res = getConnection().getACL(doc1.getObjectId(), false);
          assertNotNull("Getting ACL failed;", res);
          for (AccessControlEntry one : res)
@@ -120,7 +120,7 @@ public class ACLTest extends BaseTest
 
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testApplyACL_Simple"), cs, null, null, VersioningState.MAJOR);
+               getPropsMap(CmisConstants.DOCUMENT, "testApplyACL_Simple"), cs, null, null, VersioningState.NONE);
          getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.REPOSITORYDETERMINED);
          ObjectData obj = getStorage().getObjectById(doc1.getObjectId());
          for (AccessControlEntry one : obj.getACL(false))
@@ -176,7 +176,7 @@ public class ACLTest extends BaseTest
          newType = getStorage().getTypeDefinition(typeID, true);
 
          DocumentData doc1 =
-            getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.MAJOR);
+            getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.NONE);
          getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.REPOSITORYDETERMINED);
          ObjectData obj = getStorage().getObjectById(doc1.getObjectId());
          for (AccessControlEntry one : obj.getACL(false))
@@ -230,7 +230,7 @@ public class ACLTest extends BaseTest
          typeID = getStorage().addType(newType);
          newType = getStorage().getTypeDefinition(typeID, true);
 
-         doc1 = getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.MAJOR);
+         doc1 = getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.NONE);
          getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.OBJECTONLY);
          fail("Constraint exception must be thrown;");
       }
@@ -271,7 +271,7 @@ public class ACLTest extends BaseTest
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition,
                getPropsMap(CmisConstants.DOCUMENT, "testApplyACL_ConstraintExceptionACLPropagation"), cs, null, null,
-               VersioningState.MAJOR);
+               VersioningState.NONE);
          if (capability.getPropagation().equals(AccessControlPropagation.OBJECTONLY)
             || capability.getPropagation().equals(AccessControlPropagation.REPOSITORYDETERMINED))
             getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.PROPAGATE);
@@ -311,7 +311,7 @@ public class ACLTest extends BaseTest
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition,
                getPropsMap("cmis:document", "testApplyACL_ConstraintExceptionACLNotMatch"), cs, null, null,
-               VersioningState.MAJOR);
+               VersioningState.NONE);
          getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.OBJECTONLY);
       }
       catch (ConstraintException ec)

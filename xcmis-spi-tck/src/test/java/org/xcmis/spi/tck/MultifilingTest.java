@@ -223,7 +223,7 @@ public class MultifilingTest extends BaseTest
                   .getLocalName(), ddef2.getDisplayName(), "cmis:multifilingtype1"));
 
                DocumentData docKino =
-                  getStorage().createDocument(folder1, kinoType, dproperties, cs, null, null, VersioningState.MAJOR);
+                  getStorage().createDocument(folder1, kinoType, dproperties, cs, null, null, VersioningState.NONE);
 
                // check folder2
                ItemsList<CmisObject> children0 =
