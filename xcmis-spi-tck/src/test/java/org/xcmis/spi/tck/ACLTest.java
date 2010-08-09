@@ -84,7 +84,7 @@ public class ACLTest extends BaseTest
       {
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          List<AccessControlEntry> addACL = createACL(username, "cmis:read");
-
+         
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition,
                getPropsMap(CmisConstants.DOCUMENT, "testGetACL_Simple"), cs, addACL, null, VersioningState.NONE);
@@ -101,7 +101,12 @@ public class ACLTest extends BaseTest
       }
       catch (NotSupportedException ex)
       {
-         //SKIP
+         if (capability.equals(CapabilityACL.NONE))
+         {
+            //SKIP
+         }
+         else
+            fail("Capability ACL is supported but not supported exception thrown");
       }
    }
 
@@ -115,12 +120,9 @@ public class ACLTest extends BaseTest
    {
       try
       {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          List<AccessControlEntry> addACL = createACL(username, "cmis:read");
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testApplyACL_Simple"), cs, null, null, VersioningState.NONE);
+         DocumentData  doc1 = createDocument(testroot, "testApplyACL_Simple", "1234567890aBcDE");
+         
          getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.REPOSITORYDETERMINED);
          ObjectData obj = getStorage().getObjectById(doc1.getObjectId());
          for (AccessControlEntry one : obj.getACL(false))
@@ -134,7 +136,12 @@ public class ACLTest extends BaseTest
       }
       catch (NotSupportedException ex)
       {
-         //SKIP
+         if (capability.equals(CapabilityACL.NONE))
+         {
+            //SKIP
+         }
+         else
+            fail("Capability ACL is supported but not supported exception thrown");
       }
    }
 
@@ -188,7 +195,12 @@ public class ACLTest extends BaseTest
       }
       catch (NotSupportedException ex)
       {
-         //SKIP
+         if (capability.equals(CapabilityACL.NONE))
+         {
+            //SKIP
+         }
+         else
+            fail("Capability ACL is supported but not supported exception thrown");
       }
    }
 
@@ -249,7 +261,8 @@ public class ACLTest extends BaseTest
       }
       finally
       {
-         getStorage().deleteObject(doc1, true);
+         if (doc1 != null)
+          getStorage().deleteObject(doc1, true);
          getStorage().removeType(typeID);
       }
    }
@@ -264,14 +277,10 @@ public class ACLTest extends BaseTest
    {
       try
       {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          List<AccessControlEntry> addACL = createACL(username, "cmis:read");
          ACLCapability capability = getStorage().getRepositoryInfo().getAclCapability();
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testApplyACL_ConstraintExceptionACLPropagation"), cs, null, null,
-               VersioningState.NONE);
+         DocumentData  doc1 = createDocument(testroot, "testApplyACL_ConstraintExceptionACLPropagation", "1234567890aBcDE");
+         
          if (capability.getPropagation().equals(AccessControlPropagation.OBJECTONLY)
             || capability.getPropagation().equals(AccessControlPropagation.REPOSITORYDETERMINED))
             getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.PROPAGATE);
@@ -305,13 +314,8 @@ public class ACLTest extends BaseTest
    {
       try
       {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          List<AccessControlEntry> addACL = createACL(username, "cmis:unknown");
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap("cmis:document", "testApplyACL_ConstraintExceptionACLNotMatch"), cs, null, null,
-               VersioningState.NONE);
+         DocumentData  doc1 = createDocument(testroot, "testApplyACL_ConstraintExceptionACLNotMatch", "1234567890aBcDE");
          getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.OBJECTONLY);
       }
       catch (ConstraintException ec)

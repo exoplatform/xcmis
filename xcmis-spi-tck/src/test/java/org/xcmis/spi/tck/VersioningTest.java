@@ -44,6 +44,7 @@ import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.RenditionFilter;
+import org.xcmis.spi.StreamNotSupportedException;
 import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.CapabilityACL;
@@ -86,11 +87,7 @@ public class VersioningTest extends BaseTest
    public void testCheckOut_Simple() throws Exception
    {
       if(!IS_VERSIONABLE) return;
-      
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testCheckOut_Simple"),
-               cs, null, null, VersioningState.NONE);
+         DocumentData doc1 = createDocument(testroot, "testCheckOut_Simple", "1234567890aBcDE");
          String pwcID = getConnection().checkout(doc1.getObjectId());
          assertNotNull("Checkout failed;", pwcID);
          assertNotNull("Object not found;", getStorage().getObjectById(pwcID));
@@ -162,12 +159,8 @@ public class VersioningTest extends BaseTest
    public void testCancelCheckOut_Simple() throws Exception
    {
      if(!IS_VERSIONABLE) return;
-     
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testCancelCheckOut_Simple"),
-               cs, null, null, VersioningState.NONE);
+         DocumentData doc1 = createDocument(testroot, "testCancelCheckOut_Simple", "1234567890aBcDE");
          String pwcID = getConnection().checkout(doc1.getObjectId());
          getConnection().cancelCheckout(pwcID);
          try
@@ -250,12 +243,9 @@ public class VersioningTest extends BaseTest
      
          byte[] before = "zzz".getBytes();
          byte[] after = new byte[3];
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          ContentStream cs2 = new BaseContentStream(before, null, new MimeType("text", "plain"));
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testCheckIn_Simple"),
-               cs, null, null, VersioningState.NONE);
+         DocumentData doc1 = createDocument(testroot, "testCheckIn_Simple", "1234567890aBcDE");
+         
          String pwcID = getConnection().checkout(doc1.getObjectId());
          String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, null);
          assertNotNull("Check-in failed;", chIn);
@@ -276,14 +266,9 @@ public class VersioningTest extends BaseTest
          //SKIP
          return;
       }
-         byte[] before = "zzz".getBytes();
          byte[] after = new byte[3];
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          ContentStream cs2 = new BaseContentStream(after, null, new MimeType("text", "plain"));
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testCheckIn_AddACL"),
-               cs, null, null, VersioningState.NONE);
+         DocumentData doc1 = createDocument(testroot, "testCheckIn_AddACL", "1234567890aBcDE");
 
          String username = "username";
          List<AccessControlEntry> addACL = createACL(username, "cmis:read");
@@ -320,15 +305,9 @@ public class VersioningTest extends BaseTest
       PolicyData policy = null;
       try
       {
-         byte[] before = "zzz".getBytes();
          byte[] after = new byte[3];
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          ContentStream cs2 = new BaseContentStream(after, null, new MimeType("text", "plain"));
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testCheckIn_ApplyPolicy"),
-               cs, null, null, VersioningState.NONE);
-
+         DocumentData doc1 = createDocument(testroot, "testCheckIn_ApplyPolicy", "1234567890aBcDE");
          policy = createPolicy(testroot, "testCheckIn_ApplyPolicy_policy1");
 
          ArrayList<String> policies = new ArrayList<String>();
@@ -342,7 +321,7 @@ public class VersioningTest extends BaseTest
          while (it.hasNext())
          {
             PolicyData one = it.next();
-            assertTrue("Policy adding failed;", one.getName().equals("policy1"));
+            assertTrue("Policy adding failed;", one.getName().equals("testCheckIn_ApplyPolicy_policy1"));
             assertTrue("Policy adding failed;", one.getPolicyText().equals("testPolicyText"));
             obj.removePolicy(one);
          }
@@ -464,6 +443,10 @@ public class VersioningTest extends BaseTest
       {
          //OK
       }
+      catch (StreamNotSupportedException sex)
+      {
+         //OK
+      }
       finally
       {
          getStorage().deleteObject(doc1, true);
@@ -483,13 +466,9 @@ public class VersioningTest extends BaseTest
      if(!IS_VERSIONABLE) return;
      
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectOfLatestVersion_Simple"),
-               cs, null, null, VersioningState.NONE);
+         DocumentData doc1 = createDocument(testroot, "testGetObjectOfLatestVersion_Simple", "1234567890aBcDE");
          String pwcID = getConnection().checkout(doc1.getObjectId());
-         String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, null);
+         String chIn = getConnection().checkin(pwcID, true, null, cs, "", null, null, null);
          CmisObject obj =
             getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true, IncludeRelationships.BOTH,
                true, true, true, PropertyFilter.ALL, RenditionFilter.NONE);
@@ -506,13 +485,10 @@ public class VersioningTest extends BaseTest
    {
       if(!IS_VERSIONABLE) return;
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectOfLatestVersion_AllowableActions"),
-               cs, null, null, VersioningState.NONE);
+         DocumentData doc1 = createDocument(testroot, "testGetObjectOfLatestVersion_AllowableActions", "1234567890aBcDE");
+         
          String pwcID = getConnection().checkout(doc1.getObjectId());
-         String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, null);
+         String chIn = getConnection().checkin(pwcID, true, null, cs, "", null, null, null);
          CmisObject obj =
             getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true, IncludeRelationships.BOTH,
                true, true, true, PropertyFilter.ALL, RenditionFilter.NONE);
@@ -537,20 +513,17 @@ public class VersioningTest extends BaseTest
          return;
       }
       PolicyData policy = null;
+      String chIn = null;
       try
       {
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
-
          policy = createPolicy(testroot, "policy_testGetObjectOfLatestVersion");
          ArrayList<String> policies = new ArrayList<String>();
          policies.add(policy.getObjectId());
 
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectOfLatestVersion_IncludePolicies"),
-               cs, null, null, VersioningState.NONE);
+         DocumentData doc1 = createDocument(testroot, "testGetObjectOfLatestVersion_IncludePolicies", "1234567890aBcDE");
          String pwcID = getConnection().checkout(doc1.getObjectId());
-         String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, policies);
+         chIn = getConnection().checkin(pwcID, true, null, cs, "", null, null, policies);
          CmisObject obj =
             getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true, IncludeRelationships.BOTH,
                true, true, true, PropertyFilter.ALL, RenditionFilter.NONE);
@@ -559,12 +532,14 @@ public class VersioningTest extends BaseTest
          while (it.hasNext())
          {
             PolicyData one = (PolicyData)getStorage().getObjectById(it.next());
-            assertTrue("Policy adding failed;", one.getName().equals("policy1"));
+            assertTrue("Policy adding failed;", one.getName().equals("policy_testGetObjectOfLatestVersion"));
             assertTrue("Policy text failed;", one.getPolicyText().equals("testPolicyText"));
          }
       }
       finally
       {
+         if (chIn != null)
+          getStorage().deleteObject(getStorage().getObjectById(chIn), true);
          if (policy != null)
             getStorage().deleteObject(policy, true);
       }
@@ -581,16 +556,11 @@ public class VersioningTest extends BaseTest
      if(!IS_VERSIONABLE) return;
      
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
-
          String username = "username";
          List<AccessControlEntry> addACL = createACL(username, "cmis:read");
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectOfLatestVersion_IncludeACL"),
-               cs, null, null, VersioningState.NONE);
+         DocumentData doc1 = createDocument(testroot, "testGetObjectOfLatestVersion_IncludeACL", "1234567890aBcDE");
          String pwcID = getConnection().checkout(doc1.getObjectId());
-         String chIn = getConnection().checkin(pwcID, true, null, cs2, "", addACL, null, null);
+         String chIn = getConnection().checkin(pwcID, true, null, cs, "", addACL, null, null);
          CmisObject obj =
             getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true, IncludeRelationships.BOTH,
                true, true, true, PropertyFilter.ALL, RenditionFilter.NONE);
@@ -617,13 +587,9 @@ public class VersioningTest extends BaseTest
      if(!IS_VERSIONABLE) return;
      
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectOfLatestVersion_PropertiesFiltered"),
-               cs, null, null, VersioningState.NONE);
+         DocumentData doc1 = createDocument(testroot, "testGetObjectOfLatestVersion_PropertiesFiltered", "1234567890aBcDE");
          String pwcID = getConnection().checkout(doc1.getObjectId());
-         String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, null);
+         String chIn = getConnection().checkin(pwcID, true, null, cs, "", null, null, null);
          CmisObject obj =
             getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true, IncludeRelationships.BOTH,
                true, true, true, "cmis:name,cmis:path", RenditionFilter.NONE);
@@ -648,13 +614,9 @@ public class VersioningTest extends BaseTest
      if(!IS_VERSIONABLE) return;
      
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectOfLatestVersion_FilterNotValidException"),
-               cs, null, null, VersioningState.NONE);
+         DocumentData doc1 = createDocument(testroot, "testGetObjectOfLatestVersion_FilterNotValidException", "1234567890aBcDE");
          String pwcID = getConnection().checkout(doc1.getObjectId());
-         String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, null);
+         String chIn = getConnection().checkin(pwcID, true, null, cs, "", null, null, null);
          try {
          CmisObject obj =
             getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), false, true, IncludeRelationships.BOTH,
@@ -678,13 +640,10 @@ public class VersioningTest extends BaseTest
      if(!IS_VERSIONABLE) return;
      
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetObjectOfLatestVersion_ObjectNotFoundException"),
-               cs, null, null, VersioningState.MINOR);
+         DocumentData doc1 = createDocument(testroot, "testGetObjectOfLatestVersion_ObjectNotFoundException", "1234567890aBcDE");
+         
          String pwcID = getConnection().checkout(doc1.getObjectId());
-         String chIn = getConnection().checkin(pwcID, false, null, cs2, "", null, null, null);
+         String chIn = getConnection().checkin(pwcID, false, null, cs, "", null, null, null);
          try {
          CmisObject obj =
             getConnection().getObjectOfLatestVersion(doc1.getVersionSeriesId(), true, true, IncludeRelationships.BOTH,
@@ -708,13 +667,9 @@ public class VersioningTest extends BaseTest
      if(!IS_VERSIONABLE) return;
      
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetPropertiesOfLatestVersion_Simple"),
-               cs, null, null, VersioningState.NONE);
+         DocumentData doc1 = createDocument(testroot, "testGetPropertiesOfLatestVersion_Simple", "1234567890aBcDE");
          String pwcID = getConnection().checkout(doc1.getObjectId());
-         String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, null);
+         String chIn = getConnection().checkin(pwcID, true, null, cs, "", null, null, null);
          CmisObject obj =
             getConnection().getPropertiesOfLatestVersion(doc1.getVersionSeriesId(), true, true, PropertyFilter.ALL);
          assertNotNull("GetPropertiesOfLatestVersion failed;", obj);
@@ -733,13 +688,10 @@ public class VersioningTest extends BaseTest
      if(!IS_VERSIONABLE) return;
      
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetPropertiesOfLatestVersion_PropertiesFiltered"),
-               cs, null, null, VersioningState.NONE);
+         DocumentData doc1 = createDocument(testroot, "testGetPropertiesOfLatestVersion_PropertiesFiltered", "1234567890aBcDE");
+         
          String pwcID = getConnection().checkout(doc1.getObjectId());
-         String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, null);
+         String chIn = getConnection().checkin(pwcID, true, null, cs, "", null, null, null);
          CmisObject obj =
             getConnection().getPropertiesOfLatestVersion(doc1.getVersionSeriesId(), true, true, "cmis:name,cmis:path");
          assertNotNull("GetPropertiesOfLatestVersion failed;", obj);
@@ -763,14 +715,10 @@ public class VersioningTest extends BaseTest
    {
      if(!IS_VERSIONABLE) return;
      
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetPropertiesOfLatestVersion_FilterNotValidException"),
-               cs, null, null, VersioningState.NONE);
+         ContentStream cs = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
+         DocumentData doc1 = createDocument(testroot, "testGetPropertiesOfLatestVersion_FilterNotValidException", "1234567890aBcDE");
          String pwcID = getConnection().checkout(doc1.getObjectId());
-         String chIn = getConnection().checkin(pwcID, true, null, cs2, "", null, null, null);
+         String chIn = getConnection().checkin(pwcID, true, null, cs, "", null, null, null);
          try {
          CmisObject obj = getConnection().getPropertiesOfLatestVersion(doc1.getVersionSeriesId(), true, true, "(,*");
          fail("FilterNotValidException must be thrown;");

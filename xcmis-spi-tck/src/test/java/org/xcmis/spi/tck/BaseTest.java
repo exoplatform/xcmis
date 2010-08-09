@@ -101,7 +101,7 @@ public class BaseTest
 
    public static void setUp() throws Exception
    {
-      ConversationState state = new ConversationState(new Identity("root"));
+      ConversationState state = new ConversationState(new Identity("__system"));
       ConversationState.setCurrent(state);
 
      

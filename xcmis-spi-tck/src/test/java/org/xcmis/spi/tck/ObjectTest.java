@@ -771,13 +771,7 @@ public class ObjectTest extends BaseTest
    public void testCreateDocumentFromSource_Properties() throws Exception
    {
       String name = "testCreateDocumentFromSource_Properties2";
-      byte[] before = new byte[15];
-      before = "1234567890aBcDE".getBytes();
-      ContentStream cs = new BaseContentStream(before, null, new MimeType("text", "plain"));
-      DocumentData doc1 =
-         getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_Properties1"), cs, null, null,
-            VersioningState.NONE);
+      DocumentData  doc1 = createDocument(testroot, "testCreateDocumentFromSource_Properties1", "1234567890aBcDE");
       String docId =
          getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(),
             getPropsMap(CmisConstants.DOCUMENT, name), null, null, null, VersioningState.NONE);
@@ -802,14 +796,7 @@ public class ObjectTest extends BaseTest
       PolicyData policy = null;
       try
       {
-         byte[] before = new byte[15];
-         before = "1234567890aBcDE".getBytes();
-         ContentStream cs = new BaseContentStream(before, null, new MimeType("text", "plain"));
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_ApplyPolicy1"), cs, null, null,
-               VersioningState.NONE);
-
+         DocumentData  doc1 = createDocument(testroot, "testCreateDocumentFromSource_ApplyPolicy1", "1234567890aBcDE");
          policy = createPolicy(testroot, "object_policy2");
 
          ArrayList<String> policies = new ArrayList<String>();
@@ -850,14 +837,7 @@ public class ObjectTest extends BaseTest
          //SKIP
          return;
       }
-      byte[] before = new byte[15];
-      before = "1234567890aBcDE".getBytes();
-      ContentStream cs = new BaseContentStream(before, null, new MimeType("text", "plain"));
-      DocumentData doc1 =
-         getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_addACL1"), cs, null, null,
-            VersioningState.NONE);
-
+      DocumentData  doc1 = createDocument(testroot, "testCreateDocumentFromSource_addACL1", "1234567890aBcDE");
       String username = "username";
       List<AccessControlEntry> addACL = createACL(username, "cmis:read");
 
@@ -886,12 +866,7 @@ public class ObjectTest extends BaseTest
    public void testCreateDocumentFromSource_NameConstraintViolationException() throws Exception
    {
       String name = "testCreateDocumentFromSource_NameConstraintViolationException";
-      byte[] before = new byte[15];
-      before = "1234567890aBcDE".getBytes();
-      ContentStream cs = new BaseContentStream(before, null, new MimeType("text", "plain"));
-      DocumentData doc1 =
-         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, name), cs,
-            null, null, VersioningState.NONE);
+      DocumentData  doc1 = createDocument(testroot, name, "1234567890aBcDE");
       try
       {
          String docId =
@@ -1379,7 +1354,7 @@ public class ObjectTest extends BaseTest
             .createFolder(testroot.getObjectId(), getPropsMap(CmisConstants.FOLDER, "f1"), null, null, null);
       ObjectData obj = getStorage().getObjectById(docId);
       assertTrue("Object types does not match;", obj.getTypeId().equals(CmisConstants.FOLDER));
-      assertEquals("Path is not correct;", "/object_testroot/f1", ((FolderData)obj).getPath());
+      assertTrue("Path is not correct;", ((FolderData)obj).getPath().endsWith("object_testroot/f1"));
    }
 
    /**
@@ -1479,7 +1454,7 @@ public class ObjectTest extends BaseTest
             getConnection().createFolder(testroot.getObjectId(),
                getPropsMap(CmisConstants.FOLDER, "testCreateFolder_NameConstraint"), null, null, null);
          ObjectData res = getStorage().getObjectById(docId);
-         assertFalse("Names must not match;", res.getName().equals("f1"));
+         assertFalse("Names must not match;", res.getName().equals("testCreateFolder_NameConstraint"));
       }
       catch (NameConstraintViolationException ex)
       {
@@ -1609,7 +1584,9 @@ public class ObjectTest extends BaseTest
          if (f1 != null)
             getStorage().deleteObject(f1, true);
          if (docId != null)
+            try {
             getStorage().deleteObject(getStorage().getObjectById(docId), true);
+            } catch (ObjectNotFoundException e){};
          if (typeID != null)
             getStorage().removeType(typeID);
       }
@@ -1650,7 +1627,7 @@ public class ObjectTest extends BaseTest
 
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
-         fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "f1"));
+         fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "CreateFolder_ConstraintExceptionF1"));
       properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
          .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(),
          "cmis:objecttype16"));
@@ -1880,15 +1857,8 @@ public class ObjectTest extends BaseTest
       String typeID = null;
       try
       {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ApplyPolicy1"), cs, null, null,
-               VersioningState.NONE);
-         DocumentData doc2 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ApplyPolicy2"), cs, null, null,
-               VersioningState.NONE);
+         DocumentData  doc1 = createDocument(testroot, "testCreateRelationship_ApplyPolicy1", "1234567890aBcDE");
+         DocumentData  doc2 = createDocument(testroot, "testCreateRelationship_ApplyPolicy2", "1234567890aBcDE");
 
          Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
          Map<String, Property<?>> props = new HashMap<String, Property<?>>();
@@ -1982,15 +1952,9 @@ public class ObjectTest extends BaseTest
       String typeID = null;
       try
       {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_AddACL1"), cs, null, null,
-               VersioningState.NONE);
-         DocumentData doc2 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_AddACL2"), cs, null, null,
-               VersioningState.NONE);
+         DocumentData  doc1 = createDocument(testroot, "testCreateRelationship_AddACL1", "1234567890aBcDE");
+         DocumentData  doc2 = createDocument(testroot, "testCreateRelationship_AddACL2", "1234567890aBcDE");
+
 
          Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
          Map<String, Property<?>> props = new HashMap<String, Property<?>>();
@@ -2072,16 +2036,10 @@ public class ObjectTest extends BaseTest
          return;
       }
       ObjectData obj = null;
+      DocumentData  doc1 = createDocument(testroot, "testCreateRelationship_NameConstraintViolationException1", "1234567890aBcDE");
+      DocumentData  doc2 = createDocument(testroot, "testCreateRelationship_NameConstraintViolationException2", "1234567890aBcDE");
 
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-      DocumentData doc1 =
-         getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_NameConstraintViolationException1"), cs, null,
-            null, VersioningState.NONE);
-      DocumentData doc2 =
-         getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_NameConstraintViolationException2"), cs, null,
-            null, VersioningState.NONE);
+      
       Map<String, Property<?>> props = new HashMap<String, Property<?>>();
 
       Map<String, Property<?>> props2 = new HashMap<String, Property<?>>();
@@ -2156,16 +2114,9 @@ public class ObjectTest extends BaseTest
          return;
       }
       ObjectData obj = null;
+      DocumentData  doc1 = createDocument(testroot, "testCreateRelationship_ConstraintExceptionWrongBaseType1", "1234567890aBcDE");
+      DocumentData  doc2 = createDocument(testroot, "testCreateRelationship_ConstraintExceptionWrongBaseType2", "1234567890aBcDE");
 
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-      DocumentData doc1 =
-         getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ConstraintExceptionWrongBaseType1"), cs, null,
-            null, VersioningState.NONE);
-      DocumentData doc2 =
-         getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ConstraintExceptionWrongBaseType2"), cs, null,
-            null, VersioningState.NONE);
 
       Map<String, Property<?>> props = new HashMap<String, Property<?>>();
 
@@ -2239,15 +2190,8 @@ public class ObjectTest extends BaseTest
       String typeID = null;
       try
       {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ConstraintExceptionNotAllowedTypes1"), cs,
-               null, null, VersioningState.NONE);
-         DocumentData doc2 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ConstraintExceptionNotAllowedTypes2"), cs,
-               null, null, VersioningState.NONE);
+         DocumentData  doc1 = createDocument(testroot, "testCreateRelationship_ConstraintExceptionNotAllowedTypes1", "1234567890aBcDE");
+         DocumentData  doc2 = createDocument(testroot, "testCreateRelationship_ConstraintExceptionNotAllowedTypes2", "1234567890aBcDE");
 
          Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
          Map<String, Property<?>> props = new HashMap<String, Property<?>>();
@@ -2273,7 +2217,7 @@ public class ObjectTest extends BaseTest
                false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
 
          props.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
-            fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "rel1"));
+            fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "CreateRelationship_ConstraintExceptionNotAllowedTypes_rel1"));
 
          props.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
             .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(), "cmis:my"));
@@ -2325,16 +2269,9 @@ public class ObjectTest extends BaseTest
       ObjectData obj = null;
       String typeID = null;
       PolicyData policy = null;
-
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-      DocumentData doc1 =
-         getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ConstraintExceptionNotControllablePolicy1"),
-            cs, null, null, VersioningState.NONE);
-      DocumentData doc2 =
-         getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ConstraintExceptionNotControllablePolicy2"),
-            cs, null, null, VersioningState.NONE);
+      
+      DocumentData  doc1 = createDocument(testroot, "testCreateRelationship_ConstraintExceptionNotControllablePolicy1", "1234567890aBcDE");
+      DocumentData  doc2 = createDocument(testroot, "testCreateRelationship_ConstraintExceptionNotControllablePolicy2", "1234567890aBcDE");
 
       Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
       Map<String, Property<?>> props = new HashMap<String, Property<?>>();
@@ -2426,15 +2363,8 @@ public class ObjectTest extends BaseTest
       String typeID = null;
       try
       {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ConstraintExceptionNotControllableACL1"),
-               cs, null, null, VersioningState.NONE);
-         DocumentData doc2 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ConstraintExceptionNotControllableACL2"),
-               cs, null, null, VersioningState.NONE);
+         DocumentData  doc1 = createDocument(testroot, "testCreateRelationship_ConstraintExceptionNotControllableACL1", "1234567890aBcDE");
+         DocumentData  doc2 = createDocument(testroot, "testCreateRelationship_ConstraintExceptionNotControllableACL2", "1234567890aBcDE");
 
          Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
          Map<String, Property<?>> props = new HashMap<String, Property<?>>();
@@ -2521,15 +2451,8 @@ public class ObjectTest extends BaseTest
       String typeID = null;
       try
       {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ConstraintExceptionUnknownACE1"), cs, null,
-               null, VersioningState.NONE);
-         DocumentData doc2 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ConstraintExceptionUnknownACE2"), cs, null,
-               null, VersioningState.NONE);
+         DocumentData  doc1 = createDocument(testroot, "testCreateRelationship_ConstraintExceptionUnknownACE1", "1234567890aBcDE");
+         DocumentData  doc2 = createDocument(testroot, "testCreateRelationship_ConstraintExceptionUnknownACE2", "1234567890aBcDE");
 
          Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
          Map<String, Property<?>> props = new HashMap<String, Property<?>>();
@@ -2858,13 +2781,13 @@ public class ObjectTest extends BaseTest
                fPropDefName.getDisplayName(), "estCreatePolicy_ConstraintExceptionNotAllowed"));
          properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
             .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(),
-            "cmis:mypolicy"));
+            "cmis:mypolicys"));
          properties.put(CmisConstants.POLICY_TEXT, new StringProperty(def2.getId(), def2.getQueryName(), def2
             .getLocalName(), def2.getDisplayName(), "testPolicyText1"));
 
          TypeDefinition newType =
-            new TypeDefinition("cmis:mypolicy", BaseType.POLICY, "cmis:mypolicy", "cmis:mypolicy", "", "cmis:policy",
-               "cmis:mypolicy", "cmis:mypolicy", true, false, true, true, false, false, false, true, null, null,
+            new TypeDefinition("cmis:mypolicys", BaseType.POLICY, "cmis:mypolicys", "cmis:mypolicys", "", "cmis:policy",
+               "cmis:mypolicys", "cmis:mypolicys", true, false, true, true, false, false, false, true, null, null,
                ContentStreamAllowed.NOT_ALLOWED, fPropertyDefinitions);
          typeID = getStorage().addType(newType);
          newType = getStorage().getTypeDefinition(typeID, true);
@@ -3108,13 +3031,7 @@ public class ObjectTest extends BaseTest
    @Test
    public void testGetObject_IncludeRelationships() throws Exception
    {
-
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-      DocumentData doc1 =
-         getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testGetObject_IncludeRelationships1"), cs, null, null,
-            VersioningState.NONE);
+      DocumentData  doc1 = createDocument(testroot, "testGetObject_IncludeRelationships1", "1234567890aBcDE");
 
       RelationshipData reldata =
          getStorage().createRelationship(doc1, testroot, relationshipTypeDefinition,
@@ -3192,6 +3109,8 @@ public class ObjectTest extends BaseTest
       DocumentData doc1 =
          getStorage().createDocument(testroot, documentTypeDefinition,
             getPropsMap(CmisConstants.DOCUMENT, "testGetObject_IncludeACLs1"), cs, addACL, null, VersioningState.NONE);
+      
+      
 
       CmisObject obj =
          getConnection().getObject(doc1.getObjectId(), false, IncludeRelationships.TARGET, true, true, true, "", "*");
@@ -3324,16 +3243,8 @@ public class ObjectTest extends BaseTest
    @Test
    public void testGetObjectByPath_IncludeRelationships() throws Exception
    {
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-      FolderData folder2 =
-         getStorage().createFolder(testroot, folderTypeDefinition,
-            getPropsMap(CmisConstants.FOLDER, "testGetObjectByPathRelationships_folder"), null, null);
-
-      DocumentData doc1 =
-         getStorage().createDocument(folder2, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testGetObjectByPath_IncludeRelationships"), cs, null, null,
-            VersioningState.NONE);
+      FolderData folder2 = createFolder(testroot, "testGetObjectByPathRelationships_folder");
+      DocumentData  doc1 = createDocument(testroot, "testGetObjectByPath_IncludeRelationships", "1234567890aBcDE");
 
       RelationshipData reldata =
          getStorage().createRelationship(doc1, folder2, relationshipTypeDefinition,
@@ -3364,10 +3275,8 @@ public class ObjectTest extends BaseTest
          return;
       }
       PolicyData policy = null;
-      FolderData folder2 =
-         getStorage().createFolder(testroot, folderTypeDefinition,
-            getPropsMap(CmisConstants.FOLDER, "testGetObjectByPath_IncludePolicyIDs"), null, null);
-
+      FolderData folder2 = createFolder(testroot, "testGetObjectByPath_IncludePolicyIDs");
+      
       try
       {
          policy = createPolicy(folder2, "testGetObjectByPath_IncludePolicy");
@@ -3472,11 +3381,7 @@ public class ObjectTest extends BaseTest
 
       byte[] before = new byte[15];
       before = "1234567890aBcDE".getBytes();
-
-      ContentStream cs = new BaseContentStream(before, null, new MimeType("text", "plain"));
-      DocumentData doc1 =
-         getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testGetContentStream_Simple"), cs, null, null, VersioningState.NONE);
+      DocumentData  doc1 = createDocument(testroot, "testGetContentStream_Simple", new String(before));
       ContentStream obj = getConnection().getContentStream(doc1.getObjectId(), null);
       byte[] after = new byte[15];
       obj.getStream().read(after);
@@ -3497,7 +3402,7 @@ public class ObjectTest extends BaseTest
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition,
                getPropsMap(CmisConstants.DOCUMENT, "testGetContentStream_ConstraintException"), null, null, null,
-               VersioningState.NONE);
+               VersioningState.NONE); 
          getConnection().getContentStream(doc1.getObjectId(), null);
          fail("ConstraintException must be thrown;");
       }
@@ -3521,13 +3426,9 @@ public class ObjectTest extends BaseTest
          //SKIP
          return;
       }
-
       try
       {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testGetRenditions_Simple"), cs, null, null, VersioningState.NONE);
+         DocumentData  doc1 = createDocument(testroot, "testGetRenditions_Simple", "1234567890aBcDE");
          List<Rendition> obj = getConnection().getRenditions(doc1.getObjectId(), "", -1, 0);
          assertNotNull("Get renditions result is null;", obj);
       }
@@ -3553,11 +3454,7 @@ public class ObjectTest extends BaseTest
       }
       try
       {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testGetRenditions_FilterNotValidException"), cs, null, null,
-               VersioningState.NONE);
+         DocumentData  doc1 = createDocument(testroot, "testGetRenditions_FilterNotValidException", "1234567890aBcDE");
          getConnection().getRenditions(doc1.getObjectId(), "(,*", -1, 0);
          fail("FilterNotValidException must be thrown;");
       }
@@ -3647,10 +3544,8 @@ public class ObjectTest extends BaseTest
 
       try
       {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
-               cs, null, null, VersioningState.NONE);
+         DocumentData  doc1 = createDocument(testroot, "testUpdateProperties_VersioningException", "1234567890aBcDE");
+         
          Map<String, Property<?>> properties2 = new HashMap<String, Property<?>>();
 
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefComment =
@@ -3689,15 +3584,8 @@ public class ObjectTest extends BaseTest
       FolderData folder2 = null;
       try
       {
-         folder2 =
-            getStorage().createFolder(rootFolder, folderTypeDefinition,
-               getPropsMap(CmisConstants.FOLDER, "testMoveObject_Simple"), null, null);
-
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testMoveObject_Simple"), cs, null, null, VersioningState.NONE);
+         folder2 = createFolder(rootFolder, "testMoveObject_Simple");
+         DocumentData  doc1 = createDocument(testroot, "testMoveObject_Simple", "1234567890aBcDE");
 
          String id = getConnection().moveObject(doc1.getObjectId(), folder2.getObjectId(), testroot.getObjectId());
          ObjectData obj = getStorage().getObjectById(id);
@@ -3719,20 +3607,11 @@ public class ObjectTest extends BaseTest
    @Test
    public void testMoveObject_InvalidArgumentException() throws Exception
    {
-
       FolderData folder2 = null;
       try
       {
-         folder2 =
-            getStorage().createFolder(rootFolder, folderTypeDefinition,
-               getPropsMap(CmisConstants.FOLDER, "testMoveObject_InvalidArgumentException"), null, null);
-
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testMoveObject_InvalidArgumentException"), cs, null, null,
-               VersioningState.NONE);
+         folder2 = createFolder(rootFolder, "testMoveObject_InvalidArgumentException");
+         DocumentData  doc1 = createDocument(testroot, "testMoveObject_InvalidArgumentException", "1234567890aBcDE");
 
          String id = getConnection().moveObject(doc1.getObjectId(), testroot.getObjectId(), folder2.getObjectId());
          ObjectData obj = getStorage().getObjectById(id);
@@ -3798,13 +3677,7 @@ public class ObjectTest extends BaseTest
          newType = getStorage().getTypeDefinition(typeID, true);
 
          folder2 = getStorage().createFolder(rootFolder, newType, props2, null, null);
-
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testMoveObject_ConstraintException"), cs, null, null,
-               VersioningState.NONE);
+         DocumentData  doc1 = createDocument(testroot, "testMoveObject_ConstraintException", "1234567890aBcDE");
 
          String id = getConnection().moveObject(doc1.getObjectId(), folder2.getObjectId(), testroot.getObjectId());
          ObjectData obj = getStorage().getObjectById(id);
@@ -3835,21 +3708,9 @@ public class ObjectTest extends BaseTest
       FolderData folder2 = null;
       try
       {
-         folder2 =
-            getStorage().createFolder(rootFolder, folderTypeDefinition,
-               getPropsMap(CmisConstants.FOLDER, "testMoveObject_NameConstraintException"), null, null);
-
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testMoveObject_NameConstraintException"), cs, null, null,
-               VersioningState.NONE);
-
-         DocumentData doc2 =
-            getStorage().createDocument(folder2, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testMoveObject_NameConstraintException"), cs, null, null,
-               VersioningState.NONE);
+         folder2 = createFolder(rootFolder, "testMoveObject_NameConstraintException_folder");
+         DocumentData  doc1 = createDocument(testroot, "testMoveObject_NameConstraintException", "1234567890aBcDE");
+         DocumentData  doc2 = createDocument(folder2, "testMoveObject_NameConstraintException", "1234567890aBcDE");
          String id = getConnection().moveObject(doc1.getObjectId(), folder2.getObjectId(), testroot.getObjectId());
          ObjectData obj = getStorage().getObjectById(id);
          assertFalse("Names must not match;", obj.getName().equalsIgnoreCase(doc1.getName()));
@@ -3875,11 +3736,7 @@ public class ObjectTest extends BaseTest
    {
       try
       {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testDeleteObject_Simple"), cs, null, null, VersioningState.NONE);
+         DocumentData  doc1 = createDocument(testroot, "testDeleteObject_Simple", "1234567890aBcDE");
          String id = doc1.getObjectId();
          getConnection().deleteObject(doc1.getObjectId(), true);
          ObjectData obj = getStorage().getObjectById(id);
@@ -3898,18 +3755,10 @@ public class ObjectTest extends BaseTest
    @Test
    public void testDeleteObject_ConstraintException() throws Exception
    {
-
       try
       {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         FolderData testroot2 =
-            getStorage().createFolder(rootFolder, folderTypeDefinition,
-               getPropsMap(CmisConstants.FOLDER, "testDeleteObjectConstraintException"), null, null);
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot2, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testDeleteObject_ConstraintException"), cs, null, null,
-               VersioningState.NONE);
+         FolderData testroot2 = createFolder(rootFolder, "testDeleteObjectConstraintException");
+         DocumentData  doc1 = createDocument(testroot2, "testDeleteObject_ConstraintException", "1234567890aBcDE");
          getConnection().deleteObject(testroot2.getObjectId(), true);
          fail("ConstraintException must be thrown;");
       }
@@ -3927,20 +3776,11 @@ public class ObjectTest extends BaseTest
    @Test
    public void testDeleteTree_Simple() throws Exception
    {
-      FolderData testroot2 =
-         getStorage().createFolder(rootFolder, folderTypeDefinition,
-            getPropsMap(CmisConstants.FOLDER, "testDeleteTree_Simple"), null, null);
-
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-      getStorage().createDocument(testroot2, documentTypeDefinition,
-         getPropsMap(CmisConstants.DOCUMENT, "testDeleteTree_Simple1"), cs, null, null, VersioningState.NONE);
-
-      getStorage().createDocument(testroot2, documentTypeDefinition,
-         getPropsMap(CmisConstants.DOCUMENT, "testDeleteTree_Simple2"), cs, null, null, VersioningState.NONE);
-
-      getStorage().createFolder(testroot2, folderTypeDefinition,
-         getPropsMap(CmisConstants.FOLDER, "testDeleteTree_Simple_fol1"), null, null);
+      FolderData testroot2 = createFolder(rootFolder, "testDeleteTree_Simple");
+      createDocument(testroot2, "testDeleteTree_Simple1", "1234567890aBcDE");
+      createDocument(testroot2, "testDeleteTree_Simple2", "1234567890aBcDE");
+      createFolder(testroot2, "testDeleteTree_Simple_fol1");
+      
       String id = testroot2.getObjectId();
 
       try
@@ -3969,23 +3809,10 @@ public class ObjectTest extends BaseTest
          //SKIP
          return;
       }
-      FolderData testroot2 =
-         getStorage().createFolder(rootFolder, folderTypeDefinition,
-            getPropsMap(CmisConstants.FOLDER, "testDeleteTree_Unfile"), null, null);
-
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-      DocumentData doc1 =
-         getStorage().createDocument(testroot2, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testDeleteTree_Unfile1"), cs, null, null, VersioningState.NONE);
-
-      DocumentData doc2 =
-         getStorage().createDocument(testroot2, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testDeleteTree_Unfile2"), cs, null, null, VersioningState.NONE);
-
-      FolderData fol1 =
-         getStorage().createFolder(testroot2, folderTypeDefinition,
-            getPropsMap(CmisConstants.FOLDER, "testDeleteTree_Unfile_fol1"), null, null);
+      FolderData testroot2 = createFolder(rootFolder, "testDeleteTree_Unfile");
+      DocumentData doc1 = createDocument(testroot2, "testDeleteTree_Unfile1", "1234567890aBcDE");
+      DocumentData doc2 =  createDocument(testroot2, "testDeleteTree_Unfile2", "1234567890aBcDE");
+      createFolder(testroot2, "testDeleteTree_Unfile_fol1");
 
       String id1 = doc1.getObjectId();
       String id2 = doc2.getObjectId();
@@ -4016,16 +3843,11 @@ public class ObjectTest extends BaseTest
    @Test
    public void testSetContentStream_Simple() throws Exception
    {
-      byte[] before = "1234567890aBcDE".getBytes();
       byte[] after = "zzz".getBytes();
       byte[] result = new byte[3];
 
-      ContentStream cs1 = new BaseContentStream(before, null, new MimeType("text", "plain"));
       ContentStream cs2 = new BaseContentStream(after, null, new MimeType("text", "plain"));
-
-      DocumentData doc1 =
-         getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testSetContentStream_Simple"), cs1, null, null, VersioningState.NONE);
+      DocumentData doc1 = createDocument(testroot, "testSetContentStream_Simple", "1234567890aBcDE");
 
       String docid = getConnection().setContentStream(doc1.getObjectId(), cs2, new ChangeTokenHolder(), true);
       getStorage().getObjectById(docid).getContentStream(null).getStream().read(result);
@@ -4043,17 +3865,10 @@ public class ObjectTest extends BaseTest
       try
       {
          byte[] before = "1234567890aBcDE".getBytes();
-         byte[] after = "zzz".getBytes();
+         ContentStream cs = new BaseContentStream(before, null, new MimeType("text", "plain"));
+         DocumentData doc1 = createDocument(testroot, "testSetContentStream_ContentAlreadyExistsException", "1234567890aBcDE");
 
-         ContentStream cs1 = new BaseContentStream(before, null, new MimeType("text", "plain"));
-         ContentStream cs2 = new BaseContentStream(after, null, new MimeType("text", "plain"));
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testSetContentStream_ContentAlreadyExistsException"), cs1, null,
-               null, VersioningState.NONE);
-
-         String docid = getConnection().setContentStream(doc1.getObjectId(), cs2, new ChangeTokenHolder(), false);
+         String docid = getConnection().setContentStream(doc1.getObjectId(), cs, new ChangeTokenHolder(), false);
          fail("ContentAlreadyExistsException must be thrown;");
       }
       catch (ContentAlreadyExistsException ex)
@@ -4136,14 +3951,7 @@ public class ObjectTest extends BaseTest
    @Test
    public void testDeleteContentStream_Simple() throws Exception
    {
-      byte[] before = "1234567890aBcDE".getBytes();
-      ContentStream cs1 = new BaseContentStream(before, null, new MimeType("text", "plain"));
-
-      DocumentData doc1 =
-         getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testDeleteContentStream_Simple"), cs1, null, null,
-            VersioningState.NONE);
-
+      DocumentData doc1 = createDocument(testroot, "testDeleteContentStream_Simple", "1234567890aBcDE");
       String docid = getConnection().deleteContentStream(doc1.getObjectId(), new ChangeTokenHolder());
       assertNull("Content stream must be null;", getStorage().getObjectById(docid).getContentStream(null));
    }
@@ -4165,7 +3973,6 @@ public class ObjectTest extends BaseTest
          byte[] after = "zzz".getBytes();
 
          ContentStream cs1 = new BaseContentStream(before, null, new MimeType("text", "plain"));
-
          Map<String, Property<?>> props2 = new HashMap<String, Property<?>>();
 
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =

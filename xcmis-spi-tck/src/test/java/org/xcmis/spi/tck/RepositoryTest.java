@@ -439,7 +439,6 @@ public class RepositoryTest extends BaseTest
       typeDefinition = getConnection().getTypeDefinition("cmis:folder", false);
       assertNotNull("Type definition is null;", typeDefinition);
       assertNotNull("Type definition ID is null;", typeDefinition.getId());
-
       assertFalse("Type definition ID is empty;", typeDefinition.getId().equals(""));
       assertNotNull("Type definition local name is empty;", typeDefinition.getLocalName());
       assertNotNull("Type definition query name is empty;", typeDefinition.getQueryName());
@@ -451,8 +450,6 @@ public class RepositoryTest extends BaseTest
    private void checkPropertyDefinitions(Collection<PropertyDefinition<?>> propertyDefinitions) throws Exception
    {
       assertNotNull("PropertyDefinitions is null;", propertyDefinitions);
-      //assertTrue("PropertyDefinitions is not empty;", propertyDefinitions.size() == 0);
-         
       for (PropertyDefinition<?> propertyDefinition : propertyDefinitions)
       {
          assertNotNull("Type definition is null;", propertyDefinition);

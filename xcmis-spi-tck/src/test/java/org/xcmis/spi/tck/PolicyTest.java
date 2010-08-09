@@ -84,11 +84,7 @@ public class PolicyTest extends BaseTest
       try
       {
          String policyName = "testApplyPolicy_Simple_policy1";
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testApplyPolicy_Simple"),
-               cs, null, null, VersioningState.NONE);
-
+         DocumentData  doc1 = createDocument(testroot, "testApplyPolicy_Simple", "1234567890aBcDE");
          policy = createPolicy(testroot, policyName);
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
          ObjectData res = getStorage().getObjectById(doc1.getObjectId());
@@ -166,7 +162,7 @@ public class PolicyTest extends BaseTest
       }
       finally
       {
-         getStorage().deleteObject(doc1, false);
+         getStorage().deleteObject(doc1, true);
          getStorage().deleteObject(policy, false);
          getStorage().removeType(typeID);
       }
@@ -188,12 +184,7 @@ public class PolicyTest extends BaseTest
       PolicyData policy = null;
       try
       {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap("cmis:document", "doc1"), cs,
-               null, null, VersioningState.NONE);
-
+         DocumentData  doc1 = createDocument(testroot, "testRemovePolicy_Simple", "1234567890aBcDE");
          policy = createPolicy(testroot, "testRemovePolicy_Simple_policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
          getConnection().removePolicy(policy.getObjectId(), doc1.getObjectId());
@@ -290,12 +281,7 @@ public class PolicyTest extends BaseTest
       DocumentData doc1 = null;
       try
       {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-          doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetAppliedPolicies_Simple1"),
-               cs, null, null, VersioningState.NONE);
-
+         doc1 = createDocument(testroot, "testGetAppliedPolicies_Simple1", "1234567890aBcDE");
          policy = createPolicy(testroot, "testGetAppliedPolicies_Simple_policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
          List<CmisObject> res = getConnection().getAppliedPolicies(doc1.getObjectId(), true, "");
@@ -331,13 +317,9 @@ public class PolicyTest extends BaseTest
       DocumentData doc1 = null;
       try
       {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-         doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetAppliedPolicies_PropertiesFiltered1"), cs,
-               null, null, VersioningState.NONE);
-
+         doc1 = createDocument(testroot, "testGetAppliedPolicies_PropertiesFiltered1", "1234567890aBcDE");
          policy = createPolicy(testroot, "testGetAppliedPolicies_policy1");
+         
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
          List<CmisObject> res = getConnection().getAppliedPolicies(doc1.getObjectId(), true, "cmis:name, cmis:path");
          for (CmisObject one : res)
@@ -377,13 +359,9 @@ public class PolicyTest extends BaseTest
       DocumentData doc1 = null;
       try
       {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-         doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testGetAppliedPolicies_FilterNotValidException1"),
-               cs, null, null, VersioningState.NONE);
-
+         doc1 = createDocument(testroot, "testGetAppliedPolicies_FilterNotValidException1", "1234567890aBcDE");
          policy = createPolicy(testroot, "testGetAppliedPolicies_FilterNotValidException_policy1");
+         
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
          List<CmisObject> res = getConnection().getAppliedPolicies(doc1.getObjectId(), true, "(,*");
         fail("FilterNotValidException must be thrown;");
