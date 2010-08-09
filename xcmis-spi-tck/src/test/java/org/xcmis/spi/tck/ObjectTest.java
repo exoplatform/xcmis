@@ -72,6 +72,8 @@ public class ObjectTest extends BaseTest
 {
 
    static FolderData testroot;
+   
+   private static final String ROOT = "object_testroot";
 
    @BeforeClass
    public static void start() throws Exception
@@ -80,7 +82,7 @@ public class ObjectTest extends BaseTest
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       testroot =
          getStorage().createFolder(rootFolder, folderTypeDefinition,
-            getPropsMap(CmisConstants.FOLDER, "object_testroot"), null, null);
+            getPropsMap(CmisConstants.FOLDER, ROOT), null, null);
       System.out.print("Running Object Service tests....");
    }
 
@@ -98,7 +100,7 @@ public class ObjectTest extends BaseTest
       ContentStream cs = new BaseContentStream(before, null, new MimeType("text", "plain"));
       String docId =
          getConnection().createDocument(testroot.getObjectId(),
-            getPropsMap(CmisConstants.DOCUMENT, "testCreateDocument_CheckContent"), cs, null, null, null,
+            getPropsMap(CmisConstants.DOCUMENT, "testCreateDocument_CheckContent.txt"), cs, null, null, null,
             VersioningState.MAJOR);
       ContentStream c = getStorage().getObjectById(docId).getContentStream(null);
       assertTrue("Media types does not match", cs.getMediaType().equals(c.getMediaType()));
@@ -747,7 +749,7 @@ public class ObjectTest extends BaseTest
             VersioningState.MAJOR);
       String docId =
          getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(),
-            getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_Simple2"), null, null, null,
+            getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_Simple2.txt"), null, null, null,
             VersioningState.MAJOR);
       ContentStream c = getStorage().getObjectById(docId).getContentStream(null);
       assertTrue("Media types does not match", cs.getMediaType().equals(c.getMediaType()));
@@ -1377,7 +1379,7 @@ public class ObjectTest extends BaseTest
             .createFolder(testroot.getObjectId(), getPropsMap(CmisConstants.FOLDER, "f1"), null, null, null);
       ObjectData obj = getStorage().getObjectById(docId);
       assertTrue("Object types does not match;", obj.getTypeId().equals(CmisConstants.FOLDER));
-      assertTrue("Path is not correct;", ((FolderData)obj).getPath().equals("/object_testroot/f1"));
+      assertEquals("Path is not correct;", "/object_testroot/f1", ((FolderData)obj).getPath());
    }
 
    /**
@@ -3073,7 +3075,7 @@ public class ObjectTest extends BaseTest
       CmisObject obj =
          getConnection().getObject(testroot.getObjectId(), false, IncludeRelationships.NONE, false, false, true, "",
             "*");
-      assertTrue("Names does not match;", obj.getObjectInfo().getName().equals("testroot"));
+      assertEquals("Names does not match;", ROOT, obj.getObjectInfo().getName());
       assertTrue("Object ID's does not match;", testroot.getObjectId().equals(obj.getObjectInfo().getId()));
    }
 

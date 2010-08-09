@@ -59,6 +59,11 @@ public class PolicyTest extends BaseTest
    @BeforeClass
    public static void start() throws Exception
    {
+//      if(policyTypeDefinition == null) 
+//      {
+//        System.out.print("Relationships are not supported. Relationships tests skipped....");
+//        throw new Exception("Relationships is not Supported. Skip Relationships tests."); 
+//      }
       BaseTest.setUp();
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       testroot =

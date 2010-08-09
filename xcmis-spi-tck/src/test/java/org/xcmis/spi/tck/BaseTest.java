@@ -96,6 +96,8 @@ public class BaseTest
    protected static boolean IS_CAPABILITY_DESCENDANTS = false;
    
    protected static boolean IS_CAN_CHECKOUT = true;
+   
+   protected static boolean IS_VERSIONABLE = true;
 
    public static void setUp() throws Exception
    {
@@ -105,6 +107,7 @@ public class BaseTest
      
       rootfolderID = getStorage().getRepositoryInfo().getRootFolderId();
       rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      
 
       try
       {
@@ -133,6 +136,9 @@ public class BaseTest
          IS_CAPABILITY_DESCENDANTS = true;
 
       documentTypeDefinition = getStorage().getTypeDefinition(CmisConstants.DOCUMENT, true);
+      
+      IS_VERSIONABLE = documentTypeDefinition.isVersionable();
+      
       folderTypeDefinition = getStorage().getTypeDefinition(CmisConstants.FOLDER, true);
 
       if (IS_POLICIES_SUPPORTED)

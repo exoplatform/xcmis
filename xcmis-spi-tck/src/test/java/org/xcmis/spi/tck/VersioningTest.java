@@ -18,12 +18,20 @@
  */
 package org.xcmis.spi.tck;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ConstraintException;
@@ -52,11 +60,6 @@ import org.xcmis.spi.model.impl.IdProperty;
 import org.xcmis.spi.model.impl.StringProperty;
 import org.xcmis.spi.utils.MimeType;
 
-import static org.junit.Assert.*;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 public class VersioningTest extends BaseTest
 {
 
@@ -71,6 +74,7 @@ public class VersioningTest extends BaseTest
          getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "versioning_testroot"),
             null, null);
       System.out.print("Running Versioning Service tests....");
+
    }
 
    /**
@@ -81,6 +85,8 @@ public class VersioningTest extends BaseTest
    @Test
    public void testCheckOut_Simple() throws Exception
    {
+      if(!IS_VERSIONABLE) return;
+      
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "testCheckOut_Simple"),
@@ -98,6 +104,8 @@ public class VersioningTest extends BaseTest
    @Test
    public void testCheckOut_ConstraintException() throws Exception
    {
+      if(!IS_VERSIONABLE) return;
+      
       String typeID = new String();
       DocumentData doc1 = null;
       try
@@ -153,6 +161,8 @@ public class VersioningTest extends BaseTest
    @Test
    public void testCancelCheckOut_Simple() throws Exception
    {
+     if(!IS_VERSIONABLE) return;
+     
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
          DocumentData doc1 =
@@ -179,6 +189,8 @@ public class VersioningTest extends BaseTest
    @Test
    public void testCancelCheckOut_ConstraintException() throws Exception
    {
+      if(!IS_VERSIONABLE) return;
+     
       String typeID = new String();
       DocumentData doc1 = null;
       try
@@ -234,6 +246,8 @@ public class VersioningTest extends BaseTest
    @Test
    public void testCheckIn_Simple() throws Exception
    {
+     if(!IS_VERSIONABLE) return;
+     
          byte[] before = "zzz".getBytes();
          byte[] after = new byte[3];
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
@@ -257,6 +271,7 @@ public class VersioningTest extends BaseTest
    @Test
    public void testCheckIn_AddACL() throws Exception
    {
+      if(!IS_VERSIONABLE) return;
       if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE)){
          //SKIP
          return;
@@ -295,6 +310,8 @@ public class VersioningTest extends BaseTest
    @Test
    public void testCheckIn_ApplyPolicy() throws Exception
    {
+      if(!IS_VERSIONABLE) return;
+      
       if (!IS_POLICIES_SUPPORTED)
       {
         //SKIP
@@ -345,6 +362,8 @@ public class VersioningTest extends BaseTest
    @Test
    public void testCheckIn_ConstraintExceptionNotVersionable() throws Exception
    {
+      if(!IS_VERSIONABLE) return;
+      
       DocumentData doc1 = null;
       String typeID = new String();
       try
@@ -402,6 +421,8 @@ public class VersioningTest extends BaseTest
    @Test
    public void testCheckIn_ConstraintExceptionContentNotAllowed() throws Exception
    {
+      if(!IS_VERSIONABLE) return;
+     
       String pwcID = null;
       String typeID = new String();
       DocumentData doc1 = null;
@@ -459,6 +480,8 @@ public class VersioningTest extends BaseTest
    @Test
    public void testGetObjectOfLatestVersion_Simple() throws Exception
    {
+     if(!IS_VERSIONABLE) return;
+     
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
 
@@ -481,6 +504,7 @@ public class VersioningTest extends BaseTest
    @Test
    public void testGetObjectOfLatestVersion_AllowableActions() throws Exception
    {
+      if(!IS_VERSIONABLE) return;
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
 
@@ -504,6 +528,9 @@ public class VersioningTest extends BaseTest
    @Test
    public void testGetObjectOfLatestVersion_IncludePolicies() throws Exception
    {
+     
+      if(!IS_VERSIONABLE) return;
+      
       if (!IS_POLICIES_SUPPORTED)
       {
          //SKIP
@@ -551,6 +578,8 @@ public class VersioningTest extends BaseTest
    @Test
    public void testGetObjectOfLatestVersion_IncludeACL() throws Exception
    {
+     if(!IS_VERSIONABLE) return;
+     
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
 
@@ -585,6 +614,8 @@ public class VersioningTest extends BaseTest
    @Test
    public void testGetObjectOfLatestVersion_PropertiesFiltered() throws Exception
    {
+     if(!IS_VERSIONABLE) return;
+     
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
 
@@ -614,6 +645,8 @@ public class VersioningTest extends BaseTest
    @Test
    public void testGetObjectOfLatestVersion_FilterNotValidException() throws Exception
    {
+     if(!IS_VERSIONABLE) return;
+     
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
 
@@ -642,6 +675,8 @@ public class VersioningTest extends BaseTest
    @Test
    public void testGetObjectOfLatestVersion_ObjectNotFoundException() throws Exception
    {
+     if(!IS_VERSIONABLE) return;
+     
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
 
@@ -670,6 +705,8 @@ public class VersioningTest extends BaseTest
    @Test
    public void testGetPropertiesOfLatestVersion_Simple() throws Exception
    {
+     if(!IS_VERSIONABLE) return;
+     
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
 
@@ -693,6 +730,8 @@ public class VersioningTest extends BaseTest
    @Test
    public void testGetPropertiesOfLatestVersion_PropertiesFiltered() throws Exception
    {
+     if(!IS_VERSIONABLE) return;
+     
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
 
@@ -722,6 +761,8 @@ public class VersioningTest extends BaseTest
    @Test
    public void testGetPropertiesOfLatestVersion_FilterNotValidException() throws Exception
    {
+     if(!IS_VERSIONABLE) return;
+     
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
 
@@ -748,6 +789,8 @@ public class VersioningTest extends BaseTest
    @Test
    public void testGetPropertiesOfLatestVersion_ObjectNotFoundException() throws Exception
    {
+     if(!IS_VERSIONABLE) return;
+     
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          ContentStream cs2 = new BaseContentStream("zzz".getBytes(), null, new MimeType("text", "plain"));
 
