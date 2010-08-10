@@ -3936,8 +3936,6 @@ public class ObjectTest extends BaseTest
       {
          if (docid != null)
             getStorage().deleteObject(getStorage().getObjectById(docid), true);
-         if (doc1 != null)
-            getStorage().deleteObject(doc1, true);
          if (typeID != null)
             getStorage().removeType(typeID);
       }
