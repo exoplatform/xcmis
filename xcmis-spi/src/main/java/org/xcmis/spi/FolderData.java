@@ -57,7 +57,12 @@ public interface FolderData extends ObjectData
     * Add existed fileable object in this folder. If multifiling capability is
     * not supported then this method must throw {@link NotSupportedException}.
     * 
-    * @param object object to be added
+    * 2.2.5.1 addObjectToFolder
+    * 
+    * Implementation Compatibility: SHOULD be implemented if the repository 
+    * supports the multifiling (capabilityMultifiling) optional capabilities.
+    * 
+    * @param object the object to be added
     * @throws ConstraintException if <code>object</code> has type that is
     *         unsupported by current folder. See
     *         {@link CMIS#ALLOWED_CHILD_OBJECT_TYPE_IDS}

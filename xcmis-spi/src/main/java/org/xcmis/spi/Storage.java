@@ -173,6 +173,11 @@ public interface Storage extends TypeManager
     * <code>parent</code> as parent. If <code>parent == null</code> then policy
     * created in unfiling state.
     * 
+    * 2.2.4.5 createPolicy
+    *      
+    * Implementation Compatibility: the support for policy objects is optional, 
+    * and may be discovered via the “Get Type Children” service. (2.1.2 Object)
+    * 
     * @param parent parent folder
     * @param typeDefinition the policy type definition
     * @param properties the policy properties
@@ -254,7 +259,7 @@ public interface Storage extends TypeManager
     *        other fileable non-folder objects from the current folder tree</li>
     *        <li>delete: Delete all fileable objects</li>
     *        </ul>
-    * @param continueOnFailure if <code>true</code>, then the stprage SHOULD
+    * @param continueOnFailure if <code>true</code>, then the storage SHOULD
     *        continue attempting to perform this operation even if deletion of a
     *        child object in the specified folder cannot be deleted
     * @return list of id that were not deleted

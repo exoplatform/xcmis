@@ -87,16 +87,22 @@ public abstract class Connection
    }
 
    /**
-    * Add un-filed object in folder.
+    * Adds an existing fileable non-folder object to a folder.
     * 
-    * @param objectId the id of object to be added in folder
-    * @param folderId the target folder id
+    * 2.2.5.1 addObjectToFolder
+    * 
+    * Implementation Compatibility: SHOULD be implemented if the repository 
+    * supports the multifiling (capabilityMultifiling) optional capabilities.
+    * 
+    * @param objectId the id of the object
+    * @param folderId the target folder id into which the object is to be filed
     * @param allVersions to add all versions of the object to the folder if the
     *        storage supports version-specific filing
     * @throws ObjectNotFoundException if <code>objectId</code> or
     *         <code>folderId</code> were not found
-    * @throws ConstraintException if destination folder is not supported object
-    *         type that should be added
+    * @throws ConstraintException MUST throw this exception if the cmis:objectTypeId property value
+    *         of the given object is NOT in the list of AllowedChildObjectTypeIds of the parent-folder
+    *         specified by folderId.
     * @throws InvalidArgumentException if <code>objectId</code> is id of object
     *         that is not fileable or if <code>folderId</code> is id of object
     *         that base type is not Folder
@@ -138,6 +144,11 @@ public abstract class Connection
    /**
     * Add new type.
     * 
+    * 2.1.3 Object-Type 
+    * A repository MAY define additional object-types beyond the CMIS Base Object-Types
+    * 
+    * Implementation Compatibility: MAY be implemented.
+    * 
     * @param type type definition
     * @return ID of newly added type
     * @throws ConstraintException if any of the following conditions are met:
@@ -165,11 +176,15 @@ public abstract class Connection
     * Adds or(and) remove the given Access Control Entries to(from) the Access
     * Control List of object.
     * 
-    * @param objectId identifier of object for which should be applied specified
+    * 2.2.10.2 applyACL
+    * 
+    * Implementation Compatibility: MUST be implemented if getRepository returns capabilityACL=manage
+    * 
+    * @param objectId the identifier of object for which should be applied specified
     *        ACEs
-    * @param addACL ACEs that will be added from object's ACL. May be
+    * @param addACL the ACEs that will be added from object's ACL. May be
     *        <code>null</code> or empty list
-    * @param removeACL ACEs that will be removed from object's ACL. May be
+    * @param removeACL the ACEs that will be removed from object's ACL. May be
     *        <code>null</code> or empty list
     * @param propagation specifies how ACEs should be handled:
     *        <ul>
@@ -227,8 +242,13 @@ public abstract class Connection
    /**
     * Applies a specified policy to an object.
     * 
-    * @param policyId the policy to be applied to object
-    * @param objectId target object for policy
+    * 2.2.9.1 applyPolicy
+    * 
+    * Implementation Compatibility: the support for policy objects is optional, 
+    * and may be discovered via the “Get Type Children” service. (2.1.2 Object)
+    *      
+    * @param policyId the policy Id to be applied to object
+    * @param objectId the target object Id for policy
     * @throws ObjectNotFoundException if object with <code>objectId</code> or
     *         <code>policyId</code> does not exist
     * @throws ConstraintException if object with id <code>objectId</code> is not
@@ -256,6 +276,10 @@ public abstract class Connection
    /**
     * Discard the check-out operation. As result Private Working Copy (PWC) must
     * be removed and storage ready to next check-out operation.
+    * 
+    * 2.2.7.2 cancelCheckOut
+    * 
+    * Implementation Compatibility: specified by the “versionable” attribute on its Object-type.
     * 
     * @param documentId document id. May be PWC id or id of any other Document
     *        in Version Series
@@ -758,6 +782,11 @@ public abstract class Connection
    /**
     * Create a policy object.
     * 
+    * 2.2.4.5 createPolicy
+    *      
+    * Implementation Compatibility: the support for policy objects is optional, 
+    * and may be discovered via the “Get Type Children” service. (2.1.2 Object)
+    * 
     * @param parentId parent folder id should be <code>null</code> if policy
     *        object type is not fileable
     * @param properties properties to be applied to newly created Policy
@@ -1174,6 +1203,11 @@ public abstract class Connection
    /**
     * Get the ACL currently applied to the specified object.
     * 
+    * 2.2.10.1 getACL
+    * 
+    * Implementation Compatibility: MUST be implemented if getRepository 
+    * returns capabilityACL=discover or =manage.
+    * 
     * @param objectId identifier of object
     * @param onlyBasicPermissions if <code>true</code> then return only the CMIS
     *        Basic permissions
@@ -1251,6 +1285,11 @@ public abstract class Connection
 
    /**
     * Gets the list of policies currently applied to the specified object.
+    * 
+    * 2.2.9.3 getAppliedPolicies
+    * 
+    * Implementation Compatibility: the support for policy objects is optional, 
+    * and may be discovered via the “Get Type Children” service. (2.1.2 Object)
     * 
     * @param objectId the object id
     * @param includeObjectInfo if <code>true</code> then in result must be
@@ -1632,6 +1671,10 @@ public abstract class Connection
    /**
     * Get the collection of descendant objects contained in the specified folder
     * and any (according to <code>depth</code>) of its child-folders.
+    * 
+    * 2.2.3.2 getDescendants
+    * 
+    * Implementation Compatibility: SHOULD be implemented if capabilityGetDescendants = true
     * 
     * @param folderId folder id
     * @param depth depth for discover descendants if -1 then discovery

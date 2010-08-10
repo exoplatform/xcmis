@@ -59,6 +59,11 @@ public interface ObjectData
     * Get ACL currently applied to object. If ACL capability is not supported
     * then this method must throw {@link NotSupportedException}.
     *
+    * 2.2.10.1 getACL
+    * 
+    * Implementation Compatibility: MUST be implemented if getRepository 
+    * returns capabilityACL=discover or =manage.
+    * 
     * @param onlyBasicPermissions if <code>true</code> then only CMIS basic
     *        permissions {@link BasicPermissions} must be returned if
     *        <code>false</code> then basic permissions and repository specific
@@ -160,6 +165,11 @@ public interface ObjectData
    /**
     * Get policies applied to the current object. If Policy object type is not
     * supported then this method must throw {@link NotSupportedException}.
+    * 
+    * 2.2.9.3 getAppliedPolicies
+    * 
+    * Implementation Compatibility: the support for policy objects is optional, 
+    * and may be discovered via the “Get Type Children” service. (2.1.2 Object)
     *
     * @return applied Policies. If there is no policies applied to object or if
     *         object is not controllable by policy then empty list must be
@@ -239,7 +249,11 @@ public interface ObjectData
     * Set new ACL for object. New ACL overwrite existed one. If ACL capability
     * is not supported then this method must throw {@link NotSupportedException}
     * . ACLs will be not merged but replace existed one by new.
-    *
+    * 
+    * 2.2.10.2 applyACL
+    * 
+    * Implementation Compatibility: MUST be implemented if getRepository returns capabilityACL=manage
+    * 
     * @param acl ACL that should replace currently applied ACL
     * @throws NotSupportedException if ACL is not supported by storage
     */
