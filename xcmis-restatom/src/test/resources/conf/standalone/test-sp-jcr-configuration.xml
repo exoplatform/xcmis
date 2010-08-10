@@ -66,7 +66,7 @@
 
    <!-- Storage Provider -->
    <component>
-      <type>org.exoplatform.ecms.xcmis.sp.jcr.exo.StorageProviderImpl</type>
+      <type>org.exoplatform.ecms.xcmis.sp.StorageProviderImpl</type>
       <init-params>
          <object-param>
             <name>configs</name>
