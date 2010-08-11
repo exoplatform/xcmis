@@ -1013,6 +1013,9 @@ public abstract class Connection
    /**
     * Delete the content stream for the specified Document object.
     * 
+    * Implementation Compatibility: SHOULD be implemented if 
+    * capabilityContentStreamUpdatability = anytime or pwconly
+    * 
     * @param documentId document id
     * @param changeTokenHolder is used for optimistic locking and/or concurrency
     *        checking to ensure that user updates do not conflict. This
@@ -1674,7 +1677,8 @@ public abstract class Connection
     * 
     * 2.2.3.2 getDescendants
     * 
-    * Implementation Compatibility: SHOULD be implemented if capabilityGetDescendants = true
+    * Implementation Compatibility: SHOULD be implemented if 
+    * capabilityGetDescendants = true
     * 
     * @param folderId folder id
     * @param depth depth for discover descendants if -1 then discovery
@@ -1804,6 +1808,11 @@ public abstract class Connection
    /**
     * Get the collection of descendant folder objects contained in the specified
     * folder and any (according to <code>depth</code>) of its child-folders.
+    * 
+    * 2.2.3.3 getFolderTree
+    * 
+    * Implementation Compatibility: SHOULD be implemented if 
+    * capabilityGetFolderTree = true
     * 
     * @param folderId folder id
     * @param depth depth for discover descendants if -1 then discovery
@@ -2384,6 +2393,8 @@ public abstract class Connection
     * Get the list of associated Renditions for the specified object. Only
     * rendition attributes are returned, not rendition stream.
     * 
+    * Implementation Compatibility: SHOULD be implemented if capabilityRenditions = read
+    *     
     * @param objectId object id
     * @param renditionFilter renditions kinds or mimetypes that must be included
     *        in result. If <code>null</code> or empty string provided then no
@@ -2793,6 +2804,11 @@ public abstract class Connection
    /**
     * Remove an existing fileable non-folder object from a folder.
     * 
+    * 2.2.5.2 removeObjectFromFolder
+    * 
+    * Implementation Compatibility: SHOULD be implemented if the repository 
+    * supports the multifiling (capabilityMultifiling) and unfiling (capabilityUnfiling) optional capabilities.
+    * 
     * @param objectId the id of object to be removed
     * @param folderId the folder from which the object is to be removed. If
     *        null, then remove the object from all folders in which it is
@@ -2892,6 +2908,9 @@ public abstract class Connection
    /**
     * Sets the content stream for the specified Document object.
     * 
+    * Implementation Compatibility: SHOULD be implemented if 
+    * capabilityContentStreamUpdatability = anytime or pwconly
+    *    
     * @param documentId document id
     * @param content content stream to be applied to object
     * @param changeTokenHolder is used for optimistic locking and/or concurrency

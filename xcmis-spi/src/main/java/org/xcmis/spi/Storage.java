@@ -273,6 +273,11 @@ public interface Storage extends TypeManager
     * Remove non-folder fileable object from all folder where in which it is
     * currently filed. <b>NOTE</b> This method never remove object itself.
     * 
+    * 2.2.5.2 removeObjectFromFolder
+    * 
+    * Implementation Compatibility: SHOULD be implemented if the repository 
+    * supports the multifiling (capabilityMultifiling) and unfiling (capabilityUnfiling) optional capabilities.
+    * 
     * @param object object
     */
    void unfileObject(ObjectData object);
@@ -347,6 +352,8 @@ public interface Storage extends TypeManager
    /**
     * Get object renditions.
     * 
+    * Implementation Compatibility: SHOULD be implemented if capabilityRenditions = read
+    * 
     * @param object the object
     * @return iterator over object's renditions. If object has not any
     *         renditions then empty iterator must be returned but never
@@ -374,6 +381,9 @@ public interface Storage extends TypeManager
 
    /**
     * Iterator of all unfilled documents identifiers.
+    * 
+    * Implementation Compatibility: SHOULD be implemented if the repository 
+    * supports the unfiling (capabilityUnfiling) optional capabilities.
     * 
     * @return Iterator of all unfilled documents identifiers.
     * @throws StorageException if any storage error occurs

@@ -107,6 +107,11 @@ public interface DocumentData extends ObjectData
    /**
     * Set content stream to document. If <code>contentStream</code> is
     * <code>null</code> then existed content of this document will be removed.
+    * 
+    * Implementation Compatibility: SHOULD be implemented if 
+    * isPWC() = true && capabilityContentStreamUpdatability = anytime or pwconly
+    * or
+    * isPWC() = false && capabilityContentStreamUpdatability = anytime
     *
     * @param contentStream {@link ContentStream} or <code>null</code>
     * @throws IOException if any i/o error occurs
