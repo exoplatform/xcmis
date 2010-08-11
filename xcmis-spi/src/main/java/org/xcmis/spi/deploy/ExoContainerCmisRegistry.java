@@ -57,12 +57,12 @@ public class ExoContainerCmisRegistry extends CmisRegistry implements Startable,
             ValuesParam next = vparams.next();
             if (next.getName().equalsIgnoreCase("renditionProviders"))
             {
-               this.providers.addAll(next.getValues());
+               this.renditionProviders.addAll(next.getValues());
             }
          }
       }
       RenditionManager manager = RenditionManager.getInstance();
-      manager.addRenditionProviders(providers);
+      manager.addRenditionProviders(renditionProviders);
       setFactory(this);
    }
 

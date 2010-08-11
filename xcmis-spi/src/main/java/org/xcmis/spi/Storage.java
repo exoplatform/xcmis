@@ -43,7 +43,7 @@ import java.util.Map;
 public interface Storage extends TypeManager
 {
    /**
-    * Get storage unique id.
+    * Gets storage unique id.
     * 
     * Implementation Compatibility: MUST be implemented
     * 
@@ -52,7 +52,7 @@ public interface Storage extends TypeManager
    String getId();
 
    /**
-    * Calculate allowable actions for specified object.
+    * Calculates allowable actions for specified object.
     * 
     * Implementation Compatibility: MUST be implemented
     * 
@@ -188,7 +188,8 @@ public interface Storage extends TypeManager
     * 2.2.4.5 createPolicy
     *      
     * Implementation Compatibility: the support for policy objects is optional, 
-    * and may be discovered via the "Get Type Children" service. (2.1.2 Object)
+    * if implementation does not support cmis:policy object-type method should
+    * throw {@link NotSupportedException} 
     * 
     * @param parent parent folder
     * @param typeDefinition the policy type definition
@@ -214,7 +215,8 @@ public interface Storage extends TypeManager
     * <code>target</code>.
     * 
     * Implementation Compatibility: the support for relationship objects is optional, 
-    * and may be discovered via the "Get Type Children" service. (2.1.2 Object)
+    * if implementation does not support cmis:relationship object-type method should
+    * throw {@link NotSupportedException} 
     * 
     * @param source source of relationship
     * @param target target of relationship
@@ -297,6 +299,7 @@ public interface Storage extends TypeManager
     * 
     * Implementation Compatibility: SHOULD be implemented if the repository 
     * supports the multifiling (capabilityMultifiling) and unfiling (capabilityUnfiling) optional capabilities.
+    * Otherwise, {@link NotSupportedException} should be thrown.
     * 
     * @param object object
     */
@@ -304,6 +307,12 @@ public interface Storage extends TypeManager
 
    /**
     * Gets content changes.
+    * 
+    * 
+    * Implementation Compatibility: SHOULD be implemented if the repository 
+    * supports changes Capability (capabilityChanges != none).
+    * Otherwise, {@link NotSupportedException} should be thrown.
+    * 
     * 
     * @param changeLogToken if value other than <code>null</code>, then change
     *        event corresponded to the value of the specified change log token
@@ -322,6 +331,11 @@ public interface Storage extends TypeManager
 
    /**
     * Handle specified SQL query.
+    * 
+    * Implementation Compatibility: SHOULD be implemented if the repository 
+    * supports query Capability (capabilityQuery != none)).
+    * Otherwise, {@link NotSupportedException} should be thrown.
+    * 
     * 
     * @param query SQL query
     * @return set of query results
@@ -408,7 +422,9 @@ public interface Storage extends TypeManager
     * Collection of all Document in the specified version series, sorted by
     * cmis:creationDate descending.
     * 
-    * Implementation Compatibility: Optional. Repository versioning specific.
+    * Implementation Compatibility: SHOULD be implemented if the repository 
+    * supports versioning.
+    * Otherwise, {@link NotSupportedException} should be thrown.
     * 
     * @param versionSeriesId the id of version series
     * @return document versions
@@ -422,6 +438,7 @@ public interface Storage extends TypeManager
     * 
     * Implementation Compatibility: SHOULD be implemented if the repository 
     * supports the unfiling (capabilityUnfiling) optional capabilities.
+    * Otherwise, {@link NotSupportedException} should be thrown.
     * 
     * @return Iterator of all unfilled documents identifiers.
     * @throws StorageException if any storage error occurs

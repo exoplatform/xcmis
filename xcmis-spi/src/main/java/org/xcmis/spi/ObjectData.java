@@ -49,8 +49,10 @@ public interface ObjectData
    void accept(ObjectDataVisitor visitor);
 
    /**
-    * Applied specified policy to the current object. If Policy object type is
-    * not supported then this method must throw {@link NotSupportedException}.
+    * Applied specified policy to the current object. 
+    * 
+    * Implementation Compatibility: the support for policy objects is optional, 
+    * If Policy object type is not supported then this method must throw {@link NotSupportedException}.
     *
     * @param policy policy to be applied
     */
@@ -164,13 +166,13 @@ public interface ObjectData
    Collection<FolderData> getParents();
 
    /**
-    * Get policies applied to the current object. If Policy object type is not
-    * supported then this method must throw {@link NotSupportedException}.
+    * Get policies applied to the current object. 
     * 
     * 2.2.9.3 getAppliedPolicies
     * 
     * Implementation Compatibility: the support for policy objects is optional, 
-    * and may be discovered via the "Get Type Children" service. (2.1.2 Object)
+    * if implementation does not support cmis:policy object-type method should
+    * throw {@link NotSupportedException} 
     *
     * @return applied Policies. If there is no policies applied to object or if
     *         object is not controllable by policy then empty list must be
@@ -202,6 +204,10 @@ public interface ObjectData
 
    /**
     * Objects relationships.
+    * 
+    * Implementation Compatibility: the support for relationship objects is optional, 
+    * if implementation does not support cmis:relationship object-type method should
+    * throw {@link NotSupportedException}  
     *
     * @param direction relationship's direction.
     * @param type relationship type. If
@@ -238,8 +244,11 @@ public interface ObjectData
 
    /**
     * Remove specified policy from object. This method must not remove Policy
-    * object itself. If Policy object type is not supported then this method
-    * must throw {@link NotSupportedException}.
+    * object itself. 
+    * 
+    * Implementation Compatibility: the support for policy objects is optional, 
+    * if implementation does not support cmis:policy object-type method should
+    * throw {@link NotSupportedException} 
     *
     * @param policy the policy object
     * @throws NotSupportedException if policies is not supported at all
@@ -253,7 +262,7 @@ public interface ObjectData
     * 
     * 2.2.10.2 applyACL
     * 
-    * Implementation Compatibility: MUST be implemented if getRepository returns capabilityACL=manage
+    * Implementation Compatibility: MUST be implemented if getRepository returns capabilityACL != none
     * 
     * @param acl ACL that should replace currently applied ACL
     * @throws NotSupportedException if ACL is not supported by storage

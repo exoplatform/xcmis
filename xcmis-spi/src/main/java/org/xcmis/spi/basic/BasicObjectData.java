@@ -49,7 +49,7 @@ public abstract class BasicObjectData implements ObjectData
     */
    public void accept(ObjectDataVisitor visitor)
    {
-      throw new UnsupportedOperationException();
+      throw new NotSupportedException();
    }
 
    /**
