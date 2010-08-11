@@ -20,6 +20,11 @@
 package org.xcmis.spi;
 
 /**
+ * 2.1.6. Relationship object.
+ * 
+ * Implementation Compatibility: the support for relationship objects is optional, 
+ * and may be discovered via the "Get Type Children" service. (2.1.2 Object)
+ * 
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */

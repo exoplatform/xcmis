@@ -34,6 +34,9 @@ public interface DocumentData extends ObjectData
 {
    /**
     * Shortcut to 'cmis:versionLabel' property.
+    * 
+    * Implementation Compatibility: Optional. Repository versioning specific.
+    * Otherwise "Version Property Values are repository-specific when a document is defined as non-versionable."
     *
     * @return 'cmis:versionLabel' property
     */
@@ -41,6 +44,9 @@ public interface DocumentData extends ObjectData
 
    /**
     * Shortcut to 'cmis:versionSeriesCheckedOutBy' property.
+    * 
+    * Implementation Compatibility: Optional. Repository versioning specific.
+    * Otherwise "Version Property Values are repository-specific when a document is defined as non-versionable."
     *
     * @return 'cmis:versionSeriesCheckedOutBy' property
     */
@@ -48,6 +54,9 @@ public interface DocumentData extends ObjectData
 
    /**
     * Shortcut to 'cmis:versionSeriesCheckedOutId' property.
+    * 
+    * Implementation Compatibility: Optional. Repository versioning specific.
+    * Otherwise "Version Property Values are repository-specific when a document is defined as non-versionable."
     *
     * @return 'cmis:versionSeriesCheckedOutId' property
     */
@@ -55,6 +64,9 @@ public interface DocumentData extends ObjectData
 
    /**
     * Shortcut to 'cmis:versionSeriesId' property.
+    * 
+    * Implementation Compatibility: Optional. Repository versioning specific.
+    * Otherwise "Version Property Values are repository-specific when a document is defined as non-versionable."
     *
     * @return 'cmis:versionSeriesId' property
     */
@@ -63,12 +75,18 @@ public interface DocumentData extends ObjectData
    /**
     * Shortcut to 'cmis:isLatestMajorVersion' property.
     *
+    * Implementation Compatibility: Optional. Repository versioning specific.
+    * Otherwise "Version Property Values are repository-specific when a document is defined as non-versionable."
+    * 
     * @return 'cmis:isLatestMajorVersion' property
     */
    boolean isLatestMajorVersion();
 
    /**
     * Shortcut to 'cmis:isLatestVersion' property.
+    * 
+    * Implementation Compatibility: Optional. Repository versioning specific.
+    * Otherwise "Version Property Values are repository-specific when a document is defined as non-versionable."
     *
     * @return 'cmis:isLatestVersion' property
     */
@@ -76,7 +94,10 @@ public interface DocumentData extends ObjectData
 
    /**
     * Shortcut to 'cmis:isMajorVersion' property.
-    *
+    * 
+    * Implementation Compatibility: Optional. Repository versioning specific.
+    * Otherwise "Version Property Values are repository-specific when a document is defined as non-versionable."
+    * 
     * @return 'cmis:isMajorVersion' property
     */
    boolean isMajorVersion();
@@ -84,6 +105,9 @@ public interface DocumentData extends ObjectData
    /**
     * Shortcut to 'cmis:isVersionSeriesCheckedOut' property.
     *
+    * Implementation Compatibility: Optional. Repository versioning specific.
+    * Otherwise "Version Property Values are repository-specific when a document is defined as non-versionable."
+    * 
     * @return 'cmis:isVersionSeriesCheckedOut' property
     */
    boolean isVersionSeriesCheckedOut();
@@ -109,9 +133,9 @@ public interface DocumentData extends ObjectData
     * <code>null</code> then existed content of this document will be removed.
     * 
     * Implementation Compatibility: SHOULD be implemented if 
-    * isPWC() = true && capabilityContentStreamUpdatability = anytime or pwconly
+    * capabilityContentStreamUpdatability = anytime
     * or
-    * isPWC() = false && capabilityContentStreamUpdatability = anytime
+    * capabilityContentStreamUpdatability = pwconly and isPWC() = true
     *
     * @param contentStream {@link ContentStream} or <code>null</code>
     * @throws IOException if any i/o error occurs
@@ -135,6 +159,8 @@ public interface DocumentData extends ObjectData
    /**
     * Discard checkout operation. See {@link Connection#cancelCheckout(String)}.
     *
+    * Implementation Compatibility: Optional. Repository versioning specific.
+    * 
     * @throws VersioningException if object is non-current document version and
     *         'cancel checkout' action and not supported for non-current version
     *         of document
@@ -147,6 +173,8 @@ public interface DocumentData extends ObjectData
 
    /**
     * Set private working copy as latest (current) version of document.
+    * 
+    * Implementation Compatibility: Optional. Repository versioning specific.
     *
     * @param major is major
     * @param checkinComment check-in comment
@@ -173,6 +201,8 @@ public interface DocumentData extends ObjectData
    /**
     * Create PWC from this document. Properties and content (optionally) of this
     * document copied to PWC.
+    * 
+    * Implementation Compatibility: Optional. Repository versioning specific.
     *
     * @return PWC
     * @throws VersioningException if one of the following conditions are met:
@@ -190,6 +220,9 @@ public interface DocumentData extends ObjectData
    DocumentData checkout() throws VersioningException, UpdateConflictException, StorageException;
 
    /**
+    * Implementation Compatibility: Optional. Repository versioning specific.
+    * Otherwise "Version Property Values are repository-specific when a document is defined as non-versionable."
+    * 
     * @return <code>true</code> if current Document is private working copy and
     *         <code>false</code> otherwise
     */

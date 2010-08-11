@@ -245,7 +245,7 @@ public abstract class Connection
     * 2.2.9.1 applyPolicy
     * 
     * Implementation Compatibility: the support for policy objects is optional, 
-    * and may be discovered via the “Get Type Children” service. (2.1.2 Object)
+    * and may be discovered via the "Get Type Children" service. (2.1.2 Object)
     *      
     * @param policyId the policy Id to be applied to object
     * @param objectId the target object Id for policy
@@ -279,7 +279,7 @@ public abstract class Connection
     * 
     * 2.2.7.2 cancelCheckOut
     * 
-    * Implementation Compatibility: specified by the “versionable” attribute on its Object-type.
+    * Implementation Compatibility: Optional. Repository versioning specific.
     * 
     * @param documentId document id. May be PWC id or id of any other Document
     *        in Version Series
@@ -323,6 +323,10 @@ public abstract class Connection
    /**
     * Check-in Private Working Copy.
     * 
+    * 2.2.7.3 checkIn
+    * 
+    * Implementation Compatibility: Optional. Repository versioning specific.
+    *     
     * @param documentId document id
     * @param major <code>true</code> is new version should be marked as major
     *        <code>false</code> otherwise
@@ -397,6 +401,10 @@ public abstract class Connection
    /**
     * Check-out document.
     * 
+    * 2.2.7.1 checkOut
+    * 
+    * Implementation Compatibility: Optional. Repository versioning specific.
+    * 
     * @param documentId document id. Storage MAY allow checked-out ONLY latest
     *        version of Document
     * @return ID of checked-out document (PWC)
@@ -447,6 +455,8 @@ public abstract class Connection
 
    /**
     * Create a document object.
+    * 
+    * Implementation Compatibility: MUST be implemented
     * 
     * @param parentId parent folder id for object. May be null if storage
     *        supports unfiling
@@ -584,6 +594,8 @@ public abstract class Connection
     * Create a document object as a copy of the given source document in the
     * specified parent folder <code>parentId</code>.
     * 
+    * Implementation Compatibility: MUST be implemented
+    * 
     * @param sourceId id for the source document
     * @param parentId parent folder id for object. May be null if storage
     *        supports unfiling
@@ -693,6 +705,8 @@ public abstract class Connection
    /**
     * Create a folder object.
     * 
+    * Implementation Compatibility: MUST be implemented
+    * 
     * @param parentId parent folder id for new folder
     * @param properties properties that will be applied to newly created folder
     * @param addACL Access Control Entries that MUST added for newly created
@@ -785,7 +799,7 @@ public abstract class Connection
     * 2.2.4.5 createPolicy
     *      
     * Implementation Compatibility: the support for policy objects is optional, 
-    * and may be discovered via the “Get Type Children” service. (2.1.2 Object)
+    * and may be discovered via the "Get Type Children" service. (2.1.2 Object)
     * 
     * @param parentId parent folder id should be <code>null</code> if policy
     *        object type is not fileable
@@ -880,6 +894,9 @@ public abstract class Connection
 
    /**
     * Create a relationship object.
+    * 
+    * Implementation Compatibility: the support for relationship objects is optional, 
+    * and may be discovered via the "Get Type Children" service. (2.1.2 Object)
     * 
     * @param properties properties to be applied to newly created relationship
     * @param addACL set Access Control Entry to be applied for newly created
@@ -1084,6 +1101,8 @@ public abstract class Connection
    /**
     * Delete the specified object.
     * 
+    * Implementation Compatibility: MUST be implemented
+    * 
     * @param objectId the object id
     * @param deleteAllVersions if <code>true</code> (Default if not specified)
     *        then delete all versions of the document. If <code>false</code>,
@@ -1132,6 +1151,8 @@ public abstract class Connection
    /**
     * Delete the specified folder object and all of its child- and
     * descendant-objects.
+    * 
+    * Implementation Compatibility: MUST be implemented
     * 
     * @param folderId folder id
     * @param deleteAllVersions if <code>true</code> (Default if not specified)
@@ -1235,6 +1256,8 @@ public abstract class Connection
    /**
     * Get the list of allowable actions for an Object.
     * 
+    * Implementation Compatibility: MUST be implemented
+    * 
     * @param objectId object id
     * @return allowable actions for object
     * @throws ObjectNotFoundException if object with specified id
@@ -1249,6 +1272,10 @@ public abstract class Connection
 
    /**
     * Get all documents in version series.
+    * 
+    * 2.2.7.6 getAllVersions
+    * 
+    * Implementation Compatibility: Optional. Repository versioning specific.
     * 
     * @param versionSeriesId version series id
     * @param includeAllowableActions <code>true</code> if allowable actions
@@ -1292,7 +1319,7 @@ public abstract class Connection
     * 2.2.9.3 getAppliedPolicies
     * 
     * Implementation Compatibility: the support for policy objects is optional, 
-    * and may be discovered via the “Get Type Children” service. (2.1.2 Object)
+    * and may be discovered via the "Get Type Children" service. (2.1.2 Object)
     * 
     * @param objectId the object id
     * @param includeObjectInfo if <code>true</code> then in result must be
@@ -1333,6 +1360,8 @@ public abstract class Connection
 
    /**
     * Documents that are checked out that the user has access to.
+    * 
+    * Implementation Compatibility: Optional. Repository versioning specific.
     * 
     * @param folderId folder from which get checked-out documents if null get
     *        all checked-out documents in storage
@@ -1456,6 +1485,8 @@ public abstract class Connection
 
    /**
     * Get the list of child objects contained in the specified folder.
+    * 
+    * Implementation Compatibility: MUST be implemented
     * 
     * @param folderId folder id
     * @param includeAllowableActions if <code>true</code> then allowable actions
@@ -1630,6 +1661,8 @@ public abstract class Connection
    /**
     * Get object's content stream.
     * 
+    * Implementation Compatibility: MUST be implemented
+    * 
     * @param objectId object id
     * @param streamId identifier for the rendition stream, when used to get a
     *        rendition stream. For Documents, if not provided then this method
@@ -1750,6 +1783,8 @@ public abstract class Connection
    /**
     * Get parent for specified folder. This method MUST NOT be used for getting
     * parents of other fileable objects.
+    * 
+    * Implementation Compatibility: MUST be implemented
     * 
     * @param folderId folder id
     * @param includeObjectInfo if <code>true</code> then result must include
@@ -1884,6 +1919,8 @@ public abstract class Connection
    /**
     * Get object.
     * 
+    * Implementation Compatibility: MUST be implemented
+    * 
     * @param objectId object id
     * @param includeAllowableActions if <code>true</code> then include object
     *        allowable actions for object
@@ -1956,6 +1993,8 @@ public abstract class Connection
 
    /**
     * Get object by specified path.
+    * 
+    * Implementation Compatibility: MUST be implemented
     * 
     * @param path object's path
     * @param includeAllowableActions <code>true</code> if allowable actions
@@ -2031,6 +2070,10 @@ public abstract class Connection
 
    /**
     * Get the latest Document object in the version series.
+    * 
+    * 2.2.7.4 getObjectOfLatestVersion
+    * 
+    * Implementation Compatibility: Optional. Repository versioning specific.
     * 
     * @param versionSeriesId version series id
     * @param major if <code>true</code> then return the properties for the
@@ -2140,6 +2183,8 @@ public abstract class Connection
    /**
     * Gets the parent folder(s) for the specified object.
     * 
+    * Implementation Compatibility: MUST be implemented
+    * 
     * @param objectId object id
     * @param includeAllowableActions if <code>true</code> then allowable actions
     *        should be included in response
@@ -2235,6 +2280,9 @@ public abstract class Connection
     * Get all or a subset of relationships associated with an independent
     * object.
     * 
+    * Implementation Compatibility: the support for relationship objects is optional, 
+    * and may be discovered via the "Get Type Children" service. (2.1.2 Object)
+    * 
     * @param objectId object id
     * @param direction relationship direction
     * @param typeId relationship type id. If <code>null</code> then return
@@ -2323,6 +2371,8 @@ public abstract class Connection
    /**
     * Get object's properties.
     * 
+    * Implementation Compatibility: MUST be implemented
+    * 
     * @param objectId object id
     * @param includeObjectInfo if <code>true</code> then in result must be
     *        included external information about object. See {@link ObjectInfo}.
@@ -2356,6 +2406,10 @@ public abstract class Connection
 
    /**
     * Get properties of latest version in version series.
+    * 
+    * 2.2.7.5 getPropertiesOfLatestVersion
+    * 
+    * Implementation Compatibility: Optional. Repository versioning specific.
     * 
     * @param versionSeriesId version series id
     * @param major if <code>true</code> then return the properties for the
@@ -2478,6 +2532,8 @@ public abstract class Connection
    /**
     * Gets the storage associated to this connection.
     * 
+    * Implementation Compatibility: MUST be implemented
+    * 
     * @return storage
     */
    public Storage getStorage()
@@ -2487,6 +2543,8 @@ public abstract class Connection
 
    /**
     * Set of object types.
+    * 
+    * Implementation Compatibility: MUST be implemented
     * 
     * @param typeId the type id, if not <code>null</code> then return only
     *        specified Object Type and its direct descendant. If
@@ -2541,6 +2599,8 @@ public abstract class Connection
     * Get type definition for type <code>typeId</code> include property
     * definition, see {@link #getTypeDefinition(String, boolean)}.
     * 
+    * Implementation Compatibility: MUST be implemented
+    * 
     * @param typeId type Id
     * @return type definition
     * @throws TypeNotFoundException if type <code>typeId</code> does not exist
@@ -2552,6 +2612,8 @@ public abstract class Connection
 
    /**
     * Get type definition for type <code>typeId</code>.
+    * 
+    * Implementation Compatibility: MUST be implemented
     * 
     * @param typeId type Id
     * @param includePropertyDefinition if <code>true</code> property definition
@@ -2570,6 +2632,8 @@ public abstract class Connection
     * Get all descendants of specified <code>typeId</code> in hierarchy. If
     * <code>typeId</code> is <code>null</code> then return all types and ignore
     * the value of the <code>depth</code> parameter.
+    * 
+    * Implementation Compatibility: MUST be implemented
     * 
     * @param typeId the type id
     * @param depth the depth of level in hierarchy
@@ -2594,6 +2658,8 @@ public abstract class Connection
 
    /**
     * Moves the specified file-able object from one folder to another.
+    * 
+    * Implementation Compatibility: MUST be implemented
     * 
     * @param objectId object id
     * @param targetFolderId target folder for moving object
@@ -2860,6 +2926,9 @@ public abstract class Connection
    /**
     * Removes a specified policy from an object.
     * 
+    * Implementation Compatibility: the support for policy objects is optional, 
+    * and may be discovered via the “Get Type Children” service. (2.1.2 Object)
+    * 
     * @param policyId id of policy to be removed from object
     * @param objectId id of object
     * @throws ObjectNotFoundException if object with <code>objectId</code> does
@@ -2890,6 +2959,8 @@ public abstract class Connection
 
    /**
     * Remove type definition for type <code>typeId</code> .
+    * 
+    * Implementation Compatibility: MUST be implemented
     * 
     * @param typeId type Id
     * @throws TypeNotFoundException if type <code>typeId</code> does not exist
@@ -2999,6 +3070,8 @@ public abstract class Connection
    /**
     * Update object properties.
     * 
+    * Implementation Compatibility: MUST be implemented
+    * 
     * @param objectId object id
     * @param changeTokenHolder is used for optimistic locking and/or concurrency
     *        checking to ensure that user updates do not conflict. This
@@ -3007,7 +3080,7 @@ public abstract class Connection
     *        if caller does not provide change token. After successful updating
     *        properties <code>changeTokenHolder</code> may contains updated
     *        change token if backend support this feature
-    * @param properties properties to be applied for object
+    * @param properties the properties to be applied for object
     * @return ID of updated object
     * @throws ObjectNotFoundException if document with specified id
     *         <code>objectId</code> does not exist

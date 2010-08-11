@@ -20,6 +20,11 @@
 package org.xcmis.spi;
 
 /**
+ * 2.1.7. Policy object.
+ * 
+ * Implementation Compatibility: the support for policy objects is optional, 
+ * and may be discovered via the "Get Type Children" service. (2.1.2 Object)
+ * 
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: $
  */

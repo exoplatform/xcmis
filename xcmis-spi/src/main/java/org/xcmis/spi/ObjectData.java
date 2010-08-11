@@ -24,6 +24,7 @@ import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.RelationshipDirection;
 import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.model.Updatability;
 import org.xcmis.spi.model.Permission.BasicPermissions;
 
 import java.io.IOException;
@@ -169,7 +170,7 @@ public interface ObjectData
     * 2.2.9.3 getAppliedPolicies
     * 
     * Implementation Compatibility: the support for policy objects is optional, 
-    * and may be discovered via the “Get Type Children” service. (2.1.2 Object)
+    * and may be discovered via the "Get Type Children" service. (2.1.2 Object)
     *
     * @return applied Policies. If there is no policies applied to object or if
     *         object is not controllable by policy then empty list must be
