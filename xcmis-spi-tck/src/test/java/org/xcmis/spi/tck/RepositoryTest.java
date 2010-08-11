@@ -59,16 +59,6 @@ public class RepositoryTest extends BaseTest
       System.out.print("Running Repository Service tests....");
    }
 
-//   @Test
-//   public void testGeneral() throws Exception
-//   {
-//      // NO ONE INITIALIZE IT!
-//      assertNotNull("Storage provider is null;",storageProvider);
-//      assertNotNull("Connection is null;", storageProvider.getConnection());
-//      assertNotNull("Storage  is null;", storageProvider.getConnection().getStorage());
-//      assertNotNull("Storage  ID is null;", storageProvider.getConnection().getStorage().getId());
-//   }
-
    /**
     * 2.2.2.1 getRepositories
     * 
@@ -78,15 +68,15 @@ public class RepositoryTest extends BaseTest
    public void testGetRepositories() throws Exception
    {
       Set<RepositoryShortInfo> storageInfos = CmisRegistry.getInstance().getStorageInfos();
-      assertNotNull("StorageInfo  is null;", storageInfos);
-      assertTrue("StorageInfo  is empty;", !storageInfos.isEmpty());
+      assertNotNull("StorageInfo  is null.", storageInfos);
+      assertTrue("StorageInfo  is empty.", !storageInfos.isEmpty());
       for (RepositoryShortInfo repositoryShortInfo : storageInfos)
       {
-         assertNotNull("Repository Short Info  is null;", repositoryShortInfo.getRepositoryId());
-         assertTrue("Repository Short Info  is empty;", !repositoryShortInfo.getRepositoryId().equals(""));
-         assertNotNull("Repository name  is null;",repositoryShortInfo.getRepositoryName());
-         assertTrue("Repository name  is empty;",!repositoryShortInfo.getRepositoryName().equals(""));
-         assertNotNull("Root folder ID  is null", repositoryShortInfo.getRootFolderId());
+         assertNotNull("Repository Short Info  is null.", repositoryShortInfo.getRepositoryId());
+         assertTrue("Repository Short Info  is empty.", !repositoryShortInfo.getRepositoryId().equals(""));
+         assertNotNull("Repository name  is null.",repositoryShortInfo.getRepositoryName());
+         assertTrue("Repository name  is empty.",!repositoryShortInfo.getRepositoryName().equals(""));
+         assertNotNull("Root folder ID  is null.", repositoryShortInfo.getRootFolderId());
       }
    }
 
@@ -100,34 +90,34 @@ public class RepositoryTest extends BaseTest
    @Test
    public void testGetRepositoryInfo() throws Exception
    {
-      assertNotNull("Repository Info  is null;", getStorage().getRepositoryInfo());
-      assertNotNull("Repository Info ID  is null;", getStorage().getRepositoryInfo().getRepositoryId());
-      assertTrue("Repository Info ID  is empty;", !getStorage().getRepositoryInfo().getRepositoryId().equals(""));
-      assertNotNull("Repository Info Name  is null;", getStorage().getRepositoryInfo().getRepositoryName());
-      assertNotNull("Repository Description  is null;", getStorage().getRepositoryInfo().getRepositoryDescription());
+      assertNotNull("Repository Info  is null.", getStorage().getRepositoryInfo());
+      assertNotNull("Repository Info ID  is null.", getStorage().getRepositoryInfo().getRepositoryId());
+      assertTrue("Repository Info ID  is empty.", !getStorage().getRepositoryInfo().getRepositoryId().equals(""));
+      assertNotNull("Repository Info Name  is null.", getStorage().getRepositoryInfo().getRepositoryName());
+      assertNotNull("Repository Description  is null.", getStorage().getRepositoryInfo().getRepositoryDescription());
          
-      assertNotNull("Repository VendorName  is null;", getStorage().getRepositoryInfo().getVendorName());
-      assertNotNull("Repository ProductName  is null;", getStorage().getRepositoryInfo().getProductName());
-      assertNotNull("Repository PropductVersion  is null;", getStorage().getRepositoryInfo().getProductVersion());
-      assertNotNull("Repository Root folder ID  is null;", getStorage().getRepositoryInfo().getRootFolderId());
-      assertNotNull("Repository Capabilities  is null;", getStorage().getRepositoryInfo().getCapabilities());
+      assertNotNull("Repository VendorName  is null.", getStorage().getRepositoryInfo().getVendorName());
+      assertNotNull("Repository ProductName  is null.", getStorage().getRepositoryInfo().getProductName());
+      assertNotNull("Repository PropductVersion  is null.", getStorage().getRepositoryInfo().getProductVersion());
+      assertNotNull("Repository Root folder ID  is null.", getStorage().getRepositoryInfo().getRootFolderId());
+      assertNotNull("Repository Capabilities  is null.", getStorage().getRepositoryInfo().getCapabilities());
 
       //      assertNotNull(getStorage().getRepositoryInfo().getLatestChangeLogToken());
-      assertNotNull("Repository version supported  is null;", getStorage().getRepositoryInfo().getCmisVersionSupported());
+      assertNotNull("Repository version supported  is null.", getStorage().getRepositoryInfo().getCmisVersionSupported());
       //      assertNotNull(getStorage().getRepositoryInfo().getThinClientURI());
       //      if(getStorage().getRepositoryInfo().isChangesIncomplete().)
       //         doFail(testname, "Repository Description  is null;");
-      assertNotNull("Repository Changes on type  is null;", getStorage().getRepositoryInfo().getChangesOnType());
-      assertNotNull("Repository ACL capability  is null;", getStorage().getRepositoryInfo().getAclCapability());
+      assertNotNull("Repository Changes on type  is null.", getStorage().getRepositoryInfo().getChangesOnType());
+      assertNotNull("Repository ACL capability  is null.", getStorage().getRepositoryInfo().getAclCapability());
       
       if(!getStorage().getRepositoryInfo().getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE)) {
-        assertNotNull("Repository supported permissions  is null;", getStorage().getRepositoryInfo().getAclCapability().getSupportedPermissions());
-        assertNotNull("Repository ACL propagation  is null;", getStorage().getRepositoryInfo().getAclCapability().getPropagation());
-        assertNotNull("Repository ACL permissions  is null;", getStorage().getRepositoryInfo().getAclCapability().getPermissions());
-        assertNotNull("Repository ACL mapping  is null;", getStorage().getRepositoryInfo().getAclCapability().getMapping());
+        assertNotNull("Repository supported permissions  is null.", getStorage().getRepositoryInfo().getAclCapability().getSupportedPermissions());
+        assertNotNull("Repository ACL propagation  is null.", getStorage().getRepositoryInfo().getAclCapability().getPropagation());
+        assertNotNull("Repository ACL permissions  is null.", getStorage().getRepositoryInfo().getAclCapability().getPermissions());
+        assertNotNull("Repository ACL mapping  is null.", getStorage().getRepositoryInfo().getAclCapability().getMapping());
       }
-      assertNotNull("Repository principal anonymous  is null;", getStorage().getRepositoryInfo().getPrincipalAnonymous());
-      assertNotNull("Repository principal anyone  is null;", getStorage().getRepositoryInfo().getPrincipalAnyone());
+      assertNotNull("Repository principal anonymous  is null.", getStorage().getRepositoryInfo().getPrincipalAnonymous());
+      assertNotNull("Repository principal anyone  is null.", getStorage().getRepositoryInfo().getPrincipalAnyone());
 
    }
 
@@ -143,29 +133,29 @@ public class RepositoryTest extends BaseTest
       // root types
       ItemsList<TypeDefinition> typeChildren0 = null;
       typeChildren0 = getConnection().getTypeChildren(null, true, -1, 0);
-      assertNotNull("Root typer childrens is null;", typeChildren0);
+      assertNotNull("Root typer childrens is null.", typeChildren0);
          
       List<TypeDefinition> typeChildrenList = typeChildren0.getItems();
-      assertNotNull("Root typer childrens is empty;", typeChildrenList);
+      assertNotNull("Root typer childrens is empty.", typeChildrenList);
       List<String> ll = new ArrayList<String>();
       ll.add(CmisConstants.DOCUMENT);
       ll.add(CmisConstants.FOLDER);
       for (TypeDefinition typeDefinition : typeChildrenList)
       {
-         assertNotNull("TypeDefinition is null;", typeDefinition);
-         assertNotNull("TypeDefinition  ID is null;", typeDefinition.getId());
-         assertTrue("TypeDefinition  ID is empty;", !typeDefinition.getId().equals(""));
-         assertNotNull("TypeDefinition  BaseId is empty;", typeDefinition.getBaseId());
-         assertTrue("TypeDefinition  BaseId  does not match;", typeDefinition.getId().equals(typeDefinition.getBaseId().value()));
+         assertNotNull("TypeDefinition is null.", typeDefinition);
+         assertNotNull("TypeDefinition  ID is null.", typeDefinition.getId());
+         assertTrue("TypeDefinition  ID is empty.", !typeDefinition.getId().equals(""));
+         assertNotNull("TypeDefinition  BaseId is empty.", typeDefinition.getBaseId());
+         assertTrue("TypeDefinition  BaseId  does not match.", typeDefinition.getId().equals(typeDefinition.getBaseId().value()));
             
-         assertNotNull("TypeDefinition  display name is null;", typeDefinition.getDisplayName());
-         assertNotNull("TypeDefinition  local name is null;", typeDefinition.getLocalName());
-         assertNotNull("TypeDefinition query name is null;", typeDefinition.getQueryName());
+         assertNotNull("TypeDefinition  display name is null.", typeDefinition.getDisplayName());
+         assertNotNull("TypeDefinition  local name is null.", typeDefinition.getLocalName());
+         assertNotNull("TypeDefinition query name is null.", typeDefinition.getQueryName());
          checkPropertyDefinitions(typeDefinition.getPropertyDefinitions());
 
          if (ll.size() > 0)
             if (!ll.contains(typeDefinition.getId()))
-               fail("Mandatory type definition not found;");
+               fail("Mandatory type definition not found.");
          ll.remove(typeDefinition.getId());
       }
       if (!ll.isEmpty())
@@ -184,8 +174,8 @@ public class RepositoryTest extends BaseTest
       // root types with maxItems
       ItemsList<TypeDefinition> typeChildren3 = null;
          typeChildren3 = getConnection().getTypeChildren(null, true, 1, 0);
-      assertNotNull("Root type childrens is null;", typeChildren3);
-      assertTrue("Incorrect Root type childrens size;", typeChildren3.getItems().size() == 1);
+      assertNotNull("Root type childrens is null.", typeChildren3);
+      assertTrue("Incorrect Root type childrens size.", typeChildren3.getItems().size() == 1);
    }
 
    /**
@@ -206,8 +196,8 @@ public class RepositoryTest extends BaseTest
       // root types with skipCount
       ItemsList<TypeDefinition> typeChildren4 = null;
          typeChildren4 = getConnection().getTypeChildren(null, true, -1, sizeOfRootTypes - 1);
-         assertNotNull("Root type childrens is null;", typeChildren4);
-         assertTrue("Incorrect Root type childrens size;", typeChildren4.getItems().size() == 1);
+         assertNotNull("Root type childrens is null.", typeChildren4);
+         assertTrue("Incorrect Root type childrens size.", typeChildren4.getItems().size() == 1);
    }
 
    /**
@@ -222,7 +212,7 @@ public class RepositoryTest extends BaseTest
       // folder
       ItemsList<TypeDefinition> typeChildren1 = null;
          typeChildren1 = getConnection().getTypeChildren("cmis:folder", true, -1, 0);
-      assertNotNull("Root type childrens is null;", typeChildren1);
+      assertNotNull("Root type childrens is null.", typeChildren1);
    }
 
    /**
@@ -237,7 +227,7 @@ public class RepositoryTest extends BaseTest
       // document
       ItemsList<TypeDefinition> typeChildren2 = null;
          typeChildren2 = getConnection().getTypeChildren("cmis:document", true, -1, 0);
-         assertNotNull("Root type childrens is null;", typeChildren2);
+         assertNotNull("Root type childrens is null.", typeChildren2);
    }
 
    /**
@@ -271,21 +261,21 @@ public class RepositoryTest extends BaseTest
    {
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
          typeDescendants = getConnection().getTypeDescendants(null, 2, true);
-      assertNotNull("Type Descendants is null;", typeDescendants);
-      assertTrue("Type Descendants is empty;", typeDescendants.size() > 0);
+      assertNotNull("Type Descendants is null.", typeDescendants);
+      assertTrue("Type Descendants is empty.", typeDescendants.size() > 0);
 
       for (ItemsTree<TypeDefinition> itemsTree : typeDescendants)
       {
-         assertNotNull("Items tree is null;", itemsTree);
-         assertNotNull("Items tree children is null;", itemsTree.getChildren());
-         assertNotNull("Items tree container is null;", itemsTree.getContainer());
-         assertNotNull("Items tree container ID is null;",itemsTree.getContainer().getId());
+         assertNotNull("Items tree is null.", itemsTree);
+         assertNotNull("Items tree children is null.", itemsTree.getChildren());
+         assertNotNull("Items tree container is null.", itemsTree.getContainer());
+         assertNotNull("Items tree container ID is null.",itemsTree.getContainer().getId());
             
-         assertTrue("Items tree container ID is empty;", !itemsTree.getContainer().getId().equals(""));
-         assertNotNull ("Items tree container DisplayName is empty;", itemsTree.getContainer().getDisplayName());
-         assertNotNull("Items tree container LocalName is empty;", itemsTree.getContainer().getLocalName());
-         assertNotNull("Items tree container QueryName is empty;", itemsTree.getContainer().getQueryName() == null);
-         assertNotNull("Items tree container BaseId is empty;", itemsTree.getContainer().getBaseId());
+         assertTrue("Items tree container ID is empty.", !itemsTree.getContainer().getId().equals(""));
+         assertNotNull ("Items tree container DisplayName is empty.", itemsTree.getContainer().getDisplayName());
+         assertNotNull("Items tree container LocalName is empty.", itemsTree.getContainer().getLocalName());
+         assertNotNull("Items tree container QueryName is empty.", itemsTree.getContainer().getQueryName() == null);
+         assertNotNull("Items tree container BaseId is empty.", itemsTree.getContainer().getBaseId());
          checkPropertyDefinitions(itemsTree.getContainer().getPropertyDefinitions());
       }
    }
@@ -300,7 +290,7 @@ public class RepositoryTest extends BaseTest
    {
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
          typeDescendants = getConnection().getTypeDescendants("cmis:folder", 2, true);
-         assertNotNull("Type Descendants is null;", typeDescendants);
+         assertNotNull("Type Descendants is null.", typeDescendants);
    }
 
    /**
@@ -313,7 +303,7 @@ public class RepositoryTest extends BaseTest
    {
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
          typeDescendants = getConnection().getTypeDescendants("cmis:document", 2, true);
-         assertNotNull("Type Descendants is null;", typeDescendants);
+         assertNotNull("Type Descendants is null.", typeDescendants);
    }
 
    /**
@@ -326,13 +316,13 @@ public class RepositoryTest extends BaseTest
    {
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
          typeDescendants = getConnection().getTypeDescendants(null, 2, false);
-         assertNotNull("Type Descendants is null;", typeDescendants);
-         assertTrue("Type Descendants is  empty;", typeDescendants.size() > 0);
+         assertNotNull("Type Descendants is null.", typeDescendants);
+         assertTrue("Type Descendants is  empty.", typeDescendants.size() > 0);
       for (ItemsTree<TypeDefinition> itemsTree : typeDescendants)
       {
-         assertNotNull("Items tree is null;", itemsTree);
-         assertNotNull("Items tree container is null;", itemsTree.getContainer());
-         assertNull("Property definitions must be empty;", itemsTree.getContainer().getPropertyDefinitions());
+         assertNotNull("Items tree is null.", itemsTree);
+         assertNotNull("Items tree container is null.", itemsTree.getContainer());
+         assertNull("Property definitions must be empty.", itemsTree.getContainer().getPropertyDefinitions());
       }
    }
 
@@ -346,12 +336,12 @@ public class RepositoryTest extends BaseTest
    {
       List<ItemsTree<TypeDefinition>> typeDescendants = null;
          typeDescendants = getConnection().getTypeDescendants(null, 1, true);
-      assertNotNull("Type Descendants is null;", typeDescendants);
-      assertTrue("Type Descendants is empty;", typeDescendants.size() > 0);
+      assertNotNull("Type Descendants is null.", typeDescendants);
+      assertTrue("Type Descendants is empty.", typeDescendants.size() > 0);
       for (ItemsTree<TypeDefinition> itemsTree : typeDescendants)
       {
-         assertNotNull("Items tree is null;", itemsTree);
-         assertNull("Childrens must be empty;", itemsTree.getChildren());
+         assertNotNull("Items tree is null.", itemsTree);
+         assertNull("Childrens must be empty.", itemsTree.getChildren());
       }
    }
 
@@ -382,12 +372,12 @@ public class RepositoryTest extends BaseTest
    @Test
    public void testGetTypeDefinition_Folder() throws Exception
    {
-      assertNotNull("Folder type definition is null;", folderTypeDefinition);
-      assertNotNull("Folder type definition ID is null;", folderTypeDefinition.getId());
+      assertNotNull("Folder type definition is null.", folderTypeDefinition);
+      assertNotNull("Folder type definition ID is null.", folderTypeDefinition.getId());
 
-      assertTrue("Folder type definition ID is empty;", !folderTypeDefinition.getId().equals(""));
-      assertNotNull("Folder type definition local name is empty;", folderTypeDefinition.getLocalName());
-      assertNotNull("Folder type definition query name is empty;", folderTypeDefinition.getQueryName());
+      assertTrue("Folder type definition ID is empty.", !folderTypeDefinition.getId().equals(""));
+      assertNotNull("Folder type definition local name is empty.", folderTypeDefinition.getLocalName());
+      assertNotNull("Folder type definition query name is empty.", folderTypeDefinition.getQueryName());
       checkPropertyDefinitions(folderTypeDefinition.getPropertyDefinitions());
    }
 
@@ -399,12 +389,12 @@ public class RepositoryTest extends BaseTest
    @Test
    public void testGetTypeDefinition_Document() throws Exception
    {
-      assertNotNull("Document type definition is null;",documentTypeDefinition);
-      assertNotNull("Document type definition ID is null;", documentTypeDefinition.getId());
+      assertNotNull("Document type definition is null.",documentTypeDefinition);
+      assertNotNull("Document type definition ID is null.", documentTypeDefinition.getId());
          
-      assertTrue("Document type definition ID is empty;", !documentTypeDefinition.getId().equals(""));
-      assertNotNull("Document type definition local name is empty;", documentTypeDefinition.getLocalName());
-      assertNotNull("Document type definition query name is empty;", documentTypeDefinition.getQueryName());
+      assertTrue("Document type definition ID is empty.", !documentTypeDefinition.getId().equals(""));
+      assertNotNull("Document type definition local name is empty.", documentTypeDefinition.getLocalName());
+      assertNotNull("Document type definition query name is empty.", documentTypeDefinition.getQueryName());
       checkPropertyDefinitions(documentTypeDefinition.getPropertyDefinitions());
    }
 
@@ -437,11 +427,11 @@ public class RepositoryTest extends BaseTest
    {
       TypeDefinition typeDefinition = null;
       typeDefinition = getConnection().getTypeDefinition("cmis:folder", false);
-      assertNotNull("Type definition is null;", typeDefinition);
-      assertNotNull("Type definition ID is null;", typeDefinition.getId());
-      assertFalse("Type definition ID is empty;", typeDefinition.getId().equals(""));
-      assertNotNull("Type definition local name is empty;", typeDefinition.getLocalName());
-      assertNotNull("Type definition query name is empty;", typeDefinition.getQueryName());
+      assertNotNull("Type definition is null.", typeDefinition);
+      assertNotNull("Type definition ID is null.", typeDefinition.getId());
+      assertFalse("Type definition ID is empty.", typeDefinition.getId().equals(""));
+      assertNotNull("Type definition local name is empty.", typeDefinition.getLocalName());
+      assertNotNull("Type definition query name is empty.", typeDefinition.getQueryName());
 
       Collection<PropertyDefinition<?>> propertyDefinitions = typeDefinition.getPropertyDefinitions();
       assertNull("Property definitions must not be included;", propertyDefinitions);
@@ -449,15 +439,15 @@ public class RepositoryTest extends BaseTest
 
    private void checkPropertyDefinitions(Collection<PropertyDefinition<?>> propertyDefinitions) throws Exception
    {
-      assertNotNull("PropertyDefinitions is null;", propertyDefinitions);
+      assertNotNull("PropertyDefinitions is null.", propertyDefinitions);
       for (PropertyDefinition<?> propertyDefinition : propertyDefinitions)
       {
-         assertNotNull("Type definition is null;", propertyDefinition);
-         assertNotNull("Type definition ID is null;", propertyDefinition.getId());
-         assertFalse("Type definition ID is empty;", propertyDefinition.getId().equals(""));
-         assertNotNull("Type definition local name is empty;", propertyDefinition.getLocalName());
-         assertNotNull("Type definition query name is empty;", propertyDefinition.getQueryName());
-         assertNotNull("Type definition property type is empty;", propertyDefinition.getPropertyType());
+         assertNotNull("Type definition is null.", propertyDefinition);
+         assertNotNull("Type definition ID is null.", propertyDefinition.getId());
+         assertFalse("Type definition ID is empty.", propertyDefinition.getId().equals(""));
+         assertNotNull("Type definition local name is empty.", propertyDefinition.getLocalName());
+         assertNotNull("Type definition query name is empty.", propertyDefinition.getQueryName());
+         assertNotNull("Type definition property type is empty.", propertyDefinition.getPropertyType());
       }
    }
 

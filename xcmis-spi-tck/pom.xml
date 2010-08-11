@@ -53,9 +53,9 @@
                      <systemProperties>
                         <property>
                            <name>org.xcmis.CmisRegistryFactory</name>
-                           <value>org.xcmis.sp.inmemory.tck.InmemoryCmisRegistryFactory</value>
+                           <!--   value>org.xcmis.sp.inmemory.tck.InmemoryCmisRegistryFactory</value -->
                            <!-- value>org.xcmis.sp.sample.fs.tck.RegistryFactoryImpl</value -->
-                           <!--  value>org.exoplatform.ecms.xcmis.sp.tck.JcrCmisRegistryFactory</value -->
+                           <value>org.exoplatform.ecms.xcmis.sp.tck.JcrCmisRegistryFactory</value>
                         </property>
                      </systemProperties>
                      <includes>

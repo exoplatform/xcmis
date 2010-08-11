@@ -44,9 +44,7 @@ import org.xcmis.spi.model.CapabilityACL;
 import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.PropertyDefinition;
-import org.xcmis.spi.model.PropertyType;
 import org.xcmis.spi.model.TypeDefinition;
-import org.xcmis.spi.model.Updatability;
 import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.model.impl.IdProperty;
 import org.xcmis.spi.model.impl.StringProperty;
@@ -84,18 +82,18 @@ public class ACLTest extends BaseTest
       {
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          List<AccessControlEntry> addACL = createACL(username, "cmis:read");
-         
+
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition,
                getPropsMap(CmisConstants.DOCUMENT, "testGetACL_Simple"), cs, addACL, null, VersioningState.NONE);
          List<AccessControlEntry> res = getConnection().getACL(doc1.getObjectId(), false);
-         assertNotNull("Getting ACL failed;", res);
+         assertNotNull("Getting ACL failed.", res);
          for (AccessControlEntry one : res)
          {
             if (one.getPrincipal().equalsIgnoreCase(username))
             {
-               assertTrue("Incorrect items number in result;", one.getPermissions().size() == 1);
-               assertTrue("Setting ACL failed", one.getPermissions().contains("cmis:read"));
+               assertTrue("Incorrect items number in result.", one.getPermissions().size() == 1);
+               assertTrue("Setting ACL failed.", one.getPermissions().contains("cmis:read"));
             }
          }
       }
@@ -106,7 +104,7 @@ public class ACLTest extends BaseTest
             //SKIP
          }
          else
-            fail("Capability ACL is supported but not supported exception thrown");
+            fail("Capability ACL is supported but not supported exception thrown.");
       }
    }
 
@@ -121,16 +119,16 @@ public class ACLTest extends BaseTest
       try
       {
          List<AccessControlEntry> addACL = createACL(username, "cmis:read");
-         DocumentData  doc1 = createDocument(testroot, "testApplyACL_Simple", "1234567890aBcDE");
-         
+         DocumentData doc1 = createDocument(testroot, "testApplyACL_Simple", "1234567890aBcDE");
+
          getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.REPOSITORYDETERMINED);
          ObjectData obj = getStorage().getObjectById(doc1.getObjectId());
          for (AccessControlEntry one : obj.getACL(false))
          {
             if (one.getPrincipal().equalsIgnoreCase(username))
             {
-               assertTrue("Incorrect items number in result;", one.getPermissions().size() == 1);
-               assertTrue("Setting ACL failed", one.getPermissions().contains("cmis:read"));
+               assertTrue("Incorrect items number in result.", one.getPermissions().size() == 1);
+               assertTrue("Setting ACL failed.", one.getPermissions().contains("cmis:read"));
             }
          }
       }
@@ -141,7 +139,7 @@ public class ACLTest extends BaseTest
             //SKIP
          }
          else
-            fail("Capability ACL is supported but not supported exception thrown");
+            fail("Capability ACL is supported but not supported exception thrown.");
       }
    }
 
@@ -161,19 +159,15 @@ public class ACLTest extends BaseTest
 
          Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
          org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-               CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-               "doc1", true, null, null);
-         org.xcmis.spi.model.PropertyDefinition<?> popDefObjectTypeId =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-               CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-               false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
+         org.xcmis.spi.model.PropertyDefinition<?> propDefObjectTypeId =
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
 
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
          properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
             propDefName.getLocalName(), propDefName.getDisplayName(), "testApplyACL_RemoveACE"));
-         properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(popDefObjectTypeId.getId(), popDefObjectTypeId
-            .getQueryName(), popDefObjectTypeId.getLocalName(), popDefObjectTypeId.getDisplayName(), "cmis:acl2"));
+         properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(propDefObjectTypeId.getId(), propDefObjectTypeId
+            .getQueryName(), propDefObjectTypeId.getLocalName(), propDefObjectTypeId.getDisplayName(), "cmis:acl2"));
 
          TypeDefinition newType =
             new TypeDefinition("cmis:acl2", BaseType.DOCUMENT, "cmis:acl2", "cmis:acl2", "", "cmis:document",
@@ -188,7 +182,7 @@ public class ACLTest extends BaseTest
          ObjectData obj = getStorage().getObjectById(doc1.getObjectId());
          for (AccessControlEntry one : obj.getACL(false))
          {
-            assertTrue("Remove ACE failed;", one.getPrincipal().equalsIgnoreCase(username));
+            assertTrue("Remove ACE failed.", one.getPrincipal().equalsIgnoreCase(username));
          }
          getStorage().deleteObject(doc1, true);
          getStorage().removeType(typeID);
@@ -200,7 +194,7 @@ public class ACLTest extends BaseTest
             //SKIP
          }
          else
-            fail("Capability ACL is supported but not supported exception thrown");
+            fail("Capability ACL is supported but not supported exception thrown.");
       }
    }
 
@@ -221,13 +215,9 @@ public class ACLTest extends BaseTest
 
          Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
          org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-               CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-               "doc1", true, null, null);
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
          org.xcmis.spi.model.PropertyDefinition<?> popDefObjectTypeId =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-               CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-               false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
 
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
          properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
@@ -244,7 +234,7 @@ public class ACLTest extends BaseTest
 
          doc1 = getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.NONE);
          getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.OBJECTONLY);
-         fail("Constraint exception must be thrown;");
+         fail("Constraint exception must be thrown.");
       }
       catch (NotSupportedException ex)
       {
@@ -253,7 +243,7 @@ public class ACLTest extends BaseTest
             //SKIP
          }
          else
-            fail("Capability ACL is supported but not supported exception thrown");
+            fail("Capability ACL is supported but not supported exception thrown.");
       }
       catch (ConstraintException ec)
       {
@@ -262,7 +252,7 @@ public class ACLTest extends BaseTest
       finally
       {
          if (doc1 != null)
-          getStorage().deleteObject(doc1, true);
+            getStorage().deleteObject(doc1, true);
          getStorage().removeType(typeID);
       }
    }
@@ -279,14 +269,15 @@ public class ACLTest extends BaseTest
       {
          List<AccessControlEntry> addACL = createACL(username, "cmis:read");
          ACLCapability capability = getStorage().getRepositoryInfo().getAclCapability();
-         DocumentData  doc1 = createDocument(testroot, "testApplyACL_ConstraintExceptionACLPropagation", "1234567890aBcDE");
-         
+         DocumentData doc1 =
+            createDocument(testroot, "testApplyACL_ConstraintExceptionACLPropagation", "1234567890aBcDE");
+
          if (capability.getPropagation().equals(AccessControlPropagation.OBJECTONLY)
             || capability.getPropagation().equals(AccessControlPropagation.REPOSITORYDETERMINED))
             getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.PROPAGATE);
          else if (capability.getPropagation().equals(AccessControlPropagation.PROPAGATE))
             getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.OBJECTONLY);
-         fail("ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ec)
       {
@@ -299,7 +290,7 @@ public class ACLTest extends BaseTest
             //SKIP
          }
          else
-            fail("Capability ACL is supported but not supported exception thrown");
+            fail("Capability ACL is supported but not supported exception thrown.");
       }
    }
 
@@ -315,7 +306,7 @@ public class ACLTest extends BaseTest
       try
       {
          List<AccessControlEntry> addACL = createACL(username, "cmis:unknown");
-         DocumentData  doc1 = createDocument(testroot, "testApplyACL_ConstraintExceptionACLNotMatch", "1234567890aBcDE");
+         DocumentData doc1 = createDocument(testroot, "testApplyACL_ConstraintExceptionACLNotMatch", "1234567890aBcDE");
          getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.OBJECTONLY);
       }
       catch (ConstraintException ec)
@@ -329,7 +320,7 @@ public class ACLTest extends BaseTest
             //SKIP
          }
          else
-            fail("Capability ACL is supported but not supported exception thrown");
+            fail("Capability ACL is supported but not supported exception thrown.");
       }
    }
 

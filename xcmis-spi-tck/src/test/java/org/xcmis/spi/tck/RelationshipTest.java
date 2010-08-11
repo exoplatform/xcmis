@@ -42,10 +42,8 @@ import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.PropertyDefinition;
-import org.xcmis.spi.model.PropertyType;
 import org.xcmis.spi.model.RelationshipDirection;
 import org.xcmis.spi.model.TypeDefinition;
-import org.xcmis.spi.model.Updatability;
 import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.model.impl.IdProperty;
 import org.xcmis.spi.model.impl.StringProperty;
@@ -98,7 +96,7 @@ public class RelationshipTest extends BaseTest
          ItemsList<CmisObject> obj =
             getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true, true,
                true, "", -1, 0);
-         assertTrue("Unexpected items number;", obj.getItems().size() == 2);
+         assertTrue("Unexpected items number.", obj.getItems().size() == 2);
       }
       finally
       {
@@ -140,7 +138,7 @@ public class RelationshipTest extends BaseTest
          ItemsList<CmisObject> obj =
             getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.TARGET, null, true, true,
                true, PropertyFilter.ALL, -1, 0);
-         assertTrue("Unexpected items number;", obj.getItems().size() == 1);
+         assertTrue("Unexpected items number.", obj.getItems().size() == 1);
       }
       finally
       {
@@ -187,7 +185,7 @@ public class RelationshipTest extends BaseTest
          for (CmisObject one : obj.getItems())
          {
             AllowableActions actions = one.getAllowableActions();
-            assertNotNull("Allowable actions not found;", actions);
+            assertNotNull("Allowable actions not found.", actions);
          }
       }
       finally
@@ -220,16 +218,8 @@ public class RelationshipTest extends BaseTest
          DocumentData doc3 = createDocument(testroot, "testGetObjectRelationships_TypeId3", "1234567890aBcDE");
 
          Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-
-         org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-               CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-               "f1", true, null, null);
-
-         org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-               CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-               false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+         org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.NAME);
+         org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId = PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.OBJECT_TYPE_ID);
 
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
          properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
@@ -254,7 +244,7 @@ public class RelationshipTest extends BaseTest
          ItemsList<CmisObject> obj =
             getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER,
                "cmis:relationtype1", true, true, true, "", -1, 0);
-         assertTrue("Unexpected items number;", obj.getItems().size() == 1);
+         assertTrue("Unexpected items number.", obj.getItems().size() == 1);
       }
       finally
       {
@@ -292,16 +282,8 @@ public class RelationshipTest extends BaseTest
             createDocument(testroot, "testGetObjectRelationships_IncludeSubrelationshipTypes3", "1234567890aBcDE");
 
          Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-
-         org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-               CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-               "f1", true, null, null);
-
-         org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-               CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-               false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+         org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.NAME);
+         org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId = PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.OBJECT_TYPE_ID);
 
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
          properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
@@ -328,12 +310,12 @@ public class RelationshipTest extends BaseTest
          ItemsList<CmisObject> obj =
             getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER,
                CmisConstants.RELATIONSHIP, true, true, true, "", -1, 0);
-         assertTrue("Unexpected items number;", obj.getItems().size() == 2);
+         assertTrue("Unexpected items number.", obj.getItems().size() == 2);
 
          ItemsList<CmisObject> obj2 =
             getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER,
                CmisConstants.RELATIONSHIP, false, true, true, "", -1, 0);
-         assertTrue("Unexpected items number;", obj2.getItems().size() == 1);
+         assertTrue("Unexpected items number.", obj2.getItems().size() == 1);
       }
       finally
       {
@@ -377,7 +359,7 @@ public class RelationshipTest extends BaseTest
          ItemsList<CmisObject> obj =
             getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true, true,
                true, "", 1, 0);
-         assertTrue("Unexpected items number;", obj.getItems().size() == 1);
+         assertTrue("Unexpected items number.", obj.getItems().size() == 1);
       }
       finally
       {
@@ -419,7 +401,7 @@ public class RelationshipTest extends BaseTest
          ItemsList<CmisObject> obj =
             getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true, true,
                true, "", -1, 1);
-         assertTrue("Unexpected items number;", obj.getItems().size() == 1);
+         assertTrue("Unexpected items number.", obj.getItems().size() == 1);
       }
       finally
       {
@@ -461,16 +443,16 @@ public class RelationshipTest extends BaseTest
          ItemsList<CmisObject> obj =
             getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true, true,
                true, "", 1, 0);
-         assertTrue("Unexpected items number;", obj.getItems().size() == 1);
+         assertTrue("Unexpected items number.", obj.getItems().size() == 1);
 
          if (obj.getNumItems() == 2 || obj.getNumItems() == -1)
          {
             //OK
          }
          else
-            fail("Unexpected items number;");
+            fail("Unexpected items number.");
          if (!obj.isHasMoreItems())
-            fail("Has more items value is incorrect");
+            fail("Has more items value is incorrect.");
       }
       finally
       {
@@ -515,7 +497,7 @@ public class RelationshipTest extends BaseTest
          ItemsList<CmisObject> obj =
             getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true, true,
                true, "cmis:name,cmis:path", -1, 0);
-         assertTrue("Unexpected items number;", obj.getItems().size() == 2);
+         assertTrue("Unexpected items number.", obj.getItems().size() == 2);
 
          for (CmisObject one : obj.getItems())
          {
@@ -524,7 +506,7 @@ public class RelationshipTest extends BaseTest
                if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path"))
                   continue;//Other props must be ignored
                else
-                  fail("Property filter works incorrect");
+                  fail("Property filter works incorrect.");
             }
          }
       }
@@ -581,7 +563,7 @@ public class RelationshipTest extends BaseTest
 
          getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true, true,
             true, "(,*", -1, 0);
-         fail("FilterNotValidException must be thrown;");
+         fail("FilterNotValidException must be thrown.");
       }
       catch (FilterNotValidException ex)
       {

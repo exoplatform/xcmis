@@ -88,13 +88,13 @@ public class PolicyTest extends BaseTest
          policy = createPolicy(testroot, policyName);
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
          ObjectData res = getStorage().getObjectById(doc1.getObjectId());
-         assertTrue("Policies number incorrect;", res.getPolicies().size() == 1);
+         assertTrue("Policies number incorrect.", res.getPolicies().size() == 1);
          Iterator<PolicyData> it = res.getPolicies().iterator();
          while (it.hasNext())
          {
             PolicyData one = it.next();
-            assertTrue("Policy name does not match;",one.getName().equals(policyName));
-            assertTrue("Policy text does not match;",one.getPolicyText().equals("testPolicyText"));
+            assertTrue("Policy name does not match.",one.getName().equals(policyName));
+            assertTrue("Policy text does not match.",one.getPolicyText().equals("testPolicyText"));
             res.removePolicy(one);
          }
       }
@@ -125,27 +125,21 @@ public class PolicyTest extends BaseTest
       {
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
-         Map<String, PropertyDefinition<?>> kinoPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-         org.xcmis.spi.model.PropertyDefinition<?> kinoPropDefName2 =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-               CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-               "doc1", true, null, null);
-         org.xcmis.spi.model.PropertyDefinition<?> kinoPropDefObjectTypeId2 =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-               CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-               false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+         Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
+         org.xcmis.spi.model.PropertyDefinition<?> propDefName =PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
+         org.xcmis.spi.model.PropertyDefinition<?> popDefObjectTypeId = PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
 
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-         properties.put(CmisConstants.NAME, new StringProperty(kinoPropDefName2.getId(), kinoPropDefName2
-            .getQueryName(), kinoPropDefName2.getLocalName(), kinoPropDefName2.getDisplayName(), "testApplyPolicy_ConstraintException"));
-         properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(kinoPropDefObjectTypeId2.getId(),
-            kinoPropDefObjectTypeId2.getQueryName(), kinoPropDefObjectTypeId2.getLocalName(), kinoPropDefObjectTypeId2
+         properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName
+            .getQueryName(), propDefName.getLocalName(), propDefName.getDisplayName(), "testApplyPolicy_ConstraintException"));
+         properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(popDefObjectTypeId.getId(),
+            popDefObjectTypeId.getQueryName(), popDefObjectTypeId.getLocalName(), popDefObjectTypeId
                .getDisplayName(), "cmis:policytype1"));
 
          TypeDefinition newType =
             new TypeDefinition("cmis:policytype1", BaseType.DOCUMENT, "cmis:policytype1", "cmis:policytype1", "", "cmis:document",
                "cmis:policytype1", "cmis:policytype1", true, false, true, true, false, false, false, false, null, null,
-               ContentStreamAllowed.ALLOWED, kinoPropertyDefinitions);
+               ContentStreamAllowed.ALLOWED, propertyDefinitions);
          typeID = getStorage().addType(newType);
          newType = getStorage().getTypeDefinition(typeID, true);
 
@@ -154,7 +148,7 @@ public class PolicyTest extends BaseTest
 
          policy = createPolicy(testroot, "testApplyPolicy_ConstraintException_policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
-         fail("ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -189,8 +183,8 @@ public class PolicyTest extends BaseTest
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
          getConnection().removePolicy(policy.getObjectId(), doc1.getObjectId());
          ObjectData res = getStorage().getObjectById(doc1.getObjectId());
-         assertTrue("Policy removing error;", res.getPolicies().size() == 0);
-         assertNotNull("Policy object deleted;",getStorage().getObjectById(policy.getObjectId()));
+         assertTrue("Policy removing error.", res.getPolicies().size() == 0);
+         assertNotNull("Policy object deleted.",getStorage().getObjectById(policy.getObjectId()));
       }
       finally
       {
@@ -200,7 +194,7 @@ public class PolicyTest extends BaseTest
 
    /**
     * 2.2.9.2.2
-    * •  constraint: The Repository MUST throw this exception if the specified object's Object-Type 
+    *  constraint: The Repository MUST throw this exception if the specified object's Object-Type 
     *  definition's attribute for controllablePolicy is FALSE.
     * @throws Exception
     */
@@ -220,20 +214,14 @@ public class PolicyTest extends BaseTest
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
          Map<String, PropertyDefinition<?>> kinoPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-         org.xcmis.spi.model.PropertyDefinition<?> kinoPropDefName2 =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-               CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-               "doc1", true, null, null);
-         org.xcmis.spi.model.PropertyDefinition<?> kinoPropDefObjectTypeId2 =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-               CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-               false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+         org.xcmis.spi.model.PropertyDefinition<?> propDefName =PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
+         org.xcmis.spi.model.PropertyDefinition<?> popDefObjectTypeId = PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
 
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-         properties.put(CmisConstants.NAME, new StringProperty(kinoPropDefName2.getId(), kinoPropDefName2
-            .getQueryName(), kinoPropDefName2.getLocalName(), kinoPropDefName2.getDisplayName(), "testRemovePolicy_ConstraintException1"));
-         properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(kinoPropDefObjectTypeId2.getId(),
-            kinoPropDefObjectTypeId2.getQueryName(), kinoPropDefObjectTypeId2.getLocalName(), kinoPropDefObjectTypeId2
+         properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName
+            .getQueryName(), propDefName.getLocalName(), propDefName.getDisplayName(), "testRemovePolicy_ConstraintException1"));
+         properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(popDefObjectTypeId.getId(),
+            popDefObjectTypeId.getQueryName(), popDefObjectTypeId.getLocalName(), popDefObjectTypeId
                .getDisplayName(), "cmis:policytype2"));
 
          TypeDefinition newType =
@@ -249,7 +237,7 @@ public class PolicyTest extends BaseTest
          policy = createPolicy(testroot, "testRemovePolicy_ConstraintException_policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
          getConnection().removePolicy(policy.getObjectId(), doc1.getObjectId());
-         fail("Constraint exception must be thrown;");
+         fail("Constraint exception must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -285,11 +273,11 @@ public class PolicyTest extends BaseTest
          policy = createPolicy(testroot, "testGetAppliedPolicies_Simple_policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
          List<CmisObject> res = getConnection().getAppliedPolicies(doc1.getObjectId(), true, "");
-         assertNotNull("getAppliedPolicies() failed;", res);
+         assertNotNull("getAppliedPolicies() failed.", res);
          for (CmisObject one : res)
          {
-            assertNotNull("ObjectInfo is not present in result;", one.getObjectInfo());
-            assertTrue("Not a policy type object;", one.getObjectInfo().getTypeId().equals(CmisConstants.POLICY));
+            assertNotNull("ObjectInfo is not present in result.", one.getObjectInfo());
+            assertTrue("Not a policy type object.", one.getObjectInfo().getTypeId().equals(CmisConstants.POLICY));
         }
       }
       finally
@@ -329,7 +317,7 @@ public class PolicyTest extends BaseTest
                if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
                   continue;
                else
-                 fail("Property filter works incorrect;");
+                 fail("Property filter works incorrect.");
             }
          }
       }
@@ -344,7 +332,7 @@ public class PolicyTest extends BaseTest
 
    /**
     * 2.2.9.3.3
-    * •   filterNotValid: The Repository MUST throw this exception if this property filter input parameter is not valid.
+    * filterNotValid: The Repository MUST throw this exception if this property filter input parameter is not valid.
     * @throws Exception
     */
    @Test
@@ -364,7 +352,7 @@ public class PolicyTest extends BaseTest
          
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
          List<CmisObject> res = getConnection().getAppliedPolicies(doc1.getObjectId(), true, "(,*");
-        fail("FilterNotValidException must be thrown;");
+        fail("FilterNotValidException must be thrown.");
       }
       catch (FilterNotValidException ex)
       {

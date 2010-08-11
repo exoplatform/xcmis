@@ -80,18 +80,18 @@ public class DiscoveryTest extends BaseTest
       query =
          getConnection().query(statement, true, false, IncludeRelationships.BOTH, true, RenditionFilter.ANY, -1, 0);
 
-      assertNotNull("Quary failed;", query);
-      assertNotNull("Quary failed - no items;", query.getItems());
-      assertTrue("Quary failed -  incorrect items number;", query.getItems().size() == 1);
+      assertNotNull("Quary failed.", query);
+      assertNotNull("Quary failed - no items.", query.getItems());
+      assertTrue("Quary failed -  incorrect items number.", query.getItems().size() == 1);
 
       List<CmisObject> result = query.getItems();
       for (CmisObject cmisObject : result)
       {
-         assertNotNull("Query result not found;", cmisObject);
-         assertNotNull("ObjectInfo not found in query result;", cmisObject.getObjectInfo());
-         assertNotNull("ObjectId not found in query result;", cmisObject.getObjectInfo().getId());
-         assertTrue("ObjectId's does not match;", documentData.getObjectId().equals(cmisObject.getObjectInfo().getId()));
-         assertTrue("Object names does not match;", documentData.getName().equals(cmisObject.getObjectInfo().getName()));
+         assertNotNull("Query result not found.", cmisObject);
+         assertNotNull("ObjectInfo not found in query result.", cmisObject.getObjectInfo());
+         assertNotNull("ObjectId not found in query result.", cmisObject.getObjectInfo().getId());
+         assertTrue("ObjectId's does not match.", documentData.getObjectId().equals(cmisObject.getObjectInfo().getId()));
+         assertTrue("Object names does not match.", documentData.getName().equals(cmisObject.getObjectInfo().getName()));
          getStorage().deleteObject(documentData, true);
       }
    }
@@ -115,19 +115,19 @@ public class DiscoveryTest extends BaseTest
       query =
          getConnection().query(statement, false, false, IncludeRelationships.BOTH, true, RenditionFilter.ANY, -1, 0);
 
-      assertNotNull("Quary failed;", query);
-      assertNotNull("Quary failed - no items;", query.getItems());
+      assertNotNull("Quary failed.", query);
+      assertNotNull("Quary failed - no items.", query.getItems());
       if (query.getItems().size() == 0)
-         fail("Quary failed - no items;");
+         fail("Quary failed - no items.");
       List<CmisObject> result = query.getItems();
       for (CmisObject cmisObject : result)
       {
-         assertNotNull("Query result not found;", cmisObject);
-         assertNotNull("ObjectInfo not found in query result;", cmisObject.getObjectInfo());
+         assertNotNull("Query result not found.", cmisObject);
+         assertNotNull("ObjectInfo not found in query result.", cmisObject.getObjectInfo());
 
-         assertNotNull("ObjectId not found in query result;", cmisObject.getObjectInfo().getId());
-         assertTrue("ObjectId's does not match;", documentData.getObjectId().equals(cmisObject.getObjectInfo().getId()));
-         assertTrue("Object names does not match;", documentData.getName().equals(cmisObject.getObjectInfo().getName()));
+         assertNotNull("ObjectId not found in query result.", cmisObject.getObjectInfo().getId());
+         assertTrue("ObjectId's does not match.", documentData.getObjectId().equals(cmisObject.getObjectInfo().getId()));
+         assertTrue("Object names does not match.", documentData.getName().equals(cmisObject.getObjectInfo().getName()));
       }
       getStorage().deleteObject(documentData, true);
    }
@@ -152,8 +152,8 @@ public class DiscoveryTest extends BaseTest
          ItemsList<CmisObject> query = null;
 
          query = getConnection().getContentChanges(null, true, PropertyFilter.ALL, true, true, true, -1);
-         assertNotNull("Quary failed;", query);
-         assertNotNull("Quary failed - no items;", query.getItems());
+         assertNotNull("Quary failed.", query);
+         assertNotNull("Quary failed - no items.", query.getItems());
       }
       catch (NotSupportedException nse)
       {
