@@ -43,9 +43,7 @@ import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.PropertyDefinition;
-import org.xcmis.spi.model.PropertyType;
 import org.xcmis.spi.model.TypeDefinition;
-import org.xcmis.spi.model.Updatability;
 import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.model.impl.IdProperty;
 import org.xcmis.spi.model.impl.StringProperty;
@@ -55,15 +53,15 @@ public class PolicyTest extends BaseTest
 {
 
    static FolderData testroot = null;
-   
+
    @BeforeClass
    public static void start() throws Exception
    {
       BaseTest.setUp();
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       testroot =
-         getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "policy_testroot"),
-            null, null);
+         getStorage().createFolder(rootFolder, folderTypeDefinition,
+            getPropsMap(CmisConstants.FOLDER, "policy_testroot"), null, null);
       System.out.print("Running Policy Service tests....");
    }
 
@@ -84,7 +82,7 @@ public class PolicyTest extends BaseTest
       try
       {
          String policyName = "testApplyPolicy_Simple_policy1";
-         DocumentData  doc1 = createDocument(testroot, "testApplyPolicy_Simple", "1234567890aBcDE");
+         DocumentData doc1 = createDocument(testroot, "testApplyPolicy_Simple", "1234567890aBcDE");
          policy = createPolicy(testroot, policyName);
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
          ObjectData res = getStorage().getObjectById(doc1.getObjectId());
@@ -93,8 +91,8 @@ public class PolicyTest extends BaseTest
          while (it.hasNext())
          {
             PolicyData one = it.next();
-            assertTrue("Policy name does not match.",one.getName().equals(policyName));
-            assertTrue("Policy text does not match.",one.getPolicyText().equals("testPolicyText"));
+            assertTrue("Policy name does not match.", one.getName().equals(policyName));
+            assertTrue("Policy text does not match.", one.getPolicyText().equals("testPolicyText"));
             res.removePolicy(one);
          }
       }
@@ -126,25 +124,26 @@ public class PolicyTest extends BaseTest
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
          Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-         org.xcmis.spi.model.PropertyDefinition<?> propDefName =PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
-         org.xcmis.spi.model.PropertyDefinition<?> popDefObjectTypeId = PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
+         org.xcmis.spi.model.PropertyDefinition<?> propDefName =
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
+         org.xcmis.spi.model.PropertyDefinition<?> popDefObjectTypeId =
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
 
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-         properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName
-            .getQueryName(), propDefName.getLocalName(), propDefName.getDisplayName(), "testApplyPolicy_ConstraintException"));
-         properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(popDefObjectTypeId.getId(),
-            popDefObjectTypeId.getQueryName(), popDefObjectTypeId.getLocalName(), popDefObjectTypeId
-               .getDisplayName(), "cmis:policytype1"));
+         properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
+            propDefName.getLocalName(), propDefName.getDisplayName(), "testApplyPolicy_ConstraintException"));
+         properties.put(CmisConstants.OBJECT_TYPE_ID,
+            new IdProperty(popDefObjectTypeId.getId(), popDefObjectTypeId.getQueryName(), popDefObjectTypeId
+               .getLocalName(), popDefObjectTypeId.getDisplayName(), "cmis:policytype1"));
 
          TypeDefinition newType =
-            new TypeDefinition("cmis:policytype1", BaseType.DOCUMENT, "cmis:policytype1", "cmis:policytype1", "", "cmis:document",
-               "cmis:policytype1", "cmis:policytype1", true, false, true, true, false, false, false, false, null, null,
-               ContentStreamAllowed.ALLOWED, propertyDefinitions);
+            new TypeDefinition("cmis:policytype1", BaseType.DOCUMENT, "cmis:policytype1", "cmis:policytype1", "",
+               "cmis:document", "cmis:policytype1", "cmis:policytype1", true, false, true, true, false, false, false,
+               false, null, null, ContentStreamAllowed.ALLOWED, propertyDefinitions);
          typeID = getStorage().addType(newType);
          newType = getStorage().getTypeDefinition(typeID, true);
 
-          doc1 =
-            getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.NONE);
+         doc1 = getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.NONE);
 
          policy = createPolicy(testroot, "testApplyPolicy_ConstraintException_policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
@@ -178,13 +177,13 @@ public class PolicyTest extends BaseTest
       PolicyData policy = null;
       try
       {
-         DocumentData  doc1 = createDocument(testroot, "testRemovePolicy_Simple", "1234567890aBcDE");
+         DocumentData doc1 = createDocument(testroot, "testRemovePolicy_Simple", "1234567890aBcDE");
          policy = createPolicy(testroot, "testRemovePolicy_Simple_policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
          getConnection().removePolicy(policy.getObjectId(), doc1.getObjectId());
          ObjectData res = getStorage().getObjectById(doc1.getObjectId());
          assertTrue("Policy removing error.", res.getPolicies().size() == 0);
-         assertNotNull("Policy object deleted.",getStorage().getObjectById(policy.getObjectId()));
+         assertNotNull("Policy object deleted.", getStorage().getObjectById(policy.getObjectId()));
       }
       finally
       {
@@ -214,25 +213,26 @@ public class PolicyTest extends BaseTest
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
          Map<String, PropertyDefinition<?>> kinoPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-         org.xcmis.spi.model.PropertyDefinition<?> propDefName =PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
-         org.xcmis.spi.model.PropertyDefinition<?> popDefObjectTypeId = PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
+         org.xcmis.spi.model.PropertyDefinition<?> propDefName =
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
+         org.xcmis.spi.model.PropertyDefinition<?> popDefObjectTypeId =
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
 
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-         properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName
-            .getQueryName(), propDefName.getLocalName(), propDefName.getDisplayName(), "testRemovePolicy_ConstraintException1"));
-         properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(popDefObjectTypeId.getId(),
-            popDefObjectTypeId.getQueryName(), popDefObjectTypeId.getLocalName(), popDefObjectTypeId
-               .getDisplayName(), "cmis:policytype2"));
+         properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
+            propDefName.getLocalName(), propDefName.getDisplayName(), "testRemovePolicy_ConstraintException1"));
+         properties.put(CmisConstants.OBJECT_TYPE_ID,
+            new IdProperty(popDefObjectTypeId.getId(), popDefObjectTypeId.getQueryName(), popDefObjectTypeId
+               .getLocalName(), popDefObjectTypeId.getDisplayName(), "cmis:policytype2"));
 
          TypeDefinition newType =
-            new TypeDefinition("cmis:policytype2", BaseType.DOCUMENT, "cmis:policytype2", "cmis:policytype2", "", "cmis:document",
-               "cmis:policytype2", "cmis:policytype2", true, false, true, true, false, true, false, false, null, null,
-               ContentStreamAllowed.ALLOWED, kinoPropertyDefinitions);
+            new TypeDefinition("cmis:policytype2", BaseType.DOCUMENT, "cmis:policytype2", "cmis:policytype2", "",
+               "cmis:document", "cmis:policytype2", "cmis:policytype2", true, false, true, true, false, true, false,
+               false, null, null, ContentStreamAllowed.ALLOWED, kinoPropertyDefinitions);
          typeID = getStorage().addType(newType);
          newType = getStorage().getTypeDefinition(typeID, true);
 
-         doc1 =
-            getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.NONE);
+         doc1 = getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.NONE);
 
          policy = createPolicy(testroot, "testRemovePolicy_ConstraintException_policy1");
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
@@ -241,7 +241,7 @@ public class PolicyTest extends BaseTest
       }
       catch (ConstraintException ex)
       {
-        //OK
+         //OK
       }
       finally
       {
@@ -278,7 +278,7 @@ public class PolicyTest extends BaseTest
          {
             assertNotNull("ObjectInfo is not present in result.", one.getObjectInfo());
             assertTrue("Not a policy type object.", one.getObjectInfo().getTypeId().equals(CmisConstants.POLICY));
-        }
+         }
       }
       finally
       {
@@ -307,7 +307,7 @@ public class PolicyTest extends BaseTest
       {
          doc1 = createDocument(testroot, "testGetAppliedPolicies_PropertiesFiltered1", "1234567890aBcDE");
          policy = createPolicy(testroot, "testGetAppliedPolicies_policy1");
-         
+
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
          List<CmisObject> res = getConnection().getAppliedPolicies(doc1.getObjectId(), true, "cmis:name, cmis:path");
          for (CmisObject one : res)
@@ -317,16 +317,16 @@ public class PolicyTest extends BaseTest
                if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
                   continue;
                else
-                 fail("Property filter works incorrect.");
+                  fail("Property filter works incorrect.");
             }
          }
       }
       finally
       {
          if (doc1 != null)
-         getStorage().deleteObject(doc1, true);
+            getStorage().deleteObject(doc1, true);
          if (policy != null)
-         getStorage().deleteObject(policy, false);
+            getStorage().deleteObject(policy, false);
       }
    }
 
@@ -349,10 +349,10 @@ public class PolicyTest extends BaseTest
       {
          doc1 = createDocument(testroot, "testGetAppliedPolicies_FilterNotValidException1", "1234567890aBcDE");
          policy = createPolicy(testroot, "testGetAppliedPolicies_FilterNotValidException_policy1");
-         
+
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
          List<CmisObject> res = getConnection().getAppliedPolicies(doc1.getObjectId(), true, "(,*");
-        fail("FilterNotValidException must be thrown.");
+         fail("FilterNotValidException must be thrown.");
       }
       catch (FilterNotValidException ex)
       {
