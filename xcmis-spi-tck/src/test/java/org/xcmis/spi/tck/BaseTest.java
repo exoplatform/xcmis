@@ -94,16 +94,19 @@ public class BaseTest
 
    protected static boolean IS_CAPABILITY_DESCENDANTS = false;
    
-   protected static boolean useConf = false;
+   protected static boolean IS_CAN_CHECKOUT = true;
+   
+   protected static boolean IS_VERSIONABLE = true;
 
    public static void setUp() throws Exception
    {
-      ConversationState state = new ConversationState(new Identity("root"));
+      ConversationState state = new ConversationState(new Identity("__system"));
       ConversationState.setCurrent(state);
 
      
       rootfolderID = getStorage().getRepositoryInfo().getRootFolderId();
       rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      
 
       try
       {
@@ -132,6 +135,9 @@ public class BaseTest
          IS_CAPABILITY_DESCENDANTS = true;
 
       documentTypeDefinition = getStorage().getTypeDefinition(CmisConstants.DOCUMENT, true);
+      
+      IS_VERSIONABLE = documentTypeDefinition.isVersionable();
+      
       folderTypeDefinition = getStorage().getTypeDefinition(CmisConstants.FOLDER, true);
 
       if (IS_POLICIES_SUPPORTED)
@@ -183,7 +189,6 @@ public class BaseTest
       DocumentData doc1 = createDocument(testroot, "doc1", "1234567890");
 
       DocumentData doc2 = createDocument(testroot, "doc2", "1234567890");
-      doc2.checkout();
 
       FolderData folder2 = createFolder(testroot, "folder2");
 
@@ -194,20 +199,26 @@ public class BaseTest
       DocumentData doc4 = createDocument(folder3, "doc4", "1234567890");
 
       DocumentData doc5 = createDocument(testroot, "doc5", "1234567890");
-      doc5.checkout();
 
       DocumentData doc6 = createDocument(testroot, "doc6", "1234567890");
-      doc6.checkout();
+      
+      try
+      {
+         getConnection().checkout(doc2.getObjectId());
+         getConnection().checkout(doc5.getObjectId());
+         getConnection().checkout(doc6.getObjectId());
+      }
+      catch (ConstraintException e)
+      {
+         IS_CAN_CHECKOUT = false;
+      }
 
       if (IS_RELATIONSHIPS_SUPPORTED)
       {
-         RelationshipData rel1 =
             getStorage().createRelationship(doc3, doc4, relationshipTypeDefinition,
                getPropsMap(CmisConstants.RELATIONSHIP, "rel1"), null, null);
-         RelationshipData rel2 =
             getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
                getPropsMap(CmisConstants.RELATIONSHIP, "rel2"), null, null);
-         RelationshipData rel3 =
             getStorage().createRelationship(folder2, doc1, relationshipTypeDefinition,
                getPropsMap(CmisConstants.RELATIONSHIP, "rel3"), null, null);
       }
@@ -232,7 +243,7 @@ public class BaseTest
       ContentStream cs = new BaseContentStream(documentContent.getBytes(), null, new MimeType("text", "plain"));
       DocumentData doc =
          getStorage().createDocument(parentFolder, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, documentName), cs, null, null, VersioningState.MAJOR);
+            getPropsMap(CmisConstants.DOCUMENT, documentName), cs, null, null, VersioningState.NONE);
       return doc;
    }
 

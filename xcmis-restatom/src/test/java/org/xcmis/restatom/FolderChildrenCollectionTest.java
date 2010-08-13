@@ -433,6 +433,7 @@ public class FolderChildrenCollectionTest extends BaseTest
       ContentStream docStream = conn.getContentStream(docId, null);
       //      System.out.println(docStream.getMediaType());
       int r = docStream.getStream().read(b);
+      assertEquals("windows-1251", docStream.getMediaType().getParameter("charset"));
       assertEquals("тест", new String(b, 0, r, docStream.getMediaType().getParameter("charset")));
    }
 

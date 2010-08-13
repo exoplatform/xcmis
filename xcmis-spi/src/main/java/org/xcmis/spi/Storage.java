@@ -43,14 +43,18 @@ import java.util.Map;
 public interface Storage extends TypeManager
 {
    /**
-    * Get storage unique id.
+    * Gets storage unique id.
+    * 
+    * Implementation Compatibility: MUST be implemented
     * 
     * @return storage id
     */
    String getId();
 
    /**
-    * Calculate allowable actions for specified object.
+    * Calculates allowable actions for specified object.
+    * 
+    * Implementation Compatibility: MUST be implemented
     * 
     * @param object object
     * @return allowable actions for object
@@ -59,6 +63,8 @@ public interface Storage extends TypeManager
 
    /**
     * Get checkedout objects (private working copies) that user has access to.
+    * 
+    * Implementation Compatibility: Optional. Repository versioning specific.
     * 
     * @param folder folder, if <code>null</code> then get all checked out
     *        objects in any folders
@@ -75,6 +81,8 @@ public interface Storage extends TypeManager
     * <code>parent</code> as parent. If <code>parent == null</code> then
     * document created in unfiling state. If unfiling is not supported
     * {@link ConstraintException} should be thrown.
+    * 
+    * Implementation Compatibility: MUST be implemented
     * 
     * @param parent parent folder or <code>null</code> if document should be
     *        created in unfiling state
@@ -116,6 +124,8 @@ public interface Storage extends TypeManager
     * document created in unfiling state. If unfiling is not supported
     * {@link ConstraintException} should be thrown.
     * 
+    * Implementation Compatibility: MUST be implemented
+    * 
     * @param source source document
     * @param parent parent folder or <code>null</code> if document should be
     *        created in unfiling state
@@ -150,6 +160,8 @@ public interface Storage extends TypeManager
     * Create new folder with type <code>typeDefinition</code> using
     * <code>folder</code> as parent.
     * 
+    * Implementation Compatibility: MUST be implemented
+    * 
     * @param parent parent folder
     * @param typeDefinition the folder type definition
     * @param properties the folder properties
@@ -173,6 +185,12 @@ public interface Storage extends TypeManager
     * <code>parent</code> as parent. If <code>parent == null</code> then policy
     * created in unfiling state.
     * 
+    * 2.2.4.5 createPolicy
+    *      
+    * Implementation Compatibility: the support for policy objects is optional, 
+    * if implementation does not support cmis:policy object-type method should
+    * throw {@link NotSupportedException} 
+    * 
     * @param parent parent folder
     * @param typeDefinition the policy type definition
     * @param properties the policy properties
@@ -195,6 +213,10 @@ public interface Storage extends TypeManager
    /**
     * Create new relationship for specified <code>source</code> and
     * <code>target</code>.
+    * 
+    * Implementation Compatibility: the support for relationship objects is optional, 
+    * if implementation does not support cmis:relationship object-type method should
+    * throw {@link NotSupportedException} 
     * 
     * @param source source of relationship
     * @param target target of relationship
@@ -220,6 +242,8 @@ public interface Storage extends TypeManager
     * working copy the deletion object is the same as to cancel checkout
     * operation. See {@link DocumentData#cancelCheckout()}.
     * 
+    * Implementation Compatibility: MUST be implemented
+    * 
     * @param object object to be deleted
     * @param deleteAllVersions if <code>false</code> then delete only the object
     *        specified, if <code>true</code> delete all versions of versionable
@@ -239,6 +263,9 @@ public interface Storage extends TypeManager
     * Delete the specified folder object and all of its child- and
     * descendant-objects.
     * 
+    * 
+    * Implementation Compatibility: MUST be implemented
+    * 
     * @param folder folder to be deleted
     * @param deleteAllVersions if <code>true</code> then delete all versions of
     *        the document in this folder. If <code>false</code>, delete only the
@@ -254,7 +281,7 @@ public interface Storage extends TypeManager
     *        other fileable non-folder objects from the current folder tree</li>
     *        <li>delete: Delete all fileable objects</li>
     *        </ul>
-    * @param continueOnFailure if <code>true</code>, then the stprage SHOULD
+    * @param continueOnFailure if <code>true</code>, then the storage SHOULD
     *        continue attempting to perform this operation even if deletion of a
     *        child object in the specified folder cannot be deleted
     * @return list of id that were not deleted
@@ -268,12 +295,24 @@ public interface Storage extends TypeManager
     * Remove non-folder fileable object from all folder where in which it is
     * currently filed. <b>NOTE</b> This method never remove object itself.
     * 
+    * 2.2.5.2 removeObjectFromFolder
+    * 
+    * Implementation Compatibility: SHOULD be implemented if the repository 
+    * supports the multifiling (capabilityMultifiling) and unfiling (capabilityUnfiling) optional capabilities.
+    * Otherwise, {@link NotSupportedException} should be thrown.
+    * 
     * @param object object
     */
    void unfileObject(ObjectData object);
 
    /**
     * Gets content changes.
+    * 
+    * 
+    * Implementation Compatibility: SHOULD be implemented if the repository 
+    * supports changes Capability (capabilityChanges != none).
+    * Otherwise, {@link NotSupportedException} should be thrown.
+    * 
     * 
     * @param changeLogToken if value other than <code>null</code>, then change
     *        event corresponded to the value of the specified change log token
@@ -293,6 +332,11 @@ public interface Storage extends TypeManager
    /**
     * Handle specified SQL query.
     * 
+    * Implementation Compatibility: SHOULD be implemented if the repository 
+    * supports query Capability (capabilityQuery != none)).
+    * Otherwise, {@link NotSupportedException} should be thrown.
+    * 
+    * 
     * @param query SQL query
     * @return set of query results
     * @throws InvalidArgumentException if specified <code>query</code> is
@@ -303,6 +347,8 @@ public interface Storage extends TypeManager
    /**
     * Get object by unique identifier.
     * 
+    * Implementation Compatibility: MUST be implemented
+    * 
     * @param objectId object's ID
     * @return object
     * @throws ObjectNotFoundException if object with specified ID was not found
@@ -311,6 +357,8 @@ public interface Storage extends TypeManager
 
    /**
     * Get object by path.
+    * 
+    * Implementation Compatibility: MUST be implemented
     * 
     * @param path path
     * @return object
@@ -322,6 +370,8 @@ public interface Storage extends TypeManager
    /**
     * Move <code>object</code> from <code>source</code> to <code>target</code>.
     * If operation successful then changes saved immediately.
+    * 
+    * Implementation Compatibility: MUST be implemented
     * 
     * @param object object to be moved
     * @param target destination folder
@@ -342,6 +392,8 @@ public interface Storage extends TypeManager
    /**
     * Get object renditions.
     * 
+    * Implementation Compatibility: SHOULD be implemented if capabilityRenditions = read
+    * 
     * @param object the object
     * @return iterator over object's renditions. If object has not any
     *         renditions then empty iterator must be returned but never
@@ -352,6 +404,16 @@ public interface Storage extends TypeManager
    /**
     * Get description of storage and its capabilities.
     * 
+    * 2.2.2.2 getRepositoryInfo
+    * 
+    * Implementation Compatibility: MUST be implemented
+    * 
+    * The "Get Repository Information" service MUST also return implementation information including vendor
+    * name, product name, product version, version of CMIS that it supports, the root folder ID (see section
+    * 2.1.5.2 Folder Hierarchy), and MAY include other implementation-specific information. The version of
+    * CMIS that the repository supports MUST be expressed as a Decimal that matches the specification
+    * version.
+    * 
     * @return storage description
     */
    RepositoryInfo getRepositoryInfo();
@@ -359,6 +421,10 @@ public interface Storage extends TypeManager
    /**
     * Collection of all Document in the specified version series, sorted by
     * cmis:creationDate descending.
+    * 
+    * Implementation Compatibility: SHOULD be implemented if the repository 
+    * supports versioning.
+    * Otherwise, {@link NotSupportedException} should be thrown.
     * 
     * @param versionSeriesId the id of version series
     * @return document versions
@@ -369,6 +435,10 @@ public interface Storage extends TypeManager
 
    /**
     * Iterator of all unfilled documents identifiers.
+    * 
+    * Implementation Compatibility: SHOULD be implemented if the repository 
+    * supports the unfiling (capabilityUnfiling) optional capabilities.
+    * Otherwise, {@link NotSupportedException} should be thrown.
     * 
     * @return Iterator of all unfilled documents identifiers.
     * @throws StorageException if any storage error occurs

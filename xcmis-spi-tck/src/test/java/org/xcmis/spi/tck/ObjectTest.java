@@ -73,14 +73,16 @@ public class ObjectTest extends BaseTest
 
    static FolderData testroot;
 
+   private static final String ROOT = "object_testroot";
+
    @BeforeClass
    public static void start() throws Exception
    {
       BaseTest.setUp();
       FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
       testroot =
-         getStorage().createFolder(rootFolder, folderTypeDefinition,
-            getPropsMap(CmisConstants.FOLDER, "object_testroot"), null, null);
+         getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, ROOT), null,
+            null);
       System.out.print("Running Object Service tests....");
    }
 
@@ -98,10 +100,10 @@ public class ObjectTest extends BaseTest
       ContentStream cs = new BaseContentStream(before, null, new MimeType("text", "plain"));
       String docId =
          getConnection().createDocument(testroot.getObjectId(),
-            getPropsMap(CmisConstants.DOCUMENT, "testCreateDocument_CheckContent"), cs, null, null, null,
-            VersioningState.MAJOR);
+            getPropsMap(CmisConstants.DOCUMENT, "testCreateDocument_CheckContent.txt"), cs, null, null, null,
+            VersioningState.NONE);
       ContentStream c = getStorage().getObjectById(docId).getContentStream(null);
-      assertTrue("Media types does not match", cs.getMediaType().equals(c.getMediaType()));
+      assertTrue("Media types does not match.", cs.getMediaType().equals(c.getMediaType()));
       byte[] after = new byte[15];
       c.getStream().read(after);
       assertArrayEquals(before, after);
@@ -119,12 +121,11 @@ public class ObjectTest extends BaseTest
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
       Map<String, Property<?>> properties = getPropsMap(CmisConstants.DOCUMENT, docname);
       String docId =
-         getConnection()
-            .createDocument(testroot.getObjectId(), properties, cs, null, null, null, VersioningState.MAJOR);
+         getConnection().createDocument(testroot.getObjectId(), properties, cs, null, null, null, VersioningState.NONE);
       ObjectData res = getStorage().getObjectById(docId);
-      assertNotNull("NAME property is null;", res.getProperty(CmisConstants.NAME));
+      assertNotNull("NAME property is null.", res.getProperty(CmisConstants.NAME));
       if (!((String)res.getProperty(CmisConstants.NAME).getValues().get(0)).equals(docname))
-         fail("Names does not match;");
+         fail("Names does not match.");
    }
 
    /**
@@ -146,22 +147,21 @@ public class ObjectTest extends BaseTest
       {
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          policy = createPolicy(testroot, "testCreateDocument_ApplyPolicy_policy1");
-
          ArrayList<String> policies = new ArrayList<String>();
          policies.add(policy.getObjectId());
 
          docId =
             getConnection().createDocument(testroot.getObjectId(),
                getPropsMap(CmisConstants.DOCUMENT, "testCreateDocument_ApplyPolicy"), cs, null, null, policies,
-               VersioningState.MAJOR);
+               VersioningState.NONE);
          ObjectData res = getStorage().getObjectById(docId);
-         assertTrue("Properties size iz incorrect", res.getPolicies().size() == 1);
+         assertTrue("Properties size iz incorrect.", res.getPolicies().size() == 1);
          Iterator<PolicyData> it = res.getPolicies().iterator();
          while (it.hasNext())
          {
             PolicyData one = it.next();
-            assertTrue("Policy names does not match", one.getName().equals("testCreateDocument_ApplyPolicy_policy1"));
-            assertTrue("Policy text does not match", one.getPolicyText().equals("testPolicyText"));
+            assertTrue("Policy names does not match.", one.getName().equals("testCreateDocument_ApplyPolicy_policy1"));
+            assertTrue("Policy text does not match.", one.getPolicyText().equals("testPolicyText"));
          }
       }
       finally
@@ -194,14 +194,14 @@ public class ObjectTest extends BaseTest
       String docId =
          getConnection().createDocument(testroot.getObjectId(),
             getPropsMap(CmisConstants.DOCUMENT, "testCreateDocument_AddACL"), cs, addACL, null, null,
-            VersioningState.MAJOR);
+            VersioningState.NONE);
       ObjectData res = getStorage().getObjectById(docId);
       for (AccessControlEntry one : res.getACL(false))
       {
          if (one.getPrincipal().equalsIgnoreCase(username))
          {
-            assertTrue("Permissions size is incorrect", one.getPermissions().size() == 1);
-            assertTrue("Permissions does not match", one.getPermissions().contains("cmis:read"));
+            assertTrue("Permissions size is incorrect.", one.getPermissions().size() == 1);
+            assertTrue("Permissions does not match.", one.getPermissions().contains("cmis:read"));
          }
       }
    }
@@ -225,8 +225,8 @@ public class ObjectTest extends BaseTest
       {
          String docId =
             getConnection().createDocument(testroot.getObjectId(), getPropsMap(CmisConstants.DOCUMENT, filename), cs,
-               null, null, null, VersioningState.MAJOR);
-         fail("NameConstraintViolationException must be thrown;");
+               null, null, null, VersioningState.NONE);
+         fail("NameConstraintViolationException must be thrown.");
       }
       catch (NameConstraintViolationException ex)
       {
@@ -236,9 +236,9 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.1.3
-    * The Repository MUST throw this exception if the “contentStreamAllowed” attribute 
+    * The Repository MUST throw this exception if the "contentStreamAllowed" attribute 
     * of the Object-Type definition specified by the cmis:objectTypeId property 
-    * value is set to “not allowed” and a contentStream input parameter is provided.
+    * value is set to "not allowed" and a contentStream input parameter is provided.
     * @throws Exception
     */
    @Test
@@ -252,13 +252,9 @@ public class ObjectTest extends BaseTest
 
       Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
       org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-            "doc1", true, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
       org.xcmis.spi.model.PropertyDefinition<?> propDefObjectTypeId =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
 
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
@@ -279,7 +275,7 @@ public class ObjectTest extends BaseTest
          docId =
             getConnection().createDocument(testroot.getObjectId(), properties, cs, null, null, null,
                VersioningState.MAJOR);
-         fail("StreamNotSupportedException must be thrown;");
+         fail("StreamNotSupportedException must be thrown.");
       }
       catch (StreamNotSupportedException ex)
       {
@@ -296,7 +292,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.1.3
-    * The cmis:objectTypeId property value is not an Object-Type whose baseType is “Document”.
+    * The cmis:objectTypeId property value is not an Object-Type whose baseType is "Document".
     * @throws Exception
     */
    @Test
@@ -309,13 +305,9 @@ public class ObjectTest extends BaseTest
 
       Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
       org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-            "doc1", true, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.NAME);
       org.xcmis.spi.model.PropertyDefinition<?> propDefObjectTypeId =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.OBJECT_TYPE_ID);
 
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
@@ -336,8 +328,8 @@ public class ObjectTest extends BaseTest
       {
          docId =
             getConnection().createDocument(testroot.getObjectId(), properties, cs, null, null, null,
-               VersioningState.MAJOR);
-         fail("ConstraintException must be thrown;");
+               VersioningState.NONE);
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -354,8 +346,8 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.1.3 
-    * The “contentStreamAllowed” attribute of the Object-Type definition specified by 
-    * the cmis:objectTypeId property value is set to “required” and no contentStream input parameter is provided.  
+    * The "contentStreamAllowed" attribute of the Object-Type definition specified by 
+    * the cmis:objectTypeId property value is set to "required" and no contentStream input parameter is provided.  
     * @throws Exception
     */
    @Test
@@ -366,13 +358,9 @@ public class ObjectTest extends BaseTest
 
       Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
       org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-            "doc1", true, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
       org.xcmis.spi.model.PropertyDefinition<?> propDefObjectTypeId =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
 
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
@@ -393,8 +381,8 @@ public class ObjectTest extends BaseTest
       {
          docId =
             getConnection().createDocument(testroot.getObjectId(), properties, null, null, null, null,
-               VersioningState.MAJOR);
-         fail("ConstraintException must be thrown;");
+               VersioningState.NONE);
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -411,8 +399,8 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.1.3
-    * The “versionable” attribute of the Object-Type definition specified by the cmis:objectTypeId property value is set to TRUE 
-    * and the value for the versioningState input parameter is provided that is “none”.
+    * The "versionable" attribute of the Object-Type definition specified by the cmis:objectTypeId property value is set to TRUE 
+    * and the value for the versioningState input parameter is provided that is "none".
     * @throws Exception
     */
    @Test
@@ -420,18 +408,13 @@ public class ObjectTest extends BaseTest
    {
       String docId = null;
       String typeID = null;
-
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
       Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
       org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-            "doc1", true, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
       org.xcmis.spi.model.PropertyDefinition<?> propDefObjectTypeId =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
 
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties
@@ -453,7 +436,7 @@ public class ObjectTest extends BaseTest
          docId =
             getConnection().createDocument(testroot.getObjectId(), properties, cs, null, null, null,
                VersioningState.NONE);
-         fail("ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -470,8 +453,8 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.1.3
-    * The “versionable” attribute of the Object-Type definition specified by the cmis:objectTypeId 
-    * property value is set to FALSE and a value for the versioningState input parameter is provided that is something other than “none”.
+    * The "versionable" attribute of the Object-Type definition specified by the cmis:objectTypeId 
+    * property value is set to FALSE and a value for the versioningState input parameter is provided that is something other than "none".
     * @throws Exception
     */
    @Test
@@ -484,13 +467,9 @@ public class ObjectTest extends BaseTest
 
       Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
       org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-            "doc1", true, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
       org.xcmis.spi.model.PropertyDefinition<?> propDefObjectTypeId =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
 
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
@@ -512,7 +491,7 @@ public class ObjectTest extends BaseTest
          docId =
             getConnection().createDocument(testroot.getObjectId(), properties, cs, null, null, null,
                VersioningState.MAJOR);
-         fail("ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -529,7 +508,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.1.3
-    * The “controllablePolicy” attribute of the Object-Type definition specified by the 
+    * The "controllablePolicy" attribute of the Object-Type definition specified by the 
     * cmis:objectTypeId property value is set to FALSE and at least one policy is provided.
     * @throws Exception
     */
@@ -549,13 +528,9 @@ public class ObjectTest extends BaseTest
 
       Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
       org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-            "doc1", true, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
       org.xcmis.spi.model.PropertyDefinition<?> propDefObjectTypeId =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
 
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
@@ -581,8 +556,8 @@ public class ObjectTest extends BaseTest
       {
          docId =
             getConnection().createDocument(testroot.getObjectId(), properties, cs, null, null, policies,
-               VersioningState.MAJOR);
-         fail("ConstraintException must be thrown;");
+               VersioningState.NONE);
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -601,7 +576,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.1.3
-    * The “controllableACL” attribute of the Object-Type definition specified by the cmis:objectTypeId 
+    * The "controllableACL" attribute of the Object-Type definition specified by the cmis:objectTypeId 
     * property value is set to FALSE and at least one ACE is provided.
     * @throws Exception
     */
@@ -619,13 +594,9 @@ public class ObjectTest extends BaseTest
 
       Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
       org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-            "doc1", true, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
       org.xcmis.spi.model.PropertyDefinition<?> propDefObjectTypeId =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
 
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
@@ -649,8 +620,8 @@ public class ObjectTest extends BaseTest
       {
          docId =
             getConnection().createDocument(testroot.getObjectId(), properties, cs, addACL, null, null,
-               VersioningState.MAJOR);
-         fail("ConstraintException must be thrown;");
+               VersioningState.NONE);
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -685,13 +656,9 @@ public class ObjectTest extends BaseTest
 
       Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
       org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-            "doc1", true, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
       org.xcmis.spi.model.PropertyDefinition<?> propDefObjectTypeId =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
 
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
@@ -714,8 +681,8 @@ public class ObjectTest extends BaseTest
       {
          docId =
             getConnection().createDocument(testroot.getObjectId(), properties, cs, addACL, null, null,
-               VersioningState.MAJOR);
-         fail("ConstraintException must be thrown;");
+               VersioningState.NONE);
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -744,11 +711,11 @@ public class ObjectTest extends BaseTest
       DocumentData doc1 =
          getStorage().createDocument(testroot, documentTypeDefinition,
             getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_Simple1"), cs, null, null,
-            VersioningState.MAJOR);
+            VersioningState.NONE);
       String docId =
          getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(),
-            getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_Simple2"), null, null, null,
-            VersioningState.MAJOR);
+            getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_Simple2.txt"), null, null, null,
+            VersioningState.NONE);
       ContentStream c = getStorage().getObjectById(docId).getContentStream(null);
       assertTrue("Media types does not match", cs.getMediaType().equals(c.getMediaType()));
 
@@ -756,7 +723,7 @@ public class ObjectTest extends BaseTest
       c.getStream().read(after);
       assertArrayEquals(before, after);
       if (!testroot.getName().equals(getStorage().getObjectById(docId).getParent().getName()))
-         fail("Names does not match;");
+         fail("Names does not match.");
    }
 
    /**
@@ -769,18 +736,12 @@ public class ObjectTest extends BaseTest
    public void testCreateDocumentFromSource_Properties() throws Exception
    {
       String name = "testCreateDocumentFromSource_Properties2";
-      byte[] before = new byte[15];
-      before = "1234567890aBcDE".getBytes();
-      ContentStream cs = new BaseContentStream(before, null, new MimeType("text", "plain"));
-      DocumentData doc1 =
-         getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_Properties1"), cs, null, null,
-            VersioningState.MAJOR);
+      DocumentData doc1 = createDocument(testroot, "testCreateDocumentFromSource_Properties1", "1234567890aBcDE");
       String docId =
          getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(),
-            getPropsMap(CmisConstants.DOCUMENT, name), null, null, null, VersioningState.MAJOR);
+            getPropsMap(CmisConstants.DOCUMENT, name), null, null, null, VersioningState.NONE);
       if (!getStorage().getObjectById(docId).getProperty(CmisConstants.NAME).getValues().get(0).equals(name))
-         fail("Names does not match;");
+         fail("Names does not match.");
    }
 
    /**
@@ -800,14 +761,7 @@ public class ObjectTest extends BaseTest
       PolicyData policy = null;
       try
       {
-         byte[] before = new byte[15];
-         before = "1234567890aBcDE".getBytes();
-         ContentStream cs = new BaseContentStream(before, null, new MimeType("text", "plain"));
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_ApplyPolicy1"), cs, null, null,
-               VersioningState.MAJOR);
-
+         DocumentData doc1 = createDocument(testroot, "testCreateDocumentFromSource_ApplyPolicy1", "1234567890aBcDE");
          policy = createPolicy(testroot, "object_policy2");
 
          ArrayList<String> policies = new ArrayList<String>();
@@ -815,15 +769,15 @@ public class ObjectTest extends BaseTest
          String docId =
             getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(),
                getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_ApplyPolicy2"), null, null, policies,
-               VersioningState.MAJOR);
+               VersioningState.NONE);
          ObjectData res = getStorage().getObjectById(docId);
-         assertTrue("Properties size is incorrect", res.getPolicies().size() == 1);
+         assertTrue("Properties size is incorrect.", res.getPolicies().size() == 1);
          Iterator<PolicyData> it = res.getPolicies().iterator();
          while (it.hasNext())
          {
             PolicyData one = it.next();
-            assertTrue("Policy names does not match", one.getName().equals("object_policy2"));
-            assertTrue("Policy text does not match", one.getPolicyText().equals("testPolicyText"));
+            assertTrue("Policy names does not match.", one.getName().equals("object_policy2"));
+            assertTrue("Policy text does not match.", one.getPolicyText().equals("testPolicyText"));
             res.removePolicy(one);
          }
       }
@@ -848,28 +802,21 @@ public class ObjectTest extends BaseTest
          //SKIP
          return;
       }
-      byte[] before = new byte[15];
-      before = "1234567890aBcDE".getBytes();
-      ContentStream cs = new BaseContentStream(before, null, new MimeType("text", "plain"));
-      DocumentData doc1 =
-         getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_addACL1"), cs, null, null,
-            VersioningState.MAJOR);
-
+      DocumentData doc1 = createDocument(testroot, "testCreateDocumentFromSource_addACL1", "1234567890aBcDE");
       String username = "username";
       List<AccessControlEntry> addACL = createACL(username, "cmis:read");
 
       String docId =
          getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(),
             getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_addACL2"), addACL, null, null,
-            VersioningState.MAJOR);
+            VersioningState.NONE);
       ObjectData res = getStorage().getObjectById(docId);
       for (AccessControlEntry one : res.getACL(false))
       {
          if (one.getPrincipal().equalsIgnoreCase(username))
          {
-            assertTrue("Permissions size is incorrect", one.getPermissions().size() == 1);
-            assertTrue("Permissions does not match", one.getPermissions().contains("cmis:read"));
+            assertTrue("Permissions size is incorrect.", one.getPermissions().size() == 1);
+            assertTrue("Permissions does not match.", one.getPermissions().contains("cmis:read"));
          }
       }
    }
@@ -884,19 +831,14 @@ public class ObjectTest extends BaseTest
    public void testCreateDocumentFromSource_NameConstraintViolationException() throws Exception
    {
       String name = "testCreateDocumentFromSource_NameConstraintViolationException";
-      byte[] before = new byte[15];
-      before = "1234567890aBcDE".getBytes();
-      ContentStream cs = new BaseContentStream(before, null, new MimeType("text", "plain"));
-      DocumentData doc1 =
-         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, name), cs,
-            null, null, VersioningState.MAJOR);
+      DocumentData doc1 = createDocument(testroot, name, "1234567890aBcDE");
       try
       {
          String docId =
             getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(),
-               getPropsMap(CmisConstants.DOCUMENT, name), null, null, null, VersioningState.MAJOR);
+               getPropsMap(CmisConstants.DOCUMENT, name), null, null, null, VersioningState.NONE);
          ObjectData res = getStorage().getObjectById(docId);
-         assertFalse("Names must not match;", res.getName().equals(name));
+         assertFalse("Names must not match.", res.getName().equals(name));
       }
       catch (NameConstraintViolationException ex)
       {
@@ -906,7 +848,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.2.3
-    * constraint: The Repository MUST throw this exception if  the sourceId is not an Object whose baseType is “Document”.
+    * constraint: The Repository MUST throw this exception if  the sourceId is not an Object whose baseType is "Document".
     * @throws Exception
     */
    @Test
@@ -915,11 +857,10 @@ public class ObjectTest extends BaseTest
       FolderData test = createFolder(testroot, "123");
       try
       {
-         String docId =
-            getConnection().createDocumentFromSource(test.getObjectId(), testroot.getObjectId(),
-               getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_ConstraintExceptionWrongBaseType1"),
-               null, null, null, VersioningState.MAJOR);
-         fail("ConstraintException must be thrown;");
+         getConnection().createDocumentFromSource(test.getObjectId(), testroot.getObjectId(),
+            getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_ConstraintExceptionWrongBaseType1"),
+            null, null, null, VersioningState.NONE);
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -944,24 +885,14 @@ public class ObjectTest extends BaseTest
       try
       {
          //Creating type from cmis:folder with overriden  ALLOWED_CHILD_OBJECT_TYPE_IDS;
-
          Map<String, PropertyDefinition<?>> folderPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-               CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-               "myfolder", true, null, null);
-
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.NAME);
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-               CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-               false, false, false, false, Updatability.READONLY, "fold_type_id1", null, null, null);
-
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.OBJECT_TYPE_ID);
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefAllowedChild =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, PropertyType.ID,
-               CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, null,
-               CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, false, false, false, false, false, Updatability.READONLY,
-               "fold_type_chld_ids", null, null, null);
+            PropertyDefinitions
+               .getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS);
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
 
          properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
@@ -987,13 +918,13 @@ public class ObjectTest extends BaseTest
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition,
                getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_ConstraintExceptionNotAllowedChild"),
-               cs, null, null, VersioningState.MAJOR);
+               cs, null, null, VersioningState.NONE);
 
          docId =
             getConnection().createDocumentFromSource(doc1.getObjectId(), myfolder.getObjectId(),
                getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_ConstraintExceptionNotAllowedChild1"),
-               null, null, null, VersioningState.MAJOR);
-         fail("ConstraintException must be thrown;");
+               null, null, null, VersioningState.NONE);
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -1012,8 +943,8 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.2.3
-    * The “versionable” attribute of the Object-Type definition specified by the cmis:objectTypeId property value is set to FALSE 
-    * and a value for the versioningState input parameter is provided that is something other than “none”.
+    * The "versionable" attribute of the Object-Type definition specified by the cmis:objectTypeId property value is set to FALSE 
+    * and a value for the versioningState input parameter is provided that is something other than "none".
     * @throws Exception
     */
    @Test
@@ -1021,20 +952,14 @@ public class ObjectTest extends BaseTest
    {
       String docId = null;
       String typeID = null;
-
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
       //Creating type from cmis:folder with overriden  ALLOWED_CHILD_OBJECT_TYPE_IDS;
-
       Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
       org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-            "doc1", true, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
       org.xcmis.spi.model.PropertyDefinition<?> propDefObjectTypeId =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
 
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
@@ -1060,7 +985,7 @@ public class ObjectTest extends BaseTest
          docId =
             getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(), properties, null,
                null, null, VersioningState.MAJOR);
-         fail("ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -1077,8 +1002,8 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.2.3
-    * The “versionable” attribute of the Object-Type definition specified by the cmis:objectTypeId property value is set to TRUE and 
-    * the value for the versioningState input parameter is provided that is “none”.
+    * The "versionable" attribute of the Object-Type definition specified by the cmis:objectTypeId property value is set to TRUE and 
+    * the value for the versioningState input parameter is provided that is "none".
     * @throws Exception
     */
    @Test
@@ -1086,18 +1011,13 @@ public class ObjectTest extends BaseTest
    {
       String docId = null;
       String typeID = null;
-
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
       Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
       org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-            "doc1", true, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
       org.xcmis.spi.model.PropertyDefinition<?> propDefObjectTypeId =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
 
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
@@ -1124,7 +1044,7 @@ public class ObjectTest extends BaseTest
          docId =
             getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(), properties, null,
                null, null, VersioningState.NONE);
-         fail("ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -1144,7 +1064,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.2.3
-    * The “controllablePolicy” attribute of the Object-Type definition 
+    * The "controllablePolicy" attribute of the Object-Type definition 
     * specified by the cmis:objectTypeId property value is set to FALSE and at least one policy is provided.
     * 
     * @throws Exception
@@ -1164,13 +1084,9 @@ public class ObjectTest extends BaseTest
 
       Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
       org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-            "doc1", true, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
       org.xcmis.spi.model.PropertyDefinition<?> propDefObjectTypeId =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
 
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
@@ -1204,7 +1120,7 @@ public class ObjectTest extends BaseTest
          docId =
             getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(), properties, null,
                null, policies, VersioningState.NONE);
-         fail("ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -1223,7 +1139,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.2.3
-    * The “controllableACL” attribute of the Object-Type definition 
+    * The "controllableACL" attribute of the Object-Type definition 
     * specified by the cmis:objectTypeId property value is set to FALSE and at least one ACE is provided.
     * 
     * @throws Exception
@@ -1242,13 +1158,9 @@ public class ObjectTest extends BaseTest
 
       Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
       org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-            "doc1", true, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
       org.xcmis.spi.model.PropertyDefinition<?> propDefObjectTypeId =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
 
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
@@ -1271,13 +1183,13 @@ public class ObjectTest extends BaseTest
       DocumentData doc1 =
          getStorage().createDocument(testroot, newType,
             getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_ConstraintExceptionNotControllableACL1"),
-            cs, null, null, VersioningState.MAJOR);
+            cs, null, null, VersioningState.NONE);
       try
       {
          docId =
             getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(), properties, addACL,
                null, null, VersioningState.NONE);
-         fail("ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -1312,13 +1224,9 @@ public class ObjectTest extends BaseTest
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
       Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
       org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-            "doc1", true, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
       org.xcmis.spi.model.PropertyDefinition<?> propDefObjectTypeId =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
 
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
@@ -1341,13 +1249,13 @@ public class ObjectTest extends BaseTest
       DocumentData doc1 =
          getStorage().createDocument(testroot, newType,
             getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_ConstraintExceptionUnknownACE1"), cs,
-            null, null, VersioningState.MAJOR);
+            null, null, VersioningState.NONE);
       try
       {
          docId =
             getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(), properties, addACL,
                null, null, VersioningState.NONE);
-         fail("ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -1376,8 +1284,8 @@ public class ObjectTest extends BaseTest
          getConnection()
             .createFolder(testroot.getObjectId(), getPropsMap(CmisConstants.FOLDER, "f1"), null, null, null);
       ObjectData obj = getStorage().getObjectById(docId);
-      assertTrue("Object types does not match;", obj.getTypeId().equals(CmisConstants.FOLDER));
-      assertTrue("Path is not correct;", ((FolderData)obj).getPath().equals("/object_testroot/f1"));
+      assertTrue("Object types does not match.", obj.getTypeId().equals(CmisConstants.FOLDER));
+      assertTrue("Path is not correct.", ((FolderData)obj).getPath().endsWith("object_testroot/f1"));
    }
 
    /**
@@ -1411,8 +1319,8 @@ public class ObjectTest extends BaseTest
          while (it.hasNext())
          {
             PolicyData one = it.next();
-            assertTrue("POlicy names does not match", one.getName().equals("object_policy3"));
-            assertTrue("Policy text does not match", one.getPolicyText().equals("testPolicyText"));
+            assertTrue("Policy names does not match.", one.getName().equals("object_policy3"));
+            assertTrue("Policy text does not match.", one.getPolicyText().equals("testPolicyText"));
          }
       }
       finally
@@ -1450,8 +1358,8 @@ public class ObjectTest extends BaseTest
          for (AccessControlEntry one : res.getACL(false))
          {
             if (one.getPrincipal().equalsIgnoreCase(username))
-               assertTrue("Permissions size is incorrect", one.getPermissions().size() == 1);
-            assertTrue("Permissions does not match", one.getPermissions().contains("cmis:read"));
+               assertTrue("Permissions size is incorrect.", one.getPermissions().size() == 1);
+            assertTrue("Permissions does not match.", one.getPermissions().contains("cmis:read"));
          }
       }
       finally
@@ -1477,7 +1385,7 @@ public class ObjectTest extends BaseTest
             getConnection().createFolder(testroot.getObjectId(),
                getPropsMap(CmisConstants.FOLDER, "testCreateFolder_NameConstraint"), null, null, null);
          ObjectData res = getStorage().getObjectById(docId);
-         assertFalse("Names must not match;", res.getName().equals("f1"));
+         assertFalse("Names must not match.", res.getName().equals("testCreateFolder_NameConstraint"));
       }
       catch (NameConstraintViolationException ex)
       {
@@ -1488,7 +1396,7 @@ public class ObjectTest extends BaseTest
    /**
     * 2.2.4.3.3
     * The Repository MUST throw this exception if the cmis:objectTypeId property 
-    * value is not an Object-Type whose baseType is “Folder”.
+    * value is not an Object-Type whose baseType is "Folder".
     * @throws Exception
     */
    @Test
@@ -1498,16 +1406,10 @@ public class ObjectTest extends BaseTest
       String typeID = null;
 
       Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-            "f1", true, null, null);
-
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.POLICY, CmisConstants.NAME);
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.POLICY, CmisConstants.OBJECT_TYPE_ID);
 
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
@@ -1526,7 +1428,7 @@ public class ObjectTest extends BaseTest
       try
       {
          docId = getConnection().createFolder(testroot.getObjectId(), properties, null, null, null);
-         fail("ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -1554,22 +1456,12 @@ public class ObjectTest extends BaseTest
       String typeID = null;
 
       Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-            "f1", true, null, null);
-
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.NAME);
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
-
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.OBJECT_TYPE_ID);
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefAllowedChilds =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, PropertyType.ID,
-            CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, null,
-            CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, false, false, false, false, false, Updatability.READONLY,
-            "Allowed childs", null, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS);
 
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
@@ -1596,7 +1488,7 @@ public class ObjectTest extends BaseTest
             getConnection().createFolder(f1.getObjectId(),
                getPropsMap(CmisConstants.FOLDER, "testCreateFolder_ConstraintExceptionNotAllowedChild2"), null, null,
                null);
-         fail("ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -1607,7 +1499,13 @@ public class ObjectTest extends BaseTest
          if (f1 != null)
             getStorage().deleteObject(f1, true);
          if (docId != null)
-            getStorage().deleteObject(getStorage().getObjectById(docId), true);
+            try
+            {
+               getStorage().deleteObject(getStorage().getObjectById(docId), true);
+            }
+            catch (ObjectNotFoundException e)
+            {
+            };
          if (typeID != null)
             getStorage().removeType(typeID);
       }
@@ -1615,7 +1513,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.3.3
-    * The “controllablePolicy” attribute of the Object-Type definition specified by the 
+    * The "controllablePolicy" attribute of the Object-Type definition specified by the 
     * cmis:objectTypeId property value is set to FALSE and at least one policy is provided.
     * @throws Exception
     */
@@ -1632,23 +1530,14 @@ public class ObjectTest extends BaseTest
       String typeID = null;
 
       Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-            "f1", true, null, null);
-
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.NAME);
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
-
-      //fPropertyDefinitions.put(CmisConstants.NAME, fPropDefName);
-      //fPropertyDefinitions.put(CmisConstants.OBJECT_TYPE_ID, fPropDefObjectTypeId);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.OBJECT_TYPE_ID);
 
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
-         fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "f1"));
+         fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "CreateFolder_ConstraintExceptionF1"));
       properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
          .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(),
          "cmis:objecttype16"));
@@ -1667,7 +1556,7 @@ public class ObjectTest extends BaseTest
       try
       {
          docId = getConnection().createFolder(testroot.getObjectId(), properties, null, null, policies);
-         fail("ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -1686,7 +1575,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.3.3
-    * The “controllableACL” attribute of the Object-Type definition specified 
+    * The "controllableACL" attribute of the Object-Type definition specified 
     * by the cmis:objectTypeId property value is set to FALSE and at least one ACE is provided.
     * @throws Exception
     */
@@ -1702,16 +1591,10 @@ public class ObjectTest extends BaseTest
       String typeID = null;
 
       Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-            "f1", true, null, null);
-
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.NAME);
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.OBJECT_TYPE_ID);
 
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
@@ -1733,7 +1616,7 @@ public class ObjectTest extends BaseTest
       try
       {
          docId = getConnection().createFolder(testroot.getObjectId(), properties, addACL, null, null);
-         fail("ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -1763,18 +1646,11 @@ public class ObjectTest extends BaseTest
       }
       String docId = null;
       String typeID = null;
-
       Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-            "f1", true, null, null);
-
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.NAME);
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.OBJECT_TYPE_ID);
 
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
@@ -1796,7 +1672,7 @@ public class ObjectTest extends BaseTest
       try
       {
          docId = getConnection().createFolder(testroot.getObjectId(), properties, addACL, null, null);
-         fail("ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -1824,29 +1700,25 @@ public class ObjectTest extends BaseTest
          //SKIP
          return;
       }
-
       ObjectData obj = null;
       ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
       DocumentData doc1 =
-         getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_Simple1"), cs, null, null,
-            VersioningState.MAJOR);
+         getStorage()
+            .createDocument(testroot, documentTypeDefinition,
+               getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_Simple1"), cs, null, null,
+               VersioningState.NONE);
       DocumentData doc2 =
-         getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_Simple2"), cs, null, null,
-            VersioningState.MAJOR);
+         getStorage()
+            .createDocument(testroot, documentTypeDefinition,
+               getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_Simple2"), cs, null, null,
+               VersioningState.NONE);
 
       Map<String, Property<?>> props = getPropsMap("cmis:relationship", "objecttest_rel1");
 
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefSource =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.SOURCE_ID, PropertyType.ID,
-            CmisConstants.SOURCE_ID, CmisConstants.SOURCE_ID, null, CmisConstants.SOURCE_ID, true, false, false, false,
-            false, Updatability.READONLY, "SourceId", true, null, null);
-
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.SOURCE_ID);
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefTarget =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.TARGET_ID, PropertyType.ID,
-            CmisConstants.TARGET_ID, CmisConstants.TARGET_ID, null, CmisConstants.TARGET_ID, false, false, false,
-            false, false, Updatability.READONLY, "TargetId", null, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.TARGET_ID);
 
       props.put(CmisConstants.SOURCE_ID, new IdProperty(fPropDefSource.getId(), fPropDefSource.getQueryName(),
          fPropDefSource.getLocalName(), fPropDefSource.getDisplayName(), doc1.getObjectId()));
@@ -1855,9 +1727,9 @@ public class ObjectTest extends BaseTest
 
       String docId = getConnection().createRelationship(props, null, null, null);
       obj = getStorage().getObjectById(docId);
-      assertTrue("Cmis object types does not match;", obj.getTypeId().equals("cmis:relationship"));
-      assertTrue("Cmis objects ID does not match;", doc1.getObjectId().equals(((RelationshipData)obj).getSourceId()));
-      assertTrue("Cmis object ID  does not match;", doc2.getObjectId().equals(((RelationshipData)obj).getTargetId()));
+      assertTrue("Cmis object types does not match.", obj.getTypeId().equals("cmis:relationship"));
+      assertTrue("Cmis objects ID does not match.", doc1.getObjectId().equals(((RelationshipData)obj).getSourceId()));
+      assertTrue("Cmis object ID  does not match.", doc2.getObjectId().equals(((RelationshipData)obj).getTargetId()));
    }
 
    /**
@@ -1878,46 +1750,26 @@ public class ObjectTest extends BaseTest
       String typeID = null;
       try
       {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ApplyPolicy1"), cs, null, null,
-               VersioningState.MAJOR);
-         DocumentData doc2 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ApplyPolicy2"), cs, null, null,
-               VersioningState.MAJOR);
+         DocumentData doc1 = createDocument(testroot, "testCreateRelationship_ApplyPolicy1", "1234567890aBcDE");
+         DocumentData doc2 = createDocument(testroot, "testCreateRelationship_ApplyPolicy2", "1234567890aBcDE");
 
          Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
          Map<String, Property<?>> props = new HashMap<String, Property<?>>();
 
-         org.xcmis.spi.model.PropertyDefinition<?> fPropDefSource =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.SOURCE_ID, PropertyType.ID,
-               CmisConstants.SOURCE_ID, CmisConstants.SOURCE_ID, null, CmisConstants.SOURCE_ID, true, false, false,
-               false, false, Updatability.READONLY, "SourceId", true, null, null);
-
-         org.xcmis.spi.model.PropertyDefinition<?> fPropDefTarget =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.TARGET_ID, PropertyType.ID,
-               CmisConstants.TARGET_ID, CmisConstants.TARGET_ID, null, CmisConstants.TARGET_ID, false, false, false,
-               false, false, Updatability.READONLY, "TargetId", null, null, null);
-
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-               CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-               "rel1", true, null, null);
-
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.NAME);
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-               CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-               false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.OBJECT_TYPE_ID);
+         org.xcmis.spi.model.PropertyDefinition<?> fPropDefSource =
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.SOURCE_ID);
+         org.xcmis.spi.model.PropertyDefinition<?> fPropDefTarget =
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.TARGET_ID);
 
          props.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
             fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "objecttest_rel2"));
-
          props.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
             .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(),
             "cmis:objecttype22"));
-
          props.put(CmisConstants.SOURCE_ID, new IdProperty(fPropDefSource.getId(), fPropDefSource.getQueryName(),
             fPropDefSource.getLocalName(), fPropDefSource.getDisplayName(), doc1.getObjectId()));
          props.put(CmisConstants.TARGET_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
@@ -1935,13 +1787,13 @@ public class ObjectTest extends BaseTest
          policies.add(policy.getObjectId());
          String docId = getConnection().createRelationship(props, null, null, policies);
          obj = getStorage().getObjectById(docId);
-         assertTrue("Object policies size is incorrect;", obj.getPolicies().size() == 1);
+         assertTrue("Object policies size is incorrect.", obj.getPolicies().size() == 1);
          Iterator<PolicyData> it = obj.getPolicies().iterator();
          while (it.hasNext())
          {
             PolicyData one = it.next();
-            assertTrue("POlicy names does not match", one.getName().equals("object_policy6"));
-            assertTrue("Policy text does not match", one.getPolicyText().equals("testPolicyText"));
+            assertTrue("Policy names does not match.", one.getName().equals("object_policy6"));
+            assertTrue("Policy text does not match.", one.getPolicyText().equals("testPolicyText"));
             obj.removePolicy(one);
          }
       }
@@ -1980,46 +1832,26 @@ public class ObjectTest extends BaseTest
       String typeID = null;
       try
       {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_AddACL1"), cs, null, null,
-               VersioningState.MAJOR);
-         DocumentData doc2 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_AddACL2"), cs, null, null,
-               VersioningState.MAJOR);
+         DocumentData doc1 = createDocument(testroot, "testCreateRelationship_AddACL1", "1234567890aBcDE");
+         DocumentData doc2 = createDocument(testroot, "testCreateRelationship_AddACL2", "1234567890aBcDE");
 
          Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
          Map<String, Property<?>> props = new HashMap<String, Property<?>>();
 
-         org.xcmis.spi.model.PropertyDefinition<?> fPropDefSource =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.SOURCE_ID, PropertyType.ID,
-               CmisConstants.SOURCE_ID, CmisConstants.SOURCE_ID, null, CmisConstants.SOURCE_ID, true, false, false,
-               false, false, Updatability.READONLY, "SourceId", true, null, null);
-
-         org.xcmis.spi.model.PropertyDefinition<?> fPropDefTarget =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.TARGET_ID, PropertyType.ID,
-               CmisConstants.TARGET_ID, CmisConstants.TARGET_ID, null, CmisConstants.TARGET_ID, false, false, false,
-               false, false, Updatability.READONLY, "TargetId", null, null, null);
-
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-               CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-               "rel1", true, null, null);
-
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.NAME);
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-               CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-               false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.OBJECT_TYPE_ID);
+         org.xcmis.spi.model.PropertyDefinition<?> fPropDefSource =
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.SOURCE_ID);
+         org.xcmis.spi.model.PropertyDefinition<?> fPropDefTarget =
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.TARGET_ID);
 
          props.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
             fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "objecttest_rel3"));
-
          props.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
             .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(),
             "cmis:objecttype18"));
-
          props.put(CmisConstants.SOURCE_ID, new IdProperty(fPropDefSource.getId(), fPropDefSource.getQueryName(),
             fPropDefSource.getLocalName(), fPropDefSource.getDisplayName(), doc1.getObjectId()));
          props.put(CmisConstants.TARGET_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
@@ -2041,8 +1873,8 @@ public class ObjectTest extends BaseTest
          {
             if (one.getPrincipal().equalsIgnoreCase(username))
             {
-               assertTrue("Permissions size is incorrect", one.getPermissions().size() == 1);
-               assertTrue("Permissions does not match", one.getPermissions().contains("cmis:read"));
+               assertTrue("Permissions size is incorrect.", one.getPermissions().size() == 1);
+               assertTrue("Permissions does not match.", one.getPermissions().contains("cmis:read"));
             }
          }
       }
@@ -2070,18 +1902,12 @@ public class ObjectTest extends BaseTest
          return;
       }
       ObjectData obj = null;
-
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
       DocumentData doc1 =
-         getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_NameConstraintViolationException1"), cs, null,
-            null, VersioningState.MAJOR);
+         createDocument(testroot, "testCreateRelationship_NameConstraintViolationException1", "1234567890aBcDE");
       DocumentData doc2 =
-         getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_NameConstraintViolationException2"), cs, null,
-            null, VersioningState.MAJOR);
-      Map<String, Property<?>> props = new HashMap<String, Property<?>>();
+         createDocument(testroot, "testCreateRelationship_NameConstraintViolationException2", "1234567890aBcDE");
 
+      Map<String, Property<?>> props = new HashMap<String, Property<?>>();
       Map<String, Property<?>> props2 = new HashMap<String, Property<?>>();
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefName1 =
          PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
@@ -2092,33 +1918,20 @@ public class ObjectTest extends BaseTest
 
       getStorage().createRelationship(doc2, doc1, relationshipTypeDefinition, props2, null, null);
 
-      org.xcmis.spi.model.PropertyDefinition<?> fPropDefSource =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.SOURCE_ID, PropertyType.ID,
-            CmisConstants.SOURCE_ID, CmisConstants.SOURCE_ID, null, CmisConstants.SOURCE_ID, true, false, false, false,
-            false, Updatability.READONLY, "SourceId", true, null, null);
-
-      org.xcmis.spi.model.PropertyDefinition<?> fPropDefTarget =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.TARGET_ID, PropertyType.ID,
-            CmisConstants.TARGET_ID, CmisConstants.TARGET_ID, null, CmisConstants.TARGET_ID, false, false, false,
-            false, false, Updatability.READONLY, "TargetId", null, null, null);
-
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-            "rel", true, null, null);
-
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.NAME);
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.OBJECT_TYPE_ID);
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefSource =
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.SOURCE_ID);
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefTarget =
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.TARGET_ID);
 
       props.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(), fPropDefName
          .getLocalName(), fPropDefName.getDisplayName(), "objecttest_rel4"));
-
       props.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
          .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(),
          "cmis:relationship"));
-
       props.put(CmisConstants.SOURCE_ID, new IdProperty(fPropDefSource.getId(), fPropDefSource.getQueryName(),
          fPropDefSource.getLocalName(), fPropDefSource.getDisplayName(), doc1.getObjectId()));
       props.put(CmisConstants.TARGET_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
@@ -2127,7 +1940,7 @@ public class ObjectTest extends BaseTest
       {
          String docId = getConnection().createRelationship(props, null, null, null);
          obj = getStorage().getObjectById(docId);
-         assertFalse("Names must not match;", obj.getName().equals("objecttest_rel4"));
+         assertFalse("Names must not match.", obj.getName().equals("objecttest_rel4"));
       }
       catch (NameConstraintViolationException ex)
       {
@@ -2142,7 +1955,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.4.3
-    * The cmis:objectTypeId property value is not an Object-Type whose baseType is “Relationship”.
+    * The cmis:objectTypeId property value is not an Object-Type whose baseType is "Relationship".
     * @throws Exception
     */
    @Test
@@ -2154,46 +1967,27 @@ public class ObjectTest extends BaseTest
          return;
       }
       ObjectData obj = null;
-
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
       DocumentData doc1 =
-         getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ConstraintExceptionWrongBaseType1"), cs, null,
-            null, VersioningState.MAJOR);
+         createDocument(testroot, "testCreateRelationship_ConstraintExceptionWrongBaseType1", "1234567890aBcDE");
       DocumentData doc2 =
-         getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ConstraintExceptionWrongBaseType2"), cs, null,
-            null, VersioningState.MAJOR);
+         createDocument(testroot, "testCreateRelationship_ConstraintExceptionWrongBaseType2", "1234567890aBcDE");
 
       Map<String, Property<?>> props = new HashMap<String, Property<?>>();
 
-      org.xcmis.spi.model.PropertyDefinition<?> fPropDefSource =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.SOURCE_ID, PropertyType.ID,
-            CmisConstants.SOURCE_ID, CmisConstants.SOURCE_ID, null, CmisConstants.SOURCE_ID, true, false, false, false,
-            false, Updatability.READONLY, "SourceId", true, null, null);
-
-      org.xcmis.spi.model.PropertyDefinition<?> fPropDefTarget =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.TARGET_ID, PropertyType.ID,
-            CmisConstants.TARGET_ID, CmisConstants.TARGET_ID, null, CmisConstants.TARGET_ID, false, false, false,
-            false, false, Updatability.READONLY, "TargetId", null, null, null);
-
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-            "rel", true, null, null);
-
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.NAME);
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.OBJECT_TYPE_ID);
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefSource =
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.SOURCE_ID);
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefTarget =
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.TARGET_ID);
 
       props.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(), fPropDefName
          .getLocalName(), fPropDefName.getDisplayName(), "objecttest_rel5"));
-
       props.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
          .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(),
          CmisConstants.POLICY));
-
       props.put(CmisConstants.SOURCE_ID, new IdProperty(fPropDefSource.getId(), fPropDefSource.getQueryName(),
          fPropDefSource.getLocalName(), fPropDefSource.getDisplayName(), doc1.getObjectId()));
       props.put(CmisConstants.TARGET_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
@@ -2203,7 +1997,7 @@ public class ObjectTest extends BaseTest
       {
          String docId = getConnection().createRelationship(props, null, null, null);
          obj = getStorage().getObjectById(docId);
-         fail("ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -2218,9 +2012,9 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.4.3
-    * The sourceObjectId’s ObjectType is not in the list of “allowedSourceTypes” specified by 
+    * The sourceObjectId’s ObjectType is not in the list of "allowedSourceTypes" specified by 
     * the Object-Type definition specified by cmis:objectTypeId property value.
-    * The targetObjectId’s ObjectType is not in the list of “allowedTargetTypes” specified by 
+    * The targetObjectId’s ObjectType is not in the list of "allowedTargetTypes" specified by 
     * the Object-Type definition specified by cmis:objectTypeId property value.
     * @throws Exception
     */
@@ -2237,45 +2031,28 @@ public class ObjectTest extends BaseTest
       String typeID = null;
       try
       {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ConstraintExceptionNotAllowedTypes1"), cs,
-               null, null, VersioningState.MAJOR);
+            createDocument(testroot, "testCreateRelationship_ConstraintExceptionNotAllowedTypes1", "1234567890aBcDE");
          DocumentData doc2 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ConstraintExceptionNotAllowedTypes2"), cs,
-               null, null, VersioningState.MAJOR);
+            createDocument(testroot, "testCreateRelationship_ConstraintExceptionNotAllowedTypes2", "1234567890aBcDE");
 
          Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
          Map<String, Property<?>> props = new HashMap<String, Property<?>>();
 
-         org.xcmis.spi.model.PropertyDefinition<?> fPropDefSource =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.SOURCE_ID, PropertyType.ID,
-               CmisConstants.SOURCE_ID, CmisConstants.SOURCE_ID, null, CmisConstants.SOURCE_ID, true, false, false,
-               false, false, Updatability.READONLY, "SourceId", true, null, null);
-
-         org.xcmis.spi.model.PropertyDefinition<?> fPropDefTarget =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.TARGET_ID, PropertyType.ID,
-               CmisConstants.TARGET_ID, CmisConstants.TARGET_ID, null, CmisConstants.TARGET_ID, false, false, false,
-               false, false, Updatability.READONLY, "TargetId", null, null, null);
-
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-               CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-               "rel", true, null, null);
-
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.NAME);
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-               CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-               false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.OBJECT_TYPE_ID);
+         org.xcmis.spi.model.PropertyDefinition<?> fPropDefSource =
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.SOURCE_ID);
+         org.xcmis.spi.model.PropertyDefinition<?> fPropDefTarget =
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.TARGET_ID);
 
          props.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
-            fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "rel1"));
-
+            fPropDefName.getLocalName(), fPropDefName.getDisplayName(),
+            "CreateRelationship_ConstraintExceptionNotAllowedTypes_rel1"));
          props.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
             .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(), "cmis:my"));
-
          props.put(CmisConstants.SOURCE_ID, new IdProperty(fPropDefSource.getId(), fPropDefSource.getQueryName(),
             fPropDefSource.getLocalName(), fPropDefSource.getDisplayName(), doc1.getObjectId()));
          props.put(CmisConstants.TARGET_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
@@ -2291,7 +2068,7 @@ public class ObjectTest extends BaseTest
 
          String docId = getConnection().createRelationship(props, null, null, null);
          obj = getStorage().getObjectById(docId);
-         fail("ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -2308,7 +2085,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.4.3
-    * The “controllablePolicy” attribute of the Object-Type definition specified by the 
+    * The "controllablePolicy" attribute of the Object-Type definition specified by the 
     * cmis:objectTypeId property value is set to FALSE and at least one policy is provided.
     * @throws Exception
     */
@@ -2324,46 +2101,28 @@ public class ObjectTest extends BaseTest
       String typeID = null;
       PolicyData policy = null;
 
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
       DocumentData doc1 =
-         getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ConstraintExceptionNotControllablePolicy1"),
-            cs, null, null, VersioningState.MAJOR);
+         createDocument(testroot, "testCreateRelationship_ConstraintExceptionNotControllablePolicy1", "1234567890aBcDE");
       DocumentData doc2 =
-         getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ConstraintExceptionNotControllablePolicy2"),
-            cs, null, null, VersioningState.MAJOR);
+         createDocument(testroot, "testCreateRelationship_ConstraintExceptionNotControllablePolicy2", "1234567890aBcDE");
 
       Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
       Map<String, Property<?>> props = new HashMap<String, Property<?>>();
 
-      org.xcmis.spi.model.PropertyDefinition<?> fPropDefSource =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.SOURCE_ID, PropertyType.ID,
-            CmisConstants.SOURCE_ID, CmisConstants.SOURCE_ID, null, CmisConstants.SOURCE_ID, true, false, false, false,
-            false, Updatability.READONLY, "SourceId", true, null, null);
-
-      org.xcmis.spi.model.PropertyDefinition<?> fPropDefTarget =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.TARGET_ID, PropertyType.ID,
-            CmisConstants.TARGET_ID, CmisConstants.TARGET_ID, null, CmisConstants.TARGET_ID, false, false, false,
-            false, false, Updatability.READONLY, "TargetId", null, null, null);
-
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-            "rel1", true, null, null);
-
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.NAME);
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.OBJECT_TYPE_ID);
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefSource =
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.SOURCE_ID);
+      org.xcmis.spi.model.PropertyDefinition<?> fPropDefTarget =
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.TARGET_ID);
 
       props.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(), fPropDefName
          .getLocalName(), fPropDefName.getDisplayName(), "objecttest_rel7"));
-
       props.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
          .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(),
          "cmis:objecttype32"));
-
       props.put(CmisConstants.SOURCE_ID, new IdProperty(fPropDefSource.getId(), fPropDefSource.getQueryName(),
          fPropDefSource.getLocalName(), fPropDefSource.getDisplayName(), doc1.getObjectId()));
       props.put(CmisConstants.TARGET_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
@@ -2383,7 +2142,7 @@ public class ObjectTest extends BaseTest
       {
          String docId = getConnection().createRelationship(props, null, null, policies);
          obj = getStorage().getObjectById(docId);
-         fail("ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException xe)
       {
@@ -2402,7 +2161,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.4.3
-    * The “controllableACL” attribute of the Object-Type definition specified by the 
+    * The "controllableACL" attribute of the Object-Type definition specified by the 
     * cmis:objectTypeId property value is set to FALSE and at least one ACE is provided.
     * @throws Exception
     */
@@ -2424,46 +2183,28 @@ public class ObjectTest extends BaseTest
       String typeID = null;
       try
       {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ConstraintExceptionNotControllableACL1"),
-               cs, null, null, VersioningState.MAJOR);
+            createDocument(testroot, "testCreateRelationship_ConstraintExceptionNotControllableACL1", "1234567890aBcDE");
          DocumentData doc2 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ConstraintExceptionNotControllableACL2"),
-               cs, null, null, VersioningState.MAJOR);
+            createDocument(testroot, "testCreateRelationship_ConstraintExceptionNotControllableACL2", "1234567890aBcDE");
 
          Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
          Map<String, Property<?>> props = new HashMap<String, Property<?>>();
 
-         org.xcmis.spi.model.PropertyDefinition<?> fPropDefSource =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.SOURCE_ID, PropertyType.ID,
-               CmisConstants.SOURCE_ID, CmisConstants.SOURCE_ID, null, CmisConstants.SOURCE_ID, true, false, false,
-               false, false, Updatability.READONLY, "SourceId", true, null, null);
-
-         org.xcmis.spi.model.PropertyDefinition<?> fPropDefTarget =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.TARGET_ID, PropertyType.ID,
-               CmisConstants.TARGET_ID, CmisConstants.TARGET_ID, null, CmisConstants.TARGET_ID, false, false, false,
-               false, false, Updatability.READONLY, "TargetId", null, null, null);
-
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-               CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-               "rel1", true, null, null);
-
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.NAME);
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-               CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-               false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.OBJECT_TYPE_ID);
+         org.xcmis.spi.model.PropertyDefinition<?> fPropDefSource =
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.SOURCE_ID);
+         org.xcmis.spi.model.PropertyDefinition<?> fPropDefTarget =
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.TARGET_ID);
 
          props.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
             fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "objecttest_rel8"));
-
          props.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
             .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(),
             "cmis:objecttype21"));
-
          props.put(CmisConstants.SOURCE_ID, new IdProperty(fPropDefSource.getId(), fPropDefSource.getQueryName(),
             fPropDefSource.getLocalName(), fPropDefSource.getDisplayName(), doc1.getObjectId()));
          props.put(CmisConstants.TARGET_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
@@ -2481,7 +2222,7 @@ public class ObjectTest extends BaseTest
 
          String docId = getConnection().createRelationship(props, addACL, null, null);
          obj = getStorage().getObjectById(docId);
-         fail("ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException e)
       {
@@ -2514,51 +2255,32 @@ public class ObjectTest extends BaseTest
          //SKIP
          return;
       }
-
       ObjectData obj = null;
       String typeID = null;
       try
       {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
          DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ConstraintExceptionUnknownACE1"), cs, null,
-               null, VersioningState.MAJOR);
+            createDocument(testroot, "testCreateRelationship_ConstraintExceptionUnknownACE1", "1234567890aBcDE");
          DocumentData doc2 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_ConstraintExceptionUnknownACE2"), cs, null,
-               null, VersioningState.MAJOR);
+            createDocument(testroot, "testCreateRelationship_ConstraintExceptionUnknownACE2", "1234567890aBcDE");
 
          Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
          Map<String, Property<?>> props = new HashMap<String, Property<?>>();
 
-         org.xcmis.spi.model.PropertyDefinition<?> fPropDefSource =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.SOURCE_ID, PropertyType.ID,
-               CmisConstants.SOURCE_ID, CmisConstants.SOURCE_ID, null, CmisConstants.SOURCE_ID, true, false, false,
-               false, false, Updatability.READONLY, "SourceId", true, null, null);
-
-         org.xcmis.spi.model.PropertyDefinition<?> fPropDefTarget =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.TARGET_ID, PropertyType.ID,
-               CmisConstants.TARGET_ID, CmisConstants.TARGET_ID, null, CmisConstants.TARGET_ID, false, false, false,
-               false, false, Updatability.READONLY, "TargetId", null, null, null);
-
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-               CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-               "rel1", true, null, null);
-
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.NAME);
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-               CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-               false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.OBJECT_TYPE_ID);
+         org.xcmis.spi.model.PropertyDefinition<?> fPropDefSource =
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.SOURCE_ID);
+         org.xcmis.spi.model.PropertyDefinition<?> fPropDefTarget =
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.TARGET_ID);
 
          props.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
             fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "objecttest_rel9"));
-
          props.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
             .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(),
             "cmis:objecttype22"));
-
          props.put(CmisConstants.SOURCE_ID, new IdProperty(fPropDefSource.getId(), fPropDefSource.getQueryName(),
             fPropDefSource.getLocalName(), fPropDefSource.getDisplayName(), doc1.getObjectId()));
          props.put(CmisConstants.TARGET_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
@@ -2575,7 +2297,7 @@ public class ObjectTest extends BaseTest
 
          String docId = getConnection().createRelationship(props, addACL, null, null);
          obj = getStorage().getObjectById(docId);
-         fail("ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException e)
       {
@@ -2614,8 +2336,8 @@ public class ObjectTest extends BaseTest
 
          String docId = getConnection().createPolicy(testroot.getObjectId(), properties, null, null, null);
          obj = getStorage().getObjectById(docId);
-         assertTrue("Cmis object types does not match", obj.getTypeId().equals(CmisConstants.POLICY));
-         assertTrue("Cmis policy text does not match", ((PolicyData)obj).getPolicyText().equals("testPolicyText"));
+         assertTrue("Cmis object types does not match.", obj.getTypeId().equals(CmisConstants.POLICY));
+         assertTrue("Cmis policy text does not match.", ((PolicyData)obj).getPolicyText().equals("testPolicyText"));
       }
       finally
       {
@@ -2643,7 +2365,7 @@ public class ObjectTest extends BaseTest
       try
       {
          org.xcmis.spi.model.PropertyDefinition<?> def =
-            PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.POLICY, CmisConstants.POLICY_TEXT);
          Map<String, Property<?>> properties = getPropsMap(CmisConstants.POLICY, "testCreatePolicy_AddPolicy");
          properties.put(CmisConstants.POLICY_TEXT, new StringProperty(def.getId(), def.getQueryName(), def
             .getLocalName(), def.getDisplayName(), "testPolicyText1"));
@@ -2658,8 +2380,8 @@ public class ObjectTest extends BaseTest
          while (it.hasNext())
          {
             PolicyData one = it.next();
-            assertTrue("Policy names does not match;", one.getName().equals("testCreatePolicy_AddPolicy1"));
-            assertTrue("Policy text does not match", one.getPolicyText().equals("testPolicyText"));
+            assertTrue("Policy names does not match.", one.getName().equals("testCreatePolicy_AddPolicy1"));
+            assertTrue("Policy text does not match.", one.getPolicyText().equals("testPolicyText"));
             obj.removePolicy(one);
          }
       }
@@ -2689,7 +2411,7 @@ public class ObjectTest extends BaseTest
       try
       {
          org.xcmis.spi.model.PropertyDefinition<?> def =
-            PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.POLICY, CmisConstants.POLICY_TEXT);
          Map<String, Property<?>> properties = getPropsMap("cmis:policy", "testCreatePolicy_AddACL");
          properties.put(CmisConstants.POLICY_TEXT, new StringProperty(def.getId(), def.getQueryName(), def
             .getLocalName(), def.getDisplayName(), "testPolicyText"));
@@ -2703,8 +2425,8 @@ public class ObjectTest extends BaseTest
          {
             if (one.getPrincipal().equalsIgnoreCase(username))
             {
-               assertTrue("Permissions size is incorrect", one.getPermissions().size() == 1);
-               assertTrue("Permissions does not match", one.getPermissions().contains("cmis:read"));
+               assertTrue("Permissions size is incorrect.", one.getPermissions().size() == 1);
+               assertTrue("Permissions does not match.", one.getPermissions().contains("cmis:read"));
             }
          }
       }
@@ -2735,7 +2457,7 @@ public class ObjectTest extends BaseTest
       try
       {
          org.xcmis.spi.model.PropertyDefinition<?> def =
-            PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.POLICY, CmisConstants.POLICY_TEXT);
          Map<String, Property<?>> properties = getPropsMap("cmis:policy", policyname);
          properties.put(CmisConstants.POLICY_TEXT, new StringProperty(def.getId(), def.getQueryName(), def
             .getLocalName(), def.getDisplayName(), "testPolicyText1"));
@@ -2743,7 +2465,7 @@ public class ObjectTest extends BaseTest
          obj = null;
          String docId = getConnection().createPolicy(testroot.getObjectId(), properties, null, null, null);
          obj = getStorage().getObjectById(docId);
-         assertFalse("Names must not match;", obj.getName().equals(policyname));
+         assertFalse("Names must not match.", obj.getName().equals(policyname));
       }
       catch (NameConstraintViolationException ex)
       {
@@ -2761,7 +2483,7 @@ public class ObjectTest extends BaseTest
    /**
     * 2.2.4.3.3
     * The Repository MUST throw this exception if  to  The cmis:objectTypeId 
-    * property value is not an Object-Type whose baseType is “Policy”.
+    * property value is not an Object-Type whose baseType is "Policy".
     * @throws Exception
     */
    @Test
@@ -2773,17 +2495,11 @@ public class ObjectTest extends BaseTest
          return;
       }
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-            CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-            "f1", true, null, null);
-
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.POLICY, CmisConstants.NAME);
       org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
-         PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-            CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-            false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
-
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.POLICY, CmisConstants.OBJECT_TYPE_ID);
       org.xcmis.spi.model.PropertyDefinition<?> def =
-         PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
+         PropertyDefinitions.getPropertyDefinition(CmisConstants.POLICY, CmisConstants.POLICY_TEXT);
 
       Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
       properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
@@ -2797,7 +2513,7 @@ public class ObjectTest extends BaseTest
       try
       {
          getConnection().createPolicy(testroot.getObjectId(), properties, null, null, null);
-         fail("ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -2826,10 +2542,8 @@ public class ObjectTest extends BaseTest
          Map<String, Property<?>> folderprops = getPropsMap(CmisConstants.FOLDER, "testroot2");
 
          org.xcmis.spi.model.PropertyDefinition<?> def =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, PropertyType.ID,
-               CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, null,
-               CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, false, false, false, false, false, Updatability.READONLY,
-               "allowed", null, null, null);
+            PropertyDefinitions
+               .getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS);
          folderprops.put(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, new IdProperty(def.getId(), def.getQueryName(),
             def.getLocalName(), def.getDisplayName(), CmisConstants.DOCUMENT));
 
@@ -2838,15 +2552,9 @@ public class ObjectTest extends BaseTest
          Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
 
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-               CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-               "f1", true, null, null);
-
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.POLICY, CmisConstants.NAME);
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-               CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-               false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
-
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.POLICY, CmisConstants.OBJECT_TYPE_ID);
          org.xcmis.spi.model.PropertyDefinition<?> def2 =
             PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
 
@@ -2856,20 +2564,20 @@ public class ObjectTest extends BaseTest
                fPropDefName.getDisplayName(), "estCreatePolicy_ConstraintExceptionNotAllowed"));
          properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
             .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(),
-            "cmis:mypolicy"));
+            "cmis:mypolicys"));
          properties.put(CmisConstants.POLICY_TEXT, new StringProperty(def2.getId(), def2.getQueryName(), def2
             .getLocalName(), def2.getDisplayName(), "testPolicyText1"));
 
          TypeDefinition newType =
-            new TypeDefinition("cmis:mypolicy", BaseType.POLICY, "cmis:mypolicy", "cmis:mypolicy", "", "cmis:policy",
-               "cmis:mypolicy", "cmis:mypolicy", true, false, true, true, false, false, false, true, null, null,
-               ContentStreamAllowed.NOT_ALLOWED, fPropertyDefinitions);
+            new TypeDefinition("cmis:mypolicys", BaseType.POLICY, "cmis:mypolicys", "cmis:mypolicys", "",
+               "cmis:policy", "cmis:mypolicys", "cmis:mypolicys", true, false, true, true, false, false, false, true,
+               null, null, ContentStreamAllowed.NOT_ALLOWED, fPropertyDefinitions);
          typeID = getStorage().addType(newType);
          newType = getStorage().getTypeDefinition(typeID, true);
 
          String docId = getConnection().createPolicy(testroot2.getObjectId(), properties, null, null, null);
          obj = getStorage().getObjectById(docId);
-         fail("ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -2886,7 +2594,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.5.3
-    * The “controllablePolicy” attribute of the Object-Type definition specified by 
+    * The "controllablePolicy" attribute of the Object-Type definition specified by 
     * the cmis:objectTypeId property value is set to FALSE and at least one policy is provided.
     * @throws Exception
     */
@@ -2904,15 +2612,9 @@ public class ObjectTest extends BaseTest
          Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
 
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-               CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-               "f1", true, null, null);
-
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.POLICY, CmisConstants.NAME);
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-               CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-               false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
-
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.POLICY, CmisConstants.OBJECT_TYPE_ID);
          org.xcmis.spi.model.PropertyDefinition<?> def2 =
             PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
 
@@ -2939,7 +2641,7 @@ public class ObjectTest extends BaseTest
          policies.add(policy.getObjectId());
 
          getConnection().createPolicy(testroot.getObjectId(), properties, null, null, policies);
-         fail("ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -2954,7 +2656,7 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.5.3
-    * The “controllableACL” attribute of the Object-Type definition specified by the cmis:objectTypeId 
+    * The "controllableACL" attribute of the Object-Type definition specified by the cmis:objectTypeId 
     * property value is set to FALSE and at least one ACE is provided.
     * @throws Exception
     */
@@ -2972,15 +2674,9 @@ public class ObjectTest extends BaseTest
          Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
 
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-               CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-               "f1", true, null, null);
-
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.POLICY, CmisConstants.NAME);
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-               CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-               false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
-
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.POLICY, CmisConstants.OBJECT_TYPE_ID);
          org.xcmis.spi.model.PropertyDefinition<?> def2 =
             PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
 
@@ -3004,7 +2700,7 @@ public class ObjectTest extends BaseTest
          String username = "username";
          List<AccessControlEntry> addACL = createACL(username, "cmis:read");
          getConnection().createPolicy(testroot.getObjectId(), properties, addACL, null, null);
-         fail("ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -3042,7 +2738,7 @@ public class ObjectTest extends BaseTest
          String username = "username";
          List<AccessControlEntry> addACL = createACL(username, "cmis:unknown");
          getConnection().createPolicy(testroot.getObjectId(), properties, addACL, null, null);
-         fail("ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -3059,7 +2755,7 @@ public class ObjectTest extends BaseTest
    public void testGetAllowableActions_Simlpe() throws Exception
    {
       AllowableActions actions = getConnection().getAllowableActions(testroot.getObjectId());
-      assertNotNull("Allowable actions is null;", actions);
+      assertNotNull("Allowable actions is null.", actions);
    }
 
    /**
@@ -3073,8 +2769,8 @@ public class ObjectTest extends BaseTest
       CmisObject obj =
          getConnection().getObject(testroot.getObjectId(), false, IncludeRelationships.NONE, false, false, true, "",
             "*");
-      assertTrue("Names does not match;", obj.getObjectInfo().getName().equals("testroot"));
-      assertTrue("Object ID's does not match;", testroot.getObjectId().equals(obj.getObjectInfo().getId()));
+      assertEquals("Names does not match.", ROOT, obj.getObjectInfo().getName());
+      assertTrue("Object ID's does not match.", testroot.getObjectId().equals(obj.getObjectInfo().getId()));
    }
 
    /**
@@ -3094,7 +2790,7 @@ public class ObjectTest extends BaseTest
          if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
             continue;
          else
-            fail("Property filter does not work;");
+            fail("Property filter does not work.");
       }
    }
 
@@ -3106,13 +2802,7 @@ public class ObjectTest extends BaseTest
    @Test
    public void testGetObject_IncludeRelationships() throws Exception
    {
-
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-      DocumentData doc1 =
-         getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testGetObject_IncludeRelationships1"), cs, null, null,
-            VersioningState.MAJOR);
+      DocumentData doc1 = createDocument(testroot, "testGetObject_IncludeRelationships1", "1234567890aBcDE");
 
       RelationshipData reldata =
          getStorage().createRelationship(doc1, testroot, relationshipTypeDefinition,
@@ -3121,10 +2811,10 @@ public class ObjectTest extends BaseTest
       CmisObject obj =
          getConnection().getObject(testroot.getObjectId(), false, IncludeRelationships.TARGET, false, false, true, "",
             "*");
-      assertTrue("Relationships count is incorrect;", obj.getRelationship().size() == 1);
+      assertTrue("Relationships count is incorrect.", obj.getRelationship().size() == 1);
       for (CmisObject e : obj.getRelationship())
       {
-         assertTrue("Object ID's does not match;", reldata.getObjectId().equals(e.getObjectInfo().getId()));
+         assertTrue("Object ID's does not match.", reldata.getObjectId().equals(e.getObjectInfo().getId()));
       }
       getStorage().deleteObject(reldata, true);
    }
@@ -3155,10 +2845,10 @@ public class ObjectTest extends BaseTest
          CmisObject obj =
             getConnection().getObject(folder2.getObjectId(), false, IncludeRelationships.TARGET, true, false, true, "",
                "*");
-         assertTrue("Policy count is incorrect;", obj.getPolicyIds().size() == 1);
+         assertTrue("Policy count is incorrect.", obj.getPolicyIds().size() == 1);
          for (String e : obj.getPolicyIds())
          {
-            assertTrue("Object ID's does not match;", policy.getObjectId().equals(e));
+            assertTrue("Object ID's does not match.", policy.getObjectId().equals(e));
          }
       }
       finally
@@ -3189,7 +2879,7 @@ public class ObjectTest extends BaseTest
 
       DocumentData doc1 =
          getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testGetObject_IncludeACLs1"), cs, addACL, null, VersioningState.MAJOR);
+            getPropsMap(CmisConstants.DOCUMENT, "testGetObject_IncludeACLs1"), cs, addACL, null, VersioningState.NONE);
 
       CmisObject obj =
          getConnection().getObject(doc1.getObjectId(), false, IncludeRelationships.TARGET, true, true, true, "", "*");
@@ -3197,8 +2887,8 @@ public class ObjectTest extends BaseTest
       {
          if (one.getPrincipal().equalsIgnoreCase(username))
          {
-            assertTrue("Permissions size is incorrect", one.getPermissions().size() == 1);
-            assertTrue("Permissions does not match", one.getPermissions().contains("cmis:read"));
+            assertTrue("Permissions size is incorrect.", one.getPermissions().size() == 1);
+            assertTrue("Permissions does not match.", one.getPermissions().contains("cmis:read"));
          }
       }
    }
@@ -3215,7 +2905,7 @@ public class ObjectTest extends BaseTest
          getConnection().getObject(testroot.getObjectId(), true, IncludeRelationships.TARGET, false, false, true, "",
             "*");
       AllowableActions actions = obj.getAllowableActions();
-      assertNotNull("AllowableActions is null;", actions);
+      assertNotNull("AllowableActions is null.", actions);
    }
 
    /**
@@ -3230,7 +2920,7 @@ public class ObjectTest extends BaseTest
       {
          getConnection().getObject(testroot.getObjectId(), false, IncludeRelationships.NONE, false, false, false,
             "(,*", "*");
-         fail("FilterNotValidException must be thrown;");
+         fail("FilterNotValidException must be thrown.");
       }
       catch (FilterNotValidException ex)
       {
@@ -3248,13 +2938,13 @@ public class ObjectTest extends BaseTest
    public void testGetProperties_Filter() throws Exception
    {
       CmisObject obj = getConnection().getProperties(testroot.getObjectId(), true, "cmis:name,cmis:path");
-      assertNotNull("Get properties result is null", obj);
+      assertNotNull("Get properties result is null.", obj);
       for (Map.Entry<String, Property<?>> e : obj.getProperties().entrySet())
       {
          if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
             continue;
          else
-            fail("Property filter does not work;");
+            fail("Property filter does not work.");
       }
    }
 
@@ -3270,7 +2960,7 @@ public class ObjectTest extends BaseTest
       try
       {
          getConnection().getProperties(testroot.getObjectId(), true, "(,*");
-         fail("FilterNotValidException must be thrown;");
+         fail("FilterNotValidException must be thrown.");
       }
       catch (FilterNotValidException ex)
       {
@@ -3289,8 +2979,8 @@ public class ObjectTest extends BaseTest
       CmisObject obj =
          getConnection().getObjectByPath("/object_testroot", false, IncludeRelationships.NONE, false, false, true, "",
             "*");
-      assertTrue("Names does not match;", obj.getObjectInfo().getName().equals("object_testroot"));
-      assertTrue("Object ID's does not match;", testroot.getObjectId().equals(obj.getObjectInfo().getId()));
+      assertTrue("Names does not match.", obj.getObjectInfo().getName().equals("object_testroot"));
+      assertTrue("Object ID's does not match.", testroot.getObjectId().equals(obj.getObjectInfo().getId()));
    }
 
    /**
@@ -3310,7 +3000,7 @@ public class ObjectTest extends BaseTest
          if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
             continue;
          else
-            fail("Property filter does not work;");
+            fail("Property filter does not work.");
       }
    }
 
@@ -3322,16 +3012,8 @@ public class ObjectTest extends BaseTest
    @Test
    public void testGetObjectByPath_IncludeRelationships() throws Exception
    {
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-      FolderData folder2 =
-         getStorage().createFolder(testroot, folderTypeDefinition,
-            getPropsMap(CmisConstants.FOLDER, "testGetObjectByPathRelationships_folder"), null, null);
-
-      DocumentData doc1 =
-         getStorage().createDocument(folder2, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testGetObjectByPath_IncludeRelationships"), cs, null, null,
-            VersioningState.MAJOR);
+      FolderData folder2 = createFolder(testroot, "testGetObjectByPathRelationships_folder");
+      DocumentData doc1 = createDocument(testroot, "testGetObjectByPath_IncludeRelationships", "1234567890aBcDE");
 
       RelationshipData reldata =
          getStorage().createRelationship(doc1, folder2, relationshipTypeDefinition,
@@ -3340,10 +3022,10 @@ public class ObjectTest extends BaseTest
       CmisObject obj =
          getConnection().getObjectByPath("/object_testroot/testGetObjectByPathRelationships_folder", false,
             IncludeRelationships.TARGET, false, false, true, "", "*");
-      assertTrue("Incorect relationship size;", obj.getRelationship().size() == 1);
+      assertTrue("Incorect relationship size.", obj.getRelationship().size() == 1);
       for (CmisObject e : obj.getRelationship())
       {
-         assertTrue("Object ID's does not match;", reldata.getObjectId().equals(e.getObjectInfo().getId()));
+         assertTrue("Object ID's does not match.", reldata.getObjectId().equals(e.getObjectInfo().getId()));
       }
       getStorage().deleteObject(reldata, true);
    }
@@ -3362,9 +3044,7 @@ public class ObjectTest extends BaseTest
          return;
       }
       PolicyData policy = null;
-      FolderData folder2 =
-         getStorage().createFolder(testroot, folderTypeDefinition,
-            getPropsMap(CmisConstants.FOLDER, "testGetObjectByPath_IncludePolicyIDs"), null, null);
+      FolderData folder2 = createFolder(testroot, "testGetObjectByPath_IncludePolicyIDs");
 
       try
       {
@@ -3373,10 +3053,10 @@ public class ObjectTest extends BaseTest
          CmisObject obj =
             getConnection().getObjectByPath("/object_testroot/testGetObjectByPath_IncludePolicyIDs", false,
                IncludeRelationships.TARGET, true, false, true, "", "*");
-         assertTrue("Incorect policyIds size;", obj.getPolicyIds().size() == 1);
+         assertTrue("Incorect policyIds size.", obj.getPolicyIds().size() == 1);
          for (String e : obj.getPolicyIds())
          {
-            assertTrue("Object ID's does not match; ", policy.getObjectId().equals(e));
+            assertTrue("Object ID's does not match.", policy.getObjectId().equals(e));
          }
       }
       finally
@@ -3408,7 +3088,7 @@ public class ObjectTest extends BaseTest
       DocumentData doc1 =
          getStorage().createDocument(testroot, documentTypeDefinition,
             getPropsMap(CmisConstants.DOCUMENT, "testGetObjectByPath_IncludeACLs"), cs, addACL, null,
-            VersioningState.MAJOR);
+            VersioningState.NONE);
 
       CmisObject obj =
          getConnection().getObjectByPath("/object_testroot/testGetObjectByPath_IncludeACLs", false,
@@ -3417,8 +3097,8 @@ public class ObjectTest extends BaseTest
       {
          if (one.getPrincipal().equalsIgnoreCase(username))
          {
-            assertTrue("Permissions size is incorrect", one.getPermissions().size() == 1);
-            assertTrue("Permissions does not match", one.getPermissions().contains("cmis:read"));
+            assertTrue("Permissions size is incorrect.", one.getPermissions().size() == 1);
+            assertTrue("Permissions does not match.", one.getPermissions().contains("cmis:read"));
          }
       }
    }
@@ -3435,7 +3115,7 @@ public class ObjectTest extends BaseTest
          getConnection().getObjectByPath("/object_testroot", true, IncludeRelationships.TARGET, false, false, true, "",
             "*");
       AllowableActions actions = obj.getAllowableActions();
-      assertNotNull("AllowableActions must not be null", actions);
+      assertNotNull("AllowableActions must not be null.", actions);
    }
 
    /**
@@ -3450,7 +3130,7 @@ public class ObjectTest extends BaseTest
       {
          getConnection().getObject("/object_testroot", false, IncludeRelationships.NONE, false, false, false, "(,*",
             "*");
-         fail("FilterNotValidException must be thrown;");
+         fail("FilterNotValidException must be thrown.");
       }
       catch (FilterNotValidException ex)
       {
@@ -3470,11 +3150,7 @@ public class ObjectTest extends BaseTest
 
       byte[] before = new byte[15];
       before = "1234567890aBcDE".getBytes();
-
-      ContentStream cs = new BaseContentStream(before, null, new MimeType("text", "plain"));
-      DocumentData doc1 =
-         getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testGetContentStream_Simple"), cs, null, null, VersioningState.MAJOR);
+      DocumentData doc1 = createDocument(testroot, "testGetContentStream_Simple", new String(before));
       ContentStream obj = getConnection().getContentStream(doc1.getObjectId(), null);
       byte[] after = new byte[15];
       obj.getStream().read(after);
@@ -3495,9 +3171,9 @@ public class ObjectTest extends BaseTest
          DocumentData doc1 =
             getStorage().createDocument(testroot, documentTypeDefinition,
                getPropsMap(CmisConstants.DOCUMENT, "testGetContentStream_ConstraintException"), null, null, null,
-               VersioningState.MAJOR);
+               VersioningState.NONE);
          getConnection().getContentStream(doc1.getObjectId(), null);
-         fail("ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -3519,15 +3195,11 @@ public class ObjectTest extends BaseTest
          //SKIP
          return;
       }
-
       try
       {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testGetRenditions_Simple"), cs, null, null, VersioningState.MAJOR);
+         DocumentData doc1 = createDocument(testroot, "testGetRenditions_Simple", "1234567890aBcDE");
          List<Rendition> obj = getConnection().getRenditions(doc1.getObjectId(), "", -1, 0);
-         assertNotNull("Get renditions result is null;", obj);
+         assertNotNull("Get renditions result is null.", obj);
       }
       catch (NotSupportedException ex)
       {
@@ -3551,13 +3223,9 @@ public class ObjectTest extends BaseTest
       }
       try
       {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testGetRenditions_FilterNotValidException"), cs, null, null,
-               VersioningState.MAJOR);
+         DocumentData doc1 = createDocument(testroot, "testGetRenditions_FilterNotValidException", "1234567890aBcDE");
          getConnection().getRenditions(doc1.getObjectId(), "(,*", -1, 0);
-         fail("FilterNotValidException must be thrown;");
+         fail("FilterNotValidException must be thrown.");
       }
       catch (FilterNotValidException ex)
       {
@@ -3580,22 +3248,16 @@ public class ObjectTest extends BaseTest
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-               CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-               "f1", true, null, null);
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
+         org.xcmis.spi.model.PropertyDefinition<?> fPropDefType =
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
 
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefCreated =
             PropertyDefinitions.createPropertyDefinition(CmisConstants.CREATED_BY, PropertyType.STRING,
                CmisConstants.CREATED_BY, CmisConstants.CREATED_BY, null, CmisConstants.CREATED_BY, true, false, false,
                false, false, Updatability.READWRITE, "f2", true, null, null);
 
-         org.xcmis.spi.model.PropertyDefinition<?> fPropDefType =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-               CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-               false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
-
          Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
          properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
             fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "testUpdateProperties_Simple"));
@@ -3611,7 +3273,7 @@ public class ObjectTest extends BaseTest
          typeID = getStorage().addType(newType);
          newType = getStorage().getTypeDefinition(typeID, true);
 
-         doc1 = getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.MAJOR);
+         doc1 = getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.NONE);
 
          Map<String, Property<?>> properties2 = new HashMap<String, Property<?>>();
          properties2.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
@@ -3622,7 +3284,7 @@ public class ObjectTest extends BaseTest
 
          String id = getConnection().updateProperties(doc1.getObjectId(), new ChangeTokenHolder(), properties2);
          ObjectData obj = getStorage().getObjectById(id);
-         assertTrue("Names does not match;", obj.getName().equals("new1"));
+         assertTrue("Names does not match.", obj.getName().equals("new1"));
       }
       finally
       {
@@ -3645,21 +3307,16 @@ public class ObjectTest extends BaseTest
 
       try
       {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc1"),
-               cs, null, null, VersioningState.MAJOR);
+         DocumentData doc1 = createDocument(testroot, "testUpdateProperties_VersioningException", "1234567890aBcDE");
+
          Map<String, Property<?>> properties2 = new HashMap<String, Property<?>>();
 
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefComment =
             PropertyDefinitions.createPropertyDefinition(CmisConstants.CHECKIN_COMMENT, PropertyType.STRING,
                CmisConstants.CHECKIN_COMMENT, CmisConstants.CHECKIN_COMMENT, null, CmisConstants.CHECKIN_COMMENT, true,
                false, false, false, false, Updatability.WHENCHECKEDOUT, "f2", true, null, null);
-
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-               CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-               "f1", true, null, null);
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
 
          properties2.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
             fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "testUpdateProperties_VersioningException"));
@@ -3668,7 +3325,7 @@ public class ObjectTest extends BaseTest
 
          String id = getConnection().updateProperties(doc1.getObjectId(), new ChangeTokenHolder(), properties2);
          ObjectData obj = getStorage().getObjectById(id);
-         fail("VersioningException must be thrown;");
+         fail("VersioningException must be thrown.");
       }
       catch (VersioningException ex)
       {
@@ -3687,19 +3344,12 @@ public class ObjectTest extends BaseTest
       FolderData folder2 = null;
       try
       {
-         folder2 =
-            getStorage().createFolder(rootFolder, folderTypeDefinition,
-               getPropsMap(CmisConstants.FOLDER, "testMoveObject_Simple"), null, null);
-
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testMoveObject_Simple"), cs, null, null, VersioningState.MAJOR);
+         folder2 = createFolder(rootFolder, "testMoveObject_Simple");
+         DocumentData doc1 = createDocument(testroot, "testMoveObject_Simple", "1234567890aBcDE");
 
          String id = getConnection().moveObject(doc1.getObjectId(), folder2.getObjectId(), testroot.getObjectId());
          ObjectData obj = getStorage().getObjectById(id);
-         assertTrue("Names does not match;", folder2.getName().equals(obj.getParent().getName()));
+         assertTrue("Names does not match.", folder2.getName().equals(obj.getParent().getName()));
       }
       finally
       {
@@ -3717,24 +3367,15 @@ public class ObjectTest extends BaseTest
    @Test
    public void testMoveObject_InvalidArgumentException() throws Exception
    {
-
       FolderData folder2 = null;
       try
       {
-         folder2 =
-            getStorage().createFolder(rootFolder, folderTypeDefinition,
-               getPropsMap(CmisConstants.FOLDER, "testMoveObject_InvalidArgumentException"), null, null);
-
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testMoveObject_InvalidArgumentException"), cs, null, null,
-               VersioningState.MAJOR);
+         folder2 = createFolder(rootFolder, "testMoveObject_InvalidArgumentException");
+         DocumentData doc1 = createDocument(testroot, "testMoveObject_InvalidArgumentException", "1234567890aBcDE");
 
          String id = getConnection().moveObject(doc1.getObjectId(), testroot.getObjectId(), folder2.getObjectId());
          ObjectData obj = getStorage().getObjectById(id);
-         fail("InvalidArgumentException must be thrown;");
+         fail("InvalidArgumentException must be thrown.");
       }
       catch (InvalidArgumentException ex)
       {
@@ -3763,20 +3404,12 @@ public class ObjectTest extends BaseTest
          Map<String, Property<?>> props2 = new HashMap<String, Property<?>>();
 
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-               CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-               "f1", true, null, null);
-
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.NAME);
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefType =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-               CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-               false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
-
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.OBJECT_TYPE_ID);
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefAllowedChild =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, PropertyType.ID,
-               CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, null,
-               CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, false, false, false, false, false, Updatability.READONLY,
-               "fold_type_chld_ids", null, null, null);
+            PropertyDefinitions
+               .getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS);
 
          props2.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
             fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "testMoveObject_ConstraintExceptionFolder"));
@@ -3796,17 +3429,11 @@ public class ObjectTest extends BaseTest
          newType = getStorage().getTypeDefinition(typeID, true);
 
          folder2 = getStorage().createFolder(rootFolder, newType, props2, null, null);
-
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testMoveObject_ConstraintException"), cs, null, null,
-               VersioningState.MAJOR);
+         DocumentData doc1 = createDocument(testroot, "testMoveObject_ConstraintException", "1234567890aBcDE");
 
          String id = getConnection().moveObject(doc1.getObjectId(), folder2.getObjectId(), testroot.getObjectId());
          ObjectData obj = getStorage().getObjectById(id);
-         fail("ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -3833,24 +3460,12 @@ public class ObjectTest extends BaseTest
       FolderData folder2 = null;
       try
       {
-         folder2 =
-            getStorage().createFolder(rootFolder, folderTypeDefinition,
-               getPropsMap(CmisConstants.FOLDER, "testMoveObject_NameConstraintException"), null, null);
-
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testMoveObject_NameConstraintException"), cs, null, null,
-               VersioningState.MAJOR);
-
-         DocumentData doc2 =
-            getStorage().createDocument(folder2, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testMoveObject_NameConstraintException"), cs, null, null,
-               VersioningState.MAJOR);
+         folder2 = createFolder(rootFolder, "testMoveObject_NameConstraintException_folder");
+         DocumentData doc1 = createDocument(testroot, "testMoveObject_NameConstraintException", "1234567890aBcDE");
+         DocumentData doc2 = createDocument(folder2, "testMoveObject_NameConstraintException", "1234567890aBcDE");
          String id = getConnection().moveObject(doc1.getObjectId(), folder2.getObjectId(), testroot.getObjectId());
          ObjectData obj = getStorage().getObjectById(id);
-         assertFalse("Names must not match;", obj.getName().equalsIgnoreCase(doc1.getName()));
+         assertFalse("Names must not match.", obj.getName().equalsIgnoreCase(doc1.getName()));
       }
       catch (NameConstraintViolationException ex)
       {
@@ -3873,11 +3488,7 @@ public class ObjectTest extends BaseTest
    {
       try
       {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testDeleteObject_Simple"), cs, null, null, VersioningState.MAJOR);
+         DocumentData doc1 = createDocument(testroot, "testDeleteObject_Simple", "1234567890aBcDE");
          String id = doc1.getObjectId();
          getConnection().deleteObject(doc1.getObjectId(), true);
          ObjectData obj = getStorage().getObjectById(id);
@@ -3896,20 +3507,12 @@ public class ObjectTest extends BaseTest
    @Test
    public void testDeleteObject_ConstraintException() throws Exception
    {
-
       try
       {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         FolderData testroot2 =
-            getStorage().createFolder(rootFolder, folderTypeDefinition,
-               getPropsMap(CmisConstants.FOLDER, "testDeleteObjectConstraintException"), null, null);
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot2, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testDeleteObject_ConstraintException"), cs, null, null,
-               VersioningState.MAJOR);
+         FolderData testroot2 = createFolder(rootFolder, "testDeleteObjectConstraintException");
+         DocumentData doc1 = createDocument(testroot2, "testDeleteObject_ConstraintException", "1234567890aBcDE");
          getConnection().deleteObject(testroot2.getObjectId(), true);
-         fail("ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {
@@ -3925,20 +3528,11 @@ public class ObjectTest extends BaseTest
    @Test
    public void testDeleteTree_Simple() throws Exception
    {
-      FolderData testroot2 =
-         getStorage().createFolder(rootFolder, folderTypeDefinition,
-            getPropsMap(CmisConstants.FOLDER, "testDeleteTree_Simple"), null, null);
+      FolderData testroot2 = createFolder(rootFolder, "testDeleteTree_Simple");
+      createDocument(testroot2, "testDeleteTree_Simple1", "1234567890aBcDE");
+      createDocument(testroot2, "testDeleteTree_Simple2", "1234567890aBcDE");
+      createFolder(testroot2, "testDeleteTree_Simple_fol1");
 
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-      getStorage().createDocument(testroot2, documentTypeDefinition,
-         getPropsMap(CmisConstants.DOCUMENT, "testDeleteTree_Simple1"), cs, null, null, VersioningState.MAJOR);
-
-      getStorage().createDocument(testroot2, documentTypeDefinition,
-         getPropsMap(CmisConstants.DOCUMENT, "testDeleteTree_Simple2"), cs, null, null, VersioningState.MAJOR);
-
-      getStorage().createFolder(testroot2, folderTypeDefinition,
-         getPropsMap(CmisConstants.FOLDER, "testDeleteTree_Simple_fol1"), null, null);
       String id = testroot2.getObjectId();
 
       try
@@ -3967,23 +3561,10 @@ public class ObjectTest extends BaseTest
          //SKIP
          return;
       }
-      FolderData testroot2 =
-         getStorage().createFolder(rootFolder, folderTypeDefinition,
-            getPropsMap(CmisConstants.FOLDER, "testDeleteTree_Unfile"), null, null);
-
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-      DocumentData doc1 =
-         getStorage().createDocument(testroot2, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testDeleteTree_Unfile1"), cs, null, null, VersioningState.MAJOR);
-
-      DocumentData doc2 =
-         getStorage().createDocument(testroot2, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testDeleteTree_Unfile2"), cs, null, null, VersioningState.MAJOR);
-
-      FolderData fol1 =
-         getStorage().createFolder(testroot2, folderTypeDefinition,
-            getPropsMap(CmisConstants.FOLDER, "testDeleteTree_Unfile_fol1"), null, null);
+      FolderData testroot2 = createFolder(rootFolder, "testDeleteTree_Unfile");
+      DocumentData doc1 = createDocument(testroot2, "testDeleteTree_Unfile1", "1234567890aBcDE");
+      DocumentData doc2 = createDocument(testroot2, "testDeleteTree_Unfile2", "1234567890aBcDE");
+      createFolder(testroot2, "testDeleteTree_Unfile_fol1");
 
       String id1 = doc1.getObjectId();
       String id2 = doc2.getObjectId();
@@ -4014,16 +3595,11 @@ public class ObjectTest extends BaseTest
    @Test
    public void testSetContentStream_Simple() throws Exception
    {
-      byte[] before = "1234567890aBcDE".getBytes();
       byte[] after = "zzz".getBytes();
       byte[] result = new byte[3];
 
-      ContentStream cs1 = new BaseContentStream(before, null, new MimeType("text", "plain"));
       ContentStream cs2 = new BaseContentStream(after, null, new MimeType("text", "plain"));
-
-      DocumentData doc1 =
-         getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testSetContentStream_Simple"), cs1, null, null, VersioningState.MAJOR);
+      DocumentData doc1 = createDocument(testroot, "testSetContentStream_Simple", "1234567890aBcDE");
 
       String docid = getConnection().setContentStream(doc1.getObjectId(), cs2, new ChangeTokenHolder(), true);
       getStorage().getObjectById(docid).getContentStream(null).getStream().read(result);
@@ -4041,18 +3617,12 @@ public class ObjectTest extends BaseTest
       try
       {
          byte[] before = "1234567890aBcDE".getBytes();
-         byte[] after = "zzz".getBytes();
-
-         ContentStream cs1 = new BaseContentStream(before, null, new MimeType("text", "plain"));
-         ContentStream cs2 = new BaseContentStream(after, null, new MimeType("text", "plain"));
-
+         ContentStream cs = new BaseContentStream(before, null, new MimeType("text", "plain"));
          DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testSetContentStream_ContentAlreadyExistsException"), cs1, null,
-               null, VersioningState.MAJOR);
+            createDocument(testroot, "testSetContentStream_ContentAlreadyExistsException", "1234567890aBcDE");
 
-         String docid = getConnection().setContentStream(doc1.getObjectId(), cs2, new ChangeTokenHolder(), false);
-         fail("ContentAlreadyExistsException must be thrown;");
+         String docid = getConnection().setContentStream(doc1.getObjectId(), cs, new ChangeTokenHolder(), false);
+         fail("ContentAlreadyExistsException must be thrown.");
       }
       catch (ContentAlreadyExistsException ex)
       {
@@ -4062,8 +3632,8 @@ public class ObjectTest extends BaseTest
 
    /**
     * 2.2.4.16.3
-    * The Repository MUST throw this exception if the “contentStreamAllowed” attribute of the Object-Type 
-    * definition specified by the cmis:objectTypeId property value of the given document is set to “notallowed”. 
+    * The Repository MUST throw this exception if the "contentStreamAllowed" attribute of the Object-Type 
+    * definition specified by the cmis:objectTypeId property value of the given document is set to "notallowed". 
     * @throws Exception
     */
    @Test
@@ -4080,16 +3650,10 @@ public class ObjectTest extends BaseTest
          ContentStream cs1 = new BaseContentStream(before, null, new MimeType("text", "plain"));
          ContentStream cs2 = new BaseContentStream(after, null, new MimeType("text", "plain"));
          Map<String, Property<?>> props2 = new HashMap<String, Property<?>>();
-
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-               CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-               "f1", true, null, null);
-
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefType =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-               CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-               false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
 
          props2.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
             fPropDefName.getLocalName(), fPropDefName.getDisplayName(),
@@ -4106,10 +3670,10 @@ public class ObjectTest extends BaseTest
          typeID = getStorage().addType(newType);
          newType = getStorage().getTypeDefinition(typeID, true);
 
-         doc1 = getStorage().createDocument(testroot, newType, props2, null, null, null, VersioningState.MAJOR);
+         doc1 = getStorage().createDocument(testroot, newType, props2, null, null, null, VersioningState.NONE);
 
          docid = getConnection().setContentStream(doc1.getObjectId(), cs2, new ChangeTokenHolder(), false);
-         fail("StreamNotSupportedException must be thrown;");
+         fail("StreamNotSupportedException must be thrown.");
       }
       catch (StreamNotSupportedException ex)
       {
@@ -4119,8 +3683,6 @@ public class ObjectTest extends BaseTest
       {
          if (docid != null)
             getStorage().deleteObject(getStorage().getObjectById(docid), true);
-         if (doc1 != null)
-            getStorage().deleteObject(doc1, true);
          if (typeID != null)
             getStorage().removeType(typeID);
       }
@@ -4134,22 +3696,15 @@ public class ObjectTest extends BaseTest
    @Test
    public void testDeleteContentStream_Simple() throws Exception
    {
-      byte[] before = "1234567890aBcDE".getBytes();
-      ContentStream cs1 = new BaseContentStream(before, null, new MimeType("text", "plain"));
-
-      DocumentData doc1 =
-         getStorage().createDocument(testroot, documentTypeDefinition,
-            getPropsMap(CmisConstants.DOCUMENT, "testDeleteContentStream_Simple"), cs1, null, null,
-            VersioningState.MAJOR);
-
+      DocumentData doc1 = createDocument(testroot, "testDeleteContentStream_Simple", "1234567890aBcDE");
       String docid = getConnection().deleteContentStream(doc1.getObjectId(), new ChangeTokenHolder());
-      assertNull("Content stream must be null;", getStorage().getObjectById(docid).getContentStream(null));
+      assertNull("Content stream must be null.", getStorage().getObjectById(docid).getContentStream(null));
    }
 
    /**
     * 2.2.4.17.3
-    * The Repository MUST throw this exception if the Object’s Object-Type definition “contentStreamAllowed” 
-    * attribute is set to “required”. 
+    * The Repository MUST throw this exception if the Object’s Object-Type definition "contentStreamAllowed" 
+    * attribute is set to "required". 
     * @throws Exception
     */
    @Test
@@ -4163,18 +3718,12 @@ public class ObjectTest extends BaseTest
          byte[] after = "zzz".getBytes();
 
          ContentStream cs1 = new BaseContentStream(before, null, new MimeType("text", "plain"));
-
          Map<String, Property<?>> props2 = new HashMap<String, Property<?>>();
 
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-               CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false, Updatability.READWRITE,
-               "f1", true, null, null);
-
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
          org.xcmis.spi.model.PropertyDefinition<?> fPropDefType =
-            PropertyDefinitions.createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
-               CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-               false, false, false, false, Updatability.READONLY, "type_id1", null, null, null);
+            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
 
          props2.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
             fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "testDeleteContentStream_ConstraintException"));
@@ -4190,10 +3739,10 @@ public class ObjectTest extends BaseTest
          typeID = getStorage().addType(newType);
          newType = getStorage().getTypeDefinition(typeID, true);
 
-         doc1 = getStorage().createDocument(testroot, newType, props2, cs1, null, null, VersioningState.MAJOR);
+         doc1 = getStorage().createDocument(testroot, newType, props2, cs1, null, null, VersioningState.NONE);
 
          String docid = getConnection().deleteContentStream(doc1.getObjectId(), new ChangeTokenHolder());
-         fail("ConstraintException must be thrown;");
+         fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
       {

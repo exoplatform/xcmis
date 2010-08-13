@@ -18,6 +18,14 @@
  */
 package org.xcmis.spi.basic;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.exoplatform.services.security.ConversationState;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
@@ -27,6 +35,7 @@ import org.xcmis.spi.FolderData;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
+import org.xcmis.spi.NotSupportedException;
 import org.xcmis.spi.ObjectData;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.PermissionService;
@@ -50,14 +59,6 @@ import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 import org.xcmis.spi.utils.CmisUtils;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Basic Storage impl
@@ -153,7 +154,7 @@ public abstract class BasicStorage implements Storage
       Map<String, Property<?>> properties, List<AccessControlEntry> acl, Collection<PolicyData> policies)
       throws ConstraintException, NameConstraintViolationException, StorageException
    {
-      throw new UnsupportedOperationException();
+      throw new NotSupportedException();
    }
 
    /**
@@ -163,7 +164,7 @@ public abstract class BasicStorage implements Storage
       Map<String, Property<?>> properties, List<AccessControlEntry> acl, Collection<PolicyData> policies)
       throws NameConstraintViolationException, StorageException
    {
-      throw new UnsupportedOperationException();
+      throw new NotSupportedException();
    }
 
    /**
@@ -189,12 +190,12 @@ public abstract class BasicStorage implements Storage
     */
    public ItemsIterator<ChangeEvent> getChangeLog(String changeLogToken) throws ConstraintException
    {
-      throw new UnsupportedOperationException();
+      throw new NotSupportedException();
    }
 
    public ItemsIterator<DocumentData> getCheckedOutDocuments(ObjectData folder, String orderBy)
    {
-      throw new UnsupportedOperationException();
+      throw new NotSupportedException();
    }
 
    /**
@@ -228,7 +229,7 @@ public abstract class BasicStorage implements Storage
     */
    public ItemsIterator<Result> query(Query query) throws InvalidArgumentException
    {
-      throw new UnsupportedOperationException();
+      throw new NotSupportedException();
    }
 
    /**
@@ -236,7 +237,7 @@ public abstract class BasicStorage implements Storage
     */
    public void unfileObject(ObjectData object)
    {
-      throw new UnsupportedOperationException();
+      throw new NotSupportedException();
    }
 
    /**

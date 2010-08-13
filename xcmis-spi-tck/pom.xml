@@ -53,8 +53,9 @@
                      <systemProperties>
                         <property>
                            <name>org.xcmis.CmisRegistryFactory</name>
-                           <!--   <value>org.exoplatform.ecms.xcmis.sp.jcr.exo.tck.JcrCmisRegistryFactory</value> -->
-                           <value>org.xcmis.sp.inmemory.tck.InmemoryCmisRegistryFactory</value>
+                           <!--   value>org.xcmis.sp.inmemory.tck.InmemoryCmisRegistryFactory</value -->
+                           <!-- value>org.xcmis.sp.sample.fs.tck.RegistryFactoryImpl</value -->
+                           <value>org.exoplatform.ecms.xcmis.sp.tck.JcrCmisRegistryFactory</value>
                         </property>
                      </systemProperties>
                      <includes>
@@ -69,7 +70,7 @@
                   <executions>
                      <execution>
                         <id>test-reports</id>
-                        <phase>package</phase>
+                        <phase>test</phase>
                         <configuration>
                            <tasks>
                               <junitreport todir="target/surefire-reports">

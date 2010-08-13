@@ -32,8 +32,13 @@ public interface TypeManager
 
    /**
     * Add new type in repository.
+    * 
+    * 2.1.3 Object-Type 
+    * A repository MAY define additional object-types beyond the CMIS Base Object-Types
+    * 
+    * Implementation Compatibility: MAY be implemented.
     *
-    * @param type type definition
+    * @param type the type definition
     * @return ID of added type
     * @throws StorageException if type can't be added cause to storage internal
     *         problem

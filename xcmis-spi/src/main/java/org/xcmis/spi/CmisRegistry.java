@@ -33,6 +33,11 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
+ * xCMIS SPI entry point. 
+ * 
+ * Contains list of all known CMIS StorageProviders with convenience addStorage method for theirs initializing
+ * as well as the method getConnection for accessing data from concrete Storage (visible on top level as CMIS Repository)  
+ * 
  * @version $Id:$
  */
 
@@ -59,7 +64,15 @@ public class CmisRegistry
 
    private static AtomicReference<CmisRegistryFactory> crfs = new AtomicReference<CmisRegistryFactory>();
 
-   public static CmisRegistry getInstance()
+   /**
+    * Singleton method for obtaining "current" CmisRegistry object stored in AtomicReference-ed CmisRegistryFactory.
+    * Such a factory should be set by compilmentary (in some sence) setFactory(CmisRegistryFactory inst) method in advance.
+    * 
+    * Otherwise, it will try to find it using CmisRegistryFactoryFinder.findCmisRegistry() 
+    * 
+    * @return "current" CmisRegistry
+    */
+  public static CmisRegistry getInstance()
    {
       CmisRegistryFactory crf = crfs.get();
       if (crf != null)
@@ -83,20 +96,33 @@ public class CmisRegistry
       return crfs.get().getRegistry();
    }
 
-   public static void setFactory(CmisRegistryFactory inst)
+   /**
+    * Sets the "current" instance of CmisRegistryFactory
+    * 
+    * @param inst
+    */
+   public static void setFactory(CmisRegistryFactory factory)
    {
-      crfs.set(inst);
+      crfs.set(factory);
    }
 
-   protected List<String> providers = new ArrayList<String>();
+   protected List<String> renditionProviders = new ArrayList<String>();
 
    protected Map<String, StorageProvider> storageProviders;
 
+   /**
+    * Default constructor 
+    */
    public CmisRegistry()
    {
       this.storageProviders = new TreeMap<String, StorageProvider>();
    }
 
+   /**
+    * Registers StorageProvider
+    * 
+    * @param storageProvider to be registerd
+    */
    public void addStorage(StorageProvider storageProvider)
    {
       String id = storageProvider.getStorageID();
@@ -168,7 +194,7 @@ public class CmisRegistry
    {
       if (provider != null)
       {
-         this.providers.add(provider);
+         this.renditionProviders.add(provider);
       }
    }
 }

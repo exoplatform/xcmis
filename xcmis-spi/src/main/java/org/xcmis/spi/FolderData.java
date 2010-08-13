@@ -37,6 +37,10 @@ public interface FolderData extends ObjectData
    /**
     * Get children of current folder.
     * 
+    * Implementation Compatibility: SHOULD be implemented if the implementation 
+    * supports hierarchical view (capabilityGetDescendants, capabilityGetFolderTree). 
+    * Otherwise empty ItemsIterator should be returned.
+    * 
     * @param orderBy comma-separated list of query names and the ascending
     *        modifier 'ASC' or the descending modifier 'DESC' for each query
     *        name. This parameter may be ignored if implementation has not
@@ -54,10 +58,14 @@ public interface FolderData extends ObjectData
    boolean hasChildren();
 
    /**
-    * Add existed fileable object in this folder. If multifiling capability is
-    * not supported then this method must throw {@link NotSupportedException}.
+    * Add existed fileable object in this folder. 
+    * 2.2.5.1 addObjectToFolder
     * 
-    * @param object object to be added
+    * Implementation Compatibility: SHOULD be implemented if the implementation 
+    * supports multifiling capability (capabilityMultifiling). 
+    * Otherwise {@link NotSupportedException} should be thrown.
+    * 
+    * @param object the object to be added
     * @throws ConstraintException if <code>object</code> has type that is
     *         unsupported by current folder. See
     *         {@link CMIS#ALLOWED_CHILD_OBJECT_TYPE_IDS}
@@ -67,8 +75,11 @@ public interface FolderData extends ObjectData
 
    /**
     * Remove fileable object from current folder. This method don't remove
-    * object just unsigned it as child of this folder. If unfiling capability is
-    * not supported then this method must throw {@link NotSupportedException}.
+    * object just unsigned it as child of this folder. 
+    * 
+    * Implementation Compatibility: SHOULD be implemented if the implementation 
+    * supports unfiling capability (capabilityUnfiling). 
+    * Otherwise {@link NotSupportedException} should be thrown.
     * 
     * @param object object to be removed from current folder
     * @throws NotSupportedException if unfiling capability is not supported

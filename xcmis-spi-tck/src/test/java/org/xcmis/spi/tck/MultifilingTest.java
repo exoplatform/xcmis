@@ -35,14 +35,11 @@ import org.xcmis.spi.StorageException;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.model.BaseType;
-import org.xcmis.spi.model.Choice;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.PropertyDefinition;
-import org.xcmis.spi.model.PropertyType;
 import org.xcmis.spi.model.TypeDefinition;
-import org.xcmis.spi.model.Updatability;
 import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.model.impl.IdProperty;
 import org.xcmis.spi.model.impl.StringProperty;
@@ -93,33 +90,33 @@ public class MultifilingTest extends BaseTest
             folder1 = createFolder(rootFolder, "testFolder1");
             DocumentData doc1 = createDocument(null, "doc1", "doc1"); // unfiled document
 
-            assertNull("Unfiling failed;", doc1.getParent());
-            assertNotNull("Parents list is null;", doc1.getParents());
+            assertNull("Unfiling failed.", doc1.getParent());
+            assertNotNull("Parents list is null.", doc1.getParents());
             if (doc1.getParents().size() != 0)
-               fail("Parents list is not empty;");
+               fail("Parents list is not empty.");
 
             ItemsList<CmisObject> children0 =
                getConnection().getChildren(folder1.getObjectId(), false, null, false, true, null, null, null, -1, 0);
-            assertNotNull("Unable to get children;", children0);
-            assertNotNull("Children list is null;", children0.getItems());
+            assertNotNull("Unable to get children.", children0);
+            assertNotNull("Children list is null.", children0.getItems());
             if (children0.getItems().size() != 0)
-               fail("Clildren list is not empty;");
+               fail("Clildren list is not empty.");
 
             getConnection().addObjectToFolder(doc1.getObjectId(), folder1.getObjectId(), true);
 
             ItemsList<CmisObject> children =
                getConnection().getChildren(folder1.getObjectId(), false, null, false, true, null, null, null, -1, 0);
-            assertNotNull("Unable to get children;", children0);
-            assertNotNull("Children list is null;", children0.getItems());
+            assertNotNull("Unable to get children.", children0);
+            assertNotNull("Children list is null.", children0.getItems());
             List<CmisObject> listChildren = children.getItems();
             if (children.getItems().size() != 1)
-              fail("Clildren list elements doent match;");
+               fail("Clildren list elements doent match.");
             for (CmisObject cmisObject : listChildren)
             {
-               assertNotNull("Cannot get cmis object;",cmisObject);
-               assertNotNull("Cannot get cmis object info;", cmisObject.getObjectInfo());
-               assertNotNull("Cannot get cmis object ID;", cmisObject.getObjectInfo().getId());
-               assertTrue("Objects doen not match;", doc1.getObjectId().equals(cmisObject.getObjectInfo().getId()));
+               assertNotNull("Cannot get cmis object.", cmisObject);
+               assertNotNull("Cannot get cmis object info.", cmisObject.getObjectInfo());
+               assertNotNull("Cannot get cmis object ID.", cmisObject.getObjectInfo().getId());
+               assertTrue("Objects doen not match.", doc1.getObjectId().equals(cmisObject.getObjectInfo().getId()));
             }
          }
          finally
@@ -142,7 +139,7 @@ public class MultifilingTest extends BaseTest
     * the given object is NOT in the list of AllowedChildObjectTypeIds of 
     * the parent-folder specified by folderId.
     * 
-    * cmis:allowedChildObjectTypeIds   Id’s of the set of Object-types that can be created, moved or filed into this folder.
+    * cmis:allowedChildObjectTypeIds  IDs of the set of Object-types that can be created, moved or filed into this folder.
     * 
     * @throws Exception
     */
@@ -184,9 +181,8 @@ public class MultifilingTest extends BaseTest
             folder2 = getStorage().createFolder(rootFolder, folderTypeDefinition, properties2, null, null);
             //////////// CHECK the ALLOWED_CHILD_OBJECT_TYPE_IDS property
             IdProperty prop = (IdProperty)folder2.getProperties().get(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS);
-            assertNotNull("Properties is null;", prop);
-            assertNotNull("Property values is null;",prop.getValues());
-
+            assertNotNull("Properties is null.", prop);
+            assertNotNull("Property values is null.", prop.getValues());
 
             if (prop.getValues().size() != 0)
             {
@@ -195,9 +191,10 @@ public class MultifilingTest extends BaseTest
                   new HashMap<String, PropertyDefinition<?>>();
 
                TypeDefinition kinoType =
-                  new TypeDefinition("cmis:multifilingtype1", BaseType.DOCUMENT, "cmis:multifilingtype1", "cmis:multifilingtype1", "", "cmis:document",
-                     "cmis:multifilingtype1", "cmis:multifilingtype1", true, false, true, true, false, false, false, true, null, null,
-                     ContentStreamAllowed.ALLOWED, kinoPropertyDefinitions);
+                  new TypeDefinition("cmis:multifilingtype1", BaseType.DOCUMENT, "cmis:multifilingtype1",
+                     "cmis:multifilingtype1", "", "cmis:document", "cmis:multifilingtype1", "cmis:multifilingtype1",
+                     true, false, true, true, false, false, false, true, null, null, ContentStreamAllowed.ALLOWED,
+                     kinoPropertyDefinitions);
                typeId = getStorage().addType(kinoType);
 
                // get the new type definition for "cmis:kino"
@@ -207,14 +204,10 @@ public class MultifilingTest extends BaseTest
                ContentStream cs = new BaseContentStream("doc1".getBytes(), null, new MimeType("text", "plain"));
 
                org.xcmis.spi.model.PropertyDefinition<?> ddef =
-                  createPropertyDefinition(CmisConstants.NAME, PropertyType.STRING, CmisConstants.NAME,
-                     CmisConstants.NAME, null, CmisConstants.NAME, true, false, false, false, false,
-                     Updatability.READWRITE, "Object name.", true, null, null);
+                  PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
 
                org.xcmis.spi.model.PropertyDefinition<?> ddef2 =
-                  createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID, CmisConstants.OBJECT_TYPE_ID,
-                     CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false, false, false, false,
-                     false, Updatability.READONLY, "Object type id.", null, null, null);
+                  PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
 
                Map<String, Property<?>> dproperties = new HashMap<String, Property<?>>();
                dproperties.put(CmisConstants.NAME, new StringProperty(ddef.getId(), ddef.getQueryName(), ddef
@@ -223,19 +216,19 @@ public class MultifilingTest extends BaseTest
                   .getLocalName(), ddef2.getDisplayName(), "cmis:multifilingtype1"));
 
                DocumentData docKino =
-                  getStorage().createDocument(folder1, kinoType, dproperties, cs, null, null, VersioningState.MAJOR);
+                  getStorage().createDocument(folder1, kinoType, dproperties, cs, null, null, VersioningState.NONE);
 
                // check folder2
                ItemsList<CmisObject> children0 =
                   getConnection().getChildren(folder2.getObjectId(), false, null, false, true, null, null, null, -1, 0);
-               assertNotNull("Unable to get children;", children0);
-               assertNotNull("Children list is null;", children0.getItems());
+               assertNotNull("Unable to get children.", children0);
+               assertNotNull("Children list is null.", children0.getItems());
                if (children0.getItems().size() != 0)
-                  fail("Clildren list is not empty;");
+                  fail("Clildren list is not empty.");
 
                // add object to folder
                getConnection().addObjectToFolder(docKino.getObjectId(), folder2.getObjectId(), true);
-               fail("ConstraintException must be thrown;");
+               fail("ConstraintException must be thrown.");
             }
          }
          catch (ConstraintException e)
@@ -279,26 +272,26 @@ public class MultifilingTest extends BaseTest
 
             ItemsList<CmisObject> children0 =
                getConnection().getChildren(folder2.getObjectId(), false, null, false, true, null, null, null, -1, 0);
-            assertNotNull("Unable to get children;", children0);
-            assertNotNull("Children list is null;", children0.getItems());
+            assertNotNull("Unable to get children.", children0);
+            assertNotNull("Children list is null.", children0.getItems());
             if (children0.getItems().size() != 0)
-               fail("Clildren list is not empty;");
+               fail("Clildren list is not empty.");
 
             getConnection().addObjectToFolder(doc1.getObjectId(), folder2.getObjectId(), true);
 
             ItemsList<CmisObject> children =
                getConnection().getChildren(folder2.getObjectId(), false, null, false, true, null, null, null, -1, 0);
-            assertNotNull("Unable to get children;", children);
-            assertNotNull("Children list is null;", children.getItems());
+            assertNotNull("Unable to get children.", children);
+            assertNotNull("Children list is null.", children.getItems());
             List<CmisObject> listChildren = children.getItems();
 
-            assertTrue("Clildren list elements does not match;", children.getItems().size() == 1);
+            assertTrue("Clildren list elements does not match.", children.getItems().size() == 1);
             for (CmisObject cmisObject : listChildren)
             {
-               assertNotNull("Cannot get cmis object;",cmisObject);
-               assertNotNull("Cannot get cmis object info;", cmisObject.getObjectInfo());
-               assertNotNull("Cannot get cmis object ID;", cmisObject.getObjectInfo().getId());
-               assertTrue("Objects doen not match;", doc1.getObjectId().equals(cmisObject.getObjectInfo().getId()));
+               assertNotNull("Cannot get cmis object.", cmisObject);
+               assertNotNull("Cannot get cmis object info.", cmisObject.getObjectInfo());
+               assertNotNull("Cannot get cmis object ID.", cmisObject.getObjectInfo().getId());
+               assertTrue("Objects doen not match.", doc1.getObjectId().equals(cmisObject.getObjectInfo().getId()));
             }
          }
          finally
@@ -311,7 +304,7 @@ public class MultifilingTest extends BaseTest
       }
       else
       {
-        //SKIP
+         //SKIP
       }
    }
 
@@ -332,43 +325,43 @@ public class MultifilingTest extends BaseTest
             folder1 = createFolder(rootFolder, "testRemoveObjectFolder1");
             DocumentData doc1 = createDocument(null, "testRemoveObjectDoc1", "doc1");// unfiled document
 
-            assertNull("Unfiling failed;", doc1.getParent());
-            assertNotNull("Parents list is null;",doc1.getParents());
+            assertNull("Unfiling failed.", doc1.getParent());
+            assertNotNull("Parents list is null.", doc1.getParents());
             if (doc1.getParents().size() != 0)
-               fail("Parents list is not empty;");
+               fail("Parents list is not empty.");
 
             ItemsList<CmisObject> children0 =
                getConnection().getChildren(folder1.getObjectId(), false, null, false, true, null, null, null, -1, 0);
-            assertNotNull("Unable to get children;", children0);
-            assertNotNull("Children list is null;", children0.getItems());
+            assertNotNull("Unable to get children.", children0);
+            assertNotNull("Children list is null.", children0.getItems());
             if (children0.getItems().size() != 0)
-               fail("Clildren list is not empty;");
+               fail("Clildren list is not empty.");
 
             getConnection().addObjectToFolder(doc1.getObjectId(), folder1.getObjectId(), true);
 
             ItemsList<CmisObject> children =
                getConnection().getChildren(folder1.getObjectId(), false, null, false, true, null, null, null, -1, 0);
-            assertNotNull("Unable to get children;", children);
-            assertNotNull("Children list is null;", children.getItems());
+            assertNotNull("Unable to get children.", children);
+            assertNotNull("Children list is null.", children.getItems());
             List<CmisObject> listChildren = children.getItems();
             if (children.getItems().size() != 1)
-               fail("Clildren list elements does not match;");
+               fail("Clildren list elements does not match.");
             for (CmisObject cmisObject : listChildren)
             {
-               assertNotNull("Cannot get cmis object;",cmisObject);
-               assertNotNull("Cannot get cmis object info;", cmisObject.getObjectInfo());
-               assertNotNull("Cannot get cmis object ID;", cmisObject.getObjectInfo().getId());
-               assertTrue("Objects does not match;", doc1.getObjectId().equals(cmisObject.getObjectInfo().getId()));
+               assertNotNull("Cannot get cmis object.", cmisObject);
+               assertNotNull("Cannot get cmis object info.", cmisObject.getObjectInfo());
+               assertNotNull("Cannot get cmis object ID.", cmisObject.getObjectInfo().getId());
+               assertTrue("Objects does not match.", doc1.getObjectId().equals(cmisObject.getObjectInfo().getId()));
             }
 
             getConnection().removeObjectFromFolder(doc1.getObjectId(), folder1.getObjectId());
 
             ItemsList<CmisObject> children00 =
                getConnection().getChildren(folder1.getObjectId(), false, null, false, true, null, null, null, -1, 0);
-            assertNotNull("Unable to get children;", children00);
-            assertNotNull("Children list is null;", children00.getItems());
+            assertNotNull("Unable to get children.", children00);
+            assertNotNull("Children list is null.", children00.getItems());
             if (children0.getItems().size() != 00)
-               fail("Clildren list is not empty;");
+               fail("Clildren list is not empty.");
          }
          finally
          {
@@ -403,34 +396,34 @@ public class MultifilingTest extends BaseTest
 
             ItemsList<CmisObject> children0 =
                getConnection().getChildren(folder2.getObjectId(), false, null, false, true, null, null, null, -1, 0);
-            assertNotNull("Unable to get children;", children0);
-            assertNotNull("Children list is null;", children0.getItems());
+            assertNotNull("Unable to get children.", children0);
+            assertNotNull("Children list is null.", children0.getItems());
             if (children0.getItems().size() != 0)
-               fail("Clildren list is not empty;");
+               fail("Clildren list is not empty.");
 
             getConnection().addObjectToFolder(doc1.getObjectId(), folder2.getObjectId(), true);
             ItemsList<CmisObject> children =
                getConnection().getChildren(folder2.getObjectId(), false, null, false, true, null, null, null, -1, 0);
-            assertNotNull("Unable to get children;", children);
-            assertNotNull("Children list is null;", children.getItems());
+            assertNotNull("Unable to get children.", children);
+            assertNotNull("Children list is null.", children.getItems());
 
             List<CmisObject> listChildren = children.getItems();
             if (children.getItems().size() != 1)
-               fail("Clildren list elements does not match;");
+               fail("Clildren list elements does not match.");
             for (CmisObject cmisObject : listChildren)
             {
-               assertNotNull("Cannot get cmis object;",cmisObject);
-               assertNotNull("Cannot get cmis object info;", cmisObject.getObjectInfo());
-               assertNotNull("Cannot get cmis object ID;", cmisObject.getObjectInfo().getId());
-               assertTrue("Objects doen not match;", doc1.getObjectId().equals(cmisObject.getObjectInfo().getId()));
+               assertNotNull("Cannot get cmis object.", cmisObject);
+               assertNotNull("Cannot get cmis object info.", cmisObject.getObjectInfo());
+               assertNotNull("Cannot get cmis object ID.", cmisObject.getObjectInfo().getId());
+               assertTrue("Objects doen not match.", doc1.getObjectId().equals(cmisObject.getObjectInfo().getId()));
             }
             getConnection().removeObjectFromFolder(doc1.getObjectId(), folder2.getObjectId());
             ItemsList<CmisObject> children00 =
                getConnection().getChildren(folder2.getObjectId(), false, null, false, true, null, null, null, -1, 0);
-            assertNotNull("Unable to get children;", children00);
-            assertNotNull("Children list is null;", children00.getItems());
+            assertNotNull("Unable to get children.", children00);
+            assertNotNull("Children list is null.", children00.getItems());
             if (children0.getItems().size() != 00)
-               fail("Clildren list is not empty;");
+               fail("Clildren list is not empty.");
          }
          finally
          {
@@ -480,17 +473,6 @@ public class MultifilingTest extends BaseTest
          }
       }
       getConnection().deleteObject(cmisObject.getObjectInfo().getId(), true);
-   }
-
-   private static <T> PropertyDefinition<T> createPropertyDefinition(String id, PropertyType propertyType,
-      String queryName, String localName, String localNamespace, String displayName, boolean required,
-      boolean queryable, boolean orderable, boolean inherited, boolean isMultivalued, Updatability updatability,
-      String description, Boolean openChoice, List<Choice<T>> choices, T[] defValue)
-   {
-      PropertyDefinition<T> propertyDefinition =
-         new PropertyDefinition<T>(id, queryName, localName, localNamespace, displayName, description, propertyType,
-            updatability, inherited, required, queryable, orderable, openChoice, isMultivalued, choices, defValue);
-      return propertyDefinition;
    }
 
    @AfterClass
