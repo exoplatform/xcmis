@@ -30,7 +30,6 @@ import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.NameConstraintViolationException;
-import org.xcmis.spi.NotSupportedException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.PropertyFilter;
@@ -216,13 +215,10 @@ public class BaseTest
 
       if (IS_RELATIONSHIPS_SUPPORTED)
       {
-         RelationshipData rel1 =
             getStorage().createRelationship(doc3, doc4, relationshipTypeDefinition,
                getPropsMap(CmisConstants.RELATIONSHIP, "rel1"), null, null);
-         RelationshipData rel2 =
             getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
                getPropsMap(CmisConstants.RELATIONSHIP, "rel2"), null, null);
-         RelationshipData rel3 =
             getStorage().createRelationship(folder2, doc1, relationshipTypeDefinition,
                getPropsMap(CmisConstants.RELATIONSHIP, "rel3"), null, null);
       }
