@@ -40,6 +40,10 @@ import org.xcmis.restatom.ProviderImpl;
 import org.xcmis.spi.CmisRegistry;
 import org.xcmis.spi.Connection;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -262,7 +266,14 @@ public abstract class AbstractCmisCollection<T> extends AbstractEntityCollection
     */
    protected String getRepositoryId(RequestContext request)
    {
-      return request.getTarget().getParameter("repoid");
+      try
+      {
+         return URLDecoder.decode(request.getTarget().getParameter("repoid"), "UTF-8");
+      }
+      catch (UnsupportedEncodingException ex)
+      {
+         return request.getTarget().getParameter("repoid");
+      }
    }
 
    /**
