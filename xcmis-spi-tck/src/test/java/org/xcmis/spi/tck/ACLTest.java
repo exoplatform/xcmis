@@ -152,6 +152,7 @@ public class ACLTest extends BaseTest
    public void testApplyACL_RemoveACE() throws Exception
    {
       String typeID = null;
+      DocumentData doc1 = null;
       try
       {
          ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
@@ -176,7 +177,7 @@ public class ACLTest extends BaseTest
          typeID = getStorage().addType(newType);
          newType = getStorage().getTypeDefinition(typeID, true);
 
-         DocumentData doc1 =
+          doc1 =
             getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.NONE);
          getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.REPOSITORYDETERMINED);
          ObjectData obj = getStorage().getObjectById(doc1.getObjectId());

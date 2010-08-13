@@ -70,7 +70,7 @@
                   <executions>
                      <execution>
                         <id>test-reports</id>
-                        <phase>package</phase>
+                        <phase>test</phase>
                         <configuration>
                            <tasks>
                               <junitreport todir="target/surefire-reports">
