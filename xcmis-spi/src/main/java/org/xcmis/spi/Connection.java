@@ -437,7 +437,7 @@ public abstract class Connection
    }
 
    /**
-    * Close this connection. Release underlying resources. Not able to use this
+    * Close the connection and release underlying resources. Not able to use this
     * connection any more.
     */
    public abstract void close();
