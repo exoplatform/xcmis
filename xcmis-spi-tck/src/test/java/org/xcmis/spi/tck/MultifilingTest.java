@@ -478,17 +478,6 @@ public class MultifilingTest extends BaseTest
       getConnection().deleteObject(cmisObject.getObjectInfo().getId(), true);
    }
 
-   private static <T> PropertyDefinition<T> createPropertyDefinition(String id, PropertyType propertyType,
-      String queryName, String localName, String localNamespace, String displayName, boolean required,
-      boolean queryable, boolean orderable, boolean inherited, boolean isMultivalued, Updatability updatability,
-      String description, Boolean openChoice, List<Choice<T>> choices, T[] defValue)
-   {
-      PropertyDefinition<T> propertyDefinition =
-         new PropertyDefinition<T>(id, queryName, localName, localNamespace, displayName, description, propertyType,
-            updatability, inherited, required, queryable, orderable, openChoice, isMultivalued, choices, defValue);
-      return propertyDefinition;
-   }
-
    @AfterClass
    public static void stop() throws Exception
    {
