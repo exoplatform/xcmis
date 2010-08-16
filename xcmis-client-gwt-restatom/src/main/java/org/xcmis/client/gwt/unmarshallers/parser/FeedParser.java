@@ -28,7 +28,6 @@ import org.xcmis.client.gwt.model.restatom.FeedInfo;
 import org.xcmis.client.gwt.model.restatom.FeedType;
 import org.xcmis.client.gwt.model.util.DateUtil;
 
-import com.google.gwt.http.client.URL;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.NamedNodeMap;
 import com.google.gwt.xml.client.Node;
@@ -127,7 +126,7 @@ public class FeedParser
             AtomCollectionType collection = new AtomCollectionType();
             NodeList collectionNodes = item.getChildNodes();
             NamedNodeMap collectionAttributes = item.getAttributes();
-            String href = URL.decodeComponent(collectionAttributes.item(0).getFirstChild().getNodeValue());
+            String href = collectionAttributes.item(0).getFirstChild().getNodeValue();
             collection.setHref(href);
             for (int j = 0; j < collectionNodes.getLength(); j++)
             {
