@@ -118,7 +118,7 @@ public abstract class BaseTest extends TestCase
             ? SP_CONF_DEFAULT : propertySpConf;
 
       String containerConf = getClass().getResource(sp_conf).toString();
-      StandaloneContainer.addConfigurationURL(containerConf);
+      StandaloneContainer.setConfigurationURL(containerConf);
       container = StandaloneContainer.getInstance();
       requestHandler = (RequestHandlerImpl)container.getComponentInstanceOfType(RequestHandlerImpl.class);
 
