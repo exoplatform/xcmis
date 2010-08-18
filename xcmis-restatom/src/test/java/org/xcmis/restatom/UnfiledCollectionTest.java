@@ -38,6 +38,9 @@ public class UnfiledCollectionTest extends BaseTest
 
    public void testUnfiled() throws Exception
    {
+      if (!conn.getStorage().getRepositoryInfo().getCapabilities().isCapabilityUnfiling())
+         return;
+      
       String docId = createDocument(testFolderId, "doc1", null, null);
 
       String s = "<?xml version='1.0' encoding='utf-8'?>" //
@@ -79,8 +82,11 @@ public class UnfiledCollectionTest extends BaseTest
 
    public void testGetUnfiled() throws Exception
    {
+      if (!conn.getStorage().getRepositoryInfo().getCapabilities().isCapabilityUnfiling())
+         return;
+         
       String doc1Id = createDocument(testFolderId, "doc1", null, null);
-
+      
       ObjectData object = conn.getStorage().getObjectById(doc1Id);
       conn.getStorage().unfileObject(object);
 

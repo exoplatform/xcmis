@@ -23,7 +23,6 @@ import org.xcmis.client.gwt.CMIS;
 import org.xcmis.client.gwt.model.restatom.AtomLink;
 import org.xcmis.client.gwt.model.restatom.EnumLinkRelation;
 
-import com.google.gwt.http.client.URL;
 import com.google.gwt.xml.client.NamedNodeMap;
 import com.google.gwt.xml.client.Node;
 
@@ -58,28 +57,21 @@ public class AtomLinkParser
       AtomLink link = new AtomLink();
       for (int j = 0; j < attributesList.getLength(); j++)
       {
-         String type = "";
-         String href = "";
-         String rel = "";
-
          Node attribute = attributesList.item(j);
          
          String attributeValue = attribute.getNodeValue();
          String attributeName = attribute.getNodeName();
          if (attributeName.equals(CMIS.RELATION))
          {
-            rel = attributeValue;
-            link.setRelation(EnumLinkRelation.fromValue(rel));
+            link.setRelation(EnumLinkRelation.fromValue(attributeValue));
          }
          else if (attributeName.equals(CMIS.HREF))
          {
-            href = URL.decodeComponent(attributeValue);
-            link.setHref(href);
+            link.setHref(attributeValue);
          }
          else if (attributeName.equals(CMIS.TYPE))
          {
-            type = attributeValue;
-            link.setType(type);
+            link.setType(attributeValue);
          }
       } //end cycle 
       return link;
