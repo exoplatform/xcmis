@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.xcmis</groupId>
   <artifactId>xcmis-parent</artifactId>
-  <version>1.1-SNAPSHOT</version>
+  <version>1.1.0-Beta01</version>
   <packaging>pom</packaging>
   <name>xCMIS</name>
   <description>An extensible implementation of OASIS's Content Management Interoperability Services (CMIS) specification.</description>
