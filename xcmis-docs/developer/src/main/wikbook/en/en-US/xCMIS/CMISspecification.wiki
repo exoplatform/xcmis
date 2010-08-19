@@ -1,16 +1,12 @@
-Introduction in CMIS specefication 
+*Introduction in CMIS specefication*
 
 {info}
-Based on: 
-Abstract chapter from 
 Content Management Interoperability Services (CMIS) Version 1.0
 OASIS Standard 
 1 May 2010
 
 [http://en.wikipedia.org/wiki/Content_Management_Interoperability_Services]
-[http://gazarenkov.blogspot.com/2010/01/xcmis1-cmis-in-nutshell.html]
 {info}
-
 
 The Content Management Interoperability Services (CMIS) standard defines a domain model and Web Services and Restful AtomPub bindings that can be used by applications to work with one or more Content Management repositories/systems.
 The CMIS interface is designed to be layered on top of existing Content Management systems and their existing programmatic interfaces. 
@@ -18,7 +14,7 @@ It is not intended to prescribe how specific features should be implemented with
 Rather, it is intended to define a generic/universal set of capabilities provided by a CM system and a set of services for working with those capabilities.
 
 CMIS specification provides a Web services interface that:
-* Is designed to work over existing repositories enabling customers to build and leverage applications against multiple repositories -- unlocking content they already have
+* Is designed to work over existing repositories enabling customers to build and leverage applications against multiple repositories
 * Decouples Web services and content from the content management repository, enabling customers to manage content independently
 * Provides common Web services and Web 2.0 interfaces to dramatically simplify application development
 * Is development platform and language agnostic
