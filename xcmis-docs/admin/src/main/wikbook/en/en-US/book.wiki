@@ -3,7 +3,7 @@ h1. Introduction
 
 h1. Configuration
 {include:document="xCMIS/Configure.wiki" /}
-{include:document="xCMIS/ConfigureDMSDrives.wiki" /}
+{include:document="xCMIS/Authentication.wiki" /}
 
 h1. Miscellaneous and Tips
 {include:document="xCMIS/Miscellaneous.wiki" /}

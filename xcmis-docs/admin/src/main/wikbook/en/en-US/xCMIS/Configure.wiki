@@ -1,224 +1,69 @@
-xCMIS server configuration
+*xCMIS server configuration*
 
-_This document refers to 1.0 version of xCMIS._
+To expose WCM drives to CMIS repositories there is special extension of CmisRegistry.
 
-xCMIS is implemented as a set of components deployed on eXo (IoC) Container and exploits standard eXo configuration mechanism which uses XML files to describe the configuration to discover and deploy by eXo container mechanism.
-[eXo JCR Implementation|#JCR Implementation]
-
-h2. CMIS storage provider configuration
-
-In the server bundles provided with xCMIS an application server (Tomcat) launches Standalone eXo Container with exploded configuration which you may need to modify. This configuration is placed in _/*xcmis-server-war*/src/main/webapp/WEB-INF/classes/conf/*exo-configuration.xml*_.
-It is available in binary at _*xcmis.war*#/WEB-INF/classes/conf/*exo-configuration.xml*_.
-
-h3. StorageInitializer
-Storage initializer allows to use several storage providers simultaneously, and allows to attach an rendition providers. Simple !StorageInitializer configuration just declaring initializer class:
-
+Typical configuration of component org.exoplatform.ecms.xcmis.sp.jcr.exo.DriveCmisRegistry
 {code:xml}
-        <component>
-		<type>org.xcmis.spi.deploy.ExoContainerCmisRegistry</type>
-        </component>
+<component>
+   <type>org.exoplatform.ecms.xcmis.sp.jcr.exo.DriveCmisRegistry</type>
+   <init-params>
+      <!-- Disabled by default. Uncomment if you need query support in CMIS. -->
+         <!-- value-param>
+            <name>indexDir</name>
+            <value>${gatein.jcr.index.data.dir}/cmis-index${container.name.suffix}</value>
+         </value-param-->
+      <value-param>
+         <name>exo.cmis.renditions.persistent</name>
+         <value>true</value>
+      </value-param>
+      <values-param>
+         <name>renditionProviders</name>
+         <description>Redition providers classes.</description>
+         <!-- <value>org.xcmis.renditions.impl.PDFDocumentRenditionProvider</value> -->
+         <value>org.xcmis.renditions.impl.ImageRenditionProvider</value>
+      </values-param>
+   </init-params>
+</component>
 {code}
 
-h3. Permission Service
+Where configuration parameters:
+* indexDir - directory where lucene index will be placed. Disabled by default.
+* exo.cmis.renditions.persistent - should be document's rendition (thumbnail) persisted in JCR. Allowed value is _true_ or _false_.
+* renditionProviders - set of FQN of classes which can be used as Rendition Providers. Classes which implements org.xcmis.spi.RenditionProvider interface used to show preview of CMIS objects (thumbnails).
+
+{info}
+  In most cases it's not requred to change anything in xCIMIS configuration.
+  In case of change of indexer storage location, uncomment indexDir value parameter and point it to the actual location.
+{info}
+
+Required nodetypes and namespaces in JCR. This configuration is manadatory for xCMIS normal work.
 {code:xml}
-        <component>
-          <type>org.xcmis.spi.PermissionService</type>
-        </component>
-{code}
-
-
-h3. StorageProvider
-In particular, you may need to change the Storage Provider's type and parameters. So, the main entry point to the "interesting" part of configuration is *!StorageProvider*. For the time being xCMIS supports two types of SP: eXo JCR and Inmemory (mainly for testing purpose). 
-
-This component provides configuration of:
-   * ID of CMIS repository, 
-   * Repository name (JCR), 
-   * Workspace name (JCR), 
-   * Configuration for the index,
-
-Here is how eXo JCR's configuration looks like:
-{code:xml}
-   <component>
-      <type>org.xcmis.sp.jcr.exo.StorageProviderImpl</type>
+<external-component-plugins>
+   <target-component>org.exoplatform.services.jcr.RepositoryService</target-component>
+   <component-plugin>
+      <name>add.namespaces</name>
+      <set-method>addPlugin</set-method>
+      <type>org.exoplatform.services.jcr.impl.AddNamespacesPlugin</type>
       <init-params>
-         <object-param>
-            <name>configs</name>
-            <object type="org.xcmis.sp.jcr.exo.StorageProviderImpl$StorageProviderConfig">
-               <field name="storage">
-                      <object type="org.xcmis.sp.jcr.exo.StorageConfiguration">
-                           <field name="id">
-                              <string>cmis1</string>
-                           </field>
-                           <field name="repository">
-                              <string>repository</string>
-                           </field>
-                           <field name="workspace">
-                              <string>cmis</string>
-                           </field>
-                           <field name="indexConfiguration">
-			     <object type="org.xcmis.search.config.IndexConfiguration">
-				<field name="indexDir">
-				  <string>../temp/index/db1/ws1</string>
-				</field>
-			     </object>
-	    		   </field>
-     		      </object>
-                    </field>
-                   </object>
-{code}
-
-
-Here is how inmemory configuration looks like:
-{code:xml}
-   <component>
-      <type>org.xcmis.sp.inmemory.StorageProviderImpl</type>
-	 <init-params>
-	   <object-param>
-	     <name>configs</name>
-		<object type="org.xcmis.sp.inmemory.StorageProviderImpl$StorageProviderConfig">
-		  <field name="storage">
-			<object type="org.xcmis.sp.inmemory.StorageConfiguration">
-			    <field name="id">
-			       <!-- ID of CMIS repository -->
-			       <string>cmis-inmem1</string>
-		            </field>
-			    <field name="properties">
-			       <map type="java.util.HashMap">
-				 <entry>
-				   <key>
-				    <string>org.xcmis.inmemory.maxmem</string>
-				   </key>
-				   <value>
-				    <string>50MB</string>
-				   </value>
-				 </entry>
-				 <entry>
-				   <key>
-				    <string>org.xcmis.inmemory.maxitems</string>
-				   </key>
-				   <value>
-				    <string>50</string>
-				   </value>
-				 </entry>
-			       </map>
-			   </field>
-                      </object>
-	    	  </field>
-		</object>
-
-{code}
-
-There are additional properties for in-memory storage.
-   * _org.xcmis.inmemory.maxmem_ set max memory size allowed for storage. It is not precise calculation. Only document content is calculated. Default value is 100MB.
-   * _org.xcmis.inmemory.maxitems_ set max number of objects can be added in storage.Default value is 100.
-
-If one of thresholds is exceed then org.xcmis.spi.!CmisRuntimeException will be thrown and no more objects can be added in storage.
-
-Following links will help you with the detail explanation of [http://code.google.com/p/xcmis/wiki/xCMISSearch configuring search] and [http://code.google.com/p/xcmis/wiki/xCMISrenditionProviders configuring rendition providers].
-
-h2. eXo JCR repository service configuration
-
-h3. RepositoryService and !RepositoryServiceConfiguration
-Look at [http://wiki.exoplatform.com/xwiki/bin/view/JCR/Configuration#HPortalandStandaloneconfiguration Portal and Standalone configuration] and [http://wiki.exoplatform.com/xwiki/bin/view/Portal/Database+Configuration#HJCRdatabaseconfiguration JCR database configuration]
-
-   * Path to the JCR repository and workspaces configuration file
-
-{code:xml}
-   <component>
-      <key>org.exoplatform.services.jcr.config.RepositoryServiceConfiguration</key>
-      <type>org.exoplatform.services.jcr.impl.config.RepositoryServiceConfigurationImpl</type>
+         <properties-param>
+            <name>namespaces</name>
+            <property name="cmis" value="http://www.exoplatform.com/jcr/cmis/1.0" />
+            <property name="xcmis" value="http://www.exoplatform.com/jcr/xcmis/1.0" />
+         </properties-param>
+      </init-params>
+   </component-plugin>
+   <component-plugin>
+      <name>add.nodeType</name>
+      <set-method>addPlugin</set-method>
+      <type>org.exoplatform.services.jcr.impl.AddNodeTypePlugin</type>
       <init-params>
-         <value-param>
-            <name>conf-path</name>
-            <description>JCR configuration file</description>
-            <value>jar:/conf/portal/jcr-cmis-config.xml</value>
-            ...
-
-   <component>
-      <key>org.exoplatform.services.jcr.RepositoryService</key>
-      <type>org.exoplatform.services.jcr.impl.RepositoryServiceImpl</type>
-   </component>
+        <values-param>
+            <name>autoCreatedInNewRepository</name>
+            <description>Node types configuration file</description>
+            <value>jar:/conf/cmis-nodetypes-config.xml</value>
+         </values-param>
+      </init-params>
+   </component-plugin>
+</external-component-plugins>
 {code}
 
-{info} To read step about JCR repository configuration look at [xCMISConfigure#eXo_JCR_repository_configuration] {info}
-
-
-
-
-
-
-=eXo JCR repository and workspaces configuration=
-
-There is JCR configuration file as described in eXo wiki at [http://wiki.exoplatform.com/xwiki/bin/view/Portal/Database+Configuration#HJCRdatabaseconfiguration JCR database configuration]
-It is configured the JCR workspace for the CMIS service.
-
-The source of configuration placed at _/*xcmis-sp-jcr-exo*/src/main/resources/conf/portal/*jcr-cmis-config.xml*_. 
-It is available in binary at _*xcmis-sp-jcr-exo-X.Y.jar*#/conf/portal/*jcr-cmis-config.xml*_.
-
-   * Repository name
-   * Workspaces name
-
-{{{
-<repository-service default-repository="repository">
-  <repositories>
-    <repository name="repository" system-workspace="production" default-workspace="production">
-      <security-domain>exo-domain</security-domain>
-      <access-control>optional</access-control>
-      <authentication-policy>org.exoplatform.services.jcr.impl.core.access.JAASAuthenticator</authentication-policy>
-
-        <workspace name="production">
-          <!-- for system storage -->
-          <container class="org.exoplatform.services.jcr.impl.storage.jdbc.JDBCWorkspaceDataContainer">
-            <properties>
-              <property name="source-name" value="jdbcexo" />
-              <property name="dialect" value="hsqldb" />
-              <property name="multi-db" value="false" />
-              <property name="update-storage" value="false" />
-              <property name="max-buffer-size" value="200k" />
-              <property name="swap-directory" value="../temp/swap/production" />
-            </properties>
-          ...
-        </workspace>
-
-        <workspace name="cmis">
-          <container class="org.exoplatform.services.jcr.impl.storage.jdbc.JDBCWorkspaceDataContainer">
-            <properties>
-              <property name="source-name" value="jdbcexo" />
-              <property name="dialect" value="hsqldb" />
-              <property name="multi-db" value="false" />
-              <property name="update-storage" value="false" />
-              <property name="max-buffer-size" value="200k" />
-              <property name="swap-directory" value="../temp/swap/cmis" />
-            </properties>
-            <value-storages>
-          ...
-        </workspace>
-}}}
-
-
-=Authenticator and organization service=
-
-An Authenticator is responsible for Identity creating [http://wiki.exoplatform.com/xwiki/bin/view/Core/Security+Service#HAuthenticator Security Service Authenticator]
-
-xCMIS Tomcat bundle use default implementation of the [http://wiki.exoplatform.com/xwiki/bin/view/JCR/Organization+Service Organization Service].
-
-===!DummyOrganizationService===
-{{{
-   <component>
-      <type>org.exoplatform.services.organization.impl.mock.DummyOrganizationService</type>
-   </component>
-}}}
-
-===JAAS configuration===
-{{{
-exo-domain {
-  org.exoplatform.services.security.j2ee.TomcatLoginModule required;
-};
-}}}
-
-= See also =
-
- * HOW TO configure xCMIS server JCR storage on MySQL
-  * The wiki page at [xCMISConfigureJcrStorageOnMySQL]
- * HOW-TO change authentication method and/or write own Authenticator.
-  * The wiki page at [xCMISAuthentication]
