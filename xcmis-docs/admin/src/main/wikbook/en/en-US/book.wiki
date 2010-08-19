@@ -1,0 +1,14 @@
+h1. Introduction
+{include:document="xCMIS/Introduction.wiki" /}
+
+h1. Configuration
+{include:document="xCMIS/Configure.wiki" /}
+{include:document="xCMIS/ConfigureDMSDrives.wiki" /}
+
+h1. Miscellaneous and Tips
+{include:document="xCMIS/Miscellaneous.wiki" /}
+
+h1. Links
+{include:document="xCMIS/Links.wiki" /}
+
+
