@@ -1,4 +1,4 @@
-====== xCMIS Deployment procedure to an application server ======
+====== xCMIS Deployment procedure to an application server ====== 
 
 For assembly "xCMIS" or "xCMIS Demo" with Tomcat server application:
 
