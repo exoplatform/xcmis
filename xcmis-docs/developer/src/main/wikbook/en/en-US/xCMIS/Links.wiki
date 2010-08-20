@@ -1,4 +1,4 @@
-xCMIS related links
+eXo CMIS related links
 
 xCMIS project links:
 * Community site [http://xcmis.org/]

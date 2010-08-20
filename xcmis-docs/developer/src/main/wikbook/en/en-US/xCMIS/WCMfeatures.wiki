@@ -61,7 +61,8 @@ TODO...
 * Select *DMS Administration* repository (it's WCM drive actually) in *Repositories* panel on left
 * Go to folder /exo:ecm/views/templates/Content List Viewer/list-by-folder
 * Double-click on *OneColumnCLVTemplate.gtmpl* file and download it to local folder on the disk
-* Modify local file, change div element at begin of the template: {code:xml}
+* Modify local file, change div element at begin of the template: 
+{code:language=xml}
     <div class="TitleBarM">
       $header
       <%if (isShowRssLink) {
@@ -69,7 +70,8 @@ TODO...
       }%>
     </div>
   {code}
-with link to the eXo site:{code:xml}
+with link to the eXo site:
+{code:language=xml}
     <div class="TitleBarM">
       $header
       <%if (isShowRssLink) {
@@ -77,7 +79,7 @@ with link to the eXo site:{code:xml}
       <a href="http://www.exoplatform.org/">eXo site</a><%
       }%>
     </div>
-  {code}
+{code}
 * Open Group \-> Sites Explorer, select *DMS Administration*, go to file /exo:ecm/views/templates/Content List Viewer/list-by-folder/OneColumnCLVTemplate.gtmpl.
 * Open the file *View Node Properties* in Sites Explorer, and copy *jcr:uuid* of the file.
 It's possible to get Node ID through CMIS API call by Node's path and then looking the response XML for content download URL.
