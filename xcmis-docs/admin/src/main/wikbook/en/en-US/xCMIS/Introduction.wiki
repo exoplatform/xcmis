@@ -35,4 +35,3 @@ or visit [http://code.google.com/p/xcmis/w/list|Community Wiki] for more informa
 xCMIS project embedded in Platform to expose WCM drives as CMIS repositories.
 Features is implemented as a set of components deployed on eXo Container using XML files to describe the configuration of the service.
 
-Find more details in [#xCMIS.Developer.guide].

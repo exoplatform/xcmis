@@ -1,4 +1,4 @@
-Authenticator and organization service configuration
+h1. Authenticator and organization service configuration
 
 An Authenticator is responsible for Identity creating [Security Service Authenticator|#Core.Security.Service]
 
