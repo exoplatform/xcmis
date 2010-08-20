@@ -1,4 +1,4 @@
-h1. xCMIS server configuration
+h1. CMIS services configuration
 
 To expose WCM drives to CMIS repositories there is special extension of CmisRegistry.
 
@@ -38,7 +38,7 @@ Where configuration parameters:
 
 h1. Required nodetypes and namespaces in JCR
 
-This configuration is manadatory for xCMIS normal work.
+This configuration is manadatory for normal work.
 {code:language=xml}
 <external-component-plugins>
    <target-component>org.exoplatform.services.jcr.RepositoryService</target-component>
