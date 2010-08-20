@@ -1,5 +1,5 @@
 
-List of JAR files required for CMIS feature normal work.
+List of JAR files required for eXo CMIS normal work.
 
 xCMIS project jars (actual for xCMIS 1.1.x versions):
 * xcmis-renditions-X.X.X.jar

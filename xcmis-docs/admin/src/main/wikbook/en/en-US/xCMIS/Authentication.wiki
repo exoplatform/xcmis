@@ -2,8 +2,8 @@ h1. Authenticator and organization service configuration
 
 An Authenticator is responsible for Identity creating [Security Service Authenticator|#Core.Security.Service]
 
-xCMIS relies on 
-* xCMIS uses authentication mechanism provided by the eXo organization service. 
+eXo CMIS service relies on 
+* authentication mechanism provided by the eXo organization service. 
 * JAAS configuration of eXo Platform, e.g.
 {code}
 gatein-domain {

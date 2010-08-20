@@ -1,9 +1,9 @@
 <bookinfo>
-  <title>xCMIS</title>
-  <subtitle>xCMIS administrator's guide</subtitle>
+  <title>eXo CMIS</title>
+  <subtitle>eXo CMIS administrator's guide</subtitle>
   <edition>${project.version}</edition>
   <pubsnumber>1</pubsnumber>
-  <productname>xCMIS</productname>
+  <productname>eXo CMIS</productname>
   <productnumber>${project.version}</productnumber>
   <copyright>
     <year>2010</year>
