@@ -10,7 +10,9 @@ EXO_CONFIG_OPTS="-Xshare:auto -Xms128m -Xmx512m"
 
 #REMOTE_DEBUG="-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n"
 
-JAVA_OPTS="$JAVA_OPTS $LOG_OPTS $SECURITY_OPTS $EXO_CONFIG_OPTS $REMOTE_DEBUG"
+XCMIS_OPTS="-Dorg.xcmis.CmisRegistryFactory=org.xcmis.sp.inmemory.tck.InmemoryCmisRegistryFactory"
+
+JAVA_OPTS="$JAVA_OPTS $LOG_OPTS $SECURITY_OPTS $EXO_CONFIG_OPTS $REMOTE_DEBUG $XCMIS_OPTS"
 export JAVA_OPTS
 
 # Launches the server
