@@ -122,7 +122,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * number of items and total amount of content. Storage is not designed for high
  * concurrency load. In some cases data in storage can be in inconsistency
  * state.
- *
+ * 
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: StorageImpl.java 804 2010-04-16 16:48:59Z
  *          alexey.zavizionov@gmail.com $
@@ -735,6 +735,28 @@ public class StorageImpl implements Storage
          throw new NameConstraintViolationException("Name for new policy must be provided.");
       }
 
+      for (Iterator<Entry> iterator = entries.values().iterator(); iterator.hasNext();)
+      {
+         Entry next = iterator.next();
+         String typeId = next.getTypeId();
+         try
+         {
+            TypeDefinition type = getTypeDefinition(typeId, false);
+            if (type.getBaseId() == BaseType.POLICY)
+            {
+               String name1 = next.getValue(CmisConstants.NAME).getStrings()[0];
+               if (name.equals(name1))
+               {
+                  throw new NameConstraintViolationException("Policy with name " + name + " already exists.");
+               }
+            }
+         }
+         catch (TypeNotFoundException e)
+         {
+            // Should never thrown thins we have objects of this type.
+         }
+      }
+
       Entry policyEntry = new Entry();
 
       policyEntry.setValue(CmisConstants.OBJECT_TYPE_ID, new StringValue(typeDefinition.getId()));
@@ -800,6 +822,28 @@ public class StorageImpl implements Storage
       if (name == null || name.length() == 0)
       {
          throw new NameConstraintViolationException("Name for new relationship must be provided.");
+      }
+
+      for (Iterator<Entry> iterator = entries.values().iterator(); iterator.hasNext();)
+      {
+         Entry next = iterator.next();
+         String typeId = next.getTypeId();
+         try
+         {
+            TypeDefinition type = getTypeDefinition(typeId, false);
+            if (type.getBaseId() == BaseType.RELATIONSHIP)
+            {
+               String name1 = next.getValue(CmisConstants.NAME).getStrings()[0];
+               if (name.equals(name1))
+               {
+                  throw new NameConstraintViolationException("Relationship with name " + name + " already exists.");
+               }
+            }
+         }
+         catch (TypeNotFoundException e)
+         {
+            // Should never thrown thins we have objects of this type.
+         }
       }
 
       Entry relationshipEntry = new Entry();
@@ -1155,6 +1199,15 @@ public class StorageImpl implements Storage
    public ObjectData moveObject(ObjectData object, FolderData target, FolderData source)
       throws UpdateConflictException, VersioningException, NameConstraintViolationException, StorageException
    {
+      String name = object.getName();
+      for (ItemsIterator<ObjectData> iterator = target.getChildren(null); iterator.hasNext();)
+      {
+         if (name.equals(iterator.next().getName()))
+         {
+            throw new NameConstraintViolationException("Object with name " + name
+               + " already exists in destination folder.");
+         }
+      }
       String objectid = object.getObjectId();
       String sourceId = source.getObjectId();
       String targetId = target.getObjectId();
@@ -1343,6 +1396,24 @@ public class StorageImpl implements Storage
       return copy;
    }
 
+   public Collection<TypeDefinition> getSubTypes(String typeId, boolean includePropertyDefinitions)
+      throws TypeNotFoundException
+   {
+      List<TypeDefinition> subTypes = new ArrayList<TypeDefinition>();
+      for (ItemsIterator<TypeDefinition> children = getTypeChildren(typeId, includePropertyDefinitions); children
+         .hasNext();)
+      {
+         TypeDefinition type = children.next();
+         subTypes.add(type);
+         Collection<TypeDefinition> cchildren = getSubTypes(type.getId(), includePropertyDefinitions);
+         if (cchildren.size() > 0)
+         {
+            subTypes.addAll(cchildren);
+         }
+      }
+      return subTypes;
+   }
+
    /**
     * {@inheritDoc}
     */
@@ -1503,7 +1574,7 @@ public class StorageImpl implements Storage
 
       /**
        * Return comparable location of the object
-       *
+       * 
        * @param identifer
        * @return
        */

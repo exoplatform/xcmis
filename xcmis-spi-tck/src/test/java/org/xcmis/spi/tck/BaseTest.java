@@ -20,6 +20,8 @@
 package org.xcmis.spi.tck;
 
 import org.exoplatform.container.StandaloneContainer;
+import org.exoplatform.services.security.ConversationState;
+import org.exoplatform.services.security.Identity;
 import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.CmisRegistry;
@@ -33,7 +35,6 @@ import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.PropertyFilter;
-import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.RenditionFilter;
 import org.xcmis.spi.Storage;
 import org.xcmis.spi.StorageException;
@@ -51,8 +52,7 @@ import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.model.impl.IdProperty;
 import org.xcmis.spi.model.impl.StringProperty;
 import org.xcmis.spi.utils.MimeType;
-import org.exoplatform.services.security.ConversationState;
-import org.exoplatform.services.security.Identity;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -93,9 +93,9 @@ public class BaseTest
    protected static boolean IS_CAPABILITY_FOLDER_TREE = false;
 
    protected static boolean IS_CAPABILITY_DESCENDANTS = false;
-   
+
    protected static boolean IS_CAN_CHECKOUT = true;
-   
+
    protected static boolean IS_VERSIONABLE = true;
 
    public static void setUp() throws Exception
@@ -103,10 +103,10 @@ public class BaseTest
       ConversationState state = new ConversationState(new Identity("__system"));
       ConversationState.setCurrent(state);
 
-     
+
       rootfolderID = getStorage().getRepositoryInfo().getRootFolderId();
       rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
-      
+
 
       try
       {
@@ -115,7 +115,7 @@ public class BaseTest
       }
       catch (TypeNotFoundException ex)
       {
-         // Not supp;  
+         // Not supp;
       }
 
       try
@@ -135,9 +135,9 @@ public class BaseTest
          IS_CAPABILITY_DESCENDANTS = true;
 
       documentTypeDefinition = getStorage().getTypeDefinition(CmisConstants.DOCUMENT, true);
-      
+
       IS_VERSIONABLE = documentTypeDefinition.isVersionable();
-      
+
       folderTypeDefinition = getStorage().getTypeDefinition(CmisConstants.FOLDER, true);
 
       if (IS_POLICIES_SUPPORTED)
@@ -149,7 +149,7 @@ public class BaseTest
 
    protected static Connection getConnection()
    {
-      CmisRegistry reg =CmisRegistry.getInstance(); 
+      CmisRegistry reg =CmisRegistry.getInstance();
       Iterator<RepositoryShortInfo> it = reg.getStorageInfos().iterator();
       conn = reg.getConnection(it.next().getRepositoryId());
       return conn;
@@ -160,9 +160,9 @@ public class BaseTest
       return getConnection().getStorage();
    }
 
-   /**  
+   /**
     *  STRUCTURE:
-    *  
+    *
     *   root
     *    - testroot
     *       |- Folder1
@@ -174,11 +174,11 @@ public class BaseTest
     *       |- Doc2
     *       |- Doc5
     *       |- Doc6
-    *       
+    *
     *   Rel1 = doc3, doc4
     *   Rel2 = doc1, doc2
     *   Rel3 = folder2, doc1
-    *  
+    *
     */
    protected static String createFolderTree() throws Exception
    {
@@ -201,7 +201,7 @@ public class BaseTest
       DocumentData doc5 = createDocument(testroot, "doc5", "1234567890");
 
       DocumentData doc6 = createDocument(testroot, "doc6", "1234567890");
-      
+
       try
       {
          getConnection().checkout(doc2.getObjectId());
@@ -232,10 +232,10 @@ public class BaseTest
     * @param documentContent
     * @param major
     * @return
-    * @throws IOException 
-    * @throws StorageException 
-    * @throws NameConstraintViolationException 
-    * @throws ConstraintException 
+    * @throws IOException
+    * @throws StorageException
+    * @throws NameConstraintViolationException
+    * @throws ConstraintException
     */
    protected static DocumentData createDocument(FolderData parentFolder, String documentName, String documentContent)
       throws ConstraintException, NameConstraintViolationException, StorageException, IOException
@@ -310,7 +310,7 @@ public class BaseTest
          if (IS_RELATIONSHIPS_SUPPORTED)
             removeRelationships(testroot);
          FolderData rootFolder = (FolderData)getStorage().getObjectById(testroot);
-         List<String> failed = (List<String>)getStorage().deleteTree(rootFolder, true, UnfileObject.DELETE, true);
+         getStorage().deleteTree(rootFolder, true, UnfileObject.DELETE, true);
       }
       catch (Exception e)
       {
@@ -390,7 +390,7 @@ public class BaseTest
 //         e.printStackTrace();
 //      }
 //   }
-   
+
    protected static void removeRelationships(String testroot)
    {
       try

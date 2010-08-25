@@ -19,18 +19,22 @@
 
 package org.xcmis.spi.tck;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xcmis.spi.ChangeLogTokenHolder;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.DocumentData;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsList;
-import org.xcmis.spi.NotSupportedException;
 import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.RenditionFilter;
+import org.xcmis.spi.model.CapabilityChanges;
 import org.xcmis.spi.model.CapabilityQuery;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.IncludeRelationships;
@@ -38,10 +42,11 @@ import org.xcmis.spi.model.IncludeRelationships;
 import java.util.List;
 
 /**
- * 2.2.6 Discovery Services
- * The Discovery Services (query) are used to search for query-able objects within the Repository.
- * 
- * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey Zavizionov</a>
+ * 2.2.6 Discovery Services The Discovery Services (query) are used to search
+ * for query-able objects within the Repository.
+ *
+ * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey
+ *         Zavizionov</a>
  * @version $Id$
  */
 public class DiscoveryTest extends BaseTest
@@ -62,8 +67,9 @@ public class DiscoveryTest extends BaseTest
 
    /**
     * 2.2.6.1 query.
-    * 
-    * Description: Executes a CMIS query statement against the contents of the Repository.
+    *
+    * Description: Executes a CMIS query statement against the contents of the
+    * Repository.
     */
    @Test
    public void testQuery() throws Exception
@@ -98,8 +104,9 @@ public class DiscoveryTest extends BaseTest
 
    /**
     * 2.2.6.1 query.
-    * 
-    * Description: Executes a CMIS query statement against the contents of the Repository.
+    *
+    * Description: Executes a CMIS query statement against the contents of the
+    * Repository.
     */
    @Test
    public void testQuery2() throws Exception
@@ -134,30 +141,28 @@ public class DiscoveryTest extends BaseTest
 
    /**
     * 2.2.6.1 query.
-    * 
-    * Description: Executes a CMIS query statement against the contents of the Repository.
+    *
+    * Description: Executes a CMIS query statement against the contents of the
+    * Repository.
     */
    @Test
    public void testContentChanges() throws Exception
    {
       DocumentData documentData = null;
-      if (getStorage().getRepositoryInfo().getCapabilities().getCapabilityQuery().equals(CapabilityQuery.NONE))
+      if (getStorage().getRepositoryInfo().getCapabilities().getCapabilityChanges() == CapabilityChanges.NONE)
       {
          //SKIP
+         return;
       }
       try
       {
+         String logToken = getStorage().getRepositoryInfo().getLatestChangeLogToken();
+         ChangeLogTokenHolder logTokenHolder = new ChangeLogTokenHolder();
+         logTokenHolder.setValue(logToken);
          documentData = createDocument(testroot, "testContentChanges", "Hello World!");
-         String statement = "SELECT * FROM " + CmisConstants.DOCUMENT + " WHERE CONTAINS(\"Hello\")";
-         ItemsList<CmisObject> query = null;
-
-         query = getConnection().getContentChanges(null, true, PropertyFilter.ALL, true, true, true, -1);
-         assertNotNull("Quary failed.", query);
-         assertNotNull("Quary failed - no items.", query.getItems());
-      }
-      catch (NotSupportedException nse)
-      {
-         //SKIP
+         ItemsList<CmisObject> changes =
+            getConnection().getContentChanges(logTokenHolder, true, PropertyFilter.ALL, true, true, true, -1);
+         assertEquals(1, changes.getNumItems());
       }
       finally
       {

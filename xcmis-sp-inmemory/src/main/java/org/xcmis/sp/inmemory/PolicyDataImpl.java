@@ -100,13 +100,15 @@ class PolicyDataImpl extends BaseObjectData implements PolicyData
          }
       }
 
-      ItemsIterator<RelationshipData> relationships = getRelationships(RelationshipDirection.EITHER, null, true);
+      TypeDefinition relationshipType = storage.types.get(CmisConstants.RELATIONSHIP);
+      ItemsIterator<RelationshipData> relationships =
+         getRelationships(RelationshipDirection.EITHER, relationshipType, true);
       if (relationships.hasNext())
       {
          throw new StorageException("Object can't be deleted cause to storage referential integrity. "
             + "Object is source or target at least one Relationship.");
       }
 
-      storage.parents.remove(objectId);
+      storage.entries.remove(objectId);
    }
 }

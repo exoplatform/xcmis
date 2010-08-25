@@ -21,11 +21,6 @@ package org.xcmis.spi.tck;
 import junit.framework.JUnit4TestAdapter;
 import junit.framework.TestSuite;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-
-import org.junit.runners.Suite.SuiteClasses;
-
 //New manner;
 //@RunWith(value = Suite.class)
 //@SuiteClasses(value = {ACLTest.class, DiscoveryTest.class, MultifilingTest.class, NavigationTest.class,
@@ -33,7 +28,7 @@ import org.junit.runners.Suite.SuiteClasses;
 public class AllTests
 {
    //Old manner:
-   public static junit.framework.Test suite() { 
+   public static junit.framework.Test suite() {
       TestSuite suite = new TestSuite("All tests");
       suite.addTest(new JUnit4TestAdapter(RepositoryTest.class));
       suite.addTest(new JUnit4TestAdapter(ACLTest.class));

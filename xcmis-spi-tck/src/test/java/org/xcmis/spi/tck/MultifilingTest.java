@@ -19,8 +19,15 @@
 
 package org.xcmis.spi.tck;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ConstraintException;
@@ -49,19 +56,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.After;
-
 /**
- * 2.2.5 The Multi-filing services (addObjectToFolder, removeObjectFromFolder) are supported only 
- * if the repository supports the multifiling or unfiling optional capabilities. 
+ * 2.2.5 The Multi-filing services (addObjectToFolder, removeObjectFromFolder) are supported only
+ * if the repository supports the multifiling or unfiling optional capabilities.
  * The Multi-filing Services are used to file/un-file objects into/from folders.
- * 
+ *
  * @author <a href="mailto:alexey.zavizionov@exoplatform.com">Alexey Zavizionov</a>
  * @version $Id$
- * 
+ *
  */
 public class MultifilingTest extends BaseTest
 {
@@ -76,7 +78,7 @@ public class MultifilingTest extends BaseTest
    /**
     * 2.2.5.1 addObjectToFolder
     * Adds an existing fileable non-folder object to a folder.
-    * 
+    *
     * @throws Exception
     */
    @Test
@@ -124,23 +126,18 @@ public class MultifilingTest extends BaseTest
             clear(folder1.getObjectId());
          }
       }
-      else
-      {
-         //SKIP
-      }
-
    }
 
    /**
     * 2.2.5.1 addObjectToFolder
     * Adds an existing fileable non-folder object to a folder.
-    * 
-    * The Repository MUST throw this exception if the cmis:objectTypeId property value of 
-    * the given object is NOT in the list of AllowedChildObjectTypeIds of 
+    *
+    * The Repository MUST throw this exception if the cmis:objectTypeId property value of
+    * the given object is NOT in the list of AllowedChildObjectTypeIds of
     * the parent-folder specified by folderId.
-    * 
+    *
     * cmis:allowedChildObjectTypeIds  IDs of the set of Object-types that can be created, moved or filed into this folder.
-    * 
+    *
     * @throws Exception
     */
    @Test
@@ -245,16 +242,12 @@ public class MultifilingTest extends BaseTest
                getStorage().removeType(typeId);
          }
       }
-      else
-      {
-         //SKIP
-      }
    }
 
    /**
     * 2.2.5.1 addObjectToFolder
     * Adds an existing fileable non-folder object to a folder.
-    * 
+    *
     * @throws Exception
     */
    @Test
@@ -302,16 +295,12 @@ public class MultifilingTest extends BaseTest
                clear(folder2.getObjectId());
          }
       }
-      else
-      {
-         //SKIP
-      }
    }
 
    /**
     * 2.2.5.2 removeObjectFromFolder
     * Removes an existing fileable non-folder object from a folder.
-    * 
+    *
     * @throws Exception
     */
    @Test
@@ -369,16 +358,12 @@ public class MultifilingTest extends BaseTest
                clear(folder1.getObjectId());
          }
       }
-      else
-      {
-         //SKIP
-      }
    }
 
    /**
     * 2.2.5.2 removeObjectFromFolder
     * Removes an existing fileable non-folder object from a folder.
-    * 
+    *
     * @throws Exception
     */
    @Test
@@ -432,10 +417,6 @@ public class MultifilingTest extends BaseTest
             if (folder2 != null)
                clear(folder2.getObjectId());
          }
-      }
-      else
-      {
-         //SKIP
       }
    }
 

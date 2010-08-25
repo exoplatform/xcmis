@@ -18,17 +18,13 @@
  */
 package org.xcmis.spi.tck;
 
-import static org.junit.Assert.*;
-
-import java.util.HashMap;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ConstraintException;
@@ -48,6 +44,11 @@ import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.model.impl.IdProperty;
 import org.xcmis.spi.model.impl.StringProperty;
 import org.xcmis.spi.utils.MimeType;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 public class PolicyTest extends BaseTest
 {
@@ -104,7 +105,7 @@ public class PolicyTest extends BaseTest
 
    /**
     * 2.2.9.1.2
-    * constraint : The Repository MUST throw this exception if the specified object's Object-Type 
+    * constraint : The Repository MUST throw this exception if the specified object's Object-Type
     * definition's attribute for controllablePolicy is FALSE.
     * @throws Exception
     */
@@ -193,7 +194,7 @@ public class PolicyTest extends BaseTest
 
    /**
     * 2.2.9.2.2
-    *  constraint: The Repository MUST throw this exception if the specified object's Object-Type 
+    *  constraint: The Repository MUST throw this exception if the specified object's Object-Type
     *  definition's attribute for controllablePolicy is FALSE.
     * @throws Exception
     */
@@ -227,7 +228,7 @@ public class PolicyTest extends BaseTest
 
          TypeDefinition newType =
             new TypeDefinition("cmis:policytype2", BaseType.DOCUMENT, "cmis:policytype2", "cmis:policytype2", "",
-               "cmis:document", "cmis:policytype2", "cmis:policytype2", true, false, true, true, false, true, false,
+               "cmis:document", "cmis:policytype2", "cmis:policytype2", true, false, true, true, false, false, false,
                false, null, null, ContentStreamAllowed.ALLOWED, kinoPropertyDefinitions);
          typeID = getStorage().addType(newType);
          newType = getStorage().getTypeDefinition(typeID, true);
@@ -289,8 +290,8 @@ public class PolicyTest extends BaseTest
 
    /**
     * 2.2.9.3.1
-    * Repositories SHOULD return only the properties specified in the property filter 
-    * if they exist on the object’s type definition.
+    * Repositories SHOULD return only the properties specified in the property filter
+    * if they exist on the objectï¿½s type definition.
     * @throws Exception
     */
    @Test
@@ -351,7 +352,7 @@ public class PolicyTest extends BaseTest
          policy = createPolicy(testroot, "testGetAppliedPolicies_FilterNotValidException_policy1");
 
          getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
-         List<CmisObject> res = getConnection().getAppliedPolicies(doc1.getObjectId(), true, "(,*");
+         getConnection().getAppliedPolicies(doc1.getObjectId(), true, "(,*");
          fail("FilterNotValidException must be thrown.");
       }
       catch (FilterNotValidException ex)

@@ -36,6 +36,7 @@ import org.xcmis.spi.PolicyData;
 import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.RelationshipData;
 import org.xcmis.spi.StorageException;
+import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.UpdateConflictException;
 import org.xcmis.spi.VersioningException;
 import org.xcmis.spi.model.AccessControlEntry;
@@ -335,6 +336,27 @@ abstract class BaseObjectData implements ObjectData
          return CmisUtils.emptyItemsIterator();
       }
 
+      Collection<String> typeFilter = new HashSet<String>();
+      typeFilter.add(type.getId());
+
+      if (includeSubRelationshipTypes)
+      {
+         Collection<TypeDefinition> subTypes = null;
+         try
+         {
+            subTypes = storage.getSubTypes(type.getId(), false);
+         }
+         catch (TypeNotFoundException e)
+         {
+            // Should never happen.
+            throw new CmisRuntimeException(e.getMessage(), e);
+         }
+         for (TypeDefinition t : subTypes)
+         {
+            typeFilter.add(t.getId());
+         }
+      }
+
       Set<RelationshipData> relationships = new java.util.HashSet<RelationshipData>();
       for (String id : relationshipIds)
       {
@@ -348,11 +370,11 @@ abstract class BaseObjectData implements ObjectData
             LOG.warn("Not found relationship " + id + ".");
             continue;
          }
-         if (direction == RelationshipDirection.EITHER //
+         if ((direction == RelationshipDirection.EITHER //
             || (direction == RelationshipDirection.SOURCE && relationship.getSourceId().equals(getObjectId())) //
-            || (direction == RelationshipDirection.TARGET && relationship.getTargetId().equals(getObjectId())))
+         || (direction == RelationshipDirection.TARGET && relationship.getTargetId().equals(getObjectId())))
+            && typeFilter.contains(relationship.getTypeDefinition().getId()))
          {
-            // TODO filter by type.
             relationships.add(relationship);
          }
       }
@@ -447,7 +469,7 @@ abstract class BaseObjectData implements ObjectData
 
    /**
     * To create the new property.
-    *
+    * 
     * @param def the property definition
     * @param value the value
     * @return the new property
@@ -515,7 +537,7 @@ abstract class BaseObjectData implements ObjectData
 
    /**
     * Update properties, skip on-create and read-only properties
-    *
+    * 
     * @param property property to be updated
     */
    protected void doSetProperty(Property<?> property) throws NameConstraintViolationException

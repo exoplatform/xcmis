@@ -32,8 +32,6 @@ public class ByteArrayValue extends Value
 
    private final byte[] values;
 
-   private static final byte[] EMPTY = new byte[0];
-
    public ByteArrayValue(byte[] a)
    {
       this.values = new byte[a.length];

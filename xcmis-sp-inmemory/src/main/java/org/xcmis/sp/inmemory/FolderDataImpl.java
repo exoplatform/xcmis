@@ -212,7 +212,9 @@ class FolderDataImpl extends BaseObjectData implements FolderData
     */
    protected void delete() throws UpdateConflictException, VersioningException, StorageException
    {
-      ItemsIterator<RelationshipData> relationships = getRelationships(RelationshipDirection.EITHER, null, true);
+      TypeDefinition relationshipType = storage.types.get(CmisConstants.RELATIONSHIP);
+      ItemsIterator<RelationshipData> relationships =
+         getRelationships(RelationshipDirection.EITHER, relationshipType, true);
       if (relationships.hasNext())
       {
          throw new StorageException("Object can't be deleted cause to storage referential integrity. "

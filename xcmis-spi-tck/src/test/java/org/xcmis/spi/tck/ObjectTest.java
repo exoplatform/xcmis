@@ -18,14 +18,13 @@
  */
 package org.xcmis.spi.tck;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -68,6 +67,13 @@ import org.xcmis.spi.model.impl.IdProperty;
 import org.xcmis.spi.model.impl.StringProperty;
 import org.xcmis.spi.utils.MimeType;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 public class ObjectTest extends BaseTest
 {
 
@@ -87,10 +93,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.1.1
-    * The Content Stream that MUST be stored for the 
-    * newly-created Document Object. The method of passing the contentStream 
-    * to the server and the encoding mechanism will be specified by each specific binding. 
+    * 2.2.4.1.1 The Content Stream that MUST be stored for the newly-created
+    * Document Object. The method of passing the contentStream to the server and
+    * the encoding mechanism will be specified by each specific binding.
     */
    @Test
    public void testCreateDocument_CheckContent() throws Exception
@@ -110,8 +115,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.1.1
-    * The property values that MUST be applied to the newly-created Document Object.
+    * 2.2.4.1.1 The property values that MUST be applied to the newly-created
+    * Document Object.
+    *
     * @throws Exception
     */
    @Test
@@ -129,8 +135,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.1.1
-    * A list of policy IDs that MUST be applied to the newly-created Document object. 
+    * 2.2.4.1.1 A list of policy IDs that MUST be applied to the newly-created
+    * Document object.
+    *
     * @throws Exception
     */
    @Test
@@ -174,9 +181,10 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.1.1
-    *   A list of ACEs that MUST be added to the newly-created Document object, 
-    *   either using the ACL from folderId if specified, or being applied if no folderId is specified. 
+    * 2.2.4.1.1 A list of ACEs that MUST be added to the newly-created Document
+    * object, either using the ACL from folderId if specified, or being applied
+    * if no folderId is specified.
+    *
     * @throws Exception
     */
    @Test
@@ -207,10 +215,10 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.1.3 
-    * • nameConstraintViolation:   
-    * If the repository detects a violation with the given cmis:name property value, 
-    * the repository MAY throw this exception or chose a name which does not conflict.  
+    * 2.2.4.1.3 ï¿½ nameConstraintViolation: If the repository detects a violation
+    * with the given cmis:name property value, the repository MAY throw this
+    * exception or chose a name which does not conflict.
+    *
     * @throws Exception
     */
    @Test
@@ -235,10 +243,11 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.1.3
-    * The Repository MUST throw this exception if the "contentStreamAllowed" attribute 
-    * of the Object-Type definition specified by the cmis:objectTypeId property 
-    * value is set to "not allowed" and a contentStream input parameter is provided.
+    * 2.2.4.1.3 The Repository MUST throw this exception if the
+    * "contentStreamAllowed" attribute of the Object-Type definition specified
+    * by the cmis:objectTypeId property value is set to "not allowed" and a
+    * contentStream input parameter is provided.
+    *
     * @throws Exception
     */
    @Test
@@ -291,8 +300,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.1.3
-    * The cmis:objectTypeId property value is not an Object-Type whose baseType is "Document".
+    * 2.2.4.1.3 The cmis:objectTypeId property value is not an Object-Type whose
+    * baseType is "Document".
+    *
     * @throws Exception
     */
    @Test
@@ -345,9 +355,10 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.1.3 
-    * The "contentStreamAllowed" attribute of the Object-Type definition specified by 
-    * the cmis:objectTypeId property value is set to "required" and no contentStream input parameter is provided.  
+    * 2.2.4.1.3 The "contentStreamAllowed" attribute of the Object-Type
+    * definition specified by the cmis:objectTypeId property value is set to
+    * "required" and no contentStream input parameter is provided.
+    *
     * @throws Exception
     */
    @Test
@@ -398,9 +409,10 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.1.3
-    * The "versionable" attribute of the Object-Type definition specified by the cmis:objectTypeId property value is set to TRUE 
-    * and the value for the versioningState input parameter is provided that is "none".
+    * 2.2.4.1.3 The "versionable" attribute of the Object-Type definition
+    * specified by the cmis:objectTypeId property value is set to TRUE and the
+    * value for the versioningState input parameter is provided that is "none".
+    *
     * @throws Exception
     */
    @Test
@@ -452,9 +464,11 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.1.3
-    * The "versionable" attribute of the Object-Type definition specified by the cmis:objectTypeId 
-    * property value is set to FALSE and a value for the versioningState input parameter is provided that is something other than "none".
+    * 2.2.4.1.3 The "versionable" attribute of the Object-Type definition
+    * specified by the cmis:objectTypeId property value is set to FALSE and a
+    * value for the versioningState input parameter is provided that is
+    * something other than "none".
+    *
     * @throws Exception
     */
    @Test
@@ -507,9 +521,10 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.1.3
-    * The "controllablePolicy" attribute of the Object-Type definition specified by the 
-    * cmis:objectTypeId property value is set to FALSE and at least one policy is provided.
+    * 2.2.4.1.3 The "controllablePolicy" attribute of the Object-Type definition
+    * specified by the cmis:objectTypeId property value is set to FALSE and at
+    * least one policy is provided.
+    *
     * @throws Exception
     */
    @Test
@@ -575,9 +590,10 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.1.3
-    * The "controllableACL" attribute of the Object-Type definition specified by the cmis:objectTypeId 
-    * property value is set to FALSE and at least one ACE is provided.
+    * 2.2.4.1.3 The "controllableACL" attribute of the Object-Type definition
+    * specified by the cmis:objectTypeId property value is set to FALSE and at
+    * least one ACE is provided.
+    *
     * @throws Exception
     */
    @Test
@@ -625,7 +641,7 @@ public class ObjectTest extends BaseTest
       }
       catch (ConstraintException ex)
       {
-         //OK 
+         //OK
       }
       finally
       {
@@ -637,8 +653,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.1.3
-    * At least one of the permissions is used in an ACE provided which is not supported by the repository.
+    * 2.2.4.1.3 At least one of the permissions is used in an ACE provided which
+    * is not supported by the repository.
+    *
     * @throws Exception
     */
    @Test
@@ -698,8 +715,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.2
-    * Creates a document object as a copy of the given source document in the (optionally) specified location.
+    * 2.2.4.2 Creates a document object as a copy of the given source document
+    * in the (optionally) specified location.
+    *
     * @throws Exception
     */
    @Test
@@ -727,9 +745,10 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.2.1
-    * The property values that MUST be applied to the Object.  
-    * This list of properties SHOULD only contain properties whose values differ from the source document.
+    * 2.2.4.2.1 The property values that MUST be applied to the Object. This
+    * list of properties SHOULD only contain properties whose values differ from
+    * the source document.
+    *
     * @throws Exception
     */
    @Test
@@ -745,8 +764,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.2.1
-    * A list of policy IDs that MUST be applied to the newly-created Document object. 
+    * 2.2.4.2.1 A list of policy IDs that MUST be applied to the newly-created
+    * Document object.
+    *
     * @throws Exception
     */
    @Test
@@ -789,9 +809,10 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.2.1
-    *  A list of ACEs that MUST be added to the newly-created Document object, 
-    *  either using the ACL from folderId if specified, or being applied if no folderId is specified.  
+    * 2.2.4.2.1 A list of ACEs that MUST be added to the newly-created Document
+    * object, either using the ACL from folderId if specified, or being applied
+    * if no folderId is specified.
+    *
     * @throws Exception
     */
    @Test
@@ -822,9 +843,10 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.2.3
-    *  If the repository detects a violation with the given cmis:name property value, 
-    *  the repository MAY throw this exception or chose a name which does not conflict.
+    * 2.2.4.2.3 If the repository detects a violation with the given cmis:name
+    * property value, the repository MAY throw this exception or chose a name
+    * which does not conflict.
+    *
     * @throws Exception
     */
    @Test
@@ -847,8 +869,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.2.3
-    * constraint: The Repository MUST throw this exception if  the sourceId is not an Object whose baseType is "Document".
+    * 2.2.4.2.3 constraint: The Repository MUST throw this exception if the
+    * sourceId is not an Object whose baseType is "Document".
+    *
     * @throws Exception
     */
    @Test
@@ -869,9 +892,10 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.2.3
-    * The source document’s cmis:objectTypeId property value is NOT in the list of AllowedChildObjectTypeIds 
-    * of the parent-folder specified by folderId.
+    * 2.2.4.2.3 The source documentï¿½s cmis:objectTypeId property value is NOT in
+    * the list of AllowedChildObjectTypeIds of the parent-folder specified by
+    * folderId.
+    *
     * @throws Exception
     */
    @Test
@@ -942,9 +966,11 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.2.3
-    * The "versionable" attribute of the Object-Type definition specified by the cmis:objectTypeId property value is set to FALSE 
-    * and a value for the versioningState input parameter is provided that is something other than "none".
+    * 2.2.4.2.3 The "versionable" attribute of the Object-Type definition
+    * specified by the cmis:objectTypeId property value is set to FALSE and a
+    * value for the versioningState input parameter is provided that is
+    * something other than "none".
+    *
     * @throws Exception
     */
    @Test
@@ -1001,9 +1027,10 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.2.3
-    * The "versionable" attribute of the Object-Type definition specified by the cmis:objectTypeId property value is set to TRUE and 
-    * the value for the versioningState input parameter is provided that is "none".
+    * 2.2.4.2.3 The "versionable" attribute of the Object-Type definition
+    * specified by the cmis:objectTypeId property value is set to TRUE and the
+    * value for the versioningState input parameter is provided that is "none".
+    *
     * @throws Exception
     */
    @Test
@@ -1063,10 +1090,10 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.2.3
-    * The "controllablePolicy" attribute of the Object-Type definition 
-    * specified by the cmis:objectTypeId property value is set to FALSE and at least one policy is provided.
-    * 
+    * 2.2.4.2.3 The "controllablePolicy" attribute of the Object-Type definition
+    * specified by the cmis:objectTypeId property value is set to FALSE and at
+    * least one policy is provided.
+    *
     * @throws Exception
     */
    @Test
@@ -1111,7 +1138,7 @@ public class ObjectTest extends BaseTest
       DocumentData doc1 =
          getStorage().createDocument(
             testroot,
-            documentTypeDefinition,
+            newType,
             getPropsMap(CmisConstants.DOCUMENT,
                "testCreateDocumentFromSource_ConstraintExceptionNotControllablePolicy1"), cs, null, null,
             VersioningState.MAJOR);
@@ -1128,6 +1155,7 @@ public class ObjectTest extends BaseTest
       }
       finally
       {
+         getStorage().deleteObject(doc1, true);
          if (docId != null)
             getStorage().deleteObject(getStorage().getObjectById(docId), true);
          if (typeID != null)
@@ -1138,10 +1166,10 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.2.3
-    * The "controllableACL" attribute of the Object-Type definition 
-    * specified by the cmis:objectTypeId property value is set to FALSE and at least one ACE is provided.
-    * 
+    * 2.2.4.2.3 The "controllableACL" attribute of the Object-Type definition
+    * specified by the cmis:objectTypeId property value is set to FALSE and at
+    * least one ACE is provided.
+    *
     * @throws Exception
     */
    @Test
@@ -1207,8 +1235,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.2.3
-    * At least one of the permissions is used in an ACE provided which is not supported by the repository.
+    * 2.2.4.2.3 At least one of the permissions is used in an ACE provided which
+    * is not supported by the repository.
+    *
     * @throws Exception
     */
    @Test
@@ -1273,8 +1302,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.3
-    * Creates a folder object of the specified type in the specified location.
+    * 2.2.4.3 Creates a folder object of the specified type in the specified
+    * location.
+    *
     * @throws Exception
     */
    @Test
@@ -1289,8 +1319,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.3.1
-    * A list of policy IDs that MUST be applied to the newly-created Folder object.
+    * 2.2.4.3.1 A list of policy IDs that MUST be applied to the newly-created
+    * Folder object.
+    *
     * @throws Exception
     */
    @Test
@@ -1333,8 +1364,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.3.1
-    * A list of ACEs that MUST be added to the newly-created Folder object.
+    * 2.2.4.3.1 A list of ACEs that MUST be added to the newly-created Folder
+    * object.
+    *
     * @throws Exception
     */
    @Test
@@ -1370,8 +1402,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.3
-    * Creates a folder object of the specified type in the specified location.
+    * 2.2.4.3 Creates a folder object of the specified type in the specified
+    * location.
+    *
     * @throws Exception
     */
    @Test
@@ -1394,9 +1427,10 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.3.3
-    * The Repository MUST throw this exception if the cmis:objectTypeId property 
-    * value is not an Object-Type whose baseType is "Folder".
+    * 2.2.4.3.3 The Repository MUST throw this exception if the
+    * cmis:objectTypeId property value is not an Object-Type whose baseType is
+    * "Folder".
+    *
     * @throws Exception
     */
    @Test
@@ -1444,9 +1478,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.3.3
-    * The cmis:objectTypeId property value is NOT in the list of 
-    * AllowedChildObjectTypeIds of the parent-folder specified by folderId. 
+    * 2.2.4.3.3 The cmis:objectTypeId property value is NOT in the list of
+    * AllowedChildObjectTypeIds of the parent-folder specified by folderId.
+    *
     * @throws Exception
     */
    @Test
@@ -1496,25 +1530,28 @@ public class ObjectTest extends BaseTest
       }
       finally
       {
-         if (f1 != null)
-            getStorage().deleteObject(f1, true);
          if (docId != null)
+         {
             try
             {
                getStorage().deleteObject(getStorage().getObjectById(docId), true);
             }
             catch (ObjectNotFoundException e)
             {
-            };
+            }
+         }
+         if (f1 != null)
+            getStorage().deleteObject(f1, true);
          if (typeID != null)
             getStorage().removeType(typeID);
       }
    }
 
    /**
-    * 2.2.4.3.3
-    * The "controllablePolicy" attribute of the Object-Type definition specified by the 
-    * cmis:objectTypeId property value is set to FALSE and at least one policy is provided.
+    * 2.2.4.3.3 The "controllablePolicy" attribute of the Object-Type definition
+    * specified by the cmis:objectTypeId property value is set to FALSE and at
+    * least one policy is provided.
+    *
     * @throws Exception
     */
    @Test
@@ -1574,9 +1611,10 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.3.3
-    * The "controllableACL" attribute of the Object-Type definition specified 
-    * by the cmis:objectTypeId property value is set to FALSE and at least one ACE is provided.
+    * 2.2.4.3.3 The "controllableACL" attribute of the Object-Type definition
+    * specified by the cmis:objectTypeId property value is set to FALSE and at
+    * least one ACE is provided.
+    *
     * @throws Exception
     */
    @Test
@@ -1632,8 +1670,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.3.3
-    * At least one of the permissions is used in an ACE provided which is not supported by the repository.
+    * 2.2.4.3.3 At least one of the permissions is used in an ACE provided which
+    * is not supported by the repository.
+    *
     * @throws Exception
     */
    @Test
@@ -1676,7 +1715,7 @@ public class ObjectTest extends BaseTest
       }
       catch (ConstraintException ex)
       {
-         //OK 
+         //OK
       }
       finally
       {
@@ -1688,8 +1727,8 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.4
-    * Creates a relationship object of the specified type.
+    * 2.2.4.4 Creates a relationship object of the specified type.
+    *
     * @throws Exception
     */
    @Test
@@ -1733,8 +1772,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.4.1
-    * A list of policy IDs that MUST be applied to the newly-created Replationship object.
+    * 2.2.4.4.1 A list of policy IDs that MUST be applied to the newly-created
+    * Replationship object.
+    *
     * @throws Exception
     */
    @Test
@@ -1809,9 +1849,10 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.4.1
-    * A list of ACEs that MUST be added to the newly-created Relationship object, either using the 
-    * ACL from folderId if specified, or being applied if no folderId is specified. 
+    * 2.2.4.4.1 A list of ACEs that MUST be added to the newly-created
+    * Relationship object, either using the ACL from folderId if specified, or
+    * being applied if no folderId is specified.
+    *
     * @throws Exception
     */
    @Test
@@ -1888,9 +1929,10 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.4.3
-    * If the repository detects a violation with the given cmis:name property value, the repository MAY 
-    * throw this exception or chose a name which does not conflict.
+    * 2.2.4.4.3 If the repository detects a violation with the given cmis:name
+    * property value, the repository MAY throw this exception or chose a name
+    * which does not conflict.
+    *
     * @throws Exception
     */
    @Test
@@ -1954,8 +1996,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.4.3
-    * The cmis:objectTypeId property value is not an Object-Type whose baseType is "Relationship".
+    * 2.2.4.4.3 The cmis:objectTypeId property value is not an Object-Type whose
+    * baseType is "Relationship".
+    *
     * @throws Exception
     */
    @Test
@@ -2011,11 +2054,12 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.4.3
-    * The sourceObjectId’s ObjectType is not in the list of "allowedSourceTypes" specified by 
-    * the Object-Type definition specified by cmis:objectTypeId property value.
-    * The targetObjectId’s ObjectType is not in the list of "allowedTargetTypes" specified by 
-    * the Object-Type definition specified by cmis:objectTypeId property value.
+    * 2.2.4.4.3 The sourceObjectIdï¿½s ObjectType is not in the list of
+    * "allowedSourceTypes" specified by the Object-Type definition specified by
+    * cmis:objectTypeId property value. The targetObjectIdï¿½s ObjectType is not
+    * in the list of "allowedTargetTypes" specified by the Object-Type
+    * definition specified by cmis:objectTypeId property value.
+    *
     * @throws Exception
     */
    @Test
@@ -2084,9 +2128,10 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.4.3
-    * The "controllablePolicy" attribute of the Object-Type definition specified by the 
-    * cmis:objectTypeId property value is set to FALSE and at least one policy is provided.
+    * 2.2.4.4.3 The "controllablePolicy" attribute of the Object-Type definition
+    * specified by the cmis:objectTypeId property value is set to FALSE and at
+    * least one policy is provided.
+    *
     * @throws Exception
     */
    @Test
@@ -2146,7 +2191,7 @@ public class ObjectTest extends BaseTest
       }
       catch (ConstraintException xe)
       {
-         //OK 
+         //OK
       }
       finally
       {
@@ -2160,9 +2205,10 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.4.3
-    * The "controllableACL" attribute of the Object-Type definition specified by the 
-    * cmis:objectTypeId property value is set to FALSE and at least one ACE is provided.
+    * 2.2.4.4.3 The "controllableACL" attribute of the Object-Type definition
+    * specified by the cmis:objectTypeId property value is set to FALSE and at
+    * least one ACE is provided.
+    *
     * @throws Exception
     */
    @Test
@@ -2238,8 +2284,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.4.3
-    * At least one of the permissions is used in an ACE provided which is not supported by the repository. 
+    * 2.2.4.4.3 At least one of the permissions is used in an ACE provided which
+    * is not supported by the repository.
+    *
     * @throws Exception
     */
    @Test
@@ -2313,8 +2360,8 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.5
-    * Creates a policy object of the specified type.
+    * 2.2.4.5 Creates a policy object of the specified type.
+    *
     * @throws Exception
     */
    @Test
@@ -2347,8 +2394,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.5.1
-    * A list of policy IDs that MUST be applied to the newly-created Policy object. 
+    * 2.2.4.5.1 A list of policy IDs that MUST be applied to the newly-created
+    * Policy object.
+    *
     * @throws Exception
     */
    @Test
@@ -2395,8 +2443,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.5.1
-    * A list of ACEs that MUST be added to the newly-created Policy object. 
+    * 2.2.4.5.1 A list of ACEs that MUST be added to the newly-created Policy
+    * object.
+    *
     * @throws Exception
     */
    @Test
@@ -2438,9 +2487,10 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.5.3
-    * If the repository detects a violation with the given cmis:name property value, the repository MAY 
-    * throw this exception or chose a name which does not conflict.
+    * 2.2.4.5.3 If the repository detects a violation with the given cmis:name
+    * property value, the repository MAY throw this exception or chose a name
+    * which does not conflict.
+    *
     * @throws Exception
     */
    @Test
@@ -2481,9 +2531,10 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.3.3
-    * The Repository MUST throw this exception if  to  The cmis:objectTypeId 
-    * property value is not an Object-Type whose baseType is "Policy".
+    * 2.2.4.3.3 The Repository MUST throw this exception if to The
+    * cmis:objectTypeId property value is not an Object-Type whose baseType is
+    * "Policy".
+    *
     * @throws Exception
     */
    @Test
@@ -2522,9 +2573,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.5.3
-    * The cmis:objectTypeId property value is NOT in the list of AllowedChildObjectTypeIds 
-    * of the parent-folder specified by folderId. 
+    * 2.2.4.5.3 The cmis:objectTypeId property value is NOT in the list of
+    * AllowedChildObjectTypeIds of the parent-folder specified by folderId.
+    *
     * @throws Exception
     */
    @Test
@@ -2535,7 +2586,7 @@ public class ObjectTest extends BaseTest
          //SKIP
          return;
       }
-      String typeID = null;
+      String typeID = "cmis:mypolicys";
       ObjectData obj = null;
       try
       {
@@ -2559,24 +2610,23 @@ public class ObjectTest extends BaseTest
             PropertyDefinitions.getPropertyDefinition("cmis:policy", CmisConstants.POLICY_TEXT);
 
          Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-         properties.put(CmisConstants.NAME,
-            new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(), fPropDefName.getLocalName(),
-               fPropDefName.getDisplayName(), "estCreatePolicy_ConstraintExceptionNotAllowed"));
+         properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
+            fPropDefName.getLocalName(), fPropDefName.getDisplayName(),
+            "testCreatePolicy_ConstraintExceptionNotAllowed"));
          properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
-            .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(),
-            "cmis:mypolicys"));
+            .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(), typeID));
          properties.put(CmisConstants.POLICY_TEXT, new StringProperty(def2.getId(), def2.getQueryName(), def2
             .getLocalName(), def2.getDisplayName(), "testPolicyText1"));
 
          TypeDefinition newType =
-            new TypeDefinition("cmis:mypolicys", BaseType.POLICY, "cmis:mypolicys", "cmis:mypolicys", "",
-               "cmis:policy", "cmis:mypolicys", "cmis:mypolicys", true, false, true, true, false, false, false, true,
-               null, null, ContentStreamAllowed.NOT_ALLOWED, fPropertyDefinitions);
+            new TypeDefinition(typeID, BaseType.POLICY, "cmis:mypolicys", "cmis:mypolicys", "", "cmis:policy",
+               "cmis:mypolicys", "cmis:mypolicys", true, true, true, true, false, false, false, true, null, null,
+               ContentStreamAllowed.NOT_ALLOWED, fPropertyDefinitions);
          typeID = getStorage().addType(newType);
          newType = getStorage().getTypeDefinition(typeID, true);
 
-         String docId = getConnection().createPolicy(testroot2.getObjectId(), properties, null, null, null);
-         obj = getStorage().getObjectById(docId);
+         String policyId = getConnection().createPolicy(testroot2.getObjectId(), properties, null, null, null);
+         obj = getStorage().getObjectById(policyId);
          fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
@@ -2593,9 +2643,10 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.5.3
-    * The "controllablePolicy" attribute of the Object-Type definition specified by 
-    * the cmis:objectTypeId property value is set to FALSE and at least one policy is provided.
+    * 2.2.4.5.3 The "controllablePolicy" attribute of the Object-Type definition
+    * specified by the cmis:objectTypeId property value is set to FALSE and at
+    * least one policy is provided.
+    *
     * @throws Exception
     */
    @Test
@@ -2655,9 +2706,10 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.5.3
-    * The "controllableACL" attribute of the Object-Type definition specified by the cmis:objectTypeId 
-    * property value is set to FALSE and at least one ACE is provided.
+    * 2.2.4.5.3 The "controllableACL" attribute of the Object-Type definition
+    * specified by the cmis:objectTypeId property value is set to FALSE and at
+    * least one ACE is provided.
+    *
     * @throws Exception
     */
    @Test
@@ -2714,8 +2766,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.5.3
-    * At least one of the permissions is used in an ACE provided which is not supported by the repository. 
+    * 2.2.4.5.3 At least one of the permissions is used in an ACE provided which
+    * is not supported by the repository.
+    *
     * @throws Exception
     */
    @Test
@@ -2747,8 +2800,8 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.6
-    * Gets the list of allowable actions for an Object.
+    * 2.2.4.6 Gets the list of allowable actions for an Object.
+    *
     * @throws Exception
     */
    @Test
@@ -2759,8 +2812,8 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.7
-    * Gets the specified information for the Object. 
+    * 2.2.4.7 Gets the specified information for the Object.
+    *
     * @throws Exception
     */
    @Test
@@ -2774,9 +2827,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.7
-    * Repositories SHOULD return only the properties specified in the property filter 
-    * if they exist on the object’s type definition.
+    * 2.2.4.7 Repositories SHOULD return only the properties specified in the
+    * property filter if they exist on the objectï¿½s type definition.
+    *
     * @throws Exception
     */
    @Test
@@ -2795,8 +2848,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.7
-    * Value indicating what relationships in which the objects returned participate MUST be returned, if any.
+    * 2.2.4.7 Value indicating what relationships in which the objects returned
+    * participate MUST be returned, if any.
+    *
     * @throws Exception
     */
    @Test
@@ -2820,8 +2874,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.7
-    * The Repository MUST return the Ids of the policies applied to the object.  Defaults to FALSE.
+    * 2.2.4.7 The Repository MUST return the Ids of the policies applied to the
+    * object. Defaults to FALSE.
+    *
     * @throws Exception
     */
    @Test
@@ -2860,8 +2915,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.7
-    * If TRUE, then the Repository MUST return the ACLs for each object in the result set.
+    * 2.2.4.7 If TRUE, then the Repository MUST return the ACLs for each object
+    * in the result set.
+    *
     * @throws Exception
     */
    @Test
@@ -2894,8 +2950,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.7
-    * If TRUE, then the Repository MUST return the available actions for each object in the result set. 
+    * 2.2.4.7 If TRUE, then the Repository MUST return the available actions for
+    * each object in the result set.
+    *
     * @throws Exception
     */
    @Test
@@ -2909,8 +2966,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.7.3
-    * The Repository MUST throw this exception if this property filter input parameter is not valid.
+    * 2.2.4.7.3 The Repository MUST throw this exception if this property filter
+    * input parameter is not valid.
+    *
     * @throws Exception
     */
    @Test
@@ -2924,14 +2982,13 @@ public class ObjectTest extends BaseTest
       }
       catch (FilterNotValidException ex)
       {
-         //OK 
+         //OK
       }
    }
 
    /**
-    * 2.2.4.8
-    * Gets the list of properties for an Object.
-    * 
+    * 2.2.4.8 Gets the list of properties for an Object.
+    *
     * @throws Exception
     */
    @Test
@@ -2949,9 +3006,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.8
-    * The Repository MUST throw this exception if this property filter input parameter is not valid.
-    * 
+    * 2.2.4.8 The Repository MUST throw this exception if this property filter
+    * input parameter is not valid.
+    *
     * @throws Exception
     */
    @Test
@@ -2969,8 +3026,8 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.9.1
-    * Gets the specified object. 
+    * 2.2.4.9.1 Gets the specified object.
+    *
     * @throws Exception
     */
    @Test
@@ -2984,9 +3041,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.9.1
-    * Repositories SHOULD return only the properties specified in the property filter 
-    * if they exist on the object’s type definition.
+    * 2.2.4.9.1 Repositories SHOULD return only the properties specified in the
+    * property filter if they exist on the objectï¿½s type definition.
+    *
     * @throws Exception
     */
    @Test
@@ -3005,8 +3062,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.9.1
-    * Value indicating what relationships in which the objects returned participate MUST be returned, if any.
+    * 2.2.4.9.1 Value indicating what relationships in which the objects
+    * returned participate MUST be returned, if any.
+    *
     * @throws Exception
     */
    @Test
@@ -3031,8 +3089,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.9.1
-    * The Repository MUST return the Ids of the policies applied to the object.  Defaults to FALSE.
+    * 2.2.4.9.1 The Repository MUST return the Ids of the policies applied to
+    * the object. Defaults to FALSE.
+    *
     * @throws Exception
     */
    @Test
@@ -3068,8 +3127,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.9.1
-    * If TRUE, then the Repository MUST return the ACLs for each object in the result set.
+    * 2.2.4.9.1 If TRUE, then the Repository MUST return the ACLs for each
+    * object in the result set.
+    *
     * @throws Exception
     */
    @Test
@@ -3104,8 +3164,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.9.1
-    * : If TRUE, then the Repository MUST return the available actions for each object in the result set. 
+    * 2.2.4.9.1 : If TRUE, then the Repository MUST return the available actions
+    * for each object in the result set.
+    *
     * @throws Exception
     */
    @Test
@@ -3119,8 +3180,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.9.3
-    * The Repository MUST throw this exception if this property filter input parameter is not valid.
+    * 2.2.4.9.3 The Repository MUST throw this exception if this property filter
+    * input parameter is not valid.
+    *
     * @throws Exception
     */
    @Test
@@ -3139,9 +3201,10 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.10
-    * Gets the content stream for the specified Document object, or gets a 
-    * rendition stream for a specified rendition of a document or folder object.
+    * 2.2.4.10 Gets the content stream for the specified Document object, or
+    * gets a rendition stream for a specified rendition of a document or folder
+    * object.
+    *
     * @throws Exception
     */
    @Test
@@ -3158,9 +3221,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.10.3
-    * The Repository MUST throw this exception if the object specified by objectId does 
-    * NOT have a content stream or rendition stream. 
+    * 2.2.4.10.3 The Repository MUST throw this exception if the object
+    * specified by objectId does NOT have a content stream or rendition stream.
+    *
     * @throws Exception
     */
    @Test
@@ -3182,8 +3245,8 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.11
-    * Gets the list of associated Renditions for the specified object.
+    * 2.2.4.11 Gets the list of associated Renditions for the specified object.
+    *
     * @throws Exception
     */
    @Test
@@ -3203,13 +3266,13 @@ public class ObjectTest extends BaseTest
       }
       catch (NotSupportedException ex)
       {
-         //SKIP    
+         //SKIP
       }
    }
 
    /**
-    * 2.2.4.11.3
-    * The filter specified is not valid.
+    * 2.2.4.11.3 The filter specified is not valid.
+    *
     * @throws Exception
     */
    @Test
@@ -3234,8 +3297,8 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.12
-    * Updates properties of the specified object.
+    * 2.2.4.12 Updates properties of the specified object.
+    *
     * @throws Exception
     */
    @Test
@@ -3296,9 +3359,10 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.12.3
-    * The object is not checked out and ANY of the properties being updated are defined in their 
-    * Object-Type definition have an attribute value of Updatability when checked-out.
+    * 2.2.4.12.3 The object is not checked out and ANY of the properties being
+    * updated are defined in their Object-Type definition have an attribute
+    * value of Updatability when checked-out.
+    *
     * @throws Exception
     */
    @Test
@@ -3323,8 +3387,7 @@ public class ObjectTest extends BaseTest
          properties2.put(CmisConstants.CHECKIN_COMMENT, new StringProperty(fPropDefComment.getId(), fPropDefComment
             .getQueryName(), fPropDefComment.getLocalName(), fPropDefComment.getDisplayName(), "comment"));
 
-         String id = getConnection().updateProperties(doc1.getObjectId(), new ChangeTokenHolder(), properties2);
-         ObjectData obj = getStorage().getObjectById(id);
+         getConnection().updateProperties(doc1.getObjectId(), new ChangeTokenHolder(), properties2);
          fail("VersioningException must be thrown.");
       }
       catch (VersioningException ex)
@@ -3334,8 +3397,8 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.13
-    * Moves the specified file-able object from one folder to another. 
+    * 2.2.4.13 Moves the specified file-able object from one folder to another.
+    *
     * @throws Exception
     */
    @Test
@@ -3359,9 +3422,10 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.13.3
-    * The Repository MUST throw this exception if the service is invoked with a missing sourceFolderId or the 
-    * sourceFolderId doesn’t match the specified object’s parent folder.
+    * 2.2.4.13.3 The Repository MUST throw this exception if the service is
+    * invoked with a missing sourceFolderId or the sourceFolderId doesnï¿½t match
+    * the specified objectï¿½s parent folder.
+    *
     * @throws Exception
     */
    @Test
@@ -3373,13 +3437,12 @@ public class ObjectTest extends BaseTest
          folder2 = createFolder(rootFolder, "testMoveObject_InvalidArgumentException");
          DocumentData doc1 = createDocument(testroot, "testMoveObject_InvalidArgumentException", "1234567890aBcDE");
 
-         String id = getConnection().moveObject(doc1.getObjectId(), testroot.getObjectId(), folder2.getObjectId());
-         ObjectData obj = getStorage().getObjectById(id);
+         getConnection().moveObject(doc1.getObjectId(), testroot.getObjectId(), folder2.getObjectId());
          fail("InvalidArgumentException must be thrown.");
       }
       catch (InvalidArgumentException ex)
       {
-         //OK 
+         //OK
       }
       finally
       {
@@ -3389,9 +3452,11 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.13.3
-    * The Repository MUST throw this exception if the cmis:objectTypeId property value of the given object is NOT 
-    * in the list of AllowedChildObjectTypeIds of the parent-folder specified by targetFolderId. 
+    * 2.2.4.13.3 The Repository MUST throw this exception if the
+    * cmis:objectTypeId property value of the given object is NOT in the list of
+    * AllowedChildObjectTypeIds of the parent-folder specified by
+    * targetFolderId.
+    *
     * @throws Exception
     */
    @Test
@@ -3431,8 +3496,7 @@ public class ObjectTest extends BaseTest
          folder2 = getStorage().createFolder(rootFolder, newType, props2, null, null);
          DocumentData doc1 = createDocument(testroot, "testMoveObject_ConstraintException", "1234567890aBcDE");
 
-         String id = getConnection().moveObject(doc1.getObjectId(), folder2.getObjectId(), testroot.getObjectId());
-         ObjectData obj = getStorage().getObjectById(id);
+         getConnection().moveObject(doc1.getObjectId(), folder2.getObjectId(), testroot.getObjectId());
          fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)
@@ -3449,9 +3513,10 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.13.3
-    * The Repository MUST throw this exception if the service is invoked with a missing sourceFolderId or the 
-    * sourceFolderId doesn’t match the specified object’s parent folder.
+    * 2.2.4.13.3 The Repository MUST throw this exception if the service is
+    * invoked with a missing sourceFolderId or the sourceFolderId doesnï¿½t match
+    * the specified objectï¿½s parent folder.
+    *
     * @throws Exception
     */
    @Test
@@ -3479,8 +3544,8 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.14
-    * Deletes the specified object.   
+    * 2.2.4.14 Deletes the specified object.
+    *
     * @throws Exception
     */
    @Test
@@ -3491,7 +3556,7 @@ public class ObjectTest extends BaseTest
          DocumentData doc1 = createDocument(testroot, "testDeleteObject_Simple", "1234567890aBcDE");
          String id = doc1.getObjectId();
          getConnection().deleteObject(doc1.getObjectId(), true);
-         ObjectData obj = getStorage().getObjectById(id);
+         getStorage().getObjectById(id);
       }
       catch (ObjectNotFoundException ex)
       {
@@ -3500,8 +3565,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.14
-    * The Repository MUST throw this exception if the method is invoked on a Folder object that contains one or more objects. 
+    * 2.2.4.14 The Repository MUST throw this exception if the method is invoked
+    * on a Folder object that contains one or more objects.
+    *
     * @throws Exception
     */
    @Test
@@ -3510,7 +3576,7 @@ public class ObjectTest extends BaseTest
       try
       {
          FolderData testroot2 = createFolder(rootFolder, "testDeleteObjectConstraintException");
-         DocumentData doc1 = createDocument(testroot2, "testDeleteObject_ConstraintException", "1234567890aBcDE");
+         createDocument(testroot2, "testDeleteObject_ConstraintException", "1234567890aBcDE");
          getConnection().deleteObject(testroot2.getObjectId(), true);
          fail("ConstraintException must be thrown.");
       }
@@ -3521,8 +3587,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.15
-    *  Deletes the specified folder object and all of its child- and descendant-objects.
+    * 2.2.4.15 Deletes the specified folder object and all of its child- and
+    * descendant-objects.
+    *
     * @throws Exception
     */
    @Test
@@ -3535,12 +3602,10 @@ public class ObjectTest extends BaseTest
 
       String id = testroot2.getObjectId();
 
+      getConnection().deleteTree(id, true, UnfileObject.DELETE, true);
       try
       {
-         Collection<String> str = getConnection().deleteTree(id, true, UnfileObject.DELETE, true);
-         ObjectData root = getStorage().getObjectById(id);
-         if (root != null)
-            getStorage().deleteObject(root, true);
+         getStorage().getObjectById(id);
       }
       catch (ObjectNotFoundException ex)
       {
@@ -3549,8 +3614,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.15
-    *  Deletes the specified folder object and all of its child- and descendant-objects.
+    * 2.2.4.15 Deletes the specified folder object and all of its child- and
+    * descendant-objects.
+    *
     * @throws Exception
     */
    @Test
@@ -3588,8 +3654,8 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.16
-    * Sets the content stream for the specified Document object.
+    * 2.2.4.16 Sets the content stream for the specified Document object.
+    *
     * @throws Exception
     */
    @Test
@@ -3607,8 +3673,9 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.16.3
-    * The Repository MUST throw this exception if the input parameter overwriteFlag is FALSE and the Object already has a content-stream. 
+    * 2.2.4.16.3 The Repository MUST throw this exception if the input parameter
+    * overwriteFlag is FALSE and the Object already has a content-stream.
+    *
     * @throws Exception
     */
    @Test
@@ -3621,7 +3688,7 @@ public class ObjectTest extends BaseTest
          DocumentData doc1 =
             createDocument(testroot, "testSetContentStream_ContentAlreadyExistsException", "1234567890aBcDE");
 
-         String docid = getConnection().setContentStream(doc1.getObjectId(), cs, new ChangeTokenHolder(), false);
+         getConnection().setContentStream(doc1.getObjectId(), cs, new ChangeTokenHolder(), false);
          fail("ContentAlreadyExistsException must be thrown.");
       }
       catch (ContentAlreadyExistsException ex)
@@ -3631,9 +3698,11 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.16.3
-    * The Repository MUST throw this exception if the "contentStreamAllowed" attribute of the Object-Type 
-    * definition specified by the cmis:objectTypeId property value of the given document is set to "notallowed". 
+    * 2.2.4.16.3 The Repository MUST throw this exception if the
+    * "contentStreamAllowed" attribute of the Object-Type definition specified
+    * by the cmis:objectTypeId property value of the given document is set to
+    * "notallowed".
+    *
     * @throws Exception
     */
    @Test
@@ -3677,20 +3746,20 @@ public class ObjectTest extends BaseTest
       }
       catch (StreamNotSupportedException ex)
       {
-         //OK
+        //OK
       }
       finally
       {
-         if (docid != null)
-            getStorage().deleteObject(getStorage().getObjectById(docid), true);
+         if (doc1 != null)
+            getStorage().deleteObject(doc1, true);
          if (typeID != null)
             getStorage().removeType(typeID);
       }
    }
 
    /**
-    * 2.2.4.17
-    * Deletes the content stream for the specified Document object.
+    * 2.2.4.17 Deletes the content stream for the specified Document object.
+    *
     * @throws Exception
     */
    @Test
@@ -3702,9 +3771,10 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.17.3
-    * The Repository MUST throw this exception if the Object’s Object-Type definition "contentStreamAllowed" 
-    * attribute is set to "required". 
+    * 2.2.4.17.3 The Repository MUST throw this exception if the Objectï¿½s
+    * Object-Type definition "contentStreamAllowed" attribute is set to
+    * "required".
+    *
     * @throws Exception
     */
    @Test
@@ -3741,7 +3811,7 @@ public class ObjectTest extends BaseTest
 
          doc1 = getStorage().createDocument(testroot, newType, props2, cs1, null, null, VersioningState.NONE);
 
-         String docid = getConnection().deleteContentStream(doc1.getObjectId(), new ChangeTokenHolder());
+         getConnection().deleteContentStream(doc1.getObjectId(), new ChangeTokenHolder());
          fail("ConstraintException must be thrown.");
       }
       catch (ConstraintException ex)

@@ -80,6 +80,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
          storage.parents.remove(pwcId);
          storage.unfiled.remove(pwcId);
          storage.workingCopies.remove(vsId);
+         storage.entries.remove(pwcId);
 
          for (Iterator<String> iterator = storage.versions.get(getVersionSeriesId()).iterator(); iterator.hasNext();)
          {
@@ -421,7 +422,9 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
 
    protected void delete() throws StorageException, UpdateConflictException, VersioningException
    {
-      ItemsIterator<RelationshipData> relationships = getRelationships(RelationshipDirection.EITHER, null, true);
+      TypeDefinition relationshipType = storage.types.get(CmisConstants.RELATIONSHIP);
+      ItemsIterator<RelationshipData> relationships =
+         getRelationships(RelationshipDirection.EITHER, relationshipType, true);
       if (relationships.hasNext())
       {
          throw new StorageException("Object can't be deleted cause to storage referential integrity. "

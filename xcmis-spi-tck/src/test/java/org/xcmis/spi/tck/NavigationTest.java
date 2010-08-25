@@ -19,11 +19,15 @@
 
 package org.xcmis.spi.tck;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import java.util.List;
-import java.util.Map;
-
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FilterNotValidException;
 import org.xcmis.spi.InvalidArgumentException;
@@ -39,9 +43,9 @@ import org.xcmis.spi.model.IncludeRelationships;
 import org.xcmis.spi.model.ObjectParent;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.RelationshipDirection;
-import org.junit.Test;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+
+import java.util.List;
+import java.util.Map;
 
 public class NavigationTest extends BaseTest
 {
@@ -76,8 +80,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.1.1
-    * Value indicating what relationships in which the objects returned participate MUST be returned, if any.
+    * 2.2.3.1.1 Value indicating what relationships in which the objects
+    * returned participate MUST be returned, if any.
+    *
     * @throws Exception
     */
    @Test
@@ -101,8 +106,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.1.1
-    * If TRUE, then the Repository MUST return the available actions for each object in the result set. 
+    * 2.2.3.1.1 If TRUE, then the Repository MUST return the available actions
+    * for each object in the result set.
+    *
     * @throws Exception
     */
    @Test
@@ -118,8 +124,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.1.1
-    * If TRUE, then the Repository MUST return the available actions for each object in the result set. 
+    * 2.2.3.1.1 If TRUE, then the Repository MUST return the available actions
+    * for each object in the result set.
+    *
     * @throws Exception
     */
    @Test
@@ -135,8 +142,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.1.1
-    * If TRUE, returns a PathSegment for each child object for use in constructing that object’s path.
+    * 2.2.3.1.1 If TRUE, returns a PathSegment for each child object for use in
+    * constructing that objectï¿½s path.
+    *
     * @throws Exception
     */
    @Test
@@ -152,8 +160,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.1.1
-    * If TRUE, returns a PathSegment for each child object for use in constructing that object’s path.
+    * 2.2.3.1.1 If TRUE, returns a PathSegment for each child object for use in
+    * constructing that objectï¿½s path.
+    *
     * @throws Exception
     */
    @Test
@@ -169,8 +178,8 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.1.1
-    * If TRUE, returns a object info  for each child object.s
+    * 2.2.3.1.1 If TRUE, returns a object info for each child object.s
+    *
     * @throws Exception
     */
    @Test
@@ -198,9 +207,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.1.1
-    * Repositories SHOULD return only the properties specified in the property filter 
-    * if they exist on the object’s type definition.
+    * 2.2.3.1.1 Repositories SHOULD return only the properties specified in the
+    * property filter if they exist on the objectï¿½s type definition.
+    *
     * @throws Exception
     */
    @Test
@@ -222,8 +231,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.1.1
-    * The Repository MUST return the set of renditions whose kind matches this filter.
+    * 2.2.3.1.1 The Repository MUST return the set of renditions whose kind
+    * matches this filter.
+    *
     * @throws Exception
     */
    @Test
@@ -234,17 +244,14 @@ public class NavigationTest extends BaseTest
             RenditionFilter.NONE, "", 10, 0);
       for (CmisObject one : result.getItems())
       {
-         for (Map.Entry<String, Property<?>> e : one.getProperties().entrySet())
-         {
-            assertTrue("Rendition filter works incorrect.", one.getRenditions().size() == 0);
-         }
+         assertTrue("Rendition filter works incorrect.", one.getRenditions().size() == 0);
       }
-
    }
 
    /**
-    * 2.2.3.1.1
-    * TRUE if the Repository contains additional items after those contained in the response.  FALSE otherwise.
+    * 2.2.3.1.1 TRUE if the Repository contains additional items after those
+    * contained in the response. FALSE otherwise.
+    *
     * @throws Exception
     */
    @Test
@@ -258,8 +265,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.1.1.
-    * This is the maximum number of items to return in a response.  The repository MUST NOT exceed this maximum.
+    * 2.2.3.1.1. This is the maximum number of items to return in a response.
+    * The repository MUST NOT exceed this maximum.
+    *
     * @throws Exception
     */
    @Test
@@ -272,9 +280,11 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.1.1.
-    * If the repository knows the total number of items in a result set, the repository SHOULD include the number here. 
-    * If the repository does not know the number of items in a result set, this parameter SHOULD not be set.
+    * 2.2.3.1.1. If the repository knows the total number of items in a result
+    * set, the repository SHOULD include the number here. If the repository does
+    * not know the number of items in a result set, this parameter SHOULD not be
+    * set.
+    *
     * @throws Exception
     */
    @Test
@@ -287,8 +297,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.1.1.
-    * This is the number of potential results that the repository MUST skip/page over before returning any results.
+    * 2.2.3.1.1. This is the number of potential results that the repository
+    * MUST skip/page over before returning any results.
+    *
     * @throws Exception
     */
    @Test
@@ -301,8 +312,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.1.3
-    * The Repository MUST throw this exception if the specified folder is not a folder.
+    * 2.2.3.1.3 The Repository MUST throw this exception if the specified folder
+    * is not a folder.
+    *
     * @throws Exception
     */
    @Test
@@ -321,8 +333,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.1.3
-    * The Repository MUST throw this exception if this property filter input parameter is not valid.
+    * 2.2.3.1.3 The Repository MUST throw this exception if this property filter
+    * input parameter is not valid.
+    *
     * @throws Exception
     */
    @Test
@@ -341,8 +354,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.2
-    * Gets the set of descendant objects contained in the specified folder or any of its child-folders.
+    * 2.2.3.2 Gets the set of descendant objects contained in the specified
+    * folder or any of its child-folders.
+    *
     * @throws Exception
     */
    @Test
@@ -360,8 +374,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.2.1
-    * If TRUE, then the Repository MUST return the available actions for each object in the result set. 
+    * 2.2.3.2.1 If TRUE, then the Repository MUST return the available actions
+    * for each object in the result set.
+    *
     * @throws Exception
     */
    @Test
@@ -383,8 +398,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.2.1
-    * If TRUE, then the Repository MUST return the available actions for each object in the result set. 
+    * 2.2.3.2.1 If TRUE, then the Repository MUST return the available actions
+    * for each object in the result set.
+    *
     * @throws Exception
     */
    @Test
@@ -406,8 +422,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.2.1
-    * Value indicating what relationships in which the objects returned participate MUST be returned, if any.
+    * 2.2.3.2.1 Value indicating what relationships in which the objects
+    * returned participate MUST be returned, if any.
+    *
     * @throws Exception
     */
    @Test
@@ -437,8 +454,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.2.1
-    * Value indicating what relationships in which the objects returned participate MUST be returned, if any.
+    * 2.2.3.2.1 Value indicating what relationships in which the objects
+    * returned participate MUST be returned, if any.
+    *
     * @throws Exception
     */
    @Test
@@ -463,8 +481,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.2.1
-    * If TRUE, returns a PathSegment for each child object for use in constructing that object’s path.
+    * 2.2.3.2.1 If TRUE, returns a PathSegment for each child object for use in
+    * constructing that objectï¿½s path.
+    *
     * @throws Exception
     */
    @Test
@@ -522,9 +541,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.2.1
-    * Repositories SHOULD return only the properties specified in the property filter 
-    * if they exist on the object’s type definition.
+    * 2.2.3.2.1 Repositories SHOULD return only the properties specified in the
+    * property filter if they exist on the objectï¿½s type definition.
+    *
     * @throws Exception
     */
    @Test
@@ -552,8 +571,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.2.1
-    * The Repository MUST return the set of renditions whose kind matches this filter. 
+    * 2.2.3.2.1 The Repository MUST return the set of renditions whose kind
+    * matches this filter.
+    *
     * @throws Exception
     */
    @Test
@@ -575,8 +595,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.2.1
-    * The number of levels of depth in the folder hierarchy from which to return results.
+    * 2.2.3.2.1 The number of levels of depth in the folder hierarchy from which
+    * to return results.
+    *
     * @throws Exception
     */
    @Test
@@ -595,8 +616,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.2.3
-    * The Repository MUST throw this exception if this property filter input parameter is not valid.
+    * 2.2.3.2.3 The Repository MUST throw this exception if this property filter
+    * input parameter is not valid.
+    *
     * @throws Exception
     */
    @Test
@@ -620,8 +642,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.2.3
-    * The Repository MUST throw this exception if the service is invoked with “depth = 0”.
+    * 2.2.3.2.3 The Repository MUST throw this exception if the service is
+    * invoked with ï¿½depth = 0ï¿½.
+    *
     * @throws Exception
     */
    @Test
@@ -645,8 +668,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.2.3
-    * The Repository MUST throw this exception if the specified folder is not a folder.
+    * 2.2.3.2.3 The Repository MUST throw this exception if the specified folder
+    * is not a folder.
+    *
     * @throws Exception
     */
    @Test
@@ -670,8 +694,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.3
-    * Gets the set of descendant folder objects contained in the specified folder.
+    * 2.2.3.3 Gets the set of descendant folder objects contained in the
+    * specified folder.
+    *
     * @throws Exception
     */
    @Test
@@ -689,8 +714,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.3.1
-    * If TRUE, then the Repository MUST return the available actions for each object in the result set.  Defaults to FALSE
+    * 2.2.3.3.1 If TRUE, then the Repository MUST return the available actions
+    * for each object in the result set. Defaults to FALSE
+    *
     * @throws Exception
     */
    @Test
@@ -712,8 +738,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.3.1
-    * If TRUE, then the Repository MUST return the available actions for each object in the result set.  Defaults to FALSE
+    * 2.2.3.3.1 If TRUE, then the Repository MUST return the available actions
+    * for each object in the result set. Defaults to FALSE
+    *
     * @throws Exception
     */
    @Test
@@ -735,8 +762,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.3.1
-    * Value indicating what relationships in which the objects returned participate MUST be returned, if any.
+    * 2.2.3.3.1 Value indicating what relationships in which the objects
+    * returned participate MUST be returned, if any.
+    *
     * @throws Exception
     */
    @Test
@@ -766,8 +794,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.3.1
-    * Value indicating what relationships in which the objects returned participate MUST be returned, if any.
+    * 2.2.3.3.1 Value indicating what relationships in which the objects
+    * returned participate MUST be returned, if any.
+    *
     * @throws Exception
     */
    @Test
@@ -797,8 +826,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.3.1
-    * If TRUE, returns a PathSegment for each child object for use in constructing that object’s path.
+    * 2.2.3.3.1 If TRUE, returns a PathSegment for each child object for use in
+    * constructing that objectï¿½s path.
+    *
     * @throws Exception
     */
    @Test
@@ -838,9 +868,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.3.1
-    * Repositories SHOULD return only the properties specified in the property filter 
-    * if they exist on the object’s type definition.
+    * 2.2.3.3.1 Repositories SHOULD return only the properties specified in the
+    * property filter if they exist on the objectï¿½s type definition.
+    *
     * @throws Exception
     */
    @Test
@@ -869,8 +899,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.3.1
-    * The Repository MUST return the set of renditions whose kind matches this filter.  
+    * 2.2.3.3.1 The Repository MUST return the set of renditions whose kind
+    * matches this filter.
+    *
     * @throws Exception
     */
    @Test
@@ -892,8 +923,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.3.1
-    * The number of levels of depth in the folder hierarchy from which to return results.
+    * 2.2.3.3.1 The number of levels of depth in the folder hierarchy from which
+    * to return results.
+    *
     * @throws Exception
     */
    @Test
@@ -912,8 +944,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.3.3
-    * The Repository MUST throw this exception if this property filter input parameter is not valid.
+    * 2.2.3.3.3 The Repository MUST throw this exception if this property filter
+    * input parameter is not valid.
+    *
     * @throws Exception
     */
    @Test
@@ -937,8 +970,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.3.3
-    * The Repository MUST throw this exception if the service is invoked with an invalid depth.
+    * 2.2.3.3.3 The Repository MUST throw this exception if the service is
+    * invoked with an invalid depth.
+    *
     * @throws Exception
     */
    @Test
@@ -962,8 +996,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.3.3
-    * The Repository MUST throw this exception if the specified folder is not a folder.
+    * 2.2.3.3.3 The Repository MUST throw this exception if the specified folder
+    * is not a folder.
+    *
     * @throws Exception
     */
    @Test
@@ -987,10 +1022,10 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-   * 2.2.3.4
-   * Gets the parent folder object for the specified folder object.  
-   * @throws Exception
-   */
+    * 2.2.3.4 Gets the parent folder object for the specified folder object.
+    *
+    * @throws Exception
+    */
    @Test
    public void testGetFolderParent_Simple() throws Exception
    {
@@ -1016,9 +1051,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.4.1 
-    * Repositories SHOULD return only the properties specified in the property filter 
-    * if they exist on the object’s type definition.
+    * 2.2.3.4.1 Repositories SHOULD return only the properties specified in the
+    * property filter if they exist on the objectï¿½s type definition.
+    *
     * @throws Exception
     */
    @Test
@@ -1033,12 +1068,12 @@ public class NavigationTest extends BaseTest
          else
             fail("Property filter works incorrect.");
       }
-
    }
 
    /**
-    * 2.2.3.4.3
-    * The Repository MUST throw this exception if this property filter input parameter is not valid.
+    * 2.2.3.4.3 The Repository MUST throw this exception if this property filter
+    * input parameter is not valid.
+    *
     * @throws Exception
     */
    @Test
@@ -1047,18 +1082,18 @@ public class NavigationTest extends BaseTest
       try
       {
          ObjectData fold = getStorage().getObjectByPath("/navigation_testroot/folder1");
-         CmisObject result = getConnection().getFolderParent(fold.getObjectId(), false, "(,*");
+         getConnection().getFolderParent(fold.getObjectId(), false, "(,*");
          fail("FilterNotValidException must be thrown.");
       }
       catch (FilterNotValidException ex)
       {
-
       }
    }
 
    /**
-    * 2.2.3.4.3
-    * The Repository MUST throw this exception if the folderId input is the root folder.
+    * 2.2.3.4.3 The Repository MUST throw this exception if the folderId input
+    * is the root folder.
+    *
     * @throws Exception
     */
    @Test
@@ -1067,19 +1102,18 @@ public class NavigationTest extends BaseTest
       try
       {
          ObjectData fold = getStorage().getObjectByPath("/");
-         CmisObject result = getConnection().getFolderParent(fold.getObjectId(), true, PropertyFilter.ALL);
+         getConnection().getFolderParent(fold.getObjectId(), true, PropertyFilter.ALL);
          fail("InvalidArgumentException must be thrown.");
       }
       catch (InvalidArgumentException ex)
       {
-
       }
-
    }
 
    /**
-    * 2.2.3.5
-    * Gets the parent folder(s) for the specified non-folder, fileable object..
+    * 2.2.3.5 Gets the parent folder(s) for the specified non-folder, fileable
+    * object..
+    *
     * @throws Exception
     */
    @Test
@@ -1093,8 +1127,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.5.1
-    * Value indicating what relationships in which the objects returned participate MUST be returned, if any.
+    * 2.2.3.5.1 Value indicating what relationships in which the objects
+    * returned participate MUST be returned, if any.
+    *
     * @throws Exception
     */
    @Test
@@ -1116,8 +1151,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.5.1
-    * Value indicating what relationships in which the objects returned participate MUST be returned, if any.
+    * 2.2.3.5.1 Value indicating what relationships in which the objects
+    * returned participate MUST be returned, if any.
+    *
     * @throws Exception
     */
    @Test
@@ -1139,8 +1175,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.5.1
-    * If TRUE, then the Repository MUST return the available actions for each object in the result set.  Defaults to FALSE.
+    * 2.2.3.5.1 If TRUE, then the Repository MUST return the available actions
+    * for each object in the result set. Defaults to FALSE.
+    *
     * @throws Exception
     */
    @Test
@@ -1158,8 +1195,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.5.1
-    * If TRUE, then the Repository MUST return the available actions for each object in the result set.  Defaults to FALSE.
+    * 2.2.3.5.1 If TRUE, then the Repository MUST return the available actions
+    * for each object in the result set. Defaults to FALSE.
+    *
     * @throws Exception
     */
    @Test
@@ -1176,9 +1214,10 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.5.1
-    * Folder and object path segments are specified by pathSegment 
-    * tokens which can be retrieved by all services that take an includePathSegments parameter. 
+    * 2.2.3.5.1 Folder and object path segments are specified by pathSegment
+    * tokens which can be retrieved by all services that take an
+    * includePathSegments parameter.
+    *
     * @throws Exception
     */
    @Test
@@ -1195,9 +1234,10 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.5.1
-    * Folder and object path segments are specified by pathSegment 
-    * tokens which can be retrieved by all services that take an includePathSegments parameter. 
+    * 2.2.3.5.1 Folder and object path segments are specified by pathSegment
+    * tokens which can be retrieved by all services that take an
+    * includePathSegments parameter.
+    *
     * @throws Exception
     */
    @Test
@@ -1214,8 +1254,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.5.1
-    * The Repository MUST return the set of renditions whose kind matches this filter.  
+    * 2.2.3.5.1 The Repository MUST return the set of renditions whose kind
+    * matches this filter.
+    *
     * @throws Exception
     */
    @Test
@@ -1258,9 +1299,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.5.1
-    * Repositories SHOULD return only the properties specified in the property filter 
-    * if they exist on the object’s type definition.
+    * 2.2.3.5.1 Repositories SHOULD return only the properties specified in the
+    * property filter if they exist on the objectï¿½s type definition.
+    *
     * @throws Exception
     */
    @Test
@@ -1283,8 +1324,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.5.3
-    * The Repository MUST throw this exception if this property filter input parameter is not valid. 
+    * 2.2.3.5.3 The Repository MUST throw this exception if this property filter
+    * input parameter is not valid.
+    *
     * @throws Exception
     */
    @Test
@@ -1304,9 +1346,10 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.5.3
-    * The Repository MUST throw this exception if this method is invoked on an object who 
-    * Object-Type Definition specifies that it is not fileable.
+    * 2.2.3.5.3 The Repository MUST throw this exception if this method is
+    * invoked on an object who Object-Type Definition specifies that it is not
+    * fileable.
+    *
     * @throws Exception
     */
    @Test
@@ -1331,14 +1374,16 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.6
-    * Gets the list of documents that are checked out that the user has access to.
+    * 2.2.3.6 Gets the list of documents that are checked out that the user has
+    * access to.
+    *
     * @throws Exception
     */
    @Test
    public void testGetCheckedOutDocs_Simple() throws Exception
    {
-      if (!IS_CAN_CHECKOUT){
+      if (!IS_CAN_CHECKOUT)
+      {
          //SKIP
          return;
       }
@@ -1349,14 +1394,16 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.6.1
-    * If TRUE, then the Repository MUST return the available actions for each object in the result set.  Defaults to FALSE.
+    * 2.2.3.6.1 If TRUE, then the Repository MUST return the available actions
+    * for each object in the result set. Defaults to FALSE.
+    *
     * @throws Exception
     */
    @Test
    public void testGetCheckedOutDocs_AllowableActions() throws Exception
    {
-      if (!IS_CAN_CHECKOUT){
+      if (!IS_CAN_CHECKOUT)
+      {
          //SKIP
          return;
       }
@@ -1370,14 +1417,16 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.6.1
-    * If TRUE, then the Repository MUST return the available actions for each object in the result set. 
+    * 2.2.3.6.1 If TRUE, then the Repository MUST return the available actions
+    * for each object in the result set.
+    *
     * @throws Exception
     */
    @Test
    public void testGetCheckedOutDocs_NoAllowableActions() throws Exception
    {
-      if (!IS_CAN_CHECKOUT){
+      if (!IS_CAN_CHECKOUT)
+      {
          //SKIP
          return;
       }
@@ -1391,8 +1440,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.6.1
-    * Value indicating what relationships in which the objects returned participate MUST be returned, if any.
+    * 2.2.3.6.1 Value indicating what relationships in which the objects
+    * returned participate MUST be returned, if any.
+    *
     * @throws Exception
     */
    @Test
@@ -1416,8 +1466,9 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.6.1
-    * Value indicating what relationships in which the objects returned participate MUST be returned, if any.
+    * 2.2.3.6.1 Value indicating what relationships in which the objects
+    * returned participate MUST be returned, if any.
+    *
     * @throws Exception
     */
    @Test
@@ -1443,7 +1494,8 @@ public class NavigationTest extends BaseTest
    @Test
    public void testGetCheckedOutDocs_ObjectInfo() throws Exception
    {
-      if (!IS_CAN_CHECKOUT){
+      if (!IS_CAN_CHECKOUT)
+      {
          //SKIP
          return;
       }
@@ -1459,7 +1511,8 @@ public class NavigationTest extends BaseTest
    @Test
    public void testGetCheckedOutDocs_NoObjectInfo() throws Exception
    {
-      if (!IS_CAN_CHECKOUT){
+      if (!IS_CAN_CHECKOUT)
+      {
          //SKIP
          return;
       }
@@ -1473,14 +1526,16 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.6.1 
-    * The Repository MUST return the set of renditions whose kind matches this filter.  
+    * 2.2.3.6.1 The Repository MUST return the set of renditions whose kind
+    * matches this filter.
+    *
     * @throws Exception
     */
    @Test
    public void testGetCheckedOutDocs_NoRenditions() throws Exception
    {
-      if (!IS_CAN_CHECKOUT){
+      if (!IS_CAN_CHECKOUT)
+      {
          //SKIP
          return;
       }
@@ -1494,15 +1549,16 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.6.1
-    * Repositories SHOULD return only the properties specified in the property filter 
-    * if they exist on the object’s type definition.
+    * 2.2.3.6.1 Repositories SHOULD return only the properties specified in the
+    * property filter if they exist on the objectï¿½s type definition.
+    *
     * @throws Exception
     */
    @Test
    public void testGetCheckedOutDocs_PropertyFiltered() throws Exception
    {
-      if (!IS_CAN_CHECKOUT){
+      if (!IS_CAN_CHECKOUT)
+      {
          //SKIP
          return;
       }
@@ -1522,15 +1578,16 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.6.1
-    * This is the maximum number of items to return in a response.  
-    * The repository MUST NOT exceed this maximum.  
+    * 2.2.3.6.1 This is the maximum number of items to return in a response. The
+    * repository MUST NOT exceed this maximum.
+    *
     * @throws Exception
     */
    @Test
    public void testGetCheckedOutDocs_MaxItems() throws Exception
    {
-      if (!IS_CAN_CHECKOUT){
+      if (!IS_CAN_CHECKOUT)
+      {
          //SKIP
          return;
       }
@@ -1541,15 +1598,16 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.6.1
-    * This is the number of potential results that the repository 
-    * MUST skip/page over before returning any results.  Defaults to 0.
+    * 2.2.3.6.1 This is the number of potential results that the repository MUST
+    * skip/page over before returning any results. Defaults to 0.
+    *
     * @throws Exception
     */
    @Test
    public void testGetCheckedOutDocs_SkipCount() throws Exception
    {
-      if (!IS_CAN_CHECKOUT){
+      if (!IS_CAN_CHECKOUT)
+      {
          //SKIP
          return;
       }
@@ -1560,14 +1618,16 @@ public class NavigationTest extends BaseTest
    }
 
    /**
-    * 2.2.3.6.3
-    * The Repository MUST throw this exception if this property filter input parameter is not valid.
+    * 2.2.3.6.3 The Repository MUST throw this exception if this property filter
+    * input parameter is not valid.
+    *
     * @throws Exception
     */
    @Test
    public void testGetCheckedOutDocs_FilterNotValidException() throws Exception
    {
-      if (!IS_CAN_CHECKOUT){
+      if (!IS_CAN_CHECKOUT)
+      {
          //SKIP
          return;
       }

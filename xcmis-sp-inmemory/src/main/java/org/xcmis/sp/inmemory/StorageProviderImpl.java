@@ -23,20 +23,11 @@ import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.container.xml.ObjectParameter;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.picocontainer.Startable;
 import org.xcmis.spi.Connection;
 import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.PermissionService;
 import org.xcmis.spi.RenditionManager;
 import org.xcmis.spi.StorageProvider;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Map.Entry;
 
 /**
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
@@ -74,7 +65,7 @@ public class StorageProviderImpl implements StorageProvider
          LOG.error("Not found configuration for any storages.");
       }
    }
-   
+
    public StorageProviderImpl(String repositoryId, String repositoryName, String description, String maxStorageMemSize,
       String maxItemsNumber)
    {
@@ -83,7 +74,7 @@ public class StorageProviderImpl implements StorageProvider
       this.renditionManager = RenditionManager.getInstance();
       this.storageImpl = new StorageImpl(storageConfig, renditionManager, new PermissionService());
    }
-   
+
    public Connection getConnection()
    {
       if (storageImpl == null)

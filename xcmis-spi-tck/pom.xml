@@ -37,12 +37,14 @@
                <artifactId>xcmis-sp-inmemory</artifactId>
                <scope>test</scope>
             </dependency>
+            <!-- 
             <dependency>
                <groupId>org.exoplatform.ecms</groupId>
                <artifactId>exo-ecms-ext-xcmis-sp</artifactId>
-               <version>2.1.0-SNAPSHOT</version>
+               <version>2.1.0-CR02-SNAPSHOT</version>
                <scope>test</scope>
             </dependency>
+            -->
          </dependencies>
          <build>
             <plugins>
@@ -53,9 +55,9 @@
                      <systemProperties>
                         <property>
                            <name>org.xcmis.CmisRegistryFactory</name>
-                           <!--   value>org.xcmis.sp.inmemory.tck.InmemoryCmisRegistryFactory</value -->
-                           <!-- value>org.xcmis.sp.sample.fs.tck.RegistryFactoryImpl</value -->
-                           <value>org.exoplatform.ecms.xcmis.sp.tck.JcrCmisRegistryFactory</value>
+                           <value>org.xcmis.sp.inmemory.tck.InmemoryCmisRegistryFactory</value>
+                           <!-- <value>org.xcmis.sp.sample.fs.tck.RegistryFactoryImpl</value> -->
+                           <!-- <value>org.exoplatform.ecms.xcmis.sp.tck.JcrCmisRegistryFactory</value> -->
                         </property>
                      </systemProperties>
                      <includes>
