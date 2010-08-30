@@ -449,7 +449,8 @@ public abstract class Connection
     *        supports unfiling
     * @param properties properties that will be applied to newly created
     *        document
-    * @param content document content
+    * @param content the document content. May be <code>null</code>.  
+    *        MUST be required if the type requires it.
     * @param addACL Access Control Entries that MUST added for newly created
     *        document, either using the ACL from <code>parentId</code> if
     *        specified, or being applied if no <code>parentId</code> is

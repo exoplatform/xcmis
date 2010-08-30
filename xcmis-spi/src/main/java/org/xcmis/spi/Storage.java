@@ -88,7 +88,8 @@ public interface Storage extends TypeManager
     *        created in unfiling state
     * @param typeDefinition the document type definition
     * @param properties the document properties
-    * @param content the document content
+    * @param content the document content. May be <code>null</code>.  
+    *        MUST be required if the type requires it.
     * @param acl the list of ACEs to be applied to newly create document. May be
     *        <code>null</code> or empty list if no ACEs to be applied
     * @param policies the list of policies. May be <code>null</code> or empty
