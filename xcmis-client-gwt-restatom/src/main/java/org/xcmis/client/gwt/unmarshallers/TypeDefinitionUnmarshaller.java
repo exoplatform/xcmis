@@ -75,7 +75,10 @@ public class TypeDefinitionUnmarshaller implements Unmarshallable
       }
       catch (Exception e)
       {
-         throw new UnmarshallerException("Unable to parse type definition response.");
+         if (!(e instanceof UnmarshallerException))
+         {
+            throw new UnmarshallerException("Unable to parse type definition response.");
+         }
       }
    }
 }

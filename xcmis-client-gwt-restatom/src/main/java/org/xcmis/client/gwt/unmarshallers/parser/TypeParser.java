@@ -21,9 +21,11 @@ package org.xcmis.client.gwt.unmarshallers.parser;
 
 import org.xcmis.client.gwt.CMIS;
 import org.xcmis.client.gwt.model.EnumBaseObjectTypeIds;
+import org.xcmis.client.gwt.model.EnumContentStreamAllowed;
 import org.xcmis.client.gwt.model.property.PropertyDefinition;
 import org.xcmis.client.gwt.model.restatom.TypeEntry;
 import org.xcmis.client.gwt.model.type.TypeDefinition;
+import org.xcmis.client.gwt.rest.UnmarshallerException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,8 +55,9 @@ public class TypeParser
    /**
     * @param response response
     * @return List containing {@link CmisTypeDefinitionType}
+    * @throws UnmarshallerException 
     */
-   public static List<TypeDefinition> getTypeList(Document response)
+   public static List<TypeDefinition> getTypeList(Document response) throws UnmarshallerException
    {
       List<TypeDefinition> typeList = new ArrayList<TypeDefinition>();
       NodeList elementList = response.getElementsByTagName(CMIS.TYPE);
@@ -73,8 +76,9 @@ public class TypeParser
    /**
     * @param response response
     * @return List containing {@link TypeEntry}
+    * @throws UnmarshallerException 
     */
-   public static List<TypeEntry> getTypes(Document response)
+   public static List<TypeEntry> getTypes(Document response) throws UnmarshallerException
    {
       List<TypeEntry> types = new ArrayList<TypeEntry>();
       NodeList feedInfoList = response.getElementsByTagName(CMIS.FEED).item(0).getChildNodes();
@@ -95,8 +99,9 @@ public class TypeParser
     * 
     * @param entryNode entry node
     * @param typeEntry type entry
+    * @throws UnmarshallerException 
     */
-   public static void getTypeEntry(Node entryNode, TypeEntry typeEntry)
+   public static void getTypeEntry(Node entryNode, TypeEntry typeEntry) throws UnmarshallerException
    {
       NodeList nodeList = entryNode.getChildNodes();
       typeEntry.setLinks(AtomEntryParser.getEntryInfo(nodeList).getLinks());
@@ -126,8 +131,9 @@ public class TypeParser
     * 
     * @param parent parent
     * @param children children
+    * @throws UnmarshallerException 
     */
-   private static void setTypeChildren(TypeEntry parent, NodeList children)
+   private static void setTypeChildren(TypeEntry parent, NodeList children) throws UnmarshallerException
    {
       for (int i = 0; i < children.getLength(); i++)
       {
@@ -163,8 +169,9 @@ public class TypeParser
     * 
     * @param node node
     * @return {@link CmisTypeDefinitionType}
+    * @throws UnmarshallerException 
     */
-   public static TypeDefinition getCmisTypeDefinitionType(Node node)
+   public static TypeDefinition getCmisTypeDefinitionType(Node node) throws UnmarshallerException
    {
       TypeDefinition typeDefinition = new TypeDefinition();
       NodeList entries = node.getChildNodes();
@@ -204,7 +211,15 @@ public class TypeParser
 
          else if (item.getNodeName().equals(CMIS.CMIS_BASE_ID))
          {
-            typeDefinition.setBaseId(EnumBaseObjectTypeIds.fromValue(value));
+            try
+            {
+               typeDefinition.setBaseId(EnumBaseObjectTypeIds.fromValue(value));
+            }
+            catch (Exception e)
+            {
+               e.printStackTrace();
+               throw new UnmarshallerException("Base type \""+value+"\" doesn't exist.");
+            }
          }
 
          else if (item.getNodeName().equals(CMIS.CMIS_PARENT_ID))
@@ -231,6 +246,24 @@ public class TypeParser
          else if (item.getNodeName().equals(CMIS.CMIS_QUERYABLE))
          {
             typeDefinition.setQueryable(Boolean.valueOf(value));
+         }
+
+         else if (item.getNodeName().equals(CMIS.CMIS_VERSIONABLE))
+         {
+            typeDefinition.setVersionable(Boolean.valueOf(value));
+         }
+
+         else if (item.getNodeName().equals(CMIS.CMIS_CONTENT_STREAM_ALLOWED))
+         {
+            try
+            {
+               typeDefinition.setContentStreamAllowed(EnumContentStreamAllowed.fromValue(value));
+            }
+            catch (Exception e)
+            {
+               e.printStackTrace();
+               throw new UnmarshallerException("ContentStreamAllowed attribute cannot be \""+value+"\".");
+            }
          }
 
          else if (item.getNodeName().equals(CMIS.CMIS_CONTROLLABLE_POLICY))

@@ -853,6 +853,12 @@ public class CMIS
     * CMIS vendor name.
     */
    public static final String CMIS_VENDOR_NAME = CMIS_PREFIX + "vendorName";
+   
+   
+   /**
+    * Versionable document's specific attribute.
+    */
+   public static final String CMIS_VERSIONABLE = CMIS_PREFIX + "versionable";
 
    /**
     * CMIS content stream allowed.

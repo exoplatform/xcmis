@@ -35,6 +35,7 @@ import org.xcmis.client.gwt.model.repository.CmisRepositoryInfo;
 import org.xcmis.client.gwt.model.restatom.EnumCollectionType;
 import org.xcmis.client.gwt.model.restatom.TypeEntry;
 import org.xcmis.client.gwt.model.type.TypeDefinition;
+import org.xcmis.client.gwt.rest.UnmarshallerException;
 import org.xcmis.client.gwt.unmarshallers.parser.RepositoriesParser;
 import org.xcmis.client.gwt.unmarshallers.parser.RepositoryInfoParser;
 import org.xcmis.client.gwt.unmarshallers.parser.TypeParser;
@@ -477,7 +478,7 @@ public class GwtTestRepositoryService extends GWTTestCase
          .get(4).getHref());
    }
 
-   public void testTypeChildrenResponse()
+   public void testTypeChildrenResponse() throws UnmarshallerException
    {
       Document doc = XMLParser.parse(typeChildrenResponse);
       List<TypeEntry> types = TypeParser.getTypes(doc);
@@ -523,7 +524,7 @@ public class GwtTestRepositoryService extends GWTTestCase
    }
 
   
-   public void testGetTypesWithPropertyDefinition()
+   public void testGetTypesWithPropertyDefinition() throws UnmarshallerException
    {
       Document doc = XMLParser.parse(getTypeDefinitionIncludePropertyDefinition);
       Node entryNode = doc.getElementsByTagName(CMIS.ENTRY).item(0);
@@ -611,7 +612,7 @@ public class GwtTestRepositoryService extends GWTTestCase
       assertFalse(propertyString.isOpenChoice());
    }
 
-   public void testGetTypeDescendants()
+   public void testGetTypeDescendants() throws UnmarshallerException
    {
       Document doc = XMLParser.parse(typeDescendantsResponse);
       List<TypeEntry> types = TypeParser.getTypes(doc);
@@ -671,7 +672,7 @@ public class GwtTestRepositoryService extends GWTTestCase
       assertFalse(child.getTypeCmisTypeDefinition().isFulltextIndexed());
    }
    
-   public void testGetTypeList()
+   public void testGetTypeList() throws UnmarshallerException
    {
       Document doc = XMLParser.parse(typeDescendantsResponse);
       List<TypeDefinition> types = TypeParser.getTypeList(doc);

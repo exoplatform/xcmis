@@ -22,7 +22,6 @@ package org.xcmis.client.gwt.marshallers.builder;
 import org.xcmis.client.gwt.CMIS;
 import org.xcmis.client.gwt.model.Choice;
 import org.xcmis.client.gwt.model.EnumBaseObjectTypeIds;
-import org.xcmis.client.gwt.model.EnumContentStreamAllowed;
 import org.xcmis.client.gwt.model.property.BooleanPropertyDefinition;
 import org.xcmis.client.gwt.model.property.DateTimePropertyDefinition;
 import org.xcmis.client.gwt.model.property.DecimalPropertyDefinition;
@@ -138,8 +137,12 @@ public class TypeXMLBuilder
       if (type.getBaseId().equals(EnumBaseObjectTypeIds.CMIS_DOCUMENT))
       {
          Element contentStreamAllowed = doc.createElement(CMIS.CMIS_CONTENT_STREAM_ALLOWED);
-         contentStreamAllowed.appendChild(doc.createTextNode(EnumContentStreamAllowed.ALLOWED.value()));
+         contentStreamAllowed.appendChild(doc.createTextNode(type.getContentStreamAllowed().value()));
          typeElement.appendChild(contentStreamAllowed);
+         
+         Element versionable = doc.createElement(CMIS.CMIS_VERSIONABLE);
+         versionable.appendChild(doc.createTextNode(String.valueOf(type.isVersionable())));
+         typeElement.appendChild(versionable);
       }
 
       addPropertyDefinition(doc, typeElement, type.getPropertyDefinitions());
