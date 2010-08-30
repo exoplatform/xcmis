@@ -840,11 +840,6 @@ public class CMIS
    public static final String CMIS_THIN_CLIENT_URI = CMIS_PREFIX + "thinClientURI";
 
    /**
-    * CMIS tree type.
-    */
-   public static final String CMIS_TREE_TYPE = "application/cmistree+xml";
-
-   /**
     * CMIS updatability.
     */
    public static final String CMIS_UPDATABILITY = CMIS_PREFIX + "updatability";
@@ -965,16 +960,6 @@ public class CMIS
     * Feed.
     */
    public static final String FEED = "feed";
-
-   /**
-    * Feed type.
-    */
-   public static final String FEED_TYPE = "application/atom+xml;type=feed";
-
-   /**
-    * Atom entry type.
-    */
-   public static final String ATOM_ENTRY_TYPE = "application/atom+xml;type=entry";
 
    /**
     * Href.

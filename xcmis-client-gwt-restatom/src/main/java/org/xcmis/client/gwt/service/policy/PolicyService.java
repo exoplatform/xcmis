@@ -20,6 +20,7 @@
 package org.xcmis.client.gwt.service.policy;
 
 import org.xcmis.client.gwt.CmisArguments;
+import org.xcmis.client.gwt.CmisMediaTypes;
 import org.xcmis.client.gwt.marshallers.ApplyPolicyMarshaller;
 import org.xcmis.client.gwt.marshallers.QueryMarshaller;
 import org.xcmis.client.gwt.marshallers.RemovePolicyMarshaller;
@@ -84,7 +85,8 @@ public class PolicyService
       ApplyPolicyMarshaller marshaller = new ApplyPolicyMarshaller(applyPolicy);
 
       AsyncRequestCallback callback = new AsyncRequestCallback(eventBus, unmarshaller, event, errorEvent);
-      AsyncRequest.build(RequestBuilder.POST, url).data(marshaller).send(callback);
+      AsyncRequest.build(RequestBuilder.POST, url).header(HTTPHeader.CONTENT_TYPE, CmisMediaTypes.ATOM_ENTRY).data(
+         marshaller).send(callback);
    }
 
    /**
@@ -170,7 +172,8 @@ public class PolicyService
       params += CmisArguments.INCLUDE_ALLOWABLE_ACTIONS + "=" + includeAllowableActions + "&";
       params += CmisArguments.ALL_VERSIONS + "=" + searchAllVersions;
       AsyncRequestCallback callback = new AsyncRequestCallback(eventBus, unmarshaller, event, errorEvent);
-      AsyncRequest.build(RequestBuilder.POST, url).data(marshaller).send(callback);
+      AsyncRequest.build(RequestBuilder.POST, url).header(HTTPHeader.CONTENT_TYPE, CmisMediaTypes.QUERY_DOCUMENT).data(
+         marshaller).send(callback);
    }
 
 }

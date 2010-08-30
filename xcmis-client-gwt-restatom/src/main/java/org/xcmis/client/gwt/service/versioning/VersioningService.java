@@ -20,6 +20,7 @@
 package org.xcmis.client.gwt.service.versioning;
 
 import org.xcmis.client.gwt.CmisArguments;
+import org.xcmis.client.gwt.CmisMediaTypes;
 import org.xcmis.client.gwt.marshallers.CheckinMarshaller;
 import org.xcmis.client.gwt.marshallers.CheckoutMarshaller;
 import org.xcmis.client.gwt.model.actions.CheckIn;
@@ -81,7 +82,8 @@ public class VersioningService
       CheckoutMarshaller marshaller = new CheckoutMarshaller(checkOut);
       EntryUnmarshaller unmarshaller = new EntryUnmarshaller(document);
       AsyncRequestCallback callback = new AsyncRequestCallback(eventBus, unmarshaller, event, errorEvent);
-      AsyncRequest.build(RequestBuilder.POST, url).data(marshaller).send(callback);
+      AsyncRequest.build(RequestBuilder.POST, url).header(HTTPHeader.CONTENT_TYPE,
+         CmisMediaTypes.ATOM_ENTRY).data(marshaller).send(callback);
    }
 
    /**
@@ -128,7 +130,7 @@ public class VersioningService
       AsyncRequestCallback callback = new AsyncRequestCallback(eventBus, unmarshaller, event, errorEvent);
       AsyncRequest.build(RequestBuilder.POST, url + "?" + CmisArguments.CHECKIN + "=true" + "&" + params).header(
          HTTPHeader.X_HTTP_METHOD_OVERRIDE, HTTPMethod.PUT).header(HTTPHeader.CONTENT_TYPE,
-         "application/atom+xml;type=entry").data(marshaller).send(callback);
+            CmisMediaTypes.ATOM_ENTRY).data(marshaller).send(callback);
    }
 
    /**

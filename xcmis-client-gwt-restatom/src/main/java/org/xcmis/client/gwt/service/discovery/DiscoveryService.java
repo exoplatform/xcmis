@@ -20,12 +20,14 @@
 package org.xcmis.client.gwt.service.discovery;
 
 import org.xcmis.client.gwt.CmisArguments;
+import org.xcmis.client.gwt.CmisMediaTypes;
 import org.xcmis.client.gwt.marshallers.QueryMarshaller;
 import org.xcmis.client.gwt.model.actions.Query;
 import org.xcmis.client.gwt.model.restatom.EntryCollection;
 import org.xcmis.client.gwt.rest.AsyncRequest;
 import org.xcmis.client.gwt.rest.AsyncRequestCallback;
 import org.xcmis.client.gwt.rest.ExceptionThrownEvent;
+import org.xcmis.client.gwt.rest.HTTPHeader;
 import org.xcmis.client.gwt.service.discovery.event.QueryResultReceivedEvent;
 import org.xcmis.client.gwt.unmarshallers.EntryCollectionUnmarshaller;
 
@@ -88,7 +90,8 @@ public class DiscoveryService
             + query.getSkipCount() + "&";
 
       AsyncRequestCallback callback = new AsyncRequestCallback(eventBus, unmarshaller, event, errorEvent);
-      AsyncRequest.build(RequestBuilder.POST, url + "?" + params).data(marshaller).send(callback);
+      AsyncRequest.build(RequestBuilder.POST, url + "?" + params).header(HTTPHeader.CONTENT_TYPE,
+         CmisMediaTypes.QUERY_DOCUMENT).data(marshaller).send(callback);
    }
 
 }
