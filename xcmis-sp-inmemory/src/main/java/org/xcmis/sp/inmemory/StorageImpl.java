@@ -177,7 +177,7 @@ public class StorageImpl implements Storage
 
    private static final String REPOSITORY_DESCRIPTION = "xCMIS (eXo InMemory SP)";
 
-   private static final String PRODUCT_VERSION = "1.0";
+   private static final String PRODUCT_VERSION = "1.1";
 
    private static final String PRODUCT_NAME = "xCMIS (eXo InMemory SP)";
 
