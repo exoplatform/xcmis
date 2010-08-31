@@ -64,8 +64,6 @@
       <org.exoplatform.kernel.version>2.2.4-GA-SNAPSHOT</org.exoplatform.kernel.version>
       <org.exoplatform.core.version>2.3.4-GA-SNAPSHOT</org.exoplatform.core.version>
       <org.exoplatform.ws.version>2.1.4-GA-SNAPSHOT</org.exoplatform.ws.version>
-      <org.exoplatform.jcr.version>1.12.4-GA-SNAPSHOT</org.exoplatform.jcr.version>
-      <org.exoplatform.ecms.version>2.1.0-CR03-SNAPSHOT</org.exoplatform.ecms.version>
       <!-- Default tests settings -->
       <maven.test.skip>false</maven.test.skip>
       <forkMode>once</forkMode>
@@ -123,11 +121,6 @@
             <version>${project.version}</version>
          </dependency>
          <dependency>
-            <groupId>org.exoplatform.ecms</groupId>
-            <artifactId>exo-ecms-ext-xcmis-sp</artifactId>
-            <version>${org.exoplatform.ecms.version}</version>
-         </dependency>
-         <dependency>
             <groupId>org.xcmis</groupId>
             <artifactId>xcmis-sp-inmemory</artifactId>
             <version>${project.version}</version>
@@ -176,26 +169,6 @@
             <groupId>org.exoplatform.core</groupId>
             <artifactId>exo.core.component.organization.api</artifactId>
             <version>${org.exoplatform.core.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>org.exoplatform.jcr</groupId>
-            <artifactId>exo.jcr.component.core</artifactId>
-            <version>${org.exoplatform.jcr.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>org.exoplatform.jcr</groupId>
-            <artifactId>exo.jcr.component.ext</artifactId>
-            <version>${org.exoplatform.jcr.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>org.exoplatform.jcr</groupId>
-            <artifactId>exo.jcr.framework.web</artifactId>
-            <version>${org.exoplatform.jcr.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>org.exoplatform.jcr</groupId>
-            <artifactId>exo.jcr.component.webdav</artifactId>
-            <version>${org.exoplatform.jcr.version}</version>
          </dependency>
          <dependency>
             <groupId>org.exoplatform.ws</groupId>
