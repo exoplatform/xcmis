@@ -84,6 +84,7 @@
             </plugins>
          </build>
       </profile>
+<!--
       <profile>
          <id>exo</id>
          <activation>
@@ -113,5 +114,6 @@
             </plugins>
          </build>
       </profile>
+-->
    </profiles>
 </project>
