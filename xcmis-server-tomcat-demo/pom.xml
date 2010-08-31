@@ -205,16 +205,20 @@
                      <archive>
                         <manifest>
                            <addClasspath>true</addClasspath>
+                           <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                           <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                         </manifest>
                         <manifestEntries>
-                           <SCM-Revision>${buildNumber}</SCM-Revision>
+                           <Date>${maven.build.timestamp}</Date>
+                           <Implementation-URL>${project.url}</Implementation-URL>
                            <SCM-URL>${project.scm.connection}</SCM-URL>
-                           <Specification-Title>${project.name}</Specification-Title>
+                           <SCM-Revision>${exo.product.scm.revision}</SCM-Revision>
+                           <Specification-Title>${exo.product.name}</Specification-Title>
                            <Specification-Version>${project.version}</Specification-Version>
                            <Specification-Vendor>${project.organization.name}</Specification-Vendor>
                            <Implementation-Title>${project.name}</Implementation-Title>
                            <Implementation-Version>${project.version}</Implementation-Version>
-                           <Implementation-Vendor>eXo Platform SAS</Implementation-Vendor>
+                           <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
                         </manifestEntries>
                      </archive>
                   </configuration>
