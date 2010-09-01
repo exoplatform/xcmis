@@ -63,7 +63,7 @@ public class CmisDocumentReaderService implements DocumentReaderService
       addDocumentReader(new HTMLDocumentReader());
       addDocumentReader(new XMLDocumentReader());
       addDocumentReader(new OpenOfficeDocumentReader());
-      addDocumentReader(new TextPlainDocumentReader());
+      addDocumentReader(new TextPlainDocumentReader(new InitParams()));
 
    }
 
