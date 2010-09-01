@@ -364,8 +364,9 @@ public class StorageImpl implements Storage
     */
    public AllowableActions calculateAllowableActions(ObjectData object)
    {
+      ConversationState state = ConversationState.getCurrent();
       AllowableActions actions =
-         permissionService.calculateAllowableActions(object, ConversationState.getCurrent().getIdentity(),
+         permissionService.calculateAllowableActions(object, state != null ? state.getIdentity() : null,
             getRepositoryInfo());
       return actions;
    }
