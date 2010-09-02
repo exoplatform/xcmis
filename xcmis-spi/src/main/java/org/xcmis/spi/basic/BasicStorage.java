@@ -18,14 +18,6 @@
  */
 package org.xcmis.spi.basic;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import org.exoplatform.services.security.ConversationState;
 import org.xcmis.spi.CmisRuntimeException;
 import org.xcmis.spi.ConstraintException;
@@ -59,6 +51,14 @@ import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 import org.xcmis.spi.utils.CmisUtils;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Basic Storage impl
@@ -122,7 +122,6 @@ public abstract class BasicStorage implements Storage
    public ItemsIterator<TypeDefinition> getTypeChildren(String typeId, boolean includePropertyDefinitions)
       throws TypeNotFoundException, CmisRuntimeException
    {
-
       return this.typeManager.getTypeChildren(typeId, includePropertyDefinitions);
    }
 
@@ -132,7 +131,6 @@ public abstract class BasicStorage implements Storage
    public TypeDefinition getTypeDefinition(String typeId, boolean includePropertyDefinition)
       throws TypeNotFoundException, CmisRuntimeException
    {
-
       return this.typeManager.getTypeDefinition(typeId, includePropertyDefinition);
    }
 
@@ -172,8 +170,6 @@ public abstract class BasicStorage implements Storage
     */
    public Collection<DocumentData> getAllVersions(String versionSeriesId) throws ObjectNotFoundException
    {
-      //throw new UnsupportedOperationException();
-      // TODO
       ObjectData data = getObjectById(versionSeriesId);
       if (data.getBaseType() == BaseType.DOCUMENT)
       {
@@ -193,9 +189,12 @@ public abstract class BasicStorage implements Storage
       throw new NotSupportedException();
    }
 
-   public ItemsIterator<DocumentData> getCheckedOutDocuments(ObjectData folder, String orderBy)
+   /**
+    * {@inheritDoc}
+    */
+   public ItemsIterator<DocumentData> getCheckedOutDocuments(FolderData folder, String orderBy)
    {
-      throw new NotSupportedException();
+      return CmisUtils.emptyItemsIterator();
    }
 
    /**
@@ -212,7 +211,6 @@ public abstract class BasicStorage implements Storage
    public ItemsIterator<Rendition> getRenditions(ObjectData object)
    {
       return CmisUtils.emptyItemsIterator();
-      //throw new UnsupportedOperationException();
    }
 
    /**

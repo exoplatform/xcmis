@@ -56,33 +56,17 @@ public abstract class BasicTypeManager implements TypeManager
 
       types.put("cmis:document", //
          new TypeDefinition("cmis:document", BaseType.DOCUMENT, "cmis:document", "cmis:document", "", null,
-            "cmis:document", "Cmis Document Type", true, true, true, true, true, true, true, true, null, null,
+            "cmis:document", "Cmis Document Type", true, true, false, false, false, false, false, false, null, null,
             ContentStreamAllowed.ALLOWED, null));
       typeChildren.put("cmis:document", new HashSet<String>());
 
       types.put("cmis:folder", //
          new TypeDefinition("cmis:folder", BaseType.FOLDER, "cmis:folder", "cmis:folder", "", null, "cmis:folder",
-            "Cmis Folder type", true, true, true, false, true, true, true, false, null, null,
+            "Cmis Folder type", true, true, false, false, false, false, false, false, null, null,
             ContentStreamAllowed.NOT_ALLOWED, null));
       typeChildren.put("cmis:folder", new HashSet<String>());
 
-//      types.put("cmis:policy", //
-//         new TypeDefinition("cmis:policy", BaseType.POLICY, "cmis:policy", "cmis:policy", "", null, "cmis:policy",
-//            "Cmis Policy type", true, false, false /*no query support*/, false, false, true, true, false, null, null,
-//            ContentStreamAllowed.NOT_ALLOWED, null));
-//
-//      types.put("cmis:relationship", //
-//         new TypeDefinition("cmis:relationship", BaseType.RELATIONSHIP, "cmis:relationship", "cmis:relationship", "",
-//            null, "cmis:relationship", "Cmis Relationship type.", true, false, false /*no query support*/, false,
-//            false, true, true, false, null, null, ContentStreamAllowed.NOT_ALLOWED, null));
-
-
-
-
-//      typeChildren.put("cmis:policy", new HashSet<String>());
-//      typeChildren.put("cmis:relationship", new HashSet<String>());
    }
-   
 
    /**
     * {@inheritDoc}

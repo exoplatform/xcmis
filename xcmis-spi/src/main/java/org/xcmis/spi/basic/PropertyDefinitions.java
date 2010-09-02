@@ -55,7 +55,7 @@ final class PropertyDefinitions
 
          put(objectType.value(), createPropertyDefinition(CmisConstants.OBJECT_TYPE_ID, PropertyType.ID,
             CmisConstants.OBJECT_TYPE_ID, CmisConstants.OBJECT_TYPE_ID, null, CmisConstants.OBJECT_TYPE_ID, false,
-            false, false, false, false, Updatability.READONLY, "Object type id.", null, null, null));
+            false, false, false, false, Updatability.ONCREATE, "Object type id.", null, null, null));
 
          put(objectType.value(), createPropertyDefinition(CmisConstants.OBJECT_ID, PropertyType.ID,
             CmisConstants.OBJECT_ID, CmisConstants.OBJECT_ID, null, CmisConstants.OBJECT_ID, false, false, false,
@@ -186,11 +186,11 @@ final class PropertyDefinitions
          {
             put(objectType.value(), createPropertyDefinition(CmisConstants.SOURCE_ID, PropertyType.ID,
                CmisConstants.SOURCE_ID, CmisConstants.SOURCE_ID, null, CmisConstants.SOURCE_ID, false, false, false,
-               false, false, Updatability.READONLY, "ID of relationship's source object.", null, null, null));
+               false, false, Updatability.ONCREATE, "ID of relationship's source object.", null, null, null));
 
             put(objectType.value(), createPropertyDefinition(CmisConstants.TARGET_ID, PropertyType.ID,
                CmisConstants.TARGET_ID, CmisConstants.TARGET_ID, null, CmisConstants.TARGET_ID, false, false, false,
-               false, false, Updatability.READONLY, "ID of relationship's target object.", null, null, null));
+               false, false, Updatability.ONCREATE, "ID of relationship's target object.", null, null, null));
          }
       }
    }

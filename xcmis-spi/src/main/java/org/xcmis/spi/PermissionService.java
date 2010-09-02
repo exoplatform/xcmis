@@ -29,6 +29,7 @@ import org.xcmis.spi.model.PermissionMapping;
 import org.xcmis.spi.model.RepositoryCapabilities;
 import org.xcmis.spi.model.RepositoryInfo;
 import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.model.Permission.BasicPermissions;
 import org.xcmis.spi.utils.CmisUtils;
 
 import java.util.Collection;
@@ -59,9 +60,9 @@ public class PermissionService
    public AllowableActions calculateAllowableActions(ObjectData object, Identity userIdentity,
       RepositoryInfo repositoryInfo)
    {
-     
-      if(repositoryInfo.getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-        return AllowableActions.ALL();
+
+      if (repositoryInfo.getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
+         return AllowableActions.ALL();
 
       if (userIdentity == null)
       {
@@ -251,9 +252,11 @@ public class PermissionService
          }
          else if (AllowableActions.CAN_REMOVE_OBJECT_FROM_FOLDER.equals(action))
          {
-            if (type.isFileable()
+            if (type.isFileable() //
+               && type.getBaseId() != BaseType.FOLDER //
                && hasPermission(object, permissionMapping
-                  .getPermissions(PermissionMapping.CAN_REMOVE_OBJECT_FROM_FOLDER_OBJECT), userIdentity, repositoryInfo))
+                  .getPermissions(PermissionMapping.CAN_REMOVE_OBJECT_FROM_FOLDER_OBJECT), userIdentity, repositoryInfo) //
+               && (repositoryInfo.getCapabilities().isCapabilityUnfiling() || object.getParents().size() > 1))
             {
                actions.setCanRemoveObjectFromFolder(true);
             }
@@ -302,7 +305,7 @@ public class PermissionService
                && hasPermission(object, permissionMapping
                   .getPermissions(PermissionMapping.CAN_GET_OBJECT_RELATIONSHIPS_OBJECT), userIdentity, repositoryInfo))
             {
-               actions.setCanCreateRelationship(true);
+               actions.setCanGetObjectRelationships(true);
             }
          }
          else if (AllowableActions.CAN_ADD_POLICY.equals(action))
@@ -325,16 +328,18 @@ public class PermissionService
          }
          else if (AllowableActions.CAN_GET_APPLIED_POLICIES.equals(action))
          {
-            if (hasPermission(object, permissionMapping
-               .getPermissions(PermissionMapping.CAN_GET_APPLIED_POLICIES_OBJECT), userIdentity, repositoryInfo))
+            if (type.isControllablePolicy()
+               && hasPermission(object, permissionMapping
+                  .getPermissions(PermissionMapping.CAN_GET_APPLIED_POLICIES_OBJECT), userIdentity, repositoryInfo))
             {
                actions.setCanGetAppliedPolicies(true);
             }
          }
          else if (AllowableActions.CAN_GET_ACL.equals(action))
          {
-            if (hasPermission(object, permissionMapping.getPermissions(PermissionMapping.CAN_GET_ACL_OBJECT),
-               userIdentity, repositoryInfo))
+            if (type.isControllableACL()
+               && hasPermission(object, permissionMapping.getPermissions(PermissionMapping.CAN_GET_ACL_OBJECT),
+                  userIdentity, repositoryInfo))
             {
                actions.setCanGetACL(true);
             }
@@ -380,32 +385,20 @@ public class PermissionService
       Map<String, Set<String>> map = new HashMap<String, Set<String>>();
       CmisUtils.addAclToPermissionMap(map, acl);
 
-      Set<String> p = map.get(repositoryInfo.getPrincipalAnyone());
-      if (p != null)
+      // Check for 'any principal' first the for current principal.
+      for (String principal : new String[]{repositoryInfo.getPrincipalAnyone(), userIdentity.getUserId()})
       {
-         if (p.size() < permissions.size())
+         Set<String> p = map.get(principal);
+         if (p != null)
          {
-            return false;
-         }
-         else
-         {
+            if (p.contains(BasicPermissions.CMIS_ALL.value()))
+            {
+               // All operations allowed.
+               return true;
+            }
             return p.containsAll(permissions);
          }
       }
-
-      p = map.get(userIdentity.getUserId());
-      if (p != null)
-      {
-         if (p.size() < permissions.size())
-         {
-            return false;
-         }
-         else
-         {
-            return p.containsAll(permissions);
-         }
-      }
-
       return false;
    }
 

@@ -18,12 +18,6 @@
  */
 package org.xcmis.spi.basic;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.xcmis.spi.ConstraintException;
 import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsIterator;
@@ -37,6 +31,12 @@ import org.xcmis.spi.model.AccessControlEntry;
 import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.RelationshipDirection;
 import org.xcmis.spi.model.TypeDefinition;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Default Object Data impl
@@ -81,14 +81,17 @@ public abstract class BasicObjectData implements ObjectData
     */
    public Collection<FolderData> getParents()
    {
-      Collection <FolderData> parents = new ArrayList<FolderData>();
-      try {
-        FolderData parent = this.getParent();
-        if(parent != null)
-          parents.add(parent);
-      } catch (ConstraintException e) {
-        // Nothing?
-        //e.printStackTrace();
+      Collection<FolderData> parents = new ArrayList<FolderData>();
+      try
+      {
+         FolderData parent = this.getParent();
+         if (parent != null)
+            parents.add(parent);
+      }
+      catch (ConstraintException e)
+      {
+         // Nothing?
+         //e.printStackTrace();
       }
       return parents;
    }
@@ -96,31 +99,30 @@ public abstract class BasicObjectData implements ObjectData
    /**
     * {@inheritDoc}
     */
-   public Map<String, Property<?>> getProperties(PropertyFilter filter) {
-     
-     Collection <Property<?>> allprops = getProperties().values();
-     Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-     
-     for(Property<?> prop : allprops) {
-       String queryName = prop.getQueryName();
-       if (filter.accept(queryName))
-       {
-          properties.put(prop.getId(), prop);
-       }
-     }
-     
-     return properties;
+   public Map<String, Property<?>> getProperties(PropertyFilter filter)
+   {
 
+      Collection<Property<?>> allprops = getProperties().values();
+      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
+
+      for (Property<?> prop : allprops)
+      {
+         String queryName = prop.getQueryName();
+         if (filter.accept(queryName))
+         {
+            properties.put(prop.getId(), prop);
+         }
+      }
+      return properties;
    }
 
    /**
     * {@inheritDoc}
     */
-   public Property<?> getProperty(String id) {
-     
-     return getProperties().get(id);
+   public Property<?> getProperty(String id)
+   {
+      return getProperties().get(id);
    }
-
 
    /**
     * {@inheritDoc}
@@ -138,7 +140,6 @@ public abstract class BasicObjectData implements ObjectData
    {
 
       throw new NotSupportedException();
-      //return new BaseItemsIterator<RelationshipData>(new ArrayList<RelationshipData>());
    }
 
    /**

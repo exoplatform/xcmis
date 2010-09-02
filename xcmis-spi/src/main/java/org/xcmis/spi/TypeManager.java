@@ -32,10 +32,10 @@ public interface TypeManager
 
    /**
     * Add new type in repository.
-    * 
-    * 2.1.3 Object-Type 
-    * A repository MAY define additional object-types beyond the CMIS Base Object-Types
-    * 
+    *
+    * 2.1.3 Object-Type A repository MAY define additional object-types beyond
+    * the CMIS Base Object-Types
+    *
     * Implementation Compatibility: MAY be implemented.
     *
     * @param type the type definition
@@ -53,6 +53,7 @@ public interface TypeManager
     *         <li>New type has at least one property definitions that has
     *         unsupported type, invalid id, so on</li>
     *         </ul>
+    * @throws NotSupportedException if storage does not support adding new types
     */
    String addType(TypeDefinition type) throws ConstraintException, StorageException;
 

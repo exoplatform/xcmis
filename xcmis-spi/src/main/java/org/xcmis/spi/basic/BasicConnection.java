@@ -34,16 +34,25 @@ public class BasicConnection extends Connection
       super(storage);
    }
 
+   /**
+    * {@inheritDoc}
+    */
    @Override
    protected void checkConnection() throws IllegalStateException
    {
    }
 
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public void close()
    {
    }
 
+   /**
+    * {@inheritDoc}
+    */
    @Override
    protected void validateChangeToken(ObjectData object, String changeToken) throws UpdateConflictException
    {

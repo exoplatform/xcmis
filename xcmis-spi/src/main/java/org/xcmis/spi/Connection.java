@@ -36,8 +36,10 @@ import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.RelationshipDirection;
 import org.xcmis.spi.model.Rendition;
+import org.xcmis.spi.model.RepositoryCapabilities;
 import org.xcmis.spi.model.TypeDefinition;
 import org.xcmis.spi.model.UnfileObject;
+import org.xcmis.spi.model.Updatability;
 import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.model.Permission.BasicPermissions;
 import org.xcmis.spi.model.impl.DecimalProperty;
@@ -64,7 +66,7 @@ import java.util.Set;
  * object. When <code>Connection</code> is no longer needed then method
  * {@link #close()} should be used to release all associated resources. After
  * this connection should not be in use any more.
- * 
+ *
  * @author <a href="mailto:andrey00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: Connection.java 332 2010-03-11 17:24:56Z andrew00x $
  */
@@ -88,33 +90,42 @@ public abstract class Connection
 
    /**
     * Adds an existing fileable non-folder object to a folder.
-    * 
+    *
     * 2.2.5.1 addObjectToFolder
-    * 
-    * 
+    *
+    *
     * @param objectId the id of the object
     * @param folderId the target folder id into which the object is to be filed
-    * @param allVersions to add all versions of the object to the folder if the
-    *        storage supports version-specific filing
+    * @param allVersions to add all versions of the object to the folder or only
+    *        current document if the storage supports version-specific filing
     * @throws ObjectNotFoundException if <code>objectId</code> or
     *         <code>folderId</code> were not found
-    * @throws ConstraintException MUST throw this exception if the cmis:objectTypeId property value
-    *         of the given object is NOT in the list of AllowedChildObjectTypeIds of the parent-folder
-    *         specified by folderId.
+    * @throws ConstraintException MUST throw this exception if the
+    *         cmis:objectTypeId property value of the given object is NOT in the
+    *         list of AllowedChildObjectTypeIds of the parent-folder specified
+    *         by folderId or if <code>allVersions</code> is <code>false</code>
+    *         but version-specific filling capability is not supported by
+    *         storage
     * @throws InvalidArgumentException if <code>objectId</code> is id of object
     *         that is not fileable or if <code>folderId</code> is id of object
     *         that base type is not Folder
     * @throws NotSupportedException if multifiling feature is not supported by
     *         backend storage
+    * @see RepositoryCapabilities#isCapabilityVersionSpecificFiling()
     */
-   public void addObjectToFolder(String objectId, String folderId, boolean allVersions /* Not in use at the moment */)
-      throws ObjectNotFoundException, ConstraintException
+   public void addObjectToFolder(String objectId, String folderId, boolean allVersions) throws ObjectNotFoundException,
+      ConstraintException
    {
       checkConnection();
 
       if (!storage.getRepositoryInfo().getCapabilities().isCapabilityMultifiling())
       {
          throw new NotSupportedException("Multi-filing is not supported.");
+      }
+
+      if (!allVersions && !storage.getRepositoryInfo().getCapabilities().isCapabilityVersionSpecificFiling())
+      {
+         throw new ConstraintException("Version-specific filling capability is not supported.");
       }
 
       ObjectData object = storage.getObjectById(objectId);
@@ -140,14 +151,14 @@ public abstract class Connection
    }
 
    /**
-    * Adds the new Object-type. 
-    * 
+    * Adds the new Object-type.
+    *
     * It is not a standard CMIS feature (xCMIS specific)
-    * 
-    * 2.1.3 Object-Type 
-    * A repository MAY define additional object-types beyond the CMIS Base Object-Types
-    * 
-    * 
+    *
+    * 2.1.3 Object-Type A repository MAY define additional object-types beyond
+    * the CMIS Base Object-Types
+    *
+    *
     * @param type type definition
     * @return ID of newly added type
     * @throws ConstraintException if any of the following conditions are met:
@@ -174,11 +185,11 @@ public abstract class Connection
    /**
     * Adds or(and) removes the given Access Control Entries to(from) the Access
     * Control List of object.
-    * 
+    *
     * 2.2.10.2 applyACL
-    * 
-    * @param objectId the identifier of object for which should be applied specified
-    *        ACEs
+    *
+    * @param objectId the identifier of object for which should be applied
+    *        specified ACEs
     * @param addACL the ACEs that will be added from object's ACL. May be
     *        <code>null</code> or empty list
     * @param removeACL the ACEs that will be removed from object's ACL. May be
@@ -238,9 +249,9 @@ public abstract class Connection
 
    /**
     * Applies a specified policy to an object.
-    * 
+    *
     * 2.2.9.1 applyPolicy
-    *      
+    *
     * @param policyId the policy Id to be applied to object
     * @param objectId the target object Id for policy
     * @throws ObjectNotFoundException if object with <code>objectId</code> or
@@ -270,9 +281,9 @@ public abstract class Connection
    /**
     * Discard the check-out operation. As result Private Working Copy (PWC) must
     * be removed and storage ready to next check-out operation.
-    * 
+    *
     * 2.2.7.2 cancelCheckOut
-    * 
+    *
     * @param documentId document id. May be PWC id or id of any other Document
     *        in Version Series
     * @throws ObjectNotFoundException if object with <code>documentId</code>
@@ -314,10 +325,10 @@ public abstract class Connection
 
    /**
     * Check-in Private Working Copy.
-    * 
+    *
     * 2.2.7.3 checkIn
-    * 
-    *     
+    *
+    *
     * @param documentId document id
     * @param major <code>true</code> is new version should be marked as major
     *        <code>false</code> otherwise
@@ -391,9 +402,9 @@ public abstract class Connection
 
    /**
     * Check-out document.
-    * 
+    *
     * 2.2.7.1 checkOut
-    * 
+    *
     * @param documentId document id. Storage MAY allow checked-out ONLY latest
     *        version of Document
     * @return ID of checked-out document (PWC)
@@ -437,20 +448,22 @@ public abstract class Connection
    }
 
    /**
-    * Close the connection and release underlying resources. Not able to use this
-    * connection any more.
+    * Close the connection and release underlying resources. Not able to use
+    * this connection any more.
     */
    public abstract void close();
 
    /**
     * Create a document object.
-    * 
+    *
     * @param parentId parent folder id for object. May be null if storage
     *        supports unfiling
     * @param properties properties that will be applied to newly created
-    *        document
-    * @param content the document content. May be <code>null</code>.  
-    *        MUST be required if the type requires it.
+    *        document. If <code>properties</code> contains some property which
+    *        updatability is other then {@link Updatability#ONCREATE} or
+    *        {@link Updatability#READWRITE} this properties will be ignored
+    * @param content the document content. May be <code>null</code>. MUST be
+    *        required if the type requires it.
     * @param addACL Access Control Entries that MUST added for newly created
     *        document, either using the ACL from <code>parentId</code> if
     *        specified, or being applied if no <code>parentId</code> is
@@ -581,8 +594,8 @@ public abstract class Connection
    /**
     * Create a document object as a copy of the given source document in the
     * specified parent folder <code>parentId</code>.
-    * 
-    * 
+    *
+    *
     * @param sourceId id for the source document
     * @param parentId parent folder id for object. May be null if storage
     *        supports unfiling
@@ -691,8 +704,8 @@ public abstract class Connection
 
    /**
     * Create a folder object.
-    * 
-    * 
+    *
+    *
     * @param parentId parent folder id for new folder
     * @param properties properties that will be applied to newly created folder
     * @param addACL Access Control Entries that MUST added for newly created
@@ -781,10 +794,10 @@ public abstract class Connection
 
    /**
     * Create a policy object.
-    * 
+    *
     * 2.2.4.5 createPolicy
-    *      
-    * 
+    *
+    *
     * @param parentId parent folder id should be <code>null</code> if policy
     *        object type is not fileable
     * @param properties properties to be applied to newly created Policy
@@ -878,7 +891,7 @@ public abstract class Connection
 
    /**
     * Create a relationship object.
-    * 
+    *
     * @param properties properties to be applied to newly created relationship
     * @param addACL set Access Control Entry to be applied for newly created
     *        relationship. May be <code>null</code> or empty list
@@ -1010,8 +1023,8 @@ public abstract class Connection
 
    /**
     * Delete the content stream for the specified Document object.
-    * 
-    * 
+    *
+    *
     * @param documentId document id
     * @param changeTokenHolder is used for optimistic locking and/or concurrency
     *        checking to ensure that user updates do not conflict. This
@@ -1079,7 +1092,7 @@ public abstract class Connection
 
    /**
     * Delete the specified object.
-    * 
+    *
     * @param objectId the object id
     * @param deleteAllVersions if <code>true</code> (Default if not specified)
     *        then delete all versions of the document. If <code>false</code>,
@@ -1128,7 +1141,7 @@ public abstract class Connection
    /**
     * Delete the specified folder object and all of its child- and
     * descendant-objects.
-    * 
+    *
     * @param folderId folder id
     * @param deleteAllVersions if <code>true</code> (Default if not specified)
     *        then delete all versions of the document. If <code>false</code>,
@@ -1201,10 +1214,10 @@ public abstract class Connection
 
    /**
     * Get the ACL currently applied to the specified object.
-    * 
+    *
     * 2.2.10.1 getACL
-    * 
-    * 
+    *
+    *
     * @param objectId identifier of object
     * @param onlyBasicPermissions if <code>true</code> then return only the CMIS
     *        Basic permissions
@@ -1228,8 +1241,8 @@ public abstract class Connection
 
    /**
     * Get the list of allowable actions for an Object.
-    * 
-    * 
+    *
+    *
     * @param objectId object id
     * @return allowable actions for object
     * @throws ObjectNotFoundException if object with specified id
@@ -1244,10 +1257,10 @@ public abstract class Connection
 
    /**
     * Get all documents in version series.
-    * 
+    *
     * 2.2.7.6 getAllVersions
-    * 
-    * 
+    *
+    *
     * @param versionSeriesId version series id
     * @param includeAllowableActions <code>true</code> if allowable actions
     *        should be included in response <code>false</code> otherwise
@@ -1286,10 +1299,10 @@ public abstract class Connection
 
    /**
     * Gets the list of policies currently applied to the specified object.
-    * 
+    *
     * 2.2.9.3 getAppliedPolicies
-    * 
-    * 
+    *
+    *
     * @param objectId the object id
     * @param includeObjectInfo if <code>true</code> then in result must be
     *        included external information about each object. See
@@ -1329,8 +1342,8 @@ public abstract class Connection
 
    /**
     * Documents that are checked out that the user has access to.
-    * 
-    * 
+    *
+    *
     * @param folderId folder from which get checked-out documents if null get
     *        all checked-out documents in storage
     * @param includeAllowableActions if <code>true</code> then allowable actions
@@ -1349,7 +1362,7 @@ public abstract class Connection
     *        in result. If <code>null</code> or empty string provided then no
     *        renditions will be returned. The Rendition Filter grammar is
     *        defined as follows:
-    * 
+    *
     *        <pre>
     *        &lt;renditionInclusion&gt; ::= &lt;none&gt; | &lt;wildcard&gt; | &lt;termlist&gt;
     *        &lt;termlist&gt; ::= &lt;term&gt; | &lt;term&gt; ',' &lt;termlist&gt;
@@ -1362,7 +1375,7 @@ public abstract class Connection
     *        &lt;wildcard&gt; ::= '*
     *        &lt;none&gt; ::= 'cmis:none'
     * </pre>
-    * 
+    *
     *        An inclusion pattern allows:
     *        <ul>
     *        <li>Wildcard : include all associated Renditions</li>
@@ -1453,7 +1466,7 @@ public abstract class Connection
 
    /**
     * Get the list of child objects contained in the specified folder.
-    * 
+    *
     * @param folderId folder id
     * @param includeAllowableActions if <code>true</code> then allowable actions
     *        for each child object should be included in response
@@ -1473,7 +1486,7 @@ public abstract class Connection
     *        in result. If <code>null</code> or empty string provided then no
     *        renditions will be returned. The Rendition Filter grammar is
     *        defined as follows:
-    * 
+    *
     *        <pre>
     *        &lt;renditionInclusion&gt; ::= &lt;none&gt; | &lt;wildcard&gt; | &lt;termlist&gt;
     *        &lt;termlist&gt; ::= &lt;term&gt; | &lt;term&gt; ',' &lt;termlist&gt;
@@ -1486,7 +1499,7 @@ public abstract class Connection
     *        &lt;wildcard&gt; ::= '*
     *        &lt;none&gt; ::= 'cmis:none'
     * </pre>
-    * 
+    *
     *        An inclusion pattern allows:
     *        <ul>
     *        <li>Wildcard : include all associated Renditions</li>
@@ -1498,7 +1511,8 @@ public abstract class Connection
     * @param orderBy comma-separated list of query names and the ascending
     *        modifier 'ASC' or the descending modifier 'DESC' for each query
     *        name. A storage's handling of the orderBy input is storage-specific
-    *        and storage may ignore this parameter if it not able sort items
+    *        and storage may ignore this parameter if it not able sort items.
+    *        May be <code>null</code> if sorting is not required
     * @param maxItems max number of items in response. If -1 then no limit of
     *        max items in result set
     * @param skipCount the skip items. Must be equals or greater the 0
@@ -1579,7 +1593,7 @@ public abstract class Connection
     * Gets content changes. This service is intended to be used by search
     * crawlers or other applications that need to efficiently understand what
     * has changed in the storage.
-    * 
+    *
     * @param changeLogToken if {@link ChangeLogTokenHolder#getToken()} return
     *        value other than <code>null</code>, then change event corresponded
     *        to the value of the specified change log token will be returned as
@@ -1596,7 +1610,8 @@ public abstract class Connection
     * @param propertyFilter comma-delimited list of property definition Query
     *        Names. A wildcard '*' is supported and minds return all properties.
     *        If empty string or <code>null</code> provided than storage MAY
-    *        return storage specific set of properties
+    *        return storage specific set of properties. This parameter will be
+    *        ignored <code>includeProperties</code> is <code>false</code>
     * @param includePolicyIDs if <code>true</code>, then the include the IDs of
     *        Policies applied to the object referenced in each change event, if
     *        the change event modified the set of policies applied to the object
@@ -1626,7 +1641,7 @@ public abstract class Connection
 
    /**
     * Get document's content stream.
-    * 
+    *
     * @param objectId object id
     * @param streamId identifier for the rendition stream, when used to get a
     *        rendition stream. For Documents, if not provided then this method
@@ -1671,10 +1686,10 @@ public abstract class Connection
    /**
     * Get the collection of descendant objects contained in the specified folder
     * and any (according to <code>depth</code>) of its child-folders.
-    * 
+    *
     * 2.2.3.2 getDescendants
-    * 
-    * 
+    *
+    *
     * @param folderId folder id
     * @param depth depth for discover descendants if -1 then discovery
     *        descendants at all levels
@@ -1696,7 +1711,7 @@ public abstract class Connection
     *        in result. If <code>null</code> or empty string provided then no
     *        renditions will be returned. The Rendition Filter grammar is
     *        defined as follows:
-    * 
+    *
     *        <pre>
     *        &lt;renditionInclusion&gt; ::= &lt;none&gt; | &lt;wildcard&gt; | &lt;termlist&gt;
     *        &lt;termlist&gt; ::= &lt;term&gt; | &lt;term&gt; ',' &lt;termlist&gt;
@@ -1709,7 +1724,7 @@ public abstract class Connection
     *        &lt;wildcard&gt; ::= '*
     *        &lt;none&gt; ::= 'cmis:none'
     * </pre>
-    * 
+    *
     *        An inclusion pattern allows:
     *        <ul>
     *        <li>Wildcard : include all associated Renditions</li>
@@ -1745,7 +1760,7 @@ public abstract class Connection
    /**
     * Get parent for specified folder. This method MUST NOT be used for getting
     * parents of other fileable objects.
-    * 
+    *
     * @param folderId folder id
     * @param includeObjectInfo if <code>true</code> then result must include
     *        external information about object. See {@link ObjectInfo}.
@@ -1803,9 +1818,9 @@ public abstract class Connection
    /**
     * Get the collection of descendant folder objects contained in the specified
     * folder and any (according to <code>depth</code>) of its child-folders.
-    * 
+    *
     * 2.2.3.3 getFolderTree
-    * 
+    *
     * @param folderId folder id
     * @param depth depth for discover descendants if -1 then discovery
     *        descendants at all levels
@@ -1827,7 +1842,7 @@ public abstract class Connection
     *        in result. If <code>null</code> or empty string provided then no
     *        renditions will be returned. The Rendition Filter grammar is
     *        defined as follows:
-    * 
+    *
     *        <pre>
     *        &lt;renditionInclusion&gt; ::= &lt;none&gt; | &lt;wildcard&gt; | &lt;termlist&gt;
     *        &lt;termlist&gt; ::= &lt;term&gt; | &lt;term&gt; ',' &lt;termlist&gt;
@@ -1840,7 +1855,7 @@ public abstract class Connection
     *        &lt;wildcard&gt; ::= '*
     *        &lt;none&gt; ::= 'cmis:none'
     * </pre>
-    * 
+    *
     *        An inclusion pattern allows:
     *        <ul>
     *        <li>Wildcard : include all associated Renditions</li>
@@ -1875,7 +1890,7 @@ public abstract class Connection
 
    /**
     * Get object.
-    * 
+    *
     * @param objectId object id
     * @param includeAllowableActions if <code>true</code> then include object
     *        allowable actions for object
@@ -1894,7 +1909,7 @@ public abstract class Connection
     *        in result. If <code>null</code> or empty string provided then no
     *        renditions will be returned. The Rendition Filter grammar is
     *        defined as follows:
-    * 
+    *
     *        <pre>
     *        &lt;renditionInclusion&gt; ::= &lt;none&gt; | &lt;wildcard&gt; | &lt;termlist&gt;
     *        &lt;termlist&gt; ::= &lt;term&gt; | &lt;term&gt; ',' &lt;termlist&gt;
@@ -1907,7 +1922,7 @@ public abstract class Connection
     *        &lt;wildcard&gt; ::= '*
     *        &lt;none&gt; ::= 'cmis:none'
     * </pre>
-    * 
+    *
     *        An inclusion pattern allows:
     *        <ul>
     *        <li>Wildcard : include all associated Renditions</li>
@@ -1948,7 +1963,7 @@ public abstract class Connection
 
    /**
     * Get object by specified path.
-    * 
+    *
     * @param path object's path
     * @param includeAllowableActions <code>true</code> if allowable actions
     *        should be included in response <code>false</code> otherwise
@@ -1967,7 +1982,7 @@ public abstract class Connection
     *        in result. If <code>null</code> or empty string provided then no
     *        renditions will be returned. The Rendition Filter grammar is
     *        defined as follows:
-    * 
+    *
     *        <pre>
     *        &lt;renditionInclusion&gt; ::= &lt;none&gt; | &lt;wildcard&gt; | &lt;termlist&gt;
     *        &lt;termlist&gt; ::= &lt;term&gt; | &lt;term&gt; ',' &lt;termlist&gt;
@@ -1980,7 +1995,7 @@ public abstract class Connection
     *        &lt;wildcard&gt; ::= '*
     *        &lt;none&gt; ::= 'cmis:none'
     * </pre>
-    * 
+    *
     *        An inclusion pattern allows:
     *        <ul>
     *        <li>Wildcard : include all associated Renditions</li>
@@ -2023,9 +2038,9 @@ public abstract class Connection
 
    /**
     * Get the latest Document object in the version series.
-    * 
+    *
     * 2.2.7.4 getObjectOfLatestVersion
-    * 
+    *
     * @param versionSeriesId version series id
     * @param major if <code>true</code> then return the properties for the
     *        latest major version object in the Version Series, otherwise return
@@ -2050,7 +2065,7 @@ public abstract class Connection
     *        in result. If <code>null</code> or empty string provided then no
     *        renditions will be returned. The Rendition Filter grammar is
     *        defined as follows:
-    * 
+    *
     *        <pre>
     *        &lt;renditionInclusion&gt; ::= &lt;none&gt; | &lt;wildcard&gt; | &lt;termlist&gt;
     *        &lt;termlist&gt; ::= &lt;term&gt; | &lt;term&gt; ',' &lt;termlist&gt;
@@ -2063,7 +2078,7 @@ public abstract class Connection
     *        &lt;wildcard&gt; ::= '*
     *        &lt;none&gt; ::= 'cmis:none'
     * </pre>
-    * 
+    *
     *        An inclusion pattern allows:
     *        <ul>
     *        <li>Wildcard : include all associated Renditions</li>
@@ -2133,8 +2148,8 @@ public abstract class Connection
 
    /**
     * Gets the parent folder(s) for the specified object.
-    * 
-    * 
+    *
+    *
     * @param objectId object id
     * @param includeAllowableActions if <code>true</code> then allowable actions
     *        should be included in response
@@ -2154,7 +2169,7 @@ public abstract class Connection
     *        in result. If <code>null</code> or empty string provided then no
     *        renditions will be returned. The Rendition Filter grammar is
     *        defined as follows:
-    * 
+    *
     *        <pre>
     *        &lt;renditionInclusion&gt; ::= &lt;none&gt; | &lt;wildcard&gt; | &lt;termlist&gt;
     *        &lt;termlist&gt; ::= &lt;term&gt; | &lt;term&gt; ',' &lt;termlist&gt;
@@ -2167,7 +2182,7 @@ public abstract class Connection
     *        &lt;wildcard&gt; ::= '*
     *        &lt;none&gt; ::= 'cmis:none'
     * </pre>
-    * 
+    *
     *        An inclusion pattern allows:
     *        <ul>
     *        <li>Wildcard : include all associated Renditions</li>
@@ -2229,8 +2244,8 @@ public abstract class Connection
    /**
     * Get all or a subset of relationships associated with an independent
     * object.
-    * 
-    * 
+    *
+    *
     * @param objectId object id
     * @param direction relationship direction
     * @param typeId relationship type id. If <code>null</code> then return
@@ -2318,8 +2333,8 @@ public abstract class Connection
 
    /**
     * Get object's properties.
-    * 
-    * 
+    *
+    *
     * @param objectId object id
     * @param includeObjectInfo if <code>true</code> then in result must be
     *        included external information about object. See {@link ObjectInfo}.
@@ -2353,9 +2368,9 @@ public abstract class Connection
 
    /**
     * Get properties of latest version in version series.
-    * 
+    *
     * 2.2.7.5 getPropertiesOfLatestVersion
-    * 
+    *
     * @param versionSeriesId version series id
     * @param major if <code>true</code> then return the properties for the
     *        latest major version object in the Version Series, otherwise return
@@ -2391,14 +2406,14 @@ public abstract class Connection
    /**
     * Get the list of associated Renditions for the specified object. Only
     * rendition attributes are returned, not rendition stream.
-    * 
-    *     
+    *
+    *
     * @param objectId object id
     * @param renditionFilter renditions kinds or mimetypes that must be included
     *        in result. If <code>null</code> or empty string provided then no
     *        renditions will be returned. The Rendition Filter grammar is
     *        defined as follows:
-    * 
+    *
     *        <pre>
     *        &lt;renditionInclusion&gt; ::= &lt;none&gt; | &lt;wildcard&gt; | &lt;termlist&gt;
     *        &lt;termlist&gt; ::= &lt;term&gt; | &lt;term&gt; ',' &lt;termlist&gt;
@@ -2411,7 +2426,7 @@ public abstract class Connection
     *        &lt;wildcard&gt; ::= '*
     *        &lt;none&gt; ::= 'cmis:none'
     * </pre>
-    * 
+    *
     *        An inclusion pattern allows:
     *        <ul>
     *        <li>Wildcard : include all associated Renditions</li>
@@ -2475,7 +2490,7 @@ public abstract class Connection
 
    /**
     * Gets the storage associated to this connection.
-    * 
+    *
     * @return storage
     */
    public Storage getStorage()
@@ -2485,7 +2500,7 @@ public abstract class Connection
 
    /**
     * Set of object types.
-    * 
+    *
     * @param typeId the type id, if not <code>null</code> then return only
     *        specified Object Type and its direct descendant. If
     *        <code>null</code> then return base types.
@@ -2538,7 +2553,7 @@ public abstract class Connection
    /**
     * Get type definition for type <code>typeId</code> include property
     * definition, see {@link #getTypeDefinition(String, boolean)}.
-    * 
+    *
     * @param typeId type Id
     * @return type definition
     * @throws TypeNotFoundException if type <code>typeId</code> does not exist
@@ -2550,7 +2565,7 @@ public abstract class Connection
 
    /**
     * Get type definition for type <code>typeId</code>.
-    * 
+    *
     * @param typeId type Id
     * @param includePropertyDefinition if <code>true</code> property definition
     *        should be included
@@ -2568,7 +2583,7 @@ public abstract class Connection
     * Get all descendants of specified <code>typeId</code> in hierarchy. If
     * <code>typeId</code> is <code>null</code> then return all types and ignore
     * the value of the <code>depth</code> parameter.
-    * 
+    *
     * @param typeId the type id
     * @param depth the depth of level in hierarchy
     * @param includePropertyDefinition true if property definition should be
@@ -2592,7 +2607,7 @@ public abstract class Connection
 
    /**
     * Moves the specified file-able object from one folder to another.
-    * 
+    *
     * @param objectId object id
     * @param targetFolderId target folder for moving object
     * @param sourceFolderId move object from which object to be moved
@@ -2669,7 +2684,7 @@ public abstract class Connection
    /**
     * Executes a CMIS-SQL query statement against the contents of the CMIS
     * Storage.
-    * 
+    *
     * @param statement SQL statement
     * @param searchAllVersions if <code>false</code>, then include latest
     *        versions of documents in the query search scope otherwise all
@@ -2688,7 +2703,7 @@ public abstract class Connection
     *        in result. If <code>null</code> or empty string provided then no
     *        renditions will be returned. The Rendition Filter grammar is
     *        defined as follows:
-    * 
+    *
     *        <pre>
     *        &lt;renditionInclusion&gt; ::= &lt;none&gt; | &lt;wildcard&gt; | &lt;termlist&gt;
     *        &lt;termlist&gt; ::= &lt;term&gt; | &lt;term&gt; ',' &lt;termlist&gt;
@@ -2701,7 +2716,7 @@ public abstract class Connection
     *        &lt;wildcard&gt; ::= '*
     *        &lt;none&gt; ::= 'cmis:none'
     * </pre>
-    * 
+    *
     *        An inclusion pattern allows:
     *        <ul>
     *        <li>Wildcard : include all associated Renditions</li>
@@ -2801,14 +2816,15 @@ public abstract class Connection
 
    /**
     * Remove an existing fileable non-folder object from a folder.
-    * 
+    *
     * 2.2.5.2 removeObjectFromFolder
-    * 
-    * 
+    *
+    *
     * @param objectId the id of object to be removed
     * @param folderId the folder from which the object is to be removed. If
     *        null, then remove the object from all folders in which it is
-    *        currently filed
+    *        currently filed. In this case unfiling capability must be supported
+    *        otherwise {@link NotSupportedException} will be thrown
     * @throws ObjectNotFoundException if <code>objectId</code> or
     *         <code>folderId</code> were not found
     * @throws InvalidArgumentException if object <code>objectId</code> is not
@@ -2855,8 +2871,8 @@ public abstract class Connection
 
    /**
     * Removes a specified policy from an object.
-    * 
-    * 
+    *
+    *
     * @param policyId id of policy to be removed from object
     * @param objectId id of object
     * @throws ObjectNotFoundException if object with <code>objectId</code> does
@@ -2887,7 +2903,7 @@ public abstract class Connection
 
    /**
     * Remove type definition for type <code>typeId</code> .
-    * 
+    *
     * @param typeId type Id
     * @throws TypeNotFoundException if type <code>typeId</code> does not exist
     * @throws ConstraintException if removing type violates a storage
@@ -2904,8 +2920,8 @@ public abstract class Connection
 
    /**
     * Sets the content stream for the specified Document object.
-    * 
-    *    
+    *
+    *
     * @param documentId document id
     * @param content content stream to be applied to object
     * @param changeTokenHolder is used for optimistic locking and/or concurrency
@@ -2993,7 +3009,7 @@ public abstract class Connection
 
    /**
     * Update object properties.
-    * 
+    *
     * @param objectId object id
     * @param changeTokenHolder is used for optimistic locking and/or concurrency
     *        checking to ensure that user updates do not conflict. This
@@ -3123,7 +3139,7 @@ public abstract class Connection
    /**
     * Check is connection may be used at the moment, e.g. it may be already
     * closed.
-    * 
+    *
     * @throws IllegalStateException if connection may not be used any more
     */
    protected abstract void checkConnection() throws IllegalStateException;
@@ -3329,30 +3345,6 @@ public abstract class Connection
          }
          // TODO : validate min/max/length etc.
       }
-      //      if (properties != null && properties.size() != 0)
-      //      {
-      //         for (Property<?> property : properties.values())
-      //         {
-      //            PropertyDefinition<?> definition = typeDefinition.getPropertyDefinition(property.getId());
-      //            if (definition == null)
-      //            {
-      //               throw new ConstraintException("Property " + property.getId()
-      //                  + " is not in property definitions list of type " + typeDefinition.getId());
-      //            }
-      //            if (property.getType() != definition.getPropertyType())
-      //            {
-      //               throw new ConstraintException("Property type is not match. Property id " + property.getId());
-      //            }
-      //            if (!definition.isMultivalued() && property.getValues().size() > 1)
-      //            {
-      //               throw new ConstraintException("Property " + property.getId() + " is not multi-valued.");
-      //            }
-      //            if (definition.isRequired() && property.getValues().size() == 0)
-      //            {
-      //               throw new ConstraintException("Required property " + property.getId() + " can't be not set.");
-      //            }
-      //         }
-      //      }
    }
 
    private void checkACL(TypeDefinition typeDefinition, List<AccessControlEntry> addACL,
@@ -3445,7 +3437,7 @@ public abstract class Connection
    /**
     * Validate change token provided by caller with current change token of
     * object.
-    * 
+    *
     * @param object object
     * @param changeToken change token from 'client'
     * @throws UpdateConflictException if specified change token does not match
