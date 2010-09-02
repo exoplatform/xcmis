@@ -44,9 +44,12 @@ import org.xcmis.restatom.collections.TypesChildrenCollection;
 import org.xcmis.restatom.collections.TypesDescendantsCollection;
 import org.xcmis.restatom.collections.UnfiledCollection;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.security.Principal;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Matcher;
 
 import javax.security.auth.Subject;
 
@@ -78,7 +81,7 @@ public class ProviderImpl extends AbstractProvider
          .setTemplate("feed",
             "{target_base}/cmisatom/{repoid}/{atomdoctype}/{id}{-opt|?|q,maxItems,skipCount}{-join|&|q,maxItems,skipCount}");
 
-      resolver = new RegexTargetResolver();
+      resolver = new DecodeRegexTargetResolver();
 
       resolver.setPattern("/" + AtomCMIS.CMIS_REST_RESOURCE_PATH + "/([^/]+)/typebyid(/)?([^/?]+)?(\\??.*)?", //
          TargetType.TYPE_ENTRY, //
@@ -230,5 +233,32 @@ public class ProviderImpl extends AbstractProvider
          return subject;
       }
 
+   }
+
+   private class DecodeRegexTargetResolver extends RegexTargetResolver
+   {
+      @Override
+      protected Target getTarget(TargetType type, RequestContext request, Matcher matcher, String[] fields)
+      {
+         return new RegexTarget(type, request, matcher, fields)
+         {
+            @Override
+            public String getParameter(String name)
+            {
+               String parameter = super.getParameter(name);
+               if (parameter != null)
+               {
+                  try
+                  {
+                     return URLDecoder.decode(parameter, "UTF-8");
+                  }
+                  catch (UnsupportedEncodingException e)
+                  {
+                  }
+               }
+               return parameter;
+            }
+         };
+      }
    }
 }
