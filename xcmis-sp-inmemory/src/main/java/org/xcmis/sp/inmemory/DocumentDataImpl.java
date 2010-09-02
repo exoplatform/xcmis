@@ -174,6 +174,7 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
          Entry pwc = new Entry();
          pwc.setValue(CmisConstants.OBJECT_TYPE_ID, new StringValue(type.getId()));
          pwc.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(type.getBaseId().value()));
+         pwc.setValue(CmisConstants.IS_IMMUTABLE, new BooleanValue(false));
          pwc.setValue(CmisConstants.VERSION_SERIES_ID, new StringValue(this.getVersionSeriesId()));
          String pwcId = StorageImpl.generateId();
          pwc.setValue(CmisConstants.OBJECT_ID, new StringValue(pwcId));

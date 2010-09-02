@@ -52,6 +52,7 @@ import org.xcmis.spi.InvalidArgumentException;
 import org.xcmis.spi.ItemsIterator;
 import org.xcmis.spi.NameConstraintViolationException;
 import org.xcmis.spi.ObjectData;
+import org.xcmis.spi.ObjectDataVisitor;
 import org.xcmis.spi.ObjectNotFoundException;
 import org.xcmis.spi.PermissionService;
 import org.xcmis.spi.PolicyData;
@@ -88,6 +89,7 @@ import org.xcmis.spi.model.UnfileObject;
 import org.xcmis.spi.model.Updatability;
 import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.model.Permission.BasicPermissions;
+import org.xcmis.spi.model.impl.StringProperty;
 import org.xcmis.spi.query.Query;
 import org.xcmis.spi.query.Result;
 import org.xcmis.spi.query.Score;
@@ -107,6 +109,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -122,7 +125,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * number of items and total amount of content. Storage is not designed for high
  * concurrency load. In some cases data in storage can be in inconsistency
  * state.
- * 
+ *
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  * @version $Id: StorageImpl.java 804 2010-04-16 16:48:59Z
  *          alexey.zavizionov@gmail.com $
@@ -378,135 +381,37 @@ public class StorageImpl implements Storage
       List<AccessControlEntry> acl, Collection<PolicyData> policies, VersioningState versioningState)
       throws ConstraintException, NameConstraintViolationException, StorageException
    {
-      String name = null;
-      Property<?> nameProperty = properties.get(CmisConstants.NAME);
-      if (nameProperty != null && nameProperty.getValues().size() > 0)
+      // If name for copy is not provided then use name of source document.
+      TypeDefinition typeDefinition = source.getTypeDefinition();
+      Property<?> nameProperty = null;
+      if (properties == null)
       {
-         name = (String)nameProperty.getValues().get(0);
+         properties = new HashMap<String, Property<?>>();
       }
-      if (name == null || name.length() == 0)
+      else
+      {
+         nameProperty = properties.get(CmisConstants.NAME);
+      }
+      String name = null;
+      if (nameProperty == null || nameProperty.getValues().size() == 0
+         || (name = (String)nameProperty.getValues().get(0)) == null || name.length() == 0)
       {
          name = source.getName();
+         PropertyDefinition<?> namePropertyDefinition = typeDefinition.getPropertyDefinition(CmisConstants.NAME);
+         properties.put(namePropertyDefinition.getId(), new StringProperty(namePropertyDefinition.getId(),
+            namePropertyDefinition.getQueryName(), namePropertyDefinition.getLocalName(), namePropertyDefinition
+               .getDisplayName(), name));
       }
-
-      if (parent != null)
-      {
-         for (ItemsIterator<ObjectData> iterator = parent.getChildren(null); iterator.hasNext();)
-         {
-            if (name.equals(iterator.next().getName()))
-            {
-               throw new NameConstraintViolationException("Object with name " + name
-                  + " already exists in parent folder.");
-            }
-         }
-      }
-
-      Entry copyEntry = new Entry();
-
-      TypeDefinition sourceType = source.getTypeDefinition();
-      TypeDefinition typeDefinition =
-         new TypeDefinition(sourceType.getId(), sourceType.getBaseId(), sourceType.getQueryName(), sourceType
-            .getLocalName(), sourceType.getLocalNamespace(), sourceType.getParentId(), sourceType.getDisplayName(),
-            sourceType.getDescription(), sourceType.isCreatable(), sourceType.isFileable(), sourceType.isQueryable(),
-            sourceType.isFulltextIndexed(), sourceType.isIncludedInSupertypeQuery(), sourceType.isControllablePolicy(),
-            sourceType.isControllableACL(), sourceType.isVersionable(), sourceType.getAllowedSourceTypes(), sourceType
-               .getAllowedTargetTypes(), sourceType.getContentStreamAllowed(), PropertyDefinitions.getAll(sourceType
-               .getId()));
-
-      copyEntry.setValue(CmisConstants.OBJECT_TYPE_ID, new StringValue(typeDefinition.getId()));
-      copyEntry.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(typeDefinition.getBaseId().value()));
-      String docId = StorageImpl.generateId();
-      String verSerId = StorageImpl.generateId();
-      copyEntry.setValue(CmisConstants.OBJECT_ID, new StringValue(docId));
-      copyEntry.setValue(CmisConstants.VERSION_SERIES_ID, new StringValue(verSerId));
-      String userId = getCurrentUser();
-      copyEntry.setValue(CmisConstants.CREATED_BY, new StringValue(userId));
-      copyEntry.setValue(CmisConstants.LAST_MODIFIED_BY, new StringValue(userId));
-      Calendar cal = Calendar.getInstance();
-      copyEntry.setValue(CmisConstants.CREATION_DATE, new DateValue(cal));
-      copyEntry.setValue(CmisConstants.LAST_MODIFICATION_DATE, new DateValue(cal));
-      copyEntry.setValue(CmisConstants.IS_LATEST_VERSION, new BooleanValue(true));
-      copyEntry.setValue(CmisConstants.IS_MAJOR_VERSION, new BooleanValue(versioningState == VersioningState.MAJOR));
-      copyEntry.setValue(CmisConstants.IS_LATEST_MAJOR_VERSION, new BooleanValue(
-         versioningState == VersioningState.MAJOR));
-
-      // TODO : support for checked-out initial state
-      copyEntry.setValue(CmisConstants.VERSION_LABEL, new StringValue(PropertyDefinitions.LATEST_LABEL));
-      copyEntry.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(false));
-      //      copyEntry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, new StringValue());
-      //      copyEntry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, new StringValue());
 
       try
       {
-         ContentStream content = source.getContentStream();
-         if (content != null)
-         {
-            ByteArrayValue cv = ByteArrayValue.fromStream(content.getStream());
-            copyEntry.setValue(PropertyDefinitions.CONTENT, cv);
-            MimeType mimeType = content.getMediaType();
-            copyEntry.setValue(CmisConstants.CONTENT_STREAM_MIME_TYPE, new StringValue(mimeType.getBaseType()));
-            String charset = mimeType.getParameter(CmisConstants.CHARSET);
-            if (charset != null)
-            {
-               copyEntry.setValue(CmisConstants.CHARSET, new StringValue(charset));
-            }
-            copyEntry.setValue(CmisConstants.CONTENT_STREAM_LENGTH, new IntegerValue(BigInteger
-               .valueOf(cv.getBytes().length)));
-         }
+         return createDocument(parent, typeDefinition, properties, source.getContentStream(), acl, policies,
+            versioningState);
       }
       catch (IOException ioe)
       {
          throw new CmisRuntimeException("Unable copy content for new document. " + ioe.getMessage(), ioe);
       }
-
-      for (Property<?> property : properties.values())
-      {
-         PropertyDefinition<?> definition = typeDefinition.getPropertyDefinition(property.getId());
-         Updatability updatability = definition.getUpdatability();
-         if (updatability == Updatability.READWRITE || updatability == Updatability.ONCREATE)
-         {
-            copyEntry.setProperty(property);
-         }
-      }
-
-      if (policies != null && policies.size() > 0)
-      {
-         for (PolicyData policy : policies)
-         {
-            copyEntry.addPolicy(policy);
-         }
-      }
-
-      if (acl != null && acl.size() > 0)
-      {
-         CmisUtils.addAclToPermissionMap(copyEntry.getPermissions(), acl);
-      }
-
-      if (parent != null)
-      {
-         children.get(parent.getObjectId()).add(docId);
-         Set<String> set = new CopyOnWriteArraySet<String>();
-         set.add(parent.getObjectId());
-         parents.put(docId, set);
-      }
-      else
-      {
-         unfiled.add(docId);
-         parents.put(docId, new CopyOnWriteArraySet<String>());
-      }
-      List<String> set = new CopyOnWriteArrayList<String>();
-      set.add(docId);
-      versions.put(verSerId, set);
-      entries.put(docId, copyEntry);
-
-      DocumentDataImpl copy = new DocumentDataImpl(copyEntry, typeDefinition, this);
-
-      if (indexListener != null)
-      {
-         indexListener.created(copy);
-      }
-
-      return copy;
    }
 
    /**
@@ -548,6 +453,7 @@ public class StorageImpl implements Storage
 
       docEntry.setValue(CmisConstants.OBJECT_TYPE_ID, new StringValue(typeDefinition.getId()));
       docEntry.setValue(CmisConstants.BASE_TYPE_ID, new StringValue(typeDefinition.getBaseId().value()));
+      docEntry.setValue(CmisConstants.IS_IMMUTABLE, new BooleanValue(false));
       String docId = StorageImpl.generateId();
       String verSerId = StorageImpl.generateId();
       docEntry.setValue(CmisConstants.OBJECT_ID, new StringValue(docId));
@@ -937,81 +843,52 @@ public class StorageImpl implements Storage
    public Collection<String> deleteTree(FolderData folder, boolean deleteAllVersions, UnfileObject unfileObject,
       boolean continueOnFailure) throws UpdateConflictException
    {
-      // TODO : unfile
-      //      if (unfileObject != UnfileObject.DELETE)
-      //      {
-      //         throw new NotSupportedException("Parameter 'unfileObject' may not be other then 'DELETE'.");
-      //      }
-
-      Collection<String> failedToDelete = new ArrayList<String>();
-
-      for (ItemsIterator<ObjectData> iterator = folder.getChildren(null); iterator.hasNext();)
+      if (!deleteAllVersions)
       {
-         ObjectData object = iterator.next();
-         if (object.getBaseType() == BaseType.FOLDER)
+         // Throw exception to avoid unexpected removing data. Any way at the
+         // moment we are not able remove 'base version' of versionable node,
+         // so have not common behavior for removing just one version of document.
+         throw new CmisRuntimeException("Unable delete only specified version.");
+      }
+      String folderId = folder.getObjectId();
+      TreeVisitor visitor = new TreeVisitor();
+      folder.accept(visitor);
+      for (BaseObjectData o : visitor.items)
+      {
+         try
          {
-            deleteTree((FolderData)object, deleteAllVersions, unfileObject, continueOnFailure);
+            o.delete();
          }
-         else
+         catch (Exception e)
          {
-            try
+            if (LOG.isDebugEnabled())
+               LOG.warn("Unable delete object " + o.getObjectId());
+
+            if (!continueOnFailure)
             {
-               deleteObject(object, deleteAllVersions);
-            }
-            catch (StorageException e)
-            {
-               if (continueOnFailure)
-               {
-                  failedToDelete.add(object.getObjectId());
-               }
-               else
-               {
-                  throw new CmisRuntimeException(e.getMessage(), e);
-               }
-            }
-            catch (VersioningException e)
-            {
-               if (continueOnFailure)
-               {
-                  failedToDelete.add(object.getObjectId());
-               }
-               else
-               {
-                  throw new CmisRuntimeException(e.getMessage(), e);
-               }
+               break;
             }
          }
       }
 
       try
       {
-         deleteObject(folder, false);
+         folder = (FolderData)getObjectById(folderId);
+         // If not deleted then traversing one more time.
+         visitor = new TreeVisitor();
+         folder.accept(visitor);
+         List<String> failedToDelete = new ArrayList<String>(visitor.items.size());
+         for (BaseObjectData o : visitor.items)
+         {
+            failedToDelete.add(o.getObjectId());
+         }
+         return failedToDelete;
       }
-      catch (StorageException e)
+      catch (ObjectNotFoundException e)
       {
-         if (continueOnFailure)
-         {
-            failedToDelete.add(folder.getObjectId());
-         }
-         else
-         {
-            throw new CmisRuntimeException(e.getMessage(), e);
-         }
+         // Tree removed.
       }
-      catch (VersioningException e)
-      {
-         // should not happen for not versionable type
-         if (continueOnFailure)
-         {
-            failedToDelete.add(folder.getObjectId());
-         }
-         else
-         {
-            throw new CmisRuntimeException(e.getMessage(), e);
-         }
-      }
-
-      return failedToDelete;
+      return Collections.emptyList();
    }
 
    /**
@@ -1575,7 +1452,7 @@ public class StorageImpl implements Storage
 
       /**
        * Return comparable location of the object
-       * 
+       *
        * @param identifer
        * @return
        */
@@ -1765,4 +1642,25 @@ public class StorageImpl implements Storage
       }
    }
 
+   private class TreeVisitor implements ObjectDataVisitor
+   {
+      private Collection<BaseObjectData> items = new LinkedHashSet<BaseObjectData>();
+
+      public void visit(ObjectData object)
+      {
+         TypeDefinition type = object.getTypeDefinition();
+         if (type.getBaseId() == BaseType.FOLDER)
+         {
+            for (ItemsIterator<ObjectData> children = ((FolderDataImpl)object).getChildren(null); children.hasNext();)
+            {
+               children.next().accept(this);
+            }
+            items.add((BaseObjectData)object);
+         }
+         else
+         {
+            items.add((BaseObjectData)object);
+         }
+      }
+   }
 }

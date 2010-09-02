@@ -99,8 +99,7 @@ abstract class BaseObjectData implements ObjectData
     */
    public void accept(ObjectDataVisitor visitor)
    {
-      // TODO Auto-generated method stub
-      throw new UnsupportedOperationException();
+      visitor.visit(this);
    }
 
    /**
@@ -469,7 +468,7 @@ abstract class BaseObjectData implements ObjectData
 
    /**
     * To create the new property.
-    * 
+    *
     * @param def the property definition
     * @param value the value
     * @return the new property
@@ -537,7 +536,7 @@ abstract class BaseObjectData implements ObjectData
 
    /**
     * Update properties, skip on-create and read-only properties
-    * 
+    *
     * @param property property to be updated
     */
    protected void doSetProperty(Property<?> property) throws NameConstraintViolationException
@@ -733,10 +732,7 @@ abstract class BaseObjectData implements ObjectData
       entry.setValue(CmisConstants.CHANGE_TOKEN, new StringValue(StorageImpl.generateId()));
 
       storage.entries.put(entry.getId(), entry);
-      if (storage.indexListener != null)
-      {
-         storage.indexListener.updated(this);
-      }
+      storage.indexListener.updated(this);
    }
 
 }
