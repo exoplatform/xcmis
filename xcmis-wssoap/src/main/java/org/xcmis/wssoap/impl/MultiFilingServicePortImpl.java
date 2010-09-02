@@ -64,6 +64,10 @@ public class MultiFilingServicePortImpl implements MultiFilingServicePort
          LOG.debug("Executing operation addObjectToFolder");
       }
       Connection conn = null;
+      if (allVersions == null)
+      {
+         allVersions = true; // Default value.
+      }
       try
       {
          conn = CmisRegistry.getInstance().getConnection(repositoryId);
