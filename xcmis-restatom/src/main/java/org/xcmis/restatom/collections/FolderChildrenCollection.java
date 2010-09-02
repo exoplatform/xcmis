@@ -226,7 +226,7 @@ public class FolderChildrenCollection extends CmisObjectCollection
             if (sourceFolderId == null)
             {
                // If not specified the 'sourceFolderId', addObjectToFolder will be performed.
-               conn.addObjectToFolder(id, targetFolderId, false);
+               conn.addObjectToFolder(id, targetFolderId, true);
                objectId = id;
             }
             else
