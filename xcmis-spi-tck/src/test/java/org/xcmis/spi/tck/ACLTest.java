@@ -18,320 +18,363 @@
  */
 package org.xcmis.spi.tck;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.xcmis.spi.CmisConstants;
+import org.xcmis.spi.ConstraintException;
+import org.xcmis.spi.ItemsTree;
+import org.xcmis.spi.NotSupportedException;
+import org.xcmis.spi.model.AccessControlEntry;
+import org.xcmis.spi.model.AccessControlPropagation;
+import org.xcmis.spi.model.CapabilityACL;
+import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.utils.CmisUtils;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.junit.BeforeClass;
-import org.junit.AfterClass;
-import org.junit.Test;
-
-import org.xcmis.spi.BaseContentStream;
-import org.xcmis.spi.CmisConstants;
-import org.xcmis.spi.ConstraintException;
-import org.xcmis.spi.ContentStream;
-import org.xcmis.spi.DocumentData;
-import org.xcmis.spi.FolderData;
-import org.xcmis.spi.NotSupportedException;
-import org.xcmis.spi.ObjectData;
-import org.xcmis.spi.model.ACLCapability;
-import org.xcmis.spi.model.AccessControlEntry;
-import org.xcmis.spi.model.AccessControlPropagation;
-import org.xcmis.spi.model.BaseType;
-import org.xcmis.spi.model.CapabilityACL;
-import org.xcmis.spi.model.ContentStreamAllowed;
-import org.xcmis.spi.model.Property;
-import org.xcmis.spi.model.PropertyDefinition;
-import org.xcmis.spi.model.TypeDefinition;
-import org.xcmis.spi.model.VersioningState;
-import org.xcmis.spi.model.impl.IdProperty;
-import org.xcmis.spi.model.impl.StringProperty;
-import org.xcmis.spi.utils.MimeType;
+import java.util.Set;
 
 public class ACLTest extends BaseTest
 {
-   static FolderData testroot = null;
+   private static String testRootFolderId;
 
-   String username = "username";
+   private static TypeDefinition controllableAclType;
 
-   static CapabilityACL capability = null;
+   private static TypeDefinition notControllableAclType;
+
+   private static String controllableAclObject;
+
+   private static String notControllableAclObject;
+
+   private static String principal = "principal0";
 
    @BeforeClass
    public static void start() throws Exception
    {
       BaseTest.setUp();
-      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
-      testroot =
-         getStorage().createFolder(rootFolder, folderTypeDefinition, getPropsMap(CmisConstants.FOLDER, "acl_testroot"),
-            null, null);
-      capability = getCapabilities().getCapabilityACL();
-      System.out.print("Running ACL Service tests....");
-   }
 
-   /**
-    * 2.2.10.1
-    * Get the ACL currently applied to the specified document or folder object.
-    * @throws Exception
-    */
-   @Test
-   public void testGetACL_Simple() throws Exception
-   {
-      try
+      testRootFolderId = createFolder(rootFolderID, CmisConstants.FOLDER, "acl_testroot", null, null, null);
+
+      List<ItemsTree<TypeDefinition>> allTypes = connection.getTypeDescendants(null, -1, false);
+      controllableAclType = getControllableAclType(allTypes);
+      notControllableAclType = getNotControllableAclType(allTypes);
+
+      if (controllableAclType != null)
       {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         List<AccessControlEntry> addACL = createACL(username, "cmis:read");
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testGetACL_Simple"), cs, addACL, null, VersioningState.NONE);
-         List<AccessControlEntry> res = getConnection().getACL(doc1.getObjectId(), false);
-         assertNotNull("Getting ACL failed.", res);
-         for (AccessControlEntry one : res)
+         switch (controllableAclType.getBaseId())
          {
-            if (one.getPrincipal().equalsIgnoreCase(username))
-            {
-               assertTrue("Incorrect items number in result.", one.getPermissions().size() == 1);
-               assertTrue("Setting ACL failed.", one.getPermissions().contains("cmis:read"));
-            }
+            case DOCUMENT :
+               controllableAclObject =
+                  createDocument(testRootFolderId, controllableAclType.getId(),
+                     generateName(controllableAclType, null), null, null, null, null, null);
+               break;
+            case FOLDER :
+               controllableAclObject =
+                  createFolder(testRootFolderId, controllableAclType.getId(), generateName(controllableAclType, null),
+                     null, null, null);
+               break;
+            case POLICY :
+               controllableAclObject =
+                  createPolicy(testRootFolderId, controllableAclType.getId(), generateName(controllableAclType, null),
+                     null, null, null, null);
+               break;
+            case RELATIONSHIP :
+               String sourceId =
+                  createDocument(testRootFolderId, CmisConstants.DOCUMENT, generateName(connection
+                     .getTypeDefinition(CmisConstants.DOCUMENT), null), null, null, null, null, null);
+               String targetId =
+                  createDocument(testRootFolderId, CmisConstants.DOCUMENT, generateName(connection
+                     .getTypeDefinition(CmisConstants.DOCUMENT), null), null, null, null, null, null);
+               controllableAclObject =
+                  createRelationship(controllableAclType.getId(), generateName(controllableAclType, null), sourceId,
+                     targetId, null, null, null);
+               break;
          }
       }
-      catch (NotSupportedException ex)
+      if (notControllableAclType != null)
       {
-         if (capability.equals(CapabilityACL.NONE))
+         switch (notControllableAclType.getBaseId())
          {
-            //SKIP
-         }
-         else
-            fail("Capability ACL is supported but not supported exception thrown.");
-      }
-   }
-
-   /**
-    * 2.2.10.2
-    * Adds or removes the given ACEs to or from the ACL of document or folder object.
-    * @throws Exception
-    */
-   @Test
-   public void testApplyACL_Simple() throws Exception
-   {
-      try
-      {
-         List<AccessControlEntry> addACL = createACL(username, "cmis:read");
-         DocumentData doc1 = createDocument(testroot, "testApplyACL_Simple", "1234567890aBcDE");
-
-         getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.REPOSITORYDETERMINED);
-         ObjectData obj = getStorage().getObjectById(doc1.getObjectId());
-         for (AccessControlEntry one : obj.getACL(false))
-         {
-            if (one.getPrincipal().equalsIgnoreCase(username))
-            {
-               assertTrue("Incorrect items number in result.", one.getPermissions().size() == 1);
-               assertTrue("Setting ACL failed.", one.getPermissions().contains("cmis:read"));
-            }
+            case DOCUMENT :
+               notControllableAclObject =
+                  createDocument(testRootFolderId, notControllableAclType.getId(), generateName(notControllableAclType,
+                     null), null, null, null, null, null);
+               break;
+            case FOLDER :
+               notControllableAclObject =
+                  createFolder(testRootFolderId, notControllableAclType.getId(), generateName(notControllableAclType,
+                     null), null, null, null);
+               break;
+            case POLICY :
+               notControllableAclObject =
+                  createPolicy(testRootFolderId, notControllableAclType.getId(), generateName(notControllableAclType,
+                     null), null, null, null, null);
+               break;
+            case RELATIONSHIP :
+               String sourceId =
+                  createDocument(testRootFolderId, CmisConstants.DOCUMENT, generateName(connection
+                     .getTypeDefinition(CmisConstants.DOCUMENT), null), null, null, null, null, null);
+               String targetId =
+                  createDocument(testRootFolderId, CmisConstants.DOCUMENT, generateName(connection
+                     .getTypeDefinition(CmisConstants.DOCUMENT), null), null, null, null, null, null);
+               controllableAclObject =
+                  createRelationship(notControllableAclType.getId(), generateName(notControllableAclType, null),
+                     sourceId, targetId, null, null, null);
+               break;
          }
       }
-      catch (NotSupportedException ex)
-      {
-         if (capability.equals(CapabilityACL.NONE))
-         {
-            //SKIP
-         }
-         else
-            fail("Capability ACL is supported but not supported exception thrown.");
-      }
-   }
-
-   /**
-    * 2.2.10.2
-    * Adds or removes the given ACEs to or from the ACL of document or folder object.
-    * @throws Exception
-    */
-   @Test
-   public void testApplyACL_RemoveACE() throws Exception
-   {
-      String typeID = null;
-      DocumentData doc1 = null;
-      try
-      {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         List<AccessControlEntry> addACL = createACL(username, "cmis:read");
-
-         Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-         org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
-         org.xcmis.spi.model.PropertyDefinition<?> propDefObjectTypeId =
-            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
-
-         Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-         properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
-            propDefName.getLocalName(), propDefName.getDisplayName(), "testApplyACL_RemoveACE"));
-         properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(propDefObjectTypeId.getId(), propDefObjectTypeId
-            .getQueryName(), propDefObjectTypeId.getLocalName(), propDefObjectTypeId.getDisplayName(), "cmis:acl2"));
-
-         TypeDefinition newType =
-            new TypeDefinition("cmis:acl2", BaseType.DOCUMENT, "cmis:acl2", "cmis:acl2", "", "cmis:document",
-               "cmis:acl2", "cmis:acl2", true, false, true, true, false, false, true, false, null, null,
-               ContentStreamAllowed.ALLOWED, propertyDefinitions);
-         typeID = getStorage().addType(newType);
-         newType = getStorage().getTypeDefinition(typeID, true);
-
-          doc1 =
-            getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.NONE);
-         getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.REPOSITORYDETERMINED);
-         ObjectData obj = getStorage().getObjectById(doc1.getObjectId());
-         for (AccessControlEntry one : obj.getACL(false))
-         {
-            assertTrue("Remove ACE failed.", one.getPrincipal().equalsIgnoreCase(username));
-         }
-         getStorage().deleteObject(doc1, true);
-         getStorage().removeType(typeID);
-      }
-      catch (NotSupportedException ex)
-      {
-         if (capability.equals(CapabilityACL.NONE))
-         {
-            //SKIP
-         }
-         else
-            fail("Capability ACL is supported but not supported exception thrown.");
-      }
-   }
-
-   /**
-    * 2.2.10.2.3
-    * The specified object's Object-Type definition's attribute for controllableACL is FALSE.
-    * @throws Exception
-    */
-   @Test
-   public void testApplyACL_ConstraintExceptionACL() throws Exception
-   {
-      String typeID = null;
-      DocumentData doc1 = null;
-      try
-      {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-         List<AccessControlEntry> addACL = createACL(username, "cmis:read");
-
-         Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-         org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
-         org.xcmis.spi.model.PropertyDefinition<?> popDefObjectTypeId =
-            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
-
-         Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-         properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
-            propDefName.getLocalName(), propDefName.getDisplayName(), "testApplyACL_RemoveACE"));
-         properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(popDefObjectTypeId.getId(), popDefObjectTypeId
-            .getQueryName(), popDefObjectTypeId.getLocalName(), popDefObjectTypeId.getDisplayName(), "cmis:acl1"));
-
-         TypeDefinition newType =
-            new TypeDefinition("cmis:acl1", BaseType.DOCUMENT, "cmis:acl1", "cmis:acl1", "", "cmis:document",
-               "cmis:acl1", "cmis:acl1", true, false, true, true, false, false, false, false, null, null,
-               ContentStreamAllowed.ALLOWED, propertyDefinitions);
-         typeID = getStorage().addType(newType);
-         newType = getStorage().getTypeDefinition(typeID, true);
-
-         doc1 = getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.NONE);
-         getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.OBJECTONLY);
-         fail("Constraint exception must be thrown.");
-      }
-      catch (NotSupportedException ex)
-      {
-         if (capability.equals(CapabilityACL.NONE))
-         {
-            //SKIP
-         }
-         else
-            fail("Capability ACL is supported but not supported exception thrown.");
-      }
-      catch (ConstraintException ec)
-      {
-         //OK
-      }
-      finally
-      {
-         if (doc1 != null)
-            getStorage().deleteObject(doc1, true);
-         getStorage().removeType(typeID);
-      }
-   }
-
-   /**
-    * 2.2.10.2.3
-    * The value for ACLPropagation does not match the values as returned via getACLCapabilities.
-    * @throws Exception
-    */
-   @Test
-   public void testApplyACL_ConstraintExceptionACLPropagation() throws Exception
-   {
-      try
-      {
-         List<AccessControlEntry> addACL = createACL(username, "cmis:read");
-         ACLCapability capability = getStorage().getRepositoryInfo().getAclCapability();
-         DocumentData doc1 =
-            createDocument(testroot, "testApplyACL_ConstraintExceptionACLPropagation", "1234567890aBcDE");
-
-         if (capability.getPropagation().equals(AccessControlPropagation.OBJECTONLY)
-            || capability.getPropagation().equals(AccessControlPropagation.REPOSITORYDETERMINED))
-            getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.PROPAGATE);
-         else if (capability.getPropagation().equals(AccessControlPropagation.PROPAGATE))
-            getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.OBJECTONLY);
-         fail("ConstraintException must be thrown.");
-      }
-      catch (ConstraintException ec)
-      {
-         //OK
-      }
-      catch (NotSupportedException ex)
-      {
-         if (capability.equals(CapabilityACL.NONE))
-         {
-            //SKIP
-         }
-         else
-            fail("Capability ACL is supported but not supported exception thrown.");
-      }
-   }
-
-   /**
-    * 2.2.10.2.3
-    * At least one of the specified values for permission in ANY of the ACEs does not match ANY of the permissionNames as 
-    * returned by getACLCapability and is not a CMIS Basic permission
-    * @throws Exception
-    */
-   @Test
-   public void testApplyACL_ConstraintExceptionACLNotMatch() throws Exception
-   {
-      try
-      {
-         List<AccessControlEntry> addACL = createACL(username, "cmis:unknown");
-         DocumentData doc1 = createDocument(testroot, "testApplyACL_ConstraintExceptionACLNotMatch", "1234567890aBcDE");
-         getConnection().applyACL(doc1.getObjectId(), addACL, null, AccessControlPropagation.OBJECTONLY);
-      }
-      catch (ConstraintException ec)
-      {
-         //OK
-      }
-      catch (NotSupportedException ex)
-      {
-         if (capability.equals(CapabilityACL.NONE))
-         {
-            //SKIP
-         }
-         else
-            fail("Capability ACL is supported but not supported exception thrown.");
-      }
+      System.out.println("Running ACL Service tests");
    }
 
    @AfterClass
    public static void stop() throws Exception
    {
-      if (testroot != null)
-         clear(testroot.getObjectId());
-      if (BaseTest.conn != null)
-         BaseTest.conn.close();
-      System.out.println("done;");
+      if (testRootFolderId != null)
+      {
+         clear(testRootFolderId);
+      }
    }
+
+   /**
+    * Find first type which supports ACL.
+    *
+    * @param types tree of all available types
+    * @return type which support ACL or <code>null</code> if there is no such
+    *         type
+    * @throws Exception if any error occurs
+    */
+   private static TypeDefinition getControllableAclType(List<ItemsTree<TypeDefinition>> types) throws Exception
+   {
+      for (ItemsTree<TypeDefinition> item : types)
+      {
+         TypeDefinition container = item.getContainer();
+         if (container.isControllableACL())
+         {
+            return container;
+         }
+         List<ItemsTree<TypeDefinition>> children = item.getChildren();
+         if (children != null && !children.isEmpty())
+         {
+            return getControllableAclType(children);
+         }
+      }
+      return null;
+   }
+
+   /**
+    * Find first type which does not support ACL.
+    *
+    * @param types tree of all available types
+    * @return type which does not support ACL or <code>null</code> if there is
+    *         no such type
+    * @throws Exception if any error occurs
+    */
+   private static TypeDefinition getNotControllableAclType(List<ItemsTree<TypeDefinition>> types) throws Exception
+   {
+      for (ItemsTree<TypeDefinition> item : types)
+      {
+         TypeDefinition container = item.getContainer();
+         if (!container.isControllableACL())
+         {
+            return container;
+         }
+         List<ItemsTree<TypeDefinition>> children = item.getChildren();
+         if (children != null && !children.isEmpty())
+         {
+            return getNotControllableAclType(children);
+         }
+      }
+      return null;
+   }
+
+   /**
+    * 2.2.10.2 Adds or removes the given ACEs to or from the ACL of document or
+    * folder object.
+    *
+    * @throws Exception
+    */
+   @Test
+   public void testApplyACL_Add() throws Exception
+   {
+      if (controllableAclObject == null)
+      {
+         return;
+      }
+
+      if (capabilities.getCapabilityACL() == CapabilityACL.MANAGE)
+      {
+         List<AccessControlEntry> acl = createACL(principal, "cmis:write");
+         try
+         {
+            connection.applyACL(controllableAclObject, acl, null, aclCapability.getPropagation());
+            List<AccessControlEntry> actualACL = connection.getACL(controllableAclObject, false);
+            validateACL(acl);
+            checkACL(acl, actualACL);
+         }
+         finally
+         {
+            // Restore previous ACL.
+            connection.applyACL(controllableAclObject, null, acl, aclCapability.getPropagation());
+         }
+      }
+   }
+
+   /**
+    * 2.2.10.2.3 At least one of the specified values for permission in ANY of
+    * the ACEs does not match ANY of the permissionNames as returned by
+    * getACLCapability and is not a CMIS Basic permission
+    *
+    * @throws Exception
+    */
+   @Test
+   public void testApplyACL_ConstraintException_ACLNotMatch() throws Exception
+   {
+      if (notControllableAclObject == null)
+      {
+         return;
+      }
+      if (capabilities.getCapabilityACL() == CapabilityACL.MANAGE)
+      {
+         List<AccessControlEntry> acl = createACL(principal, "cmis:unknown");
+         try
+         {
+            connection.applyACL(notControllableAclObject, acl, null, aclCapability.getPropagation());
+            fail("ConstraintException must be thrown since type is not controllable by ACL.");
+         }
+         catch (ConstraintException e)
+         {
+         }
+      }
+   }
+
+   /**
+    * 2.2.10.2.3 The value for ACLPropagation does not match the values as
+    * returned via getACLCapabilities.
+    *
+    * @throws Exception
+    */
+   @Test
+   public void testApplyACL_ConstraintException_ACLPropagation() throws Exception
+   {
+      if (controllableAclObject == null)
+      {
+         return;
+      }
+      if (capabilities.getCapabilityACL() == CapabilityACL.MANAGE)
+      {
+         int l = AccessControlPropagation.values().length;
+         AccessControlPropagation propagation = aclCapability.getPropagation();
+         // Propagation which is not supported.
+         int ord = propagation.ordinal();
+         int p = ord == l - 1 ? ord - 1 : ord + 1;
+         AccessControlPropagation propagation1 = AccessControlPropagation.values()[p];
+         if (propagation != AccessControlPropagation.REPOSITORYDETERMINED)
+         {
+            try
+            {
+               connection.applyACL(controllableAclObject, createACL(principal, "cmis:write"), null, propagation1);
+            }
+            catch (ConstraintException e)
+            {
+            }
+         }
+      }
+   }
+
+   /**
+    * 2.2.10.2.3 The specified object's Object-Type definition's attribute for
+    * controllableACL is FALSE.
+    *
+    * @throws Exception
+    */
+   @Test
+   public void testApplyACL_ConstraintException_NotControllable() throws Exception
+   {
+      if (notControllableAclObject == null)
+      {
+         return;
+      }
+      if (capabilities.getCapabilityACL() == CapabilityACL.MANAGE)
+      {
+         List<AccessControlEntry> acl = createACL(principal, "cmis:write");
+         try
+         {
+            connection.applyACL(notControllableAclObject, acl, null, aclCapability.getPropagation());
+            fail("ConstraintException must be thrown since type is not controllable by ACL.");
+         }
+         catch (ConstraintException e)
+         {
+         }
+      }
+   }
+
+   /**
+    * Managing of ACL is not supported but discovering may be supported.
+    *
+    * @throws Exception
+    */
+   @Test
+   public void testApplyACL_NotSupportedException() throws Exception
+   {
+      // If managing is not supported then try to apply ACL to any type and
+      // expect for org.xcmis.spi.NotSupportedException.
+      if (controllableAclObject != null && capabilities.getCapabilityACL() != CapabilityACL.MANAGE)
+      {
+         List<AccessControlEntry> acl = createACL(principal, "cmis:write");
+         try
+         {
+            connection.applyACL(controllableAclObject, acl, null, aclCapability.getPropagation());
+            fail("NotSupportedException must be thrown since managing of ACL is not supported.");
+         }
+         catch (NotSupportedException e)
+         {
+         }
+      }
+   }
+
+   /**
+    * 2.2.10.1 Get the ACL currently applied to the specified document or folder
+    * object.
+    *
+    * @throws Exception
+    */
+   @Test
+   public void testGetACL_Simple() throws Exception
+   {
+      if (controllableAclObject == null)
+      {
+         return;
+      }
+
+      List<AccessControlEntry> actualACL = connection.getACL(controllableAclObject, false);
+      if (actualACL.size() > 0)
+      {
+         // May contains some ACEs which are inherited from parent or assigned by repository itself.
+         Map<String, Set<String>> m1 = new HashMap<String, Set<String>>();
+         CmisUtils.addAclToPermissionMap(m1, actualACL);
+         validateACL(actualACL);
+      }
+      else if (capabilities.getCapabilityACL() == CapabilityACL.MANAGE)
+      {
+         // If capability is MANAGE then try add and retrieve ACL.
+         List<AccessControlEntry> acl = createACL(principal, "cmis:write");
+         try
+         {
+            connection.applyACL(controllableAclObject, acl, null, aclCapability.getPropagation());
+            actualACL = connection.getACL(controllableAclObject, false);
+            validateACL(actualACL);
+            checkACL(acl, actualACL);
+         }
+         finally
+         {
+            // Restore previous ACL.
+            connection.applyACL(controllableAclObject, null, acl, aclCapability.getPropagation());
+         }
+      }
+   }
+
 }

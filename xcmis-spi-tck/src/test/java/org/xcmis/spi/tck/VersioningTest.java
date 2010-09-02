@@ -68,7 +68,7 @@ public class VersioningTest extends BaseTest
    public static void start() throws Exception
    {
       BaseTest.setUp();
-      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootFolderID);
       testroot =
          getStorage().createFolder(rootFolder, folderTypeDefinition,
             getPropsMap(CmisConstants.FOLDER, "versioning_testroot"), null, null);
@@ -94,7 +94,7 @@ public class VersioningTest extends BaseTest
 
    /**
     * 2.2.7.1.3
-    * •  constraint: The Repository MUST throw this exception if the Document’s Object-Type definition’s versionable attribute is FALSE. 
+    * ï¿½  constraint: The Repository MUST throw this exception if the Documentï¿½s Object-Type definitionï¿½s versionable attribute is FALSE. 
     * @throws Exception
     */
    @Test
@@ -172,7 +172,7 @@ public class VersioningTest extends BaseTest
 
    /**
     * 2.2.7.2.3
-    * •  constraint: The Repository MUST throw this exception if the Document’s Object-Type definition’s versionable attribute is FALSE. 
+    * ï¿½  constraint: The Repository MUST throw this exception if the Documentï¿½s Object-Type definitionï¿½s versionable attribute is FALSE. 
     * @throws Exception
     */
    @Test
@@ -293,7 +293,7 @@ public class VersioningTest extends BaseTest
       if (!IS_VERSIONABLE)
          return;
 
-      if (!IS_POLICIES_SUPPORTED)
+      if (!isPoliciesSupported)
       {
          //SKIP
          return;
@@ -331,7 +331,7 @@ public class VersioningTest extends BaseTest
 
    /**
     * 2.2.7.3.3
-    * •  constraint: The Repository MUST throw this exception if the Document’s Object-Type definition’s versionable attribute is FALSE. 
+    * ï¿½  constraint: The Repository MUST throw this exception if the Documentï¿½s Object-Type definitionï¿½s versionable attribute is FALSE. 
     * @throws Exception
     */
    @Test
@@ -385,7 +385,7 @@ public class VersioningTest extends BaseTest
 
    /**
     * 2.2.7.3.3
-    * •  constraint: The Repository MUST throw this exception if the "contentStreamAllowed" attribute of the Object-Type definition specified by the cmis:objectTypeId 
+    * ï¿½  constraint: The Repository MUST throw this exception if the "contentStreamAllowed" attribute of the Object-Type definition specified by the cmis:objectTypeId 
     * property value is set to "not allowed" and a contentStream input parameter is provided.
     * @throws Exception
     */
@@ -500,7 +500,7 @@ public class VersioningTest extends BaseTest
       if (!IS_VERSIONABLE)
          return;
 
-      if (!IS_POLICIES_SUPPORTED)
+      if (!isPoliciesSupported)
       {
          //SKIP
          return;
@@ -573,7 +573,7 @@ public class VersioningTest extends BaseTest
    /**
     * 2.2.7.4
     * Repositories SHOULD return only the properties specified in the property filter 
-    * if they exist on the object’s type definition.
+    * if they exist on the objectï¿½s type definition.
     * @throws Exception
     */
    @Test
@@ -602,7 +602,7 @@ public class VersioningTest extends BaseTest
 
    /**
     * 2.2.7.4.3
-    * • filterNotValid: The Repository MUST throw this exception if this property filter input parameter is not valid.
+    * ï¿½ filterNotValid: The Repository MUST throw this exception if this property filter input parameter is not valid.
     * @throws Exception
     */
    @Test
@@ -631,7 +631,7 @@ public class VersioningTest extends BaseTest
 
    /**
     * 2.2.7.4.3
-    * •  objectNotFound:  The Repository MUST throw this exception if the input parameter major is TRUE and the Version Series contains no major versions.
+    * ï¿½  objectNotFound:  The Repository MUST throw this exception if the input parameter major is TRUE and the Version Series contains no major versions.
     * @throws Exception
     */
    @Test
@@ -683,7 +683,7 @@ public class VersioningTest extends BaseTest
    /**
     * 2.2.7.5
     * Repositories SHOULD return only the properties specified in the property filter 
-    * if they exist on the object’s type definition.
+    * if they exist on the objectï¿½s type definition.
     * @throws Exception
     */
    @Test
@@ -713,7 +713,7 @@ public class VersioningTest extends BaseTest
 
    /**
     * 2.2.7.5.3
-    * •  filterNotValid: The Repository MUST throw this exception if this property filter input parameter is not valid.
+    * ï¿½  filterNotValid: The Repository MUST throw this exception if this property filter input parameter is not valid.
     * @throws Exception
     */
    @Test
@@ -740,7 +740,7 @@ public class VersioningTest extends BaseTest
 
    /**
     * 2.2.7.5.3
-    * •  objectNotFound:  The Repository MUST throw this exception if the input parameter major is TRUE and the Version Series contains no major versions.
+    * ï¿½  objectNotFound:  The Repository MUST throw this exception if the input parameter major is TRUE and the Version Series contains no major versions.
     * @throws Exception
     */
    @Test
@@ -775,8 +775,8 @@ public class VersioningTest extends BaseTest
    {
       if (testroot != null)
          clear(testroot.getObjectId());
-      if (BaseTest.conn != null)
-         BaseTest.conn.close();
+      if (BaseTest.connection != null)
+         BaseTest.connection.close();
       System.out.println("done;");
    }
 }

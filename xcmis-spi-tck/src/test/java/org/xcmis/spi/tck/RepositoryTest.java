@@ -455,7 +455,7 @@ public class RepositoryTest extends BaseTest
    public static void stop() throws Exception
    {
       System.out.println("done;");
-      if (BaseTest.conn != null)
-         BaseTest.conn.close();
+      if (BaseTest.connection != null)
+         BaseTest.connection.close();
    }
 }

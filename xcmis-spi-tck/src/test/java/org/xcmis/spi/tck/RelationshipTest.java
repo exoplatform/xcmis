@@ -57,7 +57,7 @@ public class RelationshipTest extends BaseTest
    public static void start() throws Exception
    {
       BaseTest.setUp();
-      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootFolderID);
       testroot =
          getStorage().createFolder(rootFolder, folderTypeDefinition,
             getPropsMap(CmisConstants.FOLDER, "relationship_testroot"), null, null);
@@ -72,7 +72,7 @@ public class RelationshipTest extends BaseTest
    @Test
    public void testGetObjectRelationships_Simple() throws Exception
    {
-      if (!IS_RELATIONSHIPS_SUPPORTED)
+      if (!isRelationshipsSupported)
       {
          //SKIP
          return;
@@ -114,7 +114,7 @@ public class RelationshipTest extends BaseTest
    @Test
    public void testGetObjectRelationships_CheckDirection() throws Exception
    {
-      if (!IS_RELATIONSHIPS_SUPPORTED)
+      if (!isRelationshipsSupported)
       {
          //SKIP
          return;
@@ -155,7 +155,7 @@ public class RelationshipTest extends BaseTest
    @Test
    public void testGetObjectRelationships_AllowableActions() throws Exception
    {
-      if (!IS_RELATIONSHIPS_SUPPORTED)
+      if (!isRelationshipsSupported)
       {
          //SKIP
          return;
@@ -203,7 +203,7 @@ public class RelationshipTest extends BaseTest
    @Test
    public void testGetObjectRelationships_TypeId() throws Exception
    {
-      if (!IS_RELATIONSHIPS_SUPPORTED)
+      if (!isRelationshipsSupported)
       {
          //SKIP
          return;
@@ -257,14 +257,14 @@ public class RelationshipTest extends BaseTest
 
    /**
     * 2.2.8.1.1
-    * If TRUE, then the Repository MUST return all relationships whose Object-Types are descendant-types of the given object’s 
+    * If TRUE, then the Repository MUST return all relationships whose Object-Types are descendant-types of the given objectï¿½s 
     * cmis:objectTypeId property value as well as relationships of the specified type. 
     * @throws Exception
     */
    @Test
    public void testGetObjectRelationships_IncludeSubrelationshipTypes() throws Exception
    {
-      if (!IS_RELATIONSHIPS_SUPPORTED)
+      if (!isRelationshipsSupported)
       {
          //SKIP
          return;
@@ -335,7 +335,7 @@ public class RelationshipTest extends BaseTest
    @Test
    public void testGetObjectRelationships_MaxItems() throws Exception
    {
-      if (!IS_RELATIONSHIPS_SUPPORTED)
+      if (!isRelationshipsSupported)
       {
          //SKIP
          return;
@@ -377,7 +377,7 @@ public class RelationshipTest extends BaseTest
    @Test
    public void testGetObjectRelationships_SkipCount() throws Exception
    {
-      if (!IS_RELATIONSHIPS_SUPPORTED)
+      if (!isRelationshipsSupported)
       {
          //SKIP
          return;
@@ -413,13 +413,13 @@ public class RelationshipTest extends BaseTest
    /**
     * 2.2.8.1.1
     * If the repository knows the total number of items in a result set, the repository SHOULD include the number here.
-    * •  Boolean hasMoreItems: TRUE if the Repository contains additional items after those contained in the response.  FALSE otherwise. 
+    * ï¿½  Boolean hasMoreItems: TRUE if the Repository contains additional items after those contained in the response.  FALSE otherwise. 
     * @throws Exception
     */
    @Test
    public void testGetObjectRelationships_Paging() throws Exception
    {
-      if (!IS_RELATIONSHIPS_SUPPORTED)
+      if (!isRelationshipsSupported)
       {
          //SKIP
          return;
@@ -464,13 +464,13 @@ public class RelationshipTest extends BaseTest
    /**
     * 2.2.8.1.3
     * Repositories SHOULD return only the properties specified in the property filter 
-    * if they exist on the object’s type definition.
+    * if they exist on the objectï¿½s type definition.
     * @throws Exception
     */
    @Test
    public void testGetObjectRelationships_PropertyFiltered() throws Exception
    {
-      if (!IS_RELATIONSHIPS_SUPPORTED)
+      if (!isRelationshipsSupported)
       {
          //SKIP
          return;
@@ -525,7 +525,7 @@ public class RelationshipTest extends BaseTest
    @Test
    public void testGetObjectRelationships_FilterNotValidException() throws Exception
    {
-      if (!IS_RELATIONSHIPS_SUPPORTED)
+      if (!isRelationshipsSupported)
       {
          //SKIP
          return;
@@ -581,8 +581,8 @@ public class RelationshipTest extends BaseTest
    {
       if (testroot != null)
          clear(testroot.getObjectId());
-      if (BaseTest.conn != null)
-         BaseTest.conn.close();
+      if (BaseTest.connection != null)
+         BaseTest.connection.close();
       System.out.println("done;");
    }
 

@@ -59,7 +59,7 @@ public class PolicyTest extends BaseTest
    public static void start() throws Exception
    {
       BaseTest.setUp();
-      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
+      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootFolderID);
       testroot =
          getStorage().createFolder(rootFolder, folderTypeDefinition,
             getPropsMap(CmisConstants.FOLDER, "policy_testroot"), null, null);
@@ -74,7 +74,7 @@ public class PolicyTest extends BaseTest
    @Test
    public void testApplyPolicy_Simple() throws Exception
    {
-      if (!IS_POLICIES_SUPPORTED)
+      if (!isPoliciesSupported)
       {
          //SKIP
          return;
@@ -112,7 +112,7 @@ public class PolicyTest extends BaseTest
    @Test
    public void testApplyPolicy_ConstraintException() throws Exception
    {
-      if (!IS_POLICIES_SUPPORTED)
+      if (!isPoliciesSupported)
       {
          //SKIP
          return;
@@ -170,7 +170,7 @@ public class PolicyTest extends BaseTest
    @Test
    public void testRemovePolicy_Simple() throws Exception
    {
-      if (!IS_POLICIES_SUPPORTED)
+      if (!isPoliciesSupported)
       {
          //SKIP
          return;
@@ -201,7 +201,7 @@ public class PolicyTest extends BaseTest
    @Test
    public void testRemovePolicy_ConstraintException() throws Exception
    {
-      if (!IS_POLICIES_SUPPORTED)
+      if (!isPoliciesSupported)
       {
          //SKIP
          return;
@@ -261,7 +261,7 @@ public class PolicyTest extends BaseTest
    @Test
    public void testGetAppliedPolicies_Simple() throws Exception
    {
-      if (!IS_POLICIES_SUPPORTED)
+      if (!isPoliciesSupported)
       {
          //SKIP
          return;
@@ -297,7 +297,7 @@ public class PolicyTest extends BaseTest
    @Test
    public void testGetAppliedPolicies_PropertiesFiltered() throws Exception
    {
-      if (!IS_POLICIES_SUPPORTED)
+      if (!isPoliciesSupported)
       {
          //SKIP
          return;
@@ -339,7 +339,7 @@ public class PolicyTest extends BaseTest
    @Test
    public void testGetAppliedPolicies_FilterNotValidException() throws Exception
    {
-      if (!IS_POLICIES_SUPPORTED)
+      if (!isPoliciesSupported)
       {
          //SKIP
          return;
@@ -371,8 +371,8 @@ public class PolicyTest extends BaseTest
    {
       if (testroot != null)
          clear(testroot.getObjectId());
-      if (BaseTest.conn != null)
-         BaseTest.conn.close();
+      if (BaseTest.connection != null)
+         BaseTest.connection.close();
       System.out.println("done;");
    }
 

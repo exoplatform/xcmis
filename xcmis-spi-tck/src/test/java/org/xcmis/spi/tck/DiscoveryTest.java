@@ -22,24 +22,28 @@ package org.xcmis.spi.tck;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.ChangeLogTokenHolder;
 import org.xcmis.spi.CmisConstants;
-import org.xcmis.spi.DocumentData;
-import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsList;
-import org.xcmis.spi.PropertyFilter;
 import org.xcmis.spi.RenditionFilter;
+import org.xcmis.spi.model.CapabilityACL;
 import org.xcmis.spi.model.CapabilityChanges;
 import org.xcmis.spi.model.CapabilityQuery;
+import org.xcmis.spi.model.CapabilityRendition;
 import org.xcmis.spi.model.CmisObject;
+import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.IncludeRelationships;
+import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.utils.MimeType;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 2.2.6 Discovery Services The Discovery Services (query) are used to search
@@ -52,91 +56,70 @@ import java.util.List;
 public class DiscoveryTest extends BaseTest
 {
 
-   static FolderData testroot = null;
+   private static String testRootFolderId;
+
+   private static String name0 = "test query 000";
+
+   private static String name1 = "test query 001";
+
+   private static String name2 = "test query 002";
+
+   private static String document0;
+
+   private static String document1;
+
+   private static String document2;
+
+   private static TypeDefinition documentType;
 
    @BeforeClass
    public static void start() throws Exception
    {
       BaseTest.setUp();
-      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootfolderID);
-      testroot =
-         getStorage().createFolder(rootFolder, folderTypeDefinition,
-            getPropsMap(CmisConstants.FOLDER, "discovery_testroot"), null, null);
-      System.out.print("Running Discovery Service tests....");
+      testRootFolderId = createFolder(rootFolderID, CmisConstants.FOLDER, "discovery_testroot", null, null, null);
+
+      documentType = connection.getTypeDefinition(CmisConstants.DOCUMENT);
+
+      document0 =
+         createDocument(testRootFolderId, //
+            documentType.getId(), //
+            name0, //
+            documentType.getContentStreamAllowed() == ContentStreamAllowed.NOT_ALLOWED ? null : new BaseContentStream(
+               "test query 000".getBytes(), "", new MimeType("text", "plain")), //
+            null, //
+            null, //
+            null, //
+            null);
+      document1 =
+         createDocument(testRootFolderId, //
+            documentType.getId(), //
+            name1, //
+            documentType.getContentStreamAllowed() == ContentStreamAllowed.NOT_ALLOWED ? null : new BaseContentStream(
+               "test query 001".getBytes(), "", new MimeType("text", "plain")), //
+            null, //
+            null, //
+            null, //
+            null);
+      document2 =
+         createDocument(testRootFolderId, //
+            documentType.getId(), //
+            name2, //
+            documentType.getContentStreamAllowed() == ContentStreamAllowed.NOT_ALLOWED ? null : new BaseContentStream(
+               "test query 002".getBytes(), "", new MimeType("text", "plain")), //
+            null, //
+            null, //
+            null, //
+            null);
+      System.out.println("Running Discovery Service tests");
    }
 
-   /**
-    * 2.2.6.1 query.
-    *
-    * Description: Executes a CMIS query statement against the contents of the
-    * Repository.
-    */
-   @Test
-   public void testQuery() throws Exception
+   @AfterClass
+   public static void stop() throws Exception
    {
-      if (getStorage().getRepositoryInfo().getCapabilities().getCapabilityQuery().equals(CapabilityQuery.NONE))
+      if (testRootFolderId != null)
       {
-         //SKIP
-         return;
+         clear(testRootFolderId);
       }
-      DocumentData documentData = createDocument(testroot, "testQuery1", "Hello World!");
-      String statement = "SELECT * FROM " + CmisConstants.DOCUMENT + " WHERE CONTAINS(\"Hello\")";
-      ItemsList<CmisObject> query = null;
-
-      query =
-         getConnection().query(statement, true, false, IncludeRelationships.BOTH, true, RenditionFilter.ANY, -1, 0);
-
-      assertNotNull("Quary failed.", query);
-      assertNotNull("Quary failed - no items.", query.getItems());
-      assertTrue("Quary failed -  incorrect items number.", query.getItems().size() == 1);
-
-      List<CmisObject> result = query.getItems();
-      for (CmisObject cmisObject : result)
-      {
-         assertNotNull("Query result not found.", cmisObject);
-         assertNotNull("ObjectInfo not found in query result.", cmisObject.getObjectInfo());
-         assertNotNull("ObjectId not found in query result.", cmisObject.getObjectInfo().getId());
-         assertTrue("ObjectId's does not match.", documentData.getObjectId().equals(cmisObject.getObjectInfo().getId()));
-         assertTrue("Object names does not match.", documentData.getName().equals(cmisObject.getObjectInfo().getName()));
-         getStorage().deleteObject(documentData, true);
-      }
-   }
-
-   /**
-    * 2.2.6.1 query.
-    *
-    * Description: Executes a CMIS query statement against the contents of the
-    * Repository.
-    */
-   @Test
-   public void testQuery2() throws Exception
-   {
-      if (getStorage().getRepositoryInfo().getCapabilities().getCapabilityQuery().equals(CapabilityQuery.NONE))
-      {
-         //SKIP
-         return;
-      }
-      DocumentData documentData = createDocument(testroot, "testQuery2", "Hello World!");
-      String statement = "SELECT * FROM " + CmisConstants.DOCUMENT + " WHERE CONTAINS(\"Hello\")";
-      ItemsList<CmisObject> query = null;
-      query =
-         getConnection().query(statement, false, false, IncludeRelationships.BOTH, true, RenditionFilter.ANY, -1, 0);
-
-      assertNotNull("Quary failed.", query);
-      assertNotNull("Quary failed - no items.", query.getItems());
-      if (query.getItems().size() == 0)
-         fail("Quary failed - no items.");
-      List<CmisObject> result = query.getItems();
-      for (CmisObject cmisObject : result)
-      {
-         assertNotNull("Query result not found.", cmisObject);
-         assertNotNull("ObjectInfo not found in query result.", cmisObject.getObjectInfo());
-
-         assertNotNull("ObjectId not found in query result.", cmisObject.getObjectInfo().getId());
-         assertTrue("ObjectId's does not match.", documentData.getObjectId().equals(cmisObject.getObjectInfo().getId()));
-         assertTrue("Object names does not match.", documentData.getName().equals(cmisObject.getObjectInfo().getName()));
-      }
-      getStorage().deleteObject(documentData, true);
    }
 
    /**
@@ -148,35 +131,117 @@ public class DiscoveryTest extends BaseTest
    @Test
    public void testContentChanges() throws Exception
    {
-      DocumentData documentData = null;
-      if (getStorage().getRepositoryInfo().getCapabilities().getCapabilityChanges() == CapabilityChanges.NONE)
+      CapabilityChanges capabilityChanges = capabilities.getCapabilityChanges();
+      if (capabilityChanges == CapabilityChanges.NONE)
       {
-         //SKIP
          return;
       }
-      try
-      {
-         String logToken = getStorage().getRepositoryInfo().getLatestChangeLogToken();
-         ChangeLogTokenHolder logTokenHolder = new ChangeLogTokenHolder();
-         logTokenHolder.setValue(logToken);
-         documentData = createDocument(testroot, "testContentChanges", "Hello World!");
-         ItemsList<CmisObject> changes =
-            getConnection().getContentChanges(logTokenHolder, true, PropertyFilter.ALL, true, true, true, -1);
-         assertEquals(1, changes.getNumItems());
-      }
-      finally
-      {
-         getStorage().deleteObject(documentData, true);
-      }
+
+      String logToken = connection.getStorage().getRepositoryInfo().getLatestChangeLogToken();
+      ChangeLogTokenHolder logTokenHolder = new ChangeLogTokenHolder();
+      logTokenHolder.setValue(logToken);
+      TypeDefinition documentType = connection.getTypeDefinition(CmisConstants.DOCUMENT);
+      createDocument(testRootFolderId, documentType.getId(), generateName(documentType, null), null, null, null, null,
+         null);
+      ItemsList<CmisObject> changes =
+         connection.getContentChanges(logTokenHolder, //
+            capabilityChanges == CapabilityChanges.ALL || capabilityChanges == CapabilityChanges.PROPERTIES ? true
+               : false, //
+            null, // implementation specific set of properties
+            isPoliciesSupported ? true : false, //
+            capabilities.getCapabilityACL() != CapabilityACL.NONE ? true : false, //
+            true, //
+            -1);
+      assertEquals(1, changes.getNumItems());
    }
 
-   @AfterClass
-   public static void stop() throws Exception
+   /**
+    * 2.2.6.1 query.
+    *
+    * Description: Executes a CMIS query statement against the contents of the
+    * Repository.
+    */
+   @Test
+   public void testQuery() throws Exception
    {
-      if (testroot != null)
-         clear(testroot.getObjectId());
-      if (BaseTest.conn != null)
-         BaseTest.conn.close();
-      System.out.println("done;");
+      if (capabilities.getCapabilityQuery() == CapabilityQuery.NONE)
+      {
+         return;
+      }
+
+      String statement = null;
+      if (documentType.getContentStreamAllowed() != ContentStreamAllowed.NOT_ALLOWED)
+      {
+         statement = "SELECT * FROM " + CmisConstants.DOCUMENT + " WHERE CONTAINS(\"test query 000\")";
+      }
+      else
+      {
+         statement = "SELECT * FROM " + CmisConstants.DOCUMENT + " WHERE cmis:name='test query 000'";
+      }
+      ItemsList<CmisObject> query =
+         connection.query(statement, //
+            capabilities.isCapabilityAllVersionsSearchable() ? true : false, //
+            true, //
+            isRelationshipsSupported ? IncludeRelationships.BOTH : IncludeRelationships.NONE, //
+            true, //
+            capabilities.getCapabilityRenditions() != CapabilityRendition.NONE ? RenditionFilter.ANY
+               : RenditionFilter.NONE, //
+            -1, //
+            0);
+
+      assertNotNull(query);
+      List<CmisObject> items = query.getItems();
+      assertEquals(1, items.size());
+
+      CmisObject item = items.get(0);
+      assertNotNull(item);
+      assertEquals(document0, item.getObjectInfo().getId());
+   }
+
+   /**
+    * 2.2.6.1 query.
+    *
+    * Description: Executes a CMIS query statement against the contents of the
+    * Repository.
+    */
+   @Test
+   public void testQuery2() throws Exception
+   {
+      if (capabilities.getCapabilityQuery() == CapabilityQuery.NONE)
+      {
+         return;
+      }
+
+      String statement = null;
+      if (documentType.getContentStreamAllowed() != ContentStreamAllowed.NOT_ALLOWED)
+      {
+         statement = "SELECT * FROM " + CmisConstants.DOCUMENT + " WHERE CONTAINS(\"test query\")";
+      }
+      else
+      {
+         statement = "SELECT * FROM " + CmisConstants.DOCUMENT + " WHERE cmis:name LIKE 'test query%'";
+      }
+      ItemsList<CmisObject> query =
+         connection.query(statement, //
+            capabilities.isCapabilityAllVersionsSearchable() ? true : false, //
+            true, //
+            isRelationshipsSupported ? IncludeRelationships.BOTH : IncludeRelationships.NONE, //
+            true, //
+            capabilities.getCapabilityRenditions() != CapabilityRendition.NONE ? RenditionFilter.ANY
+               : RenditionFilter.NONE, //
+            -1, //
+            0);
+
+      assertNotNull(query);
+      List<CmisObject> items = query.getItems();
+      assertEquals(3, items.size());
+      Set<String> ids = new HashSet<String>(3);
+      for (CmisObject item : items)
+      {
+         ids.add(item.getObjectInfo().getId());
+      }
+      assertTrue("Expected item " + document0 + " not found in result set. ", ids.contains(document0));
+      assertTrue("Expected item " + document1 + " not found in result set. ", ids.contains(document1));
+      assertTrue("Expected item " + document2 + " not found in result set. ", ids.contains(document2));
    }
 }
