@@ -212,10 +212,10 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
             String charset = getString(CmisConstants.CHARSET);
             if (charset != null)
             {
-               entry.setValue(CmisConstants.CHARSET, new StringValue(charset));
+               pwc.setValue(CmisConstants.CHARSET, new StringValue(charset));
             }
 
-            entry.setValue(CmisConstants.CONTENT_STREAM_LENGTH, new IntegerValue(BigInteger.valueOf(bytes.length)));
+            pwc.setValue(CmisConstants.CONTENT_STREAM_LENGTH, new IntegerValue(BigInteger.valueOf(bytes.length)));
          }
 
          for (Iterator<String> iterator = storage.versions.get(getVersionSeriesId()).iterator(); iterator.hasNext();)
