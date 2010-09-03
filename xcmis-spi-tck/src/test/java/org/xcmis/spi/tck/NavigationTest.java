@@ -563,7 +563,7 @@ public class NavigationTest extends BaseTest
       ItemsList<CmisObject> children =
          connection.getChildren(testRootFolderId, false, IncludeRelationships.NONE, false, true, null,
             RenditionFilter.NONE, null, 3, 0);
-      assertTrue("", children.getItems().size() <= 3);
+      assertTrue("Wrong number of items in result. ", children.getItems().size() <= 3);
    }
 
    /**

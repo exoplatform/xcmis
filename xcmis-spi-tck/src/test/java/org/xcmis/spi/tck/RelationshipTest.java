@@ -18,138 +18,143 @@
  */
 package org.xcmis.spi.tck;
 
-import static org.junit.Assert.*;
-
-import java.util.HashMap;
-import java.util.Map;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CmisConstants;
-import org.xcmis.spi.ContentStream;
-import org.xcmis.spi.DocumentData;
-import org.xcmis.spi.FilterNotValidException;
-import org.xcmis.spi.FolderData;
 import org.xcmis.spi.ItemsList;
-import org.xcmis.spi.PropertyFilter;
-import org.xcmis.spi.RelationshipData;
-import org.xcmis.spi.model.AllowableActions;
-import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.CmisObject;
-import org.xcmis.spi.model.ContentStreamAllowed;
-import org.xcmis.spi.model.Property;
-import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.RelationshipDirection;
 import org.xcmis.spi.model.TypeDefinition;
-import org.xcmis.spi.model.VersioningState;
-import org.xcmis.spi.model.impl.IdProperty;
-import org.xcmis.spi.model.impl.StringProperty;
-import org.xcmis.spi.utils.MimeType;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 public class RelationshipTest extends BaseTest
 {
-   static FolderData testroot = null;
+   private static String document0;
+
+   private static String document1;
+
+   private static String document2;
+
+   private static String relationship0_1;
+
+   private static String relationship1_2;
+
+   private static String relationship2_0;
+
+   private static TypeDefinition relationshipType;
+
+   private static String testRootFolderId;
 
    @BeforeClass
    public static void start() throws Exception
    {
       BaseTest.setUp();
-      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootFolderID);
-      testroot =
-         getStorage().createFolder(rootFolder, folderTypeDefinition,
-            getPropsMap(CmisConstants.FOLDER, "relationship_testroot"), null, null);
-      System.out.print("Running Relationship Service tests....");
+      TypeDefinition folderType = connection.getTypeDefinition(CmisConstants.FOLDER);
+      testRootFolderId = createFolder(rootFolderID, folderType.getId(), "relationship_testroot", null, null, null);
+      if (isRelationshipsSupported)
+      {
+         relationshipType = connection.getTypeDefinition(CmisConstants.RELATIONSHIP);
+         TypeDefinition documentType = connection.getTypeDefinition(CmisConstants.DOCUMENT);
+         document0 =
+            createDocument(testRootFolderId, documentType.getId(), generateName(documentType, null), null, null, null,
+               null, null);
+         document1 =
+            createDocument(testRootFolderId, documentType.getId(), generateName(documentType, null), null, null, null,
+               null, null);
+         document2 =
+            createDocument(testRootFolderId, documentType.getId(), generateName(documentType, null), null, null, null,
+               null, null);
+         relationship0_1 =
+            createRelationship(relationshipType.getId(), generateName(relationshipType, null), document0, document1,
+               null, null, null);
+         relationship1_2 =
+            createRelationship(relationshipType.getId(), generateName(relationshipType, null), document1, document2,
+               null, null, null);
+         relationship2_0 =
+            createRelationship(relationshipType.getId(), generateName(relationshipType, null), document2, document0,
+               null, null, null);
+      }
+      System.out.println("Running Relationship Service tests");
+   }
+
+   @AfterClass
+   public static void stop() throws Exception
+   {
+      if (testRootFolderId != null)
+      {
+         clear(testRootFolderId);
+      }
    }
 
    /**
-    * 2.2.8.1
-    * Gets all or a subset of relationships associated with an independent object.
+    * 2.2.8.1 getObjectRelationships.
+    * <p>
+    * See section 2.2.1.1 "Paging". If optional attribute 'maxItems' specified
+    * then number of items contained in the response must not exceed specified
+    * value.
+    * </p>
+    *
     * @throws Exception
     */
    @Test
-   public void testGetObjectRelationships_Simple() throws Exception
+   public void testGetChildren_MaxItems() throws Exception
    {
       if (!isRelationshipsSupported)
       {
-         //SKIP
          return;
       }
-      RelationshipData reldata = null;
-      RelationshipData reldata2 = null;
-      try
-      {
-         DocumentData doc1 = createDocument(testroot, "testGetObjectRelationships_Simple1", "1234567890aBcDE");
-         DocumentData doc2 = createDocument(testroot, "testGetObjectRelationships_Simple2", "1234567890aBcDE");
-         DocumentData doc3 = createDocument(testroot, "testGetObjectRelationships_Simple3", "1234567890aBcDE");
-
-         reldata =
-            getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
-               getPropsMap(CmisConstants.RELATIONSHIP, "testGetObjectRelationships_Simple_rel1"), null, null);
-
-         reldata2 =
-            getStorage().createRelationship(doc2, doc3, relationshipTypeDefinition,
-               getPropsMap(CmisConstants.RELATIONSHIP, "testGetObjectRelationships_Simple_rel2"), null, null);
-
-         ItemsList<CmisObject> obj =
-            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true, true,
-               true, "", -1, 0);
-         assertTrue("Unexpected items number.", obj.getItems().size() == 2);
-      }
-      finally
-      {
-         getStorage().deleteObject(reldata, true);
-         getStorage().deleteObject(reldata2, true);
-      }
+      ItemsList<CmisObject> relationships =
+         connection
+            .getObjectRelationships(document0, RelationshipDirection.EITHER, null, true, false, true, null, 1, 0);
+      assertTrue("Wrong number of items in result. ", relationships.getItems().size() <= 1);
    }
 
    /**
-    * 2.2.8.1.1
-    * An enumeration specifying whether the Repository MUST return relationships where the 
-    * specified Object is the source of the relationship, the target of the relationship, or both.
+    * 2.2.8.1 getObjectRelationships.
+    * <p>
+    * Gets all or a subset of relationships associated with an independent
+    * object.
+    * </p>
+    *
     * @throws Exception
     */
    @Test
-   public void testGetObjectRelationships_CheckDirection() throws Exception
+   public void testGetObjectRelationships() throws Exception
    {
       if (!isRelationshipsSupported)
       {
-         //SKIP
          return;
       }
-      RelationshipData reldata = null;
-      RelationshipData reldata2 = null;
-      try
+      ItemsList<CmisObject> relationships =
+         connection.getObjectRelationships(document0, RelationshipDirection.EITHER, null, true, false, true, null, -1,
+            0);
+      Set<String> ids = new HashSet<String>(relationships.getItems().size());
+      for (CmisObject o : relationships.getItems())
       {
-         DocumentData doc1 = createDocument(testroot, "testGetObjectRelationships_CheckDirection1", "1234567890aBcDE");
-         DocumentData doc2 = createDocument(testroot, "testGetObjectRelationships_CheckDirection2", "1234567890aBcDE");
-         DocumentData doc3 = createDocument(testroot, "testGetObjectRelationships_CheckDirection3", "1234567890aBcDE");
-
-         reldata =
-            getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
-               getPropsMap(CmisConstants.RELATIONSHIP, "testGetObjectRelationships_CheckDirection_rel1"), null, null);
-
-         reldata2 =
-            getStorage().createRelationship(doc2, doc3, relationshipTypeDefinition,
-               getPropsMap(CmisConstants.RELATIONSHIP, "testGetObjectRelationships_CheckDirection_rel2"), null, null);
-
-         ItemsList<CmisObject> obj =
-            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.TARGET, null, true, true,
-               true, PropertyFilter.ALL, -1, 0);
-         assertTrue("Unexpected items number.", obj.getItems().size() == 1);
+         ids.add(o.getObjectInfo().getId());
       }
-      finally
-      {
-         getStorage().deleteObject(reldata, true);
-         getStorage().deleteObject(reldata2, true);
-      }
+      assertEquals(2, ids.size());
+      assertTrue("Expected relationship " + relationship0_1 + "is not found in result. ", ids.contains(relationship0_1));
+      assertTrue("Expected relationship " + relationship2_0 + "is not found in result. ", ids.contains(relationship2_0));
    }
 
    /**
-    * 2.2.8.1.1
-    * If TRUE, then the Repository MUST return the available actions for each object in the result set.
+    * 2.2.8.1 getObjectRelationships.
+    * <p>
+    * Gets all or a subset of relationships associated with an independent
+    * object and include allowable actions.
+    * </p>
+    *
     * @throws Exception
     */
    @Test
@@ -157,221 +162,52 @@ public class RelationshipTest extends BaseTest
    {
       if (!isRelationshipsSupported)
       {
-         //SKIP
          return;
       }
-      RelationshipData reldata = null;
-      RelationshipData reldata2 = null;
-      try
+      ItemsList<CmisObject> relationships =
+         connection
+            .getObjectRelationships(document0, RelationshipDirection.EITHER, null, true, true, true, null, -1, 0);
+      for (CmisObject o : relationships.getItems())
       {
-         DocumentData doc1 =
-            createDocument(testroot, "testGetObjectRelationships_AllowableActions1", "1234567890aBcDE");
-         DocumentData doc2 =
-            createDocument(testroot, "testGetObjectRelationships_AllowableActions2", "1234567890aBcDE");
-         DocumentData doc3 =
-            createDocument(testroot, "testGetObjectRelationships_AllowableActions3", "1234567890aBcDE");
-
-         reldata =
-            getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
-               getPropsMap(CmisConstants.RELATIONSHIP, "testGetObjectRelationships_AllowableActions_rel1"), null, null);
-
-         reldata2 =
-            getStorage().createRelationship(doc2, doc3, relationshipTypeDefinition,
-               getPropsMap(CmisConstants.RELATIONSHIP, "testGetObjectRelationships_AllowableActions_rel2"), null, null);
-
-         ItemsList<CmisObject> obj =
-            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.TARGET, null, true, true,
-               true, "", -1, 0);
-         for (CmisObject one : obj.getItems())
-         {
-            AllowableActions actions = one.getAllowableActions();
-            assertNotNull("Allowable actions not found.", actions);
-         }
-      }
-      finally
-      {
-         getStorage().deleteObject(reldata, true);
-         getStorage().deleteObject(reldata2, true);
+         assertNotNull("Allowable actions must be include in response. ", o.getAllowableActions());
       }
    }
 
    /**
-    * 2.2.8.1.1
-    * If specified, then the Repository MUST return only relationships whose Object-Type is of the type specified.
+    * 2.2.8.1 getObjectRelationships.
+    * <p>
+    * Gets all or a subset of relationships associated with an independent
+    * object with respect to direction argument.
+    * </p>
+    *
     * @throws Exception
     */
    @Test
-   public void testGetObjectRelationships_TypeId() throws Exception
+   public void testGetObjectRelationships_Direction() throws Exception
    {
       if (!isRelationshipsSupported)
       {
-         //SKIP
          return;
       }
-      String typeID = null;
-      RelationshipData reldata = null;
-      RelationshipData reldata2 = null;
-      try
+      ItemsList<CmisObject> relationships =
+         connection.getObjectRelationships(document0, RelationshipDirection.SOURCE, null, true, false, true, null, -1,
+            0);
+      Set<String> ids = new HashSet<String>(relationships.getItems().size());
+      for (CmisObject o : relationships.getItems())
       {
-         DocumentData doc1 = createDocument(testroot, "testGetObjectRelationships_TypeId1", "1234567890aBcDE");
-         DocumentData doc2 = createDocument(testroot, "testGetObjectRelationships_TypeId2", "1234567890aBcDE");
-         DocumentData doc3 = createDocument(testroot, "testGetObjectRelationships_TypeId3", "1234567890aBcDE");
-
-         Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-         org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.NAME);
-         org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId = PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.OBJECT_TYPE_ID);
-
-         Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-         properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
-            fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "testGetObjectRelationships_TypeId_rel2"));
-         properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
-            .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(),
-            "cmis:relationtype1"));
-
-         TypeDefinition newType =
-            new TypeDefinition("cmis:relationtype1", BaseType.RELATIONSHIP, "cmis:relationtype1", "cmis:relationtype1",
-               "", "cmis:relationship", "cmis:relationtype1", "cmis:relationtype1", true, false, true, true, false,
-               false, false, false, null, null, ContentStreamAllowed.NOT_ALLOWED, fPropertyDefinitions);
-         typeID = getStorage().addType(newType);
-         newType = getStorage().getTypeDefinition(typeID, true);
-
-         reldata =
-            getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
-               getPropsMap(CmisConstants.RELATIONSHIP, "testGetObjectRelationships_TypeId_rel1"), null, null);
-
-         reldata2 = getStorage().createRelationship(doc2, doc3, newType, properties, null, null);
-
-         ItemsList<CmisObject> obj =
-            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER,
-               "cmis:relationtype1", true, true, true, "", -1, 0);
-         assertTrue("Unexpected items number.", obj.getItems().size() == 1);
+         ids.add(o.getObjectInfo().getId());
       }
-      finally
-      {
-         getStorage().deleteObject(reldata, true);
-         getStorage().deleteObject(reldata2, true);
-         if (typeID != null)
-            getStorage().removeType(typeID);
-      }
+      assertEquals(1, ids.size());
+      assertTrue("Expected relationship " + relationship0_1 + "is not found in result. ", ids.contains(relationship0_1));
    }
 
    /**
-    * 2.2.8.1.1
-    * If TRUE, then the Repository MUST return all relationships whose Object-Types are descendant-types of the given object�s 
-    * cmis:objectTypeId property value as well as relationships of the specified type. 
-    * @throws Exception
-    */
-   @Test
-   public void testGetObjectRelationships_IncludeSubrelationshipTypes() throws Exception
-   {
-      if (!isRelationshipsSupported)
-      {
-         //SKIP
-         return;
-      }
-      String typeID = null;
-      RelationshipData reldata = null;
-      RelationshipData reldata2 = null;
-      try
-      {
-         DocumentData doc1 =
-            createDocument(testroot, "testGetObjectRelationships_IncludeSubrelationshipTypes1", "1234567890aBcDE");
-         DocumentData doc2 =
-            createDocument(testroot, "testGetObjectRelationships_IncludeSubrelationshipTypes2", "1234567890aBcDE");
-         DocumentData doc3 =
-            createDocument(testroot, "testGetObjectRelationships_IncludeSubrelationshipTypes3", "1234567890aBcDE");
-
-         Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-         org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.NAME);
-         org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId = PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.OBJECT_TYPE_ID);
-
-         Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-         properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
-            fPropDefName.getLocalName(), fPropDefName.getDisplayName(),
-            "testGetObjectRelationships_IncludeSubrelationshipTypes_rel2"));
-         properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
-            .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(),
-            "cmis:relationtype2"));
-
-         TypeDefinition newType =
-            new TypeDefinition("cmis:relationtype2", BaseType.RELATIONSHIP, "cmis:relationtype2", "cmis:relationtype2",
-               "", "cmis:relationship", "cmis:relationtype2", "cmis:relationtype2", true, false, true, true, false,
-               false, false, false, null, null, ContentStreamAllowed.NOT_ALLOWED, fPropertyDefinitions);
-         typeID = getStorage().addType(newType);
-         newType = getStorage().getTypeDefinition(typeID, true);
-
-         reldata =
-            getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
-               getPropsMap("cmis:relationship", "testGetObjectRelationships_IncludeSubrelationshipTypes_rel1"), null,
-               null);
-
-         reldata2 = getStorage().createRelationship(doc2, doc3, newType, properties, null, null);
-
-         ItemsList<CmisObject> obj =
-            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER,
-               CmisConstants.RELATIONSHIP, true, true, true, "", -1, 0);
-         assertTrue("Unexpected items number.", obj.getItems().size() == 2);
-
-         ItemsList<CmisObject> obj2 =
-            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER,
-               CmisConstants.RELATIONSHIP, false, true, true, "", -1, 0);
-         assertTrue("Unexpected items number.", obj2.getItems().size() == 1);
-      }
-      finally
-      {
-         getStorage().deleteObject(reldata, true);
-         getStorage().deleteObject(reldata2, true);
-         if (typeID != null)
-            getStorage().removeType(typeID);
-      }
-   }
-
-   /**
-    * 2.2.8.1.1
-    * This is the maximum number of items to return in a response.  
-    * The repository MUST NOT exceed this maximum.
-    * @throws Exception
-    */
-   @Test
-   public void testGetObjectRelationships_MaxItems() throws Exception
-   {
-      if (!isRelationshipsSupported)
-      {
-         //SKIP
-         return;
-      }
-      RelationshipData reldata = null;
-      RelationshipData reldata2 = null;
-      try
-      {
-         DocumentData doc1 = createDocument(testroot, "testGetObjectRelationships_MaxItems1", "1234567890aBcDE");
-         DocumentData doc2 = createDocument(testroot, "testGetObjectRelationships_MaxItems2", "1234567890aBcDE");
-         DocumentData doc3 = createDocument(testroot, "testGetObjectRelationships_MaxItems3", "1234567890aBcDE");
-
-         reldata =
-            getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
-               getPropsMap(CmisConstants.RELATIONSHIP, "testGetObjectRelationships_MaxItems_rel1"), null, null);
-
-         reldata2 =
-            getStorage().createRelationship(doc2, doc3, relationshipTypeDefinition,
-               getPropsMap(CmisConstants.RELATIONSHIP, "testGetObjectRelationships_MaxItems_rel2"), null, null);
-
-         ItemsList<CmisObject> obj =
-            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true, true,
-               true, "", 1, 0);
-         assertTrue("Unexpected items number.", obj.getItems().size() == 1);
-      }
-      finally
-      {
-         getStorage().deleteObject(reldata, true);
-         getStorage().deleteObject(reldata2, true);
-      }
-   }
-
-   /**
-    * 2.2.8.1.1
-    * This is the number of potential results that the repository 
-    * MUST skip/page over before returning any results.  
+    * 2.2.8.1 getObjectRelationships.
+    * <p>
+    * See section 2.2.1.1 "Paging". If optional attribute 'skipCount' is
+    * specified then specified number of items must be skipped in result.
+    * </p>
+    *
     * @throws Exception
     */
    @Test
@@ -379,211 +215,35 @@ public class RelationshipTest extends BaseTest
    {
       if (!isRelationshipsSupported)
       {
-         //SKIP
          return;
       }
-      RelationshipData reldata = null;
-      RelationshipData reldata2 = null;
-      try
+      ItemsList<CmisObject> relationships =
+         connection.getObjectRelationships(document0, RelationshipDirection.EITHER, null, true, false, true, null, -1,
+            0);
+      // Get all items first.
+      List<String> relationshipIDs = new ArrayList<String>(2);
+      for (CmisObject o : relationships.getItems())
       {
-         DocumentData doc1 = createDocument(testroot, "testGetObjectRelationships_SkipCount1", "1234567890aBcDE");
-         DocumentData doc2 = createDocument(testroot, "testGetObjectRelationships_SkipCount2", "1234567890aBcDE");
-         DocumentData doc3 = createDocument(testroot, "testGetObjectRelationships_SkipCount3", "1234567890aBcDE");
-
-         reldata =
-            getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
-               getPropsMap(CmisConstants.RELATIONSHIP, "testGetObjectRelationships_SkipCount+rel1"), null, null);
-
-         reldata2 =
-            getStorage().createRelationship(doc2, doc3, relationshipTypeDefinition,
-               getPropsMap(CmisConstants.RELATIONSHIP, "testGetObjectRelationships_SkipCount_rel2"), null, null);
-
-         ItemsList<CmisObject> obj =
-            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true, true,
-               true, "", -1, 1);
-         assertTrue("Unexpected items number.", obj.getItems().size() == 1);
+         relationshipIDs.add(o.getObjectInfo().getId());
       }
-      finally
+      assertEquals(2, relationshipIDs.size());
+
+      relationships =
+         connection.getObjectRelationships(document0, RelationshipDirection.EITHER, null, true, false, true, null, -1,
+            1);
+      List<String> relationshipIDsPage = new ArrayList<String>(6);
+      for (CmisObject o : relationships.getItems())
       {
-         getStorage().deleteObject(reldata, true);
-         getStorage().deleteObject(reldata2, true);
+         relationshipIDsPage.add(o.getObjectInfo().getId());
       }
-   }
+      assertEquals(1, relationshipIDsPage.size());
 
-   /**
-    * 2.2.8.1.1
-    * If the repository knows the total number of items in a result set, the repository SHOULD include the number here.
-    * �  Boolean hasMoreItems: TRUE if the Repository contains additional items after those contained in the response.  FALSE otherwise. 
-    * @throws Exception
-    */
-   @Test
-   public void testGetObjectRelationships_Paging() throws Exception
-   {
-      if (!isRelationshipsSupported)
-      {
-         //SKIP
-         return;
-      }
-      RelationshipData reldata = null;
-      RelationshipData reldata2 = null;
-      try
-      {
-         DocumentData doc1 = createDocument(testroot, "testGetObjectRelationships_Paging1", "1234567890aBcDE");
-         DocumentData doc2 = createDocument(testroot, "testGetObjectRelationships_Paging2", "1234567890aBcDE");
-         DocumentData doc3 = createDocument(testroot, "testGetObjectRelationships_Paging3", "1234567890aBcDE");
+      // Skip 1 items.
+      Iterator<String> iterator0 = relationshipIDs.iterator();
+      iterator0.next();
+      iterator0.remove();
 
-         reldata =
-            getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
-               getPropsMap(CmisConstants.RELATIONSHIP, "testGetObjectRelationships_Paging_rel1"), null, null);
-
-         reldata2 =
-            getStorage().createRelationship(doc2, doc3, relationshipTypeDefinition,
-               getPropsMap(CmisConstants.RELATIONSHIP, "testGetObjectRelationships_Paging_rel2"), null, null);
-
-         ItemsList<CmisObject> obj =
-            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true, true,
-               true, "", 1, 0);
-         assertTrue("Unexpected items number.", obj.getItems().size() == 1);
-
-         if (obj.getNumItems() == 2 || obj.getNumItems() == -1)
-         {
-            //OK
-         }
-         else
-            fail("Unexpected items number.");
-         if (!obj.isHasMoreItems())
-            fail("Has more items value is incorrect.");
-      }
-      finally
-      {
-         getStorage().deleteObject(reldata, true);
-         getStorage().deleteObject(reldata2, true);
-      }
-   }
-
-   /**
-    * 2.2.8.1.3
-    * Repositories SHOULD return only the properties specified in the property filter 
-    * if they exist on the object�s type definition.
-    * @throws Exception
-    */
-   @Test
-   public void testGetObjectRelationships_PropertyFiltered() throws Exception
-   {
-      if (!isRelationshipsSupported)
-      {
-         //SKIP
-         return;
-      }
-      RelationshipData reldata = null;
-      RelationshipData reldata2 = null;
-      try
-      {
-         DocumentData doc1 =
-            createDocument(testroot, "testGetObjectRelationships_PropertyFiltered1", "1234567890aBcDE");
-         DocumentData doc2 =
-            createDocument(testroot, "testGetObjectRelationships_PropertyFiltered2", "1234567890aBcDE");
-         DocumentData doc3 =
-            createDocument(testroot, "testGetObjectRelationships_PropertyFiltered3", "1234567890aBcDE");
-
-         reldata =
-            getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
-               getPropsMap(CmisConstants.RELATIONSHIP, "testGetObjectRelationships_PropertyFiltered_rel1"), null, null);
-
-         reldata2 =
-            getStorage().createRelationship(doc2, doc3, relationshipTypeDefinition,
-               getPropsMap(CmisConstants.RELATIONSHIP, "testGetObjectRelationships_PropertyFiltered_rel2"), null, null);
-
-         ItemsList<CmisObject> obj =
-            getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true, true,
-               true, "cmis:name,cmis:path", -1, 0);
-         assertTrue("Unexpected items number.", obj.getItems().size() == 2);
-
-         for (CmisObject one : obj.getItems())
-         {
-            for (Map.Entry<String, Property<?>> e : one.getProperties().entrySet())
-            {
-               if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path"))
-                  continue;//Other props must be ignored
-               else
-                  fail("Property filter works incorrect.");
-            }
-         }
-      }
-      finally
-      {
-         getStorage().deleteObject(reldata, true);
-         getStorage().deleteObject(reldata2, true);
-      }
-   }
-
-   /**
-    * 2.2.8.1.3
-    * The Repository MUST throw this exception if this property filter input parameter is not valid.
-    * @throws Exception
-    */
-   @Test
-   public void testGetObjectRelationships_FilterNotValidException() throws Exception
-   {
-      if (!isRelationshipsSupported)
-      {
-         //SKIP
-         return;
-      }
-      RelationshipData reldata = null;
-      RelationshipData reldata2 = null;
-      try
-      {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-         DocumentData doc1 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_FilterNotValidException1"), cs, null,
-               null, VersioningState.NONE);
-
-         DocumentData doc2 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_FilterNotValidException2"), cs, null,
-               null, VersioningState.NONE);
-
-         DocumentData doc3 =
-            getStorage().createDocument(testroot, documentTypeDefinition,
-               getPropsMap(CmisConstants.DOCUMENT, "testGetObjectRelationships_FilterNotValidException3"), cs, null,
-               null, VersioningState.NONE);
-
-         reldata =
-            getStorage().createRelationship(doc1, doc2, relationshipTypeDefinition,
-               getPropsMap(CmisConstants.RELATIONSHIP, "testGetObjectRelationships_FilterNotValidException_rel1"),
-               null, null);
-
-         reldata2 =
-            getStorage().createRelationship(doc2, doc3, relationshipTypeDefinition,
-               getPropsMap(CmisConstants.RELATIONSHIP, "testGetObjectRelationships_FilterNotValidException_rel2"),
-               null, null);
-
-         getConnection().getObjectRelationships(doc2.getObjectId(), RelationshipDirection.EITHER, null, true, true,
-            true, "(,*", -1, 0);
-         fail("FilterNotValidException must be thrown.");
-      }
-      catch (FilterNotValidException ex)
-      {
-         //OK
-      }
-      finally
-      {
-         getStorage().deleteObject(reldata, true);
-         getStorage().deleteObject(reldata2, true);
-      }
-   }
-
-   @AfterClass
-   public static void stop() throws Exception
-   {
-      if (testroot != null)
-         clear(testroot.getObjectId());
-      if (BaseTest.connection != null)
-         BaseTest.connection.close();
-      System.out.println("done;");
+      assertEquals(relationshipIDs, relationshipIDsPage);
    }
 
 }

@@ -18,362 +18,243 @@
  */
 package org.xcmis.spi.tck;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CmisConstants;
 import org.xcmis.spi.ConstraintException;
-import org.xcmis.spi.ContentStream;
-import org.xcmis.spi.DocumentData;
-import org.xcmis.spi.FilterNotValidException;
-import org.xcmis.spi.FolderData;
-import org.xcmis.spi.ObjectData;
-import org.xcmis.spi.PolicyData;
-import org.xcmis.spi.model.BaseType;
+import org.xcmis.spi.ItemsTree;
 import org.xcmis.spi.model.CmisObject;
-import org.xcmis.spi.model.ContentStreamAllowed;
-import org.xcmis.spi.model.Property;
-import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.TypeDefinition;
-import org.xcmis.spi.model.VersioningState;
-import org.xcmis.spi.model.impl.IdProperty;
-import org.xcmis.spi.model.impl.StringProperty;
-import org.xcmis.spi.utils.MimeType;
 
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 public class PolicyTest extends BaseTest
 {
 
-   static FolderData testroot = null;
+   private static TypeDefinition folderType;
+
+   private static TypeDefinition policyType;
+
+   private static String controllablePolicyObject;
+
+   private static TypeDefinition controllablePolicyType;
+
+   private static String notControllablePolicyObject;
+
+   private static TypeDefinition notControllablePolicyType;
+
+   private static String testRootFolderId;
 
    @BeforeClass
    public static void start() throws Exception
    {
       BaseTest.setUp();
-      FolderData rootFolder = (FolderData)getStorage().getObjectById(rootFolderID);
-      testroot =
-         getStorage().createFolder(rootFolder, folderTypeDefinition,
-            getPropsMap(CmisConstants.FOLDER, "policy_testroot"), null, null);
-      System.out.print("Running Policy Service tests....");
-   }
-
-   /**
-    * 2.2.9.1
-    * Applies a specified policy to an object.
-    * @throws Exception
-    */
-   @Test
-   public void testApplyPolicy_Simple() throws Exception
-   {
-      if (!isPoliciesSupported)
+      folderType = connection.getTypeDefinition(CmisConstants.FOLDER);
+      if (isPoliciesSupported)
       {
-         //SKIP
-         return;
+         policyType = connection.getTypeDefinition(CmisConstants.POLICY);
       }
-      PolicyData policy = null;
-      try
+      testRootFolderId = createFolder(rootFolderID, folderType.getId(), "policy_testroot", null, null, null);
+      List<ItemsTree<TypeDefinition>> allTypes = connection.getTypeDescendants(null, -1, true);
+      controllablePolicyType = getControllablePolicyType(allTypes);
+      notControllablePolicyType = getNotControllablePolicyType(allTypes);
+      if (controllablePolicyType != null)
       {
-         String policyName = "testApplyPolicy_Simple_policy1";
-         DocumentData doc1 = createDocument(testroot, "testApplyPolicy_Simple", "1234567890aBcDE");
-         policy = createPolicy(testroot, policyName);
-         getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
-         ObjectData res = getStorage().getObjectById(doc1.getObjectId());
-         assertTrue("Policies number incorrect.", res.getPolicies().size() == 1);
-         Iterator<PolicyData> it = res.getPolicies().iterator();
-         while (it.hasNext())
+         switch (controllablePolicyType.getBaseId())
          {
-            PolicyData one = it.next();
-            assertTrue("Policy name does not match.", one.getName().equals(policyName));
-            assertTrue("Policy text does not match.", one.getPolicyText().equals("testPolicyText"));
-            res.removePolicy(one);
+            case DOCUMENT :
+               controllablePolicyObject =
+                  createDocument(testRootFolderId, controllablePolicyType.getId(), generateName(controllablePolicyType,
+                     null), null, null, null, null, null);
+               break;
+            case FOLDER :
+               controllablePolicyObject =
+                  createFolder(testRootFolderId, controllablePolicyType.getId(), generateName(controllablePolicyType,
+                     null), null, null, null);
+               break;
+            case POLICY :
+               controllablePolicyObject =
+                  createPolicy(testRootFolderId, controllablePolicyType.getId(), generateName(controllablePolicyType,
+                     null), null, null, null, null);
+               break;
+            case RELATIONSHIP :
+               String sourceId =
+                  createDocument(testRootFolderId, CmisConstants.DOCUMENT, generateName(connection
+                     .getTypeDefinition(CmisConstants.DOCUMENT), null), null, null, null, null, null);
+               String targetId =
+                  createDocument(testRootFolderId, CmisConstants.DOCUMENT, generateName(connection
+                     .getTypeDefinition(CmisConstants.DOCUMENT), null), null, null, null, null, null);
+               controllablePolicyObject =
+                  createRelationship(controllablePolicyType.getId(), generateName(controllablePolicyType, null),
+                     sourceId, targetId, null, null, null);
+               break;
          }
       }
-      finally
+      if (notControllablePolicyType != null)
       {
-         getStorage().deleteObject(policy, false);
-      }
-   }
-
-   /**
-    * 2.2.9.1.2
-    * constraint : The Repository MUST throw this exception if the specified object's Object-Type
-    * definition's attribute for controllablePolicy is FALSE.
-    * @throws Exception
-    */
-   @Test
-   public void testApplyPolicy_ConstraintException() throws Exception
-   {
-      if (!isPoliciesSupported)
-      {
-         //SKIP
-         return;
-      }
-      DocumentData doc1 = null;
-      PolicyData policy = null;
-      String typeID = null;
-      try
-      {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-         Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-         org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
-         org.xcmis.spi.model.PropertyDefinition<?> popDefObjectTypeId =
-            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
-
-         Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-         properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
-            propDefName.getLocalName(), propDefName.getDisplayName(), "testApplyPolicy_ConstraintException"));
-         properties.put(CmisConstants.OBJECT_TYPE_ID,
-            new IdProperty(popDefObjectTypeId.getId(), popDefObjectTypeId.getQueryName(), popDefObjectTypeId
-               .getLocalName(), popDefObjectTypeId.getDisplayName(), "cmis:policytype1"));
-
-         TypeDefinition newType =
-            new TypeDefinition("cmis:policytype1", BaseType.DOCUMENT, "cmis:policytype1", "cmis:policytype1", "",
-               "cmis:document", "cmis:policytype1", "cmis:policytype1", true, false, true, true, false, false, false,
-               false, null, null, ContentStreamAllowed.ALLOWED, propertyDefinitions);
-         typeID = getStorage().addType(newType);
-         newType = getStorage().getTypeDefinition(typeID, true);
-
-         doc1 = getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.NONE);
-
-         policy = createPolicy(testroot, "testApplyPolicy_ConstraintException_policy1");
-         getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
-         fail("ConstraintException must be thrown.");
-      }
-      catch (ConstraintException ex)
-      {
-         //OK
-      }
-      finally
-      {
-         getStorage().deleteObject(doc1, true);
-         getStorage().deleteObject(policy, false);
-         getStorage().removeType(typeID);
-      }
-   }
-
-   /**
-    * 2.2.9.2
-    * Removes a specified policy from an object.
-    * @throws Exception
-    */
-   @Test
-   public void testRemovePolicy_Simple() throws Exception
-   {
-      if (!isPoliciesSupported)
-      {
-         //SKIP
-         return;
-      }
-      PolicyData policy = null;
-      try
-      {
-         DocumentData doc1 = createDocument(testroot, "testRemovePolicy_Simple", "1234567890aBcDE");
-         policy = createPolicy(testroot, "testRemovePolicy_Simple_policy1");
-         getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
-         getConnection().removePolicy(policy.getObjectId(), doc1.getObjectId());
-         ObjectData res = getStorage().getObjectById(doc1.getObjectId());
-         assertTrue("Policy removing error.", res.getPolicies().size() == 0);
-         assertNotNull("Policy object deleted.", getStorage().getObjectById(policy.getObjectId()));
-      }
-      finally
-      {
-         getStorage().deleteObject(policy, false);
-      }
-   }
-
-   /**
-    * 2.2.9.2.2
-    *  constraint: The Repository MUST throw this exception if the specified object's Object-Type
-    *  definition's attribute for controllablePolicy is FALSE.
-    * @throws Exception
-    */
-   @Test
-   public void testRemovePolicy_ConstraintException() throws Exception
-   {
-      if (!isPoliciesSupported)
-      {
-         //SKIP
-         return;
-      }
-      String typeID = null;
-      PolicyData policy = null;
-      DocumentData doc1 = null;
-      try
-      {
-         ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-         Map<String, PropertyDefinition<?>> kinoPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-         org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
-         org.xcmis.spi.model.PropertyDefinition<?> popDefObjectTypeId =
-            PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
-
-         Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-         properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
-            propDefName.getLocalName(), propDefName.getDisplayName(), "testRemovePolicy_ConstraintException1"));
-         properties.put(CmisConstants.OBJECT_TYPE_ID,
-            new IdProperty(popDefObjectTypeId.getId(), popDefObjectTypeId.getQueryName(), popDefObjectTypeId
-               .getLocalName(), popDefObjectTypeId.getDisplayName(), "cmis:policytype2"));
-
-         TypeDefinition newType =
-            new TypeDefinition("cmis:policytype2", BaseType.DOCUMENT, "cmis:policytype2", "cmis:policytype2", "",
-               "cmis:document", "cmis:policytype2", "cmis:policytype2", true, false, true, true, false, false, false,
-               false, null, null, ContentStreamAllowed.ALLOWED, kinoPropertyDefinitions);
-         typeID = getStorage().addType(newType);
-         newType = getStorage().getTypeDefinition(typeID, true);
-
-         doc1 = getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.NONE);
-
-         policy = createPolicy(testroot, "testRemovePolicy_ConstraintException_policy1");
-         getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
-         getConnection().removePolicy(policy.getObjectId(), doc1.getObjectId());
-         fail("Constraint exception must be thrown.");
-      }
-      catch (ConstraintException ex)
-      {
-         //OK
-      }
-      finally
-      {
-         getStorage().deleteObject(doc1, true);
-         if (policy != null)
-            getStorage().deleteObject(policy, false);
-         getStorage().removeType(typeID);
-      }
-   }
-
-   /**
-    * 2.2.9.3
-    * Gets the list of policies currently applied to the specified object.
-    * @throws Exception
-    */
-   @Test
-   public void testGetAppliedPolicies_Simple() throws Exception
-   {
-      if (!isPoliciesSupported)
-      {
-         //SKIP
-         return;
-      }
-      PolicyData policy = null;
-      DocumentData doc1 = null;
-      try
-      {
-         doc1 = createDocument(testroot, "testGetAppliedPolicies_Simple1", "1234567890aBcDE");
-         policy = createPolicy(testroot, "testGetAppliedPolicies_Simple_policy1");
-         getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
-         List<CmisObject> res = getConnection().getAppliedPolicies(doc1.getObjectId(), true, "");
-         assertNotNull("getAppliedPolicies() failed.", res);
-         for (CmisObject one : res)
+         switch (notControllablePolicyType.getBaseId())
          {
-            assertNotNull("ObjectInfo is not present in result.", one.getObjectInfo());
-            assertTrue("Not a policy type object.", one.getObjectInfo().getTypeId().equals(CmisConstants.POLICY));
+            case DOCUMENT :
+               notControllablePolicyObject =
+                  createDocument(testRootFolderId, notControllablePolicyType.getId(), generateName(
+                     notControllablePolicyType, null), null, null, null, null, null);
+               break;
+            case FOLDER :
+               notControllablePolicyObject =
+                  createFolder(testRootFolderId, notControllablePolicyType.getId(), generateName(
+                     notControllablePolicyType, null), null, null, null);
+               break;
+            case POLICY :
+               notControllablePolicyObject =
+                  createPolicy(testRootFolderId, notControllablePolicyType.getId(), generateName(
+                     notControllablePolicyType, null), null, null, null, null);
+               break;
+            case RELATIONSHIP :
+               String sourceId =
+                  createDocument(testRootFolderId, CmisConstants.DOCUMENT, generateName(connection
+                     .getTypeDefinition(CmisConstants.DOCUMENT), null), null, null, null, null, null);
+               String targetId =
+                  createDocument(testRootFolderId, CmisConstants.DOCUMENT, generateName(connection
+                     .getTypeDefinition(CmisConstants.DOCUMENT), null), null, null, null, null, null);
+               notControllablePolicyObject =
+                  createRelationship(notControllablePolicyType.getId(), generateName(notControllablePolicyType, null),
+                     sourceId, targetId, null, null, null);
+               break;
          }
       }
-      finally
-      {
-         getStorage().deleteObject(doc1, true);
-         getStorage().deleteObject(policy, false);
-      }
-   }
-
-   /**
-    * 2.2.9.3.1
-    * Repositories SHOULD return only the properties specified in the property filter
-    * if they exist on the object�s type definition.
-    * @throws Exception
-    */
-   @Test
-   public void testGetAppliedPolicies_PropertiesFiltered() throws Exception
-   {
-      if (!isPoliciesSupported)
-      {
-         //SKIP
-         return;
-      }
-      PolicyData policy = null;
-      DocumentData doc1 = null;
-      try
-      {
-         doc1 = createDocument(testroot, "testGetAppliedPolicies_PropertiesFiltered1", "1234567890aBcDE");
-         policy = createPolicy(testroot, "testGetAppliedPolicies_policy1");
-
-         getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
-         List<CmisObject> res = getConnection().getAppliedPolicies(doc1.getObjectId(), true, "cmis:name, cmis:path");
-         for (CmisObject one : res)
-         {
-            for (Map.Entry<String, Property<?>> e : one.getProperties().entrySet())
-            {
-               if (e.getKey().equalsIgnoreCase("cmis:name") || e.getKey().equalsIgnoreCase("cmis:path")) //Other props must be ignored
-                  continue;
-               else
-                  fail("Property filter works incorrect.");
-            }
-         }
-      }
-      finally
-      {
-         if (doc1 != null)
-            getStorage().deleteObject(doc1, true);
-         if (policy != null)
-            getStorage().deleteObject(policy, false);
-      }
-   }
-
-   /**
-    * 2.2.9.3.3
-    * filterNotValid: The Repository MUST throw this exception if this property filter input parameter is not valid.
-    * @throws Exception
-    */
-   @Test
-   public void testGetAppliedPolicies_FilterNotValidException() throws Exception
-   {
-      if (!isPoliciesSupported)
-      {
-         //SKIP
-         return;
-      }
-      PolicyData policy = null;
-      DocumentData doc1 = null;
-      try
-      {
-         doc1 = createDocument(testroot, "testGetAppliedPolicies_FilterNotValidException1", "1234567890aBcDE");
-         policy = createPolicy(testroot, "testGetAppliedPolicies_FilterNotValidException_policy1");
-
-         getConnection().applyPolicy(policy.getObjectId(), doc1.getObjectId());
-         getConnection().getAppliedPolicies(doc1.getObjectId(), true, "(,*");
-         fail("FilterNotValidException must be thrown.");
-      }
-      catch (FilterNotValidException ex)
-      {
-         //OK
-      }
-      finally
-      {
-         getStorage().deleteObject(doc1, true);
-         getStorage().deleteObject(policy, false);
-      }
+      System.out.println("Running Policy Service tests");
    }
 
    @AfterClass
    public static void stop() throws Exception
    {
-      if (testroot != null)
-         clear(testroot.getObjectId());
-      if (BaseTest.connection != null)
-         BaseTest.connection.close();
-      System.out.println("done;");
+      if (testRootFolderId != null)
+      {
+         clear(testRootFolderId);
+      }
+   }
+
+   /**
+    * 2.2.9.1 applyPolicy.
+    *
+    * @throws Exception
+    */
+   @Test
+   public void testApplyPolicy() throws Exception
+   {
+      if (!isPoliciesSupported || controllablePolicyObject == null)
+      {
+         return;
+      }
+
+      String policy =
+         createPolicy(policyType.isFileable() ? testRootFolderId : null, policyType.getId(), generateName(policyType,
+            null), "policy1", null, null, null);
+
+      connection.applyPolicy(policy, controllablePolicyObject);
+      List<CmisObject> policies = connection.getAppliedPolicies(controllablePolicyObject, true, null);
+      assertTrue(policies.size() >= 1);
+      Set<String> policiesId = new HashSet<String>(policies.size());
+      for (CmisObject o : policies)
+      {
+         policiesId.add(o.getObjectInfo().getId());
+      }
+      assertTrue("Expected policy is not found. ", policiesId.contains(policy));
+   }
+
+   /**
+    * 2.2.9.1 applyPolicy.
+    * <p>
+    * {@link ConstraintException} must be thrown if the specified object's
+    * object type definition's attribute for controllablePolicy is
+    * <code>false</code>.
+    * </p>
+    *
+    * @throws Exception
+    */
+   @Test
+   public void testApplyPolicy_ConstraintException() throws Exception
+   {
+      if (!isPoliciesSupported || notControllablePolicyObject == null)
+      {
+         return;
+      }
+      String policy =
+         createPolicy(policyType.isFileable() ? testRootFolderId : null, policyType.getId(), generateName(policyType,
+            null), "policy1", null, null, null);
+      try
+      {
+         connection.applyPolicy(policy, notControllablePolicyObject);
+         fail("ConstraintException must be thrown. ");
+      }
+      catch (ConstraintException e)
+      {
+      }
+   }
+
+   /**
+    * 2.2.9.2 removePolicy.
+    * <p>
+    * {@link ConstraintException} must be thrown if the specified object's
+    * object type definition's attribute for controllablePolicy is
+    * <code>false</code>.
+    * </p>
+    *
+    * @throws Exception
+    */
+   @Test
+   public void testRemovePolicy_ConstraintException() throws Exception
+   {
+      if (!isPoliciesSupported || notControllablePolicyObject == null)
+      {
+         return;
+      }
+      try
+      {
+         // Do not send any policies to be removed.
+         // ConstraintException must be thrown without checking any policies
+         // since object is not controllable by policy.
+         connection.removePolicy(null, notControllablePolicyObject);
+         fail("ConstraintException must be thrown. ");
+      }
+      catch (ConstraintException e)
+      {
+      }
+   }
+
+   /**
+    * 2.2.9.2 removePolicy.
+    *
+    * @throws Exception
+    */
+   @Test
+   public void testRemovePolicy_Simple() throws Exception
+   {
+      if (!isPoliciesSupported || controllablePolicyObject == null)
+      {
+         //SKIP
+         return;
+      }
+      String policy =
+         createPolicy(policyType.isFileable() ? testRootFolderId : null, policyType.getId(), generateName(policyType,
+            null), "policy1", null, null, null);
+
+      connection.applyPolicy(policy, controllablePolicyObject);
+      connection.removePolicy(policy, controllablePolicyObject);
+      List<CmisObject> policies = connection.getAppliedPolicies(controllablePolicyObject, true, null);
+      Set<String> policiesId = new HashSet<String>(policies.size());
+      for (CmisObject o : policies)
+      {
+         policiesId.add(o.getObjectInfo().getId());
+      }
+      assertFalse("Policy " + policy + " must be removed. ", policiesId.contains(policy));
    }
 
 }

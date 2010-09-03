@@ -43,6 +43,7 @@ import org.xcmis.spi.StorageException;
 import org.xcmis.spi.TypeNotFoundException;
 import org.xcmis.spi.model.ACLCapability;
 import org.xcmis.spi.model.AccessControlEntry;
+import org.xcmis.spi.model.BaseType;
 import org.xcmis.spi.model.CmisObject;
 import org.xcmis.spi.model.ContentStreamAllowed;
 import org.xcmis.spi.model.IncludeRelationships;
@@ -194,7 +195,7 @@ public class BaseTest
    /**
     * Check that two ACL are matched. It minds <code>actual</code> contains at
     * least all ACEs from <code>expected</code> but may have other ACEs.
-    * 
+    *
     * @param expected expected ACEs
     * @param actual actual ACEs
     */
@@ -227,7 +228,7 @@ public class BaseTest
 
    /**
     * Validate that ACL contains only valid permissions.
-    * 
+    *
     * @param actual actual ACEs
     */
    protected void validateACL(List<AccessControlEntry> actual)
@@ -276,7 +277,7 @@ public class BaseTest
    }
 
    static byte[] TEST_CONTENT = "__TEST_CONTENT__".getBytes();
-   
+
    static final ContentStream TEST_CONTENT_STREAM = new ContentStream()
    {
 
@@ -302,6 +303,231 @@ public class BaseTest
          return "";
       }
    };
+
+   /**
+    * Find first type which supports ACL.
+    *
+    * @param types tree of all available types
+    * @return type which support ACL or <code>null</code> if there is no such
+    *         type
+    * @throws Exception if any error occurs
+    */
+   static TypeDefinition getControllableAclType(List<ItemsTree<TypeDefinition>> types) throws Exception
+   {
+      for (ItemsTree<TypeDefinition> item : types)
+      {
+         TypeDefinition container = item.getContainer();
+         if (container.isControllableACL())
+         {
+            return container;
+         }
+         List<ItemsTree<TypeDefinition>> children = item.getChildren();
+         if (children != null && !children.isEmpty())
+         {
+            return getControllableAclType(children);
+         }
+      }
+      return null;
+   }
+
+   /**
+    * Find first type which is controllable by policies.
+    *
+    * @param types tree of all available types
+    * @return type which is controllable by policies or <code>null</code> if
+    *         there is no such type
+    * @throws Exception if any error occurs
+    */
+   static TypeDefinition getControllablePolicyType(List<ItemsTree<TypeDefinition>> types) throws Exception
+   {
+      if (isPoliciesSupported)
+      {
+         for (ItemsTree<TypeDefinition> item : types)
+         {
+            TypeDefinition container = item.getContainer();
+            if (container.isControllablePolicy())
+            {
+               return container;
+            }
+            List<ItemsTree<TypeDefinition>> children = item.getChildren();
+            if (children != null && !children.isEmpty())
+            {
+               return getControllablePolicyType(children);
+            }
+         }
+      }
+      return null;
+   }
+
+   /**
+    * Find first type which is not controllable by policies.
+    *
+    * @param types tree of all available types
+    * @return type which is not controllable by policies or <code>null</code> if
+    *         there is no such type
+    * @throws Exception if any error occurs
+    */
+   static TypeDefinition getNotControllablePolicyType(List<ItemsTree<TypeDefinition>> types) throws Exception
+   {
+      for (ItemsTree<TypeDefinition> item : types)
+      {
+         TypeDefinition container = item.getContainer();
+         if (!container.isControllablePolicy())
+         {
+            return container;
+         }
+         List<ItemsTree<TypeDefinition>> children = item.getChildren();
+         if (children != null && !children.isEmpty())
+         {
+            return getNotControllablePolicyType(children);
+         }
+      }
+      return null;
+   }
+
+   /**
+    * Find first document type which does not support content stream (
+    * {@link TypeDefinition#getContentStreamAllowed()} is NOT_ALLOWED).
+    *
+    * @param types tree of all available types
+    * @return type which does not support content stream or <code>null</code> if
+    *         there is no such type
+    * @throws Exception if any error occurs
+    */
+   static TypeDefinition getStreamNotSupportedDocType(List<ItemsTree<TypeDefinition>> types) throws Exception
+   {
+      for (ItemsTree<TypeDefinition> item : types)
+      {
+         TypeDefinition container = item.getContainer();
+         if (container.getBaseId() == BaseType.DOCUMENT)
+         {
+            if (container.getContentStreamAllowed() == ContentStreamAllowed.NOT_ALLOWED)
+            {
+               return container;
+            }
+            List<ItemsTree<TypeDefinition>> children = item.getChildren();
+            if (children != null && !children.isEmpty())
+            {
+               return getStreamNotSupportedDocType(children);
+            }
+         }
+      }
+      return null;
+   }
+
+   /**
+    * Find first document type which required content stream (
+    * {@link TypeDefinition#getContentStreamAllowed()} is REQUIRED).
+    *
+    * @param types tree of all available types
+    * @return type which require content stream or <code>null</code> if there is
+    *         no such type
+    * @throws Exception if any error occurs
+    */
+   static TypeDefinition getStreamRequiredDocType(List<ItemsTree<TypeDefinition>> types) throws Exception
+   {
+      for (ItemsTree<TypeDefinition> item : types)
+      {
+         TypeDefinition container = item.getContainer();
+         if (container.getBaseId() == BaseType.DOCUMENT)
+         {
+            if (container.getContentStreamAllowed() == ContentStreamAllowed.REQUIRED)
+            {
+               return container;
+            }
+            List<ItemsTree<TypeDefinition>> children = item.getChildren();
+            if (children != null && !children.isEmpty())
+            {
+               return getStreamRequiredDocType(children);
+            }
+         }
+      }
+      return null;
+   }
+
+   /**
+    * Find first document type which is not versionable.
+    *
+    * @param types tree of all available types
+    * @return type which is not versionable or <code>null</code> if there is no
+    *         such type
+    * @throws Exception if any error occurs
+    */
+   static TypeDefinition getNotVersionableDocType(List<ItemsTree<TypeDefinition>> types) throws Exception
+   {
+      for (ItemsTree<TypeDefinition> item : types)
+      {
+         TypeDefinition container = item.getContainer();
+         if (container.getBaseId() == BaseType.DOCUMENT)
+         {
+            if (!container.isVersionable())
+            {
+               return container;
+            }
+            List<ItemsTree<TypeDefinition>> children = item.getChildren();
+            if (children != null && !children.isEmpty())
+            {
+               return getNotVersionableDocType(children);
+            }
+         }
+      }
+      return null;
+   }
+
+   /**
+    * Find first document type which is versionable.
+    *
+    * @param types tree of all available types
+    * @return type which is versionable or <code>null</code> if there is no such
+    *         type
+    * @throws Exception if any error occurs
+    */
+   static TypeDefinition getVersionableDocType(List<ItemsTree<TypeDefinition>> types) throws Exception
+   {
+      for (ItemsTree<TypeDefinition> item : types)
+      {
+         TypeDefinition container = item.getContainer();
+         if (container.getBaseId() == BaseType.DOCUMENT)
+         {
+            if (container.isVersionable())
+            {
+               return container;
+            }
+            List<ItemsTree<TypeDefinition>> children = item.getChildren();
+            if (children != null && !children.isEmpty())
+            {
+               return getVersionableDocType(children);
+            }
+         }
+      }
+      return null;
+   }
+
+   /**
+    * Find first type which does not support ACL.
+    *
+    * @param types tree of all available types
+    * @return type which does not support ACL or <code>null</code> if there is
+    *         no such type
+    * @throws Exception if any error occurs
+    */
+   static TypeDefinition getNotControllableAclType(List<ItemsTree<TypeDefinition>> types) throws Exception
+   {
+      for (ItemsTree<TypeDefinition> item : types)
+      {
+         TypeDefinition container = item.getContainer();
+         if (!container.isControllableACL())
+         {
+            return container;
+         }
+         List<ItemsTree<TypeDefinition>> children = item.getChildren();
+         if (children != null && !children.isEmpty())
+         {
+            return getNotControllableAclType(children);
+         }
+      }
+      return null;
+   }
 
    protected static String createDocument(String parentId, String typeId, String name, ContentStream content,
       List<AccessControlEntry> addACL, List<AccessControlEntry> removeACL, Collection<String> policies,

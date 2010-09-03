@@ -59,10 +59,9 @@ public class ACLTest extends BaseTest
 
       testRootFolderId = createFolder(rootFolderID, CmisConstants.FOLDER, "acl_testroot", null, null, null);
 
-      List<ItemsTree<TypeDefinition>> allTypes = connection.getTypeDescendants(null, -1, false);
+      List<ItemsTree<TypeDefinition>> allTypes = connection.getTypeDescendants(null, -1, true);
       controllableAclType = getControllableAclType(allTypes);
       notControllableAclType = getNotControllableAclType(allTypes);
-
       if (controllableAclType != null)
       {
          switch (controllableAclType.getBaseId())
@@ -121,7 +120,7 @@ public class ACLTest extends BaseTest
                String targetId =
                   createDocument(testRootFolderId, CmisConstants.DOCUMENT, generateName(connection
                      .getTypeDefinition(CmisConstants.DOCUMENT), null), null, null, null, null, null);
-               controllableAclObject =
+               notControllableAclObject =
                   createRelationship(notControllableAclType.getId(), generateName(notControllableAclType, null),
                      sourceId, targetId, null, null, null);
                break;
@@ -139,57 +138,6 @@ public class ACLTest extends BaseTest
       }
    }
 
-   /**
-    * Find first type which supports ACL.
-    *
-    * @param types tree of all available types
-    * @return type which support ACL or <code>null</code> if there is no such
-    *         type
-    * @throws Exception if any error occurs
-    */
-   private static TypeDefinition getControllableAclType(List<ItemsTree<TypeDefinition>> types) throws Exception
-   {
-      for (ItemsTree<TypeDefinition> item : types)
-      {
-         TypeDefinition container = item.getContainer();
-         if (container.isControllableACL())
-         {
-            return container;
-         }
-         List<ItemsTree<TypeDefinition>> children = item.getChildren();
-         if (children != null && !children.isEmpty())
-         {
-            return getControllableAclType(children);
-         }
-      }
-      return null;
-   }
-
-   /**
-    * Find first type which does not support ACL.
-    *
-    * @param types tree of all available types
-    * @return type which does not support ACL or <code>null</code> if there is
-    *         no such type
-    * @throws Exception if any error occurs
-    */
-   private static TypeDefinition getNotControllableAclType(List<ItemsTree<TypeDefinition>> types) throws Exception
-   {
-      for (ItemsTree<TypeDefinition> item : types)
-      {
-         TypeDefinition container = item.getContainer();
-         if (!container.isControllableACL())
-         {
-            return container;
-         }
-         List<ItemsTree<TypeDefinition>> children = item.getChildren();
-         if (children != null && !children.isEmpty())
-         {
-            return getNotControllableAclType(children);
-         }
-      }
-      return null;
-   }
 
    /**
     * 2.2.10.2 Adds or removes the given ACEs to or from the ACL of document or
@@ -204,7 +152,6 @@ public class ACLTest extends BaseTest
       {
          return;
       }
-
       if (capabilities.getCapabilityACL() == CapabilityACL.MANAGE)
       {
          List<AccessControlEntry> acl = createACL(principal, "cmis:write");
