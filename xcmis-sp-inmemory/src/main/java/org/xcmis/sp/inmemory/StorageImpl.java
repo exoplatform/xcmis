@@ -488,6 +488,8 @@ public class StorageImpl implements Storage
          }
          docEntry.setValue(CmisConstants.CONTENT_STREAM_LENGTH, new IntegerValue(BigInteger
             .valueOf(cv.getBytes().length)));
+         docEntry.setValue(CmisConstants.CONTENT_STREAM_ID, new StringValue(docId));
+         docEntry.setValue(CmisConstants.CONTENT_STREAM_FILE_NAME, new StringValue(name));
       }
 
       for (Property<?> property : properties.values())
