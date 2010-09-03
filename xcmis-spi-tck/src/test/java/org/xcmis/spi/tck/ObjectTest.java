@@ -20,10 +20,12 @@ package org.xcmis.spi.tck;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.fail;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.xcmis.spi.BaseContentStream;
 import org.xcmis.spi.CmisConstants;
@@ -44,6 +46,7 @@ import org.xcmis.spi.model.Property;
 import org.xcmis.spi.model.PropertyDefinition;
 import org.xcmis.spi.model.RepositoryCapabilities;
 import org.xcmis.spi.model.TypeDefinition;
+import org.xcmis.spi.model.Updatability;
 import org.xcmis.spi.model.VersioningState;
 import org.xcmis.spi.model.impl.IdProperty;
 import org.xcmis.spi.model.impl.StringProperty;
@@ -65,6 +68,8 @@ public class ObjectTest extends BaseTest
 
    private static TypeDefinition policyType;
 
+   private static TypeDefinition relationshipType;
+
    private String principal = "root";
 
    @BeforeClass
@@ -74,6 +79,7 @@ public class ObjectTest extends BaseTest
       folderType = connection.getTypeDefinition(CmisConstants.FOLDER);
       documentType = connection.getTypeDefinition(CmisConstants.DOCUMENT);
       policyType = connection.getTypeDefinition(CmisConstants.POLICY);
+      relationshipType = connection.getTypeDefinition(CmisConstants.RELATIONSHIP);
       testRootFolderId = createFolder(rootFolderID, folderType.getId(), "object_testroot", null, null, null);
       System.out.println("Running Object Service tests");
    }
@@ -134,13 +140,30 @@ public class ObjectTest extends BaseTest
     * Create document and apply policies to the newly-created document object.
     * If policies is not supported then this test will be skipped.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
    public void testCreateDocument_ApplyPolicy() throws Exception
    {
-      if (!isPoliciesSupported)
+      TypeDefinition type = null;
+      if (documentType.isControllablePolicy())
+      {
+         type = documentType;
+      }
+      if (type == null)
+      {
+         ItemsList<TypeDefinition> typeChildren = connection.getTypeChildren(documentType.getId(), false, -1, 0);
+         for (TypeDefinition t : typeChildren.getItems())
+         {
+            if (t.isControllablePolicy())
+            {
+               type = t;
+               break;
+            }
+         }
+      }
+      if (type == null || !isPoliciesSupported)
       {
          return;
       }
@@ -155,13 +178,15 @@ public class ObjectTest extends BaseTest
       {
          nameProperty.getValues().add("testCreateDocument_ApplyPolicy");
       }
-      String docId = connection.createDocument(testRootFolderId, //
-         properties, //
-         documentType.getContentStreamAllowed() == ContentStreamAllowed.NOT_ALLOWED ? null : BaseTest.TEST_CONTENT, //
-         null, //
-         null, //
-         Arrays.asList(policyId), //
-         documentType.isVersionable() ? VersioningState.MAJOR : VersioningState.NONE);
+      String docId =
+         connection.createDocument(testRootFolderId, //
+            properties, //
+            documentType.getContentStreamAllowed() == ContentStreamAllowed.NOT_ALLOWED ? null
+               : BaseTest.TEST_CONTENT_STREAM, //
+            null, //
+            null, //
+            Arrays.asList(policyId), //
+            documentType.isVersionable() ? VersioningState.MAJOR : VersioningState.NONE);
 
       List<CmisObject> policies = connection.getAppliedPolicies(docId, true, null);
       assertEquals(1, policies.size());
@@ -176,13 +201,31 @@ public class ObjectTest extends BaseTest
     * {@link RepositoryCapabilities#getCapabilityACL()} returns something other
     * then CapabilityACL.MANAGE) this test will be skipped.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
    public void testCreateDocument_ApplyACL() throws Exception
    {
-      if (capabilities.getCapabilityACL() != CapabilityACL.MANAGE)
+      TypeDefinition type = null;
+      if (documentType.isControllableACL())
+      {
+         type = documentType;
+      }
+      if (type == null)
+      {
+         ItemsList<TypeDefinition> typeChildren = connection.getTypeChildren(documentType.getId(), false, -1, 0);
+         for (TypeDefinition t : typeChildren.getItems())
+         {
+            if (t.isControllableACL())
+            {
+               type = t;
+               break;
+            }
+         }
+      }
+
+      if (type == null || capabilities.getCapabilityACL() != CapabilityACL.MANAGE)
       {
          return;
       }
@@ -195,13 +238,15 @@ public class ObjectTest extends BaseTest
       {
          nameProperty.getValues().add("testCreateDocument_ApplyACL");
       }
-      String docId = connection.createDocument(testRootFolderId, //
-         properties, //
-         documentType.getContentStreamAllowed() == ContentStreamAllowed.NOT_ALLOWED ? null : BaseTest.TEST_CONTENT, //
-         acl, //
-         null, //
-         null, //
-         documentType.isVersionable() ? VersioningState.MAJOR : VersioningState.NONE);
+      String docId =
+         connection.createDocument(testRootFolderId, //
+            properties, //
+            documentType.getContentStreamAllowed() == ContentStreamAllowed.NOT_ALLOWED ? null
+               : BaseTest.TEST_CONTENT_STREAM, //
+            acl, //
+            null, //
+            null, //
+            documentType.isVersionable() ? VersioningState.MAJOR : VersioningState.NONE);
       List<AccessControlEntry> actualACL = connection.getACL(docId, false);
       validateACL(actualACL);
       checkACL(acl, actualACL);
@@ -217,7 +262,7 @@ public class ObjectTest extends BaseTest
     * {@link NameConstraintViolationException} or at least second document must
     * get different name then provide when it created.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -232,20 +277,23 @@ public class ObjectTest extends BaseTest
       }
       connection.createDocument(testRootFolderId, //
          properties, //
-         documentType.getContentStreamAllowed() == ContentStreamAllowed.NOT_ALLOWED ? null : BaseTest.TEST_CONTENT, //
+         documentType.getContentStreamAllowed() == ContentStreamAllowed.NOT_ALLOWED ? null
+            : BaseTest.TEST_CONTENT_STREAM, //
          null, //
          null, //
          null, //
          documentType.isVersionable() ? VersioningState.MAJOR : VersioningState.NONE);
       try
       {
-         String docId2 = connection.createDocument(testRootFolderId, //
-            properties, //
-            documentType.getContentStreamAllowed() == ContentStreamAllowed.NOT_ALLOWED ? null : BaseTest.TEST_CONTENT, //
-            null, //
-            null, //
-            null, //
-            documentType.isVersionable() ? VersioningState.MAJOR : VersioningState.NONE);
+         String docId2 =
+            connection.createDocument(testRootFolderId, //
+               properties, //
+               documentType.getContentStreamAllowed() == ContentStreamAllowed.NOT_ALLOWED ? null
+                  : BaseTest.TEST_CONTENT_STREAM, //
+               null, //
+               null, //
+               null, //
+               documentType.isVersionable() ? VersioningState.MAJOR : VersioningState.NONE);
          // If exception was not thrown then check name, it must be different.
          CmisObject doc2 =
             connection.getObject(docId2, false, IncludeRelationships.NONE, false, false, true, null,
@@ -267,7 +315,7 @@ public class ObjectTest extends BaseTest
     * content stream input parameter is provided. If there is no any type for
     * which content stream is not allowed this test will be skipped.
     * </p>
-    *
+    * 
     * @throws Exception
     */
    @Test
@@ -300,8 +348,8 @@ public class ObjectTest extends BaseTest
          }
          try
          {
-            connection.createDocument(testRootFolderId, properties, BaseTest.TEST_CONTENT, null, null, null, type
-               .isVersionable() ? VersioningState.MAJOR : VersioningState.NONE);
+            connection.createDocument(testRootFolderId, properties, BaseTest.TEST_CONTENT_STREAM, null, null, null,
+               type.isVersionable() ? VersioningState.MAJOR : VersioningState.NONE);
             fail("StreamNotSupportedException must be thrown. ");
          }
          catch (StreamNotSupportedException e)
@@ -311,426 +359,392 @@ public class ObjectTest extends BaseTest
    }
 
    /**
-    * 2.2.4.1.3 The cmis:objectTypeId property value is not an Object-Type whose
-    * baseType is "Document".
-    *
+    * 2.2.4.1 createDocument.
+    * <p>
+    * {@link ConstraintException} must be thrown if cmis:objectTypeId property
+    * value is not an object type whose baseType is cmis:document.
+    * </p>
+    * 
     * @throws Exception
     */
    @Test
-   public void testCreateDocument_ConstraintExceptionWrongObjectType() throws Exception
+   public void testCreateDocument_ConstraintException_ObjectType() throws Exception
    {
-      String docId = null;
-      String typeID = null;
+      Map<String, Property<?>> properties = createPropertyMap(documentType);
+      StringProperty nameProperty = (StringProperty)properties.get(CmisConstants.NAME);
+      if (nameProperty != null)
+      {
+         nameProperty.getValues().add("testCreateDocument_ConstraintException_ObjectType");
+      }
+      IdProperty property = (IdProperty)properties.get(CmisConstants.OBJECT_TYPE_ID);
+      property.getValues().clear();
+      // Set cmis:folder instead cmis:document
+      property.getValues().add(folderType.getId());
 
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-      Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-      org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-         PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.NAME);
-      org.xcmis.spi.model.PropertyDefinition<?> propDefObjectTypeId =
-         PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.OBJECT_TYPE_ID);
-
-      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-      properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
-         propDefName.getLocalName(), propDefName.getDisplayName(),
-         "testCreateDocument_ConstraintExceptionWrongObjectType"));
-      properties
-         .put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(propDefObjectTypeId.getId(), propDefObjectTypeId
-            .getQueryName(), propDefObjectTypeId.getLocalName(), propDefObjectTypeId.getDisplayName(),
-            "cmis:objecttype2"));
-
-      TypeDefinition newType =
-         new TypeDefinition("cmis:objecttype2", BaseType.FOLDER, "cmis:objecttype2", "cmis:objecttype2", "",
-            "cmis:folder", "cmis:objecttype2", "cmis:objecttype2", true, false, true, true, false, false, false, true,
-            null, null, ContentStreamAllowed.NOT_ALLOWED, propertyDefinitions);
-      typeID = getStorage().addType(newType);
-      newType = getStorage().getTypeDefinition(typeID, true);
       try
       {
-         docId =
-            getConnection().createDocument(testRootFolderId, properties, cs, null, null, null, VersioningState.NONE);
+         connection.createDocument(testRootFolderId, properties,
+            documentType.getContentStreamAllowed() == ContentStreamAllowed.NOT_ALLOWED ? null
+               : BaseTest.TEST_CONTENT_STREAM, null, null, null, documentType.isVersionable() ? VersioningState.MAJOR
+               : VersioningState.NONE);
          fail("ConstraintException must be thrown.");
       }
-      catch (ConstraintException ex)
+      catch (ConstraintException e)
       {
-         //OK
-      }
-      finally
-      {
-         if (docId != null)
-            getStorage().deleteObject(getStorage().getObjectById(docId), true);
-         if (typeID != null)
-            getStorage().removeType(typeID);
       }
    }
 
    /**
-    * 2.2.4.1.3 The "contentStreamAllowed" attribute of the Object-Type
-    * definition specified by the cmis:objectTypeId property value is set to
-    * "required" and no contentStream input parameter is provided.
-    *
+    * 2.2.4.1 createDocument.
+    * <p>
+    * {@link StreamNotSupportedException} must be thrown if the
+    * "contentStreamAllowed" attribute of the object type definition specified
+    * by the cmis:objectTypeId property value is set to "required" and a content
+    * stream input parameter is not provided. If there is no any type for which
+    * content stream is "required" this test will be skipped.
+    * </p>
+    * 
     * @throws Exception
     */
    @Test
-   public void testCreateDocument_ConstraintExceptionContentAllowed() throws Exception
+   public void testCreateDocument_ConstraintException_ContentRequired() throws Exception
    {
-      String docId = null;
-      String typeID = null;
-
-      Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-      org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
-      org.xcmis.spi.model.PropertyDefinition<?> propDefObjectTypeId =
-         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
-
-      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-      properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
-         propDefName.getLocalName(), propDefName.getDisplayName(),
-         "testCreateDocument_ConstraintExceptionContentAllowed"));
-      properties
-         .put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(propDefObjectTypeId.getId(), propDefObjectTypeId
-            .getQueryName(), propDefObjectTypeId.getLocalName(), propDefObjectTypeId.getDisplayName(),
-            "cmis:objecttype3"));
-
-      TypeDefinition newType =
-         new TypeDefinition("cmis:objecttype3", BaseType.DOCUMENT, "cmis:objecttype3", "cmis:objecttype3", "",
-            "cmis:document", "cmis:objecttype3", "cmis:objecttype3", true, false, true, true, false, false, false,
-            true, null, null, ContentStreamAllowed.REQUIRED, propertyDefinitions);
-      typeID = getStorage().addType(newType);
-      newType = getStorage().getTypeDefinition(typeID, true);
-      try
+      TypeDefinition type = null;
+      if (documentType.getContentStreamAllowed() == ContentStreamAllowed.REQUIRED)
       {
-         docId =
-            getConnection().createDocument(testRootFolderId, properties, null, null, null, null, VersioningState.NONE);
-         fail("ConstraintException must be thrown.");
+         type = documentType;
       }
-      catch (ConstraintException ex)
+      if (type == null)
       {
-         //OK
+         ItemsList<TypeDefinition> typeChildren = connection.getTypeChildren(documentType.getId(), false, -1, 0);
+         for (TypeDefinition t : typeChildren.getItems())
+         {
+            if (t.getContentStreamAllowed() == ContentStreamAllowed.REQUIRED)
+            {
+               type = t;
+               break;
+            }
+         }
       }
-      finally
+      if (type != null)
       {
-         if (docId != null)
-            getStorage().deleteObject(getStorage().getObjectById(docId), true);
-         if (typeID != null)
-            getStorage().removeType(typeID);
+         Map<String, Property<?>> properties = createPropertyMap(type);
+         StringProperty nameProperty = (StringProperty)properties.get(CmisConstants.NAME);
+         if (nameProperty != null)
+         {
+            nameProperty.getValues().add("testCreateDocument_ConstraintException_ContentRequired");
+         }
+         try
+         {
+            connection.createDocument(testRootFolderId, properties, null, null, null, null, type.isVersionable()
+               ? VersioningState.MAJOR : VersioningState.NONE);
+            fail("ConstraintException must be thrown. ");
+         }
+         catch (ConstraintException e)
+         {
+         }
       }
    }
 
    /**
-    * 2.2.4.1.3 The "versionable" attribute of the Object-Type definition
-    * specified by the cmis:objectTypeId property value is set to TRUE and the
-    * value for the versioningState input parameter is provided that is "none".
-    *
+    * 2.2.4.1 createDocument.
+    * <p>
+    * {@link ConstraintException} must be thrown if "versionable" attribute of
+    * the object type definition specified by the cmis:objectTypeId property
+    * value is set to <code>true</code> and the value for the versioningState
+    * input parameter is provided that is "none".
+    * </p>
+    * 
     * @throws Exception
     */
    @Test
-   public void testCreateDocument_ConstraintExceptionVersionable() throws Exception
+   public void testCreateDocument_ConstraintException_Versionable() throws Exception
    {
-      String docId = null;
-      String typeID = null;
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-      Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-      org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
-      org.xcmis.spi.model.PropertyDefinition<?> propDefObjectTypeId =
-         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
-
-      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-      properties
-         .put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(), propDefName
-            .getLocalName(), propDefName.getDisplayName(), "testCreateDocument_ConstraintExceptionVersionable"));
-      properties
-         .put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(propDefObjectTypeId.getId(), propDefObjectTypeId
-            .getQueryName(), propDefObjectTypeId.getLocalName(), propDefObjectTypeId.getDisplayName(),
-            "cmis:objecttype4"));
-
-      TypeDefinition newType =
-         new TypeDefinition("cmis:objecttype4", BaseType.DOCUMENT, "cmis:objecttype4", "cmis:objecttype4", "",
-            "cmis:document", "cmis:objecttype4", "cmis:objecttype4", true, false, true, true, false, false, false,
-            true, null, null, ContentStreamAllowed.ALLOWED, propertyDefinitions);
-      typeID = getStorage().addType(newType);
-      newType = getStorage().getTypeDefinition(typeID, true);
-      try
+      TypeDefinition type = null;
+      if (documentType.isVersionable())
       {
-         docId =
-            getConnection().createDocument(testRootFolderId, properties, cs, null, null, null, VersioningState.NONE);
-         fail("ConstraintException must be thrown.");
+         type = documentType;
       }
-      catch (ConstraintException ex)
+      if (type == null)
       {
-         //OK
+         ItemsList<TypeDefinition> typeChildren = connection.getTypeChildren(documentType.getId(), false, -1, 0);
+         for (TypeDefinition t : typeChildren.getItems())
+         {
+            if (t.isVersionable())
+            {
+               type = t;
+               break;
+            }
+         }
       }
-      finally
+      if (type != null)
       {
-         if (docId != null)
-            getStorage().deleteObject(getStorage().getObjectById(docId), true);
-         if (typeID != null)
-            getStorage().removeType(typeID);
+         Map<String, Property<?>> properties = createPropertyMap(type);
+         StringProperty nameProperty = (StringProperty)properties.get(CmisConstants.NAME);
+         if (nameProperty != null)
+         {
+            nameProperty.getValues().add("testCreateDocument_ConstraintException_Versionable");
+         }
+         try
+         {
+            connection.createDocument(testRootFolderId, properties,
+               documentType.getContentStreamAllowed() == ContentStreamAllowed.NOT_ALLOWED ? null
+                  : BaseTest.TEST_CONTENT_STREAM, null, null, null, VersioningState.NONE);
+            fail("ConstraintException must be thrown. ");
+         }
+         catch (ConstraintException e)
+         {
+         }
       }
    }
 
    /**
-    * 2.2.4.1.3 The "versionable" attribute of the Object-Type definition
-    * specified by the cmis:objectTypeId property value is set to FALSE and a
-    * value for the versioningState input parameter is provided that is
-    * something other than "none".
-    *
+    * 2.2.4.1 createDocument.
+    * <p>
+    * {@link ConstraintException} must be thrown if "versionable" attribute of
+    * the object type definition specified by the cmis:objectTypeId property
+    * value is set to <code>false</code> and the value for the versioningState
+    * input parameter is other then "none".
+    * </p>
+    * 
     * @throws Exception
     */
    @Test
-   public void testCreateDocument_ConstraintExceptionNonVersinable() throws Exception
+   @Ignore
+   // Ignore it at the moment. Not clear from specification what must be exception
+   // or ignoring versionState attribute for not versionable document.
+   public void testCreateDocument_ConstraintException_NonVersionable() throws Exception
    {
-      String docId = null;
-      String typeID = null;
-
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-      Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-      org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
-      org.xcmis.spi.model.PropertyDefinition<?> propDefObjectTypeId =
-         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
-
-      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-      properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
-         propDefName.getLocalName(), propDefName.getDisplayName(),
-         "testCreateDocument_ConstraintExceptionNonVersinable"));
-      properties
-         .put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(propDefObjectTypeId.getId(), propDefObjectTypeId
-            .getQueryName(), propDefObjectTypeId.getLocalName(), propDefObjectTypeId.getDisplayName(),
-            "cmis:objecttype5"));
-
-      TypeDefinition newType =
-         new TypeDefinition("cmis:objecttype5", BaseType.DOCUMENT, "cmis:objecttype5", "cmis:objecttype5", "",
-            "cmis:document", "cmis:objecttype5", "cmis:objecttype5", true, false, true, true, false, false, false,
-            false, null, null, ContentStreamAllowed.ALLOWED, propertyDefinitions);
-      typeID = getStorage().addType(newType);
-      newType = getStorage().getTypeDefinition(typeID, true);
-      try
+      TypeDefinition type = null;
+      if (!documentType.isVersionable())
       {
-         docId =
-            getConnection().createDocument(testRootFolderId, properties, cs, null, null, null, VersioningState.MAJOR);
-         fail("ConstraintException must be thrown.");
+         type = documentType;
       }
-      catch (ConstraintException ex)
+      if (type == null)
       {
-         //OK
+         ItemsList<TypeDefinition> typeChildren = connection.getTypeChildren(documentType.getId(), false, -1, 0);
+         for (TypeDefinition t : typeChildren.getItems())
+         {
+            if (!t.isVersionable())
+            {
+               type = t;
+               break;
+            }
+         }
       }
-      finally
+      if (type != null)
       {
-         if (docId != null)
-            getStorage().deleteObject(getStorage().getObjectById(docId), true);
-         if (typeID != null)
-            getStorage().removeType(typeID);
+         Map<String, Property<?>> properties = createPropertyMap(type);
+         StringProperty nameProperty = (StringProperty)properties.get(CmisConstants.NAME);
+         if (nameProperty != null)
+         {
+            nameProperty.getValues().add("testCreateDocument_ConstraintException_NonVersionable");
+         }
+         try
+         {
+            connection.createDocument(testRootFolderId, properties,
+               documentType.getContentStreamAllowed() == ContentStreamAllowed.NOT_ALLOWED ? null
+                  : BaseTest.TEST_CONTENT_STREAM, null, null, null, VersioningState.MAJOR);
+            fail("ConstraintException must be thrown. ");
+         }
+         catch (ConstraintException e)
+         {
+         }
       }
    }
 
-   //   /**
-   //    * 2.2.4.1.3 The "controllablePolicy" attribute of the Object-Type definition
-   //    * specified by the cmis:objectTypeId property value is set to FALSE and at
-   //    * least one policy is provided.
-   //    *
-   //    * @throws Exception
-   //    */
-   //   @Test
-   //   public void testCreateDocument_ConstraintExceptionNotControllablePolicy() throws Exception
-   //   {
-   //      if (!isPoliciesSupported)
-   //      {
-   //         //SKIP
-   //         return;
-   //      }
-   //
-   //      String typeID = null;
-   //      PolicyData policy = null;
-   //      String docId = null;
-   //      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-   //
-   //      Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-   //      org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-   //         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
-   //      org.xcmis.spi.model.PropertyDefinition<?> propDefObjectTypeId =
-   //         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
-   //
-   //      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-   //      properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
-   //         propDefName.getLocalName(), propDefName.getDisplayName(),
-   //         "testCreateDocument_ConstraintExceptionNotControllablePolicy"));
-   //      properties
-   //         .put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(propDefObjectTypeId.getId(), propDefObjectTypeId
-   //            .getQueryName(), propDefObjectTypeId.getLocalName(), propDefObjectTypeId.getDisplayName(),
-   //            "cmis:objecttype6"));
-   //
-   //      TypeDefinition newType =
-   //         new TypeDefinition("cmis:objecttype6", BaseType.DOCUMENT, "cmis:objecttype6", "cmis:objecttype6", "",
-   //            "cmis:document", "cmis:objecttype6", "cmis:objecttype6", true, false, true, true, false, false, false,
-   //            false, null, null, ContentStreamAllowed.ALLOWED, propertyDefinitions);
-   //      typeID = getStorage().addType(newType);
-   //      newType = getStorage().getTypeDefinition(typeID, true);
-   //
-   //      policy = createPolicy(testRootFolderId, "object_policy1");
-   //
-   //      ArrayList<String> policies = new ArrayList<String>();
-   //      policies.add(policy.getObjectId());
-   //      try
-   //      {
-   //         docId =
-   //            getConnection().createDocument(testRootFolderId, properties, cs, null, null, policies,
-   //               VersioningState.NONE);
-   //         fail("ConstraintException must be thrown.");
-   //      }
-   //      catch (ConstraintException ex)
-   //      {
-   //         //OK
-   //      }
-   //      finally
-   //      {
-   //         if (docId != null)
-   //            getStorage().deleteObject(getStorage().getObjectById(docId), true);
-   //         if (policy != null)
-   //            getStorage().deleteObject(policy, true);
-   //         if (typeID != null)
-   //            getStorage().removeType(typeID);
-   //      }
-   //   }
-
    /**
-    * 2.2.4.1.3 The "controllableACL" attribute of the Object-Type definition
-    * specified by the cmis:objectTypeId property value is set to FALSE and at
-    * least one ACE is provided.
-    *
+    * 2.2.4.1 createDocument.
+    * <p>
+    * {@link ConstraintException} must be thrown if "controllablePolicy"
+    * attribute of the object type definition specified by the cmis:objectTypeId
+    * property value is set to <code>false</code> and at least one policy is
+    * provided.
+    * </p>
+    * 
     * @throws Exception
     */
    @Test
-   public void testCreateDocument_ConstraintExceptionNotControllableACL() throws Exception
+   public void testCreateDocument_ConstraintException_NotControllablePolicy() throws Exception
    {
-      if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
+      if (!isPoliciesSupported)
       {
-         //SKIP
          return;
       }
-      String docId = null;
-      String typeID = null;
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
 
-      Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-      org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
-      org.xcmis.spi.model.PropertyDefinition<?> propDefObjectTypeId =
-         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
-
-      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-      properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
-         propDefName.getLocalName(), propDefName.getDisplayName(),
-         "testCreateDocument_ConstraintExceptionNotControllableACL"));
-      properties
-         .put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(propDefObjectTypeId.getId(), propDefObjectTypeId
-            .getQueryName(), propDefObjectTypeId.getLocalName(), propDefObjectTypeId.getDisplayName(),
-            "cmis:objecttype7"));
-
-      TypeDefinition newType =
-         new TypeDefinition("cmis:objecttype7", BaseType.DOCUMENT, "cmis:objecttype7", "cmis:objecttype7", "",
-            "cmis:document", "cmis:objecttype7", "cmis:objecttype7", true, false, true, true, false, false, false,
-            false, null, null, ContentStreamAllowed.ALLOWED, propertyDefinitions);
-      typeID = getStorage().addType(newType);
-      newType = getStorage().getTypeDefinition(typeID, true);
-
-      String username = "username";
-      List<AccessControlEntry> addACL = createACL(username, "cmis:read");
-      try
+      TypeDefinition type = null;
+      if (!documentType.isControllablePolicy())
       {
-         docId =
-            getConnection().createDocument(testRootFolderId, properties, cs, addACL, null, null, VersioningState.NONE);
-         fail("ConstraintException must be thrown.");
+         type = documentType;
       }
-      catch (ConstraintException ex)
+      if (type == null)
       {
-         //OK
+         ItemsList<TypeDefinition> typeChildren = connection.getTypeChildren(documentType.getId(), false, -1, 0);
+         for (TypeDefinition t : typeChildren.getItems())
+         {
+            if (!t.isControllablePolicy())
+            {
+               type = t;
+               break;
+            }
+         }
       }
-      finally
+      if (type != null)
       {
-         if (docId != null)
-            getStorage().deleteObject(getStorage().getObjectById(docId), true);
-         if (typeID != null)
-            getStorage().removeType(typeID);
+         String policy =
+            createPolicy(testRootFolderId, policyType.getId(), generateName(policyType, null),
+               BaseTest.TEST_POLICY_TEXT, null, null, null);
+         Map<String, Property<?>> properties = createPropertyMap(type);
+         StringProperty nameProperty = (StringProperty)properties.get(CmisConstants.NAME);
+         if (nameProperty != null)
+         {
+            nameProperty.getValues().add("testCreateDocument_ConstraintException_NotControllablePolicy");
+         }
+         try
+         {
+            connection.createDocument(testRootFolderId, properties,
+               documentType.getContentStreamAllowed() == ContentStreamAllowed.NOT_ALLOWED ? null
+                  : BaseTest.TEST_CONTENT_STREAM, null, null, Arrays.asList(policy), type.isVersionable()
+                  ? VersioningState.MAJOR : VersioningState.NONE);
+            fail("ConstraintException must be thrown. ");
+         }
+         catch (ConstraintException e)
+         {
+         }
       }
    }
 
    /**
-    * 2.2.4.1.3 At least one of the permissions is used in an ACE provided which
-    * is not supported by the repository.
-    *
+    * 2.2.4.1 createDocument.
+    * <p>
+    * {@link ConstraintException} must be thrown if "controllableACL" attribute
+    * of the object type definition specified by the cmis:objectTypeId property
+    * value is set to <code>false</code> and at least one ACE is provided.
+    * </p>
+    * 
     * @throws Exception
     */
    @Test
-   public void testCreateDocument_ConstraintExceptionACENotSupp() throws Exception
+   public void testCreateDocument_ConstraintException_NotControllableACL() throws Exception
    {
-      if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
+      if (!capabilities.getCapabilityACL().equals(CapabilityACL.MANAGE))
       {
-         //SKIP
          return;
       }
-      String docId = null;
-      String typeID = null;
-
-      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-
-      Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-      org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
-      org.xcmis.spi.model.PropertyDefinition<?> propDefObjectTypeId =
-         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
-
-      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-      properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
-         propDefName.getLocalName(), propDefName.getDisplayName(), "testCreateDocument_ConstraintExceptionACENotSupp"));
-      properties
-         .put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(propDefObjectTypeId.getId(), propDefObjectTypeId
-            .getQueryName(), propDefObjectTypeId.getLocalName(), propDefObjectTypeId.getDisplayName(),
-            "cmis:objecttype8"));
-
-      TypeDefinition newType =
-         new TypeDefinition("cmis:objecttype8", BaseType.DOCUMENT, "cmis:objecttype8", "cmis:objecttype8", "",
-            "cmis:document", "cmis:objecttype8", "cmis:objecttype8", true, false, true, true, false, false, true,
-            false, null, null, ContentStreamAllowed.ALLOWED, propertyDefinitions);
-      typeID = getStorage().addType(newType);
-      newType = getStorage().getTypeDefinition(typeID, true);
-
-      String username = "username";
-      List<AccessControlEntry> addACL = createACL(username, "cmis:unknown");
-      try
+      TypeDefinition type = null;
+      if (!documentType.isControllableACL())
       {
-         docId =
-            getConnection().createDocument(testRootFolderId, properties, cs, addACL, null, null, VersioningState.NONE);
-         fail("ConstraintException must be thrown.");
+         type = documentType;
       }
-      catch (ConstraintException ex)
+      if (type == null)
       {
-         //OK
+         ItemsList<TypeDefinition> typeChildren = connection.getTypeChildren(documentType.getId(), false, -1, 0);
+         for (TypeDefinition t : typeChildren.getItems())
+         {
+            if (!t.isControllableACL())
+            {
+               type = t;
+               break;
+            }
+         }
       }
-      finally
+
+      if (type != null)
       {
-         if (docId != null)
-            getStorage().deleteObject(getStorage().getObjectById(docId), true);
-         if (typeID != null)
-            getStorage().removeType(typeID);
+         Map<String, Property<?>> properties = createPropertyMap(type);
+         StringProperty nameProperty = (StringProperty)properties.get(CmisConstants.NAME);
+         if (nameProperty != null)
+         {
+            nameProperty.getValues().add("testCreateDocument_ConstraintException_NotControllableACL");
+         }
+         try
+         {
+            connection.createDocument(testRootFolderId, properties,
+               documentType.getContentStreamAllowed() == ContentStreamAllowed.NOT_ALLOWED ? null
+                  : BaseTest.TEST_CONTENT_STREAM, createACL(principal, "cmis:write"), null, null, type.isVersionable()
+                  ? VersioningState.MAJOR : VersioningState.NONE);
+            fail("ConstraintException must be thrown. ");
+         }
+         catch (ConstraintException e)
+         {
+         }
       }
    }
 
    /**
-    * 2.2.4.2 Creates a document object as a copy of the given source document
-    * in the (optionally) specified location.
-    *
+    * 2.2.4.1 createDocument.
+    * <p>
+    * {@link ConstraintException} must be thrown if at least one of the
+    * permissions is used in an ACE provided which is not supported by the
+    * repository.
+    * </p>
+    * 
     * @throws Exception
     */
    @Test
-   public void testCreateDocumentFromSource_Simple() throws Exception
+   public void testCreateDocument_ConstraintException_ACENotSupported() throws Exception
+   {
+      if (!capabilities.getCapabilityACL().equals(CapabilityACL.MANAGE))
+      {
+         return;
+      }
+      TypeDefinition type = null;
+      if (!documentType.isControllableACL())
+      {
+         type = documentType;
+      }
+      if (type == null)
+      {
+         ItemsList<TypeDefinition> typeChildren = connection.getTypeChildren(documentType.getId(), false, -1, 0);
+         for (TypeDefinition t : typeChildren.getItems())
+         {
+            if (!t.isControllableACL())
+            {
+               type = t;
+               break;
+            }
+         }
+      }
+
+      if (type != null)
+      {
+         Map<String, Property<?>> properties = createPropertyMap(type);
+         StringProperty nameProperty = (StringProperty)properties.get(CmisConstants.NAME);
+         if (nameProperty != null)
+         {
+            nameProperty.getValues().add("testCreateDocument_ConstraintException_ACENotSupported");
+         }
+         try
+         {
+            List<AccessControlEntry> acl = createACL(principal, "cmis:unknown");
+            connection.createDocument(testRootFolderId, properties,
+               documentType.getContentStreamAllowed() == ContentStreamAllowed.NOT_ALLOWED ? null
+                  : BaseTest.TEST_CONTENT_STREAM, acl, null, null, type.isVersionable() ? VersioningState.MAJOR
+                  : VersioningState.NONE);
+            fail("ConstraintException must be thrown. ");
+         }
+         catch (ConstraintException e)
+         {
+         }
+      }
+   }
+
+   /**
+    * 2.2.4.2 createDocumentFromSource.
+    * <p>
+    * Creates a document object as a copy of the given source document in the
+    * specified location.
+    * </p>
+    * 
+    * @throws Exception
+    */
+   @Test
+   public void testCreateDocumentFromSource_Content() throws Exception
    {
       String name = generateName(documentType, null);
       String document =
-         createDocument(testRootFolderId, documentType.getId(), name, BaseTest.TEST_CONTENT, null, null, null, null);
+         createDocument(testRootFolderId, documentType.getId(), name, BaseTest.TEST_CONTENT_STREAM, null, null, null,
+            null);
       Map<String, Property<?>> properties = createPropertyMap(documentType);
       StringProperty nameProperty = (StringProperty)properties.get(CmisConstants.NAME);
       if (nameProperty != null)
@@ -753,1118 +767,516 @@ public class ObjectTest extends BaseTest
       ContentStream content = connection.getContentStream(documentCopy, null);
       byte[] buf = new byte[1024];
       int read = content.getStream().read(buf);
-      // TODO
+      byte[] res = new byte[read];
+      System.arraycopy(buf, 0, res, 0, read);
+      assertArrayEquals(TEST_CONTENT, res);
    }
 
-   //   /**
-   //    * 2.2.4.2.1 The property values that MUST be applied to the Object. This
-   //    * list of properties SHOULD only contain properties whose values differ from
-   //    * the source document.
-   //    *
-   //    * @throws Exception
-   //    */
-   //   @Test
-   //   public void testCreateDocumentFromSource_Properties() throws Exception
-   //   {
-   //      String name = "testCreateDocumentFromSource_Properties2";
-   //      DocumentData doc1 = createDocument(testroot, "testCreateDocumentFromSource_Properties1", "1234567890aBcDE");
-   //      String docId =
-   //         getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(),
-   //            getPropsMap(CmisConstants.DOCUMENT, name), null, null, null, VersioningState.NONE);
-   //      if (!getStorage().getObjectById(docId).getProperty(CmisConstants.NAME).getValues().get(0).equals(name))
-   //         fail("Names does not match.");
-   //   }
-   //
-   //   /**
-   //    * 2.2.4.2.1 A list of policy IDs that MUST be applied to the newly-created
-   //    * Document object.
-   //    *
-   //    * @throws Exception
-   //    */
-   //   @Test
-   //   public void testCreateDocumentFromSource_ApplyPolicy() throws Exception
-   //   {
-   //      if (!isPoliciesSupported)
-   //      {
-   //         //SKIP
-   //         return;
-   //      }
-   //
-   //      PolicyData policy = null;
-   //      try
-   //      {
-   //         DocumentData doc1 = createDocument(testroot, "testCreateDocumentFromSource_ApplyPolicy1", "1234567890aBcDE");
-   //         policy = createPolicy(testroot, "object_policy2");
-   //
-   //         ArrayList<String> policies = new ArrayList<String>();
-   //         policies.add(policy.getObjectId());
-   //         String docId =
-   //            getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(),
-   //               getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_ApplyPolicy2"), null, null, policies,
-   //               VersioningState.NONE);
-   //         ObjectData res = getStorage().getObjectById(docId);
-   //         assertTrue("Properties size is incorrect.", res.getPolicies().size() == 1);
-   //         Iterator<PolicyData> it = res.getPolicies().iterator();
-   //         while (it.hasNext())
-   //         {
-   //            PolicyData one = it.next();
-   //            assertTrue("Policy names does not match.", one.getName().equals("object_policy2"));
-   //            assertTrue("Policy text does not match.", one.getPolicyText().equals("testPolicyText"));
-   //            res.removePolicy(one);
-   //         }
-   //      }
-   //      finally
-   //      {
-   //         if (policy != null)
-   //            getStorage().deleteObject(policy, true);
-   //      }
-   //   }
-   //
-   //   /**
-   //    * 2.2.4.2.1 A list of ACEs that MUST be added to the newly-created Document
-   //    * object, either using the ACL from folderId if specified, or being applied
-   //    * if no folderId is specified.
-   //    *
-   //    * @throws Exception
-   //    */
-   //   @Test
-   //   public void testCreateDocumentFromSource_addACL() throws Exception
-   //   {
-   //      if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-   //      {
-   //         //SKIP
-   //         return;
-   //      }
-   //      DocumentData doc1 = createDocument(testroot, "testCreateDocumentFromSource_addACL1", "1234567890aBcDE");
-   //      String username = "username";
-   //      List<AccessControlEntry> addACL = createACL(username, "cmis:read");
-   //
-   //      String docId =
-   //         getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(),
-   //            getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_addACL2"), addACL, null, null,
-   //            VersioningState.NONE);
-   //      ObjectData res = getStorage().getObjectById(docId);
-   //      for (AccessControlEntry one : res.getACL(false))
-   //      {
-   //         if (one.getPrincipal().equalsIgnoreCase(username))
-   //         {
-   //            assertTrue("Permissions size is incorrect.", one.getPermissions().size() == 1);
-   //            assertTrue("Permissions does not match.", one.getPermissions().contains("cmis:read"));
-   //         }
-   //      }
-   //   }
-   //
-   //   /**
-   //    * 2.2.4.2.3 If the repository detects a violation with the given cmis:name
-   //    * property value, the repository MAY throw this exception or chose a name
-   //    * which does not conflict.
-   //    *
-   //    * @throws Exception
-   //    */
-   //   @Test
-   //   public void testCreateDocumentFromSource_NameConstraintViolationException() throws Exception
-   //   {
-   //      String name = "testCreateDocumentFromSource_NameConstraintViolationException";
-   //      DocumentData doc1 = createDocument(testroot, name, "1234567890aBcDE");
-   //      try
-   //      {
-   //         String docId =
-   //            getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(),
-   //               getPropsMap(CmisConstants.DOCUMENT, name), null, null, null, VersioningState.NONE);
-   //         ObjectData res = getStorage().getObjectById(docId);
-   //         assertFalse("Names must not match.", res.getName().equals(name));
-   //      }
-   //      catch (NameConstraintViolationException ex)
-   //      {
-   //         //OK
-   //      }
-   //   }
-   //
-   //   /**
-   //    * 2.2.4.2.3 constraint: The Repository MUST throw this exception if the
-   //    * sourceId is not an Object whose baseType is "Document".
-   //    *
-   //    * @throws Exception
-   //    */
-   //   @Test
-   //   public void testCreateDocumentFromSource_ConstraintExceptionWrongBaseType() throws Exception
-   //   {
-   //      FolderData test = createFolder(testroot, "123");
-   //      try
-   //      {
-   //         getConnection().createDocumentFromSource(test.getObjectId(), testroot.getObjectId(),
-   //            getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_ConstraintExceptionWrongBaseType1"),
-   //            null, null, null, VersioningState.NONE);
-   //         fail("ConstraintException must be thrown.");
-   //      }
-   //      catch (ConstraintException ex)
-   //      {
-   //         //OK
-   //      }
-   //   }
-   //
-   //   /**
-   //    * 2.2.4.2.3 The source document�s cmis:objectTypeId property value is NOT in
-   //    * the list of AllowedChildObjectTypeIds of the parent-folder specified by
-   //    * folderId.
-   //    *
-   //    * @throws Exception
-   //    */
-   //   @Test
-   //   public void testCreateDocumentFromSource_ConstraintExceptionNotAllowedChild() throws Exception
-   //   {
-   //      String docId = null;
-   //      String typeID = null;
-   //      FolderData myfolder = null;
-   //
-   //      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-   //      try
-   //      {
-   //         //Creating type from cmis:folder with overriden  ALLOWED_CHILD_OBJECT_TYPE_IDS;
-   //         Map<String, PropertyDefinition<?>> folderPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-   //         org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-   //            PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.NAME);
-   //         org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
-   //            PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.OBJECT_TYPE_ID);
-   //         org.xcmis.spi.model.PropertyDefinition<?> fPropDefAllowedChild =
-   //            PropertyDefinitions
-   //               .getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS);
-   //         Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-   //
-   //         properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
-   //            fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "myfolder"));
-   //
-   //         properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
-   //            .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(),
-   //            "cmis:myfolder"));
-   //
-   //         properties.put(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, new IdProperty(fPropDefAllowedChild.getId(),
-   //            fPropDefAllowedChild.getQueryName(), fPropDefAllowedChild.getLocalName(), fPropDefAllowedChild
-   //               .getDisplayName(), "cmis:folder"));
-   //
-   //         TypeDefinition newType =
-   //            new TypeDefinition("cmis:myfolder", BaseType.FOLDER, "cmis:myfolder", "cmis:myfolder", "", "cmis:folder",
-   //               "cmis:myfolder", "cmis:myfolder", true, false, true, true, false, false, false, false, null, null,
-   //               ContentStreamAllowed.NOT_ALLOWED, folderPropertyDefinitions);
-   //         typeID = getStorage().addType(newType);
-   //         newType = getStorage().getTypeDefinition(typeID, true);
-   //
-   //         myfolder = getStorage().createFolder(testroot, newType, properties, null, null);
-   //
-   //         DocumentData doc1 =
-   //            getStorage().createDocument(testroot, documentTypeDefinition,
-   //               getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_ConstraintExceptionNotAllowedChild"),
-   //               cs, null, null, VersioningState.NONE);
-   //
-   //         docId =
-   //            getConnection().createDocumentFromSource(doc1.getObjectId(), myfolder.getObjectId(),
-   //               getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_ConstraintExceptionNotAllowedChild1"),
-   //               null, null, null, VersioningState.NONE);
-   //         fail("ConstraintException must be thrown.");
-   //      }
-   //      catch (ConstraintException ex)
-   //      {
-   //         //OK
-   //      }
-   //      finally
-   //      {
-   //         if (docId != null)
-   //            getStorage().deleteObject(getStorage().getObjectById(docId), true);
-   //         if (myfolder != null)
-   //            getStorage().deleteObject(myfolder, true);
-   //         if (typeID != null)
-   //            getStorage().removeType(typeID);
-   //      }
-   //   }
-   //
-   //   /**
-   //    * 2.2.4.2.3 The "versionable" attribute of the Object-Type definition
-   //    * specified by the cmis:objectTypeId property value is set to FALSE and a
-   //    * value for the versioningState input parameter is provided that is
-   //    * something other than "none".
-   //    *
-   //    * @throws Exception
-   //    */
-   //   @Test
-   //   public void testCreateDocumentFromSource_ConstraintExceptionNotVersionable() throws Exception
-   //   {
-   //      String docId = null;
-   //      String typeID = null;
-   //      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-   //
-   //      //Creating type from cmis:folder with overriden  ALLOWED_CHILD_OBJECT_TYPE_IDS;
-   //      Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-   //      org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-   //         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
-   //      org.xcmis.spi.model.PropertyDefinition<?> propDefObjectTypeId =
-   //         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
-   //
-   //      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-   //      properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
-   //         propDefName.getLocalName(), propDefName.getDisplayName(),
-   //         "testCreateDocumentFromSource_ConstraintExceptionNotVersionable"));
-   //      properties
-   //         .put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(propDefObjectTypeId.getId(), propDefObjectTypeId
-   //            .getQueryName(), propDefObjectTypeId.getLocalName(), propDefObjectTypeId.getDisplayName(),
-   //            "cmis:objecttype9"));
-   //
-   //      TypeDefinition newType =
-   //         new TypeDefinition("cmis:objecttype9", BaseType.DOCUMENT, "cmis:objecttype9", "cmis:objecttype9", "",
-   //            "cmis:document", "cmis:objecttype9", "cmis:objecttype9", true, false, true, true, false, false, false,
-   //            false, null, null, ContentStreamAllowed.ALLOWED, propertyDefinitions);
-   //      typeID = getStorage().addType(newType);
-   //      newType = getStorage().getTypeDefinition(typeID, true);
-   //
-   //      DocumentData doc1 =
-   //         getStorage().createDocument(testroot, documentTypeDefinition, getPropsMap(CmisConstants.DOCUMENT, "doc"), cs,
-   //            null, null, VersioningState.MAJOR);
-   //      try
-   //      {
-   //         docId =
-   //            getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(), properties, null,
-   //               null, null, VersioningState.MAJOR);
-   //         fail("ConstraintException must be thrown.");
-   //      }
-   //      catch (ConstraintException ex)
-   //      {
-   //         //OK
-   //      }
-   //      finally
-   //      {
-   //         if (docId != null)
-   //            getStorage().deleteObject(getStorage().getObjectById(docId), true);
-   //         if (typeID != null)
-   //            getStorage().removeType(typeID);
-   //      }
-   //   }
-   //
-   //   /**
-   //    * 2.2.4.2.3 The "versionable" attribute of the Object-Type definition
-   //    * specified by the cmis:objectTypeId property value is set to TRUE and the
-   //    * value for the versioningState input parameter is provided that is "none".
-   //    *
-   //    * @throws Exception
-   //    */
-   //   @Test
-   //   public void testCreateDocumentFromSource_ConstraintExceptionIsVesrionable() throws Exception
-   //   {
-   //      String docId = null;
-   //      String typeID = null;
-   //      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-   //
-   //      Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-   //      org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-   //         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
-   //      org.xcmis.spi.model.PropertyDefinition<?> propDefObjectTypeId =
-   //         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
-   //
-   //      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-   //      properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
-   //         propDefName.getLocalName(), propDefName.getDisplayName(),
-   //         "testCreateDocumentFromSource_ConstraintExceptionIsVesrionable"));
-   //      properties.put(CmisConstants.OBJECT_TYPE_ID,
-   //         new IdProperty(propDefObjectTypeId.getId(), propDefObjectTypeId.getQueryName(), propDefObjectTypeId
-   //            .getLocalName(), propDefObjectTypeId.getDisplayName(), "cmis:objecttype10"));
-   //
-   //      TypeDefinition newType =
-   //         new TypeDefinition("cmis:objecttype10", BaseType.DOCUMENT, "cmis:objecttype10", "cmis:objecttype10", "",
-   //            "cmis:document", "cmis:objecttype10", "cmis:objecttype10", true, false, true, true, false, false, false,
-   //            true, null, null, ContentStreamAllowed.ALLOWED, propertyDefinitions);
-   //      typeID = getStorage().addType(newType);
-   //      newType = getStorage().getTypeDefinition(typeID, true);
-   //
-   //      DocumentData doc1 =
-   //         getStorage().createDocument(testroot, newType, properties, cs, null, null, VersioningState.MAJOR);
-   //
-   //      properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
-   //         propDefName.getLocalName(), propDefName.getDisplayName(), "doc2"));
-   //      try
-   //      {
-   //         docId =
-   //            getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(), properties, null,
-   //               null, null, VersioningState.NONE);
-   //         fail("ConstraintException must be thrown.");
-   //      }
-   //      catch (ConstraintException ex)
-   //      {
-   //         //OK
-   //      }
-   //      finally
-   //      {
-   //         if (doc1 != null)
-   //            getStorage().deleteObject(doc1, true);
-   //         if (docId != null)
-   //            getStorage().deleteObject(getStorage().getObjectById(docId), true);
-   //         if (typeID != null)
-   //            getStorage().removeType(typeID);
-   //
-   //      }
-   //   }
-   //
-   //   /**
-   //    * 2.2.4.2.3 The "controllablePolicy" attribute of the Object-Type definition
-   //    * specified by the cmis:objectTypeId property value is set to FALSE and at
-   //    * least one policy is provided.
-   //    *
-   //    * @throws Exception
-   //    */
-   //   @Test
-   //   public void testCreateDocumentFromSource_ConstraintExceptionNotControllablePolicy() throws Exception
-   //   {
-   //      if (!isPoliciesSupported)
-   //      {
-   //         //SKIP
-   //         return;
-   //      }
-   //      String docId = null;
-   //      String typeID = null;
-   //      PolicyData policy = null;
-   //      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-   //
-   //      Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-   //      org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-   //         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
-   //      org.xcmis.spi.model.PropertyDefinition<?> propDefObjectTypeId =
-   //         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
-   //
-   //      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-   //      properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
-   //         propDefName.getLocalName(), propDefName.getDisplayName(),
-   //         "testCreateDocumentFromSource_ConstraintExceptionNotControllablePolicy"));
-   //      properties.put(CmisConstants.OBJECT_TYPE_ID,
-   //         new IdProperty(propDefObjectTypeId.getId(), propDefObjectTypeId.getQueryName(), propDefObjectTypeId
-   //            .getLocalName(), propDefObjectTypeId.getDisplayName(), "cmis:objecttype11"));
-   //
-   //      TypeDefinition newType =
-   //         new TypeDefinition("cmis:objecttype11", BaseType.DOCUMENT, "cmis:objecttype11", "cmis:objecttype11", "",
-   //            "cmis:document", "cmis:objecttype11", "cmis:objecttype11", true, false, true, true, false, false, false,
-   //            true, null, null, ContentStreamAllowed.ALLOWED, propertyDefinitions);
-   //      typeID = getStorage().addType(newType);
-   //      newType = getStorage().getTypeDefinition(typeID, true);
-   //
-   //      policy = createPolicy(testroot, "object_policy4");
-   //
-   //      ArrayList<String> policies = new ArrayList<String>();
-   //      policies.add(policy.getObjectId());
-   //
-   //      DocumentData doc1 =
-   //         getStorage().createDocument(
-   //            testroot,
-   //            newType,
-   //            getPropsMap(CmisConstants.DOCUMENT,
-   //               "testCreateDocumentFromSource_ConstraintExceptionNotControllablePolicy1"), cs, null, null,
-   //            VersioningState.MAJOR);
-   //      try
-   //      {
-   //         docId =
-   //            getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(), properties, null,
-   //               null, policies, VersioningState.NONE);
-   //         fail("ConstraintException must be thrown.");
-   //      }
-   //      catch (ConstraintException ex)
-   //      {
-   //         //OK
-   //      }
-   //      catch (Exception e)
-   //      {
-   //         // TODO remove
-   //         e.printStackTrace();
-   //      }
-   //      finally
-   //      {
-   //         getStorage().deleteObject(doc1, true);
-   //         if (docId != null)
-   //            getStorage().deleteObject(getStorage().getObjectById(docId), true);
-   //         if (typeID != null)
-   //            getStorage().removeType(typeID);
-   //         if (policy != null)
-   //            getStorage().deleteObject(policy, true);
-   //      }
-   //   }
-   //
-   //   /**
-   //    * 2.2.4.2.3 The "controllableACL" attribute of the Object-Type definition
-   //    * specified by the cmis:objectTypeId property value is set to FALSE and at
-   //    * least one ACE is provided.
-   //    *
-   //    * @throws Exception
-   //    */
-   //   @Test
-   //   public void testCreateDocumentFromSource_ConstraintExceptionNotControllableACL() throws Exception
-   //   {
-   //      if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-   //      {
-   //         //SKIP
-   //         return;
-   //      }
-   //      String docId = null;
-   //      String typeID = null;
-   //      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-   //
-   //      Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-   //      org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-   //         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
-   //      org.xcmis.spi.model.PropertyDefinition<?> propDefObjectTypeId =
-   //         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
-   //
-   //      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-   //      properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
-   //         propDefName.getLocalName(), propDefName.getDisplayName(),
-   //         "testCreateDocumentFromSource_ConstraintExceptionNotControllableACL"));
-   //      properties.put(CmisConstants.OBJECT_TYPE_ID,
-   //         new IdProperty(propDefObjectTypeId.getId(), propDefObjectTypeId.getQueryName(), propDefObjectTypeId
-   //            .getLocalName(), propDefObjectTypeId.getDisplayName(), "cmis:objecttype12"));
-   //
-   //      TypeDefinition newType =
-   //         new TypeDefinition("cmis:objecttype12", BaseType.DOCUMENT, "cmis:objecttype12", "cmis:objecttype12", "",
-   //            "cmis:document", "cmis:objecttype12", "cmis:objecttype12", true, false, true, true, false, false, false,
-   //            false, null, null, ContentStreamAllowed.ALLOWED, propertyDefinitions);
-   //      typeID = getStorage().addType(newType);
-   //      newType = getStorage().getTypeDefinition(typeID, true);
-   //
-   //      String username = "username";
-   //      List<AccessControlEntry> addACL = createACL(username, "cmis:unknown");
-   //
-   //      DocumentData doc1 =
-   //         getStorage().createDocument(testroot, newType,
-   //            getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_ConstraintExceptionNotControllableACL1"),
-   //            cs, null, null, VersioningState.NONE);
-   //      try
-   //      {
-   //         docId =
-   //            getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(), properties, addACL,
-   //               null, null, VersioningState.NONE);
-   //         fail("ConstraintException must be thrown.");
-   //      }
-   //      catch (ConstraintException ex)
-   //      {
-   //         //OK
-   //      }
-   //      finally
-   //      {
-   //         if (doc1 != null)
-   //            getStorage().deleteObject(doc1, true);
-   //         if (docId != null)
-   //            getStorage().deleteObject(getStorage().getObjectById(docId), true);
-   //         if (typeID != null)
-   //            getStorage().removeType(typeID);
-   //      }
-   //   }
-   //
-   //   /**
-   //    * 2.2.4.2.3 At least one of the permissions is used in an ACE provided which
-   //    * is not supported by the repository.
-   //    *
-   //    * @throws Exception
-   //    */
-   //   @Test
-   //   public void testCreateDocumentFromSource_ConstraintExceptionUnknownACE() throws Exception
-   //   {
-   //      if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-   //      {
-   //         //SKIP
-   //         return;
-   //      }
-   //      String docId = null;
-   //      String typeID = null;
-   //      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-   //      Map<String, PropertyDefinition<?>> propertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-   //      org.xcmis.spi.model.PropertyDefinition<?> propDefName =
-   //         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.NAME);
-   //      org.xcmis.spi.model.PropertyDefinition<?> propDefObjectTypeId =
-   //         PropertyDefinitions.getPropertyDefinition(CmisConstants.DOCUMENT, CmisConstants.OBJECT_TYPE_ID);
-   //
-   //      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-   //      properties.put(CmisConstants.NAME, new StringProperty(propDefName.getId(), propDefName.getQueryName(),
-   //         propDefName.getLocalName(), propDefName.getDisplayName(),
-   //         "testCreateDocumentFromSource_ConstraintExceptionUnknownACE"));
-   //      properties.put(CmisConstants.OBJECT_TYPE_ID,
-   //         new IdProperty(propDefObjectTypeId.getId(), propDefObjectTypeId.getQueryName(), propDefObjectTypeId
-   //            .getLocalName(), propDefObjectTypeId.getDisplayName(), "cmis:objecttype13"));
-   //
-   //      TypeDefinition newType =
-   //         new TypeDefinition("cmis:objecttype13", BaseType.DOCUMENT, "cmis:objecttype13", "cmis:objecttype13", "",
-   //            "cmis:document", "cmis:objecttype13", "cmis:objecttype13", true, false, true, true, false, false, true,
-   //            false, null, null, ContentStreamAllowed.NOT_ALLOWED, propertyDefinitions);
-   //      typeID = getStorage().addType(newType);
-   //      newType = getStorage().getTypeDefinition(typeID, true);
-   //
-   //      String username = "username";
-   //      List<AccessControlEntry> addACL = createACL(username, "cmis:unknown");
-   //
-   //      DocumentData doc1 =
-   //         getStorage().createDocument(testroot, newType,
-   //            getPropsMap(CmisConstants.DOCUMENT, "testCreateDocumentFromSource_ConstraintExceptionUnknownACE1"), cs,
-   //            null, null, VersioningState.NONE);
-   //      try
-   //      {
-   //         docId =
-   //            getConnection().createDocumentFromSource(doc1.getObjectId(), testroot.getObjectId(), properties, addACL,
-   //               null, null, VersioningState.NONE);
-   //         fail("ConstraintException must be thrown.");
-   //      }
-   //      catch (ConstraintException ex)
-   //      {
-   //         //OK
-   //      }
-   //      finally
-   //      {
-   //         if (doc1 != null)
-   //            getStorage().deleteObject(doc1, true);
-   //         if (docId != null)
-   //            getStorage().deleteObject(getStorage().getObjectById(docId), true);
-   //         if (typeID != null)
-   //            getStorage().removeType(typeID);
-   //      }
-   //   }
-   //
-   //   /**
-   //    * 2.2.4.3 Creates a folder object of the specified type in the specified
-   //    * location.
-   //    *
-   //    * @throws Exception
-   //    */
-   //   @Test
-   //   public void testCreateFolder_Simple() throws Exception
-   //   {
-   //      String docId =
-   //         getConnection()
-   //            .createFolder(testroot.getObjectId(), getPropsMap(CmisConstants.FOLDER, "f1"), null, null, null);
-   //      ObjectData obj = getStorage().getObjectById(docId);
-   //      assertTrue("Object types does not match.", obj.getTypeId().equals(CmisConstants.FOLDER));
-   //      assertTrue("Path is not correct.", ((FolderData)obj).getPath().endsWith("object_testroot/f1"));
-   //   }
-   //
-   //   /**
-   //    * 2.2.4.3.1 A list of policy IDs that MUST be applied to the newly-created
-   //    * Folder object.
-   //    *
-   //    * @throws Exception
-   //    */
-   //   @Test
-   //   public void testCreateFolder_ApplyPolicy() throws Exception
-   //   {
-   //      if (!isPoliciesSupported)
-   //      {
-   //         //SKIP
-   //         return;
-   //      }
-   //      PolicyData policy = null;
-   //      String docId = null;
-   //      try
-   //      {
-   //         policy = createPolicy(testroot, "object_policy3");
-   //
-   //         ArrayList<String> policies = new ArrayList<String>();
-   //         policies.add(policy.getObjectId());
-   //
-   //         docId =
-   //            getConnection().createFolder(testroot.getObjectId(), getPropsMap(CmisConstants.FOLDER, "f2"), null, null,
-   //               policies);
-   //         ObjectData res = getStorage().getObjectById(docId);
-   //         assertTrue("Properties size is incorrect;", res.getPolicies().size() == 1);
-   //         Iterator<PolicyData> it = res.getPolicies().iterator();
-   //         while (it.hasNext())
-   //         {
-   //            PolicyData one = it.next();
-   //            assertTrue("Policy names does not match.", one.getName().equals("object_policy3"));
-   //            assertTrue("Policy text does not match.", one.getPolicyText().equals("testPolicyText"));
-   //         }
-   //      }
-   //      finally
-   //      {
-   //         if (docId != null)
-   //            getStorage().deleteObject(getStorage().getObjectById(docId), true);
-   //         if (policy != null)
-   //            getStorage().deleteObject(policy, true);
-   //      }
-   //   }
-   //
-   //   /**
-   //    * 2.2.4.3.1 A list of ACEs that MUST be added to the newly-created Folder
-   //    * object.
-   //    *
-   //    * @throws Exception
-   //    */
-   //   @Test
-   //   public void testCreateFolder_AddACL() throws Exception
-   //   {
-   //      if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-   //      {
-   //         //SKIP
-   //         return;
-   //      }
-   //      String docId = null;
-   //      String username = "username";
-   //      List<AccessControlEntry> addACL = createACL(username, "cmis:read");
-   //
-   //      try
-   //      {
-   //         docId =
-   //            getConnection().createFolder(testroot.getObjectId(), getPropsMap(CmisConstants.FOLDER, "testCreateFolder"),
-   //               addACL, null, null);
-   //         ObjectData res = getStorage().getObjectById(docId);
-   //         for (AccessControlEntry one : res.getACL(false))
-   //         {
-   //            if (one.getPrincipal().equalsIgnoreCase(username))
-   //               assertTrue("Permissions size is incorrect.", one.getPermissions().size() == 1);
-   //            assertTrue("Permissions does not match.", one.getPermissions().contains("cmis:read"));
-   //         }
-   //      }
-   //      finally
-   //      {
-   //         if (docId != null)
-   //            getStorage().deleteObject(getStorage().getObjectById(docId), true);
-   //      }
-   //   }
-   //
-   //   /**
-   //    * 2.2.4.3 Creates a folder object of the specified type in the specified
-   //    * location.
-   //    *
-   //    * @throws Exception
-   //    */
-   //   @Test
-   //   public void testCreateFolder_NameConstraintViolationException() throws Exception
-   //   {
-   //      getStorage().createFolder(testroot, folderTypeDefinition,
-   //         getPropsMap(CmisConstants.FOLDER, "testCreateFolder_NameConstraint"), null, null);
-   //      try
-   //      {
-   //         String docId =
-   //            getConnection().createFolder(testroot.getObjectId(),
-   //               getPropsMap(CmisConstants.FOLDER, "testCreateFolder_NameConstraint"), null, null, null);
-   //         ObjectData res = getStorage().getObjectById(docId);
-   //         assertFalse("Names must not match.", res.getName().equals("testCreateFolder_NameConstraint"));
-   //      }
-   //      catch (NameConstraintViolationException ex)
-   //      {
-   //         //OK
-   //      }
-   //   }
-   //
-   //   /**
-   //    * 2.2.4.3.3 The Repository MUST throw this exception if the
-   //    * cmis:objectTypeId property value is not an Object-Type whose baseType is
-   //    * "Folder".
-   //    *
-   //    * @throws Exception
-   //    */
-   //   @Test
-   //   public void testCreateFolder_ConstraintExceptionWrongBaseType() throws Exception
-   //   {
-   //      String docId = null;
-   //      String typeID = null;
-   //
-   //      Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-   //      org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-   //         PropertyDefinitions.getPropertyDefinition(CmisConstants.POLICY, CmisConstants.NAME);
-   //      org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
-   //         PropertyDefinitions.getPropertyDefinition(CmisConstants.POLICY, CmisConstants.OBJECT_TYPE_ID);
-   //
-   //      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-   //      properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
-   //         fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "testCreateFolder_ConstraintExceptionWrong"));
-   //      properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
-   //         .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(),
-   //         "cmis:objecttype14"));
-   //
-   //      TypeDefinition newType =
-   //         new TypeDefinition("cmis:objecttype14", BaseType.POLICY, "cmis:objecttype14", "cmis:objecttype14", "",
-   //            "cmis:policy", "cmis:objecttype14", "cmis:objecttype14", true, false, true, true, false, false, false,
-   //            true, null, null, ContentStreamAllowed.NOT_ALLOWED, fPropertyDefinitions);
-   //      typeID = getStorage().addType(newType);
-   //      newType = getStorage().getTypeDefinition(typeID, true);
-   //
-   //      try
-   //      {
-   //         docId = getConnection().createFolder(testroot.getObjectId(), properties, null, null, null);
-   //         fail("ConstraintException must be thrown.");
-   //      }
-   //      catch (ConstraintException ex)
-   //      {
-   //         //OK
-   //      }
-   //      finally
-   //      {
-   //         if (docId != null)
-   //            getStorage().deleteObject(getStorage().getObjectById(docId), true);
-   //         if (typeID != null)
-   //            getStorage().removeType(typeID);
-   //      }
-   //   }
-   //
-   //   /**
-   //    * 2.2.4.3.3 The cmis:objectTypeId property value is NOT in the list of
-   //    * AllowedChildObjectTypeIds of the parent-folder specified by folderId.
-   //    *
-   //    * @throws Exception
-   //    */
-   //   @Test
-   //   public void testCreateFolder_ConstraintExceptionNotAllowedChild() throws Exception
-   //   {
-   //      String docId = null;
-   //      String typeID = null;
-   //
-   //      Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-   //      org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-   //         PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.NAME);
-   //      org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
-   //         PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.OBJECT_TYPE_ID);
-   //      org.xcmis.spi.model.PropertyDefinition<?> fPropDefAllowedChilds =
-   //         PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS);
-   //
-   //      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-   //      properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
-   //         fPropDefName.getLocalName(), fPropDefName.getDisplayName(),
-   //         "testCreateFolder_ConstraintExceptionNotAllowedChild"));
-   //      properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
-   //         .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(),
-   //         "cmis:objecttype15"));
-   //      properties.put(CmisConstants.ALLOWED_CHILD_OBJECT_TYPE_IDS, new IdProperty(fPropDefAllowedChilds.getId(),
-   //         fPropDefAllowedChilds.getQueryName(), fPropDefAllowedChilds.getLocalName(), fPropDefAllowedChilds
-   //            .getDisplayName(), "cmis:document"));
-   //
-   //      TypeDefinition newType =
-   //         new TypeDefinition("cmis:objecttype15", BaseType.FOLDER, "cmis:objecttype15", "cmis:objecttype15", "",
-   //            "cmis:folder", "cmis:objecttype15", "cmis:objecttype15", true, false, true, true, false, false, false,
-   //            true, null, null, ContentStreamAllowed.NOT_ALLOWED, fPropertyDefinitions);
-   //      typeID = getStorage().addType(newType);
-   //      newType = getStorage().getTypeDefinition(typeID, true);
-   //
-   //      FolderData f1 = getStorage().createFolder(testroot, newType, properties, null, null);
-   //      try
-   //      {
-   //         docId =
-   //            getConnection().createFolder(f1.getObjectId(),
-   //               getPropsMap(CmisConstants.FOLDER, "testCreateFolder_ConstraintExceptionNotAllowedChild2"), null, null,
-   //               null);
-   //         fail("ConstraintException must be thrown.");
-   //      }
-   //      catch (ConstraintException ex)
-   //      {
-   //         //OK
-   //      }
-   //      finally
-   //      {
-   //         if (docId != null)
-   //         {
-   //            try
-   //            {
-   //               getStorage().deleteObject(getStorage().getObjectById(docId), true);
-   //            }
-   //            catch (ObjectNotFoundException e)
-   //            {
-   //            }
-   //         }
-   //         if (f1 != null)
-   //            getStorage().deleteObject(f1, true);
-   //         if (typeID != null)
-   //            getStorage().removeType(typeID);
-   //      }
-   //   }
-   //
-   //   /**
-   //    * 2.2.4.3.3 The "controllablePolicy" attribute of the Object-Type definition
-   //    * specified by the cmis:objectTypeId property value is set to FALSE and at
-   //    * least one policy is provided.
-   //    *
-   //    * @throws Exception
-   //    */
-   //   @Test
-   //   public void testCreateFolder_ConstraintExceptionNotControllablePolicy() throws Exception
-   //   {
-   //      if (!isPoliciesSupported)
-   //      {
-   //         //SKIP
-   //         return;
-   //      }
-   //      String docId = null;
-   //      PolicyData policy = null;
-   //      String typeID = null;
-   //
-   //      Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-   //      org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-   //         PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.NAME);
-   //      org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
-   //         PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.OBJECT_TYPE_ID);
-   //
-   //      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-   //      properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
-   //         fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "CreateFolder_ConstraintExceptionF1"));
-   //      properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
-   //         .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(),
-   //         "cmis:objecttype16"));
-   //
-   //      TypeDefinition newType =
-   //         new TypeDefinition("cmis:objecttype16", BaseType.FOLDER, "cmis:objecttype16", "cmis:objecttype16", "",
-   //            "cmis:folder", "cmis:objecttype16", "cmis:objecttype16", true, false, true, true, false, false, false,
-   //            true, null, null, ContentStreamAllowed.NOT_ALLOWED, fPropertyDefinitions);
-   //      typeID = getStorage().addType(newType);
-   //      newType = getStorage().getTypeDefinition(typeID, true);
-   //
-   //      policy = createPolicy(testroot, "policy1");
-   //
-   //      ArrayList<String> policies = new ArrayList<String>();
-   //      policies.add(policy.getObjectId());
-   //      try
-   //      {
-   //         docId = getConnection().createFolder(testroot.getObjectId(), properties, null, null, policies);
-   //         fail("ConstraintException must be thrown.");
-   //      }
-   //      catch (ConstraintException ex)
-   //      {
-   //         //OK
-   //      }
-   //      finally
-   //      {
-   //         if (docId != null)
-   //            getStorage().deleteObject(getStorage().getObjectById(docId), true);
-   //         if (policy != null)
-   //            getStorage().deleteObject(policy, true);
-   //         if (typeID != null)
-   //            getStorage().removeType(typeID);
-   //      }
-   //   }
-   //
-   //   /**
-   //    * 2.2.4.3.3 The "controllableACL" attribute of the Object-Type definition
-   //    * specified by the cmis:objectTypeId property value is set to FALSE and at
-   //    * least one ACE is provided.
-   //    *
-   //    * @throws Exception
-   //    */
-   //   @Test
-   //   public void testCreateFolder_ConstraintExceptionNotControllableACL() throws Exception
-   //   {
-   //      if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-   //      {
-   //         //SKIP
-   //         return;
-   //      }
-   //      String docId = null;
-   //      String typeID = null;
-   //
-   //      Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-   //      org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-   //         PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.NAME);
-   //      org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
-   //         PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.OBJECT_TYPE_ID);
-   //
-   //      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-   //      properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
-   //         fPropDefName.getLocalName(), fPropDefName.getDisplayName(),
-   //         "testCreateFolder_ConstraintExceptionNotControllableACL"));
-   //      properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
-   //         .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(),
-   //         "cmis:objecttype16"));
-   //
-   //      TypeDefinition newType =
-   //         new TypeDefinition("cmis:objecttype16", BaseType.FOLDER, "cmis:objecttype16", "cmis:objecttype16", "",
-   //            "cmis:folder", "cmis:objecttype16", "cmis:objecttype16", true, false, true, true, false, false, false,
-   //            true, null, null, ContentStreamAllowed.NOT_ALLOWED, fPropertyDefinitions);
-   //      typeID = getStorage().addType(newType);
-   //      newType = getStorage().getTypeDefinition(typeID, true);
-   //
-   //      String username = "username";
-   //      List<AccessControlEntry> addACL = createACL(username, "cmis:read");
-   //      try
-   //      {
-   //         docId = getConnection().createFolder(testroot.getObjectId(), properties, addACL, null, null);
-   //         fail("ConstraintException must be thrown.");
-   //      }
-   //      catch (ConstraintException ex)
-   //      {
-   //         //OK
-   //      }
-   //      finally
-   //      {
-   //         if (docId != null)
-   //            getStorage().deleteObject(getStorage().getObjectById(docId), true);
-   //         if (typeID != null)
-   //            getStorage().removeType(typeID);
-   //      }
-   //   }
-   //
-   //   /**
-   //    * 2.2.4.3.3 At least one of the permissions is used in an ACE provided which
-   //    * is not supported by the repository.
-   //    *
-   //    * @throws Exception
-   //    */
-   //   @Test
-   //   public void testCreateFolder_ConstraintExceptionUnknownACE() throws Exception
-   //   {
-   //      if (getCapabilities().getCapabilityACL().equals(CapabilityACL.NONE))
-   //      {
-   //         //SKIP
-   //         return;
-   //      }
-   //      String docId = null;
-   //      String typeID = null;
-   //      Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-   //      org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-   //         PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.NAME);
-   //      org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
-   //         PropertyDefinitions.getPropertyDefinition(CmisConstants.FOLDER, CmisConstants.OBJECT_TYPE_ID);
-   //
-   //      Map<String, Property<?>> properties = new HashMap<String, Property<?>>();
-   //      properties.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
-   //         fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "testCreateFolder_ConstraintExceptionUnknownACE"));
-   //      properties.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
-   //         .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(),
-   //         "cmis:objecttype17"));
-   //
-   //      TypeDefinition newType =
-   //         new TypeDefinition("cmis:objecttype17", BaseType.FOLDER, "cmis:objecttype17", "cmis:objecttype17", "",
-   //            "cmis:folder", "cmis:objecttype17", "cmis:objecttype17", true, false, true, true, false, false, true, true,
-   //            null, null, ContentStreamAllowed.NOT_ALLOWED, fPropertyDefinitions);
-   //      typeID = getStorage().addType(newType);
-   //      newType = getStorage().getTypeDefinition(typeID, true);
-   //
-   //      String username = "username";
-   //      List<AccessControlEntry> addACL = createACL(username, "cmis:unknown");
-   //
-   //      try
-   //      {
-   //         docId = getConnection().createFolder(testroot.getObjectId(), properties, addACL, null, null);
-   //         fail("ConstraintException must be thrown.");
-   //      }
-   //      catch (ConstraintException ex)
-   //      {
-   //         //OK
-   //      }
-   //      finally
-   //      {
-   //         if (docId != null)
-   //            getStorage().deleteObject(getStorage().getObjectById(docId), true);
-   //         if (typeID != null)
-   //            getStorage().removeType(typeID);
-   //      }
-   //   }
-   //
-   //   /**
-   //    * 2.2.4.4 Creates a relationship object of the specified type.
-   //    *
-   //    * @throws Exception
-   //    */
-   //   @Test
-   //   public void testCreateRelationship_Simple() throws Exception
-   //   {
-   //      if (!isRelationshipsSupported)
-   //      {
-   //         //SKIP
-   //         return;
-   //      }
-   //      ObjectData obj = null;
-   //      ContentStream cs = new BaseContentStream("1234567890aBcDE".getBytes(), null, new MimeType("text", "plain"));
-   //      DocumentData doc1 =
-   //         getStorage()
-   //            .createDocument(testroot, documentTypeDefinition,
-   //               getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_Simple1"), cs, null, null,
-   //               VersioningState.NONE);
-   //      DocumentData doc2 =
-   //         getStorage()
-   //            .createDocument(testroot, documentTypeDefinition,
-   //               getPropsMap(CmisConstants.DOCUMENT, "testCreateRelationship_Simple2"), cs, null, null,
-   //               VersioningState.NONE);
-   //
-   //      Map<String, Property<?>> props = getPropsMap("cmis:relationship", "objecttest_rel1");
-   //
-   //      org.xcmis.spi.model.PropertyDefinition<?> fPropDefSource =
-   //         PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.SOURCE_ID);
-   //      org.xcmis.spi.model.PropertyDefinition<?> fPropDefTarget =
-   //         PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.TARGET_ID);
-   //
-   //      props.put(CmisConstants.SOURCE_ID, new IdProperty(fPropDefSource.getId(), fPropDefSource.getQueryName(),
-   //         fPropDefSource.getLocalName(), fPropDefSource.getDisplayName(), doc1.getObjectId()));
-   //      props.put(CmisConstants.TARGET_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
-   //         fPropDefTarget.getLocalName(), fPropDefTarget.getDisplayName(), doc2.getObjectId()));
-   //
-   //      String docId = getConnection().createRelationship(props, null, null, null);
-   //      obj = getStorage().getObjectById(docId);
-   //      assertTrue("Cmis object types does not match.", obj.getTypeId().equals("cmis:relationship"));
-   //      assertTrue("Cmis objects ID does not match.", doc1.getObjectId().equals(((RelationshipData)obj).getSourceId()));
-   //      assertTrue("Cmis object ID  does not match.", doc2.getObjectId().equals(((RelationshipData)obj).getTargetId()));
-   //   }
-   //
-   //   /**
-   //    * 2.2.4.4.1 A list of policy IDs that MUST be applied to the newly-created
-   //    * Replationship object.
-   //    *
-   //    * @throws Exception
-   //    */
-   //   @Test
-   //   public void testCreateRelationship_ApplyPolicy() throws Exception
-   //   {
-   //      if (!isPoliciesSupported || !isRelationshipsSupported)
-   //      {
-   //         //SKIP
-   //         return;
-   //      }
-   //      ObjectData obj = null;
-   //      PolicyData policy = null;
-   //      String typeID = null;
-   //      try
-   //      {
-   //         DocumentData doc1 = createDocument(testroot, "testCreateRelationship_ApplyPolicy1", "1234567890aBcDE");
-   //         DocumentData doc2 = createDocument(testroot, "testCreateRelationship_ApplyPolicy2", "1234567890aBcDE");
-   //
-   //         Map<String, PropertyDefinition<?>> fPropertyDefinitions = new HashMap<String, PropertyDefinition<?>>();
-   //         Map<String, Property<?>> props = new HashMap<String, Property<?>>();
-   //
-   //         org.xcmis.spi.model.PropertyDefinition<?> fPropDefName =
-   //            PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.NAME);
-   //         org.xcmis.spi.model.PropertyDefinition<?> fPropDefObjectTypeId =
-   //            PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.OBJECT_TYPE_ID);
-   //         org.xcmis.spi.model.PropertyDefinition<?> fPropDefSource =
-   //            PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.SOURCE_ID);
-   //         org.xcmis.spi.model.PropertyDefinition<?> fPropDefTarget =
-   //            PropertyDefinitions.getPropertyDefinition(CmisConstants.RELATIONSHIP, CmisConstants.TARGET_ID);
-   //
-   //         props.put(CmisConstants.NAME, new StringProperty(fPropDefName.getId(), fPropDefName.getQueryName(),
-   //            fPropDefName.getLocalName(), fPropDefName.getDisplayName(), "objecttest_rel2"));
-   //         props.put(CmisConstants.OBJECT_TYPE_ID, new IdProperty(fPropDefObjectTypeId.getId(), fPropDefObjectTypeId
-   //            .getQueryName(), fPropDefObjectTypeId.getLocalName(), fPropDefObjectTypeId.getDisplayName(),
-   //            "cmis:objecttype22"));
-   //         props.put(CmisConstants.SOURCE_ID, new IdProperty(fPropDefSource.getId(), fPropDefSource.getQueryName(),
-   //            fPropDefSource.getLocalName(), fPropDefSource.getDisplayName(), doc1.getObjectId()));
-   //         props.put(CmisConstants.TARGET_ID, new IdProperty(fPropDefTarget.getId(), fPropDefTarget.getQueryName(),
-   //            fPropDefTarget.getLocalName(), fPropDefTarget.getDisplayName(), doc2.getObjectId()));
-   //
-   //         TypeDefinition newType =
-   //            new TypeDefinition("cmis:objecttype22", BaseType.RELATIONSHIP, "cmis:objecttype22", "cmis:objecttype22",
-   //               "", "cmis:relationship", "cmis:objecttype22", "cmis:objecttype22", true, false, true, true, false, true,
-   //               false, false, null, null, ContentStreamAllowed.NOT_ALLOWED, fPropertyDefinitions);
-   //         typeID = getStorage().addType(newType);
-   //         newType = getStorage().getTypeDefinition(typeID, true);
-   //
-   //         policy = createPolicy(testroot, "object_policy6");
-   //         ArrayList<String> policies = new ArrayList<String>();
-   //         policies.add(policy.getObjectId());
-   //         String docId = getConnection().createRelationship(props, null, null, policies);
-   //         obj = getStorage().getObjectById(docId);
-   //         assertTrue("Object policies size is incorrect.", obj.getPolicies().size() == 1);
-   //         Iterator<PolicyData> it = obj.getPolicies().iterator();
-   //         while (it.hasNext())
-   //         {
-   //            PolicyData one = it.next();
-   //            assertTrue("Policy names does not match.", one.getName().equals("object_policy6"));
-   //            assertTrue("Policy text does not match.", one.getPolicyText().equals("testPolicyText"));
-   //            obj.removePolicy(one);
-   //         }
-   //      }
-   //      finally
-   //      {
-   //         if (obj != null)
-   //            getStorage().deleteObject(obj, true);
-   //         if (policy != null)
-   //            getStorage().deleteObject(policy, true);
-   //         if (typeID != null)
-   //            getStorage().removeType(typeID);
-   //      }
-   //   }
-   //
+   /**
+    * 2.2.4.3 createFolder.
+    * <p>
+    * Create a folder object of the specified type in the specified location
+    * without any additional attributes, such as policies, ACL, etc.
+    * </p>
+    * 
+    * @throws Exception
+    */
+   @Test
+   public void testCreateFolder() throws Exception
+   {
+      Map<String, Property<?>> properties = createPropertyMap(folderType);
+      StringProperty nameProperty = (StringProperty)properties.get(CmisConstants.NAME);
+      if (nameProperty != null)
+      {
+         nameProperty.getValues().add("testCreateFolder");
+      }
+      String folderId = connection.createFolder(testRootFolderId, properties, null, null, null);
+      // Get by id.
+      try
+      {
+         connection.getObject(folderId, false, IncludeRelationships.NONE, false, false, true, null,
+            RenditionFilter.NONE);
+      }
+      catch (ObjectNotFoundException e)
+      {
+         fail("Unable get newly create folder by id. ");
+      }
+      // Get by path.
+      String path = "/object_testroot/testCreateFolder";
+      try
+      {
+         connection.getObjectByPath(path, false, IncludeRelationships.NONE, false, false, true, null,
+            RenditionFilter.NONE);
+      }
+      catch (ObjectNotFoundException e)
+      {
+         fail("Unable get newly create folder by path. ");
+      }
+   }
+
+   /**
+    * 2.2.4.3 createFolder.
+    * <p>
+    * Create folder and apply policies to the newly-created folder object. If
+    * policies is not supported then this test will be skipped.
+    * </p>
+    * 
+    * @throws Exception
+    */
+   @Test
+   public void testCreateFolder_ApplyPolicy() throws Exception
+   {
+      TypeDefinition type = null;
+      if (folderType.isControllablePolicy())
+      {
+         type = folderType;
+      }
+      if (type == null)
+      {
+         ItemsList<TypeDefinition> typeChildren = connection.getTypeChildren(folderType.getId(), false, -1, 0);
+         for (TypeDefinition t : typeChildren.getItems())
+         {
+            if (t.isControllablePolicy())
+            {
+               type = t;
+               break;
+            }
+         }
+      }
+      if (type == null || !isPoliciesSupported)
+      {
+         return;
+      }
+
+      String policyId =
+         createPolicy(policyType.isFileable() ? testRootFolderId : null, policyType.getId(), generateName(policyType,
+            null), "policy1", null, null, null);
+
+      Map<String, Property<?>> properties = createPropertyMap(folderType);
+      StringProperty nameProperty = (StringProperty)properties.get(CmisConstants.NAME);
+      if (nameProperty != null)
+      {
+         nameProperty.getValues().add("testCreateFolder_ApplyPolicy");
+      }
+
+      String folderId = connection.createFolder(testRootFolderId, properties, null, null, Arrays.asList(policyId));
+
+      List<CmisObject> policies = connection.getAppliedPolicies(folderId, true, null);
+      assertEquals(1, policies.size());
+      assertEquals(policyId, policies.get(0).getObjectInfo().getId());
+   }
+
+   /**
+    * 2.2.4.3 createFolder.
+    * <p>
+    * Create folder and apply ACL for it. If ACL is not supported at all or
+    * can't be managed (if method
+    * {@link RepositoryCapabilities#getCapabilityACL()} returns something other
+    * then CapabilityACL.MANAGE) this test will be skipped.
+    * </p>
+    * 
+    * @throws Exception
+    */
+   @Test
+   public void testCreateFolder_ApplyACL() throws Exception
+   {
+      TypeDefinition type = null;
+      if (folderType.isControllableACL())
+      {
+         type = folderType;
+      }
+      if (type == null)
+      {
+         ItemsList<TypeDefinition> typeChildren = connection.getTypeChildren(folderType.getId(), false, -1, 0);
+         for (TypeDefinition t : typeChildren.getItems())
+         {
+            if (t.isControllableACL())
+            {
+               type = t;
+               break;
+            }
+         }
+      }
+
+      if (type == null || capabilities.getCapabilityACL() != CapabilityACL.MANAGE)
+      {
+         return;
+      }
+
+      List<AccessControlEntry> acl = createACL(principal, "cmis:write");
+
+      Map<String, Property<?>> properties = createPropertyMap(folderType);
+      StringProperty nameProperty = (StringProperty)properties.get(CmisConstants.NAME);
+      if (nameProperty != null)
+      {
+         nameProperty.getValues().add("testCreateFolder_ApplyACL");
+      }
+      String folderId = connection.createFolder(testRootFolderId, properties, acl, null, null);
+      List<AccessControlEntry> actualACL = connection.getACL(folderId, false);
+      validateACL(actualACL);
+      checkACL(acl, actualACL);
+   }
+
+   /**
+    * 2.2.4.3 createFolder.
+    * <p>
+    * If a violation are detected with the given cmis:name property value, the
+    * repository MAY throw {@link NameConstraintViolationException} or chose a
+    * name which does not conflict. Try create two folders with the same name in
+    * one directory and expect to get {@link NameConstraintViolationException}
+    * or at least second folder must get different name then provide when it
+    * created.
+    * </p>
+    * 
+    * @throws Exception
+    */
+   @Test
+   public void testCreateFolder_NameConstraintViolationException() throws Exception
+   {
+      String name = "testCreateFolder_NameConstraintViolationException";
+      Map<String, Property<?>> properties = createPropertyMap(folderType);
+      StringProperty nameProperty = (StringProperty)properties.get(CmisConstants.NAME);
+      if (nameProperty != null)
+      {
+         nameProperty.getValues().add(name);
+      }
+      connection.createFolder(testRootFolderId, properties, null, null, null);
+      try
+      {
+         String folderId2 = connection.createFolder(testRootFolderId, //
+            properties, null, null, null);
+         // If exception was not thrown then check name, it must be different.
+         CmisObject folder2 =
+            connection.getObject(folderId2, false, IncludeRelationships.NONE, false, false, true, null,
+               RenditionFilter.NONE);
+         String name2 = folder2.getObjectInfo().getName();
+         assertFalse("NameConstraintViolationException must be throw or different name chosen. ", name.equals(name2));
+      }
+      catch (NameConstraintViolationException e)
+      {
+      }
+   }
+
+   /**
+    * 2.2.4.3 createFolder.
+    * <p>
+    * {@link ConstraintException} must be thrown if cmis:objectTypeId property
+    * value is not an object type whose baseType is cmis:folder.
+    * </p>
+    * 
+    * @throws Exception
+    */
+   @Test
+   public void testCreateFolder_ConstraintException_ObjectType() throws Exception
+   {
+      Map<String, Property<?>> properties = createPropertyMap(folderType);
+      StringProperty nameProperty = (StringProperty)properties.get(CmisConstants.NAME);
+      if (nameProperty != null)
+      {
+         nameProperty.getValues().add("testCreateFolder_ConstraintException_ObjectType");
+      }
+      IdProperty property = (IdProperty)properties.get(CmisConstants.OBJECT_TYPE_ID);
+      property.getValues().clear();
+      // Set cmis:document instead cmis:folder
+      property.getValues().add(documentType.getId());
+
+      try
+      {
+         connection.createFolder(testRootFolderId, properties, null, null, null);
+         fail("ConstraintException must be thrown.");
+      }
+      catch (ConstraintException e)
+      {
+      }
+   }
+
+   /**
+    * 2.2.4.3 createFolder.
+    * <p>
+    * {@link ConstraintException} must be thrown if "controllablePolicy"
+    * attribute of the object type definition specified by the cmis:objectTypeId
+    * property value is set to <code>false</code> and at least one policy is
+    * provided.
+    * </p>
+    * 
+    * @throws Exception
+    */
+   @Test
+   public void testCreateFolder_ConstraintException_NotControllablePolicy() throws Exception
+   {
+      if (!isPoliciesSupported)
+      {
+         return;
+      }
+
+      TypeDefinition type = null;
+      if (!folderType.isControllablePolicy())
+      {
+         type = folderType;
+      }
+      if (type == null)
+      {
+         ItemsList<TypeDefinition> typeChildren = connection.getTypeChildren(folderType.getId(), false, -1, 0);
+         for (TypeDefinition t : typeChildren.getItems())
+         {
+            if (!t.isControllablePolicy())
+            {
+               type = t;
+               break;
+            }
+         }
+      }
+      if (type != null)
+      {
+         String policy =
+            createPolicy(testRootFolderId, policyType.getId(), generateName(policyType, null),
+               BaseTest.TEST_POLICY_TEXT, null, null, null);
+         Map<String, Property<?>> properties = createPropertyMap(type);
+         StringProperty nameProperty = (StringProperty)properties.get(CmisConstants.NAME);
+         if (nameProperty != null)
+         {
+            nameProperty.getValues().add("testCreateFolder_ConstraintException_NotControllablePolicy");
+         }
+         try
+         {
+            connection.createFolder(testRootFolderId, properties, null, null, Arrays.asList(policy));
+            fail("ConstraintException must be thrown. ");
+         }
+         catch (ConstraintException e)
+         {
+         }
+      }
+   }
+
+   /**
+    * 2.2.4.3 createFolder.
+    * <p>
+    * {@link ConstraintException} must be thrown if at least one of the
+    * permissions is used in an ACE provided which is not supported by the
+    * repository.
+    * </p>
+    * 
+    * @throws Exception
+    */
+   @Test
+   public void testCreateFolder_ConstraintException_ACENotSupported() throws Exception
+   {
+      if (!capabilities.getCapabilityACL().equals(CapabilityACL.MANAGE))
+      {
+         return;
+      }
+      TypeDefinition type = null;
+      if (!folderType.isControllableACL())
+      {
+         type = folderType;
+      }
+      if (type == null)
+      {
+         ItemsList<TypeDefinition> typeChildren = connection.getTypeChildren(folderType.getId(), false, -1, 0);
+         for (TypeDefinition t : typeChildren.getItems())
+         {
+            if (!t.isControllableACL())
+            {
+               type = t;
+               break;
+            }
+         }
+      }
+
+      if (type != null)
+      {
+         Map<String, Property<?>> properties = createPropertyMap(type);
+         StringProperty nameProperty = (StringProperty)properties.get(CmisConstants.NAME);
+         if (nameProperty != null)
+         {
+            nameProperty.getValues().add("testCreateFolder_ConstraintException_ACENotSupported");
+         }
+         try
+         {
+            List<AccessControlEntry> acl = createACL(principal, "cmis:unknown");
+            connection.createFolder(testRootFolderId, properties, acl, null, null);
+            fail("ConstraintException must be thrown. ");
+         }
+         catch (ConstraintException e)
+         {
+         }
+      }
+   }
+
+   /**
+    * 2.2.4.3 createFolder.
+    * <p>
+    * {@link ConstraintException} must be thrown if "controllableACL" attribute
+    * of the object type definition specified by the cmis:objectTypeId property
+    * value is set to <code>false</code> and at least one ACE is provided.
+    * </p>
+    * 
+    * @throws Exception
+    */
+   @Test
+   public void testCreateFolder_ConstraintException_NotControllableACL() throws Exception
+   {
+      if (!capabilities.getCapabilityACL().equals(CapabilityACL.MANAGE))
+      {
+         return;
+      }
+      TypeDefinition type = null;
+      if (!folderType.isControllableACL())
+      {
+         type = folderType;
+      }
+      if (type == null)
+      {
+         ItemsList<TypeDefinition> typeChildren = connection.getTypeChildren(folderType.getId(), false, -1, 0);
+         for (TypeDefinition t : typeChildren.getItems())
+         {
+            if (!t.isControllableACL())
+            {
+               type = t;
+               break;
+            }
+         }
+      }
+
+      if (type != null)
+      {
+         Map<String, Property<?>> properties = createPropertyMap(type);
+         StringProperty nameProperty = (StringProperty)properties.get(CmisConstants.NAME);
+         if (nameProperty != null)
+         {
+            nameProperty.getValues().add("testCreateFolder_ConstraintException_NotControllableACL");
+         }
+         try
+         {
+            connection.createFolder(testRootFolderId, properties, createACL(principal, "cmis:write"), null, null);
+            fail("ConstraintException must be thrown. ");
+         }
+         catch (ConstraintException e)
+         {
+         }
+      }
+   }
+
+   /**
+    * 2.2.4.4 createRelationship.
+    * <p>
+    * Create a relationship object of the specified type without any additional
+    * attributes, such as policies, ACL, etc.
+    * </p>
+    * 
+    * @throws Exception
+    */
+   @Test
+   public void testCreateRelationship() throws Exception
+   {
+      if (!isRelationshipsSupported)
+      {
+         return;
+      }
+      String source = createDocument(testRootFolderId, documentType.getId(), generateName(documentType, null), null, null, null, null,
+         null);
+      String target = createDocument(testRootFolderId, documentType.getId(), generateName(documentType, null), null, null, null, null,
+         null);
+      
+      Map<String, Property<?>> properties = createPropertyMap(relationshipType);
+      StringProperty nameProperty = (StringProperty)properties.get(CmisConstants.NAME);
+      if (nameProperty != null)
+      {
+         nameProperty.getValues().add("testCreateRelationship");
+      }
+      IdProperty sourceIdProperty = (IdProperty)properties.get(CmisConstants.SOURCE_ID);
+      if (sourceIdProperty != null)
+      {
+         sourceIdProperty.getValues().add(source);
+      }
+      IdProperty targetIdProperty = (IdProperty)properties.get(CmisConstants.TARGET_ID);
+      if (targetIdProperty != null)
+      {
+         targetIdProperty.getValues().add(target);
+      }
+      String relationshipId = connection.createRelationship(properties, null, null, null);
+      try
+      {
+         connection.getObject(relationshipId, false, IncludeRelationships.NONE, false, false, true, null,
+            RenditionFilter.NONE);
+      }
+      catch (ObjectNotFoundException e)
+      {
+         fail("Unable get newly create folder by id. ");
+      }
+   }
+
+   /**
+    * 2.2.4.4 createRelationship.
+    * <p>
+    * Create a relationship object of the specified and apply policies to it.
+    * </p>
+    * 
+    * @throws Exception
+    */
+   @Test
+   public void testCreateRelationship_ApplyPolicy() throws Exception
+   {
+      if (!(isRelationshipsSupported || isPoliciesSupported))
+      {
+         return;
+      }
+      
+      TypeDefinition type = null;
+      if (relationshipType.isControllablePolicy())
+      {
+         type = relationshipType;
+      }
+      if (type == null)
+      {
+         ItemsList<TypeDefinition> typeChildren = connection.getTypeChildren(relationshipType.getId(), false, -1, 0);
+         for (TypeDefinition t : typeChildren.getItems())
+         {
+            if (t.isControllablePolicy())
+            {
+               type = t;
+               break;
+            }
+         }
+      }
+      if (type == null)
+      {
+         return;
+      }
+      
+      String source = createDocument(testRootFolderId, documentType.getId(), generateName(documentType, null), null, null, null, null,
+         null);
+      String target = createDocument(testRootFolderId, documentType.getId(), generateName(documentType, null), null, null, null, null,
+         null);
+      String policy =
+         createPolicy(policyType.isFileable() ? testRootFolderId : null, policyType.getId(), generateName(policyType,
+            null), "policy1", null, null, null);
+      
+      Map<String, Property<?>> properties = createPropertyMap(type);
+      StringProperty nameProperty = (StringProperty)properties.get(CmisConstants.NAME);
+      if (nameProperty != null)
+      {
+         nameProperty.getValues().add("testCreateRelationship_ApplyPolicy");
+      }
+      IdProperty sourceIdProperty = (IdProperty)properties.get(CmisConstants.SOURCE_ID);
+      if (sourceIdProperty != null)
+      {
+         sourceIdProperty.getValues().add(source);
+      }
+      IdProperty targetIdProperty = (IdProperty)properties.get(CmisConstants.TARGET_ID);
+      if (targetIdProperty != null)
+      {
+         targetIdProperty.getValues().add(target);
+      }
+      String relationshipId = connection.createRelationship(properties, null, null, Arrays.asList(policy));
+      
+      
+      List<CmisObject> policies = connection.getAppliedPolicies(relationshipId, true, null);
+      assertEquals(1, policies.size());
+      assertEquals(policy, policies.get(0).getObjectInfo().getId());
+   }
+
+   // TODO
    //   /**
    //    * 2.2.4.4.1 A list of ACEs that MUST be added to the newly-created
    //    * Relationship object, either using the ACL from folderId if specified, or

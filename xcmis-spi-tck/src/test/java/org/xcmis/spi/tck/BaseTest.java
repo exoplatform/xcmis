@@ -194,7 +194,7 @@ public class BaseTest
    /**
     * Check that two ACL are matched. It minds <code>actual</code> contains at
     * least all ACEs from <code>expected</code> but may have other ACEs.
-    *
+    * 
     * @param expected expected ACEs
     * @param actual actual ACEs
     */
@@ -227,7 +227,7 @@ public class BaseTest
 
    /**
     * Validate that ACL contains only valid permissions.
-    *
+    * 
     * @param actual actual ACEs
     */
    protected void validateACL(List<AccessControlEntry> actual)
@@ -275,20 +275,21 @@ public class BaseTest
       return doc;
    }
 
-   static final ContentStream TEST_CONTENT = new ContentStream()
+   static byte[] TEST_CONTENT = "__TEST_CONTENT__".getBytes();
+   
+   static final ContentStream TEST_CONTENT_STREAM = new ContentStream()
    {
-      byte[] content = "__TEST_CONTENT__".getBytes();
 
       MimeType mimeType = new MimeType("text", "plain");
 
       public long length()
       {
-         return content.length;
+         return TEST_CONTENT.length;
       }
 
       public InputStream getStream() throws IOException
       {
-         return new ByteArrayInputStream(content);
+         return new ByteArrayInputStream(TEST_CONTENT);
       }
 
       public MimeType getMediaType()
@@ -320,7 +321,7 @@ public class BaseTest
       ContentStreamAllowed streamAllowed = type.getContentStreamAllowed();
       if (streamAllowed == ContentStreamAllowed.REQUIRED && content == null)
       {
-         content = TEST_CONTENT;
+         content = TEST_CONTENT_STREAM;
       }
 
       Map<String, Property<?>> properties = createPropertyMap(type);
@@ -382,7 +383,7 @@ public class BaseTest
          {
             policyTextProperty.getValues().add(policyText != null ? policyText : TEST_POLICY_TEXT);
          }
-         policyId = connection.createPolicy(parentId, properties, null, null, null);
+         policyId = connection.createPolicy(type.isFileable() ? parentId : null, properties, null, null, null);
       }
       return policyId;
    }
