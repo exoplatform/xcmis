@@ -29,7 +29,7 @@ curl -o getrepos.xml -u root:gtn http://localhost:8080/rest/private/cmisatom/
 
 The requested file (getrepos.xml) contains the set of Repositories in the AtomPub format.
 The root element represents the set of *workspaces* representing *WCM drives* related to resources, e.g.
-{code:language=xml}
+{code}
    <workspace>
       <atom:title type="text">DMS Administration</atom:title>
    </workspace>
@@ -130,7 +130,7 @@ Get results in the test.txt file in the local folder.
 * Go to the folder /exo:ecm/views/templates/Content List Viewer/list-by-folder.
 * Double-click the *OneColumnCLVTemplate.gtmpl* file and download it to the local folder on the disk.
 * Modify the local file, change the div element at the beginning of template: 
-{code:language=xml}
+{code}
     <div class="TitleBarM">
       $header
       <%if (isShowRssLink) {
@@ -139,7 +139,7 @@ Get results in the test.txt file in the local folder.
     </div>
   {code}
 with a link to the eXo site:
-{code:language=xml}
+{code}
     <div class="TitleBarM">
       $header
       <%if (isShowRssLink) {
