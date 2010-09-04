@@ -308,6 +308,10 @@ public class RepositoryTest extends BaseTest
    @Test
    public void testGetTypeDefinition_Policy() throws Exception
    {
+      if (!isPoliciesSupported)
+      {
+         return;
+      }
       TypeDefinition type = connection.getTypeDefinition(CmisConstants.POLICY, false);
       assertEquals(CmisConstants.POLICY, type.getId());
       assertEquals(BaseType.POLICY, type.getBaseId());
