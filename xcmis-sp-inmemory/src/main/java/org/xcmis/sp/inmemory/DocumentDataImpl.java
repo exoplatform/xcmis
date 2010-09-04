@@ -141,6 +141,19 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
             throw new StorageException("Unable checkin PWC. " + ioe.getMessage(), ioe);
          }
 
+         if (acl != null && acl.size() > 0)
+         {
+            setACL(acl);
+         }
+
+         if (policies != null && policies.size() > 0)
+         {
+            for (PolicyData p : policies)
+            {
+               applyPolicy(p);
+            }
+         }
+
          entry.setValue(CmisConstants.VERSION_LABEL, new StringValue(PropertyDefinitions.LATEST_LABEL));
          entry.setValue(CmisConstants.IS_LATEST_VERSION, new BooleanValue(true));
          entry.setValue(CmisConstants.IS_MAJOR_VERSION, new BooleanValue(major));
