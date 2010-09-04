@@ -115,8 +115,8 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
             ventry.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(false));
             ventry.setValue(CmisConstants.IS_LATEST_VERSION, new BooleanValue(false));
             ventry.setValue(CmisConstants.IS_LATEST_MAJOR_VERSION, new BooleanValue(false));
-            ventry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, /*new StringValue()*/null);
-            ventry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, /*new StringValue()*/null);
+            ventry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, null);
+            ventry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, null);
             // update version labels
             ventry.setValue(CmisConstants.VERSION_LABEL, new StringValue("" + i++));
          }
@@ -146,8 +146,8 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
          entry.setValue(CmisConstants.IS_MAJOR_VERSION, new BooleanValue(major));
          entry.setValue(CmisConstants.IS_LATEST_MAJOR_VERSION, new BooleanValue(major));
          entry.setValue(CmisConstants.IS_VERSION_SERIES_CHECKED_OUT, new BooleanValue(false));
-         entry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, /*new StringValue()*/null);
-         entry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, /*new StringValue()*/null);
+         entry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_ID, null);
+         entry.setValue(CmisConstants.VERSION_SERIES_CHECKED_OUT_BY, null);
          if (checkinComment != null)
          {
             entry.setValue(CmisConstants.CHECKIN_COMMENT, new StringValue(checkinComment));
@@ -216,6 +216,8 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
             }
 
             pwc.setValue(CmisConstants.CONTENT_STREAM_LENGTH, new IntegerValue(BigInteger.valueOf(bytes.length)));
+            pwc.setValue(CmisConstants.CONTENT_STREAM_ID, new StringValue(pwcId));
+            pwc.setValue(CmisConstants.CONTENT_STREAM_FILE_NAME, new StringValue(getName()));
          }
 
          for (Iterator<String> iterator = storage.versions.get(getVersionSeriesId()).iterator(); iterator.hasNext();)
@@ -398,10 +400,12 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
    {
       if (contentStream == null || contentStream.getStream() == null)
       {
-         entry.setValue(PropertyDefinitions.CONTENT, /*new ByteArrayValue(new byte[0])*/null);
-         entry.setValue(CmisConstants.CONTENT_STREAM_MIME_TYPE, /*new StringValue()*/null);
-         entry.setValue(CmisConstants.CHARSET, /*new StringValue()*/null);
+         entry.setValue(PropertyDefinitions.CONTENT, null);
+         entry.setValue(CmisConstants.CONTENT_STREAM_MIME_TYPE, null);
+         entry.setValue(CmisConstants.CHARSET, null);
          entry.setValue(CmisConstants.CONTENT_STREAM_LENGTH, new IntegerValue(BigInteger.valueOf(0)));
+         entry.setValue(CmisConstants.CONTENT_STREAM_ID, null);
+         entry.setValue(CmisConstants.CONTENT_STREAM_FILE_NAME, null);
       }
       else
       {
@@ -418,6 +422,8 @@ class DocumentDataImpl extends BaseObjectData implements DocumentData
          }
          entry
             .setValue(CmisConstants.CONTENT_STREAM_LENGTH, new IntegerValue(BigInteger.valueOf(cv.getBytes().length)));
+         entry.setValue(CmisConstants.CONTENT_STREAM_ID, new StringValue(getObjectId()));
+         entry.setValue(CmisConstants.CONTENT_STREAM_FILE_NAME, new StringValue(getName()));
       }
    }
 
